@@ -23,9 +23,9 @@ This repo uses OpenNURBS as a submodule, so you need to run a couple more git co
 
 * `cd build` and start `python`
 ```
->>> import rhinocommon
->>> center = rhinocommon.Point3d(1,2,3)
->>> arc = rhinocommon.Arc(center, 10, 1)
+>>> import rhino_geometry as rg
+>>> center = rg.Point3d(1,2,3)
+>>> arc = rg.Arc(center, 10, 1)
 >>> nc = arc.ToNurbsCurve()
 >>> start = nc.PointAtStart
 >>> print start.X, start.Y, start.Z

@@ -5,7 +5,7 @@
 
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE(rhinocommon) {
+BOOST_PYTHON_MODULE(rhino_geometry) {
 
     class_<ON_2dPoint>("Point2d")
         .def(init<double, double>())

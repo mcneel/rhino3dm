@@ -43,4 +43,4 @@ add_compile_definitions(ON_COMPILING_OPENNURBS)
 add_compile_definitions(OPENNURBS_FREETYPE_INC_)
 add_compile_definitions(MY_ZCALLOC Z_PREFIX)
 
-PYTHON_ADD_MODULE(rhinocommon ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC})
+PYTHON_ADD_MODULE(rhino_geometry ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC})
