@@ -79,4 +79,16 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def_readwrite("Radius", &BND_Circle::m_radius)
         .def("PointAt", &BND_Circle::PointAt)
         .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve, return_value_policy<manage_new_object>());
+
+    class_<BND_PolyCurve, bases<BND_Curve>>("Polycurve");
+
+    class_<BND_PolylineCurve, bases<BND_Curve>>("Polylinecurve", init<>())
+        .add_property("PointCount", &BND_PolylineCurve::PointCount)
+        .def("Point", &BND_PolylineCurve::Point);
+
+    class_<BND_Sphere>("Sphere", init<ON_3dPoint, double>())
+        .add_property("Center", &BND_Sphere::Center)
+        .add_property("Radius", &BND_Sphere::Radius)
+        .def("ToBrep", &BND_Sphere::ToBrep, return_value_policy<manage_new_object>());
+
 }
