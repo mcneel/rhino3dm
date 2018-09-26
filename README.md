@@ -1,7 +1,6 @@
 # rhino-geometry.py
 Native python based on OpenNURBS with a RhinoCommon style
 
-# NOTE: ONLY AVAILABLE ON OSX AT THE MOMENT
 ## Build it yourself
 
 ### Get The Source
@@ -10,15 +9,21 @@ This repo uses OpenNURBS as a submodule, so you need to run a couple more git co
   * `git submodule update --init`
 
 ## Install the Tools
-### Mac OSX
-* Install Homebrew (https://brew.sh/)
-* `brew install cmake boost-python`
 
-### Compile
+* Mac
+  * Install Homebrew (https://brew.sh/)
+  * `brew install cmake boost-python`
+* Windows
+  * This project uses Visual Studio 2017 (specifically the C++ portion)
+  * Install boost (TODO: describe process)
+  * Install python (Visual Studio compile assumes python is installed to `C:\Python27`)
 
-* open bash in the `rhino-python.py` directory and type `./build.sh`
+## Compile
 
-### Test
+* (Mac) open bash in the `rhino-python.py` directory and type `./build.sh`
+* (Win) open `rhino_geometry.sln` and compile a release|x64 build
+
+## Test
 
 * `cd build` and start `python`
 ```

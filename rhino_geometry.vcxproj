@@ -119,13 +119,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)winbuild\$(Configuration)\</OutDir>
-    <IntDir>winbuild\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>build\obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)winbuild\$(Configuration)\</OutDir>
-    <IntDir>winbuild\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>build\obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
