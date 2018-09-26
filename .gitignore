@@ -32,3 +32,6 @@
 *.exe
 *.out
 *.app
+/winbuild
+/.vs
+/rhino_geometry.vcxproj.user
