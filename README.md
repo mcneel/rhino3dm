@@ -7,8 +7,7 @@ Native python based on OpenNURBS with a RhinoCommon style
 ### Get The Source
 
 This repo uses OpenNURBS as a submodule, so you need to run a couple more git commands after you have cloned. `cd` into the new repository directory and run
-  * `git submodule init`
-  * `git submodule update`
+  * `git submodule update --init`
 
 ## Install the Tools
 ### Mac OSX
