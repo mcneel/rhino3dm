@@ -1,9 +1,9 @@
 #include "bindings.h"
 
-
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE(rhino_geometry) {
+
+BOOST_PYTHON_MODULE(_rhino3dm) {
 
     class_<ON_2dPoint>("Point2d")
         .def(init<double, double>())
@@ -11,7 +11,7 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def_readwrite("Y", &ON_2dPoint::y);
 
     class_<ON_3dPoint>("Point3d")
-        .def(init<double, double, double>())
+        .def(init<double, double, double>(args("x","y","z") ))
         .def_readwrite("X", &ON_3dPoint::x)
         .def_readwrite("Y", &ON_3dPoint::y)
         .def_readwrite("Z", &ON_3dPoint::z);
@@ -22,6 +22,11 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def_readwrite("Y", &ON_4dPoint::y)
         .def_readwrite("Z", &ON_4dPoint::z)
         .def_readwrite("W", &ON_4dPoint::w);
+
+    class_<ON_2dVector>("Vector2d")
+        .def(init<double, double>())
+        .def_readwrite("X", &ON_2dVector::x)
+        .def_readwrite("Y", &ON_2dVector::y);
 
     class_<ON_3dVector>("Vector3d")
         .def(init<double, double, double>())
@@ -80,18 +85,19 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .add_property("Faces", &BND_Mesh::GetFaces);
 
     class_<BND_MeshVertexList>("MeshVertexList", no_init)
-        .add_property("Count", &BND_MeshVertexList::Count)
+        .def("__len__", &BND_MeshVertexList::Count)
         .def("SetCount", &BND_MeshVertexList::SetCount)
-        .def("Get", &BND_MeshVertexList::GetVertex)
-        .def("Set", &BND_MeshVertexList::SetVertex);
+        .def("__getitem__", &BND_MeshVertexList::GetVertex)
+        .def("__setitem__", &BND_MeshVertexList::SetVertex)
+        .def("__iter__", range(&BND_MeshVertexList::begin, &BND_MeshVertexList::end));
 
     class_<BND_MeshFaceList>("MeshFaceList", no_init)
-        .add_property("Count", &BND_MeshFaceList::Count)
-        .def("Get", &BND_MeshFaceList::GetFace);
+        .def("__len__", &BND_MeshFaceList::Count)
+        .def("__getitem__", &BND_MeshFaceList::GetFace);
 
 
     class_<ON_Line>("Line")
-        .def(init<ON_3dPoint,ON_3dPoint>())
+        .def(init<ON_3dPoint,ON_3dPoint>(args("min", "max")))
         .add_property("Length", &ON_Line::Length);
 
     class_<BND_Circle>("Circle", init<double>())
@@ -111,5 +117,33 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .add_property("Center", &BND_Sphere::Center)
         .add_property("Radius", &BND_Sphere::Radius)
         .def("ToBrep", &BND_Sphere::ToBrep, return_value_policy<manage_new_object>());
+
+    class_<BND_Viewport, bases<BND_Object>>("ViewportInfo", init<>())
+        .add_property("IsValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
+        .add_property("isValidCamer", &BND_Viewport::IsValidCamera)
+        .add_property("IsValidFrustum", &BND_Viewport::IsValidFrustum)
+        .add_property("IsParallelProjection", &BND_Viewport::IsParallelProjection, &BND_Viewport::SetProjectionToParallel)
+        .add_property("IsPerspectiveProjection", &BND_Viewport::IsPerspectiveProjection, &BND_Viewport::SetProjectionToPerspective)
+        .add_property("IsTwoPointPerspectiveProjection", &BND_Viewport::IsTwoPointPerspectiveProjection)
+        .def("ChangeToParallelProjection", &BND_Viewport::ChangeToParallelProjection)
+        .def("ChangeToPerspectiveProjection", &BND_Viewport::ChangeToPerspectiveProjection)
+        .def("ChangeToTwoPointPerspectiveProjection", &BND_Viewport::ChangeToTwoPointPerspectiveProjection)
+        .add_property("CameraLocation", &BND_Viewport::CameraLocation)
+        .add_property("CameraDirection", &BND_Viewport::CameraDirection)
+        .add_property("CameraUp", &BND_Viewport::CameraUp)
+        .def("SetCameraLocation", &BND_Viewport::SetCameraLocation)
+        .def("SetCameraDirection", &BND_Viewport::SetCameraDirection)
+        .def("SetCameraUp", &BND_Viewport::SetCameraUp)
+        .add_property("CameraX", &BND_Viewport::CameraX)
+        .add_property("CameraY", &BND_Viewport::CameraY)
+        .add_property("CameraZ", &BND_Viewport::CameraZ)
+        .def("SetFrustum", &BND_Viewport::SetFrustum)
+        .add_property("ScreenPortAspect", &BND_Viewport::ScreenPortAspect)
+        .add_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
+        .add_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
+        .def("GetXform", &BND_Viewport::GetXform, return_value_policy<manage_new_object>())
+        .def("DollyExtents", &BND_Viewport::DollyExtents);
+
+    class_<BND_Xform>("Transform", init<>());
 
 }

@@ -1,5 +1,5 @@
-# rhino-geometry.py
-Native python based on OpenNURBS with a RhinoCommon style
+# rhino3dm.py
+CPython 2.7 module based on OpenNURBS with a RhinoCommon style
 
 ## Build it yourself
 
@@ -20,17 +20,17 @@ This repo uses OpenNURBS as a submodule, so you need to run a couple more git co
 
 ## Compile
 
-* (Mac) open bash in the `rhino-python.py` directory and type `./build.sh`
+* (Mac) open bash in the `rhino3dm.py` directory and type `./build.sh`
 * (Win) open `rhino_geometry.sln` and compile a release|x64 build
 
 ## Test
 
-* `cd build` and start `python`
+* `cd artifacts` and start `python`
 ```
->>> import rhino_geometry as rg
->>> center = rg.Point3d(1,2,3)
->>> arc = rg.Arc(center, 10, 1)
+>>> from rhino3dm import *
+>>> center = Point3d(1,2,3)
+>>> arc = Arc(center, 10, 1)
 >>> nc = arc.ToNurbsCurve()
 >>> start = nc.PointAtStart
->>> print start.X, start.Y, start.Z
+>>> print start
 ```

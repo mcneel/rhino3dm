@@ -28,6 +28,18 @@ BND_MeshVertexList::BND_MeshVertexList(const std::shared_ptr<ON_Mesh>& mesh)
   m_mesh = mesh;
 }
 
+ON_3fPoint* BND_MeshVertexList::begin()
+{
+  return m_mesh->m_V.At(0);
+}
+ON_3fPoint* BND_MeshVertexList::end()
+{
+  int count = m_mesh->m_V.Count();
+  if( 0==count )
+    return nullptr;
+  return m_mesh->m_V.At(count-1);
+}
+
 BND_MeshFaceList::BND_MeshFaceList(const std::shared_ptr<ON_Mesh>& mesh)
 {
   m_mesh = mesh;

@@ -8,6 +8,9 @@ class BND_MeshVertexList
 public:
   BND_MeshVertexList(const std::shared_ptr<ON_Mesh>& mesh);
 
+  ON_3fPoint* begin();
+  ON_3fPoint* end();
+
   int Count() const;
   void SetCount(int i);
   ON_3fPoint GetVertex(int i) const;
