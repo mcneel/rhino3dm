@@ -4,6 +4,27 @@
 
 #define RH_C_FUNCTION extern "C"
 
+#if defined(__EMSCRIPTEN__)
+#define ON_WASM_COMPILE
+#else
+#define ON_PYTHON_COMPILE
+#endif
+
+#if defined(ON_PYTHON_COMPILE)
+
+#if defined(ON_RUNTIME_WIN)
+#define  BOOST_PYTHON_STATIC_LIB
+#pragma message( " --- statically linking opennurbs." )
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/opennurbs_public_staticlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/zlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/freetype263_staticlib.lib" "\"")
+#pragma comment(lib, "rpcrt4.lib")
+#pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "C:/Python27/libs/python27.lib")
+#endif
+
+#include <boost/python.hpp>
+#endif
 
 #include "bnd_boundingbox.h"
 #include "bnd_point.h"

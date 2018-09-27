@@ -1,22 +1,19 @@
 #include "bindings.h"
 
-#if defined(ON_RUNTIME_WIN)
-#define  BOOST_PYTHON_STATIC_LIB
-#pragma message( " --- statically linking opennurbs." )
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/opennurbs_public_staticlib.lib" "\"")
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/zlib.lib" "\"")
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/freetype263_staticlib.lib" "\"")
-#pragma comment(lib, "rpcrt4.lib")
-#pragma comment(lib, "shlwapi.lib")
-#pragma comment(lib, "C:/Python27/libs/python27.lib")
-
-#endif
-
-#include <boost/python.hpp>
 
 using namespace boost::python;
 
+dict MakeDict()
+{
+  dict d;
+  d["foo"] = 3.5f;
+  d["bar"] = 12;
+  return d;
+}
+
 BOOST_PYTHON_MODULE(rhino_geometry) {
+
+    def("makedict", MakeDict);
 
     class_<ON_2dPoint>("Point2d")
         .def(init<double, double>())
@@ -44,7 +41,7 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def_readwrite("X", &ON_3fPoint::x)
         .def_readwrite("Y", &ON_3fPoint::y)
         .def_readwrite("Z", &ON_3fPoint::z);
-    
+
     class_<BND_Interval>("Interval")
         .def_readwrite("T0", &BND_Interval::m_t0)
         .def_readwrite("T1", &BND_Interval::m_t1);
@@ -59,7 +56,11 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def("ToNurbsCurve", &BND_Arc::ToNurbsCurve, return_value_policy<manage_new_object>());
 
 
-    class_<BND_Object>("CommonObject", no_init);
+    class_<BND_Object>("CommonObject", no_init)
+        .def("Encode", &BND_Object::Encode)
+        .def("Decode", &BND_Object::Decode, return_value_policy<manage_new_object>())
+        .staticmethod("Decode");
+
 
     class_<BND_Geometry, bases<BND_Object>>("GeometryBase", no_init)
         .def("GetBoundingBox", &BND_Geometry::BoundingBox);

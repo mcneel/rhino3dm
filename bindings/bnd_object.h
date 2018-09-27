@@ -15,4 +15,9 @@ public:
   emscripten::val Encode() const;
   static BND_Object* Decode(emscripten::val jsonObject);
 #endif
+
+#if defined(ON_PYTHON_COMPILE)
+  boost::python::dict Encode() const;
+  static BND_Object* Decode(boost::python::dict jsonObject);
+#endif
 };
