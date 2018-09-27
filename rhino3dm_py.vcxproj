@@ -121,11 +121,13 @@
     <TargetExt>.pyd</TargetExt>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>build\obj\$(Configuration)\</IntDir>
+    <TargetName>_rhino3dm</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.pyd</TargetExt>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>build\obj\$(Configuration)\</IntDir>
+    <TargetName>_rhino3dm</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

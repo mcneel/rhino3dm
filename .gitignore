@@ -35,4 +35,4 @@
 *.app
 /winbuild
 /.vs
-/rhino_geometry.vcxproj.user
+*.vcxproj.user

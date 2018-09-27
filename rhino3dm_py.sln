@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rhino_geometry", "rhino_geometry.vcxproj", "{73B0FABA-7F88-4098-8D07-3B1433D3AEE2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rhino3dm_py", "rhino3dm_py.vcxproj", "{73B0FABA-7F88-4098-8D07-3B1433D3AEE2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{23288C65-E3EB-4D09-A648-22E1636EB40F} = {23288C65-E3EB-4D09-A648-22E1636EB40F}
 		{7B90C09F-DC78-42B2-AD34-380F6D466B29} = {7B90C09F-DC78-42B2-AD34-380F6D466B29}
