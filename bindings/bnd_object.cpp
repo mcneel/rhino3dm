@@ -163,7 +163,8 @@ BND_Object* BND_Object::Decode(emscripten::val jsonObject)
 #if defined(ON_PYTHON_COMPILE)
 BND_Object* BND_Object::Decode(boost::python::dict jsonObject)
 {
-  std::string buffer = boost::python::extract<std::string>(jsonObject["data"]);
+  const char* s = boost::python::extract<const char*>(boost::python::str(jsonObject["data"]));
+  std::string buffer = s;//boost::python::extract<const char*>(jsonObject["data"]);
   std::string decoded = base64_decode(buffer);
   int rhinoversion = boost::python::extract<int>(jsonObject["archive3dm"]);
   int opennurbsversion = boost::python::extract<int>(jsonObject["opennurbs"]);

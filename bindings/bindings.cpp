@@ -71,6 +71,21 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
     class_<BND_NurbsCurve, bases<BND_Curve>>("NurbsCurve", init<int,int>())
         .def(init<int, bool, int, int>());
 
+    class_<BND_Mesh, bases<BND_Geometry>>("Mesh", init<>())
+        .add_property("Vertices", &BND_Mesh::GetVertices)
+        .add_property("Faces", &BND_Mesh::GetFaces);
+
+    class_<BND_MeshVertexList>("MeshVertexList", no_init)
+        .add_property("Count", &BND_MeshVertexList::Count)
+        .def("SetCount", &BND_MeshVertexList::SetCount)
+        .def("Get", &BND_MeshVertexList::GetVertex)
+        .def("Set", &BND_MeshVertexList::SetVertex);
+
+    class_<BND_MeshFaceList>("MeshFaceList", no_init)
+        .add_property("Count", &BND_MeshFaceList::Count)
+        .def("Get", &BND_MeshFaceList::GetFace);
+
+
     class_<ON_Line>("Line")
         .def(init<ON_3dPoint,ON_3dPoint>())
         .add_property("Length", &ON_Line::Length);

@@ -23,6 +23,9 @@ public:
   #if defined(__EMSCRIPTEN__)
   emscripten::val GetFace(int i) const;
   #endif
+  #if defined(ON_PYTHON_COMPILE)
+  boost::python::list GetFace(int i) const;
+  #endif
 };
 
 class BND_Mesh : public BND_Geometry
