@@ -21,7 +21,7 @@ This repo uses OpenNURBS as a submodule, so you need to run a couple more git co
 ## Compile
 
 * (Mac) open bash in the `rhino3dm.py` directory and type `./build.sh`
-* (Win) open `rhino3dm_py.sln` and compile a release|x64 build
+* (Win) run the `buildRhino3dm.py` script to compile and configure
 
 ## Test
 
