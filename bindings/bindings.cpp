@@ -3,17 +3,7 @@
 
 using namespace boost::python;
 
-dict MakeDict()
-{
-  dict d;
-  d["foo"] = 3.5f;
-  d["bar"] = 12;
-  return d;
-}
-
 BOOST_PYTHON_MODULE(rhino_geometry) {
-
-    def("makedict", MakeDict);
 
     class_<ON_2dPoint>("Point2d")
         .def(init<double, double>())
