@@ -17,17 +17,20 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
         .def_readwrite("Z", &ON_3dPoint::z);
 
     class_<ON_4dPoint>("Point4d")
+        .def(init<double, double, double, double>())
         .def_readwrite("X", &ON_4dPoint::x)
         .def_readwrite("Y", &ON_4dPoint::y)
         .def_readwrite("Z", &ON_4dPoint::z)
         .def_readwrite("W", &ON_4dPoint::w);
 
     class_<ON_3dVector>("Vector3d")
+        .def(init<double, double, double>())
         .def_readwrite("X", &ON_3dVector::x)
         .def_readwrite("Y", &ON_3dVector::y)
         .def_readwrite("Z", &ON_3dVector::z);
 
     class_<ON_3fPoint>("Point3f")
+        .def(init<float, float, float>())
         .def_readwrite("X", &ON_3fPoint::x)
         .def_readwrite("Y", &ON_3fPoint::y)
         .def_readwrite("Z", &ON_3fPoint::z);
@@ -53,7 +56,8 @@ BOOST_PYTHON_MODULE(rhino_geometry) {
 
 
     class_<BND_Geometry, bases<BND_Object>>("GeometryBase", no_init)
-        .def("GetBoundingBox", &BND_Geometry::BoundingBox);
+        .def("GetBoundingBox", &BND_Geometry::BoundingBox)
+        .def("Rotate", &BND_Geometry::Rotate);
 
     class_<BND_Brep, bases<BND_Geometry>>("Brep", init<>());
 

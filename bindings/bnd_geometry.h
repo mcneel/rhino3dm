@@ -13,5 +13,5 @@ public:
   BND_Geometry(ON_Geometry* geometry);
   int Dimension() const;
   BND_BoundingBox BoundingBox() const;
-
+  bool Rotate(double rotation_angle, const ON_3dVector& rotation_axis, const ON_3dPoint& rotation_center);
 };

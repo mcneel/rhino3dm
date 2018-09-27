@@ -26,3 +26,8 @@ BND_BoundingBox BND_Geometry::BoundingBox() const
   ON_BoundingBox bbox = m_geometry->BoundingBox();
   return BND_BoundingBox(bbox);
 }
+
+bool BND_Geometry::Rotate(double rotation_angle, const ON_3dVector& rotation_axis, const ON_3dPoint& rotation_center)
+{
+  return m_geometry->Rotate(rotation_angle, rotation_axis, rotation_center);
+}
