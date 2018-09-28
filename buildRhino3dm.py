@@ -50,9 +50,9 @@ def createwheel():
     os.chdir(staging_dir)
     options = ""
     if windows_build:
-        options = "--plat-name=win"
+        options = "--plat-name=win32"
     if mac_build:
-        options = "--plat-name=osx"
+        options = "--plat-name=linux_x86_64"
     os.system(sys.executable + " setup.py bdist_wheel " + options)
     os.chdir(current_dir)
     if not os.path.exists("artifacts"):
