@@ -48,7 +48,12 @@ def createwheel():
     copyfile("pysrc/MANIFEST.in", staging_dir + "/MANIFEST.in")
     copyfile("pysrc/setup.py", staging_dir + "/setup.py")
     os.chdir(staging_dir)
-    os.system(sys.executable + " setup.py bdist_wheel")
+    options = ""
+    if windows_build:
+        options = "--plat-name=win"
+    if mac_build:
+        options = "--plat-name=osx"
+    os.system(sys.executable + " setup.py bdist_wheel " + options)
     os.chdir(current_dir)
     if not os.path.exists("artifacts"):
         os.mkdir("artifacts")

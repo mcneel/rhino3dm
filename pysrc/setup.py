@@ -27,6 +27,8 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 2.7"
+        "Operating System :: MacOS :: MacOS x",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: Implementation :: CPython"
     ],
 )
