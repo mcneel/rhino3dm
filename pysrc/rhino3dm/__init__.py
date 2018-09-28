@@ -1,4 +1,11 @@
-from _rhino3dm import *
+import struct
+
+bitness = 8 * struct.calcsize("P")
+if bitness==32:
+    from _rhino3dm_win32 import *
+else:
+    from _rhino3dm_win64 import *
+
 
 
 Point3d.__str__ = lambda self: "{},{}".format(self.X, self.Y)

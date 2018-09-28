@@ -1,0 +1,1 @@
+recursive-include rhino3dm *.pyd

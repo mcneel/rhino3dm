@@ -113,26 +113,26 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\$(Platform)</OutDir>
+    <IntDir>build\obj\$(Configuration)\$(Platform)</IntDir>
     <TargetName>_rhino3dm_win32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\$(Platform)</OutDir>
+    <IntDir>build\obj\$(Configuration)\$(Platform)</IntDir>
     <TargetName>_rhino3dm_win32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\$(Platform)</OutDir>
+    <IntDir>build\obj\$(Configuration)\$(Platform)</IntDir>
     <TargetName>_rhino3dm_win64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.pyd</TargetExt>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\$(Platform)</OutDir>
+    <IntDir>build\obj\$(Configuration)\$(Platform)</IntDir>
     <TargetName>_rhino3dm_win64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
