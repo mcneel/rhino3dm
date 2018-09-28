@@ -113,21 +113,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.pyd</TargetExt>
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <TargetName>_rhino3dm_win32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.pyd</TargetExt>
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>build\obj\$(Configuration)\</IntDir>
+    <TargetName>_rhino3dm_win32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.pyd</TargetExt>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>build\obj\$(Configuration)\</IntDir>
-    <TargetName>_rhino3dm</TargetName>
+    <TargetName>_rhino3dm_win64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.pyd</TargetExt>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>build\obj\$(Configuration)\</IntDir>
-    <TargetName>_rhino3dm</TargetName>
+    <TargetName>_rhino3dm_win64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -162,10 +168,12 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Python27\include;C:\local\boost_1_67_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\local\boost_1_67_0\stage\win32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -176,7 +184,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\local\boost_1_67_0;C:\Python27\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Python27_64bit\include;C:\local\boost_1_67_0</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

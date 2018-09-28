@@ -15,12 +15,21 @@
 #if defined(ON_RUNTIME_WIN)
 #define  BOOST_PYTHON_STATIC_LIB
 #pragma message( " --- statically linking opennurbs." )
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/opennurbs_public_staticlib.lib" "\"")
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/zlib.lib" "\"")
-#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino-geometry.py/opennurbs/bin/x64/Release/freetype263_staticlib.lib" "\"")
+
+#if defined ON_32BIT_RUNTIME
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/Win32/Release/opennurbs_public_staticlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/Win32/Release/zlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/Win32/Release/freetype263_staticlib.lib" "\"")
+#pragma comment(lib, "C:/Python27/libs/python27.lib")
+#else
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/x64/Release/opennurbs_public_staticlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/x64/Release/zlib.lib" "\"")
+#pragma comment(lib, "\"" "C:/dev/github/mcneel/rhino3dm.py/opennurbs/bin/x64/Release/freetype263_staticlib.lib" "\"")
+#pragma comment(lib, "C:/Python27_64bit/libs/python27.lib")
+#endif
+
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")
-#pragma comment(lib, "C:/Python27/libs/python27.lib")
 #endif
 
 #include <boost/python.hpp>

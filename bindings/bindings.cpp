@@ -2,8 +2,15 @@
 
 using namespace boost::python;
 
-
+#if defined(ON_RUNTIME_WIN)
+#if defined ON_32BIT_RUNTIME
+BOOST_PYTHON_MODULE(_rhino3dm_win32) {
+#else
+BOOST_PYTHON_MODULE(_rhino3dm_win64) {
+#endif
+#else
 BOOST_PYTHON_MODULE(_rhino3dm) {
+#endif
 
     class_<ON_2dPoint>("Point2d")
         .def(init<double, double>())
