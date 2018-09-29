@@ -1,4 +1,11 @@
-import setuptools, os
+import setuptools, os, platform
+
+windows_build = os.name == 'nt'
+mac_build = platform.system() == 'Darwin'
+
+os_classifier = "Operating System :: Microsoft :: Windows"
+if mac_build:
+    os_classifier = "Operating System :: MacOS :: MacOS x"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -26,8 +33,7 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: MacOS :: MacOS x",
+        os_classifier,
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython"
     ],
