@@ -50,13 +50,14 @@ def createwheel():
     copyfile("pysrc/MANIFEST.in", staging_dir + "/MANIFEST.in")
     copyfile("pysrc/setup.py", staging_dir + "/setup.py")
     os.chdir(staging_dir)
-    options = ""
-    #platform is found wit distutils.util.get_platform()
+    options = []
+    #platform is found with distutils.util.get_platform()
     if windows_build:
-        options = "--plat-name=win32"
+        options = ["--python-tag=cp27 --plat-name=win32","--python-tag=cp27 --plat-name=win-amd64"]
     if mac_build:
-        options = "--python-tag=cp27 --plat-name=macosx-10.13-x86_64"
-    os.system(sys.executable + " setup.py bdist_wheel " + options)
+        options = ["--python-tag=cp27 --plat-name=macosx-10.13-x86_64"]
+    for option in options:
+        os.system(sys.executable + " setup.py bdist_wheel " + option)
     os.chdir(current_dir)
     if not os.path.exists("artifacts"):
         os.mkdir("artifacts")
