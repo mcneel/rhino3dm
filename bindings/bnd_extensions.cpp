@@ -30,7 +30,7 @@ std::string BND_ONXModel::ReadNotes(const char* path)
     ON_BinaryFile file(ON::archive_mode::read3dm, fp);
     int version = 0;
     ON_String comments;
-    BOOL rc = file.Read3dmStartSection(&version, comments);
+    bool rc = file.Read3dmStartSection(&version, comments);
     if (rc)
     {
       ON_3dmProperties prop;
@@ -214,4 +214,3 @@ BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
 {
   m_model = m;
 }
-

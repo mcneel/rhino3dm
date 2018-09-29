@@ -1,4 +1,5 @@
 import os, platform, sys, glob
+import distutils.util
 from shutil import copyfile, copytree, rmtree, copy
 
 windows_build = os.name == 'nt'
@@ -11,20 +12,24 @@ if not os.path.exists("build"):
 def compilebinaries():
     """ compile for the platform we are running on """
     if windows_build:
-        print "Compiling for Windows"
+        print ("Compiling for Windows")
         msbuildpath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe'
-        print "Compiling for Python 2.7 | Windows (32-bit)"
+        print ("Compiling for Python 2.7 | Windows (32-bit)")
         os.system('"{}" rhino3dm_py.sln /p:Configuration=Py27Release;Platform=Win32'.format(msbuildpath))
-        print "Compiling for Python 2.7 | Windows (64-bit)"
+        print ("Compiling for Python 2.7 | Windows (64-bit)")
         os.system('"{}" rhino3dm_py.sln /p:Configuration=Py27Release;Platform=x64'.format(msbuildpath))
     if mac_build:
         os.chdir("build")
-        PYTHON_LIBRARY="/System/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
-        #PYTHON_INCLUDE_DIR="/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7"
-        PYTHON_LIBRARY="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
-        PYTHON_INCLUDE_DIR="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/Headers"
+        PYTHON_VERSION_MAJOR=sys.version_info.major
+        if PYTHON_VERSION_MAJOR==2:
+            PYTHON_LIBRARY="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
+            PYTHON_INCLUDE_DIR="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/Headers"
+        else:
+            PYTHON_LIBRARY="/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib"
+            PYTHON_INCLUDE_DIR="/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Headers"
         BUILD_TYPE="RELEASE"
-        args = "-DPYTHON_LIBRARY={} -DPYTHON_INCLUDE_DIR={} -DCMAKE_BUILD_TYPE={} .. && make".format(PYTHON_LIBRARY, PYTHON_INCLUDE_DIR, BUILD_TYPE)
+        args = "-DPYTHON_VERSION_MAJOR={} -DPYTHON_LIBRARY={} -DPYTHON_INCLUDE_DIR={}".format(PYTHON_VERSION_MAJOR, PYTHON_LIBRARY, PYTHON_INCLUDE_DIR)
+        args = args + " -DCMAKE_BUILD_TYPE={} .. && make".format(BUILD_TYPE)
         os.system("cmake "+ args)
         os.chdir("..")
 
@@ -52,18 +57,21 @@ def createwheel():
     os.chdir(staging_dir)
     options = []
     #platform is found with distutils.util.get_platform()
+    python_tag = "cp27"
+    if sys.version_info.major==3:
+        python_tag = "cp37"
     if windows_build:
         options = ["--python-tag=cp27 --plat-name=win32",
                    "--python-tag=cp27 --plat-name=win-amd64"]
     if mac_build:
-        options = ["--python-tag=cp27 --plat-name=macosx-10.13-x86_64"]
+        options = ["--python-tag={} --plat-name={}".format(python_tag, distutils.util.get_platform())]
     for option in options:
         os.system(sys.executable + " setup.py bdist_wheel " + option)
     os.chdir(current_dir)
     if not os.path.exists("artifacts"):
         os.mkdir("artifacts")
     for file in glob.glob(staging_dir + "/dist/*.whl"):
-        print file
+        print (file)
         copy(file, "artifacts" )
 
 

@@ -1,4 +1,4 @@
-import os, struct
+import os, struct, sys
 
 on_windows = os.name == 'nt'
 if on_windows:
@@ -8,7 +8,10 @@ if on_windows:
     else:
         from _rhino3dm_win64 import *
 else:
-    from _rhino3dm import *
+    if sys.version_info.major==3:
+        from ._rhino3dm import *
+    else:
+        from _rhino3dm import *
 
 
 Point3d.__str__ = lambda self: "{},{}".format(self.X, self.Y)
