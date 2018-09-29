@@ -20,7 +20,7 @@ def create_package_list(base_package):
 
 setuptools.setup(
     name="rhino3dm",
-    version="0.0.1",
+    version="0.0.2",
     author="Robert McNeel & Associates",
     author_email="steve@mcneel.com",
     description="OpenNURBS based package with a RhinoCommon style",

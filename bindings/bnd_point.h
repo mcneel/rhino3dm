@@ -14,5 +14,5 @@ public:
 class BND_Point3d
 {
 public:
-  static ON_3dPoint Transform(const ON_3dPoint& pt, const class BND_Xform& transform);
+  static ON_3dPoint Transform(const ON_3dPoint& pt, const class ON_Xform& transform);
 };

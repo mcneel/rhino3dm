@@ -72,6 +72,9 @@
     <ClCompile Include="bindings\bnd_xform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bindings\bnd_extensions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bindings\base64.h">
@@ -129,6 +132,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bindings\bnd_xform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bindings\bnd_extensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

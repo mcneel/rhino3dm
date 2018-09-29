@@ -151,6 +151,27 @@ BOOST_PYTHON_MODULE(_rhino3dm) {
         .def("GetXform", &BND_Viewport::GetXform, return_value_policy<manage_new_object>())
         .def("DollyExtents", &BND_Viewport::DollyExtents);
 
-    class_<BND_Xform>("Transform", init<>());
+    class_<ON_Xform>("Transform", init<>())
+      .def(init<double>())
+      ;
 
+    class_<BND_ONXModel>("File3dm", init<>())
+      .def("Read", &BND_ONXModel::Read, return_value_policy<manage_new_object>())
+      .staticmethod("Read")
+      .def("ReadNotes", &BND_ONXModel::ReadNotes)
+      .staticmethod("ReadNotes")
+      .def("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion)
+      .staticmethod("ReadArchiveVersion")
+      .def("Write", &BND_ONXModel::Write)
+      .add_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
+      .add_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
+      .add_property("ApplicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
+      .add_property("ApplicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+      .add_property("CreatedBy", &BND_ONXModel::GetCreatedBy)
+      .add_property("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
+      .add_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
+      .add_property("Objects", &BND_ONXModel::Objects)
+      ;
+
+    class_<BND_ONXModel_ObjectTable>("File3dmObjectTable", no_init);
 }

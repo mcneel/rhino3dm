@@ -51,7 +51,7 @@ public:
   double GetCamera35mmLensLength() const;
   void SetCamera35mmLensLength(double lens_length);
 
-  BND_Xform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
+  ON_Xform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
 
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
 };

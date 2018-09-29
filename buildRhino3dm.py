@@ -13,10 +13,10 @@ def compilebinaries():
     if windows_build:
         print "Compiling for Windows"
         msbuildpath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe'
-        print "Compiling for Windows (32-bit)"
-        os.system('"{}" rhino3dm_py.sln /p:Configuration=Release;Platform=Win32'.format(msbuildpath))
-        print "Compiling for Windows (64-bit)"
-        os.system('"{}" rhino3dm_py.sln /p:Configuration=Release;Platform=x64'.format(msbuildpath))
+        print "Compiling for Python 2.7 | Windows (32-bit)"
+        os.system('"{}" rhino3dm_py.sln /p:Configuration=Py27Release;Platform=Win32'.format(msbuildpath))
+        print "Compiling for Python 2.7 | Windows (64-bit)"
+        os.system('"{}" rhino3dm_py.sln /p:Configuration=Py27Release;Platform=x64'.format(msbuildpath))
     if mac_build:
         os.chdir("build")
         PYTHON_LIBRARY="/System/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
@@ -40,8 +40,8 @@ def createwheel():
     os.chdir("..")
     copytree("pysrc/rhino3dm", staging_dir +"/rhino3dm")
     if windows_build:
-        copyfile("build/Release/Win32/_rhino3dm_win32.pyd", staging_dir + "/rhino3dm/_rhino3dm_win32.pyd")
-        copyfile("build/Release/x64/_rhino3dm_win64.pyd", staging_dir + "/rhino3dm/_rhino3dm_win64.pyd")
+        copyfile("build/Py27Release/Win32/_rhino3dm_win32.pyd", staging_dir + "/rhino3dm/_rhino3dm_win32.pyd")
+        copyfile("build/Py27Release/x64/_rhino3dm_win64.pyd", staging_dir + "/rhino3dm/_rhino3dm_win64.pyd")
     if mac_build:
         copyfile("build/_rhino3dm.so", staging_dir + "/rhino3dm/_rhino3dm.so")
 
@@ -53,7 +53,8 @@ def createwheel():
     options = []
     #platform is found with distutils.util.get_platform()
     if windows_build:
-        options = ["--python-tag=cp27 --plat-name=win32","--python-tag=cp27 --plat-name=win-amd64"]
+        options = ["--python-tag=cp27 --plat-name=win32",
+                   "--python-tag=cp27 --plat-name=win-amd64"]
     if mac_build:
         options = ["--python-tag=cp27 --plat-name=macosx-10.13-x86_64"]
     for option in options:
