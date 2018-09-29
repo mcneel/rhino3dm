@@ -20,8 +20,10 @@ def compilebinaries():
     if mac_build:
         os.chdir("build")
         PYTHON_LIBRARY="/System/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
-        PYTHON_INCLUDE_DIR="/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7"
-        BUILD_TYPE="DEBUG"
+        #PYTHON_INCLUDE_DIR="/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7"
+        PYTHON_LIBRARY="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib"
+        PYTHON_INCLUDE_DIR="/usr/local/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/Headers"
+        BUILD_TYPE="RELEASE"
         args = "-DPYTHON_LIBRARY={} -DPYTHON_INCLUDE_DIR={} -DCMAKE_BUILD_TYPE={} .. && make".format(PYTHON_LIBRARY, PYTHON_INCLUDE_DIR, BUILD_TYPE)
         os.system("cmake "+ args)
         os.chdir("..")
@@ -44,15 +46,16 @@ def createwheel():
         copyfile("build/_rhino3dm.so", staging_dir + "/rhino3dm/_rhino3dm.so")
 
     copyfile("LICENSE", staging_dir + "/LICENSE")
-    copyfile("README.md", staging_dir + "/README.md")
+    copyfile("pysrc/README.md", staging_dir + "/README.md")
     copyfile("pysrc/MANIFEST.in", staging_dir + "/MANIFEST.in")
     copyfile("pysrc/setup.py", staging_dir + "/setup.py")
     os.chdir(staging_dir)
     options = ""
+    #platform is found wit distutils.util.get_platform()
     if windows_build:
         options = "--plat-name=win32"
     if mac_build:
-        options = "--plat-name=linux_x86_64"
+        options = "--python-tag=cp27 --plat-name=macosx-10.13-x86_64"
     os.system(sys.executable + " setup.py bdist_wheel " + options)
     os.chdir(current_dir)
     if not os.path.exists("artifacts"):

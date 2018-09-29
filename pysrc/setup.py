@@ -5,7 +5,7 @@ mac_build = platform.system() == 'Darwin'
 
 os_classifier = "Operating System :: Microsoft :: Windows"
 if mac_build:
-    os_classifier = "Operating System :: MacOS :: MacOS x"
+    os_classifier = "Operating System :: MacOS"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

@@ -1,5 +1,15 @@
 # rhino3dm.py
-CPython 2.7 module based on OpenNURBS with a RhinoCommon style
+Python 2.7 package based on OpenNURBS with a RhinoCommon style
+
+## Install from pip
+`pip install rhino3dm`
+
+### Supported platforms
+* Python27 - Windows (32 and 64 bit)
+* Python27 - OSX (installed through homebrew)
+* Other distributions are possible, just let us know where you need this package to run
+
+---
 
 ## Build it yourself
 
