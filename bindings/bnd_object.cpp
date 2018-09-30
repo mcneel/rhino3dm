@@ -72,9 +72,10 @@ emscripten::val BND_Object::Encode() const
 }
 #endif
 #if defined(ON_PYTHON_COMPILE)
-boost::python::dict BND_Object::Encode() const
+
+pybind11::dict BND_Object::Encode() const
 {
-  boost::python::dict d;
+  pybind11::dict d;
   d["version"] = 10000;
   const int rhinoversion = 60;
   d["archive3dm"] = rhinoversion;
@@ -161,13 +162,13 @@ BND_Object* BND_Object::Decode(emscripten::val jsonObject)
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-BND_Object* BND_Object::Decode(boost::python::dict jsonObject)
+
+BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
 {
-  const char* s = boost::python::extract<const char*>(boost::python::str(jsonObject["data"]));
-  std::string buffer = s;//boost::python::extract<const char*>(jsonObject["data"]);
+  std::string buffer = pybind11::str(jsonObject["data"]);
   std::string decoded = base64_decode(buffer);
-  int rhinoversion = boost::python::extract<int>(jsonObject["archive3dm"]);
-  int opennurbsversion = boost::python::extract<int>(jsonObject["opennurbs"]);
+  int rhinoversion = jsonObject["archive3dm"].cast<int>();
+  int opennurbsversion = jsonObject["opennurbs"].cast<int>();
   int length = decoded.length();
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);

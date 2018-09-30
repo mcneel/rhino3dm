@@ -92,9 +92,9 @@ emscripten::val BND_MeshFaceList::GetFace(int i) const
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-boost::python::list BND_MeshFaceList::GetFace(int i) const
+pybind11::list BND_MeshFaceList::GetFace(int i) const
 {
-  boost::python::list rc;
+  pybind11::list rc;
   ON_MeshFace& face = m_mesh->m_F[i];
   rc.append(face.vi[0]);
   rc.append(face.vi[1]);
