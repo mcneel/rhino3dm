@@ -2,7 +2,7 @@
 CPython package based on OpenNURBS with a RhinoCommon style
 
 ## Install from pip
-`pip install rhino3dm`
+`pip install rhino3dm`  
 If you get an error, you may need to run `pip install --user rhino3dm`
 
 ### Supported platforms
@@ -18,7 +18,7 @@ If you get an error, you may need to run `pip install --user rhino3dm`
 
 ### Get The Source
 
-This repo uses OpenNURBS and pybind11 as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
   * `git submodule update --init`
 
 ## Install the Tools
@@ -34,18 +34,16 @@ This repo uses OpenNURBS and pybind11 as submodules, so you need to run another 
 
 ## Compile
 
-* (All platforms) run the `build_rhino3dm.py` script to compile and configure
-  * Use Python 2.7 on `build_rhino3dm.py` to compile a 2.7 compatible package
-  * Use Python 3.7 on `build_rhino3dm.py` to compile a 3.7 compatible package
+* (All platforms) run the `build_rhino3dm.py` script to compile and configure. The library will compile for the version of python that you are executing.
 
 ## Test
 
-* `cd artifacts` and start `python`
+* `cd build_{pyver}/stage` and start `python`
 ```
 >>> from rhino3dm import *
 >>> center = Point3d(1,2,3)
 >>> arc = Arc(center, 10, 1)
 >>> nc = arc.ToNurbsCurve()
 >>> start = nc.PointAtStart
->>> print start
+>>> print(start)
 ```

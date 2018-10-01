@@ -16,7 +16,7 @@ file(RENAME "opennurbs/opennurbs_unicode_cp949.skip" "opennurbs/opennurbs_unicod
 
 
 set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 add_compile_definitions(_GNU_SOURCE)
 add_compile_definitions(ON_COMPILING_OPENNURBS)
