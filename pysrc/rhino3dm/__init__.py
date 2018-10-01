@@ -1,17 +1,8 @@
-import os, struct, sys
-
-on_windows = os.name == 'nt'
-if on_windows:
-    bitness = 8 * struct.calcsize("P")
-    if bitness==32:
-        from _rhino3dm_win32 import *
-    else:
-        from _rhino3dm_win64 import *
+import sys
+if sys.version_info.major==3:
+    from ._rhino3dm import *
 else:
-    if sys.version_info.major==3:
-        from ._rhino3dm import *
-    else:
-        from _rhino3dm import *
+    from _rhino3dm import *
 
 
 Point3d.__str__ = lambda self: "{},{}".format(self.X, self.Y)

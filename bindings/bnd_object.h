@@ -17,7 +17,7 @@ public:
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  boost::python::dict Encode() const;
-  static BND_Object* Decode(boost::python::dict jsonObject);
+  pybind11::dict Encode() const;
+  static BND_Object* Decode(pybind11::dict jsonObject);
 #endif
 };
