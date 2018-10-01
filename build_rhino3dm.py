@@ -22,8 +22,10 @@ def compilebinaries():
         if bitness==64:
             for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
-
-    os.system("cmake --build . --config Release --target _rhino3dm")
+        os.system("cmake --build . --config Release --target _rhino3dm")
+    else:
+        os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ..".format(sys.executable))
+        os.system("make")
     os.chdir("..")
 
 def createwheel():
@@ -39,7 +41,7 @@ def createwheel():
     copytree("pysrc/rhino3dm", staging_dir +"/rhino3dm")
     for file in glob.glob(build_dir + "/Release/*.pyd"):
         copy(file, staging_dir + "/rhino3dm")
-    for file in glob.glob(build_dir + "/Release/*.so"):
+    for file in glob.glob(build_dir + "/*.so"):
         copy(file, staging_dir + "/rhino3dm")
 
     copyfile("LICENSE", staging_dir + "/LICENSE")
