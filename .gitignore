@@ -36,3 +36,5 @@
 /python/wheels_for_pypi
 /python/build_py*_32bit
 /python/build_py*_64bit
+/javascript/artifacts
+/javascript/build

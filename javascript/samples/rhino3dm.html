@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>rhino3dm.js sample</title>
+    <style>
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.rhino3dm { margin-left: auto; margin-right: auto;
+         display: block; border: 0px none; background-color: darkslategray; }
+      .slidecontainer {margin-left: auto; margin-right: auto;
+         display: block;}
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas class="rhino3dm" id="canvas" width="500" height="500" ></canvas>
+    </div>
+    <div class="slidecontainer">
+      <button type="button" onclick="runMeshMaker()">Run Script</button>
+      <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
+    </div>
+    <script type='text/javascript'>
+      var Module = {
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+          return canvas;
+        }()),
+        clearCanvas: (function() {
+          var ctx=canvas.getContext("2d");
+          // Create gradient
+          var grd=ctx.createLinearGradient(0,0,0,500);
+          grd.addColorStop(0,"slategray");
+          grd.addColorStop(1,"black");
+          // Fill with gradient
+          ctx.fillStyle=grd;
+          ctx.fillRect(0,0,500,500);
+        })
+      };
+
+      function runMeshMaker() {
+        sphere = new Module.Sphere([250, 250, 0], 100);
+        brep = sphere.toBrep();
+        functionArgs = [brep.encode()];
+        // Don't need the sphere and brep anymore
+        sphere.delete();
+        brep.delete();
+
+        Module.clearCanvas();
+
+        postdata = JSON.stringify(functionArgs);
+        req = new XMLHttpRequest();
+        url = "http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep";
+        req.open("POST", url);
+
+        auth = localStorage["compute_auth"];
+        if (auth == null) {
+          auth = window.prompt("Rhino Accounts auth token");
+          if (auth != null && auth.length>20) {
+            auth = "Bearer " + auth;
+            localStorage.setItem("compute_auth", auth);
+          }
+        }
+        req.setRequestHeader("Authorization", auth);
+        req.addEventListener("loadend", loadEnd);
+        req.send(postdata);
+
+        function loadEnd(e) {
+          response = JSON.parse(req.responseText);
+          mesh = Module.CommonObject.decode(response[0]);
+
+          ctx = Module.canvas.getContext('2d');
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'red';
+
+          verts = mesh.vertices();
+          faces = mesh.faces();
+
+          ctx.beginPath();
+          for (i = 0; i < faces.count; i++) {
+            face = faces.get(i);
+            pts = [verts.get(face[0]), verts.get(face[1]), verts.get(face[2]), verts.get(face[3])];
+            ctx.moveTo(pts[0][0], pts[0][1]);
+            ctx.lineTo(pts[1][0], pts[1][1]);
+            ctx.lineTo(pts[2][0], pts[2][1]);
+            ctx.lineTo(pts[3][0], pts[3][1]);
+          }
+          ctx.stroke();
+        }
+      }
+    </script>
+
+    <script async type="text/javascript" src="rhino3dm.js"></script>
+  </body>
+</html>
