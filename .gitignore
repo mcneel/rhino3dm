@@ -1,6 +1,3 @@
-/artifacts
-/build
-
 # Prerequisites
 *.d
 
@@ -33,9 +30,9 @@
 *.exe
 *.out
 *.app
-/winbuild
+
 /.vs
 *.vcxproj.user
-/wheels_for_pypi
-/build_py*_32bit
-/build_py*_64bit
+/python/wheels_for_pypi
+/python/build_py*_32bit
+/python/build_py*_64bit

@@ -17,7 +17,7 @@ def compilebinaries():
     """ compile for the platform we are running on """
     os.chdir(build_dir)
     if windows_build:
-        command = "cmake -A {} ..".format("win32" if bitness==32 else "x64")
+        command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" ..'.format("win32" if bitness==32 else "x64", sys.executable)
         os.system(command)
         if bitness==64:
             for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
@@ -44,7 +44,7 @@ def createwheel():
     for file in glob.glob(build_dir + "/*.so"):
         copy(file, staging_dir + "/rhino3dm")
 
-    copyfile("LICENSE", staging_dir + "/LICENSE")
+    copyfile("../LICENSE", staging_dir + "/LICENSE")
     copyfile("pysrc/README.md", staging_dir + "/README.md")
     copyfile("pysrc/MANIFEST.in", staging_dir + "/MANIFEST.in")
     copyfile("pysrc/setup.py", staging_dir + "/setup.py")

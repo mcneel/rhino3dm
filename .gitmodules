@@ -1,6 +1,6 @@
-[submodule "opennurbs"]
-	path = opennurbs
+[submodule "shared_src/opennurbs"]
+	path = shared_src/opennurbs
 	url = https://github.com/mcneel/opennurbs.git
-[submodule "pybind11"]
-	path = pybind11
+[submodule "python/pybind11"]
+	path = python/pybind11
 	url = https://github.com/pybind/pybind11.git
