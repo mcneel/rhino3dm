@@ -37,7 +37,5 @@
 /.vs
 *.vcxproj.user
 /wheels_for_pypi
-/build_py27_32bit
-/build_py27_64bit
-/build_py37_32bit
-/build_py37_64bit
+/build_py*_32bit
+/build_py*_64bit
