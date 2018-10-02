@@ -6,7 +6,6 @@ Stand alone libraries based on OpenNURBS with a RhinoCommon style.
   * See python directory for details
 * Javascript (web assembly)
   * See javascript directory for details
-* .NET
-  * Not included in this project yet
-
+* .NET (coming soon)
+  * currently available as Rhino3dmIO packages on nuget
 
