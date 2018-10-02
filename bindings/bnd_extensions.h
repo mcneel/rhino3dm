@@ -2,6 +2,11 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initExtensionsBindings(pybind11::module& m);
+#endif
+
+
 class BND_ONXModel_ObjectTable
 {
   std::shared_ptr<ONX_Model> m_model;

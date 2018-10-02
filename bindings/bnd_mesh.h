@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initMeshBindings(pybind11::module& m);
+#endif
+
 class BND_MeshVertexList
 {
   std::shared_ptr<ON_Mesh> m_mesh;
@@ -31,6 +35,20 @@ public:
   #endif
 };
 
+class BND_MeshNormalList
+{
+  std::shared_ptr<ON_Mesh> m_mesh;
+public:
+  BND_MeshNormalList(const std::shared_ptr<ON_Mesh>& mesh);
+
+  ON_3fVector* begin();
+  ON_3fVector* end();
+
+  int Count() const;
+  ON_3fVector GetNormal(int i) const;
+  void SetNormal(int i, ON_3fVector v);
+};
+
 class BND_Mesh : public BND_Geometry
 {
   std::shared_ptr<ON_Mesh> m_mesh;
@@ -40,4 +58,5 @@ public:
 
   BND_MeshVertexList GetVertices();
   BND_MeshFaceList GetFaces();
+  BND_MeshNormalList GetNormals();
 };

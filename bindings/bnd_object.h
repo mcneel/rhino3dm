@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initObjectBindings(pybind11::module& m);
+#endif
+
 class BND_Object
 {
   BND_Object(ON_Object* obj);

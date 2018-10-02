@@ -14,3 +14,13 @@ BND_NurbsCurve* BND_Arc::ToNurbsCurve()
   }
   return new BND_NurbsCurve(nc);
 }
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initArcBindings(pybind11::module& m)
+{
+  py::class_<BND_Arc>(m, "Arc")
+    .def(py::init<ON_3dPoint, double, double>())
+    .def("ToNurbsCurve", &BND_Arc::ToNurbsCurve);
+}
+#endif

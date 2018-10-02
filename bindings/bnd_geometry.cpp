@@ -31,3 +31,13 @@ bool BND_Geometry::Rotate(double rotation_angle, const ON_3dVector& rotation_axi
 {
   return m_geometry->Rotate(rotation_angle, rotation_axis, rotation_center);
 }
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initGeometryBindings(pybind11::module& m)
+{
+  py::class_<BND_Geometry, BND_Object>(m, "GeometryBase")
+    .def("GetBoundingBox", &BND_Geometry::BoundingBox)
+    .def("Rotate", &BND_Geometry::Rotate);
+}
+#endif

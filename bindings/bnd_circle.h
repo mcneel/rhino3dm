@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initCircleBindings(pybind11::module& m);
+#endif
+
 class BND_Circle
 {
 public:

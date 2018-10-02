@@ -1,6 +1,9 @@
 #include "bindings.h"
 
 #pragma once
+#if defined(ON_PYTHON_COMPILE)
+void initPolylineCurveBindings(pybind11::module& m);
+#endif
 
 class BND_PolylineCurve : public BND_Curve
 {

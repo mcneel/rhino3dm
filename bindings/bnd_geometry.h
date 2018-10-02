@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initGeometryBindings(pybind11::module& m);
+#endif
+
 class BND_Geometry : public BND_Object
 {
   std::shared_ptr<ON_Geometry> m_geometry;

@@ -208,6 +208,21 @@ BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
 
     return new BND_Geometry(geometry);
   }
+
+  ON_3dmObjectAttributes* attrs = ON_3dmObjectAttributes::Cast(obj);
+  if (attrs)
+    return new BND_3dmAttributes(attrs);
+
   return new BND_Object(obj);
+}
+#endif
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initObjectBindings(pybind11::module& m)
+{
+  py::class_<BND_Object>(m, "CommonObject")
+    .def("Encode", &BND_Object::Encode)
+    .def_static("Decode", &BND_Object::Decode);
 }
 #endif

@@ -61,3 +61,21 @@ ON_3dPoint BND_Curve::PointAtEnd() const
 {
   return m_curve->PointAtEnd();
 }
+
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initCurveBindings(pybind11::module& m)
+{
+  py::class_<BND_Curve, BND_Geometry>(m, "Curve")
+    .def_property("Domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
+    .def_property_readonly("Dimension", &BND_Geometry::Dimension)
+    .def("ChangeDimension", &BND_Curve::ChangeDimension)
+    .def_property_readonly("SpanCount", &BND_Curve::SpanCount)
+    .def_property_readonly("Degree", &BND_Curve::Degree)
+    .def_property_readonly("PointAtStart", &BND_Curve::PointAtStart)
+    .def_property_readonly("PointAtEnd", &BND_Curve::PointAtEnd)
+    .def_property_readonly("IsLinear", &BND_Curve::IsLinear)
+    .def_property_readonly("IsPolyline", &BND_Curve::IsPolyline);
+}
+#endif

@@ -328,3 +328,36 @@ bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
   return rc;
 
 }
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initViewportBindings(pybind11::module& m)
+{
+  py::class_<BND_Viewport, BND_Object>(m, "ViewportInfo")
+    .def(py::init<>())
+    .def_property_readonly("IsValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
+    .def_property_readonly("isValidCamer", &BND_Viewport::IsValidCamera)
+    .def_property_readonly("IsValidFrustum", &BND_Viewport::IsValidFrustum)
+    .def_property("IsParallelProjection", &BND_Viewport::IsParallelProjection, &BND_Viewport::SetProjectionToParallel)
+    .def_property("IsPerspectiveProjection", &BND_Viewport::IsPerspectiveProjection, &BND_Viewport::SetProjectionToPerspective)
+    .def_property_readonly("IsTwoPointPerspectiveProjection", &BND_Viewport::IsTwoPointPerspectiveProjection)
+    .def("ChangeToParallelProjection", &BND_Viewport::ChangeToParallelProjection)
+    .def("ChangeToPerspectiveProjection", &BND_Viewport::ChangeToPerspectiveProjection)
+    .def("ChangeToTwoPointPerspectiveProjection", &BND_Viewport::ChangeToTwoPointPerspectiveProjection)
+    .def_property_readonly("CameraLocation", &BND_Viewport::CameraLocation)
+    .def_property_readonly("CameraDirection", &BND_Viewport::CameraDirection)
+    .def_property_readonly("CameraUp", &BND_Viewport::CameraUp)
+    .def("SetCameraLocation", &BND_Viewport::SetCameraLocation)
+    .def("SetCameraDirection", &BND_Viewport::SetCameraDirection)
+    .def("SetCameraUp", &BND_Viewport::SetCameraUp)
+    .def_property_readonly("CameraX", &BND_Viewport::CameraX)
+    .def_property_readonly("CameraY", &BND_Viewport::CameraY)
+    .def_property_readonly("CameraZ", &BND_Viewport::CameraZ)
+    .def("SetFrustum", &BND_Viewport::SetFrustum)
+    .def_property_readonly("ScreenPortAspect", &BND_Viewport::ScreenPortAspect)
+    .def_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
+    .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
+    .def("GetXform", &BND_Viewport::GetXform)
+    .def("DollyExtents", &BND_Viewport::DollyExtents);
+}
+#endif

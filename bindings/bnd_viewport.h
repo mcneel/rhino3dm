@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initViewportBindings(pybind11::module& m);
+#endif
+
 class BND_Viewport : public BND_Object
 {
   std::shared_ptr<ON_Viewport> m_viewport;

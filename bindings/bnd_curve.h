@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initCurveBindings(pybind11::module& m);
+#endif
+
 class BND_Curve : public BND_Geometry
 {
   std::shared_ptr<ON_Curve> m_curve;

@@ -214,3 +214,27 @@ BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
 {
   m_model = m;
 }
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initExtensionsBindings(pybind11::module& m)
+{
+  py::class_<BND_ONXModel>(m, "File3dm")
+    .def(py::init<>())
+    .def_static("Read", &BND_ONXModel::Read)
+    .def_static("ReadNotes", &BND_ONXModel::ReadNotes)
+    .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion)
+    .def("Write", &BND_ONXModel::Write)
+    .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
+    .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
+    .def_property("ApplicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
+    .def_property("ApplicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    .def_property_readonly("CreatedBy", &BND_ONXModel::GetCreatedBy)
+    .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
+    .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
+    .def_property_readonly("Objects", &BND_ONXModel::Objects)
+    ;
+
+  py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable");
+}
+#endif

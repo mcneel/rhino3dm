@@ -36,3 +36,17 @@ BND_NurbsCurve* BND_Circle::ToNurbsCurve() const
   }
   return new BND_NurbsCurve(nc);
 }
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initCircleBindings(pybind11::module& m)
+{
+  py::class_<BND_Circle>(m, "Circle")
+    .def(py::init<double>())
+    .def(py::init<ON_3dPoint, double>())
+    .def_readwrite("Plane", &BND_Circle::m_plane)
+    .def_readwrite("Radius", &BND_Circle::m_radius)
+    .def("PointAt", &BND_Circle::PointAt)
+    .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve);
+}
+#endif

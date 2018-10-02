@@ -27,6 +27,7 @@
 #include "bnd_xform.h"
 #include "bnd_circle.h"
 #include "bnd_object.h"
+#include "bnd_3dm_attributes.h"
 #include "bnd_geometry.h"
 #include "bnd_arc.h"
 #include "bnd_brep.h"

@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined(ON_PYTHON_COMPILE)
+void initSphereBindings(pybind11::module& m);
+#endif
+
 class BND_Sphere : public ON_Sphere
 {
 public:
