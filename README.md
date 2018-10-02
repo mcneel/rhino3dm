@@ -23,6 +23,8 @@ This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](h
 
 ## Install the Tools
 
+CMake 3.12.1 is the minimum required CMake version.
+
 * Mac
   * Install Homebrew (https://brew.sh/)
   * `brew install python2 cmake` (for Python 2.7 compile)
@@ -31,6 +33,10 @@ This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](h
   * This project uses Visual Studio 2017
   * Install the flavor of CPython that you prefer to work with from python.org
   * Install CMake (https://cmake.org/download/) and make sure that cmake.exe is added to the path
+* Linux
+  * Tested with Clang 3.8.0 on Linux Mint 18.3
+  * Install CMake 3.12.1
+  * `sudo aptitude install python2 python3 python2-dev python3-dev uuid uuid-dev`
 
 ## Compile
 
