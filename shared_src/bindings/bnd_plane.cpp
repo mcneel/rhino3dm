@@ -27,3 +27,16 @@ BND_Plane BND_Plane::WorldXY()
   BND_Plane rc = FromOnPlane(ON_Plane::World_xy);
   return rc;
 }
+
+#if defined ON_WASM_COMPILE
+using namespace emscripten;
+
+void initPlaneBindings()
+{
+  value_object<BND_Plane>("Plane")
+    .field("origin", &BND_Plane::m_origin)
+    .field("xAxis", &BND_Plane::m_xaxis)
+    .field("yAxis", &BND_Plane::m_yaxis)
+    .field("zAxis", &BND_Plane::m_zaxis);
+}
+#endif

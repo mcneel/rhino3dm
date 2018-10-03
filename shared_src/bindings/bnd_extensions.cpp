@@ -70,14 +70,14 @@ bool BND_ONXModel::Write(const char* path, int version)
   return m_model->Write(path, version);
 }
 
-std::string BND_ONXModel::GetStartSectionComments() const
+std::wstring BND_ONXModel::GetStartSectionComments() const
 {
-  ON_String comments = m_model->m_sStartSectionComments;
-  return std::string(comments);
+  ON_wString comments = m_model->m_sStartSectionComments;
+  return std::wstring(comments);
 }
-void BND_ONXModel::SetStartSectionComments(const char* comments)
+void BND_ONXModel::SetStartSectionComments(std::wstring comments)
 {
-  ON_wString wcomments = comments;
+  ON_wString wcomments = comments.c_str();
   m_model->m_sStartSectionComments = wcomments;
 }
 
@@ -236,5 +236,24 @@ void initExtensionsBindings(pybind11::module& m)
     ;
 
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable");
+}
+#endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initExtensionsBindings()
+{
+  class_<BND_ONXModel>("File3dm")
+    .constructor<>()
+    .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments);
+    //.property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
+    //.property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
+    //.property("applicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    //.property("areatedBy", &BND_ONXModel::GetCreatedBy)
+    //.property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
+    //.property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
+    //.property("objects", &BND_ONXModel::Objects)
+    //;
 }
 #endif

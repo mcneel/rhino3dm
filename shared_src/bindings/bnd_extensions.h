@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initExtensionsBindings(pybind11::module& m);
+#else
+void initExtensionsBindings();
 #endif
 
 
@@ -25,8 +27,8 @@ public:
   static int ReadArchiveVersion(const char* path);
   bool Write(const char* path, int version);
 
-  std::string GetStartSectionComments() const;
-  void SetStartSectionComments(const char* comments);
+  std::wstring GetStartSectionComments() const;
+  void SetStartSectionComments(std::wstring comments);
 
   std::string GetApplicationName() const;
   void SetApplicationName(const char* comments);

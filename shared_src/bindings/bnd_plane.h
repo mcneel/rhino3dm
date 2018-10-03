@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if defined ON_WASM_COMPILE
+void initPlaneBindings();
+#endif
+
 class BND_Plane
 {
 public:

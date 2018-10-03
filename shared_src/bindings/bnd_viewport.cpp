@@ -360,4 +360,40 @@ void initViewportBindings(pybind11::module& m)
     .def("GetXform", &BND_Viewport::GetXform)
     .def("DollyExtents", &BND_Viewport::DollyExtents);
 }
+
+#else
+
+using namespace emscripten;
+
+void initViewportBindings()
+{
+  class_<BND_Viewport, base<BND_Object>>("ViewportInfo")
+    .constructor<>()
+    .property("isValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
+    .property("isValidCamer", &BND_Viewport::IsValidCamera)
+    .property("isValidFrustum", &BND_Viewport::IsValidFrustum)
+    .property("isParallelProjection", &BND_Viewport::IsParallelProjection, &BND_Viewport::SetProjectionToParallel)
+    .property("isPerspectiveProjection", &BND_Viewport::IsPerspectiveProjection, &BND_Viewport::SetProjectionToPerspective)
+    .property("isTwoPointPerspectiveProjection", &BND_Viewport::IsTwoPointPerspectiveProjection)
+    .function("changeToParallelProjection", &BND_Viewport::ChangeToParallelProjection)
+    .function("changeToPerspectiveProjection", &BND_Viewport::ChangeToPerspectiveProjection)
+    .function("changeToTwoPointPerspectiveProjection", &BND_Viewport::ChangeToTwoPointPerspectiveProjection)
+    .property("cameraLocation", &BND_Viewport::CameraLocation)
+    .property("cameraDirection", &BND_Viewport::CameraDirection)
+    .property("cameraUp", &BND_Viewport::CameraUp)
+    .function("setCameraLocation", &BND_Viewport::SetCameraLocation)
+    .function("setCameraDirection", &BND_Viewport::SetCameraDirection)
+    .function("setCameraUp", &BND_Viewport::SetCameraUp)
+    .property("cameraX", &BND_Viewport::CameraX)
+    .property("cameraY", &BND_Viewport::CameraY)
+    .property("cameraZ", &BND_Viewport::CameraZ)
+    .function("setFrustum", &BND_Viewport::SetFrustum)
+    .function("getFrustum", &BND_Viewport::GetFrustum)
+    .property("screenPort", &BND_Viewport::GetScreenPort, &BND_Viewport::SetScreenPort)
+    .property("screenPortAspect", &BND_Viewport::ScreenPortAspect)
+    .property("cameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
+    .property("camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
+    .function("getXform", &BND_Viewport::GetXform, allow_raw_pointers())
+    .function("dollyExtents", &BND_Viewport::DollyExtents);
+}
 #endif

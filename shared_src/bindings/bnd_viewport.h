@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initViewportBindings(pybind11::module& m);
+#else
+void initViewportBindings();
 #endif
 
 class BND_Viewport : public BND_Object

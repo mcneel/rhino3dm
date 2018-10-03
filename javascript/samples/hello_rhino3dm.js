@@ -1,33 +1,49 @@
-// First test of rhinocommon.js
-sphere = new Module.Sphere([250, 250, 0], 100);
-brep = sphere.toBrep();
-functionArgs = [brep.encode()];
-// Don't need the sphere and brep anymore
-sphere.delete();
-brep.delete();
+var mesh;
 
-postdata = JSON.stringify(functionArgs);
-req = new XMLHttpRequest();
-url = "http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep";
-req.open("POST", url);
+function runMeshMaker() {
+  // First test of rhinocommon.js
+  sphere = new Module.Sphere([250, 250, 0], 100);
+  brep = sphere.toBrep();
+  functionArgs = [brep.encode()];
+  // Don't need the sphere and brep anymore
+  sphere.delete();
+  brep.delete();
 
-auth = localStorage["compute_auth"];
-if (auth == null) {
-  auth = window.prompt("Rhino Accounts auth token");
-  if (auth != null && auth.length>20) {
-    auth = "Bearer " + auth;
-    localStorage.setItem("compute_auth", auth);
+  postdata = JSON.stringify(functionArgs);
+  req = new XMLHttpRequest();
+  url = "http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep";
+  req.open("POST", url);
+
+  auth = localStorage["compute_auth"];
+  if (auth == null) {
+    auth = window.prompt("Rhino Accounts auth token");
+    if (auth != null && auth.length>20) {
+      auth = "Bearer " + auth;
+      localStorage.setItem("compute_auth", auth);
+    }
+  }
+  req.setRequestHeader("Authorization", auth);
+  req.addEventListener("loadend", loadEnd);
+  req.send(postdata);
+
+  function loadEnd(e) {
+    response = JSON.parse(req.responseText);
+    mesh = Module.CommonObject.decode(response[0]);
+
+    drawMesh();
   }
 }
-req.setRequestHeader("Authorization", auth);
-req.addEventListener("loadend", loadEnd);
-req.send(postdata);
 
-function loadEnd(e) {
-  response = JSON.parse(req.responseText);
-  mesh = Module.CommonObject.decode(response[0]);
+function drawMesh() {
+  var ctx=canvas.getContext("2d");
+  // Create gradient
+  var grd=ctx.createLinearGradient(0,0,0,500);
+  grd.addColorStop(0,"slategray");
+  grd.addColorStop(1,"black");
+  // Fill with gradient
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,500,500);
 
-  ctx = Module.canvas.getContext('2d');
   ctx.lineWidth = 1;
   ctx.strokeStyle = 'red';
 
@@ -44,4 +60,10 @@ function loadEnd(e) {
     ctx.lineTo(pts[3][0], pts[3][1]);
   }
   ctx.stroke();
+}
+
+
+function rotateMesh() {
+  mesh.rotate(.1, [1,1,0], [250,250,0]);
+  drawMesh();
 }

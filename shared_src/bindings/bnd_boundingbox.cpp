@@ -77,4 +77,16 @@ void initBoundingBoxBindings(pybind11::module& m)
       })
     ;
 }
+#else
+using namespace emscripten;
+
+void initBoundingBoxBindings()
+{
+  class_<BND_BoundingBox>("BoundingBox")
+    .constructor<ON_3dPoint, ON_3dPoint>()
+    .constructor<double, double, double, double, double, double>()
+    .property("min", &BND_BoundingBox::Min)
+    .property("max", &BND_BoundingBox::Max)
+    .function("transform", &BND_BoundingBox::Transform);
+}
 #endif

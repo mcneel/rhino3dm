@@ -70,4 +70,41 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("T1", &BND_Interval::m_t1);
 
 }
+#else
+using namespace emscripten;
+
+void initPointBindings()
+{
+  value_array<ON_2dPoint>("Point2dSimple")
+    .element(&ON_2dPoint::x)
+    .element(&ON_2dPoint::y);
+
+  value_array<ON_3dPoint>("Point3dSimple")
+    .element(&ON_3dPoint::x)
+    .element(&ON_3dPoint::y)
+    .element(&ON_3dPoint::z);
+
+  class_<BND_Point3d>("Point3d")
+    .class_function("transform", &BND_Point3d::Transform);
+
+  value_array<ON_4dPoint>("Point4dSimple")
+    .element(&ON_4dPoint::x)
+    .element(&ON_4dPoint::y)
+    .element(&ON_4dPoint::z)
+    .element(&ON_4dPoint::w);
+
+  value_array<ON_3dVector>("Vector3dSimple")
+    .element(&ON_3dVector::x)
+    .element(&ON_3dVector::y)
+    .element(&ON_3dVector::z);
+
+  value_array<ON_3fPoint>("Point3fSimple")
+    .element(&ON_3fPoint::x)
+    .element(&ON_3fPoint::y)
+    .element(&ON_3fPoint::z);
+
+  value_array<BND_Interval>("IntervalSimple")
+    .element(&BND_Interval::m_t0)
+    .element(&BND_Interval::m_t1);
+}
 #endif
