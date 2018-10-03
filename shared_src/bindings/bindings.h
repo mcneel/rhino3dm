@@ -1,6 +1,7 @@
 #pragma once
 
-#define RH_C_FUNCTION extern "C"
+// we don't need to export RH_C_FUNCTION in these libraries
+#define RH_C_FUNCTION
 
 #if defined(__EMSCRIPTEN__)
 #define ON_WASM_COMPILE

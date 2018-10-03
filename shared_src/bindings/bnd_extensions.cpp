@@ -87,7 +87,7 @@ const int idxApplicationDetails = 2;
 const int idxCreatedBy = 3;
 const int idxLastCreatedBy = 4;
 
-RH_C_FUNCTION void ONX_Model_GetString(const ONX_Model* pConstModel, int which, ON_String* pString)
+RH_C_FUNCTION void ONX_Model_GetString(const ONX_Model* pConstModel, int which, ON_wString* pString)
 {
   if (pConstModel && pString)
   {
@@ -112,7 +112,7 @@ RH_C_FUNCTION void ONX_Model_GetString(const ONX_Model* pConstModel, int which, 
   }
 }
 
-RH_C_FUNCTION void ONX_Model_SetString(ONX_Model* pModel, int which, const char* str)
+RH_C_FUNCTION void ONX_Model_SetString(ONX_Model* pModel, int which, const wchar_t* str)
 {
   ON_wString _str = str;
 
@@ -139,47 +139,47 @@ RH_C_FUNCTION void ONX_Model_SetString(ONX_Model* pModel, int which, const char*
   }
 }
 
-std::string BND_ONXModel::GetApplicationName() const
+std::wstring BND_ONXModel::GetApplicationName() const
 {
-  ON_String s;
+  ON_wString s;
   ONX_Model_GetString(m_model.get(), idxApplicationName, &s);
-  return std::string(s);
+  return std::wstring(s);
 }
-void BND_ONXModel::SetApplicationName(const char* comments)
+void BND_ONXModel::SetApplicationName(std::wstring comments)
 {
-  ONX_Model_SetString(m_model.get(), idxApplicationName, comments);
+  ONX_Model_SetString(m_model.get(), idxApplicationName, comments.c_str());
 }
-std::string BND_ONXModel::GetApplicationUrl() const
+std::wstring BND_ONXModel::GetApplicationUrl() const
 {
-  ON_String s;
+  ON_wString s;
   ONX_Model_GetString(m_model.get(), idxApplicationUrl, &s);
-  return std::string(s);
+  return std::wstring(s);
 }
-void BND_ONXModel::SetApplicationUrl(const char* s)
+void BND_ONXModel::SetApplicationUrl(std::wstring s)
 {
-  ONX_Model_SetString(m_model.get(), idxApplicationUrl, s);
+  ONX_Model_SetString(m_model.get(), idxApplicationUrl, s.c_str());
 }
-std::string BND_ONXModel::GetApplicationDetails() const
+std::wstring BND_ONXModel::GetApplicationDetails() const
 {
-  ON_String s;
+  ON_wString s;
   ONX_Model_GetString(m_model.get(), idxApplicationDetails, &s);
-  return std::string(s);
+  return std::wstring(s);
 }
-void BND_ONXModel::SetApplicationDetails(const char* s)
+void BND_ONXModel::SetApplicationDetails(std::wstring s)
 {
-  ONX_Model_SetString(m_model.get(), idxApplicationDetails, s);
+  ONX_Model_SetString(m_model.get(), idxApplicationDetails, s.c_str());
 }
-std::string BND_ONXModel::GetCreatedBy() const
+std::wstring BND_ONXModel::GetCreatedBy() const
 {
-  ON_String s;
+  ON_wString s;
   ONX_Model_GetString(m_model.get(), idxCreatedBy, &s);
-  return std::string(s);
+  return std::wstring(s);
 }
-std::string BND_ONXModel::GetLastEditedBy() const
+std::wstring BND_ONXModel::GetLastEditedBy() const
 {
-  ON_String s;
+  ON_wString s;
   ONX_Model_GetString(m_model.get(), idxLastCreatedBy, &s);
-  return std::string(s);
+  return std::wstring(s);
 }
 
 RH_C_FUNCTION int ONX_Model_GetRevision(const ONX_Model* pConstModel)
@@ -215,6 +215,28 @@ BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
   m_model = m;
 }
 
+static ON_UUID Internal_ONX_Model_AddModelGeometry(
+  ONX_Model* model,
+  const ON_Geometry* geometry,
+  const ON_3dmObjectAttributes* attributes
+)
+{
+  if (nullptr == model)
+    return ON_nil_uuid;
+  if (nullptr == geometry)
+    return ON_nil_uuid;
+  ON_ModelComponentReference model_component_reference = model->AddModelGeometryComponent(geometry, attributes);
+  return ON_ModelGeometryComponent::FromModelComponentRef(model_component_reference, &ON_ModelGeometryComponent::Unset)->Id();
+}
+
+
+ON_UUID BND_ONXModel_ObjectTable::AddPoint(double x, double y, double z)
+{
+  ON_Point point_geometry(x,y,z);
+  return Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, nullptr);
+}
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
@@ -235,7 +257,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     ;
 
-  py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable");
+  py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
+    ;
 }
 #endif
 

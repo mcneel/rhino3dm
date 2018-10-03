@@ -14,6 +14,7 @@ class BND_ONXModel_ObjectTable
   std::shared_ptr<ONX_Model> m_model;
 public:
   BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m);
+  ON_UUID AddPoint(double x, double y, double z);
 };
 
 class BND_ONXModel
@@ -30,14 +31,14 @@ public:
   std::wstring GetStartSectionComments() const;
   void SetStartSectionComments(std::wstring comments);
 
-  std::string GetApplicationName() const;
-  void SetApplicationName(const char* comments);
-  std::string GetApplicationUrl() const;
-  void SetApplicationUrl(const char* comments);
-  std::string GetApplicationDetails() const;
-  void SetApplicationDetails(const char* comments);
-  std::string GetCreatedBy() const;
-  std::string GetLastEditedBy() const;
+  std::wstring GetApplicationName() const;
+  void SetApplicationName(std::wstring name);
+  std::wstring GetApplicationUrl() const;
+  void SetApplicationUrl(std::wstring url);
+  std::wstring GetApplicationDetails() const;
+  void SetApplicationDetails(std::wstring details);
+  std::wstring GetCreatedBy() const;
+  std::wstring GetLastEditedBy() const;
   int GetRevision() const;
   void SetRevision(int r);
 

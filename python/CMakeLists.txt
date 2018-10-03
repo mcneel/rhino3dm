@@ -25,12 +25,17 @@ add_compile_definitions(MY_ZCALLOC Z_PREFIX)
 add_compile_definitions(OPENNURBS_ZLIB_LIB_DIR)
 add_compile_definitions(UNICODE)
 
-#add_library(zlib_static STATIC ${zlib_SRC})
-
-pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-target_link_libraries(_rhino3dm -luuid)
+    pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+    target_link_libraries(_rhino3dm -luuid)
+else()
+    add_library(zlib_static STATIC ${zlib_SRC})
+    add_library(opennurbs_static STATIC ${opennurbs_SRC})
+    pybind11_add_module(_rhino3dm ${bindings_SRC})
+    target_link_libraries(_rhino3dm PRIVATE zlib_static)
+    target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
 endif()
-#target_link_libraries(_rhino3dm PRIVATE zlib_static)
+
+
 
 
