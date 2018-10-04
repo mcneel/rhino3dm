@@ -8,9 +8,10 @@ void initMeshBindings(pybind11::module& m);
 
 class BND_MeshVertexList
 {
-  std::shared_ptr<ON_Mesh> m_mesh;
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshVertexList(const std::shared_ptr<ON_Mesh>& mesh);
+  BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
 
   ON_3fPoint* begin();
   ON_3fPoint* end();
@@ -23,9 +24,10 @@ public:
 
 class BND_MeshFaceList
 {
-  std::shared_ptr<ON_Mesh> m_mesh;
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshFaceList(const std::shared_ptr<ON_Mesh>& mesh);
+  BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
   int Count() const;
   #if defined(__EMSCRIPTEN__)
   emscripten::val GetFace(int i) const;
@@ -37,9 +39,10 @@ public:
 
 class BND_MeshNormalList
 {
-  std::shared_ptr<ON_Mesh> m_mesh;
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshNormalList(const std::shared_ptr<ON_Mesh>& mesh);
+  BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
 
   ON_3fVector* begin();
   ON_3fVector* end();
@@ -51,12 +54,15 @@ public:
 
 class BND_Mesh : public BND_Geometry
 {
-  std::shared_ptr<ON_Mesh> m_mesh;
+  ON_Mesh* m_mesh = nullptr;
 public:
   BND_Mesh();
-  BND_Mesh(ON_Mesh* mesh);
+  BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref);
 
   BND_MeshVertexList GetVertices();
   BND_MeshFaceList GetFaces();
   BND_MeshNormalList GetNormals();
+
+protected:
+  void SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref);
 };

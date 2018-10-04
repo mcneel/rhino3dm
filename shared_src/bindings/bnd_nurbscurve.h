@@ -8,9 +8,12 @@ void initNurbsCurveBindings(pybind11::module& m);
 
 class BND_NurbsCurve : public BND_Curve
 {
-  std::shared_ptr<ON_NurbsCurve> m_nurbscurve;
+  ON_NurbsCurve* m_nurbscurve = nullptr;
 public:
-  BND_NurbsCurve(ON_NurbsCurve* nurbscurve);
+  BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref);
   BND_NurbsCurve(int degree, int pointCount);
   BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
+
+protected:
+  void SetTrackedPointer(ON_NurbsCurve* curve, const ON_ModelComponentReference* compref);
 };

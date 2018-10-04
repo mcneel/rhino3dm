@@ -7,8 +7,11 @@ void initBrepBindings(pybind11::module& m);
 
 class BND_Brep : public BND_Geometry
 {
-  std::shared_ptr<ON_Brep> m_brep;
+  ON_Brep* m_brep = nullptr;
 public:
   BND_Brep();
-  BND_Brep(ON_Brep* brep);
+  BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref);
+
+protected:
+  void SetTrackedPointer(ON_Brep* brep, const ON_ModelComponentReference* compref);
 };

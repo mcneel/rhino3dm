@@ -9,7 +9,7 @@ BND_Brep* BND_Sphere::ToBrep()
 {
   ON_Brep* brep = ON_BrepSphere(*this);
   if(brep)
-    return new BND_Brep(brep);
+    return new BND_Brep(brep, nullptr);
   return nullptr;
 }
 

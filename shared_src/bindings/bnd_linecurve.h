@@ -8,7 +8,11 @@ void initLineCurveBindings(pybind11::module& m);
 
 class BND_LineCurve : public BND_Curve
 {
-  std::shared_ptr<ON_LineCurve> m_linecurve;
+  ON_LineCurve* m_linecurve = nullptr;
 public:
-  BND_LineCurve(ON_LineCurve* linecurve);
+  BND_LineCurve();
+  BND_LineCurve(ON_LineCurve* linecurve, const ON_ModelComponentReference* compref);
+
+protected:
+  void SetTrackedPointer(ON_LineCurve* linecurve, const ON_ModelComponentReference* compref);
 };

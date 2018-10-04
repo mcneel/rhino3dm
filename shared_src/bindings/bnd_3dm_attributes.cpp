@@ -2,15 +2,21 @@
 
 BND_3dmAttributes::BND_3dmAttributes()
 {
-  m_attributes.reset(new ON_3dmObjectAttributes());
-  m_object = m_attributes;
+  SetTrackedPointer(new ON_3dmObjectAttributes(), nullptr);
 }
 
-BND_3dmAttributes::BND_3dmAttributes(ON_3dmObjectAttributes* attrs)
+BND_3dmAttributes::BND_3dmAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
 {
-  m_attributes.reset(attrs);
-  m_object = m_attributes;
+  SetTrackedPointer(attrs, compref);
 }
+
+void BND_3dmAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
+{
+  m_attributes = attrs;
+  BND_Object::SetTrackedPointer(attrs, compref);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;

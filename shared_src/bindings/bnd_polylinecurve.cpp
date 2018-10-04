@@ -2,14 +2,18 @@
 
 BND_PolylineCurve::BND_PolylineCurve()
 {
-  m_polylinecurve.reset(new ON_PolylineCurve());
-  SetSharedCurvePointer(m_polylinecurve);
+  SetTrackedPointer(new ON_PolylineCurve(), nullptr);
 }
 
-BND_PolylineCurve::BND_PolylineCurve(ON_PolylineCurve* polylinecurve)
+BND_PolylineCurve::BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref)
 {
-  m_polylinecurve.reset(polylinecurve);
-  SetSharedCurvePointer(m_polylinecurve);
+  SetTrackedPointer(polylinecurve, compref);
+}
+
+void BND_PolylineCurve::SetTrackedPointer(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref)
+{
+  m_polylinecurve = polylinecurve;
+  BND_Curve::SetTrackedPointer(polylinecurve, compref);
 }
 
 int BND_PolylineCurve::PointCount() const
@@ -21,6 +25,8 @@ ON_3dPoint BND_PolylineCurve::Point(int index) const
 {
   return m_polylinecurve->m_pline[index];
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;

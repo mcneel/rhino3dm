@@ -18,7 +18,7 @@ file(RENAME "../shared_src/opennurbs/opennurbs_unicode_cp949.skip" "../shared_sr
 
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --bind")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --bind")
 
 add_compile_definitions(_GNU_SOURCE)
 add_compile_definitions(ON_COMPILING_OPENNURBS)

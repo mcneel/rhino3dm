@@ -8,11 +8,11 @@ PYBIND11_MODULE(_rhino3dm, m)
 {
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
 
+  initObjectBindings(m);
   init3dmAttributesBindings(m);
   initPointBindings(m);
   initArcBindings(m);
   initBoundingBoxBindings(m);
-  initObjectBindings(m);
   initGeometryBindings(m);
   initBrepBindings(m);
   initCurveBindings(m);

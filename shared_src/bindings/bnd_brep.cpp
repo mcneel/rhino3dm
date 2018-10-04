@@ -2,15 +2,21 @@
 
 BND_Brep::BND_Brep()
 {
-  m_brep.reset(new ON_Brep());
-  SetSharedGeometryPointer(m_brep);
+  SetTrackedPointer(new ON_Brep(), nullptr);
 }
 
-BND_Brep::BND_Brep(ON_Brep* brep)
+BND_Brep::BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref)
 {
-  m_brep.reset(brep);
-  SetSharedGeometryPointer(m_brep);
+  SetTrackedPointer(brep, compref);
 }
+
+void BND_Brep::SetTrackedPointer(ON_Brep* brep, const ON_ModelComponentReference* compref)
+{
+  m_brep = brep;
+  BND_Geometry::SetTrackedPointer(brep, compref);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;

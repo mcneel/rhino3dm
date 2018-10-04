@@ -3,34 +3,39 @@
 
 BND_Mesh::BND_Mesh()
 {
-  m_mesh.reset(new ON_Mesh());
-  SetSharedGeometryPointer(m_mesh);
+  SetTrackedPointer(new ON_Mesh(), nullptr);
 }
 
-BND_Mesh::BND_Mesh(ON_Mesh* mesh)
+BND_Mesh::BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
 {
-  m_mesh.reset(mesh);
-  SetSharedGeometryPointer(m_mesh);
+  SetTrackedPointer(mesh, compref);
+}
+
+void BND_Mesh::SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
+{
+  m_mesh = mesh;
+  BND_Geometry::SetTrackedPointer(mesh, compref);
 }
 
 BND_MeshVertexList BND_Mesh::GetVertices()
 {
-  return BND_MeshVertexList(m_mesh);
+  return BND_MeshVertexList(m_mesh, m_component_ref);
 }
 
 BND_MeshFaceList BND_Mesh::GetFaces()
 {
-  return BND_MeshFaceList(m_mesh);
+  return BND_MeshFaceList(m_mesh, m_component_ref);
 }
 
 BND_MeshNormalList BND_Mesh::GetNormals()
 {
-  return BND_MeshNormalList(m_mesh);
+  return BND_MeshNormalList(m_mesh, m_component_ref);
 }
 
 
-BND_MeshVertexList::BND_MeshVertexList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshVertexList::BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
+  m_component_reference = compref;
   m_mesh = mesh;
 }
 
@@ -46,8 +51,9 @@ ON_3fPoint* BND_MeshVertexList::end()
   return m_mesh->m_V.At(count-1);
 }
 
-BND_MeshFaceList::BND_MeshFaceList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
+  m_component_reference = compref;
   m_mesh = mesh;
 }
 
@@ -63,7 +69,7 @@ int BND_MeshFaceList::Count() const
 
 void BND_MeshVertexList::SetCount(int value)
 {
-  ON_Mesh* pMesh = m_mesh.get();
+  ON_Mesh* pMesh = m_mesh;
   const bool hasDoublePrecisionVerts = pMesh->HasDoublePrecisionVertices();
   pMesh->m_V.Reserve(value);
   pMesh->m_V.SetCount(value);
@@ -97,8 +103,9 @@ emscripten::val BND_MeshFaceList::GetFace(int i) const
 }
 #endif
 
-BND_MeshNormalList::BND_MeshNormalList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
+  m_component_reference = compref;
   m_mesh = mesh;
 }
 

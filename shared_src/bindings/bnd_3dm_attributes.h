@@ -8,8 +8,11 @@ void init3dmAttributesBindings(pybind11::module& m);
 
 class BND_3dmAttributes : public BND_Object
 {
-  std::shared_ptr<ON_3dmObjectAttributes> m_attributes;
+  ON_3dmObjectAttributes* m_attributes = nullptr;
 public:
   BND_3dmAttributes();
-  BND_3dmAttributes(ON_3dmObjectAttributes* attrs);
+  BND_3dmAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref);
+
+protected:
+  void SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref);
 };
