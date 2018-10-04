@@ -11,7 +11,7 @@ class BND_MeshVertexList
   ON_ModelComponentReference m_component_reference;
   ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshVertexList(const ON_ModelComponentReference& compref);
+  BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
 
   ON_3fPoint* begin();
   ON_3fPoint* end();
@@ -27,7 +27,7 @@ class BND_MeshFaceList
   ON_ModelComponentReference m_component_reference;
   ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshFaceList(const ON_ModelComponentReference& compref);
+  BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
   int Count() const;
   #if defined(__EMSCRIPTEN__)
   emscripten::val GetFace(int i) const;
@@ -42,7 +42,7 @@ class BND_MeshNormalList
   ON_ModelComponentReference m_component_reference;
   ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshNormalList(const ON_ModelComponentReference& compref);
+  BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
 
   ON_3fVector* begin();
   ON_3fVector* end();

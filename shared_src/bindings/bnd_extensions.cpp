@@ -250,22 +250,14 @@ const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
   ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
-  iterator.FirstComponentReference();
-  int count = iterator.ActiveComponentCount();
-  const ON_ModelComponent* comp = iterator.FirstComponent();
-  int current=0;
-  while(comp && current<count)
+  ON_ModelComponentReference compref = iterator.FirstComponentReference();
+  int current = 0;
+  while(current<index)
   {
-    if(current==index)
-      break;
-    comp = iterator.NextComponent();
+    compref = iterator.NextComponentReference();
     current++;
   }
-
-  if( nullptr==comp )
-    return nullptr;
-
-  return BND_Object::CreateWrapper(iterator.CurrentComponentReference());
+  return BND_Object::CreateWrapper(compref);
 }
 
 

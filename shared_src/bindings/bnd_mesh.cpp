@@ -19,25 +19,24 @@ void BND_Mesh::SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference
 
 BND_MeshVertexList BND_Mesh::GetVertices()
 {
-  return BND_MeshVertexList(m_component_ref);
+  return BND_MeshVertexList(m_mesh, m_component_ref);
 }
 
 BND_MeshFaceList BND_Mesh::GetFaces()
 {
-  return BND_MeshFaceList(m_component_ref);
+  return BND_MeshFaceList(m_mesh, m_component_ref);
 }
 
 BND_MeshNormalList BND_Mesh::GetNormals()
 {
-  return BND_MeshNormalList(m_component_ref);
+  return BND_MeshNormalList(m_mesh, m_component_ref);
 }
 
 
-BND_MeshVertexList::BND_MeshVertexList(const ON_ModelComponentReference& compref)
+BND_MeshVertexList::BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
-  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
-  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
+  m_mesh = mesh;
 }
 
 ON_3fPoint* BND_MeshVertexList::begin()
@@ -52,11 +51,10 @@ ON_3fPoint* BND_MeshVertexList::end()
   return m_mesh->m_V.At(count-1);
 }
 
-BND_MeshFaceList::BND_MeshFaceList(const ON_ModelComponentReference& compref)
+BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
-  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
-  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
+  m_mesh = mesh;
 }
 
 int BND_MeshVertexList::Count() const
@@ -105,11 +103,10 @@ emscripten::val BND_MeshFaceList::GetFace(int i) const
 }
 #endif
 
-BND_MeshNormalList::BND_MeshNormalList(const ON_ModelComponentReference& compref)
+BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
-  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
-  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
+  m_mesh = mesh;
 }
 
 ON_3fVector* BND_MeshNormalList::begin()
