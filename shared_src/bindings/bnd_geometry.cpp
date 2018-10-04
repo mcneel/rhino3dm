@@ -4,16 +4,15 @@ BND_Geometry::BND_Geometry()
 {
 }
 
-BND_Geometry::BND_Geometry(ON_Geometry* geometry)
+BND_Geometry::BND_Geometry(ON_Geometry* geometry, const ON_ModelComponentReference* compref)
 {
-  m_geometry.reset(geometry);
-  m_object = m_geometry;
+  SetTrackedPointer(geometry, compref);
 }
 
-void BND_Geometry::SetSharedGeometryPointer(const std::shared_ptr<ON_Geometry>& sp)
+void BND_Geometry::SetTrackedPointer(ON_Geometry* geometry, const ON_ModelComponentReference* compref)
 {
-  m_geometry = sp;
-  m_object = sp;
+  m_geometry = geometry;
+  BND_Object::SetTrackedPointer(geometry, compref);
 }
 
 int BND_Geometry::Dimension() const

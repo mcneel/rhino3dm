@@ -34,7 +34,7 @@ BND_NurbsCurve* BND_Circle::ToNurbsCurve() const
     delete nc;
     return nullptr;
   }
-  return new BND_NurbsCurve(nc);
+  return new BND_NurbsCurve(nc, nullptr);
 }
 
 #if defined(ON_PYTHON_COMPILE)

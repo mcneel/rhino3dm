@@ -5,16 +5,15 @@ BND_Curve::BND_Curve()
 
 }
 
-BND_Curve::BND_Curve(ON_Curve* curve)
+BND_Curve::BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref)
 {
-  m_curve.reset(curve);
-  SetSharedCurvePointer(m_curve);
+  SetTrackedPointer(curve, compref);
 }
 
-void BND_Curve::SetSharedCurvePointer(const std::shared_ptr<ON_Curve>& sp)
+void BND_Curve::SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentReference* compref)
 {
-  m_curve = sp;
-  SetSharedGeometryPointer(sp);
+  m_curve = curve;
+  BND_Geometry::SetTrackedPointer(curve, compref);
 }
 
 void BND_Curve::SetDomain(const BND_Interval& i)

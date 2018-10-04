@@ -2,15 +2,21 @@
 
 BND_PolyCurve::BND_PolyCurve()
 {
-  m_polycurve.reset(new ON_PolyCurve());
-  SetSharedCurvePointer(m_polycurve);
+  SetTrackedPointer(new ON_PolyCurve(), nullptr);
 }
 
-BND_PolyCurve::BND_PolyCurve(ON_PolyCurve* polycurve)
+BND_PolyCurve::BND_PolyCurve(ON_PolyCurve* polycurve, const ON_ModelComponentReference* compref)
 {
-  m_polycurve.reset(polycurve);
-  SetSharedCurvePointer(m_polycurve);
+  SetTrackedPointer(polycurve, compref);
 }
+
+void BND_PolyCurve::SetTrackedPointer(ON_PolyCurve* polycurve, const ON_ModelComponentReference* compref)
+{
+  m_polycurve = polycurve;
+  BND_Curve::SetTrackedPointer(polycurve, compref);
+}
+
+/////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;

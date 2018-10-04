@@ -247,6 +247,8 @@ int BND_ONXModel_ObjectTable::Count() const
 }
 const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
 {
+  // I know this is dumb. I haven't figured out how to set up enumeration in
+  // javascript yet, so this is just here to keep things moving along
   ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
   iterator.FirstComponentReference();
   int count = iterator.ActiveComponentCount();
@@ -260,12 +262,10 @@ const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
     current++;
   }
 
-  const ON_ModelGeometryComponent* mc = ON_ModelGeometryComponent::Cast(comp);
-  if( nullptr==mc )
+  if( nullptr==comp )
     return nullptr;
 
-  ON_Geometry* geometry = const_cast<ON_Geometry*>(mc->Geometry(nullptr));
-  return BND_Object::CreateWrapper(geometry);
+  return BND_Object::CreateWrapper(iterator.CurrentComponentReference());
 }
 
 

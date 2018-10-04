@@ -2,14 +2,18 @@
 
 BND_Viewport::BND_Viewport()
 {
-  m_viewport.reset(new ON_Viewport());
-  m_object = m_viewport;
+  SetTrackedPointer(new ON_Viewport(), nullptr);
 }
 
-BND_Viewport::BND_Viewport(ON_Viewport* viewport)
+BND_Viewport::BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReference* compref)
 {
-  m_viewport.reset(viewport);
-  m_object = m_viewport;
+  SetTrackedPointer(viewport, compref);
+}
+
+void BND_Viewport::SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref)
+{
+  m_viewport = viewport;
+  BND_Object::SetTrackedPointer(viewport, compref);
 }
 
 bool BND_Viewport::IsValidCameraFrame() const
@@ -212,7 +216,7 @@ bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 
 
     {
-      ON_Viewport* pViewport = m_viewport.get();
+      ON_Viewport* pViewport = m_viewport;
       ON_BoundingBox camcoord_bbox = cameraCoordinateBoundingBox;
       if ( !camcoord_bbox.IsValid() || !pViewport->IsValid() )
       {

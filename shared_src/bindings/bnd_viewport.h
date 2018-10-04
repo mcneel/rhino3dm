@@ -10,10 +10,10 @@ void initViewportBindings();
 
 class BND_Viewport : public BND_Object
 {
-  std::shared_ptr<ON_Viewport> m_viewport;
+  ON_Viewport* m_viewport = nullptr;
 public:
   BND_Viewport();
-  BND_Viewport(ON_Viewport* viewport);
+  BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 
   bool IsValidCameraFrame() const;
   bool IsValidCamera() const;
@@ -60,4 +60,7 @@ public:
   ON_Xform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
 
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
+
+protected:
+  void SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 };

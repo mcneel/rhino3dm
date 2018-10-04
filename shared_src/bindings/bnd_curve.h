@@ -8,13 +8,13 @@ void initCurveBindings(pybind11::module& m);
 
 class BND_Curve : public BND_Geometry
 {
-  std::shared_ptr<ON_Curve> m_curve;
+  ON_Curve* m_curve = nullptr;
 protected:
   BND_Curve();
-  void SetSharedCurvePointer(const std::shared_ptr<ON_Curve>& sp);
+  void SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentReference* compref);
 
 public:
-  BND_Curve(ON_Curve* curve);
+  BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref);
   void SetDomain(const BND_Interval& i);
   BND_Interval GetDomain() const;
   bool ChangeDimension(int desiredDimension);

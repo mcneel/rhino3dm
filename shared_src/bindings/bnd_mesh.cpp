@@ -3,35 +3,41 @@
 
 BND_Mesh::BND_Mesh()
 {
-  m_mesh.reset(new ON_Mesh());
-  SetSharedGeometryPointer(m_mesh);
+  SetTrackedPointer(new ON_Mesh(), nullptr);
 }
 
-BND_Mesh::BND_Mesh(ON_Mesh* mesh)
+BND_Mesh::BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
 {
-  m_mesh.reset(mesh);
-  SetSharedGeometryPointer(m_mesh);
+  SetTrackedPointer(mesh, compref);
+}
+
+void BND_Mesh::SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
+{
+  m_mesh = mesh;
+  BND_Geometry::SetTrackedPointer(mesh, compref);
 }
 
 BND_MeshVertexList BND_Mesh::GetVertices()
 {
-  return BND_MeshVertexList(m_mesh);
+  return BND_MeshVertexList(m_component_ref);
 }
 
 BND_MeshFaceList BND_Mesh::GetFaces()
 {
-  return BND_MeshFaceList(m_mesh);
+  return BND_MeshFaceList(m_component_ref);
 }
 
 BND_MeshNormalList BND_Mesh::GetNormals()
 {
-  return BND_MeshNormalList(m_mesh);
+  return BND_MeshNormalList(m_component_ref);
 }
 
 
-BND_MeshVertexList::BND_MeshVertexList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshVertexList::BND_MeshVertexList(const ON_ModelComponentReference& compref)
 {
-  m_mesh = mesh;
+  m_component_reference = compref;
+  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
+  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
 }
 
 ON_3fPoint* BND_MeshVertexList::begin()
@@ -46,9 +52,11 @@ ON_3fPoint* BND_MeshVertexList::end()
   return m_mesh->m_V.At(count-1);
 }
 
-BND_MeshFaceList::BND_MeshFaceList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshFaceList::BND_MeshFaceList(const ON_ModelComponentReference& compref)
 {
-  m_mesh = mesh;
+  m_component_reference = compref;
+  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
+  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
 }
 
 int BND_MeshVertexList::Count() const
@@ -63,7 +71,7 @@ int BND_MeshFaceList::Count() const
 
 void BND_MeshVertexList::SetCount(int value)
 {
-  ON_Mesh* pMesh = m_mesh.get();
+  ON_Mesh* pMesh = m_mesh;
   const bool hasDoublePrecisionVerts = pMesh->HasDoublePrecisionVertices();
   pMesh->m_V.Reserve(value);
   pMesh->m_V.SetCount(value);
@@ -97,9 +105,11 @@ emscripten::val BND_MeshFaceList::GetFace(int i) const
 }
 #endif
 
-BND_MeshNormalList::BND_MeshNormalList(const std::shared_ptr<ON_Mesh>& mesh)
+BND_MeshNormalList::BND_MeshNormalList(const ON_ModelComponentReference& compref)
 {
-  m_mesh = mesh;
+  m_component_reference = compref;
+  const ON_Mesh* constMesh = ON_Mesh::Cast(m_component_reference.ModelComponent());
+  m_mesh = const_cast<ON_Mesh*>(constMesh); // this is on purpose
 }
 
 ON_3fVector* BND_MeshNormalList::begin()

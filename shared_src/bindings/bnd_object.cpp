@@ -7,15 +7,31 @@ BND_Object::BND_Object()
 
 BND_Object::~BND_Object()
 {
-
+  if (m_object && m_component_ref.IsEmpty())
+    delete m_object;
 }
 
-BND_Object::BND_Object(ON_Object* obj)
+BND_Object::BND_Object(ON_Object* obj, const ON_ModelComponentReference* compref)
 {
-  m_object.reset(obj);
+  SetTrackedPointer(obj, compref);
 }
 
-BND_Object* BND_Object::CreateWrapper(ON_Object* obj)
+void BND_Object::SetTrackedPointer(ON_Object* obj, const ON_ModelComponentReference* compref)
+{
+  if( compref )
+  {
+    m_component_ref = *compref;
+  }
+  else
+  {
+    ON_ModelComponent* model_component = ON_ModelComponent::Cast(obj);
+    if (model_component)
+      m_component_ref = ON_ModelComponentReference::CreateForExperts(model_component, true);
+  }
+  m_object = obj;
+}
+
+BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentReference* compref)
 {
   if( nullptr == obj )
     return nullptr;
@@ -25,35 +41,41 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj)
   {
     ON_Mesh* mesh = ON_Mesh::Cast(obj);
     if( mesh )
-      return new BND_Mesh(mesh);
+      return new BND_Mesh(mesh, compref);
     ON_Brep* brep = ON_Brep::Cast(obj);
     if( brep )
-      return new BND_Brep(brep);
+      return new BND_Brep(brep, compref);
     ON_Curve* curve = ON_Curve::Cast(obj);
     if(curve)
     {
       ON_NurbsCurve* nc = ON_NurbsCurve::Cast(obj);
       if( nc )
-        return new BND_NurbsCurve(nc);
+        return new BND_NurbsCurve(nc, compref);
       ON_LineCurve* lc = ON_LineCurve::Cast(obj);
       if( lc )
-        return new BND_LineCurve(lc);
+        return new BND_LineCurve(lc, compref);
       ON_PolylineCurve* plc = ON_PolylineCurve::Cast(obj);
       if( plc )
-        return new BND_PolylineCurve(plc);
+        return new BND_PolylineCurve(plc, compref);
       ON_PolyCurve* pc = ON_PolyCurve::Cast(obj);
       if( pc )
-        return new BND_PolyCurve(pc);
-      return new BND_Curve(curve);
+        return new BND_PolyCurve(pc, compref);
+      return new BND_Curve(curve, compref);
     }
 
     ON_Viewport* viewport = ON_Viewport::Cast(obj);
     if( viewport )
-      return new BND_Viewport(viewport);
+      return new BND_Viewport(viewport, compref);
 
-    return new BND_Geometry(geometry);
+    return new BND_Geometry(geometry, compref);
   }
-  return new BND_Object(obj);
+  return new BND_Object(obj, compref);
+}
+
+BND_Object* BND_Object::CreateWrapper(const ON_ModelComponentReference& compref)
+{
+  ON_Object* obj = const_cast<ON_ModelComponent*>(compref.ModelComponent());
+  return CreateWrapper(obj, &compref);
 }
 
 
@@ -124,7 +146,7 @@ pybind11::dict BND_Object::Encode() const
   unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
   d["opennurbs"] = (int)(on_version__to_write);
   unsigned int length=0;
-  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object.get(), 60, true, &length);
+  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object, 60, true, &length);
   std::string data = "";
   if( length>0 && archive )
   {
@@ -178,7 +200,7 @@ BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
   int length = decoded.length();
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
-  return CreateWrapper(obj);
+  return CreateWrapper(obj, nullptr);
 }
 #endif
 
