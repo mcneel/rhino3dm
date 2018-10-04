@@ -1,7 +1,12 @@
 var m_meshes = [];
+var m_model = null;
+const m_urlbase = "http://staging.compute.rhino3d.com/Rhino/";
 
-function brepToMesh(brep) {
-  functionArgs = [brep.encode()];
+function addMesh(mesh) {
+  m_meshes.push({"mesh":mesh, "path":null})
+}
+
+function getAuthToken() {
   auth = localStorage["compute_auth"];
   if (auth == null) {
     auth = window.prompt("Rhino Accounts auth token");
@@ -10,19 +15,26 @@ function brepToMesh(brep) {
       localStorage.setItem("compute_auth", auth);
     }
   }
+  return auth;
+}
 
-  fetch("http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep", {
+function brepToMesh(brep) {
+  functionArgs = [brep.encode()];
+  auth = getAuthToken();
+
+  fetch(m_urlbase + "Geometry/Mesh/CreateFromBrep", {
     "method":"POST",
     "body": JSON.stringify(functionArgs),
     "headers": {"Authorization":auth}
-  }).then(r=>r.json())
+  })
+  .then(r=>r.json())
   .then(result=>{
     meshes = result.map(r=>Module.CommonObject.decode(r));
 
     for( i=0; i<meshes.length; i++ ) {
-      m_meshes.push(meshes[i])
+      addMesh(meshes[i]);
     }
-    drawMesh();
+    drawMeshes();
   });
 }
 
@@ -31,37 +43,13 @@ function runMeshMaker() {
 
   sphere = new Module.Sphere([250, 250, 0], 100);
   brep = sphere.toBrep();
-  functionArgs = [brep.encode()];
+  brepToMesh(brep);
   // Don't need the sphere and brep anymore
   sphere.delete();
   brep.delete();
-
-  postdata = JSON.stringify(functionArgs);
-  req = new XMLHttpRequest();
-  url = "http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep";
-  req.open("POST", url);
-
-  auth = localStorage["compute_auth"];
-  if (auth == null) {
-    auth = window.prompt("Rhino Accounts auth token");
-    if (auth != null && auth.length>20) {
-      auth = "Bearer " + auth;
-      localStorage.setItem("compute_auth", auth);
-    }
-  }
-  req.setRequestHeader("Authorization", auth);
-  req.addEventListener("loadend", loadEnd);
-  req.send(postdata);
-
-  function loadEnd(e) {
-    response = JSON.parse(req.responseText);
-    mesh = Module.CommonObject.decode(response[0]);
-    m_meshes.push(mesh);
-    drawMesh();
-  }
 }
 
-function drawMesh() {
+function drawMeshes(green=0) {
   var ctx=canvas.getContext("2d");
   // Create gradient
   var grd=ctx.createLinearGradient(0,0,0,500);
@@ -72,32 +60,36 @@ function drawMesh() {
   ctx.fillRect(0,0,500,500);
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = 'red';
+  ctx.strokeStyle = "rgb(255,"+green+",0)";
 
   for(meshindex=0; meshindex<m_meshes.length; meshindex++) {
-    mesh = m_meshes[meshindex];
-    verts = mesh.vertices();
-    faces = mesh.faces();
+    meshitem = m_meshes[meshindex]
+    if( meshitem["path"] == null ) {
+      path = new Path2D();
+      mesh = meshitem["mesh"];
+      verts = mesh.vertices();
+      faces = mesh.faces();
 
-    for (i = 0; i < faces.count; i++) {
-      ctx.beginPath();
-      face = faces.get(i);
-      pts = [verts.get(face[0]), verts.get(face[1]), verts.get(face[2]), verts.get(face[3])];
-      ctx.moveTo(pts[0][0]*10+250, -pts[0][2]*10+250);
-      ctx.lineTo(pts[1][0]*10+250, -pts[1][2]*10+250);
-      ctx.lineTo(pts[2][0]*10+250, -pts[2][2]*10+250);
-      ctx.lineTo(pts[3][0]*10+250, -pts[3][2]*10+250);
-      ctx.stroke();
+      for (i = 0; i < faces.count; i++) {
+        face = faces.get(i);
+        pts = [verts.get(face[0]), verts.get(face[1]), verts.get(face[2]), verts.get(face[3])];
+        path.moveTo(pts[0][0]*10+250, -pts[0][2]*10+250);
+        path.lineTo(pts[1][0]*10+250, -pts[1][2]*10+250);
+        path.lineTo(pts[2][0]*10+250, -pts[2][2]*10+250);
+        path.lineTo(pts[3][0]*10+250, -pts[3][2]*10+250);
+      }
+      meshitem["path"] = path;
     }
+    ctx.stroke(meshitem["path"])
   }
 }
 
 
-function rotateMesh() {
+function rotateMesh(val) {
   // get center of all m_meshes
 
   //mesh.rotate(.1, [1,1,0], [250,250,0]);
-  drawMesh();
+  drawMeshes(val);
 }
 
 function getRhinoLogoMeshes() {
@@ -110,9 +102,9 @@ function getRhinoLogoMeshes() {
 
   function loadEnd(e) {
     longInt8View = new Uint8Array(req.response);
-    model = Module.File3dm.fromByteArray(longInt8View);
+    m_model = Module.File3dm.fromByteArray(longInt8View);
 
-    objecttable = model.objects();
+    objecttable = m_model.objects();
     for(i=0; i<objecttable.count; i++) {
       brep = objecttable.get(i);
       brepToMesh(brep);
