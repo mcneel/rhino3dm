@@ -74,7 +74,12 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
 
 BND_Object* BND_Object::CreateWrapper(const ON_ModelComponentReference& compref)
 {
-  ON_Object* obj = const_cast<ON_ModelComponent*>(compref.ModelComponent());
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+  if (nullptr == geometryComponent)
+    return nullptr;
+  
+  ON_Object* obj = const_cast<ON_Geometry*>(geometryComponent->Geometry(nullptr));
   return CreateWrapper(obj, &compref);
 }
 
