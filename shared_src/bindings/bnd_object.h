@@ -15,6 +15,8 @@ protected:
 public:
   virtual ~BND_Object();
 
+  static BND_Object* CreateWrapper(ON_Object* obj);
+
 #if defined(__EMSCRIPTEN__)
   emscripten::val Encode() const;
   static BND_Object* Decode(emscripten::val jsonObject);

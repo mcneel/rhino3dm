@@ -15,6 +15,9 @@ class BND_ONXModel_ObjectTable
 public:
   BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m);
   ON_UUID AddPoint(double x, double y, double z);
+
+  int Count() const;
+  const BND_Object* ObjectAt(int index);
 };
 
 class BND_ONXModel
@@ -26,6 +29,12 @@ public:
   static BND_ONXModel* Read(const char* path);
   static std::string ReadNotes(const char* path);
   static int ReadArchiveVersion(const char* path);
+
+  #if defined(ON_WASM_COMPILE)
+  // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
+  static BND_ONXModel* FromByteArray(std::string buffer);
+  #endif
+
   bool Write(const char* path, int version);
 
   std::wstring GetStartSectionComments() const;

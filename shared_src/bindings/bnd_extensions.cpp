@@ -1,5 +1,6 @@
 #include "bindings.h"
 
+
 BND_ONXModel::BND_ONXModel()
 {
   m_model.reset(new ONX_Model());
@@ -237,10 +238,79 @@ ON_UUID BND_ONXModel_ObjectTable::AddPoint(double x, double y, double z)
 }
 
 
+int BND_ONXModel_ObjectTable::Count() const
+{
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  iterator.FirstComponentReference();
+  return iterator.ActiveComponentCount();
+
+}
+const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
+{
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  iterator.FirstComponentReference();
+  int count = iterator.ActiveComponentCount();
+  const ON_ModelComponent* comp = iterator.FirstComponent();
+  int current=0;
+  while(comp && current<count)
+  {
+    if(current==index)
+      break;
+    comp = iterator.NextComponent();
+    current++;
+  }
+
+  const ON_ModelGeometryComponent* mc = ON_ModelGeometryComponent::Cast(comp);
+  if( nullptr==mc )
+    return nullptr;
+
+  ON_Geometry* geometry = const_cast<ON_Geometry*>(mc->Geometry(nullptr));
+  return BND_Object::CreateWrapper(geometry);
+}
+
+
+#if defined(ON_WASM_COMPILE)
+BND_ONXModel* BND_ONXModel::FromByteArray(std::string sbuffer)
+{
+/*
+old code used for debugging
+const void* buffer = sbuffer.c_str();
+ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
+ON_ErrorLog errorlog;
+errorlog.EnableLogging();
+
+ONX_Model* model = new ONX_Model();
+ON_wString log;
+ON_TextLog textlog(log);
+if(!model->Read(archive)) {
+  delete model;
+  errorlog.Dump(textlog);
+  return std::wstring(log);
+}
+return std::wstring(L"success");
+*/
+
+  int length = sbuffer.length();
+  const void* buffer = sbuffer.c_str();
+  ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
+
+  ONX_Model* model = new ONX_Model();
+  if(!model->Read(archive)) {
+    delete model;
+    return nullptr;
+  }
+  return new BND_ONXModel(model);
+}
+#endif
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
 {
+  py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read)
@@ -256,10 +326,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     ;
-
-  py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
-    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
-    ;
 }
 #endif
 
@@ -268,16 +334,23 @@ using namespace emscripten;
 
 void initExtensionsBindings()
 {
+  class_<BND_ONXModel_ObjectTable>("File3dmObjectTable")
+    .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint)
+    .property("count", &BND_ONXModel_ObjectTable::Count)
+    .function("get", &BND_ONXModel_ObjectTable::ObjectAt, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
-    .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments);
-    //.property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
-    //.property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
-    //.property("applicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
-    //.property("areatedBy", &BND_ONXModel::GetCreatedBy)
-    //.property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
-    //.property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
-    //.property("objects", &BND_ONXModel::Objects)
-    //;
+    .class_function("fromByteArray", &BND_ONXModel::FromByteArray, allow_raw_pointers())
+    .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
+    .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
+    .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
+    .property("applicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    .property("createdBy", &BND_ONXModel::GetCreatedBy)
+    .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
+    .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
+    .function("objects", &BND_ONXModel::Objects)
+    ;
 }
 #endif

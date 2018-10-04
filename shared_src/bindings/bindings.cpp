@@ -54,6 +54,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initPointBindings();
   initPlaneBindings();
 
+  class_<ON_UUID>("Guid");
+
     enum_<ON::coordinate_system>("CoordinateSystem")
         .value("WORLD", ON::coordinate_system::world_cs)
         .value("CAMERA", ON::coordinate_system::camera_cs)
