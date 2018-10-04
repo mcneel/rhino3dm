@@ -121,7 +121,7 @@ emscripten::val BND_Object::Encode() const
   v.set("opennurbs", emscripten::val((int)on_version__to_write));
 
   unsigned int length=0;
-  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object.get(), 60, true, &length);
+  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object, 60, true, &length);
   std::string data = "";
   if( length>0 && archive )
   {
@@ -185,7 +185,7 @@ BND_Object* BND_Object::Decode(emscripten::val jsonObject)
   int length = decoded.length();
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
-  return CreateWrapper(obj);
+  return CreateWrapper(obj, nullptr);
 }
 #endif
 
