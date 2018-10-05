@@ -18,6 +18,7 @@ public:
 
   int Count() const;
   const BND_Object* ObjectAt(int index);
+  ON_BoundingBox GetBoundingBox() const;
 };
 
 class BND_ONXModel
@@ -34,6 +35,8 @@ public:
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* FromByteArray(std::string buffer);
   #endif
+
+  static BND_ONXModel* FromByteArray(int length, void* buffer);
 
   bool Write(const char* path, int version);
 

@@ -260,6 +260,11 @@ const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
   return BND_Object::CreateWrapper(compref);
 }
 
+ON_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
+{
+  return m_model->ModelGeometryBoundingBox();
+}
+
 
 #if defined(ON_WASM_COMPILE)
 BND_ONXModel* BND_ONXModel::FromByteArray(std::string sbuffer)
@@ -284,16 +289,20 @@ return std::wstring(L"success");
 
   int length = sbuffer.length();
   const void* buffer = sbuffer.c_str();
+  return FromByteArray(length, buffer);
+}
+#endif
+BND_ONXModel* BND_ONXModel::FromByteArray(int length, void* buffer)
+{
   ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
 
   ONX_Model* model = new ONX_Model();
-  if(!model->Read(archive)) {
+  if (!model->Read(archive)) {
     delete model;
     return nullptr;
   }
   return new BND_ONXModel(model);
 }
-#endif
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -301,6 +310,9 @@ void initExtensionsBindings(pybind11::module& m)
 {
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
+    .def("__len__", &BND_ONXModel_ObjectTable::Count)
+    .def("__getitem__", &BND_ONXModel_ObjectTable::ObjectAt)
+    .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
   py::class_<BND_ONXModel>(m, "File3dm")
@@ -308,6 +320,10 @@ void initExtensionsBindings(pybind11::module& m)
     .def_static("Read", &BND_ONXModel::Read)
     .def_static("ReadNotes", &BND_ONXModel::ReadNotes)
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion)
+    .def_static("FromByteArray", [](py::buffer b) {
+      py::buffer_info info = b.request();
+      return BND_ONXModel::FromByteArray(info.size, info.ptr);
+    })
     .def("Write", &BND_ONXModel::Write)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
