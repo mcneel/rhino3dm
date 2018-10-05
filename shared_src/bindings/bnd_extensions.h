@@ -8,6 +8,15 @@ void initExtensionsBindings(pybind11::module& m);
 void initExtensionsBindings();
 #endif
 
+class BND_FileObject
+{
+public:
+  BND_Geometry* m_geometry = nullptr;
+  BND_3dmAttributes* m_attributes = nullptr;
+
+  BND_Geometry* GetGeometry() { return m_geometry; };
+  BND_3dmAttributes* GetAttributes() { return m_attributes; }
+};
 
 class BND_ONXModel_ObjectTable
 {
@@ -17,7 +26,9 @@ public:
   ON_UUID AddPoint(double x, double y, double z);
 
   int Count() const;
-  const BND_Object* ObjectAt(int index);
+  BND_FileObject* ModelObjectAt(int index);
+  BND_Object* ObjectAt(int index);
+  BND_3dmAttributes* AttributesAt(int index);
   ON_BoundingBox GetBoundingBox() const;
 };
 

@@ -245,7 +245,26 @@ int BND_ONXModel_ObjectTable::Count() const
   return iterator.ActiveComponentCount();
 
 }
-const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
+
+BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
+{
+  BND_Geometry* geometry = dynamic_cast<BND_Geometry*>(ObjectAt(index));
+  if (nullptr == geometry)
+    return nullptr;
+  BND_3dmAttributes* attrs = AttributesAt(index);
+  if (nullptr == attrs)
+  {
+    delete geometry;
+    return nullptr;
+  }
+  BND_FileObject* rc = new BND_FileObject();
+  rc->m_attributes = attrs;
+  rc->m_geometry = geometry;
+  return rc;
+}
+
+
+BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
@@ -258,6 +277,30 @@ const BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
     current++;
   }
   return BND_Object::CreateWrapper(compref);
+}
+
+BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
+{
+  // I know this is dumb. I haven't figured out how to set up enumeration in
+  // javascript yet, so this is just here to keep things moving along
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponentReference compref = iterator.FirstComponentReference();
+  int current = 0;
+  while (current < index)
+  {
+    compref = iterator.NextComponentReference();
+    current++;
+  }
+
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+  if (nullptr == geometryComponent)
+    return nullptr;
+
+  ON_3dmObjectAttributes* attrs = const_cast<ON_3dmObjectAttributes*>(geometryComponent->Attributes(nullptr));
+  if (nullptr == attrs)
+    return nullptr;
+  return new BND_3dmAttributes(attrs, &compref);
 }
 
 ON_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
@@ -308,10 +351,15 @@ BND_ONXModel* BND_ONXModel::FromByteArray(int length, void* buffer)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
 {
+  py::class_<BND_FileObject>(m, "File3dmObject")
+    .def_property_readonly("Attributes", &BND_FileObject::GetAttributes)
+    .def_property_readonly("Geometry", &BND_FileObject::GetGeometry)
+    ;
+
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
     .def("__len__", &BND_ONXModel_ObjectTable::Count)
-    .def("__getitem__", &BND_ONXModel_ObjectTable::ObjectAt)
+    .def("__getitem__", &BND_ONXModel_ObjectTable::ModelObjectAt)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
