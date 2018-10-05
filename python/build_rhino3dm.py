@@ -22,6 +22,8 @@ def compilebinaries():
         if bitness==64:
             for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
+            for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
+                print(line.replace("WIN32;", "WIN64;"))
         os.system("cmake --build . --config Release --target _rhino3dm")
     else:
         os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ..".format(sys.executable))

@@ -20,7 +20,7 @@ def create_package_list(base_package):
 
 setuptools.setup(
     name="rhino3dm",
-    version="0.0.2",
+    version="0.0.3",
     author="Robert McNeel & Associates",
     author_email="steve@mcneel.com",
     description="OpenNURBS based package with a RhinoCommon style",
@@ -33,8 +33,6 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        os_classifier,
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython"
     ],
 )
