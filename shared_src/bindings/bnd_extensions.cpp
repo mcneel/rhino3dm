@@ -303,9 +303,9 @@ BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
   return new BND_3dmAttributes(attrs, &compref);
 }
 
-ON_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
+BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
 {
-  return m_model->ModelGeometryBoundingBox();
+  return BND_BoundingBox(m_model->ModelGeometryBoundingBox());
 }
 
 

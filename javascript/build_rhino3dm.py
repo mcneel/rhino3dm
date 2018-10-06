@@ -1,6 +1,7 @@
 import os, platform, sys, glob, struct
 
-build_dir = "build"
+dirname = os.path.dirname(os.path.abspath(__file__))
+build_dir = os.path.join(dirname, "build")
 
 # all compilation and staging occurs in the build directory
 if not os.path.exists(build_dir):

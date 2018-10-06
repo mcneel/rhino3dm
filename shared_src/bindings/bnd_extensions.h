@@ -29,7 +29,7 @@ public:
   BND_FileObject* ModelObjectAt(int index);
   BND_Object* ObjectAt(int index);
   BND_3dmAttributes* AttributesAt(int index);
-  ON_BoundingBox GetBoundingBox() const;
+  BND_BoundingBox GetBoundingBox() const;
 };
 
 class BND_ONXModel
