@@ -82,16 +82,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
     class_<BND_Brep, base<BND_Geometry>>("Brep");
 
-    class_<BND_Curve, base<BND_Geometry>>("Curve")
-        .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
-        .property("dimension", &BND_Geometry::Dimension)
-        .function("changeDimension", &BND_Curve::ChangeDimension)
-        .property("spanCount", &BND_Curve::SpanCount)
-        .property("degree", &BND_Curve::Degree)
-        .property("pointAtStart", &BND_Curve::PointAtStart)
-        .property("pointAtEnd", &BND_Curve::PointAtEnd)
-        .function("isLinear", &BND_Curve::IsLinear)
-        .function("isPolyline", &BND_Curve::IsPolyline);
+    initCurveBindings();
 
     class_<BND_Geometry, base<BND_Object>>("GeometryBase")
         .function("getBoundingBox", &BND_Geometry::BoundingBox)
