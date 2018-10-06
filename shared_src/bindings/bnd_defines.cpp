@@ -1,11 +1,14 @@
 #include "bindings.h"
 
+class BND_DocObjects {};
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
 {
-  py::enum_<ON::object_type>(m, "ObjectType")
+  py::class_<BND_DocObjects> docobjects(m, "DocObjects");
+
+  py::enum_<ON::object_type>(docobjects, "ObjectType")
     .value("None", ON::unknown_object_type)
     .value("Point", ON::point_object)
     .value("PointSet", ON::pointset_object)
