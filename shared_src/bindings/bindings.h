@@ -22,6 +22,7 @@
 #include <emscripten/bind.h>
 #endif
 
+#include "bnd_defines.h"
 #include "bnd_boundingbox.h"
 #include "bnd_point.h"
 #include "bnd_plane.h"

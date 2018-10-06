@@ -8,6 +8,7 @@ PYBIND11_MODULE(_rhino3dm, m)
 {
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
 
+  initDefines(m);
   initObjectBindings(m);
   init3dmAttributesBindings(m);
   initPointBindings(m);
@@ -51,6 +52,7 @@ using namespace emscripten;
 
 
 EMSCRIPTEN_BINDINGS(rhino3dm) {
+  initDefines();
   initPointBindings();
   initPlaneBindings();
 
@@ -84,9 +86,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
     initCurveBindings();
 
-    class_<BND_Geometry, base<BND_Object>>("GeometryBase")
-        .function("getBoundingBox", &BND_Geometry::BoundingBox)
-        .function("rotate", &BND_Geometry::Rotate);
+    initGeometryBindings();
 
     class_<ON_Line>("Line")
         .constructor<ON_3dPoint, ON_3dPoint>()
