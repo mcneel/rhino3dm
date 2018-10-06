@@ -1,0 +1,35 @@
+<html>
+	<head>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="https://threejs.org/build/three.js"></script>
+    <script src="hello_rhino3dm.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/(window.innerHeight-50), 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight-50 );
+			document.body.appendChild( renderer.domElement );
+
+      var material = new THREE.LineBasicMaterial({color: 0x00ffff});
+
+			camera.position.z = 60;
+      renderer.render( scene, camera );
+
+			var animate = function () {
+				requestAnimationFrame( animate );
+        draw3dMeshes();
+			};
+
+			animate();
+		</script>
+    <script async type="text/javascript" src="rhino3dm.js"></script>
+    <button type="button" onclick="getRhinoLogoMeshes()">Run Script</button>
+	</body>
+</html>

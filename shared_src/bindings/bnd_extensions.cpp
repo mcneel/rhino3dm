@@ -310,7 +310,7 @@ ON_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
 
 
 #if defined(ON_WASM_COMPILE)
-BND_ONXModel* BND_ONXModel::FromByteArray(std::string sbuffer)
+BND_ONXModel* BND_ONXModel::WasmFromByteArray(std::string sbuffer)
 {
 /*
 old code used for debugging
@@ -335,7 +335,7 @@ return std::wstring(L"success");
   return FromByteArray(length, buffer);
 }
 #endif
-BND_ONXModel* BND_ONXModel::FromByteArray(int length, void* buffer)
+BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
 {
   ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
 
@@ -390,15 +390,21 @@ using namespace emscripten;
 
 void initExtensionsBindings()
 {
+  class_<BND_FileObject>("File3dmObject")
+    .function("attributes", &BND_FileObject::GetAttributes, allow_raw_pointers())
+    .function("geometry", &BND_FileObject::GetGeometry, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel_ObjectTable>("File3dmObjectTable")
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint)
     .property("count", &BND_ONXModel_ObjectTable::Count)
-    .function("get", &BND_ONXModel_ObjectTable::ObjectAt, allow_raw_pointers())
+    .function("get", &BND_ONXModel_ObjectTable::ModelObjectAt, allow_raw_pointers())
+    .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
-    .class_function("fromByteArray", &BND_ONXModel::FromByteArray, allow_raw_pointers())
+    .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
     .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)

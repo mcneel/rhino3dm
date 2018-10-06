@@ -44,10 +44,10 @@ public:
 
   #if defined(ON_WASM_COMPILE)
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
-  static BND_ONXModel* FromByteArray(std::string buffer);
+  static BND_ONXModel* WasmFromByteArray(std::string buffer);
   #endif
 
-  static BND_ONXModel* FromByteArray(int length, void* buffer);
+  static BND_ONXModel* FromByteArray(int length, const void* buffer);
 
   bool Write(const char* path, int version);
 

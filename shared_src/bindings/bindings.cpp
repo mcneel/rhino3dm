@@ -112,7 +112,9 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
     class_<BND_Mesh, base<BND_Geometry>>("Mesh")
         .constructor<>()
         .function("vertices", &BND_Mesh::GetVertices)
-        .function("faces", &BND_Mesh::GetFaces);
+        .function("faces", &BND_Mesh::GetFaces)
+        .function("normals", &BND_Mesh::GetNormals);
+        ;
 
     class_<BND_MeshVertexList>("MeshVertexList")
         .property("count", &BND_MeshVertexList::Count)
@@ -123,6 +125,12 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
     class_<BND_MeshFaceList>("MeshFaceList")
         .property("count", &BND_MeshFaceList::Count)
         .function("get", &BND_MeshFaceList::GetFace);
+
+    class_<BND_MeshNormalList>("MeshNormalList")
+          .property("count", &BND_MeshNormalList::Count)
+          .function("get", &BND_MeshNormalList::GetNormal)
+          .function("set", &BND_MeshNormalList::SetNormal);
+
 
     class_<BND_PolyCurve, base<BND_Curve>>("Polycurve");
 

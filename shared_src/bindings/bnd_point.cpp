@@ -93,6 +93,11 @@ void initPointBindings()
     .element(&ON_4dPoint::z)
     .element(&ON_4dPoint::w);
 
+  value_array<ON_3fVector>("Vector3fSimple")
+    .element(&ON_3fVector::x)
+    .element(&ON_3fVector::y)
+    .element(&ON_3fVector::z);
+
   value_array<ON_3dVector>("Vector3dSimple")
     .element(&ON_3dVector::x)
     .element(&ON_3dVector::y)
