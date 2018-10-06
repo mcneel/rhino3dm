@@ -7,7 +7,7 @@ class RhinoLogoDoc {
     var objecttable = model.objects();
     for(var i=0; i<objecttable.count; i++) {
       var modelobject = objecttable.get(i);
-      this.breps.push({"geometry":modelobject.geometry(), "meshes":[], "threejs":null});
+      this.breps.push({"geometry":modelobject.geometry(), "meshes":[], "wires":[], "threejs":null, "threejswires":null});
     }
   }
 
@@ -27,6 +27,29 @@ class RhinoLogoDoc {
         .then(result=>{
           var meshes = result.map(r=>Module.CommonObject.decode(r));
           m.breps[index]["meshes"] = meshes;
+          callback(this);
+        });
+      };
+      fetchFunc(this, i, functionArgs, auth);
+    }
+  }
+
+  computeBrepWires(callback) {
+    for(var i=0; i<this.breps.length; i++) {
+      var brep = this.breps[i]["geometry"];
+      var functionArgs = [brep.encode(), 1];
+      var auth = getAuthToken();
+
+      const fetchFunc = (m, index, args, auth) => {
+        fetch(COMPUTE_URL_BASE + "Geometry/Brep/GetWireFrame", {
+          "method":"POST",
+          "body": JSON.stringify(args),
+          "headers": {"Authorization":auth}
+        })
+        .then(r=>r.json())
+        .then(result=>{
+          var curves = result.map(r=>Module.CommonObject.decode(r));
+          m.breps[index]["wires"] = curves;
           callback(this);
         });
       };
@@ -88,7 +111,7 @@ function brepToMesh(brep) {
  * @param (function) onBrepMeshedCallback - function to call each
  *     time meshes are computed for a brep
  */
-function getRhinoLogoMeshes(onModelLoadedCallback=null, onBrepMeshedCallback=null) {
+function getRhinoLogoMeshes(onModelLoadedCallback=null, onBrepMeshedCallback=null, onBrepWiresCallback=null) {
   req = new XMLHttpRequest();
   req.open("GET", "https://files.mcneel.com/TEST/Rhino Logo.3dm");
   req.responseType = "arraybuffer";
@@ -101,6 +124,9 @@ function getRhinoLogoMeshes(onModelLoadedCallback=null, onBrepMeshedCallback=nul
     var doc = new RhinoLogoDoc(model);
     if( onModelLoadedCallback!=null )
       onModelLoadedCallback(doc);
-    doc.computeBrepMeshes(onBrepMeshedCallback);
+    if( onBrepMeshedCallback!=null )
+      doc.computeBrepMeshes(onBrepMeshedCallback);
+    if( onBrepWiresCallback!=null )
+      doc.computeBrepWires(onBrepWiresCallback);
   }
 }

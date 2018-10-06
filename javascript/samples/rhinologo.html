@@ -33,7 +33,7 @@
 
 		<div id="glcanvas"></div>
 		<div id="controls">
-			<button class="inner" onclick="getRhinoLogoMeshes(onModelLoaded, onMeshesComputed)">Load Model</button>
+			<button class="inner" onclick="getRhinoLogoMeshes(onModelLoaded, onMeshesComputed, onWiresComputed)">Load Model</button>
 			<button class="inner" onclick="getAuthToken(false)">Set Authorization</button>
 		</div>
 
@@ -138,6 +138,21 @@
 				return new THREE.LineSegments( geometry, material );
 			}
 
+			function curveToLineSegments(curve, material) {
+				var geometry = new THREE.Geometry();
+				var domain = curve.domain;
+				var start = domain[0];
+				var range = domain[1]-domain[0];
+				var interval = range / 50.0;
+				for ( var i = 0; i < 51; i++ ) {
+					t = start + i*interval;
+					var pt = curve.pointAt(t);
+					geometry.vertices.push(new THREE.Vector3(pt[0], pt[1], pt[2]));
+				}
+				return new THREE.Line( geometry, material );
+
+			}
+
 			/**
 			 * Create a THREE.Mesh class representing a rhino3dm.Mesh class.
 			 *
@@ -200,11 +215,29 @@
 
 						for(meshindex=0; meshindex<meshes.length; meshindex++) {
 							mesh = meshes[meshindex]
-							var lines = meshToLineSegments(mesh, lineMaterial);
-							RHINOLOGO.scene.add( lines );
+							var lines = null;// meshToLineSegments(mesh, lineMaterial);
+							//RHINOLOGO.scene.add( lines );
 							var threemesh = meshToThreejs(mesh, meshMaterial);
 							RHINOLOGO.scene.add( threemesh );
 							brep["threejs"].push([lines, threemesh]);
+						}
+					}
+				}
+			}
+
+			function onWiresComputed(model) {
+				for(brepindex=0; brepindex<model.breps.length; brepindex++) {
+					var brep = model.breps[brepindex];
+					if( brep["wires"].length > 0 && brep["threejswires"]==null){
+						var curves = brep["wires"];
+						brep["threejswires"] = [];
+						var wireMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth:4});
+
+						for(curveindex=0; curveindex<curves.length; curveindex++) {
+							curve = curves[curveindex]
+							var lines = curveToLineSegments(curve, wireMaterial);
+							RHINOLOGO.scene.add( lines );
+							brep["threejswires"].push(lines);
 						}
 					}
 				}
