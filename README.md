@@ -9,6 +9,7 @@ Stand alone libraries based on OpenNURBS with a RhinoCommon style.
   * See javascript directory for details
 * .NET (coming soon)
   * currently available as Rhino3dmIO packages on nuget
+  * https://www.nuget.org/packages?q=rhino3dmio
 
 ----
 
