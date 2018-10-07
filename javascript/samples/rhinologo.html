@@ -35,8 +35,8 @@
 		<div id="controls">
 			<button class="inner" onclick="getRhinoLogoMeshes(onModelLoaded, onMeshesComputed, onWiresComputed)">Load Model</button>
 			<button class="inner" onclick="getAuthToken(false)">Set Authorization</button>
-			<div class="inner"><input type="checkbox" checked="true" onclick="setWireVisibility(this.checked)">Wires</input></div>
-			<div class="inner"><input type="checkbox" checked="true" onclick="setMeshVisibility(this.checked)">Meshes</input></div>
+			<div class="inner"><input type="checkbox" checked="true" onclick="RHINOLOGO.wireMaterial.visible = this.checked;">Wires</input></div>
+			<div class="inner"><input type="checkbox" checked="true" onclick="RHINOLOGO.meshMaterial.visible = this.checked;">Meshes</input></div>
 		</div>
 
 
@@ -56,6 +56,9 @@
 
 				RHINOLOGO.camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
 				RHINOLOGO.camera.position.z = 40;
+				RHINOLOGO.wireMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth:4});
+				RHINOLOGO.meshMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
+
 
 				// create a gradient background
 				var canvas = document.createElement( 'canvas' );
@@ -105,16 +108,6 @@
 				requestAnimationFrame( animate );
 				controls.update();
 				RHINOLOGO.renderer.render( RHINOLOGO.scene, RHINOLOGO.camera );
-			}
-
-			function setWireVisibility(on) {
-				if(RHINOLOGO.doc!=null) {
-					alert("got a doc");
-				}
-			}
-
-			function setMeshVisibility(on) {
-
 			}
 
 			/**
@@ -223,13 +216,12 @@
 						var meshes = brep["meshes"];
 						brep["threejs"] = [];
 						var lineMaterial = new THREE.LineBasicMaterial({color: 0x003333});
-						var meshMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
 
 						for(meshindex=0; meshindex<meshes.length; meshindex++) {
 							mesh = meshes[meshindex]
 							var lines = null;// meshToLineSegments(mesh, lineMaterial);
 							//RHINOLOGO.scene.add( lines );
-							var threemesh = meshToThreejs(mesh, meshMaterial);
+							var threemesh = meshToThreejs(mesh, RHINOLOGO.meshMaterial);
 							RHINOLOGO.scene.add( threemesh );
 							brep["threejs"].push([lines, threemesh]);
 						}
@@ -243,11 +235,10 @@
 					if( brep["wires"].length > 0 && brep["threejswires"]==null){
 						var curves = brep["wires"];
 						brep["threejswires"] = [];
-						var wireMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth:4});
 
 						for(curveindex=0; curveindex<curves.length; curveindex++) {
 							curve = curves[curveindex]
-							var lines = curveToLineSegments(curve, wireMaterial);
+							var lines = curveToLineSegments(curve, RHINOLOGO.wireMaterial);
 							RHINOLOGO.scene.add( lines );
 							brep["threejswires"].push(lines);
 						}

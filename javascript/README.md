@@ -39,12 +39,11 @@ This repo uses OpenNURBS as a submodule, so you need to run a couple more git co
 ### Compile
 
 * After installation, make sure you have  emcc, cmake, and python on your path. Emscripten provides instructions for adding path information during install.
-* From the command line (or bash), go to the root directory of this repo and type `./build.sh`. If everything is configured correctly, you should have a compiled wasm, js, and html file after a couple minutes.
+* From the command line (or bash), go to the root directory of this repo and type `python build_rhino3dm.py`. If everything is configured correctly, you should have a compiled wasm, js, and html file after a couple minutes.
 
 ### Test
 
-* Make sure you are in the `artifacts` directory that was created from a compile.
-* Type `python -m SimpleHTTPServer 8080`
+* Type `python serve.py`. This will run a simple web server which serves files in the artifacts directory
 * Go to your browser and navigate to `http://localhost:8080/rhino3dm.html`
 * For chrome, right click and select `inspect`. Click on the `console` tab and try typing in the following javascript
   * `sphere = new Module.Sphere([1,2,3],12);`

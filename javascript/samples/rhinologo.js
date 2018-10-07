@@ -124,9 +124,9 @@ function getRhinoLogoMeshes(onModelLoadedCallback=null, onBrepMeshedCallback=nul
     var doc = new RhinoLogoDoc(model);
     if( onModelLoadedCallback!=null )
       onModelLoadedCallback(doc);
-    if( onBrepMeshedCallback!=null )
-      doc.computeBrepMeshes(onBrepMeshedCallback);
     if( onBrepWiresCallback!=null )
       doc.computeBrepWires(onBrepWiresCallback);
+    if( onBrepMeshedCallback!=null )
+      doc.computeBrepMeshes(onBrepMeshedCallback);
   }
 }
