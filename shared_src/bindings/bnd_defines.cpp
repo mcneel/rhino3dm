@@ -44,6 +44,8 @@ void initDefines(pybind11::module& m)
 #endif
 
 #if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
 void initDefines()
 {
   enum_<ON::object_type>("ObjectType")
