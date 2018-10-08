@@ -38,3 +38,5 @@
 /python/build_py*_64bit
 /javascript/artifacts
 /javascript/build
+/python/docs/_build
+/python/docs/api
