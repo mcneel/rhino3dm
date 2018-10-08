@@ -1,0 +1,70 @@
+version: 2
+
+jobs:
+  build_js:
+    docker:
+      - image: trzeci/emscripten:sdk-incoming-64bit
+    steps:
+      - checkout
+      - run: git submodule update --init
+      - run:
+          name: Update cmake
+          command: |
+            version=3.12
+            build=2
+            mkdir ~/temp
+            cd ~/temp
+            wget https://cmake.org/files/v$version/cmake-$version.$build-Linux-x86_64.sh
+            cmake --version
+            which cmake
+            ls -l $(which cmake)
+            ls -l /opt/cmake
+            mkdir /opt/cmake_new
+            sh cmake-$version.$build-Linux-x86_64.sh --prefix=/opt/cmake_new --skip-license
+            ln -sf /opt/cmake_new/bin/cmake /usr/local/bin/cmake
+            cmake --version
+#      - run: python javascript/build_rhino3dm.py
+      - run:
+          name: Build
+          command: |
+            cd javascript
+            mkdir build
+            cd build
+            emcmake cmake ..
+            make
+            make install
+      - persist_to_workspace:
+          root: javascript/artifacts
+          paths:
+            - .
+  deploy_js:
+    docker:
+      - image: circleci/python:2.7-jessie
+    environment:
+      S3_BASE_URL: s3://files.na.mcneel.com/rhino3dm/js
+    steps:
+      - attach_workspace:
+          at: javascript/artifacts
+      - run: ls -l javascript/artifacts
+      - run: python --version
+      - run: sudo pip install awscli
+        # upload artifacts to s3
+      - run: aws s3 cp javascript/artifacts $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --recursive --acl public-read
+        # re-upload rhino3dm.wasm with mime-type "application/wasm"
+      - run: aws s3 cp javascript/artifacts/rhino3dm.wasm $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --acl public-read --content-type "application/wasm"
+        # copy artifacts from dujour/$CIRCLE_BUILD_NUM/ to latest/
+      - run:
+          name: Copy artifacts to latest/
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              aws s3 cp $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ $S3_BASE_URL/latest/ --recursive --acl public-read
+            fi
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build_js
+      - deploy_js:
+          requires:
+            - build_js
