@@ -1,30 +1,30 @@
 # rhino3dm.js
 Web Assembly library based on OpenNURBS with a RhinoCommon style
 
-[![Build Status](https://travis-ci.com/mcneel/rhino-geometry.js.svg?token=xzPnCyqvoS75zbqdJSUR&branch=master)](https://travis-ci.com/mcneel/rhino-geometry.js)
+[![CircleCI](https://circleci.com/gh/mcneel/rhino3dm/tree/master.svg?style=shield&circle-token=53733a2fe2cf99a11808d1e5210bc1aeb3f13ea9)](https://circleci.com/gh/mcneel/rhino3dm/tree/master)
 
 ----
 
 ## Downloads
 
-Get `rhino3dm.wasm` and `rhino3dm.js` from the [releases](https://github.com/mcneel/rhino3dm.js/releases), or try the _latest_ build straight from the `master` branch.
+Get `rhino3dm.wasm` and `rhino3dm.js` from the [releases](https://github.com/mcneel/rhino3dm/releases), or try the _latest_ build straight from the `master` branch.
 
 ```html
 <html>
   <!-- stuff -->
   <body>
-    <script async type="text/javascript" src="https://files.mcneel.com/rhino-geometry.js/latest/rhino-geometry.js"></script>
+    <script async type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
     <!-- more stuff -->
   </body>
 </html>
 ```
 
-_**Note:** You can replace `latest` with a [specific build number](https://travis-ci.com/mcneel/rhino-geometry.js/builds) if you know what you're looking for!_
+_**Note:** You can replace `latest` with `dujour/BUILD_NUMBER` if you know what you're [looking for](https://circleci.com/gh/mcneel/rhino3dm)!_
 
 
 ## Build it yourself
 
-### Get The Source
+### Get the Source
 
 This repo uses OpenNURBS as a submodule, so you need to run a couple more git commands after you have cloned. `cd` into the new repository directory and run
   * `git submodule update --init`
