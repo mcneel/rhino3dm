@@ -42,3 +42,6 @@
 /python/docs/api
 /src/build_py37_32bit
 /src/wheels_for_pypi
+/src/build_py27_32bit
+/src/build_py27_64bit
+/src/build_py37_64bit
