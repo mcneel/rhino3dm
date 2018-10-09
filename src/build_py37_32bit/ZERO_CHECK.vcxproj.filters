@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\github\mcneel\rhino3dm\src\build_py37_32bit\CMakeFiles\4e52f1ab9a94a3b8c016bb4c1d31512a\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CECF5C97-4AE8-3D8D-9E22-F998A1D512F5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
