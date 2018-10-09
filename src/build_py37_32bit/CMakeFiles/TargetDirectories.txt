@@ -1,6 +1,0 @@
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/CMakeFiles/zlib_static.dir
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/CMakeFiles/opennurbs_static.dir
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/CMakeFiles/_rhino3dm.dir
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/CMakeFiles/ALL_BUILD.dir
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/CMakeFiles/ZERO_CHECK.dir
-C:/dev/github/mcneel/rhino3dm/src/build_py37_32bit/pybind11/CMakeFiles/ALL_BUILD.dir
