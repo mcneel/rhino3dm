@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bindings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_3dm_attributes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_arc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_boundingbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_brep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_circle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_curve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_defines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_extensions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_linecurve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_nurbscurve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_point.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_polycurve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_polylinecurve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_sphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_viewport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_xform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bindings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_3dm_attributes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_arc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_boundingbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_brep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_circle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_curve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_extensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_linecurve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_nurbscurve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_polycurve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_polylinecurve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_viewport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\github\mcneel\rhino3dm\src\bindings\bnd_xform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\github\mcneel\rhino3dm\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{CA83CB12-365D-36B9-95E6-8FC27B78A927}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{ED949BC1-638A-3DF7-8503-50922C026714}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

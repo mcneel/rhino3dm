@@ -4,17 +4,17 @@ project(rhino-geometry)
 
 enable_testing()
 
-file(GLOB bindings_SRC "../shared_src/bindings/*.h" "../shared_src/bindings/*.cpp")
-file(GLOB zlib_SRC "../shared_src/opennurbs/zlib/*.h" "../shared_src/opennurbs/zlib/*.c")
+file(GLOB bindings_SRC "../src/bindings/*.h" "../src/bindings/*.cpp")
+file(GLOB zlib_SRC "../src/opennurbs/zlib/*.h" "../src/opennurbs/zlib/*.c")
 
 # temporarily rename the 3 cpp files that we don't want to compile on OSX
-file(RENAME "../shared_src/opennurbs/opennurbs_gl.cpp" "../shared_src/opennurbs/opennurbs_gl.skip")
-file(RENAME "../shared_src/opennurbs/opennurbs_unicode_cp932.cpp" "../shared_src/opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "../shared_src/opennurbs/opennurbs_unicode_cp949.cpp" "../shared_src/opennurbs/opennurbs_unicode_cp949.skip")
-file(GLOB opennurbs_SRC "../shared_src/opennurbs/*.h" "../shared_src/opennurbs/*.cpp")
-file(RENAME "../shared_src/opennurbs/opennurbs_gl.skip" "../shared_src/opennurbs/opennurbs_gl.cpp")
-file(RENAME "../shared_src/opennurbs/opennurbs_unicode_cp932.skip" "../shared_src/opennurbs/opennurbs_unicode_cp932.cpp")
-file(RENAME "../shared_src/opennurbs/opennurbs_unicode_cp949.skip" "../shared_src/opennurbs/opennurbs_unicode_cp949.cpp")
+file(RENAME "../src/opennurbs/opennurbs_gl.cpp" "../src/opennurbs/opennurbs_gl.skip")
+file(RENAME "../src/opennurbs/opennurbs_unicode_cp932.cpp" "../src/opennurbs/opennurbs_unicode_cp932.skip")
+file(RENAME "../src/opennurbs/opennurbs_unicode_cp949.cpp" "../src/opennurbs/opennurbs_unicode_cp949.skip")
+file(GLOB opennurbs_SRC "../src/opennurbs/*.h" "../src/opennurbs/*.cpp")
+file(RENAME "../src/opennurbs/opennurbs_gl.skip" "../src/opennurbs/opennurbs_gl.cpp")
+file(RENAME "../src/opennurbs/opennurbs_unicode_cp932.skip" "../src/opennurbs/opennurbs_unicode_cp932.cpp")
+file(RENAME "../src/opennurbs/opennurbs_unicode_cp949.skip" "../src/opennurbs/opennurbs_unicode_cp949.cpp")
 
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")

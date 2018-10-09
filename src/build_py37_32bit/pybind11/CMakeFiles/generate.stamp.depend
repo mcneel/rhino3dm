@@ -1,0 +1,14 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.12/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/CMakeParseArguments.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/CheckCXXCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/CheckCXXSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/FindPythonInterp.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.12/Modules/WriteBasicConfigVersionFile.cmake
+C:/dev/github/mcneel/rhino3dm/src/pybind11/CMakeLists.txt
+C:/dev/github/mcneel/rhino3dm/src/pybind11/tools/FindPythonLibsNew.cmake
+C:/dev/github/mcneel/rhino3dm/src/pybind11/tools/pybind11Tools.cmake
