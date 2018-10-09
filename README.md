@@ -15,5 +15,5 @@ Stand alone libraries based on OpenNURBS with a RhinoCommon style.
 
 ### Get The Source
 
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
-  * `git submodule update --init`
+* For the Python version see [our python readme](RHINO3DM.PY.md)
+* For the Javascript version see [our javascript readme](RHINO3DM.JS.md)
