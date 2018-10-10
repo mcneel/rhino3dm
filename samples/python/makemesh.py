@@ -23,7 +23,7 @@ btn = Tkinter.Button(top, text='Ok', command=onClickOk)
 btn.grid(row=1, column=1)
 top.mainloop()
 
-url = "http://staging.compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep"
+url = "https://compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep"
 req = urllib2.Request(url)
 req.add_header('Content-Type', 'application/json')
 req.add_header('Authorization', 'Bearer ' + auth_token)
