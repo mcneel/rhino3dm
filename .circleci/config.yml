@@ -27,14 +27,16 @@ jobs:
       - run:
           name: Build
           command: |
-            cd javascript
+            cd src
             mkdir build
             cd build
-            emcmake cmake ..
+            mkdir javascript
+            cd javascript
+            emcmake cmake ../..
             make
             make install
       - persist_to_workspace:
-          root: javascript/artifacts
+          root: src/build/artifacts_js
           paths:
             - .
   deploy_js:
@@ -44,14 +46,14 @@ jobs:
       S3_BASE_URL: s3://files.na.mcneel.com/rhino3dm/js
     steps:
       - attach_workspace:
-          at: javascript/artifacts
-      - run: ls -l javascript/artifacts
+          at: src/build/artifacts_js
+      - run: ls -l src/build/artifacts_js
       - run: python --version
       - run: sudo pip install awscli
         # upload artifacts to s3
-      - run: aws s3 cp javascript/artifacts $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --recursive --acl public-read
+      - run: aws s3 cp src/build/artifacts_js $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --recursive --acl public-read
         # re-upload rhino3dm.wasm with mime-type "application/wasm"
-      - run: aws s3 cp javascript/artifacts/rhino3dm.wasm $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --acl public-read --content-type "application/wasm"
+      - run: aws s3 cp src/build/artifacts_js/rhino3dm.wasm $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --acl public-read --content-type "application/wasm"
         # copy artifacts from dujour/$CIRCLE_BUILD_NUM/ to latest/
       - run:
           name: Copy artifacts to latest/

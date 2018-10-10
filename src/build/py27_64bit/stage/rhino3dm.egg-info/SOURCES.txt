@@ -1,0 +1,10 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+rhino3dm/__init__.py
+rhino3dm/_rhino3dm.so
+rhino3dm.egg-info/PKG-INFO
+rhino3dm.egg-info/SOURCES.txt
+rhino3dm.egg-info/dependency_links.txt
+rhino3dm.egg-info/top_level.txt

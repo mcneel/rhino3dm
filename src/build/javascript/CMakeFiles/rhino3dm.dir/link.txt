@@ -1,0 +1,1 @@
+/Users/stevenbaer/dev/github/juj/emsdk/emscripten/1.38.12/em++   -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field -s ALLOW_MEMORY_GROWTH=1 --bind   @CMakeFiles/rhino3dm.dir/objects1.rsp  -o rhino3dm.html 

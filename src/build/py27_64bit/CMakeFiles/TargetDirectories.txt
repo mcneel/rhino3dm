@@ -1,0 +1,7 @@
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/CMakeFiles/_rhino3dm.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/CMakeFiles/opennurbs_static.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/CMakeFiles/rebuild_cache.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/CMakeFiles/edit_cache.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/CMakeFiles/zlib_static.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/lib/pybind11/CMakeFiles/rebuild_cache.dir
+/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/py27_64bit/lib/pybind11/CMakeFiles/edit_cache.dir

@@ -10,7 +10,7 @@ If you get an error, you may need to run `pip install --user rhino3dm`
 * Python 3.7 - Windows (32 and 64 bit)
 * Python 2.7 - OSX (installed through homebrew)
 * Python 3.7 - OSX (installed through homebrew)
-* Other distributions are possible, just let us know where you need this package to run
+* We are currently working on getting linux packages available
 
 ---
 
@@ -40,7 +40,7 @@ CMake 3.12.1 is the minimum required CMake version.
 
 ## Compile
 
-* (All platforms) run the `build_rhino3dm.py` script to compile and configure. The library will compile for the version of python that you are executing.
+* (All platforms) run `python build_python_lib.py` in the `src` directory to compile and configure. The library will compile for the version of python that you are executing.
 
 ## Test
 
