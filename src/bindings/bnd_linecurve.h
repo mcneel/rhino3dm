@@ -12,6 +12,7 @@ class BND_LineCurve : public BND_Curve
 public:
   BND_LineCurve();
   BND_LineCurve(ON_LineCurve* linecurve, const ON_ModelComponentReference* compref);
+  BND_LineCurve(ON_3dPoint start, ON_3dPoint end);
 
 protected:
   void SetTrackedPointer(ON_LineCurve* linecurve, const ON_ModelComponentReference* compref);
