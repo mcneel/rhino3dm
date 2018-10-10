@@ -202,7 +202,7 @@ BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
   std::string decoded = base64_decode(buffer);
   int rhinoversion = jsonObject["archive3dm"].cast<int>();
   int opennurbsversion = jsonObject["opennurbs"].cast<int>();
-  int length = decoded.length();
+  int length = static_cast<int>(decoded.length());
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
   return CreateWrapper(obj, nullptr);

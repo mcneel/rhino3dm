@@ -370,7 +370,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion)
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
-      return BND_ONXModel::FromByteArray(info.size, info.ptr);
+      return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
     .def("Write", &BND_ONXModel::Write)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
