@@ -1,7 +1,7 @@
 import os, sys, BaseHTTPServer, SimpleHTTPServer
 
 dirname = os.path.dirname(os.path.abspath(__file__))
-artifacts_dir = os.path.join(dirname, "artifacts")
+artifacts_dir = os.path.join(dirname, "build/artifacts_js")
 os.chdir(artifacts_dir)
 
 class ExtHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -31,5 +31,5 @@ httpd = ServerClass(server_address, HandlerClass)
 socketname = httpd.socket.getsockname()
 
 print "Serving HTTP on", socketname[0], "port", socketname[1], "..."
-
+print "press control+c to exit"
 httpd.serve_forever()
