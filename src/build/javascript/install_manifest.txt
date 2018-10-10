@@ -1,9 +1,0 @@
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/rhino3dm.js
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/rhino3dm.wasm
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/hatchmaker.js
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/.DS_Store
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/rhino3dm.html
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/rhinologo.js
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/texttocurves.js
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/OrbitControls.js
-/Users/stevenbaer/dev/github/mcneel/rhino3dm/src/build/artifacts_js/rhinologo.html
