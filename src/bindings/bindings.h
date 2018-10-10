@@ -15,7 +15,7 @@
 #pragma comment(lib, "shlwapi.lib")
 #endif
 
-#include "../opennurbs/opennurbs.h"
+#include "../lib/opennurbs/opennurbs.h"
 
 
 #if defined(ON_WASM_COMPILE)

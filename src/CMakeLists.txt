@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(pybind11)
+add_subdirectory(lib/pybind11)
 
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
-file(GLOB zlib_SRC "opennurbs/zlib/*.h" "opennurbs/zlib/*.c")
+file(GLOB zlib_SRC "lib/opennurbs/zlib/*.h" "lib/opennurbs/zlib/*.c")
 
 # temporarily rename the 3 cpp files that we don't want to compile on OSX
-file(RENAME "opennurbs/opennurbs_gl.cpp" "opennurbs/opennurbs_gl.skip")
-file(RENAME "opennurbs/opennurbs_unicode_cp932.cpp" "opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "opennurbs/opennurbs_unicode_cp949.cpp" "opennurbs/opennurbs_unicode_cp949.skip")
-file(GLOB opennurbs_SRC "opennurbs/*.h" "opennurbs/*.cpp")
-file(RENAME "opennurbs/opennurbs_gl.skip" "opennurbs/opennurbs_gl.cpp")
-file(RENAME "opennurbs/opennurbs_unicode_cp932.skip" "opennurbs/opennurbs_unicode_cp932.cpp")
-file(RENAME "opennurbs/opennurbs_unicode_cp949.skip" "opennurbs/opennurbs_unicode_cp949.cpp")
+file(RENAME "lib/opennurbs/opennurbs_gl.cpp" "lib/opennurbs/opennurbs_gl.skip")
+file(RENAME "lib/opennurbs/opennurbs_unicode_cp932.cpp" "lib/opennurbs/opennurbs_unicode_cp932.skip")
+file(RENAME "lib/opennurbs/opennurbs_unicode_cp949.cpp" "lib/opennurbs/opennurbs_unicode_cp949.skip")
+file(GLOB opennurbs_SRC "lib/opennurbs/*.h" "lib/opennurbs/*.cpp")
+file(RENAME "lib/opennurbs/opennurbs_gl.skip" "lib/opennurbs/opennurbs_gl.cpp")
+file(RENAME "lib/opennurbs/opennurbs_unicode_cp932.skip" "lib/opennurbs/opennurbs_unicode_cp932.cpp")
+file(RENAME "lib/opennurbs/opennurbs_unicode_cp949.skip" "lib/opennurbs/opennurbs_unicode_cp949.cpp")
 
 
 set (CMAKE_CXX_STANDARD 14)
