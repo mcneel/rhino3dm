@@ -45,4 +45,5 @@
 /src/build_py27_32bit
 /src/build_py27_64bit
 /src/build_py37_64bit
+/src/build
 /.idea
