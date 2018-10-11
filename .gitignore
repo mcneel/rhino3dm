@@ -48,4 +48,5 @@
 /src/build
 /src/dist
 /src/rhino3dm.egg-info
+/dist
 /.idea

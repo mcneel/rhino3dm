@@ -1,0 +1,9 @@
+include README.md LICENSE src/rhino3dm/__init__.py
+recursive-include src CMakeLists.txt
+recursive-include src/lib/pybind11 *
+recursive-include src/bindings *
+recursive-include src/lib *.h
+recursive-include src/lib *.cpp
+recursive-include src/lib *.c
+recursive-include src/rhino3dm *.pyd
+recursive-include src/rhino3dm *.so
