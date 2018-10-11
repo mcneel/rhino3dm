@@ -6,7 +6,7 @@ import platform
 import subprocess
 import glob
 import shutil
-
+import struct
 from distutils.version import LooseVersion
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
@@ -69,8 +69,23 @@ class CMakeBuild(build_ext):
         current_dir = os.getcwd()
         os.chdir(self.build_temp)
 
-        os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-        os.system("make")
+        windows_build = os.name == 'nt'
+
+        if windows_build:
+            bitness = 8 * struct.calcsize("P")
+            command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
+                                                                                   sys.executable,
+                                                                                   ext.sourcedir+"/src")
+            os.system(command)
+            if bitness == 64:
+                for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
+                    print(line.replace("WIN32;", "WIN64;"))
+                for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
+                    print(line.replace("WIN32;", "WIN64;"))
+            os.system("cmake --build . --config Release --target _rhino3dm")
+        else:
+            os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
+            os.system("make")
 
         os.chdir(current_dir)
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
