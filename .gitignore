@@ -46,4 +46,6 @@
 /src/build_py27_64bit
 /src/build_py37_64bit
 /src/build
+/src/dist
+/src/rhino3dm.egg-info
 /.idea

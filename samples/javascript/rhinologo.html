@@ -28,6 +28,7 @@
 	<body>
 		<script src="https://threejs.org/build/three.js"></script>
 		<script src="OrbitControls.js"></script>
+		<script src="compute-login.js"></script>
 		<script src="rhinologo.js"></script>
 		<script async type="text/javascript" src="rhino3dm.js"></script>
 
@@ -43,6 +44,7 @@
 		<script>
 			// holds top level variables
 			var RHINOLOGO = {};
+			getAuthToken = _getAuthToken;
 
 			init();
 			animate();
