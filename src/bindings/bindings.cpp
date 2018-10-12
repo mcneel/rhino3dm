@@ -61,21 +61,15 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
   class_<ON_UUID>("Guid");
 
-    enum_<ON::coordinate_system>("CoordinateSystem")
-        .value("WORLD", ON::coordinate_system::world_cs)
-        .value("CAMERA", ON::coordinate_system::camera_cs)
-        .value("CLIP", ON::coordinate_system::clip_cs)
-        .value("SCREEN", ON::coordinate_system::screen_cs);
+  enum_<ON::coordinate_system>("CoordinateSystem")
+    .value("WORLD", ON::coordinate_system::world_cs)
+    .value("CAMERA", ON::coordinate_system::camera_cs)
+    .value("CLIP", ON::coordinate_system::clip_cs)
+    .value("SCREEN", ON::coordinate_system::screen_cs)
+    ;
 
   initBoundingBoxBindings();
-
-    class_<BND_Circle>("Circle")
-        .constructor<double>()
-        .constructor<ON_3dPoint, double>()
-        .property("plane", &BND_Circle::m_plane)
-        .property("radius", &BND_Circle::m_radius)
-        .function("pointAt", &BND_Circle::PointAt)
-        .function("toNurbsCurve", &BND_Circle::ToNurbsCurve, allow_raw_pointers());
+  initCircleBindings();
 
     class_<BND_Arc>("Arc")
         .constructor<ON_3dPoint, double, double>()
@@ -87,9 +81,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
     class_<BND_Brep, base<BND_Geometry>>("Brep");
 
-    initCurveBindings();
-
-    initGeometryBindings();
+  initCurveBindings();
+  initGeometryBindings();
 
     class_<ON_Line>("Line")
         .constructor<ON_3dPoint, ON_3dPoint>()
@@ -97,9 +90,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
         .property("to", &ON_Line::to)
         .property("length", &ON_Line::Length);
 
-    class_<BND_LineCurve, base<BND_Curve>>("LineCurve");
-
-    initNurbsCurveBindings();
+  initLineCurveBindings();
+  initNurbsCurveBindings();
 
     class_<BND_Mesh, base<BND_Geometry>>("Mesh")
         .constructor<>()
@@ -129,7 +121,6 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
     class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
         .property("pointCount", &BND_PolylineCurve::PointCount)
         .function("point", &BND_PolylineCurve::Point);
-  initLineCurveBindings();
 
   initSurfaceBindings();
   initNurbsSurfaceBindings();

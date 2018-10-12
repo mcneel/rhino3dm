@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initLineCurveBindings(pybind11::module& m);
+#else
+void initLineCurveBindings();
 #endif
 
 class BND_LineCurve : public BND_Curve

@@ -57,3 +57,19 @@ void initCircleBindings(pybind11::module& m)
     .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve);
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initCircleBindings()
+{
+  class_<BND_Circle>("Circle")
+    .constructor<double>()
+    .constructor<ON_3dPoint, double>()
+    .property("plane", &BND_Circle::m_plane)
+    .property("radius", &BND_Circle::m_radius)
+    .function("pointAt", &BND_Circle::PointAt)
+    .function("toNurbsCurve", &BND_Circle::ToNurbsCurve, allow_raw_pointers())
+    ;
+}
+#endif

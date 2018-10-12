@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initCircleBindings(pybind11::module& m);
+#else
+void initCircleBindings();
 #endif
 
 class BND_Circle
