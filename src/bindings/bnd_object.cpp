@@ -7,6 +7,7 @@ BND_Object::BND_Object()
 
 BND_Object::~BND_Object()
 {
+  // m_component_ref should almost always track the lifetime of the ON_Object
   if (m_object && m_component_ref.IsEmpty())
     delete m_object;
 }
@@ -60,7 +61,19 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
       ON_PolyCurve* pc = ON_PolyCurve::Cast(obj);
       if( pc )
         return new BND_PolyCurve(pc, compref);
+      ON_ArcCurve* ac = ON_ArcCurve::Cast(obj);
+      if (ac)
+        return new BND_ArcCurve(ac, compref);
       return new BND_Curve(curve, compref);
+    }
+
+    ON_Surface* surface = ON_Surface::Cast(obj);
+    if (surface)
+    {
+      ON_NurbsSurface* ns = ON_NurbsSurface::Cast(obj);
+      if (ns)
+        return new BND_NurbsSurface(ns, nullptr);
+      return new BND_Surface(surface, compref);
     }
 
     ON_Viewport* viewport = ON_Viewport::Cast(obj);

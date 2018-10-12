@@ -25,9 +25,12 @@ PYBIND11_MODULE(_rhino3dm, m)
     .def_property_readonly("Length", &ON_Line::Length);
 
   initCircleBindings(m);
+  initArcCurveBindings(m);
   initLineCurveBindings(m);
   initPolyCurveBindings(m);
   initPolylineCurveBindings(m);
+  initSurfaceBindings(m);
+  initNurbsSurfaceBindings(m);
   initSphereBindings(m);
   initViewportBindings(m);
 
@@ -58,21 +61,15 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
   class_<ON_UUID>("Guid");
 
-    enum_<ON::coordinate_system>("CoordinateSystem")
-        .value("WORLD", ON::coordinate_system::world_cs)
-        .value("CAMERA", ON::coordinate_system::camera_cs)
-        .value("CLIP", ON::coordinate_system::clip_cs)
-        .value("SCREEN", ON::coordinate_system::screen_cs);
+  enum_<ON::coordinate_system>("CoordinateSystem")
+    .value("WORLD", ON::coordinate_system::world_cs)
+    .value("CAMERA", ON::coordinate_system::camera_cs)
+    .value("CLIP", ON::coordinate_system::clip_cs)
+    .value("SCREEN", ON::coordinate_system::screen_cs)
+    ;
 
   initBoundingBoxBindings();
-
-    class_<BND_Circle>("Circle")
-        .constructor<double>()
-        .constructor<ON_3dPoint, double>()
-        .property("plane", &BND_Circle::m_plane)
-        .property("radius", &BND_Circle::m_radius)
-        .function("pointAt", &BND_Circle::PointAt)
-        .function("toNurbsCurve", &BND_Circle::ToNurbsCurve, allow_raw_pointers());
+  initCircleBindings();
 
     class_<BND_Arc>("Arc")
         .constructor<ON_3dPoint, double, double>()
@@ -84,9 +81,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
     class_<BND_Brep, base<BND_Geometry>>("Brep");
 
-    initCurveBindings();
-
-    initGeometryBindings();
+  initCurveBindings();
+  initGeometryBindings();
 
     class_<ON_Line>("Line")
         .constructor<ON_3dPoint, ON_3dPoint>()
@@ -94,11 +90,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
         .property("to", &ON_Line::to)
         .property("length", &ON_Line::Length);
 
-    class_<BND_LineCurve, base<BND_Curve>>("LineCurve");
-
-    class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
-        .constructor<int, int>()
-        .constructor<int, bool, int, int>();
+  initLineCurveBindings();
+  initNurbsCurveBindings();
 
     class_<BND_Mesh, base<BND_Geometry>>("Mesh")
         .constructor<>()
@@ -129,6 +122,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
         .property("pointCount", &BND_PolylineCurve::PointCount)
         .function("point", &BND_PolylineCurve::Point);
 
+  initSurfaceBindings();
+  initNurbsSurfaceBindings();
     class_<BND_Sphere>("Sphere")
         .constructor<ON_3dPoint,double>()
         .property("center", &BND_Sphere::Center)

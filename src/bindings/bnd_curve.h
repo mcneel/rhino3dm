@@ -10,6 +10,7 @@ void initCurveBindings();
 
 class BND_Curve : public BND_Geometry
 {
+public:
   ON_Curve* m_curve = nullptr;
 protected:
   BND_Curve();

@@ -66,4 +66,7 @@ public:
   void SetRevision(int r);
 
   BND_ONXModel_ObjectTable Objects();
+
+public:
+  static bool ReadTest(std::wstring filepath);
 };

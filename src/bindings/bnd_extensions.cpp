@@ -347,6 +347,13 @@ BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
   return new BND_ONXModel(model);
 }
 
+bool BND_ONXModel::ReadTest(std::wstring path)
+{
+  ONX_ModelTest modeltest;
+  bool rc = modeltest.ReadTest(path.c_str(), ONX_ModelTest::Type::Read, false, nullptr, nullptr);
+  return rc;
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
@@ -381,6 +388,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
+    .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
 }
 #endif

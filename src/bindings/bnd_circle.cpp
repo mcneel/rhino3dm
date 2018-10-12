@@ -1,5 +1,12 @@
 #include "bindings.h"
 
+ON_Circle BND_Circle::ToONCircle() const
+{
+  ON_Plane plane = m_plane.ToOnPlane();
+  ON_Circle circle(plane, m_radius);
+  return circle;
+}
+
 BND_Circle::BND_Circle(double radius)
 {
   m_plane = BND_Plane::WorldXY();
@@ -48,5 +55,21 @@ void initCircleBindings(pybind11::module& m)
     .def_readwrite("Radius", &BND_Circle::m_radius)
     .def("PointAt", &BND_Circle::PointAt)
     .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve);
+}
+#endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initCircleBindings()
+{
+  class_<BND_Circle>("Circle")
+    .constructor<double>()
+    .constructor<ON_3dPoint, double>()
+    .property("plane", &BND_Circle::m_plane)
+    .property("radius", &BND_Circle::m_radius)
+    .function("pointAt", &BND_Circle::PointAt)
+    .function("toNurbsCurve", &BND_Circle::ToNurbsCurve, allow_raw_pointers())
+    ;
 }
 #endif
