@@ -42,7 +42,7 @@ def createwheel():
     os.chdir(build_dir)
     os.mkdir(staging_dir)
     os.chdir("../..")
-    copytree("pysrc/rhino3dm", staging_dir +"/rhino3dm")
+    copytree("rhino3dm", staging_dir +"/rhino3dm")
     for file in glob.glob(build_dir + "/Release/*.pyd"):
         copy(file, staging_dir + "/rhino3dm")
     for file in glob.glob(build_dir + "/*.so"):

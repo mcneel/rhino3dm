@@ -8,7 +8,7 @@ Project Hompage at: https://github.com/mcneel/rhino3dm
 * Python37 - Windows (32 and 64 bit)
 * Python27 - OSX (installed through homebrew)
 * Python37 - OSX (installed through homebrew)
-* Other distributions are possible, just let us know where you need this package to run
+* Linux and other python versions are supported through source distributions\
 
 
 ## Test

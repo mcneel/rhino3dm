@@ -10,7 +10,7 @@ If you get an error, you may need to run `pip install --user rhino3dm`
 * Python 3.7 - Windows (32 and 64 bit)
 * Python 2.7 - OSX (installed through homebrew)
 * Python 3.7 - OSX (installed through homebrew)
-* We are currently working on getting linux packages available
+* Linux and other python versions are supported through source distributions on PyPi
 
 ---
 

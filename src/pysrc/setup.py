@@ -1,12 +1,5 @@
 import setuptools, os, platform
 
-windows_build = os.name == 'nt'
-mac_build = platform.system() == 'Darwin'
-
-os_classifier = "Operating System :: Microsoft :: Windows"
-if mac_build:
-    os_classifier = "Operating System :: MacOS"
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -20,7 +13,7 @@ def create_package_list(base_package):
 
 setuptools.setup(
     name="rhino3dm",
-    version="0.0.3",
+    version="0.0.4",
     author="Robert McNeel & Associates",
     author_email="steve@mcneel.com",
     description="OpenNURBS based package with a RhinoCommon style",
