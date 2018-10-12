@@ -146,7 +146,7 @@ void initNurbsCurveBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initNurbsCurveBindings()
+void initNurbsCurveBindings(void*)
 {
   class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
     .constructor<int, int>()

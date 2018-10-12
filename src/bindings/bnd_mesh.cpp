@@ -182,3 +182,35 @@ void initMeshBindings(pybind11::module& m)
     .def("__setitem__", &BND_MeshNormalList::SetNormal);
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initMeshBindings(void*)
+{
+  class_<BND_Mesh, base<BND_Geometry>>("Mesh")
+    .constructor<>()
+    .function("vertices", &BND_Mesh::GetVertices)
+    .function("faces", &BND_Mesh::GetFaces)
+    .function("normals", &BND_Mesh::GetNormals);
+    ;
+
+  class_<BND_MeshVertexList>("MeshVertexList")
+    .property("count", &BND_MeshVertexList::Count)
+    .function("setCount", &BND_MeshVertexList::SetCount)
+    .function("get", &BND_MeshVertexList::GetVertex)
+    .function("set", &BND_MeshVertexList::SetVertex)
+    ;
+
+  class_<BND_MeshFaceList>("MeshFaceList")
+    .property("count", &BND_MeshFaceList::Count)
+    .function("get", &BND_MeshFaceList::GetFace)
+    ;
+
+  class_<BND_MeshNormalList>("MeshNormalList")
+    .property("count", &BND_MeshNormalList::Count)
+    .function("get", &BND_MeshNormalList::GetNormal)
+    .function("set", &BND_MeshNormalList::SetNormal)
+    ;
+}
+#endif

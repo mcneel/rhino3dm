@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initMeshBindings(pybind11::module& m);
+#else
+void initMeshBindings(void* m);
 #endif
 
 class BND_MeshVertexList

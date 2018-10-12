@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initSurfaceBindings(pybind11::module& m);
 #else
-void initSurfaceBindings();
+void initSurfaceBindings(void* m);
 #endif
 
 class BND_Surface : public BND_Geometry
@@ -68,5 +68,3 @@ public:
   //public bool GetSurfaceParameterFromNurbsFormParameter(double nurbsS, double nurbsT, out double surfaceS, out double surfaceT)
   //public bool GetNurbsFormParameterFromSurfaceParameter(double surfaceS, double surfaceT, out double nurbsS, out double nurbsT)
 };
-
-

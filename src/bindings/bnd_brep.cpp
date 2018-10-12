@@ -26,3 +26,12 @@ void initBrepBindings(pybind11::module& m)
     .def(py::init<>());
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initBrepBindings(void*)
+{
+  class_<BND_Brep, base<BND_Geometry>>("Brep");
+}
+#endif

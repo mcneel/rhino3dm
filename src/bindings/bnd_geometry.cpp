@@ -60,7 +60,7 @@ void initGeometryBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initGeometryBindings()
+void initGeometryBindings(void*)
 {
   class_<BND_Geometry, base<BND_Object>>("GeometryBase")
     .property("objectType", &BND_Geometry::ObjectType)

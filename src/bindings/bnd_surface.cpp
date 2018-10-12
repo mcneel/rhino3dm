@@ -45,10 +45,9 @@ void initSurfaceBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initSurfaceBindings()
+void initSurfaceBindings(void*)
 {
   class_<BND_Surface, base<BND_Geometry>>("Surface")
     ;
 }
 #endif
-

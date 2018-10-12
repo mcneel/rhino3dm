@@ -24,3 +24,14 @@ void initArcBindings(pybind11::module& m)
     .def("ToNurbsCurve", &BND_Arc::ToNurbsCurve);
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initArcBindings(void*)
+{
+  class_<BND_Arc>("Arc")
+    .constructor<ON_3dPoint, double, double>()
+    .function("toNurbsCurve", &BND_Arc::ToNurbsCurve, allow_raw_pointers());
+}
+#endif

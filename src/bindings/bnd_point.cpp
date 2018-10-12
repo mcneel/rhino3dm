@@ -73,7 +73,7 @@ void initPointBindings(pybind11::module& m)
 #else
 using namespace emscripten;
 
-void initPointBindings()
+void initPointBindings(void*)
 {
   value_array<ON_2dPoint>("Point2dSimple")
     .element(&ON_2dPoint::x)

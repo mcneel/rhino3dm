@@ -4,6 +4,5 @@
 #if defined(ON_PYTHON_COMPILE)
 void initDefines(pybind11::module& m);
 #else
-void initDefines();
+void initDefines(void* m);
 #endif
-

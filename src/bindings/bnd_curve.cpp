@@ -60,7 +60,7 @@ void initCurveBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initCurveBindings()
+void initCurveBindings(void*)
 {
   class_<BND_Curve, base<BND_Geometry>>("Curve")
     .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)

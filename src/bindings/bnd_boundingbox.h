@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initBoundingBoxBindings(pybind11::module& m);
 #else
-void initBoundingBoxBindings();
+void initBoundingBoxBindings(void* m);
 #endif
 
 class BND_BoundingBox : public ON_BoundingBox

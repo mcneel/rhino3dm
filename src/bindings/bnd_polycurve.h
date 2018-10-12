@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initPolyCurveBindings(pybind11::module& m);
+#else
+void initPolyCurveBindings(void* m);
 #endif
 
 class BND_PolyCurve : public BND_Curve

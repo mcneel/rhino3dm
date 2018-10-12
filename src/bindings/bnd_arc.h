@@ -4,6 +4,8 @@
 
 #if defined(ON_PYTHON_COMPILE)
 void initArcBindings(pybind11::module& m);
+#else
+void initArcBindings(void* m);
 #endif
 
 class BND_Arc : public ON_Arc

@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initGeometryBindings(pybind11::module& m);
 #else
-void initGeometryBindings();
+void initGeometryBindings(void* m);
 #endif
 
 class BND_Geometry : public BND_Object

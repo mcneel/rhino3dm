@@ -36,7 +36,7 @@ void initLineCurveBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initLineCurveBindings()
+void initLineCurveBindings(void*)
 {
   class_<BND_LineCurve, base<BND_Curve>>("LineCurve")
     .constructor<ON_3dPoint, ON_3dPoint>()

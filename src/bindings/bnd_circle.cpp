@@ -61,7 +61,7 @@ void initCircleBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initCircleBindings()
+void initCircleBindings(void*)
 {
   class_<BND_Circle>("Circle")
     .constructor<double>()

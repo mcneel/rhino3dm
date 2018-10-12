@@ -24,3 +24,16 @@ void initSphereBindings(pybind11::module& m)
     .def("ToBrep", &BND_Sphere::ToBrep);
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initSphereBindings(void*)
+{
+  class_<BND_Sphere>("Sphere")
+    .constructor<ON_3dPoint,double>()
+    .property("center", &BND_Sphere::Center)
+    .property("radius", &BND_Sphere::Radius)
+    .function("toBrep", &BND_Sphere::ToBrep, allow_raw_pointers());
+}
+#endif

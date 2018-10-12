@@ -6,6 +6,22 @@ class BND_DocObjects {};
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
 {
+  py::class_<ON_Line>(m, "Line")
+    .def(py::init<ON_3dPoint, ON_3dPoint>())
+    .def_property_readonly("Length", &ON_Line::Length);
+
+  py::class_<ON_Xform>(m, "Transform")
+    .def(py::init<>())
+    .def(py::init<double>())
+    .def_static("Translation", py::overload_cast<double, double, double>(&ON_Xform::TranslationTransformation))
+    .def_static("Scale", py::overload_cast<const ON_3dPoint&, double>(&ON_Xform::ScaleTransformation))
+    .def_static("Rotation", [](double angle, ON_3dVector rotationAxis, ON_3dPoint rotationCenter) {
+      ON_Xform rc(1);
+      rc.Rotation(angle, rotationAxis, rotationCenter);
+      return rc;
+    })
+    ;
+
   py::class_<BND_DocObjects> docobjects(m, "DocObjects");
 
   py::enum_<ON::object_type>(docobjects, "ObjectType")
@@ -46,8 +62,18 @@ void initDefines(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initDefines()
+void initDefines(void*)
 {
+  class_<ON_UUID>("Guid");
+
+  class_<ON_Line>("Line")
+    .constructor<ON_3dPoint, ON_3dPoint>()
+    .property("from", &ON_Line::from)
+    .property("to", &ON_Line::to)
+    .property("length", &ON_Line::Length);
+
+  class_<BND_Xform>("Transform");
+
   enum_<ON::object_type>("ObjectType")
     .value("None", ON::unknown_object_type)
     .value("Point", ON::point_object)
@@ -78,6 +104,13 @@ void initDefines()
     .value("ClipPlane", ON::clipplane_object)
     .value("Extrusion", ON::extrusion_object)
     .value("AnyObject", ON::any_object)
+    ;
+
+  enum_<ON::coordinate_system>("CoordinateSystem")
+    .value("WORLD", ON::coordinate_system::world_cs)
+    .value("CAMERA", ON::coordinate_system::camera_cs)
+    .value("CLIP", ON::coordinate_system::clip_cs)
+    .value("SCREEN", ON::coordinate_system::screen_cs)
     ;
 }
 #endif

@@ -396,7 +396,7 @@ void initExtensionsBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initExtensionsBindings()
+void initExtensionsBindings(void*)
 {
   class_<BND_FileObject>("File3dmObject")
     .function("attributes", &BND_FileObject::GetAttributes, allow_raw_pointers())

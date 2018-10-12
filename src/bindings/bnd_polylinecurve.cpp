@@ -38,3 +38,15 @@ void initPolylineCurveBindings(pybind11::module& m)
     .def("Point", &BND_PolylineCurve::Point);
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initPolylineCurveBindings(void*)
+{
+  class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
+    .property("pointCount", &BND_PolylineCurve::PointCount)
+    .function("point", &BND_PolylineCurve::Point)
+    ;
+}
+#endif

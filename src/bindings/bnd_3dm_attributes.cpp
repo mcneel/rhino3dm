@@ -26,3 +26,11 @@ void init3dmAttributesBindings(pybind11::module& m)
     .def(py::init<>());
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void init3dmAttributesBindings(void*)
+{
+}
+#endif

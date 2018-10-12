@@ -2,8 +2,10 @@
 
 #pragma once
 
-#if defined ON_WASM_COMPILE
-void initPlaneBindings();
+#if defined(ON_PYTHON_COMPILE)
+void initPlaneBindings(pybind11::module& m);
+#else
+void initPlaneBindings(void* m);
 #endif
 
 class BND_Plane

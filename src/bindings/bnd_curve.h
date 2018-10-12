@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initCurveBindings(pybind11::module& m);
 #else
-void initCurveBindings();
+void initCurveBindings(void* m);
 #endif
 
 class BND_Curve : public BND_Geometry

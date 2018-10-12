@@ -369,7 +369,7 @@ void initViewportBindings(pybind11::module& m)
 
 using namespace emscripten;
 
-void initViewportBindings()
+void initViewportBindings(void*)
 {
   class_<BND_Viewport, base<BND_Object>>("ViewportInfo")
     .constructor<>()

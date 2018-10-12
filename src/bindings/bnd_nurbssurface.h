@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initNurbsSurfaceBindings(pybind11::module& m);
 #else
-void initNurbsSurfaceBindings();
+void initNurbsSurfaceBindings(void* m);
 #endif
 
 class BND_NurbsSurface : public BND_Surface

@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initNurbsCurveBindings(pybind11::module& m);
 #else
-void initNurbsCurveBindings();
+void initNurbsCurveBindings(void* m);
 #endif
 
 class BND_NurbsCurvePointList

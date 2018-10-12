@@ -80,7 +80,7 @@ void initBoundingBoxBindings(pybind11::module& m)
 #else
 using namespace emscripten;
 
-void initBoundingBoxBindings()
+void initBoundingBoxBindings(void*)
 {
   class_<BND_BoundingBox>("BoundingBox")
     .constructor<ON_3dPoint, ON_3dPoint>()

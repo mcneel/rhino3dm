@@ -47,10 +47,9 @@ void initNurbsSurfaceBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initNurbsSurfaceBindings()
+void initNurbsSurfaceBindings(void*)
 {
   class_<BND_NurbsSurface, base<BND_Surface>>("NurbsSurface")
     ;
 }
 #endif
-

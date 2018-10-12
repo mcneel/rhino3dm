@@ -25,3 +25,12 @@ void initPolyCurveBindings(pybind11::module& m)
   py::class_<BND_PolyCurve, BND_Curve>(m, "Polycurve");
 }
 #endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initPolyCurveBindings(void*)
+{
+  class_<BND_PolyCurve, base<BND_Curve>>("Polycurve");
+}
+#endif

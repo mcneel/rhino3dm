@@ -91,7 +91,7 @@ BND_Object* BND_Object::CreateWrapper(const ON_ModelComponentReference& compref)
   const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
   if (nullptr == geometryComponent)
     return nullptr;
-  
+
   ON_Object* obj = const_cast<ON_Geometry*>(geometryComponent->Geometry(nullptr));
   return CreateWrapper(obj, &compref);
 }
@@ -229,5 +229,16 @@ void initObjectBindings(pybind11::module& m)
   py::class_<BND_Object>(m, "CommonObject")
     .def("Encode", &BND_Object::Encode)
     .def_static("Decode", &BND_Object::Decode);
+}
+#endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initObjectBindings(void*)
+{
+  class_<BND_Object>("CommonObject")
+    .function("encode", &BND_Object::Encode)
+    .class_function("decode", &BND_Object::Decode, allow_raw_pointers());
 }
 #endif

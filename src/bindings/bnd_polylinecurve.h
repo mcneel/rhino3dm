@@ -3,6 +3,8 @@
 #pragma once
 #if defined(ON_PYTHON_COMPILE)
 void initPolylineCurveBindings(pybind11::module& m);
+#else
+void initPolylineCurveBindings(void* m);
 #endif
 
 class BND_PolylineCurve : public BND_Curve

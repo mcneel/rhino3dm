@@ -28,10 +28,18 @@ BND_Plane BND_Plane::WorldXY()
   return rc;
 }
 
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initPlaneBindings(pybind11::module& m)
+{
+}
+#endif
+
+
 #if defined ON_WASM_COMPILE
 using namespace emscripten;
 
-void initPlaneBindings()
+void initPlaneBindings(void*)
 {
   value_object<BND_Plane>("Plane")
     .field("origin", &BND_Plane::m_origin)

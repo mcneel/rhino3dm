@@ -30,7 +30,7 @@ void initArcCurveBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initArcCurveBindings()
+void initArcCurveBindings(void*)
 {
   class_<BND_ArcCurve, base<BND_Curve>>("ArcCurve")
     ;

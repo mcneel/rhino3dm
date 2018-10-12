@@ -5,7 +5,7 @@
 #if defined(ON_PYTHON_COMPILE)
 void initPointBindings(pybind11::module& m);
 #else
-void initPointBindings();
+void initPointBindings(void* m);
 #endif
 
 class BND_Interval
