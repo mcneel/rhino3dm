@@ -9,6 +9,7 @@ void initCircleBindings(pybind11::module& m);
 class BND_Circle
 {
 public:
+  ON_Circle ToONCircle() const;
   BND_Circle(double radius);
   BND_Circle(BND_Plane plane, double radius);
   BND_Circle(ON_3dPoint center, double radius);

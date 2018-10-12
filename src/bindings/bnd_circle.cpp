@@ -1,5 +1,12 @@
 #include "bindings.h"
 
+ON_Circle BND_Circle::ToONCircle() const
+{
+  ON_Plane plane = m_plane.ToOnPlane();
+  ON_Circle circle(plane, m_radius);
+  return circle;
+}
+
 BND_Circle::BND_Circle(double radius)
 {
   m_plane = BND_Plane::WorldXY();

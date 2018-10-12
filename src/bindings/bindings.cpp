@@ -25,9 +25,12 @@ PYBIND11_MODULE(_rhino3dm, m)
     .def_property_readonly("Length", &ON_Line::Length);
 
   initCircleBindings(m);
+  initArcCurveBindings(m);
   initLineCurveBindings(m);
   initPolyCurveBindings(m);
   initPolylineCurveBindings(m);
+  initSurfaceBindings(m);
+  initNurbsSurfaceBindings(m);
   initSphereBindings(m);
   initViewportBindings(m);
 
@@ -96,9 +99,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
     class_<BND_LineCurve, base<BND_Curve>>("LineCurve");
 
-    class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
-        .constructor<int, int>()
-        .constructor<int, bool, int, int>();
+    initNurbsCurveBindings();
 
     class_<BND_Mesh, base<BND_Geometry>>("Mesh")
         .constructor<>()
@@ -128,7 +129,10 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
     class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
         .property("pointCount", &BND_PolylineCurve::PointCount)
         .function("point", &BND_PolylineCurve::Point);
+  initLineCurveBindings();
 
+  initSurfaceBindings();
+  initNurbsSurfaceBindings();
     class_<BND_Sphere>("Sphere")
         .constructor<ON_3dPoint,double>()
         .property("center", &BND_Sphere::Center)
