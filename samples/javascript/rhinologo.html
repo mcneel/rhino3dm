@@ -28,14 +28,13 @@
 	<body>
 		<script src="https://threejs.org/build/three.js"></script>
 		<script src="OrbitControls.js"></script>
-		<script src="compute-login.js"></script>
-		<script src="rhinologo.js"></script>
+		<script src="rhinocompute.js"></script>
 		<script async type="text/javascript" src="rhino3dm.js"></script>
 
 		<div id="glcanvas"></div>
 		<div id="controls">
-			<button class="inner" onclick="getRhinoLogoMeshes(onModelLoaded, onMeshesComputed, onWiresComputed)">Load Model</button>
-			<button class="inner" onclick="getAuthToken(false)">Set Authorization</button>
+			<button class="inner" onclick="getRhinoLogoMeshes()">Load Model</button>
+			<button class="inner" onclick="RhinoCompute.getAuthToken(false)">Set Authorization</button>
 			<div class="inner"><input type="checkbox" checked="true" onclick="RHINOLOGO.wireMaterial.visible = this.checked;">Wires</input></div>
 			<div class="inner"><input type="checkbox" checked="true" onclick="RHINOLOGO.meshMaterial.visible = this.checked;">Meshes</input></div>
 		</div>
@@ -44,7 +43,7 @@
 		<script>
 			// holds top level variables
 			var RHINOLOGO = {};
-			getAuthToken = _getAuthToken;
+			RhinoCompute.authToken = RhinoCompute.getAuthToken();
 
 			init();
 			animate();
@@ -111,6 +110,28 @@
 				controls.update();
 				RHINOLOGO.renderer.render( RHINOLOGO.scene, RHINOLOGO.camera );
 			}
+
+			/**
+			 * Loads the 'Rhino Logo.3dm' model and computes meshes for each of
+			 * breps in the model.
+			 */
+			function getRhinoLogoMeshes() {
+			  req = new XMLHttpRequest();
+			  req.open("GET", "https://files.mcneel.com/TEST/Rhino Logo.3dm");
+			  req.responseType = "arraybuffer";
+			  req.addEventListener("loadend", loadEnd);
+			  req.send(null);
+
+			  function loadEnd(e) {
+			    longInt8View = new Uint8Array(req.response);
+			    var model = Module.File3dm.fromByteArray(longInt8View);
+			    var doc = new RhinoLogoDoc(model);
+					onModelLoaded(doc);
+		      doc.computeBrepWires(onWiresComputed);
+		      doc.computeBrepMeshes(onMeshesComputed);
+			  }
+			}
+
 
 			/**
 			 * Create a THREE.LineSegments class representing the face edges of a
@@ -263,6 +284,53 @@
 					geometry.rotate(-1.571, [1,0,0], [0,0,0]);
 				}
 			}
+
+
+
+			class RhinoLogoDoc {
+			  constructor(model) {
+			    this.model = model;
+			    this.breps = [];
+			    var objecttable = model.objects();
+			    for(var i=0; i<objecttable.count; i++) {
+			      var modelobject = objecttable.get(i);
+			      this.breps.push({"geometry":modelobject.geometry(), "meshes":[], "wires":[], "threejs":null, "threejswires":null});
+			    }
+			  }
+
+			  computeBrepMeshes(callback) {
+			    for(var i=0; i<this.breps.length; i++) {
+			      var brep = this.breps[i]["geometry"];
+
+			      const fetchFunc = (m, index) => {
+			        RhinoCompute.Mesh.createFromBrep(brep)
+			        .then(result=>{
+			          var meshes = result.map(r=>Module.CommonObject.decode(r));
+			          m.breps[index]["meshes"] = meshes;
+			          callback(this);
+			        });
+			      };
+			      fetchFunc(this, i);
+			    }
+			  }
+
+			  computeBrepWires(callback) {
+			    for(var i=0; i<this.breps.length; i++) {
+			      var brep = this.breps[i]["geometry"];
+
+			      const fetchFunc = (m, index, brep) => {
+			        RhinoCompute.Brep.getWireframe(brep, 1)
+			        .then(result=>{
+			          var curves = result.map(r=>Module.CommonObject.decode(r));
+			          m.breps[index]["wires"] = curves;
+			          callback(this);
+			        });
+			      };
+			      fetchFunc(this, i, brep);
+			    }
+			  }
+			};
+
 
 		</script>
 	</body>
