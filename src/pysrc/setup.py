@@ -19,7 +19,7 @@ setuptools.setup(
     description="OpenNURBS based package with a RhinoCommon style",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mcneel/rhino3dm.py",
+    url="https://github.com/mcneel/rhino3dm",
     packages= create_package_list("rhino3dm"),
     include_package_data=True,
     classifiers=[
