@@ -1,4 +1,3 @@
-
 var RhinoCompute = {
     url: "https://compute.rhino3d.com/",
 
@@ -28,6 +27,28 @@ var RhinoCompute = {
                 "body": JSON.stringify(arglist),
                 "headers": {"Authorization":RhinoCompute.authToken}
         }).then(r=>r.json());
+    },
+
+    Extrusion : {
+        getWireframe : function(extrusion) {
+            args = [extrusion];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/extrusion/getwireframe-extrusion", args);
+            return promise;
+        },
+    },
+
+    BezierCurve : {
+        createCubicBeziers : function(sourceCurve, distanceTolerance, kinkTolerance) {
+            args = [sourceCurve, distanceTolerance, kinkTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/beziercurve/createcubicbeziers-curve_double_double", args);
+            return promise;
+        },
+
+        createBeziers : function(sourceCurve) {
+            args = [sourceCurve];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/beziercurve/createbeziers-curve", args);
+            return promise;
+        },
     },
 
     Brep : {
@@ -1685,4 +1706,66 @@ var RhinoCompute = {
             return promise;
         },
     },
-}
+
+    NurbsCurve : {
+        makeCompatible : function(curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance) {
+            args = [curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/makecompatible-ienumerable<curve>_point3d_point3d_int_int_double_double", args);
+            return promise;
+        },
+
+        createParabolaFromVertex : function(vertex, startPoint, endPoint) {
+            args = [vertex, startPoint, endPoint];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createparabolafromvertex-point3d_point3d_point3d", args);
+            return promise;
+        },
+
+        createParabolaFromFocus : function(focus, startPoint, endPoint) {
+            args = [focus, startPoint, endPoint];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createparabolafromfocus-point3d_point3d_point3d", args);
+            return promise;
+        },
+
+        createFromArc : function(arc, degree, cvCount) {
+            args = [arc, degree, cvCount];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createfromarc-arc_int_int", args);
+            return promise;
+        },
+
+        createFromCircle : function(circle, degree, cvCount) {
+            args = [circle, degree, cvCount];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createfromcircle-circle_int_int", args);
+            return promise;
+        },
+
+        setEndCondition : function(nurbscurve, bSetEnd, continuity, point, tangent) {
+            args = [nurbscurve, bSetEnd, continuity, point, tangent];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d", args);
+            return promise;
+        },
+
+        setEndCondition1 : function(nurbscurve, bSetEnd, continuity, point, tangent, curvature) {
+            args = [nurbscurve, bSetEnd, continuity, point, tangent, curvature];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d_vector3d", args);
+            return promise;
+        },
+
+        setGrevillePoints : function(nurbscurve, points) {
+            args = [nurbscurve, points];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setgrevillepoints-nurbscurve_ienumerable<point3d>", args);
+            return promise;
+        },
+
+        createSpiral : function(axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1) {
+            args = [axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createspiral-point3d_vector3d_point3d_double_double_double_double", args);
+            return promise;
+        },
+
+        createSpiral1 : function(railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn) {
+            args = [railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createspiral-curve_double_double_point3d_double_double_double_double_int", args);
+            return promise;
+        },
+    },
+};
