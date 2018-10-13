@@ -28,7 +28,7 @@
 	<body>
 		<script src="https://threejs.org/build/three.js"></script>
 		<script src="OrbitControls.js"></script>
-		<script src="rhinocompute.js"></script>
+		<script src="compute.rhino3d.js"></script>
 		<script async type="text/javascript" src="rhino3dm.js"></script>
 
 		<div id="glcanvas"></div>
@@ -43,7 +43,6 @@
 		<script>
 			// holds top level variables
 			var RHINOLOGO = {};
-			RhinoCompute.authToken = RhinoCompute.getAuthToken();
 
 			init();
 			animate();
@@ -53,6 +52,7 @@
 			 * be loaded into the scene through a separate routine.
 			 */
 			function init() {
+				RhinoCompute.authToken = RhinoCompute.getAuthToken();
 				RHINOLOGO.scene = new THREE.Scene();
 
 				RHINOLOGO.camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
