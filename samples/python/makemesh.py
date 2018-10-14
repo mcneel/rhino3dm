@@ -1,13 +1,8 @@
 from rhino3dm import *
 import Tkinter
-import json
-import urllib2
 import time
-
-center = Point3d(250, 250, 0)
-sphere = Sphere(center, 100)
-brep = sphere.ToBrep()
-functionArgs = [brep.Encode()]
+import compute_rhino3d.Mesh
+import compute_rhino3d.Util
 
 auth_token = ""
 top = Tkinter.Tk()
@@ -23,14 +18,13 @@ btn = Tkinter.Button(top, text='Ok', command=onClickOk)
 btn.grid(row=1, column=1)
 top.mainloop()
 
-url = "https://compute.rhino3d.com/Rhino/Geometry/Mesh/CreateFromBrep"
-req = urllib2.Request(url)
-req.add_header('Content-Type', 'application/json')
-req.add_header('Authorization', 'Bearer ' + auth_token)
+compute_rhino3d.Util.authToken = auth_token
+center = Point3d(250, 250, 0)
+sphere = Sphere(center, 100)
 
-response = urllib2.urlopen(req, json.dumps(functionArgs))
-d = json.loads(response.read())[0]
-mesh = CommonObject.Decode(d)
+brep = sphere.ToBrep()
+d = compute_rhino3d.Mesh.CreateFromBrep(brep)
+mesh = CommonObject.Decode(d[0])
 
 top = Tkinter.Tk()
 
