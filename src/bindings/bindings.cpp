@@ -12,6 +12,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   void* m = nullptr;
 #endif
 
+  ON::Begin();
   initDefines(m);
   initObjectBindings(m);
   init3dmAttributesBindings(m);
