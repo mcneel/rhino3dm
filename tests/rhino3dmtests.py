@@ -1,14 +1,20 @@
-import unittest
-import rhino3dm
+import unittest, os, os.path, rhino3dm
 
-class TestRhino3dm(unittest.TestCase):
-    def setUp(self):
-        pass
+class TestIO(unittest.TestCase):
+    def __init__(self, path):
+        super(TestIO, self).__init__("read3dm")
+        self._path = path
 
-    def test_readmodel(self):
-        path = 'example_3dm_files_20181010/V6/my_curves.3dm'
-        self.assertTrue(rhino3dm.File3dm._TestRead(path))
+    def read3dm(self):
+        rc = rhino3dm.File3dm._TestRead(self._path)
+        self.assertTrue(rc, self._path)
 
 
-if __name__ == '__main__':
-    unittest.main()
+suite = unittest.TestSuite()
+for (root, dirs, files) in os.walk('example_3dm_files_20181010'):
+    for filename in files:
+        if filename.lower().endswith('.3dm'):
+            path = os.path.join(root, filename)
+            suite.addTest(TestIO(path))
+
+unittest.TextTestRunner(verbosity=2).run(suite)
