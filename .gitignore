@@ -50,3 +50,4 @@
 /src/rhino3dm.egg-info
 /dist
 /.idea
+/tests/example_3dm_files_20181010
