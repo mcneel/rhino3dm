@@ -116,6 +116,10 @@
 			 * breps in the model.
 			 */
 			function getRhinoLogoMeshes() {
+				if( RHINOLOGO.doc!=null ) {
+					alert("Model already loaded");
+					return;
+				}
 			  req = new XMLHttpRequest();
 			  req.open("GET", "https://files.mcneel.com/rhino3dm/models/RhinoLogo.3dm");
 			  req.responseType = "arraybuffer";

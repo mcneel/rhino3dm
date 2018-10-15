@@ -8,7 +8,7 @@ var RhinoCompute = {
         if( useLocalStorage )
             auth = localStorage["compute_auth"];
         if (auth == null) {
-            auth = window.prompt("Rhino Accounts auth token");
+            auth = window.prompt("Rhino Accounts auth token\nVisit https://www.rhino3d.com/compute/login");
             if (auth != null && auth.length>20) {
                 auth = "Bearer " + auth;
                 localStorage.setItem("compute_auth", auth);
