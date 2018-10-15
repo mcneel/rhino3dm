@@ -31,6 +31,7 @@
 #include "bnd_circle.h"
 #include "bnd_object.h"
 #include "bnd_3dm_attributes.h"
+#include "bnd_layer.h"
 #include "bnd_geometry.h"
 #include "bnd_arc.h"
 #include "bnd_brep.h"
