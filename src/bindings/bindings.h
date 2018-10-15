@@ -22,6 +22,7 @@
 #include <emscripten/bind.h>
 #endif
 
+#include "bnd_uuid.h"
 #include "bnd_defines.h"
 #include "bnd_boundingbox.h"
 #include "bnd_point.h"
@@ -41,6 +42,7 @@
 #include "bnd_nurbscurve.h"
 #include "bnd_mesh.h"
 #include "bnd_surface.h"
+#include "bnd_beam.h"
 #include "bnd_nurbssurface.h"
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"

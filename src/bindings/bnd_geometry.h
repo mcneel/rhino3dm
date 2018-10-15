@@ -17,6 +17,7 @@ protected:
 
 public:
   BND_Geometry(ON_Geometry* geometry, const ON_ModelComponentReference* compref);
+  const ON_Geometry* GeometryPointer() const { return m_geometry; }
 
   ON::object_type ObjectType() const { return m_geometry->ObjectType(); }
 

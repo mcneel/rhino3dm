@@ -231,12 +231,47 @@ static ON_UUID Internal_ONX_Model_AddModelGeometry(
 }
 
 
-ON_UUID BND_ONXModel_ObjectTable::AddPoint(double x, double y, double z)
+BND_UUID BND_ONXModel_ObjectTable::AddPoint1(double x, double y, double z)
 {
   ON_Point point_geometry(x,y,z);
-  return Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, nullptr);
+  return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dPoint& to)
+{
+  ON_LineCurve lc(from, to);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddCurve1(const BND_Curve* curve)
+{
+  const ON_Geometry* g = curve ? curve->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddTextDot1(std::wstring text, const ON_3dPoint& location)
+{
+  ON_TextDot dot(location, text.c_str(), nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &dot, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddMesh1(const BND_Mesh* mesh)
+{
+  const ON_Geometry* g = mesh ? mesh->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddBrep1(const BND_Brep* brep)
+{
+  const ON_Geometry* g = brep ? brep->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
 
 int BND_ONXModel_ObjectTable::Count() const
 {
@@ -364,9 +399,16 @@ void initExtensionsBindings(pybind11::module& m)
     ;
 
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
-    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint)
     .def("__len__", &BND_ONXModel_ObjectTable::Count)
     .def("__getitem__", &BND_ONXModel_ObjectTable::ModelObjectAt)
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1)
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2)
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4)
+    .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1)
+    .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve1)
+    .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
+    .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh1)
+    .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep1)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
