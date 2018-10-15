@@ -28,8 +28,10 @@ def compilebinaries():
                 print(line.replace("WIN32;", "WIN64;"))
         os.system("cmake --build . --config Release --target _rhino3dm")
     else:
-        os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
-        os.system("make")
+        rv = os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
+        if int(rv) > 0: sys.exit(1)
+        rv = os.system("make")
+        if int(rv) > 0: sys.exit(1)
     os.chdir("../..")
 
 def createwheel():
@@ -57,7 +59,8 @@ def createwheel():
     #platform is found with distutils.util.get_platform()
     python_tag = "cp{}{}".format(sys.version_info.major, sys.version_info.minor)
     options = "--python-tag={} --plat-name={}".format(python_tag, distutils.util.get_platform())
-    os.system('"' + sys.executable + '"' + " setup.py bdist_wheel " + options)
+    rv = os.system('"' + sys.executable + '"' + " setup.py bdist_wheel " + options)
+    if int(rv) > 0: sys.exit(1)
     os.chdir(current_dir+"/build")
     if not os.path.exists("wheels_for_pypi"):
         os.mkdir("wheels_for_pypi")

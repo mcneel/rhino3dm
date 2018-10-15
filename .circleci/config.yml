@@ -10,6 +10,7 @@ jobs:
       - run:
           name: Update cmake
           command: |
+            # https://askubuntu.com/a/865294
             version=3.12
             build=2
             mkdir ~/temp
@@ -62,6 +63,32 @@ jobs:
               aws s3 cp $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ $S3_BASE_URL/latest/ --recursive --acl public-read
             fi
 
+  build_py2:
+    docker:
+      - image: ubuntu:18.10
+    steps:
+      - run: apt update
+      - run: apt install -y git python2 python2-dev python-pip uuid uuid-dev cmake clang
+      - checkout
+      - run: git submodule update --init
+      - run: python2 --version
+      - run: python2 -m pip install -U pip setuptools
+      - run: cmake --version
+      - run: cd src && python2 build_python_lib.py
+
+  build_py3:
+    docker:
+      - image: ubuntu:18.10
+    steps:
+      - run: apt update
+      - run: apt install -y git python3 python3-dev python3-pip uuid uuid-dev cmake clang
+      - checkout
+      - run: git submodule update --init
+      - run: python3 --version
+      - run: python3 -m pip install -U pip setuptools
+      - run: cmake --version
+      - run: cd src && python3 build_python_lib.py 
+
 workflows:
   version: 2
   build:
@@ -70,3 +97,5 @@ workflows:
       - deploy_js:
           requires:
             - build_js
+      - build_py2
+      - build_py3
