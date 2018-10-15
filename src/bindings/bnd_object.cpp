@@ -72,7 +72,10 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
     {
       ON_NurbsSurface* ns = ON_NurbsSurface::Cast(obj);
       if (ns)
-        return new BND_NurbsSurface(ns, nullptr);
+        return new BND_NurbsSurface(ns, compref);
+      ON_Extrusion* extr = ON_Extrusion::Cast(obj);
+      if (extr)
+        return new BND_Extrusion(extr, compref);
       return new BND_Surface(surface, compref);
     }
 

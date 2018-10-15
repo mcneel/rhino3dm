@@ -23,7 +23,71 @@ class BND_ONXModel_ObjectTable
   std::shared_ptr<ONX_Model> m_model;
 public:
   BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m);
-  ON_UUID AddPoint(double x, double y, double z);
+  BND_UUID AddPoint1(double x, double y, double z);
+  BND_UUID AddPoint2(const ON_3dPoint& point) { return AddPoint1(point.x, point.y, point.z); }
+  //Guid AddPoint3(Point3d point, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddPoint4(const ON_3fPoint& point) { return AddPoint1(point.x, point.y, point.z); }
+  //Guid AddPoint5(Point3f point, DocObjects.ObjectAttributes attributes)
+  //Guid[] AddPoints1(IEnumerable<Point3d> points)
+  //Guid[] AddPoints2(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
+  //Guid[] AddPoints3(IEnumerable<Point3f> points)
+  //Guid[] AddPoints4(IEnumerable<Point3f> points, DocObjects.ObjectAttributes attributes)
+  //Guid AddPointCloud1(PointCloud cloud)
+  //Guid AddPointCloud2(PointCloud cloud, DocObjects.ObjectAttributes attributes)
+  //Guid AddPointCloud3(IEnumerable<Point3d> points)
+  //Guid AddPointCloud4(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
+  //Guid AddClippingPlane1(Plane plane, double uMagnitude, double vMagnitude, Guid clippedViewportId)
+  //Guid AddClippingPlane2(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds)
+  //Guid AddClippingPlane3(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds, DocObjects.ObjectAttributes attributes)
+  //Guid AddLinearDimension1(LinearDimension dimension)
+  //Guid AddLinearDimension2(LinearDimension dimension, DocObjects.ObjectAttributes attributes)
+  //Guid AddAngularDimension1(AngularDimension dimension)
+  //Guid AddAngularDimension2(AngularDimension dimension, ObjectAttributes attributes)
+  BND_UUID AddLine1(const ON_3dPoint& from, const ON_3dPoint& to);
+  //Guid AddLine2(Point3d from, Point3d to, DocObjects.ObjectAttributes attributes)
+  //Guid AddLine3(Line line)
+  //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
+  //Guid AddPolyline1(IEnumerable<Point3d> points)
+  //Guid AddPolyline2(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
+  //Guid AddArc1(Arc arc)
+  //Guid AddArc2(Arc arc, DocObjects.ObjectAttributes attributes)
+  //Guid AddCircle1(Circle circle)
+  //Guid AddCircle2(Circle circle, DocObjects.ObjectAttributes attributes)
+  //Guid AddEllipse1(Ellipse ellipse)
+  //Guid AddEllipse2(Ellipse ellipse, DocObjects.ObjectAttributes attributes)
+  //Guid AddSphere1(Sphere sphere)
+  //Guid AddSphere2(Sphere sphere, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddCurve1(const class BND_Curve* curve);
+  //Guid AddCurve2(Geometry.Curve curve, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddTextDot1(std::wstring text, const ON_3dPoint& location);
+  //Guid AddTextDot2(string text, Point3d location, DocObjects.ObjectAttributes attributes)
+  //Guid AddTextDot3(Geometry.TextDot dot)
+  //Guid AddTextDot4(Geometry.TextDot dot, DocObjects.ObjectAttributes attributes)
+  //Guid AddInstanceObject1(InstanceReferenceGeometry instanceReference)
+  //Guid AddInstanceObject2(InstanceReferenceGeometry instanceReference, ObjectAttributes attributes)
+  //Guid AddInstanceObject3(int instanceDefinitionIndex, Transform instanceXform)
+  //Guid AddInstanceObject4(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
+  //Guid AddText1(string text, Plane plane, double height, string fontName, bool bold, bool italic)
+  //Guid AddText2(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification)
+  //Guid AddText3(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, DocObjects.ObjectAttributes attributes)
+  //Guid AddText4(string text, Plane plane, double height, string fontName, bool bold, bool italic, DocObjects.ObjectAttributes attributes)
+  //Guid AddSurface1(Geometry.Surface surface)
+  //Guid AddSurface2(Geometry.Surface surface, DocObjects.ObjectAttributes attributes)
+  //Guid AddExtrusion1(Geometry.Extrusion extrusion)
+  //Guid AddExtrusion2(Geometry.Extrusion extrusion, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddMesh1(const class BND_Mesh* mesh);
+  //Guid AddMesh2(Geometry.Mesh mesh, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddBrep1(const class BND_Brep* brep);
+  //Guid AddBrep2(Geometry.Brep brep, DocObjects.ObjectAttributes attributes)
+  //Guid AddLeader1(Plane plane, IEnumerable<Point2d> points)
+  //Guid AddLeader2(Plane plane, IEnumerable<Point2d> points, DocObjects.ObjectAttributes attributes)
+  //Guid AddLeader3(string text, Plane plane, IEnumerable<Point2d> points, DocObjects.ObjectAttributes attributes)
+  //Guid AddLeader4(string text, Plane plane, IEnumerable<Point2d> points)
+  //Guid AddHatch1(Hatch hatch)
+  //Guid AddHatch2(Hatch hatch, DocObjects.ObjectAttributes attributes)
+
+  //bool Delete(Guid objectId)
+  //int Delete(IEnumerable<Guid> objectIds)
 
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);

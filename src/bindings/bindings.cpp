@@ -20,6 +20,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initArcBindings(m);
   initBoundingBoxBindings(m);
   initGeometryBindings(m);
+  initExtrusionBindings(m);
   initBrepBindings(m);
   initCurveBindings(m);
   initNurbsCurveBindings(m);
