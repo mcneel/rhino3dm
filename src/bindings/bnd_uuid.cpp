@@ -23,7 +23,11 @@ BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
 #if defined(ON_WASM_COMPILE)
 BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
 {
-  return id;
+  char s[37];
+  memset(s, 0, sizeof(s));
+
+  char* suuid = ON_UuidToString(id, s);
+  std::string rc(suuid);
+  return rc;
 }
 #endif
-

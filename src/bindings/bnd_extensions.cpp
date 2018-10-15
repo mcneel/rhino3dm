@@ -446,10 +446,15 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_ONXModel_ObjectTable>("File3dmObjectTable")
-    .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint)
     .property("count", &BND_ONXModel_ObjectTable::Count)
     .function("get", &BND_ONXModel_ObjectTable::ModelObjectAt, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
+    .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint1)
+    .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
+    .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve1, allow_raw_pointers())
+    .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
+    .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh1, allow_raw_pointers())
+    .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep1, allow_raw_pointers())
     ;
 
   class_<BND_ONXModel>("File3dm")
