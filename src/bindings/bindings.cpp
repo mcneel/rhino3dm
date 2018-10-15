@@ -16,6 +16,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initDefines(m);
   initObjectBindings(m);
   init3dmAttributesBindings(m);
+  initLayerBindings(m);
   initPointBindings(m);
   initArcBindings(m);
   initBoundingBoxBindings(m);

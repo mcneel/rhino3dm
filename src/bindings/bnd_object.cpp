@@ -85,6 +85,11 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
 
     return new BND_Geometry(geometry, compref);
   }
+
+  ON_Layer* layer = ON_Layer::Cast(obj);
+  if (layer)
+    return new BND_Layer(layer, compref);
+
   return new BND_Object(obj, compref);
 }
 
