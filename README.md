@@ -1,6 +1,10 @@
 # rhino3dm
 Stand alone libraries based on OpenNURBS with a RhinoCommon style.
 
+For bug reports or feature requests see the [contributing guide](CONTRIBUTING.md)
+
+----
+
 ### rhino3dm.py (Python)
 See [our python readme](RHINO3DM.PY.md) for details
 
