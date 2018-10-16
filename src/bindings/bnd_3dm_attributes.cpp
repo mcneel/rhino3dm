@@ -52,5 +52,13 @@ using namespace emscripten;
 
 void init3dmAttributesBindings(void*)
 {
+  class_<BND_3dmAttributes, base<BND_Object>>("ObjectAttributes")
+    .constructor<>()
+    .property("visible", &BND_3dmAttributes::IsVisible, &BND_3dmAttributes::SetVisible)
+    .property("name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
+    .property("id", &BND_3dmAttributes::GetObjectId)
+    .property("layerIndex", &BND_3dmAttributes::GetLayerIndex, &BND_3dmAttributes::SetLayerIndex)
+  ;
+
 }
 #endif
