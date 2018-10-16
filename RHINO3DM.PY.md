@@ -28,7 +28,7 @@ If you get an error, you may need to run `pip install --user rhino3dm`
 >>> print(start)
 ```
 
-See the [OpenNurbs Documentation for further details on the class layout](https://developer.rhino3d.com/guides/opennurbs/)
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
 
 ## Build it yourself
 

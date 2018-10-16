@@ -19,7 +19,7 @@ Rhino3dm.js requires two files`rhino3dm.wasm` and `rhino3dm.js`.  It is easiest 
 </html>
 ```
 
-See the [OpenNurbs Documentation for further details on the class layout](https://developer.rhino3d.com/guides/opennurbs/)
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
 
 ### Download the files
 
@@ -42,7 +42,7 @@ An advanced sample creates a 3dm file viewer in a web browser.  The html+javascr
 
 **rhino3dm.js** is used to read a 3dm file and create an instance of a File3dm class in the browser’s memory.  It then walks through the objects in the model and calls compute.rhino3d.com to create meshes and isocurves for the polysurface. These meshes and isocurves are then added to a three.js scene for display.
 
-See the [OpenNurbs Documentation for further details on the class layout](https://developer.rhino3d.com/guides/opennurbs/)
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
 
 ## Build the javascript libraries from source
 
