@@ -38,7 +38,7 @@ There a few samples are available in the [Github Repo Samples folder](https://gi
 
 An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
-![Rhino Logo in Web Browser](docs\images\rhino3dm_rhinologo.png)
+<img src="docs/images/rhino3dm_rhinologo.png" width="300"></img>
 
 **rhino3dm.js** is used to read a 3dm file and create an instance of a File3dm class in the browser’s memory.  It then walks through the objects in the model and calls compute.rhino3d.com to create meshes and isocurves for the polysurface. These meshes and isocurves are then added to a three.js scene for display.
 
