@@ -26,7 +26,7 @@ See [our python documentation](RHINO3DM.PY.md) for details
 
 **rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm). rhino3dm.js should run on all major browsers as well as [node.js](https://nodejs.org/).
 
-![Rhino Logo in Web Browser](docs\images\rhino3dm_rhinologo.png)
+<img src="docs/images/rhino3dm_rhinologo.png" width="200"></img>
 
 ```html
 <html>
