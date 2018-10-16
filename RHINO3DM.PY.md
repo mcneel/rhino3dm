@@ -1,51 +1,25 @@
 # rhino3dm.py
-CPython package based on OpenNURBS with a RhinoCommon style
+**rhino3dm.py** is a Python package that is OpenNURBS plus additional python bindings compiled to a C-extension library that can be used on all current versions of CPython (both 2.7 and 3.7) and is available on all platforms [through PyPi.org](https://pypi.org/project/rhino3dm/)
 
-## Install from pip
+#### Supported Python platforms:
+
+- Python 2.7 - Windows (32 and 64 bit)
+- Python 3.7 - Windows (32 and 64 bit)
+- Python 2.7 - OSX (installed through homebrew)
+- Python 3.7 - OSX (installed through homebrew)
+- Linux and other python versions are supported through source distributions on PyPi
+
+## Install using pip
+The easiest way to access the rhino3dm.py libraries is to use the pip installer from the Python console:
+
 `pip install rhino3dm`  
+
 If you get an error, you may need to run `pip install --user rhino3dm`
 
-### Supported platforms
-* Python 2.7 - Windows (32 and 64 bit)
-* Python 3.7 - Windows (32 and 64 bit)
-* Python 2.7 - OSX (installed through homebrew)
-* Python 3.7 - OSX (installed through homebrew)
-* Linux and other python versions are supported through source distributions on PyPi
+## Example usage
 
----
-
-## Build it yourself
-
-### Get The Source
-
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
-  * `git submodule update --init`
-
-## Install the Tools
-
-CMake 3.12.1 is the minimum required CMake version.
-
-* Mac
-  * Install Homebrew (https://brew.sh/)
-  * `brew install python2 cmake` (for Python 2.7 compile)
-  * `brew install python3 cmake` (for Python 3.7 compile)
-* Windows
-  * This project uses Visual Studio 2017
-  * Install the flavor of CPython that you prefer to work with from python.org
-  * Install CMake (https://cmake.org/download/) and make sure that cmake.exe is added to the path
-* Linux
-  * Tested with Clang 3.8.0 on Linux Mint 18.3
-  * Install CMake 3.12.1
-  * `sudo aptitude install python2 python3 python2-dev python3-dev uuid uuid-dev`
-
-## Compile
-
-* (All platforms) run `python build_python_lib.py` in the `src` directory to compile and configure. The library will compile for the version of python that you are executing.
-
-## Test
-
-* `cd build_{pyver}/stage` and start `python`
-```
+* Start the `python` console, then type:
+```python
 >>> from rhino3dm import *
 >>> center = Point3d(1,2,3)
 >>> arc = Arc(center, 10, 1)
@@ -53,3 +27,11 @@ CMake 3.12.1 is the minimum required CMake version.
 >>> start = nc.PointAtStart
 >>> print(start)
 ```
+
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
+
+## Build it yourself
+
+rhino3dm.py may be built from the source.  To find out how to build rhino3dm.py for yourself go to the [rhino3dm.py build page](docs/python/RHINO3DM-BUILD.PY.md)
+
+---

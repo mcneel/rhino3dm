@@ -1,13 +1,13 @@
 # rhino3dm.js
-Web Assembly library based on OpenNURBS with a RhinoCommon style
+**rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
 
 [![CircleCI](https://circleci.com/gh/mcneel/rhino3dm/tree/master.svg?style=shield&circle-token=53733a2fe2cf99a11808d1e5210bc1aeb3f13ea9)](https://circleci.com/gh/mcneel/rhino3dm/tree/master)
 
 ----
 
-## Downloads
+## Usage
 
-Get `rhino3dm.wasm` and `rhino3dm.js` from the [releases](https://github.com/mcneel/rhino3dm/releases), or try the _latest_ build straight from the `master` branch.
+Rhino3dm.js requires two files`rhino3dm.wasm` and `rhino3dm.js`.  It is easiest to simply reference the *latest* build directly from our servers:
 
 ```html
 <html>
@@ -19,33 +19,31 @@ Get `rhino3dm.wasm` and `rhino3dm.js` from the [releases](https://github.com/mcn
 </html>
 ```
 
-_**Note:** You can replace `latest` with `dujour/BUILD_NUMBER` if you know what you're [looking for](https://circleci.com/gh/mcneel/rhino3dm)!_
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
+
+### Download the files
+
+If it would be better to download a static build locally, download the latest build of the two files:
+-  [rhino3dm.js](https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js)
+-  [rhino3dm.wasm](https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.wasm)
 
 
-## Build it yourself
+Place these in the same folder. The `rhino3dm.js` references the `rhino3d.wasm`.
 
-### Get the Source
+Note: A list of builds is available on our [Circleci project](https://circleci.com/gh/mcneel/rhino3dm). You can replace latest with dujour/BUILD_NUMBER if you know what you're looking for!
 
-This repo uses OpenNURBS as a submodule, so you need to run a couple more git commands after you have cloned. `cd` into the new repository directory and run
-  * `git submodule update --init`
+## Example
 
-### Install the Tools
+There a few samples are available in the [Github Repo Samples folder](https://github.com/mcneel/rhino3dm/tree/master/samples/javascript)
 
-* Make sure you have python 2.7.12 or newer installed. python is available at https://www.python.org/
-* Install emscripten http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html to compile C++ to web assembly (wasm)
-* Install CMake (https://cmake.org/download/)
-* (Windows) Make sure to have make installed. https://sourceforge.net/projects/mingw-w64/files/latest/download
+An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
-### Compile
+![Rhino Logo in Web Browser](docs\images\rhino3dm_rhinologo.png)
 
-* After installation, make sure you have  emcc, cmake, and python on your path. Emscripten provides instructions for adding path information during install.
-* From the command line (or bash), go to the `src` directory of this repo and type `python build_javascript_lib.py`. If everything is configured correctly, you should have a compiled wasm, js, and html file after a couple minutes. These files will be built to the `src/build/artifacts_js` directory.
+**rhino3dm.js** is used to read a 3dm file and create an instance of a File3dm class in the browser’s memory.  It then walks through the objects in the model and calls compute.rhino3d.com to create meshes and isocurves for the polysurface. These meshes and isocurves are then added to a three.js scene for display.
 
-### Test
+See the [RhinoCommon Documentation for further details on the class layout](https://developer.rhino3d.com/guides/rhinocommon/)
 
-* Type `python serve_javascript.py`. This will run a simple web server which serves files in the artifacts directory
-* Go to your browser and navigate to `http://localhost:8080/rhino3dm.html`
-* For chrome, right click and select `inspect`. Click on the `console` tab and try typing in the following javascript
-  * `sphere = new Module.Sphere([1,2,3],12);`
-  * `brep = sphere.toBrep();`
-  * `jsonobject = brep.encode();`
+## Build the javascript libraries from source
+
+If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source. For detailed instructions go to [rhino3dm.js and rhino3dm.wasm](/docs/javascript/RHINO3DM-BUILD.JS.md) 
