@@ -16,6 +16,17 @@ void BND_Brep::SetTrackedPointer(ON_Brep* brep, const ON_ModelComponentReference
   BND_Geometry::SetTrackedPointer(brep, compref);
 }
 
+BND_BrepFaceList BND_Brep::GetFaces()
+{
+  return BND_BrepFaceList(m_brep, m_component_ref);
+}
+
+BND_BrepFaceList::BND_BrepFaceList(ON_Brep* brep, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_brep = brep;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
