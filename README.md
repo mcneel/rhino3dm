@@ -7,7 +7,7 @@ Functionality includes
 - Work with non-geometry classes supported in Rhino like layers, object attributes, tranforms and viewports
 - Read and write all of the above information to and from the *.3dm* file format
 - Use as a client to make calls into the [Rhino Compute cloud server](https://www.rhino3d.com/compute) for advanced manipulation of geometry objects
-- Available on most platforms (Windows, Mac, Linux)
+- Available on most platforms (Windows, macOS, Linux)
 
 For bug reports or feature requests see the [contributing guide](CONTRIBUTING.md)
 
