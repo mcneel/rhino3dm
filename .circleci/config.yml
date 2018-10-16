@@ -74,7 +74,7 @@ jobs:
       - run: python2 --version
       - run: python2 -m pip install -U pip setuptools
       - run: cmake --version
-      - run: cd src && python2 build_python_lib.py
+      - run: python2 setup.py bdist_wheel
 
   build_py3:
     docker:
@@ -87,7 +87,7 @@ jobs:
       - run: python3 --version
       - run: python3 -m pip install -U pip setuptools
       - run: cmake --version
-      - run: cd src && python3 build_python_lib.py 
+      - run: python3 setup.py bdist_wheel
 
 workflows:
   version: 2
