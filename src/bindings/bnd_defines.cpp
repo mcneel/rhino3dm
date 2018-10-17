@@ -2,6 +2,8 @@
 
 class BND_DocObjects {};
 
+class BND_MeshTypeNamespace {};
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
@@ -54,6 +56,15 @@ void initDefines(pybind11::module& m)
     .value("ClipPlane", ON::clipplane_object)
     .value("Extrusion", ON::extrusion_object)
     .value("AnyObject", ON::any_object)
+    .export_values();
+
+  py::class_<BND_MeshTypeNamespace> geometry(m, "MeshType");
+  py::enum_<ON::mesh_type>(geometry, "MeshTypeEnum")
+    .value("Default", ON::default_mesh)
+    .value("Render", ON::render_mesh)
+    .value("Analysis", ON::analysis_mesh)
+    .value("Preview", ON::preview_mesh)
+    .value("Any", ON::any_mesh)
     .export_values();
 }
 

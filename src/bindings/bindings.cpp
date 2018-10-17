@@ -21,7 +21,6 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initArcBindings(m);
   initBoundingBoxBindings(m);
   initGeometryBindings(m);
-  initBrepBindings(m);
   initCurveBindings(m);
   initNurbsCurveBindings(m);
   initMeshBindings(m);
@@ -31,6 +30,8 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initPolyCurveBindings(m);
   initPolylineCurveBindings(m);
   initSurfaceBindings(m);
+  initSurfaceProxyBindings(m);
+  initBrepBindings(m);
   initExtrusionBindings(m);
   initNurbsSurfaceBindings(m);
   initSphereBindings(m);

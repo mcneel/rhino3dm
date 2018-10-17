@@ -162,7 +162,8 @@ void initMeshBindings(pybind11::module& m)
     .def(py::init<>())
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
-    .def_property_readonly("Normals", &BND_Mesh::GetNormals);
+    .def_property_readonly("Normals", &BND_Mesh::GetNormals)
+    ;
 
   py::class_<BND_MeshVertexList>(m, "MeshVertexList")
     .def("__len__", &BND_MeshVertexList::Count)
@@ -170,16 +171,19 @@ void initMeshBindings(pybind11::module& m)
     .def("__getitem__", &BND_MeshVertexList::GetVertex)
     .def("__setitem__", &BND_MeshVertexList::SetVertex)
     .def("__iter__", [](BND_MeshVertexList &s) { return py::make_iterator(s.begin(), s.end()); },
-      py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */);
+      py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
+    ;
 
   py::class_<BND_MeshFaceList>(m, "MeshFaceList")
     .def("__len__", &BND_MeshFaceList::Count)
-    .def("__getitem__", &BND_MeshFaceList::GetFace);
+    .def("__getitem__", &BND_MeshFaceList::GetFace)
+    ;
 
   py::class_<BND_MeshNormalList>(m, "MeshNormalList")
     .def("__len__", &BND_MeshNormalList::Count)
     .def("__getitem__", &BND_MeshNormalList::GetNormal)
-    .def("__setitem__", &BND_MeshNormalList::SetNormal);
+    .def("__setitem__", &BND_MeshNormalList::SetNormal)
+    ;
 }
 #endif
 
@@ -192,7 +196,7 @@ void initMeshBindings(void*)
     .constructor<>()
     .function("vertices", &BND_Mesh::GetVertices)
     .function("faces", &BND_Mesh::GetFaces)
-    .function("normals", &BND_Mesh::GetNormals);
+    .function("normals", &BND_Mesh::GetNormals)
     ;
 
   class_<BND_MeshVertexList>("MeshVertexList")

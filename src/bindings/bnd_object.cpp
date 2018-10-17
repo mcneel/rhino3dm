@@ -76,6 +76,14 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
       ON_Extrusion* extr = ON_Extrusion::Cast(obj);
       if (extr)
         return new BND_Extrusion(extr, compref);
+      ON_SurfaceProxy* proxy = ON_SurfaceProxy::Cast(obj);
+      if (proxy)
+      {
+        ON_BrepFace* brepface = ON_BrepFace::Cast(obj);
+        if (brepface)
+          return new BND_BrepFace(brepface, compref);
+        return new BND_SurfaceProxy(proxy, compref);
+      }
       return new BND_Surface(surface, compref);
     }
 
