@@ -17,7 +17,7 @@
 
 #### Do you have questions about the source code?
 
-* The best place to discuss the project is through our [discourse site](https://discourse.mcneel.com/) under the rhino3dm category
+* The best place to discuss the project is through our [discourse site](https://discourse.mcneel.com/c/rhino3dm) under the rhino3dm category
 
 #### AND FINALLY
 
