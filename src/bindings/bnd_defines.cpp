@@ -2,6 +2,8 @@
 
 class BND_DocObjects {};
 
+class BND_MeshTypeNamespace {};
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
@@ -55,6 +57,15 @@ void initDefines(pybind11::module& m)
     .value("Extrusion", ON::extrusion_object)
     .value("AnyObject", ON::any_object)
     .export_values();
+
+  py::class_<BND_MeshTypeNamespace> geometry(m, "MeshType");
+  py::enum_<ON::mesh_type>(geometry, "MeshTypeEnum")
+    .value("Default", ON::default_mesh)
+    .value("Render", ON::render_mesh)
+    .value("Analysis", ON::analysis_mesh)
+    .value("Preview", ON::preview_mesh)
+    .value("Any", ON::any_mesh)
+    .export_values();
 }
 
 #endif
@@ -64,8 +75,6 @@ using namespace emscripten;
 
 void initDefines(void*)
 {
-  class_<ON_UUID>("Guid");
-
   class_<ON_Line>("Line")
     .constructor<ON_3dPoint, ON_3dPoint>()
     .property("from", &ON_Line::from)
@@ -107,10 +116,19 @@ void initDefines(void*)
     ;
 
   enum_<ON::coordinate_system>("CoordinateSystem")
-    .value("WORLD", ON::coordinate_system::world_cs)
-    .value("CAMERA", ON::coordinate_system::camera_cs)
-    .value("CLIP", ON::coordinate_system::clip_cs)
-    .value("SCREEN", ON::coordinate_system::screen_cs)
+    .value("World", ON::coordinate_system::world_cs)
+    .value("Camera", ON::coordinate_system::camera_cs)
+    .value("Clip", ON::coordinate_system::clip_cs)
+    .value("Screen", ON::coordinate_system::screen_cs)
     ;
+
+  enum_<ON::mesh_type>("MeshType")
+    .value("Default", ON::default_mesh)
+    .value("Render", ON::render_mesh)
+    .value("Analysis", ON::analysis_mesh)
+    .value("Preview", ON::preview_mesh)
+    .value("Any", ON::any_mesh)
+    ;
+
 }
 #endif
