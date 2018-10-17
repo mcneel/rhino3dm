@@ -82,6 +82,18 @@ using namespace emscripten;
 
 void initBrepBindings(void*)
 {
-  class_<BND_Brep, base<BND_Geometry>>("Brep");
+  class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
+    .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
+    ;
+
+  class_<BND_BrepFaceList>("BrepFaceList")
+    .property("count", &BND_BrepFaceList::Count)
+    .function("get", &BND_BrepFaceList::GetFace, allow_raw_pointers())
+    ;
+
+  class_<BND_Brep, base<BND_Geometry>>("Brep")
+    .constructor<>()
+    .function("faces", &BND_Brep::GetFaces)
+    ;
 }
 #endif
