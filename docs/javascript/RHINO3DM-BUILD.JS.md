@@ -18,7 +18,7 @@ If the pre-compiled libraries above do not work in your situation, you can compi
 
 ### Test
 
-* Type `python serve_javascript.py`. This will run a simple web server which serves files in the artifacts directory
+* Type `python serve_javascript_lib.py`. This will run a simple web server which serves files in the artifacts directory
 * Go to your browser and navigate to `http://localhost:8080/rhino3dm.html`
 * For chrome, right click and select `inspect`. Click on the `console` tab and try typing in the following javascript
   * `sphere = new Module.Sphere([1,2,3],12);`
