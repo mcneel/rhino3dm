@@ -7,6 +7,7 @@ import subprocess
 import glob
 import shutil
 import struct
+import fileinput
 from distutils.version import LooseVersion
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
