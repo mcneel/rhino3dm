@@ -83,7 +83,7 @@ class CMakeBuild(build_ext):
                 for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                     print(line.replace("WIN32;", "WIN64;"))
             rv = os.system("cmake --build . --config Release --target _rhino3dm")
-            print('ERRORLEVEL:', rv)
+            if int(rv) > 0: raise RuntimeError('CMake exited with {}'.format(rv))
         else:
             os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
             os.system("make")
