@@ -52,3 +52,7 @@
 /dist
 /.idea
 /tests/example_3dm_files_20181010
+/docs/docgen/bin
+/docs/docgen/obj
+/docs/docgen/packages
+/docs/docgen/.vs
