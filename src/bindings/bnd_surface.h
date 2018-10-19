@@ -8,7 +8,7 @@ void initSurfaceBindings(pybind11::module& m);
 void initSurfaceBindings(void* m);
 #endif
 
-class BND_Surface : public BND_Geometry
+class BND_Surface : public BND_GeometryBase
 {
   ON_Surface* m_surface = nullptr;
 protected:

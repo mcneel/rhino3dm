@@ -1,23 +1,23 @@
 #include "bindings.h"
 #include "base64.h"
 
-BND_Object::BND_Object()
+BND_CommonObject::BND_CommonObject()
 {
 }
 
-BND_Object::~BND_Object()
+BND_CommonObject::~BND_CommonObject()
 {
   // m_component_ref should almost always track the lifetime of the ON_Object
   if (m_object && m_component_ref.IsEmpty())
     delete m_object;
 }
 
-BND_Object::BND_Object(ON_Object* obj, const ON_ModelComponentReference* compref)
+BND_CommonObject::BND_CommonObject(ON_Object* obj, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(obj, compref);
 }
 
-void BND_Object::SetTrackedPointer(ON_Object* obj, const ON_ModelComponentReference* compref)
+void BND_CommonObject::SetTrackedPointer(ON_Object* obj, const ON_ModelComponentReference* compref)
 {
   if( compref )
   {
@@ -32,7 +32,7 @@ void BND_Object::SetTrackedPointer(ON_Object* obj, const ON_ModelComponentRefere
   m_object = obj;
 }
 
-BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentReference* compref)
+BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_ModelComponentReference* compref)
 {
   if( nullptr == obj )
     return nullptr;
@@ -91,17 +91,17 @@ BND_Object* BND_Object::CreateWrapper(ON_Object* obj, const ON_ModelComponentRef
     if( viewport )
       return new BND_Viewport(viewport, compref);
 
-    return new BND_Geometry(geometry, compref);
+    return new BND_GeometryBase(geometry, compref);
   }
 
   ON_Layer* layer = ON_Layer::Cast(obj);
   if (layer)
     return new BND_Layer(layer, compref);
 
-  return new BND_Object(obj, compref);
+  return new BND_CommonObject(obj, compref);
 }
 
-BND_Object* BND_Object::CreateWrapper(const ON_ModelComponentReference& compref)
+BND_CommonObject* BND_CommonObject::CreateWrapper(const ON_ModelComponentReference& compref)
 {
   const ON_ModelComponent* model_component = compref.ModelComponent();
   const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
@@ -145,7 +145,7 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON
 }
 
 #if defined(__EMSCRIPTEN__)
-emscripten::val BND_Object::Encode() const
+emscripten::val BND_CommonObject::Encode() const
 {
   emscripten::val v(emscripten::val::object());
   v.set("version", emscripten::val(10000));
@@ -171,7 +171,7 @@ emscripten::val BND_Object::Encode() const
 #endif
 #if defined(ON_PYTHON_COMPILE)
 
-pybind11::dict BND_Object::Encode() const
+pybind11::dict BND_CommonObject::Encode() const
 {
   pybind11::dict d;
   d["version"] = 10000;
@@ -210,7 +210,7 @@ RH_C_FUNCTION ON_Object* ON_ReadBufferArchive(int archive_3dm_version, unsigned 
 }
 
 #if defined(__EMSCRIPTEN__)
-BND_Object* BND_Object::Decode(emscripten::val jsonObject)
+BND_CommonObject* BND_CommonObject::Decode(emscripten::val jsonObject)
 {
   std::string buffer = jsonObject["data"].as<std::string>();
   std::string decoded = base64_decode(buffer);
@@ -225,7 +225,7 @@ BND_Object* BND_Object::Decode(emscripten::val jsonObject)
 
 #if defined(ON_PYTHON_COMPILE)
 
-BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
+BND_CommonObject* BND_CommonObject::Decode(pybind11::dict jsonObject)
 {
   std::string buffer = pybind11::str(jsonObject["data"]);
   std::string decoded = base64_decode(buffer);
@@ -242,9 +242,9 @@ BND_Object* BND_Object::Decode(pybind11::dict jsonObject)
 namespace py = pybind11;
 void initObjectBindings(pybind11::module& m)
 {
-  py::class_<BND_Object>(m, "CommonObject")
-    .def("Encode", &BND_Object::Encode)
-    .def_static("Decode", &BND_Object::Decode);
+  py::class_<BND_CommonObject>(m, "CommonObject")
+    .def("Encode", &BND_CommonObject::Encode)
+    .def_static("Decode", &BND_CommonObject::Decode);
 }
 #endif
 
@@ -253,8 +253,8 @@ using namespace emscripten;
 
 void initObjectBindings(void*)
 {
-  class_<BND_Object>("CommonObject")
-    .function("encode", &BND_Object::Encode)
-    .class_function("decode", &BND_Object::Decode, allow_raw_pointers());
+  class_<BND_CommonObject>("CommonObject")
+    .function("encode", &BND_CommonObject::Encode)
+    .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers());
 }
 #endif

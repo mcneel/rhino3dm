@@ -8,7 +8,7 @@ void initCurveBindings(pybind11::module& m);
 void initCurveBindings(void* m);
 #endif
 
-class BND_Curve : public BND_Geometry
+class BND_Curve : public BND_GeometryBase
 {
 public:
   ON_Curve* m_curve = nullptr;

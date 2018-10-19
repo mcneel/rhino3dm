@@ -13,7 +13,7 @@ BND_3dmAttributes::BND_3dmAttributes(ON_3dmObjectAttributes* attrs, const ON_Mod
 void BND_3dmAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
 {
   m_attributes = attrs;
-  BND_Object::SetTrackedPointer(attrs, compref);
+  BND_CommonObject::SetTrackedPointer(attrs, compref);
 }
 
 BND_UUID BND_3dmAttributes::GetObjectId() const
@@ -37,7 +37,7 @@ void BND_3dmAttributes::SetName(const std::wstring name)
 namespace py = pybind11;
 void init3dmAttributesBindings(pybind11::module& m)
 {
-  py::class_<BND_3dmAttributes, BND_Object>(m, "ObjectAttributes")
+  py::class_<BND_3dmAttributes, BND_CommonObject>(m, "ObjectAttributes")
     .def(py::init<>())
     .def_property("Visible", &BND_3dmAttributes::IsVisible, &BND_3dmAttributes::SetVisible)
     .def_property("Name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
@@ -52,7 +52,7 @@ using namespace emscripten;
 
 void init3dmAttributesBindings(void*)
 {
-  class_<BND_3dmAttributes, base<BND_Object>>("ObjectAttributes")
+  class_<BND_3dmAttributes, base<BND_CommonObject>>("ObjectAttributes")
     .constructor<>()
     .property("visible", &BND_3dmAttributes::IsVisible, &BND_3dmAttributes::SetVisible)
     .property("name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)

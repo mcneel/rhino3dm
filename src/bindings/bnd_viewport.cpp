@@ -13,7 +13,7 @@ BND_Viewport::BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReferen
 void BND_Viewport::SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref)
 {
   m_viewport = viewport;
-  BND_Object::SetTrackedPointer(viewport, compref);
+  BND_CommonObject::SetTrackedPointer(viewport, compref);
 }
 
 bool BND_Viewport::IsValidCameraFrame() const
@@ -337,7 +337,7 @@ bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 namespace py = pybind11;
 void initViewportBindings(pybind11::module& m)
 {
-  py::class_<BND_Viewport, BND_Object>(m, "ViewportInfo")
+  py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
     .def_property_readonly("IsValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .def_property_readonly("isValidCamer", &BND_Viewport::IsValidCamera)
@@ -371,7 +371,7 @@ using namespace emscripten;
 
 void initViewportBindings(void*)
 {
-  class_<BND_Viewport, base<BND_Object>>("ViewportInfo")
+  class_<BND_Viewport, base<BND_CommonObject>>("ViewportInfo")
     .constructor<>()
     .property("isValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .property("isValidCamer", &BND_Viewport::IsValidCamera)

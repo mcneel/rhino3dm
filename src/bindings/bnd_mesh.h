@@ -54,7 +54,7 @@ public:
   void SetNormal(int i, ON_3fVector v);
 };
 
-class BND_Mesh : public BND_Geometry
+class BND_Mesh : public BND_GeometryBase
 {
   ON_Mesh* m_mesh = nullptr;
 public:

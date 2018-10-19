@@ -283,7 +283,7 @@ int BND_ONXModel_ObjectTable::Count() const
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
-  BND_Geometry* geometry = dynamic_cast<BND_Geometry*>(ObjectAt(index));
+  BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(ObjectAt(index));
   if (nullptr == geometry)
     return nullptr;
   BND_3dmAttributes* attrs = AttributesAt(index);
@@ -299,7 +299,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 }
 
 
-BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
+BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
@@ -311,7 +311,7 @@ BND_Object* BND_ONXModel_ObjectTable::ObjectAt(int index)
     compref = iterator.NextComponentReference();
     current++;
   }
-  return BND_Object::CreateWrapper(compref);
+  return BND_CommonObject::CreateWrapper(compref);
 }
 
 BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)

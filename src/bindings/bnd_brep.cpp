@@ -13,7 +13,7 @@ BND_Brep::BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref)
 void BND_Brep::SetTrackedPointer(ON_Brep* brep, const ON_ModelComponentReference* compref)
 {
   m_brep = brep;
-  BND_Geometry::SetTrackedPointer(brep, compref);
+  BND_GeometryBase::SetTrackedPointer(brep, compref);
 }
 
 BND_BrepFaceList BND_Brep::GetFaces()
@@ -70,7 +70,7 @@ void initBrepBindings(pybind11::module& m)
     .def("__getitem__", &BND_BrepFaceList::GetFace)
     ;
 
-  py::class_<BND_Brep, BND_Geometry>(m, "Brep")
+  py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
     .def(py::init<>())
     .def_property_readonly("Faces", &BND_Brep::GetFaces)
     ;
@@ -91,7 +91,7 @@ void initBrepBindings(void*)
     .function("get", &BND_BrepFaceList::GetFace, allow_raw_pointers())
     ;
 
-  class_<BND_Brep, base<BND_Geometry>>("Brep")
+  class_<BND_Brep, base<BND_GeometryBase>>("Brep")
     .constructor<>()
     .function("faces", &BND_Brep::GetFaces)
     ;

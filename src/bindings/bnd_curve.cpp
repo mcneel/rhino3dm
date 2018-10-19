@@ -13,7 +13,7 @@ BND_Curve::BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref)
 void BND_Curve::SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentReference* compref)
 {
   m_curve = curve;
-  BND_Geometry::SetTrackedPointer(curve, compref);
+  BND_GeometryBase::SetTrackedPointer(curve, compref);
 }
 
 void BND_Curve::SetDomain(const BND_Interval& i)
@@ -31,9 +31,9 @@ BND_Interval BND_Curve::GetDomain() const
 namespace py = pybind11;
 void initCurveBindings(pybind11::module& m)
 {
-  py::class_<BND_Curve, BND_Geometry>(m, "Curve")
+  py::class_<BND_Curve, BND_GeometryBase>(m, "Curve")
     .def_property("Domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
-    .def_property_readonly("Dimension", &BND_Geometry::Dimension)
+    .def_property_readonly("Dimension", &BND_GeometryBase::Dimension)
     .def("ChangeDimension", &BND_Curve::ChangeDimension)
     .def_property_readonly("SpanCount", &BND_Curve::SpanCount)
     .def_property_readonly("Degree", &BND_Curve::Degree)
@@ -62,9 +62,9 @@ using namespace emscripten;
 
 void initCurveBindings(void*)
 {
-  class_<BND_Curve, base<BND_Geometry>>("Curve")
+  class_<BND_Curve, base<BND_GeometryBase>>("Curve")
     .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
-    .property("dimension", &BND_Geometry::Dimension)
+    .property("dimension", &BND_GeometryBase::Dimension)
     .function("changeDimension", &BND_Curve::ChangeDimension)
     .property("spanCount", &BND_Curve::SpanCount)
     .property("degree", &BND_Curve::Degree)

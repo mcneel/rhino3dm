@@ -8,7 +8,7 @@ void initViewportBindings(pybind11::module& m);
 void initViewportBindings(void* m);
 #endif
 
-class BND_Viewport : public BND_Object
+class BND_Viewport : public BND_CommonObject
 {
   ON_Viewport* m_viewport = nullptr;
 public:
