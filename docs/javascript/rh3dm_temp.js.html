@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: rh3dm_temp.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: rh3dm_temp.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Arc
+ */
+class Arc {
+  /**
+   * @description Initializes a nurbs curve representation of this arc. 
+     This amounts to the same as calling NurbsCurve.CreateFromArc().
+   * @returns {NurbsCurve} A nurbs curve representation of this arc or null if no such representation could be made.
+   */
+  toNurbsCurve() {  }
+}
+/**
+ &lt;summary>
+   Represent arcs and circles.
+   &lt;para>ArcCurve.IsCircle returns true if the curve is a complete circle.&lt;/para>
+   &lt;/summary>
+   &lt;remarks>
+   &lt;para>Details:&lt;/para>
+   &lt;para>an ArcCurve is a subcurve of a circle, with a constant speed
+   parameterization. The parameterization is	an affine linear
+   reparameterzation of the underlying arc	m_arc onto the domain m_t.&lt;/para>
+   &lt;para>A valid ArcCurve has Radius()>0 and  0&amp;lt;AngleRadians()&amp;lt;=2*PI
+   and a strictly increasing Domain.&lt;/para>
+   &lt;/remarks>
+ * @extends Curve
+ * @hideconstructor
+ */
+class ArcCurve {
+}
+/**
+ * BoundingBox
+ */
+class BoundingBox {
+  /**
+   * @description Constructs a new boundingbox from two corner points.
+   * @param {Array.&lt;x,y,z>} min Point containing all the minimum coordinates.
+   * @param {Array.&lt;x,y,z>} max Point containing all the maximum coordinates.
+   */
+  constructor(min,max){}
+  /**
+   * @description Updates this boundingbox to be the smallest axis aligned
+     boundingbox that contains the transformed result of its 8 original corner
+     points.
+   * @param {Transform} xform A transform.
+   * @returns {bool} true if this operation is sucessfull; otherwise false.
+   */
+  transform(xform) {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the point in the minimal corner.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get min() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the point in the maximal corner.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get max() { return null;}
+}
+/**
+ &lt;summary>
+   Boundary Representation. A surface or polysurface along with trim curve information.
+   &lt;/summary>
+ * @extends GeometryBase
+ */
+class Brep {
+  /** ... */
+  faces() {  }
+}
+/**
+ &lt;summary>
+   Provides strongly-typed access to brep faces.
+   &lt;para>A Brep face is composed of one surface and trimming curves.&lt;/para>
+   &lt;/summary>
+ * @extends SurfaceProxy
+ * @hideconstructor
+ */
+class BrepFace {
+  /**
+   * @description Obtains a reference to a specified type of mesh for this brep face.
+   * @param {MeshType} meshType The mesh type.
+   * @returns {Mesh} A mesh.
+   */
+  getMesh(meshType) {  }
+}
+/**
+ &lt;summary>
+   Provides access to all the Faces in a Brep object.
+   &lt;/summary>
+ * @hideconstructor
+ */
+class BrepFaceList {
+  /** ... */
+  get() {  }
+  /**
+   *  &lt;summary>
+     Gets the number of brep faces.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get count() { return null;}
+}
+/**
+ * Circle
+ */
+class Circle {
+  /**
+   * @description Initializes a circle with center (0,0,0) in the world XY plane.
+   * @param {double} radius Radius of circle, should be a positive number.
+   */
+  constructor(radius){}
+  /**
+   * @description Circles use trigonometric parameterization: 
+     t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.
+   * @param {double} t Parameter of point to evaluate.
+   * @returns {Array.&lt;x,y,z>} The point on the circle at the given parameter.
+   */
+  pointAt(t) {  }
+  /**
+   * @description Constructs a nurbs curve representation of this circle. 
+     This amounts to the same as calling NurbsCurve.CreateFromCircle().
+   * @returns {NurbsCurve} A nurbs curve representation of this circle or null if no such representation could be made.
+   */
+  toNurbsCurve() {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the plane of the circle.
+     &lt;/summary>
+
+   * @type {Plane}
+   */
+  get plane() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the radius of this circle. 
+     Radii should be positive values.
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get radius() { return null;}
+}
+/**
+ &lt;summary>
+   Base class for .NET classes that wrap C++ unmanaged Rhino classes.
+   &lt;/summary>
+ * @hideconstructor
+ */
+class CommonObject {
+  /** ... */
+  encode() {  }
+  /** ... */
+  static decode() {  }
+}
+/**
+ &lt;summary>
+   Represents a base class that is common to most RhinoCommon curve types.
+   &lt;para>A curve represents an entity that can be all visited by providing
+   a single parameter, usually called t.&lt;/para>
+   &lt;/summary>
+ * @extends GeometryBase
+ * @hideconstructor
+ */
+class Curve {
+  /**
+   * @description Changes the dimension of a curve.
+   * @param {int} desiredDimension The desired dimension.
+   * @returns {bool} true if the curve's dimension was already desiredDimension
+     or if the curve's dimension was successfully changed to desiredDimension;
+     otherwise false.
+   */
+  changeDimension(desiredDimension) {  }
+  /**
+   * @description Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
+   * @returns {bool} true if the curve is linear.
+   */
+  isLinear() {  }
+  /**
+   * @description Several types of Curve can have the form of a polyline
+     including a degree 1 NurbsCurve, a PolylineCurve,
+     and a PolyCurve all of whose segments are some form of
+     polyline. IsPolyline tests a curve to see if it can be
+     represented as a polyline.
+   * @returns {bool} true if this curve can be represented as a polyline; otherwise, false.
+   */
+  isPolyline() {  }
+  /**
+   * @description Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
+   * @returns {bool} true if the curve can be represented by an arc or a circle within tolerance.
+   */
+  isArc() {  }
+  /**
+   * @description Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
+   * @returns {bool} true if the Curve can be represented by an ellipse within tolerance.
+   */
+  isEllipse() {  }
+  /**
+   * @description Test a curve for planarity.
+   * @returns {bool} true if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+   */
+  isPlanar() {  }
+  /**
+   * @description If this curve is closed, then modify it so that the start/end point is at curve parameter t.
+   * @param {double} t Curve parameter of new start/end point. The returned curves domain will start at t.
+   * @returns {bool} true on success, false on failure.
+   */
+  changeClosedCurveSeam(t) {  }
+  /**
+   * @description Reverses the direction of the curve.
+   * @returns {bool} true on success, false on failure.
+   */
+  reverse() {  }
+  /**
+   * @description Evaluates point at a curve parameter.
+   * @param {double} t Evaluation parameter.
+   * @returns {Array.&lt;x,y,z>} Point (location of curve at the parameter t).
+   */
+  pointAt(t) {  }
+  /**
+   * @description Forces the curve to start at a specified point. 
+     Not all curve types support this operation.
+   * @param {Array.&lt;x,y,z>} point New start point of curve.
+   * @returns {bool} true on success, false on failure.
+   */
+  setStartPoint(point) {  }
+  /**
+   * @description Forces the curve to end at a specified point. 
+     Not all curve types support this operation.
+   * @param {Array.&lt;x,y,z>} point New end point of curve.
+   * @returns {bool} true on success, false on failure.
+   */
+  setEndPoint(point) {  }
+  /**
+   * @description Evaluates the unit tangent vector at a curve parameter.
+   * @param {double} t Evaluation parameter.
+   * @returns {Array.&lt;x,y,z>} Unit tangent vector of the curve at the parameter t.
+   */
+  tangentAt(t) {  }
+  /**
+   * @description Evaluate the curvature vector at a curve parameter.
+   * @param {double} t Evaluation parameter.
+   * @returns {Array.&lt;x,y,z>} Curvature vector of the curve at the parameter t.
+   */
+  curvatureAt(t) {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the domain of the curve.
+     &lt;/summary>
+
+   * @type {Interval}
+   */
+  get domain() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the dimension of the object.
+     &lt;para>The dimension is typically three. For parameter space trimming
+     curves the dimension is two. In rare cases the dimension can
+     be one or greater than three.&lt;/para>
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get dimension() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the number of non-empty smooth (c-infinity) spans in the curve.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get spanCount() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the maximum algebraic degree of any span
+     or a good estimate if curve spans are not algebraic.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get degree() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a value indicating whether or not this curve is a closed curve.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isClosed() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a value indicating whether or not this curve is considered to be Periodic.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isPeriodic() { return null;}
+  /**
+   *  &lt;summary>
+     Evaluates point at the start of the curve.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get pointAtStart() { return null;}
+  /**
+   *  &lt;summary>
+     Evaluates point at the end of the curve.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get pointAtEnd() { return null;}
+}
+/**
+ &lt;summary>
+   Represents an extrusion, or objects such as beams or linearly extruded elements,
+   that can be represented by profile curves and two miter planes at the extremes.
+   &lt;/summary>
+ * @extends GeometryBase
+ * @hideconstructor
+ */
+class Extrusion {
+}
+/**
+ &lt;summary>
+   Represents a 3dm file, which is stored using the OpenNURBS file standard.
+   &lt;para>The 3dm format is the main Rhinoceros storage format.&lt;/para>
+   &lt;para>Visit http://www.opennurbs.com/ for more details.&lt;/para>
+   &lt;/summary>
+ */
+class File3dm {
+  /** ... */
+  static fromByteArray() {  }
+  /** ... */
+  objects() {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the start section comments, which are the comments with which the 3dm file begins.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get startSectionComments() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the name of the application that wrote this file.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get applicationName() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets a URL for the application that wrote this file.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get applicationUrl() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets details for the application that wrote this file.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get applicationDetails() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a string that names the user who created the file.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get createdBy() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a string that names the user who last edited the file.
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get lastEditedBy() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the revision number.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get revision() { return null;}
+}
+/**
+ &lt;summary>
+   Used to store geometry table object definition and attributes in a File3dm.
+   &lt;/summary>
+ * @hideconstructor
+ */
+class File3dmObject {
+  /** ... */
+  attributes() {  }
+  /** ... */
+  geometry() {  }
+}
+/**
+ &lt;summary>
+   Represents a simple object table for a file that is open externally.
+   &lt;para>This class mimics Rhino.DocObjects.Tables.ObjectTable while providing external eccess to the file.&lt;/para>
+   &lt;/summary>
+ * @hideconstructor
+ */
+class File3dmObjectTable {
+  /** ... */
+  get() {  }
+  /**
+   * @description Gets the bounding box containing every object in this table.
+   * @returns {Rhino.Geometry.BoundingBox} The computed bounding box.
+   */
+  getBoundingBox() {  }
+  /**
+   * @description Adds a point object to the table.
+   * @param {double} x X component of point coordinate.
+   * @param {double} y Y component of point coordinate.
+   * @param {double} z Z component of point coordinate.
+   * @returns {Guid} id of new object.
+   */
+  addPoint(x,y,z) {  }
+  /**
+   * @description Adds a line object to Rhino.
+   * @param {Array.&lt;x,y,z>} from A line start point.
+   * @param {Array.&lt;x,y,z>} to A line end point.
+   * @returns {Guid} A unique identifier of new rhino object.
+   */
+  addLine(from,to) {  }
+  /**
+   * @description Adds a curve object to the table.
+   * @param {Geometry.Curve} curve A curve to add.
+   * @returns {Guid} A unique identifier for the object.
+   */
+  addCurve(curve) {  }
+  /**
+   * @description Adds a text dot object to the table.
+   * @param {string} text The text.
+   * @param {Array.&lt;x,y,z>} location The location.
+   * @returns {Guid} A unique identifier for the object.
+   */
+  addTextDot(text,location) {  }
+  /**
+   * @description Adds a mesh object to Rhino.
+   * @param {Geometry.Mesh} mesh A duplicate of this mesh is added to Rhino.
+   * @returns {Guid} A unique identifier for the object.
+   */
+  addMesh(mesh) {  }
+  /**
+   * @description Adds a brep object to Rhino.
+   * @param {Geometry.Brep} brep A duplicate of this brep is added to Rhino.
+   * @returns {Guid} A unique identifier for the object.
+   */
+  addBrep(brep) {  }
+  /**
+   *  &lt;summary>
+     Returns the total amount of items in the object table, including lights.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get count() { return null;}
+}
+/**
+ &lt;summary>
+   Provides a common base for most geometric classes. This class is abstract.
+   &lt;/summary>
+ * @extends CommonObject
+ * @hideconstructor
+ */
+class GeometryBase {
+  /**
+   * @description Translates the object along the specified vector.
+   * @param {Array.&lt;x,y,z>} translationVector A moving vector.
+   * @returns {bool} true if geometry successfully translated.
+   */
+  translate(translationVector) {  }
+  /**
+   * @description Scales the object by the specified factor. The scale is centered at the origin.
+   * @param {double} scaleFactor The uniform scaling factor.
+   * @returns {bool} true if geometry successfully scaled.
+   */
+  scale(scaleFactor) {  }
+  /**
+   * @description Rotates the object about the specified axis. A positive rotation 
+     angle results in a counter-clockwise rotation about the axis (right hand rule).
+   * @param {double} angleRadians Angle of rotation in radians.
+   * @param {Array.&lt;x,y,z>} rotationAxis Direction of the axis of rotation.
+   * @param {Array.&lt;x,y,z>} rotationCenter Point on the axis of rotation.
+   * @returns {bool} true if geometry successfully rotated.
+   */
+  rotate(angleRadians,rotationAxis,rotationCenter) {  }
+  /**
+   * @description Boundingbox solver. Gets the world axis aligned boundingbox for the geometry.
+   * @param {bool} accurate If true, a physically accurate boundingbox will be computed. 
+     If not, a boundingbox estimate will be computed. For some geometry types there is no 
+     difference between the estimate and the accurate boundingbox. Estimated boundingboxes 
+     can be computed much (much) faster than accurate (or "tight") bounding boxes. 
+     Estimated bounding boxes are always similar to or larger than accurate bounding boxes.
+   * @returns {BoundingBox} The boundingbox of the geometry in world coordinates or BoundingBox.Empty 
+     if not bounding box could be found.
+   */
+  getBoundingBox(accurate) {  }
+  /**
+   * @description Attach a user string (key,value combination) to this geometry.
+   * @param {string} key id used to retrieve this string.
+   * @param {string} value string associated with key.
+   * @returns {bool} true on success.
+   */
+  setUserString(key,value) {  }
+  /**
+   * @description Gets user string from this geometry.
+   * @param {string} key id used to retrieve the string.
+   * @returns {string} string associated with the key if successful. null if no key was found.
+   */
+  getUserString(key) {  }
+  /**
+   *  &lt;summary>
+     Useful for switch statements that need to differentiate between
+     basic object types like points, curves, surfaces, and so on.
+     &lt;/summary>
+
+   * @type {ObjectType}
+   */
+  get objectType() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the amount of user strings.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get userStringCount() { return null;}
+}
+/**
+ * Layer
+ * @extends CommonObject
+ */
+class Layer {
+}
+/**
+ * Line
+ */
+class Line {
+  /**
+   * @description Constructs a new line segment between two points.
+   * @param {Array.&lt;x,y,z>} from Start point of line.
+   * @param {Array.&lt;x,y,z>} to End point of line.
+   */
+  constructor(from,to){}
+  /**
+   *  &lt;summary>
+     Start point of line segment.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get from() { return null;}
+  /**
+   *  &lt;summary>
+     End point of line segment.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get to() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the length of this line segment. 
+     Note that a negative length will invert the line segment without 
+     making the actual length negative. The line From point will remain fixed 
+     when a new Length is set.
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get length() { return null;}
+}
+/**
+ &lt;summary>
+   Represents a linear curve.
+   &lt;/summary>
+ * @extends Curve
+ */
+class LineCurve {
+}
+/**
+ * Mesh
+ * @extends GeometryBase
+ */
+class Mesh {
+  /** ... */
+  vertices() {  }
+  /** ... */
+  faces() {  }
+  /** ... */
+  normals() {  }
+}
+/**
+ &lt;summary>
+   Provides access to the faces and Face related functionality of a Mesh.
+   &lt;/summary>
+ * @hideconstructor
+ */
+class MeshFaceList {
+  /** ... */
+  get() {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the number of mesh faces. When getting this can includes invalid faces.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get count() { return null;}
+}
+/**
+ * MeshNormalList
+ * @hideconstructor
+ */
+class MeshNormalList {
+  /** ... */
+  get() {  }
+  /** ... */
+  set() {  }
+  /**
+   */
+  get count() { return null;}
+}
+/**
+ &lt;summary>
+   Provides access to the vertices and vertex-related functionality of a mesh.
+   &lt;/summary>
+ * @hideconstructor
+ */
+class MeshVertexList {
+  /** ... */
+  setCount() {  }
+  /** ... */
+  get() {  }
+  /** ... */
+  set() {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the number of mesh vertices.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get count() { return null;}
+}
+/**
+ &lt;summary>
+   Represents a Non Uniform Rational B-Splines (NURBS) curve.
+   &lt;/summary>
+ * @extends Curve
+ */
+class NurbsCurve {
+}
+/**
+ &lt;summary>
+   Represents a Non Uniform Rational B-Splines (NURBS) surface.
+   &lt;/summary>
+ * @extends Surface
+ * @hideconstructor
+ */
+class NurbsSurface {
+}
+/**
+ &lt;summary>
+   Attributes (color, material, layer,...) associated with a rhino object
+   &lt;/summary>
+ * @extends CommonObject
+ */
+class ObjectAttributes {
+  /**
+   *  &lt;summary>Gets or sets an object's visiblity.&lt;/summary>
+
+   * @type {bool}
+   */
+  get visible() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets an object optional text name.
+     &lt;para>More than one object in a model can have the same name and
+     some objects may have no name.&lt;/para>
+     &lt;/summary>
+
+   * @type {string}
+   */
+  get name() { return null;}
+  /**
+   */
+  get id() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets an associated layer index.
+     &lt;para>Layer definitions in an OpenNURBS model are stored in a layer table.
+     The layer table is conceptually an array of ON_Layer classes.  Every
+     OpenNURBS object in a model is on some layer.  The object's layer
+     is specified by zero based indicies into the ON_Layer array.&lt;/para>
+     &lt;/summary>
+     &lt;example>
+     &lt;code source='examples\vbnet\ex_moveobjectstocurrentlayer.vb' lang='vbnet'/>
+     &lt;code source='examples\cs\ex_moveobjectstocurrentlayer.cs' lang='cs'/>
+     &lt;code source='examples\py\ex_moveobjectstocurrentlayer.py' lang='py'/>
+     &lt;/example>
+
+   * @type {int}
+   */
+  get layerIndex() { return null;}
+}
+/**
+ * Point3d
+ * @hideconstructor
+ */
+class Point3d {
+  /**
+   * @description Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+     result = transformation*point
+   * @param {Transform} xform Transformation to apply.
+   */
+  static transform(xform) {  }
+}
+/**
+ &lt;summary>
+   Represents a curve that is the result of joining several (possibly different)
+   types of curves.
+   &lt;/summary>
+ * @extends Curve
+ * @hideconstructor
+ */
+class Polycurve {
+}
+/**
+ &lt;summary>
+   Represents the geometry of a set of linked line segments.
+   &lt;para>This is fundamentally a class that derives from &lt;see cref="Curve"/>
+   and internally contains a &lt;see cref="Polyline"/>.&lt;/para>
+   &lt;/summary>
+ * @extends Curve
+ * @hideconstructor
+ */
+class Polylinecurve {
+  /**
+   * @description Gets a point at a specified index in the polyline curve.
+   * @param {int} index An index.
+   * @returns {Array.&lt;x,y,z>} A point.
+   */
+  point(index) {  }
+  /**
+   *  &lt;summary>
+     Gets the number of points in this polyline.
+     &lt;/summary>
+
+   * @type {int}
+   */
+  get pointCount() { return null;}
+}
+/**
+ * Sphere
+ */
+class Sphere {
+  /**
+   * @description Initializes a new sphere given center point and radius.
+   * @param {Array.&lt;x,y,z>} center A center point.
+   * @param {double} radius A radius value.
+   */
+  constructor(center,radius){}
+  /**
+   * @description Converts this sphere is it Brep representation
+   */
+  toBrep() {  }
+  /**
+   *  &lt;summary>
+     Gets or sets the center point of the sphere.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get center() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the Radius for this sphere.
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get radius() { return null;}
+}
+/**
+ &lt;summary>
+   Represents a base class that is common to most RhinoCommon surface types.
+   &lt;para>A surface represents an entity that can be all visited by providing
+   two independent parameters, usually called (u, v), or sometimes (s, t).&lt;/para>
+   &lt;/summary>
+ * @extends GeometryBase
+ * @hideconstructor
+ */
+class Surface {
+}
+/**
+ &lt;summary>
+   Provides a base class to brep faces and other surface proxies.
+   &lt;/summary>
+ * @extends Surface
+ * @hideconstructor
+ */
+class SurfaceProxy {
+}
+/**
+ * Transform
+ * @hideconstructor
+ */
+class Transform {
+}
+/**
+ &lt;summary>
+   Represents a viewing frustum.
+   &lt;/summary>
+ * @extends CommonObject
+ */
+class ViewportInfo {
+  /**
+   * @description Use this function to change projections of valid viewports
+     from parallel to perspective.  It will make common additional
+     adjustments to the frustum and camera location so the resulting
+     views are similar.  The camera direction and target point are
+     not be changed.
+     If the current projection is parallel and symmetricFrustum,
+     FrustumIsLeftRightSymmetric() and FrustumIsTopBottomSymmetric()
+     are all equal, then no changes are made and true is returned.
+   * @param {bool} symmetricFrustum true if you want the resulting frustum to be symmetric.
+   * @returns {bool} true if the operation succeeded; otherwise, false.
+   */
+  changeToParallelProjection(symmetricFrustum) {  }
+  /**
+   * @description Use this function to change projections of valid viewports
+     from parallel to perspective.  It will make common additional
+     adjustments to the frustum and camera location so the resulting
+     views are similar.  The camera direction and target point are
+     not changed.
+     If the current projection is perspective and symmetricFrustum,
+     IsFrustumIsLeftRightSymmetric, and IsFrustumIsTopBottomSymmetric
+     are all equal, then no changes are made and true is returned.
+   * @param {double} targetDistance If RhinoMath.UnsetValue this parameter is ignored.
+     Otherwise it must be > 0 and indicates which plane in the current view frustum should be perserved.
+   * @param {bool} symmetricFrustum true if you want the resulting frustum to be symmetric.
+   * @param {double} lensLength (pass 50.0 when in doubt)
+     35 mm lens length to use when changing from parallel
+     to perspective projections. If the current projection
+     is perspective or lens_length is &lt;= 0.0,
+     then this parameter is ignored.
+   * @returns {bool} true if the operation succeeded; otherwise, false.
+   */
+  changeToPerspectiveProjection(targetDistance,symmetricFrustum,lensLength) {  }
+  /**
+   * @description Changes projections of valid viewports
+     to a two point perspective.  It will make common additional
+     adjustments to the frustum and camera location and direction
+     so the resulting views are similar.
+     If the current projection is perspective and
+     IsFrustumIsLeftRightSymmetric is true and
+     IsFrustumIsTopBottomSymmetric is false, then no changes are
+     made and true is returned.
+   * @param {double} targetDistance If RhinoMath.UnsetValue this parameter is ignored.  Otherwise
+     it must be > 0 and indicates which plane in the current 
+     view frustum should be perserved.
+   * @param {Array.&lt;x,y,z>} up The locked up direction. Pass Vector3d.Zero if you want to use the world
+     axis direction that is closest to the current up direction.
+     Pass CameraY() if you want to preserve the current up direction.
+   * @param {double} lensLength (pass 50.0 when in doubt)
+     35 mm lens length to use when changing from parallel
+     to perspective projections. If the current projection
+     is perspective or lens_length is &lt;= 0.0,
+     then this parameter is ignored.
+   * @returns {bool} true if the operation succeeded; otherwise, false.
+   */
+  changeToTwoPointPerspectiveProjection(targetDistance,up,lensLength) {  }
+  /**
+   * @description Sets the camera location (position) point.
+   * @returns {bool} true if the operation succeeded; otherwise, false.
+   */
+  setCameraLocation() {  }
+  /**
+   * @description Sets the direction that the camera faces.
+   * @param {Array.&lt;x,y,z>} direction A new direction.
+   * @returns {bool} true if the direction was set; otherwise false.
+   */
+  setCameraDirection(direction) {  }
+  /**
+   * @description Sets the camera up vector.
+   * @param {Array.&lt;x,y,z>} up A new direction.
+   * @returns {bool} true if the direction was set; otherwise false.
+   */
+  setCameraUp(up) {  }
+  /**
+   * @description Sets the view frustum. If FrustumSymmetryIsLocked() is true
+     and left != -right or bottom != -top, then they will be
+     adjusted so the resulting frustum is symmetric.
+   * @param {double} left A new left value.
+   * @param {double} right A new right value.
+   * @param {double} bottom A new bottom value.
+   * @param {double} top A new top value.
+   * @param {double} nearDistance A new near distance value.
+   * @param {double} farDistance A new far distance value.
+   * @returns {bool} true if operation succeeded; otherwise, false.
+   */
+  setFrustum(left,right,bottom,top,nearDistance,farDistance) {  }
+  /** ... */
+  getFrustum() {  }
+  /**
+   * @description Computes a transform from a coordinate system to another.
+   * @param {CoordinateSystem} sourceSystem The coordinate system to map from.
+   * @param {CoordinateSystem} destinationSystem The coordinate system to map into.
+   * @returns {Transform} The 4x4 transformation matrix (acts on the left).
+   */
+  getXform(sourceSystem,destinationSystem) {  }
+  /**
+   * @description Dolly the camera location and so that the view frustum contains
+     all of the document objects that can be seen in view.
+     If the projection is perspective, the camera angle is not changed.
+   * @param {double} border If border > 1.0, then the fustum in enlarged by this factor
+     to provide a border around the view.  1.1 works well for
+     parallel projections; 0.0 is suggested for perspective projections.
+   * @returns {bool} True if successful.
+   */
+  dollyExtents(border) {  }
+  /**
+   */
+  get isValidCameraFrame() { return null;}
+  /**
+   */
+  get isValidCamer() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a value that indicates whether the frustum is valid.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isValidFrustum() { return null;}
+  /**
+   *  &lt;summary>
+     Get or set whether this projection is parallel.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isParallelProjection() { return null;}
+  /**
+   *  &lt;summary>
+     Get or set whether this projection is perspective.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isPerspectiveProjection() { return null;}
+  /**
+   *  &lt;summary>
+     Gets a value that indicates whether this projection is a two-point perspective.
+     &lt;/summary>
+
+   * @type {bool}
+   */
+  get isTwoPointPerspectiveProjection() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the camera location (position) point.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraLocation() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the direction that the camera faces.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraDirection() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the camera up vector.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraUp() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the unit "to the right" vector.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraX() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the unit "up" vector.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraY() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the unit vector in -CameraDirection.
+     &lt;/summary>
+
+   * @type {Array.&lt;x,y,z>}
+   */
+  get cameraZ() { return null;}
+  /**
+   *  &lt;summary>
+     Get or set the screen port. &lt;see cref="SetScreenPort(System.Drawing.Rectangle)"/> and &lt;seealso cref="GetScreenPort()"/>
+     &lt;/summary>
+
+   * @type {System.Drawing.Rectangle}
+   */
+  get screenPort() { return null;}
+  /**
+   *  &lt;summary>
+     Gets the sceen aspect ratio.
+     &lt;para>This is width / height.&lt;/para>
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get screenPortAspect() { return null;}
+  /**
+   *  &lt;summary>
+     Gets or sets the 1/2 smallest angle. See &lt;see cref="GetCameraAngles"/> for more information.
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get cameraAngle() { return null;}
+  /**
+   *  &lt;summary>
+     This property assumes the camera is horizontal and crop the
+     film rather than the image when the aspect of the frustum
+     is not 36/24.  (35mm film is 36mm wide and 24mm high.)
+     Setting preserves camera location,
+     changes the frustum, but maintains the frustum's aspect.
+     &lt;/summary>
+
+   * @type {double}
+   */
+  get camera35mmLensLength() { return null;}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Arc.html">Arc</a></li><li><a href="ArcCurve.html">ArcCurve</a></li><li><a href="BoundingBox.html">BoundingBox</a></li><li><a href="Brep.html">Brep</a></li><li><a href="BrepFace.html">BrepFace</a></li><li><a href="BrepFaceList.html">BrepFaceList</a></li><li><a href="Circle.html">Circle</a></li><li><a href="CommonObject.html">CommonObject</a></li><li><a href="Curve.html">Curve</a></li><li><a href="Extrusion.html">Extrusion</a></li><li><a href="File3dm.html">File3dm</a></li><li><a href="File3dmObject.html">File3dmObject</a></li><li><a href="File3dmObjectTable.html">File3dmObjectTable</a></li><li><a href="GeometryBase.html">GeometryBase</a></li><li><a href="Layer.html">Layer</a></li><li><a href="Line.html">Line</a></li><li><a href="LineCurve.html">LineCurve</a></li><li><a href="Mesh.html">Mesh</a></li><li><a href="MeshFaceList.html">MeshFaceList</a></li><li><a href="MeshNormalList.html">MeshNormalList</a></li><li><a href="MeshVertexList.html">MeshVertexList</a></li><li><a href="NurbsCurve.html">NurbsCurve</a></li><li><a href="NurbsSurface.html">NurbsSurface</a></li><li><a href="ObjectAttributes.html">ObjectAttributes</a></li><li><a href="Point3d.html">Point3d</a></li><li><a href="Polycurve.html">Polycurve</a></li><li><a href="Polylinecurve.html">Polylinecurve</a></li><li><a href="Sphere.html">Sphere</a></li><li><a href="Surface.html">Surface</a></li><li><a href="SurfaceProxy.html">SurfaceProxy</a></li><li><a href="Transform.html">Transform</a></li><li><a href="ViewportInfo.html">ViewportInfo</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 18 2018 21:26:52 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
