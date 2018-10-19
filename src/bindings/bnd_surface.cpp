@@ -13,7 +13,7 @@ BND_Surface::BND_Surface(ON_Surface* surface, const ON_ModelComponentReference* 
 void BND_Surface::SetTrackedPointer(ON_Surface* surface, const ON_ModelComponentReference* compref)
 {
   m_surface = surface;
-  BND_Geometry::SetTrackedPointer(surface, compref);
+  BND_GeometryBase::SetTrackedPointer(surface, compref);
 }
 
 
@@ -22,7 +22,7 @@ void BND_Surface::SetTrackedPointer(ON_Surface* surface, const ON_ModelComponent
 namespace py = pybind11;
 void initSurfaceBindings(pybind11::module& m)
 {
-  py::class_<BND_Surface, BND_Geometry>(m, "Surface")
+  py::class_<BND_Surface, BND_GeometryBase>(m, "Surface")
     .def_property_readonly("IsSolid", &BND_Surface::IsSolid)
     .def("Degree", &BND_Surface::Degree)
     .def("SpanCount", &BND_Surface::SpanCount)
@@ -47,7 +47,7 @@ using namespace emscripten;
 
 void initSurfaceBindings(void*)
 {
-  class_<BND_Surface, base<BND_Geometry>>("Surface")
+  class_<BND_Surface, base<BND_GeometryBase>>("Surface")
     ;
 }
 #endif

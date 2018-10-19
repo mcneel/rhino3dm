@@ -11,10 +11,10 @@ void initExtensionsBindings(void* m);
 class BND_FileObject
 {
 public:
-  BND_Geometry* m_geometry = nullptr;
+  BND_GeometryBase* m_geometry = nullptr;
   BND_3dmAttributes* m_attributes = nullptr;
 
-  BND_Geometry* GetGeometry() { return m_geometry; };
+  BND_GeometryBase* GetGeometry() { return m_geometry; };
   BND_3dmAttributes* GetAttributes() { return m_attributes; }
 };
 
@@ -91,7 +91,7 @@ public:
 
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);
-  BND_Object* ObjectAt(int index);
+  BND_CommonObject* ObjectAt(int index);
   BND_3dmAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
 };

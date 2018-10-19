@@ -8,7 +8,7 @@ void init3dmAttributesBindings(pybind11::module& m);
 void init3dmAttributesBindings(void* m);
 #endif
 
-class BND_3dmAttributes : public BND_Object
+class BND_3dmAttributes : public BND_CommonObject
 {
   ON_3dmObjectAttributes* m_attributes = nullptr;
 public:

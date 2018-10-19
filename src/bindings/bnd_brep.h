@@ -17,7 +17,7 @@ public:
   class BND_BrepFace* GetFace(int i);
 };
 
-class BND_Brep : public BND_Geometry
+class BND_Brep : public BND_GeometryBase
 {
   ON_Brep* m_brep = nullptr;
 public:

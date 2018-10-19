@@ -14,7 +14,7 @@ BND_Layer::BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref)
 void BND_Layer::SetTrackedPointer(ON_Layer* layer, const ON_ModelComponentReference* compref)
 {
   m_layer = layer;
-  BND_Object::SetTrackedPointer(layer, compref);
+  BND_CommonObject::SetTrackedPointer(layer, compref);
 }
 
 
@@ -22,7 +22,7 @@ void BND_Layer::SetTrackedPointer(ON_Layer* layer, const ON_ModelComponentRefere
 namespace py = pybind11;
 void initLayerBindings(pybind11::module& m)
 {
-  py::class_<BND_Layer, BND_Object>(m, "Layer")
+  py::class_<BND_Layer, BND_CommonObject>(m, "Layer")
     .def(py::init<>())
     ;
 }
@@ -33,7 +33,7 @@ using namespace emscripten;
 
 void initLayerBindings(void*)
 {
-  class_<BND_Layer, base<BND_Object>>("Layer")
+  class_<BND_Layer, base<BND_CommonObject>>("Layer")
     .constructor<>()
     ;
 }

@@ -14,7 +14,7 @@ BND_Mesh::BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
 void BND_Mesh::SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref)
 {
   m_mesh = mesh;
-  BND_Geometry::SetTrackedPointer(mesh, compref);
+  BND_GeometryBase::SetTrackedPointer(mesh, compref);
 }
 
 BND_MeshVertexList BND_Mesh::GetVertices()
@@ -158,7 +158,7 @@ pybind11::list BND_MeshFaceList::GetFace(int i) const
 namespace py = pybind11;
 void initMeshBindings(pybind11::module& m)
 {
-  py::class_<BND_Mesh, BND_Geometry>(m, "Mesh")
+  py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
     .def(py::init<>())
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
@@ -192,7 +192,7 @@ using namespace emscripten;
 
 void initMeshBindings(void*)
 {
-  class_<BND_Mesh, base<BND_Geometry>>("Mesh")
+  class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
     .constructor<>()
     .function("vertices", &BND_Mesh::GetVertices)
     .function("faces", &BND_Mesh::GetFaces)

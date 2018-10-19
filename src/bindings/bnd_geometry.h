@@ -8,15 +8,15 @@ void initGeometryBindings(pybind11::module& m);
 void initGeometryBindings(void* m);
 #endif
 
-class BND_Geometry : public BND_Object
+class BND_GeometryBase : public BND_CommonObject
 {
   ON_Geometry* m_geometry = nullptr;
 protected:
-  BND_Geometry();
+  BND_GeometryBase();
   void SetTrackedPointer(ON_Geometry* geometry, const ON_ModelComponentReference* compref);
 
 public:
-  BND_Geometry(ON_Geometry* geometry, const ON_ModelComponentReference* compref);
+  BND_GeometryBase(ON_Geometry* geometry, const ON_ModelComponentReference* compref);
   const ON_Geometry* GeometryPointer() const { return m_geometry; }
 
   ON::object_type ObjectType() const { return m_geometry->ObjectType(); }
