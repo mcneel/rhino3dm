@@ -1,23 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8">
-    <title>JSDoc: Class: Polycurve</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <title>Polycurve - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-
 <body>
 
-<div id="main">
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
 
-    <h1 class="page-title">Class: Polycurve</h1>
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Arc.html">Arc</a><ul class='methods'><li data-type='method'><a href="Arc.html#toNurbsCurve">toNurbsCurve</a></li></ul></li><li><a href="ArcCurve.html">ArcCurve</a><ul class='methods'><li data-type='method'><a href="ArcCurve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="ArcCurve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="ArcCurve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="ArcCurve.html#encode">encode</a></li><li data-type='method'><a href="ArcCurve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="ArcCurve.html#getUserString">getUserString</a></li><li data-type='method'><a href="ArcCurve.html#isArc">isArc</a></li><li data-type='method'><a href="ArcCurve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="ArcCurve.html#isLinear">isLinear</a></li><li data-type='method'><a href="ArcCurve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="ArcCurve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="ArcCurve.html#pointAt">pointAt</a></li><li data-type='method'><a href="ArcCurve.html#reverse">reverse</a></li><li data-type='method'><a href="ArcCurve.html#rotate">rotate</a></li><li data-type='method'><a href="ArcCurve.html#scale">scale</a></li><li data-type='method'><a href="ArcCurve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="ArcCurve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="ArcCurve.html#setUserString">setUserString</a></li><li data-type='method'><a href="ArcCurve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="ArcCurve.html#translate">translate</a></li></ul></li><li><a href="BoundingBox.html">BoundingBox</a><ul class='methods'><li data-type='method'><a href="BoundingBox.html#transform">transform</a></li></ul></li><li><a href="Brep.html">Brep</a><ul class='methods'><li data-type='method'><a href="Brep.html#encode">encode</a></li><li data-type='method'><a href="Brep.html#faces">faces</a></li><li data-type='method'><a href="Brep.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Brep.html#getUserString">getUserString</a></li><li data-type='method'><a href="Brep.html#rotate">rotate</a></li><li data-type='method'><a href="Brep.html#scale">scale</a></li><li data-type='method'><a href="Brep.html#setUserString">setUserString</a></li><li data-type='method'><a href="Brep.html#translate">translate</a></li></ul></li><li><a href="BrepFace.html">BrepFace</a><ul class='methods'><li data-type='method'><a href="BrepFace.html#encode">encode</a></li><li data-type='method'><a href="BrepFace.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="BrepFace.html#getMesh">getMesh</a></li><li data-type='method'><a href="BrepFace.html#getUserString">getUserString</a></li><li data-type='method'><a href="BrepFace.html#rotate">rotate</a></li><li data-type='method'><a href="BrepFace.html#scale">scale</a></li><li data-type='method'><a href="BrepFace.html#setUserString">setUserString</a></li><li data-type='method'><a href="BrepFace.html#translate">translate</a></li></ul></li><li><a href="BrepFaceList.html">BrepFaceList</a><ul class='methods'><li data-type='method'><a href="BrepFaceList.html#get">get</a></li></ul></li><li><a href="Circle.html">Circle</a><ul class='methods'><li data-type='method'><a href="Circle.html#pointAt">pointAt</a></li><li data-type='method'><a href="Circle.html#toNurbsCurve">toNurbsCurve</a></li></ul></li><li><a href="CommonObject.html">CommonObject</a><ul class='methods'><li data-type='method'><a href="CommonObject.html#.decode">decode</a></li><li data-type='method'><a href="CommonObject.html#encode">encode</a></li></ul></li><li><a href="Curve.html">Curve</a><ul class='methods'><li data-type='method'><a href="Curve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="Curve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="Curve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="Curve.html#encode">encode</a></li><li data-type='method'><a href="Curve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Curve.html#getUserString">getUserString</a></li><li data-type='method'><a href="Curve.html#isArc">isArc</a></li><li data-type='method'><a href="Curve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="Curve.html#isLinear">isLinear</a></li><li data-type='method'><a href="Curve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="Curve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="Curve.html#pointAt">pointAt</a></li><li data-type='method'><a href="Curve.html#reverse">reverse</a></li><li data-type='method'><a href="Curve.html#rotate">rotate</a></li><li data-type='method'><a href="Curve.html#scale">scale</a></li><li data-type='method'><a href="Curve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="Curve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="Curve.html#setUserString">setUserString</a></li><li data-type='method'><a href="Curve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="Curve.html#translate">translate</a></li></ul></li><li><a href="Extrusion.html">Extrusion</a><ul class='methods'><li data-type='method'><a href="Extrusion.html#encode">encode</a></li><li data-type='method'><a href="Extrusion.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Extrusion.html#getUserString">getUserString</a></li><li data-type='method'><a href="Extrusion.html#rotate">rotate</a></li><li data-type='method'><a href="Extrusion.html#scale">scale</a></li><li data-type='method'><a href="Extrusion.html#setUserString">setUserString</a></li><li data-type='method'><a href="Extrusion.html#translate">translate</a></li></ul></li><li><a href="File3dm.html">File3dm</a><ul class='methods'><li data-type='method'><a href="File3dm.html#.fromByteArray">fromByteArray</a></li><li data-type='method'><a href="File3dm.html#objects">objects</a></li></ul></li><li><a href="File3dmObject.html">File3dmObject</a><ul class='methods'><li data-type='method'><a href="File3dmObject.html#attributes">attributes</a></li><li data-type='method'><a href="File3dmObject.html#geometry">geometry</a></li></ul></li><li><a href="File3dmObjectTable.html">File3dmObjectTable</a><ul class='methods'><li data-type='method'><a href="File3dmObjectTable.html#addBrep">addBrep</a></li><li data-type='method'><a href="File3dmObjectTable.html#addCurve">addCurve</a></li><li data-type='method'><a href="File3dmObjectTable.html#addLine">addLine</a></li><li data-type='method'><a href="File3dmObjectTable.html#addMesh">addMesh</a></li><li data-type='method'><a href="File3dmObjectTable.html#addPoint">addPoint</a></li><li data-type='method'><a href="File3dmObjectTable.html#addTextDot">addTextDot</a></li><li data-type='method'><a href="File3dmObjectTable.html#get">get</a></li><li data-type='method'><a href="File3dmObjectTable.html#getBoundingBox">getBoundingBox</a></li></ul></li><li><a href="GeometryBase.html">GeometryBase</a><ul class='methods'><li data-type='method'><a href="GeometryBase.html#encode">encode</a></li><li data-type='method'><a href="GeometryBase.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="GeometryBase.html#getUserString">getUserString</a></li><li data-type='method'><a href="GeometryBase.html#rotate">rotate</a></li><li data-type='method'><a href="GeometryBase.html#scale">scale</a></li><li data-type='method'><a href="GeometryBase.html#setUserString">setUserString</a></li><li data-type='method'><a href="GeometryBase.html#translate">translate</a></li></ul></li><li><a href="Layer.html">Layer</a><ul class='methods'><li data-type='method'><a href="Layer.html#encode">encode</a></li></ul></li><li><a href="Line.html">Line</a></li><li><a href="LineCurve.html">LineCurve</a><ul class='methods'><li data-type='method'><a href="LineCurve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="LineCurve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="LineCurve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="LineCurve.html#encode">encode</a></li><li data-type='method'><a href="LineCurve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="LineCurve.html#getUserString">getUserString</a></li><li data-type='method'><a href="LineCurve.html#isArc">isArc</a></li><li data-type='method'><a href="LineCurve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="LineCurve.html#isLinear">isLinear</a></li><li data-type='method'><a href="LineCurve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="LineCurve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="LineCurve.html#pointAt">pointAt</a></li><li data-type='method'><a href="LineCurve.html#reverse">reverse</a></li><li data-type='method'><a href="LineCurve.html#rotate">rotate</a></li><li data-type='method'><a href="LineCurve.html#scale">scale</a></li><li data-type='method'><a href="LineCurve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="LineCurve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="LineCurve.html#setUserString">setUserString</a></li><li data-type='method'><a href="LineCurve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="LineCurve.html#translate">translate</a></li></ul></li><li><a href="Mesh.html">Mesh</a><ul class='methods'><li data-type='method'><a href="Mesh.html#encode">encode</a></li><li data-type='method'><a href="Mesh.html#faces">faces</a></li><li data-type='method'><a href="Mesh.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Mesh.html#getUserString">getUserString</a></li><li data-type='method'><a href="Mesh.html#normals">normals</a></li><li data-type='method'><a href="Mesh.html#rotate">rotate</a></li><li data-type='method'><a href="Mesh.html#scale">scale</a></li><li data-type='method'><a href="Mesh.html#setUserString">setUserString</a></li><li data-type='method'><a href="Mesh.html#translate">translate</a></li><li data-type='method'><a href="Mesh.html#vertices">vertices</a></li></ul></li><li><a href="MeshFaceList.html">MeshFaceList</a><ul class='methods'><li data-type='method'><a href="MeshFaceList.html#get">get</a></li></ul></li><li><a href="MeshNormalList.html">MeshNormalList</a><ul class='methods'><li data-type='method'><a href="MeshNormalList.html#get">get</a></li><li data-type='method'><a href="MeshNormalList.html#set">set</a></li></ul></li><li><a href="MeshVertexList.html">MeshVertexList</a><ul class='methods'><li data-type='method'><a href="MeshVertexList.html#get">get</a></li><li data-type='method'><a href="MeshVertexList.html#set">set</a></li><li data-type='method'><a href="MeshVertexList.html#setCount">setCount</a></li></ul></li><li><a href="NurbsCurve.html">NurbsCurve</a><ul class='methods'><li data-type='method'><a href="NurbsCurve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="NurbsCurve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="NurbsCurve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="NurbsCurve.html#encode">encode</a></li><li data-type='method'><a href="NurbsCurve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="NurbsCurve.html#getUserString">getUserString</a></li><li data-type='method'><a href="NurbsCurve.html#isArc">isArc</a></li><li data-type='method'><a href="NurbsCurve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="NurbsCurve.html#isLinear">isLinear</a></li><li data-type='method'><a href="NurbsCurve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="NurbsCurve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="NurbsCurve.html#pointAt">pointAt</a></li><li data-type='method'><a href="NurbsCurve.html#reverse">reverse</a></li><li data-type='method'><a href="NurbsCurve.html#rotate">rotate</a></li><li data-type='method'><a href="NurbsCurve.html#scale">scale</a></li><li data-type='method'><a href="NurbsCurve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="NurbsCurve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="NurbsCurve.html#setUserString">setUserString</a></li><li data-type='method'><a href="NurbsCurve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="NurbsCurve.html#translate">translate</a></li></ul></li><li><a href="NurbsSurface.html">NurbsSurface</a><ul class='methods'><li data-type='method'><a href="NurbsSurface.html#encode">encode</a></li><li data-type='method'><a href="NurbsSurface.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="NurbsSurface.html#getUserString">getUserString</a></li><li data-type='method'><a href="NurbsSurface.html#rotate">rotate</a></li><li data-type='method'><a href="NurbsSurface.html#scale">scale</a></li><li data-type='method'><a href="NurbsSurface.html#setUserString">setUserString</a></li><li data-type='method'><a href="NurbsSurface.html#translate">translate</a></li></ul></li><li><a href="ObjectAttributes.html">ObjectAttributes</a><ul class='methods'><li data-type='method'><a href="ObjectAttributes.html#encode">encode</a></li></ul></li><li><a href="Point3d.html">Point3d</a><ul class='methods'><li data-type='method'><a href="Point3d.html#.transform">transform</a></li></ul></li><li><a href="Polycurve.html">Polycurve</a><ul class='methods'><li data-type='method'><a href="Polycurve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="Polycurve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="Polycurve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="Polycurve.html#encode">encode</a></li><li data-type='method'><a href="Polycurve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Polycurve.html#getUserString">getUserString</a></li><li data-type='method'><a href="Polycurve.html#isArc">isArc</a></li><li data-type='method'><a href="Polycurve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="Polycurve.html#isLinear">isLinear</a></li><li data-type='method'><a href="Polycurve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="Polycurve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="Polycurve.html#pointAt">pointAt</a></li><li data-type='method'><a href="Polycurve.html#reverse">reverse</a></li><li data-type='method'><a href="Polycurve.html#rotate">rotate</a></li><li data-type='method'><a href="Polycurve.html#scale">scale</a></li><li data-type='method'><a href="Polycurve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="Polycurve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="Polycurve.html#setUserString">setUserString</a></li><li data-type='method'><a href="Polycurve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="Polycurve.html#translate">translate</a></li></ul></li><li><a href="Polylinecurve.html">Polylinecurve</a><ul class='methods'><li data-type='method'><a href="Polylinecurve.html#changeClosedCurveSeam">changeClosedCurveSeam</a></li><li data-type='method'><a href="Polylinecurve.html#changeDimension">changeDimension</a></li><li data-type='method'><a href="Polylinecurve.html#curvatureAt">curvatureAt</a></li><li data-type='method'><a href="Polylinecurve.html#encode">encode</a></li><li data-type='method'><a href="Polylinecurve.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Polylinecurve.html#getUserString">getUserString</a></li><li data-type='method'><a href="Polylinecurve.html#isArc">isArc</a></li><li data-type='method'><a href="Polylinecurve.html#isEllipse">isEllipse</a></li><li data-type='method'><a href="Polylinecurve.html#isLinear">isLinear</a></li><li data-type='method'><a href="Polylinecurve.html#isPlanar">isPlanar</a></li><li data-type='method'><a href="Polylinecurve.html#isPolyline">isPolyline</a></li><li data-type='method'><a href="Polylinecurve.html#point">point</a></li><li data-type='method'><a href="Polylinecurve.html#pointAt">pointAt</a></li><li data-type='method'><a href="Polylinecurve.html#reverse">reverse</a></li><li data-type='method'><a href="Polylinecurve.html#rotate">rotate</a></li><li data-type='method'><a href="Polylinecurve.html#scale">scale</a></li><li data-type='method'><a href="Polylinecurve.html#setEndPoint">setEndPoint</a></li><li data-type='method'><a href="Polylinecurve.html#setStartPoint">setStartPoint</a></li><li data-type='method'><a href="Polylinecurve.html#setUserString">setUserString</a></li><li data-type='method'><a href="Polylinecurve.html#tangentAt">tangentAt</a></li><li data-type='method'><a href="Polylinecurve.html#translate">translate</a></li></ul></li><li><a href="Sphere.html">Sphere</a><ul class='methods'><li data-type='method'><a href="Sphere.html#toBrep">toBrep</a></li></ul></li><li><a href="Surface.html">Surface</a><ul class='methods'><li data-type='method'><a href="Surface.html#encode">encode</a></li><li data-type='method'><a href="Surface.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="Surface.html#getUserString">getUserString</a></li><li data-type='method'><a href="Surface.html#rotate">rotate</a></li><li data-type='method'><a href="Surface.html#scale">scale</a></li><li data-type='method'><a href="Surface.html#setUserString">setUserString</a></li><li data-type='method'><a href="Surface.html#translate">translate</a></li></ul></li><li><a href="SurfaceProxy.html">SurfaceProxy</a><ul class='methods'><li data-type='method'><a href="SurfaceProxy.html#encode">encode</a></li><li data-type='method'><a href="SurfaceProxy.html#getBoundingBox">getBoundingBox</a></li><li data-type='method'><a href="SurfaceProxy.html#getUserString">getUserString</a></li><li data-type='method'><a href="SurfaceProxy.html#rotate">rotate</a></li><li data-type='method'><a href="SurfaceProxy.html#scale">scale</a></li><li data-type='method'><a href="SurfaceProxy.html#setUserString">setUserString</a></li><li data-type='method'><a href="SurfaceProxy.html#translate">translate</a></li></ul></li><li><a href="Transform.html">Transform</a></li><li><a href="ViewportInfo.html">ViewportInfo</a><ul class='methods'><li data-type='method'><a href="ViewportInfo.html#changeToParallelProjection">changeToParallelProjection</a></li><li data-type='method'><a href="ViewportInfo.html#changeToPerspectiveProjection">changeToPerspectiveProjection</a></li><li data-type='method'><a href="ViewportInfo.html#changeToTwoPointPerspectiveProjection">changeToTwoPointPerspectiveProjection</a></li><li data-type='method'><a href="ViewportInfo.html#dollyExtents">dollyExtents</a></li><li data-type='method'><a href="ViewportInfo.html#encode">encode</a></li><li data-type='method'><a href="ViewportInfo.html#getFrustum">getFrustum</a></li><li data-type='method'><a href="ViewportInfo.html#getXform">getXform</a></li><li data-type='method'><a href="ViewportInfo.html#setCameraDirection">setCameraDirection</a></li><li data-type='method'><a href="ViewportInfo.html#setCameraLocation">setCameraLocation</a></li><li data-type='method'><a href="ViewportInfo.html#setCameraUp">setCameraUp</a></li><li data-type='method'><a href="ViewportInfo.html#setFrustum">setFrustum</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Polycurve</h1>
+    
 
     
 
@@ -28,7 +43,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Polycurve</h2>
+        <h2>
+        Polycurve
+        </h2>
         
             <div class="class-description"><summary>
    Represents a curve that is the result of joining several (possibly different)
@@ -39,78 +56,7 @@
 </header>
 
 <article>
-    <div class="container-overview">
     
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
 
     
         <h3 class="subsection-title">Extends</h3>
@@ -129,9 +75,7 @@
 
     
 
-    
-
-    
+     
 
     
 
@@ -145,30 +89,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Gets the maximum algebraic degree of any span
-     or a good estimate if curve spans are not algebraic.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">int</span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -204,28 +128,16 @@
     
 
     
-
-    
 </dl>
 
 
 
 
 
-
-        
-            
-<h4 class="name" id="dimension"><span class="type-signature"></span>dimension<span class="type-signature"> :int</span></h4>
-
-
-
-
 <div class="description">
     <summary>
-     Gets the dimension of the object.
-     <para>The dimension is typically three. For parameter space trimming
-     curves the dimension is two. In rare cases the dimension can
-     be one or greater than three.</para>
+     Gets the maximum algebraic degree of any span
+     or a good estimate if curve spans are not algebraic.
      </summary>
 </div>
 
@@ -245,7 +157,18 @@
 
 
 
+
+        
+            
+<h4 class="name" id="dimension"><span class="type-signature"></span>dimension<span class="type-signature"> :int</span></h4>
+
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -281,9 +204,32 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Gets the dimension of the object.
+     <para>The dimension is typically three. For parameter space trimming
+     curves the dimension is two. In rare cases the dimension can
+     be one or greater than three.</para>
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">int</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -297,29 +243,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Gets or sets the domain of the curve.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Interval</span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -355,9 +282,29 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Gets or sets the domain of the curve.
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Interval</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -371,29 +318,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Gets a value indicating whether or not this curve is a closed curve.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">bool</span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -429,25 +357,15 @@
     
 
     
-
-    
 </dl>
 
 
 
 
 
-
-        
-            
-<h4 class="name" id="isPeriodic"><span class="type-signature"></span>isPeriodic<span class="type-signature"> :bool</span></h4>
-
-
-
-
 <div class="description">
     <summary>
-     Gets a value indicating whether or not this curve is considered to be Periodic.
+     Gets a value indicating whether or not this curve is a closed curve.
      </summary>
 </div>
 
@@ -467,7 +385,18 @@
 
 
 
+
+        
+            
+<h4 class="name" id="isPeriodic"><span class="type-signature"></span>isPeriodic<span class="type-signature"> :bool</span></h4>
+
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -503,9 +432,29 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Gets a value indicating whether or not this curve is considered to be Periodic.
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">bool</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -519,30 +468,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Useful for switch statements that need to differentiate between
-     basic object types like points, curves, surfaces, and so on.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">ObjectType</span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -578,9 +507,30 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Useful for switch statements that need to differentiate between
+     basic object types like points, curves, surfaces, and so on.
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">ObjectType</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -594,29 +544,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Evaluates point at the end of the curve.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;x, y, z></span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -652,25 +583,15 @@
     
 
     
-
-    
 </dl>
 
 
 
 
 
-
-        
-            
-<h4 class="name" id="pointAtStart"><span class="type-signature"></span>pointAtStart<span class="type-signature"> :Array.&lt;x, y, z></span></h4>
-
-
-
-
 <div class="description">
     <summary>
-     Evaluates point at the start of the curve.
+     Evaluates point at the end of the curve.
      </summary>
 </div>
 
@@ -690,7 +611,18 @@
 
 
 
+
+        
+            
+<h4 class="name" id="pointAtStart"><span class="type-signature"></span>pointAtStart<span class="type-signature"> :Array.&lt;x, y, z></span></h4>
+
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -726,9 +658,29 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Evaluates point at the start of the curve.
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -742,29 +694,10 @@
 
 
 
-<div class="description">
-    <summary>
-     Gets the number of non-empty smooth (c-infinity) spans in the curve.
-     </summary>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">int</span>
-
-
-        </li>
-    </ul>
-
-
-
-
 
 <dl class="details">
+
+    
 
     
 
@@ -800,25 +733,15 @@
     
 
     
-
-    
 </dl>
 
 
 
 
 
-
-        
-            
-<h4 class="name" id="userStringCount"><span class="type-signature"></span>userStringCount<span class="type-signature"> :int</span></h4>
-
-
-
-
 <div class="description">
     <summary>
-     Gets the amount of user strings.
+     Gets the number of non-empty smooth (c-infinity) spans in the curve.
      </summary>
 </div>
 
@@ -838,7 +761,18 @@
 
 
 
+
+        
+            
+<h4 class="name" id="userStringCount"><span class="type-signature"></span>userStringCount<span class="type-signature"> :int</span></h4>
+
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -874,9 +808,29 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    <summary>
+     Gets the amount of user strings.
+     </summary>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">int</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -894,17 +848,62 @@
 
     
 
-    
     <h4 class="name" id="changeClosedCurveSeam"><span class="type-signature"></span>changeClosedCurveSeam<span class="signature">(t)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
     
 
     
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Curve.html#changeClosedCurveSeam">Curve#changeClosedCurveSeam</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
 
 
 
 <div class="description">
     If this curve is closed, then modify it so that the start/end point is at curve parameter t.
 </div>
+
+
 
 
 
@@ -967,7 +966,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="changeDimension"><span class="type-signature"></span>changeDimension<span class="signature">(desiredDimension)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -976,7 +1021,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#changeClosedCurveSeam">Curve#changeClosedCurveSeam</a>
+        <a href="Curve.html#changeDimension">Curve#changeDimension</a>
     </li></ul></dd>
     
 
@@ -1003,65 +1048,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true on success, false on failure.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="changeDimension"><span class="type-signature"></span>changeDimension<span class="signature">(desiredDimension)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Changes the dimension of a curve.
 </div>
+
+
 
 
 
@@ -1124,7 +1121,55 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if the curve's dimension was already desiredDimension
+     or if the curve's dimension was successfully changed to desiredDimension;
+     otherwise false.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="curvatureAt"><span class="type-signature"></span>curvatureAt<span class="signature">(t)</span><span class="type-signature"> &rarr; {Array.&lt;x, y, z>}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -1133,7 +1178,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#changeDimension">Curve#changeDimension</a>
+        <a href="Curve.html#curvatureAt">Curve#curvatureAt</a>
     </li></ul></dd>
     
 
@@ -1160,67 +1205,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if the curve's dimension was already desiredDimension
-     or if the curve's dimension was successfully changed to desiredDimension;
-     otherwise false.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="curvatureAt"><span class="type-signature"></span>curvatureAt<span class="signature">(t)</span><span class="type-signature"> &rarr; {Array.&lt;x, y, z>}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Evaluate the curvature vector at a curve parameter.
 </div>
+
+
 
 
 
@@ -1283,50 +1278,6 @@
 
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#curvatureAt">Curve#curvatureAt</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
 
 
 
@@ -1344,7 +1295,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -1359,39 +1310,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">()</span><span class="type-signature"></span></h4>
-    
 
     
-
-
-
-<div class="description">
-    ...
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -1427,9 +1360,22 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    ...
+</div>
+
+
+
+
+
+
+
 
 
 
@@ -1453,17 +1399,62 @@
 
     
 
-    
     <h4 class="name" id="getBoundingBox"><span class="type-signature"></span>getBoundingBox<span class="signature">(accurate)</span><span class="type-signature"> &rarr; {<a href="BoundingBox.html">BoundingBox</a>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
     
 
     
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="GeometryBase.html#getBoundingBox">GeometryBase#getBoundingBox</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
 
 
 
 <div class="description">
     Boundingbox solver. Gets the world axis aligned boundingbox for the geometry.
 </div>
+
+
 
 
 
@@ -1530,7 +1521,54 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The boundingbox of the geometry in world coordinates or BoundingBox.Empty 
+     if not bounding box could be found.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="BoundingBox.html">BoundingBox</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getUserString"><span class="type-signature"></span>getUserString<span class="signature">(key)</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -1539,7 +1577,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#getBoundingBox">GeometryBase#getBoundingBox</a>
+        <a href="GeometryBase.html#getUserString">GeometryBase#getUserString</a>
     </li></ul></dd>
     
 
@@ -1566,66 +1604,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The boundingbox of the geometry in world coordinates or BoundingBox.Empty 
-     if not bounding box could be found.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="BoundingBox.html">BoundingBox</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getUserString"><span class="type-signature"></span>getUserString<span class="signature">(key)</span><span class="type-signature"> &rarr; {string}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Gets user string from this geometry.
 </div>
+
+
 
 
 
@@ -1688,50 +1677,6 @@
 
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#getUserString">GeometryBase#getUserString</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
 
 
 
@@ -1749,7 +1694,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -1764,39 +1709,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="isArc"><span class="type-signature"></span>isArc<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -1832,9 +1759,25 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1857,7 +1800,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -1872,39 +1815,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="isEllipse"><span class="type-signature"></span>isEllipse<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -1940,9 +1865,25 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1965,7 +1906,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -1980,39 +1921,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="isLinear"><span class="type-signature"></span>isLinear<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -2048,9 +1971,25 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2073,7 +2012,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -2088,39 +2027,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="isPlanar"><span class="type-signature"></span>isPlanar<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Test a curve for planarity.
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -2156,9 +2077,25 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Test a curve for planarity.
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2181,7 +2118,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -2196,43 +2133,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="isPolyline"><span class="type-signature"></span>isPolyline<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Several types of Curve can have the form of a polyline
-     including a degree 1 NurbsCurve, a PolylineCurve,
-     and a PolyCurve all of whose segments are some form of
-     polyline. IsPolyline tests a curve to see if it can be
-     represented as a polyline.
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -2268,9 +2183,29 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Several types of Curve can have the form of a polyline
+     including a degree 1 NurbsCurve, a PolylineCurve,
+     and a PolyCurve all of whose segments are some form of
+     polyline. IsPolyline tests a curve to see if it can be
+     represented as a polyline.
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2293,7 +2228,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -2308,25 +2243,67 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="pointAt"><span class="type-signature"></span>pointAt<span class="signature">(t)</span><span class="type-signature"> &rarr; {Array.&lt;x, y, z>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
     
 
     
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Curve.html#pointAt">Curve#pointAt</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
 
 
 
 <div class="description">
     Evaluates point at a curve parameter.
 </div>
+
+
 
 
 
@@ -2389,50 +2366,6 @@
 
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#pointAt">Curve#pointAt</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
 
 
 
@@ -2450,7 +2383,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -2465,39 +2398,21 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="reverse"><span class="type-signature"></span>reverse<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
 
     
-
-
-
-<div class="description">
-    Reverses the direction of the curve.
-</div>
-
-
-
-
-
-
-
-
-
 
 
 
 
 <dl class="details">
+
+    
 
     
 
@@ -2533,9 +2448,25 @@
     
 
     
-
-    
 </dl>
+
+
+
+
+
+<div class="description">
+    Reverses the direction of the curve.
+</div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2558,7 +2489,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -2573,19 +2504,59 @@
     
 
 
-
-
-
         
             
 
     
 
-    
     <h4 class="name" id="rotate"><span class="type-signature"></span>rotate<span class="signature">(angleRadians, rotationAxis, rotationCenter)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
     
 
     
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="GeometryBase.html#rotate">GeometryBase#rotate</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
 
 
 
@@ -2593,6 +2564,8 @@
     Rotates the object about the specified axis. A positive rotation 
      angle results in a counter-clockwise rotation about the axis (right hand rule).
 </div>
+
+
 
 
 
@@ -2701,7 +2674,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if geometry successfully rotated.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="scale"><span class="type-signature"></span>scale<span class="signature">(scaleFactor)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -2710,7 +2729,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#rotate">GeometryBase#rotate</a>
+        <a href="GeometryBase.html#scale">GeometryBase#scale</a>
     </li></ul></dd>
     
 
@@ -2737,65 +2756,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if geometry successfully rotated.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="scale"><span class="type-signature"></span>scale<span class="signature">(scaleFactor)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Scales the object by the specified factor. The scale is centered at the origin.
 </div>
+
+
 
 
 
@@ -2858,7 +2829,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if geometry successfully scaled.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setEndPoint"><span class="type-signature"></span>setEndPoint<span class="signature">(point)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -2867,7 +2884,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#scale">GeometryBase#scale</a>
+        <a href="Curve.html#setEndPoint">Curve#setEndPoint</a>
     </li></ul></dd>
     
 
@@ -2894,59 +2911,9 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if geometry successfully scaled.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setEndPoint"><span class="type-signature"></span>setEndPoint<span class="signature">(point)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
@@ -2954,6 +2921,8 @@
     Forces the curve to end at a specified point. 
      Not all curve types support this operation.
 </div>
+
+
 
 
 
@@ -3016,7 +2985,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setStartPoint"><span class="type-signature"></span>setStartPoint<span class="signature">(point)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -3025,7 +3040,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#setEndPoint">Curve#setEndPoint</a>
+        <a href="Curve.html#setStartPoint">Curve#setStartPoint</a>
     </li></ul></dd>
     
 
@@ -3052,59 +3067,9 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true on success, false on failure.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setStartPoint"><span class="type-signature"></span>setStartPoint<span class="signature">(point)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
@@ -3112,6 +3077,8 @@
     Forces the curve to start at a specified point. 
      Not all curve types support this operation.
 </div>
+
+
 
 
 
@@ -3174,7 +3141,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setUserString"><span class="type-signature"></span>setUserString<span class="signature">(key, value)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -3183,7 +3196,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#setStartPoint">Curve#setStartPoint</a>
+        <a href="GeometryBase.html#setUserString">GeometryBase#setUserString</a>
     </li></ul></dd>
     
 
@@ -3210,65 +3223,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true on success, false on failure.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setUserString"><span class="type-signature"></span>setUserString<span class="signature">(key, value)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Attach a user string (key,value combination) to this geometry.
 </div>
+
+
 
 
 
@@ -3354,7 +3319,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="tangentAt"><span class="type-signature"></span>tangentAt<span class="signature">(t)</span><span class="type-signature"> &rarr; {Array.&lt;x, y, z>}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -3363,7 +3374,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#setUserString">GeometryBase#setUserString</a>
+        <a href="Curve.html#tangentAt">Curve#tangentAt</a>
     </li></ul></dd>
     
 
@@ -3390,65 +3401,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true on success.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="tangentAt"><span class="type-signature"></span>tangentAt<span class="signature">(t)</span><span class="type-signature"> &rarr; {Array.&lt;x, y, z>}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Evaluates the unit tangent vector at a curve parameter.
 </div>
+
+
 
 
 
@@ -3511,7 +3474,53 @@
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Unit tangent vector of the curve at the parameter t.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="translate"><span class="type-signature"></span>translate<span class="signature">(translationVector)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+
 <dl class="details">
+
+    
 
     
 
@@ -3520,7 +3529,7 @@
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Curve.html#tangentAt">Curve#tangentAt</a>
+        <a href="GeometryBase.html#translate">GeometryBase#translate</a>
     </li></ul></dd>
     
 
@@ -3547,65 +3556,17 @@
     
 
     
-
-    
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Unit tangent vector of the curve at the parameter t.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;x, y, z></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="translate"><span class="type-signature"></span>translate<span class="signature">(translationVector)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
 
 
 
 <div class="description">
     Translates the object along the specified vector.
 </div>
+
+
 
 
 
@@ -3668,50 +3629,6 @@
 
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="GeometryBase.html#translate">GeometryBase#translate</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
 
 
 
@@ -3729,7 +3646,7 @@
 
 
 
-<dl>
+<dl class="param-type">
     <dt>
         Type
     </dt>
@@ -3742,9 +3659,6 @@
 </dl>
 
     
-
-
-
 
 
         
@@ -3760,19 +3674,19 @@
 
 
 
+    
+    
 </div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Arc.html">Arc</a></li><li><a href="ArcCurve.html">ArcCurve</a></li><li><a href="BoundingBox.html">BoundingBox</a></li><li><a href="Brep.html">Brep</a></li><li><a href="BrepFace.html">BrepFace</a></li><li><a href="BrepFaceList.html">BrepFaceList</a></li><li><a href="Circle.html">Circle</a></li><li><a href="CommonObject.html">CommonObject</a></li><li><a href="Curve.html">Curve</a></li><li><a href="Extrusion.html">Extrusion</a></li><li><a href="File3dm.html">File3dm</a></li><li><a href="File3dmObject.html">File3dmObject</a></li><li><a href="File3dmObjectTable.html">File3dmObjectTable</a></li><li><a href="GeometryBase.html">GeometryBase</a></li><li><a href="Layer.html">Layer</a></li><li><a href="Line.html">Line</a></li><li><a href="LineCurve.html">LineCurve</a></li><li><a href="Mesh.html">Mesh</a></li><li><a href="MeshFaceList.html">MeshFaceList</a></li><li><a href="MeshNormalList.html">MeshNormalList</a></li><li><a href="MeshVertexList.html">MeshVertexList</a></li><li><a href="NurbsCurve.html">NurbsCurve</a></li><li><a href="NurbsSurface.html">NurbsSurface</a></li><li><a href="ObjectAttributes.html">ObjectAttributes</a></li><li><a href="Point3d.html">Point3d</a></li><li><a href="Polycurve.html">Polycurve</a></li><li><a href="Polylinecurve.html">Polylinecurve</a></li><li><a href="Sphere.html">Sphere</a></li><li><a href="Surface.html">Surface</a></li><li><a href="SurfaceProxy.html">SurfaceProxy</a></li><li><a href="Transform.html">Transform</a></li><li><a href="ViewportInfo.html">ViewportInfo</a></li></ul>
-</nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 09:28:32 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 10:08:36 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+
+
 </body>
 </html>
