@@ -12,7 +12,7 @@
 </html>
 ```
 
-See [our javascript documentation](RHINO3DM.JS.md) for details
+See [our javascript documentation](../RHINO3DM.JS.md) for details
 
 ----
 
