@@ -7,6 +7,7 @@ import subprocess
 import glob
 import shutil
 import struct
+import fileinput
 from distutils.version import LooseVersion
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
@@ -82,7 +83,8 @@ class CMakeBuild(build_ext):
                     print(line.replace("WIN32;", "WIN64;"))
                 for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                     print(line.replace("WIN32;", "WIN64;"))
-            os.system("cmake --build . --config Release --target _rhino3dm")
+            rv = os.system("cmake --build . --config Release --target _rhino3dm")
+            if int(rv) > 0: raise RuntimeError('CMake exited with {}'.format(rv))
         else:
             os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
             os.system("make")
