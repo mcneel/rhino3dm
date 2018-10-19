@@ -43,7 +43,10 @@ namespace docgen
           {
             if(line.StartsWith(".constructor"))
             {
-
+              int startIndex = line.IndexOf("<");
+              int endIndex = line.IndexOf(">", startIndex);
+              string types = line.Substring(startIndex + 1, endIndex - startIndex - 1);
+              activeJavascriptClass.AddConstructor(types);
             }
             if(line.StartsWith(".property"))
             {
@@ -53,9 +56,14 @@ namespace docgen
             if(line.StartsWith(".function"))
             {
               string funcName = (line.Split(new char[] { '"' }))[1];
-              activeJavascriptClass.AddMethod(funcName);
+              activeJavascriptClass.AddMethod(funcName, false);
             }
-            if(line.StartsWith(";"))
+            if(line.StartsWith(".class_function"))
+            {
+              string funcName = (line.Split(new char[] { '"' }))[1];
+              activeJavascriptClass.AddMethod(funcName, true);
+            }
+            if (line.StartsWith(";"))
             {
               activeJavascriptClass = null;
             }
@@ -91,18 +99,32 @@ namespace docgen
 
     public string BaseClass { get; set; }
 
+    public void AddConstructor(string types)
+    {
+      string[] t = types.Split(new char[] { ',' });
+      for(int i=0; i<t.Length; i++)
+      {
+        t[i] = t[i].Trim();
+        if (t[i].Equals("ON_3dPoint"))
+          t[i] = "Point3d";
+        if (t[i].Equals("ON_3dVector"))
+          t[i] = "Vector3d";
+      }
+      Constructors.Add(t);
+    }
+
     public void AddProperty(string name)
     {
-      _properties.Add(name);
+      Properties.Add(name);
     }
 
-    public void AddMethod(string name)
+    public void AddMethod(string name, bool isStatic)
     {
-      _methods.Add(name);
+      Methods.Add(new Tuple<bool, string>(isStatic, name));
     }
 
-    public List<string> Methods {  get { return _methods; } }
-    List<string> _properties = new List<string>();
-    List<string> _methods = new List<string>();
+    public List<Tuple<bool, string>> Methods { get; } = new List<Tuple<bool, string>>();
+    public List<string> Properties { get; } = new List<string>();
+    public List<string[]> Constructors { get; } = new List<string[]>();
   }
 }

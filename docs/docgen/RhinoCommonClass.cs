@@ -18,6 +18,26 @@ namespace docgen
       return false;
     }
 
+    public static bool IsStatic(this PropertyDeclarationSyntax method)
+    {
+      foreach (var modifier in method.Modifiers)
+      {
+        if (modifier.Text == "static")
+          return true;
+      }
+      return false;
+    }
+
+    public static bool IsPublic(this ConstructorDeclarationSyntax c)
+    {
+      foreach (var modifier in c.Modifiers)
+      {
+        if (modifier.Text == "public")
+          return true;
+      }
+      return false;
+    }
+
     public static bool IsPublic(this MethodDeclarationSyntax method)
     {
       foreach (var modifier in method.Modifiers)
@@ -28,21 +48,14 @@ namespace docgen
       return false;
     }
 
-    public static bool IsNonConst(this MethodDeclarationSyntax method, out bool useAsReturnType)
+    public static bool IsPublic(this PropertyDeclarationSyntax p)
     {
-      useAsReturnType = false;
-      if (method.IsStatic())
-        return false;
-
-      foreach (var attr in method.AttributeLists)
+      foreach (var modifier in p.Modifiers)
       {
-        if (attr.ToString().Equals("[ConstOperation]", StringComparison.InvariantCulture))
-          return false;
+        if (modifier.Text == "public")
+          return true;
       }
-
-      useAsReturnType = method.ReturnType.ToString().Equals("void", StringComparison.InvariantCulture);
-
-      return true;
+      return false;
     }
   }
 
@@ -112,7 +125,9 @@ namespace docgen
       DocComment = docComment;
     }
     public DocumentationCommentTriviaSyntax DocComment { get; set; }
+    public List<Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax>> Constructors { get; } = new List<Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax>>();
     public List<Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax>> Methods { get; } = new List<Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax>>();
+    public List<Tuple<PropertyDeclarationSyntax, DocumentationCommentTriviaSyntax>> Properties { get; } = new List<Tuple<PropertyDeclarationSyntax, DocumentationCommentTriviaSyntax>>();
   }
 
 
@@ -200,10 +215,6 @@ namespace docgen
             }
           }
 
-          bool useAsReturnType;
-          if (node.IsNonConst(out useAsReturnType) && !useAsReturnType)
-            outCount++;
-
           if (refCount == 0 && outCount < 2)
           {
             var docComment = node.GetLeadingTrivia().Select(i => i.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
@@ -212,6 +223,37 @@ namespace docgen
         }
       }
       base.VisitMethodDeclaration(node);
+    }
+
+    public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+    {
+      if (!_buildingSpans)
+      {
+        bool isPublic = node.IsPublic();
+        bool isStatic = node.IsStatic();
+
+        if (isPublic)
+        {
+          var docComment = node.GetLeadingTrivia().Select(i => i.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
+          RhinoCommonClass.Get(_visitingClass).Properties.Add(new Tuple<PropertyDeclarationSyntax, DocumentationCommentTriviaSyntax>(node, docComment));
+        }
+      }
+      base.VisitPropertyDeclaration(node);
+    }
+
+    public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+    {
+      if (!_buildingSpans)
+      {
+        bool isPublic = node.IsPublic();
+
+        if (isPublic)
+        {
+          var docComment = node.GetLeadingTrivia().Select(i => i.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
+          RhinoCommonClass.Get(_visitingClass).Constructors.Add(new Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax>(node, docComment));
+        }
+      }
+      base.VisitConstructorDeclaration(node);
     }
   }
 }
