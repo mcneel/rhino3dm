@@ -5,9 +5,10 @@ environment:
     # For Python versions available on Appveyor, see
     # http://www.appveyor.com/docs/installed-software#python
     - PYTHON: "C:\\Python27"
-    - PYTHON: "C:\\Python27-x64"
-    - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python36-x64"
+    # NOTE: temporarily disable other flavours because it takes too long
+    # - PYTHON: "C:\\Python27-x64"
+    # - PYTHON: "C:\\Python36"
+    # - PYTHON: "C:\\Python36-x64"
 
 image: Visual Studio 2017
 
