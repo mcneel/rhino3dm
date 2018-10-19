@@ -1,1 +1,1 @@
-jsdoc bin\Debug\rh3dm_temp.js jsdoc.conf
+jsdoc bin\Debug\rh3dm_temp.js -c jsdoc.conf
