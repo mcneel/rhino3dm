@@ -18,6 +18,9 @@ If you get an error, you may need to run `pip install --user rhino3dm`
 
 If `pip` is not installed, go to the [Pip Installation instructions](https://pip.pypa.io/en/latest/installing/)
 
+## API Docs
+The latest [rhino3dm.py API Documentation](https://mcneel.github.io/rhino3dm/python/api/index.html)
+
 ## Example usage
 
 * Start the `python` console, then type:
