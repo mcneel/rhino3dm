@@ -31,7 +31,7 @@ using namespace emscripten;
 
 void initExtrusionBindings(void*)
 {
-  class_<BND_Extrusion, base<BND_GeometryBase>>("Extrusion");
+  class_<BND_Extrusion, base<BND_Surface>>("Extrusion");
 }
 #endif
 

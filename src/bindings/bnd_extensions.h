@@ -51,11 +51,11 @@ public:
   //Guid AddPolyline2(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
   //Guid AddArc1(Arc arc)
   //Guid AddArc2(Arc arc, DocObjects.ObjectAttributes attributes)
-  //Guid AddCircle1(Circle circle)
+  BND_UUID AddCircle1(const class BND_Circle& circle);
   //Guid AddCircle2(Circle circle, DocObjects.ObjectAttributes attributes)
   //Guid AddEllipse1(Ellipse ellipse)
   //Guid AddEllipse2(Ellipse ellipse, DocObjects.ObjectAttributes attributes)
-  //Guid AddSphere1(Sphere sphere)
+  BND_UUID AddSphere1(const class BND_Sphere& sphere);
   //Guid AddSphere2(Sphere sphere, DocObjects.ObjectAttributes attributes)
   BND_UUID AddCurve1(const class BND_Curve* curve);
   //Guid AddCurve2(Geometry.Curve curve, DocObjects.ObjectAttributes attributes)

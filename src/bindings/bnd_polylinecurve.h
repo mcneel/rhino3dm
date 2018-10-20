@@ -13,8 +13,14 @@ class BND_PolylineCurve : public BND_Curve
 public:
   BND_PolylineCurve();
   BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref);
-  int PointCount() const;
-  ON_3dPoint Point(int index) const;
+
+  //public PolylineCurve(System.Collections.Generic.IEnumerable<Point3d> points)
+  int PointCount() const { return m_polylinecurve->PointCount(); }
+  ON_3dPoint Point(int index) const { return m_polylinecurve->m_pline[index]; }
+  void SetPoint(int index, const ON_3dPoint& point) { m_polylinecurve->m_pline[index] = point; }
+  //public double Parameter(int index)
+  //public void SetParameter(int index, double parameter)
+  class BND_Polyline* ToPolyline() const;
 
 protected:
   void SetTrackedPointer(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref);

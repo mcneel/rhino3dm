@@ -16,14 +16,11 @@ void BND_PolylineCurve::SetTrackedPointer(ON_PolylineCurve* polylinecurve, const
   BND_Curve::SetTrackedPointer(polylinecurve, compref);
 }
 
-int BND_PolylineCurve::PointCount() const
+BND_Polyline* BND_PolylineCurve::ToPolyline() const
 {
-  return m_polylinecurve->PointCount();
-}
-
-ON_3dPoint BND_PolylineCurve::Point(int index) const
-{
-  return m_polylinecurve->m_pline[index];
+  BND_Polyline* rc = new BND_Polyline();
+  rc->m_polyline = m_polylinecurve->m_pline;
+  return rc;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +32,10 @@ void initPolylineCurveBindings(pybind11::module& m)
   py::class_<BND_PolylineCurve, BND_Curve>(m, "Polylinecurve")
     .def(py::init<>())
     .def_property_readonly("PointCount", &BND_PolylineCurve::PointCount)
-    .def("Point", &BND_PolylineCurve::Point);
+    .def("Point", &BND_PolylineCurve::Point)
+    .def("SetPoint", &BND_PolylineCurve::SetPoint)
+    .def("ToPolyline", &BND_PolylineCurve::ToPolyline)
+    ;
 }
 #endif
 
