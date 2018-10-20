@@ -206,16 +206,6 @@ void BND_ONXModel::SetRevision(int r)
   ONX_Model_SetRevision(m_model.get(), r);
 }
 
-BND_ONXModel_ObjectTable BND_ONXModel::Objects()
-{
-  return BND_ONXModel_ObjectTable(m_model);
-}
-
-BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
-{
-  m_model = m;
-}
-
 static ON_UUID Internal_ONX_Model_AddModelGeometry(
   ONX_Model* model,
   const ON_Geometry* geometry,
@@ -435,6 +425,10 @@ void initExtensionsBindings(pybind11::module& m)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
+  py::class_<BND_File3dmLayerTable>(m, "File3dmLayerTable")
+    .def("__len__", &BND_File3dmLayerTable::Count)
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read)
@@ -453,6 +447,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
+    .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
 }

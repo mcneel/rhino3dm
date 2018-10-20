@@ -15,14 +15,19 @@ public:
   BND_Layer();
   BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref);
 
-  //public override string Name {get;set;}
+  std::wstring GetName() const { return std::wstring(m_layer->NameAsPointer()); }
+  void SetName(const std::wstring& name) { m_layer->SetName(name.c_str()); }
   //public string FullPath{ get; }
   //public override Guid Id {get;set;}
+  BND_UUID GetId() const { return ON_UUID_to_Binding(m_layer->Id()); }
   //public Guid ParentLayerId {get;set;}
-  //public int IgesLevel{ get; set }
-  //public bool HasPerViewportSettings(Guid viewportId)
-  //public void DeletePerViewportSettings(Guid viewportId)
-  //public System.Drawing.Color Color {get;set;}
+  BND_UUID GetParentLayerId() const { return ON_UUID_to_Binding(m_layer->ParentId()); }
+  int GetIgesLevel() const { return m_layer->IgesLevel(); }
+  void SetIgesLevel(int level) { m_layer->SetIgesLevel(level); }
+  bool HasPerViewportSettings(BND_UUID viewportId) const;
+  void DeletePerViewportSettings(BND_UUID viewportId);
+  BND_Color GetColor() const;
+  void SetColor(const BND_Color& color);
   //public System.Drawing.Color PerViewportColor(Guid viewportId)
   //public void SetPerViewportColor(Guid viewportId, System.Drawing.Color color)
   //public void DeletePerViewportColor(Guid viewportId)

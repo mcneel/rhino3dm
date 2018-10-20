@@ -22,6 +22,7 @@
 #include <emscripten/bind.h>
 #endif
 
+#include "bnd_color.h"
 #include "bnd_uuid.h"
 #include "bnd_defines.h"
 #include "bnd_boundingbox.h"
