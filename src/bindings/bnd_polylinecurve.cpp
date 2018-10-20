@@ -45,8 +45,11 @@ using namespace emscripten;
 void initPolylineCurveBindings(void*)
 {
   class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
+    .constructor<>()
     .property("pointCount", &BND_PolylineCurve::PointCount)
     .function("point", &BND_PolylineCurve::Point)
+    .function("setPoint", &BND_PolylineCurve::SetPoint)
+    .function("ToPolyline", &BND_PolylineCurve::ToPolyline, allow_raw_pointers())
     ;
 }
 #endif

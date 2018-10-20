@@ -129,8 +129,41 @@ using namespace emscripten;
 
 void initPolylineBindings(void*)
 {
-  class_<BND_Polyline>("Polyline")
+  class_<BND_Point3dList>("Point3dList")
     .constructor<>()
+    .constructor<int>()
+    .property("capacity", &BND_Point3dList::GetCapacity, &BND_Point3dList::SetCapacity)
+    .property("count", &BND_Point3dList::GetCount, &BND_Point3dList::SetCount)
+    .function("get", &BND_Point3dList::GetPoint)
+    .function("set", &BND_Point3dList::SetPoint)
+    .function("clear", &BND_Point3dList::Clear)
+    .function("insert", &BND_Point3dList::Insert)
+    .function("removeAt", &BND_Point3dList::RemoveAt)
+    .property("boundingBox", &BND_Point3dList::BoundingBox)
+    .function("add", &BND_Point3dList::Add)
+    .function("transform", &BND_Point3dList::Transform)
+    .function("setAllX", &BND_Point3dList::SetAllX)
+    .function("setAllY", &BND_Point3dList::SetAllY)
+    .function("setAllZ", &BND_Point3dList::SetAllZ)
+    ;
+
+  class_<BND_Polyline, base<BND_Point3dList>>("Polyline")
+    .constructor<>()
+    .constructor<int>()
+    .property("isValid", &BND_Polyline::IsValid)
+    .property("segmentCount", &BND_Polyline::SegmentCount)
+    .property("isClosed", &BND_Polyline::IsClosed)
+    .function("isClosedWithinTolerance", &BND_Polyline::IsClosedWithinTolerance)
+    .property("length", &BND_Polyline::Length)
+    .function("pointAt", &BND_Polyline::PointAt)
+    .function("tangentAt", &BND_Polyline::TangentAt)
+    .function("closesPoint", &BND_Polyline::ClosestPoint)
+    .function("closestParameter", &BND_Polyline::ClosestParameter)
+    .function("toNurbsCurve", &BND_Polyline::ToNurbsCurve, allow_raw_pointers())
+    .function("toPolylineCurve", &BND_Polyline::ToPolylineCurve, allow_raw_pointers())
+    .class_function("createInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, allow_raw_pointers())
+    .class_function("createCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, allow_raw_pointers())
+    .class_function("createStarPolygon", &BND_Polyline::CreateStarPolygon, allow_raw_pointers())
     ;
 }
 #endif

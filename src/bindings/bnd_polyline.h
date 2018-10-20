@@ -42,9 +42,9 @@ public:
   BND_Polyline() = default;
   BND_Polyline(int initialCapacity) : BND_Point3dList(initialCapacity) {};
   //public Polyline(IEnumerable<Point3d> collection)
-  bool IsValid(double tolerance = 0) const { return m_polyline.IsValid(tolerance); }
+  bool IsValid() const { return m_polyline.IsValid(); }
   int SegmentCount() const { return m_polyline.SegmentCount(); }
-  bool IsClosed(double tolerance=0) const { return m_polyline.IsClosed(tolerance); }
+  bool IsClosed() const { return m_polyline.IsClosed(); }
   bool IsClosedWithinTolerance(double tolerance) const { return m_polyline.IsClosed(tolerance); }
   double Length() const { return m_polyline.Length(); }
   //public Line SegmentAt(int index)

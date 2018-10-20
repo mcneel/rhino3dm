@@ -12,10 +12,10 @@ class BND_Hatch : public BND_GeometryBase
 {
   ON_Hatch* m_hatch = nullptr;
 protected:
-  BND_Hatch();
   void SetTrackedPointer(ON_Hatch* hatch, const ON_ModelComponentReference* compref);
 
 public:
+  BND_Hatch();
   BND_Hatch(ON_Hatch* hatch, const ON_ModelComponentReference* compref);
   //public Curve[] Get3dCurves(bool outer)
   //public int PatternIndex {get;set;}

@@ -22,7 +22,9 @@ void BND_Hatch::SetTrackedPointer(ON_Hatch* hatch, const ON_ModelComponentRefere
 namespace py = pybind11;
 void initHatchBindings(pybind11::module& m)
 {
-  py::class_<BND_Hatch, BND_GeometryBase>(m, "Hatch");
+  py::class_<BND_Hatch, BND_GeometryBase>(m, "Hatch")
+    .def(py::init<>())
+    ;
 }
 #endif
 
@@ -31,8 +33,8 @@ using namespace emscripten;
 
 void initHatchBindings(void*)
 {
-  class_<BND_Hatch, base<BND_GeometryBase>>("Hatch");
+  class_<BND_Hatch, base<BND_GeometryBase>>("Hatch")
+    .constructor<>()
+    ;
 }
 #endif
-
-
