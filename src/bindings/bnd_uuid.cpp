@@ -18,6 +18,13 @@ BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
   return guid;
 }
 
+ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
+{
+  std::string s = pybind11::str(id);
+  return ON_UuidFromString(s.c_str());
+}
+
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -29,5 +36,10 @@ BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
   char* suuid = ON_UuidToString(id, s);
   std::string rc(suuid);
   return rc;
+}
+
+ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
+{
+  return ON_UuidFromString(id.c_str());
 }
 #endif

@@ -22,7 +22,7 @@ class BND_ONXModel_ObjectTable
 {
   std::shared_ptr<ONX_Model> m_model;
 public:
-  BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m);
+  BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   BND_UUID AddPoint1(double x, double y, double z);
   BND_UUID AddPoint2(const ON_3dPoint& point) { return AddPoint1(point.x, point.y, point.z); }
   //Guid AddPoint3(Point3d point, DocObjects.ObjectAttributes attributes)
@@ -96,6 +96,19 @@ public:
   BND_BoundingBox GetBoundingBox() const;
 };
 
+class BND_File3dmLayerTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmLayerTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Layer); }
+  void Add(const class BND_Layer& layer);
+  BND_Layer* FindName(std::wstring name, BND_UUID parentId);
+  //BND_Layer* FindNameHash(NameHash nameHash)
+  BND_Layer* FindIndex(int index);
+  BND_Layer* FindId(BND_UUID id);
+};
+
 class BND_ONXModel
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -129,8 +142,8 @@ public:
   int GetRevision() const;
   void SetRevision(int r);
 
-  BND_ONXModel_ObjectTable Objects();
-
+  BND_ONXModel_ObjectTable Objects() { return BND_ONXModel_ObjectTable(m_model); }
+  BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
 public:
   static bool ReadTest(std::wstring filepath);
 };

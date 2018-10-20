@@ -10,47 +10,60 @@ void initLayerBindings(void* m);
 
 class BND_Layer : public BND_CommonObject
 {
+public:
   ON_Layer* m_layer = nullptr;
 public:
   BND_Layer();
   BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref);
 
-  //public override string Name {get;set;}
+  std::wstring GetName() const { return std::wstring(m_layer->NameAsPointer()); }
+  void SetName(const std::wstring& name) { m_layer->SetName(name.c_str()); }
   //public string FullPath{ get; }
   //public override Guid Id {get;set;}
+  BND_UUID GetId() const { return ON_UUID_to_Binding(m_layer->Id()); }
   //public Guid ParentLayerId {get;set;}
-  //public int IgesLevel{ get; set }
-  //public bool HasPerViewportSettings(Guid viewportId)
-  //public void DeletePerViewportSettings(Guid viewportId)
-  //public System.Drawing.Color Color {get;set;}
-  //public System.Drawing.Color PerViewportColor(Guid viewportId)
-  //public void SetPerViewportColor(Guid viewportId, System.Drawing.Color color)
-  //public void DeletePerViewportColor(Guid viewportId)
-  //public System.Drawing.Color PlotColor {get;set}
-  //public System.Drawing.Color PerViewportPlotColor(Guid viewportId)
-  //public void SetPerViewportPlotColor(Guid viewportId, System.Drawing.Color color)
-  //public void DeletePerViewportPlotColor(Guid viewportId)
-  //public double PlotWeight {get;set;}
-  //public double PerViewportPlotWeight(Guid viewportId)
-  //public void SetPerViewportPlotWeight(Guid viewportId, double plotWeight)
-  //public void DeletePerViewportPlotWeight(Guid viewportId)
-  //public int LinetypeIndex {get;set;}
-  //public int RenderMaterialIndex {get;set;}
-  //public bool IsVisible {get;set;}
-  //public bool PerViewportIsVisible(Guid viewportId)
-  //public void SetPerViewportVisible(Guid viewportId, bool visible)
-  //public void DeletePerViewportVisible(Guid viewportId)
-  //public bool PerViewportPersistentVisibility(Guid viewportId)
-  //public void SetPerViewportPersistentVisibility(Guid viewportId, bool persistentVisibility)
-  //public void UnsetPerViewportPersistentVisibility(Guid viewportId)
-  //public bool IsLocked {get;set;}
-  //public bool GetPersistentVisibility()
-  //public void SetPersistentVisibility(bool persistentVisibility)
-  //public void UnsetPersistentVisibility()
-  //public bool GetPersistentLocking()
-  //public void SetPersistentLocking(bool persistentLocking)
-  //public void UnsetPersistentLocking()
-  //public bool IsExpanded {get;set;}
+  BND_UUID GetParentLayerId() const { return ON_UUID_to_Binding(m_layer->ParentId()); }
+  int GetIgesLevel() const { return m_layer->IgesLevel(); }
+  void SetIgesLevel(int level) { m_layer->SetIgesLevel(level); }
+  bool HasPerViewportSettings(BND_UUID viewportId) const;
+  void DeletePerViewportSettings(BND_UUID viewportId);
+  BND_Color GetColor() const;
+  void SetColor(const BND_Color& color);
+  BND_Color PerViewportColor(BND_UUID viewportId) const;
+  void SetPerViewportColor(BND_UUID viewportId, BND_Color color);
+  void DeletePerViewportColor(BND_UUID viewportId);
+  BND_Color GetPlotColor() const;
+  void SetPlotColor(const BND_Color& color);
+//  BND_Color PerViewportPlotColor(BND_UUID viewportId) const;
+//  void SetPerViewportPlotColor(BND_UUID viewportId, BND_Color color);
+//  void DeletePerViewportPlotColor(BND_UUID viewportId);
+  double GetPlotWeight() const { return m_layer->PlotWeight(); }
+  void SetPlotWeight(double weight) { m_layer->SetPlotWeight(weight); }
+//  double PerViewportPlotWeight(BND_UUID viewportId) const;
+//  void SetPerViewportPlotWeight(BND_UUID viewportId, double plotWeight);
+//  void DeletePerViewportPlotWeight(BND_UUID viewportId);
+  int GetLinetypeIndex() const { return m_layer->LinetypeIndex(); }
+  void SetLinetypeIndex(int index) { m_layer->SetLinetypeIndex(index); }
+  int GetRenderMaterialIndex() const { return m_layer->RenderMaterialIndex(); }
+  void SetRenderMaterialIndex(int index) { m_layer->SetRenderMaterialIndex(index); }
+  bool IsVisible() const { return m_layer->IsVisible(); }
+  void SetVisible(bool b) { m_layer->SetVisible(b); }
+//  bool PerViewportIsVisible(BND_UUID viewportId) const;
+//  void SetPerViewportVisible(BND_UUID viewportId, bool visible);
+//  void DeletePerViewportVisible(BND_UUID viewportId);
+//  bool PerViewportPersistentVisibility(BND_UUID viewportId) const;
+//  void SetPerViewportPersistentVisibility(BND_UUID viewportId, bool persistentVisibility);
+//  void UnsetPerViewportPersistentVisibility(BND_UUID viewportId);
+  bool IsLocked() const { return m_layer->IsLocked(); }
+  void SetLocked(bool l) { m_layer->SetLocked(l); }
+  bool GetPersistentVisibility() const { return m_layer->PersistentVisibility(); }
+  void SetPersistentVisibility(bool persistentVisibility) { m_layer->SetPersistentVisibility(persistentVisibility); }
+  void UnsetPersistentVisibility() { m_layer->UnsetPersistentVisibility(); }
+  bool GetPersistentLocking() const { return m_layer->PersistentLocking(); }
+  void SetPersistentLocking(bool persistentLocking) { m_layer->SetPersistentLocking(persistentLocking); }
+  void UnsetPersistentLocking() { m_layer->UnsetPersistentLocking(); }
+  bool IsExpanded() const { return m_layer->m_bExpanded; }
+  void SetExpanded(bool e) { m_layer->m_bExpanded = e; }
   //public void CopyAttributesFrom(Layer otherLayer)
   //public bool SetUserString(string key, string value)
   //public string GetUserString(string key)

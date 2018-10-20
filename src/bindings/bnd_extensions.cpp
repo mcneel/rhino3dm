@@ -206,16 +206,6 @@ void BND_ONXModel::SetRevision(int r)
   ONX_Model_SetRevision(m_model.get(), r);
 }
 
-BND_ONXModel_ObjectTable BND_ONXModel::Objects()
-{
-  return BND_ONXModel_ObjectTable(m_model);
-}
-
-BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
-{
-  m_model = m;
-}
-
 static ON_UUID Internal_ONX_Model_AddModelGeometry(
   ONX_Model* model,
   const ON_Geometry* geometry,
@@ -364,6 +354,53 @@ BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
   return BND_BoundingBox(m_model->ModelGeometryBoundingBox());
 }
 
+void BND_File3dmLayerTable::Add(const BND_Layer& layer)
+{
+  const ON_Layer* l = layer.m_layer;
+  int index = m_model->AddLayer(l->NameAsPointer(), l->Color());
+  ON_ModelComponentReference compref = m_model->LayerFromIndex(index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
+  if (modellayer)
+  {
+    *modellayer = *l;
+    modellayer->SetIndex(index);
+  }
+}
+
+BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
+{
+  ON_UUID id = Binding_to_ON_UUID(parentId);
+  ON_ModelComponentReference compref  = m_model->LayerFromName(id, name.c_str());
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
+  if (modellayer)
+    return new BND_Layer(modellayer, &compref);
+  return nullptr;
+}
+
+BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->LayerFromIndex(index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
+  if (modellayer)
+    return new BND_Layer(modellayer, &compref);
+  return nullptr;
+}
+
+BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->LayerFromId(_id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
+  if (modellayer)
+    return new BND_Layer(modellayer, &compref);
+  return nullptr;
+}
+
+
 
 #if defined(ON_WASM_COMPILE)
 BND_ONXModel* BND_ONXModel::WasmFromByteArray(std::string sbuffer)
@@ -435,6 +472,15 @@ void initExtensionsBindings(pybind11::module& m)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
+  py::class_<BND_File3dmLayerTable>(m, "File3dmLayerTable")
+    .def("__len__", &BND_File3dmLayerTable::Count)
+    .def("__getitem__", &BND_File3dmLayerTable::FindIndex)
+    .def("Add", &BND_File3dmLayerTable::Add)
+    .def("FindName", &BND_File3dmLayerTable::FindName)
+    .def("FindIndex", &BND_File3dmLayerTable::FindIndex)
+    .def("FindId", &BND_File3dmLayerTable::FindId)
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read)
@@ -453,6 +499,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
+    .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
 }
@@ -482,6 +529,15 @@ void initExtensionsBindings(void*)
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep1, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmLayerTable>("File3dmLayerTable")
+    .function("count", &BND_File3dmLayerTable::Count)
+    .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmLayerTable::Add)
+    .function("findName", &BND_File3dmLayerTable::FindName, allow_raw_pointers())
+    .function("findIndex", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
@@ -493,6 +549,7 @@ void initExtensionsBindings(void*)
     .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("objects", &BND_ONXModel::Objects)
+    .function("layers", &BND_ONXModel::Layers)
     ;
 }
 #endif
