@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/mcneel/rhino3dm/tree/master.svg?style=shield&circle-token=53733a2fe2cf99a11808d1e5210bc1aeb3f13ea9)](https://circleci.com/gh/mcneel/rhino3dm/tree/master)
 [![Build status](https://ci.appveyor.com/api/projects/status/v26tjylbp8txoasf/branch/master?svg=true)](https://ci.appveyor.com/project/mcneel/rhino3dm/branch/master)
 [![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg)](https://pypi.org/project/rhino3dm)
-[![NuGet](https://img.shields.io/nuget/v/Rhino3dmIO.Desktop.svg?style=flat)](https://www.nuget.org/profiles/McNeel)
+[![NuGet](https://img.shields.io/nuget/v/Rhino3dmIO.Desktop.svg?style=flat)](https://www.nuget.org/profiles/McNeel) [![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg)](https://discourse.mcneel.com/c/serengeti/rhino3dm)
 
 **rhino3dm** is a set of standalone libraries based on the [OpenNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/) geometry library with a ["RhinoCommon"](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) style. This provides the ability to access and manipulate geometry through .NET , Python or JavaScript applications independent of Rhino.  
 
