@@ -37,4 +37,9 @@ BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
   std::string rc(suuid);
   return rc;
 }
+
+ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
+{
+  return ON_UuidFromString(id.c_str());
+}
 #endif

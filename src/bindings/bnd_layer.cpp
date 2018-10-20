@@ -65,6 +65,13 @@ void initLayerBindings(void*)
 {
   class_<BND_Layer, base<BND_CommonObject>>("Layer")
     .constructor<>()
+    .property("name", &BND_Layer::GetName, &BND_Layer::SetName)
+    .property("id", &BND_Layer::GetId)
+    .property("parentLayerId", &BND_Layer::GetParentLayerId)
+    .property("igesLevel", &BND_Layer::GetIgesLevel, &BND_Layer::SetIgesLevel)
+    .function("hasPerViewportSettings", &BND_Layer::HasPerViewportSettings)
+    .function("deletePerViewportSettings", &BND_Layer::DeletePerViewportSettings)
+    .property("color", &BND_Layer::GetColor, &BND_Layer::SetColor)
     ;
 }
 #endif
