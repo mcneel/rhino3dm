@@ -124,6 +124,54 @@ namespace docgen
     {
       DocComment = docComment;
     }
+
+    public Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax> GetConstructor(string[] parameterTypes)
+    {
+      for (int i = 0; i < Constructors.Count; i++)
+      {
+        var c = Constructors[i].Item1;
+        if (c.ParameterList.Parameters.Count == parameterTypes.Length)
+        {
+          bool match = true;
+          for (int j = 0; j < parameterTypes.Length; j++)
+          {
+            var ctype = c.ParameterList.Parameters[j].Type.ToString();
+            if (!parameterTypes[j].Equals(ctype))
+            {
+              match = false;
+              break;
+            }
+          }
+          if (match)
+          {
+            return Constructors[i];
+          }
+        }
+      }
+      return null;
+    }
+
+    public Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax> GetMethod(string methodName)
+    {
+      for (int i = 0; i < Methods.Count; i++)
+      {
+        if (methodName.Equals(Methods[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
+        {
+          return Methods[i];
+        }
+      }
+      return null;
+    }
+
+    public Tuple<PropertyDeclarationSyntax, DocumentationCommentTriviaSyntax> GetProperty(string propName)
+    {
+      for (int i = 0; i < Properties.Count; i++)
+      {
+        if (propName.Equals(Properties[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
+          return Properties[i];
+      }
+      return null;
+    }
     public DocumentationCommentTriviaSyntax DocComment { get; set; }
     public List<Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax>> Constructors { get; } = new List<Tuple<ConstructorDeclarationSyntax, DocumentationCommentTriviaSyntax>>();
     public List<Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax>> Methods { get; } = new List<Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax>>();

@@ -167,6 +167,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindingClass.cs" />
+    <Compile Include="JavascriptClass.cs" />
+    <Compile Include="PythonClass.cs" />
     <Compile Include="RhinoCommonClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
