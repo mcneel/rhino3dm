@@ -245,6 +245,27 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
   return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddCircle1(const BND_Circle& circle)
+{
+  ON_NurbsCurve nc;
+  if (circle.ToONCircle().GetNurbForm(nc) != 0)
+  {
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, nullptr);
+    return ON_UUID_to_Binding(rc);
+  }
+  return ON_UUID_to_Binding(ON_nil_uuid);
+}
+BND_UUID BND_ONXModel_ObjectTable::AddSphere1(const BND_Sphere& sphere)
+{
+  ON_NurbsSurface ns;
+  if (sphere.GetNurbForm(ns) != 0)
+  {
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &ns, nullptr);
+    return ON_UUID_to_Binding(rc);
+  }
+  return ON_UUID_to_Binding(ON_nil_uuid);
+}
+
 BND_UUID BND_ONXModel_ObjectTable::AddCurve1(const BND_Curve* curve)
 {
   const ON_Geometry* g = curve ? curve->GeometryPointer() : nullptr;
@@ -405,6 +426,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1)
+    .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle1)
+    .def("AddSphere", &BND_ONXModel_ObjectTable::AddSphere1)
     .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve1)
     .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
     .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh1)
@@ -451,6 +474,8 @@ void initExtensionsBindings(void*)
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint1)
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
+    .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle1)
+    .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere1)
     .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve1, allow_raw_pointers())
     .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
     .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh1, allow_raw_pointers())

@@ -91,6 +91,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if( viewport )
       return new BND_Viewport(viewport, compref);
 
+    ON_Hatch* hatch = ON_Hatch::Cast(obj);
+    if (hatch)
+      return new BND_Hatch(hatch, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
