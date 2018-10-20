@@ -102,11 +102,11 @@ class BND_File3dmLayerTable
 public:
   BND_File3dmLayerTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Layer); }
-  //void Add(const class BND_Layer& layer);
-  //public Layer FindName(string name, Guid parentId)
-  //public Layer FindNameHash(NameHash nameHash)
-  //public Layer FindIndex(int index)
-  //public Layer FindId(Guid id)
+  void Add(const class BND_Layer& layer);
+  BND_Layer* FindName(std::wstring name, BND_UUID parentId);
+  //BND_Layer* FindNameHash(NameHash nameHash)
+  BND_Layer* FindIndex(int index);
+  BND_Layer* FindId(BND_UUID id);
 };
 
 class BND_ONXModel
