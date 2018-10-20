@@ -211,11 +211,6 @@ BND_ONXModel_ObjectTable BND_ONXModel::Objects()
   return BND_ONXModel_ObjectTable(m_model);
 }
 
-BND_ONXModel_LayerTable BND_ONXModel::Layers()
-{
-  return BND_ONXModel_LayerTable(m_model);
-}
-
 BND_ONXModel_ObjectTable::BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m)
 {
   m_model = m;
@@ -340,7 +335,6 @@ BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
   return BND_CommonObject::CreateWrapper(compref);
 }
 
-
 BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
@@ -369,35 +363,6 @@ BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
 {
   return BND_BoundingBox(m_model->ModelGeometryBoundingBox());
 }
-
-BND_ONXModel_LayerTable::BND_ONXModel_LayerTable(std::shared_ptr<ONX_Model> m)
-{
-  m_model = m;
-}
-
-BND_Layer* BND_ONXModel_LayerTable::LayerAt(int index)
-{
-  // jesterKing: copy&paste from sbaer, so dumb by association.
-  // I know this is dumb. I haven't figured out how to set up enumeration in
-  // javascript yet, so this is just here to keep things moving along
-  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::Layer);
-  ON_ModelComponentReference compref = iterator.FirstComponentReference();
-  int current = 0;
-  while(current<index)
-  {
-    compref = iterator.NextComponentReference();
-    current++;
-  }
-  return dynamic_cast<BND_Layer*>(BND_CommonObject::CreateWrapper(compref));
-}
-
-int BND_ONXModel_LayerTable::Count() const
-{
-  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::Layer);
-  iterator.FirstComponentReference();
-  return iterator.ActiveComponentCount();
-}
-
 
 
 #if defined(ON_WASM_COMPILE)
@@ -470,11 +435,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     ;
 
-  py::class_<BND_ONXModel_LayerTable>(m, "File3dmLayerTable")
-    .def("__len__", &BND_ONXModel_LayerTable::Count)
-    .def("__getitem__", &BND_ONXModel_LayerTable::LayerAt)
-    ;
-
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read)
@@ -493,7 +453,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
-    .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
 }
@@ -523,11 +482,6 @@ void initExtensionsBindings(void*)
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep1, allow_raw_pointers())
     ;
 
-  class_<BND_ONXModel_LayerTable>("File3dmLayerTable")
-    .property("count", &BND_ONXModel_LayerTable::Count)
-    .function("get", &BND_ONXModel_LayerTable::LayerAt, allow_raw_pointers())
-    ;
-
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
@@ -539,7 +493,6 @@ void initExtensionsBindings(void*)
     .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("objects", &BND_ONXModel::Objects)
-    .function("layers", &BND_ONXModel::Layers)
     ;
 }
 #endif
