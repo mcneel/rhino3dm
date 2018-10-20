@@ -16,13 +16,9 @@ public:
   BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref);
 
   //public override string Name {get;set;}
-  std::wstring GetName() const;
-  void SetName(const std::wstring name);
   //public string FullPath{ get; }
   //public override Guid Id {get;set;}
-  BND_UUID GetId() const;
   //public Guid ParentLayerId {get;set;}
-  BND_UUID GetParentLayerId() const;
   //public int IgesLevel{ get; set }
   //public bool HasPerViewportSettings(Guid viewportId)
   //public void DeletePerViewportSettings(Guid viewportId)

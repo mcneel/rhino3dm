@@ -110,13 +110,7 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(const ON_ModelComponentReferen
   const ON_ModelComponent* model_component = compref.ModelComponent();
   const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
   if (nullptr == geometryComponent)
-  {
-    const ON_Layer* layer = ON_Layer::Cast(model_component);
-    if (nullptr == layer)
-      return nullptr;
-    ON_Object* layerob = const_cast<ON_Layer*>(layer);
-    return CreateWrapper(layerob, &compref);
-  }
+    return nullptr;
 
   ON_Object* obj = const_cast<ON_Geometry*>(geometryComponent->Geometry(nullptr));
   return CreateWrapper(obj, &compref);

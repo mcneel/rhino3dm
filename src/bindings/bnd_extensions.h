@@ -96,16 +96,6 @@ public:
   BND_BoundingBox GetBoundingBox() const;
 };
 
-class BND_ONXModel_LayerTable
-{
-  std::shared_ptr<ONX_Model> m_model;
-public:
-  BND_ONXModel_LayerTable(std::shared_ptr<ONX_Model> m);
-
-  int Count() const;
-  BND_Layer* LayerAt(int index);
-};
-
 class BND_ONXModel
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -140,7 +130,6 @@ public:
   void SetRevision(int r);
 
   BND_ONXModel_ObjectTable Objects();
-  BND_ONXModel_LayerTable Layers();
 
 public:
   static bool ReadTest(std::wstring filepath);
