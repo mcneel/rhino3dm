@@ -1,0 +1,7 @@
+NurbsSurface
+************
+
+.. autoclass:: rhino3dm.NurbsSurface
+   :members:
+   :undoc-members:
+   :show-inheritance:

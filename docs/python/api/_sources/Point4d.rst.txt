@@ -1,0 +1,7 @@
+Point4d
+*******
+
+.. autoclass:: rhino3dm.Point4d
+   :members:
+   :undoc-members:
+   :show-inheritance:

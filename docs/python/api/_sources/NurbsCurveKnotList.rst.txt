@@ -1,0 +1,7 @@
+NurbsCurveKnotList
+******************
+
+.. autoclass:: rhino3dm.NurbsCurveKnotList
+   :members:
+   :undoc-members:
+   :show-inheritance:

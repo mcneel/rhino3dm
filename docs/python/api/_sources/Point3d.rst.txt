@@ -1,0 +1,7 @@
+Point3d
+*******
+
+.. autoclass:: rhino3dm.Point3d
+   :members:
+   :undoc-members:
+   :show-inheritance:

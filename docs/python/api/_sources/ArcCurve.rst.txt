@@ -1,0 +1,7 @@
+ArcCurve
+********
+
+.. autoclass:: rhino3dm.ArcCurve
+   :members:
+   :undoc-members:
+   :show-inheritance:

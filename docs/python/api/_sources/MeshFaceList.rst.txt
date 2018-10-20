@@ -1,0 +1,7 @@
+MeshFaceList
+************
+
+.. autoclass:: rhino3dm.MeshFaceList
+   :members:
+   :undoc-members:
+   :show-inheritance:

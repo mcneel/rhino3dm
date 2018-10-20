@@ -1,0 +1,7 @@
+MeshType
+********
+
+.. autoclass:: rhino3dm.MeshType
+   :members:
+   :undoc-members:
+   :show-inheritance:

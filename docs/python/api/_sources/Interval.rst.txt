@@ -1,0 +1,7 @@
+Interval
+********
+
+.. autoclass:: rhino3dm.Interval
+   :members:
+   :undoc-members:
+   :show-inheritance:

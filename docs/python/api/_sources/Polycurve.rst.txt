@@ -1,0 +1,7 @@
+Polycurve
+*********
+
+.. autoclass:: rhino3dm.Polycurve
+   :members:
+   :undoc-members:
+   :show-inheritance:

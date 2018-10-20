@@ -1,0 +1,7 @@
+Brep
+****
+
+.. autoclass:: rhino3dm.Brep
+   :members:
+   :undoc-members:
+   :show-inheritance:

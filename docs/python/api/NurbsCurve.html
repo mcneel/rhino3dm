@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>NurbsCurve &mdash; rhino3dm 0.0.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="NurbsCurveKnotList" href="NurbsCurveKnotList.html" />
+    <link rel="prev" title="MeshVertexList" href="MeshVertexList.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rhino3dm
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DocObjects.html">DocObjects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshType.html">MeshType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>NurbsCurve</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/NurbsCurve.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nurbscurve">
+<h1>NurbsCurve<a class="headerlink" href="#nurbscurve" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rhino3dm.NurbsCurve">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">NurbsCurve</code><span class="sig-paren">(</span><em>dimension</em>, <em>rational</em>, <em>order</em>, <em>pointCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Curve</span></code></a></p>
+<p>Represents a Non Uniform Rational B-Splines (NURBS) curve.</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsCurve.CreateFromArc">
+<em class="property">static </em><code class="descname">CreateFromArc</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a rational degree 2 NURBS curve representation
+of the arc. Note that the parameterization of NURBS curve
+does not match arc’s transcendental paramaterization.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Curve on success, null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsCurve.CreateFromCircle">
+<em class="property">static </em><code class="descname">CreateFromCircle</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a rational degree 2 NURBS curve representation
+of the circle. Note that the parameterization of NURBS curve
+does not match circle’s transcendental paramaterization.
+Use GetRadianFromNurbFormParameter() and
+GetParameterFromRadian() to convert between the NURBS curve
+parameter and the transcendental parameter.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Curve on success, null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsCurve.CreateFromLine">
+<em class="property">static </em><code class="descname">CreateFromLine</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a non-rational, degree 1 Nurbs curve representation of the line.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Curve on success, null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.GrevilleParameter">
+<code class="descname">GrevilleParameter</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevilleParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the greville (edit point) parameter that belongs
+to the control point at the specified index.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>index : Index of Greville (Edit) point.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.GrevillePoint">
+<code class="descname">GrevillePoint</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevillePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the greville (edit point) parameter that belongs
+to the control point at the specified index.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>index : Index of Greville (Edit) point.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.HasBezierSpans">
+<code class="descname">HasBezierSpans</code><a class="headerlink" href="#rhino3dm.NurbsCurve.HasBezierSpans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.IncreaseDegree">
+<code class="descname">IncreaseDegree</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.IncreaseDegree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increase the degree of this curve.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>desiredDegree : The desired degree.
+desiredDegree : Degrees should be number between and including 1 and 11.</dd>
+<dt>Returns:</dt>
+<dd>true on success, false on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.IsRational">
+<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.NurbsCurve.IsRational" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not the curve is rational.
+Rational curves have control-points with custom weights.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.MakePiecewiseBezier">
+<code class="descname">MakePiecewiseBezier</code><span class="sig-paren">(</span><em>setEndWeightsToOne</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.MakePiecewiseBezier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clamps ends and adds knots so the NURBS curve has bezier spans
+(all distinct knots have multiplitity = degree).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>setEndWeightsToOne : If true and the first or last weight is not one, then the first and
+setEndWeightsToOne : last spans are reparameterized so that the end weights are one.</dd>
+<dt>Returns:</dt>
+<dd>true on success, false on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.Order">
+<code class="descname">Order</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the order of the curve. Order = Degree + 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.Reparameterize">
+<code class="descname">Reparameterize</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.Reparameterize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a linear fractional transformation to reparameterize the NURBS curve.
+This does not change the curve’s domain.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>c : reparameterization constant (generally speaking, c should be &gt; 0). The
+c : control points and knots are adjusted so that
+c : output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ).
+c : Note that lambda(0) = 0, lambda(1) = 1, lambda’(t) &gt; 0,
+c : lambda’(0) = c and lambda’(1) = 1/c.</dd>
+<dt>Returns:</dt>
+<dd>true if successful.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="NurbsCurveKnotList.html" class="btn btn-neutral float-right" title="NurbsCurveKnotList" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="MeshVertexList.html" class="btn btn-neutral" title="MeshVertexList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert McNeel &amp; Associates
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

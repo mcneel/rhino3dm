@@ -1,0 +1,7 @@
+Transform
+*********
+
+.. autoclass:: rhino3dm.Transform
+   :members:
+   :undoc-members:
+   :show-inheritance:

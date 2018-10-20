@@ -1,0 +1,7 @@
+CommonObject
+************
+
+.. autoclass:: rhino3dm.CommonObject
+   :members:
+   :undoc-members:
+   :show-inheritance:

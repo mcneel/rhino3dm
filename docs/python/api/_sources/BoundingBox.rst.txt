@@ -1,0 +1,7 @@
+BoundingBox
+***********
+
+.. autoclass:: rhino3dm.BoundingBox
+   :members:
+   :undoc-members:
+   :show-inheritance:

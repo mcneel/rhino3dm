@@ -1,0 +1,7 @@
+Sphere
+******
+
+.. autoclass:: rhino3dm.Sphere
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+Vector3d
+********
+
+.. autoclass:: rhino3dm.Vector3d
+   :members:
+   :undoc-members:
+   :show-inheritance:

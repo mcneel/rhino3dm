@@ -1,0 +1,7 @@
+Extrusion
+*********
+
+.. autoclass:: rhino3dm.Extrusion
+   :members:
+   :undoc-members:
+   :show-inheritance:

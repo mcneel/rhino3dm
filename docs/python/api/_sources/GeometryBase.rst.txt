@@ -1,0 +1,7 @@
+GeometryBase
+************
+
+.. autoclass:: rhino3dm.GeometryBase
+   :members:
+   :undoc-members:
+   :show-inheritance:

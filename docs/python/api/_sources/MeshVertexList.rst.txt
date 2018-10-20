@@ -1,0 +1,7 @@
+MeshVertexList
+**************
+
+.. autoclass:: rhino3dm.MeshVertexList
+   :members:
+   :undoc-members:
+   :show-inheritance:

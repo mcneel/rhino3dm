@@ -1,0 +1,7 @@
+SurfaceProxy
+************
+
+.. autoclass:: rhino3dm.SurfaceProxy
+   :members:
+   :undoc-members:
+   :show-inheritance:

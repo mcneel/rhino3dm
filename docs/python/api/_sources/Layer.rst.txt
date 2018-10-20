@@ -1,0 +1,7 @@
+Layer
+*****
+
+.. autoclass:: rhino3dm.Layer
+   :members:
+   :undoc-members:
+   :show-inheritance:

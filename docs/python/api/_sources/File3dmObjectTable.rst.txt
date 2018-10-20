@@ -1,0 +1,7 @@
+File3dmObjectTable
+******************
+
+.. autoclass:: rhino3dm.File3dmObjectTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

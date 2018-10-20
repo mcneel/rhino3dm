@@ -1,0 +1,7 @@
+Arc
+***
+
+.. autoclass:: rhino3dm.Arc
+   :members:
+   :undoc-members:
+   :show-inheritance:

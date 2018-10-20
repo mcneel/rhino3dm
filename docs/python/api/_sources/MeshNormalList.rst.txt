@@ -1,0 +1,7 @@
+MeshNormalList
+**************
+
+.. autoclass:: rhino3dm.MeshNormalList
+   :members:
+   :undoc-members:
+   :show-inheritance:

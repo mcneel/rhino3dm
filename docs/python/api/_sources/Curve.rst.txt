@@ -1,0 +1,7 @@
+Curve
+*****
+
+.. autoclass:: rhino3dm.Curve
+   :members:
+   :undoc-members:
+   :show-inheritance:

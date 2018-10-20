@@ -1,0 +1,7 @@
+Circle
+******
+
+.. autoclass:: rhino3dm.Circle
+   :members:
+   :undoc-members:
+   :show-inheritance:

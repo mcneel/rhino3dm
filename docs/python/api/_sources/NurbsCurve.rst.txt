@@ -1,0 +1,7 @@
+NurbsCurve
+**********
+
+.. autoclass:: rhino3dm.NurbsCurve
+   :members:
+   :undoc-members:
+   :show-inheritance:

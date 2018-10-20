@@ -1,0 +1,7 @@
+Line
+****
+
+.. autoclass:: rhino3dm.Line
+   :members:
+   :undoc-members:
+   :show-inheritance:

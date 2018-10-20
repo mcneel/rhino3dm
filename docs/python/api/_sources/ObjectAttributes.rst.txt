@@ -1,0 +1,7 @@
+ObjectAttributes
+****************
+
+.. autoclass:: rhino3dm.ObjectAttributes
+   :members:
+   :undoc-members:
+   :show-inheritance:

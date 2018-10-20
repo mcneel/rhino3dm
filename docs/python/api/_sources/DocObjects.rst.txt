@@ -1,0 +1,7 @@
+DocObjects
+**********
+
+.. autoclass:: rhino3dm.DocObjects
+   :members:
+   :undoc-members:
+   :show-inheritance:

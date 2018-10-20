@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GeometryBase &mdash; rhino3dm 0.0.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Interval" href="Interval.html" />
+    <link rel="prev" title="File3dmObjectTable" href="File3dmObjectTable.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rhino3dm
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DocObjects.html">DocObjects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshType.html">MeshType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>GeometryBase</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/GeometryBase.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="geometrybase">
+<h1>GeometryBase<a class="headerlink" href="#geometrybase" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rhino3dm.GeometryBase">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">GeometryBase</code><a class="headerlink" href="#rhino3dm.GeometryBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
+<p>Provides a common base for most geometric classes. This class is abstract.</p>
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.GetBoundingBox">
+<code class="descname">GetBoundingBox</code><span class="sig-paren">(</span><em>accurate</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.GetBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boundingbox solver. Gets the world axis aligned boundingbox for the geometry.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>accurate : If true, a physically accurate boundingbox will be computed.
+accurate : If not, a boundingbox estimate will be computed. For some geometry types there is no
+accurate : difference between the estimate and the accurate boundingbox. Estimated boundingboxes
+accurate : can be computed much (much) faster than accurate (or “tight”) bounding boxes.
+accurate : Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</dd>
+<dt>Returns:</dt>
+<dd>The boundingbox of the geometry in world coordinates or BoundingBox.Empty
+if not bounding box could be found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.GetUserString">
+<code class="descname">GetUserString</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.GetUserString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets user string from this geometry.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>key : id used to retrieve the string.</dd>
+<dt>Returns:</dt>
+<dd>string associated with the key if successful. null if no key was found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.GeometryBase.ObjectType">
+<code class="descname">ObjectType</code><a class="headerlink" href="#rhino3dm.GeometryBase.ObjectType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Useful for switch statements that need to differentiate between
+basic object types like points, curves, surfaces, and so on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.Rotate">
+<code class="descname">Rotate</code><span class="sig-paren">(</span><em>angleRadians</em>, <em>rotationAxis</em>, <em>rotationCenter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.Rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotates the object about the specified axis. A positive rotation
+angle results in a counter-clockwise rotation about the axis (right hand rule).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>angleRadians : Angle of rotation in radians.
+rotationAxis : Direction of the axis of rotation.
+rotationCenter : Point on the axis of rotation.</dd>
+<dt>Returns:</dt>
+<dd>true if geometry successfully rotated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.Scale">
+<code class="descname">Scale</code><span class="sig-paren">(</span><em>scaleFactor</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.Scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales the object by the specified factor. The scale is centered at the origin.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>scaleFactor : The uniform scaling factor.</dd>
+<dt>Returns:</dt>
+<dd>true if geometry successfully scaled.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.SetUserString">
+<code class="descname">SetUserString</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.SetUserString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach a user string (key,value combination) to this geometry.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>key : id used to retrieve this string.
+value : string associated with key.</dd>
+<dt>Returns:</dt>
+<dd>true on success.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.GeometryBase.Translate">
+<code class="descname">Translate</code><span class="sig-paren">(</span><em>translationVector</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.Translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translates the object along the specified vector.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>translationVector : A moving vector.</dd>
+<dt>Returns:</dt>
+<dd>true if geometry successfully translated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.GeometryBase.UserStringCount">
+<code class="descname">UserStringCount</code><a class="headerlink" href="#rhino3dm.GeometryBase.UserStringCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the amount of user strings.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Interval.html" class="btn btn-neutral float-right" title="Interval" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="File3dmObjectTable.html" class="btn btn-neutral" title="File3dmObjectTable" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert McNeel &amp; Associates
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

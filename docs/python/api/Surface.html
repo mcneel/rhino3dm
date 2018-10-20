@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Surface &mdash; rhino3dm 0.0.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SurfaceProxy" href="SurfaceProxy.html" />
+    <link rel="prev" title="Sphere" href="Sphere.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rhino3dm
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DocObjects.html">DocObjects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshType.html">MeshType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Surface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Surface.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="surface">
+<h1>Surface<a class="headerlink" href="#surface" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rhino3dm.Surface">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Surface</code><a class="headerlink" href="#rhino3dm.Surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
+<p>Represents a base class that is common to most RhinoCommon surface types.
+A surface represents an entity that can be all visited by providing
+two independent parameters, usually called (u, v), or sometimes (s, t).</p>
+<dl class="method">
+<dt id="rhino3dm.Surface.Degree">
+<code class="descname">Degree</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the maximum algebraic degree of any span
+(or a good estimate if curve spans are not algebraic).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>direction : 0 gets first parameter’s domain, 1 gets second parameter’s domain.</dd>
+<dt>Returns:</dt>
+<dd>The maximum degree.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsAtSeam">
+<code class="descname">IsAtSeam</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSeam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a surface parameter value is at a seam.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>u : Surface u parameter to test.
+v : Surface v parameter to test.</dd>
+<dt>Returns:</dt>
+<dd>0 if not a seam,
+1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v)
+2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i])
+3 if 1 and 2 are true.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsAtSingularity">
+<code class="descname">IsAtSingularity</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>exact</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSingularity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a surface parameter value is at a singularity.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>u : Surface u parameter to test.
+v : Surface v parameter to test.
+exact : If true, test if (u,v) is exactly at a singularity.
+exact : If false, test if close enough to cause numerical problems.</dd>
+<dt>Returns:</dt>
+<dd>true if surface is singular at (s,t)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsClosed">
+<code class="descname">IsClosed</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsClosed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating if the surface is closed in a direction.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>direction : 0 = U, 1 = V.</dd>
+<dt>Returns:</dt>
+<dd>The indicating boolean value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsCone">
+<code class="descname">IsCone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the surface is a portion of a cone.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsCylinder">
+<code class="descname">IsCylinder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the surface is a portion of a cylinder.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsPeriodic">
+<code class="descname">IsPeriodic</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPeriodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating if thr surface is periodic in a direction (default is false).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>direction : 0 = U, 1 = V.</dd>
+<dt>Returns:</dt>
+<dd>The indicating boolean value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsPlanar">
+<code class="descname">IsPlanar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPlanar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests a surface to see if it is planar to zero tolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsSingular">
+<code class="descname">IsSingular</code><span class="sig-paren">(</span><em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSingular" title="Permalink to this definition">¶</a></dt>
+<dd><p>true if surface side is collapsed to a point.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>side : side of parameter space to test
+side : 0 = south, 1 = east, 2 = north, 3 = west.</dd>
+<dt>Returns:</dt>
+<dd>True if this specific side of the surface is singular; otherwise, false.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Surface.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Surface.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a values indicating whether a surface is solid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsSphere">
+<code class="descname">IsSphere</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the surface is a portion of a sphere.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsTorus">
+<code class="descname">IsTorus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsTorus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the surface is a portion of a torus.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.NormalAt">
+<code class="descname">NormalAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.NormalAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the surface normal at a point.
+This is the simple evaluation call - it does not support error handling.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>u : A U parameter.
+v : A V parameter.</dd>
+<dt>Returns:</dt>
+<dd>The normal.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.PointAt">
+<code class="descname">PointAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.PointAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a point at a given parameter.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>u : evaluation parameters.
+v : evaluation parameters.</dd>
+<dt>Returns:</dt>
+<dd>Point3d.Unset on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.SpanCount">
+<code class="descname">SpanCount</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SpanCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets number of smooth nonempty spans in the parameter direction.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>direction : 0 gets first parameter’s domain, 1 gets second parameter’s domain.</dd>
+<dt>Returns:</dt>
+<dd>The span count.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="SurfaceProxy.html" class="btn btn-neutral float-right" title="SurfaceProxy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Sphere.html" class="btn btn-neutral" title="Sphere" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert McNeel &amp; Associates
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

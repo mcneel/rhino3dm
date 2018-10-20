@@ -1,0 +1,7 @@
+LineCurve
+*********
+
+.. autoclass:: rhino3dm.LineCurve
+   :members:
+   :undoc-members:
+   :show-inheritance:
