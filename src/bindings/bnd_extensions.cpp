@@ -526,6 +526,7 @@ void initExtensionsBindings(void*)
   class_<BND_ONXModel_LayerTable>("File3dmLayerTable")
     .property("count", &BND_ONXModel_LayerTable::Count)
     .function("get", &BND_ONXModel_LayerTable::LayerAt, allow_raw_pointers())
+    ;
 
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
