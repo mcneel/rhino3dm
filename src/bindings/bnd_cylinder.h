@@ -8,8 +8,10 @@ void initCylinderBindings(pybind11::module& m);
 void initCylinderBindings(void* m);
 #endif
 
-class BND_Cylinder : ON_Cylinder
+class BND_Cylinder
 {
+public:
+  ON_Cylinder m_cylinder;
 public:
   //public Cylinder(Circle baseCircle)
   //public Cylinder(Circle baseCircle, double height)
