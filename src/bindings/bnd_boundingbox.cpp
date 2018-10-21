@@ -1,26 +1,25 @@
 #include "bindings.h"
 
 BND_BoundingBox::BND_BoundingBox(const ON_3dPoint& min, const ON_3dPoint& max)
-: ON_BoundingBox(min, max)
+: m_bbox(min, max)
 {
 
 }
 
 BND_BoundingBox::BND_BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
-: ON_BoundingBox(ON_3dPoint(minX, minY, minZ), ON_3dPoint(maxX, maxY, maxZ))
+: m_bbox(ON_3dPoint(minX, minY, minZ), ON_3dPoint(maxX, maxY, maxZ))
 {
 
 }
 
 BND_BoundingBox::BND_BoundingBox(const ON_BoundingBox& bbox)
+  : m_bbox(bbox)
 {
-  m_min = bbox.m_min;
-  m_max = bbox.m_max;
 }
 
 bool BND_BoundingBox::Transform(const ON_Xform& xform)
 {
-  return ON_BoundingBox::Transform(xform);
+  return m_bbox.Transform(xform);
 }
 
 RH_C_FUNCTION ON_Brep* ON_Brep_FromBox(const ON_3dPoint& boxmin, const ON_3dPoint& boxmax)
@@ -61,6 +60,22 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromBox(const ON_3dPoint& boxmin, const ON_3dPoin
   return rc;
 }
 
+BND_Brep* BND_BoundingBox::ToBrep() const
+{
+  ON_Brep* brep = ON_Brep_FromBox(m_bbox.m_min, m_bbox.m_max);
+  if (nullptr == brep)
+    return nullptr;
+  return new BND_Brep(brep, nullptr);
+}
+
+BND_BoundingBox BND_BoundingBox::Union(const BND_BoundingBox& a, const BND_BoundingBox& b)
+{
+  ON_BoundingBox rc = a.m_bbox;
+  rc.Union(b.m_bbox);
+  return BND_BoundingBox(rc);
+}
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initBoundingBoxBindings(pybind11::module& m)
@@ -68,13 +83,19 @@ void initBoundingBoxBindings(pybind11::module& m)
   py::class_<BND_BoundingBox>(m, "BoundingBox")
     .def(py::init<ON_3dPoint, ON_3dPoint>())
     .def(py::init<double, double, double, double, double, double>())
+    .def_property_readonly("IsValid", &BND_BoundingBox::IsValid)
     .def_property_readonly("Min", &BND_BoundingBox::Min)
     .def_property_readonly("Max", &BND_BoundingBox::Max)
-    .def("Contains", &ON_BoundingBox::IsPointIn)
+    .def_property_readonly("Center", &BND_BoundingBox::Center)
+    .def_property_readonly("Area", &BND_BoundingBox::Area)
+    .def_property_readonly("Volume", &BND_BoundingBox::Volume)
+    .def_property_readonly("Diagonal", &BND_BoundingBox::Diagonal)
+    .def("ClosestPoint", &BND_BoundingBox::ClosestPoint)
+    .def("Contains", &BND_BoundingBox::Contains)
+    .def_property_readonly("IsDegenerate", &BND_BoundingBox::IsDegenerate)
     .def("Transform", &BND_BoundingBox::Transform)
-    .def("ToBrep", [](const BND_BoundingBox& bbox) {
-        return ON_Brep_FromBox(bbox.m_min, bbox.m_max);
-      })
+    .def("ToBrep", &BND_BoundingBox::ToBrep)
+    .def_static("Union", &BND_BoundingBox::Union)
     ;
 }
 #else

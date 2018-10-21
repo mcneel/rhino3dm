@@ -199,7 +199,7 @@ ON_Xform* BND_Viewport::GetXform(ON::coordinate_system srcCS, ON::coordinate_sys
 bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 {
   bool rc = false;
-  ON_BoundingBox cameraCoordinateBoundingBox = bbox;
+  ON_BoundingBox cameraCoordinateBoundingBox = bbox.m_bbox;
   if (cameraCoordinateBoundingBox.IsValid())
   {
     if (border > 1.0 && ON_IsValid(border))
