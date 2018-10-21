@@ -30,6 +30,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initConeBindings(m);
   initCylinderBindings(m);
   initArcCurveBindings(m);
+  initBezierBindings(m);
   initLineCurveBindings(m);
   initPolyCurveBindings(m);
   initPolylineCurveBindings(m);
