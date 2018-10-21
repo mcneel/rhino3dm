@@ -7,7 +7,7 @@ BND_Box::BND_Box(const BND_BoundingBox& bbox)
 
 //BND_Brep* BND_Box::ToBrep() const
 //{
-//  
+//
 //}
 //
 //BND_Extrusion* BND_Box::ToExtrusion() const
@@ -37,6 +37,14 @@ using namespace emscripten;
 void initBoxBindings(void*)
 {
   class_<BND_Box>("Box")
+    .constructor<const BND_BoundingBox&>()
+    .property("isValid", &BND_Box::IsValid)
+    .property("center", &BND_Box::Center)
+    .property("area", &BND_Box::Area)
+    .property("volume", &BND_Box::Volume)
+    .function("pointAt", &BND_Box::PointAt)
+    .function("closestPoint", &BND_Box::ClosestPoint)
+    .function("transform", &BND_Box::Transform)
     ;
 }
 #endif
