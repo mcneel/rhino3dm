@@ -5,7 +5,7 @@ BND_Arc::BND_Arc(const BND_Circle& circle, double angleRadians)
   m_arc = ON_Arc(circle.ToONCircle(), angleRadians);
 }
 
-BND_Arc::BND_Arc(ON_3dPoint center, double radius, double angleRadians) 
+BND_Arc::BND_Arc(ON_3dPoint center, double radius, double angleRadians)
   : m_arc(center, radius, angleRadians)
 {
 }
@@ -65,7 +65,25 @@ using namespace emscripten;
 void initArcBindings(void*)
 {
   class_<BND_Arc>("Arc")
+    .constructor<const BND_Circle&, double>()
     .constructor<ON_3dPoint, double, double>()
+// the following won't work with the way we are currently defining Points/Vectors
+//    .constructor<ON_3dPoint, ON_3dPoint, ON_3dPoint>()
+//    .constructor<ON_3dPoint, ON_3dVector, ON_3dPoint>()
+    .property("isValid", &BND_Arc::IsValid)
+    .property("isCircle", &BND_Arc::IsCircle)
+    .property("radius", &BND_Arc::GetRadius, &BND_Arc::SetRadius)
+    .property("diameter", &BND_Arc::GetDiameter, &BND_Arc::SetDiameter)
+    .property("center", &BND_Arc::GetCenter, &BND_Arc::SetCenter)
+    .property("circumference", &BND_Arc::Circumference)
+    .property("length", &BND_Arc::Length)
+    .property("startPoint", &BND_Arc::StartPoint)
+    .property("midPoint", &BND_Arc::MidPoint)
+    .property("endPoint", &BND_Arc::EndPoint)
+    .function("pointAt", &BND_Arc::PointAt)
+    .function("tangentAt", &BND_Arc::TangentAt)
+    .function("closestPoint", &BND_Arc::ClosestPoint)
+    .function("reverse", &BND_Arc::Reverse)
     .function("toNurbsCurve", &BND_Arc::ToNurbsCurve, allow_raw_pointers());
 }
 #endif

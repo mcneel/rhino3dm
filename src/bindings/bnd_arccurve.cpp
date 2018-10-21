@@ -71,6 +71,16 @@ using namespace emscripten;
 void initArcCurveBindings(void*)
 {
   class_<BND_ArcCurve, base<BND_Curve>>("ArcCurve")
+    .constructor<>()
+//    .constructor<const BND_ArcCurve&>()
+    .constructor<const BND_Arc&>()
+//    .constructor<const BND_Arc, double, double>()
+//    .constructor<const BND_Circle&>()
+//    .constructor<const BND_Circle&, double, double>()
+    .property("isCompleteCircle", &BND_ArcCurve::IsCompleteCircle)
+    .property("radius", &BND_ArcCurve::GetRadius)
+    .property("angleRadians", &BND_ArcCurve::AngleRadians)
+    .property("angleDegrees", &BND_ArcCurve::AngleDegrees)
     ;
 }
 #endif
