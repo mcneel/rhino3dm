@@ -27,6 +27,17 @@ using namespace emscripten;
 void initBezierBindings(void*)
 {
   class_<BND_BezierCurve>("BezierCurve")
+    .property("dimension", &BND_BezierCurve::Dimension)
+    .property("isValid", &BND_BezierCurve::IsValid)
+    .function("pointAt", &BND_BezierCurve::PointAt)
+    .function("tangentAt", &BND_BezierCurve::TangentAt)
+    .function("curvatureAt", &BND_BezierCurve::CurvatureAt)
+    .property("isRational", &BND_BezierCurve::IsRational)
+    .property("controlVertexCount", &BND_BezierCurve::ControlVertexCount)
+    .function("makeRational", &BND_BezierCurve::MakeRational)
+    .function("makeNonRational", &BND_BezierCurve::MakeNonRational)
+    .function("increaseDegree", &BND_BezierCurve::IncreaseDegree)
+    .function("changeDimension", &BND_BezierCurve::ChangeDimension)
     ;
 }
 #endif
