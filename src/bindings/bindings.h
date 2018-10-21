@@ -41,6 +41,7 @@
 #include "bnd_arc.h"
 #include "bnd_curve.h"
 #include "bnd_arccurve.h"
+#include "bnd_bezier.h"
 #include "bnd_linecurve.h"
 #include "bnd_polycurve.h"
 #include "bnd_polylinecurve.h"
