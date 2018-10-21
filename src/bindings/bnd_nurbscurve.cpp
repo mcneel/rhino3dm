@@ -64,7 +64,7 @@ BND_NurbsCurve* BND_NurbsCurve::CreateFromLine(const ON_Line& line)
 BND_NurbsCurve* BND_NurbsCurve::CreateFromArc(const BND_Arc& arc)
 {
   ON_NurbsCurve* nc = new ON_NurbsCurve();
-  if (0 == arc.GetNurbForm(*nc))
+  if (0 == arc.m_arc.GetNurbForm(*nc))
   {
     delete nc;
     return nullptr;
