@@ -14,17 +14,16 @@ class BND_ArcCurve : public BND_Curve
 public:
   BND_ArcCurve(ON_ArcCurve* arccurve, const ON_ModelComponentReference* compref);
   BND_ArcCurve();
-  //public ArcCurve(ArcCurve other)
-  //public ArcCurve(Arc arc)
-  //public ArcCurve(Arc arc, double t0, double t1)
-  //public ArcCurve(Circle circle)
-  //public ArcCurve(Circle circle, double t0, double t1)
-  //public Arc Arc |get;
-  //public bool IsCompleteCircle | get;
-  //public double Radius | get;
-  //public double AngleRadians | get;
-  //public double AngleDegrees | get;
-
+  BND_ArcCurve(const BND_ArcCurve& other);
+  BND_ArcCurve(const class BND_Arc& arc);
+  BND_ArcCurve(const class BND_Arc& arc, double t0, double t1);
+  BND_ArcCurve(const class BND_Circle& circle);
+  BND_ArcCurve(const class BND_Circle& circle, double t0, double t1);
+  //class BND_Arc* GetArc() const;
+  bool IsCompleteCircle() const { return m_arccurve->IsCircle(); }
+  double GetRadius() const { return m_arccurve->Radius(); }
+  double AngleRadians() const { return m_arccurve->AngleRadians(); }
+  double AngleDegrees() const { return m_arccurve->AngleDegrees(); }
 
 protected:
   void SetTrackedPointer(ON_ArcCurve* arccurve, const ON_ModelComponentReference* compref);
