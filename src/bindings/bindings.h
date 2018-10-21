@@ -31,6 +31,8 @@
 #include "bnd_plane.h"
 #include "bnd_xform.h"
 #include "bnd_circle.h"
+#include "bnd_cone.h"
+#include "bnd_cylinder.h"
 #include "bnd_object.h"
 #include "bnd_3dm_attributes.h"
 #include "bnd_layer.h"

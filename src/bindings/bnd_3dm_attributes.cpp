@@ -43,6 +43,17 @@ void init3dmAttributesBindings(pybind11::module& m)
     .def_property("Name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
     .def_property_readonly("Id", &BND_3dmAttributes::GetObjectId)
     .def_property("LayerIndex", &BND_3dmAttributes::GetLayerIndex, &BND_3dmAttributes::SetLayerIndex)
+    .def_property("MaterialIndex", &BND_3dmAttributes::MaterialIndex, &BND_3dmAttributes::SetMaterialIndex)
+    .def_property("ObjectColor", &BND_3dmAttributes::GetObjectColor, &BND_3dmAttributes::SetObjectColor)
+    .def_property("PlotColor", &BND_3dmAttributes::GetPlotColor, &BND_3dmAttributes::SetPlotColor)
+    .def_property("DisplayOrder", &BND_3dmAttributes::GetDisplayOrder, &BND_3dmAttributes::SetDisplayOrder)
+    .def_property("PlotWeight", &BND_3dmAttributes::PlotWeight, &BND_3dmAttributes::SetPlotWeight)
+    .def_property("WireDensity", &BND_3dmAttributes::WireDensity, &BND_3dmAttributes::SetWireDensity)
+    .def_property("ViewportId", &BND_3dmAttributes::GetViewportId, &BND_3dmAttributes::SetViewportId)
+    .def_property_readonly("GroupCount", &BND_3dmAttributes::GroupCount)
+    .def("AddToGroup", &BND_3dmAttributes::AddToGroup)
+    .def("RemoveFromGroup", &BND_3dmAttributes::RemoveFromGroup)
+    .def("RemoveFromAllGroups", &BND_3dmAttributes::RemoveFromAllGroups)
     ;
 }
 #endif
