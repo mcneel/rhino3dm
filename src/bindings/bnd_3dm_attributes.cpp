@@ -69,6 +69,17 @@ void init3dmAttributesBindings(void*)
     .property("name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
     .property("id", &BND_3dmAttributes::GetObjectId)
     .property("layerIndex", &BND_3dmAttributes::GetLayerIndex, &BND_3dmAttributes::SetLayerIndex)
+    .property("materialIndex", &BND_3dmAttributes::MaterialIndex, &BND_3dmAttributes::SetMaterialIndex)
+    .property("objectColor", &BND_3dmAttributes::GetObjectColor, &BND_3dmAttributes::SetObjectColor)
+    .property("plotColor", &BND_3dmAttributes::GetPlotColor, &BND_3dmAttributes::SetPlotColor)
+    .property("displayOrder", &BND_3dmAttributes::GetDisplayOrder, &BND_3dmAttributes::SetDisplayOrder)
+    .property("plotWeight", &BND_3dmAttributes::PlotWeight, &BND_3dmAttributes::SetPlotWeight)
+    .property("wireDensity", &BND_3dmAttributes::WireDensity, &BND_3dmAttributes::SetWireDensity)
+    .property("viewportId", &BND_3dmAttributes::GetViewportId, &BND_3dmAttributes::SetViewportId)
+    .property("groupCount", &BND_3dmAttributes::GroupCount)
+    .function("addToGroup", &BND_3dmAttributes::AddToGroup)
+    .function("removeFromGroup", &BND_3dmAttributes::RemoveFromGroup)
+    .function("removeFromAllGroups", &BND_3dmAttributes::RemoveFromAllGroups)
   ;
 
 }
