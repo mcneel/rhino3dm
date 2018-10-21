@@ -69,7 +69,7 @@ namespace py = pybind11;
 void initExtrusionBindings(pybind11::module& m)
 {
   py::class_<BND_Extrusion, BND_Surface>(m, "Extrusion")
-    .def_static("create", &BND_Extrusion::Create)
+    .def_static("Create", &BND_Extrusion::Create)
     .def_static("CreateCylinderExtrusion", &BND_Extrusion::CreateCylinderExtrusion)
     .def_static("CreatePipeExtrusion", &BND_Extrusion::CreatePipeExtrusion)
     .def(py::init<>())
@@ -90,8 +90,19 @@ using namespace emscripten;
 
 void initExtrusionBindings(void*)
 {
-  class_<BND_Extrusion, base<BND_Surface>>("Extrusion");
+  class_<BND_Extrusion, base<BND_Surface>>("Extrusion")
+    .constructor<>()
+    .class_function("create", &BND_Extrusion::Create, allow_raw_pointers())
+    .class_function("createCylinderExtrusion", &BND_Extrusion::CreateCylinderExtrusion, allow_raw_pointers())
+    .class_function("createPipeExtrusion", &BND_Extrusion::CreatePipeExtrusion, allow_raw_pointers())
+    .function("toBrep", &BND_Extrusion::ToBrep, allow_raw_pointers())
+    .function("setPathAndUp", &BND_Extrusion::SetPathAndUp)
+    .property("pathStart", &BND_Extrusion::PathStart)
+    .property("pathEnd", &BND_Extrusion::PathEnd)
+    .property("pathTangent", &BND_Extrusion::PathTangent)
+    .property("isSolid", &BND_Extrusion::IsSolid)
+    .property("capCount", &BND_Extrusion::CapCount)
+    .function("getMesh", &BND_Extrusion::GetMesh, allow_raw_pointers())
+    ;
 }
 #endif
-
-
