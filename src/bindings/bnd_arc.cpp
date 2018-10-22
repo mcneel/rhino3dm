@@ -2,7 +2,7 @@
 
 BND_Arc::BND_Arc(const BND_Circle& circle, double angleRadians)
 {
-  m_arc = ON_Arc(circle.ToONCircle(), angleRadians);
+  m_arc = ON_Arc(circle.m_circle, angleRadians);
 }
 
 BND_Arc::BND_Arc(ON_3dPoint center, double radius, double angleRadians)

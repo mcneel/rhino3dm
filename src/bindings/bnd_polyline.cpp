@@ -47,7 +47,7 @@ BND_PolylineCurve* BND_Polyline::ToPolylineCurve() const
 BND_Polyline* BND_Polyline::CreateInscribedPolygon(BND_Circle& circle, int sideCount)
 {
   BND_Polyline* rc = new BND_Polyline();
-  if (!rc->m_polyline.CreateInscribedPolygon(circle.ToONCircle(), sideCount))
+  if (!rc->m_polyline.CreateInscribedPolygon(circle.m_circle, sideCount))
   {
     delete rc;
     return nullptr;
@@ -58,7 +58,7 @@ BND_Polyline* BND_Polyline::CreateInscribedPolygon(BND_Circle& circle, int sideC
 BND_Polyline* BND_Polyline::CreateCircumscribedPolygon(BND_Circle& circle, int sideCount)
 {
   BND_Polyline* rc = new BND_Polyline();
-  if (!rc->m_polyline.CreateCircumscribedPolygon(circle.ToONCircle(), sideCount))
+  if (!rc->m_polyline.CreateCircumscribedPolygon(circle.m_circle, sideCount))
   {
     delete rc;
     return nullptr;
@@ -69,7 +69,7 @@ BND_Polyline* BND_Polyline::CreateCircumscribedPolygon(BND_Circle& circle, int s
 BND_Polyline* BND_Polyline::CreateStarPolygon(BND_Circle& circle, double radius, int cornerCount)
 {
   BND_Polyline* rc = new BND_Polyline();
-  if (!rc->m_polyline.CreateStarPolygon(circle.ToONCircle(), radius, cornerCount))
+  if (!rc->m_polyline.CreateStarPolygon(circle.m_circle, radius, cornerCount))
   {
     delete rc;
     return nullptr;
