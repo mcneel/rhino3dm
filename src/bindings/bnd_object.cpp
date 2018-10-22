@@ -64,6 +64,9 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
       ON_ArcCurve* ac = ON_ArcCurve::Cast(obj);
       if (ac)
         return new BND_ArcCurve(ac, compref);
+      ON_CurveProxy* proxy = ON_CurveProxy::Cast(obj);
+      if (proxy)
+        return new BND_CurveProxy(proxy, compref);
       return new BND_Curve(curve, compref);
     }
 
