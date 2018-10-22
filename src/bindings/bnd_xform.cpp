@@ -57,9 +57,22 @@ void initXformBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-void initBoxBindings(void*)
+void initXformBindings(void*)
 {
   class_<BND_Xform>("Transform")
+    .constructor<double>()
+    //.constructor<const BND_Xform&>()
+    .class_function("identity", &BND_Xform::Identity)
+    .class_function("translation", &BND_Xform::Translation)
+    .class_function("scale", &BND_Xform::Scale)
+    .class_function("rotation", &BND_Xform::Rotation)
+    .property("isIdentity", &BND_Xform::IsIdentity)
+    .property("isValid", &BND_Xform::IsValid)
+    .property("isZero", &BND_Xform::IsZero)
+    .property("isZero4x4", &BND_Xform::IsZero4x4)
+    .property("isZeroTransformation", &BND_Xform::IsZeroTransformation)
+    .function("determinant", &BND_Xform::Determinant)
+    .function("transpose", &BND_Xform::Transpose)
     ;
 }
 #endif
