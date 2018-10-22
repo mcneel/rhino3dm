@@ -10,7 +10,7 @@
 Functionality includes
 
 - Create, interrogate, and store all geometry types supported in Rhino. This includes points, point clouds, NURBS curves and surfaces, polysurfaces (B-Reps), meshes, annotations, and extrusions.
-- Work with non-geometry classes supported in Rhino like layers, object attributes, tranforms and viewports
+- Work with non-geometry classes supported in Rhino like layers, object attributes, transforms and viewports
 - Read and write all of the above information to and from the *.3dm* file format
 - Use as a client to make calls into the [Rhino Compute cloud server](https://www.rhino3d.com/compute) for advanced manipulation of geometry objects
 - Available on most platforms (Windows, macOS, Linux)
