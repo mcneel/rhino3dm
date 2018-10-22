@@ -68,7 +68,7 @@ BND_Circle* BND_Curve::TryGetCircle(double tolerance) const
     rc->m_circle = arc;
     return rc;
   }
-  return false;
+  return nullptr;
 }
 
 BND_Curve* BND_Curve::Trim(double t0, double t1) const
