@@ -193,6 +193,30 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BoundingBox</code><span class="sig-paren">(</span><em>minX</em>, <em>minY</em>, <em>minZ</em>, <em>maxX</em>, <em>maxY</em>, <em>maxZ</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>…</p>
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Area">
+<code class="descname">Area</code><a class="headerlink" href="#rhino3dm.BoundingBox.Area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the area of this BoundingBox.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Center">
+<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.BoundingBox.Center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the point in the center of the boundingbox.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.BoundingBox.ClosestPoint">
+<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.ClosestPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the closest point on or in the boundingbox.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>point : Sample point.</dd>
+<dt>Returns:</dt>
+<dd>The point on or in the box that is closest to the sample point.</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.BoundingBox.Contains">
 <code class="descname">Contains</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Contains" title="Permalink to this definition">¶</a></dt>
@@ -203,6 +227,37 @@
 <dt>Returns:</dt>
 <dd>true if the point is on the inside of or coincident with this boundingbox; otherwise false.</dd>
 </dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Diagonal">
+<code class="descname">Diagonal</code><a class="headerlink" href="#rhino3dm.BoundingBox.Diagonal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the diagonal vector of this BoundingBox.
+The diagonal connects the Min and Max points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.BoundingBox.IsDegenerate">
+<code class="descname">IsDegenerate</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.IsDegenerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether a bounding box is degenerate (flat) in one or more directions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>tolerance : Distances &lt;= tolerance will be considered to be zero.  If tolerance
+tolerance : is negative (default), then a scale invarient tolerance is used.</dd>
+<dt>Returns:</dt>
+<dd>0 = box is not degenerate
+1 = box is a rectangle (degenerate in one direction).
+2 = box is a line (degenerate in two directions).
+3 = box is a point (degenerate in three directions)
+4 = box is not valid.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.BoundingBox.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value that indicates whether or not this boundingbox is valid.
+Empty boxes are not valid, and neither are boxes with unset points.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -239,6 +294,22 @@ points.</p>
 <dt>Returns:</dt>
 <dd>true if this operation is sucessfull; otherwise false.</dd>
 </dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.BoundingBox.Union">
+<em class="property">static </em><code class="descname">Union</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Union" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates this BoundingBox to represent the union of itself and another box.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>other : Box to include in this union.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Volume">
+<code class="descname">Volume</code><a class="headerlink" href="#rhino3dm.BoundingBox.Volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the volume of this BoundingBox.</p>
 </dd></dl>
 
 </dd></dl>

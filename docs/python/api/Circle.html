@@ -193,6 +193,63 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Circle</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>…</p>
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Center">
+<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Circle.Center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the center point of this circle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Circumference">
+<code class="descname">Circumference</code><a class="headerlink" href="#rhino3dm.Circle.Circumference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the circumference of this circle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.ClosestPoint">
+<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.ClosestPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the point on the circle which is closest to a test point.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>testPoint : Point to project onto the circle.</dd>
+<dt>Returns:</dt>
+<dd>The point on the circle that is closest to testPoint or
+Point3d.Unset on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.DerivativeAt">
+<code class="descname">DerivativeAt</code><span class="sig-paren">(</span><em>derivative</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.DerivativeAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the value of the Nth derivative at a parameter.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>derivative : Which order of derivative is wanted.
+t : Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.</dd>
+<dt>Returns:</dt>
+<dd>The derivative of the circle at the given parameter.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Diameter">
+<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Circle.Diameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the diameter (radius * 2.0) of this circle.
+Diameters should be positive values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Circle.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>A valid circle has radius larger than 0.0 and a base plane which is must also be valid.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Normal">
+<code class="descname">Normal</code><a class="headerlink" href="#rhino3dm.Circle.Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the normal vector for this circle.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.Circle.PointAt">
 <code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.PointAt" title="Permalink to this definition">¶</a></dt>
@@ -206,6 +263,33 @@ t -&gt; center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.</p>
 </dl>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Radius">
+<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Circle.Radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the radius of this circle.
+Radii should be positive values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.Reverse">
+<code class="descname">Reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse the orientation of the circle. Changes the domain from [a,b]
+to [-b,-a].</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.TangentAt">
+<code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.TangentAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Circles use trigonometric parameterization:
+t -&gt; center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>t : Parameter of tangent to evaluate.</dd>
+<dt>Returns:</dt>
+<dd>The tangent at the circle at the given parameter.</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.Circle.ToNurbsCurve">
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
@@ -214,6 +298,18 @@ This amounts to the same as calling NurbsCurve.CreateFromCircle().</p>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd>A nurbs curve representation of this circle or null if no such representation could be made.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.Translate">
+<code class="descname">Translate</code><span class="sig-paren">(</span><em>delta</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the circle.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>delta : Translation vector.</dd>
+<dt>Returns:</dt>
+<dd>true on success, false on failure.</dd>
 </dl>
 </dd></dl>
 

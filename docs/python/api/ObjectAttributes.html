@@ -193,6 +193,32 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ObjectAttributes</code><a class="headerlink" href="#rhino3dm.ObjectAttributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
 <p>Attributes (color, material, layer,…) associated with a rhino object</p>
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.AddToGroup">
+<code class="descname">AddToGroup</code><span class="sig-paren">(</span><em>groupIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.AddToGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds object to the group with specified index by appending index to
+group list.
+If the object is already in group, nothing is changed.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>groupIndex : The index that will be added.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.DisplayOrder">
+<code class="descname">DisplayOrder</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.DisplayOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display order used to force objects to be drawn on top or behind each other.
+Larger numbers draw on top of smaller numbers.
+0  = draw object in standard depth buffered order&lt;0 = draw object behind “normal” draw order objects&gt;0 = draw object on top of “normal” draw order objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.GroupCount">
+<code class="descname">GroupCount</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.GroupCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>number of groups object belongs to.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.LayerIndex">
 <code class="descname">LayerIndex</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.LayerIndex" title="Permalink to this definition">¶</a></dt>
@@ -204,6 +230,14 @@ is specified by zero based indicies into the ON_Layer array.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.MaterialIndex">
+<code class="descname">MaterialIndex</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.MaterialIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the material index.
+If you want something simple and fast, set the index of
+the rendering material.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.Name">
 <code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets or sets an object optional text name.
@@ -212,9 +246,67 @@ some objects may have no name.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.ObjectColor">
+<code class="descname">ObjectColor</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ObjectColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>If ON::color_from_object == ColorSource, then color is the object’s display color.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.PlotColor">
+<code class="descname">PlotColor</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>If plot_color_from_object == PlotColorSource, then PlotColor is the object’s plotting color.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.PlotWeight">
+<code class="descname">PlotWeight</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot weight in millimeters.
+=0.0 means use the default width
+&lt;0.0 means don’t plot (visible for screen display, but does not show on plot)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.RemoveFromAllGroups">
+<code class="descname">RemoveFromAllGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromAllGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes object from all groups.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.RemoveFromGroup">
+<code class="descname">RemoveFromGroup</code><span class="sig-paren">(</span><em>groupIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>removes object from the group with specified index.
+If the object is not in the group, nothing is changed.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>groupIndex : The index that will be removed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.ViewportId">
+<code class="descname">ViewportId</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ViewportId" title="Permalink to this definition">¶</a></dt>
+<dd><p>If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
+this object is only active in a specific view. This field is primarily used to assign page
+space objects to a specific page, but it can also be used to restrict model space to a
+specific view.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.Visible">
 <code class="descname">Visible</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Visible" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets or sets an object’s visiblity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.WireDensity">
+<code class="descname">WireDensity</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.WireDensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>When a surface object is displayed in wireframe, this controls
+how many isoparametric wires are used.
+value    number of isoparametric wires
+-1       boundary wires (off)
+0        boundary and knot wires
+1        boundary and knot wires and, if there are no interior knots, a single interior wire.
+N&gt;=2     boundary and knot wires and (N+1) interior wires.</p>
 </dd></dl>
 
 </dd></dl>

@@ -1,0 +1,7 @@
+CurveProxy
+**********
+
+.. autoclass:: rhino3dm.CurveProxy
+   :members:
+   :undoc-members:
+   :show-inheritance:

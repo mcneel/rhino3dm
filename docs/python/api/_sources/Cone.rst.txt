@@ -1,0 +1,7 @@
+Cone
+****
+
+.. autoclass:: rhino3dm.Cone
+   :members:
+   :undoc-members:
+   :show-inheritance:

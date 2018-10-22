@@ -1,0 +1,7 @@
+File3dmLayerTable
+*****************
+
+.. autoclass:: rhino3dm.File3dmLayerTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

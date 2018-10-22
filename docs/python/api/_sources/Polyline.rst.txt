@@ -1,0 +1,7 @@
+Polyline
+********
+
+.. autoclass:: rhino3dm.Polyline
+   :members:
+   :undoc-members:
+   :show-inheritance:

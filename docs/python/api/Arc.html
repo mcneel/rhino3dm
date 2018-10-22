@@ -190,9 +190,120 @@
 <h1>Arc<a class="headerlink" href="#arc" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Arc">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Arc</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em>, <em>angleRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Arc</code><span class="sig-paren">(</span><em>pointA</em>, <em>tangentA</em>, <em>pointB</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>…</p>
+<dl class="attribute">
+<dt id="rhino3dm.Arc.Center">
+<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Arc.Center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the center point for this arc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.Circumference">
+<code class="descname">Circumference</code><a class="headerlink" href="#rhino3dm.Arc.Circumference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the circumference of the circle that is coincident with this arc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Arc.ClosestPoint">
+<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.ClosestPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the point on an arc that is closest to a test point.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>testPoint : Point to get close to.</dd>
+<dt>Returns:</dt>
+<dd>The point on the arc that is closest to testPoint. If testPoint is
+the center of the arc, then the starting point of the arc is returned.
+UnsetPoint on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.Diameter">
+<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Arc.Diameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the Diameter of this arc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.EndPoint">
+<code class="descname">EndPoint</code><a class="headerlink" href="#rhino3dm.Arc.EndPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the end point of the arc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.IsCircle">
+<code class="descname">IsCircle</code><a class="headerlink" href="#rhino3dm.Arc.IsCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not this arc is a complete circle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Arc.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not this arc is valid.
+Detail:
+Radius&gt;0 and 0&lt;AngleRadians()&lt;=2*Math.Pi.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the arc is valid.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.Length">
+<code class="descname">Length</code><a class="headerlink" href="#rhino3dm.Arc.Length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the length of the arc. (Length = Radius * (subtended angle in radians)).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.MidPoint">
+<code class="descname">MidPoint</code><a class="headerlink" href="#rhino3dm.Arc.MidPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the mid-point of the arc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Arc.PointAt">
+<code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.PointAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the point at the given arc parameter.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>t : Arc parameter to evaluate.</dd>
+<dt>Returns:</dt>
+<dd>The point at the given parameter.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.Radius">
+<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Arc.Radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the radius of this arc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Arc.Reverse">
+<code class="descname">Reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses the orientation of the arc. Changes the domain from [a,b]
+to [-b,-a].</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.StartPoint">
+<code class="descname">StartPoint</code><a class="headerlink" href="#rhino3dm.Arc.StartPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the start point of the arc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Arc.TangentAt">
+<code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.TangentAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the tangent at the given parameter.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>t : Parameter of tangent to evaluate.</dd>
+<dt>Returns:</dt>
+<dd>The tangent at the arc at the given parameter.</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.Arc.ToNurbsCurve">
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>

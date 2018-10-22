@@ -1,0 +1,7 @@
+Cylinder
+********
+
+.. autoclass:: rhino3dm.Cylinder
+   :members:
+   :undoc-members:
+   :show-inheritance:

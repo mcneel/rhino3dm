@@ -1,0 +1,7 @@
+Box
+***
+
+.. autoclass:: rhino3dm.Box
+   :members:
+   :undoc-members:
+   :show-inheritance:

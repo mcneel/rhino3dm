@@ -1,0 +1,7 @@
+BezierCurve
+***********
+
+.. autoclass:: rhino3dm.BezierCurve
+   :members:
+   :undoc-members:
+   :show-inheritance:

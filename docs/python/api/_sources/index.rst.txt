@@ -12,19 +12,26 @@ Welcome to rhino3dm's documentation!
 
    Arc
    ArcCurve
+   BezierCurve
    BoundingBox
+   Box
    Brep
    BrepFace
    BrepFaceList
    Circle
    CommonObject
+   Cone
    Curve
+   CurveProxy
+   Cylinder
    DocObjects
    Extrusion
    File3dm
+   File3dmLayerTable
    File3dmObject
    File3dmObjectTable
    GeometryBase
+   Hatch
    Interval
    Layer
    Line
@@ -41,9 +48,11 @@ Welcome to rhino3dm's documentation!
    ObjectAttributes
    Point2d
    Point3d
+   Point3dList
    Point3f
    Point4d
    Polycurve
+   Polyline
    Polylinecurve
    Sphere
    Surface

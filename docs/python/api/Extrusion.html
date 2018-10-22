@@ -194,6 +194,126 @@
 <dd><p>Bases: <a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Surface</span></code></a></p>
 <p>Represents an extrusion, or objects such as beams or linearly extruded elements,
 that can be represented by profile curves and two miter planes at the extremes.</p>
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.CapCount">
+<code class="descname">CapCount</code><a class="headerlink" href="#rhino3dm.Extrusion.CapCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the amount of capping surfaces.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Extrusion.Create">
+<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>planarCurve</em>, <em>height</em>, <em>cap</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.Create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an extrusion of a 3d curve (which must be planar) and a height.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>planarCurve : Planar curve used as profile
+height : If the height &gt; 0, the bottom of the extrusion will be in plane and
+height : the top will be height units above the plane.
+height : If the height &lt; 0, the top of the extrusion will be in plane and
+height : the bottom will be height units below the plane.
+height : The plane used is the one that is returned from the curve’s TryGetPlane function.
+cap : If the curve is closed and cap is true, then the resulting extrusion is capped.</dd>
+<dt>Returns:</dt>
+<dd>If the input is valid, then a new extrusion is returned. Otherwise null is returned</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Extrusion.CreateCylinderExtrusion">
+<em class="property">static </em><code class="descname">CreateCylinderExtrusion</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreateCylinderExtrusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an extrusion form of a cylinder.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>cylinder : IsFinite must be true.
+capBottom : If true, the end at cylinder.Height1 will be capped.
+capTop : If true, the end at cylinder.Height2 will be capped.</dd>
+<dt>Returns:</dt>
+<dd>Extrusion on success. null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Extrusion.CreatePipeExtrusion">
+<em class="property">static </em><code class="descname">CreatePipeExtrusion</code><span class="sig-paren">(</span><em>cylinder</em>, <em>otherRadius</em>, <em>capTop</em>, <em>capBottom</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreatePipeExtrusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an extrusion form of a pipe.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>cylinder : IsFinite must be true.
+otherRadius : If cylinder.Radius is less than other radius, then the cylinder will be the inside
+otherRadius : of the pipe.
+capBottom : If true, the end at cylinder.Height1 will be capped.
+capTop : If true, the end at cylinder.Height2 will be capped.</dd>
+<dt>Returns:</dt>
+<dd>Extrusion on success. null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.GetMesh">
+<code class="descname">GetMesh</code><span class="sig-paren">(</span><em>meshType</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains a reference to a specified type of mesh for this extrusion.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>meshType : The mesh type.</dd>
+<dt>Returns:</dt>
+<dd>A mesh.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Extrusion.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether there is no gap among all surfaces constructing this object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathEnd">
+<code class="descname">PathEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.PathEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the end point of the path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathStart">
+<code class="descname">PathStart</code><a class="headerlink" href="#rhino3dm.Extrusion.PathStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the start point of the path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathTangent">
+<code class="descname">PathTangent</code><a class="headerlink" href="#rhino3dm.Extrusion.PathTangent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the up vector of the path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.SetPathAndUp">
+<code class="descname">SetPathAndUp</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>up</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.SetPathAndUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to set the two points at the extremes and the up vector.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a : The start point.
+b : The end point.
+up : The up vector.</dd>
+<dt>Returns:</dt>
+<dd>true if the operation succeeded; otherwise false.
+Setting up=a-b will make the operation fail.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.ToBrep">
+<code class="descname">ToBrep</code><span class="sig-paren">(</span><em>splitKinkyFaces</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.ToBrep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a brep form of the extrusion. The outer profile is always the first face of the brep.
+If there are inner profiles, additional brep faces are created for each profile. If the
+outer profile is closed, then end caps are added as the last two faces of the brep.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>splitKinkyFaces : If true and the profiles have kinks, then the faces corresponding to those profiles are split
+splitKinkyFaces : so they will be G1.</dd>
+<dt>Returns:</dt>
+<dd>A brep with a similar shape like this extrustion, or null on error.</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

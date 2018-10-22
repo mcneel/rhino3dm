@@ -265,6 +265,16 @@ be one or greater than three.</p>
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="rhino3dm.Curve.IsCircle">
+<code class="descname">IsCircle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>true if the Curve can be represented by a circle within tolerance.</dd>
+</dl>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.Curve.IsClosed">
 <code class="descname">IsClosed</code><a class="headerlink" href="#rhino3dm.Curve.IsClosed" title="Permalink to this definition">¶</a></dt>
@@ -396,6 +406,69 @@ Not all curve types support this operation.</p>
 <dd>t : Evaluation parameter.</dd>
 <dt>Returns:</dt>
 <dd>Unit tangent vector of the curve at the parameter t.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.ToNurbsCurve">
+<code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a NURBS curve representation of this curve.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>NURBS representation of the curve on success, null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.Trim">
+<code class="descname">Trim</code><span class="sig-paren">(</span><em>t0</em>, <em>t1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Trim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes portions of the curve outside the specified interval.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>t0 : Start of the trimming interval. Portions of the curve before curve(t0) are removed.
+t1 : End of the trimming interval. Portions of the curve after curve(t1) are removed.</dd>
+<dt>Returns:</dt>
+<dd>Trimmed portion of this curve is successfull, null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetArc">
+<code class="descname">TryGetArc</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert this curve into an Arc using RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>arc : On success, the Arc will be filled in.</dd>
+<dt>Returns:</dt>
+<dd>true if the curve could be converted into an arc.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetCircle">
+<code class="descname">TryGetCircle</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert this curve into a circle using RhinoMath.ZeroTolerance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>circle : On success, the Circle will be filled in.</dd>
+<dt>Returns:</dt>
+<dd>true if the curve could be converted into a Circle.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetPolyline">
+<code class="descname">TryGetPolyline</code><span class="sig-paren">(</span><em>polyline</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetPolyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Several types of Curve can have the form of a polyline
+including a degree 1 NurbsCurve, a PolylineCurve,
+and a PolyCurve all of whose segments are some form of
+polyline. IsPolyline tests a curve to see if it can be
+represented as a polyline.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>polyline : If true is returned, then the polyline form is returned here.</dd>
+<dt>Returns:</dt>
+<dd>true if this curve can be represented as a polyline; otherwise, false.</dd>
 </dl>
 </dd></dl>
 

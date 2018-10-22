@@ -1,0 +1,7 @@
+Hatch
+*****
+
+.. autoclass:: rhino3dm.Hatch
+   :members:
+   :undoc-members:
+   :show-inheritance:

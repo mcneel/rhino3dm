@@ -193,6 +193,38 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Transform</code><span class="sig-paren">(</span><em>diagonalValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>…</p>
+<dl class="attribute">
+<dt id="rhino3dm.Transform.IsIdentity">
+<code class="descname">IsIdentity</code><a class="headerlink" href="#rhino3dm.Transform.IsIdentity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if this Transform is the identity transform</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Transform.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Transform.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not this Transform is a valid matrix.
+A valid transform matrix is not allowed to have any invalid numbers.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Transform.IsZero">
+<code class="descname">IsZero</code><a class="headerlink" href="#rhino3dm.Transform.IsZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if matrix is Zero4x4, ZeroTransformation, or some other type of
+zero.The value xform[3][3] can be anything.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Transform.IsZero4x4">
+<code class="descname">IsZero4x4</code><a class="headerlink" href="#rhino3dm.Transform.IsZero4x4" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if all values are 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Transform.IsZeroTransformation">
+<code class="descname">IsZeroTransformation</code><a class="headerlink" href="#rhino3dm.Transform.IsZeroTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if all values are 0 and M33 is 1</p>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="rhino3dm.Transform.Rotation">
 <em class="property">static </em><code class="descname">Rotation</code><span class="sig-paren">(</span><em>sinAngle</em>, <em>cosAngle</em>, <em>rotationAxis</em>, <em>rotationCenter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Rotation" title="Permalink to this definition">¶</a></dt>
@@ -231,6 +263,12 @@ scaleFactor : Scaling factor in all directions.</dd>
 <dt>Returns:</dt>
 <dd>A transform matrix which moves geometry along the motion vector.</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Transform.Transpose">
+<code class="descname">Transpose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip row/column values</p>
 </dd></dl>
 
 </dd></dl>

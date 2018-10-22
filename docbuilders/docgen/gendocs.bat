@@ -1,1 +1,1 @@
-jsdoc bin\Debug\rh3dm_temp.js -c jsdoc.conf
+jsdoc bin\Debug\rh3dm_temp.js README.md -c jsdoc.conf -t C:\Users\Steve\AppData\Roaming\npm\node_modules\docdash
