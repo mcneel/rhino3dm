@@ -35,13 +35,13 @@ public:
 
   bool IsLinear(double tolerance = ON_ZERO_TOLERANCE) const { return m_curve->IsLinear(tolerance); }
   bool IsPolyline() const { return m_curve->IsPolyline(); }
-  // public bool TryGetPolyline(out Polyline polyline)
+  class BND_Polyline* TryGetPolyline() const;
   // public bool TryGetPolyline(out Polyline polyline, out double[] parameters)
   bool IsArc(double tolerance = ON_ZERO_TOLERANCE) const { return m_curve->IsArc(nullptr, nullptr, tolerance); }
-  // public bool TryGetArc(out Arc arc, double tolerance)
+  class BND_Arc* TryGetArc(double tolerance = ON_ZERO_TOLERANCE) const;
   // public bool TryGetArc(Plane plane, out Arc arc, double tolerance)
-  // public bool IsCircle(double tolerance)
-  // public bool TryGetCircle(out Circle circle, double tolerance)
+  bool IsCircle(double tolerance = ON_ZERO_TOLERANCE) const;
+  class BND_Circle* TryGetCircle(double tolerance = ON_ZERO_TOLERANCE) const;
   bool IsEllipse(double tolerance = ON_ZERO_TOLERANCE) const { return m_curve->IsEllipse(nullptr, nullptr, tolerance); }
   // public bool TryGetEllipse(out Ellipse ellipse, double tolerance)
   // public bool TryGetEllipse(Plane plane, out Ellipse ellipse, double tolerance)
@@ -74,12 +74,12 @@ public:
   // public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, out double t)
   // public bool GetCurveParameterFromNurbsFormParameter(double nurbsParameter, out double curveParameter)
   // public bool GetNurbsFormParameterFromCurveParameter(double curveParameter, out double nurbsParameter)
-  // public Curve Trim(double t0, double t1)
+  BND_Curve* Trim(double t0, double t1) const;
   // public Curve Trim(Interval domain)
   // public Curve[] Split(double t)
   // public Curve[] Split(IEnumerable<double> t)
   // public int HasNurbsForm()
-  // public NurbsCurve ToNurbsCurve()
+  class BND_NurbsCurve* ToNurbsCurve() const;
   // public NurbsCurve ToNurbsCurve(Interval subdomain)
   // public Interval SpanDomain(int spanIndex)
 };
