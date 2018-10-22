@@ -1,5 +1,10 @@
 #include "bindings.h"
 
+void BND_Point3dList::Transform(const BND_Xform& xform)
+{
+  m_polyline.Transform(xform.m_xform);
+}
+
 void BND_Point3dList::SetAllX(double xValue)
 {
   const int count = m_polyline.Count();

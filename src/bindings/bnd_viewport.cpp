@@ -185,10 +185,10 @@ void BND_Viewport::SetCamera35mmLensLength(double lens_length)
   m_viewport->SetCamera35mmLensLength(lens_length);
 }
 
-ON_Xform* BND_Viewport::GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS)
+BND_Xform* BND_Viewport::GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS)
 {
-  ON_Xform* xf = new ON_Xform();
-  if( !m_viewport->GetXform(srcCS, destCS, *xf) )
+  BND_Xform* xf = new BND_Xform(1);
+  if( !m_viewport->GetXform(srcCS, destCS, xf->m_xform) )
   {
     delete xf;
     return nullptr;
