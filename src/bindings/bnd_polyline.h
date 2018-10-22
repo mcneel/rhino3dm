@@ -28,7 +28,7 @@ public:
   BND_BoundingBox BoundingBox() const { return BND_BoundingBox(m_polyline.BoundingBox()); }
   //public int ClosestIndex(Point3d testPoint)
   void Add(double x, double y, double z) { m_polyline.Append(ON_3dPoint(x, y, z)); }
-  void Transform(const ON_Xform& xform) { m_polyline.Transform(xform); }
+  void Transform(const class BND_Xform& xform);
   void SetAllX(double xValue);
   void SetAllY(double yValue);
   void SetAllZ(double zValue);

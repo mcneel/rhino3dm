@@ -43,7 +43,7 @@ public:
   //void Union(Point3d point)
   //bool MakeValid()
   //Point3d[] GetCorners()
-  bool Transform(const ON_Xform& xform) { return m_box.Transform(xform); }
+  bool Transform(const class BND_Xform& xform);
   //void RepositionBasePlane(ON_3dPoint origin)
   //class BND_Brep* ToBrep() const;
   //class BND_Extrusion* ToExtrusion() const;

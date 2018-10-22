@@ -5,6 +5,11 @@ BND_Box::BND_Box(const BND_BoundingBox& bbox)
 {
 }
 
+bool BND_Box::Transform(const BND_Xform& xform)
+{
+  return m_box.Transform(xform.m_xform);
+}
+
 //BND_Brep* BND_Box::ToBrep() const
 //{
 //
