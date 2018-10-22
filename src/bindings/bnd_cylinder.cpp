@@ -77,9 +77,9 @@ void initCylinderBindings(void*)
     .property("height1", &BND_Cylinder::GetHeight1, &BND_Cylinder::SetHeight1)
     .property("height2", &BND_Cylinder::GetHeight2, &BND_Cylinder::SetHeight2)
     .property("radius", &BND_Cylinder::GetRadius, &BND_Cylinder::SetRadius)
-    .function("circleAt", &BND_Cylinder::CircleAt)
-    .function("toBrep", &BND_Cylinder::ToBrep)
-    .funciton("toNurbsSurface", &BND_Cylinder::ToNurbsSurface)
+    .function("circleAt", &BND_Cylinder::CircleAt, allow_raw_pointers())
+    .function("toBrep", &BND_Cylinder::ToBrep, allow_raw_pointers())
+    .function("toNurbsSurface", &BND_Cylinder::ToNurbsSurface, allow_raw_pointers())
     ;
 }
 #endif
