@@ -41,6 +41,7 @@
 #include "bnd_hatch.h"
 #include "bnd_arc.h"
 #include "bnd_curve.h"
+#include "bnd_curveproxy.h"
 #include "bnd_arccurve.h"
 #include "bnd_bezier.h"
 #include "bnd_linecurve.h"

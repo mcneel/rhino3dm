@@ -16,7 +16,7 @@ public:
   //public static Circle TryFitCircleTT(Curve c1, Curve c2, double t1, double t2)
   //public static Circle TryFitCircleTTT(Curve c1, Curve c2, Curve c3, double t1, double t2, double t3)
   //static public Circle Unset
-
+  BND_Circle(ON_Circle c) : m_circle(c) {}
   BND_Circle(double radius);
   BND_Circle(const class BND_Plane& plane, double radius);
   BND_Circle(ON_3dPoint center, double radius);
