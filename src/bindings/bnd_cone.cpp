@@ -44,6 +44,16 @@ using namespace emscripten;
 void initConeBindings(void*)
 {
   class_<BND_Cone>("Cone")
+    .property("height", &BND_Cone::GetHeight, &BND_Cone::SetHeight)
+    .property("radius", &BND_Cone::GetRadius, &BND_Cone::SetRadius)
+    .property("isValid", &BND_Cone::IsValid)
+    .property("basePoint", &BND_Cone::BasePoint)
+    .property("apexPoint", &BND_Cone::ApexPoint)
+    .property("axis", &BND_Cone::Axis)
+    .property("angleInRadians", &BND_Cone::AngleInRadians)
+    .property("angleInDegrees", &BND_Cone::AngleInDegrees)
+    .function("toNurbsSurface", &BND_Cone::ToNurbsSurface, allow_raw_pointers())
+    .function("toBrep", &BND_Cone::ToBrep, allow_raw_pointers())
     ;
 }
 #endif
