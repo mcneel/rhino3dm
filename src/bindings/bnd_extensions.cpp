@@ -238,7 +238,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
 BND_UUID BND_ONXModel_ObjectTable::AddCircle1(const BND_Circle& circle)
 {
   ON_NurbsCurve nc;
-  if (circle.ToONCircle().GetNurbForm(nc) != 0)
+  if (circle.m_circle.GetNurbForm(nc) != 0)
   {
     ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, nullptr);
     return ON_UUID_to_Binding(rc);

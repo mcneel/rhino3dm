@@ -28,14 +28,12 @@ BND_ArcCurve::BND_ArcCurve(const BND_Arc& arc, double t0, double t1)
 }
 BND_ArcCurve::BND_ArcCurve(const BND_Circle& circle)
 {
-  ON_Circle c = circle.ToONCircle();
-  ON_ArcCurve* ac = new ON_ArcCurve(c);
+  ON_ArcCurve* ac = new ON_ArcCurve(circle.m_circle);
   SetTrackedPointer(ac, nullptr);
 }
 BND_ArcCurve::BND_ArcCurve(const BND_Circle& circle, double t0, double t1)
 {
-  ON_Circle c = circle.ToONCircle();
-  ON_ArcCurve* ac = new ON_ArcCurve(c, t0, t1);
+  ON_ArcCurve* ac = new ON_ArcCurve(circle.m_circle, t0, t1);
   SetTrackedPointer(ac, nullptr);
 }
 

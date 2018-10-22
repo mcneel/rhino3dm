@@ -1,42 +1,30 @@
 #include "bindings.h"
 
-ON_Circle BND_Circle::ToONCircle() const
-{
-  ON_Plane plane = m_plane.ToOnPlane();
-  ON_Circle circle(plane, m_radius);
-  return circle;
-}
 
 BND_Circle::BND_Circle(double radius)
 {
-  m_plane = BND_Plane::WorldXY();
-  m_radius = radius;
+  m_circle.radius = radius;
 }
-BND_Circle::BND_Circle(BND_Plane plane, double radius)
+BND_Circle::BND_Circle(const BND_Plane& plane, double radius)
 {
-  m_plane = plane;
-  m_radius = radius;
+  m_circle.plane = plane.ToOnPlane();
+  m_circle.radius = radius;
 }
 BND_Circle::BND_Circle(ON_3dPoint center, double radius)
 {
-  m_plane = BND_Plane::WorldXY();
-  m_plane.m_origin = center;
-  m_radius = radius;
+  m_circle.plane.origin = center;
+  m_circle.radius = radius;
 }
 
 ON_3dPoint BND_Circle::PointAt(double t) const
 {
-  ON_Plane plane = m_plane.ToOnPlane();
-  ON_Circle circle(plane, m_radius);
-  return circle.PointAt(t);
+  return m_circle.PointAt(t);
 }
 
 BND_NurbsCurve* BND_Circle::ToNurbsCurve() const
 {
   ON_NurbsCurve* nc = new ON_NurbsCurve();
-  ON_Plane plane = m_plane.ToOnPlane();
-  ON_Circle circle(plane, m_radius);
-  if( 0==circle.GetNurbForm(*nc) )
+  if( 0==m_circle.GetNurbForm(*nc) )
   {
     delete nc;
     return nullptr;
@@ -51,9 +39,18 @@ void initCircleBindings(pybind11::module& m)
   py::class_<BND_Circle>(m, "Circle")
     .def(py::init<double>())
     .def(py::init<ON_3dPoint, double>())
-    .def_readwrite("Plane", &BND_Circle::m_plane)
-    .def_readwrite("Radius", &BND_Circle::m_radius)
+    .def_property_readonly("IsValid", &BND_Circle::IsValid)
+    .def_property_readonly("Radius", &BND_Circle::Radius)
+    .def_property_readonly("Diameter", &BND_Circle::Diameter)
+    .def_property_readonly("Center", &BND_Circle::Center)
+    .def_property_readonly("Normal", &BND_Circle::Normal)
+    .def_property_readonly("Circumference", &BND_Circle::Circumference)
     .def("PointAt", &BND_Circle::PointAt)
+    .def("TangentAt", &BND_Circle::TangentAt)
+    .def("DerivativeAt", &BND_Circle::DerivativeAt)
+    .def("ClosestPoint", &BND_Circle::ClosestPoint)
+    .def("Translate", &BND_Circle::Translate)
+    .def("Reverse", &BND_Circle::Reverse)
     .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve);
 }
 #endif
