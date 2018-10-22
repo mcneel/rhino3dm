@@ -14,6 +14,7 @@ public:
   ON_Arc m_arc;
 public:
   //static BND_Arc* Unset();
+  BND_Arc(const ON_Arc& arc) : m_arc(arc) {}
   BND_Arc(const class BND_Circle& circle, double angleRadians);
   //BND_Arc(const class BND_Circle& circle, Interval angleIntervalRadians);
   //BND_Arc(Plane plane, double radius, double angleRadians);
