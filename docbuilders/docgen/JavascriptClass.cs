@@ -133,9 +133,8 @@ namespace docgen
           js.AppendLine("  /**");
           if (doccomment != null)
           {
-            string comment = doccomment.ToString();
-            comment = comment.Replace("///", "");
-            js.AppendLine($"   * {comment}");
+            string comment = DocCommentToJsDoc(doccomment, propDecl);
+            js.Append(comment);
           }
           if (propDecl != null)
           {
@@ -199,6 +198,35 @@ namespace docgen
             }
           }
           js.AppendLine($"   * @param {{{ToJavascriptType(paramType)}}} {paramName} {elementText}");
+        }
+      }
+      return js.ToString();
+    }
+
+    static string DocCommentToJsDoc(DocumentationCommentTriviaSyntax doccomment,
+      PropertyDeclarationSyntax propertyDecl)
+    {
+      StringBuilder js = new StringBuilder();
+      string comment = doccomment.ToString();
+      comment = comment.Replace("///", "");
+      var doc = new System.Xml.XmlDocument();
+      doc.LoadXml("<doc>" + comment + "</doc>");
+      var nodes = doc.FirstChild.ChildNodes;
+      foreach (var node in nodes)
+      {
+        var element = node as System.Xml.XmlElement;
+        string elementText = element.InnerText.Trim();
+        if (string.IsNullOrWhiteSpace(elementText))
+          continue;
+        if (element.Name.Equals("summary", StringComparison.OrdinalIgnoreCase))
+        {
+          js.AppendLine($"   * @description {elementText}");
+        }
+        else if (element.Name.Equals("returns", StringComparison.OrdinalIgnoreCase))
+        {
+          var returnType = propertyDecl.Type;
+
+          js.AppendLine($"   * @returns {{{ToJavascriptType(returnType.ToString())}}} {elementText}");
         }
       }
       return js.ToString();

@@ -72,8 +72,6 @@ namespace docgen
         if (System.IO.Path.GetFileName(file).StartsWith("auto", StringComparison.OrdinalIgnoreCase))
           continue;
         string text = System.IO.File.ReadAllText(file);
-        if (!text.Contains("Geometry"))
-          continue;
 
         Console.WriteLine($"parse: {file}");
         var tree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text, options);
@@ -181,20 +179,14 @@ namespace docgen
 
   class SourceFileWalker : Microsoft.CodeAnalysis.CSharp.CSharpSyntaxWalker
   {
-    readonly List<Microsoft.CodeAnalysis.Text.TextSpan> _rhinoSdkSpans = new List<Microsoft.CodeAnalysis.Text.TextSpan>();
     string _visitingClass = null;
-    int _activeSpanStart;
 
     public SourceFileWalker() : base(Microsoft.CodeAnalysis.SyntaxWalkerDepth.StructuredTrivia)
     {
     }
 
-    bool _buildingSpans = true;
     public void Construct(Microsoft.CodeAnalysis.SyntaxNode node)
     {
-      _buildingSpans = true;
-      Visit(node);
-      _buildingSpans = false;
       Visit(node);
     }
 
@@ -202,6 +194,7 @@ namespace docgen
     {
       string className = node.Identifier.ToString();
       _visitingClass = className;
+
       var docComment = node.GetLeadingTrivia().Select(i => i.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
       RhinoCommonClass.Get(className).AddClassComment(docComment);
       base.VisitClassDeclaration(node);
@@ -215,34 +208,12 @@ namespace docgen
       base.VisitStructDeclaration(node);
     }
 
-    public override void VisitIfDirectiveTrivia(IfDirectiveTriviaSyntax node)
-    {
-      _activeSpanStart = node.SpanStart;
-      base.VisitIfDirectiveTrivia(node);
-    }
-    public override void VisitEndIfDirectiveTrivia(EndIfDirectiveTriviaSyntax node)
-    {
-      if (_buildingSpans)
-      {
-        var span = new Microsoft.CodeAnalysis.Text.TextSpan(_activeSpanStart, node.Span.End - _activeSpanStart);
-        _rhinoSdkSpans.Add(span);
-      }
-      base.VisitEndIfDirectiveTrivia(node);
-    }
-
-    bool InSpans(Microsoft.CodeAnalysis.Text.TextSpan span)
-    {
-      for (int i = 0; i < _rhinoSdkSpans.Count; i++)
-      {
-        if (_rhinoSdkSpans[i].IntersectsWith(span))
-          return true;
-      }
-      return false;
-    }
-
     public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
-      if (!_buildingSpans)
+      var classDeclaration = node.Parent as ClassDeclarationSyntax;
+      if (classDeclaration != null)
+        _visitingClass = classDeclaration.Identifier.ToString();
+
       {
         bool isPublic = node.IsPublic();
         bool isStatic = node.IsStatic();
@@ -275,7 +246,10 @@ namespace docgen
 
     public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
-      if (!_buildingSpans)
+      var classDeclaration = node.Parent as ClassDeclarationSyntax;
+      if (classDeclaration != null)
+        _visitingClass = classDeclaration.Identifier.ToString();
+
       {
         bool isPublic = node.IsPublic();
         bool isStatic = node.IsStatic();
@@ -291,7 +265,10 @@ namespace docgen
 
     public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
     {
-      if (!_buildingSpans)
+      var classDeclaration = node.Parent as ClassDeclarationSyntax;
+      if (classDeclaration != null)
+        _visitingClass = classDeclaration.Identifier.ToString();
+
       {
         bool isPublic = node.IsPublic();
 

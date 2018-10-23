@@ -269,10 +269,8 @@
 
 
 <div class="description">
-    <summary>
-     Even though this is a property, it is not a "fast" calculation. Every point is
+    Even though this is a property, it is not a "fast" calculation. Every point is
      evaluated in order to get the bounding box of the list.
-     </summary>
 </div>
 
 
@@ -458,12 +456,9 @@
 
 
 <div class="description">
-    <summary>
-     Gets a value that indicates whether this polyline is closed. 
-     <para>The polyline is considered to be closed if its start is 
-     identical to its endpoint.</para>
-     </summary>
-     <seealso cref="IsClosedWithinTolerance"/>
+    Gets a value that indicates whether this polyline is closed. 
+     The polyline is considered to be closed if its start is 
+     identical to its endpoint.
 </div>
 
 
@@ -531,11 +526,8 @@
 
 
 <div class="description">
-    <summary>
-     Gets a value that indicates whether this polyline is valid. 
-     <para>Valid polylines have at least one segment, no Invalid points and no zero length segments.</para>
-     <para>Closed polylines with only two segments are also not considered valid.</para>
-     </summary>
+    Gets a value that indicates whether this polyline is valid. 
+     Valid polylines have at least one segment, no Invalid points and no zero length segments.Closed polylines with only two segments are also not considered valid.
 </div>
 
 
@@ -603,9 +595,7 @@
 
 
 <div class="description">
-    <summary>
-     Gets the total length of the polyline.
-     </summary>
+    Gets the total length of the polyline.
 </div>
 
 
@@ -673,9 +663,7 @@
 
 
 <div class="description">
-    <summary>
-     Gets the number of segments for this polyline.
-     </summary>
+    Gets the number of segments for this polyline.
 </div>
 
 
@@ -1249,7 +1237,7 @@
 
     
 
-    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(x, y, z)</span><span class="type-signature"></span></h4>
 
     
 
@@ -1301,7 +1289,7 @@
 
 
 <div class="description">
-    ...
+    Adds a Point3d to the end of the list with given x,y,z coordinates.
 </div>
 
 
@@ -1312,6 +1300,101 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The X coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Z coordinate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -2336,7 +2419,7 @@
 
 
 <div class="description">
-    ...
+    Set all the X values for the points to a single value
 </div>
 
 
@@ -2420,7 +2503,7 @@
 
 
 <div class="description">
-    ...
+    Set all the Y values for the points to a single value
 </div>
 
 
@@ -2504,7 +2587,7 @@
 
 
 <div class="description">
-    ...
+    Set all the Z values for the points to a single value
 </div>
 
 
@@ -2889,7 +2972,7 @@
 
     
 
-    <h4 class="name" id="transform"><span class="type-signature"></span>transform<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="transform"><span class="type-signature"></span>transform<span class="signature">(xform)</span><span class="type-signature"></span></h4>
 
     
 
@@ -2941,7 +3024,7 @@
 
 
 <div class="description">
-    ...
+    Applies a transform to all the points in the list.
 </div>
 
 
@@ -2952,6 +3035,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>xform</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Transform.html">Transform</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transform to apply.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -2988,7 +3120,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 22 2018 15:59:47 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:46:08 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

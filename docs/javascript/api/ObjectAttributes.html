@@ -210,18 +210,9 @@
 
 
 <div class="description">
-    <summary>
-     Display order used to force objects to be drawn on top or behind each other.
+    Display order used to force objects to be drawn on top or behind each other.
      Larger numbers draw on top of smaller numbers.
-     <para>0  = draw object in standard depth buffered order</para>
-     <para>&lt;0 = draw object behind "normal" draw order objects</para>
-     <para>&gt;0 = draw object on top of "normal" draw order objects</para>
-     </summary>
-     <example>
-     <code source='examples\vbnet\ex_displayorder.vb' lang='vbnet'/>
-     <code source='examples\cs\ex_displayorder.cs' lang='cs'/>
-     <code source='examples\py\ex_displayorder.py' lang='py'/>
-     </example>
+     0  = draw object in standard depth buffered order<0 = draw object behind "normal" draw order objects>0 = draw object on top of "normal" draw order objects
 </div>
 
 
@@ -289,7 +280,7 @@
 
 
 <div class="description">
-    <summary>number of groups object belongs to.</summary>
+    number of groups object belongs to.
 </div>
 
 
@@ -411,18 +402,11 @@
 
 
 <div class="description">
-    <summary>
-     Gets or sets an associated layer index.
-     <para>Layer definitions in an OpenNURBS model are stored in a layer table.
+    Gets or sets an associated layer index.
+     Layer definitions in an OpenNURBS model are stored in a layer table.
      The layer table is conceptually an array of ON_Layer classes.  Every
      OpenNURBS object in a model is on some layer.  The object's layer
-     is specified by zero based indicies into the ON_Layer array.</para>
-     </summary>
-     <example>
-     <code source='examples\vbnet\ex_moveobjectstocurrentlayer.vb' lang='vbnet'/>
-     <code source='examples\cs\ex_moveobjectstocurrentlayer.cs' lang='cs'/>
-     <code source='examples\py\ex_moveobjectstocurrentlayer.py' lang='py'/>
-     </example>
+     is specified by zero based indicies into the ON_Layer array.
 </div>
 
 
@@ -490,11 +474,9 @@
 
 
 <div class="description">
-    <summary>
-     Gets or sets the material index.
-     <para>If you want something simple and fast, set the index of
-     the rendering material.</para>
-     </summary>
+    Gets or sets the material index.
+     If you want something simple and fast, set the index of
+     the rendering material.
 </div>
 
 
@@ -562,11 +544,9 @@
 
 
 <div class="description">
-    <summary>
-     Gets or sets an object optional text name.
-     <para>More than one object in a model can have the same name and
-     some objects may have no name.</para>
-     </summary>
+    Gets or sets an object optional text name.
+     More than one object in a model can have the same name and
+     some objects may have no name.
 </div>
 
 
@@ -634,14 +614,7 @@
 
 
 <div class="description">
-    <summary>
-     If ON::color_from_object == ColorSource, then color is the object's display color.
-     </summary>
-     <example>
-     <code source='examples\vbnet\ex_modifyobjectcolor.vb' lang='vbnet'/>
-     <code source='examples\cs\ex_modifyobjectcolor.cs' lang='cs'/>
-     <code source='examples\py\ex_modifyobjectcolor.py' lang='py'/>
-     </example>
+    If ON::color_from_object == ColorSource, then color is the object's display color.
 </div>
 
 
@@ -709,9 +682,7 @@
 
 
 <div class="description">
-    <summary>
-     If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
-     </summary>
+    If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
 </div>
 
 
@@ -779,11 +750,9 @@
 
 
 <div class="description">
-    <summary>
-     Plot weight in millimeters.
+    Plot weight in millimeters.
      =0.0 means use the default width
-     &lt;0.0 means don't plot (visible for screen display, but does not show on plot)
-     </summary>
+     <0.0 means don't plot (visible for screen display, but does not show on plot)
 </div>
 
 
@@ -851,12 +820,10 @@
 
 
 <div class="description">
-    <summary>
-     If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then 
+    If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then 
      this object is only active in a specific view. This field is primarily used to assign page
      space objects to a specific page, but it can also be used to restrict model space to a
      specific view.
-     </summary>
 </div>
 
 
@@ -924,7 +891,7 @@
 
 
 <div class="description">
-    <summary>Gets or sets an object's visiblity.</summary>
+    Gets or sets an object's visiblity.
 </div>
 
 
@@ -992,20 +959,13 @@
 
 
 <div class="description">
-    <summary>
-     When a surface object is displayed in wireframe, this controls
+    When a surface object is displayed in wireframe, this controls
      how many isoparametric wires are used.
      value    number of isoparametric wires
      -1       boundary wires (off)
      0        boundary and knot wires 
      1        boundary and knot wires and, if there are no interior knots, a single interior wire.
      N>=2     boundary and knot wires and (N+1) interior wires.
-     </summary>
-     <example>
-     <code source='examples\vbnet\ex_isocurvedensity.vb' lang='vbnet'/>
-     <code source='examples\cs\ex_isocurvedensity.cs' lang='cs'/>
-     <code source='examples\py\ex_isocurvedensity.py' lang='py'/>
-     </example>
 </div>
 
 
@@ -1473,7 +1433,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 22 2018 15:59:47 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 23 2018 10:46:08 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
