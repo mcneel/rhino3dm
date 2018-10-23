@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Point3dList &mdash; rhino3dm 0.0.6 documentation</title>
+  <title>Point3dList &mdash; rhino3dm 0.0.7 documentation</title>
   
 
   
@@ -27,7 +27,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Point3f" href="Point3f.html" />
+    <link rel="prev" title="Point3d" href="Point3d.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -77,22 +79,29 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DocObjects.html">DocObjects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
@@ -109,9 +118,11 @@
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Point3dList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
@@ -191,11 +202,51 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Point3dList</code><span class="sig-paren">(</span><em>initialCapacity</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents a list of .</p>
+<dl class="method">
+<dt id="rhino3dm.Point3dList.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a Point3d to the end of the list with given x,y,z coordinates.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>x : The X coordinate.
+y : The Y coordinate.
+z : The Z coordinate.</dd>
+</dl>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.Point3dList.BoundingBox">
 <code class="descname">BoundingBox</code><a class="headerlink" href="#rhino3dm.Point3dList.BoundingBox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Even though this is a property, it is not a “fast” calculation. Every point is
 evaluated in order to get the bounding box of the list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllX">
+<code class="descname">SetAllX</code><span class="sig-paren">(</span><em>xValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the X values for the points to a single value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllY">
+<code class="descname">SetAllY</code><span class="sig-paren">(</span><em>yValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the Y values for the points to a single value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllZ">
+<code class="descname">SetAllZ</code><span class="sig-paren">(</span><em>zValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the Z values for the points to a single value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.Transform">
+<code class="descname">Transform</code><span class="sig-paren">(</span><em>xform</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a transform to all the points in the list.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>xform : Transform to apply.</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -207,6 +258,15 @@ evaluated in order to get the bounding box of the list.</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Point3f.html" class="btn btn-neutral float-right" title="Point3f" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Point3d.html" class="btn btn-neutral" title="Point3d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

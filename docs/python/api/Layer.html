@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Layer &mdash; rhino3dm 0.0.6 documentation</title>
+  <title>Layer &mdash; rhino3dm 0.0.7 documentation</title>
   
 
   
@@ -82,19 +82,26 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DocObjects.html">DocObjects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
@@ -111,9 +118,11 @@
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
@@ -193,6 +202,172 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Layer</code><a class="headerlink" href="#rhino3dm.Layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
 <p>…</p>
+<dl class="attribute">
+<dt id="rhino3dm.Layer.Color">
+<code class="descname">Color</code><a class="headerlink" href="#rhino3dm.Layer.Color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the display color for this layer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.DeletePerViewportColor">
+<code class="descname">DeletePerViewportColor</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any per viewport layer color setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>viewportId : If not Guid.Empty, then the setting for this viewport will be deleted.
+viewportId : If Guid.Empty, the all per viewport layer color settings will be removed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.DeletePerViewportSettings">
+<code class="descname">DeletePerViewportSettings</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes per viewport layer settings.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>viewportId : If not Guid.Empty, then the settings for that viewport are deleted.
+viewportId : If Guid.Empty, then all per viewport settings are deleted.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.GetPersistentLocking">
+<code class="descname">GetPersistentLocking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.GetPersistentLocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>The persistent locking setting is used for layers that can be locked by
+a “parent” object. A common case is when a layer is a child layer
+(Layer.ParentI is not nil). In this case, when a parent layer is locked,
+then child layers are also locked. The persistent locking setting
+determines what happens when the parent is unlocked again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.GetPersistentVisibility">
+<code class="descname">GetPersistentVisibility</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.GetPersistentVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>The persistent visbility setting is used for layers whose visibilty can
+be changed by a “parent” object. A common case is when a layer is a
+child layer (ParentId is not nil). In this case, when a parent layer is
+turned off, then child layers are also turned off. The persistent
+visibility setting determines what happens when the parent is turned on
+again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.HasPerViewportSettings">
+<code class="descname">HasPerViewportSettings</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.HasPerViewportSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verifies that a layer has per viewport settings.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>viewportId : If not Guid.Empty, then checks for settings for that specific viewport.
+viewportId : If Guid.Empty, then checks for any viewport settings.</dd>
+<dt>Returns:</dt>
+<dd>True if the layer has per viewport settings, false otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.Id">
+<code class="descname">Id</code><a class="headerlink" href="#rhino3dm.Layer.Id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the ID of this layer object.
+You typically do not need to assign a custom ID.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.IgesLevel">
+<code class="descname">IgesLevel</code><a class="headerlink" href="#rhino3dm.Layer.IgesLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the IGES level for this layer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.LinetypeIndex">
+<code class="descname">LinetypeIndex</code><a class="headerlink" href="#rhino3dm.Layer.LinetypeIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the line-type index for this layer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.Name">
+<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.Layer.Name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the name of this layer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.ParentLayerId">
+<code class="descname">ParentLayerId</code><a class="headerlink" href="#rhino3dm.Layer.ParentLayerId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the ID of the parent layer. Layers can be origanized in a hierarchical structure,
+in which case this returns the parent layer ID. If the layer has no parent,
+Guid.Empty will be returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.PerViewportColor">
+<code class="descname">PerViewportColor</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.PerViewportColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the display color for this layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>viewportId : If not Guid.Empty, then the setting applies only to the viewport with the specified id.</dd>
+<dt>Returns:</dt>
+<dd>The display color.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.PlotColor">
+<code class="descname">PlotColor</code><a class="headerlink" href="#rhino3dm.Layer.PlotColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the plot color for this layer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.PlotWeight">
+<code class="descname">PlotWeight</code><a class="headerlink" href="#rhino3dm.Layer.PlotWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the weight of the plotting pen in millimeters.
+A weight of 0.0 indicates the “default” pen weight should be used.
+A weight of -1.0 indicates the layer should not be printed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Layer.RenderMaterialIndex">
+<code class="descname">RenderMaterialIndex</code><a class="headerlink" href="#rhino3dm.Layer.RenderMaterialIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the index of render material for objects on this layer that have
+MaterialSource() == MaterialFromLayer.
+A material index of -1 indicates no material has been assigned
+and the material created by the default Material constructor
+should be used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.SetPerViewportColor">
+<code class="descname">SetPerViewportColor</code><span class="sig-paren">(</span><em>viewportId</em>, <em>color</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the display color for this layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>viewportId : If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+color : The display color.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.SetPersistentLocking">
+<code class="descname">SetPersistentLocking</code><span class="sig-paren">(</span><em>persistentLocking</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.SetPersistentLocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the persistent locking setting for this layer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.SetPersistentVisibility">
+<code class="descname">SetPersistentVisibility</code><span class="sig-paren">(</span><em>persistentVisibility</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.SetPersistentVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the persistent visibility setting for this layer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.UnsetPersistentLocking">
+<code class="descname">UnsetPersistentLocking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.UnsetPersistentLocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any explicity persistent locking settings from this layer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Layer.UnsetPersistentVisibility">
+<code class="descname">UnsetPersistentVisibility</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Layer.UnsetPersistentVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any explicit persistent visibility setting from this layer</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
