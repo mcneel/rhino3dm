@@ -26,9 +26,12 @@ public:
   //public Circle(Point3d startPoint, Vector3d tangentAtP, Point3d pointOnCircle)
   bool IsValid() const { return m_circle.IsValid(); }
   double Radius() const { return m_circle.radius; }
+  void SetRadius(double r) { m_circle.radius = r; }
   double Diameter() const { return m_circle.radius * 2; }
+  void SetDiameter(double d) { m_circle.radius = d * 0.5; }
   //public Plane Plane
   ON_3dPoint Center() const { return m_circle.Center(); }
+  void SetCenter(ON_3dPoint center);
   ON_3dVector Normal() const { return m_circle.Normal(); }
   double Circumference() const { return m_circle.Circumference(); }
   //public BoundingBox BoundingBox
