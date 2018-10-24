@@ -175,8 +175,21 @@ using namespace emscripten;
 void initNurbsCurveBindings(void*)
 {
   class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
+    .class_function("createFromLine", &BND_NurbsCurve::CreateFromLine, allow_raw_pointers())
+    .class_function("createFromArc", &BND_NurbsCurve::CreateFromArc, allow_raw_pointers())
+    .class_function("createFromCircle", &BND_NurbsCurve::CreateFromCircle, allow_raw_pointers())
+    .class_function("create", &BND_NurbsCurve::Create, allow_raw_pointers())
     .constructor<int, int>()
-    .constructor<int, bool, int, int>();
+    .constructor<int, bool, int, int>()
+    .property("order", &BND_NurbsCurve::Order)
+    .property("isRational", &BND_NurbsCurve::IsRational)
+    .function("increaseDegree", &BND_NurbsCurve::IncreaseDegree)
+    .property("hasBezierSpans", &BND_NurbsCurve::HasBezierSpans)
+    .function("makePiecewiseBezier", &BND_NurbsCurve::MakePiecewiseBezier)
+    .function("reparameterize", &BND_NurbsCurve::Reparameterize)
+    .function("grevilleParameter", &BND_NurbsCurve::GrevilleParameter)
+    .function("grevillePoint", &BND_NurbsCurve::GrevillePoint)
+    ;
 }
 
 #endif
