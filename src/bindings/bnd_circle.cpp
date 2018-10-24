@@ -18,6 +18,13 @@ BND_Circle::BND_Circle(ON_3dPoint center, double radius)
   m_circle.plane.UpdateEquation();
 }
 
+void BND_Circle::SetCenter(ON_3dPoint center)
+{
+  m_circle.plane.origin = center;
+  m_circle.plane.UpdateEquation();
+}
+
+
 ON_3dPoint BND_Circle::PointAt(double t) const
 {
   return m_circle.PointAt(t);
@@ -42,9 +49,9 @@ void initCircleBindings(pybind11::module& m)
     .def(py::init<double>())
     .def(py::init<ON_3dPoint, double>())
     .def_property_readonly("IsValid", &BND_Circle::IsValid)
-    .def_property_readonly("Radius", &BND_Circle::Radius)
-    .def_property_readonly("Diameter", &BND_Circle::Diameter)
-    .def_property_readonly("Center", &BND_Circle::Center)
+    .def_property("Radius", &BND_Circle::Radius, &BND_Circle::SetRadius)
+    .def_property("Diameter", &BND_Circle::Diameter, &BND_Circle::SetDiameter)
+    .def_property("Center", &BND_Circle::Center, &BND_Circle::SetCenter)
     .def_property_readonly("Normal", &BND_Circle::Normal)
     .def_property_readonly("Circumference", &BND_Circle::Circumference)
     .def("PointAt", &BND_Circle::PointAt)
@@ -66,9 +73,9 @@ void initCircleBindings(void*)
     .constructor<double>()
     .constructor<ON_3dPoint, double>()
     .property("isValid", &BND_Circle::IsValid)
-    .property("radius", &BND_Circle::Radius)
-    .property("diameter", &BND_Circle::Diameter)
-    .property("center", &BND_Circle::Center)
+    .property("radius", &BND_Circle::Radius, &BND_Circle::SetRadius)
+    .property("diameter", &BND_Circle::Diameter, &BND_Circle::SetDiameter)
+    .property("center", &BND_Circle::Center, &BND_Circle::SetCenter)
     .property("normal", &BND_Circle::Normal)
     .property("circumference", &BND_Circle::Circumference)
     .function("pointAt", &BND_Circle::PointAt)
