@@ -16,7 +16,7 @@ public:
   //static BND_Arc* Unset();
   BND_Arc(const ON_Arc& arc) : m_arc(arc) {}
   BND_Arc(const class BND_Circle& circle, double angleRadians);
-  //BND_Arc(const class BND_Circle& circle, Interval angleIntervalRadians);
+  //BND_Arc(const class BND_Circle& circle, const class BND_Interval& angleIntervalRadians);
   //BND_Arc(Plane plane, double radius, double angleRadians);
   BND_Arc(ON_3dPoint center, double radius, double angleRadians);
   //BND_Arc(Plane plane, Point3d center, double radius, double angleRadians);
@@ -30,7 +30,7 @@ public:
   double GetDiameter() const { return 2 * GetRadius(); }
   void SetDiameter(double d) { SetRadius(d*0.5); }
   ON_3dPoint GetCenter() const { return m_arc.Center(); }
-  void SetCenter(ON_3dPoint pt) { m_arc.plane.SetOrigin(pt); }
+  void SetCenter(ON_3dPoint pt);
   double Circumference() const { return m_arc.Circumference(); }
   double Length() const { return m_arc.Length(); }
   ON_3dPoint StartPoint() const { return m_arc.StartPoint(); }
