@@ -175,6 +175,12 @@ emscripten::val BND_CommonObject::Encode() const
   v.set("data", emscripten::val(data));
   return v;
 }
+
+emscripten::val BND_CommonObject::toJSON(emscripten::val key)
+{
+  return Encode();
+}
+
 #endif
 #if defined(ON_PYTHON_COMPILE)
 
@@ -262,6 +268,7 @@ void initObjectBindings(void*)
 {
   class_<BND_CommonObject>("CommonObject")
     .function("encode", &BND_CommonObject::Encode)
+    .function("toJSON", &BND_CommonObject::toJSON)
     .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers());
 }
 #endif

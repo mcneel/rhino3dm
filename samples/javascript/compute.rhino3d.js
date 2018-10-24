@@ -18,10 +18,6 @@ var RhinoCompute = {
     },
 
     computeFetch: function(endpoint, arglist) {
-        for (i = 0; i < arglist.length; i++) {
-            if (arglist[i].encode != null)
-                arglist[i] = arglist[i].encode();
-        }
         return fetch(RhinoCompute.url+endpoint, {
                 "method":"POST",
                 "body": JSON.stringify(arglist),
