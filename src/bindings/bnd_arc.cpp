@@ -3,21 +3,25 @@
 BND_Arc::BND_Arc(const BND_Circle& circle, double angleRadians)
 {
   m_arc = ON_Arc(circle.m_circle, angleRadians);
+  m_arc.plane.UpdateEquation();
 }
 
 BND_Arc::BND_Arc(ON_3dPoint center, double radius, double angleRadians)
   : m_arc(center, radius, angleRadians)
 {
+  m_arc.plane.UpdateEquation();
 }
 
 BND_Arc::BND_Arc(ON_3dPoint startPoint, ON_3dPoint pointOnInterior, ON_3dPoint endPoint)
   : m_arc(startPoint, pointOnInterior,endPoint)
 {
+  m_arc.plane.UpdateEquation();
 }
 
 BND_Arc::BND_Arc(ON_3dPoint pointA, ON_3dVector tangentA, ON_3dPoint pointB)
   : m_arc(pointA, tangentA, pointB)
 {
+  m_arc.plane.UpdateEquation();
 }
 
 
