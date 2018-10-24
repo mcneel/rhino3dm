@@ -20,6 +20,7 @@ public:
   static BND_CommonObject* CreateWrapper(const ON_ModelComponentReference& compref);
 
 #if defined(__EMSCRIPTEN__)
+  emscripten::val toJSON(emscripten::val key);
   emscripten::val Encode() const;
   static BND_CommonObject* Decode(emscripten::val jsonObject);
 #endif
