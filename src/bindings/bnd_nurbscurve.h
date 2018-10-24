@@ -64,7 +64,7 @@ public:
   static BND_NurbsCurve* CreateFromCircle(const class BND_Circle& circle);
   //static NurbsCurve CreateFromEllipse(Ellipse ellipse)
   //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
-  //static NurbsCurve Create(bool periodic, int degree, System.Collections.Generic.IEnumerable<Point3d> points)
+  static BND_NurbsCurve* Create(bool periodic, int degree, const class BND_Point3dList& points);
   BND_NurbsCurve(int degree, int pointCount);
   BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
   int Order() const { return m_nurbscurve->Order(); }

@@ -24,6 +24,11 @@ BND_Arc::BND_Arc(ON_3dPoint pointA, ON_3dVector tangentA, ON_3dPoint pointB)
   m_arc.plane.UpdateEquation();
 }
 
+void BND_Arc::SetCenter(ON_3dPoint pt)
+{
+  m_arc.plane.SetOrigin(pt);
+  m_arc.plane.UpdateEquation();
+}
 
 BND_NurbsCurve* BND_Arc::ToNurbsCurve() const
 {

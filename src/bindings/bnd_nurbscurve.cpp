@@ -83,6 +83,32 @@ BND_NurbsCurve* BND_NurbsCurve::CreateFromCircle(const BND_Circle& circle)
   return new BND_NurbsCurve(nc, nullptr);
 }
 
+BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Point3dList& points)
+{
+  if (degree < 1)
+    return nullptr;
+
+  const int dimension = 3;
+  const double knot_delta = 1.0;
+  int order = degree + 1;
+  int count = points.GetCount();
+  if( count < 2 )
+    return nullptr;
+  const ON_3dPoint* point_array = points.m_polyline.Array();
+
+  ON_NurbsCurve* nc = new ON_NurbsCurve();
+  bool rc = periodic ? nc->CreatePeriodicUniformNurbs(dimension, order, count, point_array, knot_delta) :
+    nc->CreateClampedUniformNurbs(dimension, order, count, point_array, knot_delta);
+
+  if (false == rc)
+  {
+    delete nc;
+    return nullptr;
+  }
+  return new BND_NurbsCurve(nc, nullptr);
+}
+
+
 ON_3dPoint BND_NurbsCurve::GrevillePoint(int index) const
 {
   double t = GrevilleParameter(index);
@@ -128,6 +154,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def_static("CreateFromLine", &BND_NurbsCurve::CreateFromLine)
     .def_static("CreateFromArc", &BND_NurbsCurve::CreateFromArc)
     .def_static("CreateFromCircle", &BND_NurbsCurve::CreateFromCircle)
+    .def_static("Create", &BND_NurbsCurve::Create)
     .def(py::init<int, int>())
     .def(py::init<int, bool, int, int>())
     .def_property_readonly("Order", &BND_NurbsCurve::Order)
