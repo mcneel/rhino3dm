@@ -9,11 +9,13 @@ BND_Circle::BND_Circle(const BND_Plane& plane, double radius)
 {
   m_circle.plane = plane.ToOnPlane();
   m_circle.radius = radius;
+  m_circle.plane.UpdateEquation();
 }
 BND_Circle::BND_Circle(ON_3dPoint center, double radius)
 {
   m_circle.plane.origin = center;
   m_circle.radius = radius;
+  m_circle.plane.UpdateEquation();
 }
 
 ON_3dPoint BND_Circle::PointAt(double t) const

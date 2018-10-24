@@ -3,11 +3,13 @@
 BND_Cylinder::BND_Cylinder(const BND_Circle& baseCircle)
   : m_cylinder(baseCircle.m_circle)
 {
+  m_cylinder.circle.plane.UpdateEquation();
 }
 
 BND_Cylinder::BND_Cylinder(const BND_Circle& baseCircle, double height)
   : m_cylinder(baseCircle.m_circle, height)
 {
+  m_cylinder.circle.plane.UpdateEquation();
 }
 
 BND_Circle* BND_Cylinder::CircleAt(double linearParameter) const
