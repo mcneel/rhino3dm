@@ -14,7 +14,7 @@ The easiest way to access the rhino3dm.py libraries is to use the pip installer 
 
 `pip install rhino3dm`  
 
-If you get an error, you may need to run `pip install --user rhino3dm`
+:warning: If you get an error, you may need to run `pip install --user rhino3dm`
 
 If `pip` is not installed, go to the [Pip Installation instructions](https://pip.pypa.io/en/latest/installing/)
 
