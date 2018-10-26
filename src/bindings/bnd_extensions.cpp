@@ -248,7 +248,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddCircle1(const BND_Circle& circle)
 BND_UUID BND_ONXModel_ObjectTable::AddSphere1(const BND_Sphere& sphere)
 {
   ON_NurbsSurface ns;
-  if (sphere.GetNurbForm(ns) != 0)
+  if (sphere.m_sphere.GetNurbForm(ns) != 0)
   {
     ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &ns, nullptr);
     return ON_UUID_to_Binding(rc);
