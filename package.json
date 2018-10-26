@@ -1,0 +1,22 @@
+{
+  "name": "rhino3dm",
+  "version": "0.0.8",
+  "description": "NPM package based on OpenNURBS with a RhinoCommon style",
+  "main": "rhino3dm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcneel/rhino3dm.git"
+  },
+  "keywords": [
+    "rhino3d"
+  ],
+  "author": "Robert McNeel & Associates",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://mcneel.myjetbrains.com/youtrack/issues/RH3DM"
+  },
+  "homepage": "https://github.com/mcneel/rhino3dm#readme"
+}
