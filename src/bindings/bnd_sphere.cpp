@@ -47,16 +47,39 @@ BND_Sphere* BND_Sphere::Decode(pybind11::dict jsonObject)
 #endif
 
 #if defined(ON_WASM_COMPILE)
+
+static emscripten::val PointToDict(const ON_3dPoint& point)
+{
+  emscripten::val p(emscripten::val::object());
+  p.set("X", emscripten::val(point.x));
+  p.set("Y", emscripten::val(point.y));
+  p.set("Z", emscripten::val(point.z));
+  return p;
+}
+static emscripten::val VectorToDict(const ON_3dVector& vector)
+{
+  emscripten::val p(emscripten::val::object());
+  p.set("X", emscripten::val(vector.x));
+  p.set("Y", emscripten::val(vector.y));
+  p.set("Z", emscripten::val(vector.z));
+  return p;
+}
+
+static emscripten::val PlaneToDict(const ON_Plane& plane) {
+  emscripten::val p(emscripten::val::object());
+  p.set("Origin", PointToDict(plane.origin));
+  p.set("XAxis", VectorToDict(plane.xaxis));
+  p.set("YAxis", VectorToDict(plane.yaxis));
+  p.set("ZAxis", VectorToDict(plane.zaxis));
+  return p;
+}
+
+
 emscripten::val BND_Sphere::Encode() const
 {
   emscripten::val v(emscripten::val::object());
   v.set("Radius", emscripten::val(m_sphere.radius));
-
-  emscripten::val center_dict(emscripten::val::object());
-  center_dict.set("X", emscripten::val(m_sphere.Center().x));
-  center_dict.set("Y", emscripten::val(m_sphere.Center().y));
-  center_dict.set("Z", emscripten::val(m_sphere.Center().z));
-  v.set("Center", center_dict);
+  v.set("EquatorialPlane", PlaneToDict(m_sphere.plane));
   return v;
 }
 
@@ -68,7 +91,7 @@ emscripten::val BND_Sphere::toJSON(emscripten::val key)
 BND_Sphere* BND_Sphere::Decode(emscripten::val jsonObject)
 {
   double radius = jsonObject["Radius"].as<double>();
-  emscripten::val center_dict = jsonObject["Center"].as<emscripten::val>();
+  emscripten::val center_dict = jsonObject["EquatorialPlane"]["Origin"].as<emscripten::val>();
   ON_3dPoint center;
   center.x = center_dict["X"].as<double>();
   center.y = center_dict["Y"].as<double>();
