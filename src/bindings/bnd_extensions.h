@@ -126,7 +126,7 @@ public:
 
   static BND_ONXModel* FromByteArray(int length, const void* buffer);
 
-  bool Write(const char* path, int version);
+  bool Write(const char* path, int version=0);
 
   std::wstring GetStartSectionComments() const;
   void SetStartSectionComments(std::wstring comments);
