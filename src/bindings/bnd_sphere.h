@@ -13,6 +13,7 @@ class BND_Sphere
 public:
   ON_Sphere m_sphere;
 public:
+  BND_Sphere(const ON_Sphere& sphere) : m_sphere(sphere) {}
   BND_Sphere(ON_3dPoint center, double radius);
   //public Sphere(Plane equatorialPlane, double radius)
   //public static Sphere Unset
@@ -25,12 +26,12 @@ public:
   //public Plane EquatorialPlane | get; set;
   ON_3dPoint GetCenter() const { return m_sphere.Center(); }
   void SetCenter(const ON_3dPoint& c);
-  //public Point3d NorthPole
-  //public Point3d SouthPole
-  //public Circle LatitudeRadians(double radians)
-  //public Circle LatitudeDegrees(double degrees)
-  //public Circle LongitudeRadians(double radians)
-  //public Circle LongitudeDegrees(double degrees)
+  ON_3dPoint NorthPole() const { return m_sphere.NorthPole(); }
+  ON_3dPoint SouthPole() const { return m_sphere.SouthPole(); }
+  class BND_Circle* LatitudeRadians(double radians) const;
+  class BND_Circle* LatitudeDegrees(double degrees) const;
+  class BND_Circle* LongitudeRadians(double radians) const;
+  class BND_Circle* LongitudeDegrees(double degrees) const;
   ON_3dPoint PointAt(double longitudeRadians, double latitudeRadians) const { return m_sphere.PointAt(longitudeRadians, latitudeRadians); }
   ON_3dVector NormalAt(double longitudeRadians, double latitudeRadians) const { return m_sphere.NormalAt(longitudeRadians, latitudeRadians); }
   ON_3dPoint ClosestPoint(const ON_3dPoint& testPoint) const { return m_sphere.ClosestPointTo(testPoint); }
@@ -41,8 +42,8 @@ public:
   //public bool Rotate(double angleRadians, Vector3d axisOfRotation, Point3d centerOfRotation)
   //public bool Translate(Vector3d delta)
   //public bool Transform(Transform xform)
-  class BND_Brep* ToBrep();
-  //public NurbsSurface ToNurbsSurface()
+  class BND_Brep* ToBrep() const;
+  class BND_NurbsSurface* ToNurbsSurface() const;
   //public RevSurface ToRevSurface()
   //public bool EpsilonEquals(Sphere other, double epsilon)
 

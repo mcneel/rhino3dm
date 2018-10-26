@@ -80,31 +80,16 @@ BND_BoundingBox BND_BoundingBox::Union(const BND_BoundingBox& a, const BND_Bound
 pybind11::dict BND_BoundingBox::Encode() const
 {
   pybind11::dict d;
-  pybind11::dict minpoint;
-  minpoint["X"] = m_bbox.m_min.x;
-  minpoint["Y"] = m_bbox.m_min.y;
-  minpoint["Z"] = m_bbox.m_min.z;
-  pybind11::dict maxpoint;
-  maxpoint["X"] = m_bbox.m_max.x;
-  maxpoint["Y"] = m_bbox.m_max.y;
-  maxpoint["Z"] = m_bbox.m_max.z;
-
-  d["Min"] = minpoint;
-  d["Max"] = maxpoint;
+  d["Min"] = PointToDict(m_bbox.m_min);
+  d["Max"] = PointToDict(m_bbox.m_max);
   return d;
 }
 
 BND_BoundingBox* BND_BoundingBox::Decode(pybind11::dict jsonObject)
 {
   ON_BoundingBox bbox;
-  pybind11::dict minpoint = jsonObject["Min"];
-  bbox.m_min.x = minpoint["X"].cast<double>();
-  bbox.m_min.y = minpoint["Y"].cast<double>();
-  bbox.m_min.z = minpoint["Z"].cast<double>();
-  pybind11::dict maxpoint = jsonObject["Max"];
-  bbox.m_max.x = maxpoint["X"].cast<double>();
-  bbox.m_max.y = maxpoint["Y"].cast<double>();
-  bbox.m_max.z = maxpoint["Z"].cast<double>();
+  bbox.m_min = PointFromDict(jsonObject["Min"].cast<pybind11::dict>());
+  bbox.m_min = PointFromDict(jsonObject["Max"].cast<pybind11::dict>());
   return new BND_BoundingBox(bbox);
 }
 #endif

@@ -56,6 +56,59 @@ void initDefines(pybind11::module& m)
     .export_values();
 }
 
+pybind11::dict PointToDict(const ON_3dPoint& point)
+{
+  pybind11::dict rc;
+  rc["X"] = point.x;
+  rc["Y"] = point.y;
+  rc["Z"] = point.z;
+  return rc;
+}
+pybind11::dict VectorToDict(const ON_3dVector& vector)
+{
+  pybind11::dict rc;
+  rc["X"] = vector.x;
+  rc["Y"] = vector.y;
+  rc["Z"] = vector.z;
+  return rc;
+}
+pybind11::dict PlaneToDict(const ON_Plane& plane)
+{
+  pybind11::dict rc;
+  rc["Origin"] = PointToDict(plane.origin);
+  rc["XAxis"] = VectorToDict(plane.xaxis);
+  rc["YAxis"] = VectorToDict(plane.yaxis);
+  rc["ZAxis"] = VectorToDict(plane.zaxis);
+  return rc;
+}
+
+ON_3dPoint PointFromDict(pybind11::dict& dict)
+{
+  ON_3dVector rc;
+  rc.x = dict["X"].cast<double>();
+  rc.y = dict["Y"].cast<double>();
+  rc.z = dict["Z"].cast<double>();
+  return rc;
+}
+ON_3dVector VectorFromDict(pybind11::dict& dict)
+{
+  ON_3dVector rc;
+  rc.x = dict["X"].cast<double>();
+  rc.y = dict["Y"].cast<double>();
+  rc.z = dict["Z"].cast<double>();
+  return rc;
+}
+ON_Plane PlaneFromDict(pybind11::dict& dict)
+{
+  ON_Plane plane;
+  plane.origin = PointFromDict(dict["Origin"].cast<pybind11::dict>());
+  plane.xaxis = VectorFromDict(dict["XAxis"].cast<pybind11::dict>());
+  plane.yaxis = VectorFromDict(dict["YAxis"].cast<pybind11::dict>());
+  plane.zaxis = VectorFromDict(dict["ZAxis"].cast<pybind11::dict>());
+  plane.UpdateEquation();
+  return plane;
+}
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -115,6 +168,34 @@ void initDefines(void*)
     .value("Preview", ON::preview_mesh)
     .value("Any", ON::any_mesh)
     ;
-
 }
+
+
+emscripten::val PointToDict(const ON_3dPoint& point)
+{
+  emscripten::val p(emscripten::val::object());
+  p.set("X", emscripten::val(point.x));
+  p.set("Y", emscripten::val(point.y));
+  p.set("Z", emscripten::val(point.z));
+  return p;
+}
+emscripten::val VectorToDict(const ON_3dVector& vector)
+{
+  emscripten::val p(emscripten::val::object());
+  p.set("X", emscripten::val(vector.x));
+  p.set("Y", emscripten::val(vector.y));
+  p.set("Z", emscripten::val(vector.z));
+  return p;
+}
+
+emscripten::val PlaneToDict(const ON_Plane& plane)
+{
+  emscripten::val p(emscripten::val::object());
+  p.set("Origin", PointToDict(plane.origin));
+  p.set("XAxis", VectorToDict(plane.xaxis));
+  p.set("YAxis", VectorToDict(plane.yaxis));
+  p.set("ZAxis", VectorToDict(plane.zaxis));
+  return p;
+}
+
 #endif
