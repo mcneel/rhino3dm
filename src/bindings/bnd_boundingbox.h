@@ -50,4 +50,15 @@ public:
   //public static BoundingBox Intersection(BoundingBox a, BoundingBox b)
   //public static BoundingBox Union(BoundingBox box, Point3d point)
 
+#if defined(__EMSCRIPTEN__)
+  emscripten::val toJSON(emscripten::val key);
+  emscripten::val Encode() const;
+  static BND_BoundingBox* Decode(emscripten::val jsonObject);
+#endif
+
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::dict Encode() const;
+  static BND_BoundingBox* Decode(pybind11::dict jsonObject);
+#endif
+
 };

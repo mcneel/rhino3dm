@@ -77,6 +77,79 @@ BND_BoundingBox BND_BoundingBox::Union(const BND_BoundingBox& a, const BND_Bound
 
 
 #if defined(ON_PYTHON_COMPILE)
+pybind11::dict BND_BoundingBox::Encode() const
+{
+  pybind11::dict d;
+  pybind11::dict minpoint;
+  minpoint["X"] = m_bbox.m_min.x;
+  minpoint["Y"] = m_bbox.m_min.y;
+  minpoint["Z"] = m_bbox.m_min.z;
+  pybind11::dict maxpoint;
+  maxpoint["X"] = m_bbox.m_max.x;
+  maxpoint["Y"] = m_bbox.m_max.y;
+  maxpoint["Z"] = m_bbox.m_max.z;
+
+  d["Min"] = minpoint;
+  d["Max"] = maxpoint;
+  return d;
+}
+
+BND_BoundingBox* BND_BoundingBox::Decode(pybind11::dict jsonObject)
+{
+  ON_BoundingBox bbox;
+  pybind11::dict minpoint = jsonObject["Min"];
+  bbox.m_min.x = minpoint["X"].cast<double>();
+  bbox.m_min.y = minpoint["Y"].cast<double>();
+  bbox.m_min.z = minpoint["Z"].cast<double>();
+  pybind11::dict maxpoint = jsonObject["Max"];
+  bbox.m_max.x = maxpoint["X"].cast<double>();
+  bbox.m_max.y = maxpoint["Y"].cast<double>();
+  bbox.m_max.z = maxpoint["Z"].cast<double>();
+  return new BND_BoundingBox(bbox);
+}
+#endif
+
+#if defined(ON_WASM_COMPILE)
+emscripten::val BND_BoundingBox::Encode() const
+{
+  emscripten::val v(emscripten::val::object());
+
+  emscripten::val minpoint(emscripten::val::object());
+  minpoint.set("X", emscripten::val(m_bbox.m_min.x));
+  minpoint.set("Y", emscripten::val(m_bbox.m_min.y));
+  minpoint.set("Z", emscripten::val(m_bbox.m_min.z));
+  v.set("Min", minpoint);
+  emscripten::val maxpoint(emscripten::val::object());
+  maxpoint.set("X", emscripten::val(m_bbox.m_max.x));
+  maxpoint.set("Y", emscripten::val(m_bbox.m_max.y));
+  maxpoint.set("Z", emscripten::val(m_bbox.m_max.z));
+  v.set("Max", maxpoint);
+  return v;
+}
+
+emscripten::val BND_BoundingBox::toJSON(emscripten::val key)
+{
+  return Encode();
+}
+
+BND_BoundingBox* BND_BoundingBox::Decode(emscripten::val jsonObject)
+{
+  ON_BoundingBox bbox;
+  emscripten::val minpoint = jsonObject["Min"].as<emscripten::val>();
+  bbox.m_min.x = minpoint["X"].as<double>();
+  bbox.m_min.y = minpoint["Y"].as<double>();
+  bbox.m_min.z = minpoint["Z"].as<double>();
+  emscripten::val maxpoint = jsonObject["Max"].as<emscripten::val>();
+  bbox.m_max.x = maxpoint["X"].as<double>();
+  bbox.m_max.y = maxpoint["Y"].as<double>();
+  bbox.m_max.z = maxpoint["Z"].as<double>();
+  return new BND_BoundingBox(bbox);
+}
+
+#endif
+
+
+#if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initBoundingBoxBindings(pybind11::module& m)
 {
@@ -96,6 +169,8 @@ void initBoundingBoxBindings(pybind11::module& m)
     .def("Transform", &BND_BoundingBox::Transform)
     .def("ToBrep", &BND_BoundingBox::ToBrep)
     .def_static("Union", &BND_BoundingBox::Union)
+    .def("Encode", &BND_BoundingBox::Encode)
+    .def_static("Decode", &BND_BoundingBox::Decode)
     ;
 }
 #else
@@ -119,6 +194,9 @@ void initBoundingBoxBindings(void*)
     .function("transform", &BND_BoundingBox::Transform)
     .function("toBrep", &BND_BoundingBox::ToBrep, allow_raw_pointers())
     .class_function("union", &BND_BoundingBox::Union, allow_raw_pointers())
+    .function("encode", &BND_BoundingBox::Encode)
+    .function("toJSON", &BND_BoundingBox::toJSON)
+    .class_function("decode", &BND_BoundingBox::Decode, allow_raw_pointers())
     ;
 }
 #endif
