@@ -44,6 +44,37 @@ BND_Sphere* BND_Sphere::Decode(pybind11::dict jsonObject)
   center.z = center_dict["Z"].cast<double>();
   return new BND_Sphere(center, radius);
 }
+#endif
+
+#if defined(ON_WASM_COMPILE)
+emscripten::val BND_Sphere::Encode() const
+{
+  emscripten::val v(emscripten::val::object());
+  v.set("Radius", emscripten::val(m_sphere.radius));
+
+  emscripten::val center_dict(emscripten::val::object());
+  center_dict.set("X", emscripten::val(m_sphere.Center().x));
+  center_dict.set("Y", emscripten::val(m_sphere.Center().y));
+  center_dict.set("Z", emscripten::val(m_sphere.Center().z));
+  v.set("Center", center_dict);
+  return v;
+}
+
+emscripten::val BND_Sphere::toJSON(emscripten::val key)
+{
+  return Encode();
+}
+
+BND_Sphere* BND_Sphere::Decode(emscripten::val jsonObject)
+{
+  double radius = jsonObject["Radius"].as<double>();
+  emscripten::val center_dict = jsonObject["Center"].as<emscripten::val>();
+  ON_3dPoint center;
+  center.x = center_dict["X"].as<double>();
+  center.y = center_dict["Y"].as<double>();
+  center.z = center_dict["Z"].as<double>();
+  return new BND_Sphere(center, radius);
+}
 
 #endif
 
@@ -64,7 +95,7 @@ void initSphereBindings(pybind11::module& m)
     .def("ClosestPoint", &BND_Sphere::ClosestPoint)
     .def("ToBrep", &BND_Sphere::ToBrep)
     .def("Encode", &BND_Sphere::Encode)
-    .def_static("Decode", &BND_Sphere::Decode);
+    .def_static("Decode", &BND_Sphere::Decode)
     ;
 }
 #endif
@@ -76,8 +107,17 @@ void initSphereBindings(void*)
 {
   class_<BND_Sphere>("Sphere")
     .constructor<ON_3dPoint,double>()
-    .property("center", &BND_Sphere::Center)
-    .property("radius", &BND_Sphere::Radius)
-    .function("toBrep", &BND_Sphere::ToBrep, allow_raw_pointers());
+    .property("isValid", &BND_Sphere::IsValid)
+    .property("diameter", &BND_Sphere::GetDiameter, &BND_Sphere::SetDiameter)
+    .property("radius", &BND_Sphere::GetRadius, &BND_Sphere::SetRadius)
+    .property("center", &BND_Sphere::GetCenter, &BND_Sphere::SetCenter)
+    .function("pointAt", &BND_Sphere::PointAt)
+    .function("normalAt", &BND_Sphere::NormalAt)
+    .function("closestPoint", &BND_Sphere::ClosestPoint)
+    .function("toBrep", &BND_Sphere::ToBrep, allow_raw_pointers())
+    .function("encode", &BND_Sphere::Encode)
+    .function("toJSON", &BND_Sphere::toJSON)
+    .class_function("decode", &BND_Sphere::Decode, allow_raw_pointers())
+    ;
 }
 #endif
