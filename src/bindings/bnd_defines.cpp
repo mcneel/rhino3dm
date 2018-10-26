@@ -92,19 +92,20 @@ ON_3dPoint PointFromDict(pybind11::dict& dict)
 }
 ON_3dVector VectorFromDict(pybind11::dict& dict)
 {
-  ON_3dVector rc;
-  rc.x = dict["X"].cast<double>();
-  rc.y = dict["Y"].cast<double>();
-  rc.z = dict["Z"].cast<double>();
-  return rc;
+  ON_3dPoint pt = PointFromDict(dict);
+  return ON_3dVector(pt.x, pt.y, pt.z);
 }
 ON_Plane PlaneFromDict(pybind11::dict& dict)
 {
   ON_Plane plane;
-  plane.origin = PointFromDict(dict["Origin"].cast<pybind11::dict>());
-  plane.xaxis = VectorFromDict(dict["XAxis"].cast<pybind11::dict>());
-  plane.yaxis = VectorFromDict(dict["YAxis"].cast<pybind11::dict>());
-  plane.zaxis = VectorFromDict(dict["ZAxis"].cast<pybind11::dict>());
+  pybind11::dict d = dict["Origin"].cast<pybind11::dict>();
+  plane.origin = PointFromDict(d);
+  d = dict["XAxis"].cast<pybind11::dict>();
+  plane.xaxis = VectorFromDict(d);
+  d = dict["YAxis"].cast<pybind11::dict>();
+  plane.yaxis = VectorFromDict(d);
+  d = dict["ZAxis"].cast<pybind11::dict>();
+  plane.zaxis = VectorFromDict(d);
   plane.UpdateEquation();
   return plane;
 }

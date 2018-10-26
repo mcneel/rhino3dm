@@ -65,7 +65,8 @@ BND_Sphere* BND_Sphere::Decode(pybind11::dict jsonObject)
 {
   ON_Sphere s;
   s.radius = jsonObject["Radius"].cast<double>();
-  s.plane = PlaneFromDict(jsonObject["EquatorialPlane"].cast<pybind11::dict>());
+  pybind11::dict d = jsonObject["EquatorialPlane"].cast<pybind11::dict>();
+  s.plane = PlaneFromDict(d);
   return new BND_Sphere(s);
 }
 #endif
@@ -142,15 +143,15 @@ void initSphereBindings(void*)
     .property("center", &BND_Sphere::GetCenter, &BND_Sphere::SetCenter)
     .property("northPole", &BND_Sphere::NorthPole)
     .property("southPole", &BND_Sphere::SouthPole)
-    .function("latitudeRadians", &BND_Sphere::LatitudeRadians)
-    .function("latitudeDegrees", &BND_Sphere::LatitudeDegrees)
-    .function("longitudeRadians", &BND_Sphere::LongitudeRadians)
-    .function("longitureDegrees", &BND_Sphere::LongitudeDegrees)
+    .function("latitudeRadians", &BND_Sphere::LatitudeRadians, allow_raw_pointers())
+    .function("latitudeDegrees", &BND_Sphere::LatitudeDegrees, allow_raw_pointers())
+    .function("longitudeRadians", &BND_Sphere::LongitudeRadians, allow_raw_pointers())
+    .function("longitureDegrees", &BND_Sphere::LongitudeDegrees, allow_raw_pointers())
     .function("pointAt", &BND_Sphere::PointAt)
     .function("normalAt", &BND_Sphere::NormalAt)
     .function("closestPoint", &BND_Sphere::ClosestPoint)
     .function("toBrep", &BND_Sphere::ToBrep, allow_raw_pointers())
-    .function("toNurbsSurface", &BND_Sphere::ToNurbsSurface)
+    .function("toNurbsSurface", &BND_Sphere::ToNurbsSurface, allow_raw_pointers())
     .function("encode", &BND_Sphere::Encode)
     .function("toJSON", &BND_Sphere::toJSON)
     .class_function("decode", &BND_Sphere::Decode, allow_raw_pointers())

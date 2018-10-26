@@ -88,8 +88,10 @@ pybind11::dict BND_BoundingBox::Encode() const
 BND_BoundingBox* BND_BoundingBox::Decode(pybind11::dict jsonObject)
 {
   ON_BoundingBox bbox;
-  bbox.m_min = PointFromDict(jsonObject["Min"].cast<pybind11::dict>());
-  bbox.m_min = PointFromDict(jsonObject["Max"].cast<pybind11::dict>());
+  pybind11::dict d = jsonObject["Min"].cast<pybind11::dict>();
+  bbox.m_min = PointFromDict(d);
+  d = jsonObject["Max"].cast<pybind11::dict>();
+  bbox.m_max = PointFromDict(d);
   return new BND_BoundingBox(bbox);
 }
 #endif
