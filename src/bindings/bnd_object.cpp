@@ -87,8 +87,23 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
           return new BND_BrepFace(brepface, compref);
         return new BND_SurfaceProxy(proxy, compref);
       }
+      ON_RevSurface* revsrf = ON_RevSurface::Cast(obj);
+      if (revsrf)
+        return new BND_RevSurface(revsrf, compref);
       return new BND_Surface(surface, compref);
     }
+
+    ON_Point* point = ON_Point::Cast(obj);
+    if (point)
+      return new BND_Point(point, compref);
+
+    ON_PointCloud* pointcloud = ON_PointCloud::Cast(obj);
+    if (pointcloud)
+      return new BND_PointCloud(pointcloud, compref);
+
+    ON_PointGrid* pointgrid = ON_PointGrid::Cast(obj);
+    if (pointgrid)
+      return new BND_PointGrid(pointgrid, compref);
 
     ON_Viewport* viewport = ON_Viewport::Cast(obj);
     if( viewport )
@@ -100,6 +115,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
 
     return new BND_GeometryBase(geometry, compref);
   }
+
+  ON_Material* material = ON_Material::Cast(obj);
+  if (material)
+    return new BND_Material(material, compref);
 
   ON_Layer* layer = ON_Layer::Cast(obj);
   if (layer)
