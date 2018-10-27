@@ -18,6 +18,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initObjectBindings(m);
   init3dmAttributesBindings(m);
   initLayerBindings(m);
+  initMaterialBindings(m);
   initPointBindings(m);
   initXformBindings(m);
   initArcBindings(m);
@@ -25,6 +26,9 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initBoxBindings(m);
   initGeometryBindings(m);
   initHatchBindings(m);
+  initPointCloudBindings(m);
+  initPointGeometryBindings(m);
+  initPointGridBindings(m);
   initCurveBindings(m);
   initCurveProxyBindings(m);
   initNurbsCurveBindings(m);
@@ -32,13 +36,16 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initCircleBindings(m);
   initConeBindings(m);
   initCylinderBindings(m);
+  initEllipseBindings(m);
   initArcCurveBindings(m);
   initBezierBindings(m);
   initLineCurveBindings(m);
   initPolyCurveBindings(m);
   initPolylineCurveBindings(m);
   initSurfaceBindings(m);
+  initRevSurfaceBindings(m);
   initSurfaceProxyBindings(m);
+  initPlaneSurfaceBindings(m);
   initBrepBindings(m);
   initExtrusionBindings(m);
   initNurbsSurfaceBindings(m);
