@@ -35,7 +35,9 @@ public:
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);
   int UserStringCount() const { return m_geometry->UserStringCount(); }
-  //public System.Collections.Specialized.NameValueCollection GetUserStrings()
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple GetUserStrings() const;
+#endif
 
   int Dimension() const { return m_geometry->Dimension(); }
 };

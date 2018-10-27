@@ -47,6 +47,26 @@ std::wstring BND_GeometryBase::GetUserString(std::wstring key)
 }
 
 #if defined(ON_PYTHON_COMPILE)
+pybind11::tuple BND_GeometryBase::GetUserStrings() const
+{
+  ON_ClassArray<ON_wString> keys;
+  m_geometry->GetUserStringKeys(keys);
+  pybind11::tuple rc(keys.Count());
+  for (int i = 0; i < keys.Count(); i++)
+  {
+    ON_wString sval;
+    m_geometry->GetUserString(keys[i].Array(), sval);
+    pybind11::tuple keyval(2);
+    keyval[0] = std::wstring(keys[i].Array());
+    keyval[1] = std::wstring(sval.Array());
+    rc[i] = keyval;
+  }
+  return rc;
+}
+#endif
+
+
+#if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initGeometryBindings(pybind11::module& m)
 {
@@ -63,6 +83,7 @@ void initGeometryBindings(pybind11::module& m)
     .def("SetUserString", &BND_GeometryBase::SetUserString)
     .def("GetUserString", &BND_GeometryBase::GetUserString)
     .def_property_readonly("UserStringCount", &BND_GeometryBase::UserStringCount)
+    .def("GetUserStrings", &BND_GeometryBase::GetUserStrings)
     ;
 }
 #endif
