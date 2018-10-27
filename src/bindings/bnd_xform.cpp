@@ -1,32 +1,32 @@
 #include "bindings.h"
 
-BND_Xform BND_Xform::Identity()
+BND_Transform BND_Transform::Identity()
 {
-  BND_Xform rc(ON_Xform::IdentityTransformation);
+  BND_Transform rc(ON_Xform::IdentityTransformation);
   return rc;
 }
 
-BND_Xform BND_Xform::Translation(double x, double y, double z)
+BND_Transform BND_Transform::Translation(double x, double y, double z)
 {
-  return BND_Xform(ON_Xform::TranslationTransformation(x, y, z));
+  return BND_Transform(ON_Xform::TranslationTransformation(x, y, z));
 }
 
-BND_Xform BND_Xform::Scale(ON_3dPoint anchor, double scaleFactor)
+BND_Transform BND_Transform::Scale(ON_3dPoint anchor, double scaleFactor)
 {
-  return BND_Xform(ON_Xform::ScaleTransformation(anchor, scaleFactor));
+  return BND_Transform(ON_Xform::ScaleTransformation(anchor, scaleFactor));
 }
 
-BND_Xform BND_Xform::Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter)
+BND_Transform BND_Transform::Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter)
 {
-  BND_Xform rc(1);
+  BND_Transform rc(1);
   rc.m_xform.Rotation(angleRadians, rotationAxis, rotationCenter);
   return rc;
 }
 
 
-BND_Xform BND_Xform::Transpose() const
+BND_Transform BND_Transform::Transpose() const
 {
-  BND_Xform rc(m_xform);
+  BND_Transform rc(m_xform);
   rc.m_xform.Transpose();
   return rc;
 }
@@ -36,20 +36,20 @@ BND_Xform BND_Xform::Transpose() const
 namespace py = pybind11;
 void initXformBindings(pybind11::module& m)
 {
-  py::class_<BND_Xform>(m, "Transform")
+  py::class_<BND_Transform>(m, "Transform")
     .def(py::init<double>())
-    .def(py::init<const BND_Xform&>())
-    .def_static("Identity", &BND_Xform::Identity)
-    .def_static("Translation", &BND_Xform::Translation)
-    .def_static("Scale", &BND_Xform::Scale)
-    .def_static("Rotation", &BND_Xform::Rotation)
-    .def_property_readonly("IsIdentity", &BND_Xform::IsIdentity)
-    .def_property_readonly("IsValid", &BND_Xform::IsValid)
-    .def_property_readonly("IsZero", &BND_Xform::IsZero)
-    .def_property_readonly("IsZero4x4", &BND_Xform::IsZero4x4)
-    .def_property_readonly("IsZeroTransformation", &BND_Xform::IsZeroTransformation)
-    .def("Determinant", &BND_Xform::Determinant)
-    .def("Transpose", &BND_Xform::Transpose)
+    .def(py::init<const BND_Transform&>())
+    .def_static("Identity", &BND_Transform::Identity)
+    .def_static("Translation", &BND_Transform::Translation)
+    .def_static("Scale", &BND_Transform::Scale)
+    .def_static("Rotation", &BND_Transform::Rotation)
+    .def_property_readonly("IsIdentity", &BND_Transform::IsIdentity)
+    .def_property_readonly("IsValid", &BND_Transform::IsValid)
+    .def_property_readonly("IsZero", &BND_Transform::IsZero)
+    .def_property_readonly("IsZero4x4", &BND_Transform::IsZero4x4)
+    .def_property_readonly("IsZeroTransformation", &BND_Transform::IsZeroTransformation)
+    .def("Determinant", &BND_Transform::Determinant)
+    .def("Transpose", &BND_Transform::Transpose)
     ;
 }
 #endif
@@ -59,20 +59,20 @@ using namespace emscripten;
 
 void initXformBindings(void*)
 {
-  class_<BND_Xform>("Transform")
+  class_<BND_Transform>("Transform")
     .constructor<double>()
-    //.constructor<const BND_Xform&>()
-    .class_function("identity", &BND_Xform::Identity)
-    .class_function("translation", &BND_Xform::Translation)
-    .class_function("scale", &BND_Xform::Scale)
-    .class_function("rotation", &BND_Xform::Rotation)
-    .property("isIdentity", &BND_Xform::IsIdentity)
-    .property("isValid", &BND_Xform::IsValid)
-    .property("isZero", &BND_Xform::IsZero)
-    .property("isZero4x4", &BND_Xform::IsZero4x4)
-    .property("isZeroTransformation", &BND_Xform::IsZeroTransformation)
-    .function("determinant", &BND_Xform::Determinant)
-    .function("transpose", &BND_Xform::Transpose)
+    //.constructor<const BND_Transform&>()
+    .class_function("identity", &BND_Transform::Identity)
+    .class_function("translation", &BND_Transform::Translation)
+    .class_function("scale", &BND_Transform::Scale)
+    .class_function("rotation", &BND_Transform::Rotation)
+    .property("isIdentity", &BND_Transform::IsIdentity)
+    .property("isValid", &BND_Transform::IsValid)
+    .property("isZero", &BND_Transform::IsZero)
+    .property("isZero4x4", &BND_Transform::IsZero4x4)
+    .property("isZeroTransformation", &BND_Transform::IsZeroTransformation)
+    .function("determinant", &BND_Transform::Determinant)
+    .function("transpose", &BND_Transform::Transpose)
     ;
 }
 #endif

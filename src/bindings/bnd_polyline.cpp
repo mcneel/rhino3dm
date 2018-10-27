@@ -1,6 +1,6 @@
 #include "bindings.h"
 
-void BND_Point3dList::Transform(const BND_Xform& xform)
+void BND_Point3dList::Transform(const BND_Transform& xform)
 {
   m_polyline.Transform(xform.m_xform);
 }

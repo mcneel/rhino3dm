@@ -10,24 +10,24 @@ void initXformBindings(void* m);
 
 
 
-class BND_Xform
+class BND_Transform
 {
 public:
   ON_Xform m_xform;
 public:
-  BND_Xform(const ON_Xform& xf) : m_xform(xf) {}
-  BND_Xform(double diagonalValue) : m_xform(diagonalValue) {}
-  BND_Xform(const BND_Xform& other) : m_xform(other.m_xform) {}
-  static BND_Xform Identity();
+  BND_Transform(const ON_Xform& xf) : m_xform(xf) {}
+  BND_Transform(double diagonalValue) : m_xform(diagonalValue) {}
+  BND_Transform(const BND_Transform& other) : m_xform(other.m_xform) {}
+  static BND_Transform Identity();
   //static Transform ZeroTransformation
   //static Transform Unset
   //static Transform Translation(Vector3d motion)
-  static BND_Xform Translation(double dx, double dy, double dz);
-  static BND_Xform Scale(ON_3dPoint anchor, double scaleFactor);
+  static BND_Transform Translation(double dx, double dy, double dz);
+  static BND_Transform Scale(ON_3dPoint anchor, double scaleFactor);
   //static Transform Scale(Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor)
   //static Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
   //static Transform Rotation(double angleRadians, Point3d rotationCenter)
-  static BND_Xform Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter);
+  static BND_Transform Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter);
   //static Transform Rotation(Vector3d startDirection, Vector3d endDirection, Point3d rotationCenter)
   //static Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0,
   //  Vector3d x1, Vector3d y1, Vector3d z1)
@@ -57,8 +57,8 @@ public:
   //public Point3d[] TransformList(System.Collections.Generic.IEnumerable<Point3d> points)
   //public bool Equals(Transform other)
   //public override string ToString()
-  //BND_Xform* TryGetInverse() const;
-  BND_Xform Transpose() const;
+  //BND_Transform* TryGetInverse() const;
+  BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
 
 };

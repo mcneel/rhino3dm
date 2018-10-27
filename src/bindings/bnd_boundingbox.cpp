@@ -17,7 +17,7 @@ BND_BoundingBox::BND_BoundingBox(const ON_BoundingBox& bbox)
 {
 }
 
-bool BND_BoundingBox::Transform(const BND_Xform& xform)
+bool BND_BoundingBox::Transform(const BND_Transform& xform)
 {
   return m_bbox.Transform(xform.m_xform);
 }

@@ -15,6 +15,11 @@ void BND_GeometryBase::SetTrackedPointer(ON_Geometry* geometry, const ON_ModelCo
   BND_CommonObject::SetTrackedPointer(geometry, compref);
 }
 
+bool BND_GeometryBase::Transform(const BND_Transform& xform)
+{
+  return m_geometry->Transform(xform.m_xform);
+}
+
 BND_BoundingBox BND_GeometryBase::BoundingBox() const
 {
   ON_BoundingBox bbox = m_geometry->BoundingBox();
@@ -47,10 +52,14 @@ void initGeometryBindings(pybind11::module& m)
 {
   py::class_<BND_GeometryBase, BND_CommonObject>(m, "GeometryBase")
     .def_property_readonly("ObjectType", &BND_GeometryBase::ObjectType)
+    .def("Transform", &BND_GeometryBase::Transform)
     .def("Translate", &BND_GeometryBase::Translate)
     .def("Scale", &BND_GeometryBase::Scale)
     .def("Rotate", &BND_GeometryBase::Rotate)
     .def("GetBoundingBox", &BND_GeometryBase::BoundingBox)
+    .def_property_readonly("IsDeformable", &BND_GeometryBase::IsDeformable)
+    .def("MakeDeformable", &BND_GeometryBase::MakeDeformable)
+    .def_property_readonly("HasBrepForm", &BND_GeometryBase::HasBrepForm)
     .def("SetUserString", &BND_GeometryBase::SetUserString)
     .def("GetUserString", &BND_GeometryBase::GetUserString)
     .def_property_readonly("UserStringCount", &BND_GeometryBase::UserStringCount)
@@ -64,10 +73,14 @@ void initGeometryBindings(void*)
 {
   class_<BND_GeometryBase, base<BND_CommonObject>>("GeometryBase")
     .property("objectType", &BND_GeometryBase::ObjectType)
+    .function("transform", &BND_GeometryBase::Transform)
     .function("translate", &BND_GeometryBase::Translate)
     .function("scale", &BND_GeometryBase::Scale)
     .function("rotate", &BND_GeometryBase::Rotate)
     .function("getBoundingBox", &BND_GeometryBase::BoundingBox)
+    .property("isDeformable", &BND_GeometryBase::IsDeformable)
+    .function("makeDeformable", &BND_GeometryBase::MakeDeformable)
+    .property("hasBrepForm", &BND_GeometryBase::HasBrepForm)
     .function("setUserString", &BND_GeometryBase::SetUserString)
     .function("getUserString", &BND_GeometryBase::GetUserString)
     .property("userStringCount", &BND_GeometryBase::UserStringCount)
