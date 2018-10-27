@@ -14,6 +14,7 @@ BND_Extrusion* BND_Extrusion::Create(const BND_Curve& planarCurve, double height
   return new BND_Extrusion(ext, nullptr);
 }
 
+
 BND_Extrusion* BND_Extrusion::CreateCylinderExtrusion(const BND_Cylinder& cylinder, bool capBottom, bool capTop)
 {
   ON_Extrusion* ext = ON_Extrusion::Cylinder(cylinder.m_cylinder, capBottom, capTop);

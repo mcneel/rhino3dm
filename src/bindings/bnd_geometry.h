@@ -21,22 +21,21 @@ public:
 
   ON::object_type ObjectType() const { return m_geometry->ObjectType(); }
 
-  //public bool Transform(Transform xform)
+  bool Transform(const class BND_Transform& xform);
   bool Translate(ON_3dVector translationVector) { return m_geometry->Translate(translationVector); }
   //public bool Translate(double x, double y, double z)
   bool Scale(double scaleFactor) { return m_geometry->Scale(scaleFactor); }
   bool Rotate(double rotation_angle, const ON_3dVector& rotation_axis, const ON_3dPoint& rotation_center);
   //public uint MemoryEstimate()
   BND_BoundingBox BoundingBox() const;
-  //public bool IsDeformable {get;}
-  //public bool MakeDeformable()
-  //public bool HasBrepForm {get;}
+  bool IsDeformable() const { return m_geometry->IsDeformable(); }
+  bool MakeDeformable() { return m_geometry->MakeDeformable(); }
+  bool HasBrepForm() const { return m_geometry->HasBrepForm(); }
   //public ComponentIndex ComponentIndex()
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);
   int UserStringCount() const { return m_geometry->UserStringCount(); }
   //public System.Collections.Specialized.NameValueCollection GetUserStrings()
-
 
   int Dimension() const { return m_geometry->Dimension(); }
 };

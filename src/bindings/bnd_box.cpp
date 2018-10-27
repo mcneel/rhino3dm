@@ -5,7 +5,7 @@ BND_Box::BND_Box(const BND_BoundingBox& bbox)
 {
 }
 
-bool BND_Box::Transform(const BND_Xform& xform)
+bool BND_Box::Transform(const BND_Transform& xform)
 {
   return m_box.Transform(xform.m_xform);
 }

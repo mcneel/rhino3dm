@@ -42,7 +42,7 @@ public:
   int IsDegenerate(double tolerance) const { return m_bbox.IsDegenerate(tolerance); }
   //ON_3dPoint[] GetCorners()
   //Line[] GetEdges()
-  bool Transform(const class BND_Xform& xform);
+  bool Transform(const class BND_Transform& xform);
   class BND_Brep* ToBrep() const;
   //void Union(const BND_BoundingBox& other) { m_bbox.Union(other.m_bbox); }
   //public void Union(Point3d point)
