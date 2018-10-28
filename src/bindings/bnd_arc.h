@@ -39,17 +39,19 @@ public:
   //public Interval AngleDomain{ get; set; }
   //public double StartAngle{ get; set; }
   //public double EndAngle{ get; set; }
-  //public double Angle{ get; set; }
+  double GetAngleRadians() const { return m_arc.AngleRadians(); }
+  void SetAngleRadians(double a) { m_arc.SetAngleRadians(a); }
   //public double StartAngleDegrees{ get; set; }
   //public double EndAngleDegrees{ get; set; }
-  //public double AngleDegrees{ get; set; }
-  //public bool Trim(Interval domain)
-  //public BoundingBox BoundingBox()
+  double GetAngleDegrees() const { return m_arc.AngleDegrees(); }
+  void SetAngleDegrees(double a) { m_arc.SetAngleDegrees(a); }
+  bool Trim(const class BND_Interval& domain);
+  BND_BoundingBox BoundingBox() const;
   ON_3dPoint PointAt(double t) const { return m_arc.PointAt(t); }
   ON_3dVector TangentAt(double t) const { return m_arc.TangentAt(t); }
   //public double ClosestParameter(Point3d testPoint)
   ON_3dPoint ClosestPoint(ON_3dPoint testPoint) const { return m_arc.ClosestPointTo(testPoint); }
   void Reverse() { m_arc.Reverse(); }
-  //public bool Transform(Transform xform)
+  bool Transform(const class BND_Transform& xform);
   class BND_NurbsCurve* ToNurbsCurve() const;
 };

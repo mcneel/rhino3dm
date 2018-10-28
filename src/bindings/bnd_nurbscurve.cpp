@@ -19,6 +19,8 @@ void BND_NurbsCurvePointList::SetControlPoint(int index, ON_4dPoint point)
 }
 
 
+////////////////////////////////////
+
 BND_NurbsCurveKnotList::BND_NurbsCurveKnotList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
@@ -83,6 +85,17 @@ BND_NurbsCurve* BND_NurbsCurve::CreateFromCircle(const BND_Circle& circle)
   return new BND_NurbsCurve(nc, nullptr);
 }
 
+BND_NurbsCurve* BND_NurbsCurve::CreateFromEllipse(const class BND_Ellipse& ellipse)
+{
+  ON_NurbsCurve* nc = new ON_NurbsCurve();
+  if (0 == ellipse.m_ellipse.GetNurbForm(*nc))
+  {
+    delete nc;
+    return nullptr;
+  }
+  return new BND_NurbsCurve(nc, nullptr);
+}
+
 BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Point3dList& points)
 {
   if (degree < 1)
@@ -124,6 +137,7 @@ BND_NurbsCurvePointList BND_NurbsCurve::Points()
   return BND_NurbsCurvePointList(m_nurbscurve, m_component_ref);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -148,23 +162,28 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def("__len__", &BND_NurbsCurvePointList::Count)
     .def("__getitem__", &BND_NurbsCurvePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsCurvePointList::SetControlPoint)
+    .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
+    .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))
+    .def("MakeRational", &BND_NurbsCurvePointList::MakeRational)
+    .def("MakeNonRational", &BND_NurbsCurvePointList::MakeNonRational)
     ;
 
   py::class_<BND_NurbsCurve, BND_Curve>(m, "NurbsCurve")
-    .def_static("CreateFromLine", &BND_NurbsCurve::CreateFromLine)
-    .def_static("CreateFromArc", &BND_NurbsCurve::CreateFromArc)
-    .def_static("CreateFromCircle", &BND_NurbsCurve::CreateFromCircle)
-    .def_static("Create", &BND_NurbsCurve::Create)
-    .def(py::init<int, int>())
-    .def(py::init<int, bool, int, int>())
+    .def_static("CreateFromLine", &BND_NurbsCurve::CreateFromLine, py::arg("line"))
+    .def_static("CreateFromArc", &BND_NurbsCurve::CreateFromArc, py::arg("arc"))
+    .def_static("CreateFromCircle", &BND_NurbsCurve::CreateFromCircle, py::arg("circle"))
+    .def_static("CreateFromEllipse", &BND_NurbsCurve::CreateFromEllipse, py::arg("ellipse"))
+    .def_static("Create", &BND_NurbsCurve::Create, py::arg("periodic"), py::arg("degree"), py::arg("points"))
+    .def(py::init<int, int>(), py::arg("degree"), py::arg("pointcount"))
+    .def(py::init<int, bool, int, int>(), py::arg("dimension"), py::arg("rational"), py::arg("order"), py::arg("pointcount"))
     .def_property_readonly("Order", &BND_NurbsCurve::Order)
     .def_property_readonly("IsRational", &BND_NurbsCurve::IsRational)
-    .def("IncreaseDegree", &BND_NurbsCurve::IncreaseDegree)
+    .def("IncreaseDegree", &BND_NurbsCurve::IncreaseDegree, py::arg("desiredDegree"))
     .def_property_readonly("HasBezierSpans", &BND_NurbsCurve::HasBezierSpans)
-    .def("MakePiecewiseBezier", &BND_NurbsCurve::MakePiecewiseBezier)
+    .def("MakePiecewiseBezier", &BND_NurbsCurve::MakePiecewiseBezier, py::arg("setEndWeightsToOne"))
     .def("Reparameterize", &BND_NurbsCurve::Reparameterize)
-    .def("GrevilleParameter", &BND_NurbsCurve::GrevilleParameter)
-    .def("GrevillePoint", &BND_NurbsCurve::GrevillePoint)
+    .def("GrevilleParameter", &BND_NurbsCurve::GrevilleParameter, py::arg("index"))
+    .def("GrevillePoint", &BND_NurbsCurve::GrevillePoint, py::arg("index"))
     ;
 }
 #endif

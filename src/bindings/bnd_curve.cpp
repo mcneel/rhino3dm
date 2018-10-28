@@ -16,6 +16,21 @@ void BND_Curve::SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentRefere
   BND_GeometryBase::SetTrackedPointer(curve, compref);
 }
 
+BND_Curve* BND_Curve::CreateControlPointCurve(const BND_Point3dList& points, int degree)
+{
+  int count = points.m_polyline.Count();
+  if (count < 2)
+    return nullptr;
+
+  if (2 == count)
+    return new BND_LineCurve(points.m_polyline[0], points.m_polyline[1]);
+
+  if (1 == degree && count > 2)
+    return new BND_PolylineCurve(points);
+
+  return BND_NurbsCurve::Create(false, degree, points);
+}
+
 void BND_Curve::SetDomain(const BND_Interval& i)
 {
   m_curve->SetDomain(i.m_t0, i.m_t1);
@@ -71,6 +86,18 @@ BND_Circle* BND_Curve::TryGetCircle(double tolerance) const
   return nullptr;
 }
 
+BND_Ellipse* BND_Curve::TryGetEllipse(double tolerance) const
+{
+  ON_Ellipse ellipse;
+  if (m_curve->IsEllipse(nullptr, &ellipse, tolerance))
+  {
+    BND_Ellipse* rc = new BND_Ellipse();
+    rc->m_ellipse = ellipse;
+    return rc;
+  }
+  return nullptr;
+}
+
 BND_Curve* BND_Curve::Trim(double t0, double t1) const
 {
   ON_Curve* crv = m_curve->DuplicateCurve();
@@ -82,6 +109,23 @@ BND_Curve* BND_Curve::Trim(double t0, double t1) const
   BND_Curve* rc = dynamic_cast<BND_Curve*>(BND_CommonObject::CreateWrapper(crv, nullptr));
   return rc;
 }
+
+#if defined(ON_PYTHON_COMPILE)
+pybind11::object BND_Curve::Split(double t) const
+{
+  ON_Curve* left = nullptr;
+  ON_Curve* right = nullptr;
+  if (m_curve->Split(t, left, right))
+  {
+    pybind11::tuple rc(2);
+    rc[0] = BND_CommonObject::CreateWrapper(left, nullptr);
+    rc[1] = BND_CommonObject::CreateWrapper(right, nullptr);
+    return rc;
+  }
+  return pybind11::none();
+}
+#endif
+
 
 BND_NurbsCurve* BND_Curve::ToNurbsCurve() const
 {
@@ -97,32 +141,36 @@ namespace py = pybind11;
 void initCurveBindings(pybind11::module& m)
 {
   py::class_<BND_Curve, BND_GeometryBase>(m, "Curve")
+    .def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve, py::arg("points"), py::arg("degree")=3)
     .def_property("Domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
     .def_property_readonly("Dimension", &BND_GeometryBase::Dimension)
     .def("ChangeDimension", &BND_Curve::ChangeDimension)
     .def_property_readonly("SpanCount", &BND_Curve::SpanCount)
     .def_property_readonly("Degree", &BND_Curve::Degree)
-    .def("IsLinear", &BND_Curve::IsLinear)
+    .def("IsLinear", &BND_Curve::IsLinear, py::arg("tolerance")=ON_ZERO_TOLERANCE)
     .def("IsPolyline", &BND_Curve::IsPolyline)
     .def("TryGetPolyline", &BND_Curve::TryGetPolyline)
-    .def("IsArc", &BND_Curve::IsArc)
-    .def("TryGetArc", &BND_Curve::TryGetArc)
-    .def("IsCircle", &BND_Curve::IsCircle)
-    .def("TryGetCircle", &BND_Curve::TryGetCircle)
-    .def("IsEllipse", &BND_Curve::IsEllipse)
-    .def("IsPlanar", &BND_Curve::IsPlanar)
-    .def("ChangeClosedCurveSeam", &BND_Curve::ChangeClosedCurveSeam)
+    .def("IsArc", &BND_Curve::IsArc, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("TryGetArc", &BND_Curve::TryGetArc, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("IsCircle", &BND_Curve::IsCircle, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("TryGetCircle", &BND_Curve::TryGetCircle, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("IsEllipse", &BND_Curve::IsEllipse, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("TryGetEllipse", &BND_Curve::TryGetEllipse, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("IsPlanar", &BND_Curve::IsPlanar, py::arg("tolerance")=ON_ZERO_TOLERANCE)
+    .def("ChangeClosedCurveSeam", &BND_Curve::ChangeClosedCurveSeam, py::arg("t"))
     .def_property_readonly("IsClosed", &BND_Curve::IsClosed)
     .def_property_readonly("IsPeriodic", &BND_Curve::IsPeriodic)
+    .def("IsClosable", &BND_Curve::IsClosable, py::arg("tolerance"), py::arg("minimumAbsoluteSize")=0, py::arg("minimumRelativeSize")=10)
     .def("Reverse", &BND_Curve::Reverse)
-    .def("PointAt", &BND_Curve::PointAt)
+    .def("PointAt", &BND_Curve::PointAt, py::arg("t"))
     .def_property_readonly("PointAtStart", &BND_Curve::PointAtStart)
     .def_property_readonly("PointAtEnd", &BND_Curve::PointAtEnd)
-    .def("SetStartPoint", &BND_Curve::SetStartPoint)
-    .def("SetEndPoint", &BND_Curve::SetEndPoint)
-    .def("TangentAt", &BND_Curve::TangentAt)
-    .def("CurvatureAt", &BND_Curve::CurvatureAt)
+    .def("SetStartPoint", &BND_Curve::SetStartPoint, py::arg("point"))
+    .def("SetEndPoint", &BND_Curve::SetEndPoint, py::arg("point"))
+    .def("TangentAt", &BND_Curve::TangentAt, py::arg("t"))
+    .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
     .def("Trim", &BND_Curve::Trim)
+    .def("Split", &BND_Curve::Split, py::arg("t"))
     .def("ToNurbsCurve", &BND_Curve::ToNurbsCurve)
     ;
 }

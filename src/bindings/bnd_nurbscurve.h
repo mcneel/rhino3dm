@@ -17,8 +17,8 @@ public:
   int Count() const { return m_nurbs_curve->CVCount(); }
   ON_4dPoint GetControlPoint(int index) const;
   void SetControlPoint(int index, ON_4dPoint point);
-  //public double ControlPolygonLength
-  //public Polyline ControlPolygon()
+  double ControlPolygonLength() const { return m_nurbs_curve->ControlPolygonLength(); }
+  //class BND_Polyline* ControlPolygon() const;
   bool ChangeEndWeights(double w0, double w1) { return m_nurbs_curve->ChangeEndWeights(w0, w1); }
   bool MakeRational() { return m_nurbs_curve->MakeRational(); }
   bool MakeNonRational() { return m_nurbs_curve->MakeNonRational(); }
@@ -62,7 +62,7 @@ public:
   static BND_NurbsCurve* CreateFromLine(const ON_Line& line);
   static BND_NurbsCurve* CreateFromArc(const class BND_Arc& arc);
   static BND_NurbsCurve* CreateFromCircle(const class BND_Circle& circle);
-  //static NurbsCurve CreateFromEllipse(Ellipse ellipse)
+  static BND_NurbsCurve* CreateFromEllipse(const class BND_Ellipse& ellipse);
   //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
   static BND_NurbsCurve* Create(bool periodic, int degree, const class BND_Point3dList& points);
   BND_NurbsCurve(int degree, int pointCount);
@@ -80,7 +80,7 @@ public:
   double GrevilleParameter(int index) const { return m_nurbscurve->GrevilleAbcissa(index); }
   ON_3dPoint GrevillePoint(int index) const;
   //double[] GrevilleParameters()
-  //Point3dList GrevillePoints()
+  //class BND_Point3dList* GrevillePoints() const;
   //bool EpsilonEquals(NurbsCurve other, double epsilon)
 
 protected:

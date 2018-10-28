@@ -5,6 +5,11 @@ BND_PolylineCurve::BND_PolylineCurve()
   SetTrackedPointer(new ON_PolylineCurve(), nullptr);
 }
 
+BND_PolylineCurve::BND_PolylineCurve(const BND_Point3dList& points)
+{
+  SetTrackedPointer(new ON_PolylineCurve(points.m_polyline), nullptr);
+}
+
 BND_PolylineCurve::BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(polylinecurve, compref);
@@ -31,6 +36,7 @@ void initPolylineCurveBindings(pybind11::module& m)
 {
   py::class_<BND_PolylineCurve, BND_Curve>(m, "Polylinecurve")
     .def(py::init<>())
+    .def(py::init<const BND_Point3dList&>())
     .def_property_readonly("PointCount", &BND_PolylineCurve::PointCount)
     .def("Point", &BND_PolylineCurve::Point)
     .def("SetPoint", &BND_PolylineCurve::SetPoint)

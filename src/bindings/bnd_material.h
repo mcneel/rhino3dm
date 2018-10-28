@@ -10,6 +10,7 @@ void initMaterialBindings(void* m);
 
 class BND_Material : public BND_CommonObject
 {
+public:
   ON_Material* m_material = nullptr;
 protected:
   void SetTrackedPointer(ON_Material* material, const ON_ModelComponentReference* compref);

@@ -14,7 +14,7 @@ public:
   BND_PolylineCurve();
   BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref);
 
-  //public PolylineCurve(System.Collections.Generic.IEnumerable<Point3d> points)
+  BND_PolylineCurve(const class BND_Point3dList& points);
   int PointCount() const { return m_polylinecurve->PointCount(); }
   ON_3dPoint Point(int index) const { return m_polylinecurve->m_pline[index]; }
   void SetPoint(int index, const ON_3dPoint& point) { m_polylinecurve->m_pline[index] = point; }

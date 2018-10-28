@@ -11,10 +11,10 @@ BND_ONXModel::BND_ONXModel(ONX_Model* m)
   m_model.reset(m);
 }
 
-BND_ONXModel* BND_ONXModel::Read(const char* path)
+BND_ONXModel* BND_ONXModel::Read(std::wstring path)
 {
   ONX_Model* m = new ONX_Model();
-  if (!m->Read(path))
+  if (!m->Read(path.c_str()))
   {
     delete m;
     return nullptr;
@@ -22,10 +22,10 @@ BND_ONXModel* BND_ONXModel::Read(const char* path)
   return new BND_ONXModel(m);
 }
 
-std::string BND_ONXModel::ReadNotes(const char* path)
+std::string BND_ONXModel::ReadNotes(std::wstring path)
 {
   std::string str;
-  FILE* fp = ON::OpenFile(path, "rb");
+  FILE* fp = ON::OpenFile(path.c_str(), L"rb");
   if (fp)
   {
     ON_BinaryFile file(ON::archive_mode::read3dm, fp);
@@ -47,9 +47,9 @@ std::string BND_ONXModel::ReadNotes(const char* path)
   return str;
 }
 
-int BND_ONXModel::ReadArchiveVersion(const char* path)
+int BND_ONXModel::ReadArchiveVersion(std::wstring path)
 {
-  FILE* fp = ON::OpenFile(path, "rb");
+  FILE* fp = ON::OpenFile(path.c_str(), L"rb");
   if (fp)
   {
     ON_BinaryFile file(ON::archive_mode::read3dm, fp);
@@ -66,9 +66,9 @@ int BND_ONXModel::ReadArchiveVersion(const char* path)
   return 0;
 }
 
-bool BND_ONXModel::Write(const char* path, int version)
+bool BND_ONXModel::Write(std::wstring path, int version)
 {
-  return m_model->Write(path, version);
+  return m_model->Write(path.c_str(), version);
 }
 
 std::wstring BND_ONXModel::GetStartSectionComments() const
@@ -209,14 +209,16 @@ void BND_ONXModel::SetRevision(int r)
 static ON_UUID Internal_ONX_Model_AddModelGeometry(
   ONX_Model* model,
   const ON_Geometry* geometry,
-  const ON_3dmObjectAttributes* attributes
+  const BND_3dmAttributes* attributes
 )
 {
   if (nullptr == model)
     return ON_nil_uuid;
   if (nullptr == geometry)
     return ON_nil_uuid;
-  ON_ModelComponentReference model_component_reference = model->AddModelGeometryComponent(geometry, attributes);
+  const ON_3dmObjectAttributes* attr = attributes ? attributes->m_attributes : nullptr;
+
+  ON_ModelComponentReference model_component_reference = model->AddModelGeometryComponent(geometry, attr);
   return ON_ModelGeometryComponent::FromModelComponentRef(model_component_reference, &ON_ModelGeometryComponent::Unset)->Id();
 }
 
@@ -245,43 +247,70 @@ BND_UUID BND_ONXModel_ObjectTable::AddCircle1(const BND_Circle& circle)
   }
   return ON_UUID_to_Binding(ON_nil_uuid);
 }
-BND_UUID BND_ONXModel_ObjectTable::AddSphere1(const BND_Sphere& sphere)
+BND_UUID BND_ONXModel_ObjectTable::AddSphere(const BND_Sphere& sphere, const BND_3dmAttributes* attributes)
 {
   ON_NurbsSurface ns;
   if (sphere.m_sphere.GetNurbForm(ns) != 0)
   {
-    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &ns, nullptr);
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &ns, attributes);
     return ON_UUID_to_Binding(rc);
   }
   return ON_UUID_to_Binding(ON_nil_uuid);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddCurve1(const BND_Curve* curve)
+BND_UUID BND_ONXModel_ObjectTable::AddCurve(const BND_Curve* curve, const BND_3dmAttributes* attributes)
 {
   const ON_Geometry* g = curve ? curve->GeometryPointer() : nullptr;
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddTextDot1(std::wstring text, const ON_3dPoint& location)
+BND_UUID BND_ONXModel_ObjectTable::AddTextDot(std::wstring text, const ON_3dPoint& location, const BND_3dmAttributes* attributes)
 {
   ON_TextDot dot(location, text.c_str(), nullptr);
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &dot, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &dot, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddMesh1(const BND_Mesh* mesh)
+BND_UUID BND_ONXModel_ObjectTable::AddSurface(const BND_Surface* surface, const BND_3dmAttributes* attributes)
+{
+  const ON_Geometry* g = surface ? surface->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddExtrusion(const BND_Extrusion* extrusion, const BND_3dmAttributes* attributes)
+{
+  const ON_Geometry* g = extrusion ? extrusion->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddMesh(const BND_Mesh* mesh, const BND_3dmAttributes* attributes)
 {
   const ON_Geometry* g = mesh ? mesh->GeometryPointer() : nullptr;
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddBrep1(const BND_Brep* brep)
+BND_UUID BND_ONXModel_ObjectTable::AddBrep(const BND_Brep* brep, const BND_3dmAttributes* attributes)
 {
   const ON_Geometry* g = brep ? brep->GeometryPointer() : nullptr;
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddHatch(const BND_Hatch* hatch, const BND_3dmAttributes* attributes)
+{
+  const ON_Geometry* g = hatch ? hatch->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  m_model->RemoveModelComponent(ON_ModelComponent::Type::ModelGeometry, _id);
 }
 
 int BND_ONXModel_ObjectTable::Count() const
@@ -354,6 +383,34 @@ BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
   return BND_BoundingBox(m_model->ModelGeometryBoundingBox());
 }
 
+void BND_File3dmMaterialTable::Add(const BND_Material& material)
+{
+  const ON_Material* m = material.m_material;
+  m_model->AddModelComponent(*m);
+}
+
+BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->RenderMaterialFromIndex(index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
+  if (modelmaterial)
+    return new BND_Material(modelmaterial, &compref);
+  return nullptr;
+}
+
+BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RenderMaterialFromId(_id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
+  if (modelmaterial)
+    return new BND_Material(modelmaterial, &compref);
+  return nullptr;
+}
+
+
 void BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
@@ -400,6 +457,75 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+int BND_File3dmStringTable::Count() const
+{
+  ON_ClassArray<ON_UserString> str;
+  return m_model->GetDocumentUserStrings(str);
+}
+
+int BND_File3dmStringTable::DocumentUserTextCount() const
+{
+  ON_ClassArray<ON_UserString> strings;
+  m_model->GetDocumentUserStrings(strings);
+  int cnt = 0;
+  for (int i = 0; i < strings.Count(); i++)
+    if (strings[i].m_key.Find(L"\\")>=0) cnt++;
+  return cnt;
+}
+
+std::wstring BND_File3dmStringTable::GetKey(int i) const
+{
+  ON_ClassArray<ON_UserString> strings;
+  m_model->GetDocumentUserStrings(strings);
+  const ON_UserString& us = strings[i];
+  return std::wstring(us.m_key.Array());
+}
+
+std::wstring BND_File3dmStringTable::GetValue(int i) const
+{
+  ON_ClassArray<ON_UserString> strings;
+  m_model->GetDocumentUserStrings(strings);
+  const ON_UserString& us = strings[i];
+  return std::wstring(us.m_string_value.Array());
+}
+
+#if defined(ON_PYTHON_COMPILE)
+pybind11::tuple BND_File3dmStringTable::GetKeyValue(int i) const
+{
+  ON_ClassArray<ON_UserString> strings;
+  m_model->GetDocumentUserStrings(strings);
+  const ON_UserString& us = strings[i];
+  std::wstring key(us.m_key.Array());
+  std::wstring sval(us.m_string_value.Array());
+  pybind11::tuple rc(2);
+  rc[0] = key;
+  rc[1] = sval;
+  return rc;
+}
+#endif
+
+std::wstring BND_File3dmStringTable::GetValueFromKey(std::wstring key) const
+{
+  ON_ClassArray<ON_UserString> strings;
+  m_model->GetDocumentUserStrings(strings);
+  ON_wString _key(key.c_str());
+  for (int i = 0; i < strings.Count(); i++)
+  {
+    if (strings[i].m_key.EqualOrdinal(_key, false))
+      return std::wstring(strings[i].m_string_value.Array());
+  }
+  return std::wstring(L"");
+}
+
+void BND_File3dmStringTable::SetString(std::wstring key, std::wstring value)
+{
+  m_model->SetDocumentUserString(key.c_str(), value.c_str());
+}
+
+void BND_File3dmStringTable::Delete(std::wstring key)
+{
+  m_model->SetDocumentUserString(key.c_str(), nullptr);
+}
 
 
 #if defined(ON_WASM_COMPILE)
@@ -447,6 +573,8 @@ bool BND_ONXModel::ReadTest(std::wstring path)
   return rc;
 }
 
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
@@ -459,38 +587,59 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
     .def("__len__", &BND_ONXModel_ObjectTable::Count)
     .def("__getitem__", &BND_ONXModel_ObjectTable::ModelObjectAt)
-    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1)
-    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2)
-    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4)
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1)
     .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle1)
-    .def("AddSphere", &BND_ONXModel_ObjectTable::AddSphere1)
-    .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve1)
-    .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
-    .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh1)
-    .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep1)
+    .def("AddSphere", &BND_ONXModel_ObjectTable::AddSphere, py::arg("sphere"), py::arg("attributes") = nullptr)
+    .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve, py::arg("curve"), py::arg("attributes")=nullptr)
+    .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot, py::arg("text"), py::arg("location"), py::arg("attributes")=nullptr)
+    .def("AddSurface", &BND_ONXModel_ObjectTable::AddSphere, py::arg("surface"), py::arg("attributes")=nullptr)
+    .def("AddExtrusion", &BND_ONXModel_ObjectTable::AddExtrusion, py::arg("extrusion"), py::arg("attributes")=nullptr)
+    .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh, py::arg("mesh"), py::arg("attributes")=nullptr)
+    .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep, py::arg("brep"), py::arg("attributes")=nullptr)
+    .def("AddHatch", &BND_ONXModel_ObjectTable::AddHatch, py::arg("hatch"), py::arg("attributes")=nullptr)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
+    .def("Delete", &BND_ONXModel_ObjectTable::Delete)
+    ;
+
+  py::class_<BND_File3dmMaterialTable>(m, "File3dmMaterialTable")
+    .def("__len__", &BND_File3dmMaterialTable::Count)
+    .def("__getitem__", &BND_File3dmMaterialTable::FindIndex)
+    .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
+    .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     ;
 
   py::class_<BND_File3dmLayerTable>(m, "File3dmLayerTable")
     .def("__len__", &BND_File3dmLayerTable::Count)
     .def("__getitem__", &BND_File3dmLayerTable::FindIndex)
-    .def("Add", &BND_File3dmLayerTable::Add)
-    .def("FindName", &BND_File3dmLayerTable::FindName)
-    .def("FindIndex", &BND_File3dmLayerTable::FindIndex)
-    .def("FindId", &BND_File3dmLayerTable::FindId)
+    .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
+    .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
+    .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
+    ;
+
+  py::class_<BND_File3dmStringTable>(m, "File3dmStringTable")
+    .def("__len__", &BND_File3dmStringTable::Count)
+    .def("__getitem__", &BND_File3dmStringTable::GetKeyValue)
+    .def("__getitem__", &BND_File3dmStringTable::GetValueFromKey)
+    .def("__setitem__", &BND_File3dmStringTable::SetString)
+    .def("DocumentUserTextCount", &BND_File3dmStringTable::DocumentUserTextCount)
+    .def("Delete", &BND_File3dmStringTable::Delete)
     ;
 
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
-    .def_static("Read", &BND_ONXModel::Read)
-    .def_static("ReadNotes", &BND_ONXModel::ReadNotes)
-    .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion)
+    .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
+    .def_static("ReadNotes", &BND_ONXModel::ReadNotes, py::arg("path"))
+    .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion, py::arg("path"))
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
-    .def("Write", &BND_ONXModel::Write)
+    .def("Write", &BND_ONXModel::Write, py::arg("path"), py::arg("version")=0)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .def_property("ApplicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
@@ -499,7 +648,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
+    .def_property_readonly("Materials", &BND_ONXModel::Materials)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
+    .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
 }
@@ -522,11 +673,11 @@ void initExtensionsBindings(void*)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint1)
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle1)
-    .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere1)
-    .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve1, allow_raw_pointers())
-    .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot1)
-    .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh1, allow_raw_pointers())
-    .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep1, allow_raw_pointers())
+    .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
+    .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve, allow_raw_pointers())
+    .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot, allow_raw_pointers())
+    .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh, allow_raw_pointers())
+    .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     ;
 
   class_<BND_File3dmLayerTable>("File3dmLayerTable")
