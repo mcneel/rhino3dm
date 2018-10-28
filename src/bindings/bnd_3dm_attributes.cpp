@@ -31,6 +31,18 @@ void BND_3dmAttributes::SetName(const std::wstring name)
   m_attributes->m_name = name.c_str();
 }
 
+#if defined(ON_PYTHON_COMPILE)
+pybind11::tuple BND_3dmAttributes::GetGroupList() const
+{
+  int count = m_attributes->GroupCount();
+  pybind11::tuple rc(count);
+  const int* groups = m_attributes->GroupList();
+  for (int i = 0; i < count; i++)
+    rc[i] = groups[i];
+  return rc;
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -51,6 +63,7 @@ void init3dmAttributesBindings(pybind11::module& m)
     .def_property("WireDensity", &BND_3dmAttributes::WireDensity, &BND_3dmAttributes::SetWireDensity)
     .def_property("ViewportId", &BND_3dmAttributes::GetViewportId, &BND_3dmAttributes::SetViewportId)
     .def_property_readonly("GroupCount", &BND_3dmAttributes::GroupCount)
+    .def("GetGroupList", &BND_3dmAttributes::GetGroupList)
     .def("AddToGroup", &BND_3dmAttributes::AddToGroup)
     .def("RemoveFromGroup", &BND_3dmAttributes::RemoveFromGroup)
     .def("RemoveFromAllGroups", &BND_3dmAttributes::RemoveFromAllGroups)

@@ -10,6 +10,7 @@ void init3dmAttributesBindings(void* m);
 
 class BND_3dmAttributes : public BND_CommonObject
 {
+public:
   ON_3dmObjectAttributes* m_attributes = nullptr;
 public:
   BND_3dmAttributes();
@@ -42,6 +43,9 @@ public:
   BND_UUID GetViewportId() const { return ON_UUID_to_Binding(m_attributes->m_viewport_id); }
   void SetViewportId(BND_UUID viewportId) { m_attributes->m_viewport_id = Binding_to_ON_UUID(viewportId); }
   int GroupCount() const { return m_attributes->GroupCount(); }
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple GetGroupList() const;
+#endif
   //public int[] GetGroupList()
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }

@@ -17,9 +17,7 @@ protected:
   void SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentReference* compref);
 
 public:
-  // TODO: wrap python and embind array in a single helper class
-  //public static Curve CreateControlPointCurve(IEnumerable<Point3d> points, int degree)
-  //public static Curve CreateControlPointCurve(IEnumerable<Point3d> points)
+  static class BND_Curve* CreateControlPointCurve(const class BND_Point3dList& points, int degree);
 
 public:
   BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref);
@@ -43,7 +41,7 @@ public:
   bool IsCircle(double tolerance = ON_ZERO_TOLERANCE) const;
   class BND_Circle* TryGetCircle(double tolerance = ON_ZERO_TOLERANCE) const;
   bool IsEllipse(double tolerance = ON_ZERO_TOLERANCE) const { return m_curve->IsEllipse(nullptr, nullptr, tolerance); }
-  // public bool TryGetEllipse(out Ellipse ellipse, double tolerance)
+  class BND_Ellipse* TryGetEllipse(double tolerance = ON_ZERO_TOLERANCE) const;
   // public bool TryGetEllipse(Plane plane, out Ellipse ellipse, double tolerance)
   bool IsPlanar(double tolerance = ON_ZERO_TOLERANCE) { return m_curve->IsPlanar(nullptr, tolerance); }
   // public bool TryGetPlane(out Plane plane, double tolerance)
@@ -51,7 +49,7 @@ public:
   bool ChangeClosedCurveSeam(double t) { return m_curve->ChangeClosedCurveSeam(t); }
   bool IsClosed() const { return m_curve->IsClosed(); }
   bool IsPeriodic() const { return m_curve->IsPeriodic(); }
-  // public bool IsClosable(double tolerance, double minimumAbsoluteSize, double minimumRelativeSize)
+  bool IsClosable(double tolerance, double minimumAbsoluteSize, double minimumRelativeSize) const { return m_curve->IsClosable(tolerance, minimumAbsoluteSize, minimumRelativeSize); }
   // public CurveOrientation ClosedCurveOrientation()
   // public CurveOrientation ClosedCurveOrientation(Vector3d upDirection)
   // public CurveOrientation ClosedCurveOrientation(Plane plane)
@@ -76,7 +74,9 @@ public:
   // public bool GetNurbsFormParameterFromCurveParameter(double curveParameter, out double nurbsParameter)
   BND_Curve* Trim(double t0, double t1) const;
   // public Curve Trim(Interval domain)
-  // public Curve[] Split(double t)
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::object Split(double t) const;
+#endif
   // public Curve[] Split(IEnumerable<double> t)
   // public int HasNurbsForm()
   class BND_NurbsCurve* ToNurbsCurve() const;

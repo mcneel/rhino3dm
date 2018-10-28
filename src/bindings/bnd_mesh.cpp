@@ -32,6 +32,70 @@ BND_MeshNormalList BND_Mesh::GetNormals()
   return BND_MeshNormalList(m_mesh, m_component_ref);
 }
 
+BND_MeshTextureCoordinateList BND_Mesh::TextureCoordinates()
+{
+  return BND_MeshTextureCoordinateList(m_mesh, m_component_ref);
+}
+
+#if defined(ON_PYTHON_COMPILE)
+pybind11::tuple BND_Mesh::IsManifold(bool topologicalTest) const
+{
+  bool oriented = false;
+  bool hasboundary = false;
+  pybind11::tuple rc(3);
+  rc[0] = m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary);
+  rc[1] = oriented;
+  rc[2] = hasboundary;
+  return rc;
+}
+#endif
+
+static void ON_Mesh_DestroyTextureData(ON_Mesh* pMesh)
+{
+  if (pMesh)
+  {
+    pMesh->m_Ttag.Default();
+    pMesh->m_T.Destroy();
+    pMesh->m_TC.Destroy();
+    pMesh->m_packed_tex_domain[0].Set(0, 1);
+    pMesh->m_packed_tex_domain[1].Set(0, 1);
+    pMesh->InvalidateTextureCoordinateBoundingBox();
+  }
+}
+
+void BND_Mesh::ClearTextureData()
+{
+  ON_Mesh_DestroyTextureData(m_mesh);
+}
+
+void ON_Mesh_DestroySurfaceData(ON_Mesh* pMesh)
+{
+  if (pMesh)
+  {
+    pMesh->m_S.Destroy();
+    pMesh->m_srf_domain[0] = ON_Interval::EmptyInterval;
+    pMesh->m_srf_domain[1] = ON_Interval::EmptyInterval;
+    pMesh->m_srf_scale[0] = 0;
+    pMesh->m_srf_scale[1] = 0;
+    pMesh->InvalidateCurvatureStats();
+    pMesh->m_K.Destroy();
+  }
+}
+
+void BND_Mesh::ClearSurfaceData()
+{
+  ON_Mesh_DestroySurfaceData(m_mesh);
+}
+
+int BND_Mesh::PartitionCount() const
+{
+  const ON_MeshPartition* pPartition = m_mesh->Partition();
+  if (pPartition)
+    return pPartition->m_part.Count();
+  return 0;
+}
+
+
 
 BND_MeshVertexList::BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
@@ -136,7 +200,11 @@ void BND_MeshNormalList::SetNormal(int i, ON_3fVector v)
   m_mesh->m_N[i] = v;
 }
 
-
+BND_MeshTextureCoordinateList::BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_mesh = mesh;
+}
 
 
 
@@ -158,13 +226,6 @@ pybind11::list BND_MeshFaceList::GetFace(int i) const
 namespace py = pybind11;
 void initMeshBindings(pybind11::module& m)
 {
-  py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
-    .def(py::init<>())
-    .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
-    .def_property_readonly("Faces", &BND_Mesh::GetFaces)
-    .def_property_readonly("Normals", &BND_Mesh::GetNormals)
-    ;
-
   py::class_<BND_MeshVertexList>(m, "MeshVertexList")
     .def("__len__", &BND_MeshVertexList::Count)
     .def("SetCount", &BND_MeshVertexList::SetCount)
@@ -183,6 +244,32 @@ void initMeshBindings(pybind11::module& m)
     .def("__len__", &BND_MeshNormalList::Count)
     .def("__getitem__", &BND_MeshNormalList::GetNormal)
     .def("__setitem__", &BND_MeshNormalList::SetNormal)
+    ;
+
+  py::class_<BND_MeshTextureCoordinateList>(m, "MeshTextureCoordinateList")
+    .def("__len__", &BND_MeshTextureCoordinateList::Count)
+    .def("__getitem__", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
+    .def("__setitem__", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
+    ;
+
+  py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
+    .def(py::init<>())
+    .def_property_readonly("IsClosed", &BND_Mesh::IsClosed)
+    .def("IsManifold", &BND_Mesh::IsManifold, py::arg("topologicalTest"))
+    .def_property_readonly("HasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
+    .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
+    .def_property_readonly("Faces", &BND_Mesh::GetFaces)
+    .def_property_readonly("Normals", &BND_Mesh::GetNormals)
+    .def_property_readonly("TextureCoordinates", &BND_Mesh::TextureCoordinates)
+    .def("ClearTextureData", &BND_Mesh::ClearTextureData)
+    .def("ClearSurfaceData", &BND_Mesh::ClearSurfaceData)
+    .def("DestroyTopology", &BND_Mesh::DestroyTopology)
+    .def("DestroyTree", &BND_Mesh::DestroyTree)
+    .def("DestroyPartition", &BND_Mesh::DestroyPartition)
+    .def("Compact", &BND_Mesh::Compact)
+    .def("Append", &BND_Mesh::Append)
+    .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
+    .def_property_readonly("PartitionCount", &BND_Mesh::PartitionCount)
     ;
 }
 #endif

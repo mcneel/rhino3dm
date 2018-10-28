@@ -30,6 +30,23 @@ void BND_Arc::SetCenter(ON_3dPoint pt)
   m_arc.plane.UpdateEquation();
 }
 
+
+bool BND_Arc::Trim(const BND_Interval& domain)
+{
+  return m_arc.Trim(ON_Interval(domain.m_t0, domain.m_t1));
+}
+
+BND_BoundingBox BND_Arc::BoundingBox() const
+{
+  ON_BoundingBox bbox = m_arc.BoundingBox();
+  return BND_BoundingBox(bbox);
+}
+
+bool BND_Arc::Transform(const BND_Transform& xform)
+{
+  return m_arc.Transform(xform.m_xform);
+}
+
 BND_NurbsCurve* BND_Arc::ToNurbsCurve() const
 {
   ON_NurbsCurve* nc = new ON_NurbsCurve();
@@ -60,10 +77,15 @@ void initArcBindings(pybind11::module& m)
     .def_property_readonly("StartPoint", &BND_Arc::StartPoint)
     .def_property_readonly("MidPoint", &BND_Arc::MidPoint)
     .def_property_readonly("EndPoint", &BND_Arc::EndPoint)
+    .def_property("AngleRadians", &BND_Arc::GetAngleRadians, &BND_Arc::SetAngleRadians)
+    .def_property("AngleDegrees", &BND_Arc::GetAngleDegrees, &BND_Arc::SetAngleDegrees)
+    .def("Trim", &BND_Arc::Trim)
+    .def("BoundingBox", &BND_Arc::BoundingBox)
     .def("PointAt", &BND_Arc::PointAt)
     .def("TangentAt", &BND_Arc::TangentAt)
     .def("ClosestPoint", &BND_Arc::ClosestPoint)
     .def("Reverse", &BND_Arc::Reverse)
+    .def("Transform", &BND_Arc::Transform)
     .def("ToNurbsCurve", &BND_Arc::ToNurbsCurve);
 }
 #endif
