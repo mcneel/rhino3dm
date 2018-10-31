@@ -30,6 +30,13 @@ public:
   static BND_CommonObject* Decode(pybind11::dict jsonObject);
 #endif
 
+  bool SetUserString(std::wstring key, std::wstring value);
+  std::wstring GetUserString(std::wstring key);
+  int UserStringCount() const { return m_object->UserStringCount(); }
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple GetUserStrings() const;
+#endif
+
 protected:
   ON_ModelComponentReference m_component_ref; // holds shared pointer for this class
 

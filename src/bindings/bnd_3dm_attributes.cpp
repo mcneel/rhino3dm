@@ -1,38 +1,61 @@
 #include "bindings.h"
 
-BND_3dmAttributes::BND_3dmAttributes()
+BND_3dmObjectAttributes::BND_3dmObjectAttributes()
 {
   SetTrackedPointer(new ON_3dmObjectAttributes(), nullptr);
 }
 
-BND_3dmAttributes::BND_3dmAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
+BND_3dmObjectAttributes::BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(attrs, compref);
 }
 
-void BND_3dmAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
+void BND_3dmObjectAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
 {
   m_attributes = attrs;
   BND_CommonObject::SetTrackedPointer(attrs, compref);
 }
 
-BND_UUID BND_3dmAttributes::GetObjectId() const
+bool BND_3dmObjectAttributes::Transform(const class BND_Transform& transform)
+{
+  return m_attributes->Transform(transform.m_xform);
+}
+
+bool BND_3dmObjectAttributes::HasDisplayModeOverride(BND_UUID viewportId) const
+{
+  ON_UUID dmr_id;
+  ON_UUID _viewportId = Binding_to_ON_UUID(viewportId);
+  if (m_attributes->FindDisplayMaterialId(_viewportId, &dmr_id))
+  {
+    //make sure dmr is not the "invisible in detail" id
+    if (dmr_id != ON_DisplayMaterialRef::m_invisible_in_detail_id)
+      return true;
+  }
+  return false;
+}
+
+BND_UUID BND_3dmObjectAttributes::GetObjectId() const
 {
   return ON_UUID_to_Binding(m_attributes->m_uuid);
 }
 
-std::wstring BND_3dmAttributes::GetName() const
+void BND_3dmObjectAttributes::SetObjectId(BND_UUID id)
+{
+  m_attributes->m_uuid = Binding_to_ON_UUID(id);
+}
+
+std::wstring BND_3dmObjectAttributes::GetName() const
 {
   return std::wstring(m_attributes->m_name);
 }
 
-void BND_3dmAttributes::SetName(const std::wstring name)
+void BND_3dmObjectAttributes::SetName(const std::wstring name)
 {
   m_attributes->m_name = name.c_str();
 }
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_3dmAttributes::GetGroupList() const
+pybind11::tuple BND_3dmObjectAttributes::GetGroupList() const
 {
   int count = m_attributes->GroupCount();
   pybind11::tuple rc(count);
@@ -49,24 +72,39 @@ pybind11::tuple BND_3dmAttributes::GetGroupList() const
 namespace py = pybind11;
 void init3dmAttributesBindings(pybind11::module& m)
 {
-  py::class_<BND_3dmAttributes, BND_CommonObject>(m, "ObjectAttributes")
+  py::class_<BND_3dmObjectAttributes, BND_CommonObject>(m, "ObjectAttributes")
     .def(py::init<>())
-    .def_property("Visible", &BND_3dmAttributes::IsVisible, &BND_3dmAttributes::SetVisible)
-    .def_property("Name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
-    .def_property_readonly("Id", &BND_3dmAttributes::GetObjectId)
-    .def_property("LayerIndex", &BND_3dmAttributes::GetLayerIndex, &BND_3dmAttributes::SetLayerIndex)
-    .def_property("MaterialIndex", &BND_3dmAttributes::MaterialIndex, &BND_3dmAttributes::SetMaterialIndex)
-    .def_property("ObjectColor", &BND_3dmAttributes::GetObjectColor, &BND_3dmAttributes::SetObjectColor)
-    .def_property("PlotColor", &BND_3dmAttributes::GetPlotColor, &BND_3dmAttributes::SetPlotColor)
-    .def_property("DisplayOrder", &BND_3dmAttributes::GetDisplayOrder, &BND_3dmAttributes::SetDisplayOrder)
-    .def_property("PlotWeight", &BND_3dmAttributes::PlotWeight, &BND_3dmAttributes::SetPlotWeight)
-    .def_property("WireDensity", &BND_3dmAttributes::WireDensity, &BND_3dmAttributes::SetWireDensity)
-    .def_property("ViewportId", &BND_3dmAttributes::GetViewportId, &BND_3dmAttributes::SetViewportId)
-    .def_property_readonly("GroupCount", &BND_3dmAttributes::GroupCount)
-    .def("GetGroupList", &BND_3dmAttributes::GetGroupList)
-    .def("AddToGroup", &BND_3dmAttributes::AddToGroup)
-    .def("RemoveFromGroup", &BND_3dmAttributes::RemoveFromGroup)
-    .def("RemoveFromAllGroups", &BND_3dmAttributes::RemoveFromAllGroups)
+    .def_property("Mode", &BND_3dmObjectAttributes::GetMode, &BND_3dmObjectAttributes::SetMode)
+    .def("Transform", &BND_3dmObjectAttributes::Transform, py::arg("transform"))
+    .def_property_readonly("IsInstanceDefinitionObject", &BND_3dmObjectAttributes::IsInstanceDefinitionObject)
+    .def_property("Visible", &BND_3dmObjectAttributes::IsVisible, &BND_3dmObjectAttributes::SetVisible)
+    .def_property("CastsShadows", &BND_3dmObjectAttributes::CastsShadows, &BND_3dmObjectAttributes::SetCastsShadows)
+    .def_property("ReceivesShadows", &BND_3dmObjectAttributes::ReceivesShadows, &BND_3dmObjectAttributes::SetReceivesShadows)
+    .def_property("LinetypeSource", &BND_3dmObjectAttributes::GetLinetypeSource, &BND_3dmObjectAttributes::SetLinetypeSource)
+    .def_property("ColorSource", &BND_3dmObjectAttributes::GetColorSource, &BND_3dmObjectAttributes::SetColorSource)
+    .def_property("PlotColorSource", &BND_3dmObjectAttributes::GetPlotColorSource, &BND_3dmObjectAttributes::SetPlotColorSource)
+    .def_property("PlotWeightSource", &BND_3dmObjectAttributes::GetPlotWeightSource, &BND_3dmObjectAttributes::SetPlotWeightSource)
+    .def("HasDisplayModeOverride", &BND_3dmObjectAttributes::HasDisplayModeOverride, py::arg("viewportId"))
+    .def_property("Id", &BND_3dmObjectAttributes::GetObjectId, &BND_3dmObjectAttributes::SetObjectId)
+    .def_property("Name", &BND_3dmObjectAttributes::GetName, &BND_3dmObjectAttributes::SetName)
+    .def_property("Url", &BND_3dmObjectAttributes::GetUrl, &BND_3dmObjectAttributes::SetUrl)
+    .def_property("LayerIndex", &BND_3dmObjectAttributes::GetLayerIndex, &BND_3dmObjectAttributes::SetLayerIndex)
+    .def_property("LinetypeIndex", &BND_3dmObjectAttributes::GetLinetypeIndex, &BND_3dmObjectAttributes::SetLinetypeIndex)
+    .def_property("MaterialIndex", &BND_3dmObjectAttributes::MaterialIndex, &BND_3dmObjectAttributes::SetMaterialIndex)
+    .def_property("MaterialSource", &BND_3dmObjectAttributes::GetMaterialSource, &BND_3dmObjectAttributes::SetMaterialSource)
+    .def_property("ObjectColor", &BND_3dmObjectAttributes::GetObjectColor, &BND_3dmObjectAttributes::SetObjectColor)
+    .def_property("PlotColor", &BND_3dmObjectAttributes::GetPlotColor, &BND_3dmObjectAttributes::SetPlotColor)
+    .def_property("DisplayOrder", &BND_3dmObjectAttributes::GetDisplayOrder, &BND_3dmObjectAttributes::SetDisplayOrder)
+    .def_property("PlotWeight", &BND_3dmObjectAttributes::PlotWeight, &BND_3dmObjectAttributes::SetPlotWeight)
+    .def_property("ObjectDecoration", &BND_3dmObjectAttributes::GetObjectDecoration, &BND_3dmObjectAttributes::SetObjectDecoration)
+    .def_property("WireDensity", &BND_3dmObjectAttributes::WireDensity, &BND_3dmObjectAttributes::SetWireDensity)
+    .def_property("ViewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
+    .def_property("ActiveSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
+    .def_property_readonly("GroupCount", &BND_3dmObjectAttributes::GroupCount)
+    .def("GetGroupList", &BND_3dmObjectAttributes::GetGroupList)
+    .def("AddToGroup", &BND_3dmObjectAttributes::AddToGroup)
+    .def("RemoveFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
+    .def("RemoveFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)
     ;
 }
 #endif
@@ -76,23 +114,23 @@ using namespace emscripten;
 
 void init3dmAttributesBindings(void*)
 {
-  class_<BND_3dmAttributes, base<BND_CommonObject>>("ObjectAttributes")
+  class_<BND_3dmObjectAttributes, base<BND_CommonObject>>("ObjectAttributes")
     .constructor<>()
-    .property("visible", &BND_3dmAttributes::IsVisible, &BND_3dmAttributes::SetVisible)
-    .property("name", &BND_3dmAttributes::GetName, &BND_3dmAttributes::SetName)
-    .property("id", &BND_3dmAttributes::GetObjectId)
-    .property("layerIndex", &BND_3dmAttributes::GetLayerIndex, &BND_3dmAttributes::SetLayerIndex)
-    .property("materialIndex", &BND_3dmAttributes::MaterialIndex, &BND_3dmAttributes::SetMaterialIndex)
-    .property("objectColor", &BND_3dmAttributes::GetObjectColor, &BND_3dmAttributes::SetObjectColor)
-    .property("plotColor", &BND_3dmAttributes::GetPlotColor, &BND_3dmAttributes::SetPlotColor)
-    .property("displayOrder", &BND_3dmAttributes::GetDisplayOrder, &BND_3dmAttributes::SetDisplayOrder)
-    .property("plotWeight", &BND_3dmAttributes::PlotWeight, &BND_3dmAttributes::SetPlotWeight)
-    .property("wireDensity", &BND_3dmAttributes::WireDensity, &BND_3dmAttributes::SetWireDensity)
-    .property("viewportId", &BND_3dmAttributes::GetViewportId, &BND_3dmAttributes::SetViewportId)
-    .property("groupCount", &BND_3dmAttributes::GroupCount)
-    .function("addToGroup", &BND_3dmAttributes::AddToGroup)
-    .function("removeFromGroup", &BND_3dmAttributes::RemoveFromGroup)
-    .function("removeFromAllGroups", &BND_3dmAttributes::RemoveFromAllGroups)
+    .property("visible", &BND_3dmObjectAttributes::IsVisible, &BND_3dmObjectAttributes::SetVisible)
+    .property("name", &BND_3dmObjectAttributes::GetName, &BND_3dmObjectAttributes::SetName)
+    .property("id", &BND_3dmObjectAttributes::GetObjectId)
+    .property("layerIndex", &BND_3dmObjectAttributes::GetLayerIndex, &BND_3dmObjectAttributes::SetLayerIndex)
+    .property("materialIndex", &BND_3dmObjectAttributes::MaterialIndex, &BND_3dmObjectAttributes::SetMaterialIndex)
+    .property("objectColor", &BND_3dmObjectAttributes::GetObjectColor, &BND_3dmObjectAttributes::SetObjectColor)
+    .property("plotColor", &BND_3dmObjectAttributes::GetPlotColor, &BND_3dmObjectAttributes::SetPlotColor)
+    .property("displayOrder", &BND_3dmObjectAttributes::GetDisplayOrder, &BND_3dmObjectAttributes::SetDisplayOrder)
+    .property("plotWeight", &BND_3dmObjectAttributes::PlotWeight, &BND_3dmObjectAttributes::SetPlotWeight)
+    .property("wireDensity", &BND_3dmObjectAttributes::WireDensity, &BND_3dmObjectAttributes::SetWireDensity)
+    .property("viewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
+    .property("groupCount", &BND_3dmObjectAttributes::GroupCount)
+    .function("addToGroup", &BND_3dmObjectAttributes::AddToGroup)
+    .function("removeFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
+    .function("removeFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)
   ;
 
 }

@@ -32,12 +32,6 @@ public:
   bool MakeDeformable() { return m_geometry->MakeDeformable(); }
   bool HasBrepForm() const { return m_geometry->HasBrepForm(); }
   //public ComponentIndex ComponentIndex()
-  bool SetUserString(std::wstring key, std::wstring value);
-  std::wstring GetUserString(std::wstring key);
-  int UserStringCount() const { return m_geometry->UserStringCount(); }
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetUserStrings() const;
-#endif
 
   int Dimension() const { return m_geometry->Dimension(); }
 };

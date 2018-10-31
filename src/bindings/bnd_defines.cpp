@@ -10,11 +10,55 @@ void initDefines(pybind11::module& m)
 {
   py::class_<ON_Line>(m, "Line")
     .def(py::init<ON_3dPoint, ON_3dPoint>())
-    .def_property_readonly("Length", &ON_Line::Length);
+    .def_readwrite("From", &ON_Line::from)
+    .def_readwrite("To", &ON_Line::to)
+    .def_property_readonly("IsValid", &ON_Line::IsValid)
+    .def_property_readonly("Length", &ON_Line::Length)
+    .def_property_readonly("Direction", &ON_Line::Direction)
+    .def_property_readonly("UnitTangent", &ON_Line::Tangent)
+    .def("PointAt", &ON_Line::PointAt)
+    ;
 
-  py::class_<BND_DocObjects> docobjects(m, "DocObjects");
+  py::enum_<ON::object_mode>(m, "ObjectMode")
+    .value("Normal", ON::object_mode::normal_object)
+    .value("Hidden", ON::object_mode::hidden_object)
+    .value("Locked", ON::object_mode::locked_object)
+    .value("InstanceDefinitionObject", ON::object_mode::idef_object)
+    ;
 
-  py::enum_<ON::object_type>(docobjects, "ObjectType")
+  py::enum_<ON::object_color_source>(m, "ObjectColorSource")
+    .value("ColorFromLayer", ON::object_color_source::color_from_layer)
+    .value("ColorFromObject", ON::object_color_source::color_from_object)
+    .value("ColorFromMaterial", ON::object_color_source::color_from_material)
+    .value("ColorFromParent", ON::object_color_source::color_from_parent)
+    ;
+
+  py::enum_<ON::plot_color_source>(m, "ObjectPlotColorSource")
+    .value("PlotColorFromLayer", ON::plot_color_from_layer)
+    .value("PlotColorFromObject", ON::plot_color_from_object)
+    .value("PlotColorFromDisplay", ON::plot_color_from_display)
+    .value("PlotColorFromParent", ON::plot_color_from_parent)
+    ;
+
+  py::enum_<ON::plot_weight_source>(m, "ObjectPlotWeightSource")
+    .value("PlotWeightFromLayer", ON::plot_weight_from_layer)
+    .value("PlotWeightFromObject", ON::plot_weight_from_object)
+    .value("PlotWeightFromParent", ON::plot_weight_from_parent)
+    ;
+
+  py::enum_<ON::object_linetype_source>(m, "ObjectLinetypeSource")
+    .value("LinetypeFromLayer", ON::object_linetype_source::linetype_from_layer)
+    .value("LinetypeFromObject", ON::linetype_from_object)
+    .value("LinetypeFromParent", ON::linetype_from_parent)
+    ;
+
+  py::enum_<ON::object_material_source>(m, "ObjectMaterialSource")
+    .value("MaterialFromLayer", ON::material_from_layer)
+    .value("MaterialFromObject", ON::material_from_object)
+    .value("MaterialFromParent", ON::material_from_parent)
+    ;
+
+  py::enum_<ON::object_type>(m, "ObjectType")
     .value("None", ON::unknown_object_type)
     .value("Point", ON::point_object)
     .value("PointSet", ON::pointset_object)
@@ -44,16 +88,29 @@ void initDefines(pybind11::module& m)
     .value("ClipPlane", ON::clipplane_object)
     .value("Extrusion", ON::extrusion_object)
     .value("AnyObject", ON::any_object)
-    .export_values();
+    ;
 
-  py::class_<BND_MeshTypeNamespace> geometry(m, "MeshType");
-  py::enum_<ON::mesh_type>(geometry, "MeshTypeEnum")
+  py::enum_<ON::mesh_type>(m, "MeshType")
     .value("Default", ON::default_mesh)
     .value("Render", ON::render_mesh)
     .value("Analysis", ON::analysis_mesh)
     .value("Preview", ON::preview_mesh)
     .value("Any", ON::any_mesh)
-    .export_values();
+    ;
+
+  py::enum_<ON::object_decoration>(m, "ObjectDecoration")
+    .value("None", ON::no_object_decoration)
+    .value("StartArrowhead", ON::start_arrowhead)
+    .value("EndArrowhead", ON::end_arrowhead)
+    .value("BothArrowhead", ON::both_arrowhead)
+    ;
+
+  py::enum_<ON::active_space>(m, "ActiveSpace")
+    .value("None", ON::active_space::no_space)
+    .value("ModelSpace", ON::active_space::model_space)
+    .value("PageSpace", ON::active_space::page_space)
+    ;
+
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
