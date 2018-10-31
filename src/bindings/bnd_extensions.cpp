@@ -209,7 +209,7 @@ void BND_ONXModel::SetRevision(int r)
 static ON_UUID Internal_ONX_Model_AddModelGeometry(
   ONX_Model* model,
   const ON_Geometry* geometry,
-  const BND_3dmAttributes* attributes
+  const BND_3dmObjectAttributes* attributes
 )
 {
   if (nullptr == model)
@@ -230,6 +230,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddPoint1(double x, double y, double z)
   return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddPointCloud(const BND_PointCloud& cloud, const BND_3dmObjectAttributes* attributes)
+{
+  const ON_Geometry* g = cloud.GeometryPointer();
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
 BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dPoint& to)
 {
   ON_LineCurve lc(from, to);
@@ -237,17 +244,47 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddCircle1(const BND_Circle& circle)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
+{
+  ON_PolylineCurve plc(points.m_polyline);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddArc(const BND_Arc& arc, const BND_3dmObjectAttributes* attributes)
+{
+  ON_NurbsCurve nc;
+  if (arc.m_arc.GetNurbForm(nc) != 0)
+  {
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, attributes);
+    return ON_UUID_to_Binding(rc);
+  }
+  return ON_UUID_to_Binding(ON_nil_uuid);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddCircle(const BND_Circle& circle, const BND_3dmObjectAttributes* attributes)
 {
   ON_NurbsCurve nc;
   if (circle.m_circle.GetNurbForm(nc) != 0)
+  {
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, attributes);
+    return ON_UUID_to_Binding(rc);
+  }
+  return ON_UUID_to_Binding(ON_nil_uuid);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddEllipse(const BND_Ellipse& ellipse, const BND_3dmObjectAttributes* attributes)
+{
+  ON_NurbsCurve nc;
+  if (ellipse.m_ellipse.GetNurbForm(nc) != 0)
   {
     ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, nullptr);
     return ON_UUID_to_Binding(rc);
   }
   return ON_UUID_to_Binding(ON_nil_uuid);
 }
-BND_UUID BND_ONXModel_ObjectTable::AddSphere(const BND_Sphere& sphere, const BND_3dmAttributes* attributes)
+
+BND_UUID BND_ONXModel_ObjectTable::AddSphere(const BND_Sphere& sphere, const BND_3dmObjectAttributes* attributes)
 {
   ON_NurbsSurface ns;
   if (sphere.m_sphere.GetNurbForm(ns) != 0)
@@ -258,51 +295,58 @@ BND_UUID BND_ONXModel_ObjectTable::AddSphere(const BND_Sphere& sphere, const BND
   return ON_UUID_to_Binding(ON_nil_uuid);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddCurve(const BND_Curve* curve, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddCurve(const BND_Curve* curve, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = curve ? curve->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddTextDot(std::wstring text, const ON_3dPoint& location, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddTextDot(std::wstring text, const ON_3dPoint& location, const BND_3dmObjectAttributes* attributes)
 {
   ON_TextDot dot(location, text.c_str(), nullptr);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &dot, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddSurface(const BND_Surface* surface, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddSurface(const BND_Surface* surface, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = surface ? surface->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddExtrusion(const BND_Extrusion* extrusion, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddExtrusion(const BND_Extrusion* extrusion, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = extrusion ? extrusion->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddMesh(const BND_Mesh* mesh, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddMesh(const BND_Mesh* mesh, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = mesh ? mesh->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddBrep(const BND_Brep* brep, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddBrep(const BND_Brep* brep, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = brep ? brep->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddHatch(const BND_Hatch* hatch, const BND_3dmAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddHatch(const BND_Hatch* hatch, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = hatch ? hatch->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::Add(const BND_GeometryBase* geometry, const BND_3dmObjectAttributes* attributes)
+{
+  const ON_Geometry* g = geometry ? geometry->GeometryPointer() : nullptr;
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
   return ON_UUID_to_Binding(rc);
 }
@@ -326,7 +370,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
   BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(ObjectAt(index));
   if (nullptr == geometry)
     return nullptr;
-  BND_3dmAttributes* attrs = AttributesAt(index);
+  BND_3dmObjectAttributes* attrs = AttributesAt(index);
   if (nullptr == attrs)
   {
     delete geometry;
@@ -354,7 +398,7 @@ BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
   return BND_CommonObject::CreateWrapper(compref);
 }
 
-BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
+BND_3dmObjectAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
@@ -375,7 +419,7 @@ BND_3dmAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
   ON_3dmObjectAttributes* attrs = const_cast<ON_3dmObjectAttributes*>(geometryComponent->Attributes(nullptr));
   if (nullptr == attrs)
     return nullptr;
-  return new BND_3dmAttributes(attrs, &compref);
+  return new BND_3dmObjectAttributes(attrs, &compref);
 }
 
 BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
@@ -590,8 +634,12 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
+    .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1)
-    .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle1)
+    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline, py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
+    .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle, py::arg("circle"), py::arg("attributes") = nullptr)
+    .def("AddEllipse", &BND_ONXModel_ObjectTable::AddEllipse, py::arg("ellipse"), py::arg("attributes") = nullptr)
     .def("AddSphere", &BND_ONXModel_ObjectTable::AddSphere, py::arg("sphere"), py::arg("attributes") = nullptr)
     .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve, py::arg("curve"), py::arg("attributes")=nullptr)
     .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot, py::arg("text"), py::arg("location"), py::arg("attributes")=nullptr)
@@ -600,6 +648,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh, py::arg("mesh"), py::arg("attributes")=nullptr)
     .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep, py::arg("brep"), py::arg("attributes")=nullptr)
     .def("AddHatch", &BND_ONXModel_ObjectTable::AddHatch, py::arg("hatch"), py::arg("attributes")=nullptr)
+    .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete)
     ;
@@ -672,7 +721,7 @@ void initExtensionsBindings(void*)
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint1)
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
-    .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle1)
+    .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
     .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
     .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve, allow_raw_pointers())
     .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot, allow_raw_pointers())

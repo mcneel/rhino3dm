@@ -255,6 +255,7 @@ BND_CommonObject* BND_CommonObject::Decode(emscripten::val jsonObject)
 }
 #endif
 
+
 #if defined(ON_PYTHON_COMPILE)
 
 BND_CommonObject* BND_CommonObject::Decode(pybind11::dict jsonObject)
@@ -270,13 +271,56 @@ BND_CommonObject* BND_CommonObject::Decode(pybind11::dict jsonObject)
 }
 #endif
 
+
+bool BND_CommonObject::SetUserString(std::wstring key, std::wstring value)
+{
+  return m_object->SetUserString(key.c_str(), value.c_str());
+}
+
+std::wstring BND_CommonObject::GetUserString(std::wstring key)
+{
+  ON_wString value;
+  if (m_object->GetUserString(key.c_str(), value))
+  {
+    return std::wstring(value);
+  }
+  return std::wstring(L"");
+}
+
+#if defined(ON_PYTHON_COMPILE)
+pybind11::tuple BND_CommonObject::GetUserStrings() const
+{
+  ON_ClassArray<ON_wString> keys;
+  m_object->GetUserStringKeys(keys);
+  pybind11::tuple rc(keys.Count());
+  for (int i = 0; i < keys.Count(); i++)
+  {
+    ON_wString sval;
+    m_object->GetUserString(keys[i].Array(), sval);
+    pybind11::tuple keyval(2);
+    keyval[0] = std::wstring(keys[i].Array());
+    keyval[1] = std::wstring(sval.Array());
+    rc[i] = keyval;
+  }
+  return rc;
+}
+#endif
+
+
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initObjectBindings(pybind11::module& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
     .def("Encode", &BND_CommonObject::Encode)
-    .def_static("Decode", &BND_CommonObject::Decode);
+    .def_static("Decode", &BND_CommonObject::Decode)
+    .def("SetUserString", &BND_CommonObject::SetUserString)
+    .def("GetUserString", &BND_CommonObject::GetUserString)
+    .def_property_readonly("UserStringCount", &BND_CommonObject::UserStringCount)
+    .def("GetUserStrings", &BND_CommonObject::GetUserStrings)
+    ;
 }
 #endif
 
@@ -288,6 +332,10 @@ void initObjectBindings(void*)
   class_<BND_CommonObject>("CommonObject")
     .function("encode", &BND_CommonObject::Encode)
     .function("toJSON", &BND_CommonObject::toJSON)
-    .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers());
+    .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers())
+    .function("setUserString", &BND_CommonObject::SetUserString)
+    .function("getUserString", &BND_CommonObject::GetUserString)
+    .property("userStringCount", &BND_CommonObject::UserStringCount)
+    ;
 }
 #endif
