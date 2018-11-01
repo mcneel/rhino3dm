@@ -36,7 +36,7 @@ public:
 #if defined(ON_PYTHON_COMPILE)
   pybind11::tuple GetUserStrings() const;
 #endif
-
+  std::wstring RdkXml() const;
 protected:
   ON_ModelComponentReference m_component_ref; // holds shared pointer for this class
 
