@@ -304,6 +304,19 @@ pybind11::tuple BND_CommonObject::GetUserStrings() const
   }
   return rc;
 }
+
+std::wstring BND_CommonObject::RdkXml() const
+{
+  std::wstring rc;
+  ON_wString xmlstring;
+  if (ONX_Model::GetRDKObjectInformation(*m_object, xmlstring))
+  {
+    rc = xmlstring.Array();
+    return rc;
+  }
+  return rc;
+}
+
 #endif
 
 
@@ -320,6 +333,7 @@ void initObjectBindings(pybind11::module& m)
     .def("GetUserString", &BND_CommonObject::GetUserString)
     .def_property_readonly("UserStringCount", &BND_CommonObject::UserStringCount)
     .def("GetUserStrings", &BND_CommonObject::GetUserStrings)
+    .def("RdkXml", &BND_CommonObject::RdkXml)
     ;
 }
 #endif

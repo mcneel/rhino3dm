@@ -108,6 +108,33 @@ public:
   class BND_Layer* FindId(BND_UUID id);
 };
 
+class BND_File3dmPlugInData
+{
+protected:
+  std::shared_ptr<ONX_Model> m_model;
+  int m_index = -1;
+public:
+  BND_File3dmPlugInData(std::shared_ptr<ONX_Model> m, int index) { m_model = m; m_index = index; }
+  virtual ~BND_File3dmPlugInData() {};
+};
+
+class BND_RDKPlugInData : public BND_File3dmPlugInData
+{
+public:
+  BND_RDKPlugInData(std::shared_ptr<ONX_Model> m, int index) : BND_File3dmPlugInData(m, index) {}
+  std::wstring RdkDocumentData() const;
+};
+
+class BND_File3dmPlugInDataTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmPlugInDataTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model->m_userdata_table.Count(); }
+  BND_File3dmPlugInData* GetPlugInData(int index);
+  //public void Clear()
+};
+
 class BND_File3dmStringTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -186,7 +213,7 @@ public:
   //public File3dmViewTable AllViews | get; 
   //public IList<ViewInfo> NamedViews | get;
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
-  //public File3dmPlugInDataTable PlugInData | get;
+  BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;

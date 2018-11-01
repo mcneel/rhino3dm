@@ -501,6 +501,35 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+std::wstring BND_RDKPlugInData::RdkDocumentData() const
+{
+  std::wstring rc;
+  if (m_index >= 0 && m_index < m_model->m_userdata_table.Count())
+  {
+    ONX_Model_UserData* ud = m_model->m_userdata_table[m_index];
+    if (ud)
+    {
+      ON_wString docdata;
+      if( ONX_Model::GetRDKDocumentInformation(*ud, docdata) )
+        rc = docdata.Array();
+    }
+  }
+  return rc;
+}
+
+
+BND_File3dmPlugInData* BND_File3dmPlugInDataTable::GetPlugInData(int index)
+{
+  if (index < 0 || index >= m_model->m_userdata_table.Count())
+    return nullptr;
+  ONX_Model_UserData* ud = m_model->m_userdata_table[index];
+  if (nullptr == ud)
+    return nullptr;
+  if (ONX_Model::IsRDKDocumentInformation(*ud))
+    return new BND_RDKPlugInData(m_model, index);
+  return new BND_File3dmPlugInData(m_model, index);
+}
+
 int BND_File3dmStringTable::Count() const
 {
   ON_ClassArray<ON_UserString> str;
@@ -623,6 +652,18 @@ bool BND_ONXModel::ReadTest(std::wstring path)
 namespace py = pybind11;
 void initExtensionsBindings(pybind11::module& m)
 {
+  py::class_<BND_File3dmPlugInData>(m, "File3dmPlugInData")
+    ;
+
+  py::class_<BND_RDKPlugInData, BND_File3dmPlugInData>(m, "File3dmRdkDocumentData")
+    .def("RdkXml", &BND_RDKPlugInData::RdkDocumentData)
+    ;
+
+  py::class_<BND_File3dmPlugInDataTable>(m, "File3dmPlugInDataTable")
+    .def("__len__", &BND_File3dmPlugInDataTable::Count)
+    .def("__getitem__", &BND_File3dmPlugInDataTable::GetPlugInData)
+    ;
+
   py::class_<BND_FileObject>(m, "File3dmObject")
     .def_property_readonly("Attributes", &BND_FileObject::GetAttributes)
     .def_property_readonly("Geometry", &BND_FileObject::GetGeometry)
@@ -699,6 +740,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
+    .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
     ;
