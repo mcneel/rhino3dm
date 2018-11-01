@@ -108,6 +108,17 @@ public:
   class BND_Layer* FindId(BND_UUID id);
 };
 
+class BND_File3dmViewTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmViewTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model->m_settings.m_views.Count(); }
+  void Add(const class BND_ViewInfo& view);
+  class BND_ViewInfo* GetItem(int index) const;
+  void SetItem(int index, const class BND_ViewInfo& view);
+};
+
 class BND_File3dmPlugInData
 {
 protected:
@@ -210,7 +221,7 @@ public:
   //public File3dmDimStyleTable AllDimStyles | get;
   //public File3dmHatchPatternTable AllHatchPatterns | get;
   //public File3dmInstanceDefinitionTable AllInstanceDefinitions | get;
-  //public File3dmViewTable AllViews | get; 
+  BND_File3dmViewTable Views() { return BND_File3dmViewTable(m_model); }
   //public IList<ViewInfo> NamedViews | get;
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }

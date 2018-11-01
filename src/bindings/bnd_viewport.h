@@ -10,6 +10,7 @@ void initViewportBindings(void* m);
 
 class BND_Viewport : public BND_CommonObject
 {
+public:
   ON_Viewport* m_viewport = nullptr;
 public:
   BND_Viewport();

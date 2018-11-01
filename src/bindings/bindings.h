@@ -30,6 +30,7 @@
 #include "bnd_point.h"
 #include "bnd_polyline.h"
 #include "bnd_plane.h"
+#include "bnd_3dm_settings.h"
 #include "bnd_xform.h"
 #include "bnd_circle.h"
 #include "bnd_cone.h"

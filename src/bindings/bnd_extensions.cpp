@@ -501,6 +501,28 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+void BND_File3dmViewTable::Add(const BND_ViewInfo& view)
+{
+  m_model->m_settings.m_views.Append(view.m_view);
+}
+
+BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
+{
+  if (index < 0 || index >= m_model->m_settings.m_views.Count())
+    return nullptr;
+  BND_ViewInfo* rc = new BND_ViewInfo();
+  rc->m_view = m_model->m_settings.m_views[index];
+  return rc;
+}
+
+void BND_File3dmViewTable::SetItem(int index, const BND_ViewInfo& view)
+{
+  if (index < 0 || index >= m_model->m_settings.m_views.Count())
+    return;
+  m_model->m_settings.m_views[index] = view.m_view;
+}
+
+
 std::wstring BND_RDKPlugInData::RdkDocumentData() const
 {
   std::wstring rc;
@@ -711,6 +733,13 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
     ;
 
+  py::class_<BND_File3dmViewTable>(m, "File3dmViewTable")
+    .def("__len__", &BND_File3dmViewTable::Count)
+    .def("__getitem__", &BND_File3dmViewTable::GetItem)
+    .def("__setitem__", &BND_File3dmViewTable::SetItem)
+    .def("Add", &BND_File3dmViewTable::Add)
+    ;
+
   py::class_<BND_File3dmStringTable>(m, "File3dmStringTable")
     .def("__len__", &BND_File3dmStringTable::Count)
     .def("__getitem__", &BND_File3dmStringTable::GetKeyValue)
@@ -740,6 +769,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
+    .def_property_readonly("Views", &BND_ONXModel::Views)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
