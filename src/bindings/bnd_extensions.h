@@ -79,6 +79,7 @@ public:
 
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);
+  BND_CommonObject* FindIndex(int index); // helper function for iterator
   BND_CommonObject* ObjectAt(int index);
   BND_3dmObjectAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
@@ -116,6 +117,7 @@ public:
   int Count() const { return m_model->m_settings.m_views.Count(); }
   void Add(const class BND_ViewInfo& view);
   class BND_ViewInfo* GetItem(int index) const;
+  class BND_ViewInfo* FindIndex(int index) const; // helper function for iterator
   void SetItem(int index, const class BND_ViewInfo& view);
 };
 
