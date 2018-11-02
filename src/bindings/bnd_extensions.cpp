@@ -704,7 +704,7 @@ struct PyBNDIterator {
 
   const IT seq;
   py::object ref;
-  size_t index = 0;
+  int index = 0;
 };
 
 #endif
@@ -731,7 +731,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Geometry", &BND_FileObject::GetGeometry)
     ;
 
-  py::class_<PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*> >(m, "ObjectIterator")
+  py::class_<PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*> >(m, "__ObjectIterator")
     .def("__iter__", [](PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*> &it) -> PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>::next)
     ;
@@ -762,7 +762,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete)
     ;
 
-  py::class_<PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> >(m, "MaterialIterator")
+  py::class_<PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> >(m, "__MaterialIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>  &it) -> PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> & { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> ::next)
     ;
@@ -776,7 +776,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     ;
 
-  py::class_<PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> >(m, "LayerIterator")
+  py::class_<PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> >(m, "__LayerIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> &it) -> PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>::next)
     ;
@@ -791,7 +791,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
     ;
 
-  py::class_<PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> >(m, "ViewIterator")
+  py::class_<PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> >(m, "__ViewIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> &it) -> PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>::next)
     ;
