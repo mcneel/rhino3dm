@@ -382,6 +382,11 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
   return rc;
 }
 
+// helper function for iterator
+BND_FileObject* BND_ONXModel_ObjectTable::IterIndex(int index)
+{
+  return ModelObjectAt(index);
+}
 
 BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
 {
@@ -433,6 +438,11 @@ void BND_File3dmMaterialTable::Add(const BND_Material& material)
   m_model->AddModelComponent(*m);
 }
 
+BND_Material* BND_File3dmMaterialTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
 BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
 {
   ON_ModelComponentReference compref = m_model->RenderMaterialFromIndex(index);
@@ -453,7 +463,6 @@ BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
     return new BND_Material(modelmaterial, &compref);
   return nullptr;
 }
-
 
 void BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
@@ -478,6 +487,11 @@ BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
   if (modellayer)
     return new BND_Layer(modellayer, &compref);
   return nullptr;
+}
+
+BND_Layer* BND_File3dmLayerTable::IterIndex(int index)
+{
+  return FindIndex(index);
 }
 
 BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
@@ -513,6 +527,11 @@ BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
   BND_ViewInfo* rc = new BND_ViewInfo();
   rc->m_view = m_model->m_settings.m_views[index];
   return rc;
+}
+
+BND_ViewInfo* BND_File3dmViewTable::IterIndex(int index) const
+{
+  return GetItem(index);
 }
 
 void BND_File3dmViewTable::SetItem(int index, const BND_ViewInfo& view)
@@ -669,6 +688,27 @@ bool BND_ONXModel::ReadTest(std::wstring path)
 }
 
 
+// --------------------- Iterator helpers ------- //
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+
+template <typename IT, typename ET>
+struct PyBNDIterator {
+  PyBNDIterator(const IT table, py::object ref)
+    : seq(table), ref(ref) {}
+
+  ET next() {
+    if(index>=seq.Count()) throw py::stop_iteration();
+    return const_cast<IT>(seq).IterIndex(index++);
+  }
+
+  const IT seq;
+  py::object ref;
+  int index = 0;
+};
+
+#endif
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -691,9 +731,15 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Geometry", &BND_FileObject::GetGeometry)
     ;
 
+  py::class_<PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*> >(m, "__ObjectIterator")
+    .def("__iter__", [](PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*> &it) -> PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>::next)
+    ;
+
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
     .def("__len__", &BND_ONXModel_ObjectTable::Count)
     .def("__getitem__", &BND_ONXModel_ObjectTable::ModelObjectAt)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>(s.cast<BND_ONXModel_ObjectTable &>(), s); })
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
@@ -716,27 +762,45 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete)
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> >(m, "__MaterialIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>  &it) -> PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> & { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> ::next)
+    ;
+
   py::class_<BND_File3dmMaterialTable>(m, "File3dmMaterialTable")
     .def("__len__", &BND_File3dmMaterialTable::Count)
     .def("__getitem__", &BND_File3dmMaterialTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>(s.cast<BND_File3dmMaterialTable &>(), s); })
     .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
     .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> >(m, "__LayerIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> &it) -> PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>::next)
+    ;
+
   py::class_<BND_File3dmLayerTable>(m, "File3dmLayerTable")
     .def("__len__", &BND_File3dmLayerTable::Count)
     .def("__getitem__", &BND_File3dmLayerTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>(s.cast<BND_File3dmLayerTable &>(), s); })
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
     .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> >(m, "__ViewIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> &it) -> PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>::next)
+    ;
+
   py::class_<BND_File3dmViewTable>(m, "File3dmViewTable")
     .def("__len__", &BND_File3dmViewTable::Count)
     .def("__getitem__", &BND_File3dmViewTable::GetItem)
     .def("__setitem__", &BND_File3dmViewTable::SetItem)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>(s.cast<BND_File3dmViewTable &>(), s); })
     .def("Add", &BND_File3dmViewTable::Add)
     ;
 

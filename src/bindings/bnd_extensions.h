@@ -79,6 +79,7 @@ public:
 
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);
+  BND_FileObject* IterIndex(int index); // helper function for iterator
   BND_CommonObject* ObjectAt(int index);
   BND_3dmObjectAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
@@ -92,6 +93,7 @@ public:
   int Count() const { return m_model->ActiveComponentCount(ON_ModelComponent::Type::RenderMaterial); }
   void Add(const class BND_Material& material);
   class BND_Material* FindIndex(int index);
+  class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);
 };
 
@@ -105,6 +107,7 @@ public:
   class BND_Layer* FindName(std::wstring name, BND_UUID parentId);
   //BND_Layer* FindNameHash(NameHash nameHash)
   class BND_Layer* FindIndex(int index);
+  class BND_Layer* IterIndex(int index); // helper function for iterator
   class BND_Layer* FindId(BND_UUID id);
 };
 
@@ -116,6 +119,7 @@ public:
   int Count() const { return m_model->m_settings.m_views.Count(); }
   void Add(const class BND_ViewInfo& view);
   class BND_ViewInfo* GetItem(int index) const;
+  class BND_ViewInfo* IterIndex(int index) const; // helper function for iterator
   void SetItem(int index, const class BND_ViewInfo& view);
 };
 
