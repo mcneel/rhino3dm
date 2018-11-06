@@ -1,0 +1,7 @@
+ConstructionPlane
+*****************
+
+.. autoclass:: rhino3dm.ConstructionPlane
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+MeshTextureCoordinateList
+*************************
+
+.. autoclass:: rhino3dm.MeshTextureCoordinateList
+   :members:
+   :undoc-members:
+   :show-inheritance:

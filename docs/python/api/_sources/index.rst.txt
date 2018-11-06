@@ -13,6 +13,7 @@ Welcome to rhino3dm's documentation!
    Arc
    ArcCurve
    BezierCurve
+   Bitmap
    BoundingBox
    Box
    Brep
@@ -21,45 +22,64 @@ Welcome to rhino3dm's documentation!
    Circle
    CommonObject
    Cone
+   ConstructionPlane
    Curve
    CurveProxy
    Cylinder
-   DocObjects
+   Ellipse
    Extrusion
    File3dm
+   File3dmBitmapTable
    File3dmLayerTable
+   File3dmMaterialTable
    File3dmObject
    File3dmObjectTable
+   File3dmPlugInData
+   File3dmPlugInDataTable
+   File3dmRdkDocumentData
+   File3dmStringTable
+   File3dmViewTable
+   FileReference
    GeometryBase
    Hatch
    Interval
    Layer
    Line
    LineCurve
+   Material
    Mesh
    MeshFaceList
    MeshNormalList
-   MeshType
+   MeshTextureCoordinateList
    MeshVertexList
+   ModelComponent
    NurbsCurve
    NurbsCurveKnotList
    NurbsCurvePointList
    NurbsSurface
    ObjectAttributes
+   PlaneSurface
+   Point
    Point2d
    Point3d
    Point3dList
    Point3f
    Point4d
+   PointCloud
+   PointGrid
    Polycurve
    Polyline
    Polylinecurve
+   RevSurface
    Sphere
    Surface
    SurfaceProxy
+   Texture
+   TextureMapping
    Transform
    Vector2d
    Vector3d
+   ViewInfo
    ViewportInfo
 
 

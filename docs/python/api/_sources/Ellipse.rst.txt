@@ -1,0 +1,7 @@
+Ellipse
+*******
+
+.. autoclass:: rhino3dm.Ellipse
+   :members:
+   :undoc-members:
+   :show-inheritance:

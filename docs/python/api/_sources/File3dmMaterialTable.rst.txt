@@ -1,0 +1,7 @@
+File3dmMaterialTable
+********************
+
+.. autoclass:: rhino3dm.File3dmMaterialTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

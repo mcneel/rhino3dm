@@ -1,0 +1,7 @@
+ViewInfo
+********
+
+.. autoclass:: rhino3dm.ViewInfo
+   :members:
+   :undoc-members:
+   :show-inheritance:

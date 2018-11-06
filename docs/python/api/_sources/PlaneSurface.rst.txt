@@ -1,0 +1,7 @@
+PlaneSurface
+************
+
+.. autoclass:: rhino3dm.PlaneSurface
+   :members:
+   :undoc-members:
+   :show-inheritance:

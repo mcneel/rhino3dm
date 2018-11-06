@@ -1,0 +1,7 @@
+PointGrid
+*********
+
+.. autoclass:: rhino3dm.PointGrid
+   :members:
+   :undoc-members:
+   :show-inheritance:

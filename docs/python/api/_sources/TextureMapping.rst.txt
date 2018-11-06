@@ -1,0 +1,7 @@
+TextureMapping
+**************
+
+.. autoclass:: rhino3dm.TextureMapping
+   :members:
+   :undoc-members:
+   :show-inheritance:

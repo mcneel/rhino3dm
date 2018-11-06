@@ -1,0 +1,7 @@
+ModelComponent
+**************
+
+.. autoclass:: rhino3dm.ModelComponent
+   :members:
+   :undoc-members:
+   :show-inheritance:

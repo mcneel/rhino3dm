@@ -1,0 +1,7 @@
+FileReference
+*************
+
+.. autoclass:: rhino3dm.FileReference
+   :members:
+   :undoc-members:
+   :show-inheritance:

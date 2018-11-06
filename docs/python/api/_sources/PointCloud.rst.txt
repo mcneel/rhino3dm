@@ -1,0 +1,7 @@
+PointCloud
+**********
+
+.. autoclass:: rhino3dm.PointCloud
+   :members:
+   :undoc-members:
+   :show-inheritance:

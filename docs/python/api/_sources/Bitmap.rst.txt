@@ -1,7 +1,7 @@
-MeshType
-********
+Bitmap
+******
 
-.. autoclass:: rhino3dm.MeshType
+.. autoclass:: rhino3dm.Bitmap
    :members:
    :undoc-members:
    :show-inheritance:

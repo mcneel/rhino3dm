@@ -28,6 +28,8 @@ namespace docgen
           if (line.StartsWith("class_"))
           {
             string name = (line.Split(new char[] { '"' }))[1];
+            if (name.StartsWith("__"))
+              continue;
             var activeJavascriptClass = new JavascriptClass(name);
             int baseIndex = line.IndexOf("base<BND_");
             if( baseIndex>0 )
@@ -45,6 +47,8 @@ namespace docgen
           if( line.StartsWith("py::class_"))
           {
             string name = (line.Split(new char[] { '"' }))[1];
+            if (name.StartsWith("__"))
+              continue;
             var activePythonClass = new PythonClass(name);
             int baseIndex = line.IndexOf(",");
             if (baseIndex > 0)

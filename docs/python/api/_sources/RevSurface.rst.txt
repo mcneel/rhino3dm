@@ -1,7 +1,7 @@
-DocObjects
+RevSurface
 **********
 
-.. autoclass:: rhino3dm.DocObjects
+.. autoclass:: rhino3dm.RevSurface
    :members:
    :undoc-members:
    :show-inheritance:

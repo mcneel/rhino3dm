@@ -1,0 +1,7 @@
+File3dmBitmapTable
+******************
+
+.. autoclass:: rhino3dm.File3dmBitmapTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

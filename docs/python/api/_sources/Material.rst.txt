@@ -1,0 +1,7 @@
+Material
+********
+
+.. autoclass:: rhino3dm.Material
+   :members:
+   :undoc-members:
+   :show-inheritance:

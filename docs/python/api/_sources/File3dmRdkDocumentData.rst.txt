@@ -1,0 +1,7 @@
+File3dmRdkDocumentData
+**********************
+
+.. autoclass:: rhino3dm.File3dmRdkDocumentData
+   :members:
+   :undoc-members:
+   :show-inheritance:

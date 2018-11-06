@@ -1,0 +1,7 @@
+File3dmPlugInDataTable
+**********************
+
+.. autoclass:: rhino3dm.File3dmPlugInDataTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

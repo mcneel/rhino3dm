@@ -1,0 +1,7 @@
+Texture
+*******
+
+.. autoclass:: rhino3dm.Texture
+   :members:
+   :undoc-members:
+   :show-inheritance:
