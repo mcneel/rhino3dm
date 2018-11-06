@@ -25,7 +25,7 @@ public:
   void SetThickLineFrequency(int i) { m_cplane.m_grid_thick_frequency = i; }
   bool IsDepthBuffered() const { return m_cplane.m_bDepthBuffer; }
   void SetDepthBuffered(bool b) { m_cplane.m_bDepthBuffer = b; }
-  std::wstring GetName() const { return std::wstring(m_cplane.m_name.Array()); }
+  std::wstring GetName() const { return std::wstring(m_cplane.m_name); }
   void SetName(std::wstring s) { m_cplane.m_name = s.c_str(); }
 };
 
@@ -54,4 +54,3 @@ public:
   class BND_Viewport* GetViewport() const;
   void SetViewport(const class BND_Viewport& viewport);
 };
-

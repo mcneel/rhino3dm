@@ -180,6 +180,46 @@ void initDefines(void*)
     .property("to", &ON_Line::to)
     .property("length", &ON_Line::Length);
 
+
+  enum_<ON::object_mode>("ObjectMode")
+    .value("Normal", ON::object_mode::normal_object)
+    .value("Hidden", ON::object_mode::hidden_object)
+    .value("Locked", ON::object_mode::locked_object)
+    .value("InstanceDefinitionObject", ON::object_mode::idef_object)
+    ;
+
+  enum_<ON::object_color_source>("ObjectColorSource")
+    .value("ColorFromLayer", ON::object_color_source::color_from_layer)
+    .value("ColorFromObject", ON::object_color_source::color_from_object)
+    .value("ColorFromMaterial", ON::object_color_source::color_from_material)
+    .value("ColorFromParent", ON::object_color_source::color_from_parent)
+    ;
+
+  enum_<ON::plot_color_source>("ObjectPlotColorSource")
+    .value("PlotColorFromLayer", ON::plot_color_from_layer)
+    .value("PlotColorFromObject", ON::plot_color_from_object)
+    .value("PlotColorFromDisplay", ON::plot_color_from_display)
+    .value("PlotColorFromParent", ON::plot_color_from_parent)
+    ;
+
+  enum_<ON::plot_weight_source>("ObjectPlotWeightSource")
+    .value("PlotWeightFromLayer", ON::plot_weight_from_layer)
+    .value("PlotWeightFromObject", ON::plot_weight_from_object)
+    .value("PlotWeightFromParent", ON::plot_weight_from_parent)
+    ;
+
+  enum_<ON::object_linetype_source>("ObjectLinetypeSource")
+    .value("LinetypeFromLayer", ON::object_linetype_source::linetype_from_layer)
+    .value("LinetypeFromObject", ON::linetype_from_object)
+    .value("LinetypeFromParent", ON::linetype_from_parent)
+    ;
+
+  enum_<ON::object_material_source>("ObjectMaterialSource")
+    .value("MaterialFromLayer", ON::material_from_layer)
+    .value("MaterialFromObject", ON::material_from_object)
+    .value("MaterialFromParent", ON::material_from_parent)
+    ;
+
   enum_<ON::object_type>("ObjectType")
     .value("None", ON::unknown_object_type)
     .value("Point", ON::point_object)
@@ -225,6 +265,19 @@ void initDefines(void*)
     .value("Analysis", ON::analysis_mesh)
     .value("Preview", ON::preview_mesh)
     .value("Any", ON::any_mesh)
+    ;
+
+  enum_<ON::object_decoration>("ObjectDecoration")
+    .value("None", ON::no_object_decoration)
+    .value("StartArrowhead", ON::start_arrowhead)
+    .value("EndArrowhead", ON::end_arrowhead)
+    .value("BothArrowhead", ON::both_arrowhead)
+    ;
+
+  enum_<ON::active_space>("ActiveSpace")
+    .value("None", ON::active_space::no_space)
+    .value("ModelSpace", ON::active_space::model_space)
+    .value("PageSpace", ON::active_space::page_space)
     ;
 }
 

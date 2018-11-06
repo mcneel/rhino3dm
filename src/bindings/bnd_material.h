@@ -63,20 +63,16 @@ public:
   void SetTransparentColor(const BND_Color& c) { m_material->m_transparent = Binding_to_ON_Color(c); }
   void Default() { *m_material = ON_Material::Default; }
   //public Texture[] GetTextures()
-  //public Texture GetBitmapTexture()
-  //public bool SetBitmapTexture(string filename)
-  //public bool SetBitmapTexture(Texture texture)
-  //public Texture GetBumpTexture()
-  //public bool SetBumpTexture(string filename)
-  //public bool SetBumpTexture(Texture texture)
-  //public Texture GetEnvironmentTexture()
-  //public bool SetEnvironmentTexture(string filename)
-  //public bool SetEnvironmentTexture(Texture texture)
-  //public Texture GetTransparencyTexture()
-  //public bool SetTransparencyTexture(string filename)
-  //public bool SetTransparencyTexture(Texture texture)
-  //public bool SetUserString(string key, string value)
-  //public string GetUserString(string key)
-  //public int UserStringCount
-  //public System.Collections.Specialized.NameValueCollection GetUserStrings()
+  class BND_Texture* GetBitmapTexture() const;
+  bool SetBitmapTexture(std::wstring filename);
+  bool SetBitmapTexture2(const class BND_Texture& texture);
+  class BND_Texture* GetBumpTexture() const;
+  bool SetBumpTexture(std::wstring filename);
+  bool SetBumpTexture2(const class BND_Texture& texture);
+  class BND_Texture* GetEnvironmentTexture() const;
+  bool SetEnvironmentTexture(std::wstring filename);
+  bool SetEnvironmentTexture2(const class BND_Texture& texture);
+  class BND_Texture* GetTransparencyTexture() const;
+  bool SetTransparencyTexture(std::wstring filename);
+  bool SetTransparencyTexture2(const class BND_Texture& texture);
 };

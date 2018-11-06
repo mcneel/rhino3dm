@@ -22,6 +22,78 @@ void BND_Material::SetTrackedPointer(ON_Material* material, const ON_ModelCompon
   BND_CommonObject::SetTrackedPointer(material, compref);
 }
 
+static BND_Texture* GetTextureHelper(const ON_Material* mat, ON_Texture::TYPE t)
+{
+  int index = mat->FindTexture(nullptr, t);
+  const ON_Texture* texture = mat->m_textures.At(index);
+  if (nullptr == texture)
+    return nullptr;
+  return new BND_Texture(new ON_Texture(*texture), nullptr);
+}
+
+BND_Texture* BND_Material::GetBitmapTexture() const
+{
+  return GetTextureHelper(m_material, ON_Texture::TYPE::bitmap_texture);
+}
+BND_Texture* BND_Material::GetBumpTexture() const
+{
+  return GetTextureHelper(m_material, ON_Texture::TYPE::bump_texture);
+}
+BND_Texture* BND_Material::GetEnvironmentTexture() const
+{
+  return GetTextureHelper(m_material, ON_Texture::TYPE::emap_texture);
+}
+BND_Texture* BND_Material::GetTransparencyTexture() const
+{
+  return GetTextureHelper(m_material, ON_Texture::TYPE::transparency_texture);
+}
+
+bool BND_Material::SetBitmapTexture(std::wstring filename)
+{
+  m_material->DeleteTexture(nullptr, ON_Texture::TYPE::bitmap_texture);
+  return m_material->AddTexture(filename.c_str(), ON_Texture::TYPE::bitmap_texture);
+}
+bool BND_Material::SetBumpTexture(std::wstring filename)
+{
+  m_material->DeleteTexture(nullptr, ON_Texture::TYPE::bump_texture);
+  return m_material->AddTexture(filename.c_str(), ON_Texture::TYPE::bump_texture);
+}
+bool BND_Material::SetEnvironmentTexture(std::wstring filename)
+{
+  m_material->DeleteTexture(nullptr, ON_Texture::TYPE::emap_texture);
+  return m_material->AddTexture(filename.c_str(), ON_Texture::TYPE::emap_texture);
+}
+bool BND_Material::SetTransparencyTexture(std::wstring filename)
+{
+  m_material->DeleteTexture(nullptr, ON_Texture::TYPE::transparency_texture);
+  return m_material->AddTexture(filename.c_str(), ON_Texture::TYPE::transparency_texture);
+}
+
+static bool SetTextureHelper(ON_Material* material, const ON_Texture* texture, ON_Texture::TYPE t)
+{
+  material->DeleteTexture(nullptr, t);
+  ON_Texture tx(*texture);
+  tx.m_type = ON_Texture::TYPE::bitmap_texture;
+  return material->AddTexture(tx);
+}
+
+bool BND_Material::SetBitmapTexture2(const BND_Texture& texture)
+{
+  return SetTextureHelper(m_material, texture.m_texture, ON_Texture::TYPE::bitmap_texture);
+}
+bool BND_Material::SetBumpTexture2(const BND_Texture& texture)
+{
+  return SetTextureHelper(m_material, texture.m_texture, ON_Texture::TYPE::bump_texture);
+}
+bool BND_Material::SetEnvironmentTexture2(const BND_Texture& texture)
+{
+  return SetTextureHelper(m_material, texture.m_texture, ON_Texture::TYPE::emap_texture);
+}
+bool BND_Material::SetTransparencyTexture2(const BND_Texture& texture)
+{
+  return SetTextureHelper(m_material, texture.m_texture, ON_Texture::TYPE::transparency_texture);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -50,6 +122,18 @@ void initMaterialBindings(pybind11::module& m)
     .def_property("ReflectionColor", &BND_Material::GetReflectionColor, &BND_Material::SetReflectionColor)
     .def_property("TransparentColor", &BND_Material::GetTransparentColor, &BND_Material::SetTransparentColor)
     .def("Default", &BND_Material::Default)
+    .def("GetBitmapTexture", &BND_Material::GetBitmapTexture)
+    .def("SetBitmapTexture", &BND_Material::SetBitmapTexture)
+    .def("SetBitmapTexture", &BND_Material::SetBitmapTexture2)
+    .def("GetBumpTexture", &BND_Material::GetBumpTexture)
+    .def("SetBumpTexture", &BND_Material::SetBumpTexture)
+    .def("SetBumpTexture", &BND_Material::SetBumpTexture2)
+    .def("GetEnvironmentTexture", &BND_Material::GetEnvironmentTexture)
+    .def("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture)
+    .def("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2)
+    .def("GetTransparencyTexture", &BND_Material::GetTransparencyTexture)
+    .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture)
+    .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
     ;
 }
 #endif
@@ -81,6 +165,18 @@ void initMaterialBindings(void*)
     .property("reflectionColor", &BND_Material::GetReflectionColor, &BND_Material::SetReflectionColor)
     .property("transparentColor", &BND_Material::GetTransparentColor, &BND_Material::SetTransparentColor)
     .function("default", &BND_Material::Default)
+    .function("getBitmapTexture", &BND_Material::GetBitmapTexture, allow_raw_pointers())
+    .function("setBitmapTexture", &BND_Material::SetBitmapTexture)
+    //.function("setBitmapTexture", &BND_Material::SetBitmapTexture2)
+    .function("getBumpTexture", &BND_Material::GetBumpTexture, allow_raw_pointers())
+    .function("setBumpTexture", &BND_Material::SetBumpTexture)
+    //.function("SetBumpTexture", &BND_Material::SetBumpTexture2)
+    .function("getEnvironmentTexture", &BND_Material::GetEnvironmentTexture, allow_raw_pointers())
+    .function("setEnvironmentTexture", &BND_Material::SetEnvironmentTexture)
+    //.function("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2)
+    .function("getTransparencyTexture", &BND_Material::GetTransparencyTexture, allow_raw_pointers())
+    .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture)
+    //.function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
     ;
 }
 #endif

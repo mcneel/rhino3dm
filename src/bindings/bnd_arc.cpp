@@ -111,10 +111,15 @@ void initArcBindings(void*)
     .property("startPoint", &BND_Arc::StartPoint)
     .property("midPoint", &BND_Arc::MidPoint)
     .property("endPoint", &BND_Arc::EndPoint)
+    .property("angleRadians", &BND_Arc::GetAngleRadians, &BND_Arc::SetAngleRadians)
+    .property("angleDegrees", &BND_Arc::GetAngleDegrees, &BND_Arc::SetAngleDegrees)
+    .function("trim", &BND_Arc::Trim)
+    .function("boundingBox", &BND_Arc::BoundingBox)
     .function("pointAt", &BND_Arc::PointAt)
     .function("tangentAt", &BND_Arc::TangentAt)
     .function("closestPoint", &BND_Arc::ClosestPoint)
     .function("reverse", &BND_Arc::Reverse)
+    .function("transform", &BND_Arc::Transform)
     .function("toNurbsCurve", &BND_Arc::ToNurbsCurve, allow_raw_pointers());
 }
 #endif

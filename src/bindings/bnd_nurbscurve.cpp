@@ -193,10 +193,36 @@ using namespace emscripten;
 
 void initNurbsCurveBindings(void*)
 {
+  class_<BND_NurbsCurveKnotList>("NurbsCurveKnotList")
+    .property("count", &BND_NurbsCurveKnotList::Count)
+    .function("get", &BND_NurbsCurveKnotList::GetKnot)
+    .function("set", &BND_NurbsCurveKnotList::SetKnot)
+    .function("insertKnot", &BND_NurbsCurveKnotList::InsertKnot)
+    .function("knotMultiplicity", &BND_NurbsCurveKnotList::KnotMultiplicity)
+    .function("createUniformKnots", &BND_NurbsCurveKnotList::CreateUniformKnots)
+    .function("createPeriodicKnots", &BND_NurbsCurveKnotList::CreatePeriodicKnots)
+    .property("isClampedStart", &BND_NurbsCurveKnotList::IsClampedStart)
+    .property("isClampedEnd", &BND_NurbsCurveKnotList::IsClampedEnd)
+    .function("superfluousKnot", &BND_NurbsCurveKnotList::SuperfluousKnot)
+    ;
+  ;
+
+  class_<BND_NurbsCurvePointList>("NurbsCurvePointList")
+    .property("count", &BND_NurbsCurvePointList::Count)
+    .function("get", &BND_NurbsCurvePointList::GetControlPoint)
+    .function("set", &BND_NurbsCurvePointList::SetControlPoint)
+    .property("controlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
+    .function("changeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights)
+    .function("makeRational", &BND_NurbsCurvePointList::MakeRational)
+    .function("makeNonRational", &BND_NurbsCurvePointList::MakeNonRational)
+    ;
+
+
   class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
     .class_function("createFromLine", &BND_NurbsCurve::CreateFromLine, allow_raw_pointers())
     .class_function("createFromArc", &BND_NurbsCurve::CreateFromArc, allow_raw_pointers())
     .class_function("createFromCircle", &BND_NurbsCurve::CreateFromCircle, allow_raw_pointers())
+    .class_function("createFromEllipse", &BND_NurbsCurve::CreateFromEllipse, allow_raw_pointers())
     .class_function("create", &BND_NurbsCurve::Create, allow_raw_pointers())
     .constructor<int, int>()
     .constructor<int, bool, int, int>()

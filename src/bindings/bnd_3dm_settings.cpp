@@ -33,7 +33,7 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property("WallpaperHidden", &BND_ViewInfo::WallpaperHidden, &BND_ViewInfo::SetWallpaperHidden)
     .def_property("FocalBlurDistance", &BND_ViewInfo::GetFocalBlurDistance, &BND_ViewInfo::SetFocalBlurDistance)
     .def_property("FocalBlurAperture", &BND_ViewInfo::GetFocalBlurAperture, &BND_ViewInfo::SetFocalBlurAperture)
-    .def_property("FocalBlurJitter", &BND_ViewInfo::GetFocalBlurJitter, &BND_ViewInfo::GetFocalBlurJitter)
+    .def_property("FocalBlurJitter", &BND_ViewInfo::GetFocalBlurJitter, &BND_ViewInfo::SetFocalBlurJitter)
     .def_property("FocalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
     .def_property("Viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport)
     ;
@@ -45,5 +45,27 @@ using namespace emscripten;
 
 void init3dmSettingsBindings(void*)
 {
+  class_<BND_ConstructionPlane>("ConstructionPlane")
+    .constructor<>()
+    .property("plane", &BND_ConstructionPlane::GetPlane, &BND_ConstructionPlane::SetPlane)
+    .property("gridSpacing", &BND_ConstructionPlane::GetGridSpacing, &BND_ConstructionPlane::SetGridSpacing)
+    .property("snapSpacing", &BND_ConstructionPlane::GetSnapSpacing, &BND_ConstructionPlane::SetSnapSpacing)
+    .property("gridLineCount", &BND_ConstructionPlane::GetGridLineCount, &BND_ConstructionPlane::SetGridLineCount)
+    .property("thickLineFrequency", &BND_ConstructionPlane::GetThickLineFrequency, &BND_ConstructionPlane::SetThickLineFrequency)
+    .property("depthBuffered", &BND_ConstructionPlane::IsDepthBuffered, &BND_ConstructionPlane::SetDepthBuffered)
+    .property("name", &BND_ConstructionPlane::GetName, &BND_ConstructionPlane::SetName)
+    ;
+
+  class_<BND_ViewInfo>("ViewInfo")
+    .property("name", &BND_ViewInfo::GetName, &BND_ViewInfo::SetName)
+    .property("wallpaperName", &BND_ViewInfo::GetWallpaperFilename)
+    .property("showWallpaperInGrayScale", &BND_ViewInfo::ShowWallpaperInGrayScale, &BND_ViewInfo::SetShowWallpaperInGrayScale)
+    .property("wallpaperHidden", &BND_ViewInfo::WallpaperHidden, &BND_ViewInfo::SetWallpaperHidden)
+    .property("focalBlurDistance", &BND_ViewInfo::GetFocalBlurDistance, &BND_ViewInfo::SetFocalBlurDistance)
+    .property("focalBlurAperture", &BND_ViewInfo::GetFocalBlurAperture, &BND_ViewInfo::SetFocalBlurAperture)
+    .property("focalBlurJitter", &BND_ViewInfo::GetFocalBlurJitter, &BND_ViewInfo::SetFocalBlurJitter)
+    .property("focalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
+    //.property("viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport, allow_raw_pointers())
+    ;
 }
 #endif

@@ -124,6 +124,18 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   if (layer)
     return new BND_Layer(layer, compref);
 
+  ON_Texture* texture = ON_Texture::Cast(obj);
+  if (texture)
+    return new BND_Texture(texture, compref);
+
+  ON_Bitmap* bitmap = ON_Bitmap::Cast(obj);
+  if (bitmap)
+    return new BND_Bitmap(bitmap, compref);
+
+  ON_TextureMapping* texturemapping = ON_TextureMapping::Cast(obj);
+  if (texturemapping)
+    return new BND_TextureMapping(texturemapping, compref);
+
   return new BND_CommonObject(obj, compref);
 }
 
