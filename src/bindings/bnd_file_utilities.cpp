@@ -37,5 +37,11 @@ using namespace emscripten;
 
 void initFileUtilitiesBindings(void*)
 {
+  class_<BND_FileReference>("FileReference")
+    .class_function("createFromFullPath", &BND_FileReference::CreateFromFullPath)
+    .class_function("createFromFullAndRelativePaths", &BND_FileReference::CreateFromFullAndRelativePaths)
+    .property("fullPath", &BND_FileReference::GetFullPath)
+    .property("relativePath", &BND_FileReference::GetRelativePath)
+    ;
 }
 #endif

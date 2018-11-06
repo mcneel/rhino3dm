@@ -40,5 +40,10 @@ using namespace emscripten;
 
 void initTextureBindings(void*)
 {
+  class_<BND_Texture>("Texture")
+    .constructor<>()
+    .property("fileName", &BND_Texture::GetFileName, &BND_Texture::SetFileName)
+    .function("fileReference", &BND_Texture::GetFileReference, allow_raw_pointers())
+    ;
 }
 #endif

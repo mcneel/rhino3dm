@@ -50,6 +50,14 @@ using namespace emscripten;
 void initNurbsSurfaceBindings(void*)
 {
   class_<BND_NurbsSurface, base<BND_Surface>>("NurbsSurface")
+    .class_function("createRuledSurface", &BND_NurbsSurface::CreateRuledSurface, allow_raw_pointers())
+    .property("isRational", &BND_NurbsSurface::IsRational)
+    .function("makeRational", &BND_NurbsSurface::MakeRational)
+    .function("makeNonRational", &BND_NurbsSurface::MakeNonRational)
+    .function("increaseDegreeU", &BND_NurbsSurface::IncreaseDegreeU)
+    .function("increaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV)
+    .property("orderU", &BND_NurbsSurface::OrderU)
+    .property("orderV", &BND_NurbsSurface::OrderV)
     ;
 }
 #endif

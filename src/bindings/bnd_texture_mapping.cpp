@@ -167,5 +167,23 @@ using namespace emscripten;
 
 void initTextureMappingBindings(void*)
 {
+  class_<BND_TextureMapping, base<BND_CommonObject>>("TextureMapping")
+    .constructor<>()
+    .property("requiresVertexNormals", &BND_TextureMapping::RequiresVertexNormals)
+    .property("isPeriodic", &BND_TextureMapping::IsPeriodic)
+    .class_function("createSurfaceParameterMapping", &BND_TextureMapping::CreateSurfaceParameterMapping, allow_raw_pointers())
+    .class_function("createPlaneMapping", &BND_TextureMapping::CreatePlaneMapping, allow_raw_pointers())
+    .class_function("createCylinderMapping", &BND_TextureMapping::CreateCylinderMapping, allow_raw_pointers())
+    .class_function("createSphereMapping", &BND_TextureMapping::CreateSphereMapping, allow_raw_pointers())
+    .class_function("CreateBoxMapping", &BND_TextureMapping::CreateBoxMapping, allow_raw_pointers())
+    //.def("TryGetMappingPlane", &BND_TextureMapping::TryGetMappingPlane)
+    .function("tryGetMappingCylinder", &BND_TextureMapping::TryGetMappingCylinder, allow_raw_pointers())
+    .function("tryGetMappingSphere", &BND_TextureMapping::TryGetMappingSphere, allow_raw_pointers())
+    //.def("TryGetMappingBox", &BND_TextureMapping::TryGetMappingBox)
+    .function("reverseTextureCoordinate", &BND_TextureMapping::ReverseTextureCoordinate)
+    .function("swapTextureCoordinate", &BND_TextureMapping::SwapTextureCoordinate)
+    .function("tileTextureCoordinate", &BND_TextureMapping::TileTextureCoordinate)
+    .function("evaluate", &BND_TextureMapping::Evaluate)
+    ;
 }
 #endif

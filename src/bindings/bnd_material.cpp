@@ -165,6 +165,18 @@ void initMaterialBindings(void*)
     .property("reflectionColor", &BND_Material::GetReflectionColor, &BND_Material::SetReflectionColor)
     .property("transparentColor", &BND_Material::GetTransparentColor, &BND_Material::SetTransparentColor)
     .function("default", &BND_Material::Default)
+    .function("getBitmapTexture", &BND_Material::GetBitmapTexture, allow_raw_pointers())
+    .function("setBitmapTexture", &BND_Material::SetBitmapTexture)
+    //.function("setBitmapTexture", &BND_Material::SetBitmapTexture2)
+    .function("getBumpTexture", &BND_Material::GetBumpTexture, allow_raw_pointers())
+    .function("setBumpTexture", &BND_Material::SetBumpTexture)
+    //.function("SetBumpTexture", &BND_Material::SetBumpTexture2)
+    .function("getEnvironmentTexture", &BND_Material::GetEnvironmentTexture, allow_raw_pointers())
+    .function("setEnvironmentTexture", &BND_Material::SetEnvironmentTexture)
+    //.function("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2)
+    .function("getTransparencyTexture", &BND_Material::GetTransparencyTexture, allow_raw_pointers())
+    .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture)
+    //.function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
     ;
 }
 #endif

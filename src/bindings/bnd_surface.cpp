@@ -48,6 +48,21 @@ using namespace emscripten;
 void initSurfaceBindings(void*)
 {
   class_<BND_Surface, base<BND_GeometryBase>>("Surface")
+    .property("isSolid", &BND_Surface::IsSolid)
+    .function("degree", &BND_Surface::Degree)
+    .function("spanCount", &BND_Surface::SpanCount)
+    .function("pointAt", &BND_Surface::PointAt)
+    .function("normalAt", &BND_Surface::NormalAt)
+    .function("isClosed", &BND_Surface::IsClosed)
+    .function("isPeriodic", &BND_Surface::IsPeriodic)
+    .function("isSingular", &BND_Surface::IsSingular)
+    .function("isAtSingularity", &BND_Surface::IsAtSingularity)
+    .function("isAtSeam", &BND_Surface::IsAtSeam)
+    .function("isPlanar", &BND_Surface::IsPlanar)
+    .function("isSphere", &BND_Surface::IsSphere)
+    .function("isCylinder", &BND_Surface::IsCylinder)
+    .function("isCone", &BND_Surface::IsCone)
+    .function("isTorus", &BND_Surface::IsTorus)
     ;
 }
 #endif

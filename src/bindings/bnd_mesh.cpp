@@ -279,13 +279,6 @@ using namespace emscripten;
 
 void initMeshBindings(void*)
 {
-  class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
-    .constructor<>()
-    .function("vertices", &BND_Mesh::GetVertices)
-    .function("faces", &BND_Mesh::GetFaces)
-    .function("normals", &BND_Mesh::GetNormals)
-    ;
-
   class_<BND_MeshVertexList>("MeshVertexList")
     .property("count", &BND_MeshVertexList::Count)
     .function("setCount", &BND_MeshVertexList::SetCount)
@@ -302,6 +295,32 @@ void initMeshBindings(void*)
     .property("count", &BND_MeshNormalList::Count)
     .function("get", &BND_MeshNormalList::GetNormal)
     .function("set", &BND_MeshNormalList::SetNormal)
+    ;
+
+  class_<BND_MeshTextureCoordinateList>("MeshTextureCoordinateList")
+    .property("count", &BND_MeshTextureCoordinateList::Count)
+    .function("get", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
+    .function("set", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
+    ;
+
+  class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
+    .constructor<>()
+    .property("isClosed", &BND_Mesh::IsClosed)
+    //.function("isManifold", &BND_Mesh::IsManifold)
+    .property("hasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
+    .function("vertices", &BND_Mesh::GetVertices)
+    .function("faces", &BND_Mesh::GetFaces)
+    .function("normals", &BND_Mesh::GetNormals)
+    .function("textureCoordinates", &BND_Mesh::TextureCoordinates)
+    .function("clearTextureData", &BND_Mesh::ClearTextureData)
+    .function("clearSurfaceData", &BND_Mesh::ClearSurfaceData)
+    .function("destroyTopology", &BND_Mesh::DestroyTopology)
+    .function("destroyTree", &BND_Mesh::DestroyTree)
+    .function("destroyPartition", &BND_Mesh::DestroyPartition)
+    .function("compact", &BND_Mesh::Compact)
+    .function("append", &BND_Mesh::Append)
+    .function("createPartitions", &BND_Mesh::CreatePartitions)
+    .property("partitionCount", &BND_Mesh::PartitionCount)
     ;
 }
 #endif

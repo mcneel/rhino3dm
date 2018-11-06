@@ -48,7 +48,7 @@ public:
   void SetObjectId(BND_UUID id);
   std::wstring GetName() const;
   void SetName(const std::wstring name);
-  std::wstring GetUrl() const { return std::wstring(m_attributes->m_url.Array()); }
+  std::wstring GetUrl() const { return std::wstring(m_attributes->m_url); }
   void SetUrl(const std::wstring url) { m_attributes->m_url = url.c_str(); }
   int GetLayerIndex() const { return m_attributes->m_layer_index; }
   void SetLayerIndex(int index) { m_attributes->m_layer_index = index; }

@@ -36,5 +36,13 @@ using namespace emscripten;
 
 void initBitmapBindings(void*)
 {
+  class_<BND_Bitmap>("Bitmap")
+    .constructor<>()
+    .property("width", &BND_Bitmap::Width)
+    .property("height", &BND_Bitmap::Height)
+    .property("bitsPerPixel", &BND_Bitmap::BitsPerPixel)
+    .property("sizeOfScan", &BND_Bitmap::SizeOfScan)
+    .property("sizeOfImage", &BND_Bitmap::SizeOfImage)
+    ;
 }
 #endif
