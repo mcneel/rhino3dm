@@ -97,6 +97,18 @@ public:
   class BND_Material* FindId(BND_UUID id);
 };
 
+class BND_File3dmBitmapTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmBitmapTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Image); }
+  void Add(const class BND_Bitmap& bitmap);
+  class BND_Bitmap* FindIndex(int index);
+  class BND_Bitmap* IterIndex(int index); // helper function for iterator
+  class BND_Bitmap* FindId(BND_UUID id);
+};
+
 class BND_File3dmLayerTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -114,14 +126,16 @@ public:
 class BND_File3dmViewTable
 {
   std::shared_ptr<ONX_Model> m_model;
+  bool m_named_views = false;
 public:
-  BND_File3dmViewTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
-  int Count() const { return m_model->m_settings.m_views.Count(); }
+  BND_File3dmViewTable(std::shared_ptr<ONX_Model> m, bool namedViews) { m_model = m; m_named_views = namedViews; }
+  int Count() const;
   void Add(const class BND_ViewInfo& view);
   class BND_ViewInfo* GetItem(int index) const;
   class BND_ViewInfo* IterIndex(int index) const; // helper function for iterator
   void SetItem(int index, const class BND_ViewInfo& view);
 };
+
 
 class BND_File3dmPlugInData
 {
@@ -220,13 +234,14 @@ public:
   BND_ONXModel_ObjectTable Objects() { return BND_ONXModel_ObjectTable(m_model); }
   BND_File3dmMaterialTable Materials() { return BND_File3dmMaterialTable(m_model); }
   //public File3dmLinetypeTable AllLinetypes
+  BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
   //public File3dmGroupTable AllGroups | get;
   //public File3dmDimStyleTable AllDimStyles | get;
   //public File3dmHatchPatternTable AllHatchPatterns | get;
   //public File3dmInstanceDefinitionTable AllInstanceDefinitions | get;
-  BND_File3dmViewTable Views() { return BND_File3dmViewTable(m_model); }
-  //public IList<ViewInfo> NamedViews | get;
+  BND_File3dmViewTable Views() { return BND_File3dmViewTable(m_model, false); }
+  BND_File3dmViewTable NamedViews() { return BND_File3dmViewTable(m_model, true); }
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }

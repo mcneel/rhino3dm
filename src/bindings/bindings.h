@@ -23,6 +23,7 @@
 #endif
 
 #include "bnd_color.h"
+#include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
 #include "bnd_defines.h"
 #include "bnd_boundingbox.h"
@@ -37,9 +38,13 @@
 #include "bnd_cylinder.h"
 #include "bnd_ellipse.h"
 #include "bnd_object.h"
+#include "bnd_model_component.h"
 #include "bnd_3dm_attributes.h"
+#include "bnd_bitmap.h"
 #include "bnd_layer.h"
 #include "bnd_material.h"
+#include "bnd_texture.h"
+#include "bnd_texture_mapping.h"
 #include "bnd_geometry.h"
 #include "bnd_hatch.h"
 #include "bnd_pointcloud.h"

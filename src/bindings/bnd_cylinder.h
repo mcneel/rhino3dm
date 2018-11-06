@@ -13,6 +13,7 @@ class BND_Cylinder
 public:
   ON_Cylinder m_cylinder;
 public:
+  BND_Cylinder(const ON_Cylinder& c) : m_cylinder(c) {}
   BND_Cylinder(const class BND_Circle& baseCircle);
   BND_Cylinder(const class BND_Circle& baseCircle, double height);
   bool IsValid() const { return m_cylinder.IsValid(); }

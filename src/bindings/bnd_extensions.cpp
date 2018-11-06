@@ -464,6 +464,39 @@ BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
+{
+  const ON_Bitmap* b = bitmap.m_bitmap;
+  m_model->AddModelComponent(*b);
+}
+
+BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->RenderMaterialFromIndex(index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
+  if (modelbitmap)
+    return new BND_Bitmap(modelbitmap, &compref);
+  return nullptr;
+}
+
+BND_Bitmap* BND_File3dmBitmapTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
+BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RenderMaterialFromId(_id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
+  if (modelbitmap)
+    return new BND_Bitmap(modelbitmap, &compref);
+  return nullptr;
+}
+
+
 void BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
@@ -515,17 +548,30 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+int BND_File3dmViewTable::Count() const
+{
+  return m_named_views ? m_model->m_settings.m_named_views.Count() : m_model->m_settings.m_views.Count();
+}
+
 void BND_File3dmViewTable::Add(const BND_ViewInfo& view)
 {
-  m_model->m_settings.m_views.Append(view.m_view);
+  if (m_named_views)
+    m_model->m_settings.m_named_views.Append(view.m_view);
+  else
+    m_model->m_settings.m_views.Append(view.m_view);
 }
 
 BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
 {
-  if (index < 0 || index >= m_model->m_settings.m_views.Count())
+  int count = m_named_views ? m_model->m_settings.m_named_views.Count()
+    : m_model->m_settings.m_views.Count();
+  if (index < 0 || index >= count)
     return nullptr;
   BND_ViewInfo* rc = new BND_ViewInfo();
-  rc->m_view = m_model->m_settings.m_views[index];
+  if (m_named_views)
+    rc->m_view = m_model->m_settings.m_named_views[index];
+  else
+    rc->m_view = m_model->m_settings.m_views[index];
   return rc;
 }
 
@@ -536,9 +582,15 @@ BND_ViewInfo* BND_File3dmViewTable::IterIndex(int index) const
 
 void BND_File3dmViewTable::SetItem(int index, const BND_ViewInfo& view)
 {
-  if (index < 0 || index >= m_model->m_settings.m_views.Count())
+  int count = m_named_views ? m_model->m_settings.m_named_views.Count()
+    : m_model->m_settings.m_views.Count();
+  if (index < 0 || index >= count)
     return;
-  m_model->m_settings.m_views[index] = view.m_view;
+
+  if (m_named_views)
+    m_model->m_settings.m_named_views[index] = view.m_view;
+  else
+    m_model->m_settings.m_views[index] = view.m_view;
 }
 
 
@@ -776,6 +828,21 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> >(m, "__ImageIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>  &it) -> PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> & { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> ::next)
+    ;
+
+  py::class_<BND_File3dmBitmapTable>(m, "File3dmBitmapTable")
+    .def("__len__", &BND_File3dmBitmapTable::Count)
+    .def("__getitem__", &BND_File3dmBitmapTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>(s.cast<BND_File3dmBitmapTable &>(), s); })
+    .def("Add", &BND_File3dmBitmapTable::Add, py::arg("bitmap"))
+    .def("FindIndex", &BND_File3dmBitmapTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmBitmapTable::FindId, py::arg("id"))
+    ;
+
+
   py::class_<PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> >(m, "__LayerIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> &it) -> PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>::next)
@@ -832,8 +899,10 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
+    .def_property_readonly("Bitmaps", &BND_ONXModel::Bitmaps)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_property_readonly("Views", &BND_ONXModel::Views)
+    .def_property_readonly("NamedViews", &BND_ONXModel::NamedViews)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_static("_TestRead", &BND_ONXModel::ReadTest)
