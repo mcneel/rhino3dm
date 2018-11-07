@@ -1293,6 +1293,128 @@ var RhinoCompute = {
         },
     },
 
+    Intersection : {
+        curvePlane : function(curve, plane, tolerance) {
+            args = [curve, plane, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveplane-curve_plane_double", args);
+            return promise;
+        },
+
+        meshPlane : function(mesh, plane) {
+            args = [mesh, plane];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_plane", args);
+            return promise;
+        },
+
+        meshPlane1 : function(mesh, planes) {
+            args = [mesh, planes];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_planearray", args);
+            return promise;
+        },
+
+        curveSelf : function(curve, tolerance) {
+            args = [curve, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveself-curve_double", args);
+            return promise;
+        },
+
+        curveCurve : function(curveA, curveB, tolerance, overlapTolerance) {
+            args = [curveA, curveB, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvecurve-curve_curve_double_double", args);
+            return promise;
+        },
+
+        curveLine : function(curve, line, tolerance, overlapTolerance) {
+            args = [curve, line, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveline-curve_line_double_double", args);
+            return promise;
+        },
+
+        curveSurface : function(curve, surface, tolerance, overlapTolerance) {
+            args = [curve, surface, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_surface_double_double", args);
+            return promise;
+        },
+
+        curveSurface1 : function(curve, curveDomain, surface, tolerance, overlapTolerance) {
+            args = [curve, curveDomain, surface, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_interval_surface_double_double", args);
+            return promise;
+        },
+
+        curveBrep : function(curve, brep, tolerance, angleTolerance, t) {
+            args = [curve, brep, tolerance, angleTolerance, t];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_double_doublearray", args);
+            return promise;
+        },
+
+        meshMeshFast : function(meshA, meshB) {
+            args = [meshA, meshB];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh", args);
+            return promise;
+        },
+
+        meshMeshAccurate : function(meshA, meshB, tolerance) {
+            args = [meshA, meshB, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshaccurate-mesh_mesh_double", args);
+            return promise;
+        },
+
+        meshRay : function(mesh, ray) {
+            args = [mesh, ray];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d", args);
+            return promise;
+        },
+
+        meshRay1 : function(mesh, ray, meshFaceIndices) {
+            args = [mesh, ray, meshFaceIndices];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d_intarray", args);
+            return promise;
+        },
+
+        meshPolyline : function(mesh, curve, faceIds) {
+            args = [mesh, curve, faceIds];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshpolyline-mesh_polylinecurve_intarray", args);
+            return promise;
+        },
+
+        meshLine : function(mesh, line, faceIds) {
+            args = [mesh, line, faceIds];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshline-mesh_line_intarray", args);
+            return promise;
+        },
+
+        rayShoot : function(ray, geometry, maxReflections) {
+            args = [ray, geometry, maxReflections];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/rayshoot-ray3d_geometrybasearray_int", args);
+            return promise;
+        },
+
+        projectPointsToMeshes : function(meshes, points, direction, tolerance) {
+            args = [meshes, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshes-mesharray_point3darray_vector3d_double", args);
+            return promise;
+        },
+
+        projectPointsToMeshesEx : function(meshes, points, direction, tolerance, indices) {
+            args = [meshes, points, direction, tolerance, indices];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshesex-mesharray_point3darray_vector3d_double_intarray", args);
+            return promise;
+        },
+
+        projectPointsToBreps : function(breps, points, direction, tolerance) {
+            args = [breps, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobreps-breparray_point3darray_vector3d_double", args);
+            return promise;
+        },
+
+        projectPointsToBrepsEx : function(breps, points, direction, tolerance, indices) {
+            args = [breps, points, direction, tolerance, indices];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobrepsex-breparray_point3darray_vector3d_double_intarray", args);
+            return promise;
+        },
+    },
+
     Mesh : {
         createFromPlane : function(plane, xInterval, yInterval, xCount, yCount) {
             args = [plane, xInterval, yInterval, xCount, yCount];
