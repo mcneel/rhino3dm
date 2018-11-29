@@ -136,6 +136,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   if (texturemapping)
     return new BND_TextureMapping(texturemapping, compref);
 
+  ON_DimStyle* dimstyle = ON_DimStyle::Cast(obj);
+  if (dimstyle)
+    return new BND_DimensionStyle(dimstyle, compref);
+
   return new BND_CommonObject(obj, compref);
 }
 

@@ -20,6 +20,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initObjectBindings(m);
   init3dmAttributesBindings(m);
   initBitmapBindings(m);
+  initDimensionStyleBindings(m);
   initLayerBindings(m);
   initMaterialBindings(m);
   initTextureBindings(m);
@@ -42,6 +43,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initConeBindings(m);
   initCylinderBindings(m);
   initEllipseBindings(m);
+  initFontBindings(m);
   initArcCurveBindings(m);
   initBezierBindings(m);
   initLineCurveBindings(m);

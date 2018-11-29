@@ -99,7 +99,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='0.1.0',
+    version='0.1.1',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -131,6 +131,7 @@ for i in range(len(model.Objects)):
     print("{}, {}".format(bbox.Min, bbox.Max))
 ```
 """,
+    long_description_content_type="text/markdown",
     packages=find_packages('src'),
     package_dir={'': 'src'},
     ext_modules=[CMakeExtension('rhino3dm/_rhino3dm')],
