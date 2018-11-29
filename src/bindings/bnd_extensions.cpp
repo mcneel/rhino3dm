@@ -986,6 +986,14 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmDimStyleTable>("File3dmDimStyleTable")
+    .function("count", &BND_File3dmDimStyleTable::Count)
+    .function("get", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmDimStyleTable::Add)
+    .function("findIndex", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
@@ -998,6 +1006,7 @@ void initExtensionsBindings(void*)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("objects", &BND_ONXModel::Objects)
     .function("layers", &BND_ONXModel::Layers)
+    .function("dimstyles", &BND_ONXModel::DimStyles)
     ;
 }
 #endif

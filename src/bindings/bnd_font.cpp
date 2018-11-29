@@ -49,5 +49,22 @@ using namespace emscripten;
 
 void initFontBindings(void*)
 {
+  class_<BND_Font>("Font")
+    .constructor<std::wstring>()
+    .property("quartetName", &BND_Font::QuartetName)
+    .property("faceName", &BND_Font::FaceName)
+    .property("postScriptName", &BND_Font::PostScriptName)
+    .property("richTextFontName", &BND_Font::RichTextFontName)
+    .property("bold", &BND_Font::Bold)
+    .property("italic", &BND_Font::Italic)
+    .property("underlined", &BND_Font::Underlined)
+    .property("strikeOut", &BND_Font::StrikeOut)
+    .property("isEngravingFont", &BND_Font::IsEngravingFont)
+    .property("isSymbolFont", &BND_Font::IsSymbolFont)
+    .property("isSingleStrokeFont", &BND_Font::IsSingleStrokeFont)
+    .property("isSimulated", &BND_Font::IsSimulated)
+    .property("pointSize", &BND_Font::PointSize)
+    .property("familyName", &BND_Font::FamilyName)
+    ;
 }
 #endif
