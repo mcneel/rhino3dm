@@ -123,6 +123,18 @@ public:
   class BND_Layer* FindId(BND_UUID id);
 };
 
+class BND_File3dmDimStyleTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmDimStyleTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::DimStyle); }
+  void Add(const class BND_DimensionStyle& dimstyle);
+  class BND_DimensionStyle* FindIndex(int index) const;
+  class BND_DimensionStyle* IterIndex(int index) const; // helper function for iterator
+  class BND_DimensionStyle* FindId(BND_UUID id) const;
+};
+
 class BND_File3dmViewTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -135,7 +147,6 @@ public:
   class BND_ViewInfo* IterIndex(int index) const; // helper function for iterator
   void SetItem(int index, const class BND_ViewInfo& view);
 };
-
 
 class BND_File3dmPlugInData
 {
@@ -237,7 +248,7 @@ public:
   BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
   //public File3dmGroupTable AllGroups | get;
-  //public File3dmDimStyleTable AllDimStyles | get;
+  BND_File3dmDimStyleTable DimStyles() { return BND_File3dmDimStyleTable(m_model); }
   //public File3dmHatchPatternTable AllHatchPatterns | get;
   //public File3dmInstanceDefinitionTable AllInstanceDefinitions | get;
   BND_File3dmViewTable Views() { return BND_File3dmViewTable(m_model, false); }
