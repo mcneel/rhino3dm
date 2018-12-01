@@ -113,6 +113,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if (hatch)
       return new BND_Hatch(hatch, compref);
 
+    ON_InstanceRef* iref = ON_InstanceRef::Cast(obj);
+    if (iref)
+      return new BND_InstanceReferenceGeometry(iref, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
@@ -139,6 +143,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   ON_DimStyle* dimstyle = ON_DimStyle::Cast(obj);
   if (dimstyle)
     return new BND_DimensionStyle(dimstyle, compref);
+
+  ON_InstanceDefinition* idef = ON_InstanceDefinition::Cast(obj);
+  if (idef)
+    return new BND_InstanceDefinitionGeometry(idef, compref);
 
   return new BND_CommonObject(obj, compref);
 }
