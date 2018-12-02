@@ -70,5 +70,15 @@ using namespace emscripten;
 
 void initInstanceBindings(void*)
 {
+  class_<BND_InstanceDefinitionGeometry, base<BND_CommonObject>>("InstanceDefinition")
+    .constructor<>()
+    .property("description", &BND_InstanceDefinitionGeometry::Description)
+    ;
+
+  class_<BND_InstanceReferenceGeometry, base<BND_GeometryBase>>("InstanceReference")
+    .constructor<BND_UUID, const BND_Transform&>()
+    .property("parentIdefId", &BND_InstanceReferenceGeometry::ParentIdefId)
+    .property("xform", &BND_InstanceReferenceGeometry::Xform)
+    ;
 }
 #endif
