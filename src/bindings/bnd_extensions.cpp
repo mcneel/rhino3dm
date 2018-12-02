@@ -625,6 +625,34 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindId(BND_UUID id) const
   return nullptr;
 }
 
+void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometry& idef)
+{
+  const ON_InstanceDefinition* _idef = idef.m_idef;
+  m_model->AddModelComponent(*_idef);
+}
+BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
+{
+  ON_ModelComponentReference compref = m_model->DimensionStyleFromIndex(index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
+  if (modelidef)
+    return new BND_InstanceDefinitionGeometry(modelidef, &compref);
+  return nullptr;
+}
+BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::IterIndex(int index) const
+{
+  return FindIndex(index);
+}
+BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindId(BND_UUID id) const
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->DimensionStyleFromId(_id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
+  if (modelidef)
+    return new BND_InstanceDefinitionGeometry(modelidef, &compref);
+  return nullptr;
+}
 
 
 std::wstring BND_RDKPlugInData::RdkDocumentData() const
@@ -891,6 +919,12 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
     ;
 
+
+  py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> &it) -> PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>::next)
+    ;
+
   py::class_<BND_File3dmDimStyleTable>(m, "File3dmDimStyleTable")
     .def("__len__", &BND_File3dmDimStyleTable::Count)
     .def("__getitem__", &BND_File3dmDimStyleTable::FindIndex)
@@ -898,6 +932,20 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Add", &BND_File3dmDimStyleTable::Add, py::arg("dimstyle"))
     .def("FindIndex", &BND_File3dmDimStyleTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmDimStyleTable::FindId, py::arg("id"))
+    ;
+
+  py::class_<PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*> >(m, "__IdefIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*> &it) -> PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>::next)
+    ;
+
+  py::class_<BND_File3dmInstanceDefinitionTable>(m, "File3dmInstanceDefinitionTable")
+    .def("__len__", &BND_File3dmInstanceDefinitionTable::Count)
+    .def("__getitem__", &BND_File3dmInstanceDefinitionTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>(s.cast<BND_File3dmInstanceDefinitionTable &>(), s); })
+    .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("idef"))
+    .def("FindIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmInstanceDefinitionTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*> >(m, "__ViewIterator")
@@ -944,6 +992,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Bitmaps", &BND_ONXModel::Bitmaps)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_property_readonly("DimStyles", &BND_ONXModel::DimStyles)
+    .def_property_readonly("InstanceDefinitions", &BND_ONXModel::InstanceDefinitions)
     .def_property_readonly("Views", &BND_ONXModel::Views)
     .def_property_readonly("NamedViews", &BND_ONXModel::NamedViews)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
@@ -994,6 +1043,14 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmInstanceDefinitionTable>("File3dmInstanceDefinitionTable")
+    .function("count", &BND_File3dmInstanceDefinitionTable::Count)
+    .function("get", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmInstanceDefinitionTable::Add)
+    .function("findIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmInstanceDefinitionTable::FindId, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
@@ -1007,6 +1064,7 @@ void initExtensionsBindings(void*)
     .function("objects", &BND_ONXModel::Objects)
     .function("layers", &BND_ONXModel::Layers)
     .function("dimstyles", &BND_ONXModel::DimStyles)
+    .function("instanceDefinitions", &BND_ONXModel::InstanceDefinitions)
     ;
 }
 #endif

@@ -135,6 +135,18 @@ public:
   class BND_DimensionStyle* FindId(BND_UUID id) const;
 };
 
+class BND_File3dmInstanceDefinitionTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmInstanceDefinitionTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::InstanceDefinition); }
+  void Add(const class BND_InstanceDefinitionGeometry& idef);
+  class BND_InstanceDefinitionGeometry* FindIndex(int index) const;
+  class BND_InstanceDefinitionGeometry* IterIndex(int index) const; // helper function for iterator
+  class BND_InstanceDefinitionGeometry* FindId(BND_UUID id) const;
+};
+
 class BND_File3dmViewTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -250,7 +262,7 @@ public:
   //public File3dmGroupTable AllGroups | get;
   BND_File3dmDimStyleTable DimStyles() { return BND_File3dmDimStyleTable(m_model); }
   //public File3dmHatchPatternTable AllHatchPatterns | get;
-  //public File3dmInstanceDefinitionTable AllInstanceDefinitions | get;
+  BND_File3dmInstanceDefinitionTable InstanceDefinitions() { return BND_File3dmInstanceDefinitionTable(m_model); }
   BND_File3dmViewTable Views() { return BND_File3dmViewTable(m_model, false); }
   BND_File3dmViewTable NamedViews() { return BND_File3dmViewTable(m_model, true); }
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
