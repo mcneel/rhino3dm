@@ -47,83 +47,83 @@ public:
   bool GetAlternateBelowLine() const { return m_dimstyle->AlternateBelow(); }
   void SetAlternateBelowLine(bool b) { m_dimstyle->SetAlternateBelow(b); }
   DIMSTYLE_PROPERTY(bool, DrawTextMask)
-  //public bool FixedExtensionOn | get; set;
+    //public bool FixedExtensionOn | get; set;
 
-  DIMSTYLE_PROPERTY(bool, LeaderHasLanding)
-  DIMSTYLE_PROPERTY(bool, DrawForward)
-  DIMSTYLE_PROPERTY(bool, TextUnderlined)
+    DIMSTYLE_PROPERTY(bool, LeaderHasLanding)
+    DIMSTYLE_PROPERTY(bool, DrawForward)
+    DIMSTYLE_PROPERTY(bool, TextUnderlined)
 
-  //  DIMSTYLE_PROPERTY(double, MaskOffest)
-  //  DIMSTYLE_PROPERTY(double, ExtensionLineExtension)
-  //  DIMSTYLE_PROPERTY(double, ExtensionLineOffset)
-    //public double DimensionLineExtension | get; set;
-  DIMSTYLE_PROPERTY(double, ArrowSize) //ArrowLength
-  DIMSTYLE_PROPERTY(double, LeaderArrowSize) //LeaderArrowLength
-  DIMSTYLE_PROPERTY(double, CenterMark) //CentermarkSize
-  DIMSTYLE_PROPERTY(double, TextGap)
-  DIMSTYLE_PROPERTY(double, TextHeight)
-  DIMSTYLE_PROPERTY(double, LengthFactor)
-  DIMSTYLE_PROPERTY(double, AlternateLengthFactor)
-  DIMSTYLE_PROPERTY(double, ToleranceUpperValue)
-  DIMSTYLE_PROPERTY(double, ToleranceLowerValue)
-  DIMSTYLE_PROPERTY(double, ToleranceHeightScale)
-  DIMSTYLE_PROPERTY(double, BaselineSpacing)
-  //DIMSTYLE_PROPERTY(double, DimensionScale)
-  //DIMSTYLE_PROPERTY(double, FixedExtensionLength)
-  DIMSTYLE_PROPERTY(double, TextRotation)
-  DIMSTYLE_PROPERTY(double, StackHeightScale)
-  //DIMSTYLE_PROPERTY(double, Roundoff)
-  //public double AlternateRoundoff | get; set;
-  //public double AngularRoundoff | get; set;
-  DIMSTYLE_PROPERTY(double, LeaderLandingLength)
-  //public double LeaderTextRotationRadians | get; set;
-  //public double LeaderTextRotationDegrees | get; set;
-  //public ScaleValue DimensionScaleValue | get; set;
-  //public double ScaleLeftLengthMillimeters | get; set;
-  //public double ScaleRightLengthMillimeters | get; set;
-  //public LengthDisplay DimensionLengthDisplay | get; set;
-  //public LengthDisplay AlternateDimensionLengthDisplay | get; set;
-  //public UnitSystem DimensionLengthDisplayUnit(uint model_serial_number)
-  //public UnitSystem AlternateDimensionLengthDisplayUnit(uint model_serial_number)
-  //public AngleDisplayFormat AngleFormat | get; set;
-  //public ToleranceDisplayFormat ToleranceFormat | get; set;
-  //public MaskType MaskColorSource | get; set;
-  //public StackDisplayFormat StackFractionFormat | get; set;
-  //public ZeroSuppression ZeroSuppress | get; set;
-  //public ZeroSuppression AlternateZeroSuppress | get; set;
-  //public ZeroSuppression AngleZeroSuppress | get; set;
-  //public ArrowType ArrowType1 | get; set;
-  //public ArrowType ArrowType2 | get; set;
-  //public ArrowType LeaderArrowType | get; set;
-  //public int TextMoveLeader | get; set;
-  //public int ArcLengthSymbol | get; set;
-  //public CenterMarkStyle CenterMarkType | get; set;
-  //public LeaderContentAngleStyle LeaderContentAngleType | get; set;
-  //public TextVerticalAlignment TextVerticalAlignment | get; set;
-  //public TextHorizontalAlignment TextHorizontalAlignment | get; set;
-  //public TextVerticalAlignment LeaderTextVerticalAlignment | get; set;
-  //public TextHorizontalAlignment LeaderTextHorizontalAlignment | get; set;
-  //public TextLocation DimTextLocation | get; set; 
-  //public TextLocation DimRadialTextLocation | get; set;
-  //public LeaderCurveStyle LeaderCurveType | get; set;
-  //public LeaderContentAngleStyle DimTextAngleType | get; set;
-  //public LeaderContentAngleStyle DimRadialTextAngleType | get; set;
-  //public TextOrientation TextOrientation | get; set;
-  //public TextOrientation LeaderTextOrientation | get; set;
-  //public TextOrientation DimTextOrientation | get; set;
-  //public TextOrientation DimRadialTextOrientation | get; set;
-  //public int LengthResolution | get; set;
-  //public int AlternateLengthResolution | get; set;
-  //public int AngleResolution | get; set;
-  //public int ToleranceResolution | get; set;
-  //public int AlternateToleranceResolution | get; set;
-  //public string Prefix | get; set;
-  //public string Suffix | get; set;
-  //public string AlternatePrefix | get; set;
-  //public string AlternateSuffix | get; set;
-  //public bool IsFieldOverriden(Field field)
-  //public void SetFieldOverride(Field field)
-  //public void ClearFieldOverride(Field field)
+    //  DIMSTYLE_PROPERTY(double, MaskOffest)
+    //  DIMSTYLE_PROPERTY(double, ExtensionLineExtension)
+    //  DIMSTYLE_PROPERTY(double, ExtensionLineOffset)
+      //public double DimensionLineExtension | get; set;
+    DIMSTYLE_PROPERTY(double, ArrowSize) //ArrowLength
+    DIMSTYLE_PROPERTY(double, LeaderArrowSize) //LeaderArrowLength
+    DIMSTYLE_PROPERTY(double, CenterMark) //CentermarkSize
+    DIMSTYLE_PROPERTY(double, TextGap)
+    DIMSTYLE_PROPERTY(double, TextHeight)
+    DIMSTYLE_PROPERTY(double, LengthFactor)
+    DIMSTYLE_PROPERTY(double, AlternateLengthFactor)
+    DIMSTYLE_PROPERTY(double, ToleranceUpperValue)
+    DIMSTYLE_PROPERTY(double, ToleranceLowerValue)
+    DIMSTYLE_PROPERTY(double, ToleranceHeightScale)
+    DIMSTYLE_PROPERTY(double, BaselineSpacing)
+    //DIMSTYLE_PROPERTY(double, DimensionScale)
+    //DIMSTYLE_PROPERTY(double, FixedExtensionLength)
+    DIMSTYLE_PROPERTY(double, TextRotation)
+    DIMSTYLE_PROPERTY(double, StackHeightScale)
+    //DIMSTYLE_PROPERTY(double, Roundoff)
+    //public double AlternateRoundoff | get; set;
+    //public double AngularRoundoff | get; set;
+    DIMSTYLE_PROPERTY(double, LeaderLandingLength)
+    //public double LeaderTextRotationRadians | get; set;
+    //public double LeaderTextRotationDegrees | get; set;
+    //public ScaleValue DimensionScaleValue | get; set;
+    //public double ScaleLeftLengthMillimeters | get; set;
+    //public double ScaleRightLengthMillimeters | get; set;
+    //public LengthDisplay DimensionLengthDisplay | get; set;
+    //public LengthDisplay AlternateDimensionLengthDisplay | get; set;
+    //public UnitSystem DimensionLengthDisplayUnit(uint model_serial_number)
+    //public UnitSystem AlternateDimensionLengthDisplayUnit(uint model_serial_number)
+    //public AngleDisplayFormat AngleFormat | get; set;
+    //public ToleranceDisplayFormat ToleranceFormat | get; set;
+    //public MaskType MaskColorSource | get; set;
+    //public StackDisplayFormat StackFractionFormat | get; set;
+    //public ZeroSuppression ZeroSuppress | get; set;
+    //public ZeroSuppression AlternateZeroSuppress | get; set;
+    //public ZeroSuppression AngleZeroSuppress | get; set;
+    //public ArrowType ArrowType1 | get; set;
+    //public ArrowType ArrowType2 | get; set;
+    //public ArrowType LeaderArrowType | get; set;
+    //public int TextMoveLeader | get; set;
+    //public int ArcLengthSymbol | get; set;
+    //public CenterMarkStyle CenterMarkType | get; set;
+    //public LeaderContentAngleStyle LeaderContentAngleType | get; set;
+    //public TextVerticalAlignment TextVerticalAlignment | get; set;
+    //public TextHorizontalAlignment TextHorizontalAlignment | get; set;
+    //public TextVerticalAlignment LeaderTextVerticalAlignment | get; set;
+    //public TextHorizontalAlignment LeaderTextHorizontalAlignment | get; set;
+    //public TextLocation DimTextLocation | get; set; 
+    //public TextLocation DimRadialTextLocation | get; set;
+    //public LeaderCurveStyle LeaderCurveType | get; set;
+    //public LeaderContentAngleStyle DimTextAngleType | get; set;
+    //public LeaderContentAngleStyle DimRadialTextAngleType | get; set;
+    //public TextOrientation TextOrientation | get; set;
+    //public TextOrientation LeaderTextOrientation | get; set;
+    //public TextOrientation DimTextOrientation | get; set;
+    //public TextOrientation DimRadialTextOrientation | get; set;
+    //public int LengthResolution | get; set;
+    //public int AlternateLengthResolution | get; set;
+    //public int AngleResolution | get; set;
+    //public int ToleranceResolution | get; set;
+    //public int AlternateToleranceResolution | get; set;
+    //public string Prefix | get; set;
+    //public string Suffix | get; set;
+    //public string AlternatePrefix | get; set;
+    //public string AlternateSuffix | get; set;
+  bool IsFieldOverriden(ON_DimStyle::field field) const { return m_dimstyle->IsFieldOverride(field); }
+  void SetFieldOverride(ON_DimStyle::field field) { m_dimstyle->SetFieldOverride(field, true); }
+  void ClearFieldOverride(ON_DimStyle::field field) { m_dimstyle->SetFieldOverride(field, false); }
   void ClearAllFieldOverrides() { m_dimstyle->ClearAllFieldOverrides(); }
   bool HasFieldOverrides() const { return m_dimstyle->HasOverrides(); }
   bool IsChild() const { return m_dimstyle->IsChildDimstyle(); }

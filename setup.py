@@ -99,7 +99,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='0.1.2',
+    version='0.1.3',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
