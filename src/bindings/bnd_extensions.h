@@ -251,7 +251,7 @@ public:
   //public DateTime LastEdited | get;
   int GetRevision() const;
   void SetRevision(int r);
-  //public File3dmSettings Settings | get;
+  BND_File3dmSettings Settings() { return BND_File3dmSettings(m_model); }
   //public ManifestTable Manifest | get;
 
   BND_ONXModel_ObjectTable Objects() { return BND_ONXModel_ObjectTable(m_model); }
