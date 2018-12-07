@@ -1,0 +1,7 @@
+InstanceReference
+*****************
+
+.. autoclass:: rhino3dm.InstanceReference
+   :members:
+   :undoc-members:
+   :show-inheritance:

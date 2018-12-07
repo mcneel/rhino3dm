@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>DimensionStyle &mdash; rhino3dm 0.0.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ellipse" href="Ellipse.html" />
+    <link rel="prev" title="Cylinder" href="Cylinder.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rhino3dm
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceReference.html">InstanceReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>DimensionStyle</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/DimensionStyle.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dimensionstyle">
+<h1>DimensionStyle<a class="headerlink" href="#dimensionstyle" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rhino3dm.DimensionStyle">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">DimensionStyle</code><a class="headerlink" href="#rhino3dm.DimensionStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
+<p>Can also be considered an annotation style since it is used for
+more than just dimensions</p>
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.AlternateBelowLine">
+<code class="descname">AlternateBelowLine</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateBelowLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.AlternateLengthFactor">
+<code class="descname">AlternateLengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateLengthFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ArrowBlockId1">
+<code class="descname">ArrowBlockId1</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowBlockId1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ArrowBlockId2">
+<code class="descname">ArrowBlockId2</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowBlockId2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ArrowLength">
+<code class="descname">ArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.BaselineSpacing">
+<code class="descname">BaselineSpacing</code><a class="headerlink" href="#rhino3dm.DimensionStyle.BaselineSpacing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.CentermarkSize">
+<code class="descname">CentermarkSize</code><a class="headerlink" href="#rhino3dm.DimensionStyle.CentermarkSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ClearAllFieldOverrides">
+<code class="descname">ClearAllFieldOverrides</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearAllFieldOverrides" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets all the fields in this DimensionStyle to be not overridden
+Does not change any dimstyle_id’s or parent_id’s</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ClearFieldOverride">
+<code class="descname">ClearFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearFieldOverride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the field as not overridden</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.DrawForward">
+<code class="descname">DrawForward</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawForward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.DrawTextMask">
+<code class="descname">DrawTextMask</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawTextMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.Font">
+<code class="descname">Font</code><a class="headerlink" href="#rhino3dm.DimensionStyle.Font" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.HasFieldOverrides">
+<code class="descname">HasFieldOverrides</code><a class="headerlink" href="#rhino3dm.DimensionStyle.HasFieldOverrides" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if any fields in this DimensionStyle are overrides</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>True if any fields are overrides
+False is no fields are overrides</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.IsChild">
+<code class="descname">IsChild</code><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChild" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if this DimensionStyle is a child of any other DimensionStyle</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>True if this is a child DimensionStyle,
+False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.IsChildOf">
+<code class="descname">IsChildOf</code><span class="sig-paren">(</span><em>parentId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChildOf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if this DimensionStyle is a child of a specific DimensionStyle</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>True if this is a child of the DimensionStyle with Parent
+False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderArrowBlockId">
+<code class="descname">LeaderArrowBlockId</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowBlockId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderArrowLength">
+<code class="descname">LeaderArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderHasLanding">
+<code class="descname">LeaderHasLanding</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderHasLanding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderLandingLength">
+<code class="descname">LeaderLandingLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderLandingLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LengthFactor">
+<code class="descname">LengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LengthFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ParentId">
+<code class="descname">ParentId</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ParentId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or Set the Id of this DimensionStyle’s parent.
+If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ScaleLengthValues">
+<code class="descname">ScaleLengthValues</code><span class="sig-paren">(</span><em>scale</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ScaleLengthValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales all length values by ‘scale’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.SetFieldOverride">
+<code class="descname">SetFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.SetFieldOverride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a field as overridden</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.StackHeightScale">
+<code class="descname">StackHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.StackHeightScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressArrow1">
+<code class="descname">SuppressArrow1</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressArrow2">
+<code class="descname">SuppressArrow2</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressExtension1">
+<code class="descname">SuppressExtension1</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressExtension1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressExtension2">
+<code class="descname">SuppressExtension2</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressExtension2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextGap">
+<code class="descname">TextGap</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextGap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextHEight">
+<code class="descname">TextHEight</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextHEight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextRotation">
+<code class="descname">TextRotation</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextRotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextUnderlined">
+<code class="descname">TextUnderlined</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextUnderlined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ToleranceHeightScale">
+<code class="descname">ToleranceHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceHeightScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ToleranceLowerValue">
+<code class="descname">ToleranceLowerValue</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceLowerValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ToleranceUpperValue">
+<code class="descname">ToleranceUpperValue</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceUpperValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Ellipse.html" class="btn btn-neutral float-right" title="Ellipse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Cylinder.html" class="btn btn-neutral" title="Cylinder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert McNeel &amp; Associates
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

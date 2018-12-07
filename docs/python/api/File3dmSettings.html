@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>File3dmSettings &mdash; rhino3dm 0.0.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File3dmStringTable" href="File3dmStringTable.html" />
+    <link rel="prev" title="File3dmRdkDocumentData" href="File3dmRdkDocumentData.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rhino3dm
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceReference.html">InstanceReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>File3dmSettings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/File3dmSettings.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="file3dmsettings">
+<h1>File3dmSettings<a class="headerlink" href="#file3dmsettings" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rhino3dm.File3dmSettings">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">File3dmSettings</code><a class="headerlink" href="#rhino3dm.File3dmSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>General settings in a 3dm file.</p>
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelAbsoluteTolerance">
+<code class="descname">ModelAbsoluteTolerance</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAbsoluteTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model space absolute tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelAngleToleranceDegrees">
+<code class="descname">ModelAngleToleranceDegrees</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAngleToleranceDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model space angle tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelAngleToleranceRadians">
+<code class="descname">ModelAngleToleranceRadians</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAngleToleranceRadians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model space angle tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelBasePoint">
+<code class="descname">ModelBasePoint</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelBasePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model basepoint that is used when the file is read as an instance definition.
+This point is mapped to the origin in the instance definition.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelRelativeTolerance">
+<code class="descname">ModelRelativeTolerance</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelRelativeTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model space relative tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelUnitSystem">
+<code class="descname">ModelUnitSystem</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelUnitSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the model unit system, using  enumeration.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.ModelUrl">
+<code class="descname">ModelUrl</code><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets a Uniform Resource Locator (URL) direction for the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.PageAbsoluteTolerance">
+<code class="descname">PageAbsoluteTolerance</code><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAbsoluteTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the page space absolute tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.PageAngleToleranceDegrees">
+<code class="descname">PageAngleToleranceDegrees</code><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAngleToleranceDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the page space angle tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.PageAngleToleranceRadians">
+<code class="descname">PageAngleToleranceRadians</code><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAngleToleranceRadians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the page space angle tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.PageRelativeTolerance">
+<code class="descname">PageRelativeTolerance</code><a class="headerlink" href="#rhino3dm.File3dmSettings.PageRelativeTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the page space relative tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dmSettings.PageUnitSystem">
+<code class="descname">PageUnitSystem</code><a class="headerlink" href="#rhino3dm.File3dmSettings.PageUnitSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets or sets the page unit system, using  enumeration.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="File3dmStringTable.html" class="btn btn-neutral float-right" title="File3dmStringTable" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="File3dmRdkDocumentData.html" class="btn btn-neutral" title="File3dmRdkDocumentData" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert McNeel &amp; Associates
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -96,10 +96,13 @@
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
@@ -107,11 +110,15 @@
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceReference.html">InstanceReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
@@ -248,6 +255,18 @@ The 3dm format is the main Rhinoceros storage format.Visit <a class="reference e
 </dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.File3dm.DimStyles">
+<code class="descname">DimStyles</code><a class="headerlink" href="#rhino3dm.File3dm.DimStyles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dimension Styles in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.InstanceDefinitions">
+<code class="descname">InstanceDefinitions</code><a class="headerlink" href="#rhino3dm.File3dm.InstanceDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instance definitions in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.File3dm.LastEditedBy">
 <code class="descname">LastEditedBy</code><a class="headerlink" href="#rhino3dm.File3dm.LastEditedBy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets a string that names the user who last edited the file.</p>
@@ -324,6 +343,13 @@ which contains all objects.</p>
 <dt id="rhino3dm.File3dm.Revision">
 <code class="descname">Revision</code><a class="headerlink" href="#rhino3dm.File3dm.Revision" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets or sets the revision number.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Settings">
+<code class="descname">Settings</code><a class="headerlink" href="#rhino3dm.File3dm.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings include tolerance, and unit system, and defaults used
+for creating views and objects.</p>
 </dd></dl>
 
 <dl class="attribute">

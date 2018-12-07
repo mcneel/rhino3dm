@@ -1,0 +1,7 @@
+File3dmSettings
+***************
+
+.. autoclass:: rhino3dm.File3dmSettings
+   :members:
+   :undoc-members:
+   :show-inheritance:

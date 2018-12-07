@@ -1,0 +1,7 @@
+File3dmInstanceDefinitionTable
+******************************
+
+.. autoclass:: rhino3dm.File3dmInstanceDefinitionTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+Font
+****
+
+.. autoclass:: rhino3dm.Font
+   :members:
+   :undoc-members:
+   :show-inheritance:

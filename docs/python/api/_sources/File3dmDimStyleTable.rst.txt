@@ -1,0 +1,7 @@
+File3dmDimStyleTable
+********************
+
+.. autoclass:: rhino3dm.File3dmDimStyleTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

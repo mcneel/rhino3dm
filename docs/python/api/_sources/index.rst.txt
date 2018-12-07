@@ -26,10 +26,13 @@ Welcome to rhino3dm's documentation!
    Curve
    CurveProxy
    Cylinder
+   DimensionStyle
    Ellipse
    Extrusion
    File3dm
    File3dmBitmapTable
+   File3dmDimStyleTable
+   File3dmInstanceDefinitionTable
    File3dmLayerTable
    File3dmMaterialTable
    File3dmObject
@@ -37,11 +40,15 @@ Welcome to rhino3dm's documentation!
    File3dmPlugInData
    File3dmPlugInDataTable
    File3dmRdkDocumentData
+   File3dmSettings
    File3dmStringTable
    File3dmViewTable
    FileReference
+   Font
    GeometryBase
    Hatch
+   InstanceDefinition
+   InstanceReference
    Interval
    Layer
    Line

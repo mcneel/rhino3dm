@@ -1,0 +1,7 @@
+DimensionStyle
+**************
+
+.. autoclass:: rhino3dm.DimensionStyle
+   :members:
+   :undoc-members:
+   :show-inheritance:
