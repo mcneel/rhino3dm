@@ -308,6 +308,37 @@ void initDefines(void*)
     .value("ModelSpace", ON::active_space::model_space)
     .value("PageSpace", ON::active_space::page_space)
     ;
+
+  enum_<ON::LengthUnitSystem>("UnitSystem")
+    .value("None", ON::LengthUnitSystem::None)
+    .value("Angstroms", ON::LengthUnitSystem::Angstroms)
+    .value("Nanometers", ON::LengthUnitSystem::Nanometers)
+    .value("Microns", ON::LengthUnitSystem::Microns)
+    .value("Millimeters", ON::LengthUnitSystem::Millimeters)
+    .value("Centimeters", ON::LengthUnitSystem::Centimeters)
+    .value("Decimeters", ON::LengthUnitSystem::Decimeters)
+    .value("Meters", ON::LengthUnitSystem::Meters)
+    .value("Dekameters", ON::LengthUnitSystem::Dekameters)
+    .value("Hectomeers", ON::LengthUnitSystem::Hectometers)
+    .value("Kilometers", ON::LengthUnitSystem::Kilometers)
+    .value("Megameters", ON::LengthUnitSystem::Megameters)
+    .value("Gigameters", ON::LengthUnitSystem::Gigameters)
+    .value("Microinches", ON::LengthUnitSystem::Microinches)
+    .value("Mils", ON::LengthUnitSystem::Mils)
+    .value("Inches", ON::LengthUnitSystem::Inches)
+    .value("Feet", ON::LengthUnitSystem::Feet)
+    .value("Yards", ON::LengthUnitSystem::Yards)
+    .value("Miles", ON::LengthUnitSystem::Miles)
+    .value("PrinterPoints", ON::LengthUnitSystem::PrinterPoints)
+    .value("PrinterPicas", ON::LengthUnitSystem::PrinterPicas)
+    .value("NauticalMiles", ON::LengthUnitSystem::NauticalMiles)
+    .value("AstronomicalUnits", ON::LengthUnitSystem::AstronomicalUnits)
+    .value("LightYears", ON::LengthUnitSystem::LightYears)
+    .value("Parsecs", ON::LengthUnitSystem::Parsecs)
+    .value("CustomUnits", ON::LengthUnitSystem::CustomUnits)
+    .value("Unset", ON::LengthUnitSystem::Unset)
+    ;
+
 }
 
 

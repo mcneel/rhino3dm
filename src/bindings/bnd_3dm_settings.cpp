@@ -83,5 +83,21 @@ void init3dmSettingsBindings(void*)
     .property("focalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
     //.property("viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport, allow_raw_pointers())
     ;
+
+
+  class_<BND_File3dmSettings>("File3dmSettings")
+    .property("modelUrl", &BND_File3dmSettings::GetModelUrl, &BND_File3dmSettings::SetModelUrl)
+    .property("modelBasePoint", &BND_File3dmSettings::GetModelBasePoint, &BND_File3dmSettings::SetModelBasePoint)
+    .property("modelAbsoluteTolerance", &BND_File3dmSettings::GetModelAbsoluteTolerance, &BND_File3dmSettings::SetModelAbsoluteTolerance)
+    .property("modelAngleToleranceRadians", &BND_File3dmSettings::GetModelAngleToleranceRadians, &BND_File3dmSettings::SetModelAngleToleranceRadians)
+    .property("modelAngleToleranceDegrees", &BND_File3dmSettings::GetModelAngleToleranceDegrees, &BND_File3dmSettings::SetModelAngleToleranceDegrees)
+    .property("modelRelativeTolerance", &BND_File3dmSettings::GetModelRelativeTolerance, &BND_File3dmSettings::SetModelRelativeTolerance)
+    .property("pageAbsoluteTolerance", &BND_File3dmSettings::GetPageAbsoluteTolerance, &BND_File3dmSettings::SetPageAbsoluteTolerance)
+    .property("pageAngleToleranceRadians", &BND_File3dmSettings::GetPageAngleToleranceRadians, &BND_File3dmSettings::SetPageAngleToleranceRadians)
+    .property("pageAngleToleranceDegrees", &BND_File3dmSettings::GetPageAngleToleranceDegrees, &BND_File3dmSettings::SetPageAngleToleranceDegrees)
+    .property("pageRelativeTolerance", &BND_File3dmSettings::GetPageRelativeTolerance, &BND_File3dmSettings::SetPageRelativeTolerance)
+    .property("modelUnitSystem", &BND_File3dmSettings::GetModelUnitSystem, &BND_File3dmSettings::SetModelUnitSystem)
+    .property("pageUnitSystem", &BND_File3dmSettings::GetPageUnitSystem, &BND_File3dmSettings::SetPageUnitSystem)
+    ;
 }
 #endif
