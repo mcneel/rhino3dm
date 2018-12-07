@@ -37,6 +37,22 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property("FocalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
     .def_property("Viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport)
     ;
+
+  py::class_<BND_File3dmSettings>(m, "File3dmSettings")
+    .def_property("ModelUrl", &BND_File3dmSettings::GetModelUrl, &BND_File3dmSettings::SetModelUrl)
+    .def_property("ModelBasePoint", &BND_File3dmSettings::GetModelBasePoint, &BND_File3dmSettings::SetModelBasePoint)
+    .def_property("ModelAbsoluteTolerance", &BND_File3dmSettings::GetModelAbsoluteTolerance, &BND_File3dmSettings::SetModelAbsoluteTolerance)
+    .def_property("ModelAngleToleranceRadians", &BND_File3dmSettings::GetModelAngleToleranceRadians, &BND_File3dmSettings::SetModelAngleToleranceRadians)
+    .def_property("ModelAngleToleranceDegrees", &BND_File3dmSettings::GetModelAngleToleranceDegrees, &BND_File3dmSettings::SetModelAngleToleranceDegrees)
+    .def_property("ModelRelativeTolerance", &BND_File3dmSettings::GetModelRelativeTolerance, &BND_File3dmSettings::SetModelRelativeTolerance)
+    .def_property("PageAbsoluteTolerance", &BND_File3dmSettings::GetPageAbsoluteTolerance, &BND_File3dmSettings::SetPageAbsoluteTolerance)
+    .def_property("PageAngleToleranceRadians", &BND_File3dmSettings::GetPageAngleToleranceRadians, &BND_File3dmSettings::SetPageAngleToleranceRadians)
+    .def_property("PageAngleToleranceDegrees", &BND_File3dmSettings::GetPageAngleToleranceDegrees, &BND_File3dmSettings::SetPageAngleToleranceDegrees)
+    .def_property("PageRelativeTolerance", &BND_File3dmSettings::GetPageRelativeTolerance, &BND_File3dmSettings::SetPageRelativeTolerance)
+    .def_property("ModelUnitSystem", &BND_File3dmSettings::GetModelUnitSystem, &BND_File3dmSettings::SetModelUnitSystem)
+    .def_property("PageUnitSystem", &BND_File3dmSettings::GetPageUnitSystem, &BND_File3dmSettings::SetPageUnitSystem)
+    ;
+
 }
 #endif
 
