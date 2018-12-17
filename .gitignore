@@ -31,6 +31,8 @@
 *.out
 *.app
 
+.vscode
+
 /.vs
 *.vcxproj.user
 /python/wheels_for_pypi
