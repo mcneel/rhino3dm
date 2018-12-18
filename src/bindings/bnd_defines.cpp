@@ -139,6 +139,7 @@ void initDefines(pybind11::module& m)
     .value("Parsecs", ON::LengthUnitSystem::Parsecs)
     .value("CustomUnits", ON::LengthUnitSystem::CustomUnits)
     .value("Unset", ON::LengthUnitSystem::Unset)
+    .def_static("UnitScale", [](ON::LengthUnitSystem a, ON::LengthUnitSystem b) { return ON::UnitScale(a, b);})
     ;
 }
 
