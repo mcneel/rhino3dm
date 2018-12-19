@@ -28,14 +28,9 @@ jobs:
       - run:
           name: Build
           command: |
-            cd src
-            mkdir build
-            cd build
-            mkdir javascript
-            cd javascript
-            emcmake cmake ../..
-            make
-            make install
+            emcc --version
+            python --version
+            python src/build_javascript_lib.py
       - persist_to_workspace:
           root: src/build/artifacts_js
           paths:
