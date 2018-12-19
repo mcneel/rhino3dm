@@ -16,18 +16,9 @@
     </a-scene>
 
     <script>
-
-      // DEBUG
-      //var geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-      //var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-      //var sphere = new THREE.Mesh( geometry, material );
-      //var entity = document.querySelector('a-entity');
-      //entity.setObject3D('sphere', sphere);
-      // END DEBUG
-      //THREE.Object3d.DefaultUp = THREE.Axes.Z
-
-      RhinoCompute.authToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwIjoiUEtDUyM3IiwiYyI6IkFFU18yNTZfQ0JDIiwiYjY0aXYiOiJRUXM1NFkwM01xR3B1YlBLdllqTElRPT0iLCJiNjRjdCI6ImtwUjJzY2w0enVhRGFnQlM1TVFmVTJscnVpNUZ0MG9obTNySGdNU2dFLzhXZ1JUaUoxTHdOOWEyT0JjSmJkVXQxa1o0OFhZZlF1VGRzWnk2aHBkdDBFQnA0Zmw5WkxTN0xjaFVxT2lzendqcktkajF2TmY0VEJBSWVLWUprWkZvNXFFdElMaFZJMElJUXJNdjRhc0IrdVFIVlBRdlJqczRqeHZHVHNrUDRyUW9kZHVkWXB1Sm8zUy9Wa3JuUmwwZVBScEpZVDlCWE9xNVYyRDZFZExwTXc9PSIsImlhdCI6MTU0NTE2MDE3NX0.6wy7edzcXbXLTU2Is8YGh3yjr2ezBRZoZ6sgrryuZUs"
       const getRhinoLogoMeshes = (Rhino) => {
+        RhinoCompute.authToken = RhinoCompute.getAuthToken()
+
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "https://files.mcneel.com/rhino3dm/models/RhinoLogo.3dm", true)
         xhr.responseType = "arraybuffer"
