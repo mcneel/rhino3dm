@@ -1244,6 +1244,12 @@ var RhinoCompute = {
             return promise;
         },
 
+        ribbonOffset : function(curve, distance, blendRadius, directionPoint, normal, tolerance) {
+            args = [curve, distance, blendRadius, directionPoint, normal, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/ribbonoffset-curve_double_double_point3d_vector3d_double", args);
+            return promise;
+        },
+
         offsetOnSurface : function(curve, face, distance, fittingTolerance) {
             args = [curve, face, distance, fittingTolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_brepface_double_double", args);
@@ -1351,6 +1357,12 @@ var RhinoCompute = {
         meshMeshFast : function(meshA, meshB) {
             args = [meshA, meshB];
             var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh", args);
+            return promise;
+        },
+
+        meshMesh : function(meshes, tolerance, mode) {
+            args = [meshes, tolerance, mode];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmesh-mesharray_double_setscombinations", args);
             return promise;
         },
 
@@ -1821,6 +1833,48 @@ var RhinoCompute = {
         withEdgeSoftening : function(mesh, softeningRadius, chamfer, faceted, force, angleThreshold) {
             args = [mesh, softeningRadius, chamfer, faceted, force, angleThreshold];
             var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/withedgesoftening-mesh_double_bool_bool_bool_double", args);
+            return promise;
+        },
+
+        reduce : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize) {
+            args = [mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_int_bool_int_bool", args);
+            return promise;
+        },
+
+        reduce1 : function(mesh, parameters) {
+            args = [mesh, parameters];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_reducemeshparameters", args);
+            return promise;
+        },
+
+        computeThickness : function(meshes, maximumThickness) {
+            args = [meshes, maximumThickness];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double", args);
+            return promise;
+        },
+
+        computeThickness1 : function(meshes, maximumThickness, cancelToken) {
+            args = [meshes, maximumThickness, cancelToken];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double_system.threading.cancellationtoken", args);
+            return promise;
+        },
+
+        computeThickness2 : function(meshes, maximumThickness, sharpAngle, cancelToken) {
+            args = [meshes, maximumThickness, sharpAngle, cancelToken];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double_double_system.threading.cancellationtoken", args);
+            return promise;
+        },
+
+        createContourCurves : function(meshToContour, contourStart, contourEnd, interval) {
+            args = [meshToContour, contourStart, contourEnd, interval];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createcontourcurves-mesh_point3d_point3d_double", args);
+            return promise;
+        },
+
+        createContourCurves1 : function(meshToContour, sectionPlane) {
+            args = [meshToContour, sectionPlane];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createcontourcurves-mesh_plane", args);
             return promise;
         },
     },
