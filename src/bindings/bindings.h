@@ -26,6 +26,7 @@
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
 #include "bnd_defines.h"
+#include "bnd_intersect.h"
 #include "bnd_boundingbox.h"
 #include "bnd_box.h"
 #include "bnd_point.h"

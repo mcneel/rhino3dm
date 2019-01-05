@@ -32,6 +32,13 @@ BND_Plane BND_Plane::WorldXY()
 namespace py = pybind11;
 void initPlaneBindings(pybind11::module& m)
 {
+  py::class_<BND_Plane>(m, "Plane")
+    .def_static("WorldXY", &BND_Plane::WorldXY)
+    .def_readwrite("Origin", &BND_Plane::m_origin)
+    .def_readwrite("XAxis", &BND_Plane::m_xaxis)
+    .def_readwrite("YAxis", &BND_Plane::m_yaxis)
+    .def_readwrite("ZAxis", &BND_Plane::m_zaxis)
+    ;
 }
 #endif
 
