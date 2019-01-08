@@ -264,15 +264,33 @@ var RhinoCompute = {
             return promise;
         },
 
+        createFilletSurface1 : function(face0, uv0, face1, uv1, radius, trim, extend, tolerance) {
+            args = [face0, uv0, face1, uv1, radius, trim, extend, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfilletsurface-brepface_point2d_brepface_point2d_double_bool_bool_double_breparray_breparray", args);
+            return promise;
+        },
+
         createChamferSurface : function(face0, uv0, radius0, face1, uv1, radius1, extend, tolerance) {
             args = [face0, uv0, radius0, face1, uv1, radius1, extend, tolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_double", args);
             return promise;
         },
 
+        createChamferSurface1 : function(face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance) {
+            args = [face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_bool_double_breparray_breparray", args);
+            return promise;
+        },
+
         createFilletEdges : function(brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance) {
             args = [brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfilletedges-brep_intarray_doublearray_doublearray_blendtype_railtype_double", args);
+            return promise;
+        },
+
+        createOffsetBrep : function(brep, distance, solid, extend, tolerance) {
+            args = [brep, distance, solid, extend, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createoffsetbrep-brep_double_bool_bool_double_breparray_breparray", args);
             return promise;
         },
 
@@ -456,8 +474,8 @@ var RhinoCompute = {
             return promise;
         },
 
-        split1 : function(brep, splitter, intersectionTolerance, toleranceWasRaised) {
-            args = [brep, splitter, intersectionTolerance, toleranceWasRaised];
+        split1 : function(brep, splitter, intersectionTolerance) {
+            args = [brep, splitter, intersectionTolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/brep/split-brep_brep_double_bool", args);
             return promise;
         },
@@ -788,8 +806,8 @@ var RhinoCompute = {
             return promise;
         },
 
-        projectToBrep2 : function(curve, breps, direction, tolerance, brepIndices) {
-            args = [curve, breps, direction, tolerance, brepIndices];
+        projectToBrep2 : function(curve, breps, direction, tolerance) {
+            args = [curve, breps, direction, tolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curve_breparray_vector3d_double_intarray", args);
             return promise;
         },
@@ -797,6 +815,12 @@ var RhinoCompute = {
         projectToBrep3 : function(curves, breps, direction, tolerance) {
             args = [curves, breps, direction, tolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double", args);
+            return promise;
+        },
+
+        projectToBrep4 : function(curves, breps, direction, tolerance) {
+            args = [curves, breps, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double_intarray_intarray", args);
             return promise;
         },
 
@@ -842,27 +866,57 @@ var RhinoCompute = {
             return promise;
         },
 
+        getLocalPerpPoint : function(curve, testPoint, seedParmameter) {
+            args = [curve, testPoint, seedParmameter];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocalperppoint-curve_point3d_double_double", args);
+            return promise;
+        },
+
+        getLocalPerpPoint1 : function(curve, testPoint, seedParmameter, subDomain) {
+            args = [curve, testPoint, seedParmameter, subDomain];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocalperppoint-curve_point3d_double_interval_double", args);
+            return promise;
+        },
+
+        getLocalTangentPoint : function(curve, testPoint, seedParmameter) {
+            args = [curve, testPoint, seedParmameter];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_double", args);
+            return promise;
+        },
+
+        getLocalTangentPoint1 : function(curve, testPoint, seedParmameter, subDomain) {
+            args = [curve, testPoint, seedParmameter, subDomain];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_interval_double", args);
+            return promise;
+        },
+
         makeClosed : function(curve, tolerance) {
             args = [curve, tolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/makeclosed-curve_double", args);
             return promise;
         },
 
-        lcoalClosestPoint : function(curve, testPoint, seed, t) {
-            args = [curve, testPoint, seed, t];
+        lcoalClosestPoint : function(curve, testPoint, seed) {
+            args = [curve, testPoint, seed];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lcoalclosestpoint-curve_point3d_double_double", args);
             return promise;
         },
 
-        closestPoint : function(curve, testPoint, t) {
-            args = [curve, testPoint, t];
+        closestPoint : function(curve, testPoint) {
+            args = [curve, testPoint];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoint-curve_point3d_double", args);
             return promise;
         },
 
-        closestPoint1 : function(curve, testPoint, t, maximumDistance) {
-            args = [curve, testPoint, t, maximumDistance];
+        closestPoint1 : function(curve, testPoint, maximumDistance) {
+            args = [curve, testPoint, maximumDistance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoint-curve_point3d_double_double", args);
+            return promise;
+        },
+
+        closestPoints : function(curve, otherCurve) {
+            args = [curve, otherCurve];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoints-curve_curve_point3d_point3d", args);
             return promise;
         },
 
@@ -914,8 +968,8 @@ var RhinoCompute = {
             return promise;
         },
 
-        perpendicularFrameAt : function(curve, t, plane) {
-            args = [curve, t, plane];
+        perpendicularFrameAt : function(curve, t) {
+            args = [curve, t];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/perpendicularframeat-curve_double_plane", args);
             return promise;
         },
@@ -968,50 +1022,50 @@ var RhinoCompute = {
             return promise;
         },
 
-        lengthParameter : function(curve, segmentLength, t) {
-            args = [curve, segmentLength, t];
+        lengthParameter : function(curve, segmentLength) {
+            args = [curve, segmentLength];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double", args);
             return promise;
         },
 
-        lengthParameter1 : function(curve, segmentLength, t, fractionalTolerance) {
-            args = [curve, segmentLength, t, fractionalTolerance];
+        lengthParameter1 : function(curve, segmentLength, fractionalTolerance) {
+            args = [curve, segmentLength, fractionalTolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_double", args);
             return promise;
         },
 
-        lengthParameter2 : function(curve, segmentLength, t, subdomain) {
-            args = [curve, segmentLength, t, subdomain];
+        lengthParameter2 : function(curve, segmentLength, subdomain) {
+            args = [curve, segmentLength, subdomain];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_interval", args);
             return promise;
         },
 
-        lengthParameter3 : function(curve, segmentLength, t, fractionalTolerance, subdomain) {
-            args = [curve, segmentLength, t, fractionalTolerance, subdomain];
+        lengthParameter3 : function(curve, segmentLength, fractionalTolerance, subdomain) {
+            args = [curve, segmentLength, fractionalTolerance, subdomain];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_double_interval", args);
             return promise;
         },
 
-        normalizedLengthParameter : function(curve, s, t) {
-            args = [curve, s, t];
+        normalizedLengthParameter : function(curve, s) {
+            args = [curve, s];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double", args);
             return promise;
         },
 
-        normalizedLengthParameter1 : function(curve, s, t, fractionalTolerance) {
-            args = [curve, s, t, fractionalTolerance];
+        normalizedLengthParameter1 : function(curve, s, fractionalTolerance) {
+            args = [curve, s, fractionalTolerance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double", args);
             return promise;
         },
 
-        normalizedLengthParameter2 : function(curve, s, t, subdomain) {
-            args = [curve, s, t, subdomain];
+        normalizedLengthParameter2 : function(curve, s, subdomain) {
+            args = [curve, s, subdomain];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_interval", args);
             return promise;
         },
 
-        normalizedLengthParameter3 : function(curve, s, t, fractionalTolerance, subdomain) {
-            args = [curve, s, t, fractionalTolerance, subdomain];
+        normalizedLengthParameter3 : function(curve, s, fractionalTolerance, subdomain) {
+            args = [curve, s, fractionalTolerance, subdomain];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double_interval", args);
             return promise;
         },
@@ -1046,8 +1100,8 @@ var RhinoCompute = {
             return promise;
         },
 
-        divideByCount1 : function(curve, segmentCount, includeEnds, points) {
-            args = [curve, segmentCount, includeEnds, points];
+        divideByCount1 : function(curve, segmentCount, includeEnds) {
+            args = [curve, segmentCount, includeEnds];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebycount-curve_int_bool_point3darray", args);
             return promise;
         },
@@ -1064,14 +1118,14 @@ var RhinoCompute = {
             return promise;
         },
 
-        divideByLength2 : function(curve, segmentLength, includeEnds, points) {
-            args = [curve, segmentLength, includeEnds, points];
+        divideByLength2 : function(curve, segmentLength, includeEnds) {
+            args = [curve, segmentLength, includeEnds];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool_point3darray", args);
             return promise;
         },
 
-        divideByLength3 : function(curve, segmentLength, includeEnds, reverse, points) {
-            args = [curve, segmentLength, includeEnds, reverse, points];
+        divideByLength3 : function(curve, segmentLength, includeEnds, reverse) {
+            args = [curve, segmentLength, includeEnds, reverse];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool_bool_point3darray", args);
             return promise;
         },
@@ -1295,134 +1349,6 @@ var RhinoCompute = {
         offsetNormalToSurface : function(curve, surface, height) {
             args = [curve, surface, height];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetnormaltosurface-curve_surface_double", args);
-            return promise;
-        },
-    },
-
-    Intersection : {
-        curvePlane : function(curve, plane, tolerance) {
-            args = [curve, plane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveplane-curve_plane_double", args);
-            return promise;
-        },
-
-        meshPlane : function(mesh, plane) {
-            args = [mesh, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_plane", args);
-            return promise;
-        },
-
-        meshPlane1 : function(mesh, planes) {
-            args = [mesh, planes];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_planearray", args);
-            return promise;
-        },
-
-        curveSelf : function(curve, tolerance) {
-            args = [curve, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveself-curve_double", args);
-            return promise;
-        },
-
-        curveCurve : function(curveA, curveB, tolerance, overlapTolerance) {
-            args = [curveA, curveB, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvecurve-curve_curve_double_double", args);
-            return promise;
-        },
-
-        curveLine : function(curve, line, tolerance, overlapTolerance) {
-            args = [curve, line, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveline-curve_line_double_double", args);
-            return promise;
-        },
-
-        curveSurface : function(curve, surface, tolerance, overlapTolerance) {
-            args = [curve, surface, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_surface_double_double", args);
-            return promise;
-        },
-
-        curveSurface1 : function(curve, curveDomain, surface, tolerance, overlapTolerance) {
-            args = [curve, curveDomain, surface, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_interval_surface_double_double", args);
-            return promise;
-        },
-
-        curveBrep : function(curve, brep, tolerance, angleTolerance, t) {
-            args = [curve, brep, tolerance, angleTolerance, t];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_double_doublearray", args);
-            return promise;
-        },
-
-        meshMeshFast : function(meshA, meshB) {
-            args = [meshA, meshB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh", args);
-            return promise;
-        },
-
-        meshMesh : function(meshes, tolerance, mode) {
-            args = [meshes, tolerance, mode];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmesh-mesharray_double_setscombinations", args);
-            return promise;
-        },
-
-        meshMeshAccurate : function(meshA, meshB, tolerance) {
-            args = [meshA, meshB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshaccurate-mesh_mesh_double", args);
-            return promise;
-        },
-
-        meshRay : function(mesh, ray) {
-            args = [mesh, ray];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d", args);
-            return promise;
-        },
-
-        meshRay1 : function(mesh, ray, meshFaceIndices) {
-            args = [mesh, ray, meshFaceIndices];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d_intarray", args);
-            return promise;
-        },
-
-        meshPolyline : function(mesh, curve, faceIds) {
-            args = [mesh, curve, faceIds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshpolyline-mesh_polylinecurve_intarray", args);
-            return promise;
-        },
-
-        meshLine : function(mesh, line, faceIds) {
-            args = [mesh, line, faceIds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshline-mesh_line_intarray", args);
-            return promise;
-        },
-
-        rayShoot : function(ray, geometry, maxReflections) {
-            args = [ray, geometry, maxReflections];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/rayshoot-ray3d_geometrybasearray_int", args);
-            return promise;
-        },
-
-        projectPointsToMeshes : function(meshes, points, direction, tolerance) {
-            args = [meshes, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshes-mesharray_point3darray_vector3d_double", args);
-            return promise;
-        },
-
-        projectPointsToMeshesEx : function(meshes, points, direction, tolerance, indices) {
-            args = [meshes, points, direction, tolerance, indices];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshesex-mesharray_point3darray_vector3d_double_intarray", args);
-            return promise;
-        },
-
-        projectPointsToBreps : function(breps, points, direction, tolerance) {
-            args = [breps, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobreps-breparray_point3darray_vector3d_double", args);
-            return promise;
-        },
-
-        projectPointsToBrepsEx : function(breps, points, direction, tolerance, indices) {
-            args = [breps, points, direction, tolerance, indices];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobrepsex-breparray_point3darray_vector3d_double_intarray", args);
             return promise;
         },
     },
@@ -1722,9 +1648,15 @@ var RhinoCompute = {
             return promise;
         },
 
-        closestPoint : function(mesh, testPoint, pointOnMesh, maximumDistance) {
-            args = [mesh, testPoint, pointOnMesh, maximumDistance];
+        closestPoint : function(mesh, testPoint, maximumDistance) {
+            args = [mesh, testPoint, maximumDistance];
             var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_double", args);
+            return promise;
+        },
+
+        closestPoint1 : function(mesh, testPoint, maximumDistance) {
+            args = [mesh, testPoint, maximumDistance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_vector3d_double", args);
             return promise;
         },
 
@@ -1842,7 +1774,13 @@ var RhinoCompute = {
             return promise;
         },
 
-        reduce1 : function(mesh, parameters) {
+        reduce1 : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress) {
+            args = [mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_int_bool_int_bool_system.threading.cancellationtoken_doublearray_string", args);
+            return promise;
+        },
+
+        reduce2 : function(mesh, parameters) {
             args = [mesh, parameters];
             var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_reducemeshparameters", args);
             return promise;
@@ -1937,6 +1875,170 @@ var RhinoCompute = {
         createSpiral1 : function(railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn) {
             args = [railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn];
             var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createspiral-curve_double_double_point3d_double_double_double_double_int", args);
+            return promise;
+        },
+    },
+
+    Intersection : {
+        curvePlane : function(curve, plane, tolerance) {
+            args = [curve, plane, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveplane-curve_plane_double", args);
+            return promise;
+        },
+
+        meshPlane : function(mesh, plane) {
+            args = [mesh, plane];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_plane", args);
+            return promise;
+        },
+
+        meshPlane1 : function(mesh, planes) {
+            args = [mesh, planes];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_planearray", args);
+            return promise;
+        },
+
+        brepPlane : function(brep, plane, tolerance) {
+            args = [brep, plane, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepplane-brep_plane_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        curveSelf : function(curve, tolerance) {
+            args = [curve, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveself-curve_double", args);
+            return promise;
+        },
+
+        curveCurve : function(curveA, curveB, tolerance, overlapTolerance) {
+            args = [curveA, curveB, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvecurve-curve_curve_double_double", args);
+            return promise;
+        },
+
+        curveLine : function(curve, line, tolerance, overlapTolerance) {
+            args = [curve, line, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveline-curve_line_double_double", args);
+            return promise;
+        },
+
+        curveSurface : function(curve, surface, tolerance, overlapTolerance) {
+            args = [curve, surface, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_surface_double_double", args);
+            return promise;
+        },
+
+        curveSurface1 : function(curve, curveDomain, surface, tolerance, overlapTolerance) {
+            args = [curve, curveDomain, surface, tolerance, overlapTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_interval_surface_double_double", args);
+            return promise;
+        },
+
+        curveBrep : function(curve, brep, tolerance) {
+            args = [curve, brep, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        curveBrep1 : function(curve, brep, tolerance, angleTolerance) {
+            args = [curve, brep, tolerance, angleTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_double_doublearray", args);
+            return promise;
+        },
+
+        curveBrepFace : function(curve, face, tolerance) {
+            args = [curve, face, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrepface-curve_brepface_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        surfaceSurface : function(surfaceA, surfaceB, tolerance) {
+            args = [surfaceA, surfaceB, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/surfacesurface-surface_surface_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        brepBrep : function(brepA, brepB, tolerance) {
+            args = [brepA, brepB, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepbrep-brep_brep_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        brepSurface : function(brep, surface, tolerance) {
+            args = [brep, surface, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepsurface-brep_surface_double_curvearray_point3darray", args);
+            return promise;
+        },
+
+        meshMeshFast : function(meshA, meshB) {
+            args = [meshA, meshB];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh", args);
+            return promise;
+        },
+
+        meshMesh : function(meshes, tolerance, mode) {
+            args = [meshes, tolerance, mode];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmesh-mesharray_double_setscombinations", args);
+            return promise;
+        },
+
+        meshMeshAccurate : function(meshA, meshB, tolerance) {
+            args = [meshA, meshB, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshaccurate-mesh_mesh_double", args);
+            return promise;
+        },
+
+        meshRay : function(mesh, ray) {
+            args = [mesh, ray];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d", args);
+            return promise;
+        },
+
+        meshRay1 : function(mesh, ray) {
+            args = [mesh, ray];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d_intarray", args);
+            return promise;
+        },
+
+        meshPolyline : function(mesh, curve) {
+            args = [mesh, curve];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshpolyline-mesh_polylinecurve_intarray", args);
+            return promise;
+        },
+
+        meshLine : function(mesh, line) {
+            args = [mesh, line];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshline-mesh_line_intarray", args);
+            return promise;
+        },
+
+        rayShoot : function(ray, geometry, maxReflections) {
+            args = [ray, geometry, maxReflections];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/rayshoot-ray3d_geometrybasearray_int", args);
+            return promise;
+        },
+
+        projectPointsToMeshes : function(meshes, points, direction, tolerance) {
+            args = [meshes, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshes-mesharray_point3darray_vector3d_double", args);
+            return promise;
+        },
+
+        projectPointsToMeshesEx : function(meshes, points, direction, tolerance) {
+            args = [meshes, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshesex-mesharray_point3darray_vector3d_double_intarray", args);
+            return promise;
+        },
+
+        projectPointsToBreps : function(breps, points, direction, tolerance) {
+            args = [breps, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobreps-breparray_point3darray_vector3d_double", args);
+            return promise;
+        },
+
+        projectPointsToBrepsEx : function(breps, points, direction, tolerance) {
+            args = [breps, points, direction, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobrepsex-breparray_point3darray_vector3d_double_intarray", args);
             return promise;
         },
     },
