@@ -565,6 +565,62 @@ var RhinoCompute = {
         },
     },
 
+    BrepFace : {
+        pullPointsToFace : function(brepface, points, tolerance) {
+            args = [brepface, points, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/pullpointstoface-brepface_point3darray_double", args);
+            return promise;
+        },
+
+        draftAnglePoint : function(brepface, testPoint, testAngle, pullDirection, edge) {
+            args = [brepface, testPoint, testAngle, pullDirection, edge];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/draftanglepoint-brepface_point2d_double_vector3d_bool_point3d_double", args);
+            return promise;
+        },
+
+        removeHoles : function(brepface, tolerance) {
+            args = [brepface, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/removeholes-brepface_double", args);
+            return promise;
+        },
+
+        split : function(brepface, curves, tolerance) {
+            args = [brepface, curves, tolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/split-brepface_curvearray_double", args);
+            return promise;
+        },
+
+        isPointOnFace : function(brepface, u, v) {
+            args = [brepface, u, v];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/ispointonface-brepface_double_double", args);
+            return promise;
+        },
+
+        trimAwareIsoIntervals : function(brepface, direction, constantParameter) {
+            args = [brepface, direction, constantParameter];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/trimawareisointervals-brepface_int_double", args);
+            return promise;
+        },
+
+        trimAwareIsoCurve : function(brepface, direction, constantParameter) {
+            args = [brepface, direction, constantParameter];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/trimawareisocurve-brepface_int_double", args);
+            return promise;
+        },
+
+        changeSurface : function(brepface, surfaceIndex) {
+            args = [brepface, surfaceIndex];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/changesurface-brepface_int", args);
+            return promise;
+        },
+
+        rebuildEdges : function(brepface, tolerance, rebuildSharedEdges, rebuildVertices) {
+            args = [brepface, tolerance, rebuildSharedEdges, rebuildVertices];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/rebuildedges-brepface_double_bool_bool", args);
+            return promise;
+        },
+    },
+
     Curve : {
         getConicSectionType : function(curve) {
             args = [curve];
@@ -1349,6 +1405,124 @@ var RhinoCompute = {
         offsetNormalToSurface : function(curve, surface, height) {
             args = [curve, surface, height];
             var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetnormaltosurface-curve_surface_double", args);
+            return promise;
+        },
+    },
+
+    AreaMassProperties : {
+        compute : function(closedPlanarCurve) {
+            args = [closedPlanarCurve];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-curve", args);
+            return promise;
+        },
+
+        compute1 : function(closedPlanarCurve, planarTolerance) {
+            args = [closedPlanarCurve, planarTolerance];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-curve_double", args);
+            return promise;
+        },
+
+        compute2 : function(hatch) {
+            args = [hatch];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-hatch", args);
+            return promise;
+        },
+
+        compute3 : function(mesh) {
+            args = [mesh];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-mesh", args);
+            return promise;
+        },
+
+        compute4 : function(mesh, area, firstMoments, secondMoments, productMoments) {
+            args = [mesh, area, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-mesh_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute5 : function(brep) {
+            args = [brep];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-brep", args);
+            return promise;
+        },
+
+        compute6 : function(brep, area, firstMoments, secondMoments, productMoments) {
+            args = [brep, area, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-brep_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute7 : function(surface) {
+            args = [surface];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-surface", args);
+            return promise;
+        },
+
+        compute8 : function(surface, area, firstMoments, secondMoments, productMoments) {
+            args = [surface, area, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-surface_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute9 : function(geometry) {
+            args = [geometry];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-geometrybasearray", args);
+            return promise;
+        },
+
+        compute10 : function(geometry, area, firstMoments, secondMoments, productMoments) {
+            args = [geometry, area, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-geometrybasearray_bool_bool_bool_bool", args);
+            return promise;
+        },
+    },
+
+    VolumeMassProperties : {
+        compute : function(mesh) {
+            args = [mesh];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-mesh", args);
+            return promise;
+        },
+
+        compute1 : function(mesh, volume, firstMoments, secondMoments, productMoments) {
+            args = [mesh, volume, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-mesh_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute2 : function(brep) {
+            args = [brep];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-brep", args);
+            return promise;
+        },
+
+        compute3 : function(brep, volume, firstMoments, secondMoments, productMoments) {
+            args = [brep, volume, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-brep_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute4 : function(surface) {
+            args = [surface];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-surface", args);
+            return promise;
+        },
+
+        compute5 : function(surface, volume, firstMoments, secondMoments, productMoments) {
+            args = [surface, volume, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-surface_bool_bool_bool_bool", args);
+            return promise;
+        },
+
+        compute6 : function(geometry) {
+            args = [geometry];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-geometrybasearray", args);
+            return promise;
+        },
+
+        compute7 : function(geometry, volume, firstMoments, secondMoments, productMoments) {
+            args = [geometry, volume, firstMoments, secondMoments, productMoments];
+            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-geometrybasearray_bool_bool_bool_bool", args);
             return promise;
         },
     },
