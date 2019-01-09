@@ -19,8 +19,8 @@ public:
   BND_Transform(double diagonalValue) : m_xform(diagonalValue) {}
   BND_Transform(const BND_Transform& other) : m_xform(other.m_xform) {}
   static BND_Transform Identity();
-  //static Transform ZeroTransformation
-  //static Transform Unset
+  static BND_Transform ZeroTransformation() {return BND_Transform(ON_Xform::ZeroTransformation);}
+  static BND_Transform Unset() { return BND_Transform(ON_Xform::Unset); }
   //static Transform Translation(Vector3d motion)
   static BND_Transform Translation(double dx, double dy, double dz);
   static BND_Transform Scale(ON_3dPoint anchor, double scaleFactor);

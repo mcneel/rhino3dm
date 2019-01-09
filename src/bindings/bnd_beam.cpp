@@ -14,6 +14,25 @@ BND_Extrusion* BND_Extrusion::Create(const BND_Curve& planarCurve, double height
   return new BND_Extrusion(ext, nullptr);
 }
 
+BND_Extrusion* BND_Extrusion::CreateBoxExtrusion(const BND_Box& box, bool cap)
+{
+  if (!box.m_box.IsValid()) return nullptr;
+
+  ON_Polyline pl;
+  pl.Append(box.m_box.PointAt(0, 0, 0));
+  pl.Append(box.m_box.PointAt(1, 0, 0));
+  pl.Append(box.m_box.PointAt(1, 1, 0));
+  pl.Append(box.m_box.PointAt(0, 1, 0));
+  pl.Append(box.m_box.PointAt(0, 0, 0));
+  ON_PolylineCurve plc(pl);
+  ON_3dPoint p0 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[0]);
+  ON_3dPoint p1 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[1]);
+  double height = (p1 - p0).Length();
+  ON_Extrusion* ext = ON_Extrusion::CreateFrom3dCurve(plc, nullptr, height, cap);
+  if (nullptr == ext)
+    return nullptr;
+  return new BND_Extrusion(ext, nullptr);
+}
 
 BND_Extrusion* BND_Extrusion::CreateCylinderExtrusion(const BND_Cylinder& cylinder, bool capBottom, bool capTop)
 {
@@ -43,6 +62,74 @@ bool BND_Extrusion::SetPathAndUp(ON_3dPoint a, ON_3dPoint b, ON_3dVector up)
   return m_extrusion->SetPathAndUp(a, b, up);
 }
 
+ON_3dVector BND_Extrusion::MiterPlaneNormalAtStart() const
+{
+  ON_3dVector rc = ON_3dVector::UnsetVector;
+  m_extrusion->GetMiterPlaneNormal(0, rc);
+  return rc;
+}
+ON_3dVector BND_Extrusion::MiterPlaneNormalAtEnd() const
+{
+  ON_3dVector rc = ON_3dVector::UnsetVector;
+  m_extrusion->GetMiterPlaneNormal(1, rc);
+  return rc;
+}
+
+BND_Transform* BND_Extrusion::GetProfileTransformation(double s) const
+{
+  ON_Xform xf;
+  if (!m_extrusion->GetProfileTransformation(s, xf))
+    return nullptr;
+  return new BND_Transform(xf);
+}
+
+BND_Plane* BND_Extrusion::GetProfilePlane(double s) const
+{
+  ON_Plane plane;
+  if (!m_extrusion->GetProfilePlane(s, plane))
+    return nullptr;
+  return new BND_Plane(BND_Plane::FromOnPlane(plane));
+}
+
+BND_Plane* BND_Extrusion::GetPathPlane(double s) const
+{
+  ON_Plane plane;
+  if (!m_extrusion->GetPathPlane(s, plane))
+    return nullptr;
+  return new BND_Plane(BND_Plane::FromOnPlane(plane));
+}
+
+bool BND_Extrusion::SetOuterProfile(const class BND_Curve* outerProfile, bool cap)
+{
+  return m_extrusion->SetOuterProfile(outerProfile->m_curve->DuplicateCurve(), cap);
+}
+bool BND_Extrusion::AddInnerProfile(const class BND_Curve* innerProfile)
+{
+  return m_extrusion->AddInnerProfile(innerProfile->m_curve->DuplicateCurve());
+}
+
+BND_Curve* BND_Extrusion::Profile3d(int profileIndex, double s) const
+{
+  ON_Curve* crv = m_extrusion->Profile3d(profileIndex, s);
+  if (nullptr == crv)
+    return nullptr;
+  return (BND_Curve*)BND_GeometryBase::CreateWrapper(crv, nullptr);
+}
+
+BND_LineCurve* BND_Extrusion::PathLineCurve() const
+{
+  ON_LineCurve* linecurve = m_extrusion->PathLineCurve(nullptr);
+  if (nullptr == linecurve)
+    return nullptr;
+  return (BND_LineCurve*)BND_GeometryBase::CreateWrapper(linecurve, nullptr);
+}
+
+int BND_Extrusion::ProfileIndex(double profileParameter) const
+{
+  return m_extrusion->ProfileIndex(profileParameter);
+}
+
+
 BND_Extrusion::BND_Extrusion()
 {
   SetTrackedPointer(new ON_Extrusion(), nullptr);
@@ -71,6 +158,7 @@ void initExtrusionBindings(pybind11::module& m)
 {
   py::class_<BND_Extrusion, BND_Surface>(m, "Extrusion")
     .def_static("Create", &BND_Extrusion::Create)
+    .def_static("CreateBoxExtrusion", &BND_Extrusion::CreateBoxExtrusion)
     .def_static("CreateCylinderExtrusion", &BND_Extrusion::CreateCylinderExtrusion)
     .def_static("CreatePipeExtrusion", &BND_Extrusion::CreatePipeExtrusion)
     .def(py::init<>())
@@ -79,8 +167,23 @@ void initExtrusionBindings(pybind11::module& m)
     .def_property_readonly("PathStart", &BND_Extrusion::PathStart)
     .def_property_readonly("PathEnd", &BND_Extrusion::PathEnd)
     .def_property_readonly("PathTangent", &BND_Extrusion::PathTangent)
+    .def_property("MiterPlaneNormalAtStart", &BND_Extrusion::MiterPlaneNormalAtStart, &BND_Extrusion::SetMiterPlaneNormalAtStart)
+    .def_property("MiterPlaneNormalAtEnd", &BND_Extrusion::MiterPlaneNormalAtEnd, &BND_Extrusion::SetMiterPlaneNormalAtEnd)
+    .def_property_readonly("IsMiteredAtStart", &BND_Extrusion::IsMiteredAtStart)
+    .def_property_readonly("IsMiteredAtEnd", &BND_Extrusion::IsMiteredAtEnd)
     .def_property_readonly("IsSolid", &BND_Extrusion::IsSolid)
+    .def_property_readonly("IsCappedAtBottom", &BND_Extrusion::IsCappedAtBottom)
+    .def_property_readonly("IsCappedAtTop", &BND_Extrusion::IsCappedAtTop)
     .def_property_readonly("CapCount", &BND_Extrusion::CapCount)
+    .def("GetProfileTransformation", &BND_Extrusion::GetProfileTransformation)
+    .def("GetProfilePlane", &BND_Extrusion::GetProfilePlane)
+    .def("GetPathPlane", &BND_Extrusion::GetPathPlane)
+    .def("SetOuterProfile", &BND_Extrusion::SetOuterProfile)
+    .def("AddInnerProfile", &BND_Extrusion::AddInnerProfile)
+    .def_property_readonly("ProfileCount", &BND_Extrusion::ProfileCount)
+    .def("Profile3d", &BND_Extrusion::Profile3d)
+    .def("PathLineCurve", &BND_Extrusion::PathLineCurve)
+    .def("ProfileIndex", &BND_Extrusion::ProfileIndex)
     .def("GetMesh", &BND_Extrusion::GetMesh)
     ;
 }
