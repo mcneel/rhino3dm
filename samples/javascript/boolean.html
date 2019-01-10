@@ -38,9 +38,9 @@
 
 <body>
 <script src="https://threejs.org/build/three.js"></script>
-<script src="https://files.mcneel.com/rhino3dm/js/latest/OrbitControls.js"></script>
-<script src="https://files.mcneel.com/rhino3dm/js/latest/compute.rhino3d.js"></script>
-<script async type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+<script src="OrbitControls.js"></script>
+<script src="compute.rhino3d.js"></script>
+<script type="text/javascript" src="rhino3dm.js"></script>
 
 <div id="glcanvas"></div>
 <div id="controls">
@@ -54,6 +54,13 @@
     // holds top level variables
     var RHINOLOGO = {};
     let logo, cutters, difference;
+
+    // load rhino3dm
+    var Module;
+    rhino3dm().then((m) => {
+      Module = m;
+      console.log("rhino3dm loaded!")
+    });
 
     init();
     animate();

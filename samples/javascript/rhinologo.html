@@ -29,7 +29,7 @@
     <script src="https://threejs.org/build/three.js"></script>
     <script src="OrbitControls.js"></script>
     <script src="compute.rhino3d.js"></script>
-    <script async type="text/javascript" src="rhino3dm.js"></script>
+    <script type="text/javascript" src="rhino3dm.js"></script>
 
     <div id="glcanvas"></div>
     <div id="controls">
@@ -43,6 +43,13 @@
     <script>
       // holds top level variables
       var RHINOLOGO = {};
+
+      // load rhino3dm
+      var Module;
+      rhino3dm().then((m) => {
+        Module = m;
+        console.log("rhino3dm loaded!");
+      });
 
       init();
       animate();

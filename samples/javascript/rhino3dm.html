@@ -30,11 +30,18 @@
     </script>
 
     <script src="compute.rhino3d.js"></script>
-    <script async type="text/javascript" src="rhino3dm.js"></script>
+    <script type="text/javascript" src="rhino3dm.js"></script>
 
     <script>
     RhinoCompute.authToken = RhinoCompute.getAuthToken();
     var mesh;
+
+    // load rhino3dm
+    var Module;
+    rhino3dm().then((m) => {
+      Module = m;
+      console.log("rhino3dm loaded!");
+    });
 
     function runMeshMaker() {
       // First test of rhinocommon.js
