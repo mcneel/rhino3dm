@@ -116,7 +116,7 @@
         return new THREE.Mesh( geometry, material );
       }
 
-      Rhino3dm().then((Module) => {
+      rhino3dm().then((Module) => {
         console.log("runtime loaded!")
         getRhinoLogoMeshes(Module)
       })
