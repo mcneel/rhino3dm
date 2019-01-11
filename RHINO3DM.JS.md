@@ -13,8 +13,18 @@ Rhino3dm.js requires two files`rhino3dm.wasm` and `rhino3dm.js`.  It is easiest 
 <html>
   <!-- stuff -->
   <body>
-    <script async type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
-    <!-- more stuff -->
+    <script type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+    <script>
+      // NOTE: the rhino3dm library is compiled with the MODULARIZE
+      // option to avoid collisions with other web assemblies
+      // here's one way of using it...
+      rhino3dm.then((Module) => {
+        sphere = new Module.Sphere([1,2,3], 12)
+        // more stuff
+      })
+      // even more stuff
+    </script>
+    <!-- you get the idea -->
   </body>
 </html>
 ```
@@ -45,4 +55,4 @@ An advanced sample creates a 3dm file viewer in a web browser.  The html+javascr
 
 ## Build from source
 
-If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source. For detailed instructions go to [rhino3dm.js and rhino3dm.wasm](/docs/javascript/RHINO3DM-BUILD.JS.md) 
+If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source. For detailed instructions go to [rhino3dm.js and rhino3dm.wasm](/docs/javascript/RHINO3DM-BUILD.JS.md)

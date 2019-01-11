@@ -37,8 +37,14 @@ See [our python documentation](RHINO3DM.PY.md) for details
 <html>
   <!-- stuff -->
   <body>
-    <script async type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
-    <!-- more stuff -->
+    <script type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+    <script>
+      rhino3dm.then((Module) => {
+        sphere = new Module.Sphere([1,2,3], 12)
+        // more stuff
+      })
+    </script>
+    <!-- even more stuff -->
   </body>
 </html>
 ```
