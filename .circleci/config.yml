@@ -93,6 +93,8 @@ jobs:
     macos:
       xcode: "10.0.0"
     steps:
+      # brew update required to workaround Homebrew/brew#5513
+      - run: brew update
       - run: brew install cmake
       - run: cmake --version
       - run: python --version
