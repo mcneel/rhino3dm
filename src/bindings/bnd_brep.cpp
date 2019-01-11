@@ -250,7 +250,21 @@ void initBrepBindings(void*)
 
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")
     .constructor<>()
+    .class_function("createFromMesh", &BND_Brep::CreateFromMesh, allow_raw_pointers())
+    .class_function("createFromBox", &BND_Brep::CreateFromBox, allow_raw_pointers())
+    //.class_function("CreateFromBox", &BND_Brep::CreateFromBox2, allow_raw_pointers())
+    .class_function("createFromCylinder", &BND_Brep::CreateFromCylinder, allow_raw_pointers())
+    .class_function("createFromSphere", &BND_Brep::CreateFromSphere, allow_raw_pointers())
+    .class_function("createQuadSphere", &BND_Brep::CreateQuadSphere, allow_raw_pointers())
+    .class_function("createFromCone", &BND_Brep::CreateFromCone, allow_raw_pointers())
+    .class_function("createFromRevSurface", &BND_Brep::CreateFromRevSurface, allow_raw_pointers())
+    .class_function("createFromSurface", &BND_Brep::CreateFromSurface, allow_raw_pointers())
+    .class_function("createTrimmedPlane", &BND_Brep::CreateTrimmedPlane, allow_raw_pointers())
     .function("faces", &BND_Brep::GetFaces)
+    .property("isSolid", &BND_Brep::IsSolid)
+    .property("isManifold", &BND_Brep::IsManifold)
+    .property("isSurface", &BND_Brep::IsSurface)
+    .function("flip", &BND_Brep::Flip)
     ;
 }
 #endif
