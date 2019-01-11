@@ -10,6 +10,7 @@ void initSurfaceBindings(void* m);
 
 class BND_Surface : public BND_GeometryBase
 {
+public:
   ON_Surface* m_surface = nullptr;
 protected:
   BND_Surface();

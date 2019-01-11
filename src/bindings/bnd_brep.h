@@ -24,18 +24,18 @@ public:
   BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref);
 
   //public static Brep TryConvertBrep(GeometryBase geometry)
-  //public static Brep CreateFromMesh(Mesh mesh, bool trimmedTriangles)
-  //public static Brep CreateFromBox(BoundingBox box)
-  //public static Brep CreateFromBox(Box box)
-  //public static Brep CreateFromBox(IEnumerable<Point3d> corners)
-  //public static Brep CreateFromCylinder(Cylinder cylinder, bool capBottom, bool capTop)
-  //public static Brep CreateFromSphere(Sphere sphere)
-  //public static Brep CreateQuadSphere(Sphere sphere)
-  //public static Brep CreateFromCone(Cone cone, bool capBottom)
-  //public static Brep CreateFromRevSurface(RevSurface surface, bool capStart, bool capEnd)
-  //public static Brep CreateFromSurface(Surface surface)
-  //public static Brep CreateTrimmedPlane(Plane plane, Curve curve)
-  //public static Brep CreateTrimmedPlane(Plane plane, IEnumerable<Curve> curves)
+  static BND_Brep* CreateFromMesh(const class BND_Mesh& mesh, bool trimmedTriangles);
+  static BND_Brep* CreateFromBox(const class BND_BoundingBox& box);
+  static BND_Brep* CreateFromBox2(const class BND_Box& box);
+  //static BND_Brep* CreateFromBox(IEnumerable<Point3d> corners)
+  static BND_Brep* CreateFromCylinder(const class BND_Cylinder& cylinder, bool capBottom, bool capTop);
+  static BND_Brep* CreateFromSphere(const class BND_Sphere& sphere);
+  static BND_Brep* CreateQuadSphere(const class BND_Sphere& sphere);
+  static BND_Brep* CreateFromCone(const class BND_Cone& cone, bool capBottom);
+  static BND_Brep* CreateFromRevSurface(const class BND_RevSurface& surface, bool capStart, bool capEnd);
+  static BND_Brep* CreateFromSurface(const class BND_Surface& surface);
+  static BND_Brep* CreateTrimmedPlane(const class BND_Plane& plane, const class BND_Curve& curve);
+  //static BND_Brep* CreateTrimmedPlane(Plane plane, IEnumerable<Curve> curves)
   BND_Brep();
   //public Collections.BrepVertexList Vertices
   //public Collections.BrepSurfaceList Surfaces
@@ -45,17 +45,17 @@ public:
   BND_BrepFaceList GetFaces();
   //public Collections.BrepCurveList Curves2D
   //public Collections.BrepCurveList Curves3D
-  //public bool IsSolid
+  bool IsSolid() const { return m_brep->IsSolid(); }
   //public BrepSolidOrientation SolidOrientation
-  //public bool IsManifold
-  //public bool IsSurface
+  bool IsManifold() const { return m_brep->IsManifold(); }
+  bool IsSurface() const { return m_brep->IsSurface(); }
   //public override GeometryBase Duplicate()
   //public Brep DuplicateSubBrep(IEnumerable<int> faceIndices)
   //public Curve[] DuplicateEdgeCurves()
   //public Curve[] DuplicateEdgeCurves(bool nakedOnly)
   //public Curve[] DuplicateNakedEdgeCurves(bool outer, bool inner)
   //public Point3d[] DuplicateVertices()
-  //public void Flip()
+  void Flip() { m_brep->Flip(); }
   //public bool IsDuplicate(Brep other, double tolerance)
   //public bool IsValidTopology(out string log)
   //public bool IsValidGeometry(out string log)

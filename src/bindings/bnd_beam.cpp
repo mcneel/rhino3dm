@@ -113,8 +113,33 @@ BND_Curve* BND_Extrusion::Profile3d(int profileIndex, double s) const
   ON_Curve* crv = m_extrusion->Profile3d(profileIndex, s);
   if (nullptr == crv)
     return nullptr;
-  return (BND_Curve*)BND_GeometryBase::CreateWrapper(crv, nullptr);
+  return dynamic_cast<BND_Curve*>(BND_GeometryBase::CreateWrapper(crv, nullptr));
 }
+
+BND_Curve* BND_Extrusion::Profile3d_2(ON_COMPONENT_INDEX ci) const
+{
+  ON_Curve* crv = m_extrusion->Profile3d(ci);
+  if (nullptr == crv)
+    return nullptr;
+  return dynamic_cast<BND_Curve*>(BND_GeometryBase::CreateWrapper(crv, nullptr));
+}
+
+BND_Curve* BND_Extrusion::WallEdge(ON_COMPONENT_INDEX ci) const
+{
+  ON_Curve* crv = m_extrusion->WallEdge(ci);
+  if (nullptr == crv)
+    return nullptr;
+  return dynamic_cast<BND_Curve*>(BND_GeometryBase::CreateWrapper(crv, nullptr));
+}
+
+BND_Surface* BND_Extrusion::WallSurface(ON_COMPONENT_INDEX ci) const
+{
+  ON_Surface* srf = m_extrusion->WallSurface(ci);
+  if (nullptr == srf)
+    return nullptr;
+  return dynamic_cast<BND_Surface*>(BND_GeometryBase::CreateWrapper(srf, nullptr));
+}
+
 
 BND_LineCurve* BND_Extrusion::PathLineCurve() const
 {
@@ -182,6 +207,9 @@ void initExtrusionBindings(pybind11::module& m)
     .def("AddInnerProfile", &BND_Extrusion::AddInnerProfile)
     .def_property_readonly("ProfileCount", &BND_Extrusion::ProfileCount)
     .def("Profile3d", &BND_Extrusion::Profile3d)
+    .def("Profile3d", &BND_Extrusion::Profile3d_2)
+    .def("WallEdge", &BND_Extrusion::WallEdge)
+    .def("WallSurface", &BND_Extrusion::WallSurface)
     .def("PathLineCurve", &BND_Extrusion::PathLineCurve)
     .def("ProfileIndex", &BND_Extrusion::ProfileIndex)
     .def("GetMesh", &BND_Extrusion::GetMesh)
