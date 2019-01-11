@@ -68,6 +68,7 @@ public:
 
 class BND_Mesh : public BND_GeometryBase
 {
+public:
   ON_Mesh* m_mesh = nullptr;
 public:
   BND_Mesh();

@@ -10,6 +10,7 @@ void initRevSurfaceBindings(void* m);
 
 class BND_RevSurface : public BND_Surface
 {
+public:
   ON_RevSurface* m_revsurface = nullptr;
 protected:
   void SetTrackedPointer(ON_RevSurface* revsurface, const ON_ModelComponentReference* compref);

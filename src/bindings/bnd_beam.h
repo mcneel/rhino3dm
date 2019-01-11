@@ -42,13 +42,12 @@ public:
   bool AddInnerProfile(const class BND_Curve* innerProfile);
   int ProfileCount() const { return m_extrusion->ProfileCount(); }
   class BND_Curve* Profile3d(int profileIndex, double s) const;
-  //class BND_Curve* Profile3d(ComponentIndex ci) const;
-  //class BND_Curve* WallEdge(ComponentIndex ci) const;
-  //Surface WallSurface(ComponentIndex ci)
+  class BND_Curve* Profile3d_2(ON_COMPONENT_INDEX ci) const;
+  class BND_Curve* WallEdge(ON_COMPONENT_INDEX ci) const;
+  class BND_Surface* WallSurface(ON_COMPONENT_INDEX ci) const;
   class BND_LineCurve* PathLineCurve() const;
   int ProfileIndex(double profileParameter) const;
   class BND_Mesh* GetMesh(ON::mesh_type meshType);
 
   BND_Extrusion(ON_Extrusion* extrusion, const ON_ModelComponentReference* compref);
-
 };
