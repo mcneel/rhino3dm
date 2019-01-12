@@ -161,6 +161,37 @@ namespace docgen
         rst.AppendLine("   :show-inheritance:");
         System.IO.File.WriteAllText($"../{pyclass.ClassName}.rst", rst.ToString());
       }
+      // write the index
+      StringBuilder indexRst = new StringBuilder();
+      indexRst.Append(
+@".. rhino3dm documentation master file, created by
+   sphinx-quickstart on Fri Oct 19 16:07:18 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to rhino3dm's documentation!
+====================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+");
+      foreach (var key in keys)
+      {
+        var pyclass = GetPY(key);
+        indexRst.AppendLine($"   {pyclass.ClassName}");
+      }
+      indexRst.Append(
+      @"
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`");
+      System.IO.File.WriteAllText("../index.rst", indexRst.ToString());
 
       System.IO.File.WriteAllText("../rhino3dm.py", py.ToString());
     }

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ViewInfo &mdash; rhino3dm 0.1.6 documentation</title>
+  <title>Intersection &mdash; rhino3dm 0.1.6 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="DimensionStyle" href="DimensionStyle.html" />
-    <link rel="prev" title="Vector3d" href="Vector3d.html" /> 
+    <link rel="next" title="Interval" href="Interval.html" />
+    <link rel="prev" title="Font" href="Font.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -108,7 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -128,7 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -206,13 +206,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>ViewInfo</li>
+      <li>Intersection</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/ViewInfo.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Intersection.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -225,59 +225,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="viewinfo">
-<h1>ViewInfo<a class="headerlink" href="#viewinfo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="intersection">
+<h1>Intersection<a class="headerlink" href="#intersection" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rhino3dm.ViewInfo">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ViewInfo</code><a class="headerlink" href="#rhino3dm.ViewInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents the name and orientation of a View (and named view).
-views can be thought of as cameras.</p>
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurAperture">
-<code class="descname">FocalBlurAperture</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurAperture" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur aperture of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurDistance">
-<code class="descname">FocalBlurDistance</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurDistance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur distance of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurJitter">
-<code class="descname">FocalBlurJitter</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurJitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur jitter of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurSampleCount">
-<code class="descname">FocalBlurSampleCount</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurSampleCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur sample count of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.Name">
-<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ViewInfo.Name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the name of the NamedView.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.ShowWallpaperInGrayScale">
-<code class="descname">ShowWallpaperInGrayScale</code><a class="headerlink" href="#rhino3dm.ViewInfo.ShowWallpaperInGrayScale" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be shown in gray scale in this view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.Viewport">
-<code class="descname">Viewport</code><a class="headerlink" href="#rhino3dm.ViewInfo.Viewport" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the viewport, or viewing frustum, associated with this view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.WallpaperHidden">
-<code class="descname">WallpaperHidden</code><a class="headerlink" href="#rhino3dm.ViewInfo.WallpaperHidden" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be hidden from this view.</p>
+<dt id="rhino3dm.Intersection">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Intersection</code><a class="headerlink" href="#rhino3dm.Intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides static methods for the computation of intersections, projections, sections and similar.</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.LinePlane">
+<em class="property">static </em><code class="descname">LinePlane</code><span class="sig-paren">(</span><em>line</em>, <em>plane</em>, <em>lineParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LinePlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects a line and a plane. This function only returns true if the
+intersection result is a single point (i.e. if the line is coincident with
+the plane then no intersection is assumed).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>line : Line for intersection.
+plane : Plane to intersect.
+lineParameter : Parameter on line where intersection occurs.
+lineParameter : If the parameter is not within the {0, 1} Interval then the finite segment
+lineParameter : does not intersect the plane.</dd>
+<dt>Returns:</dt>
+<dd>true on success, false on failure.</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -292,10 +261,10 @@ views can be thought of as cameras.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="DimensionStyle.html" class="btn btn-neutral float-right" title="DimensionStyle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Interval.html" class="btn btn-neutral float-right" title="Interval" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Vector3d.html" class="btn btn-neutral" title="Vector3d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Font.html" class="btn btn-neutral" title="Font" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

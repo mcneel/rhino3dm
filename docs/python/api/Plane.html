@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ViewInfo &mdash; rhino3dm 0.1.6 documentation</title>
+  <title>Plane &mdash; rhino3dm 0.1.6 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="DimensionStyle" href="DimensionStyle.html" />
-    <link rel="prev" title="Vector3d" href="Vector3d.html" /> 
+    <link rel="next" title="Point2d" href="Point2d.html" />
+    <link rel="prev" title="NurbsCurvePointList" href="NurbsCurvePointList.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -117,7 +117,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
@@ -128,7 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -206,13 +206,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>ViewInfo</li>
+      <li>Plane</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/ViewInfo.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Plane.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -225,61 +225,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="viewinfo">
-<h1>ViewInfo<a class="headerlink" href="#viewinfo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="plane">
+<h1>Plane<a class="headerlink" href="#plane" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rhino3dm.ViewInfo">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ViewInfo</code><a class="headerlink" href="#rhino3dm.ViewInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents the name and orientation of a View (and named view).
-views can be thought of as cameras.</p>
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurAperture">
-<code class="descname">FocalBlurAperture</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurAperture" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur aperture of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurDistance">
-<code class="descname">FocalBlurDistance</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurDistance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur distance of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurJitter">
-<code class="descname">FocalBlurJitter</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurJitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur jitter of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurSampleCount">
-<code class="descname">FocalBlurSampleCount</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurSampleCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur sample count of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.Name">
-<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ViewInfo.Name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the name of the NamedView.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.ShowWallpaperInGrayScale">
-<code class="descname">ShowWallpaperInGrayScale</code><a class="headerlink" href="#rhino3dm.ViewInfo.ShowWallpaperInGrayScale" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be shown in gray scale in this view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.Viewport">
-<code class="descname">Viewport</code><a class="headerlink" href="#rhino3dm.ViewInfo.Viewport" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the viewport, or viewing frustum, associated with this view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.WallpaperHidden">
-<code class="descname">WallpaperHidden</code><a class="headerlink" href="#rhino3dm.ViewInfo.WallpaperHidden" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be hidden from this view.</p>
-</dd></dl>
-
+<dt id="rhino3dm.Plane">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Plane</code><a class="headerlink" href="#rhino3dm.Plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>…</p>
 </dd></dl>
 
 </div>
@@ -292,10 +243,10 @@ views can be thought of as cameras.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="DimensionStyle.html" class="btn btn-neutral float-right" title="DimensionStyle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Point2d.html" class="btn btn-neutral float-right" title="Point2d" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Vector3d.html" class="btn btn-neutral" title="Vector3d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="NurbsCurvePointList.html" class="btn btn-neutral" title="NurbsCurvePointList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

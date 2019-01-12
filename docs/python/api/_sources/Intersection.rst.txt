@@ -1,0 +1,7 @@
+Intersection
+************
+
+.. autoclass:: rhino3dm.Intersection
+   :members:
+   :undoc-members:
+   :show-inheritance:

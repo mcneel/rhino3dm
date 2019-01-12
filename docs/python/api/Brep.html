@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Brep &mdash; rhino3dm 0.0.7 documentation</title>
+  <title>Brep &mdash; rhino3dm 0.1.6 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BrepFace" href="BrepFace.html" />
-    <link rel="prev" title="Box" href="Box.html" /> 
+    <link rel="next" title="Curve" href="Curve.html" />
+    <link rel="prev" title="ViewportInfo" href="ViewportInfo.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,24 +81,18 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Brep</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
@@ -109,55 +103,64 @@
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
-<li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="InstanceReference.html">InstanceReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
-<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
-<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
-<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InstanceReference.html">InstanceReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 </ul>
 
             
@@ -229,10 +232,167 @@
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Brep</code><a class="headerlink" href="#rhino3dm.Brep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
 <p>Boundary Representation. A surface or polysurface along with trim curve information.</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromBox">
+<em class="property">static </em><code class="descname">CreateFromBox</code><span class="sig-paren">(</span><em>box</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs new brep that matches a bounding box.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>box : A box to use for creation.</dd>
+<dt>Returns:</dt>
+<dd>A new brep; or null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromCone">
+<em class="property">static </em><code class="descname">CreateFromCone</code><span class="sig-paren">(</span><em>cone</em>, <em>capBottom</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromCone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep representation of the cone with a single
+face for the cone, an edge along the cone seam,
+and vertices at the base and apex ends of this seam edge.
+The optional cap is a single face with one circular edge
+starting and ending at the base vertex.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>cone : A cone value.
+capBottom : if true the base of the cone should be capped.</dd>
+<dt>Returns:</dt>
+<dd>A Brep if successful, null on error.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromCylinder">
+<em class="property">static </em><code class="descname">CreateFromCylinder</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a cylinder.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>cylinder : cylinder.IsFinite() must be true.
+capBottom : if true end at cylinder.m_height[0] should be capped.
+capTop : if true end at cylinder.m_height[1] should be capped.</dd>
+<dt>Returns:</dt>
+<dd>A Brep representation of the cylinder with a single face for the cylinder,
+an edge along the cylinder seam, and vertices at the bottom and top ends of this
+seam edge. The optional bottom/top caps are single faces with one circular edge
+starting and ending at the bottom/top vertex.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromMesh">
+<em class="property">static </em><code class="descname">CreateFromMesh</code><span class="sig-paren">(</span><em>mesh</em>, <em>trimmedTriangles</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a brep representation of a mesh</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>trimmedTriangles : if true, triangles in the mesh will be represented by trimmed planes in
+trimmedTriangles : the brep. If false, triangles in the mesh will be represented by
+trimmedTriangles : untrimmed singular bilinear NURBS surfaces in the brep.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromRevSurface">
+<em class="property">static </em><code class="descname">CreateFromRevSurface</code><span class="sig-paren">(</span><em>surface</em>, <em>capStart</em>, <em>capEnd</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromRevSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a brep form of a surface of revolution.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>surface : The surface of revolution.
+capStart : if true, the start of the revolute is not on the axis of revolution,
+capStart : and the surface of revolution is closed, then a circular cap will be
+capStart : added to close of the hole at the start of the revolute.
+capEnd : if true, the end of the revolute is not on the axis of revolution,
+capEnd : and the surface of revolution is closed, then a circular cap will be
+capEnd : added to close of the hole at the end of the revolute.</dd>
+<dt>Returns:</dt>
+<dd>A Brep if successful, null on error.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromSphere">
+<em class="property">static </em><code class="descname">CreateFromSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a sphere.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>sphere : The input sphere provides the orienting plane and radius.</dd>
+<dt>Returns:</dt>
+<dd>A Brep if successful, null on error.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromSurface">
+<em class="property">static </em><code class="descname">CreateFromSurface</code><span class="sig-paren">(</span><em>surface</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep from a surface. The resulting Brep has an outer boundary made
+from four trims. The trims are ordered so that they run along the south, east,
+north, and then west side of the surface’s parameter space.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>surface : A surface to convert.</dd>
+<dt>Returns:</dt>
+<dd>Resulting brep or null on failure.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateQuadSphere">
+<em class="property">static </em><code class="descname">CreateQuadSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateQuadSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a quad sphere.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>sphere : The input sphere provides the orienting plane and radius.</dd>
+<dt>Returns:</dt>
+<dd>A Brep if successful, null on error.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateTrimmedPlane">
+<em class="property">static </em><code class="descname">CreateTrimmedPlane</code><span class="sig-paren">(</span><em>plane</em>, <em>curve</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateTrimmedPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Brep trimmed plane.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>plane : Plane that will be trimmed.
+curve : A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.</dd>
+<dt>Returns:</dt>
+<dd>Resulting brep or null on failure.</dd>
+</dl>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.Brep.Faces">
 <code class="descname">Faces</code><a class="headerlink" href="#rhino3dm.Brep.Faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the brep faces list accessor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Brep.Flip">
+<code class="descname">Flip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.Flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses entire brep orientation of all faces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsManifold">
+<code class="descname">IsManifold</code><a class="headerlink" href="#rhino3dm.Brep.IsManifold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not the Brep is manifold.
+Non-Manifold breps have at least one edge that is shared among three or more faces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Brep.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether this brep is a solid, or a closed oriented manifold.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsSurface">
+<code class="descname">IsSurface</code><a class="headerlink" href="#rhino3dm.Brep.IsSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the Brep has a single face and that face is geometrically the same
+as the underlying surface.  I.e., the face has trivial trimming.
+In this case, the surface is the first face surface. The flag
+Brep.Faces[0].OrientationIsReversed records the correspondence between the surface’s
+natural parametric orientation and the orientation of the Brep.trivial trimming here means that there is only one loop curve in the brep
+and that loop curve is the same as the underlying surface boundary.</p>
 </dd></dl>
 
 </dd></dl>
@@ -247,10 +407,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="BrepFace.html" class="btn btn-neutral float-right" title="BrepFace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Curve.html" class="btn btn-neutral float-right" title="Curve" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Box.html" class="btn btn-neutral" title="Box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ViewportInfo.html" class="btn btn-neutral" title="ViewportInfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -259,7 +419,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Robert McNeel &amp; Associates
+        &copy; Copyright 2019, Robert McNeel &amp; Associates
 
     </p>
   </div>
@@ -284,7 +444,7 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
 
   

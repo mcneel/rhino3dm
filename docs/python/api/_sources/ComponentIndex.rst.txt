@@ -1,0 +1,7 @@
+ComponentIndex
+**************
+
+.. autoclass:: rhino3dm.ComponentIndex
+   :members:
+   :undoc-members:
+   :show-inheritance:

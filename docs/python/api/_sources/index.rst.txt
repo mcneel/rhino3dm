@@ -11,24 +11,18 @@ Welcome to rhino3dm's documentation!
    :caption: Contents:
 
    Arc
-   ArcCurve
    BezierCurve
    Bitmap
    BoundingBox
    Box
-   Brep
-   BrepFace
    BrepFaceList
    Circle
    CommonObject
+   ComponentIndex
    Cone
    ConstructionPlane
-   Curve
-   CurveProxy
    Cylinder
-   DimensionStyle
    Ellipse
-   Extrusion
    File3dm
    File3dmBitmapTable
    File3dmDimStyleTable
@@ -39,55 +33,64 @@ Welcome to rhino3dm's documentation!
    File3dmObjectTable
    File3dmPlugInData
    File3dmPlugInDataTable
-   File3dmRdkDocumentData
    File3dmSettings
    File3dmStringTable
    File3dmViewTable
    FileReference
    Font
-   GeometryBase
-   Hatch
-   InstanceDefinition
-   InstanceReference
+   Intersection
    Interval
-   Layer
    Line
-   LineCurve
-   Material
-   Mesh
    MeshFaceList
    MeshNormalList
    MeshTextureCoordinateList
    MeshVertexList
-   ModelComponent
-   NurbsCurve
    NurbsCurveKnotList
    NurbsCurvePointList
-   NurbsSurface
-   ObjectAttributes
-   PlaneSurface
-   Point
+   Plane
    Point2d
    Point3d
    Point3dList
    Point3f
    Point4d
-   PointCloud
-   PointGrid
-   Polycurve
-   Polyline
-   Polylinecurve
-   RevSurface
    Sphere
-   Surface
-   SurfaceProxy
    Texture
-   TextureMapping
    Transform
    Vector2d
    Vector3d
    ViewInfo
+   DimensionStyle
+   GeometryBase
+   InstanceDefinition
+   Layer
+   Material
+   ModelComponent
+   ObjectAttributes
+   TextureMapping
    ViewportInfo
+   Brep
+   Curve
+   Hatch
+   InstanceReference
+   Mesh
+   Point
+   PointCloud
+   PointGrid
+   Surface
+   ArcCurve
+   CurveProxy
+   Extrusion
+   LineCurve
+   NurbsCurve
+   NurbsSurface
+   PlaneSurface
+   Polycurve
+   Polylinecurve
+   RevSurface
+   SurfaceProxy
+   BrepFace
+   File3dmRdkDocumentData
+   Polyline
 
 
 Indices and tables

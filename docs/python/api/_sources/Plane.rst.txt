@@ -1,0 +1,7 @@
+Plane
+*****
+
+.. autoclass:: rhino3dm.Plane
+   :members:
+   :undoc-members:
+   :show-inheritance:
