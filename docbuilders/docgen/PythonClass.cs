@@ -177,10 +177,16 @@ Welcome to rhino3dm's documentation!
    :caption: Contents:
 
 ");
+      List<string> names = new List<string>();
       foreach (var key in keys)
       {
         var pyclass = GetPY(key);
-        indexRst.AppendLine($"   {pyclass.ClassName}");
+        names.Add(pyclass.ClassName);
+      }
+      names.Sort();
+      foreach (var name in names)
+      {
+        indexRst.AppendLine($"   {name}");
       }
       indexRst.Append(
       @"
