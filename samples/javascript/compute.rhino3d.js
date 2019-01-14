@@ -25,2194 +25,2963 @@ var RhinoCompute = {
         }).then(r=>r.json());
     },
 
+    zipArgs: function(multiple, ...args) {
+        if(!multiple)
+            return args;
+
+        if(args.length==1)
+            return args[0].map(function(_,i) { return [args[0][i]]; });
+        if(args.length==2)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i]]; }
+            );
+        if(args.length==3)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i],args[2][i]]; }
+            );
+        if(args.length==4)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i],args[2][i],args[3][i]]; }
+            );
+        if(args.length==5)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i]]; }
+            );
+        if(args.length==6)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i]]; }
+            );
+        if(args.length==7)
+            return args[0].map(function(_,i) {
+                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i]]; }
+            );
+        return args[0].map(function(_,i) {
+            return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i],args[7][i]]; }
+        );
+    },
+
     Extrusion : {
-        getWireframe : function(extrusion) {
-            args = [extrusion];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/extrusion/getwireframe-extrusion", args);
+        getWireframe : function(extrusion, multiple=false) {
+            let url="rhino/geometry/extrusion/getwireframe-extrusion";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, extrusion);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     BezierCurve : {
-        createCubicBeziers : function(sourceCurve, distanceTolerance, kinkTolerance) {
-            args = [sourceCurve, distanceTolerance, kinkTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/beziercurve/createcubicbeziers-curve_double_double", args);
+        createCubicBeziers : function(sourceCurve, distanceTolerance, kinkTolerance, multiple=false) {
+            let url="rhino/geometry/beziercurve/createcubicbeziers-curve_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, sourceCurve, distanceTolerance, kinkTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBeziers : function(sourceCurve) {
-            args = [sourceCurve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/beziercurve/createbeziers-curve", args);
+        createBeziers : function(sourceCurve, multiple=false) {
+            let url="rhino/geometry/beziercurve/createbeziers-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, sourceCurve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     Brep : {
-        changeSeam : function(face, direction, parameter, tolerance) {
-            args = [face, direction, parameter, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/changeseam-brepface_int_double_double", args);
+        changeSeam : function(face, direction, parameter, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/changeseam-brepface_int_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face, direction, parameter, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        copyTrimCurves : function(trimSource, surfaceSource, tolerance) {
-            args = [trimSource, surfaceSource, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/copytrimcurves-brepface_surface_double", args);
+        copyTrimCurves : function(trimSource, surfaceSource, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/copytrimcurves-brepface_surface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, trimSource, surfaceSource, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBaseballSphere : function(center, radius, tolerance) {
-            args = [center, radius, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbaseballsphere-point3d_double_double", args);
+        createBaseballSphere : function(center, radius, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbaseballsphere-point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, center, radius, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createDevelopableLoft : function(crv0, crv1, reverse0, reverse1, density) {
-            args = [crv0, crv1, reverse0, reverse1, density];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createdevelopableloft-curve_curve_bool_bool_int", args);
+        createDevelopableLoft : function(crv0, crv1, reverse0, reverse1, density, multiple=false) {
+            let url="rhino/geometry/brep/createdevelopableloft-curve_curve_bool_bool_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, crv0, crv1, reverse0, reverse1, density);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createDevelopableLoft1 : function(rail0, rail1, fixedRulings) {
-            args = [rail0, rail1, fixedRulings];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createdevelopableloft-nurbscurve_nurbscurve_point2darray", args);
+        createDevelopableLoft1 : function(rail0, rail1, fixedRulings, multiple=false) {
+            let url="rhino/geometry/brep/createdevelopableloft-nurbscurve_nurbscurve_point2darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail0, rail1, fixedRulings);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps : function(inputLoops) {
-            args = [inputLoops];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-curvearray", args);
+        createPlanarBreps : function(inputLoops, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-curvearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoops);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps1 : function(inputLoops, tolerance) {
-            args = [inputLoops, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-curvearray_double", args);
+        createPlanarBreps1 : function(inputLoops, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-curvearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoops, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps2 : function(inputLoop) {
-            args = [inputLoop];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-curve", args);
+        createPlanarBreps2 : function(inputLoop, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoop);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps3 : function(inputLoop, tolerance) {
-            args = [inputLoop, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-curve_double", args);
+        createPlanarBreps3 : function(inputLoop, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoop, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTrimmedSurface : function(trimSource, surfaceSource) {
-            args = [trimSource, surfaceSource];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createtrimmedsurface-brepface_surface", args);
+        createTrimmedSurface : function(trimSource, surfaceSource, multiple=false) {
+            let url="rhino/geometry/brep/createtrimmedsurface-brepface_surface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, trimSource, surfaceSource);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTrimmedSurface1 : function(trimSource, surfaceSource, tolerance) {
-            args = [trimSource, surfaceSource, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createtrimmedsurface-brepface_surface_double", args);
+        createTrimmedSurface1 : function(trimSource, surfaceSource, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createtrimmedsurface-brepface_surface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, trimSource, surfaceSource, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCornerPoints : function(corner1, corner2, corner3, tolerance) {
-            args = [corner1, corner2, corner3, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromcornerpoints-point3d_point3d_point3d_double", args);
+        createFromCornerPoints : function(corner1, corner2, corner3, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromcornerpoints-point3d_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corner1, corner2, corner3, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCornerPoints1 : function(corner1, corner2, corner3, corner4, tolerance) {
-            args = [corner1, corner2, corner3, corner4, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromcornerpoints-point3d_point3d_point3d_point3d_double", args);
+        createFromCornerPoints1 : function(corner1, corner2, corner3, corner4, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromcornerpoints-point3d_point3d_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corner1, corner2, corner3, corner4, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createEdgeSurface : function(curves) {
-            args = [curves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createedgesurface-curvearray", args);
+        createEdgeSurface : function(curves, multiple=false) {
+            let url="rhino/geometry/brep/createedgesurface-curvearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps : function(inputLoops) {
-            args = [inputLoops];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist", args);
+        createPlanarBreps : function(inputLoops, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoops);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPlanarBreps1 : function(inputLoops, tolerance) {
-            args = [inputLoops, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist_double", args);
+        createPlanarBreps1 : function(inputLoops, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputLoops, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromOffsetFace : function(face, offsetDistance, offsetTolerance, bothSides, createSolid) {
-            args = [face, offsetDistance, offsetTolerance, bothSides, createSolid];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromoffsetface-brepface_double_double_bool_bool", args);
+        createFromOffsetFace : function(face, offsetDistance, offsetTolerance, bothSides, createSolid, multiple=false) {
+            let url="rhino/geometry/brep/createfromoffsetface-brepface_double_double_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face, offsetDistance, offsetTolerance, bothSides, createSolid);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createSolid : function(breps, tolerance) {
-            args = [breps, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createsolid-breparray_double", args);
+        createSolid : function(breps, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createsolid-breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, breps, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeSurfaces : function(surface0, surface1, tolerance, angleToleranceRadians) {
-            args = [surface0, surface1, tolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergesurfaces-surface_surface_double_double", args);
+        mergeSurfaces : function(surface0, surface1, tolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/brep/mergesurfaces-surface_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface0, surface1, tolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeSurfaces1 : function(brep0, brep1, tolerance, angleToleranceRadians) {
-            args = [brep0, brep1, tolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergesurfaces-brep_brep_double_double", args);
+        mergeSurfaces1 : function(brep0, brep1, tolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/brep/mergesurfaces-brep_brep_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep0, brep1, tolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeSurfaces2 : function(brep0, brep1, tolerance, angleToleranceRadians, point0, point1, roundness, smooth) {
-            args = [brep0, brep1, tolerance, angleToleranceRadians, point0, point1, roundness, smooth];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergesurfaces-brep_brep_double_double_point2d_point2d_double_bool", args);
+        mergeSurfaces2 : function(brep0, brep1, tolerance, angleToleranceRadians, point0, point1, roundness, smooth, multiple=false) {
+            let url="rhino/geometry/brep/mergesurfaces-brep_brep_double_double_point2d_point2d_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep0, brep1, tolerance, angleToleranceRadians, point0, point1, roundness, smooth);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPatch : function(geometry, startingSurface, tolerance) {
-            args = [geometry, startingSurface, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createpatch-geometrybasearray_surface_double", args);
+        createPatch : function(geometry, startingSurface, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createpatch-geometrybasearray_surface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry, startingSurface, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPatch1 : function(geometry, uSpans, vSpans, tolerance) {
-            args = [geometry, uSpans, vSpans, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createpatch-geometrybasearray_int_int_double", args);
+        createPatch1 : function(geometry, uSpans, vSpans, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createpatch-geometrybasearray_int_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry, uSpans, vSpans, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPatch2 : function(geometry, startingSurface, uSpans, vSpans, trim, tangency, pointSpacing, flexibility, surfacePull, fixEdges, tolerance) {
-            args = [geometry, startingSurface, uSpans, vSpans, trim, tangency, pointSpacing, flexibility, surfacePull, fixEdges, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createpatch-geometrybasearray_surface_int_int_bool_bool_double_double_double_boolarray_double", args);
+        createPatch2 : function(geometry, startingSurface, uSpans, vSpans, trim, tangency, pointSpacing, flexibility, surfacePull, fixEdges, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createpatch-geometrybasearray_surface_int_int_bool_bool_double_double_double_boolarray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry, startingSurface, uSpans, vSpans, trim, tangency, pointSpacing, flexibility, surfacePull, fixEdges, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPipe : function(rail, radius, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians) {
-            args = [rail, radius, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createpipe-curve_double_bool_pipecapmode_bool_double_double", args);
+        createPipe : function(rail, radius, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/brep/createpipe-curve_double_bool_pipecapmode_bool_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail, radius, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPipe1 : function(rail, railRadiiParameters, radii, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians) {
-            args = [rail, railRadiiParameters, radii, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createpipe-curve_doublearray_doublearray_bool_pipecapmode_bool_double_double", args);
+        createPipe1 : function(rail, railRadiiParameters, radii, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/brep/createpipe-curve_doublearray_doublearray_bool_pipecapmode_bool_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail, railRadiiParameters, radii, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSweep : function(rail, shape, closed, tolerance) {
-            args = [rail, shape, closed, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromsweep-curve_curve_bool_double", args);
+        createFromSweep : function(rail, shape, closed, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromsweep-curve_curve_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail, shape, closed, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSweep1 : function(rail, shapes, closed, tolerance) {
-            args = [rail, shapes, closed, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromsweep-curve_curvearray_bool_double", args);
+        createFromSweep1 : function(rail, shapes, closed, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromsweep-curve_curvearray_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail, shapes, closed, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSweep2 : function(rail1, rail2, shape, closed, tolerance) {
-            args = [rail1, rail2, shape, closed, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromsweep-curve_curve_curve_bool_double", args);
+        createFromSweep2 : function(rail1, rail2, shape, closed, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromsweep-curve_curve_curve_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail1, rail2, shape, closed, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSweep3 : function(rail1, rail2, shapes, closed, tolerance) {
-            args = [rail1, rail2, shapes, closed, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromsweep-curve_curve_curvearray_bool_double", args);
+        createFromSweep3 : function(rail1, rail2, shapes, closed, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromsweep-curve_curve_curvearray_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail1, rail2, shapes, closed, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSweepInParts : function(rail1, rail2, shapes, rail_params, closed, tolerance) {
-            args = [rail1, rail2, shapes, rail_params, closed, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromsweepinparts-curve_curve_curvearray_point2darray_bool_double", args);
+        createFromSweepInParts : function(rail1, rail2, shapes, rail_params, closed, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromsweepinparts-curve_curve_curvearray_point2darray_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, rail1, rail2, shapes, rail_params, closed, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromTaperedExtrude : function(curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType, tolerance, angleToleranceRadians) {
-            args = [curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType, tolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromtaperedextrude-curve_double_vector3d_point3d_double_extrudecornertype_double_double", args);
+        createFromTaperedExtrude : function(curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType, tolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/brep/createfromtaperedextrude-curve_double_vector3d_point3d_double_extrudecornertype_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType, tolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromTaperedExtrude1 : function(curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType) {
-            args = [curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromtaperedextrude-curve_double_vector3d_point3d_double_extrudecornertype", args);
+        createFromTaperedExtrude1 : function(curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType, multiple=false) {
+            let url="rhino/geometry/brep/createfromtaperedextrude-curve_double_vector3d_point3d_double_extrudecornertype";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveToExtrude, distance, direction, basePoint, draftAngleRadians, cornerType);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBlendSurface : function(face0, edge0, domain0, rev0, continuity0, face1, edge1, domain1, rev1, continuity1) {
-            args = [face0, edge0, domain0, rev0, continuity0, face1, edge1, domain1, rev1, continuity1];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createblendsurface-brepface_brepedge_interval_bool_blendcontinuity_brepface_brepedge_interval_bool_blendcontinuity", args);
+        createBlendSurface : function(face0, edge0, domain0, rev0, continuity0, face1, edge1, domain1, rev1, continuity1, multiple=false) {
+            let url="rhino/geometry/brep/createblendsurface-brepface_brepedge_interval_bool_blendcontinuity_brepface_brepedge_interval_bool_blendcontinuity";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, edge0, domain0, rev0, continuity0, face1, edge1, domain1, rev1, continuity1);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBlendShape : function(face0, edge0, t0, rev0, continuity0, face1, edge1, t1, rev1, continuity1) {
-            args = [face0, edge0, t0, rev0, continuity0, face1, edge1, t1, rev1, continuity1];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createblendshape-brepface_brepedge_double_bool_blendcontinuity_brepface_brepedge_double_bool_blendcontinuity", args);
+        createBlendShape : function(face0, edge0, t0, rev0, continuity0, face1, edge1, t1, rev1, continuity1, multiple=false) {
+            let url="rhino/geometry/brep/createblendshape-brepface_brepedge_double_bool_blendcontinuity_brepface_brepedge_double_bool_blendcontinuity";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, edge0, t0, rev0, continuity0, face1, edge1, t1, rev1, continuity1);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFilletSurface : function(face0, uv0, face1, uv1, radius, extend, tolerance) {
-            args = [face0, uv0, face1, uv1, radius, extend, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfilletsurface-brepface_point2d_brepface_point2d_double_bool_double", args);
+        createFilletSurface : function(face0, uv0, face1, uv1, radius, extend, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfilletsurface-brepface_point2d_brepface_point2d_double_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, uv0, face1, uv1, radius, extend, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFilletSurface1 : function(face0, uv0, face1, uv1, radius, trim, extend, tolerance) {
-            args = [face0, uv0, face1, uv1, radius, trim, extend, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfilletsurface-brepface_point2d_brepface_point2d_double_bool_bool_double_breparray_breparray", args);
+        createFilletSurface1 : function(face0, uv0, face1, uv1, radius, trim, extend, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfilletsurface-brepface_point2d_brepface_point2d_double_bool_bool_double_breparray_breparray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, uv0, face1, uv1, radius, trim, extend, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createChamferSurface : function(face0, uv0, radius0, face1, uv1, radius1, extend, tolerance) {
-            args = [face0, uv0, radius0, face1, uv1, radius1, extend, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_double", args);
+        createChamferSurface : function(face0, uv0, radius0, face1, uv1, radius1, extend, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, uv0, radius0, face1, uv1, radius1, extend, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createChamferSurface1 : function(face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance) {
-            args = [face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_bool_double_breparray_breparray", args);
+        createChamferSurface1 : function(face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createchamfersurface-brepface_point2d_double_brepface_point2d_double_bool_bool_double_breparray_breparray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, face0, uv0, radius0, face1, uv1, radius1, trim, extend, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFilletEdges : function(brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance) {
-            args = [brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfilletedges-brep_intarray_doublearray_doublearray_blendtype_railtype_double", args);
+        createFilletEdges : function(brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfilletedges-brep_intarray_doublearray_doublearray_blendtype_railtype_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, edgeIndices, startRadii, endRadii, blendType, railType, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createOffsetBrep : function(brep, distance, solid, extend, tolerance) {
-            args = [brep, distance, solid, extend, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createoffsetbrep-brep_double_bool_bool_double_breparray_breparray", args);
+        createOffsetBrep : function(brep, distance, solid, extend, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createoffsetbrep-brep_double_bool_bool_double_breparray_breparray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, distance, solid, extend, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromJoinedEdges : function(brep0, edgeIndex0, brep1, edgeIndex1, joinTolerance) {
-            args = [brep0, edgeIndex0, brep1, edgeIndex1, joinTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromjoinededges-brep_int_brep_int_double", args);
+        createFromJoinedEdges : function(brep0, edgeIndex0, brep1, edgeIndex1, joinTolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromjoinededges-brep_int_brep_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep0, edgeIndex0, brep1, edgeIndex1, joinTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromLoft : function(curves, start, end, loftType, closed) {
-            args = [curves, start, end, loftType, closed];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromloft-curvearray_point3d_point3d_lofttype_bool", args);
+        createFromLoft : function(curves, start, end, loftType, closed, multiple=false) {
+            let url="rhino/geometry/brep/createfromloft-curvearray_point3d_point3d_lofttype_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, start, end, loftType, closed);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromLoftRebuild : function(curves, start, end, loftType, closed, rebuildPointCount) {
-            args = [curves, start, end, loftType, closed, rebuildPointCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromloftrebuild-curvearray_point3d_point3d_lofttype_bool_int", args);
+        createFromLoftRebuild : function(curves, start, end, loftType, closed, rebuildPointCount, multiple=false) {
+            let url="rhino/geometry/brep/createfromloftrebuild-curvearray_point3d_point3d_lofttype_bool_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, start, end, loftType, closed, rebuildPointCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromLoftRefit : function(curves, start, end, loftType, closed, refitTolerance) {
-            args = [curves, start, end, loftType, closed, refitTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createfromloftrefit-curvearray_point3d_point3d_lofttype_bool_double", args);
+        createFromLoftRefit : function(curves, start, end, loftType, closed, refitTolerance, multiple=false) {
+            let url="rhino/geometry/brep/createfromloftrefit-curvearray_point3d_point3d_lofttype_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, start, end, loftType, closed, refitTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanUnion : function(breps, tolerance) {
-            args = [breps, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanunion-breparray_double", args);
+        createBooleanUnion : function(breps, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanunion-breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, breps, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanUnion1 : function(breps, tolerance, manifoldOnly) {
-            args = [breps, tolerance, manifoldOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanunion-breparray_double_bool", args);
+        createBooleanUnion1 : function(breps, tolerance, manifoldOnly, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanunion-breparray_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, breps, tolerance, manifoldOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection : function(firstSet, secondSet, tolerance) {
-            args = [firstSet, secondSet, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanintersection-breparray_breparray_double", args);
+        createBooleanIntersection : function(firstSet, secondSet, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanintersection-breparray_breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection1 : function(firstSet, secondSet, tolerance, manifoldOnly) {
-            args = [firstSet, secondSet, tolerance, manifoldOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanintersection-breparray_breparray_double_bool", args);
+        createBooleanIntersection1 : function(firstSet, secondSet, tolerance, manifoldOnly, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanintersection-breparray_breparray_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet, tolerance, manifoldOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection2 : function(firstBrep, secondBrep, tolerance) {
-            args = [firstBrep, secondBrep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanintersection-brep_brep_double", args);
+        createBooleanIntersection2 : function(firstBrep, secondBrep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanintersection-brep_brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstBrep, secondBrep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection3 : function(firstBrep, secondBrep, tolerance, manifoldOnly) {
-            args = [firstBrep, secondBrep, tolerance, manifoldOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleanintersection-brep_brep_double_bool", args);
+        createBooleanIntersection3 : function(firstBrep, secondBrep, tolerance, manifoldOnly, multiple=false) {
+            let url="rhino/geometry/brep/createbooleanintersection-brep_brep_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstBrep, secondBrep, tolerance, manifoldOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference : function(firstSet, secondSet, tolerance) {
-            args = [firstSet, secondSet, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleandifference-breparray_breparray_double", args);
+        createBooleanDifference : function(firstSet, secondSet, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbooleandifference-breparray_breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference1 : function(firstSet, secondSet, tolerance, manifoldOnly) {
-            args = [firstSet, secondSet, tolerance, manifoldOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleandifference-breparray_breparray_double_bool", args);
+        createBooleanDifference1 : function(firstSet, secondSet, tolerance, manifoldOnly, multiple=false) {
+            let url="rhino/geometry/brep/createbooleandifference-breparray_breparray_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet, tolerance, manifoldOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference2 : function(firstBrep, secondBrep, tolerance) {
-            args = [firstBrep, secondBrep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleandifference-brep_brep_double", args);
+        createBooleanDifference2 : function(firstBrep, secondBrep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createbooleandifference-brep_brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstBrep, secondBrep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference3 : function(firstBrep, secondBrep, tolerance, manifoldOnly) {
-            args = [firstBrep, secondBrep, tolerance, manifoldOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createbooleandifference-brep_brep_double_bool", args);
+        createBooleanDifference3 : function(firstBrep, secondBrep, tolerance, manifoldOnly, multiple=false) {
+            let url="rhino/geometry/brep/createbooleandifference-brep_brep_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstBrep, secondBrep, tolerance, manifoldOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createShell : function(brep, facesToRemove, distance, tolerance) {
-            args = [brep, facesToRemove, distance, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createshell-brep_intarray_double_double", args);
+        createShell : function(brep, facesToRemove, distance, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/createshell-brep_intarray_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, facesToRemove, distance, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinBreps : function(brepsToJoin, tolerance) {
-            args = [brepsToJoin, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/joinbreps-breparray_double", args);
+        joinBreps : function(brepsToJoin, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/joinbreps-breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepsToJoin, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeBreps : function(brepsToMerge, tolerance) {
-            args = [brepsToMerge, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergebreps-breparray_double", args);
+        mergeBreps : function(brepsToMerge, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/mergebreps-breparray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepsToMerge, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createContourCurves : function(brepToContour, contourStart, contourEnd, interval) {
-            args = [brepToContour, contourStart, contourEnd, interval];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createcontourcurves-brep_point3d_point3d_double", args);
+        createContourCurves : function(brepToContour, contourStart, contourEnd, interval, multiple=false) {
+            let url="rhino/geometry/brep/createcontourcurves-brep_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepToContour, contourStart, contourEnd, interval);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createContourCurves1 : function(brepToContour, sectionPlane) {
-            args = [brepToContour, sectionPlane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createcontourcurves-brep_plane", args);
+        createContourCurves1 : function(brepToContour, sectionPlane, multiple=false) {
+            let url="rhino/geometry/brep/createcontourcurves-brep_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepToContour, sectionPlane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createCurvatureAnalysisMesh : function(brep, state) {
-            args = [brep, state];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/createcurvatureanalysismesh-brep_rhino.applicationsettings.curvatureanalysissettingsstate", args);
+        createCurvatureAnalysisMesh : function(brep, state, multiple=false) {
+            let url="rhino/geometry/brep/createcurvatureanalysismesh-brep_rhino.applicationsettings.curvatureanalysissettingsstate";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, state);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getRegions : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getregions-brep", args);
+        getRegions : function(brep, multiple=false) {
+            let url="rhino/geometry/brep/getregions-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getWireframe : function(brep, density) {
-            args = [brep, density];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getwireframe-brep_int", args);
+        getWireframe : function(brep, density, multiple=false) {
+            let url="rhino/geometry/brep/getwireframe-brep_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, density);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint : function(brep, testPoint) {
-            args = [brep, testPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/closestpoint-brep_point3d", args);
+        closestPoint : function(brep, testPoint, multiple=false) {
+            let url="rhino/geometry/brep/closestpoint-brep_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, testPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        isPointInside : function(brep, point, tolerance, strictlyIn) {
-            args = [brep, point, tolerance, strictlyIn];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/ispointinside-brep_point3d_double_bool", args);
+        isPointInside : function(brep, point, tolerance, strictlyIn, multiple=false) {
+            let url="rhino/geometry/brep/ispointinside-brep_point3d_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, point, tolerance, strictlyIn);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        capPlanarHoles : function(brep, tolerance) {
-            args = [brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/capplanarholes-brep_double", args);
+        capPlanarHoles : function(brep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/capplanarholes-brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        join : function(brep, otherBrep, tolerance, compact) {
-            args = [brep, otherBrep, tolerance, compact];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/join-brep_brep_double_bool", args);
+        join : function(brep, otherBrep, tolerance, compact, multiple=false) {
+            let url="rhino/geometry/brep/join-brep_brep_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, otherBrep, tolerance, compact);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinNakedEdges : function(brep, tolerance) {
-            args = [brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/joinnakededges-brep_double", args);
+        joinNakedEdges : function(brep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/joinnakededges-brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeCoplanarFaces : function(brep, tolerance) {
-            args = [brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergecoplanarfaces-brep_double", args);
+        mergeCoplanarFaces : function(brep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/mergecoplanarfaces-brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        mergeCoplanarFaces1 : function(brep, tolerance, angleTolerance) {
-            args = [brep, tolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/mergecoplanarfaces-brep_double_double", args);
+        mergeCoplanarFaces1 : function(brep, tolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/brep/mergecoplanarfaces-brep_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split : function(brep, splitter, intersectionTolerance) {
-            args = [brep, splitter, intersectionTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/split-brep_brep_double", args);
+        split : function(brep, splitter, intersectionTolerance, multiple=false) {
+            let url="rhino/geometry/brep/split-brep_brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, splitter, intersectionTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split1 : function(brep, splitter, intersectionTolerance) {
-            args = [brep, splitter, intersectionTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/split-brep_brep_double_bool", args);
+        split1 : function(brep, splitter, intersectionTolerance, multiple=false) {
+            let url="rhino/geometry/brep/split-brep_brep_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, splitter, intersectionTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        trim : function(brep, cutter, intersectionTolerance) {
-            args = [brep, cutter, intersectionTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/trim-brep_brep_double", args);
+        trim : function(brep, cutter, intersectionTolerance, multiple=false) {
+            let url="rhino/geometry/brep/trim-brep_brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, cutter, intersectionTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        trim1 : function(brep, cutter, intersectionTolerance) {
-            args = [brep, cutter, intersectionTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/trim-brep_plane_double", args);
+        trim1 : function(brep, cutter, intersectionTolerance, multiple=false) {
+            let url="rhino/geometry/brep/trim-brep_plane_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, cutter, intersectionTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        unjoinEdges : function(brep, edgesToUnjoin) {
-            args = [brep, edgesToUnjoin];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/unjoinedges-brep_intarray", args);
+        unjoinEdges : function(brep, edgesToUnjoin, multiple=false) {
+            let url="rhino/geometry/brep/unjoinedges-brep_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, edgesToUnjoin);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinEdges : function(brep, edgeIndex0, edgeIndex1, joinTolerance, compact) {
-            args = [brep, edgeIndex0, edgeIndex1, joinTolerance, compact];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/joinedges-brep_int_int_double_bool", args);
+        joinEdges : function(brep, edgeIndex0, edgeIndex1, joinTolerance, compact, multiple=false) {
+            let url="rhino/geometry/brep/joinedges-brep_int_int_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, edgeIndex0, edgeIndex1, joinTolerance, compact);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        transformComponent : function(brep, components, xform, tolerance, timeLimit, useMultipleThreads) {
-            args = [brep, components, xform, tolerance, timeLimit, useMultipleThreads];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/transformcomponent-brep_componentindexarray_transform_double_double_bool", args);
+        transformComponent : function(brep, components, xform, tolerance, timeLimit, useMultipleThreads, multiple=false) {
+            let url="rhino/geometry/brep/transformcomponent-brep_componentindexarray_transform_double_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, components, xform, tolerance, timeLimit, useMultipleThreads);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getArea : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getarea-brep", args);
+        getArea : function(brep, multiple=false) {
+            let url="rhino/geometry/brep/getarea-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getArea1 : function(brep, relativeTolerance, absoluteTolerance) {
-            args = [brep, relativeTolerance, absoluteTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getarea-brep_double_double", args);
+        getArea1 : function(brep, relativeTolerance, absoluteTolerance, multiple=false) {
+            let url="rhino/geometry/brep/getarea-brep_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, relativeTolerance, absoluteTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getVolume : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getvolume-brep", args);
+        getVolume : function(brep, multiple=false) {
+            let url="rhino/geometry/brep/getvolume-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getVolume1 : function(brep, relativeTolerance, absoluteTolerance) {
-            args = [brep, relativeTolerance, absoluteTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/getvolume-brep_double_double", args);
+        getVolume1 : function(brep, relativeTolerance, absoluteTolerance, multiple=false) {
+            let url="rhino/geometry/brep/getvolume-brep_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, relativeTolerance, absoluteTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        rebuildTrimsForV2 : function(brep, face, nurbsSurface) {
-            args = [brep, face, nurbsSurface];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/rebuildtrimsforv2-brep_brepface_nurbssurface", args);
+        rebuildTrimsForV2 : function(brep, face, nurbsSurface, multiple=false) {
+            let url="rhino/geometry/brep/rebuildtrimsforv2-brep_brepface_nurbssurface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, face, nurbsSurface);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        makeValidForV2 : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/makevalidforv2-brep", args);
+        makeValidForV2 : function(brep, multiple=false) {
+            let url="rhino/geometry/brep/makevalidforv2-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        repair : function(brep, tolerance) {
-            args = [brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/repair-brep_double", args);
+        repair : function(brep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/repair-brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        removeHoles : function(brep, tolerance) {
-            args = [brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/removeholes-brep_double", args);
+        removeHoles : function(brep, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/removeholes-brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        removeHoles1 : function(brep, loops, tolerance) {
-            args = [brep, loops, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brep/removeholes-brep_componentindexarray_double", args);
+        removeHoles1 : function(brep, loops, tolerance, multiple=false) {
+            let url="rhino/geometry/brep/removeholes-brep_componentindexarray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, loops, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     BrepFace : {
-        pullPointsToFace : function(brepface, points, tolerance) {
-            args = [brepface, points, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/pullpointstoface-brepface_point3darray_double", args);
+        pullPointsToFace : function(brepface, points, tolerance, multiple=false) {
+            let url="rhino/geometry/brepface/pullpointstoface-brepface_point3darray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, points, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        draftAnglePoint : function(brepface, testPoint, testAngle, pullDirection, edge) {
-            args = [brepface, testPoint, testAngle, pullDirection, edge];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/draftanglepoint-brepface_point2d_double_vector3d_bool_point3d_double", args);
+        draftAnglePoint : function(brepface, testPoint, testAngle, pullDirection, edge, multiple=false) {
+            let url="rhino/geometry/brepface/draftanglepoint-brepface_point2d_double_vector3d_bool_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, testPoint, testAngle, pullDirection, edge);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        removeHoles : function(brepface, tolerance) {
-            args = [brepface, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/removeholes-brepface_double", args);
+        removeHoles : function(brepface, tolerance, multiple=false) {
+            let url="rhino/geometry/brepface/removeholes-brepface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split : function(brepface, curves, tolerance) {
-            args = [brepface, curves, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/split-brepface_curvearray_double", args);
+        split : function(brepface, curves, tolerance, multiple=false) {
+            let url="rhino/geometry/brepface/split-brepface_curvearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, curves, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        isPointOnFace : function(brepface, u, v) {
-            args = [brepface, u, v];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/ispointonface-brepface_double_double", args);
+        isPointOnFace : function(brepface, u, v, multiple=false) {
+            let url="rhino/geometry/brepface/ispointonface-brepface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, u, v);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        trimAwareIsoIntervals : function(brepface, direction, constantParameter) {
-            args = [brepface, direction, constantParameter];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/trimawareisointervals-brepface_int_double", args);
+        trimAwareIsoIntervals : function(brepface, direction, constantParameter, multiple=false) {
+            let url="rhino/geometry/brepface/trimawareisointervals-brepface_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, direction, constantParameter);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        trimAwareIsoCurve : function(brepface, direction, constantParameter) {
-            args = [brepface, direction, constantParameter];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/trimawareisocurve-brepface_int_double", args);
+        trimAwareIsoCurve : function(brepface, direction, constantParameter, multiple=false) {
+            let url="rhino/geometry/brepface/trimawareisocurve-brepface_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, direction, constantParameter);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        changeSurface : function(brepface, surfaceIndex) {
-            args = [brepface, surfaceIndex];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/changesurface-brepface_int", args);
+        changeSurface : function(brepface, surfaceIndex, multiple=false) {
+            let url="rhino/geometry/brepface/changesurface-brepface_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, surfaceIndex);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        rebuildEdges : function(brepface, tolerance, rebuildSharedEdges, rebuildVertices) {
-            args = [brepface, tolerance, rebuildSharedEdges, rebuildVertices];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/brepface/rebuildedges-brepface_double_bool_bool", args);
+        rebuildEdges : function(brepface, tolerance, rebuildSharedEdges, rebuildVertices, multiple=false) {
+            let url="rhino/geometry/brepface/rebuildedges-brepface_double_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepface, tolerance, rebuildSharedEdges, rebuildVertices);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     Curve : {
-        getConicSectionType : function(curve) {
-            args = [curve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getconicsectiontype-curve", args);
+        getConicSectionType : function(curve, multiple=false) {
+            let url="rhino/geometry/curve/getconicsectiontype-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createInterpolatedCurve : function(points, degree) {
-            args = [points, degree];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createinterpolatedcurve-point3darray_int", args);
+        createInterpolatedCurve : function(points, degree, multiple=false) {
+            let url="rhino/geometry/curve/createinterpolatedcurve-point3darray_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, degree);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createInterpolatedCurve1 : function(points, degree, knots) {
-            args = [points, degree, knots];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createinterpolatedcurve-point3darray_int_curveknotstyle", args);
+        createInterpolatedCurve1 : function(points, degree, knots, multiple=false) {
+            let url="rhino/geometry/curve/createinterpolatedcurve-point3darray_int_curveknotstyle";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, degree, knots);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createInterpolatedCurve2 : function(points, degree, knots, startTangent, endTangent) {
-            args = [points, degree, knots, startTangent, endTangent];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createinterpolatedcurve-point3darray_int_curveknotstyle_vector3d_vector3d", args);
+        createInterpolatedCurve2 : function(points, degree, knots, startTangent, endTangent, multiple=false) {
+            let url="rhino/geometry/curve/createinterpolatedcurve-point3darray_int_curveknotstyle_vector3d_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, degree, knots, startTangent, endTangent);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createSoftEditCurve : function(curve, t, delta, length, fixEnds) {
-            args = [curve, t, delta, length, fixEnds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createsofteditcurve-curve_double_vector3d_double_bool", args);
+        createSoftEditCurve : function(curve, t, delta, length, fixEnds, multiple=false) {
+            let url="rhino/geometry/curve/createsofteditcurve-curve_double_vector3d_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, t, delta, length, fixEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFilletCornersCurve : function(curve, radius, tolerance, angleTolerance) {
-            args = [curve, radius, tolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createfilletcornerscurve-curve_double_double_double", args);
+        createFilletCornersCurve : function(curve, radius, tolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/curve/createfilletcornerscurve-curve_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, radius, tolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createArcBlend : function(startPt, startDir, endPt, endDir, controlPointLengthRatio) {
-            args = [startPt, startDir, endPt, endDir, controlPointLengthRatio];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createarcblend-point3d_vector3d_point3d_vector3d_double", args);
+        createArcBlend : function(startPt, startDir, endPt, endDir, controlPointLengthRatio, multiple=false) {
+            let url="rhino/geometry/curve/createarcblend-point3d_vector3d_point3d_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, startPt, startDir, endPt, endDir, controlPointLengthRatio);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createMeanCurve : function(curveA, curveB, angleToleranceRadians) {
-            args = [curveA, curveB, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createmeancurve-curve_curve_double", args);
+        createMeanCurve : function(curveA, curveB, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/curve/createmeancurve-curve_curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createMeanCurve1 : function(curveA, curveB) {
-            args = [curveA, curveB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createmeancurve-curve_curve", args);
+        createMeanCurve1 : function(curveA, curveB, multiple=false) {
+            let url="rhino/geometry/curve/createmeancurve-curve_curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBlendCurve : function(curveA, curveB, continuity) {
-            args = [curveA, curveB, continuity];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createblendcurve-curve_curve_blendcontinuity", args);
+        createBlendCurve : function(curveA, curveB, continuity, multiple=false) {
+            let url="rhino/geometry/curve/createblendcurve-curve_curve_blendcontinuity";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, continuity);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBlendCurve1 : function(curveA, curveB, continuity, bulgeA, bulgeB) {
-            args = [curveA, curveB, continuity, bulgeA, bulgeB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createblendcurve-curve_curve_blendcontinuity_double_double", args);
+        createBlendCurve1 : function(curveA, curveB, continuity, bulgeA, bulgeB, multiple=false) {
+            let url="rhino/geometry/curve/createblendcurve-curve_curve_blendcontinuity_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, continuity, bulgeA, bulgeB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBlendCurve2 : function(curve0, t0, reverse0, continuity0, curve1, t1, reverse1, continuity1) {
-            args = [curve0, t0, reverse0, continuity0, curve1, t1, reverse1, continuity1];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createblendcurve-curve_double_bool_blendcontinuity_curve_double_bool_blendcontinuity", args);
+        createBlendCurve2 : function(curve0, t0, reverse0, continuity0, curve1, t1, reverse1, continuity1, multiple=false) {
+            let url="rhino/geometry/curve/createblendcurve-curve_double_bool_blendcontinuity_curve_double_bool_blendcontinuity";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, t0, reverse0, continuity0, curve1, t1, reverse1, continuity1);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurves : function(curve0, curve1, numCurves) {
-            args = [curve0, curve1, numCurves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurves-curve_curve_int", args);
+        createTweenCurves : function(curve0, curve1, numCurves, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurves-curve_curve_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurves1 : function(curve0, curve1, numCurves, tolerance) {
-            args = [curve0, curve1, numCurves, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurves-curve_curve_int_double", args);
+        createTweenCurves1 : function(curve0, curve1, numCurves, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurves-curve_curve_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurvesWithMatching : function(curve0, curve1, numCurves) {
-            args = [curve0, curve1, numCurves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurveswithmatching-curve_curve_int", args);
+        createTweenCurvesWithMatching : function(curve0, curve1, numCurves, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurveswithmatching-curve_curve_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurvesWithMatching1 : function(curve0, curve1, numCurves, tolerance) {
-            args = [curve0, curve1, numCurves, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurveswithmatching-curve_curve_int_double", args);
+        createTweenCurvesWithMatching1 : function(curve0, curve1, numCurves, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurveswithmatching-curve_curve_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurvesWithSampling : function(curve0, curve1, numCurves, numSamples) {
-            args = [curve0, curve1, numCurves, numSamples];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurveswithsampling-curve_curve_int_int", args);
+        createTweenCurvesWithSampling : function(curve0, curve1, numCurves, numSamples, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurveswithsampling-curve_curve_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves, numSamples);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTweenCurvesWithSampling1 : function(curve0, curve1, numCurves, numSamples, tolerance) {
-            args = [curve0, curve1, numCurves, numSamples, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtweencurveswithsampling-curve_curve_int_int_double", args);
+        createTweenCurvesWithSampling1 : function(curve0, curve1, numCurves, numSamples, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createtweencurveswithsampling-curve_curve_int_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, numCurves, numSamples, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinCurves : function(inputCurves) {
-            args = [inputCurves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/joincurves-curvearray", args);
+        joinCurves : function(inputCurves, multiple=false) {
+            let url="rhino/geometry/curve/joincurves-curvearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputCurves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinCurves1 : function(inputCurves, joinTolerance) {
-            args = [inputCurves, joinTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/joincurves-curvearray_double", args);
+        joinCurves1 : function(inputCurves, joinTolerance, multiple=false) {
+            let url="rhino/geometry/curve/joincurves-curvearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputCurves, joinTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        joinCurves2 : function(inputCurves, joinTolerance, preserveDirection) {
-            args = [inputCurves, joinTolerance, preserveDirection];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/joincurves-curvearray_double_bool", args);
+        joinCurves2 : function(inputCurves, joinTolerance, preserveDirection, multiple=false) {
+            let url="rhino/geometry/curve/joincurves-curvearray_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, inputCurves, joinTolerance, preserveDirection);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        makeEndsMeet : function(curveA, adjustStartCurveA, curveB, adjustStartCurveB) {
-            args = [curveA, adjustStartCurveA, curveB, adjustStartCurveB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/makeendsmeet-curve_bool_curve_bool", args);
+        makeEndsMeet : function(curveA, adjustStartCurveA, curveB, adjustStartCurveB, multiple=false) {
+            let url="rhino/geometry/curve/makeendsmeet-curve_bool_curve_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, adjustStartCurveA, curveB, adjustStartCurveB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFillet : function(curve0, curve1, radius, t0Base, t1Base) {
-            args = [curve0, curve1, radius, t0Base, t1Base];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createfillet-curve_curve_double_double_double", args);
+        createFillet : function(curve0, curve1, radius, t0Base, t1Base, multiple=false) {
+            let url="rhino/geometry/curve/createfillet-curve_curve_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, curve1, radius, t0Base, t1Base);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFilletCurves : function(curve0, point0, curve1, point1, radius, join, trim, arcExtension, tolerance, angleTolerance) {
-            args = [curve0, point0, curve1, point1, radius, join, trim, arcExtension, tolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createfilletcurves-curve_point3d_curve_point3d_double_bool_bool_bool_double_double", args);
+        createFilletCurves : function(curve0, point0, curve1, point1, radius, join, trim, arcExtension, tolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/curve/createfilletcurves-curve_point3d_curve_point3d_double_bool_bool_bool_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve0, point0, curve1, point1, radius, join, trim, arcExtension, tolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanUnion : function(curves) {
-            args = [curves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleanunion-curvearray", args);
+        createBooleanUnion : function(curves, multiple=false) {
+            let url="rhino/geometry/curve/createbooleanunion-curvearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanUnion1 : function(curves, tolerance) {
-            args = [curves, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleanunion-curvearray_double", args);
+        createBooleanUnion1 : function(curves, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createbooleanunion-curvearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection : function(curveA, curveB) {
-            args = [curveA, curveB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleanintersection-curve_curve", args);
+        createBooleanIntersection : function(curveA, curveB, multiple=false) {
+            let url="rhino/geometry/curve/createbooleanintersection-curve_curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection1 : function(curveA, curveB, tolerance) {
-            args = [curveA, curveB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleanintersection-curve_curve_double", args);
+        createBooleanIntersection1 : function(curveA, curveB, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createbooleanintersection-curve_curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference : function(curveA, curveB) {
-            args = [curveA, curveB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleandifference-curve_curve", args);
+        createBooleanDifference : function(curveA, curveB, multiple=false) {
+            let url="rhino/geometry/curve/createbooleandifference-curve_curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference1 : function(curveA, curveB, tolerance) {
-            args = [curveA, curveB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleandifference-curve_curve_double", args);
+        createBooleanDifference1 : function(curveA, curveB, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createbooleandifference-curve_curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference2 : function(curveA, subtractors) {
-            args = [curveA, subtractors];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleandifference-curve_curvearray", args);
+        createBooleanDifference2 : function(curveA, subtractors, multiple=false) {
+            let url="rhino/geometry/curve/createbooleandifference-curve_curvearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, subtractors);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference3 : function(curveA, subtractors, tolerance) {
-            args = [curveA, subtractors, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createbooleandifference-curve_curvearray_double", args);
+        createBooleanDifference3 : function(curveA, subtractors, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createbooleandifference-curve_curvearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, subtractors, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createTextOutlines : function(text, font, textHeight, textStyle, closeLoops, plane, smallCapsScale, tolerance) {
-            args = [text, font, textHeight, textStyle, closeLoops, plane, smallCapsScale, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createtextoutlines-string_string_double_int_bool_plane_double_double", args);
+        createTextOutlines : function(text, font, textHeight, textStyle, closeLoops, plane, smallCapsScale, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/createtextoutlines-string_string_double_int_bool_plane_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, text, font, textHeight, textStyle, closeLoops, plane, smallCapsScale, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createCurve2View : function(curveA, curveB, vectorA, vectorB, tolerance, angleTolerance) {
-            args = [curveA, curveB, vectorA, vectorB, tolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createcurve2view-curve_curve_vector3d_vector3d_double_double", args);
+        createCurve2View : function(curveA, curveB, vectorA, vectorB, tolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/curve/createcurve2view-curve_curve_vector3d_vector3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, vectorA, vectorB, tolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        doDirectionsMatch : function(curveA, curveB) {
-            args = [curveA, curveB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dodirectionsmatch-curve_curve", args);
+        doDirectionsMatch : function(curveA, curveB, multiple=false) {
+            let url="rhino/geometry/curve/dodirectionsmatch-curve_curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToMesh : function(curve, mesh, direction, tolerance) {
-            args = [curve, mesh, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttomesh-curve_mesh_vector3d_double", args);
+        projectToMesh : function(curve, mesh, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttomesh-curve_mesh_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, mesh, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToMesh1 : function(curve, meshes, direction, tolerance) {
-            args = [curve, meshes, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttomesh-curve_mesharray_vector3d_double", args);
+        projectToMesh1 : function(curve, meshes, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttomesh-curve_mesharray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, meshes, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToMesh2 : function(curves, meshes, direction, tolerance) {
-            args = [curves, meshes, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttomesh-curvearray_mesharray_vector3d_double", args);
+        projectToMesh2 : function(curves, meshes, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttomesh-curvearray_mesharray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, meshes, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToBrep : function(curve, brep, direction, tolerance) {
-            args = [curve, brep, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curve_brep_vector3d_double", args);
+        projectToBrep : function(curve, brep, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttobrep-curve_brep_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, brep, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToBrep1 : function(curve, breps, direction, tolerance) {
-            args = [curve, breps, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curve_breparray_vector3d_double", args);
+        projectToBrep1 : function(curve, breps, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttobrep-curve_breparray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, breps, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToBrep2 : function(curve, breps, direction, tolerance) {
-            args = [curve, breps, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curve_breparray_vector3d_double_intarray", args);
+        projectToBrep2 : function(curve, breps, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttobrep-curve_breparray_vector3d_double_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, breps, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToBrep3 : function(curves, breps, direction, tolerance) {
-            args = [curves, breps, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double", args);
+        projectToBrep3 : function(curves, breps, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, breps, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToBrep4 : function(curves, breps, direction, tolerance) {
-            args = [curves, breps, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double_intarray_intarray", args);
+        projectToBrep4 : function(curves, breps, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/projecttobrep-curvearray_breparray_vector3d_double_intarray_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, breps, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectToPlane : function(curve, plane) {
-            args = [curve, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/projecttoplane-curve_plane", args);
+        projectToPlane : function(curve, plane, multiple=false) {
+            let url="rhino/geometry/curve/projecttoplane-curve_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pullToBrepFace : function(curve, face, tolerance) {
-            args = [curve, face, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/pulltobrepface-curve_brepface_double", args);
+        pullToBrepFace : function(curve, face, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/pulltobrepface-curve_brepface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        planarClosedCurveRelationship : function(curveA, curveB, testPlane, tolerance) {
-            args = [curveA, curveB, testPlane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/planarclosedcurverelationship-curve_curve_plane_double", args);
+        planarClosedCurveRelationship : function(curveA, curveB, testPlane, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/planarclosedcurverelationship-curve_curve_plane_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, testPlane, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        planarCurveCollision : function(curveA, curveB, testPlane, tolerance) {
-            args = [curveA, curveB, testPlane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/planarcurvecollision-curve_curve_plane_double", args);
+        planarCurveCollision : function(curveA, curveB, testPlane, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/planarcurvecollision-curve_curve_plane_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, testPlane, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        duplicateSegments : function(curve) {
-            args = [curve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/duplicatesegments-curve", args);
+        duplicateSegments : function(curve, multiple=false) {
+            let url="rhino/geometry/curve/duplicatesegments-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        smooth : function(curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem) {
-            args = [curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/smooth-curve_double_bool_bool_bool_bool_smoothingcoordinatesystem", args);
+        smooth : function(curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, multiple=false) {
+            let url="rhino/geometry/curve/smooth-curve_double_bool_bool_bool_bool_smoothingcoordinatesystem";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        smooth1 : function(curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane) {
-            args = [curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/smooth-curve_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane", args);
+        smooth1 : function(curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane, multiple=false) {
+            let url="rhino/geometry/curve/smooth-curve_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLocalPerpPoint : function(curve, testPoint, seedParmameter) {
-            args = [curve, testPoint, seedParmameter];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocalperppoint-curve_point3d_double_double", args);
+        getLocalPerpPoint : function(curve, testPoint, seedParmameter, multiple=false) {
+            let url="rhino/geometry/curve/getlocalperppoint-curve_point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, seedParmameter);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLocalPerpPoint1 : function(curve, testPoint, seedParmameter, subDomain) {
-            args = [curve, testPoint, seedParmameter, subDomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocalperppoint-curve_point3d_double_interval_double", args);
+        getLocalPerpPoint1 : function(curve, testPoint, seedParmameter, subDomain, multiple=false) {
+            let url="rhino/geometry/curve/getlocalperppoint-curve_point3d_double_interval_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, seedParmameter, subDomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLocalTangentPoint : function(curve, testPoint, seedParmameter) {
-            args = [curve, testPoint, seedParmameter];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_double", args);
+        getLocalTangentPoint : function(curve, testPoint, seedParmameter, multiple=false) {
+            let url="rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, seedParmameter);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLocalTangentPoint1 : function(curve, testPoint, seedParmameter, subDomain) {
-            args = [curve, testPoint, seedParmameter, subDomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_interval_double", args);
+        getLocalTangentPoint1 : function(curve, testPoint, seedParmameter, subDomain, multiple=false) {
+            let url="rhino/geometry/curve/getlocaltangentpoint-curve_point3d_double_interval_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, seedParmameter, subDomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        makeClosed : function(curve, tolerance) {
-            args = [curve, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/makeclosed-curve_double", args);
+        makeClosed : function(curve, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/makeclosed-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        lcoalClosestPoint : function(curve, testPoint, seed) {
-            args = [curve, testPoint, seed];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lcoalclosestpoint-curve_point3d_double_double", args);
+        lcoalClosestPoint : function(curve, testPoint, seed, multiple=false) {
+            let url="rhino/geometry/curve/lcoalclosestpoint-curve_point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, seed);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint : function(curve, testPoint) {
-            args = [curve, testPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoint-curve_point3d_double", args);
+        closestPoint : function(curve, testPoint, multiple=false) {
+            let url="rhino/geometry/curve/closestpoint-curve_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint1 : function(curve, testPoint, maximumDistance) {
-            args = [curve, testPoint, maximumDistance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoint-curve_point3d_double_double", args);
+        closestPoint1 : function(curve, testPoint, maximumDistance, multiple=false) {
+            let url="rhino/geometry/curve/closestpoint-curve_point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, maximumDistance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoints : function(curve, otherCurve) {
-            args = [curve, otherCurve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/closestpoints-curve_curve_point3d_point3d", args);
+        closestPoints : function(curve, otherCurve, multiple=false) {
+            let url="rhino/geometry/curve/closestpoints-curve_curve_point3d_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, otherCurve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        contains : function(curve, testPoint) {
-            args = [curve, testPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/contains-curve_point3d", args);
+        contains : function(curve, testPoint, multiple=false) {
+            let url="rhino/geometry/curve/contains-curve_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        contains1 : function(curve, testPoint, plane) {
-            args = [curve, testPoint, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/contains-curve_point3d_plane", args);
+        contains1 : function(curve, testPoint, plane, multiple=false) {
+            let url="rhino/geometry/curve/contains-curve_point3d_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        contains2 : function(curve, testPoint, plane, tolerance) {
-            args = [curve, testPoint, plane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/contains-curve_point3d_plane_double", args);
+        contains2 : function(curve, testPoint, plane, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/contains-curve_point3d_plane_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, testPoint, plane, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extremeParameters : function(curve, direction) {
-            args = [curve, direction];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extremeparameters-curve_vector3d", args);
+        extremeParameters : function(curve, direction, multiple=false) {
+            let url="rhino/geometry/curve/extremeparameters-curve_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, direction);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPeriodicCurve : function(curve) {
-            args = [curve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createperiodiccurve-curve", args);
+        createPeriodicCurve : function(curve, multiple=false) {
+            let url="rhino/geometry/curve/createperiodiccurve-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPeriodicCurve1 : function(curve, smooth) {
-            args = [curve, smooth];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/createperiodiccurve-curve_bool", args);
+        createPeriodicCurve1 : function(curve, smooth, multiple=false) {
+            let url="rhino/geometry/curve/createperiodiccurve-curve_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, smooth);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pointAtLength : function(curve, length) {
-            args = [curve, length];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/pointatlength-curve_double", args);
+        pointAtLength : function(curve, length, multiple=false) {
+            let url="rhino/geometry/curve/pointatlength-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, length);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pointAtNormalizedLength : function(curve, length) {
-            args = [curve, length];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/pointatnormalizedlength-curve_double", args);
+        pointAtNormalizedLength : function(curve, length, multiple=false) {
+            let url="rhino/geometry/curve/pointatnormalizedlength-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, length);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        perpendicularFrameAt : function(curve, t) {
-            args = [curve, t];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/perpendicularframeat-curve_double_plane", args);
+        perpendicularFrameAt : function(curve, t, multiple=false) {
+            let url="rhino/geometry/curve/perpendicularframeat-curve_double_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, t);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getPerpendicularFrames : function(curve, parameters) {
-            args = [curve, parameters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getperpendicularframes-curve_doublearray", args);
+        getPerpendicularFrames : function(curve, parameters, multiple=false) {
+            let url="rhino/geometry/curve/getperpendicularframes-curve_doublearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, parameters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLength : function(curve) {
-            args = [curve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlength-curve", args);
+        getLength : function(curve, multiple=false) {
+            let url="rhino/geometry/curve/getlength-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLength1 : function(curve, fractionalTolerance) {
-            args = [curve, fractionalTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlength-curve_double", args);
+        getLength1 : function(curve, fractionalTolerance, multiple=false) {
+            let url="rhino/geometry/curve/getlength-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, fractionalTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLength2 : function(curve, subdomain) {
-            args = [curve, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlength-curve_interval", args);
+        getLength2 : function(curve, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/getlength-curve_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getLength3 : function(curve, fractionalTolerance, subdomain) {
-            args = [curve, fractionalTolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/getlength-curve_double_interval", args);
+        getLength3 : function(curve, fractionalTolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/getlength-curve_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, fractionalTolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        isShort : function(curve, tolerance) {
-            args = [curve, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/isshort-curve_double", args);
+        isShort : function(curve, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/isshort-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        isShort1 : function(curve, tolerance, subdomain) {
-            args = [curve, tolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/isshort-curve_double_interval", args);
+        isShort1 : function(curve, tolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/isshort-curve_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        removeShortSegments : function(curve, tolerance) {
-            args = [curve, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/removeshortsegments-curve_double", args);
+        removeShortSegments : function(curve, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/removeshortsegments-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        lengthParameter : function(curve, segmentLength) {
-            args = [curve, segmentLength];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double", args);
+        lengthParameter : function(curve, segmentLength, multiple=false) {
+            let url="rhino/geometry/curve/lengthparameter-curve_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        lengthParameter1 : function(curve, segmentLength, fractionalTolerance) {
-            args = [curve, segmentLength, fractionalTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_double", args);
+        lengthParameter1 : function(curve, segmentLength, fractionalTolerance, multiple=false) {
+            let url="rhino/geometry/curve/lengthparameter-curve_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, fractionalTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        lengthParameter2 : function(curve, segmentLength, subdomain) {
-            args = [curve, segmentLength, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_interval", args);
+        lengthParameter2 : function(curve, segmentLength, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/lengthparameter-curve_double_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        lengthParameter3 : function(curve, segmentLength, fractionalTolerance, subdomain) {
-            args = [curve, segmentLength, fractionalTolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/lengthparameter-curve_double_double_double_interval", args);
+        lengthParameter3 : function(curve, segmentLength, fractionalTolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/lengthparameter-curve_double_double_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, fractionalTolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameter : function(curve, s) {
-            args = [curve, s];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double", args);
+        normalizedLengthParameter : function(curve, s, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameter-curve_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameter1 : function(curve, s, fractionalTolerance) {
-            args = [curve, s, fractionalTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double", args);
+        normalizedLengthParameter1 : function(curve, s, fractionalTolerance, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, fractionalTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameter2 : function(curve, s, subdomain) {
-            args = [curve, s, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_interval", args);
+        normalizedLengthParameter2 : function(curve, s, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameter-curve_double_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameter3 : function(curve, s, fractionalTolerance, subdomain) {
-            args = [curve, s, fractionalTolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double_interval", args);
+        normalizedLengthParameter3 : function(curve, s, fractionalTolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameter-curve_double_double_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, fractionalTolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameters : function(curve, s, absoluteTolerance) {
-            args = [curve, s, absoluteTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double", args);
+        normalizedLengthParameters : function(curve, s, absoluteTolerance, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, absoluteTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameters1 : function(curve, s, absoluteTolerance, fractionalTolerance) {
-            args = [curve, s, absoluteTolerance, fractionalTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_double", args);
+        normalizedLengthParameters1 : function(curve, s, absoluteTolerance, fractionalTolerance, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, absoluteTolerance, fractionalTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameters2 : function(curve, s, absoluteTolerance, subdomain) {
-            args = [curve, s, absoluteTolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_interval", args);
+        normalizedLengthParameters2 : function(curve, s, absoluteTolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, absoluteTolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalizedLengthParameters3 : function(curve, s, absoluteTolerance, fractionalTolerance, subdomain) {
-            args = [curve, s, absoluteTolerance, fractionalTolerance, subdomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_double_interval", args);
+        normalizedLengthParameters3 : function(curve, s, absoluteTolerance, fractionalTolerance, subdomain, multiple=false) {
+            let url="rhino/geometry/curve/normalizedlengthparameters-curve_doublearray_double_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, s, absoluteTolerance, fractionalTolerance, subdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByCount : function(curve, segmentCount, includeEnds) {
-            args = [curve, segmentCount, includeEnds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebycount-curve_int_bool", args);
+        divideByCount : function(curve, segmentCount, includeEnds, multiple=false) {
+            let url="rhino/geometry/curve/dividebycount-curve_int_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentCount, includeEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByCount1 : function(curve, segmentCount, includeEnds) {
-            args = [curve, segmentCount, includeEnds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebycount-curve_int_bool_point3darray", args);
+        divideByCount1 : function(curve, segmentCount, includeEnds, multiple=false) {
+            let url="rhino/geometry/curve/dividebycount-curve_int_bool_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentCount, includeEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByLength : function(curve, segmentLength, includeEnds) {
-            args = [curve, segmentLength, includeEnds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool", args);
+        divideByLength : function(curve, segmentLength, includeEnds, multiple=false) {
+            let url="rhino/geometry/curve/dividebylength-curve_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, includeEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByLength1 : function(curve, segmentLength, includeEnds, reverse) {
-            args = [curve, segmentLength, includeEnds, reverse];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool_bool", args);
+        divideByLength1 : function(curve, segmentLength, includeEnds, reverse, multiple=false) {
+            let url="rhino/geometry/curve/dividebylength-curve_double_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, includeEnds, reverse);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByLength2 : function(curve, segmentLength, includeEnds) {
-            args = [curve, segmentLength, includeEnds];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool_point3darray", args);
+        divideByLength2 : function(curve, segmentLength, includeEnds, multiple=false) {
+            let url="rhino/geometry/curve/dividebylength-curve_double_bool_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, includeEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideByLength3 : function(curve, segmentLength, includeEnds, reverse) {
-            args = [curve, segmentLength, includeEnds, reverse];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/dividebylength-curve_double_bool_bool_point3darray", args);
+        divideByLength3 : function(curve, segmentLength, includeEnds, reverse, multiple=false) {
+            let url="rhino/geometry/curve/dividebylength-curve_double_bool_bool_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, segmentLength, includeEnds, reverse);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideEquidistant : function(curve, distance) {
-            args = [curve, distance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/divideequidistant-curve_double", args);
+        divideEquidistant : function(curve, distance, multiple=false) {
+            let url="rhino/geometry/curve/divideequidistant-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, distance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        divideAsContour : function(curve, contourStart, contourEnd, interval) {
-            args = [curve, contourStart, contourEnd, interval];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/divideascontour-curve_point3d_point3d_double", args);
+        divideAsContour : function(curve, contourStart, contourEnd, interval, multiple=false) {
+            let url="rhino/geometry/curve/divideascontour-curve_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, contourStart, contourEnd, interval);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        trim : function(curve, side, length) {
-            args = [curve, side, length];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/trim-curve_curveend_double", args);
+        trim : function(curve, side, length, multiple=false) {
+            let url="rhino/geometry/curve/trim-curve_curveend_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, length);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split : function(curve, cutter, tolerance) {
-            args = [curve, cutter, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/split-curve_brep_double", args);
+        split : function(curve, cutter, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/split-curve_brep_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, cutter, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split1 : function(curve, cutter, tolerance, angleToleranceRadians) {
-            args = [curve, cutter, tolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/split-curve_brep_double_double", args);
+        split1 : function(curve, cutter, tolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/curve/split-curve_brep_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, cutter, tolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split2 : function(curve, cutter, tolerance) {
-            args = [curve, cutter, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/split-curve_surface_double", args);
+        split2 : function(curve, cutter, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/split-curve_surface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, cutter, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split3 : function(curve, cutter, tolerance, angleToleranceRadians) {
-            args = [curve, cutter, tolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/split-curve_surface_double_double", args);
+        split3 : function(curve, cutter, tolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/curve/split-curve_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, cutter, tolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extend : function(curve, t0, t1) {
-            args = [curve, t0, t1];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extend-curve_double_double", args);
+        extend : function(curve, t0, t1, multiple=false) {
+            let url="rhino/geometry/curve/extend-curve_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, t0, t1);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extend1 : function(curve, domain) {
-            args = [curve, domain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extend-curve_interval", args);
+        extend1 : function(curve, domain, multiple=false) {
+            let url="rhino/geometry/curve/extend-curve_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, domain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extend2 : function(curve, side, length, style) {
-            args = [curve, side, length, style];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extend-curve_curveend_double_curveextensionstyle", args);
+        extend2 : function(curve, side, length, style, multiple=false) {
+            let url="rhino/geometry/curve/extend-curve_curveend_double_curveextensionstyle";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, length, style);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extend3 : function(curve, side, style, geometry) {
-            args = [curve, side, style, geometry];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extend-curve_curveend_curveextensionstyle_geometrybasearray", args);
+        extend3 : function(curve, side, style, geometry, multiple=false) {
+            let url="rhino/geometry/curve/extend-curve_curveend_curveextensionstyle_geometrybasearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, style, geometry);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extend4 : function(curve, side, style, endPoint) {
-            args = [curve, side, style, endPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extend-curve_curveend_curveextensionstyle_point3d", args);
+        extend4 : function(curve, side, style, endPoint, multiple=false) {
+            let url="rhino/geometry/curve/extend-curve_curveend_curveextensionstyle_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, style, endPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extendOnSurface : function(curve, side, surface) {
-            args = [curve, side, surface];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extendonsurface-curve_curveend_surface", args);
+        extendOnSurface : function(curve, side, surface, multiple=false) {
+            let url="rhino/geometry/curve/extendonsurface-curve_curveend_surface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, surface);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extendOnSurface1 : function(curve, side, face) {
-            args = [curve, side, face];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extendonsurface-curve_curveend_brepface", args);
+        extendOnSurface1 : function(curve, side, face, multiple=false) {
+            let url="rhino/geometry/curve/extendonsurface-curve_curveend_brepface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, face);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extendByLine : function(curve, side, geometry) {
-            args = [curve, side, geometry];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extendbyline-curve_curveend_geometrybasearray", args);
+        extendByLine : function(curve, side, geometry, multiple=false) {
+            let url="rhino/geometry/curve/extendbyline-curve_curveend_geometrybasearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, geometry);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extendByArc : function(curve, side, geometry) {
-            args = [curve, side, geometry];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/extendbyarc-curve_curveend_geometrybasearray", args);
+        extendByArc : function(curve, side, geometry, multiple=false) {
+            let url="rhino/geometry/curve/extendbyarc-curve_curveend_geometrybasearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, side, geometry);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        simplify : function(curve, options, distanceTolerance, angleToleranceRadians) {
-            args = [curve, options, distanceTolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/simplify-curve_curvesimplifyoptions_double_double", args);
+        simplify : function(curve, options, distanceTolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/curve/simplify-curve_curvesimplifyoptions_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, options, distanceTolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        simplifyEnd : function(curve, end, options, distanceTolerance, angleToleranceRadians) {
-            args = [curve, end, options, distanceTolerance, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/simplifyend-curve_curveend_curvesimplifyoptions_double_double", args);
+        simplifyEnd : function(curve, end, options, distanceTolerance, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/curve/simplifyend-curve_curveend_curvesimplifyoptions_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, end, options, distanceTolerance, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        fair : function(curve, distanceTolerance, angleTolerance, clampStart, clampEnd, iterations) {
-            args = [curve, distanceTolerance, angleTolerance, clampStart, clampEnd, iterations];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/fair-curve_double_double_int_int_int", args);
+        fair : function(curve, distanceTolerance, angleTolerance, clampStart, clampEnd, iterations, multiple=false) {
+            let url="rhino/geometry/curve/fair-curve_double_double_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, distanceTolerance, angleTolerance, clampStart, clampEnd, iterations);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        fit : function(curve, degree, fitTolerance, angleTolerance) {
-            args = [curve, degree, fitTolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/fit-curve_int_double_double", args);
+        fit : function(curve, degree, fitTolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/curve/fit-curve_int_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, degree, fitTolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        rebuild : function(curve, pointCount, degree, preserveTangents) {
-            args = [curve, pointCount, degree, preserveTangents];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/rebuild-curve_int_int_bool", args);
+        rebuild : function(curve, pointCount, degree, preserveTangents, multiple=false) {
+            let url="rhino/geometry/curve/rebuild-curve_int_int_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, pointCount, degree, preserveTangents);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        toPolyline : function(curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint) {
-            args = [curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/topolyline-curve_int_int_double_double_double_double_double_double_bool", args);
+        toPolyline : function(curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint, multiple=false) {
+            let url="rhino/geometry/curve/topolyline-curve_int_int_double_double_double_double_double_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        toPolyline1 : function(curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint, curveDomain) {
-            args = [curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint, curveDomain];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/topolyline-curve_int_int_double_double_double_double_double_double_bool_interval", args);
+        toPolyline1 : function(curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint, curveDomain, multiple=false) {
+            let url="rhino/geometry/curve/topolyline-curve_int_int_double_double_double_double_double_double_bool_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, mainSegmentCount, subSegmentCount, maxAngleRadians, maxChordLengthRatio, maxAspectRatio, tolerance, minEdgeLength, maxEdgeLength, keepStartPoint, curveDomain);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        toPolyline2 : function(curve, tolerance, angleTolerance, minimumLength, maximumLength) {
-            args = [curve, tolerance, angleTolerance, minimumLength, maximumLength];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/topolyline-curve_double_double_double_double", args);
+        toPolyline2 : function(curve, tolerance, angleTolerance, minimumLength, maximumLength, multiple=false) {
+            let url="rhino/geometry/curve/topolyline-curve_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance, angleTolerance, minimumLength, maximumLength);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        toArcsAndLines : function(curve, tolerance, angleTolerance, minimumLength, maximumLength) {
-            args = [curve, tolerance, angleTolerance, minimumLength, maximumLength];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/toarcsandlines-curve_double_double_double_double", args);
+        toArcsAndLines : function(curve, tolerance, angleTolerance, minimumLength, maximumLength, multiple=false) {
+            let url="rhino/geometry/curve/toarcsandlines-curve_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance, angleTolerance, minimumLength, maximumLength);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pullToMesh : function(curve, mesh, tolerance) {
-            args = [curve, mesh, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/pulltomesh-curve_mesh_double", args);
+        pullToMesh : function(curve, mesh, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/pulltomesh-curve_mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, mesh, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offset : function(curve, plane, distance, tolerance, cornerStyle) {
-            args = [curve, plane, distance, tolerance, cornerStyle];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offset-curve_plane_double_double_curveoffsetcornerstyle", args);
+        offset : function(curve, plane, distance, tolerance, cornerStyle, multiple=false) {
+            let url="rhino/geometry/curve/offset-curve_plane_double_double_curveoffsetcornerstyle";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, plane, distance, tolerance, cornerStyle);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offset1 : function(curve, directionPoint, normal, distance, tolerance, cornerStyle) {
-            args = [curve, directionPoint, normal, distance, tolerance, cornerStyle];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offset-curve_point3d_vector3d_double_double_curveoffsetcornerstyle", args);
+        offset1 : function(curve, directionPoint, normal, distance, tolerance, cornerStyle, multiple=false) {
+            let url="rhino/geometry/curve/offset-curve_point3d_vector3d_double_double_curveoffsetcornerstyle";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, directionPoint, normal, distance, tolerance, cornerStyle);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        ribbonOffset : function(curve, distance, blendRadius, directionPoint, normal, tolerance) {
-            args = [curve, distance, blendRadius, directionPoint, normal, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/ribbonoffset-curve_double_double_point3d_vector3d_double", args);
+        ribbonOffset : function(curve, distance, blendRadius, directionPoint, normal, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/ribbonoffset-curve_double_double_point3d_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, distance, blendRadius, directionPoint, normal, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface : function(curve, face, distance, fittingTolerance) {
-            args = [curve, face, distance, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_brepface_double_double", args);
+        offsetOnSurface : function(curve, face, distance, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_brepface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, distance, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface1 : function(curve, face, throughPoint, fittingTolerance) {
-            args = [curve, face, throughPoint, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_brepface_point2d_double", args);
+        offsetOnSurface1 : function(curve, face, throughPoint, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_brepface_point2d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, throughPoint, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface2 : function(curve, face, curveParameters, offsetDistances, fittingTolerance) {
-            args = [curve, face, curveParameters, offsetDistances, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_brepface_doublearray_doublearray_double", args);
+        offsetOnSurface2 : function(curve, face, curveParameters, offsetDistances, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_brepface_doublearray_doublearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, curveParameters, offsetDistances, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface3 : function(curve, surface, distance, fittingTolerance) {
-            args = [curve, surface, distance, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_surface_double_double", args);
+        offsetOnSurface3 : function(curve, surface, distance, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, surface, distance, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface4 : function(curve, surface, throughPoint, fittingTolerance) {
-            args = [curve, surface, throughPoint, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_surface_point2d_double", args);
+        offsetOnSurface4 : function(curve, surface, throughPoint, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_surface_point2d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, surface, throughPoint, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetOnSurface5 : function(curve, surface, curveParameters, offsetDistances, fittingTolerance) {
-            args = [curve, surface, curveParameters, offsetDistances, fittingTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetonsurface-curve_surface_doublearray_doublearray_double", args);
+        offsetOnSurface5 : function(curve, surface, curveParameters, offsetDistances, fittingTolerance, multiple=false) {
+            let url="rhino/geometry/curve/offsetonsurface-curve_surface_doublearray_doublearray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, surface, curveParameters, offsetDistances, fittingTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pullToBrepFace : function(curve, face, tolerance) {
-            args = [curve, face, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/pulltobrepface-curve_brepface_double", args);
+        pullToBrepFace : function(curve, face, tolerance, multiple=false) {
+            let url="rhino/geometry/curve/pulltobrepface-curve_brepface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offsetNormalToSurface : function(curve, surface, height) {
-            args = [curve, surface, height];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/curve/offsetnormaltosurface-curve_surface_double", args);
+        offsetNormalToSurface : function(curve, surface, height, multiple=false) {
+            let url="rhino/geometry/curve/offsetnormaltosurface-curve_surface_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, surface, height);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     AreaMassProperties : {
-        compute : function(closedPlanarCurve) {
-            args = [closedPlanarCurve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-curve", args);
+        compute : function(closedPlanarCurve, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-curve";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, closedPlanarCurve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute1 : function(closedPlanarCurve, planarTolerance) {
-            args = [closedPlanarCurve, planarTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-curve_double", args);
+        compute1 : function(closedPlanarCurve, planarTolerance, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, closedPlanarCurve, planarTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute2 : function(hatch) {
-            args = [hatch];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-hatch", args);
+        compute2 : function(hatch, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-hatch";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, hatch);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute3 : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-mesh", args);
+        compute3 : function(mesh, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute4 : function(mesh, area, firstMoments, secondMoments, productMoments) {
-            args = [mesh, area, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-mesh_bool_bool_bool_bool", args);
+        compute4 : function(mesh, area, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-mesh_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, area, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute5 : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-brep", args);
+        compute5 : function(brep, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute6 : function(brep, area, firstMoments, secondMoments, productMoments) {
-            args = [brep, area, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-brep_bool_bool_bool_bool", args);
+        compute6 : function(brep, area, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-brep_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, area, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute7 : function(surface) {
-            args = [surface];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-surface", args);
+        compute7 : function(surface, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-surface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute8 : function(surface, area, firstMoments, secondMoments, productMoments) {
-            args = [surface, area, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-surface_bool_bool_bool_bool", args);
+        compute8 : function(surface, area, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-surface_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, area, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute9 : function(geometry) {
-            args = [geometry];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-geometrybasearray", args);
+        compute9 : function(geometry, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-geometrybasearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute10 : function(geometry, area, firstMoments, secondMoments, productMoments) {
-            args = [geometry, area, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/areamassproperties/compute-geometrybasearray_bool_bool_bool_bool", args);
+        compute10 : function(geometry, area, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/areamassproperties/compute-geometrybasearray_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry, area, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
+
     },
 
     VolumeMassProperties : {
-        compute : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-mesh", args);
+        compute : function(mesh, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute1 : function(mesh, volume, firstMoments, secondMoments, productMoments) {
-            args = [mesh, volume, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-mesh_bool_bool_bool_bool", args);
+        compute1 : function(mesh, volume, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-mesh_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, volume, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute2 : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-brep", args);
+        compute2 : function(brep, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute3 : function(brep, volume, firstMoments, secondMoments, productMoments) {
-            args = [brep, volume, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-brep_bool_bool_bool_bool", args);
+        compute3 : function(brep, volume, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-brep_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, volume, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute4 : function(surface) {
-            args = [surface];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-surface", args);
+        compute4 : function(surface, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-surface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute5 : function(surface, volume, firstMoments, secondMoments, productMoments) {
-            args = [surface, volume, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-surface_bool_bool_bool_bool", args);
+        compute5 : function(surface, volume, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-surface_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, volume, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute6 : function(geometry) {
-            args = [geometry];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-geometrybasearray", args);
+        compute6 : function(geometry, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-geometrybasearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        compute7 : function(geometry, volume, firstMoments, secondMoments, productMoments) {
-            args = [geometry, volume, firstMoments, secondMoments, productMoments];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/volumemassproperties/compute-geometrybasearray_bool_bool_bool_bool", args);
+        compute7 : function(geometry, volume, firstMoments, secondMoments, productMoments, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/compute-geometrybasearray_bool_bool_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, geometry, volume, firstMoments, secondMoments, productMoments);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
+
+        sum : function(volumemassproperties, summand, multiple=false) {
+            let url="rhino/geometry/volumemassproperties/sum-volumemassproperties_volumemassproperties";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, volumemassproperties, summand);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
     },
 
     Mesh : {
-        createFromPlane : function(plane, xInterval, yInterval, xCount, yCount) {
-            args = [plane, xInterval, yInterval, xCount, yCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromplane-plane_interval_interval_int_int", args);
+        createFromPlane : function(plane, xInterval, yInterval, xCount, yCount, multiple=false) {
+            let url="rhino/geometry/mesh/createfromplane-plane_interval_interval_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, plane, xInterval, yInterval, xCount, yCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromBox : function(box, xCount, yCount, zCount) {
-            args = [box, xCount, yCount, zCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfrombox-boundingbox_int_int_int", args);
+        createFromBox : function(box, xCount, yCount, zCount, multiple=false) {
+            let url="rhino/geometry/mesh/createfrombox-boundingbox_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, box, xCount, yCount, zCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromBox1 : function(box, xCount, yCount, zCount) {
-            args = [box, xCount, yCount, zCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfrombox-box_int_int_int", args);
+        createFromBox1 : function(box, xCount, yCount, zCount, multiple=false) {
+            let url="rhino/geometry/mesh/createfrombox-box_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, box, xCount, yCount, zCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromBox2 : function(corners, xCount, yCount, zCount) {
-            args = [corners, xCount, yCount, zCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfrombox-point3darray_int_int_int", args);
+        createFromBox2 : function(corners, xCount, yCount, zCount, multiple=false) {
+            let url="rhino/geometry/mesh/createfrombox-point3darray_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corners, xCount, yCount, zCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSphere : function(sphere, xCount, yCount) {
-            args = [sphere, xCount, yCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromsphere-sphere_int_int", args);
+        createFromSphere : function(sphere, xCount, yCount, multiple=false) {
+            let url="rhino/geometry/mesh/createfromsphere-sphere_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, sphere, xCount, yCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createIcoSphere : function(sphere, subdivisions) {
-            args = [sphere, subdivisions];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createicosphere-sphere_int", args);
+        createIcoSphere : function(sphere, subdivisions, multiple=false) {
+            let url="rhino/geometry/mesh/createicosphere-sphere_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, sphere, subdivisions);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createQuadSphere : function(sphere, subdivisions) {
-            args = [sphere, subdivisions];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createquadsphere-sphere_int", args);
+        createQuadSphere : function(sphere, subdivisions, multiple=false) {
+            let url="rhino/geometry/mesh/createquadsphere-sphere_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, sphere, subdivisions);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCylinder : function(cylinder, vertical, around) {
-            args = [cylinder, vertical, around];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromcylinder-cylinder_int_int", args);
+        createFromCylinder : function(cylinder, vertical, around, multiple=false) {
+            let url="rhino/geometry/mesh/createfromcylinder-cylinder_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, cylinder, vertical, around);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCone : function(cone, vertical, around) {
-            args = [cone, vertical, around];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromcone-cone_int_int", args);
+        createFromCone : function(cone, vertical, around, multiple=false) {
+            let url="rhino/geometry/mesh/createfromcone-cone_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, cone, vertical, around);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCone1 : function(cone, vertical, around, solid) {
-            args = [cone, vertical, around, solid];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromcone-cone_int_int_bool", args);
+        createFromCone1 : function(cone, vertical, around, solid, multiple=false) {
+            let url="rhino/geometry/mesh/createfromcone-cone_int_int_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, cone, vertical, around, solid);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromPlanarBoundary : function(boundary, parameters) {
-            args = [boundary, parameters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromplanarboundary-curve_meshingparameters", args);
+        createFromPlanarBoundary : function(boundary, parameters, multiple=false) {
+            let url="rhino/geometry/mesh/createfromplanarboundary-curve_meshingparameters";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, boundary, parameters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromPlanarBoundary1 : function(boundary, parameters, tolerance) {
-            args = [boundary, parameters, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromplanarboundary-curve_meshingparameters_double", args);
+        createFromPlanarBoundary1 : function(boundary, parameters, tolerance, multiple=false) {
+            let url="rhino/geometry/mesh/createfromplanarboundary-curve_meshingparameters_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, boundary, parameters, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromClosedPolyline : function(polyline) {
-            args = [polyline];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromclosedpolyline-polyline", args);
+        createFromClosedPolyline : function(polyline, multiple=false) {
+            let url="rhino/geometry/mesh/createfromclosedpolyline-polyline";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, polyline);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromTessellation : function(points, edges, plane, allowNewVertices) {
-            args = [points, edges, plane, allowNewVertices];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromtessellation-point3darray_ienumerable<point3d>array_plane_bool", args);
+        createFromTessellation : function(points, edges, plane, allowNewVertices, multiple=false) {
+            let url="rhino/geometry/mesh/createfromtessellation-point3darray_ienumerable<point3d>array_plane_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, edges, plane, allowNewVertices);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromBrep : function(brep) {
-            args = [brep];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfrombrep-brep", args);
+        createFromBrep : function(brep, multiple=false) {
+            let url="rhino/geometry/mesh/createfrombrep-brep";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromBrep1 : function(brep, meshingParameters) {
-            args = [brep, meshingParameters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfrombrep-brep_meshingparameters", args);
+        createFromBrep1 : function(brep, meshingParameters, multiple=false) {
+            let url="rhino/geometry/mesh/createfrombrep-brep_meshingparameters";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, meshingParameters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSurface : function(surface) {
-            args = [surface];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromsurface-surface", args);
+        createFromSurface : function(surface, multiple=false) {
+            let url="rhino/geometry/mesh/createfromsurface-surface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromSurface1 : function(surface, meshingParameters) {
-            args = [surface, meshingParameters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromsurface-surface_meshingparameters", args);
+        createFromSurface1 : function(surface, meshingParameters, multiple=false) {
+            let url="rhino/geometry/mesh/createfromsurface-surface_meshingparameters";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, meshingParameters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createPatch : function(outerBoundary, angleToleranceRadians, pullbackSurface, innerBoundaryCurves, innerBothSideCurves, innerPoints, trimback, divisions) {
-            args = [outerBoundary, angleToleranceRadians, pullbackSurface, innerBoundaryCurves, innerBothSideCurves, innerPoints, trimback, divisions];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createpatch-polyline_double_surface_curvearray_curvearray_point3darray_bool_int", args);
+        createPatch : function(outerBoundary, angleToleranceRadians, pullbackSurface, innerBoundaryCurves, innerBothSideCurves, innerPoints, trimback, divisions, multiple=false) {
+            let url="rhino/geometry/mesh/createpatch-polyline_double_surface_curvearray_curvearray_point3darray_bool_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, outerBoundary, angleToleranceRadians, pullbackSurface, innerBoundaryCurves, innerBothSideCurves, innerPoints, trimback, divisions);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanUnion : function(meshes) {
-            args = [meshes];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createbooleanunion-mesharray", args);
+        createBooleanUnion : function(meshes, multiple=false) {
+            let url="rhino/geometry/mesh/createbooleanunion-mesharray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanDifference : function(firstSet, secondSet) {
-            args = [firstSet, secondSet];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createbooleandifference-mesharray_mesharray", args);
+        createBooleanDifference : function(firstSet, secondSet, multiple=false) {
+            let url="rhino/geometry/mesh/createbooleandifference-mesharray_mesharray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanIntersection : function(firstSet, secondSet) {
-            args = [firstSet, secondSet];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createbooleanintersection-mesharray_mesharray", args);
+        createBooleanIntersection : function(firstSet, secondSet, multiple=false) {
+            let url="rhino/geometry/mesh/createbooleanintersection-mesharray_mesharray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, firstSet, secondSet);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createBooleanSplit : function(meshesToSplit, meshSplitters) {
-            args = [meshesToSplit, meshSplitters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createbooleansplit-mesharray_mesharray", args);
+        createBooleanSplit : function(meshesToSplit, meshSplitters, multiple=false) {
+            let url="rhino/geometry/mesh/createbooleansplit-mesharray_mesharray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshesToSplit, meshSplitters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCurvePipe : function(curve, radius, segments, accuracy, capType, faceted, intervals) {
-            args = [curve, radius, segments, accuracy, capType, faceted, intervals];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createfromcurvepipe-curve_double_int_int_meshpipecapstyle_bool_intervalarray", args);
+        createFromCurvePipe : function(curve, radius, segments, accuracy, capType, faceted, intervals, multiple=false) {
+            let url="rhino/geometry/mesh/createfromcurvepipe-curve_double_int_int_meshpipecapstyle_bool_intervalarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, radius, segments, accuracy, capType, faceted, intervals);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        volume : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/volume-mesh", args);
+        volume : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/volume-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        smooth : function(mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem) {
-            args = [mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/smooth-mesh_double_bool_bool_bool_bool_smoothingcoordinatesystem", args);
+        smooth : function(mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, multiple=false) {
+            let url="rhino/geometry/mesh/smooth-mesh_double_bool_bool_bool_bool_smoothingcoordinatesystem";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        smooth1 : function(mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane) {
-            args = [mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/smooth-mesh_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane", args);
+        smooth1 : function(mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane, multiple=false) {
+            let url="rhino/geometry/mesh/smooth-mesh_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        smooth2 : function(mesh, vertexIndices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane) {
-            args = [mesh, vertexIndices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/smooth-mesh_intarray_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane", args);
+        smooth2 : function(mesh, vertexIndices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane, multiple=false) {
+            let url="rhino/geometry/mesh/smooth-mesh_intarray_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, vertexIndices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        unweld : function(mesh, angleToleranceRadians, modifyNormals) {
-            args = [mesh, angleToleranceRadians, modifyNormals];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/unweld-mesh_double_bool", args);
+        unweld : function(mesh, angleToleranceRadians, modifyNormals, multiple=false) {
+            let url="rhino/geometry/mesh/unweld-mesh_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, angleToleranceRadians, modifyNormals);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        unweldEdge : function(mesh, edgeIndices, modifyNormals) {
-            args = [mesh, edgeIndices, modifyNormals];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/unweldedge-mesh_intarray_bool", args);
+        unweldEdge : function(mesh, edgeIndices, modifyNormals, multiple=false) {
+            let url="rhino/geometry/mesh/unweldedge-mesh_intarray_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, edgeIndices, modifyNormals);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        weld : function(mesh, angleToleranceRadians) {
-            args = [mesh, angleToleranceRadians];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/weld-mesh_double", args);
+        weld : function(mesh, angleToleranceRadians, multiple=false) {
+            let url="rhino/geometry/mesh/weld-mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, angleToleranceRadians);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        rebuildNormals : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/rebuildnormals-mesh", args);
+        rebuildNormals : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/rebuildnormals-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        extractNonManifoldEdges : function(mesh, selective) {
-            args = [mesh, selective];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/extractnonmanifoldedges-mesh_bool", args);
+        extractNonManifoldEdges : function(mesh, selective, multiple=false) {
+            let url="rhino/geometry/mesh/extractnonmanifoldedges-mesh_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, selective);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        healNakedEdges : function(mesh, distance) {
-            args = [mesh, distance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/healnakededges-mesh_double", args);
+        healNakedEdges : function(mesh, distance, multiple=false) {
+            let url="rhino/geometry/mesh/healnakededges-mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, distance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        fillHoles : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/fillholes-mesh", args);
+        fillHoles : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/fillholes-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        fileHole : function(mesh, topologyEdgeIndex) {
-            args = [mesh, topologyEdgeIndex];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/filehole-mesh_int", args);
+        fileHole : function(mesh, topologyEdgeIndex, multiple=false) {
+            let url="rhino/geometry/mesh/filehole-mesh_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, topologyEdgeIndex);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        unifyNormals : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/unifynormals-mesh", args);
+        unifyNormals : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/unifynormals-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        unifyNormals1 : function(mesh, countOnly) {
-            args = [mesh, countOnly];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/unifynormals-mesh_bool", args);
+        unifyNormals1 : function(mesh, countOnly, multiple=false) {
+            let url="rhino/geometry/mesh/unifynormals-mesh_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, countOnly);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        splitDisjointPieces : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/splitdisjointpieces-mesh", args);
+        splitDisjointPieces : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/splitdisjointpieces-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split : function(mesh, plane) {
-            args = [mesh, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/split-mesh_plane", args);
+        split : function(mesh, plane, multiple=false) {
+            let url="rhino/geometry/mesh/split-mesh_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split1 : function(mesh, mesh) {
-            args = [mesh, mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/split-mesh_mesh", args);
+        split1 : function(mesh, mesh, multiple=false) {
+            let url="rhino/geometry/mesh/split-mesh_mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        split2 : function(mesh, meshes) {
-            args = [mesh, meshes];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/split-mesh_mesharray", args);
+        split2 : function(mesh, meshes, multiple=false) {
+            let url="rhino/geometry/mesh/split-mesh_mesharray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, meshes);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getOutlines : function(mesh, plane) {
-            args = [mesh, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/getoutlines-mesh_plane", args);
+        getOutlines : function(mesh, plane, multiple=false) {
+            let url="rhino/geometry/mesh/getoutlines-mesh_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getOutlines1 : function(mesh, viewport) {
-            args = [mesh, viewport];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/getoutlines-mesh_display.rhinoviewport", args);
+        getOutlines1 : function(mesh, viewport, multiple=false) {
+            let url="rhino/geometry/mesh/getoutlines-mesh_display.rhinoviewport";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, viewport);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getOutlines2 : function(mesh, viewportInfo, plane) {
-            args = [mesh, viewportInfo, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/getoutlines-mesh_viewportinfo_plane", args);
+        getOutlines2 : function(mesh, viewportInfo, plane, multiple=false) {
+            let url="rhino/geometry/mesh/getoutlines-mesh_viewportinfo_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, viewportInfo, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getNakedEdges : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/getnakededges-mesh", args);
+        getNakedEdges : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/getnakededges-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        explodeAtUnweldedEdges : function(mesh) {
-            args = [mesh];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/explodeatunweldededges-mesh", args);
+        explodeAtUnweldedEdges : function(mesh, multiple=false) {
+            let url="rhino/geometry/mesh/explodeatunweldededges-mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint : function(mesh, testPoint) {
-            args = [mesh, testPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestpoint-mesh_point3d", args);
+        closestPoint : function(mesh, testPoint, multiple=false) {
+            let url="rhino/geometry/mesh/closestpoint-mesh_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, testPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestMeshPoint : function(mesh, testPoint, maximumDistance) {
-            args = [mesh, testPoint, maximumDistance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestmeshpoint-mesh_point3d_double", args);
+        closestMeshPoint : function(mesh, testPoint, maximumDistance, multiple=false) {
+            let url="rhino/geometry/mesh/closestmeshpoint-mesh_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, testPoint, maximumDistance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint : function(mesh, testPoint, maximumDistance) {
-            args = [mesh, testPoint, maximumDistance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_double", args);
+        closestPoint : function(mesh, testPoint, maximumDistance, multiple=false) {
+            let url="rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, testPoint, maximumDistance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        closestPoint1 : function(mesh, testPoint, maximumDistance) {
-            args = [mesh, testPoint, maximumDistance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_vector3d_double", args);
+        closestPoint1 : function(mesh, testPoint, maximumDistance, multiple=false) {
+            let url="rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, testPoint, maximumDistance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pointAt : function(mesh, meshPoint) {
-            args = [mesh, meshPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/pointat-mesh_meshpoint", args);
+        pointAt : function(mesh, meshPoint, multiple=false) {
+            let url="rhino/geometry/mesh/pointat-mesh_meshpoint";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, meshPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pointAt1 : function(mesh, faceIndex, t0, t1, t2, t3) {
-            args = [mesh, faceIndex, t0, t1, t2, t3];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/pointat-mesh_int_double_double_double_double", args);
+        pointAt1 : function(mesh, faceIndex, t0, t1, t2, t3, multiple=false) {
+            let url="rhino/geometry/mesh/pointat-mesh_int_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, faceIndex, t0, t1, t2, t3);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalAt : function(mesh, meshPoint) {
-            args = [mesh, meshPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/normalat-mesh_meshpoint", args);
+        normalAt : function(mesh, meshPoint, multiple=false) {
+            let url="rhino/geometry/mesh/normalat-mesh_meshpoint";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, meshPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        normalAt1 : function(mesh, faceIndex, t0, t1, t2, t3) {
-            args = [mesh, faceIndex, t0, t1, t2, t3];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/normalat-mesh_int_double_double_double_double", args);
+        normalAt1 : function(mesh, faceIndex, t0, t1, t2, t3, multiple=false) {
+            let url="rhino/geometry/mesh/normalat-mesh_int_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, faceIndex, t0, t1, t2, t3);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        colorAt : function(mesh, meshPoint) {
-            args = [mesh, meshPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/colorat-mesh_meshpoint", args);
+        colorAt : function(mesh, meshPoint, multiple=false) {
+            let url="rhino/geometry/mesh/colorat-mesh_meshpoint";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, meshPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        colorAt1 : function(mesh, faceIndex, t0, t1, t2, t3) {
-            args = [mesh, faceIndex, t0, t1, t2, t3];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/colorat-mesh_int_double_double_double_double", args);
+        colorAt1 : function(mesh, faceIndex, t0, t1, t2, t3, multiple=false) {
+            let url="rhino/geometry/mesh/colorat-mesh_int_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, faceIndex, t0, t1, t2, t3);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        pullPointsToMesh : function(mesh, points) {
-            args = [mesh, points];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/pullpointstomesh-mesh_point3darray", args);
+        pullPointsToMesh : function(mesh, points, multiple=false) {
+            let url="rhino/geometry/mesh/pullpointstomesh-mesh_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, points);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offset : function(mesh, distance) {
-            args = [mesh, distance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/offset-mesh_double", args);
+        offset : function(mesh, distance, multiple=false) {
+            let url="rhino/geometry/mesh/offset-mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, distance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offset1 : function(mesh, distance, solidify) {
-            args = [mesh, distance, solidify];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/offset-mesh_double_bool", args);
+        offset1 : function(mesh, distance, solidify, multiple=false) {
+            let url="rhino/geometry/mesh/offset-mesh_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, distance, solidify);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        offset2 : function(mesh, distance, solidify, direction) {
-            args = [mesh, distance, solidify, direction];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/offset-mesh_double_bool_vector3d", args);
+        offset2 : function(mesh, distance, solidify, direction, multiple=false) {
+            let url="rhino/geometry/mesh/offset-mesh_double_bool_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, distance, solidify, direction);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        collapseFacesByEdgeLength : function(mesh, bGreaterThan, edgeLength) {
-            args = [mesh, bGreaterThan, edgeLength];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/collapsefacesbyedgelength-mesh_bool_double", args);
+        collapseFacesByEdgeLength : function(mesh, bGreaterThan, edgeLength, multiple=false) {
+            let url="rhino/geometry/mesh/collapsefacesbyedgelength-mesh_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, bGreaterThan, edgeLength);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        collapseFacesByArea : function(mesh, lessThanArea, greaterThanArea) {
-            args = [mesh, lessThanArea, greaterThanArea];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/collapsefacesbyarea-mesh_double_double", args);
+        collapseFacesByArea : function(mesh, lessThanArea, greaterThanArea, multiple=false) {
+            let url="rhino/geometry/mesh/collapsefacesbyarea-mesh_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, lessThanArea, greaterThanArea);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        collapseFacesByByAspectRatio : function(mesh, aspectRatio) {
-            args = [mesh, aspectRatio];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/collapsefacesbybyaspectratio-mesh_double", args);
+        collapseFacesByByAspectRatio : function(mesh, aspectRatio, multiple=false) {
+            let url="rhino/geometry/mesh/collapsefacesbybyaspectratio-mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, aspectRatio);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        getUnsafeLock : function(mesh, writable) {
-            args = [mesh, writable];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/getunsafelock-mesh_bool", args);
+        getUnsafeLock : function(mesh, writable, multiple=false) {
+            let url="rhino/geometry/mesh/getunsafelock-mesh_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, writable);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        releaseUnsafeLock : function(mesh, meshData) {
-            args = [mesh, meshData];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/releaseunsafelock-mesh_meshunsafelock", args);
+        releaseUnsafeLock : function(mesh, meshData, multiple=false) {
+            let url="rhino/geometry/mesh/releaseunsafelock-mesh_meshunsafelock";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, meshData);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        withShutLining : function(mesh, faceted, tolerance, curves) {
-            args = [mesh, faceted, tolerance, curves];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/withshutlining-mesh_bool_double_shutliningcurveinfoarray", args);
+        withShutLining : function(mesh, faceted, tolerance, curves, multiple=false) {
+            let url="rhino/geometry/mesh/withshutlining-mesh_bool_double_shutliningcurveinfoarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, faceted, tolerance, curves);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        withDisplacement : function(mesh, displacement) {
-            args = [mesh, displacement];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/withdisplacement-mesh_meshdisplacementinfo", args);
+        withDisplacement : function(mesh, displacement, multiple=false) {
+            let url="rhino/geometry/mesh/withdisplacement-mesh_meshdisplacementinfo";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, displacement);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        withEdgeSoftening : function(mesh, softeningRadius, chamfer, faceted, force, angleThreshold) {
-            args = [mesh, softeningRadius, chamfer, faceted, force, angleThreshold];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/withedgesoftening-mesh_double_bool_bool_bool_double", args);
+        withEdgeSoftening : function(mesh, softeningRadius, chamfer, faceted, force, angleThreshold, multiple=false) {
+            let url="rhino/geometry/mesh/withedgesoftening-mesh_double_bool_bool_bool_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, softeningRadius, chamfer, faceted, force, angleThreshold);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        reduce : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize) {
-            args = [mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_int_bool_int_bool", args);
+        reduce : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, multiple=false) {
+            let url="rhino/geometry/mesh/reduce-mesh_int_bool_int_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        reduce1 : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress) {
-            args = [mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_int_bool_int_bool_system.threading.cancellationtoken_doublearray_string", args);
+        reduce1 : function(mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress, multiple=false) {
+            let url="rhino/geometry/mesh/reduce-mesh_int_bool_int_bool_system.threading.cancellationtoken_doublearray_string";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, desiredPolygonCount, allowDistortion, accuracy, normalizeSize, cancelToken, progress);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        reduce2 : function(mesh, parameters) {
-            args = [mesh, parameters];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/reduce-mesh_reducemeshparameters", args);
+        reduce2 : function(mesh, parameters, multiple=false) {
+            let url="rhino/geometry/mesh/reduce-mesh_reducemeshparameters";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, parameters);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        computeThickness : function(meshes, maximumThickness) {
-            args = [meshes, maximumThickness];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double", args);
+        computeThickness : function(meshes, maximumThickness, multiple=false) {
+            let url="rhino/geometry/mesh/computethickness-mesharray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, maximumThickness);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        computeThickness1 : function(meshes, maximumThickness, cancelToken) {
-            args = [meshes, maximumThickness, cancelToken];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double_system.threading.cancellationtoken", args);
+        computeThickness1 : function(meshes, maximumThickness, cancelToken, multiple=false) {
+            let url="rhino/geometry/mesh/computethickness-mesharray_double_system.threading.cancellationtoken";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, maximumThickness, cancelToken);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        computeThickness2 : function(meshes, maximumThickness, sharpAngle, cancelToken) {
-            args = [meshes, maximumThickness, sharpAngle, cancelToken];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/computethickness-mesharray_double_double_system.threading.cancellationtoken", args);
+        computeThickness2 : function(meshes, maximumThickness, sharpAngle, cancelToken, multiple=false) {
+            let url="rhino/geometry/mesh/computethickness-mesharray_double_double_system.threading.cancellationtoken";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, maximumThickness, sharpAngle, cancelToken);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createContourCurves : function(meshToContour, contourStart, contourEnd, interval) {
-            args = [meshToContour, contourStart, contourEnd, interval];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createcontourcurves-mesh_point3d_point3d_double", args);
+        createContourCurves : function(meshToContour, contourStart, contourEnd, interval, multiple=false) {
+            let url="rhino/geometry/mesh/createcontourcurves-mesh_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshToContour, contourStart, contourEnd, interval);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createContourCurves1 : function(meshToContour, sectionPlane) {
-            args = [meshToContour, sectionPlane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/mesh/createcontourcurves-mesh_plane", args);
+        createContourCurves1 : function(meshToContour, sectionPlane, multiple=false) {
+            let url="rhino/geometry/mesh/createcontourcurves-mesh_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshToContour, sectionPlane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     NurbsCurve : {
-        makeCompatible : function(curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance) {
-            args = [curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/makecompatible-curvearray_point3d_point3d_int_int_double_double", args);
+        makeCompatible : function(curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/nurbscurve/makecompatible-curvearray_point3d_point3d_int_int_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, startPt, endPt, simplifyMethod, numPoints, refitTolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createParabolaFromVertex : function(vertex, startPoint, endPoint) {
-            args = [vertex, startPoint, endPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createparabolafromvertex-point3d_point3d_point3d", args);
+        createParabolaFromVertex : function(vertex, startPoint, endPoint, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createparabolafromvertex-point3d_point3d_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, vertex, startPoint, endPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createParabolaFromFocus : function(focus, startPoint, endPoint) {
-            args = [focus, startPoint, endPoint];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createparabolafromfocus-point3d_point3d_point3d", args);
+        createParabolaFromFocus : function(focus, startPoint, endPoint, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createparabolafromfocus-point3d_point3d_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, focus, startPoint, endPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromArc : function(arc, degree, cvCount) {
-            args = [arc, degree, cvCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createfromarc-arc_int_int", args);
+        createFromArc : function(arc, degree, cvCount, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createfromarc-arc_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, arc, degree, cvCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createFromCircle : function(circle, degree, cvCount) {
-            args = [circle, degree, cvCount];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createfromcircle-circle_int_int", args);
+        createFromCircle : function(circle, degree, cvCount, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createfromcircle-circle_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, circle, degree, cvCount);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        setEndCondition : function(nurbscurve, bSetEnd, continuity, point, tangent) {
-            args = [nurbscurve, bSetEnd, continuity, point, tangent];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d", args);
+        setEndCondition : function(nurbscurve, bSetEnd, continuity, point, tangent, multiple=false) {
+            let url="rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, nurbscurve, bSetEnd, continuity, point, tangent);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        setEndCondition1 : function(nurbscurve, bSetEnd, continuity, point, tangent, curvature) {
-            args = [nurbscurve, bSetEnd, continuity, point, tangent, curvature];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d_vector3d", args);
+        setEndCondition1 : function(nurbscurve, bSetEnd, continuity, point, tangent, curvature, multiple=false) {
+            let url="rhino/geometry/nurbscurve/setendcondition-nurbscurve_bool_nurbscurveendconditiontype_point3d_vector3d_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, nurbscurve, bSetEnd, continuity, point, tangent, curvature);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        setGrevillePoints : function(nurbscurve, points) {
-            args = [nurbscurve, points];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/setgrevillepoints-nurbscurve_point3darray", args);
+        setGrevillePoints : function(nurbscurve, points, multiple=false) {
+            let url="rhino/geometry/nurbscurve/setgrevillepoints-nurbscurve_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, nurbscurve, points);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createSpiral : function(axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1) {
-            args = [axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createspiral-point3d_vector3d_point3d_double_double_double_double", args);
+        createSpiral : function(axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createspiral-point3d_vector3d_point3d_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, axisStart, axisDir, radiusPoint, pitch, turnCount, radius0, radius1);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        createSpiral1 : function(railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn) {
-            args = [railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/nurbscurve/createspiral-curve_double_double_point3d_double_double_double_double_int", args);
+        createSpiral1 : function(railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn, multiple=false) {
+            let url="rhino/geometry/nurbscurve/createspiral-curve_double_double_point3d_double_double_double_double_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, railCurve, t0, t1, radiusPoint, pitch, turnCount, radius0, radius1, pointsPerTurn);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
 
     Intersection : {
-        curvePlane : function(curve, plane, tolerance) {
-            args = [curve, plane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveplane-curve_plane_double", args);
+        curvePlane : function(curve, plane, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curveplane-curve_plane_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, plane, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshPlane : function(mesh, plane) {
-            args = [mesh, plane];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_plane", args);
+        meshPlane : function(mesh, plane, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshplane-mesh_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshPlane1 : function(mesh, planes) {
-            args = [mesh, planes];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshplane-mesh_planearray", args);
+        meshPlane1 : function(mesh, planes, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshplane-mesh_planearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, planes);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        brepPlane : function(brep, plane, tolerance) {
-            args = [brep, plane, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepplane-brep_plane_double_curvearray_point3darray", args);
+        brepPlane : function(brep, plane, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/brepplane-brep_plane_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, plane, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveSelf : function(curve, tolerance) {
-            args = [curve, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveself-curve_double", args);
+        curveSelf : function(curve, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curveself-curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveCurve : function(curveA, curveB, tolerance, overlapTolerance) {
-            args = [curveA, curveB, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvecurve-curve_curve_double_double", args);
+        curveCurve : function(curveA, curveB, tolerance, overlapTolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvecurve-curve_curve_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curveA, curveB, tolerance, overlapTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveLine : function(curve, line, tolerance, overlapTolerance) {
-            args = [curve, line, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curveline-curve_line_double_double", args);
+        curveLine : function(curve, line, tolerance, overlapTolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curveline-curve_line_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, line, tolerance, overlapTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveSurface : function(curve, surface, tolerance, overlapTolerance) {
-            args = [curve, surface, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_surface_double_double", args);
+        curveSurface : function(curve, surface, tolerance, overlapTolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvesurface-curve_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, surface, tolerance, overlapTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveSurface1 : function(curve, curveDomain, surface, tolerance, overlapTolerance) {
-            args = [curve, curveDomain, surface, tolerance, overlapTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvesurface-curve_interval_surface_double_double", args);
+        curveSurface1 : function(curve, curveDomain, surface, tolerance, overlapTolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvesurface-curve_interval_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, curveDomain, surface, tolerance, overlapTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveBrep : function(curve, brep, tolerance) {
-            args = [curve, brep, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_curvearray_point3darray", args);
+        curveBrep : function(curve, brep, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, brep, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveBrep1 : function(curve, brep, tolerance, angleTolerance) {
-            args = [curve, brep, tolerance, angleTolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_double_doublearray", args);
+        curveBrep1 : function(curve, brep, tolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvebrep-curve_brep_double_double_doublearray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, brep, tolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        curveBrepFace : function(curve, face, tolerance) {
-            args = [curve, face, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/curvebrepface-curve_brepface_double_curvearray_point3darray", args);
+        curveBrepFace : function(curve, face, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/curvebrepface-curve_brepface_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curve, face, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        surfaceSurface : function(surfaceA, surfaceB, tolerance) {
-            args = [surfaceA, surfaceB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/surfacesurface-surface_surface_double_curvearray_point3darray", args);
+        surfaceSurface : function(surfaceA, surfaceB, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/surfacesurface-surface_surface_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surfaceA, surfaceB, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        brepBrep : function(brepA, brepB, tolerance) {
-            args = [brepA, brepB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepbrep-brep_brep_double_curvearray_point3darray", args);
+        brepBrep : function(brepA, brepB, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/brepbrep-brep_brep_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brepA, brepB, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        brepSurface : function(brep, surface, tolerance) {
-            args = [brep, surface, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/brepsurface-brep_surface_double_curvearray_point3darray", args);
+        brepSurface : function(brep, surface, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/brepsurface-brep_surface_double_curvearray_point3darray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, brep, surface, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshMeshFast : function(meshA, meshB) {
-            args = [meshA, meshB];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh", args);
+        meshMeshFast : function(meshA, meshB, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshmeshfast-mesh_mesh";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshA, meshB);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshMesh : function(meshes, tolerance, mode) {
-            args = [meshes, tolerance, mode];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmesh-mesharray_double_setscombinations", args);
+        meshMesh : function(meshes, tolerance, mode, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshmesh-mesharray_double_setscombinations";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, tolerance, mode);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshMeshAccurate : function(meshA, meshB, tolerance) {
-            args = [meshA, meshB, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshmeshaccurate-mesh_mesh_double", args);
+        meshMeshAccurate : function(meshA, meshB, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshmeshaccurate-mesh_mesh_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshA, meshB, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshRay : function(mesh, ray) {
-            args = [mesh, ray];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d", args);
+        meshRay : function(mesh, ray, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshray-mesh_ray3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, ray);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshRay1 : function(mesh, ray) {
-            args = [mesh, ray];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshray-mesh_ray3d_intarray", args);
+        meshRay1 : function(mesh, ray, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshray-mesh_ray3d_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, ray);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshPolyline : function(mesh, curve) {
-            args = [mesh, curve];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshpolyline-mesh_polylinecurve_intarray", args);
+        meshPolyline : function(mesh, curve, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshpolyline-mesh_polylinecurve_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, curve);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        meshLine : function(mesh, line) {
-            args = [mesh, line];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/meshline-mesh_line_intarray", args);
+        meshLine : function(mesh, line, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/meshline-mesh_line_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, mesh, line);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        rayShoot : function(ray, geometry, maxReflections) {
-            args = [ray, geometry, maxReflections];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/rayshoot-ray3d_geometrybasearray_int", args);
+        rayShoot : function(ray, geometry, maxReflections, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/rayshoot-ray3d_geometrybasearray_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, ray, geometry, maxReflections);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectPointsToMeshes : function(meshes, points, direction, tolerance) {
-            args = [meshes, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshes-mesharray_point3darray_vector3d_double", args);
+        projectPointsToMeshes : function(meshes, points, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/projectpointstomeshes-mesharray_point3darray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, points, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectPointsToMeshesEx : function(meshes, points, direction, tolerance) {
-            args = [meshes, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstomeshesex-mesharray_point3darray_vector3d_double_intarray", args);
+        projectPointsToMeshesEx : function(meshes, points, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/projectpointstomeshesex-mesharray_point3darray_vector3d_double_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, meshes, points, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectPointsToBreps : function(breps, points, direction, tolerance) {
-            args = [breps, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobreps-breparray_point3darray_vector3d_double", args);
+        projectPointsToBreps : function(breps, points, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/projectpointstobreps-breparray_point3darray_vector3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, breps, points, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
 
-        projectPointsToBrepsEx : function(breps, points, direction, tolerance) {
-            args = [breps, points, direction, tolerance];
-            var promise = RhinoCompute.computeFetch("rhino/geometry/intersect/intersection/projectpointstobrepsex-breparray_point3darray_vector3d_double_intarray", args);
+        projectPointsToBrepsEx : function(breps, points, direction, tolerance, multiple=false) {
+            let url="rhino/geometry/intersect/intersection/projectpointstobrepsex-breparray_point3darray_vector3d_double_intarray";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, breps, points, direction, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
     },
