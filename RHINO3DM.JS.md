@@ -29,9 +29,6 @@ Rhino3dm.js requires two files`rhino3dm.wasm` and `rhino3dm.js`.  It is easiest 
 </html>
 ```
 
-## API Docs
-The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
-
 ### Download the files
 
 If it would be better to download a static build locally, download the latest build of the two files:
@@ -43,7 +40,19 @@ Place these in the same folder. The `rhino3dm.js` references the `rhino3d.wasm`.
 
 Note: A list of builds is available on our [Circleci project](https://circleci.com/gh/mcneel/rhino3dm). You can replace latest with dujour/BUILD_NUMBER if you know what you're looking for!
 
-## Example
+### Node.js
+
+**rhino3dm.js** is also available on npm; try `npm install rhino3dm`.
+
+```js
+rhino3dm = require('rhino3dm')() // note the trailing "()"
+sphere = new rhino3dm.Sphere([1,2,3,], 12)
+```
+
+## API Docs
+The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
+
+## Examples
 
 There a few samples are available in the [Github Repo Samples folder](https://github.com/mcneel/rhino3dm/tree/master/samples/javascript)
 
