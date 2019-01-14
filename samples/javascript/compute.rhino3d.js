@@ -2389,10 +2389,10 @@ var RhinoCompute = {
             return promise;
         },
 
-        split1 : function(mesh, mesh, multiple=false) {
+        split1 : function(mesh, mesh2, multiple=false) {
             let url="rhino/geometry/mesh/split-mesh_mesh";
             if(multiple) url = url + "?multiple=true"
-            let args = RhinoCompute.zipArgs(multiple, mesh, mesh);
+            let args = RhinoCompute.zipArgs(multiple, mesh, mesh2);
             var promise = RhinoCompute.computeFetch(url, args);
             return promise;
         },
