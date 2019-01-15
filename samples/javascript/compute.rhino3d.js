@@ -2986,3 +2986,7 @@ var RhinoCompute = {
         },
     },
 };
+
+// export RhinoCompute object if node.js
+if (typeof exports === 'object' && typeof module === 'object')
+    module.exports = RhinoCompute;
