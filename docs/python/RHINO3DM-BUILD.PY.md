@@ -23,7 +23,9 @@ CMake 3.12.1 is the minimum required CMake version.
 
 ## Compile
 
-* (All platforms) run `python build_python_lib.py` in the `src` directory to compile and configure. The library will compile for the version of python that you are executing.
+* (All platforms) run `python setup.py bdist` in the root directory to compile and configure. The library will compile for the version of python that you are executing.
+
+* (Windows) If you are on Windows, you can create a Visual Studio project file for editing and compiling code by running the `build_python_project.py` script in the `src` directory. This is the easiest way to add new code to the project.
 
 ## Test
 

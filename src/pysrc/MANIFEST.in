@@ -1,4 +1,0 @@
-recursive-include rhino3dm *.pyd
-recursive-include rhino3dm *.so
-include LICENSE
-include README.md
