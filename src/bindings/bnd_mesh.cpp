@@ -1,6 +1,112 @@
 #include "bindings.h"
 #include "base64.h"
 
+
+
+#if defined(ON_PYTHON_COMPILE)
+pybind11::dict BND_MeshingParameters::Encode() const
+{
+  pybind11::dict d;
+  d["TextureRange"] = GetTextureRange();
+  d["JaggedSeams"] = GetJaggedSeams();
+  d["RefineGrid"] = GetRefineGrid();
+  d["SimplePlanes"] = GetSimplePlanes();
+  d["ComputeCurvature"] = GetComputeCurvature();
+  d["ClosedObjectPostProcess"] = GetClosedObjectPostProcess();
+  d["GridMinCount"] = GetGridMinCount();
+  d["GridMaxCount"] = GetGridMaxCount();
+  d["GridAngle"] = GetGridAngle();
+  d["GridAspectRatio"] = GetGridAspectRatio();
+  d["GridAmplification"] = GetGridAmplification();
+  d["Tolerance"] = GetTolerance();
+  d["MinimumTolerance"] = GetMinimumTolerance();
+  d["RelativeTolerance"] = GetRelativeTolerance();
+  d["MinimumEdgeLength"] = GetMinimumEdgeLength();
+  d["MaximumEdgeLength"] = GetMaximumEdgeLength();
+  d["RefineAngle"] = GetRefineAngle();
+  return d;
+}
+
+BND_MeshingParameters* BND_MeshingParameters::Decode(pybind11::dict jsonObject)
+{
+  BND_MeshingParameters* mp = new BND_MeshingParameters();
+  mp->SetTextureRange(jsonObject["TextureRange"].cast<int>());
+  mp->SetJaggedSeams(jsonObject["JaggedSeams"].cast<bool>());
+  mp->SetRefineGrid(jsonObject["RefineGrid"].cast<bool>());
+  mp->SetSimplePlanes(jsonObject["SimplePlanes"].cast<bool>());
+  mp->SetComputeCurvature(jsonObject["ComputeCurvature"].cast<bool>());
+  mp->SetClosedObjectPostProcess(jsonObject["ClosedObjectPostProcess"].cast<bool>());
+  mp->SetGridMinCount(jsonObject["GridMinCount"].cast<int>());
+  mp->SetGridMaxCount(jsonObject["GridMaxCount"].cast<int>());
+  mp->SetGridAngle(jsonObject["GridAngle"].cast<double>());
+  mp->SetGridAspectRatio(jsonObject["GridAspectRatio"].cast<double>());
+  mp->SetGridAmplification(jsonObject["GridAmplification"].cast<double>());
+  mp->SetTolerance(jsonObject["Tolerance"].cast<double>());
+  mp->SetMinimumTolerance(jsonObject["MinimumTolerance"].cast<double>());
+  mp->SetRelativeTolerance(jsonObject["RelativeTolerance"].cast<double>());
+  mp->SetMinimumEdgeLength(jsonObject["MinimumEdgeLength"].cast<double>());
+  mp->SetMaximumEdgeLength(jsonObject["MaximumEdgeLength"].cast<double>());
+  mp->SetRefineAngle(jsonObject["RefineAngle"].cast<double>());
+  return mp;
+}
+#endif
+
+#if defined(__EMSCRIPTEN__)
+emscripten::val BND_MeshingParameters::Encode() const
+{
+  emscripten::val v(emscripten::val::object());
+  v.set("TextureRange", emscripten::val(GetTextureRange()));
+  v.set("JaggedSeams", emscripten::val(GetJaggedSeams()));
+  v.set("RefineGrid", emscripten::val(GetRefineGrid()));
+  v.set("SimplePlanes", emscripten::val(GetSimplePlanes()));
+  v.set("ComputeCurvature", emscripten::val(GetComputeCurvature()));
+  v.set("ClosedObjectPostProcess", emscripten::val(GetClosedObjectPostProcess()));
+  v.set("GridMinCount", emscripten::val(GetGridMinCount()));
+  v.set("GridMaxCount", emscripten::val(GetGridMaxCount()));
+  v.set("GridAngle", emscripten::val(GetGridAngle()));
+  v.set("GridAspectRatio", emscripten::val(GetGridAspectRatio()));
+  v.set("GridAmplification", emscripten::val(GetGridAmplification()));
+  v.set("Tolerance", emscripten::val(GetTolerance()));
+  v.set("MinimumTolerance", emscripten::val(GetMinimumTolerance()));
+  v.set("RelativeTolerance", emscripten::val(GetRelativeTolerance()));
+  v.set("MinimumEdgeLength", emscripten::val(GetMinimumEdgeLength()));
+  v.set("MaximumEdgeLength", emscripten::val(GetMaximumEdgeLength()));
+  v.set("RefineAngle", emscripten::val(GetRefineAngle()));
+  return v;
+}
+
+emscripten::val BND_MeshingParameters::toJSON(emscripten::val key)
+{
+  return Encode();
+}
+
+BND_MeshingParameters* BND_MeshingParameters::Decode(emscripten::val jsonObject)
+{
+  BND_MeshingParameters* mp = new BND_MeshingParameters();
+  mp->SetTextureRange(jsonObject["TextureRange"].as<int>());
+  mp->SetJaggedSeams(jsonObject["JaggedSeams"].as<bool>());
+  mp->SetRefineGrid(jsonObject["RefineGrid"].as<bool>());
+  mp->SetSimplePlanes(jsonObject["SimplePlanes"].as<bool>());
+  mp->SetComputeCurvature(jsonObject["ComputeCurvature"].as<bool>());
+  mp->SetClosedObjectPostProcess(jsonObject["ClosedObjectPostProcess"].as<bool>());
+  mp->SetGridMinCount(jsonObject["GridMinCount"].as<int>());
+  mp->SetGridMaxCount(jsonObject["GridMaxCount"].as<int>());
+  mp->SetGridAngle(jsonObject["GridAngle"].as<double>());
+  mp->SetGridAspectRatio(jsonObject["GridAspectRatio"].as<double>());
+  mp->SetGridAmplification(jsonObject["GridAmplification"].as<double>());
+  mp->SetTolerance(jsonObject["Tolerance"].as<double>());
+  mp->SetMinimumTolerance(jsonObject["MinimumTolerance"].as<double>());
+  mp->SetRelativeTolerance(jsonObject["RelativeTolerance"].as<double>());
+  mp->SetMinimumEdgeLength(jsonObject["MinimumEdgeLength"].as<double>());
+  mp->SetMaximumEdgeLength(jsonObject["MaximumEdgeLength"].as<double>());
+  mp->SetRefineAngle(jsonObject["RefineAngle"].as<double>());
+  return mp;
+}
+
+#endif
+
+
+
 BND_Mesh::BND_Mesh()
 {
   SetTrackedPointer(new ON_Mesh(), nullptr);
@@ -226,6 +332,35 @@ pybind11::list BND_MeshFaceList::GetFace(int i) const
 namespace py = pybind11;
 void initMeshBindings(pybind11::module& m)
 {
+  py::class_<BND_MeshingParameters>(m, "MeshingParameters")
+    .def(py::init<>())
+    .def(py::init<double>())
+    .def(py::init<double, double>())
+    .def_property_readonly_static("Default", &BND_MeshingParameters::Default)
+    .def_property_readonly_static("FastRenderMesh", &BND_MeshingParameters::FastRenderMesh)
+    .def_property_readonly_static("QualityRenderMesh", &BND_MeshingParameters::QualityRenderMesh)
+    .def_property_readonly_static("DefaultAnalysisMesh", &BND_MeshingParameters::DefaultAnalysisMesh)
+    .def_property("TextureRange", &BND_MeshingParameters::GetTextureRange, &BND_MeshingParameters::SetTextureRange)
+    .def_property("JaggedSeams", &BND_MeshingParameters::GetJaggedSeams, &BND_MeshingParameters::SetJaggedSeams)
+    .def_property("RefineGrid", &BND_MeshingParameters::GetRefineGrid, &BND_MeshingParameters::SetRefineGrid)
+    .def_property("SimplePlanes", &BND_MeshingParameters::GetSimplePlanes, &BND_MeshingParameters::SetSimplePlanes)
+    .def_property("ComputeCurvature", &BND_MeshingParameters::GetComputeCurvature, &BND_MeshingParameters::SetComputeCurvature)
+    .def_property("ClosedObjectPostProcess", &BND_MeshingParameters::GetClosedObjectPostProcess, &BND_MeshingParameters::SetClosedObjectPostProcess)
+    .def_property("GridMinCount", &BND_MeshingParameters::GetGridMinCount, &BND_MeshingParameters::SetGridMinCount)
+    .def_property("GridMaxCount", &BND_MeshingParameters::GetGridMaxCount, &BND_MeshingParameters::SetGridMaxCount)
+    .def_property("GridAngle", &BND_MeshingParameters::GetGridAngle, &BND_MeshingParameters::SetGridAngle)
+    .def_property("GridAspectRatio", &BND_MeshingParameters::GetGridAspectRatio, &BND_MeshingParameters::SetGridAspectRatio)
+    .def_property("GridAmplification", &BND_MeshingParameters::GetGridAmplification, &BND_MeshingParameters::SetGridAmplification)
+    .def_property("Tolerance", &BND_MeshingParameters::GetTolerance, &BND_MeshingParameters::SetTolerance)
+    .def_property("MinimumTolerance", &BND_MeshingParameters::GetMinimumTolerance, &BND_MeshingParameters::SetMinimumTolerance)
+    .def_property("RelativeTolerance", &BND_MeshingParameters::GetRelativeTolerance, &BND_MeshingParameters::SetRelativeTolerance)
+    .def_property("MinimumEdgeLength", &BND_MeshingParameters::GetMinimumEdgeLength, &BND_MeshingParameters::SetMinimumEdgeLength)
+    .def_property("MaximumEdgeLength", &BND_MeshingParameters::GetMaximumEdgeLength, &BND_MeshingParameters::SetMaximumEdgeLength)
+    .def_property("RefineAngle", &BND_MeshingParameters::GetRefineAngle, &BND_MeshingParameters::SetRefineAngle)
+    .def("Encode", &BND_MeshingParameters::Encode)
+    .def_static("Decode", &BND_MeshingParameters::Decode)
+    ;
+
   py::class_<BND_MeshVertexList>(m, "MeshVertexList")
     .def("__len__", &BND_MeshVertexList::Count)
     .def("SetCount", &BND_MeshVertexList::SetCount)
@@ -279,6 +414,37 @@ using namespace emscripten;
 
 void initMeshBindings(void*)
 {
+  class_<BND_MeshingParameters>("MeshingParameters")
+    .constructor<>()
+    .constructor<double>()
+    .constructor<double, double>()
+    .class_function("default", &BND_MeshingParameters::Default, allow_raw_pointers())
+    .class_function("fastRenderMesh", &BND_MeshingParameters::FastRenderMesh, allow_raw_pointers())
+    .class_function("qualityRenderMesh", &BND_MeshingParameters::QualityRenderMesh, allow_raw_pointers())
+    .class_function("defaultAnalysisMesh", &BND_MeshingParameters::DefaultAnalysisMesh, allow_raw_pointers())
+    .property("textureRange", &BND_MeshingParameters::GetTextureRange, &BND_MeshingParameters::SetTextureRange)
+    .property("jaggedSeams", &BND_MeshingParameters::GetJaggedSeams, &BND_MeshingParameters::SetJaggedSeams)
+    .property("refineGrid", &BND_MeshingParameters::GetRefineGrid, &BND_MeshingParameters::SetRefineGrid)
+    .property("simplePlanes", &BND_MeshingParameters::GetSimplePlanes, &BND_MeshingParameters::SetSimplePlanes)
+    .property("computeCurvature", &BND_MeshingParameters::GetComputeCurvature, &BND_MeshingParameters::SetComputeCurvature)
+    .property("closedObjectPostProcess", &BND_MeshingParameters::GetClosedObjectPostProcess, &BND_MeshingParameters::SetClosedObjectPostProcess)
+    .property("gridMinCount", &BND_MeshingParameters::GetGridMinCount, &BND_MeshingParameters::SetGridMinCount)
+    .property("gridMaxCount", &BND_MeshingParameters::GetGridMaxCount, &BND_MeshingParameters::SetGridMaxCount)
+    .property("gridAngle", &BND_MeshingParameters::GetGridAngle, &BND_MeshingParameters::SetGridAngle)
+    .property("gridAspectRatio", &BND_MeshingParameters::GetGridAspectRatio, &BND_MeshingParameters::SetGridAspectRatio)
+    .property("gridAmplification", &BND_MeshingParameters::GetGridAmplification, &BND_MeshingParameters::SetGridAmplification)
+    .property("tolerance", &BND_MeshingParameters::GetTolerance, &BND_MeshingParameters::SetTolerance)
+    .property("minimumTolerance", &BND_MeshingParameters::GetMinimumTolerance, &BND_MeshingParameters::SetMinimumTolerance)
+    .property("relativeTolerance", &BND_MeshingParameters::GetRelativeTolerance, &BND_MeshingParameters::SetRelativeTolerance)
+    .property("minimumEdgeLength", &BND_MeshingParameters::GetMinimumEdgeLength, &BND_MeshingParameters::SetMinimumEdgeLength)
+    .property("maximumEdgeLength", &BND_MeshingParameters::GetMaximumEdgeLength, &BND_MeshingParameters::SetMaximumEdgeLength)
+    .property("refineAngle", &BND_MeshingParameters::GetRefineAngle, &BND_MeshingParameters::SetRefineAngle)
+    .function("toJSON", &BND_MeshingParameters::toJSON)
+    .function("encode", &BND_MeshingParameters::Encode)
+    .class_function("decode", &BND_MeshingParameters::Decode, allow_raw_pointers())
+    ;
+
+
   class_<BND_MeshVertexList>("MeshVertexList")
     .property("count", &BND_MeshVertexList::Count)
     .function("setCount", &BND_MeshVertexList::SetCount)
