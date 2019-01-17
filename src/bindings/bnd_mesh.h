@@ -63,6 +63,12 @@ public:
   static BND_MeshingParameters* Decode(pybind11::dict jsonObject);
 #endif
 
+#if defined(__EMSCRIPTEN__)
+  emscripten::val toJSON(emscripten::val key);
+  emscripten::val Encode() const;
+  static BND_MeshingParameters* Decode(emscripten::val jsonObject);
+#endif
+
 };
 
 class BND_MeshVertexList
