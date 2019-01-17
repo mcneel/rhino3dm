@@ -8,6 +8,63 @@ void initMeshBindings(pybind11::module& m);
 void initMeshBindings(void* m);
 #endif
 
+class BND_MeshingParameters
+{
+  ON_MeshParameters m_mesh_parameters;
+public:
+  BND_MeshingParameters() = default;
+  BND_MeshingParameters(double density) : m_mesh_parameters(density) {}
+  BND_MeshingParameters(double density, double minimumEdgeLength) : m_mesh_parameters(density, minimumEdgeLength) {}
+  BND_MeshingParameters(const ON_MeshParameters& mp) : m_mesh_parameters(mp) {}
+
+  static BND_MeshingParameters Default() { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
+  static BND_MeshingParameters FastRenderMesh() { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }
+  static BND_MeshingParameters QualityRenderMesh() { return BND_MeshingParameters(ON_MeshParameters::QualityRenderMesh); }
+  static BND_MeshingParameters DefaultAnalysisMesh() { return BND_MeshingParameters(ON_MeshParameters::DefaultAnalysisMesh); }
+
+  //public MeshingParameterTextureRange TextureRange | getset
+  int GetTextureRange() const { return m_mesh_parameters.TextureRange(); }
+  void SetTextureRange(int i) { m_mesh_parameters.SetTextureRange(i); }
+  bool GetJaggedSeams() const { return m_mesh_parameters.JaggedSeams(); }
+  void SetJaggedSeams(bool b) { m_mesh_parameters.SetJaggedSeams(b); }
+  bool GetRefineGrid() const { return m_mesh_parameters.Refine(); }
+  void SetRefineGrid(bool b) { m_mesh_parameters.SetRefine(b); }
+  bool GetSimplePlanes() const { return m_mesh_parameters.SimplePlanes(); }
+  void SetSimplePlanes(bool b) { m_mesh_parameters.SetSimplePlanes(b); }
+  bool GetComputeCurvature() const { return m_mesh_parameters.ComputeCurvature(); }
+  void SetComputeCurvature(bool b) { m_mesh_parameters.SetComputeCurvature(b); }
+  bool GetClosedObjectPostProcess() const { return m_mesh_parameters.ClosedObjectPostProcess(); }
+  void SetClosedObjectPostProcess(bool b) { m_mesh_parameters.SetClosedObjectPostProcess(b); }
+  int GetGridMinCount() const { return m_mesh_parameters.GridMinCount(); }
+  void SetGridMinCount(int val) { m_mesh_parameters.SetGridMinCount(val); }
+  int GetGridMaxCount() const { return m_mesh_parameters.GridMaxCount(); }
+  void SetGridMaxCount(int val) { m_mesh_parameters.SetGridMaxCount(val); }
+  double GetGridAngle() const { return m_mesh_parameters.GridAngleRadians(); }
+  void SetGridAngle(double d) { m_mesh_parameters.SetGridAngleRadians(d); }
+  double GetGridAspectRatio() const { return m_mesh_parameters.GridAspectRatio(); }
+  void SetGridAspectRatio(double d) { m_mesh_parameters.SetGridAspectRatio(d); }
+  double GetGridAmplification() const { return m_mesh_parameters.GridAmplification(); }
+  void SetGridAmplification(double d) { m_mesh_parameters.SetGridAmplification(d); }
+  double GetTolerance() const { return m_mesh_parameters.Tolerance(); }
+  void SetTolerance(double d) { m_mesh_parameters.SetTolerance(d); }
+  double GetMinimumTolerance() const { return m_mesh_parameters.MinimumTolerance(); }
+  void SetMinimumTolerance(double d) { m_mesh_parameters.SetMinimumTolerance(d); }
+  double GetRelativeTolerance() const { return m_mesh_parameters.RelativeTolerance(); }
+  void SetRelativeTolerance(double d) { m_mesh_parameters.SetRelativeTolerance(d); };
+  double GetMinimumEdgeLength() const { return m_mesh_parameters.MinimumEdgeLength(); }
+  void SetMinimumEdgeLength(double d) { m_mesh_parameters.SetMinimumEdgeLength(d); }
+  double GetMaximumEdgeLength() const { return m_mesh_parameters.MaximumEdgeLength(); }
+  void SetMaximumEdgeLength(double d) { m_mesh_parameters.SetMaximumEdgeLength(d); }
+  double GetRefineAngle() const { return m_mesh_parameters.RefineAngleRadians(); }
+  void SetRefineAngle(double d) { m_mesh_parameters.SetRefineAngleRadians(d); }
+
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::dict Encode() const;
+  static BND_MeshingParameters* Decode(pybind11::dict jsonObject);
+#endif
+
+};
+
 class BND_MeshVertexList
 {
   ON_ModelComponentReference m_component_reference;
