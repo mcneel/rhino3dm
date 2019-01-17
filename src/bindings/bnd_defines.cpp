@@ -4,6 +4,15 @@ class BND_DocObjects {};
 
 class BND_MeshTypeNamespace {};
 
+enum class LoftType : int
+{
+  Normal = 0,
+  Loose = 1,
+  Tight = 2,
+  Straight = 3,
+  Uniform = 5
+};
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
@@ -56,6 +65,14 @@ void initDefines(pybind11::module& m)
     .def_property_readonly("Direction", &ON_Line::Direction)
     .def_property_readonly("UnitTangent", &ON_Line::Tangent)
     .def("PointAt", &ON_Line::PointAt)
+    ;
+
+  py::enum_<LoftType>(m, "LoftType")
+    .value("Normal", LoftType::Normal)
+    .value("Loose", LoftType::Loose)
+    .value("Tight", LoftType::Tight)
+    .value("Straight", LoftType::Straight)
+    .value("Uniform", LoftType::Uniform)
     ;
 
   py::enum_<ON::object_mode>(m, "ObjectMode")
