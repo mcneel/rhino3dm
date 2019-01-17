@@ -58,6 +58,7 @@ Welcome to rhino3dm's documentation!
    Material
    Mesh
    MeshFaceList
+   MeshingParameters
    MeshNormalList
    MeshTextureCoordinateList
    MeshVertexList

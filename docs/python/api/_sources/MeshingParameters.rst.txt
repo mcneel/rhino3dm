@@ -1,0 +1,7 @@
+MeshingParameters
+*****************
+
+.. autoclass:: rhino3dm.MeshingParameters
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -128,6 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
@@ -233,6 +234,22 @@
 <dd><p>Bases: <a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Surface</span></code></a></p>
 <p>Represents a surface of revolution.
 Revolutions can be incomplete (they can form arcs).</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.RevSurface.Create">
+<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>revoluteCurve</em>, <em>axisOfRevolution</em>, <em>startAngleRadians</em>, <em>endAngleRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RevSurface.Create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new surface of revolution from a generatrix curve and an axis.
+This overload accepts a slice start and end angles.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>revoluteCurve : A generatrix.
+axisOfRevolution : An axis.
+startAngleRadians : An angle in radias for the start.
+endAngleRadians : An angle in radias for the end.</dd>
+<dt>Returns:</dt>
+<dd>A new surface of revolution, or null if any of the inputs is invalid or on error.</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
