@@ -16,6 +16,24 @@ void BND_RevSurface::SetTrackedPointer(ON_RevSurface* revsrf, const ON_ModelComp
   BND_Surface::SetTrackedPointer(revsrf, compref);
 }
 
+BND_RevSurface* BND_RevSurface::Create1(const BND_Curve& revoluteCurve, const ON_Line& axisOfRevolution, double startAngle, double endAngle)
+{
+  ON_RevSurface* rc = ON_RevSurface::New();
+  if (rc)
+  {
+    rc->m_curve = revoluteCurve.m_curve->DuplicateCurve();
+    rc->m_axis = axisOfRevolution;
+    ON_Interval domain(startAngle, endAngle);
+    if (domain.IsDecreasing())
+      rc->m_angle.Set(domain.m_t[0], domain.m_t[1] + 2.0*ON_PI);
+    else
+      rc->m_angle.Set(domain.m_t[0], domain.m_t[1]);
+    return new BND_RevSurface(rc, nullptr);
+  }
+  return nullptr;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -24,6 +42,7 @@ void initRevSurfaceBindings(pybind11::module& m)
 {
   py::class_<BND_RevSurface, BND_Surface>(m, "RevSurface")
     .def(py::init<>())
+    .def_static("Create", &BND_RevSurface::Create1)
     ;
 }
 #endif

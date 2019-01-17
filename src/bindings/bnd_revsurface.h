@@ -18,4 +18,6 @@ protected:
 public:
   BND_RevSurface();
   BND_RevSurface(ON_RevSurface* revsurface, const ON_ModelComponentReference* compref);
+
+  static BND_RevSurface* Create1(const class BND_Curve& revoluteCurve, const ON_Line& axisOfRevolution, double startAngleRadians, double endAngleRadians);
 };

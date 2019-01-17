@@ -16,13 +16,13 @@ ON_3dPoint BND_Point3d::Transform(const ON_3dPoint& pt, const BND_Transform& tra
   return rc;
 }
 
-static ON_3dPoint GetUnsetPoint3d()
+
+#if defined(ON_PYTHON_COMPILE)
+static ON_3dPoint GetUnsetPoint3d(pybind11::object /*self*/)
 {
   return ON_3dPoint::UnsetPoint;
 }
 
-
-#if defined(ON_PYTHON_COMPILE)
 static pybind11::dict EncodePoint2d(const ON_2dPoint& pt)
 {
   pybind11::dict d;
