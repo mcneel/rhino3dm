@@ -2768,6 +2768,306 @@ var RhinoCompute = {
         },
     },
 
+    NurbsSurface : {
+        createCurveOnSurfacePoints : function(surface, fixedPoints, tolerance, periodic, initCount, levels, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createcurveonsurfacepoints-surface_point2darray_double_bool_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, fixedPoints, tolerance, periodic, initCount, levels);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createCurveOnSurface : function(surface, points, tolerance, periodic, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createcurveonsurface-surface_point2darray_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, points, tolerance, periodic);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        makeCompatible : function(surface0, surface1, multiple=false) {
+            let url="rhino/geometry/nurbssurface/makecompatible-surface_surface_nurbssurface_nurbssurface";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface0, surface1);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createFromPoints : function(points, uCount, vCount, uDegree, vDegree, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createfrompoints-point3darray_int_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, uCount, vCount, uDegree, vDegree);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createThroughPoints : function(points, uCount, vCount, uDegree, vDegree, uClosed, vClosed, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createthroughpoints-point3darray_int_int_int_int_bool_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, points, uCount, vCount, uDegree, vDegree, uClosed, vClosed);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createFromCorners : function(corner1, corner2, corner3, corner4, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createfromcorners-point3d_point3d_point3d_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corner1, corner2, corner3, corner4);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createFromCorners1 : function(corner1, corner2, corner3, corner4, tolerance, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createfromcorners-point3d_point3d_point3d_point3d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corner1, corner2, corner3, corner4, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createFromCorners2 : function(corner1, corner2, corner3, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createfromcorners-point3d_point3d_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, corner1, corner2, corner3);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createRailRevolvedSurface : function(profile, rail, axis, scaleHeight, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createrailrevolvedsurface-curve_curve_line_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, profile, rail, axis, scaleHeight);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createNetworkSurface : function(uCurves, uContinuityStart, uContinuityEnd, vCurves, vContinuityStart, vContinuityEnd, edgeTolerance, interiorTolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createnetworksurface-curvearray_int_int_curvearray_int_int_double_double_double_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, uCurves, uContinuityStart, uContinuityEnd, vCurves, vContinuityStart, vContinuityEnd, edgeTolerance, interiorTolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createNetworkSurface1 : function(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance, multiple=false) {
+            let url="rhino/geometry/nurbssurface/createnetworksurface-curvearray_int_double_double_double_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, curves, continuity, edgeTolerance, interiorTolerance, angleTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+    },
+
+    Surface : {
+        createRollingBallFillet : function(surfaceA, surfaceB, radius, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/createrollingballfillet-surface_surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surfaceA, surfaceB, radius, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createRollingBallFillet1 : function(surfaceA, flipA, surfaceB, flipB, radius, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/createrollingballfillet-surface_bool_surface_bool_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surfaceA, flipA, surfaceB, flipB, radius, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createRollingBallFillet2 : function(surfaceA, uvA, surfaceB, uvB, radius, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/createrollingballfillet-surface_point2d_surface_point2d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surfaceA, uvA, surfaceB, uvB, radius, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createExtrusion : function(profile, direction, multiple=false) {
+            let url="rhino/geometry/surface/createextrusion-curve_vector3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, profile, direction);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createExtrusionToPoint : function(profile, apexPoint, multiple=false) {
+            let url="rhino/geometry/surface/createextrusiontopoint-curve_point3d";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, profile, apexPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createPeriodicSurface : function(surface, direction, multiple=false) {
+            let url="rhino/geometry/surface/createperiodicsurface-surface_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, direction);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createPeriodicSurface1 : function(surface, direction, bSmooth, multiple=false) {
+            let url="rhino/geometry/surface/createperiodicsurface-surface_int_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, direction, bSmooth);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        createSoftEditSurface : function(surface, uv, delta, uLength, vLength, tolerance, fixEnds, multiple=false) {
+            let url="rhino/geometry/surface/createsofteditsurface-surface_point2d_vector3d_double_double_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, uv, delta, uLength, vLength, tolerance, fixEnds);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        smooth : function(surface, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, multiple=false) {
+            let url="rhino/geometry/surface/smooth-surface_double_bool_bool_bool_bool_smoothingcoordinatesystem";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        smooth1 : function(surface, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane, multiple=false) {
+            let url="rhino/geometry/surface/smooth-surface_double_bool_bool_bool_bool_smoothingcoordinatesystem_plane";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        getSurfaceSize : function(surface, multiple=false) {
+            let url="rhino/geometry/surface/getsurfacesize-surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        closestSide : function(surface, u, v, multiple=false) {
+            let url="rhino/geometry/surface/closestside-surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, u, v);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        extend : function(surface, edge, extensionLength, smooth, multiple=false) {
+            let url="rhino/geometry/surface/extend-surface_isostatus_double_bool";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, edge, extensionLength, smooth);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        rebuild : function(surface, uDegree, vDegree, uPointCount, vPointCount, multiple=false) {
+            let url="rhino/geometry/surface/rebuild-surface_int_int_int_int";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, uDegree, vDegree, uPointCount, vPointCount);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        rebuildOneDirection : function(surface, direction, pointCount, loftType, refitTolerance, multiple=false) {
+            let url="rhino/geometry/surface/rebuildonedirection-surface_int_int_lofttype_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, direction, pointCount, loftType, refitTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        closestPoint : function(surface, testPoint, multiple=false) {
+            let url="rhino/geometry/surface/closestpoint-surface_point3d_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, testPoint);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        localClosestPoint : function(surface, testPoint, seedU, seedV, multiple=false) {
+            let url="rhino/geometry/surface/localclosestpoint-surface_point3d_double_double_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, testPoint, seedU, seedV);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        offset : function(surface, distance, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/offset-surface_double_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, distance, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        fit : function(surface, uDegree, vDegree, fitTolerance, multiple=false) {
+            let url="rhino/geometry/surface/fit-surface_int_int_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, uDegree, vDegree, fitTolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        interpolatedCurveOnSurfaceUV : function(surface, points, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/interpolatedcurveonsurfaceuv-surface_point2darray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, points, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        interpolatedCurveOnSurface : function(surface, points, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/interpolatedcurveonsurface-surface_point3darray_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, points, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        shortPath : function(surface, start, end, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/shortpath-surface_point2d_point2d_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, start, end, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        pushup : function(surface, curve2d, tolerance, curve2dSubdomain, multiple=false) {
+            let url="rhino/geometry/surface/pushup-surface_curve_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, curve2d, tolerance, curve2dSubdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        pushup1 : function(surface, curve2d, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/pushup-surface_curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, curve2d, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        pullback : function(surface, curve3d, tolerance, multiple=false) {
+            let url="rhino/geometry/surface/pullback-surface_curve_double";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, curve3d, tolerance);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+
+        pullback1 : function(surface, curve3d, tolerance, curve3dSubdomain, multiple=false) {
+            let url="rhino/geometry/surface/pullback-surface_curve_double_interval";
+            if(multiple) url = url + "?multiple=true"
+            let args = RhinoCompute.zipArgs(multiple, surface, curve3d, tolerance, curve3dSubdomain);
+            var promise = RhinoCompute.computeFetch(url, args);
+            return promise;
+        },
+    },
+
     Intersection : {
         curvePlane : function(curve, plane, tolerance, multiple=false) {
             let url="rhino/geometry/intersect/intersection/curveplane-curve_plane_double";
