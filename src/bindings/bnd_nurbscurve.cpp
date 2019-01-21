@@ -184,6 +184,8 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def("Reparameterize", &BND_NurbsCurve::Reparameterize)
     .def("GrevilleParameter", &BND_NurbsCurve::GrevilleParameter, py::arg("index"))
     .def("GrevillePoint", &BND_NurbsCurve::GrevillePoint, py::arg("index"))
+    .def_property_readonly("Points", &BND_NurbsCurve::Points)
+    .def_property_readonly("Knots", &BND_NurbsCurve::Knots)
     ;
 }
 #endif
