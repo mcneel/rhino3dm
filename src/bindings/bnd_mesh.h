@@ -17,10 +17,17 @@ public:
   BND_MeshingParameters(double density, double minimumEdgeLength) : m_mesh_parameters(density, minimumEdgeLength) {}
   BND_MeshingParameters(const ON_MeshParameters& mp) : m_mesh_parameters(mp) {}
 
+#if defined(ON_PYTHON_COMPILE)
+  static BND_MeshingParameters Default(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
+  static BND_MeshingParameters FastRenderMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }
+  static BND_MeshingParameters QualityRenderMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::QualityRenderMesh); }
+  static BND_MeshingParameters DefaultAnalysisMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultAnalysisMesh); }
+#else
   static BND_MeshingParameters Default() { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
   static BND_MeshingParameters FastRenderMesh() { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }
   static BND_MeshingParameters QualityRenderMesh() { return BND_MeshingParameters(ON_MeshParameters::QualityRenderMesh); }
   static BND_MeshingParameters DefaultAnalysisMesh() { return BND_MeshingParameters(ON_MeshParameters::DefaultAnalysisMesh); }
+#endif
 
   //public MeshingParameterTextureRange TextureRange | getset
   int GetTextureRange() const { return m_mesh_parameters.TextureRange(); }
