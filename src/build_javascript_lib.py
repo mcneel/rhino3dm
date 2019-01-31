@@ -10,11 +10,15 @@ if not os.path.exists(build_dir):
         os.mkdir(base_build_dir)
     os.mkdir(build_dir)
 
+def system(cmd):
+    rv = os.system(cmd)
+    if (rv != 0): sys.exit(rv)
+
 def compilebinaries():
     os.chdir(build_dir)
-    os.system("emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" ../..")
-    os.system("make")
-    os.system("make install")
+    system("emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" ../..")
+    system("make")
+    system("make install")
     os.chdir("../..")
 
 compilebinaries()
