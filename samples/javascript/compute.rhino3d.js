@@ -1,5 +1,5 @@
 var RhinoCompute = {
-    version: "0.5.0",
+    version: "0.5.1",
 
     url: "https://compute.rhino3d.com/",
 
@@ -206,7 +206,7 @@ var RhinoCompute = {
             return promise;
         },
 
-        createPlanarBreps : function(inputLoops, multiple=false) {
+        createPlanarBreps4 : function(inputLoops, multiple=false) {
             let url="rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist";
             if(multiple) url = url + "?multiple=true"
             let args = RhinoCompute.zipArgs(multiple, inputLoops);
@@ -214,7 +214,7 @@ var RhinoCompute = {
             return promise;
         },
 
-        createPlanarBreps1 : function(inputLoops, tolerance, multiple=false) {
+        createPlanarBreps5 : function(inputLoops, tolerance, multiple=false) {
             let url="rhino/geometry/brep/createplanarbreps-rhino.collections.curvelist_double";
             if(multiple) url = url + "?multiple=true"
             let args = RhinoCompute.zipArgs(multiple, inputLoops, tolerance);
@@ -1930,7 +1930,7 @@ var RhinoCompute = {
             return promise;
         },
 
-        pullToBrepFace : function(curve, face, tolerance, multiple=false) {
+        pullToBrepFace1 : function(curve, face, tolerance, multiple=false) {
             let url="rhino/geometry/curve/pulltobrepface-curve_brepface_double";
             if(multiple) url = url + "?multiple=true"
             let args = RhinoCompute.zipArgs(multiple, curve, face, tolerance);
@@ -2506,7 +2506,7 @@ var RhinoCompute = {
             return promise;
         },
 
-        closestPoint : function(mesh, testPoint, maximumDistance, multiple=false) {
+        closestPoint1 : function(mesh, testPoint, maximumDistance, multiple=false) {
             let url="rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_double";
             if(multiple) url = url + "?multiple=true"
             let args = RhinoCompute.zipArgs(multiple, mesh, testPoint, maximumDistance);
@@ -2514,7 +2514,7 @@ var RhinoCompute = {
             return promise;
         },
 
-        closestPoint1 : function(mesh, testPoint, maximumDistance, multiple=false) {
+        closestPoint2 : function(mesh, testPoint, maximumDistance, multiple=false) {
             let url="rhino/geometry/mesh/closestpoint-mesh_point3d_point3d_vector3d_double";
             if(multiple) url = url + "?multiple=true"
             let args = RhinoCompute.zipArgs(multiple, mesh, testPoint, maximumDistance);
