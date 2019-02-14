@@ -1,6 +1,45 @@
 #include "bindings.h"
 #include "base64.h"
 
+
+#if defined(ON_PYTHON_COMPILE)
+std::string StringFromDict(pybind11::dict& d, const char* key)
+{
+  std::string rc = pybind11::str(d[key]);
+  return rc;
+}
+int IntFromDict(pybind11::dict& d, const char* key)
+{
+  int rc = d[key].cast<int>();
+  return rc;
+}
+
+template <class T>
+void SetDictValue(pybind11::dict& d, const char* key, T& value)
+{
+  d[key] = value;
+}
+
+#else
+std::string StringFromDict(emscripten::val& d, const char* key)
+{
+  std::string rc = d[key].as<std::string>();
+  return rc;
+}
+int IntFromDict(emscripten::val& d, const char* key)
+{
+  int rc = d[key].as<int>();
+  return rc;
+}
+
+template <class T>
+void SetDictValue(emscripten::val& d, const char* key, T& value)
+{
+  d.set(key, emscripten::val(value));
+}
+
+#endif
+
 static ON_UUID RhinoDotNetDictionaryId()
 {
   // The .NET dictionary Id we have been using for a long time

@@ -74,19 +74,3 @@
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"
 #include "bnd_extensions.h"
-
-#if defined(ON_PYTHON_COMPILE)
-std::string StringFromDict(pybind11::dict& d, const char* key);
-int IntFromDict(pybind11::dict& d, const char* key);
-
-template <class T>
-void SetDictValue(pybind11::dict& d, const char* key, T& value);
-
-#else
-
-std::string StringFromDict(emscripten::val& d, const char* key);
-int IntFromDict(emscripten::val& d, const char* key);
-
-template <class T>
-void SetDictValue(emscripten::val& d, const char* key, T& value);
-#endif
