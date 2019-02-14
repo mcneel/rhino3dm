@@ -44,3 +44,13 @@ private:
   BND_CommonObject(ON_Object* obj, const ON_ModelComponentReference* compref);
   ON_Object* m_object = nullptr;
 };
+
+class BND_ArchivableDictionary
+{
+public:
+#if defined(ON_PYTHON_COMPILE)
+  static pybind11::dict EncodeFromDictionary(pybind11::dict dict);
+  static pybind11::dict DecodeToDictionary(pybind11::dict jsonObject);
+#endif
+
+};
