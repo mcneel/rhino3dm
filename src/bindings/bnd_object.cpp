@@ -249,12 +249,12 @@ static void SetupEncodedDictionaryVersions(BND_DICT& d, int& rhinoversion)
 BND_DICT BND_CommonObject::Encode() const
 {
 #if defined(ON_PYTHON_COMPILE)
-  BND_DICT v;
+  BND_DICT d;
 #else
-  emscripten::val v(emscripten::val::object());
+  emscripten::val d(emscripten::val::object());
 #endif
   int rhinoversion;
-  SetupEncodedDictionaryVersions(v, rhinoversion);
+  SetupEncodedDictionaryVersions(d, rhinoversion);
 
   unsigned int length=0;
   ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object, rhinoversion, true, &length);
@@ -270,9 +270,9 @@ BND_DICT BND_CommonObject::Encode() const
 #if defined(ON_PYTHON_COMPILE)
   d["data"] = data;
 #else
-  v.set("data", emscripten::val(data));
+  d.set("data", emscripten::val(data));
 #endif
-  return v;
+  return d;
 }
 
 #if defined(__EMSCRIPTEN__)
