@@ -1,6 +1,16 @@
 #include "bindings.h"
 #include "base64.h"
 
+static ON_UUID RhinoDotNetDictionaryId()
+{
+  // The .NET dictionary Id we have been using for a long time
+  //21EE7933-1E2D-4047-869E-6BDBF986EA11
+  static const ON_UUID id =
+  { 0x21ee7933, 0x1e2d, 0x4047, { 0x86, 0x9e, 0x6b, 0xdb, 0xf9, 0x86, 0xea, 0x11 } };
+  return id;
+}
+
+
 BND_CommonObject::BND_CommonObject()
 {
 }
@@ -265,84 +275,6 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(in
   return rc;
 }
 
-static ON_UUID RhinoDotNetDictionaryId()
-{
-  // The .NET dictionary Id we have been using for a long time
-  //21EE7933-1E2D-4047-869E-6BDBF986EA11
-  static const GUID id =
-  { 0x21ee7933, 0x1e2d, 0x4047, { 0x86, 0x9e, 0x6b, 0xdb, 0xf9, 0x86, 0xea, 0x11 } };
-  return id;
-}
-
-enum class ItemType : int
-{
-  // values <= 0 are considered bogus
-  // each supported object type has an associated ItemType enum value
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // NEVER EVER Change ItemType values as this will break I/O code
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Undefined = 0,
-  // some basic types
-  Bool = 1, // bool
-  Byte = 2, // unsigned char
-  SByte = 3, // char
-  Short = 4, // short
-  UShort = 5, // unsigned short
-  Int32 = 6, // int
-  UInt32 = 7, // unsigned int
-  Int64 = 8, // time_t
-  Single = 9, // float
-  Double = 10, // double
-  Guid = 11,
-  String = 12,
-
-  // array of basic .NET data types
-  ArrayBool = 13,
-  ArrayByte = 14,
-  ArraySByte = 15,
-  ArrayShort = 16,
-  ArrayInt32 = 17,
-  ArraySingle = 18,
-  ArrayDouble = 19,
-  ArrayGuid = 20,
-  ArrayString = 21,
-
-  // System::Drawing structs
-  Color = 22,
-  Point = 23,
-  PointF = 24,
-  Rectangle = 25,
-  RectangleF = 26,
-  Size = 27,
-  SizeF = 28,
-  Font = 29,
-
-  // RMA::OpenNURBS::ValueTypes structs
-  Interval = 30,
-  Point2d = 31,
-  Point3d = 32,
-  Point4d = 33,
-  Vector2d = 34,
-  Vector3d = 35,
-  BoundingBox = 36,
-  Ray3d = 37,
-  PlaneEquation = 38,
-  Xform = 39,
-  Plane = 40,
-  Line = 41,
-  Point3f = 42,
-  Vector3f = 43,
-
-  // RMA::OpenNURBS classes
-  OnBinaryArchiveDictionary = 44,
-  OnObject = 45, // don't use this anymore
-  OnMeshParameters = 46,
-  OnGeometry = 47,
-  OnObjRef = 48,
-  ArrayObjRef = 49,
-  MAXVALUE = 49
-};
-
 static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const ON_wString& key, ItemType it, pybind11::handle& value)
 {
   if (ItemType::Undefined == it)
@@ -560,7 +492,7 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
     {
       it = ItemType::OnGeometry; //47
     }
-    
+
     if (ItemType::Undefined == it)
     {
       archive->EndWriteDictionary();
@@ -592,40 +524,61 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
   delete archive;
   return rc;
 }
+#endif
 
+#if defined(ON_PYTHON_COMPILE)
 pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonObject)
+#else
+emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jsonObject)
+#endif
 {
-  std::string buffer = pybind11::str(jsonObject["data"]);
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::dict rc;
+#else
+  emscripten::val rc(emscripten::val::object());
+#endif
+
+  std::string buffer = StringFromDict(jsonObject, "data");
+  int rhinoversion = IntFromDict(jsonObject, "archive3dm");
+  int opennurbsversion = IntFromDict(jsonObject, "opennurbs");
   std::string decoded = base64_decode(buffer);
-  int rhinoversion = jsonObject["archive3dm"].cast<int>();
-  int opennurbsversion = jsonObject["opennurbs"].cast<int>();
   int length = static_cast<int>(decoded.length());
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   // Eliminate potential bogus file versions written
+#if defined(ON_PYTHON_COMPILE)
   pybind11::cast_error exception("Unable to decode ArchivableDictionary");
   if (rhinoversion > 5 && rhinoversion < 50)
     throw exception;
 
   if (length < 1 || nullptr == c)
     throw exception;
+#endif
 
   ON_Read3dmBufferArchive archive((size_t)length, c, false, rhinoversion, opennurbsversion);
   ON_UUID dictionaryId;
   unsigned int dictionaryVersion = 0;
   ON_wString dictionaryName;
+#if defined(ON_PYTHON_COMPILE)
   if (!archive.BeginReadDictionary(&dictionaryId, &dictionaryVersion, dictionaryName))
     throw exception;
   if (dictionaryId != RhinoDotNetDictionaryId())
     throw exception;
+#else
+  archive.BeginReadDictionary(&dictionaryId, &dictionaryVersion, dictionaryName);
+#endif
 
-  pybind11::dict rc;
   while (true)
   {
     int i_type = 0;
     ON_wString entryName;
     int read_rc = archive.BeginReadDictionaryEntry(&i_type, entryName);
+#if defined(ON_PYTHON_COMPILE)
     if (0 == read_rc)
       throw exception;
+#else
+    if (0 == read_rc)
+      break;
+#endif
     if (1 != read_rc)
       break;
     // Make sure this type is readable with the current version of RhinoCommon.
@@ -642,7 +595,7 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           bool b;
           if (archive.ReadBool(&b))
-            rc[keyname] = b;
+            SetDictValue(rc, keyname, b);
         }
         break;
       case ItemType::Byte:
@@ -650,7 +603,7 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           char c;
           if (archive.ReadByte(1, &c))
-            rc[keyname] = c;
+            SetDictValue(rc, keyname, c);
         }
         break;
       case ItemType::Short:
@@ -658,7 +611,7 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           short s;
           if (archive.ReadShort(&s))
-            rc[keyname] = s;
+            SetDictValue(rc, keyname, s);
         }
         break;
       case ItemType::Int32:
@@ -666,42 +619,51 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           int i;
           if (archive.ReadInt(&i))
-            rc[keyname] = i;
+            SetDictValue(rc, keyname, i);
         }
         break;
       case ItemType::Int64:
         {
           time_t t;
           if( archive.ReadBigTime(&t) )
-            rc[keyname] = (ON__INT64)t;
+          {
+            ON__INT64 i64 = (ON__INT64)t;
+            SetDictValue(rc, keyname, i64);
+          }
         }
         break;
       case ItemType::Single:
         {
           float f;
           if (archive.ReadFloat(&f))
-            rc[keyname] = f;
+            SetDictValue(rc, keyname, f);
         }
         break;
       case ItemType::Double:
         {
           double d;
           if (archive.ReadDouble(&d))
-            rc[keyname] = d;
+            SetDictValue(rc, keyname, d);
         }
         break;
       case ItemType::Guid:
         {
           ON_UUID id;
           if (archive.ReadUuid(id))
-            rc[keyname] = ON_UUID_to_Binding(id);
+          {
+            auto binding = ON_UUID_to_Binding(id);
+            SetDictValue(rc, keyname, binding);
+          }
         }
         break;
       case ItemType::String:
         {
           ON_wString s;
           if (archive.ReadString(s))
-            rc[keyname] = std::wstring(s.Array());
+          {
+            std::wstring str(s.Array());
+            SetDictValue(rc, keyname, str);
+          }
         }
         break;
       case ItemType::ArrayBool:
@@ -712,7 +674,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<bool> bool_array(count);
             char* c = (char*)bool_array.Array();
             if (archive.ReadChar(count, c))
-              rc[keyname] = std::vector<bool>(bool_array.Array(), bool_array.Array() + count);
+            {
+              std::vector<bool> arr(bool_array.Array(), bool_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -725,7 +690,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<char> char_array(count);
             char* c = char_array.Array();
             if (archive.ReadChar(count, c))
-              rc[keyname] = std::vector<char>(char_array.Array(), char_array.Array() + count);
+            {
+              std::vector<char> arr(char_array.Array(), char_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -737,7 +705,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<short> short_array(count);
             short* s = short_array.Array();
             if (archive.ReadShort(count, s))
-              rc[keyname] = std::vector<short>(short_array.Array(), short_array.Array() + count);
+            {
+              std::vector<short> arr(short_array.Array(), short_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -749,7 +720,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<int> int_array(count);
             int* i = int_array.Array();
             if (archive.ReadInt(count, i))
-              rc[keyname] = std::vector<int>(int_array.Array(), int_array.Array() + count);
+            {
+              std::vector<int> arr(int_array.Array(), int_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -761,7 +735,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<float> float_array(count);
             float* f = float_array.Array();
             if (archive.ReadFloat(count, f))
-              rc[keyname] = std::vector<float>(float_array.Array(), float_array.Array() + count);
+            {
+              std::vector<float> arr(float_array.Array(), float_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -773,7 +750,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
             ON_SimpleArray<double> double_array(count);
             double* d = double_array.Array();
             if (archive.ReadDouble(count, d))
-              rc[keyname] = std::vector<double>(double_array.Array(), double_array.Array() + count);
+            {
+              std::vector<double> arr(double_array.Array(), double_array.Array() + count);
+              SetDictValue(rc, keyname, arr);
+            }
           }
         }
         break;
@@ -790,7 +770,7 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
               archive.ReadUuid(id);
               uuids.push_back(ON_UUID_to_Binding(id));
             }
-            rc[keyname] = uuids;
+            SetDictValue(rc, keyname, uuids);
           }
         }
         break;
@@ -809,7 +789,7 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
                 strings.push_back(std::wstring(str.Array()));
               }
             }
-            rc[keyname] = strings;
+            SetDictValue(rc, keyname, strings);
           }
         }
         break;
@@ -818,7 +798,8 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           ON_Color c;
           if (archive.ReadColor(c))
           {
-            rc[keyname] = ON_Color_to_Binding(c);
+            auto binding = ON_Color_to_Binding(c);
+            SetDictValue(rc, keyname, binding);
           }
         }
         break;
@@ -827,7 +808,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           int i[2];
           if (archive.ReadInt(2, i))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+#endif
           }
         }
         break;
@@ -836,7 +819,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           float f[2];
           if (archive.ReadFloat(2, f))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+#endif
           }
         }
         break;
@@ -845,7 +830,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           int i[4];
           if (archive.ReadInt(4, i))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1], i[2], i[3]);
+#endif
           }
         }
         break;
@@ -854,7 +841,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           float f[4];
           if (archive.ReadFloat(4, f))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1], f[2], f[3]);
+#endif
           }
         }
         break;
@@ -863,7 +852,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           int i[2];
           if (archive.ReadInt(2, i))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+#endif
           }
         }
         break;
@@ -872,7 +863,9 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           float f[2];
           if (archive.ReadFloat(2, f))
           {
+#if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+#endif
           }
         }
         break;
@@ -883,7 +876,8 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           double d[2];
           if (archive.ReadDouble(2, d))
           {
-            rc[keyname] = BND_Interval(ON_Interval(d[0], d[1]));
+            auto binding = BND_Interval(ON_Interval(d[0], d[1]));
+            SetDictValue(rc, keyname, binding);
           }
         }
         break;
@@ -891,42 +885,45 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           ON_2dPoint pt;
           if (archive.ReadPoint(pt))
-            rc[keyname] = pt;
+            SetDictValue(rc, keyname, pt);
         }
         break;
       case ItemType::Point3d:
         {
           ON_3dPoint pt;
           if (archive.ReadPoint(pt))
-            rc[keyname] = pt;
+            SetDictValue(rc, keyname, pt);
         }
         break;
       case ItemType::Point4d:
         {
           ON_4dPoint pt;
           if (archive.ReadPoint(pt))
-            rc[keyname] = pt;
+            SetDictValue(rc, keyname, pt);
         }
         break;
       case ItemType::Vector2d:
         {
           ON_2dVector v;
           if (archive.ReadVector(v))
-            rc[keyname] = v;
+            SetDictValue(rc, keyname, v);
         }
         break;
       case ItemType::Vector3d:
         {
           ON_3dVector v;
           if (archive.ReadVector(v))
-            rc[keyname] = v;
+            SetDictValue(rc, keyname, v);
         }
         break;
       case ItemType::BoundingBox:
         {
           ON_BoundingBox bb;
           if (archive.ReadBoundingBox(bb))
-            rc[keyname] = BND_BoundingBox(bb);
+          {
+            auto binding = BND_BoundingBox(bb);
+            SetDictValue(rc, keyname, binding);
+          }
         }
         break;
       case ItemType::Ray3d:
@@ -937,35 +934,41 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           ON_Xform xf;
           if (archive.ReadXform(xf))
-            rc[keyname] = BND_Transform(xf);
+          {
+            auto binding = BND_Transform(xf);
+            SetDictValue(rc, keyname, binding);
+          }
         }
         break;
       case ItemType::Plane:
         {
           ON_Plane plane;
           if (archive.ReadPlane(plane))
-            rc[keyname] = BND_Plane::FromOnPlane(plane);
+          {
+            auto binding = BND_Plane::FromOnPlane(plane);
+            SetDictValue(rc, keyname, binding);
+          }
         }
         break;
       case ItemType::Line:
         {
           ON_Line line;
           if (archive.ReadLine(line))
-            rc[keyname] = line;
+            SetDictValue(rc, keyname, line);
         }
         break;
       case ItemType::Point3f:
         {
           ON_3fPoint pt;
           if (archive.ReadFloat(3, &pt.x))
-            rc[keyname] = pt;
+            SetDictValue(rc, keyname, pt);
         }
         break;
       case ItemType::Vector3f:
         {
           ON_3fVector v;
           if (archive.ReadFloat(3, &v.x))
-            rc[keyname] = v;
+            SetDictValue(rc, keyname, v);
         }
         break;
       case ItemType::OnBinaryArchiveDictionary:
@@ -975,7 +978,8 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           ON_Object* pObject = nullptr;
           if (archive.ReadObject(&pObject))
           {
-            rc[keyname] = BND_CommonObject::CreateWrapper(pObject, nullptr);
+            auto binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
+            SetDictValue(rc, keyname, binding);
           }
         }
         break;
@@ -983,7 +987,10 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         {
           ON_MeshParameters mp;
           if (mp.Read(archive))
-            rc[keyname] = BND_MeshingParameters(mp);
+          {
+            auto binding = BND_MeshingParameters(mp);
+            SetDictValue(rc, keyname, binding);
+          }
         }
         break;
       case ItemType::OnGeometry:
@@ -991,7 +998,8 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
           ON_Object* pObject = nullptr;
           if (archive.ReadObject(&pObject))
           {
-            rc[keyname] = BND_CommonObject::CreateWrapper(pObject, nullptr);
+            auto binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
+            SetDictValue(rc, keyname, binding);
           }
         }
         break;
@@ -1003,15 +1011,20 @@ pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonO
         break;
       }
     }
+#if defined(ON_PYTHON_COMPILE)
     if (!archive.EndReadDictionaryEntry())
       throw exception;
+#else
+    archive.EndReadDictionaryEntry();
+#endif
   }
 
   archive.EndReadDictionary();
   return rc;
 }
 
-#endif
+
+
 
 RH_C_FUNCTION ON_Object* ON_ReadBufferArchive(int archive_3dm_version, unsigned int archive_on_version, int length, /*ARRAY*/const unsigned char* buffer)
 {
