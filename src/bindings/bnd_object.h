@@ -54,7 +54,7 @@ public:
 #endif
 
 #if defined(__EMSCRIPTEN__)
-  //static emscripten::val EncodeFromDictionary(emscripten::val dict);
+  static emscripten::val EncodeFromDictionary(emscripten::val dict);
   static emscripten::val DecodeToDictionary(emscripten::val jsonObject);
 #endif
 

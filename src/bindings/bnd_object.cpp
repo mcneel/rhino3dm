@@ -2,43 +2,36 @@
 #include "base64.h"
 
 
+std::string StringFromDict(BND_DICT& d, const char* key)
+{
 #if defined(ON_PYTHON_COMPILE)
-std::string StringFromDict(pybind11::dict& d, const char* key)
-{
   std::string rc = pybind11::str(d[key]);
-  return rc;
-}
-int IntFromDict(pybind11::dict& d, const char* key)
-{
-  int rc = d[key].cast<int>();
-  return rc;
-}
-
-template <class T>
-void SetDictValue(pybind11::dict& d, const char* key, T& value)
-{
-  d[key] = value;
-}
-
 #else
-std::string StringFromDict(emscripten::val& d, const char* key)
-{
   std::string rc = d[key].as<std::string>();
+#endif
   return rc;
 }
-int IntFromDict(emscripten::val& d, const char* key)
+
+int IntFromDict(BND_DICT& d, const char* key)
 {
+#if defined(ON_PYTHON_COMPILE)
+  int rc = d[key].cast<int>();
+#else
   int rc = d[key].as<int>();
+#endif
   return rc;
 }
 
 template <class T>
-void SetDictValue(emscripten::val& d, const char* key, T& value)
+void SetDictValue(BND_DICT& d, const char* key, T& value)
 {
+#if defined(ON_PYTHON_COMPILE)
+  d[key] = value;
+#else
   d.set(key, emscripten::val(value));
+#endif
 }
 
-#endif
 
 static ON_UUID RhinoDotNetDictionaryId()
 {
@@ -243,53 +236,26 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON
   return rc;
 }
 
-#if defined(__EMSCRIPTEN__)
-emscripten::val BND_CommonObject::Encode() const
+static void SetupEncodedDictionaryVersions(BND_DICT& d, int& rhinoversion)
 {
-  emscripten::val v(emscripten::val::object());
-  v.set("version", emscripten::val(10000));
-  const int rhinoversion = 60;
-  v.set("archive3dm", emscripten::val(rhinoversion));
-  unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
-  v.set("opennurbs", emscripten::val((int)on_version__to_write));
-
-  unsigned int length=0;
-  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object, 60, true, &length);
-  std::string data = "";
-  if( length>0 && archive )
-  {
-    unsigned char* buffer = (unsigned char*)archive->Buffer();
-    data = base64_encode(buffer, length);
-  }
-  if( archive )
-    delete archive;
-
-  v.set("data", emscripten::val(data));
-  return v;
-}
-
-emscripten::val BND_CommonObject::toJSON(emscripten::val key)
-{
-  return Encode();
-}
-
-#endif
-#if defined(ON_PYTHON_COMPILE)
-
-static void SetupEncodedDictionaryVersions(pybind11::dict& d, int& rhinoversion)
-{
-  d["version"] = 10000;
+  int version = 10000;
+  SetDictValue(d, "version", version);
   rhinoversion = 60;
-  d["archive3dm"] = rhinoversion;
-  unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
-  d["opennurbs"] = (int)(on_version__to_write);
+  SetDictValue(d, "archive3dm", rhinoversion);
+  int on_version__to_write = (int)ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
+  SetDictValue(d, "opennurbs", on_version__to_write);
 }
 
-pybind11::dict BND_CommonObject::Encode() const
+BND_DICT BND_CommonObject::Encode() const
 {
-  pybind11::dict d;
+#if defined(ON_PYTHON_COMPILE)
+  BND_DICT v;
+#else
+  emscripten::val v(emscripten::val::object());
+#endif
   int rhinoversion;
-  SetupEncodedDictionaryVersions(d, rhinoversion);
+  SetupEncodedDictionaryVersions(v, rhinoversion);
+
   unsigned int length=0;
   ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewWriter(m_object, rhinoversion, true, &length);
   std::string data = "";
@@ -301,9 +267,20 @@ pybind11::dict BND_CommonObject::Encode() const
   if( archive )
     delete archive;
 
+#if defined(ON_PYTHON_COMPILE)
   d["data"] = data;
-  return d;
+#else
+  v.set("data", emscripten::val(data));
+#endif
+  return v;
 }
+
+#if defined(__EMSCRIPTEN__)
+BND_DICT BND_CommonObject::toJSON(BND_DICT key)
+{
+  return Encode();
+}
+#endif
 
 RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(int rhinoversion)
 {
@@ -314,6 +291,7 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(in
   return rc;
 }
 
+#if defined(ON_PYTHON_COMPILE)
 static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const ON_wString& key, ItemType it, pybind11::handle& value)
 {
   if (ItemType::Undefined == it)
@@ -565,11 +543,103 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
 }
 #endif
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_ArchivableDictionary::DecodeToDictionary(pybind11::dict jsonObject)
-#else
-emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jsonObject)
+#if defined(__EMSCRIPTEN__)
+BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
+{
+  BND_DICT rc = emscripten::val::object();
+  int rhinoversion;
+  SetupEncodedDictionaryVersions(rc, rhinoversion);
+  /*
+
+  ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewMemoryWriter(rhinoversion);
+  if (!archive)
+    return rc;
+
+  if (!archive->BeginWriteDictionary(RhinoDotNetDictionaryId(), 0, L""))
+    return rc;
+
+  for (auto item : d)
+  {
+    std::string key(pybind11::str(item.first));
+    ON_wString wkey(key.c_str());
+
+    ItemType it = ItemType::Undefined;
+    if (pybind11::bool_::check_(item.second))
+    {
+      it = ItemType::Bool; //1
+    }
+    else if (pybind11::int_::check_(item.second))
+    {
+      it = ItemType::Int32; //6
+    }
+    else if (pybind11::float_::check_(item.second))
+    {
+      it = ItemType::Double; //10
+    }
+    else if (pybind11::str::check_(item.second))
+    {
+      it = ItemType::String; //12
+    }
+    else if (pybind11::isinstance<ON_2dPoint>(item.second))
+    {
+      it = ItemType::Point2d; //31
+    }
+    else if (pybind11::isinstance<ON_3dPoint>(item.second))
+    {
+      it = ItemType::Point3d; //32
+    }
+    else if (pybind11::isinstance<ON_4dPoint>(item.second))
+    {
+      it = ItemType::Point4d; //33
+    }
+    else if (pybind11::isinstance<ON_2dVector>(item.second))
+    {
+      it = ItemType::Vector2d; //34
+    }
+    else if (pybind11::isinstance<ON_3dVector>(item.second))
+    {
+      it = ItemType::Vector3d; //35
+    }
+    else if (pybind11::isinstance<BND_GeometryBase>(item.second))
+    {
+      it = ItemType::OnGeometry; //47
+    }
+
+    if (ItemType::Undefined == it)
+    {
+      archive->EndWriteDictionary();
+      delete archive;
+      ON_String msg("Unable to serialize '");
+      msg += wkey + "'.";
+      msg += "\nAllowed value types are bool, int, float, str, Point2d, Point3d, Point4d,";
+      msg += "\nVector2d, Vector3d, and GeometryBase.";
+      msg += "\nMore types can be supported; just ask.";
+      throw pybind11::cast_error(msg);
+    }
+
+    if (ItemType::Undefined != it)
+      WriteDictionaryEntryHelper(archive, wkey, it, item.second);
+  }
+  pybind11::cast_error("");
+  archive->EndWriteDictionary();
+
+  std::string data = "";
+  int length = (int)archive->SizeOfArchive();
+  if (length > 0)
+  {
+    unsigned char* buffer = (unsigned char*)archive->Buffer();
+    data = base64_encode(buffer, length);
+  }
+
+  rc["data"] = data;
+
+  delete archive;
+  */
+  return rc;
+}
 #endif
+
+BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
 {
 #if defined(ON_PYTHON_COMPILE)
   pybind11::dict rc;
@@ -849,6 +919,11 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,i[0]);
+            arr.set(1,i[1]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -860,6 +935,11 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,f[0]);
+            arr.set(1,f[1]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -871,6 +951,13 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1], i[2], i[3]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,i[0]);
+            arr.set(1,i[1]);
+            arr.set(2,i[2]);
+            arr.set(3,i[3]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -882,6 +969,13 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1], f[2], f[3]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,f[0]);
+            arr.set(1,f[1]);
+            arr.set(2,f[2]);
+            arr.set(3,f[3]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -893,6 +987,11 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,i[0]);
+            arr.set(1,i[1]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -904,6 +1003,11 @@ emscripten::val BND_ArchivableDictionary::DecodeToDictionary(emscripten::val jso
           {
 #if defined(ON_PYTHON_COMPILE)
             rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+#else
+            emscripten::val arr = emscripten::val::array();
+            arr.set(0,f[0]);
+            arr.set(1,f[1]);
+            SetDictValue(rc, keyname, arr);
 #endif
           }
         }
@@ -1079,35 +1183,17 @@ RH_C_FUNCTION ON_Object* ON_ReadBufferArchive(int archive_3dm_version, unsigned 
   return rc;
 }
 
-#if defined(__EMSCRIPTEN__)
-BND_CommonObject* BND_CommonObject::Decode(emscripten::val jsonObject)
+BND_CommonObject* BND_CommonObject::Decode(BND_DICT jsonObject)
 {
-  std::string buffer = jsonObject["data"].as<std::string>();
+  std::string buffer = StringFromDict(jsonObject,"data");
   std::string decoded = base64_decode(buffer);
-  int rhinoversion = jsonObject["archive3dm"].as<int>();
-  int opennurbsversion = jsonObject["opennurbs"].as<int>();
+  int rhinoversion = IntFromDict(jsonObject,"archive3dm");
+  int opennurbsversion = IntFromDict(jsonObject,"opennurbs");
   int length = decoded.length();
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
   return CreateWrapper(obj, nullptr);
 }
-#endif
-
-
-#if defined(ON_PYTHON_COMPILE)
-
-BND_CommonObject* BND_CommonObject::Decode(pybind11::dict jsonObject)
-{
-  std::string buffer = pybind11::str(jsonObject["data"]);
-  std::string decoded = base64_decode(buffer);
-  int rhinoversion = jsonObject["archive3dm"].cast<int>();
-  int opennurbsversion = jsonObject["opennurbs"].cast<int>();
-  int length = static_cast<int>(decoded.length());
-  const unsigned char* c = (const unsigned char*)&decoded.at(0);
-  ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
-  return CreateWrapper(obj, nullptr);
-}
-#endif
 
 
 bool BND_CommonObject::SetUserString(std::wstring key, std::wstring value)

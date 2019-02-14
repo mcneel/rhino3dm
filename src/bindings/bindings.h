@@ -22,6 +22,13 @@
 #include <emscripten/bind.h>
 #endif
 
+#if defined(ON_PYTHON_COMPILE)
+typedef pybind11::dict BND_DICT;
+#endif
+#if defined(ON_WASM_COMPILE)
+typedef emscripten::val BND_DICT;
+#endif
+
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
