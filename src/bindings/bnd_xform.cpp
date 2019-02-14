@@ -23,6 +23,21 @@ BND_Transform BND_Transform::Rotation(double angleRadians, ON_3dVector rotationA
   return rc;
 }
 
+BND_Transform* BND_Transform::TryGetInverse() const
+{
+  ON_Xform rc = m_xform.Inverse();
+  if (!rc.IsValid())
+    return nullptr;
+  return new BND_Transform(rc);
+}
+
+BND_BoundingBox BND_Transform::TransformBoundingBox(const BND_BoundingBox& bbox) const
+{
+  BND_BoundingBox rc(bbox.m_bbox);
+  rc.m_bbox.Transform(m_xform);
+  return rc;
+}
+
 
 BND_Transform BND_Transform::Transpose() const
 {
@@ -51,6 +66,8 @@ void initXformBindings(pybind11::module& m)
     .def_property_readonly("IsZero4x4", &BND_Transform::IsZero4x4)
     .def_property_readonly("IsZeroTransformation", &BND_Transform::IsZeroTransformation)
     .def("Determinant", &BND_Transform::Determinant)
+    .def("TryGetInverse", &BND_Transform::TryGetInverse)
+    .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox)
     .def("Transpose", &BND_Transform::Transpose)
     ;
 }
@@ -76,6 +93,8 @@ void initXformBindings(void*)
     .property("isZero4x4", &BND_Transform::IsZero4x4)
     .property("isZeroTransformation", &BND_Transform::IsZeroTransformation)
     .function("determinant", &BND_Transform::Determinant)
+    .function("tryGetInverse", &BND_Transform::TryGetInverse, allow_raw_pointers())
+    .function("transformBoundingBox", &BND_Transform::TransformBoundingBox, allow_raw_pointers())
     .function("transpose", &BND_Transform::Transpose)
     ;
 }

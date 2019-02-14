@@ -19,7 +19,6 @@ public:
   //public BoundingBox(System.Collections.Generic.IEnumerable<Point3d> points, Transform xform)
   BND_BoundingBox(const ON_BoundingBox& bbox);
   //static BoundingBox Empty
-  //override string ToString()
   bool IsValid() const { return m_bbox.IsValid(); }
   ON_3dPoint Min() const { return m_bbox.Min(); }
   ON_3dPoint Max() const { return m_bbox.Max(); }

@@ -4,7 +4,7 @@ if sys.version_info.major==3:
 else:
     from _rhino3dm import *
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 Point3d.__str__ = lambda self: "{},{}".format(self.X, self.Y)
 Point3d.__str__ = lambda self: "{},{},{}".format(self.X, self.Y, self.Z)
