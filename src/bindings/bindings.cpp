@@ -63,3 +63,4 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initViewportBindings(m);
   initExtensionsBindings(m);
 }
+

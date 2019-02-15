@@ -53,4 +53,79 @@ public:
   static pybind11::dict DecodeToDictionary(pybind11::dict jsonObject);
 #endif
 
+#if defined(__EMSCRIPTEN__)
+  static emscripten::val EncodeFromDictionary(emscripten::val dict);
+  static emscripten::val DecodeToDictionary(emscripten::val jsonObject);
+  static void WriteGeometry(class BND_GeometryBase* geometry);
+#endif
+
+};
+
+enum class ItemType : int
+{
+  // values <= 0 are considered bogus
+  // each supported object type has an associated ItemType enum value
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // NEVER EVER Change ItemType values as this will break I/O code
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Undefined = 0,
+  // some basic types
+  Bool = 1, // bool
+  Byte = 2, // unsigned char
+  SByte = 3, // char
+  Short = 4, // short
+  UShort = 5, // unsigned short
+  Int32 = 6, // int
+  UInt32 = 7, // unsigned int
+  Int64 = 8, // time_t
+  Single = 9, // float
+  Double = 10, // double
+  Guid = 11,
+  String = 12,
+
+  // array of basic .NET data types
+  ArrayBool = 13,
+  ArrayByte = 14,
+  ArraySByte = 15,
+  ArrayShort = 16,
+  ArrayInt32 = 17,
+  ArraySingle = 18,
+  ArrayDouble = 19,
+  ArrayGuid = 20,
+  ArrayString = 21,
+
+  // System::Drawing structs
+  Color = 22,
+  Point = 23,
+  PointF = 24,
+  Rectangle = 25,
+  RectangleF = 26,
+  Size = 27,
+  SizeF = 28,
+  Font = 29,
+
+  // RMA::OpenNURBS::ValueTypes structs
+  Interval = 30,
+  Point2d = 31,
+  Point3d = 32,
+  Point4d = 33,
+  Vector2d = 34,
+  Vector3d = 35,
+  BoundingBox = 36,
+  Ray3d = 37,
+  PlaneEquation = 38,
+  Xform = 39,
+  Plane = 40,
+  Line = 41,
+  Point3f = 42,
+  Vector3f = 43,
+
+  // RMA::OpenNURBS classes
+  OnBinaryArchiveDictionary = 44,
+  OnObject = 45, // don't use this anymore
+  OnMeshParameters = 46,
+  OnGeometry = 47,
+  OnObjRef = 48,
+  ArrayObjRef = 49,
+  MAXVALUE = 49
 };
