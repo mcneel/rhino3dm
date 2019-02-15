@@ -544,12 +544,190 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
 #endif
 
 #if defined(__EMSCRIPTEN__)
+/*
+std::string BND_ArchivableDictionary::Test(BND_DICT d)
+{
+  emscripten::val keys = emscripten::val::global("Object").call<emscripten::val>("keys", d);
+  std::string name = keys[0].as<std::string>();
+  emscripten::val v = d[name];
+  emscripten::val vt = v.typeOf();
+  emscripten::val lc = emscripten::val::module_property("LineCurve");
+  if( v.instanceof(lc))
+  {
+    std::string prefix = "prefix";
+    emscripten::val callrc = emscripten::val::module_property("ArchivableDictionary").call<emscripten::val>("test2", v, prefix);
+    name = callrc.as<std::string>();
+  }
+  else
+    name = "no";
+  //name = vt.as<std::string>();
+  return name;
+}
+
+std::string BND_ArchivableDictionary::Test2(BND_LineCurve* lc, std::string s)
+{
+  std::string rc;
+  if( lc)
+    rc = s+"worked";
+  else
+    rc = s+"failed";
+  return rc;
+}
+*/
+static ON_Write3dmBufferArchive* _activeWriteBuffer = nullptr;
+void BND_ArchivableDictionary::WriteGeometry(BND_GeometryBase* geometry)
+{
+  if( geometry && _activeWriteBuffer )
+  {
+    _activeWriteBuffer->WriteObject(*geometry->GeometryPointer());
+  }
+}
+
+static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const ON_wString& key, ItemType it, emscripten::val& value)
+{
+  if (ItemType::Undefined == it)
+    return false;
+
+  if (!archive->BeginWriteDictionaryEntry((int)it, key))
+    return false;
+  bool rc = false;
+
+  switch (it)
+  {
+  case ItemType::Undefined:
+    break;
+  case ItemType::Bool:
+    {
+      bool b = value.as<bool>();
+      rc = archive->WriteBool(b);
+    }
+    break;
+  case ItemType::Byte:
+    break;
+  case ItemType::SByte:
+    break;
+  case ItemType::Short:
+    break;
+  case ItemType::UShort:
+    break;
+  case ItemType::Int32:
+    {
+      int i = value.as<int>();
+      rc = archive->WriteInt(i);
+    }
+    break;
+  case ItemType::UInt32:
+    break;
+  case ItemType::Int64:
+    break;
+  case ItemType::Single:
+    break;
+  case ItemType::Double:
+    {
+      double d = value.as<double>();
+      rc = archive->WriteDouble(d);
+    }
+    break;
+  case ItemType::Guid:
+    break;
+  case ItemType::String:
+    {
+      std::string s = value.as<std::string>();
+      ON_wString ws(s.c_str());
+      rc = archive->WriteString(ws);
+    }
+    break;
+  case ItemType::ArrayBool:
+    break;
+  case ItemType::ArrayByte:
+    break;
+  case ItemType::ArraySByte:
+    break;
+  case ItemType::ArrayShort:
+    break;
+  case ItemType::ArrayInt32:
+    break;
+  case ItemType::ArraySingle:
+    break;
+  case ItemType::ArrayDouble:
+    break;
+  case ItemType::ArrayGuid:
+    break;
+  case ItemType::ArrayString:
+    break;
+  case ItemType::Color:
+    break;
+  case ItemType::Point:
+    break;
+  case ItemType::PointF:
+    break;
+  case ItemType::Rectangle:
+    break;
+  case ItemType::RectangleF:
+    break;
+  case ItemType::Size:
+    break;
+  case ItemType::SizeF:
+    break;
+  case ItemType::Font:
+    break;
+  case ItemType::Interval:
+    break;
+  case ItemType::Point2d:
+    break;
+  case ItemType::Point3d:
+    break;
+  case ItemType::Point4d:
+    break;
+  case ItemType::Vector2d:
+    break;
+  case ItemType::Vector3d:
+    break;
+  case ItemType::BoundingBox:
+    break;
+  case ItemType::Ray3d:
+    break;
+  case ItemType::PlaneEquation:
+    break;
+  case ItemType::Xform:
+    break;
+  case ItemType::Plane:
+    break;
+  case ItemType::Line:
+    break;
+  case ItemType::Point3f:
+    break;
+  case ItemType::Vector3f:
+    break;
+  case ItemType::OnBinaryArchiveDictionary:
+    break;
+  case ItemType::OnObject:
+    break;
+  case ItemType::OnMeshParameters:
+    break;
+  case ItemType::OnGeometry:
+  {
+    _activeWriteBuffer = archive;
+    emscripten::val::module_property("ArchivableDictionary").call<void>("writeGeometry", value);
+    _activeWriteBuffer = nullptr;
+  }
+    break;
+  case ItemType::OnObjRef:
+    break;
+  case ItemType::ArrayObjRef:
+    break;
+  default:
+    break;
+  }
+  return archive->EndWriteDictionaryEntry() && rc;
+}
+
+
 BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
 {
   BND_DICT rc = emscripten::val::object();
   int rhinoversion;
   SetupEncodedDictionaryVersions(rc, rhinoversion);
-  /*
 
   ON_Write3dmBufferArchive* archive = ON_WriteBufferArchive_NewMemoryWriter(rhinoversion);
   if (!archive)
@@ -558,49 +736,31 @@ BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
   if (!archive->BeginWriteDictionary(RhinoDotNetDictionaryId(), 0, L""))
     return rc;
 
-  for (auto item : d)
+  //emscripten::val commonObject = emscripten::val::module_property("CommonObject");
+  emscripten::val geometryBase = emscripten::val::module_property("GeometryBase");
+
+  emscripten::val keys = emscripten::val::global("Object").call<emscripten::val>("keys", dict);
+  int keyCount = keys["length"].as<int>();
+  for(int keyIndex = 0; keyIndex<keyCount; keyIndex++)
   {
-    std::string key(pybind11::str(item.first));
-    ON_wString wkey(key.c_str());
+    std::string keyname = keys[keyIndex].as<std::string>();
+    emscripten::val value = dict[keyname];
+    ON_wString wkey(keyname.c_str());
 
     ItemType it = ItemType::Undefined;
-    if (pybind11::bool_::check_(item.second))
+    if( value.isTrue() || value.isFalse() )
     {
       it = ItemType::Bool; //1
     }
-    else if (pybind11::int_::check_(item.second))
-    {
-      it = ItemType::Int32; //6
-    }
-    else if (pybind11::float_::check_(item.second))
+    else if( value.isNumber() )
     {
       it = ItemType::Double; //10
     }
-    else if (pybind11::str::check_(item.second))
+    else if( value.isString() )
     {
       it = ItemType::String; //12
     }
-    else if (pybind11::isinstance<ON_2dPoint>(item.second))
-    {
-      it = ItemType::Point2d; //31
-    }
-    else if (pybind11::isinstance<ON_3dPoint>(item.second))
-    {
-      it = ItemType::Point3d; //32
-    }
-    else if (pybind11::isinstance<ON_4dPoint>(item.second))
-    {
-      it = ItemType::Point4d; //33
-    }
-    else if (pybind11::isinstance<ON_2dVector>(item.second))
-    {
-      it = ItemType::Vector2d; //34
-    }
-    else if (pybind11::isinstance<ON_3dVector>(item.second))
-    {
-      it = ItemType::Vector3d; //35
-    }
-    else if (pybind11::isinstance<BND_GeometryBase>(item.second))
+    else if( value.instanceof(geometryBase) )
     {
       it = ItemType::OnGeometry; //47
     }
@@ -611,16 +771,14 @@ BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
       delete archive;
       ON_String msg("Unable to serialize '");
       msg += wkey + "'.";
-      msg += "\nAllowed value types are bool, int, float, str, Point2d, Point3d, Point4d,";
-      msg += "\nVector2d, Vector3d, and GeometryBase.";
+      msg += "\nAllowed value types are boolean, number, string, and GeometryBase.";
       msg += "\nMore types can be supported; just ask.";
-      throw pybind11::cast_error(msg);
+      throw std::runtime_error(msg);
     }
 
     if (ItemType::Undefined != it)
-      WriteDictionaryEntryHelper(archive, wkey, it, item.second);
+      WriteDictionaryEntryHelper(archive, wkey, it, value);
   }
-  pybind11::cast_error("");
   archive->EndWriteDictionary();
 
   std::string data = "";
@@ -631,10 +789,9 @@ BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
     data = base64_encode(buffer, length);
   }
 
-  rc["data"] = data;
+  SetDictValue(rc, "data", data);
 
   delete archive;
-  */
   return rc;
 }
 #endif
@@ -1279,6 +1436,14 @@ void initObjectBindings(void*)
     .function("setUserString", &BND_CommonObject::SetUserString)
     .function("getUserString", &BND_CommonObject::GetUserString)
     .property("userStringCount", &BND_CommonObject::UserStringCount)
+    ;
+
+  class_<BND_ArchivableDictionary>("ArchivableDictionary")
+    .class_function("encodeDict", &BND_ArchivableDictionary::EncodeFromDictionary)
+    .class_function("decodeDict", &BND_ArchivableDictionary::DecodeToDictionary)
+    .class_function("writeGeometry", &BND_ArchivableDictionary::WriteGeometry, allow_raw_pointers())
+    //.class_function("test", &BND_ArchivableDictionary::Test)
+    //.class_function("test2", &BND_ArchivableDictionary::Test2, allow_raw_pointers())
     ;
 }
 #endif

@@ -56,6 +56,7 @@ public:
 #if defined(__EMSCRIPTEN__)
   static emscripten::val EncodeFromDictionary(emscripten::val dict);
   static emscripten::val DecodeToDictionary(emscripten::val jsonObject);
+  static void WriteGeometry(class BND_GeometryBase* geometry);
 #endif
 
 };
