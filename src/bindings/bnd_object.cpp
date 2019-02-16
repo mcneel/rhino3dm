@@ -741,6 +741,18 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::ArrayObjRef:
     break;
+  case ItemType::ArrayGeometry:
+  {
+    int itemCount = value["length"].as<int>();
+    rc = archive->WriteInt(itemCount);
+    for( int index=0; index<itemCount; index++ )
+    {
+      _activeWriteBuffer = archive;
+      emscripten::val::module_property("ArchivableDictionary").call<void>("writeGeometry", value[index]);
+      _activeWriteBuffer = nullptr;
+    }
+  }
+    break;
   default:
     break;
   }
@@ -788,6 +800,19 @@ BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
     else if( value.instanceof(geometryBase) )
     {
       it = ItemType::OnGeometry; //47
+    }
+    else if( value.isArray() )
+    {
+      int elementCount = value["length"].as<int>();
+      for( int index=0; index<elementCount; index++ )
+      {
+        if( !value[index].instanceof(geometryBase) )
+        {
+          it = ItemType::Undefined;
+          break;
+        }
+        it = ItemType::ArrayGeometry;
+      }
     }
 
     if (ItemType::Undefined == it)
@@ -1336,7 +1361,11 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
         int count;
         if (archive.ReadInt(&count) && count > 0)
         {
+#if defined(ON_PYTHON_COMPILE)
           pybind11::list geometrylist;
+#else
+          std::vector<BND_CommonObject*> geometrylist;
+#endif
           while(count>0)
           {
             count--;
@@ -1344,7 +1373,11 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
             if (archive.ReadObject(&pObject))
             {
               auto binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
+#if defined(ON_PYTHON_COMPILE)
               geometrylist.append(binding);
+#else
+              geometrylist.push_back(binding);
+#endif
             }
           }
           SetDictValue(rc, keyname, geometrylist);
