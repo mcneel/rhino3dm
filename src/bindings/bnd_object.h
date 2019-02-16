@@ -127,5 +127,6 @@ enum class ItemType : int
   OnGeometry = 47,
   OnObjRef = 48,
   ArrayObjRef = 49,
-  MAXVALUE = 49
+  ArrayGeometry = 50,
+  MAXVALUE = 50
 };

@@ -444,6 +444,19 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::ArrayObjRef:
     break;
+  case ItemType::ArrayGeometry:
+  {
+    int listCount = 0;
+    for (auto item : pybind11::iter(value))
+      listCount++;
+    rc = archive->WriteInt(listCount);
+    for (auto item : pybind11::iter(value))
+    {
+      BND_GeometryBase* geometry = item.cast<BND_GeometryBase*>();
+      rc = rc && archive->WriteObject(*geometry->GeometryPointer());
+    }
+  }
+    break;
   default:
     break;
   }
@@ -509,7 +522,19 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
     {
       it = ItemType::OnGeometry; //47
     }
-
+    else if (pybind11::isinstance<pybind11::iterable>(item.second))
+    {
+      for (auto listitem : pybind11::iter(item.second))
+      {
+        bool isGeometry = pybind11::isinstance<BND_GeometryBase>(listitem);
+        if (!isGeometry)
+        {
+          it = ItemType::Undefined;
+          break;
+        }
+        it = ItemType::ArrayGeometry;
+      }
+    }
     if (ItemType::Undefined == it)
     {
       archive->EndWriteDictionary();
@@ -1306,6 +1331,24 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
       case ItemType::OnObjRef:
         break;
       case ItemType::ArrayObjRef:
+        break;
+      case ItemType::ArrayGeometry:
+        int count;
+        if (archive.ReadInt(&count) && count > 0)
+        {
+          pybind11::list geometrylist;
+          while(count>0)
+          {
+            count--;
+            ON_Object* pObject = nullptr;
+            if (archive.ReadObject(&pObject))
+            {
+              auto binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
+              geometrylist.append(binding);
+            }
+          }
+          SetDictValue(rc, keyname, geometrylist);
+        }
         break;
       default:
         break;
