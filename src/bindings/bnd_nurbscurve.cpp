@@ -236,6 +236,8 @@ void initNurbsCurveBindings(void*)
     .function("reparameterize", &BND_NurbsCurve::Reparameterize)
     .function("grevilleParameter", &BND_NurbsCurve::GrevilleParameter)
     .function("grevillePoint", &BND_NurbsCurve::GrevillePoint)
+    .function("points", &BND_NurbsCurve::Points, allow_raw_pointers())
+    .function("knots", &BND_NurbsCurve::Knots, allow_raw_pointers())
     ;
 }
 
