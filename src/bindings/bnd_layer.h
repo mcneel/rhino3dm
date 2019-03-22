@@ -21,6 +21,8 @@ public:
   //public string FullPath{ get; }
   BND_UUID GetId() const { return ON_UUID_to_Binding(m_layer->Id()); }
   void SetId(BND_UUID id) { m_layer->SetId(Binding_to_ON_UUID(id)); }
+
+  int GetIndex() const { return m_layer->Index(); }
   //public Guid ParentLayerId {get;set;}
   BND_UUID GetParentLayerId() const { return ON_UUID_to_Binding(m_layer->ParentId()); }
   int GetIgesLevel() const { return m_layer->IgesLevel(); }
