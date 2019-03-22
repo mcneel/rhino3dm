@@ -18,6 +18,12 @@ public:
   static BND_Plane WorldZX();
   static BND_Plane Unset();
 
+#if defined(__EMSCRIPTEN__)
+  emscripten::val toJSON(emscripten::val key);
+  emscripten::val Encode() const;
+  static BND_Plane* Decode(emscripten::val jsonObject);
+#endif
+
 #if defined(ON_PYTHON_COMPILE)
   pybind11::dict Encode() const;
   static BND_Plane* Decode(pybind11::dict jsonObject);
@@ -27,4 +33,11 @@ public:
   ON_3dVector m_xaxis;
   ON_3dVector m_yaxis;
   ON_3dVector m_zaxis;
+};
+
+class BND_PlaneHelper
+{
+public:
+  static BND_Plane WorldXY();
+
 };

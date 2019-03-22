@@ -51,6 +51,63 @@ BND_Plane BND_Plane::Unset()
   return rc;
 }
 
+#if defined(ON_WASM_COMPILE)
+emscripten::val BND_Plane::Encode() const
+{
+  emscripten::val v(emscripten::val::object());
+
+  emscripten::val origin(emscripten::val::object());
+  origin.set("X", emscripten::val(m_origin.x));
+  origin.set("Y", emscripten::val(m_origin.y));
+  origin.set("Z", emscripten::val(m_origin.z));
+  v.set("Origin", origin);
+  emscripten::val xaxis(emscripten::val::object());
+  xaxis.set("X", emscripten::val(m_xaxis.x));
+  xaxis.set("Y", emscripten::val(m_xaxis.y));
+  xaxis.set("Z", emscripten::val(m_xaxis.z));
+  v.set("XAxis", xaxis);
+  emscripten::val yaxis(emscripten::val::object());
+  yaxis.set("X", emscripten::val(m_yaxis.x));
+  yaxis.set("Y", emscripten::val(m_yaxis.y));
+  yaxis.set("Z", emscripten::val(m_yaxis.z));
+  v.set("YAxis", yaxis);
+  emscripten::val zaxis(emscripten::val::object());
+  zaxis.set("X", emscripten::val(m_zaxis.x));
+  zaxis.set("Y", emscripten::val(m_zaxis.y));
+  zaxis.set("Z", emscripten::val(m_zaxis.z));
+  v.set("ZAxis", zaxis);
+  return v;
+}
+
+emscripten::val BND_Plane::toJSON(emscripten::val key)
+{
+  return Encode();
+}
+
+BND_Plane* BND_Plane::Decode(emscripten::val jsonObject)
+{
+  BND_Plane* plane = new BND_Plane();
+  emscripten::val origin = jsonObject["Origin"].as<emscripten::val>();
+  plane->m_origin.x = origin["X"].as<double>();
+  plane->m_origin.y = origin["Y"].as<double>();
+  plane->m_origin.z = origin["Z"].as<double>();
+  emscripten::val xaxis = jsonObject["XAxis"].as<emscripten::val>();
+  plane->m_xaxis.x = xaxis["X"].as<double>();
+  plane->m_xaxis.y = xaxis["Y"].as<double>();
+  plane->m_xaxis.z = xaxis["Z"].as<double>();
+  emscripten::val yaxis = jsonObject["YAxis"].as<emscripten::val>();
+  plane->m_yaxis.x = yaxis["X"].as<double>();
+  plane->m_yaxis.y = yaxis["Y"].as<double>();
+  plane->m_yaxis.z = yaxis["Z"].as<double>();
+  emscripten::val zaxis = jsonObject["ZAxis"].as<emscripten::val>();
+  plane->m_zaxis.x = zaxis["X"].as<double>();
+  plane->m_zaxis.y = zaxis["Y"].as<double>();
+  plane->m_zaxis.z = zaxis["Z"].as<double>();
+  return plane;
+}
+
+#endif
+
 #if defined(ON_PYTHON_COMPILE)
 BND_DICT BND_Plane::Encode() const
 {
@@ -78,7 +135,10 @@ BND_Plane* BND_Plane::Decode(pybind11::dict jsonObject)
 }
 #endif
 
-
+BND_Plane BND_PlaneHelper::WorldXY()
+{
+  return BND_Plane::WorldXY();
+}
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -105,10 +165,14 @@ using namespace emscripten;
 
 void initPlaneBindings(void*)
 {
-  value_object<BND_Plane>("Plane")
+  value_object<BND_Plane>("SimplePlane")
     .field("origin", &BND_Plane::m_origin)
     .field("xAxis", &BND_Plane::m_xaxis)
     .field("yAxis", &BND_Plane::m_yaxis)
     .field("zAxis", &BND_Plane::m_zaxis);
+
+  class_<BND_PlaneHelper>("Plane")
+      .class_function("worldXY", &BND_PlaneHelper::WorldXY);
+
 }
 #endif
