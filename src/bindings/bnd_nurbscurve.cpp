@@ -121,6 +121,19 @@ BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Poin
   return new BND_NurbsCurve(nc, nullptr);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+BND_NurbsCurve* BND_NurbsCurve::Create2(bool periodic, int degree, pybind11::object points)
+{
+  BND_Point3dList list;
+  for (auto item : points)
+  {
+    ON_3dPoint point = item.cast<ON_3dPoint>();
+    list.Add(point.x, point.y, point.z);
+  }
+  return Create(periodic, degree, list);
+
+}
+#endif
 
 ON_3dPoint BND_NurbsCurve::GrevillePoint(int index) const
 {
@@ -173,7 +186,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def_static("CreateFromArc", &BND_NurbsCurve::CreateFromArc, py::arg("arc"))
     .def_static("CreateFromCircle", &BND_NurbsCurve::CreateFromCircle, py::arg("circle"))
     .def_static("CreateFromEllipse", &BND_NurbsCurve::CreateFromEllipse, py::arg("ellipse"))
-    .def_static("Create", &BND_NurbsCurve::Create, py::arg("periodic"), py::arg("degree"), py::arg("points"))
+    .def_static("Create", &BND_NurbsCurve::Create2, py::arg("periodic"), py::arg("degree"), py::arg("points"))
     .def(py::init<int, int>(), py::arg("degree"), py::arg("pointcount"))
     .def(py::init<int, bool, int, int>(), py::arg("dimension"), py::arg("rational"), py::arg("order"), py::arg("pointcount"))
     .def_property_readonly("Order", &BND_NurbsCurve::Order)

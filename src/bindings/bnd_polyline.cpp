@@ -1,5 +1,14 @@
 #include "bindings.h"
 
+ON_3dPoint BND_Point3dList::GetPoint(int index) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= m_polyline.Count())
+    throw pybind11::index_error();
+#endif
+  return m_polyline[index]; 
+}
+
 void BND_Point3dList::Transform(const BND_Transform& xform)
 {
   m_polyline.Transform(xform.m_xform);
