@@ -65,6 +65,9 @@ public:
   static BND_NurbsCurve* CreateFromEllipse(const class BND_Ellipse& ellipse);
   //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
   static BND_NurbsCurve* Create(bool periodic, int degree, const class BND_Point3dList& points);
+#if defined(ON_PYTHON_COMPILE)
+  static BND_NurbsCurve* Create2(bool periodic, int degree, pybind11::object points);
+#endif
   BND_NurbsCurve(int degree, int pointCount);
   BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
   int Order() const { return m_nurbscurve->Order(); }

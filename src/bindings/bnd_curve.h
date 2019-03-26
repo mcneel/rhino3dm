@@ -2,6 +2,63 @@
 
 #pragma once
 
+enum class BlendContinuity : int
+{
+  Position = 0,
+  Tangency = 1,
+  Curvature = 2
+};
+
+enum class CurveOffsetCornerStyle : int
+{
+  None = 0,
+  Sharp = 1,
+  Round = 2,
+  Smooth = 3,
+  Chamfer = 4
+};
+
+enum class CurveKnotStyle : int
+{
+  Uniform = 0,
+  Chord = 1,
+  ChordSquareRoot = 2,
+  UniformPeriodic = 3,
+  ChordPeriodic = 4,
+  ChordSquareRootPeriodic = 5
+};
+
+enum class CurveOrientation : int
+{
+  Undefined = 0,
+  Clockwise = -1,
+  CounterClockwise = +1
+};
+
+enum class PointContainment : int
+{
+  Unset = 0,
+  Inside = 1,
+  Outside = 2,
+  Coincident = 3
+};
+
+enum class RegionContainment : int
+{
+  Disjoint = 0,
+  MutualIntersection = 1,
+  AInsideB = 2,
+  BInsideA = 3,
+};
+
+enum class CurveExtensionStyle : int
+{
+  Line = 0,
+  Arc = 1,
+  Smooth = 2,
+};
+
+
 #if defined(ON_PYTHON_COMPILE)
 void initCurveBindings(pybind11::module& m);
 #else
@@ -18,7 +75,9 @@ protected:
 
 public:
   static class BND_Curve* CreateControlPointCurve(const class BND_Point3dList& points, int degree);
-
+#if defined(ON_PYTHON_COMPILE)
+  static class BND_Curve* CreateControlPointCurve2(pybind11::object points, int degree);
+#endif
 public:
   BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref);
 
@@ -50,7 +109,7 @@ public:
   bool IsClosed() const { return m_curve->IsClosed(); }
   bool IsPeriodic() const { return m_curve->IsPeriodic(); }
   bool IsClosable(double tolerance, double minimumAbsoluteSize, double minimumRelativeSize) const { return m_curve->IsClosable(tolerance, minimumAbsoluteSize, minimumRelativeSize); }
-  // public CurveOrientation ClosedCurveOrientation()
+  CurveOrientation ClosedCurveOrientation() const;
   // public CurveOrientation ClosedCurveOrientation(Vector3d upDirection)
   // public CurveOrientation ClosedCurveOrientation(Plane plane)
   // public CurveOrientation ClosedCurveOrientation(Transform xform)

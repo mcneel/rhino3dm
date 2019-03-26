@@ -1,5 +1,8 @@
 #include "bindings.h"
 
+
+
+
 BND_Curve::BND_Curve()
 {
 
@@ -30,6 +33,20 @@ BND_Curve* BND_Curve::CreateControlPointCurve(const BND_Point3dList& points, int
 
   return BND_NurbsCurve::Create(false, degree, points);
 }
+
+#if defined(ON_PYTHON_COMPILE)
+BND_Curve* BND_Curve::CreateControlPointCurve2(pybind11::object points, int degree)
+{
+  BND_Point3dList list;
+  for (auto item : points)
+  {
+    ON_3dPoint point = item.cast<ON_3dPoint>();
+    list.Add(point.x, point.y, point.z);
+  }
+  return CreateControlPointCurve(list, degree);
+}
+#endif
+
 
 void BND_Curve::SetDomain(const BND_Interval& i)
 {
@@ -98,6 +115,20 @@ BND_Ellipse* BND_Curve::TryGetEllipse(double tolerance) const
   return nullptr;
 }
 
+CurveOrientation BND_Curve::ClosedCurveOrientation() const
+{
+  if (m_curve)
+  {
+    int rc = ON_ClosedCurveOrientation(*m_curve, nullptr);
+    if (1 == rc)
+      return CurveOrientation::CounterClockwise;
+    if (-1 == rc)
+      return CurveOrientation::Clockwise;
+  }
+  return CurveOrientation::Undefined;
+}
+
+
 BND_Curve* BND_Curve::Trim(double t0, double t1) const
 {
   ON_Curve* crv = m_curve->DuplicateCurve();
@@ -136,15 +167,66 @@ BND_NurbsCurve* BND_Curve::ToNurbsCurve() const
 }
 
 
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initCurveBindings(pybind11::module& m)
 {
+  py::enum_<BlendContinuity>(m, "BlendContinuity")
+    .value("Position", BlendContinuity::Position)
+    .value("Tangency", BlendContinuity::Tangency)
+    .value("Curvature", BlendContinuity::Curvature)
+    ;
+
+  py::enum_<CurveOffsetCornerStyle>(m, "CurveOffsetCornerStyle")
+    .value("None", CurveOffsetCornerStyle::None)
+    .value("Sharp", CurveOffsetCornerStyle::Sharp)
+    .value("Round", CurveOffsetCornerStyle::Round)
+    .value("Smooth", CurveOffsetCornerStyle::Smooth)
+    .value("Chamfer", CurveOffsetCornerStyle::Chamfer)
+    ;
+
+  py::enum_<CurveKnotStyle>(m, "CurveKnotStyle")
+    .value("Uniform", CurveKnotStyle::Uniform)
+    .value("Chord", CurveKnotStyle::Chord)
+    .value("ChordSquareRoot", CurveKnotStyle::ChordSquareRoot)
+    .value("UniformPeriodic", CurveKnotStyle::UniformPeriodic)
+    .value("ChordPeriodic", CurveKnotStyle::ChordPeriodic)
+    .value("ChordSquareRootPeriodic", CurveKnotStyle::ChordSquareRootPeriodic)
+    ;
+
+  py::enum_<CurveOrientation>(m, "CurveOrientation")
+    .value("Undefined", CurveOrientation::Undefined)
+    .value("Clockwise", CurveOrientation::Clockwise)
+    .value("CounterClockwise", CurveOrientation::CounterClockwise)
+    ;
+
+  py::enum_<PointContainment>(m, "PointContainment")
+    .value("Unset", PointContainment::Unset)
+    .value("Inside", PointContainment::Inside)
+    .value("Outside", PointContainment::Outside)
+    .value("Coincident", PointContainment::Coincident)
+    ;
+
+  py::enum_<RegionContainment>(m, "RegionContainment")
+    .value("Disjoint", RegionContainment::Disjoint)
+    .value("MutualIntersection", RegionContainment::MutualIntersection)
+    .value("AInsideB", RegionContainment::AInsideB)
+    .value("BInsideA", RegionContainment::BInsideA)
+    ;
+
+  py::enum_<CurveExtensionStyle>(m, "CurveExtensionStyle")
+    .value("Line", CurveExtensionStyle::Line)
+    .value("Arc", CurveExtensionStyle::Arc)
+    .value("Smooth", CurveExtensionStyle::Smooth)
+    ;
+
   py::class_<BND_Curve, BND_GeometryBase>(m, "Curve")
-    .def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve, py::arg("points"), py::arg("degree")=3)
+    //.def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve, py::arg("points"), py::arg("degree")=3)
+    .def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve2, py::arg("points"), py::arg("degree")=3)
     .def_property("Domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
     .def_property_readonly("Dimension", &BND_GeometryBase::Dimension)
-    .def("ChangeDimension", &BND_Curve::ChangeDimension)
+    .def("ChangeDimension", &BND_Curve::ChangeDimension, py::arg("desiredDimension"))
     .def_property_readonly("SpanCount", &BND_Curve::SpanCount)
     .def_property_readonly("Degree", &BND_Curve::Degree)
     .def("IsLinear", &BND_Curve::IsLinear, py::arg("tolerance")=ON_ZERO_TOLERANCE)
@@ -162,6 +244,7 @@ void initCurveBindings(pybind11::module& m)
     .def_property_readonly("IsPeriodic", &BND_Curve::IsPeriodic)
     .def("IsClosable", &BND_Curve::IsClosable, py::arg("tolerance"), py::arg("minimumAbsoluteSize")=0, py::arg("minimumRelativeSize")=10)
     .def("Reverse", &BND_Curve::Reverse)
+    .def("ClosedCurveOrientation", &BND_Curve::ClosedCurveOrientation)
     .def("PointAt", &BND_Curve::PointAt, py::arg("t"))
     .def_property_readonly("PointAtStart", &BND_Curve::PointAtStart)
     .def_property_readonly("PointAtEnd", &BND_Curve::PointAtEnd)
@@ -169,7 +252,7 @@ void initCurveBindings(pybind11::module& m)
     .def("SetEndPoint", &BND_Curve::SetEndPoint, py::arg("point"))
     .def("TangentAt", &BND_Curve::TangentAt, py::arg("t"))
     .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
-    .def("Trim", &BND_Curve::Trim)
+    .def("Trim", &BND_Curve::Trim, py::arg("t0"), py::arg("t1"))
     .def("Split", &BND_Curve::Split, py::arg("t"))
     .def("ToNurbsCurve", &BND_Curve::ToNurbsCurve)
     ;

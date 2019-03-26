@@ -17,7 +17,7 @@ public:
   void SetCapacity(int cap) { m_polyline.SetCapacity(cap); }
   int GetCount() const { return m_polyline.Count(); }
   void SetCount(int count) { m_polyline.SetCount(count); }
-  ON_3dPoint GetPoint(int index) { return m_polyline[index]; }
+  ON_3dPoint GetPoint(int index) const;
   void SetPoint(int index, const ON_3dPoint& point) { m_polyline[index] = point; }
   void Clear() { m_polyline.Empty(); }
   void Insert(int index, const ON_3dPoint& item) { m_polyline.Insert(index, item); }

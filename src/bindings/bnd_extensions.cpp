@@ -251,6 +251,19 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, co
   return ON_UUID_to_Binding(rc);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes)
+{
+  BND_Point3dList list;
+  for (auto item : points)
+  {
+    ON_3dPoint point = item.cast<ON_3dPoint>();
+    list.Add(point.x, point.y, point.z);
+  }
+  return AddPolyline(list, attributes);
+}
+#endif
+
 BND_UUID BND_ONXModel_ObjectTable::AddArc(const BND_Arc& arc, const BND_3dmObjectAttributes* attributes)
 {
   ON_NurbsCurve nc;
@@ -858,7 +871,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1)
-    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline, py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
     .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle, py::arg("circle"), py::arg("attributes") = nullptr)
     .def("AddEllipse", &BND_ONXModel_ObjectTable::AddEllipse, py::arg("ellipse"), py::arg("attributes") = nullptr)

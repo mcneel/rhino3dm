@@ -47,6 +47,9 @@ public:
   //Guid AddLine3(Line line)
   //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
   BND_UUID AddPolyline(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
+#if defined(ON_PYTHON_COMPILE)
+  BND_UUID AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes);
+#endif
   BND_UUID AddArc(const class BND_Arc& arc, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddCircle(const class BND_Circle& circle, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddEllipse(const class BND_Ellipse& ellipse, const class BND_3dmObjectAttributes* attributes);
