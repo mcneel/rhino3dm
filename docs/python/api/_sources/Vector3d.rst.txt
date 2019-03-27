@@ -1,7 +1,18 @@
 Vector3d
-********
+========
 
-.. autoclass:: rhino3dm.Vector3d
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Vector3d
+
+   .. py:method:: Vector3d(x, y, z)
+
+      Initializes a new instance of a vector, using its three components.
+
+      :param float x: The X (first) component.
+      :param float y: The Y (second) component.
+      :param float z: The Z (third) component.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

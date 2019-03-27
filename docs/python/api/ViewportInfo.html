@@ -81,6 +81,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -225,63 +226,108 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="viewportinfo">
-<h1>ViewportInfo<a class="headerlink" href="#viewportinfo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="viewportinfo"></span><h1>ViewportInfo<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.ViewportInfo">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ViewportInfo</code><a class="headerlink" href="#rhino3dm.ViewportInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
-<p>Represents a viewing frustum.</p>
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.Camera35mmLensLength">
-<code class="descname">Camera35mmLensLength</code><a class="headerlink" href="#rhino3dm.ViewportInfo.Camera35mmLensLength" title="Permalink to this definition">¶</a></dt>
-<dd><p>This property assumes the camera is horizontal and crop the
-film rather than the image when the aspect of the frustum
-is not 36/24.  (35mm film is 36mm wide and 24mm high.)
-Setting preserves camera location,
-changes the frustum, but maintains the frustum’s aspect.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.ViewportInfo.ViewportInfo">
+<code class="descname">ViewportInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ViewportInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>ViewportInfo constructor</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraAngle">
-<code class="descname">CameraAngle</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraAngle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the 1/2 smallest angle. See  for more information.</p>
+<dt id="rhino3dm.ViewportInfo.IsValidCameraFrame">
+<code class="descname">IsValidCameraFrame</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidCameraFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.isValidCamer">
+<code class="descname">isValidCamer</code><a class="headerlink" href="#rhino3dm.ViewportInfo.isValidCamer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.IsValidFrustum">
+<code class="descname">IsValidFrustum</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidFrustum" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value that indicates whether the frustum is valid.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraDirection">
-<code class="descname">CameraDirection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraDirection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the direction that the camera faces.</p>
+<dt id="rhino3dm.ViewportInfo.IsParallelProjection">
+<code class="descname">IsParallelProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsParallelProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Get or set whether this projection is parallel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.IsPerspectiveProjection">
+<code class="descname">IsPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Get or set whether this projection is perspective.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection">
+<code class="descname">IsTwoPointPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value that indicates whether this projection is a two-point perspective.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.CameraLocation">
 <code class="descname">CameraLocation</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraLocation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the camera location (position) point.</p>
+<dd><p>rhino3dm.Point3d: Gets the camera location (position) point.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.CameraDirection">
+<code class="descname">CameraDirection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the direction that the camera faces.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.CameraUp">
 <code class="descname">CameraUp</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraUp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the camera up vector.</p>
+<dd><p>rhino3dm.Vector3d: Gets the camera up vector.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.CameraX">
 <code class="descname">CameraX</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the unit “to the right” vector.</p>
+<dd><p>rhino3dm.Vector3d: Gets the unit “to the right” vector.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.CameraY">
 <code class="descname">CameraY</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the unit “up” vector.</p>
+<dd><p>rhino3dm.Vector3d: Gets the unit “up” vector.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.CameraZ">
 <code class="descname">CameraZ</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraZ" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the unit vector in -CameraDirection.</p>
+<dd><p>rhino3dm.Vector3d: Gets the unit vector in -CameraDirection.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.ScreenPortAspect">
+<code class="descname">ScreenPortAspect</code><a class="headerlink" href="#rhino3dm.ViewportInfo.ScreenPortAspect" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the sceen aspect ratio.
+This is width / height.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.CameraAngle">
+<code class="descname">CameraAngle</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the 1/2 smallest angle. See  for more information.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewportInfo.Camera35mmLensLength">
+<code class="descname">Camera35mmLensLength</code><a class="headerlink" href="#rhino3dm.ViewportInfo.Camera35mmLensLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: This property assumes the camera is horizontal and crop the
+film rather than the image when the aspect of the frustum
+is not 36/24.  (35mm film is 36mm wide and 24mm high.)
+Setting preserves camera location,
+changes the frustum, but maintains the frustum’s aspect.</p>
 </dd></dl>
 
 <dl class="method">
@@ -294,13 +340,19 @@ views are similar.  The camera direction and target point are
 not be changed.
 If the current projection is parallel and symmetricFrustum,
 FrustumIsLeftRightSymmetric() and FrustumIsTopBottomSymmetric()
-are all equal, then no changes are made and true is returned.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>symmetricFrustum : true if you want the resulting frustum to be symmetric.</dd>
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
+are all equal, then no changes are made and True is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -313,20 +365,26 @@ views are similar.  The camera direction and target point are
 not changed.
 If the current projection is perspective and symmetricFrustum,
 IsFrustumIsLeftRightSymmetric, and IsFrustumIsTopBottomSymmetric
-are all equal, then no changes are made and true is returned.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>targetDistance : If RhinoMath.UnsetValue this parameter is ignored.
-targetDistance : Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be perserved.
-symmetricFrustum : true if you want the resulting frustum to be symmetric.
-lensLength : (pass 50.0 when in doubt)
-lensLength : 35 mm lens length to use when changing from parallel
-lensLength : to perspective projections. If the current projection
-lensLength : is perspective or lens_length is &lt;= 0.0,
-lensLength : then this parameter is ignored.</dd>
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
+are all equal, then no changes are made and True is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be perserved.</li>
+<li><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</li>
+<li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -337,138 +395,152 @@ to a two point perspective.  It will make common additional
 adjustments to the frustum and camera location and direction
 so the resulting views are similar.
 If the current projection is perspective and
-IsFrustumIsLeftRightSymmetric is true and
+IsFrustumIsLeftRightSymmetric is True and
 IsFrustumIsTopBottomSymmetric is false, then no changes are
-made and true is returned.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>targetDistance : If RhinoMath.UnsetValue this parameter is ignored.  Otherwise
-targetDistance : it must be &gt; 0 and indicates which plane in the current
-targetDistance : view frustum should be perserved.
-up : The locked up direction. Pass Vector3d.Zero if you want to use the world
-up : axis direction that is closest to the current up direction.
-up : Pass CameraY() if you want to preserve the current up direction.
-lensLength : (pass 50.0 when in doubt)
-lensLength : 35 mm lens length to use when changing from parallel
-lensLength : to perspective projections. If the current projection
-lensLength : is perspective or lens_length is &lt;= 0.0,
-lensLength : then this parameter is ignored.</dd>
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.DollyExtents">
-<code class="descname">DollyExtents</code><span class="sig-paren">(</span><em>geometry</em>, <em>border</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DollyExtents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dolly the camera location and so that the view frustum contains
-all of the document objects that can be seen in view.
-If the projection is perspective, the camera angle is not changed.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>border : If border &gt; 1.0, then the fustum in enlarged by this factor
-border : to provide a border around the view.  1.1 works well for
-border : parallel projections; 0.0 is suggested for perspective projections.</dd>
-<dt>Returns:</dt>
-<dd>True if successful.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.GetXform">
-<code class="descname">GetXform</code><span class="sig-paren">(</span><em>sourceSystem</em>, <em>destinationSystem</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetXform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes a transform from a coordinate system to another.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>sourceSystem : The coordinate system to map from.
-destinationSystem : The coordinate system to map into.</dd>
-<dt>Returns:</dt>
-<dd>The 4x4 transformation matrix (acts on the left).</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsParallelProjection">
-<code class="descname">IsParallelProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsParallelProjection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get or set whether this projection is parallel.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsPerspectiveProjection">
-<code class="descname">IsPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get or set whether this projection is perspective.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection">
-<code class="descname">IsTwoPointPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether this projection is a two-point perspective.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsValidFrustum">
-<code class="descname">IsValidFrustum</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidFrustum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether the frustum is valid.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.ScreenPortAspect">
-<code class="descname">ScreenPortAspect</code><a class="headerlink" href="#rhino3dm.ViewportInfo.ScreenPortAspect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the sceen aspect ratio.
-This is width / height.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetCameraDirection">
-<code class="descname">SetCameraDirection</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraDirection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the direction that the camera faces.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>direction : A new direction.</dd>
-<dt>Returns:</dt>
-<dd>true if the direction was set; otherwise false.</dd>
-</dl>
+made and True is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored.  Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be perserved.</li>
+<li><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – The locked up direction. Pass Vector3d.Zero if you want to use the world axis direction that is closest to the current up direction. Pass CameraY() if you want to preserve the current up direction.</li>
+<li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.ViewportInfo.SetCameraLocation">
 <code class="descname">SetCameraLocation</code><span class="sig-paren">(</span><em>location</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraLocation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the camera location (position) point.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ViewportInfo.SetCameraDirection">
+<code class="descname">SetCameraDirection</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the direction that the camera faces.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the direction was set; otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.ViewportInfo.SetCameraUp">
 <code class="descname">SetCameraUp</code><span class="sig-paren">(</span><em>up</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraUp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the camera up vector.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>up : A new direction.</dd>
-<dt>Returns:</dt>
-<dd>true if the direction was set; otherwise false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the direction was set; otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.ViewportInfo.SetFrustum">
-<code class="descname">SetFrustum</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>bottom</em>, <em>top</em>, <em>nearDistance</em>, <em>farDistance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetFrustum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetFrustum</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>bottom</em>, <em>top</em>, <em>near</em>, <em>far</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetFrustum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the view frustum. If FrustumSymmetryIsLocked() is true
 and left != -right or bottom != -top, then they will be
 adjusted so the resulting frustum is symmetric.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>left : A new left value.
-right : A new right value.
-bottom : A new bottom value.
-top : A new top value.
-nearDistance : A new near distance value.
-farDistance : A new far distance value.</dd>
-<dt>Returns:</dt>
-<dd>true if operation succeeded; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>left</strong> (<em>float</em>) – A new left value.</li>
+<li><strong>right</strong> (<em>float</em>) – A new right value.</li>
+<li><strong>bottom</strong> (<em>float</em>) – A new bottom value.</li>
+<li><strong>top</strong> (<em>float</em>) – A new top value.</li>
+<li><strong>nearDistance</strong> (<em>float</em>) – A new near distance value.</li>
+<li><strong>farDistance</strong> (<em>float</em>) – A new far distance value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if operation succeeded; otherwise, false.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ViewportInfo.GetXform">
+<code class="descname">GetXform</code><span class="sig-paren">(</span><em>sourceCoordinateSystem</em>, <em>destinationCoordinateSystem</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetXform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a transform from a coordinate system to another.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sourceSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map from.</li>
+<li><strong>destinationSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map into.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The 4x4 transformation matrix (acts on the left).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ViewportInfo.DollyExtents">
+<code class="descname">DollyExtents</code><span class="sig-paren">(</span><em>bbox</em>, <em>border</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DollyExtents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dolly the camera location and so that the view frustum contains
+all of the document objects that can be seen in view.
+If the projection is perspective, the camera angle is not changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,53 +227,67 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="sphere">
-<h1>Sphere<a class="headerlink" href="#sphere" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="sphere"></span><h1>Sphere<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Sphere">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Sphere</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>…</p>
-<dl class="attribute">
-<dt id="rhino3dm.Sphere.Center">
-<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Sphere.Center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the center point of the sphere.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Sphere.ClosestPoint">
-<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.ClosestPoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns point on sphere that is closest to given point.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>testPoint : Point to project onto Sphere.</dd>
-<dt>Returns:</dt>
-<dd>Point on sphere surface closest to testPoint.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Sphere.Diameter">
-<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Sphere.Diameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the diameter for this sphere.</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Sphere</code><a class="headerlink" href="#rhino3dm.Sphere" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.Sphere.Sphere">
+<code class="descname">Sphere</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.Sphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new sphere given center point and radius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A center point.</li>
+<li><strong>radius</strong> (<em>float</em>) – A radius value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Sphere.IsValid">
 <code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Sphere.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether the sphere is valid.</p>
+<dd><p>bool: Gets a value that indicates whether the sphere is valid.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Sphere.LatitudeDegrees">
-<code class="descname">LatitudeDegrees</code><span class="sig-paren">(</span><em>degrees</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.LatitudeDegrees" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the parallel at a specific latitude angle.
-The angle is specified in degrees.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>degrees : An angle in degrees for the meridian.</dd>
-<dt>Returns:</dt>
-<dd>A circle.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.Sphere.Diameter">
+<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Sphere.Diameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the diameter for this sphere.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Sphere.Radius">
+<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Sphere.Radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Radius for this sphere.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Sphere.Center">
+<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Sphere.Center" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the center point of the sphere.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Sphere.NorthPole">
+<code class="descname">NorthPole</code><a class="headerlink" href="#rhino3dm.Sphere.NorthPole" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets the point at the North Pole of the sphere.
+This is the parameterization singularity that can be obtained,
+at V value +Math.Pi/2.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Sphere.SouthPole">
+<code class="descname">SouthPole</code><a class="headerlink" href="#rhino3dm.Sphere.SouthPole" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets the point at the South Pole of the sphere.
+This is the parameterization singularity that can be obtained,
+at V value -Math.Pi/2.</p>
 </dd></dl>
 
 <dl class="method">
@@ -280,12 +295,37 @@ The angle is specified in degrees.</p>
 <code class="descname">LatitudeRadians</code><span class="sig-paren">(</span><em>radians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.LatitudeRadians" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the parallel at a specific latitude angle.
 The angle is specified in radians.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>radians : An angle in radians for the parallel.</dd>
-<dt>Returns:</dt>
-<dd>A circle.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>radians</strong> (<em>float</em>) – An angle in radians for the parallel.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A circle.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Sphere.LatitudeDegrees">
+<code class="descname">LatitudeDegrees</code><span class="sig-paren">(</span><em>degrees</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.LatitudeDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the parallel at a specific latitude angle.
+The angle is specified in degrees.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>degrees</strong> (<em>float</em>) – An angle in degrees for the meridian.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A circle.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -293,66 +333,104 @@ The angle is specified in radians.</p>
 <code class="descname">LongitudeRadians</code><span class="sig-paren">(</span><em>radians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.LongitudeRadians" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the meridian at a specific longitude angle.
 The angle is specified in radians.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>radians : An angle in radians.</dd>
-<dt>Returns:</dt>
-<dd>A circle.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>radians</strong> (<em>float</em>) – An angle in radians.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A circle.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Sphere.NormalAt">
-<code class="descname">NormalAt</code><span class="sig-paren">(</span><em>longitudeRadians</em>, <em>latitudeRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.NormalAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the normal at a specific angular location on the sphere.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>longitudeRadians : A number within the interval [0, 2pi].
-latitudeRadians : A number within the interval [-pi/2, pi/2].</dd>
-<dt>Returns:</dt>
-<dd>A vector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Sphere.NorthPole">
-<code class="descname">NorthPole</code><a class="headerlink" href="#rhino3dm.Sphere.NorthPole" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the point at the North Pole of the sphere.
-This is the parameterization singularity that can be obtained,
-at V value +Math.Pi/2.</p>
+<dt id="rhino3dm.Sphere.LongitureDegrees">
+<code class="descname">LongitureDegrees</code><span class="sig-paren">(</span><em>degrees</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.LongitureDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Sphere.PointAt">
 <code class="descname">PointAt</code><span class="sig-paren">(</span><em>longitudeRadians</em>, <em>latitudeRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.PointAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates the sphere at specific longitude and latitude angles.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>longitudeRadians : A number within the interval [0, 2pi].
-latitudeRadians : A number within the interval [-pi/2,pi/2].</dd>
-<dt>Returns:</dt>
-<dd>A point value.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>longitudeRadians</strong> (<em>float</em>) – A number within the interval [0, 2pi].</li>
+<li><strong>latitudeRadians</strong> (<em>float</em>) – A number within the interval [-pi/2,pi/2].</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A point value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Sphere.Radius">
-<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Sphere.Radius" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Radius for this sphere.</p>
+<dl class="method">
+<dt id="rhino3dm.Sphere.NormalAt">
+<code class="descname">NormalAt</code><span class="sig-paren">(</span><em>longitudeRadians</em>, <em>latitudeRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.NormalAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the normal at a specific angular location on the sphere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>longitudeRadians</strong> (<em>float</em>) – A number within the interval [0, 2pi].</li>
+<li><strong>latitudeRadians</strong> (<em>float</em>) – A number within the interval [-pi/2, pi/2].</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A vector.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Sphere.SouthPole">
-<code class="descname">SouthPole</code><a class="headerlink" href="#rhino3dm.Sphere.SouthPole" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the point at the South Pole of the sphere.
-This is the parameterization singularity that can be obtained,
-at V value -Math.Pi/2.</p>
+<dl class="method">
+<dt id="rhino3dm.Sphere.ClosestPoint">
+<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.ClosestPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns point on sphere that is closest to given point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point to project onto Sphere.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Point on sphere surface closest to testPoint.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Sphere.ToBrep">
 <code class="descname">ToBrep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.ToBrep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts this sphere is it Brep representation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -360,10 +438,28 @@ at V value -Math.Pi/2.</p>
 <code class="descname">ToNurbsSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.ToNurbsSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts this sphere to its NurbsSurface representation.
 This is synonymous with calling NurbsSurface.CreateFromSphere().</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A nurbs surface representation of this sphere or null.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A nurbs surface representation of this sphere or null.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Sphere.Encode">
+<code class="descname">Encode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.Encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Sphere.Decode">
+<em class="property">static </em><code class="descname">Decode</code><span class="sig-paren">(</span><em>jsonObject</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Sphere.Decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

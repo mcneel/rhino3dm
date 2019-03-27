@@ -1,7 +1,14 @@
 InstanceDefinition
-******************
+==================
 
-.. autoclass:: rhino3dm.InstanceDefinition
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: InstanceDefinition
+
+   .. py:method:: InstanceDefinition()
+
+      InstanceDefinition constructor
+
+
+   .. py:attribute:: Description
+

@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,16 +227,117 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="meshingparameters">
-<h1>MeshingParameters<a class="headerlink" href="#meshingparameters" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="meshingparameters"></span><h1>MeshingParameters<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.MeshingParameters">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">MeshingParameters</code><span class="sig-paren">(</span><em>density</em>, <em>minimumEdgeLength</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents settings used for creating a mesh representation of a brep or surface.</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">MeshingParameters</code><a class="headerlink" href="#rhino3dm.MeshingParameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.MeshingParameters.MeshingParameters">
+<code class="descname">MeshingParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.MeshingParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>MeshingParameters constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">MeshingParameters</code><span class="sig-paren">(</span><em>density</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new instance with simple values,
+similar to that of Rhino’s meshing slider interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>density</strong> (<em>float</em>) – The density and number of mesh polygons, where 0.0 &lt;= density &lt;= 1.0, where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">MeshingParameters</code><span class="sig-paren">(</span><em>density</em>, <em>minimumEdgeLength</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new instance with simple values,
+similar to that of Rhino’s meshing slider interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>density</strong> (<em>float</em>) – The density and number of mesh polygons, where 0.0 &lt;= density &lt;= 1.0, where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.</li>
+<li><strong>minimumEdgeLength</strong> (<em>float</em>) – The minimum allowed mesh edge length.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.Default">
+<code class="descname">Default</code><a class="headerlink" href="#rhino3dm.MeshingParameters.Default" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default render mesh.
+Only use this if you plan on specifying your own custom meshing
+parameters.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.FastRenderMesh">
+<code class="descname">FastRenderMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.FastRenderMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when
+meshing speed is prefered over mesh quality.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.QualityRenderMesh">
+<code class="descname">QualityRenderMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.QualityRenderMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when mesh
+quality is prefered over meshing speed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.DefaultAnalysisMesh">
+<code class="descname">DefaultAnalysisMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.DefaultAnalysisMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default analysis mesh.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.TextureRange">
+<code class="descname">TextureRange</code><a class="headerlink" href="#rhino3dm.MeshingParameters.TextureRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>MeshingParameterTextureRange: Gets or sets how and if textures will be packed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.JaggedSeams">
+<code class="descname">JaggedSeams</code><a class="headerlink" href="#rhino3dm.MeshingParameters.JaggedSeams" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets whether or not the mesh is allowed to have jagged seams.
+When this flag is set to true, meshes on either side of a Brep Edge will not match up.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.RefineGrid">
+<code class="descname">RefineGrid</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not the sampling grid can be refined
+when certain tolerances are not met.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.SimplePlanes">
+<code class="descname">SimplePlanes</code><a class="headerlink" href="#rhino3dm.MeshingParameters.SimplePlanes" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not planar areas are allowed
+to be meshed in a simplified manner.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.ComputeCurvature">
+<code class="descname">ComputeCurvature</code><a class="headerlink" href="#rhino3dm.MeshingParameters.ComputeCurvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not surface curvature
+data will be embedded in the mesh.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.MeshingParameters.ClosedObjectPostProcess">
 <code class="descname">ClosedObjectPostProcess</code><a class="headerlink" href="#rhino3dm.MeshingParameters.ClosedObjectPostProcess" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a value indicating whether or not to post process non-closed meshes
+<dd><p>bool: Gets or sets a value indicating whether or not to post process non-closed meshes
 that should be closed. If the Brep being meshed is closed, JaggedSeams = false,
 and ClosedObjectPostProcess = true, and the resulting mesh is not closed, then a
 post meshing process is applied to find and close gaps in the mesh. Typically the
@@ -244,135 +346,85 @@ loops in trimming curve.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.ComputeCurvature">
-<code class="descname">ComputeCurvature</code><a class="headerlink" href="#rhino3dm.MeshingParameters.ComputeCurvature" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a value indicating whether or not surface curvature
-data will be embedded in the mesh.</p>
+<dt id="rhino3dm.MeshingParameters.GridMinCount">
+<code class="descname">GridMinCount</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMinCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the minimum number of grid quads in the initial sampling grid.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.Default">
-<code class="descname">Default</code><a class="headerlink" href="#rhino3dm.MeshingParameters.Default" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets mesh creation parameters to create the default render mesh.
-Only use this if you plan on specifying your own custom meshing
-parameters.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.DefaultAnalysisMesh">
-<code class="descname">DefaultAnalysisMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.DefaultAnalysisMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets mesh creation parameters to create the default analysis mesh.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.FastRenderMesh">
-<code class="descname">FastRenderMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.FastRenderMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets mesh creation parameters to create the a render mesh when
-meshing speed is prefered over mesh quality.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.GridAmplification">
-<code class="descname">GridAmplification</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAmplification" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the grid amplification factor.
-Values lower than 1.0 will decrease the number of initial quads,
-values higher than 1.0 will increase the number of initial quads.</p>
+<dt id="rhino3dm.MeshingParameters.GridMaxCount">
+<code class="descname">GridMaxCount</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMaxCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the maximum number of grid quads in the initial sampling grid.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.MeshingParameters.GridAngle">
 <code class="descname">GridAngle</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAngle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the maximum allowed angle difference (in radians)
+<dd><p>float: Gets or sets the maximum allowed angle difference (in radians)
 for a single sampling quad. The angle pertains to the surface normals.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.MeshingParameters.GridAspectRatio">
 <code class="descname">GridAspectRatio</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAspectRatio" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the maximum allowed aspect ratio of sampling quads.</p>
+<dd><p>float: Gets or sets the maximum allowed aspect ratio of sampling quads.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.GridMaxCount">
-<code class="descname">GridMaxCount</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMaxCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the maximum number of grid quads in the initial sampling grid.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.GridMinCount">
-<code class="descname">GridMinCount</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMinCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the minimum number of grid quads in the initial sampling grid.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.JaggedSeams">
-<code class="descname">JaggedSeams</code><a class="headerlink" href="#rhino3dm.MeshingParameters.JaggedSeams" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets whether or not the mesh is allowed to have jagged seams.
-When this flag is set to true, meshes on either side of a Brep Edge will not match up.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.MaximumEdgeLength">
-<code class="descname">MaximumEdgeLength</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MaximumEdgeLength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the maximum allowed mesh edge length.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.MinimumEdgeLength">
-<code class="descname">MinimumEdgeLength</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumEdgeLength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the minimum allowed mesh edge length.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.MinimumTolerance">
-<code class="descname">MinimumTolerance</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumTolerance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the minimum tolerance.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.QualityRenderMesh">
-<code class="descname">QualityRenderMesh</code><a class="headerlink" href="#rhino3dm.MeshingParameters.QualityRenderMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets mesh creation parameters to create the a render mesh when mesh
-quality is prefered over meshing speed.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.RefineAngle">
-<code class="descname">RefineAngle</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineAngle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the mesh parameter refine angle.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.RefineGrid">
-<code class="descname">RefineGrid</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineGrid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a value indicating whether or not the sampling grid can be refined
-when certain tolerances are not met.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.RelativeTolerance">
-<code class="descname">RelativeTolerance</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RelativeTolerance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the relative tolerance.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.SimplePlanes">
-<code class="descname">SimplePlanes</code><a class="headerlink" href="#rhino3dm.MeshingParameters.SimplePlanes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a value indicating whether or not planar areas are allowed
-to be meshed in a simplified manner.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.MeshingParameters.TextureRange">
-<code class="descname">TextureRange</code><a class="headerlink" href="#rhino3dm.MeshingParameters.TextureRange" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets how and if textures will be packed.</p>
+<dt id="rhino3dm.MeshingParameters.GridAmplification">
+<code class="descname">GridAmplification</code><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAmplification" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the grid amplification factor.
+Values lower than 1.0 will decrease the number of initial quads,
+values higher than 1.0 will increase the number of initial quads.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.MeshingParameters.Tolerance">
 <code class="descname">Tolerance</code><a class="headerlink" href="#rhino3dm.MeshingParameters.Tolerance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the maximum allowed edge deviation.
+<dd><p>float: Gets or sets the maximum allowed edge deviation.
 This tolerance is measured between the center of the mesh edge and the surface.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.MinimumTolerance">
+<code class="descname">MinimumTolerance</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the minimum tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.RelativeTolerance">
+<code class="descname">RelativeTolerance</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RelativeTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the relative tolerance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.MinimumEdgeLength">
+<code class="descname">MinimumEdgeLength</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumEdgeLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the minimum allowed mesh edge length.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.MaximumEdgeLength">
+<code class="descname">MaximumEdgeLength</code><a class="headerlink" href="#rhino3dm.MeshingParameters.MaximumEdgeLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the maximum allowed mesh edge length.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshingParameters.RefineAngle">
+<code class="descname">RefineAngle</code><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the mesh parameter refine angle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshingParameters.Encode">
+<code class="descname">Encode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.Encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.MeshingParameters.Decode">
+<em class="property">static </em><code class="descname">Decode</code><span class="sig-paren">(</span><em>jsonObject</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.Decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

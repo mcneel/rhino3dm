@@ -1,7 +1,26 @@
 Bitmap
-******
+======
 
-.. autoclass:: rhino3dm.Bitmap
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Bitmap
+
+   .. py:method:: Bitmap()
+
+      Bitmap constructor
+
+
+   .. py:attribute:: Width
+
+
+   .. py:attribute:: Height
+
+
+   .. py:attribute:: BitsPerPixel
+
+
+   .. py:attribute:: SizeOfScan
+
+
+   .. py:attribute:: SizeOfImage
+

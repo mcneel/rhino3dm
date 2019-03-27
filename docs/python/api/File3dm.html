@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,151 +227,184 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="file3dm">
-<h1>File3dm<a class="headerlink" href="#file3dm" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="file3dm"></span><h1>File3dm<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.File3dm">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">File3dm</code><a class="headerlink" href="#rhino3dm.File3dm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a 3dm file, which is stored using the OpenNURBS file standard.
-The 3dm format is the main Rhinoceros storage format.Visit <a class="reference external" href="http://www.opennurbs.com/">http://www.opennurbs.com/</a> for more details.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.File3dm.File3dm">
+<code class="descname">File3dm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.File3dm" title="Permalink to this definition">¶</a></dt>
+<dd><p>File3dm constructor</p>
+</dd></dl>
+
 <dl class="attribute">
-<dt id="rhino3dm.File3dm.ApplicationDetails">
-<code class="descname">ApplicationDetails</code><a class="headerlink" href="#rhino3dm.File3dm.ApplicationDetails" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets details for the application that wrote this file.</p>
+<dt id="rhino3dm.File3dm.StartSectionComments">
+<code class="descname">StartSectionComments</code><a class="headerlink" href="#rhino3dm.File3dm.StartSectionComments" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets the start section comments, which are the comments with which the 3dm file begins.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.ApplicationName">
 <code class="descname">ApplicationName</code><a class="headerlink" href="#rhino3dm.File3dm.ApplicationName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the name of the application that wrote this file.</p>
+<dd><p>str: Gets or sets the name of the application that wrote this file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.ApplicationUrl">
 <code class="descname">ApplicationUrl</code><a class="headerlink" href="#rhino3dm.File3dm.ApplicationUrl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a URL for the application that wrote this file.</p>
+<dd><p>str: Gets or sets a URL for the application that wrote this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.ApplicationDetails">
+<code class="descname">ApplicationDetails</code><a class="headerlink" href="#rhino3dm.File3dm.ApplicationDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets details for the application that wrote this file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.CreatedBy">
 <code class="descname">CreatedBy</code><a class="headerlink" href="#rhino3dm.File3dm.CreatedBy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a string that names the user who created the file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.DimStyles">
-<code class="descname">DimStyles</code><a class="headerlink" href="#rhino3dm.File3dm.DimStyles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dimension Styles in this file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.InstanceDefinitions">
-<code class="descname">InstanceDefinitions</code><a class="headerlink" href="#rhino3dm.File3dm.InstanceDefinitions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Instance definitions in this file.</p>
+<dd><p>str: Gets a string that names the user who created the file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.LastEditedBy">
 <code class="descname">LastEditedBy</code><a class="headerlink" href="#rhino3dm.File3dm.LastEditedBy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a string that names the user who last edited the file.</p>
+<dd><p>str: Gets a string that names the user who last edited the file.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.File3dm.Layers">
-<code class="descname">Layers</code><a class="headerlink" href="#rhino3dm.File3dm.Layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Layers in this file.</p>
+<dt id="rhino3dm.File3dm.Revision">
+<code class="descname">Revision</code><a class="headerlink" href="#rhino3dm.File3dm.Revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the revision number.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.File3dm.Materials">
-<code class="descname">Materials</code><a class="headerlink" href="#rhino3dm.File3dm.Materials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Materials in this file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.NamedViews">
-<code class="descname">NamedViews</code><a class="headerlink" href="#rhino3dm.File3dm.NamedViews" title="Permalink to this definition">¶</a></dt>
-<dd><p>Named views in this file.</p>
+<dt id="rhino3dm.File3dm.Settings">
+<code class="descname">Settings</code><a class="headerlink" href="#rhino3dm.File3dm.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>File3dmSettings: Settings include tolerance, and unit system, and defaults used
+for creating views and objects.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.Objects">
 <code class="descname">Objects</code><a class="headerlink" href="#rhino3dm.File3dm.Objects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets access to the  class associated with this file,
+<dd><p>File3dmObjectTable: Gets access to the  class associated with this file,
 which contains all objects.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Materials">
+<code class="descname">Materials</code><a class="headerlink" href="#rhino3dm.File3dm.Materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;Material&gt;: Materials in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Bitmaps">
+<code class="descname">Bitmaps</code><a class="headerlink" href="#rhino3dm.File3dm.Bitmaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Layers">
+<code class="descname">Layers</code><a class="headerlink" href="#rhino3dm.File3dm.Layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;Layer&gt;: Layers in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.DimStyles">
+<code class="descname">DimStyles</code><a class="headerlink" href="#rhino3dm.File3dm.DimStyles" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;DimensionStyle&gt;: Dimension Styles in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.InstanceDefinitions">
+<code class="descname">InstanceDefinitions</code><a class="headerlink" href="#rhino3dm.File3dm.InstanceDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;InstanceDefinitionGeometry&gt;: Instance definitions in this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Views">
+<code class="descname">Views</code><a class="headerlink" href="#rhino3dm.File3dm.Views" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;ViewInfo&gt;: Views that represent the RhinoViews which are displayed when Rhino loads this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.NamedViews">
+<code class="descname">NamedViews</code><a class="headerlink" href="#rhino3dm.File3dm.NamedViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>IList&lt;ViewInfo&gt;: Named views in this file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.File3dm.PlugInData">
 <code class="descname">PlugInData</code><a class="headerlink" href="#rhino3dm.File3dm.PlugInData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Custom plug-in data in this file.  This data is not attached to any geometry or attributes</p>
+<dd><p>File3dmPlugInDataTable: Custom plug-in data in this file.  This data is not attached to any geometry or attributes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.File3dm.Strings">
+<code class="descname">Strings</code><a class="headerlink" href="#rhino3dm.File3dm.Strings" title="Permalink to this definition">¶</a></dt>
+<dd><p>File3dmStringTable: Document user strings in this file</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.File3dm.Read">
 <em class="property">static </em><code class="descname">Read</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads a 3dm file from a specified location.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>path : The file to read.</dd>
-<dt>Returns:</dt>
-<dd>new File3dm on success, null on error.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.File3dm.ReadArchiveVersion">
-<em class="property">static </em><code class="descname">ReadArchiveVersion</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.ReadArchiveVersion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads only the archive 3dm version from an existing 3dm file.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>path : The file from which to read the archive version.</dd>
-<dt>Returns:</dt>
-<dd>The 3dm file archive version.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – The file to read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new File3dm on success, None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.File3dm" title="rhino3dm.File3dm">File3dm</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.File3dm.ReadNotes">
 <em class="property">static </em><code class="descname">ReadNotes</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.ReadNotes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads only the notes from an existing 3dm file.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>path : The file from which to read the notes.</dd>
-<dt>Returns:</dt>
-<dd>The 3dm file notes.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – The file from which to read the notes.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The 3dm file notes.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.Revision">
-<code class="descname">Revision</code><a class="headerlink" href="#rhino3dm.File3dm.Revision" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the revision number.</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.File3dm.ReadArchiveVersion">
+<em class="property">static </em><code class="descname">ReadArchiveVersion</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.ReadArchiveVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads only the archive 3dm version from an existing 3dm file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – The file from which to read the archive version.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The 3dm file archive version.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.Settings">
-<code class="descname">Settings</code><a class="headerlink" href="#rhino3dm.File3dm.Settings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Settings include tolerance, and unit system, and defaults used
-for creating views and objects.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.StartSectionComments">
-<code class="descname">StartSectionComments</code><a class="headerlink" href="#rhino3dm.File3dm.StartSectionComments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the start section comments, which are the comments with which the 3dm file begins.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.Strings">
-<code class="descname">Strings</code><a class="headerlink" href="#rhino3dm.File3dm.Strings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Document user strings in this file</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.File3dm.Views">
-<code class="descname">Views</code><a class="headerlink" href="#rhino3dm.File3dm.Views" title="Permalink to this definition">¶</a></dt>
-<dd><p>Views that represent the RhinoViews which are displayed when Rhino loads this file.</p>
+<dl class="staticmethod">
+<dt id="rhino3dm.File3dm.FromByteArray">
+<em class="property">static </em><code class="descname">FromByteArray</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.FromByteArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
@@ -378,17 +412,30 @@ for creating views and objects.</p>
 <code class="descname">Write</code><span class="sig-paren">(</span><em>path</em>, <em>version</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes contents of this model to an openNURBS archive.
 If the model is not valid, then Write will refuse to write it.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>path : The file name to use for writing.
-version : Version of the openNURBS archive to write.  Must be [2; current version].
-version : Rhino can read its current version, plus earlier file versions except 1.
-version : Use latest version when possible.
-version : Alternatively, 0 is a placeholder for the last valid version.</dd>
-<dt>Returns:</dt>
-<dd>true if archive is written with no error.
-false if errors occur.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> (<em>str</em>) – The file name to use for writing.</li>
+<li><strong>version</strong> (<em>int</em>) – Version of the openNURBS archive to write.  Must be [2; current version]. Rhino can read its current version, plus earlier file versions except 1. Use latest version when possible. Alternatively, 0 is a placeholder for the last valid version.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if archive is written with no error. False if errors occur.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.File3dm._TestRead">
+<em class="property">static </em><code class="descname">_TestRead</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm._TestRead" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

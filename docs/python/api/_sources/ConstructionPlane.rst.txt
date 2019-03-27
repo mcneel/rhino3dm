@@ -1,7 +1,42 @@
 ConstructionPlane
-*****************
+=================
 
-.. autoclass:: rhino3dm.ConstructionPlane
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ConstructionPlane
+
+   .. py:method:: ConstructionPlane()
+
+      ConstructionPlane constructor
+
+
+   .. py:attribute:: Plane
+
+      rhino3dm.Plane: Gets or sets the geometric plane to use for construction.
+
+   .. py:attribute:: GridSpacing
+
+      float: Gets or sets the distance between grid lines.
+
+   .. py:attribute:: SnapSpacing
+
+      float: when "grid snap" is enabled, the distance between snap points.
+      Typically this is the same distance as grid spacing.
+
+   .. py:attribute:: GridLineCount
+
+      int: Gets or sets the total amount of grid lines in each direction.
+
+   .. py:attribute:: ThickLineFrequency
+
+      int: Gets or sets the recurrence of a wider line on the grid.
+      0: No lines are thick, all are drawn thin.1: All lines are thick.2: Every other line is thick.3: One line in three lines is thick (and two are thin).4: ...
+
+   .. py:attribute:: DepthBuffered
+
+      bool: Gets or sets whether the grid is drawn on top of geometry.
+      false=grid is always drawn behind 3d geometrytrue=grid is drawn at its depth as a 3d plane and grid lines obscure things behind the grid.
+
+   .. py:attribute:: Name
+
+      str: Gets or sets the name of the construction plane.

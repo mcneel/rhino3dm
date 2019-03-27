@@ -1,7 +1,6 @@
 SurfaceProxy
-************
+============
 
-.. autoclass:: rhino3dm.SurfaceProxy
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: SurfaceProxy

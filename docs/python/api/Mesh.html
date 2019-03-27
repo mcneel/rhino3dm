@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,33 +227,136 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="mesh">
-<h1>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="mesh"></span><h1>Mesh<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Mesh">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Mesh</code><a class="headerlink" href="#rhino3dm.Mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
-<p>…</p>
-<dl class="method">
-<dt id="rhino3dm.Mesh.Append">
-<code class="descname">Append</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Appends a copy of another mesh to this one and updates indices of appended mesh parts.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>other : Mesh to append to this one.</dd>
-</dl>
+<dd><dl class="method">
+<dt id="rhino3dm.Mesh.Mesh">
+<code class="descname">Mesh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mesh constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.IsClosed">
+<code class="descname">IsClosed</code><a class="headerlink" href="#rhino3dm.Mesh.IsClosed" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether a mesh is considered to be closed (solid).
+A mesh is considered solid when every mesh edge borders two or more faces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.HasCachedTextureCoordinates">
+<code class="descname">HasCachedTextureCoordinates</code><a class="headerlink" href="#rhino3dm.Mesh.HasCachedTextureCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Will return True if SetCachedTextureCoordinates has been called;
+otherwise will return false.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.Vertices">
+<code class="descname">Vertices</code><a class="headerlink" href="#rhino3dm.Mesh.Vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.MeshVertexList: Gets access to the vertices set of this mesh.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.Faces">
+<code class="descname">Faces</code><a class="headerlink" href="#rhino3dm.Mesh.Faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.MeshFaceList: Gets access to the mesh face list.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.Normals">
+<code class="descname">Normals</code><a class="headerlink" href="#rhino3dm.Mesh.Normals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.MeshVertexNormalList: Gets access to the vertex normal collection in this mesh.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.TextureCoordinates">
+<code class="descname">TextureCoordinates</code><a class="headerlink" href="#rhino3dm.Mesh.TextureCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.MeshTextureCoordinateList: Gets access to the vertex texture coordinate collection in this mesh.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Mesh.PartitionCount">
+<code class="descname">PartitionCount</code><a class="headerlink" href="#rhino3dm.Mesh.PartitionCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Number of partition information chunks stored on this mesh based
+on the last call to CreatePartitions</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Mesh.ClearSurfaceData">
-<code class="descname">ClearSurfaceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.ClearSurfaceData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes surface parameters, curvature parameters and surface statistics from the mesh.</p>
+<dt id="rhino3dm.Mesh.IsManifold">
+<code class="descname">IsManifold</code><span class="sig-paren">(</span><em>topologicalTest</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.IsManifold" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Mesh.ClearTextureData">
 <code class="descname">ClearTextureData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.ClearTextureData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes all texture coordinate information from this mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Mesh.ClearSurfaceData">
+<code class="descname">ClearSurfaceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.ClearSurfaceData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes surface parameters, curvature parameters and surface statistics from the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Mesh.DestroyTopology">
+<code class="descname">DestroyTopology</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTopology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes topology data, forcing all topology information to be recomputed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Mesh.DestroyTree">
+<code class="descname">DestroyTree</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroys the mesh vertex access tree.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Mesh.DestroyPartition">
+<code class="descname">DestroyPartition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyPartition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroys mesh partition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -260,10 +364,32 @@
 <code class="descname">Compact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Compact" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes any unreferenced objects from arrays, reindexes as needed
 and shrinks arrays to minimum required size.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Mesh.Append">
+<code class="descname">Append</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a copy of another mesh to this one and updates indices of appended mesh parts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#rhino3dm.Mesh" title="rhino3dm.Mesh"><em>rhino3dm.Mesh</em></a>) – Mesh to append to this one.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -273,77 +399,16 @@ and shrinks arrays to minimum required size.</p>
 were only able to process small batches of triangles and the
 CreatePartitions() function was provided to partition the mesh into
 subsets of vertices and faces that those rendering engines could handle.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true on success</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Mesh.DestroyPartition">
-<code class="descname">DestroyPartition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyPartition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destroys mesh partition.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Mesh.DestroyTopology">
-<code class="descname">DestroyTopology</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTopology" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes topology data, forcing all topology information to be recomputed.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Mesh.DestroyTree">
-<code class="descname">DestroyTree</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destroys the mesh vertex access tree.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.Faces">
-<code class="descname">Faces</code><a class="headerlink" href="#rhino3dm.Mesh.Faces" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets access to the mesh face list.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.HasCachedTextureCoordinates">
-<code class="descname">HasCachedTextureCoordinates</code><a class="headerlink" href="#rhino3dm.Mesh.HasCachedTextureCoordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Will return true if SetCachedTextureCoordinates has been called;
-otherwise will return false.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.IsClosed">
-<code class="descname">IsClosed</code><a class="headerlink" href="#rhino3dm.Mesh.IsClosed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether a mesh is considered to be closed (solid).
-A mesh is considered solid when every mesh edge borders two or more faces.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the mesh is closed, false if it is not.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.Normals">
-<code class="descname">Normals</code><a class="headerlink" href="#rhino3dm.Mesh.Normals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets access to the vertex normal collection in this mesh.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.PartitionCount">
-<code class="descname">PartitionCount</code><a class="headerlink" href="#rhino3dm.Mesh.PartitionCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of partition information chunks stored on this mesh based
-on the last call to CreatePartitions</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.TextureCoordinates">
-<code class="descname">TextureCoordinates</code><a class="headerlink" href="#rhino3dm.Mesh.TextureCoordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets access to the vertex texture coordinate collection in this mesh.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Mesh.Vertices">
-<code class="descname">Vertices</code><a class="headerlink" href="#rhino3dm.Mesh.Vertices" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets access to the vertices set of this mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

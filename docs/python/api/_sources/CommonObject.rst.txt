@@ -1,7 +1,33 @@
 CommonObject
-************
+============
 
-.. autoclass:: rhino3dm.CommonObject
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: CommonObject
+
+   .. py:attribute:: UserStringCount
+
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation
+
+   .. py:method:: SetUserString(key, value)
+
+      [todo] add documentation
+
+   .. py:method:: GetUserString(key)
+
+      [todo] add documentation
+
+   .. py:method:: GetUserStrings()
+
+      [todo] add documentation
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation

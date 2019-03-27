@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,49 +227,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="filereference">
-<h1>FileReference<a class="headerlink" href="#filereference" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="filereference"></span><h1>FileReference<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.FileReference">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">FileReference</code><a class="headerlink" href="#rhino3dm.FileReference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Manages a reference to an existing or nonexisting file,
-using either or both absolute or relative paths.
-Once constructed, this class is immutable.</p>
-<dl class="staticmethod">
-<dt id="rhino3dm.FileReference.CreateFromFullAndRelativePaths">
-<em class="property">static </em><code class="descname">CreateFromFullAndRelativePaths</code><span class="sig-paren">(</span><em>fullPath</em>, <em>relativePath</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.FileReference.CreateFromFullAndRelativePaths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new file reference. This returns a new instance even if the path does not exist.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>fullPath : A full path. This parameter cannot be null.
-relativePath : A relative path. This parameter can be null.</dd>
-<dt>Returns:</dt>
-<dd>A file reference to the specified paths.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.FileReference.CreateFromFullPath">
-<em class="property">static </em><code class="descname">CreateFromFullPath</code><span class="sig-paren">(</span><em>fullPath</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.FileReference.CreateFromFullPath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new file reference. This returns a new instance even if the path does not exist.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>fullPath : A full path.</dd>
-<dt>Returns:</dt>
-<dd>A file reference to the specified path.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
+<dd><dl class="attribute">
 <dt id="rhino3dm.FileReference.FullPath">
 <code class="descname">FullPath</code><a class="headerlink" href="#rhino3dm.FileReference.FullPath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the absolute path of this file reference.</p>
+<dd><p>str: Gets the absolute path of this file reference.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.FileReference.RelativePath">
 <code class="descname">RelativePath</code><a class="headerlink" href="#rhino3dm.FileReference.RelativePath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the relative path of this file reference.</p>
+<dd><p>str: Gets the relative path of this file reference.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.FileReference.CreateFromFullPath">
+<em class="property">static </em><code class="descname">CreateFromFullPath</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.FileReference.CreateFromFullPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new file reference. This returns a new instance even if the path does not exist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fullPath</strong> (<em>str</em>) – A full path.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A file reference to the specified path.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.FileReference" title="rhino3dm.FileReference">FileReference</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.FileReference.CreateFromFullAndRelativePaths">
+<em class="property">static </em><code class="descname">CreateFromFullAndRelativePaths</code><span class="sig-paren">(</span><em>fullPath</em>, <em>relativePath</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.FileReference.CreateFromFullAndRelativePaths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new file reference. This returns a new instance even if the path does not exist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fullPath</strong> (<em>str</em>) – A full path. This parameter cannot be null.</li>
+<li><strong>relativePath</strong> (<em>str</em>) – A relative path. This parameter can be null.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A file reference to the specified paths.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.FileReference" title="rhino3dm.FileReference">FileReference</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -1,7 +1,25 @@
 Texture
-*******
+=======
 
-.. autoclass:: rhino3dm.Texture
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Texture
+
+   .. py:method:: Texture()
+
+      Texture constructor
+
+
+   .. py:attribute:: FileName
+
+      str: Gets or sets a file name that is used by this texture.
+      NOTE: We are moving away from string-based FileName, and suggest
+      the usage of the new FileReference class.Also, this filename may well not be a path that makes sense
+      on a user's computer because it was a path initially set on
+      a different user's computer. If you want to get a workable path
+      for this user, use the BitmapTable.Find function using this
+      property.
+
+   .. py:method:: FileReference()
+
+      [todo] add documentation

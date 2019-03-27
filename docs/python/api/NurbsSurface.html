@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,88 +227,201 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="nurbssurface">
-<h1>NurbsSurface<a class="headerlink" href="#nurbssurface" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="nurbssurface"></span><h1>NurbsSurface<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.NurbsSurface">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">NurbsSurface</code><a class="headerlink" href="#rhino3dm.NurbsSurface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Surface</span></code></a></p>
-<p>Represents a Non Uniform Rational B-Splines (NURBS) surface.</p>
+<dd><dl class="attribute">
+<dt id="rhino3dm.NurbsSurface.IsRational">
+<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.NurbsSurface.IsRational" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether or not the nurbs surface is rational.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsSurface.OrderU">
+<code class="descname">OrderU</code><a class="headerlink" href="#rhino3dm.NurbsSurface.OrderU" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the order in the U direction.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsSurface.OrderV">
+<code class="descname">OrderV</code><a class="headerlink" href="#rhino3dm.NurbsSurface.OrderV" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the order in the V direction.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsSurface.Create">
+<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>dimension</em>, <em>isRational</em>, <em>order0</em>, <em>order1</em>, <em>controlPointCount0</em>, <em>controlPointCount1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.Create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new NURBS surface with internal uninitialized arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dimension</strong> (<em>int</em>) – The number of dimensions.&gt;= 1. This value is usually 3.</li>
+<li><strong>isRational</strong> (<em>bool</em>) – True to make a rational NURBS.</li>
+<li><strong>order0</strong> (<em>int</em>) – The order in U direction.&gt;= 2.</li>
+<li><strong>order1</strong> (<em>int</em>) – The order in V direction.&gt;= 2.</li>
+<li><strong>controlPointCount0</strong> (<em>int</em>) – Control point count in U direction.&gt;= order0.</li>
+<li><strong>controlPointCount1</strong> (<em>int</em>) – Control point count in V direction.&gt;= order1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new NURBS surface, or None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsSurface.CreateFromCone">
+<em class="property">static </em><code class="descname">CreateFromCone</code><span class="sig-paren">(</span><em>cone</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.CreateFromCone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new NURBS surfaces from cone data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cone</strong> (<a class="reference internal" href="Cone.html#rhino3dm.Cone" title="rhino3dm.Cone"><em>Cone</em></a>) – A cone value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new NURBS surface, or None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsSurface.CreateFromSphere">
+<em class="property">static </em><code class="descname">CreateFromSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.CreateFromSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new NURBS surfaces from sphere data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sphere</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – A sphere value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new NURBS surface, or None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.NurbsSurface.CreateFromCylinder">
+<em class="property">static </em><code class="descname">CreateFromCylinder</code><span class="sig-paren">(</span><em>cylinder</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.CreateFromCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new NURBS surfaces from cylinder data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cylinder</strong> (<a class="reference internal" href="Cylinder.html#rhino3dm.Cylinder" title="rhino3dm.Cylinder"><em>Cylinder</em></a>) – A cylinder value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new NURBS surface, or None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="rhino3dm.NurbsSurface.CreateRuledSurface">
 <em class="property">static </em><code class="descname">CreateRuledSurface</code><span class="sig-paren">(</span><em>curveA</em>, <em>curveB</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.CreateRuledSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a ruled surface between two curves. Curves must share the same knot-vector.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>curveA : First curve.
-curveB : Second curve.</dd>
-<dt>Returns:</dt>
-<dd>A ruled surface on success or null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsSurface.IncreaseDegreeU">
-<code class="descname">IncreaseDegreeU</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.IncreaseDegreeU" title="Permalink to this definition">¶</a></dt>
-<dd><p>Increase the degree of this surface in U direction.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>desiredDegree : The desired degree.
-desiredDegree : Degrees should be number between and including 1 and 11.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsSurface.IncreaseDegreeV">
-<code class="descname">IncreaseDegreeV</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.IncreaseDegreeV" title="Permalink to this definition">¶</a></dt>
-<dd><p>Increase the degree of this surface in V direction.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>desiredDegree : The desired degree.
-desiredDegree : Degrees should be number between and including 1 and 11.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.NurbsSurface.IsRational">
-<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.NurbsSurface.IsRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not the nurbs surface is rational.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsSurface.MakeNonRational">
-<code class="descname">MakeNonRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.MakeNonRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes this surface non-rational.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>curveA</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – First curve.</li>
+<li><strong>curveB</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – Second curve.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A ruled surface on success or None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.NurbsSurface.MakeRational">
 <code class="descname">MakeRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.MakeRational" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes this surface rational.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.NurbsSurface.OrderU">
-<code class="descname">OrderU</code><a class="headerlink" href="#rhino3dm.NurbsSurface.OrderU" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the order in the U direction.</p>
+<dl class="method">
+<dt id="rhino3dm.NurbsSurface.MakeNonRational">
+<code class="descname">MakeNonRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.MakeNonRational" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes this surface non-rational.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.NurbsSurface.OrderV">
-<code class="descname">OrderV</code><a class="headerlink" href="#rhino3dm.NurbsSurface.OrderV" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the order in the V direction.</p>
+<dl class="method">
+<dt id="rhino3dm.NurbsSurface.IncreaseDegreeU">
+<code class="descname">IncreaseDegreeU</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.IncreaseDegreeU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increase the degree of this surface in U direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desiredDegree</strong> (<em>int</em>) – The desired degree. Degrees should be number between and including 1 and 11.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsSurface.IncreaseDegreeV">
+<code class="descname">IncreaseDegreeV</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsSurface.IncreaseDegreeV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increase the degree of this surface in V direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desiredDegree</strong> (<em>int</em>) – The desired degree. Degrees should be number between and including 1 and 11.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

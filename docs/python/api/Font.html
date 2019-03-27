@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,62 +227,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="font">
-<h1>Font<a class="headerlink" href="#font" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="font"></span><h1>Font<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Font">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Font</code><a class="headerlink" href="#rhino3dm.Font" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a format for text.</p>
-<dl class="attribute">
-<dt id="rhino3dm.Font.Bold">
-<code class="descname">Bold</code><a class="headerlink" href="#rhino3dm.Font.Bold" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.FaceName">
-<code class="descname">FaceName</code><a class="headerlink" href="#rhino3dm.Font.FaceName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns Facename</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.FamilyName">
-<code class="descname">FamilyName</code><a class="headerlink" href="#rhino3dm.Font.FamilyName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.IsEngravingFont">
-<code class="descname">IsEngravingFont</code><a class="headerlink" href="#rhino3dm.Font.IsEngravingFont" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.IsSimulated">
-<code class="descname">IsSimulated</code><a class="headerlink" href="#rhino3dm.Font.IsSimulated" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.IsSingleStrokeFont">
-<code class="descname">IsSingleStrokeFont</code><a class="headerlink" href="#rhino3dm.Font.IsSingleStrokeFont" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.IsSymbolFont">
-<code class="descname">IsSymbolFont</code><a class="headerlink" href="#rhino3dm.Font.IsSymbolFont" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.Italic">
-<code class="descname">Italic</code><a class="headerlink" href="#rhino3dm.Font.Italic" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.PointSize">
-<code class="descname">PointSize</code><a class="headerlink" href="#rhino3dm.Font.PointSize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Font.PostScriptName">
-<code class="descname">PostScriptName</code><a class="headerlink" href="#rhino3dm.Font.PostScriptName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Font PostScriptName - “Apple font name”</p>
+<dd><dl class="method">
+<dt id="rhino3dm.Font.Font">
+<code class="descname">Font</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Font.Font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Font constructor</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -290,11 +244,38 @@
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.Font.FaceName">
+<code class="descname">FaceName</code><a class="headerlink" href="#rhino3dm.Font.FaceName" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Returns Facename</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.PostScriptName">
+<code class="descname">PostScriptName</code><a class="headerlink" href="#rhino3dm.Font.PostScriptName" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Returns the Font PostScriptName - “Apple font name”</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.Font.RichTextFontName">
 <code class="descname">RichTextFontName</code><a class="headerlink" href="#rhino3dm.Font.RichTextFontName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Font RichTextFontName used in RTF strings:
-{fonttbl…{fN RichTextFontName;}…}</p>
+<dd><p>str: Returns the Font RichTextFontName used in RTF strings:
+{\fonttbl…{\fN RichTextFontName;}…}</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.Bold">
+<code class="descname">Bold</code><a class="headerlink" href="#rhino3dm.Font.Bold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.Italic">
+<code class="descname">Italic</code><a class="headerlink" href="#rhino3dm.Font.Italic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.Underlined">
+<code class="descname">Underlined</code><a class="headerlink" href="#rhino3dm.Font.Underlined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Font.StrikeOut">
@@ -302,8 +283,33 @@
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.Font.Underlined">
-<code class="descname">Underlined</code><a class="headerlink" href="#rhino3dm.Font.Underlined" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.Font.IsEngravingFont">
+<code class="descname">IsEngravingFont</code><a class="headerlink" href="#rhino3dm.Font.IsEngravingFont" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.IsSymbolFont">
+<code class="descname">IsSymbolFont</code><a class="headerlink" href="#rhino3dm.Font.IsSymbolFont" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.IsSingleStrokeFont">
+<code class="descname">IsSingleStrokeFont</code><a class="headerlink" href="#rhino3dm.Font.IsSingleStrokeFont" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.IsSimulated">
+<code class="descname">IsSimulated</code><a class="headerlink" href="#rhino3dm.Font.IsSimulated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.PointSize">
+<code class="descname">PointSize</code><a class="headerlink" href="#rhino3dm.Font.PointSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Font.FamilyName">
+<code class="descname">FamilyName</code><a class="headerlink" href="#rhino3dm.Font.FamilyName" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

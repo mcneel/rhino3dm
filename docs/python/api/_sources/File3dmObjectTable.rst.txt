@@ -1,7 +1,166 @@
 File3dmObjectTable
-******************
+==================
 
-.. autoclass:: rhino3dm.File3dmObjectTable
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmObjectTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: AddPoint(x, y, z)
+
+      Adds a point object to the table.
+
+      :param float x: X component of point coordinate.
+      :param float y: Y component of point coordinate.
+      :param float z: Z component of point coordinate.
+
+      :return: id of new object.
+      :rtype: Guid
+
+   .. py:method:: AddPoint(point)
+
+      Adds a point object to the table.
+
+      :return: id of new object.
+      :rtype: Guid
+
+   .. py:method:: AddPoint(point)
+
+      Adds a point object to the table.
+
+      :return: id of new object.
+      :rtype: Guid
+
+   .. py:method:: AddPointCloud(cloud, attributes)
+
+      Adds a point cloud object to the document.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddLine(from, to)
+
+      Adds a line object to Rhino.
+
+      :param rhino3dm.Point3d from: A line start point.
+      :param rhino3dm.Point3d to: A line end point.
+
+      :return: A unique identifier of new rhino object.
+      :rtype: Guid
+
+   .. py:method:: AddPolyline(polyline, attributes)
+
+      Adds a polyline object to Rhino.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddArc(arc, attributes)
+
+      Adds a curve object to the document representing an arc.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddCircle(circle, attributes)
+
+      Adds a curve object to the document representing a circle.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddEllipse(ellipse, attributes)
+
+      Adds a curve object to the document representing an ellipse.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddSphere(sphere, attributes)
+
+      Adds a surface object to the document representing a sphere.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddCurve(curve, attributes)
+
+      Adds a curve object to the table.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddTextDot(text, location, attributes)
+
+      Adds a text dot object to the table.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddSurface(surface, attributes)
+
+      Adds a surface object to Rhino.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddExtrusion(extrusion, attributes)
+
+      Adds an extrusion object to Rhino.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddMesh(mesh, attributes)
+
+      Adds a mesh object to Rhino.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddBrep(brep, attributes)
+
+      Adds a brep object to Rhino.
+
+      :return: A unique identifier for the object.
+      :rtype: Guid
+
+   .. py:method:: AddHatch(hatch, attributes)
+
+      Adds a hatch to the document.
+
+      :return: A unique identifier for the hatch, or  on failure.
+      :rtype: Guid
+
+   .. py:method:: Add(geometry, attributes)
+
+      Duplicates the object, then adds a copy of the object to the document.
+
+      :rtype: void
+
+   .. py:method:: GetBoundingBox()
+
+      Gets the bounding box containing every object in this table.
+
+      :return: The computed bounding box.
+      :rtype: Rhino.Geometry.BoundingBox
+
+   .. py:method:: Delete(id)
+
+      Deletes object from document.
+
+      :param Guid objectId: Id of the object to delete.
+
+      :return: True on success, False on failure.
+      :rtype: bool

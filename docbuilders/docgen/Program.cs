@@ -1,36 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace docgen
 {
-  class Program
-  {
-    static void Main(string[] args)
+    class Program
     {
-      // read all RhinoCommon classes into memory
-      const string rhinocommonPath = @"C:\dev\github\mcneel\rhino\src4\DotNetSDK\rhinocommon\dotnet";
-      Console.WriteLine("[Parse RhinoCommon source]");
-      Console.ForegroundColor = ConsoleColor.DarkGreen;
-      RhinoCommonClass.BuildClassDictionary(rhinocommonPath);
-      Console.ResetColor();
+        static void Main(string[] args)
+        {
+            // read all RhinoCommon classes into memory
+            const string rhinocommonPath = @"C:\dev\github\mcneel\rhino\src4\DotNetSDK\rhinocommon\dotnet";
+            Console.WriteLine("[Parse RhinoCommon source]");
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            RhinoCommonClass.BuildClassDictionary(rhinocommonPath);
+            Console.ResetColor();
 
-      Console.WriteLine("[Parse C++ Bindings]");
-      Console.ForegroundColor = ConsoleColor.Green;
-      const string bindingPath = @"../../../../src/bindings";
-      BindingClass.BuildClassDictionary(bindingPath);
-      Console.ResetColor();
-      Console.WriteLine("[END PARSE]");
+            Console.WriteLine("[Parse C++ Bindings]");
+            Console.ForegroundColor = ConsoleColor.Green;
+            const string bindingPath = @"../../../../src/bindings";
+            BindingClass.BuildClassDictionary(bindingPath);
+            Console.ResetColor();
+            Console.WriteLine("[END PARSE]");
 
 
-      Console.ForegroundColor = ConsoleColor.Blue;
-      Console.WriteLine("Writing javascript");
-      JavascriptClass.Write("rh3dm_temp.js");
-      Console.WriteLine("Writing python");
-      PythonClass.Write();
+            Console.ForegroundColor = ConsoleColor.Blue;
+            //Console.WriteLine("Writing javascript");
+            //JavascriptClass.Write("rh3dm_temp.js");
+            Console.WriteLine("Writing python");
+            PythonClass.Write();
+        }
     }
-  }
 }

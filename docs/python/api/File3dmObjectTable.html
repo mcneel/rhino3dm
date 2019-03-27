@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,227 +227,364 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="file3dmobjecttable">
-<h1>File3dmObjectTable<a class="headerlink" href="#file3dmobjecttable" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="file3dmobjecttable"></span><h1>File3dmObjectTable<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.File3dmObjectTable">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">File3dmObjectTable</code><a class="headerlink" href="#rhino3dm.File3dmObjectTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a simple object table for a file that is open externally.
-This class mimics Rhino.DocObjects.Tables.ObjectTable while providing external eccess to the file.</p>
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.Add">
-<code class="descname">Add</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Duplicates the object, then adds a copy of the object to the document.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>item : The item to duplicate and add.</dd>
-</dl>
+<dd><dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddArc">
-<code class="descname">AddArc</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddArc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a curve object to the document representing an arc.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>arc : An arc.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<dt id="rhino3dm.File3dmObjectTable.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddBrep">
-<code class="descname">AddBrep</code><span class="sig-paren">(</span><em>brep</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddBrep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a brep object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>brep : A duplicate of this brep is added to Rhino.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddCircle">
-<code class="descname">AddCircle</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCircle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a curve object to the document representing a circle.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>circle : A circle to add.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddCurve">
-<code class="descname">AddCurve</code><span class="sig-paren">(</span><em>curve</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a curve object to the table.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>curve : A curve to add.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddEllipse">
-<code class="descname">AddEllipse</code><span class="sig-paren">(</span><em>ellipse</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddEllipse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a curve object to the document representing an ellipse.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ellipse : An ellipse to add.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddExtrusion">
-<code class="descname">AddExtrusion</code><span class="sig-paren">(</span><em>extrusion</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddExtrusion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an extrusion object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>extrusion : A duplicate of this extrusion is added to Rhino.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddHatch">
-<code class="descname">AddHatch</code><span class="sig-paren">(</span><em>hatch</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddHatch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a hatch to the document.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>hatch : A hatch.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the hatch, or  on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddLine">
-<code class="descname">AddLine</code><span class="sig-paren">(</span><em>_from</em>, <em>to</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a line object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>from : A line start point.
-to : A line end point.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier of new rhino object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddMesh">
-<code class="descname">AddMesh</code><span class="sig-paren">(</span><em>mesh</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a mesh object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>mesh : A duplicate of this mesh is added to Rhino.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<dt id="rhino3dm.File3dmObjectTable.__iter__">
+<code class="descname">__iter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.AddPoint">
 <code class="descname">AddPoint</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a point object to the table.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>x : X component of point coordinate.
-y : Y component of point coordinate.
-z : Z component of point coordinate.</dd>
-<dt>Returns:</dt>
-<dd>id of new object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) – X component of point coordinate.</li>
+<li><strong>y</strong> (<em>float</em>) – Y component of point coordinate.</li>
+<li><strong>z</strong> (<em>float</em>) – Z component of point coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">id of new object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Guid</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">AddPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span></dt>
+<dd><p>Adds a point object to the table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">id of new object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">AddPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span></dt>
+<dd><p>Adds a point object to the table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">id of new object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.AddPointCloud">
-<code class="descname">AddPointCloud</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPointCloud" title="Permalink to this definition">¶</a></dt>
+<code class="descname">AddPointCloud</code><span class="sig-paren">(</span><em>cloud</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPointCloud" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a point cloud object to the document.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cloud : PointCloud to add.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddLine">
+<code class="descname">AddLine</code><span class="sig-paren">(</span><em>from</em>, <em>to</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a line object to Rhino.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>from</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A line start point.</li>
+<li><strong>to</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A line end point.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A unique identifier of new rhino object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Guid</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.AddPolyline">
-<code class="descname">AddPolyline</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPolyline" title="Permalink to this definition">¶</a></dt>
+<code class="descname">AddPolyline</code><span class="sig-paren">(</span><em>polyline</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPolyline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a polyline object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>points : A list, an array or any enumerable set of .</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddArc">
+<code class="descname">AddArc</code><span class="sig-paren">(</span><em>arc</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a curve object to the document representing an arc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddCircle">
+<code class="descname">AddCircle</code><span class="sig-paren">(</span><em>circle</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a curve object to the document representing a circle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddEllipse">
+<code class="descname">AddEllipse</code><span class="sig-paren">(</span><em>ellipse</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddEllipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a curve object to the document representing an ellipse.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.AddSphere">
-<code class="descname">AddSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSphere" title="Permalink to this definition">¶</a></dt>
+<code class="descname">AddSphere</code><span class="sig-paren">(</span><em>sphere</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSphere" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a surface object to the document representing a sphere.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>sphere : A sphere to add.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.AddSurface">
-<code class="descname">AddSurface</code><span class="sig-paren">(</span><em>surface</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSurface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a surface object to Rhino.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>surface : A duplicate of this surface is added to Rhino.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<dt id="rhino3dm.File3dmObjectTable.AddCurve">
+<code class="descname">AddCurve</code><span class="sig-paren">(</span><em>curve</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a curve object to the table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.AddTextDot">
-<code class="descname">AddTextDot</code><span class="sig-paren">(</span><em>text</em>, <em>location</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddTextDot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">AddTextDot</code><span class="sig-paren">(</span><em>text</em>, <em>location</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddTextDot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a text dot object to the table.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>text : The text.
-location : The location.</dd>
-<dt>Returns:</dt>
-<dd>A unique identifier for the object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.File3dmObjectTable.Delete">
-<code class="descname">Delete</code><span class="sig-paren">(</span><em>objectId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes object from document.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>objectId : Id of the object to delete.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<dt id="rhino3dm.File3dmObjectTable.AddSurface">
+<code class="descname">AddSurface</code><span class="sig-paren">(</span><em>surface</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a surface object to Rhino.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddExtrusion">
+<code class="descname">AddExtrusion</code><span class="sig-paren">(</span><em>extrusion</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddExtrusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an extrusion object to Rhino.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddMesh">
+<code class="descname">AddMesh</code><span class="sig-paren">(</span><em>mesh</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a mesh object to Rhino.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddBrep">
+<code class="descname">AddBrep</code><span class="sig-paren">(</span><em>brep</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddBrep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a brep object to Rhino.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.AddHatch">
+<code class="descname">AddHatch</code><span class="sig-paren">(</span><em>hatch</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddHatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a hatch to the document.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A unique identifier for the hatch, or  on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Guid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>geometry</em>, <em>attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicates the object, then adds a copy of the object to the document.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmObjectTable.GetBoundingBox">
 <code class="descname">GetBoundingBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.GetBoundingBox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the bounding box containing every object in this table.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>The computed bounding box.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The computed bounding box.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Rhino.Geometry.BoundingBox</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmObjectTable.Delete">
+<code class="descname">Delete</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes object from document.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>objectId</strong> (<em>Guid</em>) – Id of the object to delete.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

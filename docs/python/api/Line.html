@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,53 +227,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="line">
-<h1>Line<a class="headerlink" href="#line" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="line"></span><h1>Line<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Line">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Line</code><span class="sig-paren">(</span><em>_from</em>, <em>to</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Line" title="Permalink to this definition">¶</a></dt>
-<dd><p>…</p>
-<dl class="attribute">
-<dt id="rhino3dm.Line.Direction">
-<code class="descname">Direction</code><a class="headerlink" href="#rhino3dm.Line.Direction" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the direction of this line segment.
-The length of the direction vector equals the length of
-the line segment.</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Line</code><a class="headerlink" href="#rhino3dm.Line" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.Line.Line">
+<code class="descname">Line</code><span class="sig-paren">(</span><em>from</em>, <em>to</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Line.Line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new line segment between two points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>from</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Start point of line.</li>
+<li><strong>to</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – End point of line.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Line.IsValid">
 <code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Line.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not this line is valid.
+<dd><p>bool: Gets a value indicating whether or not this line is valid.
 Valid lines must have valid start and end points.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Line.Length">
 <code class="descname">Length</code><a class="headerlink" href="#rhino3dm.Line.Length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the length of this line segment.
+<dd><p>float: Gets or sets the length of this line segment.
 Note that a negative length will invert the line segment without
 making the actual length negative. The line From point will remain fixed
 when a new Length is set.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Line.Direction">
+<code class="descname">Direction</code><a class="headerlink" href="#rhino3dm.Line.Direction" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the direction of this line segment.
+The length of the direction vector equals the length of
+the line segment.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Line.UnitTangent">
+<code class="descname">UnitTangent</code><a class="headerlink" href="#rhino3dm.Line.UnitTangent" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the tangent of the line segment.
+Note that tangent vectors are always unit vectors.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Line.PointAt">
 <code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Line.PointAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates the line at the specified parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Parameter to evaluate line segment at. Line parameters are normalised parameters.</dd>
-<dt>Returns:</dt>
-<dd>The point at the specified parameter.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Line.UnitTangent">
-<code class="descname">UnitTangent</code><a class="headerlink" href="#rhino3dm.Line.UnitTangent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the tangent of the line segment.
-Note that tangent vectors are always unit vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Parameter to evaluate line segment at. Line parameters are normalised parameters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The point at the specified parameter.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

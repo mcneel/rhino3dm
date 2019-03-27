@@ -1,7 +1,6 @@
 Ellipse
-*******
+=======
 
-.. autoclass:: rhino3dm.Ellipse
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Ellipse

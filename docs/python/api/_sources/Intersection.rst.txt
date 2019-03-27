@@ -1,7 +1,22 @@
 Intersection
-************
+============
 
-.. autoclass:: rhino3dm.Intersection
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Intersection
+
+   .. py:staticmethod:: LineLine(lineA, lineB)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: LinePlane(line, plane)
+
+      Intersects a line and a plane. This function only returns True if the
+      intersection result is a single point (i.e. if the line is coincident with
+      the plane then no intersection is assumed).
+
+      :param Line line: Line for intersection.
+      :param rhino3dm.Plane plane: Plane to intersect.
+
+      :return: True on success, False on failure.
+      :rtype: bool

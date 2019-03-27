@@ -1,7 +1,40 @@
 Point3d
-*******
+=======
 
-.. autoclass:: rhino3dm.Point3d
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point3d
+
+   .. py:method:: Point3d(x, y, z)
+
+      Initializes a new point by defining the X, Y and Z coordinates.
+
+      :param float x: The value of the X (first) coordinate.
+      :param float y: The value of the Y (second) coordinate.
+      :param float z: The value of the Z (third) coordinate.
+
+   .. py:attribute:: Unset
+
+      rhino3dm.Point3d: Gets the value of a point at location RhinoMath.UnsetValue,RhinoMath.UnsetValue,RhinoMath.UnsetValue.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: DistanceTo(other)
+
+      Computes the distance between two points.
+
+      :param rhino3dm.Point3d other: Other point for distance measurement.
+
+      :return: The length of the line between this and the other point; or 0 if any of the points is not valid.
+      :rtype: float
+
+   .. py:method:: Transform(xform)
+
+      Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+      result = transformation*point
+
+      :param Transform xform: Transformation to apply.
+
+      :rtype: void

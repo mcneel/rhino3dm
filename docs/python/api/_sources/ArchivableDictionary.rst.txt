@@ -1,0 +1,14 @@
+ArchivableDictionary
+====================
+
+.. py:module:: rhino3dm
+
+.. py:class:: ArchivableDictionary
+
+   .. py:staticmethod:: EncodeDict()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: DecodeDict()
+
+      [todo] add documentation

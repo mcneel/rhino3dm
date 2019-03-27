@@ -1,7 +1,11 @@
 Point
-*****
+=====
 
-.. autoclass:: rhino3dm.Point
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point
+
+   .. py:method:: Point()
+
+      Point constructor
+

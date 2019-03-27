@@ -1,7 +1,11 @@
 PointCloud
-**********
+==========
 
-.. autoclass:: rhino3dm.PointCloud
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: PointCloud
+
+   .. py:method:: PointCloud()
+
+      PointCloud constructor
+

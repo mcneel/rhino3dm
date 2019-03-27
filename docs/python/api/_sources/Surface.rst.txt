@@ -1,7 +1,138 @@
 Surface
-*******
+=======
 
-.. autoclass:: rhino3dm.Surface
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Surface
+
+   .. py:attribute:: IsSolid
+
+      bool: Gets a values indicating whether a surface is solid.
+
+   .. py:method:: Degree(direction)
+
+      Returns the maximum algebraic degree of any span
+      (or a good estimate if curve spans are not algebraic).
+
+      :param int direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :return: The maximum degree.
+      :rtype: int
+
+   .. py:method:: SpanCount(direction)
+
+      Gets number of smooth nonempty spans in the parameter direction.
+
+      :param int direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :return: The span count.
+      :rtype: int
+
+   .. py:method:: PointAt(u, v)
+
+      Evaluates a point at a given parameter.
+
+      :param float u: evaluation parameters.
+      :param float v: evaluation parameters.
+
+      :return: Point3d.Unset on failure.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: NormalAt(u, v)
+
+      Computes the surface normal at a point.
+      This is the simple evaluation call - it does not support error handling.
+
+      :param float u: A U parameter.
+      :param float v: A V parameter.
+
+      :return: The normal.
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: IsClosed(direction)
+
+      Gets a value indicating if the surface is closed in a direction.
+
+      :param int direction: 0 = U, 1 = V.
+
+      :return: The indicating boolean value.
+      :rtype: bool
+
+   .. py:method:: IsPeriodic(direction)
+
+      Gets a value indicating if thr surface is periodic in a direction (default is false).
+
+      :param int direction: 0 = U, 1 = V.
+
+      :return: The indicating boolean value.
+      :rtype: bool
+
+   .. py:method:: IsSingular(side)
+
+      True if surface side is collapsed to a point.
+
+      :param int side: side of parameter space to test \
+         0 = south, 1 = east, 2 = north, 3 = west.
+
+      :return: True if this specific side of the surface is singular; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: IsAtSingularity(u, v, exact)
+
+      Tests if a surface parameter value is at a singularity.
+
+      :param float u: Surface u parameter to test.
+      :param float v: Surface v parameter to test.
+      :param bool exact: If true, test if (u,v) is exactly at a singularity. \
+         If false, test if close enough to cause numerical problems.
+
+      :return: True if surface is singular at (s,t)
+      :rtype: bool
+
+   .. py:method:: IsAtSeam(u, v)
+
+      Tests if a surface parameter value is at a seam.
+
+      :param float u: Surface u parameter to test.
+      :param float v: Surface v parameter to test.
+
+      :return: 0 if not a seam, \
+         1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) \
+         2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) \
+         3 if 1 and 2 are true.
+      :rtype: int
+
+   .. py:method:: IsPlanar(tolerance)
+
+      Tests a surface to see if it is planar to zero tolerance.
+
+      :return: True if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+      :rtype: bool
+
+   .. py:method:: IsSphere(tolerance)
+
+      Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.
+
+      :return: True if the surface is a portion of a sphere.
+      :rtype: bool
+
+   .. py:method:: IsCylinder(tolerance)
+
+      Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.
+
+      :return: True if the surface is a portion of a cylinder.
+      :rtype: bool
+
+   .. py:method:: IsCone(tolerance)
+
+      Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.
+
+      :return: True if the surface is a portion of a cone.
+      :rtype: bool
+
+   .. py:method:: IsTorus(tolerance)
+
+      Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.
+
+      :return: True if the surface is a portion of a torus.
+      :rtype: bool

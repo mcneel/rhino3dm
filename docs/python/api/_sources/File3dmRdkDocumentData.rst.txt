@@ -1,7 +1,10 @@
 File3dmRdkDocumentData
-**********************
+======================
 
-.. autoclass:: rhino3dm.File3dmRdkDocumentData
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmRdkDocumentData
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation

@@ -1,7 +1,17 @@
 InstanceReference
-*****************
+=================
 
-.. autoclass:: rhino3dm.InstanceReference
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: InstanceReference
+
+   .. py:method:: InstanceReference()
+
+      InstanceReference constructor
+
+
+   .. py:attribute:: ParentIdefId
+
+
+   .. py:attribute:: Xform
+

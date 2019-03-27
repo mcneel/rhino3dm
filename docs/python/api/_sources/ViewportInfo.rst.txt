@@ -1,7 +1,199 @@
 ViewportInfo
-************
+============
 
-.. autoclass:: rhino3dm.ViewportInfo
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ViewportInfo
+
+   .. py:method:: ViewportInfo()
+
+      ViewportInfo constructor
+
+
+   .. py:attribute:: IsValidCameraFrame
+
+
+   .. py:attribute:: isValidCamer
+
+
+   .. py:attribute:: IsValidFrustum
+
+      bool: Gets a value that indicates whether the frustum is valid.
+
+   .. py:attribute:: IsParallelProjection
+
+      bool: Get or set whether this projection is parallel.
+
+   .. py:attribute:: IsPerspectiveProjection
+
+      bool: Get or set whether this projection is perspective.
+
+   .. py:attribute:: IsTwoPointPerspectiveProjection
+
+      bool: Gets a value that indicates whether this projection is a two-point perspective.
+
+   .. py:attribute:: CameraLocation
+
+      rhino3dm.Point3d: Gets the camera location (position) point.
+
+   .. py:attribute:: CameraDirection
+
+      rhino3dm.Vector3d: Gets the direction that the camera faces.
+
+   .. py:attribute:: CameraUp
+
+      rhino3dm.Vector3d: Gets the camera up vector.
+
+   .. py:attribute:: CameraX
+
+      rhino3dm.Vector3d: Gets the unit "to the right" vector.
+
+   .. py:attribute:: CameraY
+
+      rhino3dm.Vector3d: Gets the unit "up" vector.
+
+   .. py:attribute:: CameraZ
+
+      rhino3dm.Vector3d: Gets the unit vector in -CameraDirection.
+
+   .. py:attribute:: ScreenPortAspect
+
+      float: Gets the sceen aspect ratio.
+      This is width / height.
+
+   .. py:attribute:: CameraAngle
+
+      float: Gets or sets the 1/2 smallest angle. See  for more information.
+
+   .. py:attribute:: Camera35mmLensLength
+
+      float: This property assumes the camera is horizontal and crop the
+      film rather than the image when the aspect of the frustum
+      is not 36/24.  (35mm film is 36mm wide and 24mm high.)
+      Setting preserves camera location,
+      changes the frustum, but maintains the frustum's aspect.
+
+   .. py:method:: ChangeToParallelProjection(symmetricFrustum)
+
+      Use this function to change projections of valid viewports
+      from parallel to perspective.  It will make common additional
+      adjustments to the frustum and camera location so the resulting
+      views are similar.  The camera direction and target point are
+      not be changed.
+      If the current projection is parallel and symmetricFrustum,
+      FrustumIsLeftRightSymmetric() and FrustumIsTopBottomSymmetric()
+      are all equal, then no changes are made and True is returned.
+
+      :param bool symmetricFrustum: True if you want the resulting frustum to be symmetric.
+
+      :return: True if the operation succeeded; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: ChangeToPerspectiveProjection(targetDistance, symmetricFrustum, lensLength)
+
+      Use this function to change projections of valid viewports
+      from parallel to perspective.  It will make common additional
+      adjustments to the frustum and camera location so the resulting
+      views are similar.  The camera direction and target point are
+      not changed.
+      If the current projection is perspective and symmetricFrustum,
+      IsFrustumIsLeftRightSymmetric, and IsFrustumIsTopBottomSymmetric
+      are all equal, then no changes are made and True is returned.
+
+      :param float targetDistance: If RhinoMath.UnsetValue this parameter is ignored. \
+         Otherwise it must be > 0 and indicates which plane in the current view frustum should be perserved.
+      :param bool symmetricFrustum: True if you want the resulting frustum to be symmetric.
+      :param float lensLength: (pass 50.0 when in doubt) \
+         35 mm lens length to use when changing from parallel \
+         to perspective projections. If the current projection \
+         is perspective or lens_length is <= 0.0, \
+         then this parameter is ignored.
+
+      :return: True if the operation succeeded; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: ChangeToTwoPointPerspectiveProjection(targetDistance, up, lensLength)
+
+      Changes projections of valid viewports
+      to a two point perspective.  It will make common additional
+      adjustments to the frustum and camera location and direction
+      so the resulting views are similar.
+      If the current projection is perspective and
+      IsFrustumIsLeftRightSymmetric is True and
+      IsFrustumIsTopBottomSymmetric is false, then no changes are
+      made and True is returned.
+
+      :param float targetDistance: If RhinoMath.UnsetValue this parameter is ignored.  Otherwise \
+         it must be > 0 and indicates which plane in the current \
+         view frustum should be perserved.
+      :param rhino3dm.Vector3d up: The locked up direction. Pass Vector3d.Zero if you want to use the world \
+         axis direction that is closest to the current up direction. \
+         Pass CameraY() if you want to preserve the current up direction.
+      :param float lensLength: (pass 50.0 when in doubt) \
+         35 mm lens length to use when changing from parallel \
+         to perspective projections. If the current projection \
+         is perspective or lens_length is <= 0.0, \
+         then this parameter is ignored.
+
+      :return: True if the operation succeeded; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: SetCameraLocation(location)
+
+      Sets the camera location (position) point.
+
+      :return: True if the operation succeeded; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: SetCameraDirection(direction)
+
+      Sets the direction that the camera faces.
+
+      :param rhino3dm.Vector3d direction: A new direction.
+
+      :return: True if the direction was set; otherwise false.
+      :rtype: bool
+
+   .. py:method:: SetCameraUp(up)
+
+      Sets the camera up vector.
+
+      :param rhino3dm.Vector3d up: A new direction.
+
+      :return: True if the direction was set; otherwise false.
+      :rtype: bool
+
+   .. py:method:: SetFrustum(left, right, bottom, top, near, far)
+
+      Sets the view frustum. If FrustumSymmetryIsLocked() is true
+      and left != -right or bottom != -top, then they will be
+      adjusted so the resulting frustum is symmetric.
+
+      :param float left: A new left value.
+      :param float right: A new right value.
+      :param float bottom: A new bottom value.
+      :param float top: A new top value.
+      :param float nearDistance: A new near distance value.
+      :param float farDistance: A new far distance value.
+
+      :return: True if operation succeeded; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: GetXform(sourceCoordinateSystem, destinationCoordinateSystem)
+
+      Computes a transform from a coordinate system to another.
+
+      :param CoordinateSystem sourceSystem: The coordinate system to map from.
+      :param CoordinateSystem destinationSystem: The coordinate system to map into.
+
+      :return: The 4x4 transformation matrix (acts on the left).
+      :rtype: Transform
+
+   .. py:method:: DollyExtents(bbox, border)
+
+      Dolly the camera location and so that the view frustum contains
+      all of the document objects that can be seen in view.
+      If the projection is perspective, the camera angle is not changed.
+
+      :return: True if successful.
+      :rtype: bool

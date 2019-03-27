@@ -1,7 +1,33 @@
 File3dmInstanceDefinitionTable
-******************************
+==============================
 
-.. autoclass:: rhino3dm.File3dmInstanceDefinitionTable
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmInstanceDefinitionTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(idef)
+
+      Adds an instance definition to the instance definition table.
+
+      :return: >=0  index of instance definition in the instance definition table. -1 on failure.
+      :rtype: int
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation

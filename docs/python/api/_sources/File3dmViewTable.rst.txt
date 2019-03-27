@@ -1,7 +1,28 @@
 File3dmViewTable
-****************
+================
 
-.. autoclass:: rhino3dm.File3dmViewTable
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmViewTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(view)
+
+      Adds a
+
+      :rtype: void

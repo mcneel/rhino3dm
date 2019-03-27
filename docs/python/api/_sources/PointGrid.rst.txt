@@ -1,7 +1,11 @@
 PointGrid
-*********
+=========
 
-.. autoclass:: rhino3dm.PointGrid
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: PointGrid
+
+   .. py:method:: PointGrid()
+
+      PointGrid constructor
+

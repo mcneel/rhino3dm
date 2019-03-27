@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BezierCurve" href="BezierCurve.html" />
+    <link rel="next" title="ArchivableDictionary" href="ArchivableDictionary.html" />
     <link rel="prev" title="Arc" href="Arc.html" /> 
 
   
@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,36 +227,95 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="arccurve">
-<h1>ArcCurve<a class="headerlink" href="#arccurve" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="arccurve"></span><h1>ArcCurve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.ArcCurve">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ArcCurve</code><a class="headerlink" href="#rhino3dm.ArcCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Curve</span></code></a></p>
-<p>Represent arcs and circles.
-ArcCurve.IsCircle returns true if the curve is a complete circle.</p>
-<dl class="attribute">
-<dt id="rhino3dm.ArcCurve.AngleDegrees">
-<code class="descname">AngleDegrees</code><a class="headerlink" href="#rhino3dm.ArcCurve.AngleDegrees" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the angles of this arc in degrees.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.ArcCurve.ArcCurve">
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ArcCurve.ArcCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>ArcCurve constructor</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ArcCurve.AngleRadians">
-<code class="descname">AngleRadians</code><a class="headerlink" href="#rhino3dm.ArcCurve.AngleRadians" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the angles of this arc in radians.</p>
+<dl class="method">
+<dt>
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>ArcCurve constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>ArcCurve constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>ArcCurve constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new  instance,
+copying the shape of a .
+Parameterization will be [0;circle.Circumference]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>circle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – The original circle.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ArcCurve</code><span class="sig-paren">(</span><em>circle</em>, <em>t0</em>, <em>t1</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new  instance,
+copying values from a  and specifying the
+needed parametrization of the arc.
+Circle will not be newly cut at these parameterizations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>circle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – A circle.</li>
+<li><strong>t0</strong> (<em>float</em>) – A new Domain.T0 value.</li>
+<li><strong>t1</strong> (<em>float</em>) – A new Domain.T1 value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ArcCurve.IsCompleteCircle">
 <code class="descname">IsCompleteCircle</code><a class="headerlink" href="#rhino3dm.ArcCurve.IsCompleteCircle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not this curve can be represented by a complete circle.</p>
+<dd><p>bool: Gets a value indicating whether or not this curve can be represented by a complete circle.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ArcCurve.Radius">
 <code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.ArcCurve.Radius" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the radius of this ArcCurve.</p>
+<dd><p>float: Gets the radius of this ArcCurve.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ArcCurve.AngleRadians">
+<code class="descname">AngleRadians</code><a class="headerlink" href="#rhino3dm.ArcCurve.AngleRadians" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the angles of this arc in radians.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ArcCurve.AngleDegrees">
+<code class="descname">AngleDegrees</code><a class="headerlink" href="#rhino3dm.ArcCurve.AngleDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the angles of this arc in degrees.</p>
 </dd></dl>
 
 </dd></dl>
@@ -270,7 +330,7 @@ ArcCurve.IsCircle returns true if the curve is a complete circle.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="BezierCurve.html" class="btn btn-neutral float-right" title="BezierCurve" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ArchivableDictionary.html" class="btn btn-neutral float-right" title="ArchivableDictionary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Arc.html" class="btn btn-neutral" title="Arc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

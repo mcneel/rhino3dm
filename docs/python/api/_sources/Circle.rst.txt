@@ -1,7 +1,109 @@
 Circle
-******
+======
 
-.. autoclass:: rhino3dm.Circle
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Circle
+
+   .. py:method:: Circle(radius)
+
+      Initializes a circle with center (0,0,0) in the world XY plane.
+
+      :param float radius: Radius of circle, should be a positive number.
+
+   .. py:method:: Circle(center, radius)
+
+      Initializes a circle parallel to the world XY plane with given center and radius.
+
+      :param rhino3dm.Point3d center: Center of circle.
+      :param float radius: Radius of circle (should be a positive value).
+
+   .. py:attribute:: IsValid
+
+      bool: A valid circle has radius larger than 0.0 and a base plane which is must also be valid.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of this circle.
+      Radii should be positive values.
+
+   .. py:attribute:: Diameter
+
+      float: Gets or sets the diameter (radius * 2.0) of this circle.
+      Diameters should be positive values.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets or sets the center point of this circle.
+
+   .. py:attribute:: Normal
+
+      rhino3dm.Vector3d: Gets the normal vector for this circle.
+
+   .. py:attribute:: Circumference
+
+      float: Gets or sets the circumference of this circle.
+
+   .. py:method:: PointAt(t)
+
+      Circles use trigonometric parameterization:
+      t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.
+
+      :param float t: Parameter of point to evaluate.
+
+      :return: The point on the circle at the given parameter.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Circles use trigonometric parameterization:
+      t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.
+
+      :param float t: Parameter of tangent to evaluate.
+
+      :return: The tangent at the circle at the given parameter.
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: DerivativeAt(derivative, t)
+
+      Determines the value of the Nth derivative at a parameter.
+
+      :param int derivative: Which order of derivative is wanted.
+      :param float t: Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.
+
+      :return: The derivative of the circle at the given parameter.
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Gets the point on the circle which is closest to a test point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto the circle.
+
+      :return: The point on the circle that is closest to testPoint or \
+         Point3d.Unset on failure.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Translate(delta)
+
+      Moves the circle.
+
+      :param rhino3dm.Vector3d delta: Translation vector.
+
+      :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:method:: Reverse()
+
+      Reverse the orientation of the circle. Changes the domain from [a,b]
+      to [-b,-a].
+
+      :rtype: void
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a nurbs curve representation of this circle.
+      This amounts to the same as calling NurbsCurve.CreateFromCircle().
+
+      :return: A nurbs curve representation of this circle or None if no such representation could be made.
+      :rtype: rhino3dm.NurbsCurve

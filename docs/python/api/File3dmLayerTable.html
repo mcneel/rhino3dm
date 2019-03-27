@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,36 +227,82 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="file3dmlayertable">
-<h1>File3dmLayerTable<a class="headerlink" href="#file3dmlayertable" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="file3dmlayertable"></span><h1>File3dmLayerTable<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.File3dmLayerTable">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">File3dmLayerTable</code><a class="headerlink" href="#rhino3dm.File3dmLayerTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides access to layers in the 3dm file.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.File3dmLayerTable.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
 <dl class="method">
-<dt id="rhino3dm.File3dmLayerTable.FindIndex">
-<code class="descname">FindIndex</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieves a Layer object based on Index. This seach type of search is discouraged.
-We are moving towards using only IDs for all tables.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>index : The index to search for.</dd>
-<dt>Returns:</dt>
-<dd>A Layer object, or null if none was found.</dd>
-</dl>
+<dt id="rhino3dm.File3dmLayerTable.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmLayerTable.__iter__">
+<code class="descname">__iter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmLayerTable.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.File3dmLayerTable.FindName">
 <code class="descname">FindName</code><span class="sig-paren">(</span><em>name</em>, <em>parentId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds a Layer given its name.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>name : The name of the Layer to be searched.
-parentId : The id of the parent Layer to be searched.</dd>
-<dt>Returns:</dt>
-<dd>A Layer, or null on error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) – The name of the Layer to be searched.</li>
+<li><strong>parentId</strong> (<em>Guid</em>) – The id of the parent Layer to be searched.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Layer, or None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Layer.html#rhino3dm.Layer" title="rhino3dm.Layer">Layer</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmLayerTable.FindIndex">
+<code class="descname">FindIndex</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a Layer object based on Index. This seach type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<em>int</em>) – The index to search for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Layer object, or None if none was found.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Layer.html#rhino3dm.Layer" title="rhino3dm.Layer">Layer</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.File3dmLayerTable.FindId">
+<code class="descname">FindId</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindId" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

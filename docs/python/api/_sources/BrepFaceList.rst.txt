@@ -1,7 +1,14 @@
 BrepFaceList
-************
+============
 
-.. autoclass:: rhino3dm.BrepFaceList
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: BrepFaceList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation

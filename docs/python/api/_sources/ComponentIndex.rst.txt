@@ -1,7 +1,11 @@
 ComponentIndex
-**************
+==============
 
-.. autoclass:: rhino3dm.ComponentIndex
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ComponentIndex
+
+   .. py:method:: ComponentIndex()
+
+      ComponentIndex constructor
+

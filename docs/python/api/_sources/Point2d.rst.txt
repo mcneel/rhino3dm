@@ -1,7 +1,26 @@
 Point2d
-*******
+=======
 
-.. autoclass:: rhino3dm.Point2d
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point2d
+
+   .. py:method:: Point2d(x, y)
+
+      Initializes a new instance of  from coordinates.
+
+      :param float x: The X (first) coordinate.
+      :param float y: The Y (second) coordinate.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: DistanceTo(other)
+
+      Computes the distance between two points.
+
+      :param rhino3dm.Point2d other: Another point.
+
+      :return: The length of the line between the two points, or 0 if either point is invalid.
+      :rtype: float

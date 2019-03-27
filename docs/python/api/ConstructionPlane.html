@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,57 +227,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="constructionplane">
-<h1>ConstructionPlane<a class="headerlink" href="#constructionplane" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="constructionplane"></span><h1>ConstructionPlane<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.ConstructionPlane">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ConstructionPlane</code><a class="headerlink" href="#rhino3dm.ConstructionPlane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a contruction plane inside the document.
-Use Rhino.DocObjects.Tables.NamedConstructionPlaneTable
-methods and indexers to add and access a .</p>
-<dl class="attribute">
-<dt id="rhino3dm.ConstructionPlane.DepthBuffered">
-<code class="descname">DepthBuffered</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.DepthBuffered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets whether the grid is drawn on top of geometry.
-false=grid is always drawn behind 3d geometrytrue=grid is drawn at its depth as a 3d plane and grid lines obscure things behind the grid.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ConstructionPlane.GridLineCount">
-<code class="descname">GridLineCount</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.GridLineCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the total amount of grid lines in each direction.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ConstructionPlane.GridSpacing">
-<code class="descname">GridSpacing</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.GridSpacing" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the distance between grid lines.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ConstructionPlane.Name">
-<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.Name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the name of the construction plane.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.ConstructionPlane.ConstructionPlane">
+<code class="descname">ConstructionPlane</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ConstructionPlane.ConstructionPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>ConstructionPlane constructor</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ConstructionPlane.Plane">
 <code class="descname">Plane</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.Plane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the geometric plane to use for construction.</p>
+<dd><p>rhino3dm.Plane: Gets or sets the geometric plane to use for construction.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ConstructionPlane.GridSpacing">
+<code class="descname">GridSpacing</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.GridSpacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the distance between grid lines.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ConstructionPlane.SnapSpacing">
 <code class="descname">SnapSpacing</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.SnapSpacing" title="Permalink to this definition">¶</a></dt>
-<dd><p>when “grid snap” is enabled, the distance between snap points.
+<dd><p>float: when “grid snap” is enabled, the distance between snap points.
 Typically this is the same distance as grid spacing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ConstructionPlane.GridLineCount">
+<code class="descname">GridLineCount</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.GridLineCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the total amount of grid lines in each direction.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ConstructionPlane.ThickLineFrequency">
 <code class="descname">ThickLineFrequency</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.ThickLineFrequency" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the recurrence of a wider line on the grid.
+<dd><p>int: Gets or sets the recurrence of a wider line on the grid.
 0: No lines are thick, all are drawn thin.1: All lines are thick.2: Every other line is thick.3: One line in three lines is thick (and two are thin).4: …</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ConstructionPlane.DepthBuffered">
+<code class="descname">DepthBuffered</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.DepthBuffered" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets whether the grid is drawn on top of geometry.
+false=grid is always drawn behind 3d geometrytrue=grid is drawn at its depth as a 3d plane and grid lines obscure things behind the grid.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ConstructionPlane.Name">
+<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ConstructionPlane.Name" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets the name of the construction plane.</p>
 </dd></dl>
 
 </dd></dl>

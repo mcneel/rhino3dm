@@ -1,7 +1,55 @@
 File3dmSettings
-***************
+===============
 
-.. autoclass:: rhino3dm.File3dmSettings
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmSettings
+
+   .. py:attribute:: ModelUrl
+
+      str: Gets or sets a Uniform Resource Locator (URL) direction for the model.
+
+   .. py:attribute:: ModelBasePoint
+
+      rhino3dm.Point3d: Gets or sets the model basepoint that is used when the file is read as an instance definition.
+      This point is mapped to the origin in the instance definition.
+
+   .. py:attribute:: ModelAbsoluteTolerance
+
+      float: Gets or sets the model space absolute tolerance.
+
+   .. py:attribute:: ModelAngleToleranceRadians
+
+      float: Gets or sets the model space angle tolerance.
+
+   .. py:attribute:: ModelAngleToleranceDegrees
+
+      float: Gets or sets the model space angle tolerance.
+
+   .. py:attribute:: ModelRelativeTolerance
+
+      float: Gets or sets the model space relative tolerance.
+
+   .. py:attribute:: PageAbsoluteTolerance
+
+      float: Gets or sets the page space absolute tolerance.
+
+   .. py:attribute:: PageAngleToleranceRadians
+
+      float: Gets or sets the page space angle tolerance.
+
+   .. py:attribute:: PageAngleToleranceDegrees
+
+      float: Gets or sets the page space angle tolerance.
+
+   .. py:attribute:: PageRelativeTolerance
+
+      float: Gets or sets the page space relative tolerance.
+
+   .. py:attribute:: ModelUnitSystem
+
+      UnitSystem: Gets or sets the model unit system, using  enumeration.
+
+   .. py:attribute:: PageUnitSystem
+
+      UnitSystem: Gets or sets the page unit system, using  enumeration.

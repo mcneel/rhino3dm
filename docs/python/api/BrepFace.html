@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,24 +227,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="brepface">
-<h1>BrepFace<a class="headerlink" href="#brepface" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="brepface"></span><h1>BrepFace<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.BrepFace">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BrepFace</code><a class="headerlink" href="#rhino3dm.BrepFace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="SurfaceProxy.html#rhino3dm.SurfaceProxy" title="rhino3dm.SurfaceProxy"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.SurfaceProxy</span></code></a></p>
-<p>Provides strongly-typed access to brep faces.
-A Brep face is composed of one surface and trimming curves.</p>
-<dl class="method">
+<dd><dl class="method">
 <dt id="rhino3dm.BrepFace.GetMesh">
 <code class="descname">GetMesh</code><span class="sig-paren">(</span><em>meshType</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.GetMesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtains a reference to a specified type of mesh for this brep face.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>meshType : The mesh type.</dd>
-<dt>Returns:</dt>
-<dd>A mesh.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>meshType</strong> (<em>MeshType</em>) – The mesh type.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A mesh.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Mesh.html#rhino3dm.Mesh" title="rhino3dm.Mesh">rhino3dm.Mesh</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
