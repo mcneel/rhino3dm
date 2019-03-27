@@ -24,14 +24,14 @@ namespace py = pybind11;
 void initBoxBindings(pybind11::module& m)
 {
   py::class_<BND_Box>(m, "Box")
-    .def(py::init<const BND_BoundingBox&>())
+    .def(py::init<const BND_BoundingBox&>(), py::arg("bbox"))
     .def_property_readonly("IsValid", &BND_Box::IsValid)
     .def_property_readonly("Center", &BND_Box::Center)
     .def_property_readonly("Area", &BND_Box::Area)
     .def_property_readonly("Volume", &BND_Box::Volume)
-    .def("PointAt", &BND_Box::PointAt)
-    .def("ClosestPoint", &BND_Box::ClosestPoint)
-    .def("Transform", &BND_Box::Transform)
+    .def("PointAt", &BND_Box::PointAt, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("ClosestPoint", &BND_Box::ClosestPoint, py::arg("point"))
+    .def("Transform", &BND_Box::Transform, py::arg("xform"))
     ;
 }
 #endif

@@ -51,20 +51,20 @@ void initDefines(pybind11::module& m)
     ;
 
   py::class_<ON_COMPONENT_INDEX>(m, "ComponentIndex")
-    .def(py::init<ON_COMPONENT_INDEX::TYPE, int>())
+    .def(py::init<ON_COMPONENT_INDEX::TYPE, int>(), py::arg("type"), py::arg("index"))
     .def_readonly("ComponentIndexType", &ON_COMPONENT_INDEX::m_type)
     .def_readonly("Index", &ON_COMPONENT_INDEX::m_index)
     ;
 
   py::class_<ON_Line>(m, "Line")
-    .def(py::init<ON_3dPoint, ON_3dPoint>())
+    .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("start"), py::arg("end"))
     .def_readwrite("From", &ON_Line::from)
     .def_readwrite("To", &ON_Line::to)
     .def_property_readonly("IsValid", &ON_Line::IsValid)
     .def_property_readonly("Length", &ON_Line::Length)
     .def_property_readonly("Direction", &ON_Line::Direction)
     .def_property_readonly("UnitTangent", &ON_Line::Tangent)
-    .def("PointAt", &ON_Line::PointAt)
+    .def("PointAt", &ON_Line::PointAt, py::arg("t"))
     ;
 
   py::enum_<LoftType>(m, "LoftType")

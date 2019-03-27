@@ -36,10 +36,10 @@ void initPolylineCurveBindings(pybind11::module& m)
 {
   py::class_<BND_PolylineCurve, BND_Curve>(m, "Polylinecurve")
     .def(py::init<>())
-    .def(py::init<const BND_Point3dList&>())
+    .def(py::init<const BND_Point3dList&>(), py::arg("points"))
     .def_property_readonly("PointCount", &BND_PolylineCurve::PointCount)
-    .def("Point", &BND_PolylineCurve::Point)
-    .def("SetPoint", &BND_PolylineCurve::SetPoint)
+    .def("Point", &BND_PolylineCurve::Point, py::arg("index"))
+    .def("SetPoint", &BND_PolylineCurve::SetPoint, py::arg("index"), py::arg("point"))
     .def("ToPolyline", &BND_PolylineCurve::ToPolyline)
     ;
 }

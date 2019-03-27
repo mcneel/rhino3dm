@@ -82,15 +82,15 @@ namespace py = pybind11;
 void initPointBindings(pybind11::module& m)
 {
   py::class_<ON_2dPoint>(m, "Point2d")
-    .def(py::init<double, double>())
+    .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodePoint2d)
     .def_readwrite("X", &ON_2dPoint::x)
     .def_readwrite("Y", &ON_2dPoint::y)
     .def(py::self + py::self)
-    .def("DistanceTo", &ON_2dPoint::DistanceTo);
+    .def("DistanceTo", &ON_2dPoint::DistanceTo, py::arg("other"));
 
   py::class_<ON_3dPoint>(m, "Point3d")
-    .def(py::init<double, double, double>())
+    .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def_property_readonly_static("Unset", &GetUnsetPoint3d)
     .def("Encode", &EncodePoint3d)
     .def_readwrite("X", &ON_3dPoint::x)
@@ -100,11 +100,11 @@ void initPointBindings(pybind11::module& m)
     .def(py::self * double())
     .def(py::self + ON_3dVector())
     .def(py::self * ON_Xform())
-    .def("DistanceTo", &ON_3dPoint::DistanceTo)
-    .def("Transform", &ON_3dPoint::Transform);
+    .def("DistanceTo", &ON_3dPoint::DistanceTo, py::arg("other"))
+    .def("Transform", &ON_3dPoint::Transform, py::arg("xform"));
 
   py::class_<ON_4dPoint>(m, "Point4d")
-    .def(py::init<double, double, double, double>())
+    .def(py::init<double, double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("w"))
     .def("Encode", &EncodePoint4d)
     .def_readwrite("X", &ON_4dPoint::x)
     .def_readwrite("Y", &ON_4dPoint::y)
@@ -112,20 +112,20 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("W", &ON_4dPoint::w);
 
   py::class_<ON_2dVector>(m, "Vector2d")
-    .def(py::init<double, double>())
+    .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodeVector2d)
     .def_readwrite("X", &ON_2dVector::x)
     .def_readwrite("Y", &ON_2dVector::y);
 
   py::class_<ON_3dVector>(m, "Vector3d")
-    .def(py::init<double, double, double>())
+    .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def("Encode", &EncodeVector3d)
     .def_readwrite("X", &ON_3dVector::x)
     .def_readwrite("Y", &ON_3dVector::y)
     .def_readwrite("Z", &ON_3dVector::z);
 
   py::class_<ON_3fPoint>(m, "Point3f")
-    .def(py::init<float, float, float>())
+    .def(py::init<float, float, float>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def("Encode", &EncodePoint3f)
     .def_readwrite("X", &ON_3fPoint::x)
     .def_readwrite("Y", &ON_3fPoint::y)

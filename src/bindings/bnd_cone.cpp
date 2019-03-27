@@ -33,7 +33,7 @@ void initConeBindings(pybind11::module& m)
     .def_property_readonly("AngleInRadians", &BND_Cone::AngleInRadians)
     .def_property_readonly("AngleInDegrees", &BND_Cone::AngleInDegrees)
     .def("ToNurbsSurface", &BND_Cone::ToNurbsSurface)
-    .def("ToBrep", &BND_Cone::ToBrep)
+    .def("ToBrep", &BND_Cone::ToBrep, py::arg("capBottom"))
     ;
 }
 #endif

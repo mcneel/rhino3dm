@@ -25,7 +25,7 @@ namespace py = pybind11;
 void initFontBindings(pybind11::module& m)
 {
   py::class_<BND_Font>(m, "Font")
-    .def(py::init<std::wstring>())
+    .def(py::init<std::wstring>(), py::arg("familyName"))
     .def_property_readonly("QuartetName", &BND_Font::QuartetName)
     .def_property_readonly("FaceName", &BND_Font::FaceName)
     .def_property_readonly("PostScriptName", &BND_Font::PostScriptName)

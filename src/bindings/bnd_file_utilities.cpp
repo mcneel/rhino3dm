@@ -24,8 +24,8 @@ namespace py = pybind11;
 void initFileUtilitiesBindings(pybind11::module& m)
 {
   py::class_<BND_FileReference>(m, "FileReference")
-    .def_static("CreateFromFullPath", &BND_FileReference::CreateFromFullPath)
-    .def_static("CreateFromFullAndRelativePaths", &BND_FileReference::CreateFromFullAndRelativePaths)
+    .def_static("CreateFromFullPath", &BND_FileReference::CreateFromFullPath, py::arg("path"))
+    .def_static("CreateFromFullAndRelativePaths", &BND_FileReference::CreateFromFullAndRelativePaths, py::arg("fullPath"), py::arg("relativePath"))
     .def_property_readonly("FullPath", &BND_FileReference::GetFullPath)
     .def_property_readonly("RelativePath", &BND_FileReference::GetRelativePath)
     ;
