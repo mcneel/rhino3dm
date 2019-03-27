@@ -1,7 +1,14 @@
 LineCurve
-*********
+=========
 
-.. autoclass:: rhino3dm.LineCurve
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: LineCurve
+
+   .. py:method:: LineCurve(from, to)
+
+      Initializes a new instance of the  class, by
+      setting start and end point from two 3D points.
+
+      :param rhino3dm.Point3d from: A start point.
+      :param rhino3dm.Point3d to: An end point.

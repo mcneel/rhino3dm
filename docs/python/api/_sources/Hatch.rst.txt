@@ -1,7 +1,11 @@
 Hatch
-*****
+=====
 
-.. autoclass:: rhino3dm.Hatch
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Hatch
+
+   .. py:method:: Hatch()
+
+      Hatch constructor
+

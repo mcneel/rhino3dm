@@ -1,7 +1,18 @@
 MeshNormalList
-**************
+==============
 
-.. autoclass:: rhino3dm.MeshNormalList
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: MeshNormalList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation

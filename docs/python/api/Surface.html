@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,150 +227,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="surface">
-<h1>Surface<a class="headerlink" href="#surface" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="surface"></span><h1>Surface<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Surface">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Surface</code><a class="headerlink" href="#rhino3dm.Surface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
-<p>Represents a base class that is common to most RhinoCommon surface types.
-A surface represents an entity that can be all visited by providing
-two independent parameters, usually called (u, v), or sometimes (s, t).</p>
+<dd><dl class="attribute">
+<dt id="rhino3dm.Surface.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Surface.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a values indicating whether a surface is solid.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.Surface.Degree">
 <code class="descname">Degree</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Degree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the maximum algebraic degree of any span
 (or a good estimate if curve spans are not algebraic).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>direction : 0 gets first parameter’s domain, 1 gets second parameter’s domain.</dd>
-<dt>Returns:</dt>
-<dd>The maximum degree.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The maximum degree.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Surface.IsAtSeam">
-<code class="descname">IsAtSeam</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSeam" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if a surface parameter value is at a seam.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>u : Surface u parameter to test.
-v : Surface v parameter to test.</dd>
-<dt>Returns:</dt>
-<dd>0 if not a seam,
-1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v)
-2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i])
-3 if 1 and 2 are true.</dd>
-</dl>
+<dt id="rhino3dm.Surface.SpanCount">
+<code class="descname">SpanCount</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SpanCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets number of smooth nonempty spans in the parameter direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The span count.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Surface.IsAtSingularity">
-<code class="descname">IsAtSingularity</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>exact</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSingularity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if a surface parameter value is at a singularity.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>u : Surface u parameter to test.
-v : Surface v parameter to test.
-exact : If true, test if (u,v) is exactly at a singularity.
-exact : If false, test if close enough to cause numerical problems.</dd>
-<dt>Returns:</dt>
-<dd>true if surface is singular at (s,t)</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsClosed">
-<code class="descname">IsClosed</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsClosed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating if the surface is closed in a direction.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>direction : 0 = U, 1 = V.</dd>
-<dt>Returns:</dt>
-<dd>The indicating boolean value.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsCone">
-<code class="descname">IsCone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCone" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the surface is a portion of a cone.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsCylinder">
-<code class="descname">IsCylinder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCylinder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the surface is a portion of a cylinder.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsPeriodic">
-<code class="descname">IsPeriodic</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPeriodic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating if thr surface is periodic in a direction (default is false).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>direction : 0 = U, 1 = V.</dd>
-<dt>Returns:</dt>
-<dd>The indicating boolean value.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsPlanar">
-<code class="descname">IsPlanar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPlanar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests a surface to see if it is planar to zero tolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsSingular">
-<code class="descname">IsSingular</code><span class="sig-paren">(</span><em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSingular" title="Permalink to this definition">¶</a></dt>
-<dd><p>true if surface side is collapsed to a point.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>side : side of parameter space to test
-side : 0 = south, 1 = east, 2 = north, 3 = west.</dd>
-<dt>Returns:</dt>
-<dd>True if this specific side of the surface is singular; otherwise, false.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Surface.IsSolid">
-<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Surface.IsSolid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a values indicating whether a surface is solid.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsSphere">
-<code class="descname">IsSphere</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the surface is a portion of a sphere.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Surface.IsTorus">
-<code class="descname">IsTorus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsTorus" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the surface is a portion of a torus.</dd>
-</dl>
+<dt id="rhino3dm.Surface.PointAt">
+<code class="descname">PointAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.PointAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a point at a given parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> (<em>float</em>) – evaluation parameters.</li>
+<li><strong>v</strong> (<em>float</em>) – evaluation parameters.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Point3d.Unset on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -377,38 +304,207 @@ side : 0 = south, 1 = east, 2 = north, 3 = west.</dd>
 <code class="descname">NormalAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.NormalAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the surface normal at a point.
 This is the simple evaluation call - it does not support error handling.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>u : A U parameter.
-v : A V parameter.</dd>
-<dt>Returns:</dt>
-<dd>The normal.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> (<em>float</em>) – A U parameter.</li>
+<li><strong>v</strong> (<em>float</em>) – A V parameter.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The normal.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Surface.PointAt">
-<code class="descname">PointAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.PointAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates a point at a given parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>u : evaluation parameters.
-v : evaluation parameters.</dd>
-<dt>Returns:</dt>
-<dd>Point3d.Unset on failure.</dd>
-</dl>
+<dt id="rhino3dm.Surface.IsClosed">
+<code class="descname">IsClosed</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsClosed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating if the surface is closed in a direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The indicating boolean value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Surface.SpanCount">
-<code class="descname">SpanCount</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SpanCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets number of smooth nonempty spans in the parameter direction.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>direction : 0 gets first parameter’s domain, 1 gets second parameter’s domain.</dd>
-<dt>Returns:</dt>
-<dd>The span count.</dd>
-</dl>
+<dt id="rhino3dm.Surface.IsPeriodic">
+<code class="descname">IsPeriodic</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPeriodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating if thr surface is periodic in a direction (default is false).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The indicating boolean value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsSingular">
+<code class="descname">IsSingular</code><span class="sig-paren">(</span><em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSingular" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if surface side is collapsed to a point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>side</strong> (<em>int</em>) – side of parameter space to test 0 = south, 1 = east, 2 = north, 3 = west.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this specific side of the surface is singular; otherwise, false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsAtSingularity">
+<code class="descname">IsAtSingularity</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>exact</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSingularity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a surface parameter value is at a singularity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</li>
+<li><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</li>
+<li><strong>exact</strong> (<em>bool</em>) – If true, test if (u,v) is exactly at a singularity. If false, test if close enough to cause numerical problems.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if surface is singular at (s,t)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsAtSeam">
+<code class="descname">IsAtSeam</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSeam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a surface parameter value is at a seam.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</li>
+<li><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 if not a seam, 1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) 2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) 3 if 1 and 2 are true.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsPlanar">
+<code class="descname">IsPlanar</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPlanar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests a surface to see if it is planar to zero tolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsSphere">
+<code class="descname">IsSphere</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a sphere.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsCylinder">
+<code class="descname">IsCylinder</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a cylinder.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsCone">
+<code class="descname">IsCone</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a cone.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.IsTorus">
+<code class="descname">IsTorus</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsTorus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a torus.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

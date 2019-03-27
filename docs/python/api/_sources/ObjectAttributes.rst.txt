@@ -1,7 +1,195 @@
 ObjectAttributes
-****************
+================
 
-.. autoclass:: rhino3dm.ObjectAttributes
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ObjectAttributes
+
+   .. py:method:: ObjectAttributes()
+
+      ObjectAttributes constructor
+
+
+   .. py:attribute:: Mode
+
+      ObjectMode: An object must be in one of three modes: normal, locked or hidden.
+      If an object is in normal mode, then the object's layer controls visibility
+      and selectability. If an object is locked, then the object's layer controls
+      visibility by the object cannot be selected. If the object is hidden, it is
+      not visible and it cannot be selected.
+
+   .. py:attribute:: IsInstanceDefinitionObject
+
+      bool: Use this query to determine if an object is part of an instance definition.
+
+   .. py:attribute:: Visible
+
+      bool: Gets or sets an object's visiblity.
+
+   .. py:attribute:: CastsShadows
+
+      bool: Gets or sets an object's casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.
+
+   .. py:attribute:: ReceivesShadows
+
+      bool: Gets or sets an object's receives shadows property, or whether or not an object receives shadows from other objects.
+
+   .. py:attribute:: LinetypeSource
+
+      ObjectLinetypeSource: The Linetype used to display an object is specified in one of two ways.
+      If LinetypeSource is ON::linetype_from_layer, then the object's layer ON_Layer::Linetype() is used.
+      If LinetypeSource is ON::linetype_from_object, then value of m_linetype is used.
+
+   .. py:attribute:: ColorSource
+
+      ObjectColorSource: The color used to display an object is specified in one of three ways.
+      If ColorSource is ON::color_from_layer, then the object's layer ON_Layer::Color() is used.
+      If ColorSource is ON::color_from_object, then value of m_color is used.
+      If ColorSource is ON::color_from_material, then the diffuse color of the object's
+      render material is used.  See ON_3dmObjectAttributes::MaterialSource() to
+      determine where to get the definition of the object's render material.
+
+   .. py:attribute:: PlotColorSource
+
+      ObjectPlotColorSource: The color used to plot an object on paper is specified in one of three ways.
+      If PlotColorSource is ON::plot_color_from_layer, then the object's layer ON_Layer::PlotColor() is used.
+      If PlotColorSource is ON::plot_color_from_object, then value of PlotColor() is used.
+
+   .. py:attribute:: PlotWeightSource
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Name
+
+      str: Gets or sets an object optional text name.
+      More than one object in a model can have the same name and
+      some objects may have no name.
+
+   .. py:attribute:: Url
+
+      str: Objects may have an URL. There are no restrictions on what value this
+      URL may have. As an example, if the object came from a commercial part
+      library, the URL might point to the definition of that part.
+
+   .. py:attribute:: LayerIndex
+
+      int: Gets or sets an associated layer index.
+      Layer definitions in an OpenNURBS model are stored in a layer table.
+      The layer table is conceptually an array of ON_Layer classes.  Every
+      OpenNURBS object in a model is on some layer.  The object's layer
+      is specified by zero based indicies into the ON_Layer array.
+
+   .. py:attribute:: LinetypeIndex
+
+      int: Gets or sets the linetype index.
+      Linetype definitions in an OpenNURBS model are stored in a linetype table.
+      The linetype table is conceptually an array of ON_Linetype classes. Every
+      OpenNURBS object in a model references some linetype.  The object's linetype
+      is specified by zero based indicies into the ON_Linetype array.Index 0 is reserved for continuous linetype (no pattern).
+
+   .. py:attribute:: MaterialIndex
+
+      int: Gets or sets the material index.
+      If you want something simple and fast, set the index of
+      the rendering material.
+
+   .. py:attribute:: MaterialSource
+
+      ObjectMaterialSource: Determines if the simple material should come from the object or from it's layer.
+      High quality rendering plug-ins should use m_rendering_attributes.
+
+   .. py:attribute:: ObjectColor
+
+      System.Drawing.Color: If ON::color_from_object == ColorSource, then color is the object's display color.
+
+   .. py:attribute:: PlotColor
+
+      System.Drawing.Color: If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
+
+   .. py:attribute:: DisplayOrder
+
+      int: Display order used to force objects to be drawn on top or behind each other.
+      Larger numbers draw on top of smaller numbers.
+      0  = draw object in standard depth buffered order<0 = draw object behind "normal" draw order objects>0 = draw object on top of "normal" draw order objects
+
+   .. py:attribute:: PlotWeight
+
+      float: Plot weight in millimeters.
+      =0.0 means use the default width
+      <0.0 means don't plot (visible for screen display, but does not show on plot)
+
+   .. py:attribute:: ObjectDecoration
+
+      ObjectDecoration: Used to indicate an object has a decoration (like an arrowhead on a curve)
+
+   .. py:attribute:: WireDensity
+
+      int: When a surface object is displayed in wireframe, this controls
+      how many isoparametric wires are used.
+      value    number of isoparametric wires
+      -1       boundary wires (off)
+      0        boundary and knot wires
+      1        boundary and knot wires and, if there are no interior knots, a single interior wire.
+      N>=2     boundary and knot wires and (N+1) interior wires.
+
+   .. py:attribute:: ViewportId
+
+      Guid: If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
+      this object is only active in a specific view. This field is primarily used to assign page
+      space objects to a specific page, but it can also be used to restrict model space to a
+      specific view.
+
+   .. py:attribute:: ActiveSpace
+
+
+   .. py:attribute:: GroupCount
+
+      int: number of groups object belongs to.
+
+   .. py:method:: Transform(transform)
+
+      Apply a transformation.
+
+      :param Transform xform: The transformation.
+
+      :return: trueif successful, False otherwise.
+      :rtype: bool
+
+   .. py:method:: HasDisplayModeOverride(viewportId)
+
+      Determines if an object has a display mode override for a given viewport.
+
+      :param Guid viewportId: Id of a Rhino Viewport.
+
+      :return: True if the object has a display mode override for the viewport; otherwise, false.
+      :rtype: bool
+
+   .. py:method:: GetGroupList()
+
+      Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.
+
+      :return: An array of group indices. None might be returned in place of an empty array.
+      :rtype: int[]
+
+   .. py:method:: AddToGroup()
+
+      Adds object to the group with specified index by appending index to
+      group list.
+      If the object is already in group, nothing is changed.
+
+      :rtype: void
+
+   .. py:method:: RemoveFromGroup()
+
+      removes object from the group with specified index.
+      If the object is not in the group, nothing is changed.
+
+      :rtype: void
+
+   .. py:method:: RemoveFromAllGroups()
+
+      Removes object from all groups.
+
+      :rtype: void

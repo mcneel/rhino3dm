@@ -1,7 +1,134 @@
 File3dm
-*******
+=======
 
-.. autoclass:: rhino3dm.File3dm
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dm
+
+   .. py:method:: File3dm()
+
+      File3dm constructor
+
+
+   .. py:attribute:: StartSectionComments
+
+      str: Gets or sets the start section comments, which are the comments with which the 3dm file begins.
+
+   .. py:attribute:: ApplicationName
+
+      str: Gets or sets the name of the application that wrote this file.
+
+   .. py:attribute:: ApplicationUrl
+
+      str: Gets or sets a URL for the application that wrote this file.
+
+   .. py:attribute:: ApplicationDetails
+
+      str: Gets or sets details for the application that wrote this file.
+
+   .. py:attribute:: CreatedBy
+
+      str: Gets a string that names the user who created the file.
+
+   .. py:attribute:: LastEditedBy
+
+      str: Gets a string that names the user who last edited the file.
+
+   .. py:attribute:: Revision
+
+      int: Gets or sets the revision number.
+
+   .. py:attribute:: Settings
+
+      File3dmSettings: Settings include tolerance, and unit system, and defaults used
+      for creating views and objects.
+
+   .. py:attribute:: Objects
+
+      File3dmObjectTable: Gets access to the  class associated with this file,
+      which contains all objects.
+
+   .. py:attribute:: Materials
+
+      IList<Material>: Materials in this file.
+
+   .. py:attribute:: Bitmaps
+
+
+   .. py:attribute:: Layers
+
+      IList<Layer>: Layers in this file.
+
+   .. py:attribute:: DimStyles
+
+      IList<DimensionStyle>: Dimension Styles in this file.
+
+   .. py:attribute:: InstanceDefinitions
+
+      IList<InstanceDefinitionGeometry>: Instance definitions in this file.
+
+   .. py:attribute:: Views
+
+      IList<ViewInfo>: Views that represent the RhinoViews which are displayed when Rhino loads this file.
+
+   .. py:attribute:: NamedViews
+
+      IList<ViewInfo>: Named views in this file.
+
+   .. py:attribute:: PlugInData
+
+      File3dmPlugInDataTable: Custom plug-in data in this file.  This data is not attached to any geometry or attributes
+
+   .. py:attribute:: Strings
+
+      File3dmStringTable: Document user strings in this file
+
+   .. py:staticmethod:: Read(path)
+
+      Reads a 3dm file from a specified location.
+
+      :param str path: The file to read.
+
+      :return: new File3dm on success, None on error.
+      :rtype: File3dm
+
+   .. py:staticmethod:: ReadNotes(path)
+
+      Reads only the notes from an existing 3dm file.
+
+      :param str path: The file from which to read the notes.
+
+      :return: The 3dm file notes.
+      :rtype: str
+
+   .. py:staticmethod:: ReadArchiveVersion(path)
+
+      Reads only the archive 3dm version from an existing 3dm file.
+
+      :param str path: The file from which to read the archive version.
+
+      :return: The 3dm file archive version.
+      :rtype: int
+
+   .. py:staticmethod:: FromByteArray()
+
+      [todo] add documentation
+
+   .. py:method:: Write(path, version)
+
+      Writes contents of this model to an openNURBS archive.
+      If the model is not valid, then Write will refuse to write it.
+
+      :param str path: The file name to use for writing.
+      :param int version: Version of the openNURBS archive to write.  Must be [2; current version]. \
+         Rhino can read its current version, plus earlier file versions except 1. \
+         Use latest version when possible. \
+         Alternatively, 0 is a placeholder for the last valid version.
+
+      :return: True if archive is written with no error. \
+         False if errors occur.
+      :rtype: bool
+
+   .. py:staticmethod:: _TestRead()
+
+      [todo] add documentation

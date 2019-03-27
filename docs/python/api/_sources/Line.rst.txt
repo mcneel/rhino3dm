@@ -1,7 +1,45 @@
 Line
-****
+====
 
-.. autoclass:: rhino3dm.Line
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Line
+
+   .. py:method:: Line(from, to)
+
+      Constructs a new line segment between two points.
+
+      :param rhino3dm.Point3d from: Start point of line.
+      :param rhino3dm.Point3d to: End point of line.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value indicating whether or not this line is valid.
+      Valid lines must have valid start and end points.
+
+   .. py:attribute:: Length
+
+      float: Gets or sets the length of this line segment.
+      Note that a negative length will invert the line segment without
+      making the actual length negative. The line From point will remain fixed
+      when a new Length is set.
+
+   .. py:attribute:: Direction
+
+      rhino3dm.Vector3d: Gets the direction of this line segment.
+      The length of the direction vector equals the length of
+      the line segment.
+
+   .. py:attribute:: UnitTangent
+
+      rhino3dm.Vector3d: Gets the tangent of the line segment.
+      Note that tangent vectors are always unit vectors.
+
+   .. py:method:: PointAt(t)
+
+      Evaluates the line at the specified parameter.
+
+      :param float t: Parameter to evaluate line segment at. Line parameters are normalised parameters.
+
+      :return: The point at the specified parameter.
+      :rtype: rhino3dm.Point3d

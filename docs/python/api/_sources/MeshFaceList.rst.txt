@@ -1,7 +1,14 @@
 MeshFaceList
-************
+============
 
-.. autoclass:: rhino3dm.MeshFaceList
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: MeshFaceList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation

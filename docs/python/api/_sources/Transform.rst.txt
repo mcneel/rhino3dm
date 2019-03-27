@@ -1,7 +1,103 @@
 Transform
-*********
+=========
 
-.. autoclass:: rhino3dm.Transform
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Transform
+
+   .. py:method:: Transform(diagonalValue)
+
+      Initializes a new transform matrix with a specified value along the diagonal.
+
+      :param float diagonalValue: Value to assign to all diagonal cells except M33 which is set to 1.0.
+
+   .. py:method:: Transform()
+
+      Transform constructor
+
+
+   .. py:attribute:: IsIdentity
+
+      bool: Return True if this Transform is the identity transform
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value indicating whether or not this Transform is a valid matrix.
+      A valid transform matrix is not allowed to have any invalid numbers.
+
+   .. py:attribute:: IsZero
+
+      bool: True if matrix is Zero4x4, ZeroTransformation, or some other type of
+      zero.The value xform[3][3] can be anything.
+
+   .. py:attribute:: IsZero4x4
+
+      bool: True if all values are 0
+
+   .. py:attribute:: IsZeroTransformation
+
+      bool: True if all values are 0 and M33 is 1
+
+   .. py:staticmethod:: Identity()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: ZeroTransformation()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Unset()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Translation(x, y, z)
+
+      Constructs a new translation (move) transformation.
+
+      :return: A transform matrix which moves geometry along the motion vector.
+      :rtype: Transform
+
+   .. py:staticmethod:: Scale(anchor, scaleFactor)
+
+      Constructs a new uniform scaling transformation with a specified scaling anchor point.
+
+      :param rhino3dm.Point3d anchor: Defines the anchor point of the scaling operation.
+      :param float scaleFactor: Scaling factor in all directions.
+
+      :return: A transform matrix which scales geometry uniformly around the anchor point.
+      :rtype: Transform
+
+   .. py:staticmethod:: Rotation(angleRadians, rotationAxis, rotationCenter)
+
+      Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
+
+      :return: A transformation matrix which rotates geometry around an anchor point.
+      :rtype: Transform
+
+   .. py:method:: Determinant()
+
+      [todo] add documentation
+
+   .. py:method:: TryGetInverse()
+
+      Attempts to get the inverse transform of this transform.
+
+      :return: True on success. \
+         If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. \
+         If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
+      :rtype: bool
+
+   .. py:method:: TransformBoundingBox(bbox)
+
+      Computes a new boundingbox that is the smallest axis aligned
+      boundingbox that contains the transformed result of its 8 original corner
+      points.
+
+      :return: A new bounding box.
+      :rtype: rhino3dm.BoundingBox
+
+   .. py:method:: Transpose()
+
+      Flip row/column values
+
+      :rtype: Transform

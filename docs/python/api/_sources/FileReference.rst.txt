@@ -1,7 +1,33 @@
 FileReference
-*************
+=============
 
-.. autoclass:: rhino3dm.FileReference
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: FileReference
+
+   .. py:attribute:: FullPath
+
+      str: Gets the absolute path of this file reference.
+
+   .. py:attribute:: RelativePath
+
+      str: Gets the relative path of this file reference.
+
+   .. py:staticmethod:: CreateFromFullPath(path)
+
+      Returns a new file reference. This returns a new instance even if the path does not exist.
+
+      :param str fullPath: A full path.
+
+      :return: A file reference to the specified path.
+      :rtype: FileReference
+
+   .. py:staticmethod:: CreateFromFullAndRelativePaths(fullPath, relativePath)
+
+      Returns a new file reference. This returns a new instance even if the path does not exist.
+
+      :param str fullPath: A full path. This parameter cannot be null.
+      :param str relativePath: A relative path. This parameter can be null.
+
+      :return: A file reference to the specified paths.
+      :rtype: FileReference

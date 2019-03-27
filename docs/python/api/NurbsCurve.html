@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,26 +227,94 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="nurbscurve">
-<h1>NurbsCurve<a class="headerlink" href="#nurbscurve" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="nurbscurve"></span><h1>NurbsCurve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.NurbsCurve">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">NurbsCurve</code><span class="sig-paren">(</span><em>dimension</em>, <em>rational</em>, <em>order</em>, <em>pointCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Curve</span></code></a></p>
-<p>Represents a Non Uniform Rational B-Splines (NURBS) curve.</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">NurbsCurve</code><a class="headerlink" href="#rhino3dm.NurbsCurve" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.NurbsCurve.NurbsCurve">
+<code class="descname">NurbsCurve</code><span class="sig-paren">(</span><em>degree</em>, <em>pointCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.NurbsCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new NURBS curve with a specific degree and control point count.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>degree</strong> (<em>int</em>) – Degree of curve. Must be equal to or larger than 1 and smaller than or equal to 11.</li>
+<li><strong>pointCount</strong> (<em>int</em>) – Number of control-points.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">NurbsCurve</code><span class="sig-paren">(</span><em>dimension</em>, <em>rational</em>, <em>order</em>, <em>pointCount</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a new NURBS curve with knot and CV memory allocated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dimension</strong> (<em>int</em>) – &gt;=1.</li>
+<li><strong>rational</strong> (<em>bool</em>) – True to make a rational NURBS.</li>
+<li><strong>order</strong> (<em>int</em>) – (&gt;= 2) The order=degree+1.</li>
+<li><strong>pointCount</strong> (<em>int</em>) – (&gt;= order) number of control vertices.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.Order">
+<code class="descname">Order</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Order" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the order of the curve. Order = Degree + 1.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.IsRational">
+<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.NurbsCurve.IsRational" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether or not the curve is rational.
+Rational curves have control-points with custom weights.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.HasBezierSpans">
+<code class="descname">HasBezierSpans</code><a class="headerlink" href="#rhino3dm.NurbsCurve.HasBezierSpans" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Returns True if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.Points">
+<code class="descname">Points</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.NurbsCurvePointList: Gets access to the control points of this nurbs curve.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.NurbsCurve.Knots">
+<code class="descname">Knots</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Knots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.NurbsCurveKnotList: Gets access to the knots (or “knot vector”) of this nurbs curve.</p>
+</dd></dl>
+
 <dl class="staticmethod">
-<dt id="rhino3dm.NurbsCurve.Create">
-<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>periodic</em>, <em>degree</em>, <em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.Create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a 3D NURBS curve from a list of control points.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>periodic : If true, create a periodic uniform curve. If false, create a clamped uniform curve.
-degree : (&gt;=1) degree=order-1.
-points : control vertex locations.</dd>
-<dt>Returns:</dt>
-<dd>new NURBS curve on success
-null on error.</dd>
-</dl>
+<dt id="rhino3dm.NurbsCurve.CreateFromLine">
+<em class="property">static </em><code class="descname">CreateFromLine</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a non-rational, degree 1 Nurbs curve representation of the line.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Curve on success, None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -254,10 +323,16 @@ null on error.</dd>
 <dd><p>Gets a rational degree 2 NURBS curve representation
 of the arc. Note that the parameterization of NURBS curve
 does not match arc’s transcendental paramaterization.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>Curve on success, null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Curve on success, None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -269,10 +344,16 @@ does not match circle’s transcendental paramaterization.
 Use GetRadianFromNurbFormParameter() and
 GetParameterFromRadian() to convert between the NURBS curve
 parameter and the transcendental parameter.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>Curve on success, null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Curve on success, None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -281,68 +362,59 @@ parameter and the transcendental parameter.</p>
 <dd><p>Gets a rational degree 2 NURBS curve representation of the ellipse.
 Note that the parameterization of the NURBS curve does not match
 with the transcendental paramaterization of the ellipsis.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A nurbs curve representation of this ellipse or null if no such representation could be made.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A nurbs curve representation of this ellipse or None if no such representation could be made.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="rhino3dm.NurbsCurve.CreateFromLine">
-<em class="property">static </em><code class="descname">CreateFromLine</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a non-rational, degree 1 Nurbs curve representation of the line.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>Curve on success, null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsCurve.GrevilleParameter">
-<code class="descname">GrevilleParameter</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevilleParameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the greville (edit point) parameter that belongs
-to the control point at the specified index.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>index : Index of Greville (Edit) point.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsCurve.GrevillePoint">
-<code class="descname">GrevillePoint</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevillePoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the greville (edit point) parameter that belongs
-to the control point at the specified index.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>index : Index of Greville (Edit) point.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.NurbsCurve.HasBezierSpans">
-<code class="descname">HasBezierSpans</code><a class="headerlink" href="#rhino3dm.NurbsCurve.HasBezierSpans" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns true if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)</p>
+<dt id="rhino3dm.NurbsCurve.Create">
+<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>periodic</em>, <em>degree</em>, <em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.Create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a 3D NURBS curve from a list of control points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>periodic</strong> (<em>bool</em>) – If true, create a periodic uniform curve. If false, create a clamped uniform curve.</li>
+<li><strong>degree</strong> (<em>int</em>) – (&gt;=1) degree=order-1.</li>
+<li><strong>points</strong> (<em>System.Collections.Generic.IEnumerable&lt;Point3d&gt;</em>) – control vertex locations.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new NURBS curve on success None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.NurbsCurve.IncreaseDegree">
 <code class="descname">IncreaseDegree</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.IncreaseDegree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Increase the degree of this curve.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>desiredDegree : The desired degree.
-desiredDegree : Degrees should be number between and including 1 and 11.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.NurbsCurve.IsRational">
-<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.NurbsCurve.IsRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not the curve is rational.
-Rational curves have control-points with custom weights.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desiredDegree</strong> (<em>int</em>) – The desired degree. Degrees should be number between and including 1 and 11.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -350,19 +422,18 @@ Rational curves have control-points with custom weights.</p>
 <code class="descname">MakePiecewiseBezier</code><span class="sig-paren">(</span><em>setEndWeightsToOne</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.MakePiecewiseBezier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clamps ends and adds knots so the NURBS curve has bezier spans
 (all distinct knots have multiplitity = degree).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>setEndWeightsToOne : If true and the first or last weight is not one, then the first and
-setEndWeightsToOne : last spans are reparameterized so that the end weights are one.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.NurbsCurve.Order">
-<code class="descname">Order</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the order of the curve. Order = Degree + 1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>setEndWeightsToOne</strong> (<em>bool</em>) – If True and the first or last weight is not one, then the first and last spans are reparameterized so that the end weights are one.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -370,16 +441,52 @@ setEndWeightsToOne : last spans are reparameterized so that the end weights are 
 <code class="descname">Reparameterize</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.Reparameterize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a linear fractional transformation to reparameterize the NURBS curve.
 This does not change the curve’s domain.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>c : reparameterization constant (generally speaking, c should be &gt; 0). The
-c : control points and knots are adjusted so that
-c : output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ).
-c : Note that lambda(0) = 0, lambda(1) = 1, lambda’(t) &gt; 0,
-c : lambda’(0) = c and lambda’(1) = 1/c.</dd>
-<dt>Returns:</dt>
-<dd>true if successful.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>c</strong> (<em>float</em>) – reparameterization constant (generally speaking, c should be &gt; 0). The control points and knots are adjusted so that output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ). Note that lambda(0) = 0, lambda(1) = 1, lambda’(t) &gt; 0, lambda’(0) = c and lambda’(1) = 1/c.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if successful.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.GrevilleParameter">
+<code class="descname">GrevilleParameter</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevilleParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the greville (edit point) parameter that belongs
+to the control point at the specified index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<em>int</em>) – Index of Greville (Edit) point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurve.GrevillePoint">
+<code class="descname">GrevillePoint</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.GrevillePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the greville (edit point) parameter that belongs
+to the control point at the specified index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<em>int</em>) – Index of Greville (Edit) point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,67 +227,79 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="circle">
-<h1>Circle<a class="headerlink" href="#circle" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="circle"></span><h1>Circle<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Circle">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Circle</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle" title="Permalink to this definition">¶</a></dt>
-<dd><p>…</p>
-<dl class="attribute">
-<dt id="rhino3dm.Circle.Center">
-<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Circle.Center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the center point of this circle.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Circle.Circumference">
-<code class="descname">Circumference</code><a class="headerlink" href="#rhino3dm.Circle.Circumference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the circumference of this circle.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Circle.ClosestPoint">
-<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.ClosestPoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the point on the circle which is closest to a test point.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>testPoint : Point to project onto the circle.</dd>
-<dt>Returns:</dt>
-<dd>The point on the circle that is closest to testPoint or
-Point3d.Unset on failure.</dd>
-</dl>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Circle</code><a class="headerlink" href="#rhino3dm.Circle" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.Circle.Circle">
+<code class="descname">Circle</code><span class="sig-paren">(</span><em>radius</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Circle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a circle with center (0,0,0) in the world XY plane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>radius</strong> (<em>float</em>) – Radius of circle, should be a positive number.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Circle.DerivativeAt">
-<code class="descname">DerivativeAt</code><span class="sig-paren">(</span><em>derivative</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.DerivativeAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines the value of the Nth derivative at a parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>derivative : Which order of derivative is wanted.
-t : Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.</dd>
-<dt>Returns:</dt>
-<dd>The derivative of the circle at the given parameter.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Circle.Diameter">
-<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Circle.Diameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the diameter (radius * 2.0) of this circle.
-Diameters should be positive values.</p>
+<dt>
+<code class="descname">Circle</code><span class="sig-paren">(</span><em>center</em>, <em>radius</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a circle parallel to the world XY plane with given center and radius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Center of circle.</li>
+<li><strong>radius</strong> (<em>float</em>) – Radius of circle (should be a positive value).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Circle.IsValid">
 <code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Circle.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>A valid circle has radius larger than 0.0 and a base plane which is must also be valid.</p>
+<dd><p>bool: A valid circle has radius larger than 0.0 and a base plane which is must also be valid.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Radius">
+<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Circle.Radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the radius of this circle.
+Radii should be positive values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Diameter">
+<code class="descname">Diameter</code><a class="headerlink" href="#rhino3dm.Circle.Diameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the diameter (radius * 2.0) of this circle.
+Diameters should be positive values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Center">
+<code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Circle.Center" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the center point of this circle.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Circle.Normal">
 <code class="descname">Normal</code><a class="headerlink" href="#rhino3dm.Circle.Normal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the normal vector for this circle.</p>
+<dd><p>rhino3dm.Vector3d: Gets the normal vector for this circle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Circle.Circumference">
+<code class="descname">Circumference</code><a class="headerlink" href="#rhino3dm.Circle.Circumference" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the circumference of this circle.</p>
 </dd></dl>
 
 <dl class="method">
@@ -294,26 +307,18 @@ Diameters should be positive values.</p>
 <code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.PointAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Circles use trigonometric parameterization:
 t -&gt; center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Parameter of point to evaluate.</dd>
-<dt>Returns:</dt>
-<dd>The point on the circle at the given parameter.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Circle.Radius">
-<code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Circle.Radius" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the radius of this circle.
-Radii should be positive values.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Circle.Reverse">
-<code class="descname">Reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Reverse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reverse the orientation of the circle. Changes the domain from [a,b]
-to [-b,-a].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Parameter of point to evaluate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The point on the circle at the given parameter.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -321,12 +326,93 @@ to [-b,-a].</p>
 <code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.TangentAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Circles use trigonometric parameterization:
 t -&gt; center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Parameter of tangent to evaluate.</dd>
-<dt>Returns:</dt>
-<dd>The tangent at the circle at the given parameter.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Parameter of tangent to evaluate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tangent at the circle at the given parameter.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.DerivativeAt">
+<code class="descname">DerivativeAt</code><span class="sig-paren">(</span><em>derivative</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.DerivativeAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the value of the Nth derivative at a parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>derivative</strong> (<em>int</em>) – Which order of derivative is wanted.</li>
+<li><strong>t</strong> (<em>float</em>) – Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The derivative of the circle at the given parameter.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.ClosestPoint">
+<code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.ClosestPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the point on the circle which is closest to a test point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point to project onto the circle.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The point on the circle that is closest to testPoint or Point3d.Unset on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.Translate">
+<code class="descname">Translate</code><span class="sig-paren">(</span><em>delta</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the circle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>delta</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Translation vector.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Circle.Reverse">
+<code class="descname">Reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse the orientation of the circle. Changes the domain from [a,b]
+to [-b,-a].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -334,22 +420,16 @@ t -&gt; center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.</p>
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a nurbs curve representation of this circle.
 This amounts to the same as calling NurbsCurve.CreateFromCircle().</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A nurbs curve representation of this circle or null if no such representation could be made.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Circle.Translate">
-<code class="descname">Translate</code><span class="sig-paren">(</span><em>delta</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Circle.Translate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Moves the circle.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>delta : Translation vector.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A nurbs curve representation of this circle or None if no such representation could be made.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsCurve.html#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,161 +227,116 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="curve">
-<h1>Curve<a class="headerlink" href="#curve" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="curve"></span><h1>Curve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Curve">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Curve</code><a class="headerlink" href="#rhino3dm.Curve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
-<p>Represents a base class that is common to most RhinoCommon curve types.
-A curve represents an entity that can be all visited by providing
-a single parameter, usually called t.</p>
-<dl class="method">
-<dt id="rhino3dm.Curve.ChangeClosedCurveSeam">
-<code class="descname">ChangeClosedCurveSeam</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ChangeClosedCurveSeam" title="Permalink to this definition">¶</a></dt>
-<dd><p>If this curve is closed, then modify it so that the start/end point is at curve parameter t.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Curve parameter of new start/end point. The returned curves domain will start at t.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.ChangeDimension">
-<code class="descname">ChangeDimension</code><span class="sig-paren">(</span><em>desiredDimension</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ChangeDimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Changes the dimension of a curve.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>desiredDimension : The desired dimension.</dd>
-<dt>Returns:</dt>
-<dd>true if the curve’s dimension was already desiredDimension
-or if the curve’s dimension was successfully changed to desiredDimension;
-otherwise false.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Curve.CreateControlPointCurve">
-<em class="property">static </em><code class="descname">CreateControlPointCurve</code><span class="sig-paren">(</span><em>points</em>, <em>degree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CreateControlPointCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a curve from a set of control-point locations.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>points : Control points.
-degree : Degree of curve. The number of control points must be at least degree+1.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.CurvatureAt">
-<code class="descname">CurvatureAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CurvatureAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the curvature vector at a curve parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Evaluation parameter.</dd>
-<dt>Returns:</dt>
-<dd>Curvature vector of the curve at the parameter t.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Curve.Degree">
-<code class="descname">Degree</code><a class="headerlink" href="#rhino3dm.Curve.Degree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the maximum algebraic degree of any span
-or a good estimate if curve spans are not algebraic.</p>
+<dd><dl class="attribute">
+<dt id="rhino3dm.Curve.Domain">
+<code class="descname">Domain</code><a class="headerlink" href="#rhino3dm.Curve.Domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Interval: Gets or sets the domain of the curve.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Curve.Dimension">
 <code class="descname">Dimension</code><a class="headerlink" href="#rhino3dm.Curve.Dimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the dimension of the object.
+<dd><p>int: Gets the dimension of the object.
 The dimension is typically three. For parameter space trimming
 curves the dimension is two. In rare cases the dimension can
 be one or greater than three.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.Curve.Domain">
-<code class="descname">Domain</code><a class="headerlink" href="#rhino3dm.Curve.Domain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the domain of the curve.</p>
+<dt id="rhino3dm.Curve.SpanCount">
+<code class="descname">SpanCount</code><a class="headerlink" href="#rhino3dm.Curve.SpanCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the number of non-empty smooth (c-infinity) spans in the curve.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Curve.IsArc">
-<code class="descname">IsArc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsArc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the curve can be represented by an arc or a circle within tolerance.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.IsCircle">
-<code class="descname">IsCircle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsCircle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the Curve can be represented by a circle within tolerance.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.IsClosable">
-<code class="descname">IsClosable</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsClosable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decide if it makes sense to close off this curve by moving the endpoint
-to the start based on start-end gap size and length of curve as
-approximated by chord defined by 6 points.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>tolerance : Maximum allowable distance between start and end.
-tolerance : If start - end gap is greater than tolerance, this function will return false.</dd>
-<dt>Returns:</dt>
-<dd>true if start and end points are close enough based on above conditions.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.Curve.Degree">
+<code class="descname">Degree</code><a class="headerlink" href="#rhino3dm.Curve.Degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the maximum algebraic degree of any span
+or a good estimate if curve spans are not algebraic.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Curve.IsClosed">
 <code class="descname">IsClosed</code><a class="headerlink" href="#rhino3dm.Curve.IsClosed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not this curve is a closed curve.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.IsEllipse">
-<code class="descname">IsEllipse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsEllipse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the Curve can be represented by an ellipse within tolerance.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.IsLinear">
-<code class="descname">IsLinear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsLinear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the curve is linear.</dd>
-</dl>
+<dd><p>bool: Gets a value indicating whether or not this curve is a closed curve.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Curve.IsPeriodic">
 <code class="descname">IsPeriodic</code><a class="headerlink" href="#rhino3dm.Curve.IsPeriodic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not this curve is considered to be Periodic.</p>
+<dd><p>bool: Gets a value indicating whether or not this curve is considered to be Periodic.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Curve.PointAtStart">
+<code class="descname">PointAtStart</code><a class="headerlink" href="#rhino3dm.Curve.PointAtStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Evaluates point at the start of the curve.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Curve.PointAtEnd">
+<code class="descname">PointAtEnd</code><a class="headerlink" href="#rhino3dm.Curve.PointAtEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Evaluates point at the end of the curve.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Curve.CreateControlPointCurve">
+<em class="property">static </em><code class="descname">CreateControlPointCurve</code><span class="sig-paren">(</span><em>points</em>, <em>degree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CreateControlPointCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a curve from a set of control-point locations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>points</strong> (<em>list</em><em>[</em><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a><em>]</em>) – Control points.</li>
+<li><strong>degree</strong> (<em>int</em>) – Degree of curve. The number of control points must be at least degree+1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Curve.IsPlanar">
-<code class="descname">IsPlanar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsPlanar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test a curve for planarity.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</dd>
-</dl>
+<dt id="rhino3dm.Curve.ChangeDimension">
+<code class="descname">ChangeDimension</code><span class="sig-paren">(</span><em>desiredDimension</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ChangeDimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the dimension of a curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desiredDimension</strong> (<em>int</em>) – The desired dimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the curve’s dimension was already desiredDimension or if the curve’s dimension was successfully changed to desiredDimension; otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.IsLinear">
+<code class="descname">IsLinear</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsLinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve is linear.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -391,57 +347,235 @@ including a degree 1 NurbsCurve, a PolylineCurve,
 and a PolyCurve all of whose segments are some form of
 polyline. IsPolyline tests a curve to see if it can be
 represented as a polyline.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true if this curve can be represented as a polyline; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if this curve can be represented as a polyline; otherwise, false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Curve.PointAt">
-<code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.PointAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates point at a curve parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Evaluation parameter.</dd>
-<dt>Returns:</dt>
-<dd>Point (location of curve at the parameter t).</dd>
-</dl>
+<dt id="rhino3dm.Curve.TryGetPolyline">
+<code class="descname">TryGetPolyline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetPolyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Several types of Curve can have the form of a polyline
+including a degree 1 NurbsCurve, a PolylineCurve,
+and a PolyCurve all of whose segments are some form of
+polyline. IsPolyline tests a curve to see if it can be
+represented as a polyline.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if this curve can be represented as a polyline; otherwise, false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Curve.PointAtEnd">
-<code class="descname">PointAtEnd</code><a class="headerlink" href="#rhino3dm.Curve.PointAtEnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates point at the end of the curve.</p>
+<dl class="method">
+<dt id="rhino3dm.Curve.IsArc">
+<code class="descname">IsArc</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve can be represented by an arc or a circle within tolerance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Curve.PointAtStart">
-<code class="descname">PointAtStart</code><a class="headerlink" href="#rhino3dm.Curve.PointAtStart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates point at the start of the curve.</p>
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetArc">
+<code class="descname">TryGetArc</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert this curve into an Arc using RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into an arc.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.IsCircle">
+<code class="descname">IsCircle</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the Curve can be represented by a circle within tolerance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetCircle">
+<code class="descname">TryGetCircle</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert this curve into a circle using RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into a Circle.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.IsEllipse">
+<code class="descname">IsEllipse</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsEllipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the Curve can be represented by an ellipse within tolerance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TryGetEllipse">
+<code class="descname">TryGetEllipse</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetEllipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert this curve into an Ellipse within RhinoMath.ZeroTolerance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into an Ellipse.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.IsPlanar">
+<code class="descname">IsPlanar</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsPlanar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test a curve for planarity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.ChangeClosedCurveSeam">
+<code class="descname">ChangeClosedCurveSeam</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ChangeClosedCurveSeam" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this curve is closed, then modify it so that the start/end point is at curve parameter t.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Curve parameter of new start/end point. The returned curves domain will start at t.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.IsClosable">
+<code class="descname">IsClosable</code><span class="sig-paren">(</span><em>tolerance</em>, <em>minimumAbsoluteSize</em>, <em>minimumRelativeSize</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.IsClosable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decide if it makes sense to close off this curve by moving the endpoint
+to the start based on start-end gap size and length of curve as
+approximated by chord defined by 6 points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if start and end points are close enough based on above conditions.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Curve.Reverse">
 <code class="descname">Reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Reverse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reverses the direction of the curve.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Curve.SetEndPoint">
-<code class="descname">SetEndPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.SetEndPoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forces the curve to end at a specified point.
-Not all curve types support this operation.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>point : New end point of curve.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<dt id="rhino3dm.Curve.ClosedCurveOrientation">
+<code class="descname">ClosedCurveOrientation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ClosedCurveOrientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world xy plane.
+Only works with simple (no self intersections) closed, planar curves.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The orientation of this curve with respect to world xy plane.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">CurveOrientation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.PointAt">
+<code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.PointAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates point at a curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Point (location of curve at the parameter t).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -449,18 +583,97 @@ Not all curve types support this operation.</p>
 <code class="descname">SetStartPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.SetStartPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forces the curve to start at a specified point.
 Not all curve types support this operation.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>point : New start point of curve.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – New start point of curve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Curve.SpanCount">
-<code class="descname">SpanCount</code><a class="headerlink" href="#rhino3dm.Curve.SpanCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of non-empty smooth (c-infinity) spans in the curve.</p>
+<dl class="method">
+<dt id="rhino3dm.Curve.SetEndPoint">
+<code class="descname">SetEndPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.SetEndPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forces the curve to end at a specified point.
+Not all curve types support this operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – New end point of curve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.TangentAt">
+<code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TangentAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the unit tangent vector at a curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Unit tangent vector of the curve at the parameter t.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.CurvatureAt">
+<code class="descname">CurvatureAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CurvatureAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the curvature vector at a curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Curvature vector of the curve at the parameter t.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.Trim">
+<code class="descname">Trim</code><span class="sig-paren">(</span><em>t0</em>, <em>t1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Trim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes portions of the curve outside the specified interval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t0</strong> (<em>float</em>) – Start of the trimming interval. Portions of the curve before curve(t0) are removed.</li>
+<li><strong>t1</strong> (<em>float</em>) – End of the trimming interval. Portions of the curve after curve(t1) are removed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Trimmed portion of this curve is successfull, None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -468,99 +681,34 @@ Not all curve types support this operation.</p>
 <code class="descname">Split</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Split" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits (divides) the curve at the specified parameter.
 The parameter must be in the interior of the curve’s domain.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Parameter to split the curve at in the interval returned by Domain().</dd>
-<dt>Returns:</dt>
-<dd>Two curves on success, null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.TangentAt">
-<code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TangentAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates the unit tangent vector at a curve parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Evaluation parameter.</dd>
-<dt>Returns:</dt>
-<dd>Unit tangent vector of the curve at the parameter t.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Parameter to split the curve at in the interval returned by Domain().</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Two curves on success, None on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a>[]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Curve.ToNurbsCurve">
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a NURBS curve representation of this curve.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>NURBS representation of the curve on success, null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.Trim">
-<code class="descname">Trim</code><span class="sig-paren">(</span><em>t0</em>, <em>t1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Trim" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes portions of the curve outside the specified interval.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t0 : Start of the trimming interval. Portions of the curve before curve(t0) are removed.
-t1 : End of the trimming interval. Portions of the curve after curve(t1) are removed.</dd>
-<dt>Returns:</dt>
-<dd>Trimmed portion of this curve is successfull, null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.TryGetArc">
-<code class="descname">TryGetArc</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetArc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try to convert this curve into an Arc using RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>arc : On success, the Arc will be filled in.</dd>
-<dt>Returns:</dt>
-<dd>true if the curve could be converted into an arc.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.TryGetCircle">
-<code class="descname">TryGetCircle</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetCircle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try to convert this curve into a circle using RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>circle : On success, the Circle will be filled in.</dd>
-<dt>Returns:</dt>
-<dd>true if the curve could be converted into a Circle.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.TryGetEllipse">
-<code class="descname">TryGetEllipse</code><span class="sig-paren">(</span><em>ellipse</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetEllipse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try to convert this curve into an Ellipse within RhinoMath.ZeroTolerance.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ellipse : On success, the Ellipse will be filled in.</dd>
-<dt>Returns:</dt>
-<dd>true if the curve could be converted into an Ellipse.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Curve.TryGetPolyline">
-<code class="descname">TryGetPolyline</code><span class="sig-paren">(</span><em>polyline</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.TryGetPolyline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Several types of Curve can have the form of a polyline
-including a degree 1 NurbsCurve, a PolylineCurve,
-and a PolyCurve all of whose segments are some form of
-polyline. IsPolyline tests a curve to see if it can be
-represented as a polyline.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>polyline : If true is returned, then the polyline form is returned here.</dd>
-<dt>Returns:</dt>
-<dd>true if this curve can be represented as a polyline; otherwise, false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">NURBS representation of the curve on success, None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsCurve.html#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

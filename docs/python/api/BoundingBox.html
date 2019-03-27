@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">BoundingBox</a></li>
@@ -226,99 +227,147 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="boundingbox">
-<h1>BoundingBox<a class="headerlink" href="#boundingbox" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="boundingbox"></span><h1>BoundingBox<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.BoundingBox">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BoundingBox</code><span class="sig-paren">(</span><em>minX</em>, <em>minY</em>, <em>minZ</em>, <em>maxX</em>, <em>maxY</em>, <em>maxZ</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox" title="Permalink to this definition">¶</a></dt>
-<dd><p>…</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BoundingBox</code><a class="headerlink" href="#rhino3dm.BoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.BoundingBox.BoundingBox">
+<code class="descname">BoundingBox</code><span class="sig-paren">(</span><em>min</em>, <em>max</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.BoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new boundingbox from two corner points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>min</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point containing all the minimum coordinates.</li>
+<li><strong>max</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point containing all the maximum coordinates.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">BoundingBox</code><span class="sig-paren">(</span><em>minX</em>, <em>minY</em>, <em>minZ</em>, <em>maxX</em>, <em>maxY</em>, <em>maxZ</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a boundingbox from numeric extremes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>minX</strong> (<em>float</em>) – Lower extreme for box X size.</li>
+<li><strong>minY</strong> (<em>float</em>) – Lower extreme for box Y size.</li>
+<li><strong>minZ</strong> (<em>float</em>) – Lower extreme for box Z size.</li>
+<li><strong>maxX</strong> (<em>float</em>) – Upper extreme for box X size.</li>
+<li><strong>maxY</strong> (<em>float</em>) – Upper extreme for box Y size.</li>
+<li><strong>maxZ</strong> (<em>float</em>) – Upper extreme for box Z size.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
-<dt id="rhino3dm.BoundingBox.Area">
-<code class="descname">Area</code><a class="headerlink" href="#rhino3dm.BoundingBox.Area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the area of this BoundingBox.</p>
+<dt id="rhino3dm.BoundingBox.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.BoundingBox.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value that indicates whether or not this boundingbox is valid.
+Empty boxes are not valid, and neither are boxes with unset points.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Min">
+<code class="descname">Min</code><a class="headerlink" href="#rhino3dm.BoundingBox.Min" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the point in the minimal corner.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Max">
+<code class="descname">Max</code><a class="headerlink" href="#rhino3dm.BoundingBox.Max" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the point in the maximal corner.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.BoundingBox.Center">
 <code class="descname">Center</code><a class="headerlink" href="#rhino3dm.BoundingBox.Center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the point in the center of the boundingbox.</p>
+<dd><p>rhino3dm.Point3d: Gets the point in the center of the boundingbox.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Area">
+<code class="descname">Area</code><a class="headerlink" href="#rhino3dm.BoundingBox.Area" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the area of this BoundingBox.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Volume">
+<code class="descname">Volume</code><a class="headerlink" href="#rhino3dm.BoundingBox.Volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the volume of this BoundingBox.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.BoundingBox.Diagonal">
+<code class="descname">Diagonal</code><a class="headerlink" href="#rhino3dm.BoundingBox.Diagonal" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the diagonal vector of this BoundingBox.
+The diagonal connects the Min and Max points.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.BoundingBox.ClosestPoint">
 <code class="descname">ClosestPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.ClosestPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the closest point on or in the boundingbox.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>point : Sample point.</dd>
-<dt>Returns:</dt>
-<dd>The point on or in the box that is closest to the sample point.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Sample point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The point on or in the box that is closest to the sample point.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.BoundingBox.Contains">
 <code class="descname">Contains</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tests a point for boundingbox inclusion. This is the same as calling Contains(point, false)</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>point : Point to test.</dd>
-<dt>Returns:</dt>
-<dd>true if the point is on the inside of or coincident with this boundingbox; otherwise false.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.BoundingBox.Diagonal">
-<code class="descname">Diagonal</code><a class="headerlink" href="#rhino3dm.BoundingBox.Diagonal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the diagonal vector of this BoundingBox.
-The diagonal connects the Min and Max points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point to test.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the point is on the inside of or coincident with this boundingbox; otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.BoundingBox.IsDegenerate">
 <code class="descname">IsDegenerate</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.IsDegenerate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines whether a bounding box is degenerate (flat) in one or more directions.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>tolerance : Distances &lt;= tolerance will be considered to be zero.  If tolerance
-tolerance : is negative (default), then a scale invarient tolerance is used.</dd>
-<dt>Returns:</dt>
-<dd>0 = box is not degenerate
-1 = box is a rectangle (degenerate in one direction).
-2 = box is a line (degenerate in two directions).
-3 = box is a point (degenerate in three directions)
-4 = box is not valid.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.BoundingBox.IsValid">
-<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.BoundingBox.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether or not this boundingbox is valid.
-Empty boxes are not valid, and neither are boxes with unset points.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.BoundingBox.Max">
-<code class="descname">Max</code><a class="headerlink" href="#rhino3dm.BoundingBox.Max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the point in the maximal corner.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.BoundingBox.Min">
-<code class="descname">Min</code><a class="headerlink" href="#rhino3dm.BoundingBox.Min" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the point in the minimal corner.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.BoundingBox.ToBrep">
-<code class="descname">ToBrep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.ToBrep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a  representation of this boundingbox.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>If this operation is sucessfull, a Brep representation of this box; otherwise null.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tolerance</strong> (<em>float</em>) – Distances &lt;= tolerance will be considered to be zero.  If tolerance is negative (default), then a scale invarient tolerance is used.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">0 = box is not degenerate 1 = box is a rectangle (degenerate in one direction). 2 = box is a line (degenerate in two directions). 3 = box is a point (degenerate in three directions) 4 = box is not valid.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -327,28 +376,60 @@ Empty boxes are not valid, and neither are boxes with unset points.</p>
 <dd><p>Updates this boundingbox to be the smallest axis aligned
 boundingbox that contains the transformed result of its 8 original corner
 points.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>xform : A transform.</dd>
-<dt>Returns:</dt>
-<dd>true if this operation is sucessfull; otherwise false.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xform</strong> (<a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – A transform.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this operation is sucessfull; otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.BoundingBox.ToBrep">
+<code class="descname">ToBrep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.ToBrep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a  representation of this boundingbox.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If this operation is sucessfull, a Brep representation of this box; otherwise null.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.BoundingBox.Union">
-<em class="property">static </em><code class="descname">Union</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Union" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">Union</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Union" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates this BoundingBox to represent the union of itself and another box.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>other : Box to include in this union.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.BoundingBox.Volume">
-<code class="descname">Volume</code><a class="headerlink" href="#rhino3dm.BoundingBox.Volume" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the volume of this BoundingBox.</p>
+<dl class="method">
+<dt id="rhino3dm.BoundingBox.Encode">
+<code class="descname">Encode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.BoundingBox.Decode">
+<em class="property">static </em><code class="descname">Decode</code><span class="sig-paren">(</span><em>jsonObject</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BoundingBox.Decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

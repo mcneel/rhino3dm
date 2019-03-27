@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,59 +227,62 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="viewinfo">
-<h1>ViewInfo<a class="headerlink" href="#viewinfo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="viewinfo"></span><h1>ViewInfo<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.ViewInfo">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ViewInfo</code><a class="headerlink" href="#rhino3dm.ViewInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents the name and orientation of a View (and named view).
-views can be thought of as cameras.</p>
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurAperture">
-<code class="descname">FocalBlurAperture</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurAperture" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur aperture of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurDistance">
-<code class="descname">FocalBlurDistance</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurDistance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur distance of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurJitter">
-<code class="descname">FocalBlurJitter</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurJitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur jitter of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.FocalBlurSampleCount">
-<code class="descname">FocalBlurSampleCount</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurSampleCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the Focal blur sample count of the active viewport</p>
-</dd></dl>
-
-<dl class="attribute">
+<dd><dl class="attribute">
 <dt id="rhino3dm.ViewInfo.Name">
 <code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ViewInfo.Name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the name of the NamedView.</p>
+<dd><p>str: Gets or sets the name of the NamedView.</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.WallpaperName">
+<code class="descname">WallpaperName</code><a class="headerlink" href="#rhino3dm.ViewInfo.WallpaperName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewInfo.ShowWallpaperInGrayScale">
 <code class="descname">ShowWallpaperInGrayScale</code><a class="headerlink" href="#rhino3dm.ViewInfo.ShowWallpaperInGrayScale" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be shown in gray scale in this view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ViewInfo.Viewport">
-<code class="descname">Viewport</code><a class="headerlink" href="#rhino3dm.ViewInfo.Viewport" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the viewport, or viewing frustum, associated with this view.</p>
+<dd><p>bool: True if wallpaper (if any) is to be shown in gray scale in this view.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ViewInfo.WallpaperHidden">
 <code class="descname">WallpaperHidden</code><a class="headerlink" href="#rhino3dm.ViewInfo.WallpaperHidden" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if wallpaper (if any) is to be hidden from this view.</p>
+<dd><p>bool: True if wallpaper (if any) is to be hidden from this view.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.FocalBlurDistance">
+<code class="descname">FocalBlurDistance</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Focal blur distance of the active viewport</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.FocalBlurAperture">
+<code class="descname">FocalBlurAperture</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurAperture" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Focal blur aperture of the active viewport</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.FocalBlurJitter">
+<code class="descname">FocalBlurJitter</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurJitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Focal blur jitter of the active viewport</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.FocalBlurSampleCount">
+<code class="descname">FocalBlurSampleCount</code><a class="headerlink" href="#rhino3dm.ViewInfo.FocalBlurSampleCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>uint: Gets or sets the Focal blur sample count of the active viewport</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ViewInfo.Viewport">
+<code class="descname">Viewport</code><a class="headerlink" href="#rhino3dm.ViewInfo.Viewport" title="Permalink to this definition">¶</a></dt>
+<dd><p>ViewportInfo: Gets the viewport, or viewing frustum, associated with this view.</p>
 </dd></dl>
 
 </dd></dl>

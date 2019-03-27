@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,100 +227,182 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="texturemapping">
-<h1>TextureMapping<a class="headerlink" href="#texturemapping" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="texturemapping"></span><h1>TextureMapping<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.TextureMapping">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">TextureMapping</code><a class="headerlink" href="#rhino3dm.TextureMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
-<p>Represents a texture mapping.</p>
-<dl class="staticmethod">
-<dt id="rhino3dm.TextureMapping.CreateBoxMapping">
-<em class="property">static </em><code class="descname">CreateBoxMapping</code><span class="sig-paren">(</span><em>plane</em>, <em>dx</em>, <em>dy</em>, <em>dz</em>, <em>capped</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateBoxMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a box projection texture mapping.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>plane : The sides of the box the box are parallel to the plane’s coordinate
-plane : planes.  The dx, dy, dz intervals determine the location of the sides.
-dx : Determines the location of the front and back planes. The vector
-dx : plane.xaxis is perpendicular to these planes and they pass through
-dx : plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectivly.
-dy : Determines the location of the left and right planes. The vector
-dy : plane.yaxis is perpendicular to these planes and they pass through
-dy : plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectivly.
-dz : Determines the location of the top and bottom planes. The vector
-dz : plane.zaxis is perpendicular to these planes and they pass through
-dz : plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectivly.
-capped : If true, the box is treated as a finite capped box.</dd>
-<dt>Returns:</dt>
-<dd>TextureMapping instance if input is valid</dd>
-</dl>
+<dd><dl class="method">
+<dt id="rhino3dm.TextureMapping.TextureMapping">
+<code class="descname">TextureMapping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TextureMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>TextureMapping constructor</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="rhino3dm.TextureMapping.RequiresVertexNormals">
+<code class="descname">RequiresVertexNormals</code><a class="headerlink" href="#rhino3dm.TextureMapping.RequiresVertexNormals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.TextureMapping.IsPeriodic">
+<code class="descname">IsPeriodic</code><a class="headerlink" href="#rhino3dm.TextureMapping.IsPeriodic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="staticmethod">
-<dt id="rhino3dm.TextureMapping.CreateCylinderMapping">
-<em class="property">static </em><code class="descname">CreateCylinderMapping</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capped</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateCylinderMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a cylindrical projection texture mapping.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cylinder : cylinder in world space used to define a cylindrical coordinate system.
-cylinder : The angular parameter maps (0,2pi) to texture “u” (0,1), The height
-cylinder : parameter maps (height[0],height[1]) to texture “v” (0,1), and the
-cylinder : radial parameter maps (0,r) to texture “w” (0,1).
-capped : If true, the cylinder is treated as a finite capped cylinder</dd>
-<dt>Returns:</dt>
-<dd>TextureMapping instance if input is valid</dd>
-</dl>
+<dt id="rhino3dm.TextureMapping.CreateSurfaceParameterMapping">
+<em class="property">static </em><code class="descname">CreateSurfaceParameterMapping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateSurfaceParameterMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.TextureMapping.CreatePlaneMapping">
 <em class="property">static </em><code class="descname">CreatePlaneMapping</code><span class="sig-paren">(</span><em>plane</em>, <em>dx</em>, <em>dy</em>, <em>dz</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreatePlaneMapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a planar UV projection texture mapping</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>plane : A plane to use for mapping.
-dx : portion of the plane’s x axis that is mapped to [0,1] (can be a decreasing interval)
-dy : portion of the plane’s y axis that is mapped to [0,1] (can be a decreasing interval)
-dz : portion of the plane’s z axis that is mapped to [0,1] (can be a decreasing interval)</dd>
-<dt>Returns:</dt>
-<dd>TextureMapping instance if input is valid</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – A plane to use for mapping.</li>
+<li><strong>dx</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – portion of the plane’s x axis that is mapped to [0,1] (can be a decreasing interval)</li>
+<li><strong>dy</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – portion of the plane’s y axis that is mapped to [0,1] (can be a decreasing interval)</li>
+<li><strong>dz</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – portion of the plane’s z axis that is mapped to [0,1] (can be a decreasing interval)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">TextureMapping instance if input is valid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping">TextureMapping</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.TextureMapping.CreateCylinderMapping">
+<em class="property">static </em><code class="descname">CreateCylinderMapping</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capped</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateCylinderMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cylindrical projection texture mapping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cylinder</strong> (<a class="reference internal" href="Cylinder.html#rhino3dm.Cylinder" title="rhino3dm.Cylinder"><em>Cylinder</em></a>) – cylinder in world space used to define a cylindrical coordinate system. The angular parameter maps (0,2pi) to texture “u” (0,1), The height parameter maps (height[0],height[1]) to texture “v” (0,1), and the radial parameter maps (0,r) to texture “w” (0,1).</li>
+<li><strong>capped</strong> (<em>bool</em>) – If true, the cylinder is treated as a finite capped cylinder</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">TextureMapping instance if input is valid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping">TextureMapping</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.TextureMapping.CreateSphereMapping">
 <em class="property">static </em><code class="descname">CreateSphereMapping</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateSphereMapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a spherical projection texture mapping.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>sphere : sphere in world space used to define a spherical coordinate system.
-sphere : The longitude parameter maps (0,2pi) to texture “u” (0,1).
-sphere : The latitude paramter maps (-pi/2,+pi/2) to texture “v” (0,1).
-sphere : The radial parameter maps (0,r) to texture “w” (0,1).</dd>
-<dt>Returns:</dt>
-<dd>TextureMapping instance if input is valid</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sphere</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – sphere in world space used to define a spherical coordinate system. The longitude parameter maps (0,2pi) to texture “u” (0,1). The latitude paramter maps (-pi/2,+pi/2) to texture “v” (0,1). The radial parameter maps (0,r) to texture “w” (0,1).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">TextureMapping instance if input is valid</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping">TextureMapping</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.TextureMapping.CreateBoxMapping">
+<em class="property">static </em><code class="descname">CreateBoxMapping</code><span class="sig-paren">(</span><em>plane</em>, <em>dx</em>, <em>dy</em>, <em>dz</em>, <em>capped</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateBoxMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a box projection texture mapping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – The sides of the box the box are parallel to the plane’s coordinate planes.  The dx, dy, dz intervals determine the location of the sides.</li>
+<li><strong>dx</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – Determines the location of the front and back planes. The vector plane.xaxis is perpendicular to these planes and they pass through plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectivly.</li>
+<li><strong>dy</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – Determines the location of the left and right planes. The vector plane.yaxis is perpendicular to these planes and they pass through plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectivly.</li>
+<li><strong>dz</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – Determines the location of the top and bottom planes. The vector plane.zaxis is perpendicular to these planes and they pass through plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectivly.</li>
+<li><strong>capped</strong> (<em>bool</em>) – If true, the box is treated as a finite capped box.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">TextureMapping instance if input is valid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping">TextureMapping</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.TextureMapping.TryGetMappingCylinder">
-<code class="descname">TryGetMappingCylinder</code><span class="sig-paren">(</span><em>cylinder</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TryGetMappingCylinder" title="Permalink to this definition">¶</a></dt>
+<code class="descname">TryGetMappingCylinder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TryGetMappingCylinder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a cylindrical projection parameters from this texture mapping.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>Returns true if a valid cylinder is returned.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns True if a valid cylinder is returned.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.TextureMapping.TryGetMappingSphere">
-<code class="descname">TryGetMappingSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TryGetMappingSphere" title="Permalink to this definition">¶</a></dt>
+<code class="descname">TryGetMappingSphere</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TryGetMappingSphere" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a spherical projection parameters from this texture mapping.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>Returns true if a valid sphere is returned.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns True if a valid sphere is returned.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.TextureMapping.ReverseTextureCoordinate">
+<code class="descname">ReverseTextureCoordinate</code><span class="sig-paren">(</span><em>dir</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.ReverseTextureCoordinate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.TextureMapping.SwapTextureCoordinate">
+<code class="descname">SwapTextureCoordinate</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.SwapTextureCoordinate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.TextureMapping.TileTextureCoordinate">
+<code class="descname">TileTextureCoordinate</code><span class="sig-paren">(</span><em>dir</em>, <em>count</em>, <em>offset</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.TileTextureCoordinate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.TextureMapping.Evaluate">
+<code class="descname">Evaluate</code><span class="sig-paren">(</span><em>p</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.Evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

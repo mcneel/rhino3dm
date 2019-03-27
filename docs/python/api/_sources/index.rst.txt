@@ -12,6 +12,7 @@ Welcome to rhino3dm's documentation!
 
    Arc
    ArcCurve
+   ArchivableDictionary
    BezierCurve
    Bitmap
    BoundingBox

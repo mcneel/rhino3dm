@@ -1,7 +1,36 @@
 File3dmMaterialTable
-********************
+====================
 
-.. autoclass:: rhino3dm.File3dmMaterialTable
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmMaterialTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(material)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a material based on Index. This seach type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A material, or None if none was found.
+      :rtype: DocObjects.Material
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation

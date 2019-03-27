@@ -1,7 +1,14 @@
 File3dmObject
-*************
+=============
 
-.. autoclass:: rhino3dm.File3dmObject
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmObject
+
+   .. py:attribute:: Attributes
+
+      ObjectAttributes: Gets the attributes that are linked with this document object.
+
+   .. py:attribute:: Geometry
+
+      rhino3dm.GeometryBase: Gets the geometry that is linked with this document object.

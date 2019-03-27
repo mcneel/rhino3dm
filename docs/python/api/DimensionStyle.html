@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,22 +227,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="dimensionstyle">
-<h1>DimensionStyle<a class="headerlink" href="#dimensionstyle" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="dimensionstyle"></span><h1>DimensionStyle<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.DimensionStyle">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">DimensionStyle</code><a class="headerlink" href="#rhino3dm.DimensionStyle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
-<p>Can also be considered an annotation style since it is used for
-more than just dimensions</p>
+<dd><dl class="method">
+<dt id="rhino3dm.DimensionStyle.DimensionStyle">
+<code class="descname">DimensionStyle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.DimensionStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>DimensionStyle constructor</p>
+</dd></dl>
+
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.AlternateBelowLine">
-<code class="descname">AlternateBelowLine</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateBelowLine" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.Name">
+<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.DimensionStyle.Name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.AlternateLengthFactor">
-<code class="descname">AlternateLengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateLengthFactor" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.Font">
+<code class="descname">Font</code><a class="headerlink" href="#rhino3dm.DimensionStyle.Font" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -255,138 +259,8 @@ more than just dimensions</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.ArrowLength">
-<code class="descname">ArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowLength" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.BaselineSpacing">
-<code class="descname">BaselineSpacing</code><a class="headerlink" href="#rhino3dm.DimensionStyle.BaselineSpacing" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.CentermarkSize">
-<code class="descname">CentermarkSize</code><a class="headerlink" href="#rhino3dm.DimensionStyle.CentermarkSize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.DimensionStyle.ClearAllFieldOverrides">
-<code class="descname">ClearAllFieldOverrides</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearAllFieldOverrides" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets all the fields in this DimensionStyle to be not overridden
-Does not change any dimstyle_id’s or parent_id’s</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.DimensionStyle.ClearFieldOverride">
-<code class="descname">ClearFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearFieldOverride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the field as not overridden</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.DrawForward">
-<code class="descname">DrawForward</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawForward" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.DrawTextMask">
-<code class="descname">DrawTextMask</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawTextMask" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.Font">
-<code class="descname">Font</code><a class="headerlink" href="#rhino3dm.DimensionStyle.Font" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.HasFieldOverrides">
-<code class="descname">HasFieldOverrides</code><a class="headerlink" href="#rhino3dm.DimensionStyle.HasFieldOverrides" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if any fields in this DimensionStyle are overrides</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>True if any fields are overrides
-False is no fields are overrides</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.IsChild">
-<code class="descname">IsChild</code><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChild" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if this DimensionStyle is a child of any other DimensionStyle</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>True if this is a child DimensionStyle,
-False otherwise.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.DimensionStyle.IsChildOf">
-<code class="descname">IsChildOf</code><span class="sig-paren">(</span><em>parentId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChildOf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if this DimensionStyle is a child of a specific DimensionStyle</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>True if this is a child of the DimensionStyle with Parent
-False otherwise.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="rhino3dm.DimensionStyle.LeaderArrowBlockId">
 <code class="descname">LeaderArrowBlockId</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowBlockId" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.LeaderArrowLength">
-<code class="descname">LeaderArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowLength" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.LeaderHasLanding">
-<code class="descname">LeaderHasLanding</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderHasLanding" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.LeaderLandingLength">
-<code class="descname">LeaderLandingLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderLandingLength" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.LengthFactor">
-<code class="descname">LengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LengthFactor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.ParentId">
-<code class="descname">ParentId</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ParentId" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get or Set the Id of this DimensionStyle’s parent.
-If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.DimensionStyle.ScaleLengthValues">
-<code class="descname">ScaleLengthValues</code><span class="sig-paren">(</span><em>scale</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ScaleLengthValues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scales all length values by ‘scale’</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.DimensionStyle.SetFieldOverride">
-<code class="descname">SetFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.SetFieldOverride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set a field as overridden</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.StackHeightScale">
-<code class="descname">StackHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.StackHeightScale" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.SuppressArrow1">
-<code class="descname">SuppressArrow1</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow1" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.SuppressArrow2">
-<code class="descname">SuppressArrow2</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -400,6 +274,56 @@ If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressArrow1">
+<code class="descname">SuppressArrow1</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.SuppressArrow2">
+<code class="descname">SuppressArrow2</code><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.AlternateBelowLine">
+<code class="descname">AlternateBelowLine</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateBelowLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.DrawTextMask">
+<code class="descname">DrawTextMask</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawTextMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderHasLanding">
+<code class="descname">LeaderHasLanding</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderHasLanding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.DrawForward">
+<code class="descname">DrawForward</code><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawForward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextUnderlined">
+<code class="descname">TextUnderlined</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextUnderlined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ArrowLength">
+<code class="descname">ArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderArrowLength">
+<code class="descname">LeaderArrowLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.CentermarkSize">
+<code class="descname">CentermarkSize</code><a class="headerlink" href="#rhino3dm.DimensionStyle.CentermarkSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.DimensionStyle.TextGap">
 <code class="descname">TextGap</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextGap" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -410,18 +334,18 @@ If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.TextRotation">
-<code class="descname">TextRotation</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextRotation" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.LengthFactor">
+<code class="descname">LengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LengthFactor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.TextUnderlined">
-<code class="descname">TextUnderlined</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextUnderlined" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.AlternateLengthFactor">
+<code class="descname">AlternateLengthFactor</code><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateLengthFactor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.ToleranceHeightScale">
-<code class="descname">ToleranceHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceHeightScale" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.ToleranceUpperValue">
+<code class="descname">ToleranceUpperValue</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceUpperValue" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -430,9 +354,127 @@ If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.DimensionStyle.ToleranceUpperValue">
-<code class="descname">ToleranceUpperValue</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceUpperValue" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.DimensionStyle.ToleranceHeightScale">
+<code class="descname">ToleranceHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceHeightScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.BaselineSpacing">
+<code class="descname">BaselineSpacing</code><a class="headerlink" href="#rhino3dm.DimensionStyle.BaselineSpacing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.TextRotation">
+<code class="descname">TextRotation</code><a class="headerlink" href="#rhino3dm.DimensionStyle.TextRotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.StackHeightScale">
+<code class="descname">StackHeightScale</code><a class="headerlink" href="#rhino3dm.DimensionStyle.StackHeightScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.LeaderLandingLength">
+<code class="descname">LeaderLandingLength</code><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderLandingLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.HasFieldOverrides">
+<code class="descname">HasFieldOverrides</code><a class="headerlink" href="#rhino3dm.DimensionStyle.HasFieldOverrides" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Checks if any fields in this DimensionStyle are overrides</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.IsChild">
+<code class="descname">IsChild</code><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChild" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Tests if this DimensionStyle is a child of any other DimensionStyle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.DimensionStyle.ParentId">
+<code class="descname">ParentId</code><a class="headerlink" href="#rhino3dm.DimensionStyle.ParentId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guid: Get or Set the Id of this DimensionStyle’s parent.
+If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ScaleLengthValues">
+<code class="descname">ScaleLengthValues</code><span class="sig-paren">(</span><em>scale</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ScaleLengthValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales all length values by ‘scale’</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.IsFieldOverridden">
+<code class="descname">IsFieldOverridden</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsFieldOverridden" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.SetFieldOverride">
+<code class="descname">SetFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.SetFieldOverride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a field as overridden</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ClearFieldOverride">
+<code class="descname">ClearFieldOverride</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearFieldOverride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the field as not overridden</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.ClearAllFieldOverrides">
+<code class="descname">ClearAllFieldOverrides</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearAllFieldOverrides" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets all the fields in this DimensionStyle to be not overridden
+Does not change any dimstyle_id’s or parent_id’s</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.DimensionStyle.IsChildOf">
+<code class="descname">IsChildOf</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChildOf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if this DimensionStyle is a child of a specific DimensionStyle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if this is a child of the DimensionStyle with Parent False otherwise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 

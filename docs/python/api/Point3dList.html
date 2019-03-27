@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,57 +227,162 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="point3dlist">
-<h1>Point3dList<a class="headerlink" href="#point3dlist" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="point3dlist"></span><h1>Point3dList<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Point3dList">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Point3dList</code><span class="sig-paren">(</span><em>initialCapacity</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a list of .</p>
-<dl class="method">
-<dt id="rhino3dm.Point3dList.Add">
-<code class="descname">Add</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a Point3d to the end of the list with given x,y,z coordinates.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>x : The X coordinate.
-y : The Y coordinate.
-z : The Z coordinate.</dd>
-</dl>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Point3dList</code><a class="headerlink" href="#rhino3dm.Point3dList" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.Point3dList.Point3dList">
+<code class="descname">Point3dList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Point3dList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Point3dList constructor</p>
 </dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Point3dList</code><span class="sig-paren">(</span><em>initialCapacity</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new point list with a preallocated initial capacity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>initialCapacity</strong> (<em>int</em>) – The number of added items before which the underlying array will be resized.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Point3dList.Capacity">
+<code class="descname">Capacity</code><a class="headerlink" href="#rhino3dm.Point3dList.Capacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Point3dList.Count">
+<code class="descname">Count</code><a class="headerlink" href="#rhino3dm.Point3dList.Count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Point3dList.BoundingBox">
 <code class="descname">BoundingBox</code><a class="headerlink" href="#rhino3dm.Point3dList.BoundingBox" title="Permalink to this definition">¶</a></dt>
-<dd><p>Even though this is a property, it is not a “fast” calculation. Every point is
+<dd><p>rhino3dm.BoundingBox: Even though this is a property, it is not a “fast” calculation. Every point is
 evaluated in order to get the bounding box of the list.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Point3dList.SetAllX">
-<code class="descname">SetAllX</code><span class="sig-paren">(</span><em>xValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set all the X values for the points to a single value</p>
+<dt id="rhino3dm.Point3dList.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Point3dList.SetAllY">
-<code class="descname">SetAllY</code><span class="sig-paren">(</span><em>yValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set all the Y values for the points to a single value</p>
+<dt id="rhino3dm.Point3dList.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhino3dm.Point3dList.SetAllZ">
-<code class="descname">SetAllZ</code><span class="sig-paren">(</span><em>zValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllZ" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set all the Z values for the points to a single value</p>
+<dt id="rhino3dm.Point3dList.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.Clear">
+<code class="descname">Clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.Insert">
+<code class="descname">Insert</code><span class="sig-paren">(</span><em>index</em>, <em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.RemoveAt">
+<code class="descname">RemoveAt</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.RemoveAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a Point3d to the end of the list with given x,y,z coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) – The X coordinate.</li>
+<li><strong>y</strong> (<em>float</em>) – The Y coordinate.</li>
+<li><strong>z</strong> (<em>float</em>) – The Z coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Point3dList.Transform">
 <code class="descname">Transform</code><span class="sig-paren">(</span><em>xform</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.Transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a transform to all the points in the list.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>xform : Transform to apply.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xform</strong> (<a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – Transform to apply.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllX">
+<code class="descname">SetAllX</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the X values for the points to a single value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllY">
+<code class="descname">SetAllY</code><span class="sig-paren">(</span><em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the Y values for the points to a single value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Point3dList.SetAllZ">
+<code class="descname">SetAllZ</code><span class="sig-paren">(</span><em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Point3dList.SetAllZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all the Z values for the points to a single value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

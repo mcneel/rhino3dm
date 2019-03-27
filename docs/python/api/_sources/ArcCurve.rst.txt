@@ -1,7 +1,61 @@
 ArcCurve
-********
+========
 
-.. autoclass:: rhino3dm.ArcCurve
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ArcCurve
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:method:: ArcCurve(circle)
+
+      Initializes a new  instance,
+      copying the shape of a .
+      Parameterization will be [0;circle.Circumference]
+
+      :param Circle circle: The original circle.
+
+   .. py:method:: ArcCurve(circle, t0, t1)
+
+      Initializes a new  instance,
+      copying values from a  and specifying the
+      needed parametrization of the arc.
+      Circle will not be newly cut at these parameterizations.
+
+      :param Circle circle: A circle.
+      :param float t0: A new Domain.T0 value.
+      :param float t1: A new Domain.T1 value.
+
+   .. py:attribute:: IsCompleteCircle
+
+      bool: Gets a value indicating whether or not this curve can be represented by a complete circle.
+
+   .. py:attribute:: Radius
+
+      float: Gets the radius of this ArcCurve.
+
+   .. py:attribute:: AngleRadians
+
+      float: Gets the angles of this arc in radians.
+
+   .. py:attribute:: AngleDegrees
+
+      float: Gets the angles of this arc in degrees.

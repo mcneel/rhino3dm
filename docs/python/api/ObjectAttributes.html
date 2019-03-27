@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,35 +227,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="objectattributes">
-<h1>ObjectAttributes<a class="headerlink" href="#objectattributes" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="objectattributes"></span><h1>ObjectAttributes<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.ObjectAttributes">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ObjectAttributes</code><a class="headerlink" href="#rhino3dm.ObjectAttributes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="CommonObject.html#rhino3dm.CommonObject" title="rhino3dm.CommonObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.CommonObject</span></code></a></p>
-<p>Attributes (color, material, layer,…) associated with a rhino object</p>
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.AddToGroup">
-<code class="descname">AddToGroup</code><span class="sig-paren">(</span><em>groupIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.AddToGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds object to the group with specified index by appending index to
-group list.
-If the object is already in group, nothing is changed.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>groupIndex : The index that will be added.</dd>
-</dl>
+<dd><dl class="method">
+<dt id="rhino3dm.ObjectAttributes.ObjectAttributes">
+<code class="descname">ObjectAttributes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.ObjectAttributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>ObjectAttributes constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.Mode">
+<code class="descname">Mode</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>ObjectMode: An object must be in one of three modes: normal, locked or hidden.
+If an object is in normal mode, then the object’s layer controls visibility
+and selectability. If an object is locked, then the object’s layer controls
+visibility by the object cannot be selected. If the object is hidden, it is
+not visible and it cannot be selected.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.IsInstanceDefinitionObject">
+<code class="descname">IsInstanceDefinitionObject</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.IsInstanceDefinitionObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Use this query to determine if an object is part of an instance definition.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.Visible">
+<code class="descname">Visible</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Visible" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets an object’s visiblity.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.CastsShadows">
 <code class="descname">CastsShadows</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.CastsShadows" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets an object’s casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.</p>
+<dd><p>bool: Gets or sets an object’s casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.ReceivesShadows">
+<code class="descname">ReceivesShadows</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ReceivesShadows" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets an object’s receives shadows property, or whether or not an object receives shadows from other objects.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.LinetypeSource">
+<code class="descname">LinetypeSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.LinetypeSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>ObjectLinetypeSource: The Linetype used to display an object is specified in one of two ways.
+If LinetypeSource is ON::linetype_from_layer, then the object’s layer ON_Layer::Linetype() is used.
+If LinetypeSource is ON::linetype_from_object, then value of m_linetype is used.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.ColorSource">
 <code class="descname">ColorSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ColorSource" title="Permalink to this definition">¶</a></dt>
-<dd><p>The color used to display an object is specified in one of three ways.
+<dd><p>ObjectColorSource: The color used to display an object is specified in one of three ways.
 If ColorSource is ON::color_from_layer, then the object’s layer ON_Layer::Color() is used.
 If ColorSource is ON::color_from_object, then value of m_color is used.
 If ColorSource is ON::color_from_material, then the diffuse color of the object’s
@@ -263,51 +292,43 @@ determine where to get the definition of the object’s render material.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.DisplayOrder">
-<code class="descname">DisplayOrder</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.DisplayOrder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display order used to force objects to be drawn on top or behind each other.
-Larger numbers draw on top of smaller numbers.
-0  = draw object in standard depth buffered order&lt;0 = draw object behind “normal” draw order objects&gt;0 = draw object on top of “normal” draw order objects</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.GetGroupList">
-<code class="descname">GetGroupList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.GetGroupList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>An array of group indices. null might be returned in place of an empty array.</dd>
-</dl>
+<dt id="rhino3dm.ObjectAttributes.PlotColorSource">
+<code class="descname">PlotColorSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotColorSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>ObjectPlotColorSource: The color used to plot an object on paper is specified in one of three ways.
+If PlotColorSource is ON::plot_color_from_layer, then the object’s layer ON_Layer::PlotColor() is used.
+If PlotColorSource is ON::plot_color_from_object, then value of PlotColor() is used.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.GroupCount">
-<code class="descname">GroupCount</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.GroupCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>number of groups object belongs to.</p>
-</dd></dl>
+<dt id="rhino3dm.ObjectAttributes.PlotWeightSource">
+<code class="descname">PlotWeightSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotWeightSource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.HasDisplayModeOverride">
-<code class="descname">HasDisplayModeOverride</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.HasDisplayModeOverride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if an object has a display mode override for a given viewport.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>viewportId : Id of a Rhino Viewport.</dd>
-<dt>Returns:</dt>
-<dd>true if the object has a display mode override for the viewport; otherwise, false.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.Id">
+<code class="descname">Id</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.Name">
+<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Name" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets an object optional text name.
+More than one object in a model can have the same name and
+some objects may have no name.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.IsInstanceDefinitionObject">
-<code class="descname">IsInstanceDefinitionObject</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.IsInstanceDefinitionObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use this query to determine if an object is part of an instance definition.</p>
+<dt id="rhino3dm.ObjectAttributes.Url">
+<code class="descname">Url</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Url" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Objects may have an URL. There are no restrictions on what value this
+URL may have. As an example, if the object came from a commercial part
+library, the URL might point to the definition of that part.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.LayerIndex">
 <code class="descname">LayerIndex</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.LayerIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets an associated layer index.
+<dd><p>int: Gets or sets an associated layer index.
 Layer definitions in an OpenNURBS model are stored in a layer table.
 The layer table is conceptually an array of ON_Layer classes.  Every
 OpenNURBS object in a model is on some layer.  The object’s layer
@@ -317,7 +338,7 @@ is specified by zero based indicies into the ON_Layer array.</p>
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.LinetypeIndex">
 <code class="descname">LinetypeIndex</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.LinetypeIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the linetype index.
+<dd><p>int: Gets or sets the linetype index.
 Linetype definitions in an OpenNURBS model are stored in a linetype table.
 The linetype table is conceptually an array of ON_Linetype classes. Every
 OpenNURBS object in a model references some linetype.  The object’s linetype
@@ -325,17 +346,9 @@ is specified by zero based indicies into the ON_Linetype array.Index 0 is reserv
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.LinetypeSource">
-<code class="descname">LinetypeSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.LinetypeSource" title="Permalink to this definition">¶</a></dt>
-<dd><p>The Linetype used to display an object is specified in one of two ways.
-If LinetypeSource is ON::linetype_from_layer, then the object’s layer ON_Layer::Linetype() is used.
-If LinetypeSource is ON::linetype_from_object, then value of m_linetype is used.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.MaterialIndex">
 <code class="descname">MaterialIndex</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.MaterialIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the material index.
+<dd><p>int: Gets or sets the material index.
 If you want something simple and fast, set the index of
 the rendering material.</p>
 </dd></dl>
@@ -343,135 +356,171 @@ the rendering material.</p>
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.MaterialSource">
 <code class="descname">MaterialSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.MaterialSource" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the simple material should come from the object or from it’s layer.
+<dd><p>ObjectMaterialSource: Determines if the simple material should come from the object or from it’s layer.
 High quality rendering plug-ins should use m_rendering_attributes.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.Mode">
-<code class="descname">Mode</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Mode" title="Permalink to this definition">¶</a></dt>
-<dd><p>An object must be in one of three modes: normal, locked or hidden.
-If an object is in normal mode, then the object’s layer controls visibility
-and selectability. If an object is locked, then the object’s layer controls
-visibility by the object cannot be selected. If the object is hidden, it is
-not visible and it cannot be selected.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.Name">
-<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets an object optional text name.
-More than one object in a model can have the same name and
-some objects may have no name.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.ObjectColor">
 <code class="descname">ObjectColor</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ObjectColor" title="Permalink to this definition">¶</a></dt>
-<dd><p>If ON::color_from_object == ColorSource, then color is the object’s display color.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.ObjectDecoration">
-<code class="descname">ObjectDecoration</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ObjectDecoration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Used to indicate an object has a decoration (like an arrowhead on a curve)</p>
+<dd><p>System.Drawing.Color: If ON::color_from_object == ColorSource, then color is the object’s display color.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.PlotColor">
 <code class="descname">PlotColor</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotColor" title="Permalink to this definition">¶</a></dt>
-<dd><p>If plot_color_from_object == PlotColorSource, then PlotColor is the object’s plotting color.</p>
+<dd><p>System.Drawing.Color: If plot_color_from_object == PlotColorSource, then PlotColor is the object’s plotting color.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.PlotColorSource">
-<code class="descname">PlotColorSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotColorSource" title="Permalink to this definition">¶</a></dt>
-<dd><p>The color used to plot an object on paper is specified in one of three ways.
-If PlotColorSource is ON::plot_color_from_layer, then the object’s layer ON_Layer::PlotColor() is used.
-If PlotColorSource is ON::plot_color_from_object, then value of PlotColor() is used.</p>
+<dt id="rhino3dm.ObjectAttributes.DisplayOrder">
+<code class="descname">DisplayOrder</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.DisplayOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Display order used to force objects to be drawn on top or behind each other.
+Larger numbers draw on top of smaller numbers.
+0  = draw object in standard depth buffered order&lt;0 = draw object behind “normal” draw order objects&gt;0 = draw object on top of “normal” draw order objects</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.PlotWeight">
 <code class="descname">PlotWeight</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotWeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot weight in millimeters.
+<dd><p>float: Plot weight in millimeters.
 =0.0 means use the default width
 &lt;0.0 means don’t plot (visible for screen display, but does not show on plot)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.PlotWeightSource">
-<code class="descname">PlotWeightSource</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.PlotWeightSource" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.ReceivesShadows">
-<code class="descname">ReceivesShadows</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ReceivesShadows" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets an object’s receives shadows property, or whether or not an object receives shadows from other objects.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.RemoveFromAllGroups">
-<code class="descname">RemoveFromAllGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromAllGroups" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes object from all groups.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.RemoveFromGroup">
-<code class="descname">RemoveFromGroup</code><span class="sig-paren">(</span><em>groupIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>removes object from the group with specified index.
-If the object is not in the group, nothing is changed.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>groupIndex : The index that will be removed.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ObjectAttributes.Transform">
-<code class="descname">Transform</code><span class="sig-paren">(</span><em>xform</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.Transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a transformation.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>xform : The transformation.</dd>
-<dt>Returns:</dt>
-<dd>trueif successful, false otherwise.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.Url">
-<code class="descname">Url</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Objects may have an URL. There are no restrictions on what value this
-URL may have. As an example, if the object came from a commercial part
-library, the URL might point to the definition of that part.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.ViewportId">
-<code class="descname">ViewportId</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ViewportId" title="Permalink to this definition">¶</a></dt>
-<dd><p>If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
-this object is only active in a specific view. This field is primarily used to assign page
-space objects to a specific page, but it can also be used to restrict model space to a
-specific view.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.ObjectAttributes.Visible">
-<code class="descname">Visible</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.Visible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets an object’s visiblity.</p>
+<dt id="rhino3dm.ObjectAttributes.ObjectDecoration">
+<code class="descname">ObjectDecoration</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ObjectDecoration" title="Permalink to this definition">¶</a></dt>
+<dd><p>ObjectDecoration: Used to indicate an object has a decoration (like an arrowhead on a curve)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.ObjectAttributes.WireDensity">
 <code class="descname">WireDensity</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.WireDensity" title="Permalink to this definition">¶</a></dt>
-<dd><p>When a surface object is displayed in wireframe, this controls
+<dd><p>int: When a surface object is displayed in wireframe, this controls
 how many isoparametric wires are used.
 value    number of isoparametric wires
 -1       boundary wires (off)
 0        boundary and knot wires
 1        boundary and knot wires and, if there are no interior knots, a single interior wire.
 N&gt;=2     boundary and knot wires and (N+1) interior wires.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.ViewportId">
+<code class="descname">ViewportId</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ViewportId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guid: If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
+this object is only active in a specific view. This field is primarily used to assign page
+space objects to a specific page, but it can also be used to restrict model space to a
+specific view.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.ActiveSpace">
+<code class="descname">ActiveSpace</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.ActiveSpace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ObjectAttributes.GroupCount">
+<code class="descname">GroupCount</code><a class="headerlink" href="#rhino3dm.ObjectAttributes.GroupCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: number of groups object belongs to.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.Transform">
+<code class="descname">Transform</code><span class="sig-paren">(</span><em>transform</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.Transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a transformation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xform</strong> (<a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – The transformation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">trueif successful, False otherwise.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.HasDisplayModeOverride">
+<code class="descname">HasDisplayModeOverride</code><span class="sig-paren">(</span><em>viewportId</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.HasDisplayModeOverride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if an object has a display mode override for a given viewport.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>viewportId</strong> (<em>Guid</em>) – Id of a Rhino Viewport.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the object has a display mode override for the viewport; otherwise, false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.GetGroupList">
+<code class="descname">GetGroupList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.GetGroupList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An array of group indices. None might be returned in place of an empty array.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int[]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.AddToGroup">
+<code class="descname">AddToGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.AddToGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds object to the group with specified index by appending index to
+group list.
+If the object is already in group, nothing is changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.RemoveFromGroup">
+<code class="descname">RemoveFromGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>removes object from the group with specified index.
+If the object is not in the group, nothing is changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ObjectAttributes.RemoveFromAllGroups">
+<code class="descname">RemoveFromAllGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ObjectAttributes.RemoveFromAllGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes object from all groups.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -1,7 +1,137 @@
 MeshingParameters
-*****************
+=================
 
-.. autoclass:: rhino3dm.MeshingParameters
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: MeshingParameters
+
+   .. py:method:: MeshingParameters()
+
+      MeshingParameters constructor
+
+
+   .. py:method:: MeshingParameters(density)
+
+      Initializes a new instance with simple values,
+      similar to that of Rhino's meshing slider interface.
+
+      :param float density: The density and number of mesh polygons, where 0.0 <= density <= 1.0, \
+         where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
+
+   .. py:method:: MeshingParameters(density, minimumEdgeLength)
+
+      Initializes a new instance with simple values,
+      similar to that of Rhino's meshing slider interface.
+
+      :param float density: The density and number of mesh polygons, where 0.0 <= density <= 1.0, \
+         where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
+      :param float minimumEdgeLength: The minimum allowed mesh edge length.
+
+   .. py:attribute:: Default
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default render mesh.
+      Only use this if you plan on specifying your own custom meshing
+      parameters.
+
+   .. py:attribute:: FastRenderMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when
+      meshing speed is prefered over mesh quality.
+
+   .. py:attribute:: QualityRenderMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when mesh
+      quality is prefered over meshing speed.
+
+   .. py:attribute:: DefaultAnalysisMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default analysis mesh.
+
+   .. py:attribute:: TextureRange
+
+      MeshingParameterTextureRange: Gets or sets how and if textures will be packed.
+
+   .. py:attribute:: JaggedSeams
+
+      bool: Gets or sets whether or not the mesh is allowed to have jagged seams.
+      When this flag is set to true, meshes on either side of a Brep Edge will not match up.
+
+   .. py:attribute:: RefineGrid
+
+      bool: Gets or sets a value indicating whether or not the sampling grid can be refined
+      when certain tolerances are not met.
+
+   .. py:attribute:: SimplePlanes
+
+      bool: Gets or sets a value indicating whether or not planar areas are allowed
+      to be meshed in a simplified manner.
+
+   .. py:attribute:: ComputeCurvature
+
+      bool: Gets or sets a value indicating whether or not surface curvature
+      data will be embedded in the mesh.
+
+   .. py:attribute:: ClosedObjectPostProcess
+
+      bool: Gets or sets a value indicating whether or not to post process non-closed meshes
+      that should be closed. If the Brep being meshed is closed, JaggedSeams = false,
+      and ClosedObjectPostProcess = true, and the resulting mesh is not closed, then a
+      post meshing process is applied to find and close gaps in the mesh. Typically the
+      resulting mesh is not closed because the input Brep has a geometric flaw, like
+      loops in trimming curve.
+
+   .. py:attribute:: GridMinCount
+
+      int: Gets or sets the minimum number of grid quads in the initial sampling grid.
+
+   .. py:attribute:: GridMaxCount
+
+      int: Gets or sets the maximum number of grid quads in the initial sampling grid.
+
+   .. py:attribute:: GridAngle
+
+      float: Gets or sets the maximum allowed angle difference (in radians)
+      for a single sampling quad. The angle pertains to the surface normals.
+
+   .. py:attribute:: GridAspectRatio
+
+      float: Gets or sets the maximum allowed aspect ratio of sampling quads.
+
+   .. py:attribute:: GridAmplification
+
+      float: Gets or sets the grid amplification factor.
+      Values lower than 1.0 will decrease the number of initial quads,
+      values higher than 1.0 will increase the number of initial quads.
+
+   .. py:attribute:: Tolerance
+
+      float: Gets or sets the maximum allowed edge deviation.
+      This tolerance is measured between the center of the mesh edge and the surface.
+
+   .. py:attribute:: MinimumTolerance
+
+      float: Gets or sets the minimum tolerance.
+
+   .. py:attribute:: RelativeTolerance
+
+      float: Gets or sets the relative tolerance.
+
+   .. py:attribute:: MinimumEdgeLength
+
+      float: Gets or sets the minimum allowed mesh edge length.
+
+   .. py:attribute:: MaximumEdgeLength
+
+      float: Gets or sets the maximum allowed mesh edge length.
+
+   .. py:attribute:: RefineAngle
+
+      float: Gets or sets the mesh parameter refine angle.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation

@@ -1,7 +1,41 @@
 ViewInfo
-********
+========
 
-.. autoclass:: rhino3dm.ViewInfo
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: ViewInfo
+
+   .. py:attribute:: Name
+
+      str: Gets or sets the name of the NamedView.
+
+   .. py:attribute:: WallpaperName
+
+
+   .. py:attribute:: ShowWallpaperInGrayScale
+
+      bool: True if wallpaper (if any) is to be shown in gray scale in this view.
+
+   .. py:attribute:: WallpaperHidden
+
+      bool: True if wallpaper (if any) is to be hidden from this view.
+
+   .. py:attribute:: FocalBlurDistance
+
+      float: Gets or sets the Focal blur distance of the active viewport
+
+   .. py:attribute:: FocalBlurAperture
+
+      float: Gets or sets the Focal blur aperture of the active viewport
+
+   .. py:attribute:: FocalBlurJitter
+
+      float: Gets or sets the Focal blur jitter of the active viewport
+
+   .. py:attribute:: FocalBlurSampleCount
+
+      uint: Gets or sets the Focal blur sample count of the active viewport
+
+   .. py:attribute:: Viewport
+
+      ViewportInfo: Gets the viewport, or viewing frustum, associated with this view.

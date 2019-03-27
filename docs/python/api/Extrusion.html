@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,282 +227,189 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="extrusion">
-<h1>Extrusion<a class="headerlink" href="#extrusion" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="extrusion"></span><h1>Extrusion<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Extrusion">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Extrusion</code><a class="headerlink" href="#rhino3dm.Extrusion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Surface</span></code></a></p>
-<p>Represents an extrusion, or objects such as beams or linearly extruded elements,
-that can be represented by profile curves and two miter planes at the extremes.</p>
-<dl class="method">
-<dt id="rhino3dm.Extrusion.AddInnerProfile">
-<code class="descname">AddInnerProfile</code><span class="sig-paren">(</span><em>innerProfile</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.AddInnerProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an inner profile.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>innerProfile : Closed curve in the XY plane or a 2d curve.</dd>
-<dt>Returns:</dt>
-<dd>true if the profile was set.</dd>
-</dl>
+<dd><dl class="method">
+<dt id="rhino3dm.Extrusion.Extrusion">
+<code class="descname">Extrusion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.Extrusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extrusion constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathStart">
+<code class="descname">PathStart</code><a class="headerlink" href="#rhino3dm.Extrusion.PathStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets the start point of the path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathEnd">
+<code class="descname">PathEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.PathEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets the end point of the path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.PathTangent">
+<code class="descname">PathTangent</code><a class="headerlink" href="#rhino3dm.Extrusion.PathTangent" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the up vector of the path.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.MiterPlaneNormalAtStart">
+<code class="descname">MiterPlaneNormalAtStart</code><a class="headerlink" href="#rhino3dm.Extrusion.MiterPlaneNormalAtStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets or sets the normal of the miter plane at the start in profile coordinates.
+In profile coordinates, 0,0,1 always maps to the extrusion axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.MiterPlaneNormalAtEnd">
+<code class="descname">MiterPlaneNormalAtEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.MiterPlaneNormalAtEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets or sets the normal of the miter plane at the end in profile coordinates.
+In profile coordinates, 0,0,1 always maps to the extrusion axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsMiteredAtStart">
+<code class="descname">IsMiteredAtStart</code><a class="headerlink" href="#rhino3dm.Extrusion.IsMiteredAtStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Returns a value indicating whether a miter plane at start is defined.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsMiteredAtEnd">
+<code class="descname">IsMiteredAtEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.IsMiteredAtEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether a miter plane at the end is defined.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Extrusion.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether there is no gap among all surfaces constructing this object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsCappedAtBottom">
+<code class="descname">IsCappedAtBottom</code><a class="headerlink" href="#rhino3dm.Extrusion.IsCappedAtBottom" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether the surface that fills the bottom profile is existing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.IsCappedAtTop">
+<code class="descname">IsCappedAtTop</code><a class="headerlink" href="#rhino3dm.Extrusion.IsCappedAtTop" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether the surface that fills the top profile is existing.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Extrusion.CapCount">
 <code class="descname">CapCount</code><a class="headerlink" href="#rhino3dm.Extrusion.CapCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the amount of capping surfaces.</p>
+<dd><p>int: Gets the amount of capping surfaces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Extrusion.ProfileCount">
+<code class="descname">ProfileCount</code><a class="headerlink" href="#rhino3dm.Extrusion.ProfileCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the amount of profile curves.</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Extrusion.Create">
 <em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>planarCurve</em>, <em>height</em>, <em>cap</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.Create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an extrusion of a 3d curve (which must be planar) and a height.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>planarCurve : Planar curve used as profile
-height : If the height &gt; 0, the bottom of the extrusion will be in plane and
-height : the top will be height units above the plane.
-height : If the height &lt; 0, the top of the extrusion will be in plane and
-height : the bottom will be height units below the plane.
-height : The plane used is the one that is returned from the curve’s TryGetPlane function.
-cap : If the curve is closed and cap is true, then the resulting extrusion is capped.</dd>
-<dt>Returns:</dt>
-<dd>If the input is valid, then a new extrusion is returned. Otherwise null is returned</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>planarCurve</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – Planar curve used as profile</li>
+<li><strong>height</strong> (<em>float</em>) – If the height &gt; 0, the bottom of the extrusion will be in plane and the top will be height units above the plane. If the height &lt; 0, the top of the extrusion will be in plane and the bottom will be height units below the plane. The plane used is the one that is returned from the curve’s TryGetPlane function.</li>
+<li><strong>cap</strong> (<em>bool</em>) – If the curve is closed and cap is true, then the resulting extrusion is capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If the input is valid, then a new extrusion is returned. Otherwise None is returned</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Extrusion" title="rhino3dm.Extrusion">Extrusion</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Extrusion.CreateBoxExtrusion">
 <em class="property">static </em><code class="descname">CreateBoxExtrusion</code><span class="sig-paren">(</span><em>box</em>, <em>cap</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreateBoxExtrusion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets an extrusion from a box.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>box : IsValid must be true.
-cap : If true, the base and the top of the box will be capped. Defaults to true.</dd>
-<dt>Returns:</dt>
-<dd>Extrusion on success. null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>box</strong> (<a class="reference internal" href="Box.html#rhino3dm.Box" title="rhino3dm.Box"><em>rhino3dm.Box</em></a>) – IsValid must be true.</li>
+<li><strong>cap</strong> (<em>bool</em>) – If true, the base and the top of the box will be capped. Defaults to true.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Extrusion on success. None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Extrusion" title="rhino3dm.Extrusion">Extrusion</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Extrusion.CreateCylinderExtrusion">
 <em class="property">static </em><code class="descname">CreateCylinderExtrusion</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreateCylinderExtrusion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets an extrusion form of a cylinder.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cylinder : IsFinite must be true.
-capBottom : If true, the end at cylinder.Height1 will be capped.
-capTop : If true, the end at cylinder.Height2 will be capped.</dd>
-<dt>Returns:</dt>
-<dd>Extrusion on success. null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cylinder</strong> (<a class="reference internal" href="Cylinder.html#rhino3dm.Cylinder" title="rhino3dm.Cylinder"><em>Cylinder</em></a>) – IsFinite must be true.</li>
+<li><strong>capBottom</strong> (<em>bool</em>) – If true, the end at cylinder.Height1 will be capped.</li>
+<li><strong>capTop</strong> (<em>bool</em>) – If true, the end at cylinder.Height2 will be capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Extrusion on success. None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Extrusion" title="rhino3dm.Extrusion">Extrusion</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Extrusion.CreatePipeExtrusion">
-<em class="property">static </em><code class="descname">CreatePipeExtrusion</code><span class="sig-paren">(</span><em>cylinder</em>, <em>otherRadius</em>, <em>capTop</em>, <em>capBottom</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreatePipeExtrusion" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">CreatePipeExtrusion</code><span class="sig-paren">(</span><em>cylinder</em>, <em>otherRadius</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.CreatePipeExtrusion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets an extrusion form of a pipe.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cylinder : IsFinite must be true.
-otherRadius : If cylinder.Radius is less than other radius, then the cylinder will be the inside
-otherRadius : of the pipe.
-capBottom : If true, the end at cylinder.Height1 will be capped.
-capTop : If true, the end at cylinder.Height2 will be capped.</dd>
-<dt>Returns:</dt>
-<dd>Extrusion on success. null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.GetMesh">
-<code class="descname">GetMesh</code><span class="sig-paren">(</span><em>meshType</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Obtains a reference to a specified type of mesh for this extrusion.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>meshType : The mesh type.</dd>
-<dt>Returns:</dt>
-<dd>A mesh.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.GetPathPlane">
-<code class="descname">GetPathPlane</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetPathPlane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the 3D plane perpendicular to the path at a normalized path parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>s : 0.0 = starting profile
-s : 1.0 = ending profile.</dd>
-<dt>Returns:</dt>
-<dd>A plane. The plane is Invalid on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.GetProfilePlane">
-<code class="descname">GetProfilePlane</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetProfilePlane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the 3D plane containing the profile curve at a normalized path parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>s : 0.0 = starting profile
-s : 1.0 = ending profile.</dd>
-<dt>Returns:</dt>
-<dd>A plane. The plane is Invalid on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.GetProfileTransformation">
-<code class="descname">GetProfileTransformation</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetProfileTransformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the transformation that maps the xy profile curve to its 3d location.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>s : 0.0 = starting profile
-s : 1.0 = ending profile.</dd>
-<dt>Returns:</dt>
-<dd>A Transformation. The transform is Invalid on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.IsCappedAtBottom">
-<code class="descname">IsCappedAtBottom</code><a class="headerlink" href="#rhino3dm.Extrusion.IsCappedAtBottom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether the surface that fills the bottom profile is existing.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.IsCappedAtTop">
-<code class="descname">IsCappedAtTop</code><a class="headerlink" href="#rhino3dm.Extrusion.IsCappedAtTop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether the surface that fills the top profile is existing.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.IsMiteredAtEnd">
-<code class="descname">IsMiteredAtEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.IsMiteredAtEnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether a miter plane at the end is defined.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.IsMiteredAtStart">
-<code class="descname">IsMiteredAtStart</code><a class="headerlink" href="#rhino3dm.Extrusion.IsMiteredAtStart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a value indicating whether a miter plane at start is defined.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.IsSolid">
-<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Extrusion.IsSolid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether there is no gap among all surfaces constructing this object.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.MiterPlaneNormalAtEnd">
-<code class="descname">MiterPlaneNormalAtEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.MiterPlaneNormalAtEnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the normal of the miter plane at the end in profile coordinates.
-In profile coordinates, 0,0,1 always maps to the extrusion axis</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.MiterPlaneNormalAtStart">
-<code class="descname">MiterPlaneNormalAtStart</code><a class="headerlink" href="#rhino3dm.Extrusion.MiterPlaneNormalAtStart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the normal of the miter plane at the start in profile coordinates.
-In profile coordinates, 0,0,1 always maps to the extrusion axis</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.PathEnd">
-<code class="descname">PathEnd</code><a class="headerlink" href="#rhino3dm.Extrusion.PathEnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the end point of the path.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.PathLineCurve">
-<code class="descname">PathLineCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.PathLineCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the line-like curve that is the conceptual axis of the extrusion.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>The path as a line curve.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.PathStart">
-<code class="descname">PathStart</code><a class="headerlink" href="#rhino3dm.Extrusion.PathStart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the start point of the path.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.PathTangent">
-<code class="descname">PathTangent</code><a class="headerlink" href="#rhino3dm.Extrusion.PathTangent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the up vector of the path.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.Profile3d">
-<code class="descname">Profile3d</code><span class="sig-paren">(</span><em>profileIndex</em>, <em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.Profile3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a transversal isocurve of the extruded profile.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>profileIndex : 0 &lt;= profileIndex &lt; ProfileCount
-profileIndex : The outer profile has index 0.
-s : 0.0 &lt;= s &lt;= 1.0
-s : A relative parameter controling which profile is returned.
-s : 0 = bottom profile and 1 = top profile.</dd>
-<dt>Returns:</dt>
-<dd>The profile.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Extrusion.ProfileCount">
-<code class="descname">ProfileCount</code><a class="headerlink" href="#rhino3dm.Extrusion.ProfileCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the amount of profile curves.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.ProfileIndex">
-<code class="descname">ProfileIndex</code><span class="sig-paren">(</span><em>profileParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.ProfileIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the index of the profile curve at a domain related to a parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>profileParameter : Parameter on profile curve.</dd>
-<dt>Returns:</dt>
-<dd>-1 if profileParameter does not correspond to a point on the profile curve.
-When the profileParameter corresponds to the end of one profile and the
-beginning of the next profile, the index of the next profile is returned.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.SetOuterProfile">
-<code class="descname">SetOuterProfile</code><span class="sig-paren">(</span><em>outerProfile</em>, <em>cap</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.SetOuterProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the outer profile of the extrusion.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>outerProfile : curve in the XY plane or a 2D curve.
-cap : If outerProfile is a closed curve, then cap determines if the extrusion
-cap : has end caps. If outerProfile is an open curve, cap is ignored.</dd>
-<dt>Returns:</dt>
-<dd>true if the profile was set. If the outer profile is closed, then the
-extrusion may also have inner profiles. If the outer profile is open,
-the extrusion may not have inner profiles. If the extrusion already
-has a profile, the set will fail.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.Extrusion.SetPathAndUp">
-<code class="descname">SetPathAndUp</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>up</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.SetPathAndUp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allows to set the two points at the extremes and the up vector.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>a : The start point.
-b : The end point.
-up : The up vector.</dd>
-<dt>Returns:</dt>
-<dd>true if the operation succeeded; otherwise false.
-Setting up=a-b will make the operation fail.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cylinder</strong> (<a class="reference internal" href="Cylinder.html#rhino3dm.Cylinder" title="rhino3dm.Cylinder"><em>Cylinder</em></a>) – IsFinite must be true.</li>
+<li><strong>otherRadius</strong> (<em>float</em>) – If cylinder.Radius is less than other radius, then the cylinder will be the inside of the pipe.</li>
+<li><strong>capBottom</strong> (<em>bool</em>) – If true, the end at cylinder.Height1 will be capped.</li>
+<li><strong>capTop</strong> (<em>bool</em>) – If true, the end at cylinder.Height2 will be capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Extrusion on success. None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Extrusion" title="rhino3dm.Extrusion">Extrusion</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -510,37 +418,258 @@ Setting up=a-b will make the operation fail.</dd>
 <dd><p>Constructs a brep form of the extrusion. The outer profile is always the first face of the brep.
 If there are inner profiles, additional brep faces are created for each profile. If the
 outer profile is closed, then end caps are added as the last two faces of the brep.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>splitKinkyFaces : If true and the profiles have kinks, then the faces corresponding to those profiles are split
-splitKinkyFaces : so they will be G1.</dd>
-<dt>Returns:</dt>
-<dd>A brep with a similar shape like this extrustion, or null on error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>splitKinkyFaces</strong> (<em>bool</em>) – If True and the profiles have kinks, then the faces corresponding to those profiles are split so they will be G1.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A brep with a similar shape like this extrustion, or None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.SetPathAndUp">
+<code class="descname">SetPathAndUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.SetPathAndUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to set the two points at the extremes and the up vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise false. Setting up=a-b will make the operation fail.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.GetProfileTransformation">
+<code class="descname">GetProfileTransformation</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetProfileTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the transformation that maps the xy profile curve to its 3d location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>float</em>) – 0.0 = starting profile 1.0 = ending profile.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Transformation. The transform is Invalid on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.GetProfilePlane">
+<code class="descname">GetProfilePlane</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetProfilePlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the 3D plane containing the profile curve at a normalized path parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>float</em>) – 0.0 = starting profile 1.0 = ending profile.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A plane. The plane is Invalid on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.GetPathPlane">
+<code class="descname">GetPathPlane</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetPathPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the 3D plane perpendicular to the path at a normalized path parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>float</em>) – 0.0 = starting profile 1.0 = ending profile.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A plane. The plane is Invalid on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.SetOuterProfile">
+<code class="descname">SetOuterProfile</code><span class="sig-paren">(</span><em>outerProfile</em>, <em>cap</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.SetOuterProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the outer profile of the extrusion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outerProfile</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – curve in the XY plane or a 2D curve.</li>
+<li><strong>cap</strong> (<em>bool</em>) – If outerProfile is a closed curve, then cap determines if the extrusion has end caps. If outerProfile is an open curve, cap is ignored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the profile was set. If the outer profile is closed, then the extrusion may also have inner profiles. If the outer profile is open, the extrusion may not have inner profiles. If the extrusion already has a profile, the set will fail.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.AddInnerProfile">
+<code class="descname">AddInnerProfile</code><span class="sig-paren">(</span><em>innerProfile</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.AddInnerProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an inner profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>innerProfile</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – Closed curve in the XY plane or a 2d curve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the profile was set.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.Profile3d">
+<code class="descname">Profile3d</code><span class="sig-paren">(</span><em>profileIndex</em>, <em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.Profile3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a transversal isocurve of the extruded profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>profileIndex</strong> (<em>int</em>) – 0 &lt;= profileIndex &lt; ProfileCount The outer profile has index 0.</li>
+<li><strong>s</strong> (<em>float</em>) – 0.0 &lt;= s &lt;= 1.0 A relative parameter controling which profile is returned. 0 = bottom profile and 1 = top profile.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The profile.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Profile3d</code><span class="sig-paren">(</span><em>ci</em><span class="sig-paren">)</span></dt>
+<dd><p>Gets a transversal isocurve of the extruded profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The profile.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Extrusion.WallEdge">
 <code class="descname">WallEdge</code><span class="sig-paren">(</span><em>ci</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.WallEdge" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets one of the longitudinal curves along the beam or extrusion.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ci : The index of this profile.</dd>
-<dt>Returns:</dt>
-<dd>The profile.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ci</strong> (<a class="reference internal" href="ComponentIndex.html#rhino3dm.ComponentIndex" title="rhino3dm.ComponentIndex"><em>ComponentIndex</em></a>) – The index of this profile.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The profile.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Extrusion.WallSurface">
 <code class="descname">WallSurface</code><span class="sig-paren">(</span><em>ci</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.WallSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets one of the longitudinal surfaces of the extrusion.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ci : The index specifying which precise item to retrieve.</dd>
-<dt>Returns:</dt>
-<dd>The surface.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ci</strong> (<a class="reference internal" href="ComponentIndex.html#rhino3dm.ComponentIndex" title="rhino3dm.ComponentIndex"><em>ComponentIndex</em></a>) – The index specifying which precise item to retrieve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The surface.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.PathLineCurve">
+<code class="descname">PathLineCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.PathLineCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the line-like curve that is the conceptual axis of the extrusion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The path as a line curve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="LineCurve.html#rhino3dm.LineCurve" title="rhino3dm.LineCurve">LineCurve</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.ProfileIndex">
+<code class="descname">ProfileIndex</code><span class="sig-paren">(</span><em>profileParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.ProfileIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the index of the profile curve at a domain related to a parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>profileParameter</strong> (<em>float</em>) – Parameter on profile curve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">-1 if profileParameter does not correspond to a point on the profile curve. When the profileParameter corresponds to the end of one profile and the beginning of the next profile, the index of the next profile is returned.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Extrusion.GetMesh">
+<code class="descname">GetMesh</code><span class="sig-paren">(</span><em>meshType</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Extrusion.GetMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains a reference to a specified type of mesh for this extrusion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>meshType</strong> (<em>MeshType</em>) – The mesh type.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A mesh.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Mesh.html#rhino3dm.Mesh" title="rhino3dm.Mesh">rhino3dm.Mesh</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

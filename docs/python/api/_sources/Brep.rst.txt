@@ -1,7 +1,145 @@
 Brep
-****
+====
 
-.. autoclass:: rhino3dm.Brep
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Brep
+
+   .. py:method:: Brep()
+
+      Brep constructor
+
+
+   .. py:attribute:: Faces
+
+      Collections.BrepFaceList: Gets the brep faces list accessor.
+
+   .. py:attribute:: IsSolid
+
+      bool: Determines whether this brep is a solid, or a closed oriented manifold.
+
+   .. py:attribute:: IsManifold
+
+      bool: Gets a value indicating whether or not the Brep is manifold.
+      Non-Manifold breps have at least one edge that is shared among three or more faces.
+
+   .. py:attribute:: IsSurface
+
+      bool: Returns True if the Brep has a single face and that face is geometrically the same
+      as the underlying surface.  I.e., the face has trivial trimming.
+      In this case, the surface is the first face surface. The flag
+      Brep.Faces[0].OrientationIsReversed records the correspondence between the surface's
+      natural parametric orientation and the orientation of the Brep.trivial trimming here means that there is only one loop curve in the brep
+      and that loop curve is the same as the underlying surface boundary.
+
+   .. py:staticmethod:: CreateFromMesh(mesh, trimedTriangles)
+
+      Create a brep representation of a mesh
+
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromBox(box)
+
+      Constructs new brep that matches a bounding box.
+
+      :param rhino3dm.BoundingBox box: A box to use for creation.
+
+      :return: A new brep; or None on failure.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromBox(box)
+
+      Constructs new brep that matches a bounding box.
+
+      :param rhino3dm.BoundingBox box: A box to use for creation.
+
+      :return: A new brep; or None on failure.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromCylinder(cylinder, capBottom, capTop)
+
+      Constructs a Brep definition of a cylinder.
+
+      :param Cylinder cylinder: cylinder.IsFinite() must be true.
+      :param bool capBottom: if True end at cylinder.m_height[0] should be capped.
+      :param bool capTop: if True end at cylinder.m_height[1] should be capped.
+
+      :return: A Brep representation of the cylinder with a single face for the cylinder, \
+         an edge along the cylinder seam, and vertices at the bottom and top ends of this \
+         seam edge. The optional bottom/top caps are single faces with one circular edge \
+         starting and ending at the bottom/top vertex.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromSphere(sphere)
+
+      Constructs a Brep definition of a sphere.
+
+      :param rhino3dm.Sphere sphere: The input sphere provides the orienting plane and radius.
+
+      :return: A Brep if successful, None on error.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateQuadSphere(sphere)
+
+      Constructs a Brep definition of a quad sphere.
+
+      :param rhino3dm.Sphere sphere: The input sphere provides the orienting plane and radius.
+
+      :return: A Brep if successful, None on error.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromCone(cone, capBottom)
+
+      Constructs a Brep representation of the cone with a single
+      face for the cone, an edge along the cone seam,
+      and vertices at the base and apex ends of this seam edge.
+      The optional cap is a single face with one circular edge
+      starting and ending at the base vertex.
+
+      :param Cone cone: A cone value.
+      :param bool capBottom: if True the base of the cone should be capped.
+
+      :return: A Brep if successful, None on error.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromRevSurface(surface, capStart, capEnd)
+
+      Constructs a brep form of a surface of revolution.
+
+      :param RevSurface surface: The surface of revolution.
+      :param bool capStart: if true, the start of the revolute is not on the axis of revolution, \
+         and the surface of revolution is closed, then a circular cap will be \
+         added to close of the hole at the start of the revolute.
+      :param bool capEnd: if true, the end of the revolute is not on the axis of revolution, \
+         and the surface of revolution is closed, then a circular cap will be \
+         added to close of the hole at the end of the revolute.
+
+      :return: A Brep if successful, None on error.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromSurface(surface)
+
+      Constructs a Brep from a surface. The resulting Brep has an outer boundary made
+      from four trims. The trims are ordered so that they run along the south, east,
+      north, and then west side of the surface's parameter space.
+
+      :param rhino3dm.Surface surface: A surface to convert.
+
+      :return: Resulting brep or None on failure.
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateTrimmedPlane(plane, curve)
+
+      Create a Brep trimmed plane.
+
+      :param rhino3dm.Plane plane: Plane that will be trimmed.
+      :param rhino3dm.Curve curve: A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.
+
+      :return: Resulting brep or None on failure.
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: Flip()
+
+      Reverses entire brep orientation of all faces.
+
+      :rtype: void

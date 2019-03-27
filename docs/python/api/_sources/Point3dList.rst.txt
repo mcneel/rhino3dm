@@ -1,7 +1,88 @@
 Point3dList
-***********
+===========
 
-.. autoclass:: rhino3dm.Point3dList
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point3dList
+
+   .. py:method:: Point3dList()
+
+      Point3dList constructor
+
+
+   .. py:method:: Point3dList(initialCapacity)
+
+      Initializes a new point list with a preallocated initial capacity.
+
+      :param int initialCapacity: The number of added items before which the underlying array will be resized.
+
+   .. py:attribute:: Capacity
+
+
+   .. py:attribute:: Count
+
+
+   .. py:attribute:: BoundingBox
+
+      rhino3dm.BoundingBox: Even though this is a property, it is not a "fast" calculation. Every point is
+      evaluated in order to get the bounding box of the list.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation
+
+   .. py:method:: Insert(index, item)
+
+      [todo] add documentation
+
+   .. py:method:: RemoveAt(index)
+
+      [todo] add documentation
+
+   .. py:method:: Add(x, y, z)
+
+      Adds a Point3d to the end of the list with given x,y,z coordinates.
+
+      :param float x: The X coordinate.
+      :param float y: The Y coordinate.
+      :param float z: The Z coordinate.
+
+      :rtype: void
+
+   .. py:method:: Transform(xform)
+
+      Applies a transform to all the points in the list.
+
+      :param Transform xform: Transform to apply.
+
+      :rtype: void
+
+   .. py:method:: SetAllX(x)
+
+      Set all the X values for the points to a single value
+
+      :rtype: void
+
+   .. py:method:: SetAllY(y)
+
+      Set all the Y values for the points to a single value
+
+      :rtype: void
+
+   .. py:method:: SetAllZ(z)
+
+      Set all the Z values for the points to a single value
+
+      :rtype: void

@@ -1,7 +1,19 @@
 Point4d
-*******
+=======
 
-.. autoclass:: rhino3dm.Point4d
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point4d
+
+   .. py:method:: Point4d(x, y, z, w)
+
+      Initializes a new instance of the  class based on coordinates.
+
+      :param float x: The X (first) dimension.
+      :param float y: The Y (second) dimension.
+      :param float z: The Z (third) dimension.
+      :param float w: The W (fourth) dimension, or weight.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

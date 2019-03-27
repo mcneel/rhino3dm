@@ -1,7 +1,18 @@
 Point3f
-*******
+=======
 
-.. autoclass:: rhino3dm.Point3f
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Point3f
+
+   .. py:method:: Point3f(x, y, z)
+
+      Initializes a new two-dimensional vector from two components.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+      :param float z: Z component of vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

@@ -1,7 +1,85 @@
 Cylinder
-********
+========
 
-.. autoclass:: rhino3dm.Cylinder
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Cylinder
+
+   .. py:method:: Cylinder(baseCircle)
+
+      Constructs a new cylinder with infinite height.
+
+      :param Circle baseCircle: Base circle for infinite cylinder.
+
+   .. py:method:: Cylinder(baseCircle, height)
+
+      Constructs a new cylinder with a finite height.
+
+      :param Circle baseCircle: Base circle for cylinder.
+      :param float height: Height of cylinder (zero for infinite cylinder).
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a boolean value indicating whether this cylinder is valid.
+      A valid cylinder is represented by a valid circle and two valid heights.
+
+   .. py:attribute:: IsFinite
+
+      bool: True if the cylinder is finite (Height0 != Height1)
+      False if the cylinder is infinite.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets the center point of the defining circle.
+
+   .. py:attribute:: Axis
+
+      rhino3dm.Vector3d: Gets the axis direction of the cylinder.
+
+   .. py:attribute:: TotalHeight
+
+      float: Gets the height of the cylinder.
+      Infinite cylinders have a height of zero, not Double.PositiveInfinity.
+
+   .. py:attribute:: Height1
+
+      float: Gets or sets the start height of the cylinder.
+      The center of bottom cap is: BasePlane.Origin + Height1 * BasePlane.ZAxis.
+
+   .. py:attribute:: Height2
+
+      float: Gets or sets the end height of the cylinder.
+      If the end height equals the start height, the cylinder is
+      presumed to be infinite.
+      The center of top cap is: BasePlane.Origin + Height2 * BasePlane.ZAxis.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of the cylinder.
+
+   .. py:method:: CircleAt(linearParameter)
+
+      Compute the circle at the given elevation parameter.
+
+      :param float linearParameter: Height parameter for circle section.
+
+      :rtype: Circle
+
+   .. py:method:: ToBrep(capBottom, capTop)
+
+      Constructs a Brep representation of this Cylinder.
+      This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :param bool capBottom: If true, the bottom of the cylinder will be capped.
+      :param bool capTop: If true, the top of the cylinder will be capped.
+
+      :return: A Brep representation of the cylinder or null.
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: ToNurbsSurface()
+
+      Constructs a Nurbs surface representation of this cylinder.
+      This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :return: A Nurbs surface representation of the cylinder or null.
+      :rtype: NurbsSurface

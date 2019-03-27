@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,22 +227,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="texture">
-<h1>Texture<a class="headerlink" href="#texture" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="texture"></span><h1>Texture<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Texture">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Texture</code><a class="headerlink" href="#rhino3dm.Texture" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a texture that is mapped on objects.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.Texture.Texture">
+<code class="descname">Texture</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Texture.Texture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Texture constructor</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="rhino3dm.Texture.FileName">
 <code class="descname">FileName</code><a class="headerlink" href="#rhino3dm.Texture.FileName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets a file name that is used by this texture.
+<dd><p>str: Gets or sets a file name that is used by this texture.
 NOTE: We are moving away from string-based FileName, and suggest
 the usage of the new FileReference class.Also, this filename may well not be a path that makes sense
 on a user’s computer because it was a path initially set on
 a different user’s computer. If you want to get a workable path
 for this user, use the BitmapTable.Find function using this
 property.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Texture.FileReference">
+<code class="descname">FileReference</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Texture.FileReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

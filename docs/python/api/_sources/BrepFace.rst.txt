@@ -1,7 +1,15 @@
 BrepFace
-********
+========
 
-.. autoclass:: rhino3dm.BrepFace
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: BrepFace
+
+   .. py:method:: GetMesh(meshType)
+
+      Obtains a reference to a specified type of mesh for this brep face.
+
+      :param MeshType meshType: The mesh type.
+
+      :return: A mesh.
+      :rtype: rhino3dm.Mesh

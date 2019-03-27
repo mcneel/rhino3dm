@@ -1,7 +1,108 @@
 TextureMapping
-**************
+==============
 
-.. autoclass:: rhino3dm.TextureMapping
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: TextureMapping
+
+   .. py:method:: TextureMapping()
+
+      TextureMapping constructor
+
+
+   .. py:attribute:: RequiresVertexNormals
+
+
+   .. py:attribute:: IsPeriodic
+
+
+   .. py:staticmethod:: CreateSurfaceParameterMapping()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreatePlaneMapping(plane, dx, dy, dz)
+
+      Create a planar UV projection texture mapping
+
+      :param rhino3dm.Plane plane: A plane to use for mapping.
+      :param rhino3dm.Interval dx: portion of the plane's x axis that is mapped to [0,1] (can be a decreasing interval)
+      :param rhino3dm.Interval dy: portion of the plane's y axis that is mapped to [0,1] (can be a decreasing interval)
+      :param rhino3dm.Interval dz: portion of the plane's z axis that is mapped to [0,1] (can be a decreasing interval)
+
+      :return: TextureMapping instance if input is valid
+      :rtype: TextureMapping
+
+   .. py:staticmethod:: CreateCylinderMapping(cylinder, capped)
+
+      Create a cylindrical projection texture mapping.
+
+      :param Cylinder cylinder: cylinder in world space used to define a cylindrical coordinate system. \
+         The angular parameter maps (0,2pi) to texture "u" (0,1), The height \
+         parameter maps (height[0],height[1]) to texture "v" (0,1), and the \
+         radial parameter maps (0,r) to texture "w" (0,1).
+      :param bool capped: If true, the cylinder is treated as a finite capped cylinder
+
+      :return: TextureMapping instance if input is valid
+      :rtype: TextureMapping
+
+   .. py:staticmethod:: CreateSphereMapping(sphere)
+
+      Create a spherical projection texture mapping.
+
+      :param rhino3dm.Sphere sphere: sphere in world space used to define a spherical coordinate system. \
+         The longitude parameter maps (0,2pi) to texture "u" (0,1). \
+         The latitude paramter maps (-pi/2,+pi/2) to texture "v" (0,1). \
+         The radial parameter maps (0,r) to texture "w" (0,1).
+
+      :return: TextureMapping instance if input is valid
+      :rtype: TextureMapping
+
+   .. py:staticmethod:: CreateBoxMapping(plane, dx, dy, dz, capped)
+
+      Create a box projection texture mapping.
+
+      :param rhino3dm.Plane plane: The sides of the box the box are parallel to the plane's coordinate \
+         planes.  The dx, dy, dz intervals determine the location of the sides.
+      :param rhino3dm.Interval dx: Determines the location of the front and back planes. The vector \
+         plane.xaxis is perpendicular to these planes and they pass through \
+         plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectivly.
+      :param rhino3dm.Interval dy: Determines the location of the left and right planes. The vector \
+         plane.yaxis is perpendicular to these planes and they pass through \
+         plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectivly.
+      :param rhino3dm.Interval dz: Determines the location of the top and bottom planes. The vector \
+         plane.zaxis is perpendicular to these planes and they pass through \
+         plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectivly.
+      :param bool capped: If true, the box is treated as a finite capped box.
+
+      :return: TextureMapping instance if input is valid
+      :rtype: TextureMapping
+
+   .. py:method:: TryGetMappingCylinder()
+
+      Get a cylindrical projection parameters from this texture mapping.
+
+      :return: Returns True if a valid cylinder is returned.
+      :rtype: bool
+
+   .. py:method:: TryGetMappingSphere()
+
+      Get a spherical projection parameters from this texture mapping.
+
+      :return: Returns True if a valid sphere is returned.
+      :rtype: bool
+
+   .. py:method:: ReverseTextureCoordinate(dir)
+
+      [todo] add documentation
+
+   .. py:method:: SwapTextureCoordinate(i, j)
+
+      [todo] add documentation
+
+   .. py:method:: TileTextureCoordinate(dir, count, offset)
+
+      [todo] add documentation
+
+   .. py:method:: Evaluate(p, n)
+
+      [todo] add documentation

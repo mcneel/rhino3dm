@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,99 +227,74 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="polyline">
-<h1>Polyline<a class="headerlink" href="#polyline" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="polyline"></span><h1>Polyline<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Polyline">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Polyline</code><span class="sig-paren">(</span><em>initialCapacity</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Point3dList.html#rhino3dm.Point3dList" title="rhino3dm.Point3dList"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Point3dList</span></code></a></p>
-<p>Represents an ordered set of points connected by linear segments.
-Polylines are closed if start and end points coincide.</p>
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Polyline</code><a class="headerlink" href="#rhino3dm.Polyline" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.Polyline.Polyline">
+<code class="descname">Polyline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.Polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polyline constructor</p>
+</dd></dl>
+
 <dl class="method">
-<dt id="rhino3dm.Polyline.ClosestParameter">
-<code class="descname">ClosestParameter</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.ClosestParameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the parameter along the polyline which is closest to a test-point.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>testPoint : Point to approximate.</dd>
-<dt>Returns:</dt>
-<dd>The parameter along the polyline closest to testPoint.</dd>
-</dl>
+<dt>
+<code class="descname">Polyline</code><span class="sig-paren">(</span><em>initialCapacity</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a new empty polyline with an initial capacity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>initialCapacity</strong> (<em>int</em>) – Number of vertices this polyline can contain without resizing.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Polyline.CreateCircumscribedPolygon">
-<em class="property">static </em><code class="descname">CreateCircumscribedPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>sideCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateCircumscribedPolygon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a regular polygon circumscribe about a circle. The midpoints of the polygon’s edges will be tanget to the circle.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>circle : The circle.
-sideCount : The number of sides</dd>
-<dt>Returns:</dt>
-<dd>A closed polyline if successful, null otherwise.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.Polyline.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Polyline.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value that indicates whether this polyline is valid.
+Valid polylines have at least one segment, no Invalid points and no zero length segments.Closed polylines with only two segments are also not considered valid.</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Polyline.CreateInscribedPolygon">
-<em class="property">static </em><code class="descname">CreateInscribedPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>sideCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateInscribedPolygon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a regular polygon inscribed in a circle. The vertices of the polygon will be on the circle.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>circle : The circle.
-sideCount : The number of sides</dd>
-<dt>Returns:</dt>
-<dd>A closed polyline if successful, null otherwise.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Polyline.CreateStarPolygon">
-<em class="property">static </em><code class="descname">CreateStarPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>radius</em>, <em>cornerCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateStarPolygon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a regular star polygon. The star begins at circle.PointAt(0) and the vertices
-alternate between being on circle and begin on a concentric circle of other_radius.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>circle : The circle.
-radius : The radius of other circle.
-cornerCount : The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.</dd>
-<dt>Returns:</dt>
-<dd>A closed polyline if successful, null otherwise.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.Polyline.SegmentCount">
+<code class="descname">SegmentCount</code><a class="headerlink" href="#rhino3dm.Polyline.SegmentCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the number of segments for this polyline.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Polyline.IsClosed">
 <code class="descname">IsClosed</code><a class="headerlink" href="#rhino3dm.Polyline.IsClosed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether this polyline is closed.
+<dd><p>bool: Gets a value that indicates whether this polyline is closed.
 The polyline is considered to be closed if its start is
 identical to its endpoint.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Polyline.Length">
+<code class="descname">Length</code><a class="headerlink" href="#rhino3dm.Polyline.Length" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the total length of the polyline.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Polyline.IsClosedWithinTolerance">
 <code class="descname">IsClosedWithinTolerance</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.IsClosedWithinTolerance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines whether the polyline is closed, provided a tolerance value.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>tolerance : If the distance between the start and end point of the polyline
-tolerance : is less than tolerance, the polyline is considered to be closed.</dd>
-<dt>Returns:</dt>
-<dd>true if the polyline is closed to within tolerance, false otherwise.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Polyline.IsValid">
-<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Polyline.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value that indicates whether this polyline is valid.
-Valid polylines have at least one segment, no Invalid points and no zero length segments.Closed polylines with only two segments are also not considered valid.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Polyline.Length">
-<code class="descname">Length</code><a class="headerlink" href="#rhino3dm.Polyline.Length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the total length of the polyline.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tolerance</strong> (<em>float</em>) – If the distance between the start and end point of the polyline is less than tolerance, the polyline is considered to be closed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the polyline is closed to within tolerance, False otherwise.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -326,18 +302,18 @@ Valid polylines have at least one segment, no Invalid points and no zero length 
 <code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.PointAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the point on the polyline at the given parameter.
 The integer part of the parameter indicates the index of the segment.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Polyline parameter.</dd>
-<dt>Returns:</dt>
-<dd>The point on the polyline at t.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Polyline.SegmentCount">
-<code class="descname">SegmentCount</code><a class="headerlink" href="#rhino3dm.Polyline.SegmentCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of segments for this polyline.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Polyline parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The point on the polyline at t.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -345,32 +321,148 @@ The integer part of the parameter indicates the index of the segment.</p>
 <code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.TangentAt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the unit tangent vector along the polyline at the given parameter.
 The integer part of the parameter indicates the index of the segment.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>t : Polyline parameter.</dd>
-<dt>Returns:</dt>
-<dd>The tangent along the polyline at t.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Polyline parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tangent along the polyline at t.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Polyline.ClosesPoint">
+<code class="descname">ClosesPoint</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.ClosesPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Polyline.ClosestParameter">
+<code class="descname">ClosestParameter</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.ClosestParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the parameter along the polyline which is closest to a test-point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point to approximate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The parameter along the polyline closest to testPoint.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Polyline.ToNurbsCurve">
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a nurbs curve representation of this polyline.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A Nurbs curve shaped like this polyline or null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Nurbs curve shaped like this polyline or None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsCurve.html#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Polyline.ToPolylineCurve">
 <code class="descname">ToPolylineCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.ToPolylineCurve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a polyline curve representation of this polyline.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A curve shaped like this polyline or null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A curve shaped like this polyline or None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">PolylineCurve</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Polyline.CreateInscribedPolygon">
+<em class="property">static </em><code class="descname">CreateInscribedPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>sideCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateInscribedPolygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a regular polygon inscribed in a circle. The vertices of the polygon will be on the circle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>circle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – The circle.</li>
+<li><strong>sideCount</strong> (<em>int</em>) – The number of sides</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A closed polyline if successful, None otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Polyline" title="rhino3dm.Polyline">rhino3dm.Polyline</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Polyline.CreateCircumscribedPolygon">
+<em class="property">static </em><code class="descname">CreateCircumscribedPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>sideCount</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateCircumscribedPolygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a regular polygon circumscribe about a circle. The midpoints of the polygon’s edges will be tanget to the circle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>circle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – The circle.</li>
+<li><strong>sideCount</strong> (<em>int</em>) – The number of sides</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A closed polyline if successful, None otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Polyline" title="rhino3dm.Polyline">rhino3dm.Polyline</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Polyline.CreateStarPolygon">
+<em class="property">static </em><code class="descname">CreateStarPolygon</code><span class="sig-paren">(</span><em>circle</em>, <em>radius</em>, <em>cornerCounts</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Polyline.CreateStarPolygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a regular star polygon. The star begins at circle.PointAt(0) and the vertices
+alternate between being on circle and begin on a concentric circle of other_radius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>circle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – The circle.</li>
+<li><strong>radius</strong> (<em>float</em>) – The radius of other circle.</li>
+<li><strong>cornerCount</strong> (<em>int</em>) – The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A closed polyline if successful, None otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Polyline" title="rhino3dm.Polyline">rhino3dm.Polyline</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -1,7 +1,30 @@
 Plane
-*****
+=====
 
-.. autoclass:: rhino3dm.Plane
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Plane
+
+   .. py:staticmethod:: WorldXY()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: WorldYZ()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: WorldZX()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Unset()
+
+      [todo] add documentation
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation

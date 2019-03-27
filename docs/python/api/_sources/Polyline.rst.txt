@@ -1,7 +1,125 @@
 Polyline
-********
+========
 
-.. autoclass:: rhino3dm.Polyline
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Polyline
+
+   .. py:method:: Polyline()
+
+      Polyline constructor
+
+
+   .. py:method:: Polyline(initialCapacity)
+
+      Initializes a new empty polyline with an initial capacity.
+
+      :param int initialCapacity: Number of vertices this polyline can contain without resizing.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value that indicates whether this polyline is valid.
+      Valid polylines have at least one segment, no Invalid points and no zero length segments.Closed polylines with only two segments are also not considered valid.
+
+   .. py:attribute:: SegmentCount
+
+      int: Gets the number of segments for this polyline.
+
+   .. py:attribute:: IsClosed
+
+      bool: Gets a value that indicates whether this polyline is closed.
+      The polyline is considered to be closed if its start is
+      identical to its endpoint.
+
+   .. py:attribute:: Length
+
+      float: Gets the total length of the polyline.
+
+   .. py:method:: IsClosedWithinTolerance(tolerance)
+
+      Determines whether the polyline is closed, provided a tolerance value.
+
+      :param float tolerance: If the distance between the start and end point of the polyline \
+         is less than tolerance, the polyline is considered to be closed.
+
+      :return: True if the polyline is closed to within tolerance, False otherwise.
+      :rtype: bool
+
+   .. py:method:: PointAt(t)
+
+      Gets the point on the polyline at the given parameter.
+      The integer part of the parameter indicates the index of the segment.
+
+      :param float t: Polyline parameter.
+
+      :return: The point on the polyline at t.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Gets the unit tangent vector along the polyline at the given parameter.
+      The integer part of the parameter indicates the index of the segment.
+
+      :param float t: Polyline parameter.
+
+      :return: The tangent along the polyline at t.
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: ClosesPoint(testPoint)
+
+      [todo] add documentation
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets the parameter along the polyline which is closest to a test-point.
+
+      :param rhino3dm.Point3d testPoint: Point to approximate.
+
+      :return: The parameter along the polyline closest to testPoint.
+      :rtype: float
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a nurbs curve representation of this polyline.
+
+      :return: A Nurbs curve shaped like this polyline or None on failure.
+      :rtype: rhino3dm.NurbsCurve
+
+   .. py:method:: ToPolylineCurve()
+
+      Constructs a polyline curve representation of this polyline.
+
+      :return: A curve shaped like this polyline or None on failure.
+      :rtype: PolylineCurve
+
+   .. py:staticmethod:: CreateInscribedPolygon(circle, sideCount)
+
+      Create a regular polygon inscribed in a circle. The vertices of the polygon will be on the circle.
+
+      :param Circle circle: The circle.
+      :param int sideCount: The number of sides
+
+      :return: A closed polyline if successful, None otherwise.
+      :rtype: rhino3dm.Polyline
+
+   .. py:staticmethod:: CreateCircumscribedPolygon(circle, sideCount)
+
+      Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tanget to the circle.
+
+      :param Circle circle: The circle.
+      :param int sideCount: The number of sides
+
+      :return: A closed polyline if successful, None otherwise.
+      :rtype: rhino3dm.Polyline
+
+   .. py:staticmethod:: CreateStarPolygon(circle, radius, cornerCounts)
+
+      Create a regular star polygon. The star begins at circle.PointAt(0) and the vertices
+      alternate between being on circle and begin on a concentric circle of other_radius.
+
+      :param Circle circle: The circle.
+      :param float radius: The radius of other circle.
+      :param int cornerCount: The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.
+
+      :return: A closed polyline if successful, None otherwise.
+      :rtype: rhino3dm.Polyline

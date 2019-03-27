@@ -1,7 +1,126 @@
 Sphere
-******
+======
 
-.. autoclass:: rhino3dm.Sphere
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Sphere
+
+   .. py:method:: Sphere(center, radius)
+
+      Initializes a new sphere given center point and radius.
+
+      :param rhino3dm.Point3d center: A center point.
+      :param float radius: A radius value.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value that indicates whether the sphere is valid.
+
+   .. py:attribute:: Diameter
+
+      float: Gets or sets the diameter for this sphere.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the Radius for this sphere.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets or sets the center point of the sphere.
+
+   .. py:attribute:: NorthPole
+
+      rhino3dm.Point3d: Gets the point at the North Pole of the sphere.
+      This is the parameterization singularity that can be obtained,
+      at V value +Math.Pi/2.
+
+   .. py:attribute:: SouthPole
+
+      rhino3dm.Point3d: Gets the point at the South Pole of the sphere.
+      This is the parameterization singularity that can be obtained,
+      at V value -Math.Pi/2.
+
+   .. py:method:: LatitudeRadians(radians)
+
+      Computes the parallel at a specific latitude angle.
+      The angle is specified in radians.
+
+      :param float radians: An angle in radians for the parallel.
+
+      :return: A circle.
+      :rtype: Circle
+
+   .. py:method:: LatitudeDegrees(degrees)
+
+      Computes the parallel at a specific latitude angle.
+      The angle is specified in degrees.
+
+      :param float degrees: An angle in degrees for the meridian.
+
+      :return: A circle.
+      :rtype: Circle
+
+   .. py:method:: LongitudeRadians(radians)
+
+      Computes the meridian at a specific longitude angle.
+      The angle is specified in radians.
+
+      :param float radians: An angle in radians.
+
+      :return: A circle.
+      :rtype: Circle
+
+   .. py:method:: LongitureDegrees(degrees)
+
+      [todo] add documentation
+
+   .. py:method:: PointAt(longitudeRadians, latitudeRadians)
+
+      Evaluates the sphere at specific longitude and latitude angles.
+
+      :param float longitudeRadians: A number within the interval [0, 2pi].
+      :param float latitudeRadians: A number within the interval [-pi/2,pi/2].
+
+      :return: A point value.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: NormalAt(longitudeRadians, latitudeRadians)
+
+      Computes the normal at a specific angular location on the sphere.
+
+      :param float longitudeRadians: A number within the interval [0, 2pi].
+      :param float latitudeRadians: A number within the interval [-pi/2, pi/2].
+
+      :return: A vector.
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Returns point on sphere that is closest to given point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto Sphere.
+
+      :return: Point on sphere surface closest to testPoint.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: ToBrep()
+
+      Converts this sphere is it Brep representation
+
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: ToNurbsSurface()
+
+      Converts this sphere to its NurbsSurface representation.
+      This is synonymous with calling NurbsSurface.CreateFromSphere().
+
+      :return: A nurbs surface representation of this sphere or null.
+      :rtype: NurbsSurface
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation

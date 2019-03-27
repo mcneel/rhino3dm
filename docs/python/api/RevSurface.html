@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,28 +227,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="revsurface">
-<h1>RevSurface<a class="headerlink" href="#revsurface" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="revsurface"></span><h1>RevSurface<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.RevSurface">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">RevSurface</code><a class="headerlink" href="#rhino3dm.RevSurface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.Surface</span></code></a></p>
-<p>Represents a surface of revolution.
-Revolutions can be incomplete (they can form arcs).</p>
+<dd><dl class="method">
+<dt id="rhino3dm.RevSurface.RevSurface">
+<code class="descname">RevSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RevSurface.RevSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>RevSurface constructor</p>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="rhino3dm.RevSurface.Create">
-<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>revoluteCurve</em>, <em>axisOfRevolution</em>, <em>startAngleRadians</em>, <em>endAngleRadians</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RevSurface.Create" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">Create</code><span class="sig-paren">(</span><em>revoluteCurve</em>, <em>axisOfRevolution</em>, <em>startAngle</em>, <em>endAngle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RevSurface.Create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a new surface of revolution from a generatrix curve and an axis.
 This overload accepts a slice start and end angles.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>revoluteCurve : A generatrix.
-axisOfRevolution : An axis.
-startAngleRadians : An angle in radias for the start.
-endAngleRadians : An angle in radias for the end.</dd>
-<dt>Returns:</dt>
-<dd>A new surface of revolution, or null if any of the inputs is invalid or on error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>revoluteCurve</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – A generatrix.</li>
+<li><strong>axisOfRevolution</strong> (<a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line"><em>Line</em></a>) – An axis.</li>
+<li><strong>startAngleRadians</strong> (<em>float</em>) – An angle in radias for the start.</li>
+<li><strong>endAngleRadians</strong> (<em>float</em>) – An angle in radias for the end.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new surface of revolution, or None if any of the inputs is invalid or on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.RevSurface" title="rhino3dm.RevSurface">RevSurface</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

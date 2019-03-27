@@ -1,7 +1,102 @@
 Mesh
-****
+====
 
-.. autoclass:: rhino3dm.Mesh
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Mesh
+
+   .. py:method:: Mesh()
+
+      Mesh constructor
+
+
+   .. py:attribute:: IsClosed
+
+      bool: Gets a value indicating whether a mesh is considered to be closed (solid).
+      A mesh is considered solid when every mesh edge borders two or more faces.
+
+   .. py:attribute:: HasCachedTextureCoordinates
+
+      bool: Will return True if SetCachedTextureCoordinates has been called;
+      otherwise will return false.
+
+   .. py:attribute:: Vertices
+
+      Collections.MeshVertexList: Gets access to the vertices set of this mesh.
+
+   .. py:attribute:: Faces
+
+      Collections.MeshFaceList: Gets access to the mesh face list.
+
+   .. py:attribute:: Normals
+
+      Collections.MeshVertexNormalList: Gets access to the vertex normal collection in this mesh.
+
+   .. py:attribute:: TextureCoordinates
+
+      Collections.MeshTextureCoordinateList: Gets access to the vertex texture coordinate collection in this mesh.
+
+   .. py:attribute:: PartitionCount
+
+      int: Number of partition information chunks stored on this mesh based
+      on the last call to CreatePartitions
+
+   .. py:method:: IsManifold(topologicalTest)
+
+      [todo] add documentation
+
+   .. py:method:: ClearTextureData()
+
+      Removes all texture coordinate information from this mesh.
+
+      :rtype: void
+
+   .. py:method:: ClearSurfaceData()
+
+      Removes surface parameters, curvature parameters and surface statistics from the mesh.
+
+      :rtype: void
+
+   .. py:method:: DestroyTopology()
+
+      Removes topology data, forcing all topology information to be recomputed.
+
+      :rtype: void
+
+   .. py:method:: DestroyTree()
+
+      Destroys the mesh vertex access tree.
+
+      :rtype: void
+
+   .. py:method:: DestroyPartition()
+
+      Destroys mesh partition.
+
+      :rtype: void
+
+   .. py:method:: Compact()
+
+      Removes any unreferenced objects from arrays, reindexes as needed
+      and shrinks arrays to minimum required size.
+
+      :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:method:: Append(other)
+
+      Appends a copy of another mesh to this one and updates indices of appended mesh parts.
+
+      :param rhino3dm.Mesh other: Mesh to append to this one.
+
+      :rtype: void
+
+   .. py:method:: CreatePartitions(maximumVertexCount, maximumTriangleCount)
+
+      In ancient times (or modern smartphone times), some rendering engines
+      were only able to process small batches of triangles and the
+      CreatePartitions() function was provided to partition the mesh into
+      subsets of vertices and faces that those rendering engines could handle.
+
+      :return: True on success
+      :rtype: bool

@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,49 +227,89 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="nurbscurvepointlist">
-<h1>NurbsCurvePointList<a class="headerlink" href="#nurbscurvepointlist" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="nurbscurvepointlist"></span><h1>NurbsCurvePointList<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.NurbsCurvePointList">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">NurbsCurvePointList</code><a class="headerlink" href="#rhino3dm.NurbsCurvePointList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides access to the control points of a nurbs curve.</p>
+<dd><dl class="attribute">
+<dt id="rhino3dm.NurbsCurvePointList.ControlPolygonLength">
+<code class="descname">ControlPolygonLength</code><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.ControlPolygonLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the length of the polyline connecting all control points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurvePointList.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurvePointList.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurvePointList.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhino3dm.NurbsCurvePointList.ChangeEndWeights">
 <code class="descname">ChangeEndWeights</code><span class="sig-paren">(</span><em>w0</em>, <em>w1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.ChangeEndWeights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a combination of scaling and reparameterization to change the end weights to the specified values.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>w0 : Weight for first control point.
-w1 : Weight for last control point.</dd>
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.NurbsCurvePointList.ControlPolygonLength">
-<code class="descname">ControlPolygonLength</code><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.ControlPolygonLength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the length of the polyline connecting all control points.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.NurbsCurvePointList.MakeNonRational">
-<code class="descname">MakeNonRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.MakeNonRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>w0</strong> (<em>float</em>) – Weight for first control point.</li>
+<li><strong>w1</strong> (<em>float</em>) – Weight for last control point.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.NurbsCurvePointList.MakeRational">
 <code class="descname">MakeRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.MakeRational" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts the curve to a Rational NURBS curve. Rational NURBS curves have weighted control points.</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>true on success, false on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.NurbsCurvePointList.MakeNonRational">
+<code class="descname">MakeNonRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurvePointList.MakeNonRational" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

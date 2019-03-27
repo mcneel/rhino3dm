@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,23 +227,156 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="brep">
-<h1>Brep<a class="headerlink" href="#brep" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="brep"></span><h1>Brep<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Brep">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Brep</code><a class="headerlink" href="#rhino3dm.Brep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="GeometryBase.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">rhino3dm.GeometryBase</span></code></a></p>
-<p>Boundary Representation. A surface or polysurface along with trim curve information.</p>
+<dd><dl class="method">
+<dt id="rhino3dm.Brep.Brep">
+<code class="descname">Brep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.Brep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brep constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.Faces">
+<code class="descname">Faces</code><a class="headerlink" href="#rhino3dm.Brep.Faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collections.BrepFaceList: Gets the brep faces list accessor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Brep.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Determines whether this brep is a solid, or a closed oriented manifold.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsManifold">
+<code class="descname">IsManifold</code><a class="headerlink" href="#rhino3dm.Brep.IsManifold" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether or not the Brep is manifold.
+Non-Manifold breps have at least one edge that is shared among three or more faces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Brep.IsSurface">
+<code class="descname">IsSurface</code><a class="headerlink" href="#rhino3dm.Brep.IsSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Returns True if the Brep has a single face and that face is geometrically the same
+as the underlying surface.  I.e., the face has trivial trimming.
+In this case, the surface is the first face surface. The flag
+Brep.Faces[0].OrientationIsReversed records the correspondence between the surface’s
+natural parametric orientation and the orientation of the Brep.trivial trimming here means that there is only one loop curve in the brep
+and that loop curve is the same as the underlying surface boundary.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromMesh">
+<em class="property">static </em><code class="descname">CreateFromMesh</code><span class="sig-paren">(</span><em>mesh</em>, <em>trimedTriangles</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a brep representation of a mesh</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="rhino3dm.Brep.CreateFromBox">
 <em class="property">static </em><code class="descname">CreateFromBox</code><span class="sig-paren">(</span><em>box</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromBox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs new brep that matches a bounding box.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>box : A box to use for creation.</dd>
-<dt>Returns:</dt>
-<dd>A new brep; or null on failure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>box</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – A box to use for creation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new brep; or None on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt>
+<em class="property">static </em><code class="descname">CreateFromBox</code><span class="sig-paren">(</span><em>box</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs new brep that matches a bounding box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>box</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – A box to use for creation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new brep; or None on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromCylinder">
+<em class="property">static </em><code class="descname">CreateFromCylinder</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a cylinder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cylinder</strong> (<a class="reference internal" href="Cylinder.html#rhino3dm.Cylinder" title="rhino3dm.Cylinder"><em>Cylinder</em></a>) – cylinder.IsFinite() must be true.</li>
+<li><strong>capBottom</strong> (<em>bool</em>) – if True end at cylinder.m_height[0] should be capped.</li>
+<li><strong>capTop</strong> (<em>bool</em>) – if True end at cylinder.m_height[1] should be capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Brep representation of the cylinder with a single face for the cylinder, an edge along the cylinder seam, and vertices at the bottom and top ends of this seam edge. The optional bottom/top caps are single faces with one circular edge starting and ending at the bottom/top vertex.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateFromSphere">
+<em class="property">static </em><code class="descname">CreateFromSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a sphere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sphere</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – The input sphere provides the orienting plane and radius.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Brep if successful, None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Brep.CreateQuadSphere">
+<em class="property">static </em><code class="descname">CreateQuadSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateQuadSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a Brep definition of a quad sphere.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sphere</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – The input sphere provides the orienting plane and radius.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Brep if successful, None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -253,72 +387,49 @@ face for the cone, an edge along the cone seam,
 and vertices at the base and apex ends of this seam edge.
 The optional cap is a single face with one circular edge
 starting and ending at the base vertex.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cone : A cone value.
-capBottom : if true the base of the cone should be capped.</dd>
-<dt>Returns:</dt>
-<dd>A Brep if successful, null on error.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Brep.CreateFromCylinder">
-<em class="property">static </em><code class="descname">CreateFromCylinder</code><span class="sig-paren">(</span><em>cylinder</em>, <em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromCylinder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a Brep definition of a cylinder.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>cylinder : cylinder.IsFinite() must be true.
-capBottom : if true end at cylinder.m_height[0] should be capped.
-capTop : if true end at cylinder.m_height[1] should be capped.</dd>
-<dt>Returns:</dt>
-<dd>A Brep representation of the cylinder with a single face for the cylinder,
-an edge along the cylinder seam, and vertices at the bottom and top ends of this
-seam edge. The optional bottom/top caps are single faces with one circular edge
-starting and ending at the bottom/top vertex.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Brep.CreateFromMesh">
-<em class="property">static </em><code class="descname">CreateFromMesh</code><span class="sig-paren">(</span><em>mesh</em>, <em>trimmedTriangles</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a brep representation of a mesh</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>trimmedTriangles : if true, triangles in the mesh will be represented by trimmed planes in
-trimmedTriangles : the brep. If false, triangles in the mesh will be represented by
-trimmedTriangles : untrimmed singular bilinear NURBS surfaces in the brep.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cone</strong> (<a class="reference internal" href="Cone.html#rhino3dm.Cone" title="rhino3dm.Cone"><em>Cone</em></a>) – A cone value.</li>
+<li><strong>capBottom</strong> (<em>bool</em>) – if True the base of the cone should be capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Brep if successful, None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Brep.CreateFromRevSurface">
 <em class="property">static </em><code class="descname">CreateFromRevSurface</code><span class="sig-paren">(</span><em>surface</em>, <em>capStart</em>, <em>capEnd</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromRevSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a brep form of a surface of revolution.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>surface : The surface of revolution.
-capStart : if true, the start of the revolute is not on the axis of revolution,
-capStart : and the surface of revolution is closed, then a circular cap will be
-capStart : added to close of the hole at the start of the revolute.
-capEnd : if true, the end of the revolute is not on the axis of revolution,
-capEnd : and the surface of revolution is closed, then a circular cap will be
-capEnd : added to close of the hole at the end of the revolute.</dd>
-<dt>Returns:</dt>
-<dd>A Brep if successful, null on error.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Brep.CreateFromSphere">
-<em class="property">static </em><code class="descname">CreateFromSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateFromSphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a Brep definition of a sphere.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>sphere : The input sphere provides the orienting plane and radius.</dd>
-<dt>Returns:</dt>
-<dd>A Brep if successful, null on error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>surface</strong> (<a class="reference internal" href="RevSurface.html#rhino3dm.RevSurface" title="rhino3dm.RevSurface"><em>RevSurface</em></a>) – The surface of revolution.</li>
+<li><strong>capStart</strong> (<em>bool</em>) – if true, the start of the revolute is not on the axis of revolution, and the surface of revolution is closed, then a circular cap will be added to close of the hole at the start of the revolute.</li>
+<li><strong>capEnd</strong> (<em>bool</em>) – if true, the end of the revolute is not on the axis of revolution, and the surface of revolution is closed, then a circular cap will be added to close of the hole at the end of the revolute.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Brep if successful, None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -327,73 +438,56 @@ capEnd : added to close of the hole at the end of the revolute.</dd>
 <dd><p>Constructs a Brep from a surface. The resulting Brep has an outer boundary made
 from four trims. The trims are ordered so that they run along the south, east,
 north, and then west side of the surface’s parameter space.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>surface : A surface to convert.</dd>
-<dt>Returns:</dt>
-<dd>Resulting brep or null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="rhino3dm.Brep.CreateQuadSphere">
-<em class="property">static </em><code class="descname">CreateQuadSphere</code><span class="sig-paren">(</span><em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateQuadSphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a Brep definition of a quad sphere.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>sphere : The input sphere provides the orienting plane and radius.</dd>
-<dt>Returns:</dt>
-<dd>A Brep if successful, null on error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>surface</strong> (<a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface"><em>rhino3dm.Surface</em></a>) – A surface to convert.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Resulting brep or None on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Brep.CreateTrimmedPlane">
 <em class="property">static </em><code class="descname">CreateTrimmedPlane</code><span class="sig-paren">(</span><em>plane</em>, <em>curve</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.CreateTrimmedPlane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Brep trimmed plane.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>plane : Plane that will be trimmed.
-curve : A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.</dd>
-<dt>Returns:</dt>
-<dd>Resulting brep or null on failure.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Brep.Faces">
-<code class="descname">Faces</code><a class="headerlink" href="#rhino3dm.Brep.Faces" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the brep faces list accessor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Plane that will be trimmed.</li>
+<li><strong>curve</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Resulting brep or None on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.Brep.Flip">
 <code class="descname">Flip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Brep.Flip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reverses entire brep orientation of all faces.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Brep.IsManifold">
-<code class="descname">IsManifold</code><a class="headerlink" href="#rhino3dm.Brep.IsManifold" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a value indicating whether or not the Brep is manifold.
-Non-Manifold breps have at least one edge that is shared among three or more faces.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Brep.IsSolid">
-<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Brep.IsSolid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines whether this brep is a solid, or a closed oriented manifold.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Brep.IsSurface">
-<code class="descname">IsSurface</code><a class="headerlink" href="#rhino3dm.Brep.IsSurface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns true if the Brep has a single face and that face is geometrically the same
-as the underlying surface.  I.e., the face has trivial trimming.
-In this case, the surface is the first face surface. The flag
-Brep.Faces[0].OrientationIsReversed records the correspondence between the surface’s
-natural parametric orientation and the orientation of the Brep.trivial trimming here means that there is only one loop curve in the brep
-and that loop curve is the same as the underlying surface boundary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

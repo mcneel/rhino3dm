@@ -82,6 +82,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -226,68 +227,112 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="cylinder">
-<h1>Cylinder<a class="headerlink" href="#cylinder" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rhino3dm">
+<span id="cylinder"></span><h1>Cylinder<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="rhino3dm.Cylinder">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Cylinder</code><a class="headerlink" href="#rhino3dm.Cylinder" title="Permalink to this definition">¶</a></dt>
-<dd><p>…</p>
+<dd><dl class="method">
+<dt id="rhino3dm.Cylinder.Cylinder">
+<code class="descname">Cylinder</code><span class="sig-paren">(</span><em>baseCircle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Cylinder.Cylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new cylinder with infinite height.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>baseCircle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – Base circle for infinite cylinder.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Cylinder</code><span class="sig-paren">(</span><em>baseCircle</em>, <em>height</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a new cylinder with a finite height.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>baseCircle</strong> (<a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle"><em>Circle</em></a>) – Base circle for cylinder.</li>
+<li><strong>height</strong> (<em>float</em>) – Height of cylinder (zero for infinite cylinder).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
-<dt id="rhino3dm.Cylinder.Axis">
-<code class="descname">Axis</code><a class="headerlink" href="#rhino3dm.Cylinder.Axis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the axis direction of the cylinder.</p>
+<dt id="rhino3dm.Cylinder.IsValid">
+<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Cylinder.IsValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a boolean value indicating whether this cylinder is valid.
+A valid cylinder is represented by a valid circle and two valid heights.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Cylinder.IsFinite">
+<code class="descname">IsFinite</code><a class="headerlink" href="#rhino3dm.Cylinder.IsFinite" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: True if the cylinder is finite (Height0 != Height1)
+False if the cylinder is infinite.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Cylinder.Center">
 <code class="descname">Center</code><a class="headerlink" href="#rhino3dm.Cylinder.Center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the center point of the defining circle.</p>
+<dd><p>rhino3dm.Point3d: Gets the center point of the defining circle.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Cylinder.CircleAt">
-<code class="descname">CircleAt</code><span class="sig-paren">(</span><em>linearParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Cylinder.CircleAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the circle at the given elevation parameter.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>linearParameter : Height parameter for circle section.</dd>
-</dl>
+<dl class="attribute">
+<dt id="rhino3dm.Cylinder.Axis">
+<code class="descname">Axis</code><a class="headerlink" href="#rhino3dm.Cylinder.Axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets the axis direction of the cylinder.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Cylinder.TotalHeight">
+<code class="descname">TotalHeight</code><a class="headerlink" href="#rhino3dm.Cylinder.TotalHeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets the height of the cylinder.
+Infinite cylinders have a height of zero, not Double.PositiveInfinity.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Cylinder.Height1">
 <code class="descname">Height1</code><a class="headerlink" href="#rhino3dm.Cylinder.Height1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the start height of the cylinder.
+<dd><p>float: Gets or sets the start height of the cylinder.
 The center of bottom cap is: BasePlane.Origin + Height1 * BasePlane.ZAxis.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Cylinder.Height2">
 <code class="descname">Height2</code><a class="headerlink" href="#rhino3dm.Cylinder.Height2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the end height of the cylinder.
+<dd><p>float: Gets or sets the end height of the cylinder.
 If the end height equals the start height, the cylinder is
 presumed to be infinite.
 The center of top cap is: BasePlane.Origin + Height2 * BasePlane.ZAxis.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.Cylinder.IsFinite">
-<code class="descname">IsFinite</code><a class="headerlink" href="#rhino3dm.Cylinder.IsFinite" title="Permalink to this definition">¶</a></dt>
-<dd><p>true if the cylinder is finite (Height0 != Height1)
-false if the cylinder is infinite.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Cylinder.IsValid">
-<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Cylinder.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a boolean value indicating whether this cylinder is valid.
-A valid cylinder is represented by a valid circle and two valid heights.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="rhino3dm.Cylinder.Radius">
 <code class="descname">Radius</code><a class="headerlink" href="#rhino3dm.Cylinder.Radius" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets or sets the radius of the cylinder.</p>
+<dd><p>float: Gets or sets the radius of the cylinder.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Cylinder.CircleAt">
+<code class="descname">CircleAt</code><span class="sig-paren">(</span><em>linearParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Cylinder.CircleAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the circle at the given elevation parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>linearParameter</strong> (<em>float</em>) – Height parameter for circle section.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -295,13 +340,24 @@ A valid cylinder is represented by a valid circle and two valid heights.</p>
 <code class="descname">ToBrep</code><span class="sig-paren">(</span><em>capBottom</em>, <em>capTop</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Cylinder.ToBrep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a Brep representation of this Cylinder.
 This is synonymous with calling NurbsSurface.CreateFromCylinder().</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>capBottom : If true, the bottom of the cylinder will be capped.
-capTop : If true, the top of the cylinder will be capped.</dd>
-<dt>Returns:</dt>
-<dd>A Brep representation of the cylinder or null.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>capBottom</strong> (<em>bool</em>) – If true, the bottom of the cylinder will be capped.</li>
+<li><strong>capTop</strong> (<em>bool</em>) – If true, the top of the cylinder will be capped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Brep representation of the cylinder or null.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -309,17 +365,16 @@ capTop : If true, the top of the cylinder will be capped.</dd>
 <code class="descname">ToNurbsSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Cylinder.ToNurbsSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a Nurbs surface representation of this cylinder.
 This is synonymous with calling NurbsSurface.CreateFromCylinder().</p>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>A Nurbs surface representation of the cylinder or null.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rhino3dm.Cylinder.TotalHeight">
-<code class="descname">TotalHeight</code><a class="headerlink" href="#rhino3dm.Cylinder.TotalHeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the height of the cylinder.
-Infinite cylinders have a height of zero, not Double.PositiveInfinity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Nurbs surface representation of the cylinder or null.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -1,7 +1,59 @@
 Box
-***
+===
 
-.. autoclass:: rhino3dm.Box
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: Box
+
+   .. py:method:: Box()
+
+      Box constructor
+
+
+   .. py:attribute:: IsValid
+
+      bool: Gets the validity of this Box. Boxes are invalid when the base plane or any of
+      the dimension intervals are invalid or decreasing.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets the point that is in the center of the box.
+
+   .. py:attribute:: Area
+
+      float: Gets the total surface area of this box.
+
+   .. py:attribute:: Volume
+
+      float: Gets the total volume of this box.
+
+   .. py:method:: PointAt(x, y, z)
+
+      Evaluates the box volume at the given unitized parameters.
+      The box has idealized side length of 1x1x1.
+
+      :param float x: Unitized parameter (between 0 and 1 is inside the box) along box X direction.
+      :param float y: Unitized parameter (between 0 and 1 is inside the box) along box Y direction.
+      :param float z: Unitized parameter (between 0 and 1 is inside the box) along box Z direction.
+
+      :return: The point at (x,y,z).
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: ClosestPoint(point)
+
+      Finds the closest point on or in the Box. The box should be Valid for this to work.
+
+      :param rhino3dm.Point3d point: Sample point.
+
+      :return: The point on or in the box that is closest to the sample point.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transforms this Box using a Transformation matrix. If the Transform does not preserve
+      Similarity, the dimensions of the resulting box cannot be trusted.
+
+      :param Transform xform: Transformation matrix to apply to this Box.
+
+      :return: True if the Box was successfully transformed, False if otherwise.
+      :rtype: bool

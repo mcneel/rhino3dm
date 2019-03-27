@@ -1,7 +1,11 @@
 PlaneSurface
-************
+============
 
-.. autoclass:: rhino3dm.PlaneSurface
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. py:module:: rhino3dm
+
+.. py:class:: PlaneSurface
+
+   .. py:method:: PlaneSurface()
+
+      PlaneSurface constructor
+
