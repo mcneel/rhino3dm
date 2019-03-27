@@ -42,7 +42,7 @@ void initRevSurfaceBindings(pybind11::module& m)
 {
   py::class_<BND_RevSurface, BND_Surface>(m, "RevSurface")
     .def(py::init<>())
-    .def_static("Create", &BND_RevSurface::Create1)
+    .def_static("Create", &BND_RevSurface::Create1, py::arg("revoluteCurve"), py::arg("axisOfRevolution"), py::arg("startAngle"), py::arg("endAngle"))
     ;
 }
 #endif

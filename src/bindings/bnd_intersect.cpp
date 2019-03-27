@@ -33,8 +33,8 @@ namespace py = pybind11;
 void initIntersectBindings(pybind11::module& m)
 {
   py::class_<BND_Intersection>(m, "Intersection")
-    .def_static("LineLine", &BND_Intersection::LineLine)
-    .def_static("LinePlane", &BND_Intersection::LinePlane)
+    .def_static("LineLine", &BND_Intersection::LineLine, py::arg("lineA"), py::arg("lineB"))
+    .def_static("LinePlane", &BND_Intersection::LinePlane, py::arg("line"), py::arg("plane"))
     ;
 
 }

@@ -28,7 +28,7 @@ namespace py = pybind11;
 void initLineCurveBindings(pybind11::module& m)
 {
   py::class_<BND_LineCurve, BND_Curve>(m, "LineCurve")
-    .def(py::init<ON_3dPoint, ON_3dPoint>())
+    .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("start"), py::arg("end"))
     ;
 }
 #endif

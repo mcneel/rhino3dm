@@ -154,7 +154,7 @@ void initPlaneBindings(pybind11::module& m)
     .def_readwrite("YAxis", &BND_Plane::m_yaxis)
     .def_readwrite("ZAxis", &BND_Plane::m_zaxis)
     .def("Encode", &BND_Plane::Encode)
-    .def_static("Decode", &BND_Plane::Decode)
+    .def_static("Decode", &BND_Plane::Decode, py::arg("jsonObject"))
     ;
 }
 #endif

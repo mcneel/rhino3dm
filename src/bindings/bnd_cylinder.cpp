@@ -46,8 +46,8 @@ namespace py = pybind11;
 void initCylinderBindings(pybind11::module& m)
 {
   py::class_<BND_Cylinder>(m, "Cylinder")
-    .def(py::init<const BND_Circle&>())
-    .def(py::init<const BND_Circle&, double>())
+    .def(py::init<const BND_Circle&>(), py::arg("baseCircle"))
+    .def(py::init<const BND_Circle&, double>(), py::arg("baseCircle"), py::arg("height"))
     .def_property_readonly("IsValid", &BND_Cylinder::IsValid)
     .def_property_readonly("IsFinite", &BND_Cylinder::IsFinite)
     .def_property_readonly("Center", &BND_Cylinder::Center)
@@ -56,8 +56,8 @@ void initCylinderBindings(pybind11::module& m)
     .def_property("Height1", &BND_Cylinder::GetHeight1, &BND_Cylinder::SetHeight1)
     .def_property("Height2", &BND_Cylinder::GetHeight2, &BND_Cylinder::SetHeight2)
     .def_property("Radius", &BND_Cylinder::GetRadius, &BND_Cylinder::SetRadius)
-    .def("CircleAt", &BND_Cylinder::CircleAt)
-    .def("ToBrep", &BND_Cylinder::ToBrep)
+    .def("CircleAt", &BND_Cylinder::CircleAt, py::arg("linearParameter"))
+    .def("ToBrep", &BND_Cylinder::ToBrep, py::arg("capBottom"), py::arg("capTop"))
     .def("ToNurbsSurface", &BND_Cylinder::ToNurbsSurface)
     ;
 }
