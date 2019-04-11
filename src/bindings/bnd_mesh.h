@@ -124,6 +124,18 @@ public:
   void SetNormal(int i, ON_3fVector v);
 };
 
+class BND_MeshVertexColorList
+{
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
+public:
+  BND_MeshVertexColorList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+  int Count() const { return m_mesh->m_C.Count(); }
+  BND_Color GetColor(int i) const { return ON_Color_to_Binding(m_mesh->m_C[i]); }
+  void SetColor(int i, BND_Color color) { m_mesh->m_C[i] = Binding_to_ON_Color(color); }
+};
+
+
 class BND_MeshTextureCoordinateList
 {
   ON_ModelComponentReference m_component_reference;
@@ -157,7 +169,7 @@ public:
   BND_MeshFaceList GetFaces();
   //public Collections.MeshNgonList Ngons
   //public Collections.MeshFaceNormalList FaceNormals
-  //public Collections.MeshVertexColorList VertexColors
+  BND_MeshVertexColorList VertexColors();
   BND_MeshTextureCoordinateList TextureCoordinates();
   //public Collections.MeshVertexStatusList ComponentStates
 

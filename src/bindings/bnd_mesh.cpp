@@ -138,6 +138,11 @@ BND_MeshNormalList BND_Mesh::GetNormals()
   return BND_MeshNormalList(m_mesh, m_component_ref);
 }
 
+BND_MeshVertexColorList BND_Mesh::VertexColors()
+{
+  return BND_MeshVertexColorList(m_mesh, m_component_ref);
+}
+
 BND_MeshTextureCoordinateList BND_Mesh::TextureCoordinates()
 {
   return BND_MeshTextureCoordinateList(m_mesh, m_component_ref);
@@ -279,6 +284,13 @@ BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentRef
   m_mesh = mesh;
 }
 
+BND_MeshVertexColorList::BND_MeshVertexColorList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_mesh = mesh;
+}
+
+
 ON_3fVector* BND_MeshNormalList::begin()
 {
   return m_mesh->m_N.At(0);
@@ -381,6 +393,12 @@ void initMeshBindings(pybind11::module& m)
     .def("__setitem__", &BND_MeshNormalList::SetNormal)
     ;
 
+  py::class_<BND_MeshVertexColorList>(m, "MeshVertexColorList")
+    .def("__len__", &BND_MeshVertexColorList::Count)
+    .def("__getitem__", &BND_MeshVertexColorList::GetColor)
+    .def("__setitem__", &BND_MeshVertexColorList::SetColor)
+    ;
+
   py::class_<BND_MeshTextureCoordinateList>(m, "MeshTextureCoordinateList")
     .def("__len__", &BND_MeshTextureCoordinateList::Count)
     .def("__getitem__", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
@@ -395,6 +413,7 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
     .def_property_readonly("Normals", &BND_Mesh::GetNormals)
+    .def_property_readonly("VertexColors", &BND_Mesh::VertexColors)
     .def_property_readonly("TextureCoordinates", &BND_Mesh::TextureCoordinates)
     .def("ClearTextureData", &BND_Mesh::ClearTextureData)
     .def("ClearSurfaceData", &BND_Mesh::ClearSurfaceData)
