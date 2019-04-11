@@ -13,6 +13,13 @@ from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 
 
+def system(cmd):
+    rv = os.system(cmd)
+    rc = rv if os.name == 'nt' else os.WEXITSTATUS(rv)
+    if (rc != 0):
+        raise RuntimeError('The command "{}" exited with {}'.format(cmd, rc))
+
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -77,17 +84,16 @@ class CMakeBuild(build_ext):
             command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
                                                                                    sys.executable,
                                                                                    ext.sourcedir+"/src")
-            os.system(command)
+            system(command)
             if bitness == 64:
                 for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
                     print(line.replace("WIN32;", "WIN64;"))
                 for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                     print(line.replace("WIN32;", "WIN64;"))
-            rv = os.system("cmake --build . --config Release --target _rhino3dm")
-            if int(rv) > 0: raise RuntimeError('CMake exited with {}'.format(rv))
+            system("cmake --build . --config Release --target _rhino3dm")
         else:
-            os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-            os.system("make")
+            system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
+            system("make")
 
         os.chdir(current_dir)
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
