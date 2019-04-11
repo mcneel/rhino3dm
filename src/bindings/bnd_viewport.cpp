@@ -16,32 +16,6 @@ void BND_Viewport::SetTrackedPointer(ON_Viewport* viewport, const ON_ModelCompon
   BND_CommonObject::SetTrackedPointer(viewport, compref);
 }
 
-bool BND_Viewport::IsValidCameraFrame() const
-{
-  return m_viewport->IsValidCameraFrame();
-}
-bool BND_Viewport::IsValidCamera() const
-{
-  return m_viewport->IsValidCamera();
-}
-bool BND_Viewport::IsValidFrustum() const
-{
-  return m_viewport->IsValidFrustum();
-}
-
-bool BND_Viewport::IsPerspectiveProjection() const
-{
-  return m_viewport->IsPerspectiveProjection();
-}
-bool BND_Viewport::IsParallelProjection() const
-{
-  return m_viewport->IsParallelProjection();
-}
-bool BND_Viewport::IsTwoPointPerspectiveProjection() const
-{
-  return m_viewport->IsTwoPointPerspectiveProjection();
-}
-
 void BND_Viewport::SetProjectionToParallel(bool parallel)
 {
   if( parallel )

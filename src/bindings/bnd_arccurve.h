@@ -19,7 +19,7 @@ public:
   BND_ArcCurve(const class BND_Arc& arc, double t0, double t1);
   BND_ArcCurve(const class BND_Circle& circle);
   BND_ArcCurve(const class BND_Circle& circle, double t0, double t1);
-  //class BND_Arc* GetArc() const;
+  class BND_Arc* GetArc() const;
   bool IsCompleteCircle() const { return m_arccurve->IsCircle(); }
   double GetRadius() const { return m_arccurve->Radius(); }
   double AngleRadians() const { return m_arccurve->AngleRadians(); }

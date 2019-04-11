@@ -16,13 +16,13 @@ public:
   BND_Viewport();
   BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 
-  bool IsValidCameraFrame() const;
-  bool IsValidCamera() const;
-  bool IsValidFrustum() const;
+  bool IsValidCameraFrame() const { return m_viewport->IsValidCameraFrame(); }
+  bool IsValidCamera() const { return m_viewport->IsValidCamera(); }
+  bool IsValidFrustum() const { return m_viewport->IsValidFrustum(); }
 
-  bool IsPerspectiveProjection() const;
-  bool IsParallelProjection() const;
-  bool IsTwoPointPerspectiveProjection() const;
+  bool IsPerspectiveProjection() const { return m_viewport->IsPerspectiveProjection(); }
+  bool IsParallelProjection() const { return m_viewport->IsParallelProjection(); }
+  bool IsTwoPointPerspectiveProjection() const { return m_viewport->IsTwoPointPerspectiveProjection(); }
   void SetProjectionToParallel(bool parallel);
   void SetProjectionToPerspective(bool perspective);
 
