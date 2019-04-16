@@ -86,6 +86,51 @@ bool BND_Viewport::SetFrustum(double left, double right, double bottom, double t
   return m_viewport->SetFrustum(left, right, bottom, top, near_dist, far_dist);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+BND_DICT BND_Viewport::GetFrustum() const
+{
+  double left, right, bottom, top, near_dist, far_dist;
+  bool success = m_viewport->GetFrustum(&left, &right, &bottom, &top, &near_dist, &far_dist);
+  if (success)
+  {
+    BND_DICT d;
+    d["left"] = left;
+    d["right"] = right;
+    d["bottom"] = bottom;
+    d["top"] = top;
+    d["near"] = near_dist;
+    d["far"] = far_dist;
+    return d;
+  }
+  throw pybind11::value_error("Invalid viewport");
+}
+
+void BND_Viewport::SetScreenPort(BND_DICT rect)
+{
+  int x = rect["x"].cast<int>();
+  int y = rect["y"].cast<int>();
+  int width = rect["width"].cast<int>();
+  int height = rect["height"].cast<int>();
+  m_viewport->SetScreenPort(x, x + width, y + height, y);
+}
+
+BND_DICT BND_Viewport::GetScreenPort() const
+{
+  int left, right, bottom, top, near_dist, far_dist;
+  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &near_dist, &far_dist);
+  if (success)
+  {
+    BND_DICT d;
+    d["x"] = left;
+    d["y"] = top;
+    d["width"] = fabs(right - left);
+    d["height"] = fabs(bottom - top);
+    return d;
+  }
+  throw pybind11::value_error("Invalid viewport");
+}
+#endif
+
 #if defined(__EMSCRIPTEN__)
 emscripten::val BND_Viewport::GetFrustum() const
 {
@@ -332,6 +377,9 @@ void initViewportBindings(pybind11::module& m)
     .def_property_readonly("CameraY", &BND_Viewport::CameraY)
     .def_property_readonly("CameraZ", &BND_Viewport::CameraZ)
     .def("SetFrustum", &BND_Viewport::SetFrustum, py::arg("left"), py::arg("right"), py::arg("bottom"), py::arg("top"), py::arg("near"), py::arg("far"))
+    .def("GetFrustum", &BND_Viewport::GetFrustum)
+    .def("SetScreenPort", &BND_Viewport::SetScreenPort)
+    .def("GetScreenPort", &BND_Viewport::GetScreenPort)
     .def_property_readonly("ScreenPortAspect", &BND_Viewport::ScreenPortAspect)
     .def_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
