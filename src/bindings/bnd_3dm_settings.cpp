@@ -145,6 +145,29 @@ void init3dmSettingsBindings(void*)
     //.property("viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport, allow_raw_pointers())
     ;
 
+  class_<BND_RenderSettings, base<BND_CommonObject>>("RenderSettings")
+    .constructor<>()
+    .property("ambientLight", &BND_RenderSettings::GetAmbientLight, &BND_RenderSettings::SetAmbientLight)
+    .property("backgroundColorTop", &BND_RenderSettings::GetBackgroundColorTop, &BND_RenderSettings::SetBackgroundColorTop)
+    .property("backgroundColorBottom", &BND_RenderSettings::GetBackgroundColorBottom, &BND_RenderSettings::SetBackgroundColorBottom)
+    .property("useHiddenLights", &BND_RenderSettings::GetUseHiddenLights, &BND_RenderSettings::SetUseHiddenLights)
+    .property("depthCue", &BND_RenderSettings::GetDepthCue, &BND_RenderSettings::SetDepthCue)
+    .property("flatShade", &BND_RenderSettings::GetFlatShade, &BND_RenderSettings::SetFlatShade)
+    .property("renderBackFaces", &BND_RenderSettings::GetRenderBackFaces, &BND_RenderSettings::SetRenderBackFaces)
+    .property("renderPoints", &BND_RenderSettings::GetRenderPoints, &BND_RenderSettings::SetRenderPoints)
+    .property("renderCurves", &BND_RenderSettings::GetRenderCurves, &BND_RenderSettings::SetRenderCurves)
+    .property("renderIsoParams", &BND_RenderSettings::GetRenderIsoParams, &BND_RenderSettings::SetRenderIsoParams)
+    .property("renderMeshEdges", &BND_RenderSettings::GetRenderMeshEdges, &BND_RenderSettings::SetRenderMeshEdges)
+    .property("renderAnnotations", &BND_RenderSettings::GetRenderAnnotations, &BND_RenderSettings::SetRenderAnnotations)
+    .property("useViewportSize", &BND_RenderSettings::GetUseViewportSize, &BND_RenderSettings::SetUseViewportSize)
+    .property("scaleBackgroundToFit", &BND_RenderSettings::GetScaleBackgroundToFit, &BND_RenderSettings::SetScaleBackgroundToFit)
+    .property("transparentBackground", &BND_RenderSettings::GetTransparentBackground, &BND_RenderSettings::SetTransparentBackground)
+    .property("imageDpi", &BND_RenderSettings::GetImageDpi, &BND_RenderSettings::SetImageDpi)
+    .property("shadowMapLevel", &BND_RenderSettings::GetShadowMapLevel, &BND_RenderSettings::SetShadowMapLevel)
+    .property("namedView", &BND_RenderSettings::GetNamedView, &BND_RenderSettings::SetNamedView)
+    .property("snapShot", &BND_RenderSettings::GetSnapShot, &BND_RenderSettings::SetSnapShot)
+    .property("specificViewport", &BND_RenderSettings::GetSpecificViewport, &BND_RenderSettings::SetSpecificViewport)
+    ;
 
   class_<BND_File3dmSettings>("File3dmSettings")
     .property("modelUrl", &BND_File3dmSettings::GetModelUrl, &BND_File3dmSettings::SetModelUrl)
@@ -159,6 +182,7 @@ void init3dmSettingsBindings(void*)
     .property("pageRelativeTolerance", &BND_File3dmSettings::GetPageRelativeTolerance, &BND_File3dmSettings::SetPageRelativeTolerance)
     .property("modelUnitSystem", &BND_File3dmSettings::GetModelUnitSystem, &BND_File3dmSettings::SetModelUnitSystem)
     .property("pageUnitSystem", &BND_File3dmSettings::GetPageUnitSystem, &BND_File3dmSettings::SetPageUnitSystem)
+    .function("renderSettings", &BND_File3dmSettings::GetRenderSettings)
     ;
 }
 #endif
