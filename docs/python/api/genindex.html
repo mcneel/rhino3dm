@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshVertexColorList.html">MeshVertexColorList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurve.html">NurbsCurve</a></li>
@@ -151,6 +152,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
@@ -286,6 +288,8 @@
 </li>
         <li><a href="MeshTextureCoordinateList.html#rhino3dm.MeshTextureCoordinateList.__getitem__">(rhino3dm.MeshTextureCoordinateList method)</a>
 </li>
+        <li><a href="MeshVertexColorList.html#rhino3dm.MeshVertexColorList.__getitem__">(rhino3dm.MeshVertexColorList method)</a>
+</li>
         <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList.__getitem__">(rhino3dm.MeshVertexList method)</a>
 </li>
         <li><a href="NurbsCurveKnotList.html#rhino3dm.NurbsCurveKnotList.__getitem__">(rhino3dm.NurbsCurveKnotList method)</a>
@@ -313,8 +317,6 @@
         <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList.__iter__">(rhino3dm.MeshVertexList method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="BrepFaceList.html#rhino3dm.BrepFaceList.__len__">__len__() (rhino3dm.BrepFaceList method)</a>
 
       <ul>
@@ -342,6 +344,8 @@
 </li>
         <li><a href="MeshTextureCoordinateList.html#rhino3dm.MeshTextureCoordinateList.__len__">(rhino3dm.MeshTextureCoordinateList method)</a>
 </li>
+        <li><a href="MeshVertexColorList.html#rhino3dm.MeshVertexColorList.__len__">(rhino3dm.MeshVertexColorList method)</a>
+</li>
         <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList.__len__">(rhino3dm.MeshVertexList method)</a>
 </li>
         <li><a href="NurbsCurveKnotList.html#rhino3dm.NurbsCurveKnotList.__len__">(rhino3dm.NurbsCurveKnotList method)</a>
@@ -351,6 +355,8 @@
         <li><a href="Point3dList.html#rhino3dm.Point3dList.__len__">(rhino3dm.Point3dList method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="File3dmStringTable.html#rhino3dm.File3dmStringTable.__setitem__">__setitem__() (rhino3dm.File3dmStringTable method)</a>
 
       <ul>
@@ -359,6 +365,8 @@
         <li><a href="MeshNormalList.html#rhino3dm.MeshNormalList.__setitem__">(rhino3dm.MeshNormalList method)</a>
 </li>
         <li><a href="MeshTextureCoordinateList.html#rhino3dm.MeshTextureCoordinateList.__setitem__">(rhino3dm.MeshTextureCoordinateList method)</a>
+</li>
+        <li><a href="MeshVertexColorList.html#rhino3dm.MeshVertexColorList.__setitem__">(rhino3dm.MeshVertexColorList method)</a>
 </li>
         <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList.__setitem__">(rhino3dm.MeshVertexList method)</a>
 </li>
@@ -431,13 +439,15 @@
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.AddToGroup">AddToGroup() (rhino3dm.ObjectAttributes method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateBelowLine">AlternateBelowLine (rhino3dm.DimensionStyle attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateLengthFactor">AlternateLengthFactor (rhino3dm.DimensionStyle attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.AmbientColor">AmbientColor (rhino3dm.Material attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.AmbientLight">AmbientLight (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="Arc.html#rhino3dm.Arc.AngleDegrees">AngleDegrees (rhino3dm.Arc attribute)</a>
 
@@ -466,7 +476,11 @@
       <li><a href="File3dm.html#rhino3dm.File3dm.ApplicationUrl">ApplicationUrl (rhino3dm.File3dm attribute)</a>
 </li>
       <li><a href="Arc.html#rhino3dm.Arc">Arc (class in rhino3dm)</a>
+
+      <ul>
+        <li><a href="ArcCurve.html#rhino3dm.ArcCurve.Arc">(rhino3dm.ArcCurve attribute)</a>
 </li>
+      </ul></li>
       <li><a href="Arc.html#rhino3dm.Arc.Arc">Arc() (rhino3dm.Arc method)</a>, <a href="Arc.html#rhino3dm.Arc.Arc">[1]</a>, <a href="Arc.html#rhino3dm.Arc.Arc">[2]</a>, <a href="Arc.html#rhino3dm.Arc.Arc">[3]</a>
 </li>
       <li><a href="ArcCurve.html#rhino3dm.ArcCurve">ArcCurve (class in rhino3dm)</a>
@@ -501,6 +515,10 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.BackgroundColorBottom">BackgroundColorBottom (rhino3dm.RenderSettings attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.BackgroundColorTop">BackgroundColorTop (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.BaselineSpacing">BaselineSpacing (rhino3dm.DimensionStyle attribute)</a>
 </li>
       <li><a href="Cone.html#rhino3dm.Cone.BasePoint">BasePoint (rhino3dm.Cone attribute)</a>
@@ -517,14 +535,14 @@
 </li>
       <li><a href="Font.html#rhino3dm.Font.Bold">Bold (rhino3dm.Font attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="BoundingBox.html#rhino3dm.BoundingBox">BoundingBox (class in rhino3dm)</a>
 
       <ul>
         <li><a href="Point3dList.html#rhino3dm.Point3dList.BoundingBox">(rhino3dm.Point3dList attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Arc.html#rhino3dm.Arc.BoundingBox">BoundingBox() (rhino3dm.Arc method)</a>
 
       <ul>
@@ -817,6 +835,8 @@
 </li>
       <li><a href="ConstructionPlane.html#rhino3dm.ConstructionPlane.DepthBuffered">DepthBuffered (rhino3dm.ConstructionPlane attribute)</a>
 </li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.DepthCue">DepthCue (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="Circle.html#rhino3dm.Circle.DerivativeAt">DerivativeAt() (rhino3dm.Circle method)</a>
 </li>
       <li><a href="InstanceDefinition.html#rhino3dm.InstanceDefinition.Description">Description (rhino3dm.InstanceDefinition attribute)</a>
@@ -825,10 +845,10 @@
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh.DestroyTopology">DestroyTopology() (rhino3dm.Mesh method)</a>
 </li>
-      <li><a href="Mesh.html#rhino3dm.Mesh.DestroyTree">DestroyTree() (rhino3dm.Mesh method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Mesh.html#rhino3dm.Mesh.DestroyTree">DestroyTree() (rhino3dm.Mesh method)</a>
+</li>
       <li><a href="Transform.html#rhino3dm.Transform.Determinant">Determinant() (rhino3dm.Transform method)</a>
 </li>
       <li><a href="BoundingBox.html#rhino3dm.BoundingBox.Diagonal">Diagonal (rhino3dm.BoundingBox attribute)</a>
@@ -1007,6 +1027,8 @@
       </ul></li>
       <li><a href="File3dmLayerTable.html#rhino3dm.File3dmLayerTable.FindName">FindName() (rhino3dm.File3dmLayerTable method)</a>
 </li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.FlatShade">FlatShade (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="Brep.html#rhino3dm.Brep.Flip">Flip() (rhino3dm.Brep method)</a>
 </li>
       <li><a href="ViewInfo.html#rhino3dm.ViewInfo.FocalBlurAperture">FocalBlurAperture (rhino3dm.ViewInfo attribute)</a>
@@ -1055,6 +1077,8 @@
 </li>
       <li><a href="Material.html#rhino3dm.Material.GetEnvironmentTexture">GetEnvironmentTexture() (rhino3dm.Material method)</a>
 </li>
+      <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.GetFrustum">GetFrustum() (rhino3dm.ViewportInfo method)</a>
+</li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.GetGroupList">GetGroupList() (rhino3dm.ObjectAttributes method)</a>
 </li>
       <li><a href="BrepFace.html#rhino3dm.BrepFace.GetMesh">GetMesh() (rhino3dm.BrepFace method)</a>
@@ -1074,6 +1098,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Extrusion.html#rhino3dm.Extrusion.GetProfileTransformation">GetProfileTransformation() (rhino3dm.Extrusion method)</a>
+</li>
+      <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.GetScreenPort">GetScreenPort() (rhino3dm.ViewportInfo method)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.GetTransparencyTexture">GetTransparencyTexture() (rhino3dm.Material method)</a>
 </li>
@@ -1152,6 +1178,8 @@
       <li><a href="Transform.html#rhino3dm.Transform.Identity">Identity() (rhino3dm.Transform static method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.IgesLevel">IgesLevel (rhino3dm.Layer attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.ImageDpi">ImageDpi (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="BezierCurve.html#rhino3dm.BezierCurve.IncreaseDegree">IncreaseDegree() (rhino3dm.BezierCurve method)</a>
 
@@ -1239,10 +1267,10 @@
 </li>
       <li><a href="Cylinder.html#rhino3dm.Cylinder.IsFinite">IsFinite (rhino3dm.Cylinder attribute)</a>
 </li>
-      <li><a href="Transform.html#rhino3dm.Transform.IsIdentity">IsIdentity (rhino3dm.Transform attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Transform.html#rhino3dm.Transform.IsIdentity">IsIdentity (rhino3dm.Transform attribute)</a>
+</li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.IsInstanceDefinitionObject">IsInstanceDefinitionObject (rhino3dm.ObjectAttributes attribute)</a>
 </li>
       <li><a href="Curve.html#rhino3dm.Curve.IsLinear">IsLinear() (rhino3dm.Curve method)</a>
@@ -1487,6 +1515,8 @@
 </li>
       <li><a href="MeshTextureCoordinateList.html#rhino3dm.MeshTextureCoordinateList">MeshTextureCoordinateList (class in rhino3dm)</a>
 </li>
+      <li><a href="MeshVertexColorList.html#rhino3dm.MeshVertexColorList">MeshVertexColorList (class in rhino3dm)</a>
+</li>
       <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList">MeshVertexList (class in rhino3dm)</a>
 </li>
       <li><a href="Arc.html#rhino3dm.Arc.MidPoint">MidPoint (rhino3dm.Arc attribute)</a>
@@ -1539,6 +1569,8 @@
         <li><a href="ViewInfo.html#rhino3dm.ViewInfo.Name">(rhino3dm.ViewInfo attribute)</a>
 </li>
       </ul></li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.NamedView">NamedView (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="File3dm.html#rhino3dm.File3dm.NamedViews">NamedViews (rhino3dm.File3dm attribute)</a>
 </li>
       <li><a href="Circle.html#rhino3dm.Circle.Normal">Normal (rhino3dm.Circle attribute)</a>
@@ -1803,8 +1835,6 @@
 </li>
       <li><a href="FileReference.html#rhino3dm.FileReference.RelativePath">RelativePath (rhino3dm.FileReference attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="MeshingParameters.html#rhino3dm.MeshingParameters.RelativeTolerance">RelativeTolerance (rhino3dm.MeshingParameters attribute)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList.RemoveAt">RemoveAt() (rhino3dm.Point3dList method)</a>
@@ -1813,9 +1843,31 @@
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.RemoveFromGroup">RemoveFromGroup() (rhino3dm.ObjectAttributes method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderAnnotations">RenderAnnotations (rhino3dm.RenderSettings attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderBackFaces">RenderBackFaces (rhino3dm.RenderSettings attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderCurves">RenderCurves (rhino3dm.RenderSettings attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderIsoParams">RenderIsoParams (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="Layer.html#rhino3dm.Layer.RenderMaterialIndex">RenderMaterialIndex (rhino3dm.Layer attribute)</a>
 </li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderMeshEdges">RenderMeshEdges (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="Material.html#rhino3dm.Material.RenderPlugInId">RenderPlugInId (rhino3dm.Material attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderPoints">RenderPoints (rhino3dm.RenderSettings attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings">RenderSettings (class in rhino3dm)</a>
+
+      <ul>
+        <li><a href="File3dmSettings.html#rhino3dm.File3dmSettings.RenderSettings">(rhino3dm.File3dmSettings attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderSettings">RenderSettings() (rhino3dm.RenderSettings method)</a>, <a href="RenderSettings.html#rhino3dm.RenderSettings.RenderSettings">[1]</a>
 </li>
       <li><a href="NurbsCurve.html#rhino3dm.NurbsCurve.Reparameterize">Reparameterize() (rhino3dm.NurbsCurve method)</a>
 </li>
@@ -1837,7 +1889,7 @@
 </li>
       <li><a href="RevSurface.html#rhino3dm.RevSurface.RevSurface">RevSurface() (rhino3dm.RevSurface method)</a>
 </li>
-      <li><a href="Arc.html#module-rhino3dm">rhino3dm (module)</a>, <a href="ArcCurve.html#module-rhino3dm">[1]</a>, <a href="ArchivableDictionary.html#module-rhino3dm">[2]</a>, <a href="BezierCurve.html#module-rhino3dm">[3]</a>, <a href="Bitmap.html#module-rhino3dm">[4]</a>, <a href="BoundingBox.html#module-rhino3dm">[5]</a>, <a href="Box.html#module-rhino3dm">[6]</a>, <a href="Brep.html#module-rhino3dm">[7]</a>, <a href="BrepFace.html#module-rhino3dm">[8]</a>, <a href="BrepFaceList.html#module-rhino3dm">[9]</a>, <a href="Circle.html#module-rhino3dm">[10]</a>, <a href="CommonObject.html#module-rhino3dm">[11]</a>, <a href="ComponentIndex.html#module-rhino3dm">[12]</a>, <a href="Cone.html#module-rhino3dm">[13]</a>, <a href="ConstructionPlane.html#module-rhino3dm">[14]</a>, <a href="Curve.html#module-rhino3dm">[15]</a>, <a href="CurveProxy.html#module-rhino3dm">[16]</a>, <a href="Cylinder.html#module-rhino3dm">[17]</a>, <a href="DimensionStyle.html#module-rhino3dm">[18]</a>, <a href="Ellipse.html#module-rhino3dm">[19]</a>, <a href="Extrusion.html#module-rhino3dm">[20]</a>, <a href="File3dm.html#module-rhino3dm">[21]</a>, <a href="File3dmBitmapTable.html#module-rhino3dm">[22]</a>, <a href="File3dmDimStyleTable.html#module-rhino3dm">[23]</a>, <a href="File3dmInstanceDefinitionTable.html#module-rhino3dm">[24]</a>, <a href="File3dmLayerTable.html#module-rhino3dm">[25]</a>, <a href="File3dmMaterialTable.html#module-rhino3dm">[26]</a>, <a href="File3dmObject.html#module-rhino3dm">[27]</a>, <a href="File3dmObjectTable.html#module-rhino3dm">[28]</a>, <a href="File3dmPlugInData.html#module-rhino3dm">[29]</a>, <a href="File3dmPlugInDataTable.html#module-rhino3dm">[30]</a>, <a href="File3dmRdkDocumentData.html#module-rhino3dm">[31]</a>, <a href="File3dmSettings.html#module-rhino3dm">[32]</a>, <a href="File3dmStringTable.html#module-rhino3dm">[33]</a>, <a href="File3dmViewTable.html#module-rhino3dm">[34]</a>, <a href="FileReference.html#module-rhino3dm">[35]</a>, <a href="Font.html#module-rhino3dm">[36]</a>, <a href="GeometryBase.html#module-rhino3dm">[37]</a>, <a href="Hatch.html#module-rhino3dm">[38]</a>, <a href="InstanceDefinition.html#module-rhino3dm">[39]</a>, <a href="InstanceReference.html#module-rhino3dm">[40]</a>, <a href="Intersection.html#module-rhino3dm">[41]</a>, <a href="Interval.html#module-rhino3dm">[42]</a>, <a href="Layer.html#module-rhino3dm">[43]</a>, <a href="Line.html#module-rhino3dm">[44]</a>, <a href="LineCurve.html#module-rhino3dm">[45]</a>, <a href="Material.html#module-rhino3dm">[46]</a>, <a href="Mesh.html#module-rhino3dm">[47]</a>, <a href="MeshFaceList.html#module-rhino3dm">[48]</a>, <a href="MeshNormalList.html#module-rhino3dm">[49]</a>, <a href="MeshTextureCoordinateList.html#module-rhino3dm">[50]</a>, <a href="MeshVertexList.html#module-rhino3dm">[51]</a>, <a href="MeshingParameters.html#module-rhino3dm">[52]</a>, <a href="ModelComponent.html#module-rhino3dm">[53]</a>, <a href="NurbsCurve.html#module-rhino3dm">[54]</a>, <a href="NurbsCurveKnotList.html#module-rhino3dm">[55]</a>, <a href="NurbsCurvePointList.html#module-rhino3dm">[56]</a>, <a href="NurbsSurface.html#module-rhino3dm">[57]</a>, <a href="ObjectAttributes.html#module-rhino3dm">[58]</a>, <a href="Plane.html#module-rhino3dm">[59]</a>, <a href="PlaneSurface.html#module-rhino3dm">[60]</a>, <a href="Point.html#module-rhino3dm">[61]</a>, <a href="Point2d.html#module-rhino3dm">[62]</a>, <a href="Point3d.html#module-rhino3dm">[63]</a>, <a href="Point3dList.html#module-rhino3dm">[64]</a>, <a href="Point3f.html#module-rhino3dm">[65]</a>, <a href="Point4d.html#module-rhino3dm">[66]</a>, <a href="PointCloud.html#module-rhino3dm">[67]</a>, <a href="PointGrid.html#module-rhino3dm">[68]</a>, <a href="Polycurve.html#module-rhino3dm">[69]</a>, <a href="Polyline.html#module-rhino3dm">[70]</a>, <a href="Polylinecurve.html#module-rhino3dm">[71]</a>, <a href="RevSurface.html#module-rhino3dm">[72]</a>, <a href="Sphere.html#module-rhino3dm">[73]</a>, <a href="Surface.html#module-rhino3dm">[74]</a>, <a href="SurfaceProxy.html#module-rhino3dm">[75]</a>, <a href="Texture.html#module-rhino3dm">[76]</a>, <a href="TextureMapping.html#module-rhino3dm">[77]</a>, <a href="Transform.html#module-rhino3dm">[78]</a>, <a href="Vector2d.html#module-rhino3dm">[79]</a>, <a href="Vector3d.html#module-rhino3dm">[80]</a>, <a href="ViewInfo.html#module-rhino3dm">[81]</a>, <a href="ViewportInfo.html#module-rhino3dm">[82]</a>
+      <li><a href="Arc.html#module-rhino3dm">rhino3dm (module)</a>, <a href="ArcCurve.html#module-rhino3dm">[1]</a>, <a href="ArchivableDictionary.html#module-rhino3dm">[2]</a>, <a href="BezierCurve.html#module-rhino3dm">[3]</a>, <a href="Bitmap.html#module-rhino3dm">[4]</a>, <a href="BoundingBox.html#module-rhino3dm">[5]</a>, <a href="Box.html#module-rhino3dm">[6]</a>, <a href="Brep.html#module-rhino3dm">[7]</a>, <a href="BrepFace.html#module-rhino3dm">[8]</a>, <a href="BrepFaceList.html#module-rhino3dm">[9]</a>, <a href="Circle.html#module-rhino3dm">[10]</a>, <a href="CommonObject.html#module-rhino3dm">[11]</a>, <a href="ComponentIndex.html#module-rhino3dm">[12]</a>, <a href="Cone.html#module-rhino3dm">[13]</a>, <a href="ConstructionPlane.html#module-rhino3dm">[14]</a>, <a href="Curve.html#module-rhino3dm">[15]</a>, <a href="CurveProxy.html#module-rhino3dm">[16]</a>, <a href="Cylinder.html#module-rhino3dm">[17]</a>, <a href="DimensionStyle.html#module-rhino3dm">[18]</a>, <a href="Ellipse.html#module-rhino3dm">[19]</a>, <a href="Extrusion.html#module-rhino3dm">[20]</a>, <a href="File3dm.html#module-rhino3dm">[21]</a>, <a href="File3dmBitmapTable.html#module-rhino3dm">[22]</a>, <a href="File3dmDimStyleTable.html#module-rhino3dm">[23]</a>, <a href="File3dmInstanceDefinitionTable.html#module-rhino3dm">[24]</a>, <a href="File3dmLayerTable.html#module-rhino3dm">[25]</a>, <a href="File3dmMaterialTable.html#module-rhino3dm">[26]</a>, <a href="File3dmObject.html#module-rhino3dm">[27]</a>, <a href="File3dmObjectTable.html#module-rhino3dm">[28]</a>, <a href="File3dmPlugInData.html#module-rhino3dm">[29]</a>, <a href="File3dmPlugInDataTable.html#module-rhino3dm">[30]</a>, <a href="File3dmRdkDocumentData.html#module-rhino3dm">[31]</a>, <a href="File3dmSettings.html#module-rhino3dm">[32]</a>, <a href="File3dmStringTable.html#module-rhino3dm">[33]</a>, <a href="File3dmViewTable.html#module-rhino3dm">[34]</a>, <a href="FileReference.html#module-rhino3dm">[35]</a>, <a href="Font.html#module-rhino3dm">[36]</a>, <a href="GeometryBase.html#module-rhino3dm">[37]</a>, <a href="Hatch.html#module-rhino3dm">[38]</a>, <a href="InstanceDefinition.html#module-rhino3dm">[39]</a>, <a href="InstanceReference.html#module-rhino3dm">[40]</a>, <a href="Intersection.html#module-rhino3dm">[41]</a>, <a href="Interval.html#module-rhino3dm">[42]</a>, <a href="Layer.html#module-rhino3dm">[43]</a>, <a href="Line.html#module-rhino3dm">[44]</a>, <a href="LineCurve.html#module-rhino3dm">[45]</a>, <a href="Material.html#module-rhino3dm">[46]</a>, <a href="Mesh.html#module-rhino3dm">[47]</a>, <a href="MeshFaceList.html#module-rhino3dm">[48]</a>, <a href="MeshNormalList.html#module-rhino3dm">[49]</a>, <a href="MeshTextureCoordinateList.html#module-rhino3dm">[50]</a>, <a href="MeshVertexColorList.html#module-rhino3dm">[51]</a>, <a href="MeshVertexList.html#module-rhino3dm">[52]</a>, <a href="MeshingParameters.html#module-rhino3dm">[53]</a>, <a href="ModelComponent.html#module-rhino3dm">[54]</a>, <a href="NurbsCurve.html#module-rhino3dm">[55]</a>, <a href="NurbsCurveKnotList.html#module-rhino3dm">[56]</a>, <a href="NurbsCurvePointList.html#module-rhino3dm">[57]</a>, <a href="NurbsSurface.html#module-rhino3dm">[58]</a>, <a href="ObjectAttributes.html#module-rhino3dm">[59]</a>, <a href="Plane.html#module-rhino3dm">[60]</a>, <a href="PlaneSurface.html#module-rhino3dm">[61]</a>, <a href="Point.html#module-rhino3dm">[62]</a>, <a href="Point2d.html#module-rhino3dm">[63]</a>, <a href="Point3d.html#module-rhino3dm">[64]</a>, <a href="Point3dList.html#module-rhino3dm">[65]</a>, <a href="Point3f.html#module-rhino3dm">[66]</a>, <a href="Point4d.html#module-rhino3dm">[67]</a>, <a href="PointCloud.html#module-rhino3dm">[68]</a>, <a href="PointGrid.html#module-rhino3dm">[69]</a>, <a href="Polycurve.html#module-rhino3dm">[70]</a>, <a href="Polyline.html#module-rhino3dm">[71]</a>, <a href="Polylinecurve.html#module-rhino3dm">[72]</a>, <a href="RenderSettings.html#module-rhino3dm">[73]</a>, <a href="RevSurface.html#module-rhino3dm">[74]</a>, <a href="Sphere.html#module-rhino3dm">[75]</a>, <a href="Surface.html#module-rhino3dm">[76]</a>, <a href="SurfaceProxy.html#module-rhino3dm">[77]</a>, <a href="Texture.html#module-rhino3dm">[78]</a>, <a href="TextureMapping.html#module-rhino3dm">[79]</a>, <a href="Transform.html#module-rhino3dm">[80]</a>, <a href="Vector2d.html#module-rhino3dm">[81]</a>, <a href="Vector3d.html#module-rhino3dm">[82]</a>, <a href="ViewInfo.html#module-rhino3dm">[83]</a>, <a href="ViewportInfo.html#module-rhino3dm">[84]</a>
 </li>
       <li><a href="Font.html#rhino3dm.Font.RichTextFontName">RichTextFontName (rhino3dm.Font attribute)</a>
 </li>
@@ -1857,6 +1909,8 @@
         <li><a href="Transform.html#rhino3dm.Transform.Scale">(rhino3dm.Transform static method)</a>
 </li>
       </ul></li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.ScaleBackgroundToFit">ScaleBackgroundToFit (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.ScaleLengthValues">ScaleLengthValues() (rhino3dm.DimensionStyle method)</a>
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.ScreenPortAspect">ScreenPortAspect (rhino3dm.ViewportInfo attribute)</a>
@@ -1901,6 +1955,8 @@
 </li>
       <li><a href="Polylinecurve.html#rhino3dm.Polylinecurve.SetPoint">SetPoint() (rhino3dm.Polylinecurve method)</a>
 </li>
+      <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.SetScreenPort">SetScreenPort() (rhino3dm.ViewportInfo method)</a>
+</li>
       <li><a href="Curve.html#rhino3dm.Curve.SetStartPoint">SetStartPoint() (rhino3dm.Curve method)</a>
 </li>
       <li><a href="File3dm.html#rhino3dm.File3dm.Settings">Settings (rhino3dm.File3dm attribute)</a>
@@ -1910,6 +1966,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="CommonObject.html#rhino3dm.CommonObject.SetUserString">SetUserString() (rhino3dm.CommonObject method)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.ShadowMapLevel">ShadowMapLevel (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.Shine">Shine (rhino3dm.Material attribute)</a>
 </li>
@@ -1921,6 +1979,8 @@
 </li>
       <li><a href="Bitmap.html#rhino3dm.Bitmap.SizeOfScan">SizeOfScan (rhino3dm.Bitmap attribute)</a>
 </li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.SnapShot">SnapShot (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="ConstructionPlane.html#rhino3dm.ConstructionPlane.SnapSpacing">SnapSpacing (rhino3dm.ConstructionPlane attribute)</a>
 </li>
       <li><a href="Sphere.html#rhino3dm.Sphere.SouthPole">SouthPole (rhino3dm.Sphere attribute)</a>
@@ -1928,6 +1988,8 @@
       <li><a href="Curve.html#rhino3dm.Curve.SpanCount">SpanCount (rhino3dm.Curve attribute)</a>
 </li>
       <li><a href="Surface.html#rhino3dm.Surface.SpanCount">SpanCount() (rhino3dm.Surface method)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.SpecificViewport">SpecificViewport (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.SpecularColor">SpecularColor (rhino3dm.Material attribute)</a>
 </li>
@@ -2035,8 +2097,6 @@
         <li><a href="Polyline.html#rhino3dm.Polyline.ToNurbsCurve">(rhino3dm.Polyline method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Cone.html#rhino3dm.Cone.ToNurbsSurface">ToNurbsSurface() (rhino3dm.Cone method)</a>
 
       <ul>
@@ -2045,6 +2105,8 @@
         <li><a href="Sphere.html#rhino3dm.Sphere.ToNurbsSurface">(rhino3dm.Sphere method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Polylinecurve.html#rhino3dm.Polylinecurve.ToPolyline">ToPolyline() (rhino3dm.Polylinecurve method)</a>
 </li>
       <li><a href="Polyline.html#rhino3dm.Polyline.ToPolylineCurve">ToPolylineCurve() (rhino3dm.Polyline method)</a>
@@ -2082,6 +2144,8 @@
       <li><a href="Transform.html#rhino3dm.Transform.Translation">Translation() (rhino3dm.Transform static method)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.Transparency">Transparency (rhino3dm.Material attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.TransparentBackground">TransparentBackground (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.TransparentColor">TransparentColor (rhino3dm.Material attribute)</a>
 </li>
@@ -2135,7 +2199,11 @@
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.Url">Url (rhino3dm.ObjectAttributes attribute)</a>
 </li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.UseHiddenLights">UseHiddenLights (rhino3dm.RenderSettings attribute)</a>
+</li>
       <li><a href="CommonObject.html#rhino3dm.CommonObject.UserStringCount">UserStringCount (rhino3dm.CommonObject attribute)</a>
+</li>
+      <li><a href="RenderSettings.html#rhino3dm.RenderSettings.UseViewportSize">UseViewportSize (rhino3dm.RenderSettings attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2150,6 +2218,8 @@
       <li><a href="Vector3d.html#rhino3dm.Vector3d">Vector3d (class in rhino3dm)</a>
 </li>
       <li><a href="Vector3d.html#rhino3dm.Vector3d.Vector3d">Vector3d() (rhino3dm.Vector3d method)</a>
+</li>
+      <li><a href="Mesh.html#rhino3dm.Mesh.VertexColors">VertexColors (rhino3dm.Mesh attribute)</a>
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh.Vertices">Vertices (rhino3dm.Mesh attribute)</a>
 </li>

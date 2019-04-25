@@ -44,6 +44,10 @@ ArcCurve
       :param float t0: A new Domain.T0 value.
       :param float t1: A new Domain.T1 value.
 
+   .. py:attribute:: Arc
+
+      Arc: Gets the arc that is contained within this ArcCurve.
+
    .. py:attribute:: IsCompleteCircle
 
       bool: Gets a value indicating whether or not this curve can be represented by a complete circle.

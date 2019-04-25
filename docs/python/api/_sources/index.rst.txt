@@ -62,6 +62,7 @@ Welcome to rhino3dm's documentation!
    MeshingParameters
    MeshNormalList
    MeshTextureCoordinateList
+   MeshVertexColorList
    MeshVertexList
    ModelComponent
    NurbsCurve
@@ -82,6 +83,7 @@ Welcome to rhino3dm's documentation!
    Polycurve
    Polyline
    Polylinecurve
+   RenderSettings
    RevSurface
    Sphere
    Surface
