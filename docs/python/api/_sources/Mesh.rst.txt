@@ -32,6 +32,10 @@ Mesh
 
       Collections.MeshVertexNormalList: Gets access to the vertex normal collection in this mesh.
 
+   .. py:attribute:: VertexColors
+
+      Collections.MeshVertexColorList: Gets access to the (optional) vertex color collection in this mesh.
+
    .. py:attribute:: TextureCoordinates
 
       Collections.MeshTextureCoordinateList: Gets access to the vertex texture coordinate collection in this mesh.

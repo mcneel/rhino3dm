@@ -179,6 +179,40 @@ ViewportInfo
       :return: True if operation succeeded; otherwise, false.
       :rtype: bool
 
+   .. py:method:: GetFrustum()
+
+      [todo] add documentation
+
+   .. py:method:: SetScreenPort()
+
+      Location of viewport in pixels.
+      These are provided so you can set the port you are using
+      and get the appropriate transformations to and from
+      screen space.
+      // For a Windows window
+      /      int width = width of window client area in pixels;
+      /      int height = height of window client area in pixels;
+      /      port_left = 0;
+      /      port_right = width;
+      /      port_top = 0;
+      /      port_bottom = height;
+      /      port_near = 0;
+      /      port_far = 1;
+      /      SetScreenPort( port_left, port_right,
+      /                     port_bottom, port_top,
+      /                     port_near, port_far );
+
+      :return: True if input is valid.
+      :rtype: bool
+
+   .. py:method:: GetScreenPort()
+
+      Gets the location of viewport in pixels.
+      See documentation for SetScreenPort.
+
+      :return: The rectangle, or Empty rectangle on error.
+      :rtype: System.Drawing.Rectangle
+
    .. py:method:: GetXform(sourceCoordinateSystem, destinationCoordinateSystem)
 
       Computes a transform from a coordinate system to another.

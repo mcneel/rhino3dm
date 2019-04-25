@@ -53,3 +53,6 @@ File3dmSettings
    .. py:attribute:: PageUnitSystem
 
       UnitSystem: Gets or sets the page unit system, using  enumeration.
+
+   .. py:attribute:: RenderSettings
+
