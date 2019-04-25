@@ -190,6 +190,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   if (idef)
     return new BND_InstanceDefinitionGeometry(idef, compref);
 
+  ON_3dmRenderSettings* render_settings = ON_3dmRenderSettings::Cast(obj);
+  if (render_settings)
+    return new BND_RenderSettings(render_settings, compref);
+
   return new BND_CommonObject(obj, compref);
 }
 

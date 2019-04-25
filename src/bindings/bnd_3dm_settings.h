@@ -55,6 +55,67 @@ public:
   void SetViewport(const class BND_Viewport& viewport);
 };
 
+class BND_RenderSettings : public BND_CommonObject
+{
+  std::shared_ptr<ONX_Model> m_model;
+  ON_3dmRenderSettings* m_render_settings = nullptr;
+protected:
+  void SetTrackedPointer(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref);
+
+public:
+  BND_RenderSettings(std::shared_ptr<ONX_Model> m);
+  BND_RenderSettings();
+  BND_RenderSettings(const BND_RenderSettings& other);
+  BND_RenderSettings(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref);
+  ~BND_RenderSettings();
+
+  BND_Color GetAmbientLight() const { return ON_Color_to_Binding(m_render_settings->m_ambient_light); }
+  void SetAmbientLight(const BND_Color& color) { m_render_settings->m_ambient_light = Binding_to_ON_Color(color); }
+  BND_Color GetBackgroundColorTop() const { return ON_Color_to_Binding(m_render_settings->m_background_color); }
+  void SetBackgroundColorTop(const BND_Color& color) { m_render_settings->m_background_color = Binding_to_ON_Color(color); }
+  BND_Color GetBackgroundColorBottom() const { return ON_Color_to_Binding(m_render_settings->m_background_bottom_color); }
+  void SetBackgroundColorBottom(const BND_Color& color) { m_render_settings->m_background_bottom_color = Binding_to_ON_Color(color); }
+  bool GetUseHiddenLights() const { return m_render_settings->m_bUseHiddenLights; }
+  void SetUseHiddenLights(bool b) { m_render_settings->m_bUseHiddenLights = b; }
+  bool GetDepthCue() const { return m_render_settings->m_bDepthCue; }
+  void SetDepthCue(bool b) { m_render_settings->m_bDepthCue = b; }
+  bool GetFlatShade() const { return m_render_settings->m_bFlatShade; }
+  void SetFlatShade(bool b) { m_render_settings->m_bFlatShade = b; }
+  bool GetRenderBackFaces() const { return m_render_settings->m_bRenderBackfaces; }
+  void SetRenderBackFaces(bool b) { m_render_settings->m_bRenderBackfaces = b; }
+  bool GetRenderPoints() const { return m_render_settings->m_bRenderPoints; }
+  void SetRenderPoints(bool b) { m_render_settings->m_bRenderPoints = b; }
+  bool GetRenderCurves() const { return m_render_settings->m_bRenderCurves; }
+  void SetRenderCurves(bool b) { m_render_settings->m_bRenderCurves = b; }
+  bool GetRenderIsoParams() const { return m_render_settings->m_bRenderIsoparams; }
+  void SetRenderIsoParams(bool b) { m_render_settings->m_bRenderIsoparams = b; }
+  bool GetRenderMeshEdges() const { return m_render_settings->m_bRenderMeshEdges; }
+  void SetRenderMeshEdges(bool b) { m_render_settings->m_bRenderMeshEdges = b; }
+  bool GetRenderAnnotations() const { return m_render_settings->m_bRenderAnnotation; }
+  void SetRenderAnnotations(bool b) { m_render_settings->m_bRenderAnnotation = b; }
+  //AntialiasLevel
+  bool GetUseViewportSize() const { return !m_render_settings->m_bCustomImageSize; }
+  void SetUseViewportSize(bool b) { m_render_settings->m_bCustomImageSize = !b; }
+  bool GetScaleBackgroundToFit() const { return m_render_settings->ScaleBackgroundToFit(); }
+  void SetScaleBackgroundToFit(bool b) { m_render_settings->SetScaleBackgroundToFit(b); }
+  bool GetTransparentBackground() const { return m_render_settings->m_bTransparentBackground; }
+  void SetTransparentBackground(bool b) { m_render_settings->m_bTransparentBackground = b; }
+  // ImageUnitSystem
+  double GetImageDpi() const { return m_render_settings->m_image_dpi; }
+  void SetImageDpi(double d) { m_render_settings->m_image_dpi = d; }
+  // ImageSize
+  int GetShadowMapLevel() const { return m_render_settings->m_shadowmap_style; }
+  void SetShadowMapLevel(int i) { m_render_settings->m_shadowmap_style = i; }
+  // BackgroundStyls
+  std::wstring GetNamedView() const { return std::wstring(m_render_settings->NamedView().Array()); }
+  void SetNamedView(const std::wstring& s) { m_render_settings->SetNamedView(s.c_str()); }
+  std::wstring GetSnapShot() const { return std::wstring(m_render_settings->Snapshot().Array()); }
+  void SetSnapShot(const std::wstring& s) { m_render_settings->SetSnapshot(s.c_str()); }
+  std::wstring GetSpecificViewport() const { return std::wstring(m_render_settings->SpecificViewport().Array()); }
+  void SetSpecificViewport(const std::wstring& s) { m_render_settings->SetSpecificViewport(s.c_str()); }
+  //RenderSource
+};
+
 class BND_File3dmSettings
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -89,4 +150,5 @@ public:
   ON::LengthUnitSystem GetPageUnitSystem() const { return m_model->m_settings.m_PageUnitsAndTolerances.m_unit_system.UnitSystem(); }
   void SetPageUnitSystem(ON::LengthUnitSystem us) { m_model->m_settings.m_PageUnitsAndTolerances.m_unit_system.SetUnitSystem(us); }
 
+  BND_RenderSettings GetRenderSettings() { return BND_RenderSettings(m_model); }
 };
