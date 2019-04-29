@@ -16,10 +16,10 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initFileUtilitiesBindings(m);
   initDefines(m);
   initIntersectBindings(m);
-  init3dmSettingsBindings(m);
   initPolylineBindings(m);
   initPlaneBindings(m);
   initObjectBindings(m);
+  init3dmSettingsBindings(m);
   init3dmAttributesBindings(m);
   initBitmapBindings(m);
   initDimensionStyleBindings(m);
