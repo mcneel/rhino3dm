@@ -18,7 +18,7 @@ def methodgen():
     os.system(app + args)
 
 
-def createproject(bitness, compile):
+def create_cpp_project(bitness, compile):
     # staging and compilation occurs in the build directory
     build_dir = "build/rhcommon_c_{0}".format(bitness)
     if not os.path.exists(build_dir):
@@ -52,9 +52,13 @@ if __name__ == '__main__':
     # always compile and run methodgen first to make sure the pinvoke
     # definitions are in place
     methodgen()
-"""
+
     # only create 32 bit compile on windows
     if os.name == 'nt':
-        createproject(32, True)
-    createproject(64, True)
-"""
+        create_cpp_project(32, True)
+    create_cpp_project(64, True)
+
+    # compile Rhino3dm .NET project
+    conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
+    os.system('msbuild {} ./dotnet/rhino3dm.csproj'.format(conf))
+

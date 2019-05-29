@@ -66,3 +66,6 @@
 /src/methodgen/bin
 /src/methodgen/obj
 /src/methodgen/methodgen.csproj.user
+/src/dotnet/AutoNativeEnums.cs
+/src/dotnet/AutoNativeMethods.cs
+/src/dotnet/Release
