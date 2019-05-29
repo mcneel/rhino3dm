@@ -42,7 +42,38 @@ internal partial class UnsafeNativeMethods
           {
             string env_path = Environment.GetEnvironmentVariable("path");
             var sub_directory = Environment.Is64BitProcess ? "\\Win64" : "\\Win32";
-            Environment.SetEnvironmentVariable("path", env_path + ";" + dir_name + sub_directory);
+            if (System.IO.Directory.Exists(sub_directory))
+            {
+              Environment.SetEnvironmentVariable("path", env_path + ";" + dir_name + sub_directory);
+            }
+            else
+            {
+              // attempt to extract dll as embedded resource
+              var assembly = typeof(Import).Assembly;
+              string resourceName = Environment.Is64BitProcess ?
+                "Rhino.win64_native.librhino3dmio_native.dll" :
+                "Rhino.win32_native.librhino3dmio_native.dll";
+              var stream = assembly.GetManifestResourceStream(resourceName);
+              var temp_path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Environment.Is64BitProcess ?
+                "rhino3dm_win64" : "rhino3dm_win32");
+              if( !System.IO.Directory.Exists(temp_path))
+                System.IO.Directory.CreateDirectory(temp_path);
+              var path = System.IO.Path.Combine(temp_path, "librhino3dmio_native.dll");
+              try
+              {
+                using (var fs = new System.IO.FileStream(path, System.IO.FileMode.OpenOrCreate))
+                {
+                  stream.CopyTo(fs);
+                }
+              }
+              catch (Exception)
+              {
+              }
+
+              stream.Close();
+
+              Environment.SetEnvironmentVariable("path", env_path + ";" + temp_path);
+            }
           }
           break;
         default:

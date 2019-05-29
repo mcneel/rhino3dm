@@ -10,7 +10,7 @@ def methodgen():
     # compile methodgen
     os.system('msbuild ./methodgen')
     # execute methodgen for Rhino3dm
-    dir_cpp = os.getcwd() + '/rhcommon_c'
+    dir_cpp = os.getcwd() + '/librhino3dmio_native'
     dir_cs = os.getcwd() + '/dotnet'
     path_replace = '../lib/opennurbs'
     app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
@@ -20,7 +20,7 @@ def methodgen():
 
 def create_cpp_project(bitness, compile):
     # staging and compilation occurs in the build directory
-    build_dir = "build/rhcommon_c_{0}".format(bitness)
+    build_dir = "build/librhino3dmio_native_{0}".format(bitness)
     if not os.path.exists(build_dir):
         if(not os.path.exists("build")):
             os.mkdir("build")
@@ -31,15 +31,15 @@ def create_cpp_project(bitness, compile):
         arch = ""
         if bitness == 64:
             arch = " Win64"
-        args = '-G "Visual Studio 15 2017{0}" ../../rhcommon_c'.format(arch)
-        os.system('cmake ' + args)
+        args = '-G "Visual Studio 15 2017{0}"'.format(arch)
+        os.system('cmake ' + args + ' ../../librhino3dmio_native')
         if bitness == 64:
-            for line in fileinput.input("rhcommon_c.vcxproj", inplace=1):
+            for line in fileinput.input("librhino3dmio_native.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
             for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
         if compile:
-            os.system("cmake --build . --config Release --target rhcommon_c")
+            os.system("cmake --build . --config Release --target librhino3dmio_native")
     else:
         rv = os.system("cmake ../..".format(sys.executable))
         if compile and int(rv) == 0:

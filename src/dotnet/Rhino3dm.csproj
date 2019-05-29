@@ -304,6 +304,16 @@
     <Folder Include="NodeInCode\" />
     <Folder Include="Notifications\" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll">
+      <Link>win32_native\librhino3dmio_native.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll">
+      <Link>win64_native\librhino3dmio_native.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
