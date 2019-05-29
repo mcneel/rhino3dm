@@ -1,0 +1,560 @@
+#!/usr/bin/env python
+
+# cibuild - dan@mcneel.com
+# created: September 13th, 2017
+#
+# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+#
+# This script builds the native library for Rhino3dmIO for the mobile platforms that we target, iOS and Android
+# and requires that the setup script has previously been run in order to generate the project files for the
+# the specific platforms.  See bootstrap script for required tools.  This script cannot be moved from its current
+# location without reworking the relative paths that point to the build locations of the platform project files.
+
+import subprocess
+import sys
+import getopt
+import os
+import glob
+import logging
+import distutils.dir_util
+import shutil
+from sys import platform as _platform
+from os import listdir
+from os.path import isfile, isdir, join
+
+# script running on platform globals
+windows = False
+macos = False
+linux = False
+
+# General globals
+verbose = False
+xcode_logging = False
+overwrite = False
+has_built_ios = False
+has_built_android = False
+has_built_macos = False
+native_lib_filename = 'librhino3dmio_native'
+path_to_bin = ''
+rhino3dmio_path = ''
+build_folder_path = ''
+
+# iOS globals
+is_ready_for_ios_build = False
+did_build_ios_successfully = False
+
+# Android globals
+is_ready_for_android_build = False
+did_build_android_successfully = False
+
+# macOS globals
+is_ready_for_macos_build = False
+did_build_macos_successfully = False
+
+
+# ---------------------------------------------------- Utilities -------------------------------------------------------
+
+
+# colors for terminal reporting
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def print_standard_out(logging_message):
+    logging_prefix = ""
+    logging_message = logging_message.ljust(45)
+    if xcode_logging:
+        sys.stdout.write(logging_prefix + logging_message)
+    else:
+        sys.stdout.write(bcolors.BOLD + logging_prefix + logging_message + bcolors.ENDC)
+
+
+def print_logging_message(logging_message):
+    logging_prefix = ""
+    if xcode_logging:
+        print logging_prefix + logging_message
+    else:
+        print bcolors.BOLD + bcolors.OKGREEN + logging_prefix.upper() + bcolors.ENDC + bcolors.OKGREEN + logging_message + bcolors.ENDC
+
+
+def print_warning_message(warning_message):
+    # Xcode will process the following warning message and respond accordingly - unfortunatly, this is case sensitive
+    # print("warning: warning message here")
+    # sys.exit(0)
+    warning_prefix = " warning: "
+    if xcode_logging:
+        print warning_prefix + warning_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + warning_prefix.upper() + bcolors.ENDC + bcolors.FAIL + warning_message + \
+              bcolors.ENDC
+
+
+def print_error_message(error_message):
+    # Xcode will process the following error message and respond accordingly - unfortunatly, this is case sensitive
+    # print("error: error message here")
+    # sys.exit(1)
+    error_prefix = " error: "
+    if xcode_logging:
+        print error_prefix + error_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + error_prefix.upper() + bcolors.ENDC + bcolors.FAIL + error_message + \
+              bcolors.ENDC
+
+
+def print_ok_message(ok_message):
+    ok_prefix = " ok: "
+    if xcode_logging:
+        print ok_prefix + ok_message
+    else:
+        print bcolors.BOLD + bcolors.OKBLUE + ok_prefix.upper() + bcolors.ENDC + bcolors.OKBLUE + ok_message + \
+              bcolors.ENDC
+
+
+# ----------------------------------------------- Build Checking -------------------------------------------------------
+
+
+def check_has_built_for_android():
+    print_standard_out(" Checking for existing builds...")
+    global has_built_android
+    global native_lib_filename
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".so"
+    android_build_path = os.path.join(build_folder_path, "Release-android", "libs")
+
+    if os.path.exists(os.path.join(android_build_path, "arm64-v8a", library_name)) and os.path.exists(os.path.join(android_build_path, "armeabi-v7a", library_name)) and os.path.exists(os.path.join(android_build_path, "x86", library_name) and os.path.exists(os.path.join(android_build_path, "x86_64", library_name))):
+        print_ok_message("Found")
+        has_built_android = True
+    else:
+        print_ok_message("Not Found")
+        has_built_android = False
+
+
+def check_has_built_for_ios():
+    print_standard_out(" Checking for existing builds...")
+    global has_built_ios
+    global native_lib_filename
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".a"
+
+    if os.path.exists(os.path.join(build_folder_path, "Release-ios", library_name)):
+        print_ok_message("Found")
+        has_built_ios = True
+    else:
+        print_ok_message("Not Found")
+        has_built_ios = False
+
+
+def check_has_built_for_macos():
+    print_standard_out(" Checking for existing builds...")
+    global has_built_macos
+    global native_lib_filename
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".dylib"
+
+    if os.path.exists(os.path.join(build_folder_path, "Release", library_name)):
+        print_ok_message("Found")
+        has_built_macos = True
+    else:
+        print_ok_message("Not Found")
+        has_built_macos = False
+
+
+def create_build_folders_for_ios():
+    global path_to_bin
+    global build_folder_path
+
+    if not os.path.exists(build_folder_path):
+        os.mkdir(build_folder_path)
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(build_folder_path):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit(1)
+
+    if not os.path.exists(os.path.join(build_folder_path, "Release-ios")):
+        os.mkdir(os.path.join(build_folder_path, "Release-ios"))
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(os.path.join(build_folder_path, "Release-ios")):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit()
+
+
+def create_build_folders_for_macos():
+    global path_to_bin
+    global build_folder_path
+
+    if not os.path.exists(build_folder_path):
+        os.mkdir(build_folder_path)
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(build_folder_path):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit(1)
+
+    if not os.path.exists(os.path.join(build_folder_path, "Release")):
+        os.mkdir(os.path.join(build_folder_path, "Release"))
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(os.path.join(build_folder_path, "Release")):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit()
+
+
+def create_build_folders_for_android():
+    global path_to_bin
+    global build_folder_path
+
+    if not os.path.exists(build_folder_path):
+        os.mkdir(build_folder_path)
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(build_folder_path):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit(1)
+
+    if not os.path.exists(os.path.join(build_folder_path, "Release-android")):
+        os.mkdir(os.path.join(build_folder_path, "Release-android"))
+
+    # check to make sure the folder was created successfully
+    if not os.path.exists(os.path.join(build_folder_path, "Release-android")):
+        print_error_message("Unable to create build folders.  Please make sure you have admin privileges and try again.")
+        sys.exit(1)
+
+
+def build_for_android():
+    global native_lib_filename
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".so"
+    ndk_command = ''
+
+    print ""
+    print_standard_out("Android Build...")
+    print "Go get coffee, this can take 20 minutes."
+    print "Making " + library_name + " for Android..."
+
+    if macos:
+        ndk_command = os.environ['ANDROID_NDK'] + '/ndk-build'
+    if windows:
+        ndk_command = "ndk-build.cmd"
+
+    rhino3dmio_path = os.path.join(path_to_bin, "rhino3dmio")
+    os.chdir(rhino3dmio_path)
+
+    devnull = open(os.devnull, 'w')
+
+    if verbose:
+        p = subprocess.call([ndk_command, "-B", "NDK_LIBS_OUT=./build/Release-android/libs"])
+    else:
+        p = subprocess.call([ndk_command, "-B", "NDK_LIBS_OUT=./build/Release-android/libs"], stdout=devnull, stderr=devnull)
+
+    if p == 0:
+        print_ok_message("Done")
+        global did_build_android_successfully
+        did_build_android_successfully = True
+    else:
+        print_error_message("Failed to build Android native library.")
+        sys.exit(1)
+
+
+def build_for_ios():
+    global native_lib_filename
+    global rhino3dmio_path
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".a"
+    xcodeproj = native_lib_filename + ".xcodeproj"
+    xcodeproj_path = os.path.join(rhino3dmio_path, xcodeproj)
+
+    print_standard_out(" Compiling x86_64 (Simulator)...")
+    if verbose:
+        subprocess.call(["xcodebuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-sdk", "iphonesimulator", "-arch", "x86_64", "-configuration", "Release", "clean", "build"])
+    else:
+        devnull = open(os.devnull, 'w')
+        subprocess.call(["xcodeBuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-sdk", "iphonesimulator", "-arch", "x86_64", "-configuration", "Release", "clean", "build"], stdout=devnull, stderr=devnull)
+
+    if os.path.exists(os.path.join(build_folder_path, "Release-iphonesimulator", library_name)):
+        shutil.move(os.path.join(build_folder_path, "Release-iphonesimulator", library_name), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-x86_64.a"))
+        print_ok_message("Done")
+    else:
+        print_error_message("Failed")
+        sys.exit(1)
+
+    print_standard_out(" Compiling arm64 version...")
+    if verbose:
+        subprocess.call(["xcodeBuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-sdk", "iphoneos", "-arch", "arm64", "-configuration", "Release", "clean", "build"])
+    else:
+        devnull = open(os.devnull, 'w')
+        subprocess.call(["xcodeBuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-sdk", "iphoneos", "-arch", "arm64", "-configuration", "Release", "clean", "build"], stdout=devnull, stderr=devnull)
+
+    if os.path.exists(os.path.join(build_folder_path, "Release-iphoneos", library_name)):
+        shutil.move(os.path.join(build_folder_path, "Release-iphoneos", library_name), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-arm64.a"))
+        print_ok_message("Done")
+    else:
+        print_error_message("...FAILED\n")
+        sys.exit(1)
+
+    print_standard_out(" Creating Universal Binary             ")
+    if verbose:
+        subprocess.call(["lipo", "-create", "-output", os.path.join(build_folder_path, "Release-ios", library_name), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-x86_64.a"), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-arm64.a")])
+    else:
+        devnull = open(os.devnull, 'w')
+        subprocess.call(["lipo", "-create", "-output", os.path.join(build_folder_path, "Release-ios", library_name), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-x86_64.a"), os.path.join(build_folder_path, "Release-ios", native_lib_filename + "-arm64.a")], stdout=devnull, stderr=devnull)
+
+    print_ok_message("Done")
+
+    global did_build_ios_successfully
+    did_build_ios_successfully = True
+
+
+def build_for_macos():
+    global native_lib_filename
+    global rhino3dmio_path
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".dylib"
+    xcodeproj = native_lib_filename + ".xcodeproj"
+    xcodeproj_path = os.path.join(rhino3dmio_path, xcodeproj)
+
+    print_standard_out(" Compiling for macOS...")
+    if verbose:
+        subprocess.call(["xcodebuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-configuration", "Release", "clean", "build"])
+    else:
+        devnull = open(os.devnull, 'w')
+        subprocess.call(["xcodeBuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-configuration", "Release", "clean", "build"], stdout=devnull, stderr=devnull)
+
+    if os.path.exists(os.path.join(build_folder_path, "Release", library_name)):
+        print_ok_message("Done")
+        global did_build_macos_successfully
+        did_build_macos_successfully = True
+    else:
+        print_error_message("Failed")
+        sys.exit(1)
+
+
+def build_for_windows():
+    global native_lib_filename
+    global rhino3dmio_path
+    global path_to_bin
+    global build_folder_path
+
+    library_name = native_lib_filename + ".dll"
+    sln = native_lib_filename + ".sln"
+    sln_path = os.path.join(rhino3dmio_path, sln)
+
+    print_standard_out(" Compiling for Windows (x64)...")
+    if verbose:
+        subprocess.call(["msbuild", sln_path, "Rebuild", "/p:Configuration=Release;Platform=x64"])
+    else:
+        devnull = open(os.devnull, 'w')
+        subprocess.call(["xcodeBuild", "-project", xcodeproj_path, "-target", native_lib_filename, "-configuration", "Release", "clean", "build"], stdout=devnull, stderr=devnull)
+
+    if os.path.exists(os.path.join(build_folder_path, "Release", library_name)):
+        print_ok_message("Done")
+        global did_build_macos_successfully
+        did_build_macos_successfully = True
+    else:
+        print_error_message("Failed")
+        sys.exit(1)
+
+
+# ----------------------------------------------- Errors/Instructions --------------------------------------------------
+
+
+def write_android_finished_message():
+    global build_folder_path
+    print_ok_message("Build Complete.  Libraries are in " + os.path.join(build_folder_path, "Release-android", "libs"))
+
+
+def write_ios_finished_message():
+    print_ok_message("iOS Build Complete.  Libraries are in " + os.path.join(build_folder_path, "Release-ios"))
+
+
+def write_macos_finished_message():
+    print_ok_message("macOS Build Complete.  Library is in " + os.path.join(build_folder_path, "Release"))
+
+
+# --------------------------------------------------- Script Flow ------------------------------------------------------
+
+
+def usage():
+    global native_lib_filename
+    global macos
+    global windows
+
+    print ""
+    print("cibuild - script for building native openNURBS library for Rhino3dmIO")
+    if windows:
+        print "usage: python cibuild --platform [argument] --help --verbose --overwrite"
+    if macos:
+        print "usage: ./cibuild --platform [argument] --help --verbose --overwrite"
+    print ""
+    print " option:            arguments:    description:"
+    print " ---------------    ----------    --------------------------------------------"
+    print " -p  --platform     android       build " + native_lib_filename + ".so for Android"
+    if macos:
+        print "                    ios           build " + native_lib_filename + ".a for iOS"
+        print "                    macos         build " + native_lib_filename + ".dylib for macOS"
+    print " -h  --help                       display this help information"
+    print " -v  --verbose                    show verbose build messages"
+    print " -o  --overwrite                  overwrite existing builds"
+    if macos:
+        print " -x  --xcodelog                   Generate Xcode-compatible log messages"
+    print ""
+    return
+
+
+def main():
+    global xcode_logging
+    global verbose
+    global overwrite
+    global has_built_ios
+    global has_built_android
+    global native_lib_filename
+
+    # check os
+    global linux
+    global macos
+    global windows
+
+    global path_to_bin
+    global rhino3dmio_path
+    global build_folder_path
+
+    this_file = os.path.realpath(__file__)
+    this_dir = os.path.dirname(this_file)
+    os.chdir(this_dir)
+    path_to_bin = os.path.abspath("../../../../../bin/")
+    rhino3dmio_path = os.path.join(path_to_bin, "rhino3dmio")
+    build_folder_path = os.path.join(rhino3dmio_path, "build")
+
+    if _platform == "linux" or _platform == "linux2":
+        linux = True
+    elif _platform == "darwin":
+        macos = True
+    elif _platform == "win32" or _platform == "cygwin":
+        windows = True
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hp:vox", ["help", "platform=", "verbose", "overwrite", "xcodelog"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        usage()
+        sys.exit(2)
+
+    platform = None
+
+    for o, a in opts:
+        if o == "-v" or o == "--verbose":
+            verbose = True
+        elif o == "-o" or o == "--overwrite":
+            overwrite = True
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit(0)
+        elif o in ("-p", "--platform"):
+            platform = a
+        elif o == "-x" or o == "--xcodelog":
+            xcode_logging = True
+        else:
+            assert False, "unhandled option"
+
+    # user has not entered any arguments...
+    if platform is None:
+        usage()
+        sys.exit(0)
+
+    # turn on xcodelog by default on windows to suppress colors
+    if windows:
+        xcode_logging = True
+
+    # platform compiles
+    if platform == "android":
+        # TODO: Remove this line when we manage to get NDK builds working on Windows
+        if not macos:
+            print_error_message("At the moment, targeting Android requires running this script on macOS.")
+            sys.exit(1)
+
+        if has_built_android and not overwrite:
+            print_warning_message("Existing build found.  NOT BUILDING.  Use -o argument to overwrite the existing builds")
+            sys.exit(0)
+
+        if overwrite or not has_built_android:
+
+            create_build_folders_for_android()
+
+            build_for_android()
+
+            if did_build_android_successfully:
+                write_android_finished_message()
+
+    elif platform == "ios":
+        if not macos:
+            print_error_message("Targeting iOS requires running this script on macOS 10.9.2 or higher.")
+            sys.exit(1)
+
+        print ""
+        if xcode_logging:
+            print "iOS Build..."
+        else:
+            print bcolors.BOLD + "iOS Build..." + bcolors.ENDC
+
+        check_has_built_for_ios()
+
+        if has_built_ios and not overwrite:
+            print_warning_message("Existing build found.  NOT BUILDING.  Use -o argument to overwrite the existing builds")
+            sys.exit(0)
+
+        if overwrite or not has_built_ios:
+            create_build_folders_for_ios()
+
+            build_for_ios()
+
+            if did_build_ios_successfully:
+                write_ios_finished_message()
+
+    elif platform == "macos":
+        if not macos:
+            print_error_message("Targeting macOS requires running this script on macOS 10.9.2 or higher.")
+            sys.exit(1)
+
+        print ""
+        if xcode_logging:
+            print "macOS Build..."
+        else:
+            print bcolors.BOLD + "macOS Build..." + bcolors.ENDC
+
+        check_has_built_for_macos()
+
+        if has_built_macos and not overwrite:
+            print_warning_message("Existing build found.  NOT BUILDING.  Use -o argument to overwrite the existing builds")
+            sys.exit(0)
+
+        if overwrite or not has_built_macos:
+            create_build_folders_for_macos()
+
+            build_for_macos()
+
+            if did_build_macos_successfully:
+                write_macos_finished_message()
+
+
+if __name__ == "__main__":
+    main()

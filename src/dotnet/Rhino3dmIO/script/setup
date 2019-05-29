@@ -1,0 +1,572 @@
+#!/usr/bin/env python
+
+# setup - steve@mcneel.com and dan@mcneel.com
+# created: June 7th, 2017
+#
+# This script decompresses the native opennurbs public toolkit (to be wrapped)
+# into the appropriate location and then uses the GYP (https://gyp.gsrc.io/)
+# tools to generate the platform-specific rhino3dmio projects for Windows,
+# macOS, iOS, and Android
+#
+# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+#
+# Gyp usage notes:
+# /c/Python27/Scripts/gyp librhino3dmio_native.gyp --depth=. -f msvs -G msvs_version=2017
+# /c/Python27/Scripts/gyp librhino3dmio_native.gyp --depth=. -f xcode
+
+
+import glob
+import os
+import shutil
+import subprocess
+import getopt
+import sys
+import json
+import gyp
+import shutil
+from sys import platform as _platform
+
+
+# script running on platform globals
+windows = False
+macos = False
+linux = False
+
+# can be set as command line arguments
+platform = ""
+xcode_logging = False
+verbose = False
+
+
+# ---------------------------------------------------- Utilities -------------------------------------------------------
+
+
+# colors for terminal reporting
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def print_standard_out(logging_message):
+    logging_prefix = ""
+    logging_message = logging_message.ljust(45)
+    if xcode_logging:
+        sys.stdout.write(logging_prefix + logging_message)
+    else:
+        sys.stdout.write(bcolors.BOLD + logging_prefix + logging_message + bcolors.ENDC)
+
+
+def print_logging_message(logging_message):
+    logging_prefix = ""
+    if xcode_logging:
+        print logging_prefix + logging_message
+    else:
+        print bcolors.BOLD + bcolors.OKGREEN + logging_prefix.upper() + bcolors.ENDC + bcolors.OKGREEN + logging_message + bcolors.ENDC
+
+
+def print_warning_message(warning_message):
+    # Xcode will process the following warning message and respond accordingly - unfortunatly, this is case sensitive
+    # print("warning: warning message here")
+    # sys.exit(0)
+    warning_prefix = " warning: "
+    if xcode_logging:
+        print warning_prefix + warning_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + warning_prefix.upper() + bcolors.ENDC + bcolors.FAIL + warning_message + \
+              bcolors.ENDC
+
+
+def print_error_message(error_message):
+    # Xcode will process the following error message and respond accordingly - unfortunatly, this is case sensitive
+    # print("error: error message here")
+    # sys.exit(1)
+    error_prefix = " error: "
+    if xcode_logging:
+        print error_prefix + error_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + error_prefix.upper() + bcolors.ENDC + bcolors.FAIL + error_message + \
+              bcolors.ENDC
+
+
+def print_ok_message(ok_message):
+    ok_prefix = " ok: "
+    if xcode_logging:
+        print ok_prefix + ok_message
+    else:
+        print bcolors.BOLD + bcolors.OKBLUE + ok_prefix.upper() + bcolors.ENDC + bcolors.OKBLUE + ok_message + \
+              bcolors.ENDC
+
+
+# ------------------------------------------------- Post-Processing ----------------------------------------------------
+
+
+def postprocess_vcxproj(proj):
+    # This can probably be removed in the future as we get better at using GYP.
+    # For now, this is a simple solution
+    lines = []
+    with open(proj, "r") as f:
+        tags = ("WindowsTargetPlatformVersion",
+                "IgnoreWarnCompileDuplicatedFilename",
+                "PreferredToolArchitecture",
+                "ExecutablePath",
+                "IntDir",
+                "OutDir",
+                "TargetPath",
+                "OutputFile")
+        for line in f:
+            skip = False
+            for tag in tags:
+                if line.find("<"+tag) > 0:
+                    skip = True
+            if skip:
+                continue
+            lines.append(line)
+    with open(proj, "w") as f:
+        f.writelines(lines)
+
+
+# ---------------------------------------------------- Creation --------------------------------------------------------
+
+
+def create_ios_compatible_gyp(file):
+    # dan@mcneel: This could probably be removed as well when we get a better at using gyp.
+    # I was unable pass gyp variables from librhino3dmio_native to its dependencies, so this method
+    # adds the necessary ios settings to the xcode_settings section of the gyp file
+    line1 = "\"SDKROOT\": \"iphoneos\","
+    line2 = "\"IPHONEOS_DEPLOYMENT_TARGET\": \"9.3\","
+    line3 = "\"VALID_ARCHS\": \"arm64 x86_64\","
+    line4 = "\"TARGETED_DEVICE_FAMILY\": \"1,2\","
+    line5 = "\"MACH_O_TYPE\": \"staticlib\","
+    line6 = "\"EXECUTABLE_EXTENSION\": \"a\","
+
+    with open(file, "r") as in_file:
+        buf = in_file.readlines()
+    with open(file, "w") as out_file:
+        for line in buf:
+            if "\"xcode_settings\": {\n" in line:
+                indent_split = line.split("\"")
+                sep = "\n" + indent_split[0] + "\t"
+                line = line + sep + line1 + sep + line2 + sep + line3 + sep + line4 + sep + line5 + sep + line6 + "\n"
+            out_file.write(line)
+
+
+def create_android_makefiles ():
+    global platform
+    global verbose
+    global path_to_src
+
+    path_to_bin = os.path.join(path_to_src, 'bin')
+    rhino3dmio_path = os.path.join(path_to_bin, "rhino3dmio")
+    jni_path = os.path.join(rhino3dmio_path, "jni")
+
+    # Application.mk
+    application_mk_path = os.path.join(jni_path, "Application.mk")
+    if os.path.isfile(application_mk_path):
+        os.remove(application_mk_path)
+
+    application_mk_file = open(application_mk_path, "w")
+    application_mk_file.write("# This is the Application NDK make file for openNURBS shared library for Android.\n")
+    application_mk_file.write("# WARNING: This file is autogenerated by the build system and should not be edit by hand.\n")
+    application_mk_file.write("\n")
+    application_mk_file.write("# Build for Android API level 24\n")
+    application_mk_file.write("APP_PLATFORM := android-24\n")
+    application_mk_file.write("\n")
+    application_mk_file.write("# Build Intel, ARMv5TE and ARMv7-A machine code.\n")
+    application_mk_file.write("APP_ABI := armeabi-v7a arm64-v8a x86_64 x86\n")
+    application_mk_file.write("\n")
+    application_mk_file.write("# Load the modules...at this point, only opennurbs, no opennurbs-prebuilt\n")
+    application_mk_file.write("APP_MODULES := rhino3dmio_native\n")
+    application_mk_file.write("\n")
+    application_mk_file.write("# Tell NDK to place its compiler flags before the local compiler flags in Android.mk\n")
+    application_mk_file.write("#APP_CFLAGS += -Ofast\n")
+    application_mk_file.write("#APP_CPPFLAGS += -Ofast\n")
+    application_mk_file.write("APP_STL := c++_static\n")
+    application_mk_file.write("APP_CPPFLAGS := -frtti -fexceptions\n")
+    application_mk_file.close()
+
+    # Android.mk
+    # parse librhino3dmio_native.gyp
+    librhino3dmio_native_gyp_path = os.path.join(rhino3dmio_path, "librhino3dmio_native.gyp")
+
+    with open(librhino3dmio_native_gyp_path) as data_file:
+        librhino3dmio_native_gyp_json = json.load(data_file)
+
+    librhino3dmio_defines = librhino3dmio_native_gyp_json["targets"][0]["defines"]
+    librhino3dmio_sources_unfiltered = librhino3dmio_native_gyp_json["targets"][0]["sources"]
+
+    librhino3dmio_sources = []
+    for source in librhino3dmio_sources_unfiltered:
+        if source.endswith(".c") or source.endswith(".cpp"):
+            librhino3dmio_sources.append(source)
+
+    # parse opennurbs_public.gyp
+    opennurbs_public_gyp_path = os.path.join(rhino3dmio_path, "opennurbs_public", "opennurbs_public.gyp")
+
+    with open(opennurbs_public_gyp_path) as data_file:
+        opennurbs_public_gyp_json = json.load(data_file)
+
+    opennurbs_public_defines = opennurbs_public_gyp_json["targets"][0]["defines"]
+    opennurbs_public_sources_unfiltered = opennurbs_public_gyp_json["targets"][0]["sources"]
+
+    opennurbs_public_sources = []
+    for source in opennurbs_public_sources_unfiltered:
+        if source.endswith(".c") or source.endswith(".cpp"):
+            opennurbs_public_sources.append(source)
+
+    # parse zlib.gyp
+    zlib_gyp_path = os.path.join(rhino3dmio_path, "opennurbs_public", "zlib", "zlib.gyp")
+
+    with open(zlib_gyp_path) as data_file:
+        zlib_gyp_json = json.load(data_file)
+
+    zlib_sources_unfiltered = zlib_gyp_json["targets"][0]["sources"]
+
+    zlib_sources = []
+    for source in zlib_sources_unfiltered:
+        if source.endswith(".c") or source.endswith(".cpp"):
+            zlib_sources.append(source)
+
+    # parse freetype263.gyp
+    freetype263_gyp_path = os.path.join(rhino3dmio_path, "opennurbs_public", "freetype263", "freetype263.gyp")
+
+    with open(freetype263_gyp_path) as data_file:
+        freetype263_gyp_json = json.load(data_file)
+
+    freetype263_defines = freetype263_gyp_json["targets"][0]["defines"]
+    freetype263_sources_unfiltered = freetype263_gyp_json["targets"][0]["sources"]
+
+    freetype263_sources = []
+    for source in freetype263_sources_unfiltered:
+        if source.endswith(".c") or source.endswith(".cpp"):
+            freetype263_sources.append(source)
+
+    defines = librhino3dmio_defines + opennurbs_public_defines + freetype263_defines
+
+    android_mk_path = os.path.join(jni_path, "Android.mk")
+    if os.path.isfile(android_mk_path):
+        os.remove(android_mk_path)
+
+    android_mk_file = open(android_mk_path, "w")
+    android_mk_file.write("# This is the Android NDK make file for openNURBS shared library for Android.\n")
+    android_mk_file.write("# WARNING: This file is autogenerated by the build system and should not be edit by hand.\n")
+    android_mk_file.write("\n")
+    android_mk_file.write("LOCAL_PATH := $(call my-dir)\n")
+    android_mk_file.write("\n")
+    android_mk_file.write("include $(call all-subdir-makefiles)\n")
+    android_mk_file.write("include $(CLEAR_VARS)\n")
+    android_mk_file.write("LOCAL_MODULE := rhino3dmio_native\n")
+
+    android_mk_file.write("LOCAL_SRC_FILES := ../" + librhino3dmio_sources[0] + " \\" + "\n\t\t")
+    for source in librhino3dmio_sources[1:]:
+        android_mk_file.write("../" + source + " \\" + "\n\t\t")
+
+    for source in opennurbs_public_sources:
+        android_mk_file.write("../opennurbs_public/" + source + " \\" + "\n\t\t")
+
+    for source in zlib_sources:
+        android_mk_file.write("../opennurbs_public/zlib/" + source + " \\" + "\n\t\t")
+
+    # no freetype for android yet
+    # for source in freetype263_sources:
+    #    android_mk_file.write("../opennurbs_public/freetype263/" + source + " \\" + "\n\t\t")
+
+    android_uuid = ("clear", "compare", "copy", "gen_uuid", "isnull", "pack", "parse", "unpack", "unparse", "uuid_time")
+    for source in android_uuid:
+        android_mk_file.write("../opennurbs_public/android_uuid/" + source +".c \\" + "\n\t\t")
+
+    android_mk_file.write("\n")
+    android_mk_file.write("LOCAL_CFLAGS := -D" + defines[0] + " -D" + defines[1] + " -D" + defines[2] + " -DMONO_BUILD -D__ANDROID__ -DON_64BIT_RUNTIME -DON_LITTLE_ENDIAN -DON_COMPILER_ANDROIDNDK\n")
+    android_mk_file.write("LOCAL_CPPFLAGS := -D" + defines[0] + " -D" + defines[1] + " -D" + defines[2] + " -DMONO_BUILD -D__ANDROID__ -DON_64BIT_RUNTIME -DON_LITTLE_ENDIAN -DON_COMPILER_ANDROIDNDK -D__GXX_EXPERIMENTAL_CXX0X__ -std=c++14\n")
+    android_mk_file.write("LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL\n")
+    android_mk_file.write("include $(BUILD_SHARED_LIBRARY)\n")
+    android_mk_file.close()
+
+
+def create_wasm_makefiles ():
+    pass # we'll eventually build the whole make file out here. For now just use the premade file
+
+def create():
+    global platform
+    global verbose
+    global path_to_src
+    global script_folder
+
+    print_standard_out("Setting up build paths...")
+
+    path_to_bin = os.path.join(path_to_src, "bin")
+    build_path = os.path.join(path_to_bin, "rhino3dmio")
+    if platform == "wasm":
+        build_path = os.path.join(path_to_bin, "rhinocommon_js")
+    jni_path = os.path.join(build_path, "jni")
+    wasm_path = os.path.join(build_path, "wasm_bindings")
+
+    if not os.path.exists(build_path):
+        os.makedirs(build_path)
+    if not os.path.exists(os.path.join(build_path, "rhcommon_c")) and platform != "wasm":
+        os.makedirs(os.path.join(build_path, "rhcommon_c"))
+
+    if platform == "android" and not os.path.exists(jni_path):
+        os.makedirs(jni_path)
+    if platform == "wasm" and not os.path.exists(wasm_path):
+        os.makedirs(wasm_path)
+
+
+    print_ok_message("Done")
+
+    print_standard_out("Creating OpenNURBS Public...")
+
+    # Create openNURBS public
+    on_public_script = os.path.join(path_to_src, '..', 'installer', 'OpenNurbsPublic', 'main.py')
+    on_public_src = os.path.join(path_to_src, 'opennurbs')
+    on_public_dest = os.path.join(build_path, "opennurbs_public")
+
+    devnull = open(os.devnull, 'w')
+
+    if verbose:
+        subprocess.call([sys.executable, on_public_script, on_public_src, build_path])
+    else:
+        subprocess.call([sys.executable, on_public_script, on_public_src, build_path], stdout=devnull, stderr=devnull)
+
+    print_ok_message("Done")
+
+    # Copy Rhino3dmIO C++ files to bin
+    print_standard_out("Copying source C++ files to bin...")
+
+    os.chdir(script_folder)
+
+    if platform != "wasm":
+        patterns = ("../../../c/*.h", "../../../c/on_*.cpp", "../../../c/st*.cpp")
+        for pattern in patterns:
+            for filename in glob.glob(pattern):
+                if verbose:
+                    print_logging_message(" Copying: " + filename + " to destination.")
+                shutil.copy(filename, build_path)
+        shutil.copy("../../../c/rhcommon_c/rhcommon_c_api.h", os.path.join(build_path, "rhcommon_c"))
+
+    if platform == "wasm":
+        for filename in glob.glob("../../../../../wasm_bindings/*.cpp"):
+            if verbose:
+                print_logging_message(" Copying: " + filename + " to destination.")
+            shutil.copy(filename, wasm_path)
+        shutil.copy("../../../../../wasm_bindings/wasm_makefile", os.path.join(build_path, "makefile"))
+
+
+    print_ok_message("Done")
+
+    if (platform == "wasm"):
+        return
+
+    # Copy gyp files to appropriate folders in bin
+    print_standard_out("Copying gyp files to folders in bin...")
+
+    shutil.copy("../gyp/librhino3dmio_native.gyp", build_path)
+    shutil.copy("../gyp/opennurbs_public.gyp", on_public_dest)
+    shutil.copy("../gyp/freetype263.gyp", os.path.join(on_public_dest, "freetype263"))
+    shutil.copy("../gyp/zlib.gyp", os.path.join(on_public_dest, "zlib"))
+
+    print_ok_message("Done")
+
+    os.chdir(build_path)
+
+    if platform == "windows":
+        print_standard_out("Generating vcxproj files...")
+
+        subprocess.call(["gyp", "librhino3dmio_native.gyp", "--depth=.", "-f", "msvs", "-G", "msvs_version=2017"])
+
+        proj_files = (os.path.join(build_path, "librhino3dmio_native.vcxproj"),
+                      os.path.join(on_public_dest, "opennurbs_public_staticlib.vcxproj"),
+                      os.path.join(on_public_dest, "freetype263", "freetype263_staticlib.vcxproj"),
+                      os.path.join(on_public_dest, "zlib", "zlib.vcxproj"))
+        for proj in proj_files:
+            postprocess_vcxproj(proj)
+
+        print_ok_message("Done")
+
+    if platform == "android":
+        print_standard_out("Generating makefiles files for Android...")
+        create_android_makefiles()
+        print_ok_message("Done")
+
+    if platform == "wasm":
+        print_standard_out("Generating makefiles files for Android...")
+        create_wasm_makefiles()
+        print_ok_message("Done")
+
+    if platform == "macos":
+        print_standard_out("Generating xcodeproj files for macOS...")
+        subprocess.call(["gyp", "librhino3dmio_native.gyp", "--depth=.", "-f", "xcode"])
+        print_ok_message("Done")
+
+    if platform == "ios":
+        print_standard_out("Generating xcodeproj files for iOS...")
+        create_ios_compatible_gyp("librhino3dmio_native.gyp")
+        create_ios_compatible_gyp(os.path.join(on_public_dest, "opennurbs_public.gyp"))
+        create_ios_compatible_gyp(os.path.join(on_public_dest, "freetype263", "freetype263.gyp"))
+        create_ios_compatible_gyp(os.path.join(on_public_dest, "zlib", "zlib.gyp"))
+        subprocess.call(["gyp", "librhino3dmio_native.gyp", "--depth=.", "-f", "xcode", "-D mobile_build=ios"])
+        print_ok_message("Done")
+
+
+def update_version_numbers():
+    print_standard_out("Updating Version Numbers...")
+
+    global platform
+    global verbose
+    global path_to_src
+
+    path_to_update_version_numbers = os.path.join(path_to_src, "UpdateVersionNumbers.csproj")
+
+    devnull = open(os.devnull, 'w')
+
+    if verbose:
+        subprocess.call(["msbuild", path_to_update_version_numbers])
+    else:
+        subprocess.call(["msbuild", path_to_update_version_numbers], stdout=devnull, stderr=devnull)
+
+    print_ok_message("Done")
+
+def build_methodgen():
+    print_standard_out('Building MethodGen...')
+
+    global verbose
+    global path_to_src
+
+    path_to_methodgen = os.path.join(path_to_src, 'DotNetSDK', 'rhinocommon', 'methodgen', 'methodgen.csproj')
+    devnull = open(os.devnull, 'w')
+    props = '/p:Configuration=Release'
+
+    if verbose:
+        r = subprocess.call(["msbuild", path_to_methodgen, props])
+    else:
+        r = subprocess.call(["msbuild", path_to_methodgen, props], stdout=devnull, stderr=devnull)
+
+    if r == 0:
+        print_ok_message("Done")
+    else:
+        print_error_message("Failed")
+
+def run_methodgen():
+    print_standard_out("Running MethodGen...")
+
+    global platform
+    global verbose
+    global path_to_src
+
+    path_to_methodgen = os.path.join(path_to_src, "DotNetSDK", "rhinocommon", "MethodGen.exe")
+
+    devnull = open(os.devnull, 'w')
+
+    if verbose:
+        if windows:
+            subprocess.call([path_to_methodgen, "rhino3dmio"])
+        if macos:
+            subprocess.call(["mono", path_to_methodgen, "rhino3dmio"])
+    else:
+        if windows:
+            subprocess.call([path_to_methodgen, "rhino3dmio"], stdout=devnull, stderr=devnull)
+        if macos:
+            subprocess.call(["mono", path_to_methodgen, "rhino3dmio"], stdout=devnull, stderr=devnull)
+
+    print_ok_message("Done")
+
+
+# --------------------------------------------------- Script Flow ------------------------------------------------------
+
+
+def usage():
+    global macos
+    global windows
+
+    print ""
+    print("setup - generate the project files for Rhino3dmIO")
+    if windows:
+        print "usage: python setup --platform [argument] --help"
+    if macos:
+        print "usage: ./setup --platform [argument] --help"
+    print ""
+    print " option:          arguments:  description:"
+    print " ---------------  ----------  ------------------------------------------- "
+    print " -h  --help                   Display this help information               "
+    print " -p  --platform   android     Generate makefiles for Android              "
+    if windows:
+        print "                  windows     Generate vcxproj files (default on Windows) "
+    if macos:
+        print "                  ios         Generate xcodeproj files for iOS            "
+        print "                  macos       Generate xcodeproj files (default on macOS) "
+    print "                  wasm       Generate files for WebAssembly compile"
+    print " -v  --verbose                Show verbose logging messages               "
+    if macos:
+        print " -x  --xcodelog               Generate Xcode-compatible log messages      "
+    print ""
+    return
+
+
+def main():
+    global platform
+    global xcode_logging
+    global verbose
+    global path_to_src
+    global script_folder
+
+    this_file = os.path.realpath(__file__)
+    script_folder = os.path.dirname(this_file)
+    path_to_src = os.path.abspath(os.path.join(script_folder, "..", "..", "..", "..", ".."))
+
+    # check os
+    global linux
+    global macos
+    global windows
+
+    if _platform == "linux" or _platform == "linux2":
+        linux = True
+    elif _platform == "darwin":
+        macos = True
+    elif _platform == "win32" or _platform == "cygwin":
+        windows = True
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hp:vx", ["help", "platform=", "verbose", "xcodelog"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-p", "--platform"):
+            platform = a
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif o == "-x" or o == "--xcodelog":
+            xcode_logging = True
+        elif o == "-v" or o == "--verbose":
+            verbose = True
+        else:
+            assert False, "unhandled option"
+
+    # set platform defaults on the platform one is running on
+    if platform == "":
+        if os.name == "nt":
+            platform = "windows"
+        else:
+            platform = "macos"
+
+    # turn on xcodelog by default on windows to suppress colors
+    if windows:
+        xcode_logging = True
+
+    update_version_numbers()
+    if platform!="wasm": #wasm compile does not require any .NET code
+        build_methodgen()
+        run_methodgen()
+    create()
+
+
+if __name__ == "__main__":
+    main()

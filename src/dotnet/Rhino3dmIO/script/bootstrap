@@ -1,0 +1,1085 @@
+#!/usr/bin/env python
+
+# bootstrap - dan@mcneel.com
+# created: September 7th, 2017
+#
+# This script checks for the necessary tools to construct and build the Rhino3dmIO native and wrapper libraries
+# for all supported platforms.  See related scripts in this folder for other steps in the process.
+# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+
+
+import subprocess
+import sys
+import getopt
+import os
+import glob
+import logging
+import distutils.dir_util
+import shutil
+import urllib2
+import urllib
+import re
+from subprocess import Popen, PIPE
+from sys import platform as _platform
+from os import listdir
+from os.path import isfile, isdir, join
+
+# script running on platform globals
+windows = False
+macos = False
+linux = False
+
+# General globals
+has_gyp = False
+path_to_src = ''
+native_lib_filename = 'librhino3dmio_native'
+xcode_logging = False
+verbose = False
+has_openNURBS = False
+did_fail_check_once = False
+
+# Windows globals
+has_msbuild = False
+has_correct_msbuild = False
+cuurent_using_msbuild = ''
+has_necessary_windows_tools = False
+drive_prefix = ''
+
+# macOS and iOS globals
+has_xcodeTools = False
+has_xamarin_ios = False
+has_lipo = False
+has_necessary_macos_tools = False
+has_necessary_ios_tools = False
+
+# Android globals
+has_ndk = False
+has_xamarin_android = False
+has_correct_android_ndk = False
+has_necessary_android_tools = False
+running_android_ndk = ''
+android_ndk_path = ''
+ndk_root_path = ''
+ndk_root_path_spaceless = ''
+
+# archive urls (for downloading).  These are read in at runtime from the Current Development Tools.md file.
+xcode_archive_url = ''
+android_ndk_archive_url_win = ''
+android_ndk_archive_url_mac = ''
+gyp_archive_url = ''
+
+# required versions.  These are read in at runtime from the Current Development Tools.md file in the parent folder.
+currently_using_macos = ''
+currently_using_xcode = ''
+currently_using_gyp = ''
+currently_using_android_ndk = ''
+
+
+# ---------------------------------------------------- Utilities -------------------------------------------------------
+
+
+# colors for terminal reporting
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def normalize_version(v):
+    parts = [int(x) for x in v.split(".")]
+    while parts[-1] == 0:
+        parts.pop()
+    return parts
+
+
+def compare_versions(v1, v2):
+    return cmp(normalize_version(v1), normalize_version(v2))
+
+
+def connected_to_internet(host='http://google.com'):
+    try:
+        urllib.urlopen(host)
+        return True
+    except:
+        print_error_message("No internet connection available.")
+        return False
+
+
+def print_standard_out(logging_message):
+    logging_prefix = ""
+    logging_message = logging_message.ljust(45)
+    if xcode_logging:
+        sys.stdout.write(logging_prefix + logging_message)
+    else:
+        sys.stdout.write(bcolors.BOLD + logging_prefix + logging_message + bcolors.ENDC)
+
+
+def print_warning_message(warning_message):
+    # Xcode will process the following warning message and respond accordingly - unfortunatly, this is case sensitive
+    # print("warning: warning message here")
+    # sys.exit(0)
+    warning_prefix = " warning: "
+    if xcode_logging:
+        print warning_prefix + warning_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + warning_prefix.upper() + bcolors.ENDC + bcolors.FAIL + warning_message + \
+              bcolors.ENDC
+
+
+def print_error_message(error_message):
+    # Xcode will process the following error message and respond accordingly - unfortunatly, this is case sensitive
+    # print("error: error message here")
+    # sys.exit(1)
+    error_prefix = " error: "
+    if xcode_logging:
+        print error_prefix + error_message
+    else:
+        print bcolors.BOLD + bcolors.FAIL + error_prefix.upper() + bcolors.ENDC + bcolors.FAIL + error_message + \
+              bcolors.ENDC
+
+
+def print_ok_message(ok_message):
+    ok_prefix = " ok: "
+    if xcode_logging:
+        print ok_prefix + ok_message
+    else:
+        print bcolors.BOLD + bcolors.OKBLUE + ok_prefix.upper() + bcolors.ENDC + bcolors.OKBLUE + ok_message + \
+              bcolors.ENDC
+
+
+def download_file(url, destination_folder):
+    file_name = url.split('/')[-1]
+    u = urllib2.urlopen(url)
+    f = open(destination_folder + file_name, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    if xcode_logging:
+        print "Downloading: %s Bytes: %s" % (file_name, file_size)
+    else:
+        print bcolors.BOLD + "Downloading: " + bcolors.ENDC + "%s Bytes: %s" % (file_name, file_size)
+
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
+
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        print status,
+
+    f.close()
+
+
+if os.name == 'nt':
+    import ctypes
+    from ctypes import windll, wintypes
+    from uuid import UUID
+
+    # ctypes GUID copied from MSDN sample code
+    class GUID(ctypes.Structure):
+        _fields_ = [
+            ("Data1", wintypes.DWORD),
+            ("Data2", wintypes.WORD),
+            ("Data3", wintypes.WORD),
+            ("Data4", wintypes.BYTE * 8)
+        ]
+
+        def __init__(self, uuidstr):
+            uuid = UUID(uuidstr)
+            ctypes.Structure.__init__(self)
+            self.Data1, self.Data2, self.Data3, \
+                self.Data4[0], self.Data4[1], rest = uuid.fields
+            for i in range(2, 8):
+                self.Data4[i] = rest>>(8-i-1)*8 & 0xff
+
+    SHGetKnownFolderPath = windll.shell32.SHGetKnownFolderPath
+    SHGetKnownFolderPath.argtypes = [
+        ctypes.POINTER(GUID), wintypes.DWORD,
+        wintypes.HANDLE, ctypes.POINTER(ctypes.c_wchar_p)
+    ]
+
+    def _get_known_folder_path(uuidstr):
+        pathptr = ctypes.c_wchar_p()
+        guid = GUID(uuidstr)
+        if SHGetKnownFolderPath(ctypes.byref(guid), 0, 0, ctypes.byref(pathptr)):
+            raise ctypes.WinError()
+        return pathptr.value
+
+    FOLDERID_Download = '{374DE290-123F-4565-9164-39C4925E467B}'
+
+    def get_download_folder():
+        return _get_known_folder_path(FOLDERID_Download) + "\\"
+if _platform == "darwin":
+    def get_download_folder():
+        home = os.path.expanduser("~")
+        return os.path.join(home, "Downloads/")
+
+
+def which(program):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
+def split_by_numbers(x):
+    r = re.compile('(\d+)')
+    l = r.split(x)
+    return [int(y) if y.isdigit() else y for y in l]
+
+
+def read_required_versions():
+    global path_to_src
+
+    global currently_using_macos
+    global currently_using_android_ndk
+    global currently_using_xcode
+    global currently_using_gyp
+    global currently_using_msbuild
+    global xcode_archive_url
+    global android_ndk_archive_url_win
+    global android_ndk_archive_url_mac
+    global gyp_archive_url
+
+    # check to make sure that the Current Development Tools.md (macOS) file exists, exit with warning if not
+    current_development_tools_mac_file_path = os.path.join(path_to_src, "..", "build", "mac", "Current Development Tools.md")
+    if not os.path.exists(current_development_tools_mac_file_path):
+        print_error_message("Could not find the Current Development Tools.md (macOS) file listing our current development tools.\n This file should be in: " + os.path.abspath(current_development_tools_mac_file_path) + "\n Exiting script.")
+        sys.exit(1)
+
+    # check to make sure that the Current Development Tools.md (Rhino3dmIO) file exists, exit with warning if not
+    script_folder = os.getcwd()
+    current_development_tools_rhino3dmio_file_path = os.path.join(script_folder, '..', 'Current Development Tools.md')
+    if not os.path.exists(current_development_tools_rhino3dmio_file_path):
+        print_error_message("Could not find the Current Development Tools.md (Rhino3dmIO) file listing our current development tools.\n This file should be in: " + current_development_tools_rhino3dmio_file_path + "\n Exiting script.")
+        sys.exit(1)
+
+    # open and read Current Development Tools.md (Mac) and load required versions
+    current_development_tools_mac_file = open(current_development_tools_mac_file_path, "r")
+    for line in current_development_tools_mac_file:
+        if 'currently_using_macos = ' in line:
+            currently_using_macos = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'currently_using_xcode = ' in line:
+            currently_using_xcode = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'xcode_archive_url = ' in line:
+            xcode_archive_url = line.split('= ', 1)[1].split('`', 1)[0]
+
+    # check to make sure all the required version strings are filled and warn if not
+    if not currently_using_macos:
+        print_warning_message("Could not find a listing for a current macOS version in Current Development Tools.md.")
+
+    if not currently_using_xcode:
+        print_warning_message("Could not find a listing for a current Xcode version in Current Development Tools.md.")
+
+    # open and read Current Development Tools.md (Rhino3dmIO) and load required versions
+    current_development_tools_rhino3dmio_file = open(current_development_tools_rhino3dmio_file_path, "r")
+    for line in current_development_tools_rhino3dmio_file:
+        if 'gyp_archive_url = ' in line:
+            gyp_archive_url = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'currently_using_android_ndk = ' in line:
+            currently_using_android_ndk = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'android_ndk_archive_url_win = ' in line:
+            android_ndk_archive_url_win = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'android_ndk_archive_url_mac = ' in line:
+            android_ndk_archive_url_mac = line.split('= ', 1)[1].split('`', 1)[0]
+        if 'currently_using_msbuild = ' in line:
+            currently_using_msbuild = line.split('= ', 1)[1].split('`', 1)[0]
+
+    # check to make sure all the required version strings are filled and warn if not
+    if not gyp_archive_url:
+        print_warning_message("Could not find a gyp download URL in Current Development Tools.md.")
+
+    if not currently_using_android_ndk:
+        print_warning_message("Could not find a listing for the current Android NDK version in Current Development Tools.md.")
+
+    if not android_ndk_archive_url_win:
+        print_warning_message("Could not find an Android NDK download URL in Current Development Tools.md.")
+
+    if not android_ndk_archive_url_mac:
+        print_warning_message("Could not find an Android NDK download URL in Current Development Tools.md.")
+
+    return
+
+
+# ---------------------------------------------------- Check tools -----------------------------------------------------
+
+
+def check_android_tools():
+    print ""
+    if xcode_logging:
+        print "Checking for Android tools..."
+    else:
+        print bcolors.BOLD + "Checking for Android tools..." + bcolors.ENDC
+
+    check_opennurbs()
+    check_gyp()
+    check_xamarin_android()
+    check_ndk()
+    check_msbuild()
+
+    global has_openNURBS
+    global has_gyp
+    global has_msbuild
+    global has_xamarin_android
+    global has_necessary_android_tools
+    global currently_using_android_ndk
+    global has_correct_android_ndk
+    global running_android_ndk
+    global did_fail_check_once
+
+    global native_lib_filename
+    library_name = native_lib_filename + ".so"
+
+    if has_xamarin_android and has_ndk and has_openNURBS and has_gyp and has_msbuild:
+        has_necessary_android_tools = True
+        print_ok_message("Found all necessary tools to build " + library_name + " for Android")
+        if not has_correct_android_ndk:
+            print (" This system is running the " + running_android_ndk)
+            print (" We are currently using the " + "android-ndk-" + currently_using_android_ndk)
+            print_warning_message("You have a different Android NDK installed than is currently in use.")
+    else:
+        has_necessary_android_tools = False
+
+    if not has_necessary_android_tools:
+        print_error_message("NOT ready for Android build.  Please address the following:")
+
+        if not has_openNURBS:
+            print_missing_opennurbs_error()
+        if not has_xamarin_android:
+            print " Building the .NET portion Rhino3dmIO.Android requires Xamarin.Android."
+            print " Xamarin.Android can be installed from the Visual Studio for Mac installer."
+        if not has_gyp:
+            print_missing_gyp_error()
+        if not has_ndk:
+            print "  Building an android native library requires Google's NDK tools."
+            print "  Xamarin.Android comes with a copy of the Android NDK.  Normally,"
+            if windows:
+                print "  this is in " + ndk_root_path + " but using this script"
+                print "  requires that the ndk be placed in " + ndk_root_path_spaceless
+            if macos:
+                print "  this is in " + ndk_root_path + "/"
+            print "  If you are missing the NDK, you can download a new copy here:"
+            print "  https://developer.android.com/ndk/downloads/index.html"
+            print "  or use this bootstrap script's --download android switch to download."
+            print_android_ndk_installation_instructions()
+        if not has_msbuild:
+            print_missing_msbuild_error()
+
+        did_fail_check_once = True
+    return
+
+
+def check_windows_tools():
+    print ""
+    if xcode_logging:
+        print "Checking for Windows tools..."
+    else:
+        print bcolors.BOLD + "Checking for Windows tools..." + bcolors.ENDC
+
+    check_opennurbs()
+    check_gyp()
+    check_msbuild()
+
+    global has_openNURBS
+    global has_gyp
+    global has_msbuild
+    global has_necessary_windows_tools
+    global did_fail_check_once
+
+    global native_lib_filename
+    library_name = native_lib_filename + ".dll"
+
+    if has_openNURBS and has_gyp and has_msbuild:
+        has_necessary_windows_tools = True
+        print_ok_message("Found all necessary tools to build " + library_name + " for Windows")
+    else:
+        has_necessary_windows_tools = False
+
+    if not has_necessary_windows_tools:
+        print_error_message("NOT ready for Windows build.  Please address the following:")
+
+        if not has_openNURBS:
+            print_missing_opennurbs_error()
+        if not has_gyp:
+            print_missing_gyp_error()
+        if not has_msbuild:
+            print_missing_msbuild_error()
+
+        did_fail_check_once = True
+    return
+
+
+def check_ios_tools():
+    print ""
+    if xcode_logging:
+        print "Checking for iOS tools..."
+    else:
+        print bcolors.BOLD + "Checking for iOS tools..." + bcolors.ENDC
+
+    check_opennurbs()
+    check_gyp()
+    check_xcode_tools()
+    check_xamarin_ios()
+    check_lipo()
+    check_msbuild()
+
+    global has_openNURBS
+    global has_gyp
+    global has_xcodeTools
+    global has_xamarin_ios
+    global has_lipo
+    global has_msbuild
+    global has_necessary_ios_tools
+    global did_fail_check_once
+
+    global native_lib_filename
+    library_name = native_lib_filename + ".a"
+
+    if has_openNURBS and has_gyp and has_xcodeTools and has_xamarin_ios and has_lipo and has_msbuild:
+        has_necessary_ios_tools = True
+        print_ok_message("Found all necessary tools to build " + library_name + " for iOS")
+    else:
+        has_necessary_ios_tools = False
+
+    if not has_necessary_ios_tools:
+        print_error_message("NOT ready for iOS build.  Please address the following:")
+        if not has_openNURBS:
+            print_missing_opennurbs_error()
+        if not has_gyp:
+            print_missing_gyp_error()
+        if not has_xcodeTools:
+            print_missing_xcodetools_error()
+        if not has_xamarin_ios:
+            print_missing_xamarin_ios_error()
+        if not has_lipo:
+            print_missing_lip_error()
+        if not has_msbuild:
+            print_missing_msbuild_error()
+
+        did_fail_check_once = True
+    return
+
+
+def check_macos_tools():
+    print ""
+    if xcode_logging:
+        print "Checking macOS tools..."
+    else:
+        print bcolors.BOLD + "Checking macOS tools..." + bcolors.ENDC
+
+    check_opennurbs()
+    check_gyp()
+    check_xcode_tools()
+    check_lipo()
+    check_msbuild()
+
+    global has_openNURBS
+    global has_gyp
+    global has_xcodeTools
+    global has_lipo
+    global has_msbuild
+    global has_necessary_ios_tools
+    global did_fail_check_once
+
+    global native_lib_filename
+    library_name = native_lib_filename + ".dylib"
+
+    if has_openNURBS and has_gyp and has_xcodeTools and has_lipo and has_msbuild:
+        has_necessary_ios_tools = True
+        print_ok_message("Found all necessary tools to build " + library_name + " for macOS")
+    else:
+        has_necessary_ios_tools = False
+
+    if not has_necessary_ios_tools:
+        print_error_message("NOT ready for macOS build.  Please address the following:")
+        if not has_openNURBS:
+            print_missing_opennurbs_error()
+        if not has_gyp:
+            print_missing_gyp_error()
+        if not has_xcodeTools:
+            print_missing_xcodetools_error()
+        if not has_lipo:
+            print_missing_lip_error()
+        if not has_msbuild:
+            print_missing_msbuild_error()
+
+        did_fail_check_once = True
+    return
+
+
+def check_xamarin_android():
+    print_standard_out(" Checking for Xamarin.Android")
+
+    global has_xamarin_android
+    xamarin_android_path = os.path.join('/', 'Library', 'Frameworks', 'Xamarin.Android.Framework')
+
+    if os.path.exists(xamarin_android_path):
+        print_ok_message("Found Xamarin.Android framework")
+        has_xamarin_android = True
+    else:
+        print_error_message("Xamarin.Android framework not found")
+        has_xamarin_android = False
+
+
+def check_ndk():
+    print_standard_out(" Checking for NDK")
+
+    global has_ndk
+    global currently_using_android_ndk
+    global running_android_ndk
+    global has_correct_android_ndk
+    global ndk_root_path
+    global ndk_root_path_spaceless
+
+    ndk_env = True
+
+    # check if ndk-build is already in the path.
+    is_executable = which("ndk-build")
+
+    if is_executable is None:
+        has_ndk = False
+    else:
+        has_ndk = True
+
+    if has_ndk:
+        has_ndk = True
+
+    global android_ndk_path
+    global drive_prefix
+
+    ndk_build_sub_search = ''
+    if windows:
+        ndk_build_sub_search = "\\android-ndk-r??\\ndk-build"
+    if macos:
+        ndk_build_sub_search = "/android-ndk-r??/ndk-build"
+
+    # check to see if the ndk-build tool is in a typical path and store that in a variable
+    if os.path.exists(ndk_root_path):
+        ndk_build_sub_search = ''
+
+        if glob.glob(ndk_root_path + ndk_build_sub_search):
+            has_ndk = True
+            path_to_search = ndk_root_path
+
+            only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+
+            folder_versions = []
+            for folder in only_folders:
+                if folder.startswith("android-ndk-r"):
+                    folder_version = folder.split("android-ndk-")[1]
+                    folder_versions.append(folder_version)
+
+            if any(currently_using_android_ndk in folder for folder in folder_versions):
+                has_correct_android_ndk = True
+                running_android_ndk = "android-ndk-" + currently_using_android_ndk
+                android_ndk_path = os.path.join(ndk_root_path, running_android_ndk, '')
+            else:
+                has_correct_android_ndk = False
+                sorted_folder_versions = sorted(folder_versions, key=split_by_numbers)
+                if sorted_folder_versions:
+                    running_android_ndk = "android-ndk-" + sorted_folder_versions[-1]
+                    android_ndk_path = os.path.join(ndk_root_path, running_android_ndk, '')
+                else:
+                    running_android_ndk = "android-ndk-??"
+
+            # env var
+            if os.environ.get('ANDROID_NDK') != android_ndk_path:
+                ndk_env = has_ndk = False
+    elif windows:
+        # it is possible that the NDK has been moved to the space-less, root folder (see below) and then
+        # been deleted from the ndk_root_path, so check there as well...
+        if windows:
+            if glob.glob(ndk_root_path_spaceless + ndk_build_sub_search):
+                has_ndk = True
+                path_to_search = ndk_root_path_spaceless
+
+                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+
+                folder_versions = []
+                for folder in only_folders:
+                    if folder.startswith("android-ndk-r"):
+                        folder_version = folder.split("android-ndk-")[1]
+                        folder_versions.append(folder_version)
+
+                if any(currently_using_android_ndk in folder for folder in folder_versions):
+                    has_correct_android_ndk = True
+                    running_android_ndk = "android-ndk-" + currently_using_android_ndk
+                    android_ndk_path = os.path.join(ndk_root_path, running_android_ndk, '')
+                else:
+                    has_correct_android_ndk = False
+                    sorted_folder_versions = sorted(folder_versions, key=split_by_numbers)
+                    if sorted_folder_versions:
+                        running_android_ndk = "android-ndk-" + sorted_folder_versions[-1]
+                        android_ndk_path = os.path.join(ndk_root_path, running_android_ndk, '')
+                    else:
+                        running_android_ndk = "android-ndk-??"
+    else:
+        has_ndk = False
+
+    if has_ndk:
+        print_ok_message("Found the NDK")
+        # TODO: Even though the ndk-build is found, even adding it to the PATH does not work yet
+        # and I'm (dan) not sure how to get it run on Windows yet.
+
+        # the ndk does not allow spaces in its path on windows, so we need to copy the ndk to the
+        # root folder so that we can run it from there.
+        if windows:
+            # check to see if the ndk has been copied already
+            android_on_root_path = drive_prefix + '\\' + 'Android\\' + 'ndk\\' + running_android_ndk + '\\'
+
+            if os.path.exists(android_on_root_path):
+                android_ndk_path = android_on_root_path
+            else:
+                print_warning_message("The Android NDK does not allow spaces in its path on Windows, so this script is copying the NDK to:\n " + android_on_root_path + "\n Copying...this may take a few minutes...")
+                distutils.dir_util.copy_tree(android_ndk_path, android_on_root_path, True, True)
+                android_ndk_path = android_on_root_path
+    else:
+        if not ndk_env:
+            print_error_message('NDK exists but the ANDROID_NDK variable is wrong (see below)')
+        else:
+            print_error_message("NDK not found")
+
+
+def check_opennurbs():
+    print_standard_out(" Checking for opennurbs")
+    global has_openNURBS
+    global path_to_src
+
+    opennnurbs_3dm_h_path = os.path.join(path_to_src, "opennurbs", "opennurbs_3dm.h")
+
+    if os.path.exists(opennnurbs_3dm_h_path):
+        print_ok_message("Found opennurbs")
+        has_openNURBS = True
+    else:
+        # check to see if this is the public version of rhinocommon
+        this_file = os.path.realpath(__file__)
+        this_dir = os.path.dirname(this_file)
+        opennurbs_3dm_h_public_path = os.path.join(this_dir, "..", "..", "..", "c", "opennurbs", "opennurbs_3dm.h")
+        if os.path.exists(opennurbs_3dm_h_public_path):
+            print_ok_message("Found opennurbs")
+            has_openNURBS = True
+        else:
+            print_error_message("opennurbs not found")
+            has_openNURBS = False
+
+
+def check_gyp():
+    print_standard_out(" Checking for gyp")
+    global has_gyp
+
+    # check if ndk-build is already in the path.
+    is_executable = ''
+    if windows:
+        is_executable = which("gyp.exe")
+    if macos:
+        is_executable = which("gyp")
+
+    if is_executable is None:
+        has_gyp = False
+    else:
+        has_gyp = True
+
+    # it's possible this is being run from an environment that does not have the right environment variables (like
+    # a Visual Studio pre-build event) so check again in a typical location on macOS:
+    if macos and not has_gyp:
+        python_root_path = "/Library/Frameworks/Python.framework/Versions"
+        gyp_sub_search = "/2.?/bin/gyp"
+        gyp_search = python_root_path + gyp_sub_search
+        if glob.glob(gyp_search):
+            has_gyp = True
+
+    if has_gyp:
+        print_ok_message("Found gyp")
+    else:
+        print_error_message("gyp not found")
+
+
+def check_xcode_tools():
+    print_standard_out(" Checking for Xcode command line tools")
+    global has_xcodeTools
+
+    if which("xcodebuild") is None:
+        print_error_message("xcodebuild not found")
+        has_xcodeTools = False
+    else:
+        print_ok_message("Found xcodebuild")
+        has_xcodeTools = True
+
+
+def check_xamarin_ios():
+    print_standard_out(" Checking for Xamarin.iOS")
+    global has_xamarin_ios
+
+    if os.path.exists("/Library/Frameworks/Xamarin.iOS.framework"):
+        print_ok_message("Found Xamarin.iOS")
+        has_xamarin_ios = True
+    else:
+        print_error_message("Xamarin.iOS not found")
+        has_xamarin_ios = False
+
+
+def check_lipo():
+    print_standard_out(" Checking for lipo")
+    global has_lipo
+
+    if which("lipo") is None:
+        print_error_message("lipo not found")
+        has_lipo = False
+    else:
+        print_ok_message("Found lipo")
+        has_lipo = True
+
+
+def check_msbuild():
+    print_standard_out(" Checking for msbuild")
+    global has_msbuild
+    global has_correct_msbuild
+
+    msbuild_exe = ''
+
+    # TODO: Windows will likely require a specific version of msbuild, likely that found in:
+    # C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\amd64
+    if windows:
+        msbuild_exe = "msbuild.exe"
+    if macos:
+        msbuild_exe = "msbuild"
+
+    if which(msbuild_exe) is None:
+        print_error_message("msbuild not found")
+        has_msbuild = False
+    else:
+        print_ok_message("Found msbuild")
+        has_msbuild = True
+
+    if has_msbuild:
+        p = subprocess.Popen(['msbuild', '/version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        msbuild_output = p.communicate()[0]
+
+        running_msbuild = msbuild_output.split('\n')[-1].split('.')[0]
+
+        version_alignment = compare_versions(running_msbuild, currently_using_msbuild)
+
+        if version_alignment == 0:
+            has_correct_msbuild = True
+        elif version_alignment > 0:
+            print_warning_message("You are running a newer version of msbuild than is currently in use for active development.  \n  This system is defaulting to msbuild " + running_msbuild + "\n  We are currently using msbuild " + currently_using_msbuild + "\n  Please make sure the current msbuild is in your PATH.")
+        elif version_alignment < 0:
+            print_warning_message("You are running an older version of msbuild than is currently in use for active development.  \n  This system is defaulting to msbuild " + running_msbuild + "\n  We are currently using msbuild " + currently_using_msbuild + "\n  Please make sure the current msbuild is in your PATH.")
+        else:
+            print_warning_message("You are running a different version of msbuild than is currently in use for active development.  \n  This system is defaulting to msbuild " + running_msbuild + "\n  We are currently using msbuild " + currently_using_msbuild + "\n  Please make sure the current msbuild is in your PATH.")
+
+
+# ----------------------------------------------- Errors/Instructions --------------------------------------------------
+
+
+def print_missing_opennurbs_error():
+    print_error_message("openNURBS is missing...")
+    print "  Building this library requires openNURBS. Please place a complete"
+    print "  copy of openNURBS in the opennurbs folder before continuing."
+    print "  Go to http://www.rhino3d.com/opennurbs and download the C++"
+    print "  openNURBS SDK and place it in the opennurbs folder contained in"
+    print "  rhinocommon/c/ folder.  If this is an internal build from rhino"
+    print "  source, please check to make sure the src4/opennurbs project is"
+    print "  contains the headers.  This script checks for opennurbs_3dm.h."
+
+
+def print_missing_gyp_error():
+    print_error_message("gyp is missing or not in PATH...")
+    print "  Building this library requires gyp (Generate Your Projects)."
+    print "  Use this bootstrap script's --download option to get gyp"
+    print_gyp_installation_instructions()
+
+
+def print_missing_xcodetools_error():
+    print_error_message("Xcode Command Line Tools missing or not in PATH...")
+    print "  Building the universal binary requires xcodebuild.  This utility"
+    print "  is included with Apple's Xcode Command Line Tools.  Verify that Xcode "
+    print "  is installed and the command-line tools are present.  This may require"
+    print "  restarting your Terminal session after installation. "
+
+
+def print_missing_xamarin_ios_error():
+    print_error_message("Xamarin.iOS platform library is missing...")
+    print "  Building the library requires the Xamarin.iOS library.  This library"
+    print "  is included with the Xamarin.iOS platform tools that install with"
+    print "  Visual Studio for Mac."
+
+
+def print_missing_lip_error():
+    print_error_message("Lipo missing or not in PATH...")
+    print "  Building the universal binary requires lipo.  If you are seeing this"
+    print "  error, it is likely that lipo is not in your path.  Verify that lipo"
+    print "  is in the /usr/bin folder and that this folder is in your PATH."
+
+
+def print_missing_msbuild_error():
+    print_error_message("msbuild missing or not in PATH...")
+    print "  Building the library requires msbuild.  If you are seeing this"
+    print "  error, it is likely that msbuild is not in your path or you do not have"
+    if windows:
+        print "  Visual Studio installed."
+    if macos:
+        print "  Visual Studio for Mac installed."
+
+
+def print_gyp_installation_instructions():
+    if windows:
+        print "  To install gyp, decompress the gyp.zip archive and run:\n  python setup.py install\n  Then make sure that C:\Python27\Scripts\ is in your PATH."
+    if macos:
+        print "  To install gyp, decompress the gyp.zip archive then, from Terminal, run:\n  [sudo] python setup.py install\n  Test your installation with:\n  which gyp"
+
+
+def print_android_ndk_installation_instructions():
+    global ndk_root_path
+    if windows:
+        print "  To install the NDK, decompress the folder, then move it to " + ndk_root_path_spaceless + "\n  Next, add " + ndk_root_path_spaceless + "android-ndk-" + currently_using_android_ndk + "\\ to your PATH"
+    if macos:
+        print "  To install the NDK, decompress the folder, then move it to " + ndk_root_path + "/\n  Next, add the following line to your ~/.bash_profile:\n  export ANDROID_NDK=\"" + ndk_root_path + "/android-ndk-" + currently_using_android_ndk + '/"'
+
+
+# -------------------------------------------------- Download tools ----------------------------------------------------
+
+def download_all():
+    download_gyp()
+    download_ndk()
+
+
+def download_android_tools():
+    download_gyp()
+    download_ndk()
+
+
+def download_windows_tools():
+    download_gyp()
+
+
+def download_ios_tools():
+    download_gyp()
+
+
+def download_macos_tools():
+    download_gyp()
+
+
+def download_gyp():
+    print ""
+    url = gyp_archive_url
+    destination_folder = get_download_folder()
+
+    download_file(url, destination_folder)
+    print_ok_message('Downloaded to ' + destination_folder + url.split('/')[-1])
+    print_gyp_installation_instructions()
+
+
+def download_ndk():
+    print ""
+    global ndk_root_path
+    url = ''
+    destination_folder = get_download_folder()
+    if windows:
+        url = android_ndk_archive_url_win
+    if macos:
+        url = android_ndk_archive_url_mac
+
+    download_file(url, destination_folder)
+    print_ok_message('Downloaded to ' + destination_folder + url.split('/')[-1])
+    print_android_ndk_installation_instructions()
+
+
+# --------------------------------------------------- Script Flow ------------------------------------------------------
+
+
+def usage():
+    global macos
+    global windows
+
+    print ""
+    print("bootstrap - check for and download developer tools for Rhino3dmIO")
+    if windows:
+        print "usage: python bootstrap --check [argument] -d [argument] --help"
+    if macos:
+        print "usage: ./bootstrap --check [argument] -d [argument] --help"
+    print ""
+    print " option:            arguments:    description:"
+    print " ---------------    ----------    ---------------------------------------"
+    print " -h   --help                      Display this help information          "
+    print " -c   --check       all           Check all current tools                "
+    print "                    android       Check for current Android requirements "
+    if windows:
+        print "                    windows       Check Windows requirements             "
+    if macos:
+        print "                    ios           Check for iOS requirements             "
+        print "                    macos         Check for macOS requirements           "
+    print " -d   --download    all           Download all required tools            "
+    print "                    android       Download Android requirements              "
+    if windows:
+        print "                    windows       Download Windows requirements          "
+    if macos:
+        print "                    ios           Download iOS requirements              "
+        print "                    macos         Download macOS requirements            "
+        print " -x   --xcodelog                  Generate Xcode-compatible log messages "
+    print ""
+    return
+
+
+def main():
+    platform = None
+    check = None
+    download = None
+    global path_to_src
+    global xcode_logging
+    global verbose
+
+    this_file = os.path.realpath(__file__)
+    this_dir = os.path.dirname(this_file)
+    os.chdir(this_dir)
+    path_to_src = os.path.abspath(os.path.join(this_dir, "..", "..", "..", "..", ".."))
+
+    # check os
+    global linux
+    global macos
+    global windows
+
+    read_required_versions()
+
+    if _platform == "linux" or _platform == "linux2":
+        linux = True
+    elif _platform == "darwin":
+        macos = True
+    elif _platform == "win32" or _platform == "cygwin":
+        windows = True
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hc:d:x", ["help", "check=", "download=", "xcodelog"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o == "-v" or o == "--verbose":
+            global verbose
+            verbose = True
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit(2)
+        elif o in ("-d", "--download"):
+            download = a
+        elif o in ("-c", "--check"):
+            check = a
+        elif o == "-x" or o == "--xcodelog":
+            xcode_logging = True
+        else:
+            assert False, "unhandled option"
+
+    # user has not entered any arguments...
+    if download is None and check is None:
+        usage()
+        sys.exit(2)
+
+    # turn on xcodelog by default on windows to suppress colors
+    if windows:
+        xcode_logging = True
+
+    # set Android NDK root paths per-platform
+    global ndk_root_path
+    global ndk_root_path_spaceless
+    global drive_prefix
+    if windows:
+        program_files = os.environ["ProgramW6432"]
+        ndk_root_path = os.path.join(program_files, "Android", "ndk")
+        drive_prefix = os.path.splitdrive(sys.executable)[0]
+        ndk_root_path_spaceless = drive_prefix + '\\' + 'Android\\' + 'ndk\\'
+    if macos:
+        home = os.path.expanduser("~")
+        ndk_root_path = os.path.join(home, "Library", "Developer", "Xamarin", "android-ndk")
+
+    # check developer tools
+    global did_fail_check_once
+    if check == "all":
+        check_android_tools()
+        if windows:
+            check_windows_tools()
+        if macos:
+            check_ios_tools()
+            check_macos_tools()
+        print ""
+    elif check == "android":
+        check_android_tools()
+        print ""
+    elif check == "windows":
+        if windows:
+            check_windows_tools()
+        else:
+            print_error_message("Checking for Windows tools requires running this script on Windows.")
+        print ""
+    elif check == "ios":
+        if macos:
+            check_ios_tools()
+        else:
+            print_error_message("Checking for iOS tools requires running this script on macOS.")
+        print ""
+    elif check == "macos":
+        if macos:
+            check_macos_tools()
+        else:
+            print_error_message("Checking for macOS tools requires running this script on macOS.")
+        print ""
+
+    if did_fail_check_once:
+        sys.exit(1)
+
+    # download developer tools
+    if download == "all":
+        if connected_to_internet():
+            download_all()
+            print ""
+    elif download == "android":
+        if connected_to_internet():
+            download_android_tools()
+        print ""
+    elif download == "windows":
+        if connected_to_internet():
+            if windows:
+                download_windows_tools()
+            else:
+                print_error_message("Downloading Windows tools requires running this script on Windows.")
+        print ""
+    elif download == "ios":
+        if connected_to_internet():
+            if macos:
+                download_ios_tools()
+            else:
+                print_error_message("Downloading iOS tools requires running this script on macOS.")
+        print ""
+    elif download == "macos":
+        if connected_to_internet():
+            if macos:
+                download_macos_tools()
+            else:
+                print_error_message("Downloading macOS tools requires running this script on macOS.")
+        print ""
+
+
+if __name__ == "__main__":
+    main()
