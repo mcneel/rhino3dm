@@ -102,9 +102,9 @@ using Rhino.Runtime.InteropWrappers;
       }
     }
 
-    public bool BuildDeclarations(string cppFilePath, bool rhino3dmIoBuild)
+    public bool BuildDeclarations(string cppFilePath, bool rhino3dmIoBuild, string opennurbsPathReplacement)
     {
-      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmIoBuild);
+      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmIoBuild, opennurbsPathReplacement);
       if (d!=null)
         m_declarations.Add(d);
       return (d != null);
@@ -145,7 +145,7 @@ using Rhino.Runtime.InteropWrappers;
       return sb.ToString();
     }
 
-    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmIoBuild)
+    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmIoBuild, string opennurbsPathReplacement)
     {
       const string RH_C_FUNCTION = "RH_C_FUNCTION";
       const string RH_C_PREPROC = "RH_C_PREPROCESSOR";
@@ -154,6 +154,8 @@ using Rhino.Runtime.InteropWrappers;
 
       var d = new DeclarationList {m_source_filename = cppFileName};
       string source_code = File.ReadAllText(cppFileName);
+      if( !string.IsNullOrWhiteSpace(opennurbsPathReplacement) )
+        source_code = source_code.Replace("../../../opennurbs", opennurbsPathReplacement);
 
       // 3 August 2017 S. Baer
       // rhino3dmIoBuild really means "run an extremely crude preprocessor that I don't trust"

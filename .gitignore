@@ -60,3 +60,9 @@
 /docbuilders/docgen/.vs
 /docbuilders/docgen/out
 /docbuilders/docgen/_build
+/src/dotnet/Debug
+/src/dotnet/.vs
+/src/dotnet/obj
+/src/methodgen/bin
+/src/methodgen/obj
+/src/methodgen/methodgen.csproj.user

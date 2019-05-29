@@ -1,12 +1,24 @@
 """
-Create C++ projects for rhcommon_c native compiles used by .NET
+Create / compile projects for .NET version of rhino3dm
 """
 import os
 import sys
 import fileinput
 
 
-def createproject(bitness):
+def methodgen():
+    # compile methodgen
+    os.system('msbuild ./methodgen')
+    # execute methodgen for Rhino3dm
+    dir_cpp = os.getcwd() + '/rhcommon_c'
+    dir_cs = os.getcwd() + '/dotnet'
+    path_replace = '../lib/opennurbs'
+    app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
+    args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
+    os.system(app + args)
+
+
+def createproject(bitness, compile):
     # staging and compilation occurs in the build directory
     build_dir = "build/rhcommon_c_{0}".format(bitness)
     if not os.path.exists(build_dir):
@@ -15,8 +27,7 @@ def createproject(bitness):
         os.mkdir(build_dir)
 
     os.chdir(build_dir)
-    windows_build = os.name == 'nt'
-    if windows_build:
+    if os.name == 'nt':  # windows build
         arch = ""
         if bitness == 64:
             arch = " Win64"
@@ -27,17 +38,23 @@ def createproject(bitness):
                 print(line.replace("WIN32;", "WIN64;"))
             for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
-        os.system("cmake --build . --config Release --target rhcommon_c")
+        if compile:
+            os.system("cmake --build . --config Release --target rhcommon_c")
     else:
-        rv = os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
-        if int(rv) > 0: sys.exit(1)
-        #rv = os.system("make")
-        #if int(rv) > 0: sys.exit(1)
+        rv = os.system("cmake ../..".format(sys.executable))
+        if compile and int(rv) == 0:
+            os.system("make")
 
     os.chdir("../..")
 
 
-# only create 32 bit compile on windows
-if os.name == 'nt':
-    createproject(32)
-createproject(64)
+if __name__ == '__main__':
+    # always compile and run methodgen first to make sure the pinvoke
+    # definitions are in place
+    methodgen()
+"""
+    # only create 32 bit compile on windows
+    if os.name == 'nt':
+        createproject(32, True)
+    createproject(64, True)
+"""

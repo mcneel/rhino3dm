@@ -27,6 +27,7 @@ namespace MethodGen
       bool rhinocommon_build = false;
       string dir_cpp;
       string dir_cs;
+      string opennurbsPathReplacement = "";
 
       if (1 == args.Length && string.Equals(args[0], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
       {
@@ -38,6 +39,8 @@ namespace MethodGen
       {
         dir_cpp = args[0];
         dir_cs = args[1];
+        if (args.Length > 2)
+          opennurbsPathReplacement = args[2];
       }
       else
       {
@@ -96,12 +99,12 @@ namespace MethodGen
       {
         if (rhino3dmio_build && (System.IO.Path.GetFileName(file).StartsWith("rh_") || System.IO.Path.GetFileName(file).StartsWith("tl_")))
           continue;
-        nmd.BuildDeclarations(file, rhino3dmio_build);
+        nmd.BuildDeclarations(file, rhino3dmio_build, opennurbsPathReplacement);
       }
       // get all of the .h files
       files = System.IO.Directory.GetFiles(dir_cpp, "*.h");
       foreach (var file in files)
-        nmd.BuildDeclarations(file, rhino3dmio_build);
+        nmd.BuildDeclarations(file, rhino3dmio_build, opennurbsPathReplacement);
 
       string output_file_methods = System.IO.Path.Combine(dir_cs, "AutoNativeMethods.cs");
       nmd.Write(output_file_methods, "lib");
@@ -123,11 +126,11 @@ namespace MethodGen
         // get all of the .cpp files
         files = System.IO.Directory.GetFiles(dir_cpp, "*.cpp");
         foreach (var file in files)
-          nmd.BuildDeclarations(file, false);
+          nmd.BuildDeclarations(file, false, "");
         // get all of the .h files
         files = System.IO.Directory.GetFiles(dir_cpp, "*.h");
         foreach (var file in files)
-          nmd.BuildDeclarations(file, false);
+          nmd.BuildDeclarations(file, false, "");
 
         output_file_methods = System.IO.Path.Combine(dir_cs, "AutoNativeMethodsRdk.cs");
         nmd.Write(output_file_methods, "librdk");
