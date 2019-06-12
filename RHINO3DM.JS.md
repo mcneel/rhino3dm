@@ -45,9 +45,23 @@ Note: A list of builds is available on our [Circleci project](https://circleci.c
 **rhino3dm.js** is also available on npm; try `npm install rhino3dm`.
 
 ```js
-rhino3dm = require('rhino3dm')() // note the trailing "()"
-sphere = new rhino3dm.Sphere([1,2,3,], 12)
+$ node
+> rhino3dm = require('rhino3dm')() // note the trailing "()"
+> sphere = new rhino3dm.Sphere([1,2,3,], 12)
 ```
+
+It takes a moment to load the ~5 MB wasm file – this happens asycnhronously. Unlike interactive usage, when scripting with `rhino3dm` you can use the fact that the `rhino3dm()` function returns a `Promise`.
+
+```js
+# script.js
+rhino3dm = require('rhino3dm')
+
+rhino3dm().then((rhino) => {
+  sphere = new rhino.Sphere([1,2,3,], 12)
+  console.log(sphere.radius)
+})
+```
+
 
 ## API Docs
 The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
