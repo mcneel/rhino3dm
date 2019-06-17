@@ -166,29 +166,7 @@
     <Compile Include="opennurbs\opennurbs_xform.cs" />
     <Compile Include="opennurbs\opennurbs_zlib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RDK\groundplane.cs" />
     <Compile Include="RDK\rdk_color.cs" />
-    <Compile Include="RDK\rdk_content.cs" />
-    <Compile Include="RDK\rdk_contentfield.cs" />
-    <Compile Include="RDK\rdk_content_factories.cs" />
-    <Compile Include="RDK\rdk_content_list.cs" />
-    <Compile Include="RDK\rdk_custom_render_meshes.cs" />
-    <Compile Include="RDK\rdk_decals.cs" />
-    <Compile Include="RDK\rdk_environment.cs" />
-    <Compile Include="RDK\rdk_globals.cs" />
-    <Compile Include="RDK\rdk_material.cs" />
-    <Compile Include="RDK\rdk_plugin.cs" />
-    <Compile Include="RDK\rdk_preview_scene.cs" />
-    <Compile Include="RDK\rdk_rendermesh_iterator.cs" />
-    <Compile Include="RDK\rdk_render_plugin_info.cs" />
-    <Compile Include="RDK\rdk_render_window.cs" />
-    <Compile Include="RDK\rdk_sdkrender.cs" />
-    <Compile Include="RDK\rdk_simulated_environment.cs" />
-    <Compile Include="RDK\rdk_texture.cs" />
-    <Compile Include="RDK\rdk_undo.cs" />
-    <Compile Include="RDK\rdk_variant.cs" />
-    <Compile Include="RDK\simulatedtexture.cs" />
-    <Compile Include="RDK\sun.cs" />
     <Compile Include="resolver.cs" />
     <Compile Include="rhino\Interpolator.cs" />
     <Compile Include="rhino\persistentsettingshooks.cs" />
@@ -299,17 +277,13 @@
   <ItemGroup>
     <None Include="RDN_StrongName.snk" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FileIO\" />
-    <Folder Include="NodeInCode\" />
-    <Folder Include="Notifications\" />
-  </ItemGroup>
-  <ItemGroup>
+  <ItemGroup />
+  <ItemGroup Condition="exists('..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll')">
     <EmbeddedResource Include="..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll">
       <Link>win32_native\librhino3dmio_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="exists('..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll')">
     <EmbeddedResource Include="..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll">
       <Link>win64_native\librhino3dmio_native.dll</Link>
     </EmbeddedResource>

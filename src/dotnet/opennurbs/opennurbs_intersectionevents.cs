@@ -4,12 +4,13 @@ using Rhino.Runtime;
 
 namespace Rhino.Geometry.Intersect
 {
+#if RHINO_SDK
   /// <summary>
   /// Provides all the information for a single Curve Intersection event.
   /// </summary>
   public class IntersectionEvent
   {
-    #region members
+  #region members
     internal int m_type; // 1 == ccx_point
                          // 2 == ccx_overlap
                          // 3 == csx_point
@@ -26,9 +27,9 @@ namespace Rhino.Geometry.Intersect
     internal double m_b1; //Parameter on B (or last parameter of overlap) (or last U parameter on surface)
     internal double m_b2; //First V parameter on surface
     internal double m_b3; //Last V parameter on surface
-    #endregion
+  #endregion
 
-    #region properties
+  #region properties
     /// <summary>
     /// All curve intersection events are either a single point or an overlap.
     /// </summary>
@@ -164,22 +165,21 @@ namespace Rhino.Geometry.Intersect
         vDomain = new Interval(m_b2, m_b3);
       }
     }
-    #endregion
+  #endregion
   }
 
-#if RHINO_SDK
   /// <summary>
   /// Maintains an ordered list of Curve Intersection results.
   /// </summary>
   public class CurveIntersections : IDisposable, IList<IntersectionEvent>
   {
-    #region members
+  #region members
     IntPtr m_ptr; //ON_SimpleArray<ON_X_EVENT>
     IntersectionEvent[] m_events; // = null; initialized by runtime
     int m_count;
-    #endregion
+  #endregion
 
-    #region constructor
+  #region constructor
     internal static CurveIntersections Create(IntPtr pIntersectionArray)
     {
       if (IntPtr.Zero == pIntersectionArray)
@@ -233,9 +233,9 @@ namespace Rhino.Geometry.Intersect
         m_events = null;
       }
     }
-    #endregion
+  #endregion
 
-    #region properties
+  #region properties
     /// <summary>
     /// Gets the number of recorded intersection events.
     /// </summary>
@@ -273,9 +273,9 @@ namespace Rhino.Geometry.Intersect
         ref x.m_type, ref x.m_A0, ref x.m_A1, ref x.m_B0, ref x.m_B1,
         ref x.m_a0, ref x.m_a1, ref x.m_b0, ref x.m_b1, ref x.m_b2, ref x.m_b3);
     }
-    #endregion
+  #endregion
 
-    #region methods
+  #region methods
     private IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
@@ -323,9 +323,9 @@ namespace Rhino.Geometry.Intersect
         yield return this[i];
       }
     }
-    #endregion
+  #endregion
 
-    #region explicit implementations of IList<IntersectionEvent> and its base types
+  #region explicit implementations of IList<IntersectionEvent> and its base types
       //that did not seem necessary in normal usage
 
     /// <summary>
@@ -447,7 +447,7 @@ namespace Rhino.Geometry.Intersect
     {
       return GetEnumerator();
     }
-    #endregion
+  #endregion
   }
 #endif
 }
