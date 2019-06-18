@@ -28,58 +28,97 @@ internal partial class UnsafeNativeMethods
     Init();
   }
 
-  private static bool g_paths_set = false;
-  public static void Init()
+  static void Init()
   {
-    if (!g_paths_set)
+    bool onWindows = false;
+    bool onMac = false;
+    bool onLinux = false;
     {
-      var assembly_name = System.Reflection.Assembly.GetExecutingAssembly().Location;
-      string dir_name = System.IO.Path.GetDirectoryName(assembly_name);
+      // https://stackoverflow.com/questions/38790802/determine-operating-system-in-net-core
+      // General purpose technique to detemine platform. This should get moved into HostUtils
 
-      switch(Environment.OSVersion.Platform)
-      {
-        case PlatformID.Win32NT:
-          {
-            string env_path = Environment.GetEnvironmentVariable("path");
-            var sub_directory = Environment.Is64BitProcess ? "\\Win64" : "\\Win32";
-            if (System.IO.Directory.Exists(sub_directory))
-            {
-              Environment.SetEnvironmentVariable("path", env_path + ";" + dir_name + sub_directory);
-            }
-            else
-            {
-              // attempt to extract dll as embedded resource
-              var assembly = typeof(Import).Assembly;
-              string resourceName = Environment.Is64BitProcess ?
-                "Rhino.win64_native.librhino3dmio_native.dll" :
-                "Rhino.win32_native.librhino3dmio_native.dll";
-              var stream = assembly.GetManifestResourceStream(resourceName);
-              var temp_path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Environment.Is64BitProcess ?
-                "rhino3dm_win64" : "rhino3dm_win32");
-              if( !System.IO.Directory.Exists(temp_path))
-                System.IO.Directory.CreateDirectory(temp_path);
-              var path = System.IO.Path.Combine(temp_path, "librhino3dmio_native.dll");
-              try
-              {
-                using (var fs = new System.IO.FileStream(path, System.IO.FileMode.OpenOrCreate))
-                {
-                  stream.CopyTo(fs);
-                }
-              }
-              catch (Exception)
-              {
-              }
-
-              stream.Close();
-
-              Environment.SetEnvironmentVariable("path", env_path + ";" + temp_path);
-            }
-          }
-          break;
-        default:
-          break; // This is solved on Mac by using a config file
+      string windir = Environment.GetEnvironmentVariable ("windir");
+      if (!string.IsNullOrEmpty (windir) && windir.Contains (@"\") && System.IO.Directory.Exists (windir)) {
+        onWindows = true;
+      } else if (System.IO.File.Exists (@"/proc/sys/kernel/ostype")) {
+        string osType = System.IO.File.ReadAllText (@"/proc/sys/kernel/ostype");
+        if (osType.StartsWith ("Linux", StringComparison.OrdinalIgnoreCase)) {
+          // Note: Android gets here too
+          onLinux = true;
+        } else {
+          // do nothing ??
+        }
+      } else if (System.IO.File.Exists (@"/System/Library/CoreServices/SystemVersion.plist")) {
+        // Note: iOS gets here too
+        onMac = true;
+      } else {
+        // do nothing ??
       }
-      g_paths_set = true;
+    }
+
+    string extension = ".dll";
+    if (onMac)
+      extension = ".dylib";
+    if (onLinux)
+      extension = ".so";
+
+
+    // 1. check to see if the native library is in the same directory as this assembly
+    //    If the library exists in this location, always choose to use that
+    var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly ().Location;
+    string assemblyDirectory = System.IO.Path.GetDirectoryName (assemblyPath);
+    var nativeLibraryPath = System.IO.Path.Combine (assemblyDirectory, "librhino3dmio_native" + extension);
+    if (System.IO.File.Exists (nativeLibraryPath))
+      return;
+
+
+    {
+
+      string resourceName = null;
+      string tempPath = null;
+
+      if (onWindows)
+      {
+        string env_path = Environment.GetEnvironmentVariable ("path");
+        resourceName = Environment.Is64BitProcess ?
+          "Rhino.win64_native.librhino3dmio_native.dll" :
+          "Rhino.win32_native.librhino3dmio_native.dll";
+        tempPath = System.IO.Path.Combine (System.IO.Path.GetTempPath (), Environment.Is64BitProcess ?
+          "rhino3dm_win64" : "rhino3dm_win32");
+
+        Environment.SetEnvironmentVariable ("path", env_path + ";" + tempPath);
+      }
+
+      if(onMac)
+      {
+        resourceName = "Rhino.macos_native.librhino3dmio_native.dylib";
+        tempPath = System.IO.Path.Combine (System.IO.Path.GetTempPath (), Environment.Is64BitProcess ?
+          "rhino3dm_macos64" : "rhino3dm_macos32");
+        string env_path = Environment.GetEnvironmentVariable ("DYLD_FRAMEWORK_PATH");
+        Environment.SetEnvironmentVariable ("DYLD_FRAMEWORK_PATH", env_path + ";" + tempPath);
+      }
+
+      if (!string.IsNullOrEmpty(resourceName) && !string.IsNullOrEmpty(tempPath))
+      {
+        // attempt to extract dll as embedded resource
+        var assembly = typeof (Import).Assembly;
+        var stream = assembly.GetManifestResourceStream (resourceName);
+        if (!System.IO.Directory.Exists (tempPath))
+          System.IO.Directory.CreateDirectory (tempPath);
+
+        int index = resourceName.IndexOf ("librhino3dm", StringComparison.InvariantCultureIgnoreCase);
+
+        var path = System.IO.Path.Combine (tempPath, resourceName.Substring(index));
+        try {
+          using (var fs = new System.IO.FileStream (path, System.IO.FileMode.OpenOrCreate)) {
+            stream.CopyTo (fs);
+          }
+        } catch (Exception) {
+        }
+
+        stream.Close ();
+
+      }
     }
   }
 #endif

@@ -45,3 +45,5 @@ else()
   target_link_libraries(librhino3dmio_native PRIVATE opennurbs_static)
 endif()
 
+set_target_properties(librhino3dmio_native PROPERTIES PREFIX "")
+

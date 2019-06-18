@@ -15,7 +15,10 @@ def methodgen():
     path_replace = '../lib/opennurbs'
     app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
     args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
-    os.system(app + args)
+    if os.name == 'nt':  # windows build
+        os.system(app + args)
+    else:
+        os.system('mono ' + app + args)
 
 
 def create_cpp_project(bitness, compile):
@@ -41,7 +44,7 @@ def create_cpp_project(bitness, compile):
         if compile:
             os.system("cmake --build . --config Release --target librhino3dmio_native")
     else:
-        rv = os.system("cmake ../..".format(sys.executable))
+        rv = os.system("cmake ../../librhino3dmio_native")
         if compile and int(rv) == 0:
             os.system("make")
 
@@ -60,5 +63,5 @@ if __name__ == '__main__':
 
     # compile Rhino3dm .NET project
     conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-    os.system('msbuild {} ./dotnet/rhino3dm.csproj'.format(conf))
+    os.system('msbuild ./dotnet/rhino3dm.csproj {}'.format(conf))
 
