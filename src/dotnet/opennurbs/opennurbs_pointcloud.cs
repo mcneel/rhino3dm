@@ -488,7 +488,7 @@ namespace Rhino.Geometry
       int countColor;
 
       var argbList = new List<int>();
-#if MOBILE_BUILD
+#if MOBILE_BUILD || DOTNETCORE
       foreach (var color in colors) {
         var abgr = Color.FromArgb (color.A, color.B, color.G, color.R);
         argbList.Add (abgr.ToArgb ());

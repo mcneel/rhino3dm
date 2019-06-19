@@ -436,7 +436,7 @@ namespace Rhino.Collections
           break;
         case ItemType.Font: //29
           {
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
             System.Drawing.Font val = archive.ReadFont();
             rc = Set(key, val);
 #endif
@@ -696,7 +696,7 @@ namespace Rhino.Collections
           archive.WriteSizeF((System.Drawing.SizeF)val);
           break;
         case ItemType.Font: // 29
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
           archive.WriteFont((System.Drawing.Font)val);
 #endif
           break;
@@ -1541,7 +1541,7 @@ namespace Rhino.Collections
     /// <para>Because <see cref="System.Drawing.SizeF"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     public bool Set(string key, System.Drawing.SizeF val) { return SetItem(key, ItemType.SizeF, val); }
 
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
     /// <summary>
     /// Sets a <see cref="System.Drawing.Font"/>.
     /// </summary>
@@ -2572,7 +2572,7 @@ namespace Rhino.FileIO
     }
 
 
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
     /// <summary>
     /// Writes a <see cref="System.Drawing.Font"/> value to the archive.
     /// </summary>
@@ -3528,7 +3528,7 @@ namespace Rhino.FileIO
       return new System.Drawing.SizeF(xy[0], xy[1]);
     }
 
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
     /// <summary>
     /// Reads a <see cref="System.Drawing.Font"/> from the archive.
     /// </summary>

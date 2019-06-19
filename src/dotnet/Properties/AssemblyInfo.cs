@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if !DOTNETCORE
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
@@ -25,6 +26,8 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("e1abd154-3fbb-4901-b1b7-76202cafc6bf")]
+
+#endif
 
 // Version information for an assembly consists of the following four values:
 //
@@ -58,8 +61,11 @@ using System.Runtime.InteropServices;
 // 21 Feb 2013 (5.1.30000.7) Update for SR3 of Rhino 5
 // March 2013 Rhino V6 version = 6.0.0.1
 // 29 Aug 2017 - switch to automated assembly versioning
+
 #if RHINO3DMIO_BUILD
+#if !DOTNETCORE
 [assembly: AssemblyVersion("6.0.0.1")]
+#endif
 #endif
 
 // 2013-12-19, Brian Gillespie

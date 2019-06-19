@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if MOBILE_BUILD
+using System;
 
 using UIKit;
 using Foundation;
@@ -13,3 +14,4 @@ namespace Rhino3dmIO.iOS
   // the Rhino3dmIO classes along with it - an ApiDefinition.cs is 
   // required for all btouch projects.
 }
+#endif

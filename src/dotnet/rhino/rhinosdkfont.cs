@@ -52,7 +52,7 @@ namespace Rhino.DocObjects
       m_managed_font = managedFont;
     }
 
-#if !MOBILE_BUILD
+#if !MOBILE_BUILD && !DOTNETCORE
     public static string[] AvailableFontFaceNames()
     {
       string[] rc = null;

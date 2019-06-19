@@ -77,10 +77,11 @@ def create_cpp_project(bitness, compile):
 
 def compilerhino3dm(dotnetcore):
     if dotnetcore:
-        pass
+        conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
+        os.system('dotnet build ./dotnet/Rhino3dm.core.csproj {}'.format(conf))
     else:
         conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-        os.system('msbuild ./dotnet/rhino3dm.csproj {}'.format(conf))
+        os.system('msbuild ./dotnet/Rhino3dm.csproj {}'.format(conf))
 
 
 if __name__ == '__main__':

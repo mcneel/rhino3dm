@@ -69,4 +69,5 @@
 /src/dotnet/AutoNativeEnums.cs
 /src/dotnet/AutoNativeMethods.cs
 /src/dotnet/Release
+/src/dotnet/bin
 /src/.mypy_cache
