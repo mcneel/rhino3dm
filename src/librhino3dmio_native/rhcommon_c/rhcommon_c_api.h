@@ -120,11 +120,11 @@ _variablename = (LPCTSTR) _variablename##_;                        \
 
 
 // Android compile
-#if defined (ON_COMPILER_ANDROIDNDK)
-#define RH_C_FUNCTION extern "C" 
-#define RH_CPP_FUNCTION
-#define RH_CPP_CLASS
-#define RH_EXPORT
+#if defined (ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
+#define RH_CPP_FUNCTION __attribute__ ((visibility ("default")))
+#define RH_CPP_CLASS __attribute__ ((visibility ("default")))
+#define RH_C_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+#define RH_EXPORT __attribute__ ((visibility ("default")))
 
 #define RHMONO_STRING ON__UINT16
 // macro used to convert input strings to their appropriate type

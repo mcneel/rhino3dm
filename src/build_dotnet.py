@@ -4,21 +4,45 @@ Create / compile projects for .NET version of rhino3dm
 import os
 import sys
 import fileinput
+import shutil
 
-
-def methodgen():
-    # compile methodgen
-    os.system('msbuild ./methodgen')
-    # execute methodgen for Rhino3dm
+def methodgen(dotnetcore):
+    # set up args to pass to methodgen application
     dir_cpp = os.getcwd() + '/librhino3dmio_native'
     dir_cs = os.getcwd() + '/dotnet'
     path_replace = '../lib/opennurbs'
-    app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
     args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
-    if os.name == 'nt':  # windows build
-        os.system(app + args)
+
+    if dotnetcore:
+        # staging and compilation occurs in the build directory
+        build_dir = "build/methodgen"
+        if not os.path.exists(build_dir):
+            if(not os.path.exists("build")):
+                os.mkdir("build")
+            os.mkdir(build_dir)
+        src_files = os.listdir('./methodgen')
+        for file_name in src_files:
+            if file_name.endswith('.cs'):
+                full_path = os.path.join('./methodgen', file_name)
+                if os.path.isfile(full_path):
+                    shutil.copy(full_path, build_dir)
+            if file_name.endswith('.core'):
+                full_path = os.path.join('./methodgen', file_name)
+                if os.path.isfile(full_path):
+                    shutil.copy(full_path, build_dir + '/methodgen.csproj')
+        # compile methodgen
+        os.system('dotnet build ' + './' + build_dir)
+        # execute methodgen
+        os.system('dotnet ./'+build_dir+'/bin/Debug/netcoreapp2.2/methodgen.dll '+ args)
     else:
-        os.system('mono ' + app + args)
+        # compile methodgen
+        os.system('msbuild ./methodgen')
+        # execute methodgen for Rhino3dm
+        app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
+        if os.name == 'nt':  # windows build
+            os.system(app + args)
+        else:
+            os.system('mono ' + app + args)
 
 
 def create_cpp_project(bitness, compile):
@@ -51,10 +75,23 @@ def create_cpp_project(bitness, compile):
     os.chdir("../..")
 
 
+def compilerhino3dm(dotnetcore):
+    if dotnetcore:
+        pass
+    else:
+        conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
+        os.system('msbuild ./dotnet/rhino3dm.csproj {}'.format(conf))
+
+
 if __name__ == '__main__':
+    dotnetcore = False
+    if len(sys.argv)>1 and sys.argv[1]=='--core':
+        dotnetcore = True
+    if sys.platform.startswith('linux'):
+        dotnetcore = True
     # always compile and run methodgen first to make sure the pinvoke
     # definitions are in place
-    methodgen()
+    methodgen(dotnetcore)
 
     # only create 32 bit compile on windows
     if os.name == 'nt':
@@ -62,6 +99,5 @@ if __name__ == '__main__':
     create_cpp_project(64, True)
 
     # compile Rhino3dm .NET project
-    conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-    os.system('msbuild ./dotnet/rhino3dm.csproj {}'.format(conf))
+    compilerhino3dm(dotnetcore)
 
