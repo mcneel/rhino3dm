@@ -1,0 +1,322 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E10F2F27-4825-4BFB-83B4-E929BDC6E027}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Rhino</RootNamespace>
+    <AssemblyName>Rhino3dm</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;RHINO3DMIO_BUILD</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>$(SolutionDir)$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE;RHINO3DMIO_BUILD</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoNativeEnums.cs" />
+    <Compile Include="AutoNativeMethods.cs" />
+    <Compile Include="hostutils.cs" />
+    <Compile Include="Import.cs" />
+    <Compile Include="interop.cs" />
+    <Compile Include="MonoHost.cs" />
+    <Compile Include="NameSpaceDoc.cs" />
+    <Compile Include="opennurbs\opennurbs_3dm.cs" />
+    <Compile Include="opennurbs\opennurbs_3dm_attributes.cs" />
+    <Compile Include="opennurbs\opennurbs_3dm_properties.cs" />
+    <Compile Include="opennurbs\opennurbs_3dm_settings.cs" />
+    <Compile Include="opennurbs\opennurbs_annotation.cs" />
+    <Compile Include="opennurbs\opennurbs_annotation2.cs" />
+    <Compile Include="opennurbs\opennurbs_annotationbase.cs" />
+    <Compile Include="opennurbs\opennurbs_arc.cs" />
+    <Compile Include="opennurbs\opennurbs_arccurve.cs" />
+    <Compile Include="opennurbs\opennurbs_archive.cs" />
+    <Compile Include="opennurbs\opennurbs_array.cs" />
+    <Compile Include="opennurbs\opennurbs_base32.cs" />
+    <Compile Include="opennurbs\opennurbs_base64.cs" />
+    <Compile Include="opennurbs\opennurbs_beam.cs" />
+    <Compile Include="opennurbs\opennurbs_bezier.cs" />
+    <Compile Include="opennurbs\opennurbs_bitmap.cs" />
+    <Compile Include="opennurbs\opennurbs_bounding_box.cs" />
+    <Compile Include="opennurbs\opennurbs_box.cs" />
+    <Compile Include="opennurbs\opennurbs_brep.cs" />
+    <Compile Include="opennurbs\opennurbs_circle.cs" />
+    <Compile Include="opennurbs\opennurbs_color.cs" />
+    <Compile Include="opennurbs\opennurbs_compstat.cs" />
+    <Compile Include="opennurbs\opennurbs_cone.cs" />
+    <Compile Include="opennurbs\opennurbs_crc.cs" />
+    <Compile Include="opennurbs\opennurbs_curve.cs" />
+    <Compile Include="opennurbs\opennurbs_curveonsurface.cs" />
+    <Compile Include="opennurbs\opennurbs_curveproxy.cs" />
+    <Compile Include="opennurbs\opennurbs_cylinder.cs" />
+    <Compile Include="opennurbs\opennurbs_defines.cs" />
+    <Compile Include="opennurbs\opennurbs_detail.cs" />
+    <Compile Include="opennurbs\opennurbs_dimension.cs" />
+    <Compile Include="opennurbs\opennurbs_dimstyle.cs" />
+    <Compile Include="opennurbs\opennurbs_ellipse.cs" />
+    <Compile Include="opennurbs\opennurbs_error.cs" />
+    <Compile Include="opennurbs\opennurbs_evaluate_nurbs.cs" />
+    <Compile Include="opennurbs\opennurbs_extensions.cs" />
+    <Compile Include="opennurbs\opennurbs_file_utilities.cs" />
+    <Compile Include="opennurbs\opennurbs_font.cs" />
+    <Compile Include="opennurbs\opennurbs_fpoint.cs" />
+    <Compile Include="opennurbs\opennurbs_geometry.cs" />
+    <Compile Include="opennurbs\opennurbs_group.cs" />
+    <Compile Include="opennurbs\opennurbs_hatch.cs" />
+    <Compile Include="opennurbs\opennurbs_hiddenlinedrawing.cs" />
+    <Compile Include="opennurbs\opennurbs_iepsiloncomparable.cs" />
+    <Compile Include="opennurbs\opennurbs_instance.cs" />
+    <Compile Include="opennurbs\opennurbs_intersect.cs" />
+    <Compile Include="opennurbs\opennurbs_intersectionevents.cs" />
+    <Compile Include="opennurbs\opennurbs_knot.cs" />
+    <Compile Include="opennurbs\opennurbs_layer.cs" />
+    <Compile Include="opennurbs\opennurbs_leader.cs" />
+    <Compile Include="opennurbs\opennurbs_light.cs" />
+    <Compile Include="opennurbs\opennurbs_line.cs" />
+    <Compile Include="opennurbs\opennurbs_linecurve.cs" />
+    <Compile Include="opennurbs\opennurbs_linestyle.cs" />
+    <Compile Include="opennurbs\opennurbs_linetype.cs" />
+    <Compile Include="opennurbs\opennurbs_list.cs" />
+    <Compile Include="opennurbs\opennurbs_lookup.cs" />
+    <Compile Include="opennurbs\opennurbs_mapchan.cs" />
+    <Compile Include="opennurbs\opennurbs_massprop.cs" />
+    <Compile Include="opennurbs\opennurbs_material.cs" />
+    <Compile Include="opennurbs\opennurbs_math.cs" />
+    <Compile Include="opennurbs\opennurbs_matrix.cs" />
+    <Compile Include="opennurbs\opennurbs_memory.cs" />
+    <Compile Include="opennurbs\opennurbs_mesh.cs" />
+    <Compile Include="opennurbs\opennurbs_mesh_marker.cs" />
+    <Compile Include="opennurbs\opennurbs_model_component.cs" />
+    <Compile Include="opennurbs\opennurbs_nurbscurve.cs" />
+    <Compile Include="opennurbs\opennurbs_nurbssurface.cs" />
+    <Compile Include="opennurbs\opennurbs_object.cs" />
+    <Compile Include="opennurbs\opennurbs_objref.cs" />
+    <Compile Include="opennurbs\opennurbs_offsetsurface.cs" />
+    <Compile Include="opennurbs\opennurbs_oject_history.cs" />
+    <Compile Include="opennurbs\opennurbs_optimize.cs" />
+    <Compile Include="opennurbs\opennurbs_parse.cs" />
+    <Compile Include="opennurbs\opennurbs_plane.cs" />
+    <Compile Include="opennurbs\opennurbs_planesurface.cs" />
+    <Compile Include="opennurbs\opennurbs_pluginlist.cs" />
+    <Compile Include="opennurbs\opennurbs_plus.cs" />
+    <Compile Include="opennurbs\opennurbs_plus_registry.cs" />
+    <Compile Include="opennurbs\opennurbs_plus_sil.cs" />
+    <Compile Include="opennurbs\opennurbs_point.cs" />
+    <Compile Include="opennurbs\opennurbs_pointcloud.cs" />
+    <Compile Include="opennurbs\opennurbs_pointgeometry.cs" />
+    <Compile Include="opennurbs\opennurbs_pointgrid.cs" />
+    <Compile Include="opennurbs\opennurbs_polycurve.cs" />
+    <Compile Include="opennurbs\opennurbs_polyedgecurve.cs" />
+    <Compile Include="opennurbs\opennurbs_polyline.cs" />
+    <Compile Include="opennurbs\opennurbs_polylinecurve.cs" />
+    <Compile Include="opennurbs\opennurbs_progress_reporter.cs" />
+    <Compile Include="opennurbs\opennurbs_quaternion.cs" />
+    <Compile Include="opennurbs\opennurbs_rectangle.cs" />
+    <Compile Include="opennurbs\opennurbs_rendering.cs" />
+    <Compile Include="opennurbs\opennurbs_revsurface.cs" />
+    <Compile Include="opennurbs\opennurbs_rtree.cs" />
+    <Compile Include="opennurbs\opennurbs_sphere.cs" />
+    <Compile Include="opennurbs\opennurbs_string.cs" />
+    <Compile Include="opennurbs\opennurbs_string_value.cs" />
+    <Compile Include="opennurbs\opennurbs_subd.cs" />
+    <Compile Include="opennurbs\opennurbs_sumsurface.cs" />
+    <Compile Include="opennurbs\opennurbs_surface.cs" />
+    <Compile Include="opennurbs\opennurbs_surfaceproxy.cs" />
+    <Compile Include="opennurbs\opennurbs_system.cs" />
+    <Compile Include="opennurbs\opennurbs_terminator.cs" />
+    <Compile Include="opennurbs\opennurbs_text.cs" />
+    <Compile Include="opennurbs\opennurbs_textlog.cs" />
+    <Compile Include="opennurbs\opennurbs_texture.cs" />
+    <Compile Include="opennurbs\opennurbs_texture_mapping.cs" />
+    <Compile Include="opennurbs\opennurbs_torus.cs" />
+    <Compile Include="opennurbs\opennurbs_userdata.cs" />
+    <Compile Include="opennurbs\opennurbs_uuid.cs" />
+    <Compile Include="opennurbs\opennurbs_version.cs" />
+    <Compile Include="opennurbs\opennurbs_viewport.cs" />
+    <Compile Include="opennurbs\opennurbs_workspace.cs" />
+    <Compile Include="opennurbs\opennurbs_x.cs" />
+    <Compile Include="opennurbs\opennurbs_xform.cs" />
+    <Compile Include="opennurbs\opennurbs_zlib.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RDK\rdk_color.cs" />
+    <Compile Include="resolver.cs" />
+    <Compile Include="rhino\Interpolator.cs" />
+    <Compile Include="rhino\persistentsettingshooks.cs" />
+    <Compile Include="rhino\RhinoColors.cs" />
+    <Compile Include="rhino\rhinofilewatcher.cs" />
+    <Compile Include="rhino\rhinosdkanalysismodes.cs" />
+    <Compile Include="rhino\rhinosdkannotationobject.cs" />
+    <Compile Include="rhino\rhinosdkapp.cs" />
+    <Compile Include="rhino\rhinosdkappsettings.cs" />
+    <Compile Include="rhino\rhinosdkbitmap.cs" />
+    <Compile Include="rhino\rhinosdkbrepobject.cs" />
+    <Compile Include="rhino\rhinosdkcageobject.cs" />
+    <Compile Include="rhino\rhinosdkchannelattributes.cs" />
+    <Compile Include="rhino\rhinosdkchecks.cs" />
+    <Compile Include="rhino\rhinosdkclippingplane.cs" />
+    <Compile Include="rhino\rhinosdkcolorbutton.cs" />
+    <Compile Include="rhino\rhinosdkcommand.cs" />
+    <Compile Include="rhino\rhinosdkcommandoption.cs" />
+    <Compile Include="rhino\rhinosdkcommandoptionname.cs" />
+    <Compile Include="rhino\rhinosdkcontextmenu.cs" />
+    <Compile Include="rhino\rhinosdkcurveobject.cs" />
+    <Compile Include="rhino\rhinosdkcurveseam.cs" />
+    <Compile Include="rhino\rhinosdkdetailobject.cs" />
+    <Compile Include="rhino\rhinosdkdialog.cs" />
+    <Compile Include="rhino\rhinosdkdib.cs" />
+    <Compile Include="rhino\rhinosdkdigitizerinfo.cs" />
+    <Compile Include="rhino\rhinosdkdigitizermanager.cs" />
+    <Compile Include="rhino\rhinosdkdimension.cs" />
+    <Compile Include="rhino\rhinosdkdimstyle.cs" />
+    <Compile Include="rhino\rhinosdkdimstylecombobox.cs" />
+    <Compile Include="rhino\rhinosdkdirectorymanager.cs" />
+    <Compile Include="rhino\rhinosdkdisplay.cs" />
+    <Compile Include="rhino\rhinosdkdisplayattrsmgr.cs" />
+    <Compile Include="rhino\rhinosdkdisplayconduit.cs" />
+    <Compile Include="rhino\rhinosdkdisplayconduitutility.cs" />
+    <Compile Include="rhino\rhinosdkdisplayengine.cs" />
+    <Compile Include="rhino\rhinosdkdisplaypipeline.cs" />
+    <Compile Include="rhino\rhinosdkdisplaypipelineattributes.cs" />
+    <Compile Include="rhino\rhinosdkdisplaypipelinematerial.cs" />
+    <Compile Include="rhino\rhinosdkdoc.cs" />
+    <Compile Include="rhino\rhinosdkdocproperties.cs" />
+    <Compile Include="rhino\rhinosdkeventwatcher.cs" />
+    <Compile Include="rhino\rhinosdkextrude.cs" />
+    <Compile Include="rhino\rhinosdkextrusion.cs" />
+    <Compile Include="rhino\rhinosdkfair.cs" />
+    <Compile Include="rhino\rhinosdkfilemenu.cs" />
+    <Compile Include="rhino\rhinosdkfileoptions.cs" />
+    <Compile Include="rhino\rhinosdkfileutilities.cs" />
+    <Compile Include="rhino\rhinosdkfont.cs" />
+    <Compile Include="rhino\rhinosdkget.cs" />
+    <Compile Include="rhino\rhinosdkgetarc.cs" />
+    <Compile Include="rhino\rhinosdkgetcircle.cs" />
+    <Compile Include="rhino\rhinosdkgetcone.cs" />
+    <Compile Include="rhino\rhinosdkgetcylinder.cs" />
+    <Compile Include="rhino\rhinosdkgetfiledialog.cs" />
+    <Compile Include="rhino\rhinosdkgetline.cs" />
+    <Compile Include="rhino\rhinosdkgetobject.cs" />
+    <Compile Include="rhino\rhinosdkgetplane.cs" />
+    <Compile Include="rhino\rhinosdkgetpoint.cs" />
+    <Compile Include="rhino\rhinosdkgetpolyline.cs" />
+    <Compile Include="rhino\rhinosdkgetstring.cs" />
+    <Compile Include="rhino\rhinosdkgetxform.cs" />
+    <Compile Include="rhino\rhinosdkgrips.cs" />
+    <Compile Include="rhino\rhinosdkgroup.cs" />
+    <Compile Include="rhino\rhinosdkgroupobject.cs" />
+    <Compile Include="rhino\rhinosdkgumball.cs" />
+    <Compile Include="rhino\rhinosdkhatchobject.cs" />
+    <Compile Include="rhino\rhinosdkhatchpattern.cs" />
+    <Compile Include="rhino\rhinosdkhistoryrecordtable.cs" />
+    <Compile Include="rhino\rhinosdkinstance.cs" />
+    <Compile Include="rhino\rhinosdklayer.cs" />
+    <Compile Include="rhino\rhinosdkleader.cs" />
+    <Compile Include="rhino\rhinosdkleaderstyle.cs" />
+    <Compile Include="rhino\rhinosdklight.cs" />
+    <Compile Include="rhino\rhinosdklinetype.cs" />
+    <Compile Include="rhino\rhinosdkloft.cs" />
+    <Compile Include="rhino\rhinosdkmaterial.cs" />
+    <Compile Include="rhino\rhinosdkmeshextruder.cs" />
+    <Compile Include="rhino\rhinosdkmeshobject.cs" />
+    <Compile Include="rhino\rhinosdkmouse.cs" />
+    <Compile Include="rhino\rhinosdkobject.cs" />
+    <Compile Include="rhino\rhinosdkobjectattributes.cs" />
+    <Compile Include="rhino\rhinosdkobjecthistory.cs" />
+    <Compile Include="rhino\rhinosdkobjectpropertiesdialogpage.cs" />
+    <Compile Include="rhino\rhinosdkoptionsdialogpage.cs" />
+    <Compile Include="rhino\rhinosdkpagelayoutview.cs" />
+    <Compile Include="rhino\rhinosdkpages.cs" />
+    <Compile Include="rhino\rhinosdkpanels.cs" />
+    <Compile Include="rhino\rhinosdkpick.cs" />
+    <Compile Include="rhino\rhinosdkplugin.cs" />
+    <Compile Include="rhino\rhinosdkpointobject.cs" />
+    <Compile Include="rhino\rhinosdkpolyedge.cs" />
+    <Compile Include="rhino\rhinosdkprintinfo.cs" />
+    <Compile Include="rhino\rhinosdksnapshotsclient.cs" />
+    <Compile Include="rhino\rhinosdkstackeddialogpage.cs" />
+    <Compile Include="rhino\rhinosdksubdobject.cs" />
+    <Compile Include="rhino\rhinosdksweep.cs" />
+    <Compile Include="rhino\rhinosdktext.cs" />
+    <Compile Include="rhino\rhinosdkuifile.cs" />
+    <Compile Include="rhino\rhinosdkuiprofilecontext.cs" />
+    <Compile Include="rhino\rhinosdkunrollsrf.cs" />
+    <Compile Include="rhino\rhinosdkview.cs" />
+    <Compile Include="rhino\rhinosdkviewport.cs" />
+    <Compile Include="rhino\rhinosdkworksession.cs" />
+    <Compile Include="UI\Localization.cs" />
+    <Compile Include="UnsafeNativeMethods.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RDN_StrongName.snk" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup Condition="exists('..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll')">
+    <EmbeddedResource Include="..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll">
+      <Link>win32_native\librhino3dmio_native.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup Condition="exists('..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll')">
+    <EmbeddedResource Include="..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll">
+      <Link>win64_native\librhino3dmio_native.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup Condition="exists('..\build\librhino3dmio_native_64\librhino3dmio_native.dylib')">
+    <EmbeddedResource Include="..\build\librhino3dmio_native_64\librhino3dmio_native.dylib">
+      <Link>macos_native\librhino3dmio_native.dylib</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy RemoveTrailingWhitespace="True" NoTabsAfterNonTabs="False" EolMarker="Native" FileWidth="80" TabWidth="2" TabsToSpaces="True" IndentWidth="2" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentBlock="True" IndentBraces="False" IndentSwitchCaseSection="True" LabelPositioning="OneLess" NewLinesForBracesInTypes="True" NewLinesForBracesInMethods="True" SpaceWithinMethodDeclarationParenthesis="False" SpaceBetweenEmptyMethodDeclarationParentheses="False" SpaceWithinMethodCallParentheses="False" SpaceBetweenEmptyMethodCallParentheses="False" SpaceAfterControlFlowStatementKeyword="True" SpaceWithinExpressionParentheses="False" SpaceWithinCastParentheses="False" SpaceWithinOtherParentheses="False" SpaceAfterCast="False" SpacesIgnoreAroundVariableDeclaration="False" SpaceBetweenEmptySquareBrackets="False" SpaceWithinSquareBrackets="False" SpaceAfterColonInBaseTypeDeclaration="True" SpaceAfterComma="True" SpaceAfterDot="False" SpaceAfterSemicolonsInForStatement="True" SpaceBeforeColonInBaseTypeDeclaration="True" SpaceBeforeComma="False" SpaceBeforeDot="False" SpaceBeforeSemicolonsInForStatement="False" SpacingAroundBinaryOperator="Single" WrappingPreserveSingleLine="True" WrappingKeepStatementsOnSingleLine="True" IndentSwitchSection="False" NewLinesForBracesInProperties="False" NewLinesForBracesInAccessors="False" NewLinesForBracesInAnonymousMethods="False" NewLinesForBracesInControlBlocks="False" NewLinesForBracesInAnonymousTypes="False" NewLinesForBracesInObjectCollectionArrayInitializers="False" NewLinesForBracesInLambdaExpressionBody="False" NewLineForElse="False" NewLineForCatch="False" NewLineForFinally="False" NewLineForMembersInObjectInit="False" NewLineForMembersInAnonymousTypes="False" NewLineForClausesInQuery="False" SpacingAfterMethodDeclarationName="True" SpaceAfterMethodCallName="True" SpaceBeforeOpenSquareBracket="True" scope="text/x-csharp" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+</Project>

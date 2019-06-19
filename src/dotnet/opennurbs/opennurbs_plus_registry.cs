@@ -1,0 +1,1 @@
+// skip. Registry access is built into .NET framework

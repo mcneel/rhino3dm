@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DefineConstants>RHINO3DMIO_BUILD DOTNETCORE</DefineConstants>
+    <AssemblyName>Rhino3dm</AssemblyName>
+  </PropertyGroup>
+
+</Project>

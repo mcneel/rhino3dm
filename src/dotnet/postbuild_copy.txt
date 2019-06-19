@@ -1,0 +1,8 @@
+If you want the RhinoCommon build to automatically copy RhinoCommon.dll to the 
+Rhino executable directories, then create a file called 
+
+...\src4\DotNetSDK\rhinocommon\dotnet\postbuild_copy.yes 
+
+If you have any questions, ask Steve or Dale Lear.
+
+
