@@ -97,6 +97,31 @@ jobs:
       - run: git submodule update --init
       - run: python setup.py bdist_wheel
 
+  build_dotnet:
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      # https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/sdk-current
+      - run:
+          name: Bootstrap
+          command: |
+            apt update
+            apt install -y git python3 uuid uuid-dev cmake clang wget
+            wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+            dpkg -i packages-microsoft-prod.deb
+            rm -rf packages-microsoft-prod.deb
+            apt update
+            apt install -y dotnet-sdk-2.2
+      - checkout
+      - run: git submodule update --init
+      - run: python3 --version
+      - run: cmake --version
+      - run:
+          name: Build
+          command: |
+            cd src
+            python3 build_dotnet.py
+
 workflows:
   version: 2
   build:
@@ -108,3 +133,4 @@ workflows:
       - build_py2
       - build_py3
       - build_py2_mac
+      - build_dotnet
