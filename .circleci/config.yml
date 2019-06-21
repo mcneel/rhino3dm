@@ -122,6 +122,42 @@ jobs:
             cd src
             python3 build_dotnet.py
 
+  build_dotnet_amazonlinux2:
+    docker:
+      - image: amazonlinux:2
+    steps:
+      - run:
+          name: Bootstrap
+          command: |
+            yum update -y
+            yum install -y git clang libuuid libuuid-devel
+            # https://github.com/dotnet/core/blob/master/release-notes/download-archives/2.0.0-download.md#rhel-and-fedora-based-systems
+            rpm --import https://packages.microsoft.com/keys/microsoft.asc
+            sh -c 'echo -e "[packages-microsoft-com-prod]\nname=packages-microsoft-com-prod \nbaseurl=https://packages.microsoft.com/yumrepos/microsoft-rhel7.3-prod\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/dotnetdev.repo'
+            yum install -y libunwind libicu
+            yum update -y
+            yum install -y dotnet-sdk-2.2
+            dotnet --version
+            # https://www.matbra.com/2017/12/07/install-cmake-on-aws-linux.html
+            yum remove -y cmake
+            curl -O https://cmake.org/files/v3.14/cmake-3.14.5.tar.gz
+            yum install -y gcc-c++ make tar
+            tar -xzf cmake-3.14.5.tar.gz
+            cd cmake-3.14.5
+            ./bootstrap
+            make
+            make install
+            cmake --version
+            cd ..
+            rm -rf *
+      - checkout
+      - run: git submodule update --init
+      - run:
+          name: Build
+          command: |
+            cd src
+            python3 build_dotnet.py
+
 workflows:
   version: 2
   build:
@@ -134,3 +170,4 @@ workflows:
       - build_py3
       - build_py2_mac
       - build_dotnet
+      - build_dotnet_amazonlinux2
