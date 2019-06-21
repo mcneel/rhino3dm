@@ -6,6 +6,13 @@ import sys
 import fileinput
 import shutil
 
+def system(cmd):
+    # copied from setup.py
+    rv = os.system(cmd)
+    rc = rv if os.name == 'nt' else os.WEXITSTATUS(rv)
+    if (rc != 0):
+        raise RuntimeError('The command "{}" exited with {}'.format(cmd, rc))
+
 def methodgen(dotnetcore):
     # set up args to pass to methodgen application
     dir_cpp = os.getcwd() + '/librhino3dmio_native'
@@ -31,18 +38,18 @@ def methodgen(dotnetcore):
                 if os.path.isfile(full_path):
                     shutil.copy(full_path, build_dir + '/methodgen.csproj')
         # compile methodgen
-        os.system('dotnet build ' + './' + build_dir)
+        system('dotnet build ' + './' + build_dir)
         # execute methodgen
-        os.system('dotnet ./'+build_dir+'/bin/Debug/netcoreapp2.2/methodgen.dll '+ args)
+        system('dotnet ./'+build_dir+'/bin/Debug/netcoreapp2.2/methodgen.dll '+ args)
     else:
         # compile methodgen
-        os.system('msbuild ./methodgen')
+        system('msbuild ./methodgen')
         # execute methodgen for Rhino3dm
         app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
         if os.name == 'nt':  # windows build
-            os.system(app + args)
+            system(app + args)
         else:
-            os.system('mono ' + app + args)
+            system('mono ' + app + args)
 
 
 def create_cpp_project(bitness, compile):
@@ -59,18 +66,18 @@ def create_cpp_project(bitness, compile):
         if bitness == 64:
             arch = " Win64"
         args = '-G "Visual Studio 15 2017{0}"'.format(arch)
-        os.system('cmake ' + args + ' ../../librhino3dmio_native')
+        system('cmake ' + args + ' ../../librhino3dmio_native')
         if bitness == 64:
             for line in fileinput.input("librhino3dmio_native.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
             for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
         if compile:
-            os.system("cmake --build . --config Release --target librhino3dmio_native")
+            system("cmake --build . --config Release --target librhino3dmio_native")
     else:
-        rv = os.system("cmake ../../librhino3dmio_native")
-        if compile and int(rv) == 0:
-            os.system("make")
+        system("cmake ../../librhino3dmio_native")
+        if compile:
+            system("make")
 
     os.chdir("../..")
 
@@ -78,10 +85,10 @@ def create_cpp_project(bitness, compile):
 def compilerhino3dm(dotnetcore):
     if dotnetcore:
         conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-        os.system('dotnet build ./dotnet/Rhino3dm.core.csproj {}'.format(conf))
+        system('dotnet build ./dotnet/Rhino3dm.core.csproj {}'.format(conf))
     else:
         conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-        os.system('msbuild ./dotnet/Rhino3dm.csproj {}'.format(conf))
+        system('msbuild ./dotnet/Rhino3dm.csproj {}'.format(conf))
 
 
 if __name__ == '__main__':
