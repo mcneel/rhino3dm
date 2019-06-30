@@ -1040,6 +1040,14 @@ void initExtensionsBindings(void*)
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmMaterialTable>("File3dmMaterialTable")
+    .function("count", &BND_File3dmMaterialTable::Count)
+    .function("get", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmMaterialTable::Add)
+    .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
+    ;
+
   class_<BND_File3dmLayerTable>("File3dmLayerTable")
     .function("count", &BND_File3dmLayerTable::Count)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
@@ -1077,6 +1085,7 @@ void initExtensionsBindings(void*)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("settings", &BND_ONXModel::Settings)
     .function("objects", &BND_ONXModel::Objects)
+    .function("materials", &BND_ONXModel::Materials)
     .function("layers", &BND_ONXModel::Layers)
     .function("dimstyles", &BND_ONXModel::DimStyles)
     .function("instanceDefinitions", &BND_ONXModel::InstanceDefinitions)
