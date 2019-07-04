@@ -142,6 +142,10 @@ class BND_MeshTextureCoordinateList
   ON_Mesh* m_mesh = nullptr;
 public:
   BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+
+  ON_2fPoint* begin();
+  ON_2fPoint* end();
+
   int Count() const { return m_mesh->m_T.Count(); }
   ON_2fPoint GetTextureCoordinate(int i) const { return m_mesh->m_T[i]; }
   void SetTextureCoordinate(int i, ON_2fPoint tc) { m_mesh->m_T[i] = tc; }
