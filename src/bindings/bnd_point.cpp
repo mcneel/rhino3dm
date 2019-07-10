@@ -67,12 +67,27 @@ static pybind11::dict EncodeVector3d(const ON_3dVector& v)
   d["Z"] = v.z;
   return d;
 }
+static pybind11::dict EncodePoint2f(const ON_2fPoint& pt)
+{
+  pybind11::dict d;
+  d["X"] = pt.x;
+  d["Y"] = pt.y;
+  return d;
+}
 static pybind11::dict EncodePoint3f(const ON_3fPoint& pt)
 {
   pybind11::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   d["Z"] = pt.z;
+  return d;
+}
+static pybind11::dict EncodeVector3f(const ON_3fVector& v)
+{
+  pybind11::dict d;
+  d["X"] = v.x;
+  d["Y"] = v.y;
+  d["Z"] = v.z;
   return d;
 }
 
@@ -123,6 +138,20 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("X", &ON_3dVector::x)
     .def_readwrite("Y", &ON_3dVector::y)
     .def_readwrite("Z", &ON_3dVector::z);
+    
+  py::class_<ON_3fVector>(m, "Vector3f")
+    .def(py::init<float, float, float>(), py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("Encode", &EncodeVector3f)
+    .def_readwrite("X", &ON_3fVector::x)
+    .def_readwrite("Y", &ON_3fVector::y)
+    .def_readwrite("Z", &ON_3fVector::z);
+
+  py::class_<ON_2fPoint>(m, "Point2f")
+    .def(py::init<float, float>(), py::arg("x"), py::arg("y"))
+    .def("Encode", &EncodePoint2f)
+    .def_readwrite("X", &ON_2fPoint::x)
+    .def_readwrite("Y", &ON_2fPoint::y)
+    .def(py::self + py::self);
 
   py::class_<ON_3fPoint>(m, "Point3f")
     .def(py::init<float, float, float>(), py::arg("x"), py::arg("y"), py::arg("z"))
