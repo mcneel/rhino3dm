@@ -92,14 +92,6 @@ rhino3dm().then(function(m) {
 
 function compute(){
 
-    // clear meshes from scene
-
-    scene.traverse(child => {
-        if(child.type === 'Mesh'){
-            scene.remove(child);
-        }
-    });
-
     // clear values
     args.values = [];
     
@@ -115,12 +107,17 @@ function compute(){
         let data = JSON.parse(result.values[0].Values[0][0].data);
         let mesh = rhino.CommonObject.decode(data);
 
-        let material = new THREE.MeshStandardMaterial( {wireframe: false, color: 0xffffff, roughness: 1.00 } );
+        let material = new THREE.MeshNormalMaterial();
         let threeMesh = meshToThreejs(mesh, material);
 
-        scene.add(threeMesh);
-        
+        // clear meshes from scene
+        scene.traverse(child => {
+            if(child.type === 'Mesh'){
+                scene.remove(child);
+            }
+        });
 
+        scene.add(threeMesh);
     });
 }
 
@@ -213,25 +210,6 @@ function init(){
 
     controls = new THREE.OrbitControls( camera, renderer.domElement  );
 
-    var ambientLight = new THREE.AmbientLight( 0x404040 ); // soft white light
-    scene.add( ambientLight );
-
-    var light1 = new THREE.PointLight( 0xffffff, 3, 100 );
-    light1.position.set( 50, 50, 50 );
-    scene.add( light1 );
-
-    var light2 = new THREE.PointLight( 0xffffff, 3, 100 );
-    light2.position.set( -50, -50, -50 );
-    scene.add( light2 );
-
-    var light3 = new THREE.PointLight( 0xffffff, 3, 100 );
-    light3.position.set( -50, 0, -50 );
-    scene.add( light3 );
-
-    var light4 = new THREE.PointLight( 0xffffff, 3, 100 );
-    light4.position.set( 50, 0, 50 );
-    scene.add( light3 );
-
     camera.position.z = 50;
 
     window.addEventListener( 'resize', onWindowResize, false );
@@ -249,7 +227,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
-    composer.setSize( window.innerWidth, window.innerHeight);
     animate();
 }
 
