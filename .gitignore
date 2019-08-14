@@ -71,3 +71,9 @@
 /src/dotnet/Release
 /src/dotnet/bin
 /src/.mypy_cache
+/src/docgen/obj
+/src/docgen/out
+/src/docgen/packages
+/src/docgen/.vs
+/src/docgen/artifacts
+/src/docgen/bin
