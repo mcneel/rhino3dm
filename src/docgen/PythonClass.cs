@@ -37,8 +37,10 @@ namespace docgen
             return 4;
         }
 
-        public static void Write()
+        public static void Write(string directory)
         {
+            if (!System.IO.Directory.Exists(directory))
+                System.IO.Directory.CreateDirectory(directory);
             StringBuilder py = new StringBuilder();
             var keys = AllPythonClasses.Keys.ToList();
             keys.Sort((a, b) =>
@@ -54,8 +56,7 @@ namespace docgen
                 return a.CompareTo(b);
             });
 
-            var rstDirectory = new System.IO.DirectoryInfo("../");
-
+            var rstDirectory = new System.IO.DirectoryInfo(directory);
             foreach (var key in keys)
             {
                 var pyclass = GetPY(key);
@@ -200,9 +201,9 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`");
-            System.IO.File.WriteAllText("../index.rst", indexRst.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.rst"), indexRst.ToString());
 
-            System.IO.File.WriteAllText("../rhino3dm.py", py.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "rhino3dm.py"), py.ToString());
         }
 
         static string DocCommentToPythonDoc(DocumentationCommentTriviaSyntax doccomment, int indentLevel)

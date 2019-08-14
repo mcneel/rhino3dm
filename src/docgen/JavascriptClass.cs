@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace docgen
@@ -13,8 +12,19 @@ namespace docgen
         {
         }
 
-        public static void Write(string path)
+        /// <summary>
+        /// Create API documentation file(s). Currently javascript help is created
+        /// by first creating a fake javascript file that mocks rhino3dm wasm and
+        /// then runing jsdoc on this file.
+        /// TODO: My plan is to switch this over to the RST+sphinx technique that
+        /// I would like to use for all languages
+        /// </summary>
+        /// <param name="directory">Where to write the API help</param>
+        public static void GenerateApiHelp(string directory)
         {
+            if (!System.IO.Directory.Exists(directory))
+                System.IO.Directory.CreateDirectory(directory);
+
             StringBuilder js = new StringBuilder();
             var keys = BindingClass.AllJavascriptClasses.Keys.ToList();
             keys.Sort();
@@ -145,14 +155,161 @@ namespace docgen
                 }
                 js.AppendLine("}");
             }
+
+            string path = System.IO.Path.Combine(directory, "rh3dm_temp.js");
             System.IO.File.WriteAllText(path, js.ToString());
         }
 
+
+        public static void GenerateTypescriptDefinition(string directory)
+        {
+            if (!System.IO.Directory.Exists(directory))
+                System.IO.Directory.CreateDirectory(directory);
+
+            var js = new StringBuilder();
+            js.AppendLine("declare module 'rhino3dm' {");
+            js.AppendLine();
+            var keys = BindingClass.AllJavascriptClasses.Keys.ToList();
+            keys.Sort();
+
+            foreach (var key in keys)
+            {
+                js.AppendLine();
+                var jsclass = GetJS(key);
+                var rhcommon = RhinoCommonClass.Get(key);
+
+                js.Append($"\tclass {jsclass.ClassName}");
+                if (!string.IsNullOrWhiteSpace(jsclass.BaseClass))
+                    js.Append($" extends {jsclass.BaseClass}");
+                js.AppendLine(" {");
+
+                foreach (var prop in jsclass.Properties)
+                {
+                    PropertyDeclarationSyntax propDecl = null;
+                    DocumentationCommentTriviaSyntax doccomment = null;
+                    for (int i = 0; i < rhcommon.Properties.Count; i++)
+                    {
+                        if (prop.Equals(rhcommon.Properties[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            propDecl = rhcommon.Properties[i].Item1;
+                            doccomment = rhcommon.Properties[i].Item2;
+                            break;
+                        }
+                    }
+                    js.AppendLine("\t\t/**");
+                    if (doccomment != null)
+                    {
+                        string[] comments = DocCommentToTypeScript(doccomment, propDecl);
+                        foreach (var comment in comments)
+                        {
+                            if( !string.IsNullOrWhiteSpace(comment))
+                                js.AppendLine($"\t\t * {comment}");
+                        }
+                    }
+                    string proptype = "any";
+                    if (propDecl != null)
+                    {
+                        proptype = ToTypescriptType(propDecl.Type.ToString());
+                    }
+                    js.AppendLine("\t\t */");
+                    js.AppendLine($"\t\t{prop}: {proptype};");
+                }
+
+                foreach (var (isStatic, method, args) in jsclass.Methods)
+                {
+                    MethodDeclarationSyntax methodDecl = null;
+                    DocumentationCommentTriviaSyntax doccomment = null;
+                    for (int i = 0; i < rhcommon.Methods.Count; i++)
+                    {
+                        if (method.Equals(rhcommon.Methods[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            methodDecl = rhcommon.Methods[i].Item1;
+                            doccomment = rhcommon.Methods[i].Item2;
+                            break;
+                        }
+                    }
+
+                    List<string> paramNames = new List<string>();
+                    if (doccomment == null)
+                    {
+                        js.AppendLine("\t\t/** ... */");
+                    }
+                    else
+                    {
+                        js.AppendLine("\t\t/**");
+                        string s = DocCommentToJsDoc(doccomment, methodDecl, methodDecl.ParameterList, out paramNames);
+                        string[] lines = s.Split(new char[] { '\n' });
+                        for( int i=0; i<lines.Length; i++ )
+                        {
+                            string line = lines[i].Trim();
+                            if (string.IsNullOrWhiteSpace(line))
+                                continue;
+                            if (line.StartsWith("*"))
+                                line = " " + line;
+                            js.AppendLine($"\t\t{line}");
+                        }
+                        js.AppendLine("\t\t */");
+                    }
+
+                    string parameters = "";
+                    foreach (var p in paramNames)
+                    {
+                        parameters += p + ",";
+                    }
+                    if (!string.IsNullOrEmpty(parameters))
+                        parameters = parameters.Substring(0, parameters.Length - 1);
+
+                    string returnType = "void";
+                    if (methodDecl != null)
+                        returnType = ToTypescriptType(methodDecl.ReturnType.ToString());
+
+                    if (isStatic)
+                        js.AppendLine($"\t\tstatic {method}({parameters}): {returnType};");
+                    else
+                        js.AppendLine($"\t\t{method}({parameters}): {returnType};");
+                }
+
+
+                js.AppendLine("\t}");
+            }
+
+            js.AppendLine("}");
+            string path = System.IO.Path.Combine(directory, "rhino3dm.d.ts");
+            System.IO.File.WriteAllText(path, js.ToString());
+
+        }
 
         static string ToJavascriptType(string type)
         {
             if (type.Equals("Point3d") || type.Equals("Vector3d"))
                 return "Array.<x,y,z>";
+            return type;
+        }
+
+        static string ToTypescriptType(string type)
+        {
+            if (type.Equals("Point3d") || type.Equals("Vector3d"))
+                return "number[]";
+            if (type.Equals("bool"))
+                return "boolean";
+            if (type.Equals("double"))
+                return "number";
+            if (type.Equals("int") || type.Equals("uint"))
+                return "number";
+            if (type.Equals("Guid"))
+                return "string";
+            if (type.Equals("Interval"))
+                return "number[]";
+
+            // not properly parsing enums yet
+            if (type.Equals("ComponentIndexType") || type.Equals("UnitSystem") || type.Equals("ObjectType") || type.Equals("MeshingParameterTextureRange"))
+                return "any";
+            if (type.Equals("ObjectMode") || type.Equals("ObjectLinetypeSource") || type.Equals("ObjectColorSource") || 
+                type.Equals("ObjectPlotColorSource") || type.Equals("ObjectPlotWeightSource") || type.Equals("ObjectMaterialSource") ||
+                type.Equals("ObjectDecoration"))
+                return "any";
+            if (type.Equals("System.Drawing.Color") || type.Equals("System.Drawing.Rectangle"))
+                return "number[]";
             return type;
         }
 
@@ -230,6 +387,38 @@ namespace docgen
                 }
             }
             return js.ToString();
+        }
+
+        static string[] DocCommentToTypeScript(DocumentationCommentTriviaSyntax doccomment,
+          PropertyDeclarationSyntax propertyDecl)
+        {
+            StringBuilder js = new StringBuilder();
+            string comment = doccomment.ToString();
+            comment = comment.Replace("///", "");
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml("<doc>" + comment + "</doc>");
+            var nodes = doc.FirstChild.ChildNodes;
+            foreach (var node in nodes)
+            {
+                var element = node as System.Xml.XmlElement;
+                string elementText = element.InnerText.Trim();
+                if (string.IsNullOrWhiteSpace(elementText))
+                    continue;
+                if (element.Name.Equals("summary", StringComparison.OrdinalIgnoreCase))
+                {
+                    js.AppendLine($"{elementText}");
+                }
+                //else if (element.Name.Equals("returns", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    var returnType = propertyDecl.Type;
+
+                //    js.AppendLine($"   * @returns {{{ToJavascriptType(returnType.ToString())}}} {elementText}");
+                //}
+            }
+            string[] lines = js.ToString().Split(new char[] { '\n' });
+            for (int i = 0; i < lines.Length; i++)
+                lines[i] = lines[i].Trim();
+            return lines;
         }
     }
 }
