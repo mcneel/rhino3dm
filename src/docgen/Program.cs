@@ -17,7 +17,7 @@ namespace docgen
             Console.WriteLine("[Parse C++ Bindings]");
             Console.ForegroundColor = ConsoleColor.Green;
             const string bindingPath = @"../../bindings";
-            BindingClass.BuildClassDictionary(bindingPath);
+            BindingClass.BuildDictionary(bindingPath);
             Console.ResetColor();
             Console.WriteLine("[END PARSE]");
 

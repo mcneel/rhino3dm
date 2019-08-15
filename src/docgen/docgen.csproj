@@ -168,6 +168,7 @@
   <ItemGroup>
     <Compile Include="BindingClass.cs" />
     <Compile Include="JavascriptClass.cs" />
+    <Compile Include="JavascriptEnum.cs" />
     <Compile Include="PythonClass.cs" />
     <Compile Include="RhinoCommonClass.cs" />
     <Compile Include="Program.cs" />

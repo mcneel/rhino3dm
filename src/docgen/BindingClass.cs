@@ -14,9 +14,10 @@ namespace docgen
         public string ClassName { get; set; }
 
         public static Dictionary<string, JavascriptClass> AllJavascriptClasses { get; } = new Dictionary<string, JavascriptClass>();
+        public static Dictionary<string, JavascriptEnum> AllJavascriptEnums { get; } = new Dictionary<string, JavascriptEnum>();
         public static Dictionary<string, PythonClass> AllPythonClasses { get; } = new Dictionary<string, PythonClass>();
 
-        public static void BuildClassDictionary(string sourcePath)
+        public static void BuildDictionary(string sourcePath)
         {
             BindingClass activeClass = null;
             foreach (var file in AllSourceFiles(sourcePath))
@@ -68,6 +69,17 @@ namespace docgen
                         continue;
                     }
 
+                    if (line.StartsWith("enum_"))
+                    {
+                        string name = (line.Split(new char[] { '"' }))[1];
+                        if (name.StartsWith("__"))
+                            continue;
+                        var jsenum = new JavascriptEnum(name);
+                        AllJavascriptEnums.Add(name.ToLowerInvariant(), jsenum);
+                        activeClass = jsenum;
+                        continue;
+                    }
+
                     if (activeClass != null)
                     {
                         if (line.StartsWith(".constructor"))
@@ -113,6 +125,11 @@ namespace docgen
                         if (line.StartsWith(";"))
                         {
                             activeClass = null;
+                        }
+                        if( activeClass is JavascriptEnum && line.StartsWith(".value"))
+                        {
+                            string enumValue = (line.Split(new char[] { '"' }))[1];
+                            (activeClass as JavascriptEnum).Elements.Add(enumValue);
                         }
                     }
                 }

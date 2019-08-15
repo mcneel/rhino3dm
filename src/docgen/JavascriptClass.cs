@@ -168,8 +168,25 @@ namespace docgen
 
             var js = new StringBuilder();
             js.AppendLine("declare module 'rhino3dm' {");
-            js.AppendLine();
-            var keys = BindingClass.AllJavascriptClasses.Keys.ToList();
+
+            var keys = BindingClass.AllJavascriptEnums.Keys.ToList();
+            keys.Sort();
+            foreach(var key in keys)
+            {
+                js.AppendLine();
+                JavascriptEnum jsenum = BindingClass.AllJavascriptEnums[key];
+                js.AppendLine($"\tenum {jsenum.Name} {{");
+                for( int i=0; i<jsenum.Elements.Count; i++)
+                {
+                    if (i < (jsenum.Elements.Count - 1))
+                        js.AppendLine($"\t\t{jsenum.Elements[i]},");
+                    else
+                        js.AppendLine($"\t\t{jsenum.Elements[i]}");
+                }
+                js.AppendLine("\t}");
+            }
+
+            keys = BindingClass.AllJavascriptClasses.Keys.ToList();
             keys.Sort();
 
             foreach (var key in keys)
@@ -209,7 +226,7 @@ namespace docgen
                     string proptype = "any";
                     if (propDecl != null)
                     {
-                        proptype = ToTypescriptType(propDecl.Type.ToString());
+                        proptype = ToTypeScriptType(propDecl.Type.ToString());
                     }
                     js.AppendLine("\t\t */");
                     js.AppendLine($"\t\t{prop}: {proptype};");
@@ -230,6 +247,7 @@ namespace docgen
                     }
 
                     List<string> paramNames = new List<string>();
+                    List<string> paramTypes = new List<string>();
                     if (doccomment == null)
                     {
                         js.AppendLine("\t\t/** ... */");
@@ -237,7 +255,7 @@ namespace docgen
                     else
                     {
                         js.AppendLine("\t\t/**");
-                        string s = DocCommentToJsDoc(doccomment, methodDecl, methodDecl.ParameterList, out paramNames);
+                        string s = DocCommentToTypeScript(doccomment, methodDecl, methodDecl.ParameterList, out paramNames, out paramTypes);
                         string[] lines = s.Split(new char[] { '\n' });
                         for( int i=0; i<lines.Length; i++ )
                         {
@@ -252,16 +270,16 @@ namespace docgen
                     }
 
                     string parameters = "";
-                    foreach (var p in paramNames)
+                    for( int i=0; i<paramNames.Count; i++)
                     {
-                        parameters += p + ",";
+                        parameters += $"{paramNames[i]}:{paramTypes[i]},";
                     }
                     if (!string.IsNullOrEmpty(parameters))
                         parameters = parameters.Substring(0, parameters.Length - 1);
 
                     string returnType = "void";
                     if (methodDecl != null)
-                        returnType = ToTypescriptType(methodDecl.ReturnType.ToString());
+                        returnType = ToTypeScriptType(methodDecl.ReturnType.ToString());
 
                     if (isStatic)
                         js.AppendLine($"\t\tstatic {method}({parameters}): {returnType};");
@@ -286,7 +304,7 @@ namespace docgen
             return type;
         }
 
-        static string ToTypescriptType(string type)
+        static string ToTypeScriptType(string type)
         {
             if (type.Equals("Point3d") || type.Equals("Vector3d"))
                 return "number[]";
@@ -301,13 +319,6 @@ namespace docgen
             if (type.Equals("Interval"))
                 return "number[]";
 
-            // not properly parsing enums yet
-            if (type.Equals("ComponentIndexType") || type.Equals("UnitSystem") || type.Equals("ObjectType") || type.Equals("MeshingParameterTextureRange"))
-                return "any";
-            if (type.Equals("ObjectMode") || type.Equals("ObjectLinetypeSource") || type.Equals("ObjectColorSource") || 
-                type.Equals("ObjectPlotColorSource") || type.Equals("ObjectPlotWeightSource") || type.Equals("ObjectMaterialSource") ||
-                type.Equals("ObjectDecoration"))
-                return "any";
             if (type.Equals("System.Drawing.Color") || type.Equals("System.Drawing.Rectangle"))
                 return "number[]";
             return type;
@@ -384,6 +395,55 @@ namespace docgen
                     var returnType = propertyDecl.Type;
 
                     js.AppendLine($"   * @returns {{{ToJavascriptType(returnType.ToString())}}} {elementText}");
+                }
+            }
+            return js.ToString();
+        }
+
+        static string DocCommentToTypeScript(DocumentationCommentTriviaSyntax doccomment,
+          MethodDeclarationSyntax methodDecl,
+          ParameterListSyntax parameters,
+          out List<string> paramNames, out List<string> paramTypes)
+        {
+            paramNames = new List<string>();
+            paramTypes = new List<string>();
+            StringBuilder js = new StringBuilder();
+            string comment = doccomment.ToString();
+            comment = comment.Replace("///", "");
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml("<doc>" + comment + "</doc>");
+            var nodes = doc.FirstChild.ChildNodes;
+            foreach (var node in nodes)
+            {
+                var element = node as System.Xml.XmlElement;
+                string elementText = element.InnerText.Trim();
+                if (string.IsNullOrWhiteSpace(elementText))
+                    continue;
+                if (element.Name.Equals("summary", StringComparison.OrdinalIgnoreCase))
+                {
+                    js.AppendLine($"   * @description {elementText}");
+                }
+                else if (element.Name.Equals("returns", StringComparison.OrdinalIgnoreCase))
+                {
+                    var returnType = methodDecl.ReturnType;
+
+                    js.AppendLine($"   * @returns {{{ToTypeScriptType(returnType.ToString())}}} {elementText}");
+                }
+                else if (element.Name.Equals("param", StringComparison.OrdinalIgnoreCase))
+                {
+                    string paramType = "";
+                    string paramName = element.Attributes["name"].Value;
+                    paramNames.Add(paramName);
+                    for (int j = 0; j < parameters.Parameters.Count; j++)
+                    {
+                        if (paramName.Equals(parameters.Parameters[j].Identifier.ToString()))
+                        {
+                            paramType = parameters.Parameters[j].Type.ToString();
+                            break;
+                        }
+                    }
+                    paramTypes.Add(ToTypeScriptType(paramType));
+                    js.AppendLine($"   * @param {{{ToTypeScriptType(paramType)}}} {paramName} {elementText}");
                 }
             }
             return js.ToString();
