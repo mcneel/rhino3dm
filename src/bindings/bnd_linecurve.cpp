@@ -41,6 +41,7 @@ void initLineCurveBindings(void*)
 {
   class_<BND_LineCurve, base<BND_Curve>>("LineCurve")
     .constructor<ON_3dPoint, ON_3dPoint>()
+    .property("line", &BND_LineCurve::GetLine, &BND_LineCurve::SetLine)
     ;
   }
 #endif

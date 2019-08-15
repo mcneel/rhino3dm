@@ -43,6 +43,8 @@ void initPointGeometryBindings(void*)
 {
   class_<BND_Point, base<BND_GeometryBase>>("Point")
     .constructor<>()
+    .constructor<ON_3dPoint>()
+    .property("location", &BND_Point::GetLocation, &BND_Point::SetLocation)
     ;
 }
 #endif
