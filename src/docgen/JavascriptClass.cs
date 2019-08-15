@@ -191,12 +191,21 @@ namespace docgen
                 js.AppendLine("\t}");
             }
 
-            keys = BindingClass.AllJavascriptClasses.Keys.ToList();
-            keys.Sort();
-
             // Declare parent module
             js.AppendLine();
             js.AppendLine("\tclass RhinoModule {");
+
+            // Add enum property helpers
+            foreach (var key in keys)
+            {
+                var jsenum = BindingClass.AllJavascriptEnums[key];
+                js.AppendLine($"\t\t{jsenum.Name}: typeof {jsenum.Name}");
+            }
+
+            keys = BindingClass.AllJavascriptClasses.Keys.ToList();
+            keys.Sort();
+
+            // Add class property helpers
             foreach (var key in keys)
             {
                 var jsclass = GetJS(key);
@@ -370,7 +379,26 @@ namespace docgen
                 return "string";
             if (type.Equals("Interval"))
                 return "number[]";
-
+            if (type.Equals("IEnumerable<GeometryBase>"))
+                return "GeometryBase[]";
+            if (type.Equals("IEnumerable<ObjectAttributes>"))
+                return "ObjectAttributes[]";
+            if (type.Equals("DocObjects.Material"))
+                return "Material";
+            if (type.Equals("Rhino.Geometry.BoundingBox"))
+                return "BoundingBox";
+            if (type.Equals("Geometry.Curve"))
+                return "Curve";
+            if (type.Equals("Geometry.Mesh"))
+                return "Mesh";
+            if (type.Equals("Geometry.Brep"))
+                return "Brep";
+            if (type.Equals("MeshingParameterTextureRange"))
+                return "number";
+            if (type.Equals("System.Collections.Generic.IEnumerable<Point3d>"))
+                return "Point3dList";
+            if (type.Equals("PolylineCurve"))
+                return "Polylinecurve";
             if (type.Equals("System.Drawing.Color") || type.Equals("System.Drawing.Rectangle"))
                 return "number[]";
             return type;
