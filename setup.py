@@ -143,4 +143,5 @@ for i in range(len(model.Objects)):
     ext_modules=[CMakeExtension('rhino3dm/_rhino3dm')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    include_package_data=True
 )
