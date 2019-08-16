@@ -32,8 +32,10 @@ namespace docgen
             Console.WriteLine("Writing javascript typescript definition file");
             JavascriptClass.GenerateTypescriptDefinition(Path.Combine(outDir.FullName, "js_tsdef"));
 
-            Console.WriteLine("Writing python");
-            PythonClass.Write(Path.Combine(outDir.FullName, "py_apidocs"));
+            Console.WriteLine("Writing python API help");
+            PythonClass.GenerateApiHelp(Path.Combine(outDir.FullName, "py_apidocs"));
+            Console.WriteLine("Writing python type stubs file");
+            PythonClass.GenerateTypeStubs(Path.Combine(outDir.FullName, "py_stubs"));
         }
     }
 }

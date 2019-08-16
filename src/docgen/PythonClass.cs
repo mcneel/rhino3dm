@@ -37,7 +37,7 @@ namespace docgen
             return 4;
         }
 
-        public static void Write(string directory)
+        public static void GenerateApiHelp(string directory)
         {
             if (!System.IO.Directory.Exists(directory))
                 System.IO.Directory.CreateDirectory(directory);
@@ -204,6 +204,128 @@ Indices and tables
             System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.rst"), indexRst.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "rhino3dm.py"), py.ToString());
+        }
+
+
+        public static void GenerateTypeStubs(string directory)
+        {
+            if (!System.IO.Directory.Exists(directory))
+                System.IO.Directory.CreateDirectory(directory);
+
+            StringBuilder py = new StringBuilder();
+            py.AppendLine("from typing import Tuple, Set, Iterable, List");
+            
+
+            var keys = AllPythonClasses.Keys.ToList();
+            keys.Sort((a, b) =>
+            {
+                var rhcmnA = GetPY(a);
+                int aVal = ClassValue(rhcmnA);
+                var rhcmnB = GetPY(b);
+                int bVal = ClassValue(rhcmnB);
+                if (aVal < bVal)
+                    return -1;
+                if (bVal < aVal)
+                    return 1;
+                return a.CompareTo(b);
+            });
+
+            foreach (var key in keys)
+            {
+                var pyclass = GetPY(key);
+                var rhcommon = RhinoCommonClass.Get(key);
+                py.AppendLine();
+                py.AppendLine($"class {pyclass.ClassName}:");
+
+                foreach(var constructor in pyclass.Constructors)
+                {
+                    var c = rhcommon.GetConstructor(constructor);
+                    if (c == null)
+                        continue;
+
+                    var constructorDecl = c.Item1;
+                    if (constructorDecl != null)
+                    {
+                        py.Append(T1 + "def __init__(self");
+                        foreach(var parameter in constructorDecl.ParameterList.Parameters)
+                        {
+                            py.Append($", {ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
+                        }
+                        py.AppendLine("): ...");
+                    }
+                }
+
+                foreach (var propName in pyclass.Properties)
+                {
+                    var p = rhcommon.GetProperty(propName);
+                    if (null == p)
+                        continue;
+
+                    py.AppendLine(T1 + "@property");
+                    py.AppendLine(T1 + $"def {propName}(self) -> {ToPythonType(p.Item1.Type.ToString())}: ...");
+                }
+
+                foreach (var (isStatic, method, args) in pyclass.Methods)
+                {
+                    var m = rhcommon.GetMethod(method);
+                    if (m == null)
+                        continue;
+
+                    if (isStatic)
+                        py.AppendLine(T1 + "@staticmethod");
+                    py.Append(T1 + $"def {method}(");
+                    bool addComma = false;
+                    if (!isStatic)
+                    {
+                        py.Append("self");
+                        addComma = true;
+                    }
+
+                    foreach (var parameter in m.Item1.ParameterList.Parameters)
+                    {
+                        if (addComma)
+                            py.Append(", ");
+                        addComma = true;
+                        py.Append($"{ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
+                    }
+                    py.AppendLine($") -> {ToPythonType(m.Item1.ReturnType.ToString())}: ...");
+                }
+
+            }
+            py.AppendLine();
+            System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "__init__.pyi"), py.ToString());
+        }
+
+        static string ToSafePythonName(string name)
+        {
+            if (name.Equals("from"))
+                return "_from";
+            return name;
+        }
+
+        static string ToPythonType(string type)
+        {
+            if (type.Equals("double"))
+                return "float";
+            if (type.Equals("string"))
+                return "str";
+            if (type.Contains("<"))
+            {
+                string t = type.Split(new char[] { '<', '>' })[1];
+                t = ToPythonType(t);
+                return $"Iterable[{t}]";
+            }
+            if (type.Equals("Color"))
+                return "Tuple[int, int, int, int]";
+
+            if( type.Contains("."))
+            {
+                var items = type.Split(new char[] { '.' });
+                return ToPythonType(items.Last());
+            }
+            if (type.Equals("void"))
+                return "None";
+            return type;
         }
 
         static string DocCommentToPythonDoc(DocumentationCommentTriviaSyntax doccomment, int indentLevel)
