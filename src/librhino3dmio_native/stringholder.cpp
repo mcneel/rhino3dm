@@ -7,11 +7,11 @@ ON_wString unichar2on(const unichar* inStr)
   int inStrLen;
   for (inStrLen=0; inStr[inStrLen]; inStrLen++)
     ;
-  
+
   // create an ON_wString with sufficient length
   ON_wString wstr;
   wstr.SetLength(inStrLen);
-  
+
   // copy inStr into wstr
   int idx;
   for (idx=0; idx<inStrLen; idx++)
@@ -43,7 +43,7 @@ void CRhCmnStringHolder::Set(const ON_wString& s)
     free(m_macString);
     m_macString = NULL;
   }
-  
+
   const wchar_t* inStr = s.Array();
   if( inStr != NULL )
   {
@@ -62,12 +62,12 @@ const RHMONO_STRING* CRhCmnStringHolder::Array() const
 #if defined (_WIN32)
     return m_winString.Array();
 #endif
-    
+
 #if defined(__APPLE__)
   return m_macString;
 #endif
-    
-#if defined (ON_COMPILER_ANDROIDNDK)
+
+#if defined (ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
   const ON__UINT32* sUTF32 = (const ON__UINT32*)m_winString.Array();
   int length = m_winString.Length();
   CRhCmnStringHolder* pThis = const_cast<CRhCmnStringHolder*>(this);

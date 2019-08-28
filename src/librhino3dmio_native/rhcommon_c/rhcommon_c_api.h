@@ -241,7 +241,7 @@ private:
 #else
   ON_wString m_winString;
 #endif
-#if defined(ON_COMPILER_ANDROIDNDK)
+#if defined(ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
   ON_SimpleArray<ON__UINT16> m_android;
 #endif
 };
