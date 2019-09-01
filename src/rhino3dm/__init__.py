@@ -1,8 +1,8 @@
 import sys
-if sys.version_info.major==3:
-    from ._rhino3dm import *
-else:
+if sys.version_info.major==2:
     from _rhino3dm import *
+else:
+    from ._rhino3dm import *
 
 __version__ = '0.5.0'
 
