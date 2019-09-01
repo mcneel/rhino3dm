@@ -338,10 +338,11 @@ Indices and tables
             if (type.Equals("void"))
                 return "None";
 
-            if (type.Equals("int[]"))
-                return "List[int]";
-            if (type.Equals("Curve[]"))
-                return "List[Curve]";
+            if (type.EndsWith("[]"))
+            {
+                var s = type.Substring(0, type.Length - 2);
+                return $"List[{s}]";
+            }
             return type;
         }
 
