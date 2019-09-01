@@ -11,6 +11,7 @@
 
 #if defined(ON_PYTHON_COMPILE)
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")
 #endif
