@@ -235,9 +235,9 @@ Indices and tables
                 var pyclass = GetPY(key);
                 var rhcommon = RhinoCommonClass.Get(key);
                 py.AppendLine();
-                py.AppendLine($"class {pyclass.ClassName}:");
 
-                foreach(var constructor in pyclass.Constructors)
+                var py1 = new StringBuilder();
+                foreach (var constructor in pyclass.Constructors)
                 {
                     var c = rhcommon.GetConstructor(constructor);
                     if (c == null)
@@ -246,25 +246,27 @@ Indices and tables
                     var constructorDecl = c.Item1;
                     if (constructorDecl != null)
                     {
-                        py.Append(T1 + "def __init__(self");
+                        py1.Append(T1 + "def __init__(self");
                         foreach(var parameter in constructorDecl.ParameterList.Parameters)
                         {
-                            py.Append($", {ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
+                            py1.Append($", {ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
                         }
-                        py.AppendLine("): ...");
+                        py1.AppendLine("): ...");
                     }
                 }
 
+                var py2 = new StringBuilder();
                 foreach (var propName in pyclass.Properties)
                 {
                     var p = rhcommon.GetProperty(propName);
                     if (null == p)
                         continue;
 
-                    py.AppendLine(T1 + "@property");
-                    py.AppendLine(T1 + $"def {propName}(self) -> {ToPythonType(p.Item1.Type.ToString())}: ...");
+                    py2.AppendLine(T1 + "@property");
+                    py2.AppendLine(T1 + $"def {propName}(self) -> {ToPythonType(p.Item1.Type.ToString())}: ...");
                 }
 
+                var py3 = new StringBuilder();
                 foreach (var (isStatic, method, args) in pyclass.Methods)
                 {
                     var m = rhcommon.GetMethod(method);
@@ -272,23 +274,33 @@ Indices and tables
                         continue;
 
                     if (isStatic)
-                        py.AppendLine(T1 + "@staticmethod");
-                    py.Append(T1 + $"def {method}(");
+                        py3.AppendLine(T1 + "@staticmethod");
+                    py3.Append(T1 + $"def {method}(");
                     bool addComma = false;
                     if (!isStatic)
                     {
-                        py.Append("self");
+                        py3.Append("self");
                         addComma = true;
                     }
 
                     foreach (var parameter in m.Item1.ParameterList.Parameters)
                     {
                         if (addComma)
-                            py.Append(", ");
+                            py3.Append(", ");
                         addComma = true;
-                        py.Append($"{ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
+                        py3.Append($"{ToSafePythonName(parameter.Identifier.ToString())}: {ToPythonType(parameter.Type.ToString())}");
                     }
-                    py.AppendLine($") -> {ToPythonType(m.Item1.ReturnType.ToString())}: ...");
+                    py3.AppendLine($") -> {ToPythonType(m.Item1.ReturnType.ToString())}: ...");
+                }
+
+                if( py1.Length == 0 && py2.Length == 0 && py3.Length == 0)
+                    py.AppendLine($"class {pyclass.ClassName}: ...");
+                else
+                {
+                    py.AppendLine($"class {pyclass.ClassName}:");
+                    py.Append(py1);
+                    py.Append(py2);
+                    py.Append(py3);
                 }
 
             }
@@ -325,6 +337,11 @@ Indices and tables
             }
             if (type.Equals("void"))
                 return "None";
+
+            if (type.Equals("int[]"))
+                return "List[int]";
+            if (type.Equals("Curve[]"))
+                return "List[Curve]";
             return type;
         }
 
