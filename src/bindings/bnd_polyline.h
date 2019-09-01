@@ -25,6 +25,7 @@ public:
 
   BND_Point3dList() = default;
   BND_Point3dList(int initialCapacity) : m_polyline(initialCapacity) {}
+  BND_Point3dList(const std::vector<ON_3dPoint>& points);
   BND_BoundingBox BoundingBox() const { return BND_BoundingBox(m_polyline.BoundingBox()); }
   //public int ClosestIndex(Point3d testPoint)
   void Add(double x, double y, double z) { m_polyline.Append(ON_3dPoint(x, y, z)); }
@@ -41,7 +42,7 @@ class BND_Polyline : public BND_Point3dList
 public:
   BND_Polyline() = default;
   BND_Polyline(int initialCapacity) : BND_Point3dList(initialCapacity) {};
-  //public Polyline(IEnumerable<Point3d> collection)
+  BND_Polyline(const std::vector<ON_3dPoint>& points) : BND_Point3dList(points) {};
   bool IsValid() const { return m_polyline.IsValid(); }
   int SegmentCount() const { return m_polyline.SegmentCount(); }
   bool IsClosed() const { return m_polyline.IsClosed(); }
