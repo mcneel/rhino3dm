@@ -54,17 +54,22 @@ void BND_3dmObjectAttributes::SetName(const std::wstring name)
   m_attributes->m_name = name.c_str();
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_3dmObjectAttributes::GetGroupList() const
+BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
 {
   int count = m_attributes->GroupCount();
-  pybind11::tuple rc(count);
   const int* groups = m_attributes->GroupList();
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple rc(count);
   for (int i = 0; i < count; i++)
     rc[i] = groups[i];
+#endif
+#if defined(ON_WASM_COMPILE)
+  emscripten::val rc(emscripten::val::array());
+  for (int i = 0; i < count; i++)
+    rc.set(i, groups[i]);
+#endif
   return rc;
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +147,7 @@ void init3dmAttributesBindings(void*)
     .property("viewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
     .property("activeSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
     .property("groupCount", &BND_3dmObjectAttributes::GroupCount)
-    //.function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
+    .function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
     .function("addToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .function("removeFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
     .function("removeFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)

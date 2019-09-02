@@ -86,9 +86,7 @@ public:
   void SetSpace(ON::active_space a) { m_attributes->m_space = a; }
 
   int GroupCount() const { return m_attributes->GroupCount(); }
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetGroupList() const;
-#endif
+  BND_TUPLE GetGroupList() const;
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }
   void RemoveFromAllGroups() { m_attributes->RemoveFromAllGroups(); }

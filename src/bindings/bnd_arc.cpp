@@ -93,13 +93,16 @@ void initArcBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
+static BND_Arc* JsConstructFromPoints(ON_3dPoint a, ON_3dPoint b, ON_3dPoint c) {
+  return new BND_Arc(a,b,c);
+  }
+
 void initArcBindings(void*)
 {
   class_<BND_Arc>("Arc")
     .constructor<const BND_Circle&, double>()
     .constructor<ON_3dPoint, double, double>()
-// the following won't work with the way we are currently defining Points/Vectors
-//    .constructor<ON_3dPoint, ON_3dPoint, ON_3dPoint>()
+    .class_function("createFromPoints", &JsConstructFromPoints, allow_raw_pointers())
 //    .constructor<ON_3dPoint, ON_3dVector, ON_3dPoint>()
     .property("isValid", &BND_Arc::IsValid)
     .property("isCircle", &BND_Arc::IsCircle)

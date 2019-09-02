@@ -72,15 +72,21 @@ void initArcCurveBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
+static BND_ArcCurve* JsConstructFromArc(const BND_Arc& arc) { return new BND_ArcCurve(arc); }
+static BND_ArcCurve* JsConstructFromArc2(const BND_Arc& arc, double t0, double t1) { return new BND_ArcCurve(arc, t0, t1); }
+static BND_ArcCurve* JsConstructFromCircle(const BND_Circle& c) { return new BND_ArcCurve(c); }
+static BND_ArcCurve* JsConstructFromCircle2(const BND_Circle& c, double t0, double t1) { return new BND_ArcCurve(c, t0, t1); }
+
 void initArcCurveBindings(void*)
 {
   class_<BND_ArcCurve, base<BND_Curve>>("ArcCurve")
     .constructor<>()
-//    .constructor<const BND_ArcCurve&>()
     .constructor<const BND_Arc&>()
-//    .constructor<const BND_Arc, double, double>()
-//    .constructor<const BND_Circle&>()
-//    .constructor<const BND_Circle&, double, double>()
+    .class_function("createFromArc", &JsConstructFromArc, allow_raw_pointers())
+    .class_function("createFromArc", &JsConstructFromArc2, allow_raw_pointers())
+    .class_function("createFromCircle", &JsConstructFromCircle, allow_raw_pointers())
+    .class_function("createFromCircle", &JsConstructFromCircle2, allow_raw_pointers())
+    //.property("arc", &BND_ArcCurve::GetArc, allow_raw_pointers())
     .property("isCompleteCircle", &BND_ArcCurve::IsCompleteCircle)
     .property("radius", &BND_ArcCurve::GetRadius)
     .property("angleRadians", &BND_ArcCurve::AngleRadians)
