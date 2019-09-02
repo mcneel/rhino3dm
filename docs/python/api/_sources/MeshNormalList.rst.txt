@@ -16,3 +16,7 @@ MeshNormalList
    .. py:method:: __setitem__()
 
       [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation

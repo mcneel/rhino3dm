@@ -1,0 +1,17 @@
+Point2f
+=======
+
+.. py:module:: rhino3dm
+
+.. py:class:: Point2f
+
+   .. py:method:: Point2f(x, y)
+
+      Initializes a new two-dimensional point from two components.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

@@ -9,3 +9,13 @@ Point
 
       Point constructor
 
+
+   .. py:method:: Point(location)
+
+      Initializes a new point instance with a location.
+
+      :param rhino3dm.Point3d location: A position in 3D space.
+
+   .. py:attribute:: Location
+
+      rhino3dm.Point3d: Gets or sets the location (position) of this point.

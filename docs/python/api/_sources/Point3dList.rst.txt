@@ -16,6 +16,11 @@ Point3dList
 
       :param int initialCapacity: The number of added items before which the underlying array will be resized.
 
+   .. py:method:: Point3dList()
+
+      Point3dList constructor
+
+
    .. py:attribute:: Capacity
 
 

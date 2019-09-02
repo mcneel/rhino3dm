@@ -74,13 +74,15 @@ Welcome to rhino3dm's documentation!
    PlaneSurface
    Point
    Point2d
+   Point2f
    Point3d
    Point3dList
    Point3f
    Point4d
    PointCloud
+   PointCloudItem
    PointGrid
-   Polycurve
+   PolyCurve
    Polyline
    Polylinecurve
    RenderSettings
@@ -93,6 +95,7 @@ Welcome to rhino3dm's documentation!
    Transform
    Vector2d
    Vector3d
+   Vector3f
    ViewInfo
    ViewportInfo
 

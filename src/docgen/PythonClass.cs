@@ -41,6 +41,12 @@ namespace docgen
         {
             if (!System.IO.Directory.Exists(directory))
                 System.IO.Directory.CreateDirectory(directory);
+
+            var stream = typeof(PythonClass).Assembly.GetManifestResourceStream("docgen.conf.py");
+            var streamreader = new System.IO.StreamReader(stream);
+            string s = streamreader.ReadToEnd();
+            System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "conf.py"), s);
+            
             StringBuilder py = new StringBuilder();
             var keys = AllPythonClasses.Keys.ToList();
             keys.Sort((a, b) =>

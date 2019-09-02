@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Polycurve &mdash; rhino3dm 0.1.6 documentation</title>
+  <title>PolyCurve &mdash; rhino3dm 0.6.0 documentation</title>
   
 
   
@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Polyline" href="Polyline.html" />
     <link rel="prev" title="PointGrid" href="PointGrid.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,6 +58,10 @@
 
           
             
+            
+              <div class="version">
+                0.6.0
+              </div>
             
           
 
@@ -144,13 +150,15 @@
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2f.html">Point2f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointCloudItem.html">PointCloudItem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Polycurve</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
@@ -163,6 +171,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3f.html">Vector3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
@@ -210,13 +219,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Polycurve</li>
+      <li>PolyCurve</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/Polycurve.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/PolyCurve.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -230,11 +239,242 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-rhino3dm">
-<span id="polycurve"></span><h1>Polycurve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
+<span id="polycurve"></span><h1>PolyCurve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rhino3dm.Polycurve">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Polycurve</code><a class="headerlink" href="#rhino3dm.Polycurve" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="rhino3dm.PolyCurve">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">PolyCurve</code><a class="headerlink" href="#rhino3dm.PolyCurve" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rhino3dm.PolyCurve.PolyCurve">
+<code class="descname">PolyCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.PolyCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>PolyCurve constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.PolyCurve.SegmentCount">
+<code class="descname">SegmentCount</code><a class="headerlink" href="#rhino3dm.PolyCurve.SegmentCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the number of segments that make up this Polycurve.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.PolyCurve.IsNested">
+<code class="descname">IsNested</code><a class="headerlink" href="#rhino3dm.PolyCurve.IsNested" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets a value indicating whether or not a PolyCurve contains nested PolyCurves.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.PolyCurve.HasGap">
+<code class="descname">HasGap</code><a class="headerlink" href="#rhino3dm.PolyCurve.HasGap" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: This is a quick way to see if the curve has gaps between the sub curve segments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.SegmentCurve">
+<code class="descname">SegmentCurve</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.SegmentCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the segment curve at the given index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<em>int</em>) – Index of segment to retrieve.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The segment at the given index or None on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.RemoveNesting">
+<code class="descname">RemoveNesting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.RemoveNesting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Explodes nested polycurve segments and reconstructs this curve from the shattered remains.
+The result will have not have any PolyCurves as segments but it will have identical
+locus and parameterization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if any nested PolyCurve was found and absorbed, False if no PolyCurve segments could be found.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.Explode">
+<code class="descname">Explode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.Explode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Explodes this PolyCurve into a list of Curve segments. This will not explode nested polycurves.
+Call  first if you need all individual segments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An array of polycurve segments.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a>[]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.Append">
+<code class="descname">Append</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.Append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends and matches the start of the line to the end of polycurve.
+This function will fail if the polycurve is closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line"><em>Line</em></a>) – Line segment to append.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Append</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span></dt>
+<dd><p>Appends and matches the start of the line to the end of polycurve.
+This function will fail if the polycurve is closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line"><em>Line</em></a>) – Line segment to append.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Append</code><span class="sig-paren">(</span><em>curve</em><span class="sig-paren">)</span></dt>
+<dd><p>Appends and matches the start of the line to the end of polycurve.
+This function will fail if the polycurve is closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line"><em>Line</em></a>) – Line segment to append.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.AppendSegment">
+<code class="descname">AppendSegment</code><span class="sig-paren">(</span><em>curve</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.AppendSegment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends the curve to the polycurve without changing the new segment’s geometry.
+This function will fail if the PolyCurve is closed or if SegmentCount &gt; 0 and the new segment is closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>curve</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – Segment to append.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.SegmentCurveParameter">
+<code class="descname">SegmentCurveParameter</code><span class="sig-paren">(</span><em>polycurveParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.SegmentCurveParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a polycurve parameter to a segment curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>polycurveParameter</strong> (<em>float</em>) – Parameter on PolyCurve to convert.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Segment curve evaluation parameter or UnsetValue if the segment curve parameter could not be computed.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.PolyCurveParameter">
+<code class="descname">PolyCurveParameter</code><span class="sig-paren">(</span><em>segmentIndex</em>, <em>segmentCurveParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.PolyCurveParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a segment curve parameter to a polycurve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>segmentIndex</strong> (<em>int</em>) – Index of segment.</li>
+<li><strong>segmentCurveParameter</strong> (<em>float</em>) – Parameter on segment.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Polycurve evaluation parameter or UnsetValue if the polycurve curve parameter could not be computed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.SegmentDomain">
+<code class="descname">SegmentDomain</code><span class="sig-paren">(</span><em>segmentIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.SegmentDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the polycurve subdomain assigned to a segment curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>segmentIndex</strong> (<em>int</em>) – Index of segment.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The polycurve subdomain assigned to a segment curve. Returns Interval.Unset if segment_index &lt; 0 or segment_index &gt;= Count().</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval">rhino3dm.Interval</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.PolyCurve.SegmentIndex">
+<code class="descname">SegmentIndex</code><span class="sig-paren">(</span><em>polycurveParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.PolyCurve.SegmentIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the segment used for evaluation at polycurve_parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>polycurveParameter</strong> (<em>float</em>) – Parameter on polycurve for segment lookup.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of the segment used for evaluation at polycurve_parameter. If polycurve_parameter &lt; Domain.Min(), then 0 is returned. If polycurve_parameter &gt; Domain.Max(), then Count()-1 is returned.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 
@@ -249,7 +489,7 @@
         <a href="Polyline.html" class="btn btn-neutral float-right" title="Polyline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="PointGrid.html" class="btn btn-neutral" title="PointGrid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="PointGrid.html" class="btn btn-neutral float-left" title="PointGrid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -275,26 +515,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

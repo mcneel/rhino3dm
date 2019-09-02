@@ -16,6 +16,11 @@ Polyline
 
       :param int initialCapacity: Number of vertices this polyline can contain without resizing.
 
+   .. py:method:: Polyline()
+
+      Polyline constructor
+
+
    .. py:attribute:: IsValid
 
       bool: Gets a value that indicates whether this polyline is valid.

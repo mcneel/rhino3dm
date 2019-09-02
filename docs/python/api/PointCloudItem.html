@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>BezierCurve &mdash; rhino3dm 0.6.0 documentation</title>
+  <title>PointCloudItem &mdash; rhino3dm 0.6.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Bitmap" href="Bitmap.html" />
-    <link rel="prev" title="ArchivableDictionary" href="ArchivableDictionary.html" /> 
+    <link rel="next" title="PointGrid" href="PointGrid.html" />
+    <link rel="prev" title="PointCloud" href="PointCloud.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">BezierCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
@@ -156,7 +156,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PointCloudItem.html">PointCloudItem</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PointCloudItem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
@@ -219,13 +219,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>BezierCurve</li>
+      <li>PointCloudItem</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/BezierCurve.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/PointCloudItem.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -239,151 +239,56 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-rhino3dm">
-<span id="beziercurve"></span><h1>BezierCurve<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
+<span id="pointclouditem"></span><h1>PointCloudItem<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rhino3dm.BezierCurve">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BezierCurve</code><a class="headerlink" href="#rhino3dm.BezierCurve" title="Permalink to this definition">¶</a></dt>
+<dt id="rhino3dm.PointCloudItem">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">PointCloudItem</code><a class="headerlink" href="#rhino3dm.PointCloudItem" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
-<dt id="rhino3dm.BezierCurve.Dimension">
-<code class="descname">Dimension</code><a class="headerlink" href="#rhino3dm.BezierCurve.Dimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>int: Dimension of Bezier</p>
+<dt id="rhino3dm.PointCloudItem.Location">
+<code class="descname">Location</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Location" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the location of this point cloud item.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.BezierCurve.IsValid">
-<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.BezierCurve.IsValid" title="Permalink to this definition">¶</a></dt>
-<dd><p>bool: Tests an object to see if it is valid.</p>
+<dt id="rhino3dm.PointCloudItem.X">
+<code class="descname">X</code><a class="headerlink" href="#rhino3dm.PointCloudItem.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the X component of this point cloud item location.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.BezierCurve.IsRational">
-<code class="descname">IsRational</code><a class="headerlink" href="#rhino3dm.BezierCurve.IsRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>bool: Gets a value indicating whether or not the curve is rational.
-Rational curves have control-points with custom weights.</p>
+<dt id="rhino3dm.PointCloudItem.Y">
+<code class="descname">Y</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Y component of this point cloud item location.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="rhino3dm.BezierCurve.ControlVertexCount">
-<code class="descname">ControlVertexCount</code><a class="headerlink" href="#rhino3dm.BezierCurve.ControlVertexCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>int: Number of control vertices in this curve</p>
+<dt id="rhino3dm.PointCloudItem.Z">
+<code class="descname">Z</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the Z component of this point cloud item location.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.PointAt">
-<code class="descname">PointAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.PointAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates point at a curve parameter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Point (location of curve at the parameter t).</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="rhino3dm.PointCloudItem.Normal">
+<code class="descname">Normal</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Gets or sets the normal vector for this point cloud item.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.TangentAt">
-<code class="descname">TangentAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.TangentAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates the unit tangent vector at a curve parameter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Unit tangent vector of the curve at the parameter t.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="rhino3dm.PointCloudItem.Color">
+<code class="descname">Color</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color: Gets or sets the color of this point cloud item.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.CurvatureAt">
-<code class="descname">CurvatureAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.CurvatureAt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the curvature vector at a curve parameter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Curvature vector of the curve at the parameter t.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="rhino3dm.PointCloudItem.Hidden">
+<code class="descname">Hidden</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Gets or sets the hidden flag of this point cloud item.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.MakeRational">
-<code class="descname">MakeRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.MakeRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make bezier rational</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.MakeNonRational">
-<code class="descname">MakeNonRational</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.MakeNonRational" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make bezier non-rational</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">treu if successful</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.IncreaseDegree">
-<code class="descname">IncreaseDegree</code><span class="sig-paren">(</span><em>desiredDegree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.IncreaseDegree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Increase degree of bezier</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful.  False if desiredDegree &lt; current degree.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.BezierCurve.ChangeDimension">
-<code class="descname">ChangeDimension</code><span class="sig-paren">(</span><em>desiredDimension</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BezierCurve.ChangeDimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change dimension of bezier.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful.  False if desired_dimension &lt; 1</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="attribute">
+<dt id="rhino3dm.PointCloudItem.Index">
+<code class="descname">Index</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Index" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the index of this point cloud item.</p>
 </dd></dl>
 
 </dd></dl>
@@ -398,10 +303,10 @@ Rational curves have control-points with custom weights.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Bitmap.html" class="btn btn-neutral float-right" title="Bitmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="PointGrid.html" class="btn btn-neutral float-right" title="PointGrid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ArchivableDictionary.html" class="btn btn-neutral float-left" title="ArchivableDictionary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="PointCloud.html" class="btn btn-neutral float-left" title="PointCloud" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
