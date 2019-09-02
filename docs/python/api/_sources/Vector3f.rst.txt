@@ -1,0 +1,18 @@
+Vector3f
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Vector3f
+
+   .. py:method:: Vector3f(x, y, z)
+
+      Constructs a new vector from 3 single precision numbers.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+      :param float z: Z component of vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

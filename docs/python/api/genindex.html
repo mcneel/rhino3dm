@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; rhino3dm 0.1.6 documentation</title>
+  <title>Index &mdash; rhino3dm 0.6.0 documentation</title>
   
 
   
@@ -18,32 +18,34 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -55,6 +57,10 @@
 
           
             
+            
+              <div class="version">
+                0.6.0
+              </div>
             
           
 
@@ -143,13 +149,15 @@
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point2d.html">Point2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Point2f.html">Point2f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3d.html">Point3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3dList.html">Point3dList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point3f.html">Point3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point4d.html">Point4d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointCloud.html">PointCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PointCloudItem.html">PointCloudItem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polycurve.html">Polycurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
@@ -162,6 +170,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Vector3f.html">Vector3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
@@ -255,6 +264,7 @@
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
  | <a href="#Z"><strong>Z</strong></a>
  
 </div>
@@ -298,6 +308,8 @@
 </li>
         <li><a href="Point3dList.html#rhino3dm.Point3dList.__getitem__">(rhino3dm.Point3dList method)</a>
 </li>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.__getitem__">(rhino3dm.PointCloud method)</a>
+</li>
       </ul></li>
       <li><a href="File3dmBitmapTable.html#rhino3dm.File3dmBitmapTable.__iter__">__iter__() (rhino3dm.File3dmBitmapTable method)</a>
 
@@ -314,9 +326,15 @@
 </li>
         <li><a href="File3dmViewTable.html#rhino3dm.File3dmViewTable.__iter__">(rhino3dm.File3dmViewTable method)</a>
 </li>
+        <li><a href="MeshNormalList.html#rhino3dm.MeshNormalList.__iter__">(rhino3dm.MeshNormalList method)</a>
+</li>
+        <li><a href="MeshTextureCoordinateList.html#rhino3dm.MeshTextureCoordinateList.__iter__">(rhino3dm.MeshTextureCoordinateList method)</a>
+</li>
         <li><a href="MeshVertexList.html#rhino3dm.MeshVertexList.__iter__">(rhino3dm.MeshVertexList method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="BrepFaceList.html#rhino3dm.BrepFaceList.__len__">__len__() (rhino3dm.BrepFaceList method)</a>
 
       <ul>
@@ -354,9 +372,9 @@
 </li>
         <li><a href="Point3dList.html#rhino3dm.Point3dList.__len__">(rhino3dm.Point3dList method)</a>
 </li>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.__len__">(rhino3dm.PointCloud method)</a>
+</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="File3dmStringTable.html#rhino3dm.File3dmStringTable.__setitem__">__setitem__() (rhino3dm.File3dmStringTable method)</a>
 
       <ul>
@@ -404,6 +422,8 @@
 </li>
         <li><a href="Point3dList.html#rhino3dm.Point3dList.Add">(rhino3dm.Point3dList method)</a>
 </li>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.Add">(rhino3dm.PointCloud method)</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Add">[1]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Add">[2]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Add">[3]</a>
+</li>
       </ul></li>
       <li><a href="File3dmObjectTable.html#rhino3dm.File3dmObjectTable.AddArc">AddArc() (rhino3dm.File3dmObjectTable method)</a>
 </li>
@@ -431,6 +451,8 @@
 </li>
       <li><a href="File3dmObjectTable.html#rhino3dm.File3dmObjectTable.AddPolyline">AddPolyline() (rhino3dm.File3dmObjectTable method)</a>
 </li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.AddRange">AddRange() (rhino3dm.PointCloud method)</a>, <a href="PointCloud.html#rhino3dm.PointCloud.AddRange">[1]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.AddRange">[2]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.AddRange">[3]</a>
+</li>
       <li><a href="File3dmObjectTable.html#rhino3dm.File3dmObjectTable.AddSphere">AddSphere() (rhino3dm.File3dmObjectTable method)</a>
 </li>
       <li><a href="File3dmObjectTable.html#rhino3dm.File3dmObjectTable.AddSurface">AddSurface() (rhino3dm.File3dmObjectTable method)</a>
@@ -441,10 +463,10 @@
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateBelowLine">AlternateBelowLine (rhino3dm.DimensionStyle attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateLengthFactor">AlternateLengthFactor (rhino3dm.DimensionStyle attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Material.html#rhino3dm.Material.AmbientColor">AmbientColor (rhino3dm.Material attribute)</a>
 </li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.AmbientLight">AmbientLight (rhino3dm.RenderSettings attribute)</a>
@@ -468,6 +490,14 @@
       <li><a href="Cone.html#rhino3dm.Cone.ApexPoint">ApexPoint (rhino3dm.Cone attribute)</a>
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh.Append">Append() (rhino3dm.Mesh method)</a>
+
+      <ul>
+        <li><a href="PolyCurve.html#rhino3dm.PolyCurve.Append">(rhino3dm.PolyCurve method)</a>, <a href="PolyCurve.html#rhino3dm.PolyCurve.Append">[1]</a>, <a href="PolyCurve.html#rhino3dm.PolyCurve.Append">[2]</a>
+</li>
+      </ul></li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.AppendNew">AppendNew() (rhino3dm.PointCloud method)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.AppendSegment">AppendSegment() (rhino3dm.PolyCurve method)</a>
 </li>
       <li><a href="File3dm.html#rhino3dm.File3dm.ApplicationDetails">ApplicationDetails (rhino3dm.File3dm attribute)</a>
 </li>
@@ -637,7 +667,13 @@
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.ClearAllFieldOverrides">ClearAllFieldOverrides() (rhino3dm.DimensionStyle method)</a>
 </li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ClearColors">ClearColors() (rhino3dm.PointCloud method)</a>
+</li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.ClearFieldOverride">ClearFieldOverride() (rhino3dm.DimensionStyle method)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ClearHiddenFlags">ClearHiddenFlags() (rhino3dm.PointCloud method)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ClearNormals">ClearNormals() (rhino3dm.PointCloud method)</a>
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh.ClearSurfaceData">ClearSurfaceData() (rhino3dm.Mesh method)</a>
 </li>
@@ -660,11 +696,17 @@
 </li>
         <li><a href="Circle.html#rhino3dm.Circle.ClosestPoint">(rhino3dm.Circle method)</a>
 </li>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.ClosestPoint">(rhino3dm.PointCloud method)</a>
+</li>
         <li><a href="Sphere.html#rhino3dm.Sphere.ClosestPoint">(rhino3dm.Sphere method)</a>
 </li>
       </ul></li>
       <li><a href="Layer.html#rhino3dm.Layer.Color">Color (rhino3dm.Layer attribute)</a>
+
+      <ul>
+        <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Color">(rhino3dm.PointCloudItem attribute)</a>
 </li>
+      </ul></li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.ColorSource">ColorSource (rhino3dm.ObjectAttributes attribute)</a>
 </li>
       <li><a href="CommonObject.html#rhino3dm.CommonObject">CommonObject (class in rhino3dm)</a>
@@ -687,12 +729,22 @@
 </li>
       <li><a href="BoundingBox.html#rhino3dm.BoundingBox.Contains">Contains() (rhino3dm.BoundingBox method)</a>
 </li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ContainsColors">ContainsColors (rhino3dm.PointCloud attribute)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ContainsHiddenFlags">ContainsHiddenFlags (rhino3dm.PointCloud attribute)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.ContainsNormals">ContainsNormals (rhino3dm.PointCloud attribute)</a>
+</li>
       <li><a href="NurbsCurvePointList.html#rhino3dm.NurbsCurvePointList.ControlPolygonLength">ControlPolygonLength (rhino3dm.NurbsCurvePointList attribute)</a>
 </li>
       <li><a href="BezierCurve.html#rhino3dm.BezierCurve.ControlVertexCount">ControlVertexCount (rhino3dm.BezierCurve attribute)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList.Count">Count (rhino3dm.Point3dList attribute)</a>
+
+      <ul>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.Count">(rhino3dm.PointCloud attribute)</a>
 </li>
+      </ul></li>
       <li><a href="Extrusion.html#rhino3dm.Extrusion.Create">Create() (rhino3dm.Extrusion static method)</a>
 
       <ul>
@@ -918,6 +970,8 @@
 </li>
         <li><a href="Point2d.html#rhino3dm.Point2d.Encode">(rhino3dm.Point2d method)</a>
 </li>
+        <li><a href="Point2f.html#rhino3dm.Point2f.Encode">(rhino3dm.Point2f method)</a>
+</li>
         <li><a href="Point3d.html#rhino3dm.Point3d.Encode">(rhino3dm.Point3d method)</a>
 </li>
         <li><a href="Point3f.html#rhino3dm.Point3f.Encode">(rhino3dm.Point3f method)</a>
@@ -930,6 +984,8 @@
 </li>
         <li><a href="Vector3d.html#rhino3dm.Vector3d.Encode">(rhino3dm.Vector3d method)</a>
 </li>
+        <li><a href="Vector3f.html#rhino3dm.Vector3f.Encode">(rhino3dm.Vector3f method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -940,6 +996,8 @@
       <li><a href="TextureMapping.html#rhino3dm.TextureMapping.Evaluate">Evaluate() (rhino3dm.TextureMapping method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.Expanded">Expanded (rhino3dm.Layer attribute)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.Explode">Explode() (rhino3dm.PolyCurve method)</a>
 </li>
       <li><a href="Extrusion.html#rhino3dm.Extrusion">Extrusion (class in rhino3dm)</a>
 </li>
@@ -1075,6 +1133,8 @@
       </ul></li>
       <li><a href="Material.html#rhino3dm.Material.GetBumpTexture">GetBumpTexture() (rhino3dm.Material method)</a>
 </li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.GetColors">GetColors() (rhino3dm.PointCloud method)</a>
+</li>
       <li><a href="Material.html#rhino3dm.Material.GetEnvironmentTexture">GetEnvironmentTexture() (rhino3dm.Material method)</a>
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.GetFrustum">GetFrustum() (rhino3dm.ViewportInfo method)</a>
@@ -1087,16 +1147,20 @@
         <li><a href="Extrusion.html#rhino3dm.Extrusion.GetMesh">(rhino3dm.Extrusion method)</a>
 </li>
       </ul></li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.GetNormals">GetNormals() (rhino3dm.PointCloud method)</a>
+</li>
       <li><a href="Extrusion.html#rhino3dm.Extrusion.GetPathPlane">GetPathPlane() (rhino3dm.Extrusion method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.GetPersistentLocking">GetPersistentLocking() (rhino3dm.Layer method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.GetPersistentVisibility">GetPersistentVisibility() (rhino3dm.Layer method)</a>
 </li>
-      <li><a href="Extrusion.html#rhino3dm.Extrusion.GetProfilePlane">GetProfilePlane() (rhino3dm.Extrusion method)</a>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.GetPoints">GetPoints() (rhino3dm.PointCloud method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Extrusion.html#rhino3dm.Extrusion.GetProfilePlane">GetProfilePlane() (rhino3dm.Extrusion method)</a>
+</li>
       <li><a href="Extrusion.html#rhino3dm.Extrusion.GetProfileTransformation">GetProfileTransformation() (rhino3dm.Extrusion method)</a>
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.GetScreenPort">GetScreenPort() (rhino3dm.ViewportInfo method)</a>
@@ -1145,6 +1209,8 @@
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.HasFieldOverrides">HasFieldOverrides (rhino3dm.DimensionStyle attribute)</a>
 </li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.HasGap">HasGap (rhino3dm.PolyCurve attribute)</a>
+</li>
       <li><a href="Layer.html#rhino3dm.Layer.HasPerViewportSettings">HasPerViewportSettings() (rhino3dm.Layer method)</a>
 </li>
   </ul></td>
@@ -1162,6 +1228,10 @@
       <li><a href="Cylinder.html#rhino3dm.Cylinder.Height1">Height1 (rhino3dm.Cylinder attribute)</a>
 </li>
       <li><a href="Cylinder.html#rhino3dm.Cylinder.Height2">Height2 (rhino3dm.Cylinder attribute)</a>
+</li>
+      <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Hidden">Hidden (rhino3dm.PointCloudItem attribute)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.HiddenPointCount">HiddenPointCount (rhino3dm.PointCloud attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1192,12 +1262,24 @@
       <li><a href="NurbsSurface.html#rhino3dm.NurbsSurface.IncreaseDegreeV">IncreaseDegreeV() (rhino3dm.NurbsSurface method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.Index">Index (rhino3dm.Layer attribute)</a>
+
+      <ul>
+        <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Index">(rhino3dm.PointCloudItem attribute)</a>
 </li>
+      </ul></li>
       <li><a href="Material.html#rhino3dm.Material.IndexOfRefraction">IndexOfRefraction (rhino3dm.Material attribute)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList.Insert">Insert() (rhino3dm.Point3dList method)</a>
+
+      <ul>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.Insert">(rhino3dm.PointCloud method)</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Insert">[1]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Insert">[2]</a>, <a href="PointCloud.html#rhino3dm.PointCloud.Insert">[3]</a>
 </li>
+      </ul></li>
       <li><a href="NurbsCurveKnotList.html#rhino3dm.NurbsCurveKnotList.InsertKnot">InsertKnot() (rhino3dm.NurbsCurveKnotList method)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.InsertNew">InsertNew() (rhino3dm.PointCloud method)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.InsertRange">InsertRange() (rhino3dm.PointCloud method)</a>
 </li>
       <li><a href="InstanceDefinition.html#rhino3dm.InstanceDefinition">InstanceDefinition (class in rhino3dm)</a>
 </li>
@@ -1265,10 +1347,10 @@
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.IsFieldOverridden">IsFieldOverridden() (rhino3dm.DimensionStyle method)</a>
 </li>
-      <li><a href="Cylinder.html#rhino3dm.Cylinder.IsFinite">IsFinite (rhino3dm.Cylinder attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Cylinder.html#rhino3dm.Cylinder.IsFinite">IsFinite (rhino3dm.Cylinder attribute)</a>
+</li>
       <li><a href="Transform.html#rhino3dm.Transform.IsIdentity">IsIdentity (rhino3dm.Transform attribute)</a>
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.IsInstanceDefinitionObject">IsInstanceDefinitionObject (rhino3dm.ObjectAttributes attribute)</a>
@@ -1282,6 +1364,8 @@
       <li><a href="Extrusion.html#rhino3dm.Extrusion.IsMiteredAtEnd">IsMiteredAtEnd (rhino3dm.Extrusion attribute)</a>
 </li>
       <li><a href="Extrusion.html#rhino3dm.Extrusion.IsMiteredAtStart">IsMiteredAtStart (rhino3dm.Extrusion attribute)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.IsNested">IsNested (rhino3dm.PolyCurve attribute)</a>
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.IsParallelProjection">IsParallelProjection (rhino3dm.ViewportInfo attribute)</a>
 </li>
@@ -1429,12 +1513,16 @@
         <li><a href="Polyline.html#rhino3dm.Polyline.Length">(rhino3dm.Polyline attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.LengthFactor">LengthFactor (rhino3dm.DimensionStyle attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Line.html#rhino3dm.Line">Line (class in rhino3dm)</a>
+
+      <ul>
+        <li><a href="LineCurve.html#rhino3dm.LineCurve.Line">(rhino3dm.LineCurve attribute)</a>
 </li>
+      </ul></li>
       <li><a href="Line.html#rhino3dm.Line.Line">Line() (rhino3dm.Line method)</a>
 </li>
       <li><a href="LineCurve.html#rhino3dm.LineCurve">LineCurve (class in rhino3dm)</a>
@@ -1453,6 +1541,12 @@
       </ul></li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.LinetypeSource">LinetypeSource (rhino3dm.ObjectAttributes attribute)</a>
 </li>
+      <li><a href="Point.html#rhino3dm.Point.Location">Location (rhino3dm.Point attribute)</a>
+
+      <ul>
+        <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Location">(rhino3dm.PointCloudItem attribute)</a>
+</li>
+      </ul></li>
       <li><a href="Layer.html#rhino3dm.Layer.Locked">Locked (rhino3dm.Layer attribute)</a>
 </li>
       <li><a href="Sphere.html#rhino3dm.Sphere.LongitudeRadians">LongitudeRadians() (rhino3dm.Sphere method)</a>
@@ -1498,6 +1592,8 @@
       <li><a href="BoundingBox.html#rhino3dm.BoundingBox.Max">Max (rhino3dm.BoundingBox attribute)</a>
 </li>
       <li><a href="MeshingParameters.html#rhino3dm.MeshingParameters.MaximumEdgeLength">MaximumEdgeLength (rhino3dm.MeshingParameters attribute)</a>
+</li>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.Merge">Merge() (rhino3dm.PointCloud method)</a>
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh">Mesh (class in rhino3dm)</a>
 </li>
@@ -1574,7 +1670,11 @@
       <li><a href="File3dm.html#rhino3dm.File3dm.NamedViews">NamedViews (rhino3dm.File3dm attribute)</a>
 </li>
       <li><a href="Circle.html#rhino3dm.Circle.Normal">Normal (rhino3dm.Circle attribute)</a>
+
+      <ul>
+        <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Normal">(rhino3dm.PointCloudItem attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Sphere.html#rhino3dm.Sphere.NormalAt">NormalAt() (rhino3dm.Sphere method)</a>
@@ -1687,7 +1787,7 @@
 </li>
       <li><a href="Point.html#rhino3dm.Point">Point (class in rhino3dm)</a>
 </li>
-      <li><a href="Point.html#rhino3dm.Point.Point">Point() (rhino3dm.Point method)</a>
+      <li><a href="Point.html#rhino3dm.Point.Point">Point() (rhino3dm.Point method)</a>, <a href="Point.html#rhino3dm.Point.Point">[1]</a>
 
       <ul>
         <li><a href="Polylinecurve.html#rhino3dm.Polylinecurve.Point">(rhino3dm.Polylinecurve method)</a>
@@ -1697,16 +1797,20 @@
 </li>
       <li><a href="Point2d.html#rhino3dm.Point2d.Point2d">Point2d() (rhino3dm.Point2d method)</a>
 </li>
+      <li><a href="Point2f.html#rhino3dm.Point2f">Point2f (class in rhino3dm)</a>
+</li>
+      <li><a href="Point2f.html#rhino3dm.Point2f.Point2f">Point2f() (rhino3dm.Point2f method)</a>
+</li>
       <li><a href="Point3d.html#rhino3dm.Point3d">Point3d (class in rhino3dm)</a>
 </li>
       <li><a href="Point3d.html#rhino3dm.Point3d.Point3d">Point3d() (rhino3dm.Point3d method)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList">Point3dList (class in rhino3dm)</a>
 </li>
+      <li><a href="Point3dList.html#rhino3dm.Point3dList.Point3dList">Point3dList() (rhino3dm.Point3dList method)</a>, <a href="Point3dList.html#rhino3dm.Point3dList.Point3dList">[1]</a>, <a href="Point3dList.html#rhino3dm.Point3dList.Point3dList">[2]</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Point3dList.html#rhino3dm.Point3dList.Point3dList">Point3dList() (rhino3dm.Point3dList method)</a>, <a href="Point3dList.html#rhino3dm.Point3dList.Point3dList">[1]</a>
-</li>
       <li><a href="Point3f.html#rhino3dm.Point3f">Point3f (class in rhino3dm)</a>
 </li>
       <li><a href="Point3f.html#rhino3dm.Point3f.Point3f">Point3f() (rhino3dm.Point3f method)</a>
@@ -1728,6 +1832,8 @@
 </li>
         <li><a href="Line.html#rhino3dm.Line.PointAt">(rhino3dm.Line method)</a>
 </li>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.PointAt">(rhino3dm.PointCloud method)</a>
+</li>
         <li><a href="Polyline.html#rhino3dm.Polyline.PointAt">(rhino3dm.Polyline method)</a>
 </li>
         <li><a href="Sphere.html#rhino3dm.Sphere.PointAt">(rhino3dm.Sphere method)</a>
@@ -1741,7 +1847,9 @@
 </li>
       <li><a href="PointCloud.html#rhino3dm.PointCloud">PointCloud (class in rhino3dm)</a>
 </li>
-      <li><a href="PointCloud.html#rhino3dm.PointCloud.PointCloud">PointCloud() (rhino3dm.PointCloud method)</a>
+      <li><a href="PointCloud.html#rhino3dm.PointCloud.PointCloud">PointCloud() (rhino3dm.PointCloud method)</a>, <a href="PointCloud.html#rhino3dm.PointCloud.PointCloud">[1]</a>
+</li>
+      <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem">PointCloudItem (class in rhino3dm)</a>
 </li>
       <li><a href="Polylinecurve.html#rhino3dm.Polylinecurve.PointCount">PointCount (rhino3dm.Polylinecurve attribute)</a>
 </li>
@@ -1753,11 +1861,15 @@
 </li>
       <li><a href="Font.html#rhino3dm.Font.PointSize">PointSize (rhino3dm.Font attribute)</a>
 </li>
-      <li><a href="Polycurve.html#rhino3dm.Polycurve">Polycurve (class in rhino3dm)</a>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve">PolyCurve (class in rhino3dm)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.PolyCurve">PolyCurve() (rhino3dm.PolyCurve method)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.PolyCurveParameter">PolyCurveParameter() (rhino3dm.PolyCurve method)</a>
 </li>
       <li><a href="Polyline.html#rhino3dm.Polyline">Polyline (class in rhino3dm)</a>
 </li>
-      <li><a href="Polyline.html#rhino3dm.Polyline.Polyline">Polyline() (rhino3dm.Polyline method)</a>, <a href="Polyline.html#rhino3dm.Polyline.Polyline">[1]</a>
+      <li><a href="Polyline.html#rhino3dm.Polyline.Polyline">Polyline() (rhino3dm.Polyline method)</a>, <a href="Polyline.html#rhino3dm.Polyline.Polyline">[1]</a>, <a href="Polyline.html#rhino3dm.Polyline.Polyline">[2]</a>
 </li>
       <li><a href="Polylinecurve.html#rhino3dm.Polylinecurve">Polylinecurve (class in rhino3dm)</a>
 </li>
@@ -1838,13 +1950,19 @@
       <li><a href="MeshingParameters.html#rhino3dm.MeshingParameters.RelativeTolerance">RelativeTolerance (rhino3dm.MeshingParameters attribute)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList.RemoveAt">RemoveAt() (rhino3dm.Point3dList method)</a>
+
+      <ul>
+        <li><a href="PointCloud.html#rhino3dm.PointCloud.RemoveAt">(rhino3dm.PointCloud method)</a>
 </li>
+      </ul></li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.RemoveFromAllGroups">RemoveFromAllGroups() (rhino3dm.ObjectAttributes method)</a>
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.RemoveFromGroup">RemoveFromGroup() (rhino3dm.ObjectAttributes method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.RemoveNesting">RemoveNesting() (rhino3dm.PolyCurve method)</a>
+</li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderAnnotations">RenderAnnotations (rhino3dm.RenderSettings attribute)</a>
 </li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.RenderBackFaces">RenderBackFaces (rhino3dm.RenderSettings attribute)</a>
@@ -1889,7 +2007,7 @@
 </li>
       <li><a href="RevSurface.html#rhino3dm.RevSurface.RevSurface">RevSurface() (rhino3dm.RevSurface method)</a>
 </li>
-      <li><a href="Arc.html#module-rhino3dm">rhino3dm (module)</a>, <a href="ArcCurve.html#module-rhino3dm">[1]</a>, <a href="ArchivableDictionary.html#module-rhino3dm">[2]</a>, <a href="BezierCurve.html#module-rhino3dm">[3]</a>, <a href="Bitmap.html#module-rhino3dm">[4]</a>, <a href="BoundingBox.html#module-rhino3dm">[5]</a>, <a href="Box.html#module-rhino3dm">[6]</a>, <a href="Brep.html#module-rhino3dm">[7]</a>, <a href="BrepFace.html#module-rhino3dm">[8]</a>, <a href="BrepFaceList.html#module-rhino3dm">[9]</a>, <a href="Circle.html#module-rhino3dm">[10]</a>, <a href="CommonObject.html#module-rhino3dm">[11]</a>, <a href="ComponentIndex.html#module-rhino3dm">[12]</a>, <a href="Cone.html#module-rhino3dm">[13]</a>, <a href="ConstructionPlane.html#module-rhino3dm">[14]</a>, <a href="Curve.html#module-rhino3dm">[15]</a>, <a href="CurveProxy.html#module-rhino3dm">[16]</a>, <a href="Cylinder.html#module-rhino3dm">[17]</a>, <a href="DimensionStyle.html#module-rhino3dm">[18]</a>, <a href="Ellipse.html#module-rhino3dm">[19]</a>, <a href="Extrusion.html#module-rhino3dm">[20]</a>, <a href="File3dm.html#module-rhino3dm">[21]</a>, <a href="File3dmBitmapTable.html#module-rhino3dm">[22]</a>, <a href="File3dmDimStyleTable.html#module-rhino3dm">[23]</a>, <a href="File3dmInstanceDefinitionTable.html#module-rhino3dm">[24]</a>, <a href="File3dmLayerTable.html#module-rhino3dm">[25]</a>, <a href="File3dmMaterialTable.html#module-rhino3dm">[26]</a>, <a href="File3dmObject.html#module-rhino3dm">[27]</a>, <a href="File3dmObjectTable.html#module-rhino3dm">[28]</a>, <a href="File3dmPlugInData.html#module-rhino3dm">[29]</a>, <a href="File3dmPlugInDataTable.html#module-rhino3dm">[30]</a>, <a href="File3dmRdkDocumentData.html#module-rhino3dm">[31]</a>, <a href="File3dmSettings.html#module-rhino3dm">[32]</a>, <a href="File3dmStringTable.html#module-rhino3dm">[33]</a>, <a href="File3dmViewTable.html#module-rhino3dm">[34]</a>, <a href="FileReference.html#module-rhino3dm">[35]</a>, <a href="Font.html#module-rhino3dm">[36]</a>, <a href="GeometryBase.html#module-rhino3dm">[37]</a>, <a href="Hatch.html#module-rhino3dm">[38]</a>, <a href="InstanceDefinition.html#module-rhino3dm">[39]</a>, <a href="InstanceReference.html#module-rhino3dm">[40]</a>, <a href="Intersection.html#module-rhino3dm">[41]</a>, <a href="Interval.html#module-rhino3dm">[42]</a>, <a href="Layer.html#module-rhino3dm">[43]</a>, <a href="Line.html#module-rhino3dm">[44]</a>, <a href="LineCurve.html#module-rhino3dm">[45]</a>, <a href="Material.html#module-rhino3dm">[46]</a>, <a href="Mesh.html#module-rhino3dm">[47]</a>, <a href="MeshFaceList.html#module-rhino3dm">[48]</a>, <a href="MeshNormalList.html#module-rhino3dm">[49]</a>, <a href="MeshTextureCoordinateList.html#module-rhino3dm">[50]</a>, <a href="MeshVertexColorList.html#module-rhino3dm">[51]</a>, <a href="MeshVertexList.html#module-rhino3dm">[52]</a>, <a href="MeshingParameters.html#module-rhino3dm">[53]</a>, <a href="ModelComponent.html#module-rhino3dm">[54]</a>, <a href="NurbsCurve.html#module-rhino3dm">[55]</a>, <a href="NurbsCurveKnotList.html#module-rhino3dm">[56]</a>, <a href="NurbsCurvePointList.html#module-rhino3dm">[57]</a>, <a href="NurbsSurface.html#module-rhino3dm">[58]</a>, <a href="ObjectAttributes.html#module-rhino3dm">[59]</a>, <a href="Plane.html#module-rhino3dm">[60]</a>, <a href="PlaneSurface.html#module-rhino3dm">[61]</a>, <a href="Point.html#module-rhino3dm">[62]</a>, <a href="Point2d.html#module-rhino3dm">[63]</a>, <a href="Point3d.html#module-rhino3dm">[64]</a>, <a href="Point3dList.html#module-rhino3dm">[65]</a>, <a href="Point3f.html#module-rhino3dm">[66]</a>, <a href="Point4d.html#module-rhino3dm">[67]</a>, <a href="PointCloud.html#module-rhino3dm">[68]</a>, <a href="PointGrid.html#module-rhino3dm">[69]</a>, <a href="Polycurve.html#module-rhino3dm">[70]</a>, <a href="Polyline.html#module-rhino3dm">[71]</a>, <a href="Polylinecurve.html#module-rhino3dm">[72]</a>, <a href="RenderSettings.html#module-rhino3dm">[73]</a>, <a href="RevSurface.html#module-rhino3dm">[74]</a>, <a href="Sphere.html#module-rhino3dm">[75]</a>, <a href="Surface.html#module-rhino3dm">[76]</a>, <a href="SurfaceProxy.html#module-rhino3dm">[77]</a>, <a href="Texture.html#module-rhino3dm">[78]</a>, <a href="TextureMapping.html#module-rhino3dm">[79]</a>, <a href="Transform.html#module-rhino3dm">[80]</a>, <a href="Vector2d.html#module-rhino3dm">[81]</a>, <a href="Vector3d.html#module-rhino3dm">[82]</a>, <a href="ViewInfo.html#module-rhino3dm">[83]</a>, <a href="ViewportInfo.html#module-rhino3dm">[84]</a>
+      <li><a href="Arc.html#module-rhino3dm">rhino3dm (module)</a>, <a href="ArcCurve.html#module-rhino3dm">[1]</a>, <a href="ArchivableDictionary.html#module-rhino3dm">[2]</a>, <a href="BezierCurve.html#module-rhino3dm">[3]</a>, <a href="Bitmap.html#module-rhino3dm">[4]</a>, <a href="BoundingBox.html#module-rhino3dm">[5]</a>, <a href="Box.html#module-rhino3dm">[6]</a>, <a href="Brep.html#module-rhino3dm">[7]</a>, <a href="BrepFace.html#module-rhino3dm">[8]</a>, <a href="BrepFaceList.html#module-rhino3dm">[9]</a>, <a href="Circle.html#module-rhino3dm">[10]</a>, <a href="CommonObject.html#module-rhino3dm">[11]</a>, <a href="ComponentIndex.html#module-rhino3dm">[12]</a>, <a href="Cone.html#module-rhino3dm">[13]</a>, <a href="ConstructionPlane.html#module-rhino3dm">[14]</a>, <a href="Curve.html#module-rhino3dm">[15]</a>, <a href="CurveProxy.html#module-rhino3dm">[16]</a>, <a href="Cylinder.html#module-rhino3dm">[17]</a>, <a href="DimensionStyle.html#module-rhino3dm">[18]</a>, <a href="Ellipse.html#module-rhino3dm">[19]</a>, <a href="Extrusion.html#module-rhino3dm">[20]</a>, <a href="File3dm.html#module-rhino3dm">[21]</a>, <a href="File3dmBitmapTable.html#module-rhino3dm">[22]</a>, <a href="File3dmDimStyleTable.html#module-rhino3dm">[23]</a>, <a href="File3dmInstanceDefinitionTable.html#module-rhino3dm">[24]</a>, <a href="File3dmLayerTable.html#module-rhino3dm">[25]</a>, <a href="File3dmMaterialTable.html#module-rhino3dm">[26]</a>, <a href="File3dmObject.html#module-rhino3dm">[27]</a>, <a href="File3dmObjectTable.html#module-rhino3dm">[28]</a>, <a href="File3dmPlugInData.html#module-rhino3dm">[29]</a>, <a href="File3dmPlugInDataTable.html#module-rhino3dm">[30]</a>, <a href="File3dmRdkDocumentData.html#module-rhino3dm">[31]</a>, <a href="File3dmSettings.html#module-rhino3dm">[32]</a>, <a href="File3dmStringTable.html#module-rhino3dm">[33]</a>, <a href="File3dmViewTable.html#module-rhino3dm">[34]</a>, <a href="FileReference.html#module-rhino3dm">[35]</a>, <a href="Font.html#module-rhino3dm">[36]</a>, <a href="GeometryBase.html#module-rhino3dm">[37]</a>, <a href="Hatch.html#module-rhino3dm">[38]</a>, <a href="InstanceDefinition.html#module-rhino3dm">[39]</a>, <a href="InstanceReference.html#module-rhino3dm">[40]</a>, <a href="Intersection.html#module-rhino3dm">[41]</a>, <a href="Interval.html#module-rhino3dm">[42]</a>, <a href="Layer.html#module-rhino3dm">[43]</a>, <a href="Line.html#module-rhino3dm">[44]</a>, <a href="LineCurve.html#module-rhino3dm">[45]</a>, <a href="Material.html#module-rhino3dm">[46]</a>, <a href="Mesh.html#module-rhino3dm">[47]</a>, <a href="MeshFaceList.html#module-rhino3dm">[48]</a>, <a href="MeshNormalList.html#module-rhino3dm">[49]</a>, <a href="MeshTextureCoordinateList.html#module-rhino3dm">[50]</a>, <a href="MeshVertexColorList.html#module-rhino3dm">[51]</a>, <a href="MeshVertexList.html#module-rhino3dm">[52]</a>, <a href="MeshingParameters.html#module-rhino3dm">[53]</a>, <a href="ModelComponent.html#module-rhino3dm">[54]</a>, <a href="NurbsCurve.html#module-rhino3dm">[55]</a>, <a href="NurbsCurveKnotList.html#module-rhino3dm">[56]</a>, <a href="NurbsCurvePointList.html#module-rhino3dm">[57]</a>, <a href="NurbsSurface.html#module-rhino3dm">[58]</a>, <a href="ObjectAttributes.html#module-rhino3dm">[59]</a>, <a href="Plane.html#module-rhino3dm">[60]</a>, <a href="PlaneSurface.html#module-rhino3dm">[61]</a>, <a href="Point.html#module-rhino3dm">[62]</a>, <a href="Point2d.html#module-rhino3dm">[63]</a>, <a href="Point2f.html#module-rhino3dm">[64]</a>, <a href="Point3d.html#module-rhino3dm">[65]</a>, <a href="Point3dList.html#module-rhino3dm">[66]</a>, <a href="Point3f.html#module-rhino3dm">[67]</a>, <a href="Point4d.html#module-rhino3dm">[68]</a>, <a href="PointCloud.html#module-rhino3dm">[69]</a>, <a href="PointCloudItem.html#module-rhino3dm">[70]</a>, <a href="PointGrid.html#module-rhino3dm">[71]</a>, <a href="PolyCurve.html#module-rhino3dm">[72]</a>, <a href="Polyline.html#module-rhino3dm">[73]</a>, <a href="Polylinecurve.html#module-rhino3dm">[74]</a>, <a href="RenderSettings.html#module-rhino3dm">[75]</a>, <a href="RevSurface.html#module-rhino3dm">[76]</a>, <a href="Sphere.html#module-rhino3dm">[77]</a>, <a href="Surface.html#module-rhino3dm">[78]</a>, <a href="SurfaceProxy.html#module-rhino3dm">[79]</a>, <a href="Texture.html#module-rhino3dm">[80]</a>, <a href="TextureMapping.html#module-rhino3dm">[81]</a>, <a href="Transform.html#module-rhino3dm">[82]</a>, <a href="Vector2d.html#module-rhino3dm">[83]</a>, <a href="Vector3d.html#module-rhino3dm">[84]</a>, <a href="Vector3f.html#module-rhino3dm">[85]</a>, <a href="ViewInfo.html#module-rhino3dm">[86]</a>, <a href="ViewportInfo.html#module-rhino3dm">[87]</a>
 </li>
       <li><a href="Font.html#rhino3dm.Font.RichTextFontName">RichTextFontName (rhino3dm.Font attribute)</a>
 </li>
@@ -1915,7 +2033,19 @@
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo.ScreenPortAspect">ScreenPortAspect (rhino3dm.ViewportInfo attribute)</a>
 </li>
-      <li><a href="Polyline.html#rhino3dm.Polyline.SegmentCount">SegmentCount (rhino3dm.Polyline attribute)</a>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.SegmentCount">SegmentCount (rhino3dm.PolyCurve attribute)</a>
+
+      <ul>
+        <li><a href="Polyline.html#rhino3dm.Polyline.SegmentCount">(rhino3dm.Polyline attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.SegmentCurve">SegmentCurve() (rhino3dm.PolyCurve method)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.SegmentCurveParameter">SegmentCurveParameter() (rhino3dm.PolyCurve method)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.SegmentDomain">SegmentDomain() (rhino3dm.PolyCurve method)</a>
+</li>
+      <li><a href="PolyCurve.html#rhino3dm.PolyCurve.SegmentIndex">SegmentIndex() (rhino3dm.PolyCurve method)</a>
 </li>
       <li><a href="Point3dList.html#rhino3dm.Point3dList.SetAllX">SetAllX() (rhino3dm.Point3dList method)</a>
 </li>
@@ -1959,12 +2089,12 @@
 </li>
       <li><a href="Curve.html#rhino3dm.Curve.SetStartPoint">SetStartPoint() (rhino3dm.Curve method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="File3dm.html#rhino3dm.File3dm.Settings">Settings (rhino3dm.File3dm attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.SetTransparencyTexture">SetTransparencyTexture() (rhino3dm.Material method)</a>, <a href="Material.html#rhino3dm.Material.SetTransparencyTexture">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="CommonObject.html#rhino3dm.CommonObject.SetUserString">SetUserString() (rhino3dm.CommonObject method)</a>
 </li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.ShadowMapLevel">ShadowMapLevel (rhino3dm.RenderSettings attribute)</a>
@@ -2219,16 +2349,20 @@
 </li>
       <li><a href="Vector3d.html#rhino3dm.Vector3d.Vector3d">Vector3d() (rhino3dm.Vector3d method)</a>
 </li>
+      <li><a href="Vector3f.html#rhino3dm.Vector3f">Vector3f (class in rhino3dm)</a>
+</li>
+      <li><a href="Vector3f.html#rhino3dm.Vector3f.Vector3f">Vector3f() (rhino3dm.Vector3f method)</a>
+</li>
       <li><a href="Mesh.html#rhino3dm.Mesh.VertexColors">VertexColors (rhino3dm.Mesh attribute)</a>
 </li>
       <li><a href="Mesh.html#rhino3dm.Mesh.Vertices">Vertices (rhino3dm.Mesh attribute)</a>
 </li>
       <li><a href="ViewInfo.html#rhino3dm.ViewInfo">ViewInfo (class in rhino3dm)</a>
 </li>
-      <li><a href="ViewInfo.html#rhino3dm.ViewInfo.Viewport">Viewport (rhino3dm.ViewInfo attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ViewInfo.html#rhino3dm.ViewInfo.Viewport">Viewport (rhino3dm.ViewInfo attribute)</a>
+</li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.ViewportId">ViewportId (rhino3dm.ObjectAttributes attribute)</a>
 </li>
       <li><a href="ViewportInfo.html#rhino3dm.ViewportInfo">ViewportInfo (class in rhino3dm)</a>
@@ -2283,13 +2417,29 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.X">X (rhino3dm.PointCloudItem attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="InstanceReference.html#rhino3dm.InstanceReference.Xform">Xform (rhino3dm.InstanceReference attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Y">Y (rhino3dm.PointCloudItem attribute)</a>
 </li>
   </ul></td>
 </tr></table>
 
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="PointCloudItem.html#rhino3dm.PointCloudItem.Z">Z (rhino3dm.PointCloudItem attribute)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Transform.html#rhino3dm.Transform.ZeroTransformation">ZeroTransformation() (rhino3dm.Transform static method)</a>
 </li>
@@ -2325,26 +2475,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

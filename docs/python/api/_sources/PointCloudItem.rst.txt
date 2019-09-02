@@ -1,0 +1,38 @@
+PointCloudItem
+==============
+
+.. py:module:: rhino3dm
+
+.. py:class:: PointCloudItem
+
+   .. py:attribute:: Location
+
+      rhino3dm.Point3d: Gets or sets the location of this point cloud item.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X component of this point cloud item location.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y component of this point cloud item location.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z component of this point cloud item location.
+
+   .. py:attribute:: Normal
+
+      rhino3dm.Vector3d: Gets or sets the normal vector for this point cloud item.
+
+   .. py:attribute:: Color
+
+      Color: Gets or sets the color of this point cloud item.
+
+   .. py:attribute:: Hidden
+
+      bool: Gets or sets the hidden flag of this point cloud item.
+
+   .. py:attribute:: Index
+
+      int: Gets the index of this point cloud item.

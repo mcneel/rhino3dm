@@ -6,8 +6,8 @@ REM Command file for Sphinx documentation
 
 set SPHINXBUILD=C:\Users\sbaer\AppData\Roaming\Python\Python37\Scripts\sphinx-build
 
-set SOURCEDIR=.
-set BUILDDIR=_build
+set SOURCEDIR=./out/py_apidocs
+set BUILDDIR=./out/py_apidocs/sphinxout
 
 if "%1" == "" goto help
 
