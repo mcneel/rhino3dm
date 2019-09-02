@@ -54,6 +54,7 @@ void initRevSurfaceBindings(void*)
 {
   class_<BND_RevSurface, base<BND_Surface>>("RevSurface")
     .constructor<>()
+    .class_function("create", &BND_RevSurface::Create1, allow_raw_pointers())
     ;
 }
 #endif

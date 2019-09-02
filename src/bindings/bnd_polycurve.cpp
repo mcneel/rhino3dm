@@ -115,6 +115,22 @@ using namespace emscripten;
 
 void initPolyCurveBindings(void*)
 {
-  class_<BND_PolyCurve, base<BND_Curve>>("PolyCurve");
+  class_<BND_PolyCurve, base<BND_Curve>>("PolyCurve")
+    .constructor<>()
+    .property("segmentCount", &BND_PolyCurve::SegmentCount)
+    .function("segmentCurve", &BND_PolyCurve::SegmentCurve, allow_raw_pointers())
+    .property("isNested", &BND_PolyCurve::IsNested)
+    .property("hasGap", &BND_PolyCurve::HasGap)
+    .function("removeNesting", &BND_PolyCurve::RemoveNesting)
+    .function("explode", &BND_PolyCurve::Explode)
+    .function("append", &BND_PolyCurve::Append1)
+    .function("append", &BND_PolyCurve::Append2)
+    .function("append", &BND_PolyCurve::Append3)
+    .function("appendSegment", &BND_PolyCurve::AppendSegment)
+    .function("segmentCurveParameter", &BND_PolyCurve::SegmentCurveParameter)
+    .function("polyCurveParameter", &BND_PolyCurve::PolyCurveParameter)
+    .function("segmentDomain", &BND_PolyCurve::SegmentDomain)
+    .function("segmentIndex", &BND_PolyCurve::SegmentIndex)
+  ;
 }
 #endif

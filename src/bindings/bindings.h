@@ -26,10 +26,12 @@
 #if defined(ON_PYTHON_COMPILE)
 typedef pybind11::dict BND_DICT;
 typedef pybind11::tuple BND_Color;
+typedef pybind11::tuple BND_TUPLE;
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
 typedef emscripten::val BND_Color;
+typedef emscripten::val BND_TUPLE;
 #endif
 
 #include "bnd_color.h"

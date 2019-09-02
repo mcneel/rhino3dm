@@ -52,6 +52,7 @@ void initPolylineCurveBindings(void*)
 {
   class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
     .constructor<>()
+    .constructor<const BND_Point3dList&>()
     .property("pointCount", &BND_PolylineCurve::PointCount)
     .function("point", &BND_PolylineCurve::Point)
     .function("setPoint", &BND_PolylineCurve::SetPoint)
