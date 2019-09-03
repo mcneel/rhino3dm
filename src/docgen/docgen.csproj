@@ -186,5 +186,10 @@
   <ItemGroup>
     <EmbeddedResource Include="conf.py" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\version.txt">
+      <Link>version.txt</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

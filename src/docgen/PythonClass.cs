@@ -45,6 +45,13 @@ namespace docgen
             var stream = typeof(PythonClass).Assembly.GetManifestResourceStream("docgen.conf.py");
             var streamreader = new System.IO.StreamReader(stream);
             string s = streamreader.ReadToEnd();
+            streamreader.Close();
+            stream = typeof(PythonClass).Assembly.GetManifestResourceStream("docgen.version.txt");
+            streamreader = new System.IO.StreamReader(stream);
+            string version = streamreader.ReadToEnd();
+            streamreader.Close();
+
+            s = s.Replace("{VERSION}", version);
             System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "conf.py"), s);
             
             StringBuilder py = new StringBuilder();

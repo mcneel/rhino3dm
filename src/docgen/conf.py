@@ -24,9 +24,9 @@ copyright = u'2019, Robert McNeel & Associates'
 author = u'Steve Baer'
 
 # The short X.Y version
-version = u'0.6.0'
+version = u'{VERSION}'
 # The full version, including alpha/beta/rc tags
-release = u'0.6.0'
+release = u'{VERSION}'
 
 
 # -- General configuration ---------------------------------------------------
