@@ -35,6 +35,6 @@ See the [RhinoCommon Documentation for further details on the class layout](http
 
 ## Build it yourself
 
-rhino3dm.py may be built from the source.  To find out how to build rhino3dm.py for yourself go to the [rhino3dm.py build page](docs/python/RHINO3DM-BUILD.PY.md)
+rhino3dm.py may be built from the source.  To find out how to build rhino3dm.py for yourself go to the [rhino3dm.py build page](RHINO3DM-BUILD.PY.md)
 
 ---

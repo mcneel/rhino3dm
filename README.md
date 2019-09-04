@@ -28,7 +28,7 @@ For bug reports or feature requests see the [contributing guide](CONTRIBUTING.md
 
 `pip install rhino3dm`
 
-See [our python documentation](RHINO3DM.PY.md) for details
+See [our python documentation](docs/python/RHINO3DM.PY.md) for details
 
 
 ### rhino3dm.js (Javascript/web assembly)
@@ -53,7 +53,7 @@ See [our python documentation](RHINO3DM.PY.md) for details
 </html>
 ```
 
-See [our javascript documentation](RHINO3DM.JS.md) for details
+See [our javascript documentation](docs/javascript/RHINO3DM.JS.md) for details
 
 ### Rhino3dm.NET
 
