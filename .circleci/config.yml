@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run: git submodule update --init
       - run: python --version && emcc --version && cmake --version
-      - run: python src/build_javascript_lib.py
+      - run: python src/build_javascript.py
       - persist_to_workspace:
           root: src/build/artifacts_js
           paths:
