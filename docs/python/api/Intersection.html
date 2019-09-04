@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Intersection &mdash; rhino3dm 0.6.0 documentation</title>
+  <title>Intersection &mdash; rhino3dm 0.7.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.7.0
               </div>
             
           
@@ -250,6 +250,12 @@
 </dd></dl>
 
 <dl class="staticmethod">
+<dt>
+<em class="property">static </em><code class="descname">LineLine</code><span class="sig-paren">(</span><em>lineA</em>, <em>lineB</em>, <em>tolerance</em>, <em>finiteSegments</em><span class="sig-paren">)</span></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
 <dt id="rhino3dm.Intersection.LinePlane">
 <em class="property">static </em><code class="descname">LinePlane</code><span class="sig-paren">(</span><em>line</em>, <em>plane</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LinePlane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersects a line and a plane. This function only returns True if the
@@ -266,6 +272,147 @@ the plane then no intersection is assumed).</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.PlanePlane">
+<em class="property">static </em><code class="descname">PlanePlane</code><span class="sig-paren">(</span><em>planeA</em>, <em>planeB</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.PlanePlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects two planes and return the intersection line. If the planes are
+parallel or coincident, no intersection is assumed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>planeA</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – First plane for intersection.</li>
+<li><strong>planeB</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Second plane for intersection.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.PlanePlanePlane">
+<em class="property">static </em><code class="descname">PlanePlanePlane</code><span class="sig-paren">(</span><em>planeA</em>, <em>planeB</em>, <em>planeC</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.PlanePlanePlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects three planes to find the single point they all share.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>planeA</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – First plane for intersection.</li>
+<li><strong>planeB</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Second plane for intersection.</li>
+<li><strong>planeC</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Third plane for intersection.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure. If at least two out of the three planes are parallel or coincident, failure is assumed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.PlaneSphere">
+<em class="property">static </em><code class="descname">PlaneSphere</code><span class="sig-paren">(</span><em>plane</em>, <em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.PlaneSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects a plane with a sphere using exact calculations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Plane to intersect.</li>
+<li><strong>sphere</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – Sphere to intersect.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If  is returned, the intersectionCircle has a radius of zero and the center point is the point on the plane closest to the sphere.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">PlaneSphereIntersection</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.LineCircle">
+<em class="property">static </em><code class="descname">LineCircle</code><span class="sig-paren">(</span><em>line</em>, <em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LineCircle" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.LineSphere">
+<em class="property">static </em><code class="descname">LineSphere</code><span class="sig-paren">(</span><em>line</em>, <em>sphere</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LineSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.LineCylinder">
+<em class="property">static </em><code class="descname">LineCylinder</code><span class="sig-paren">(</span><em>line</em>, <em>cylinder</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LineCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.SphereSphere">
+<em class="property">static </em><code class="descname">SphereSphere</code><span class="sig-paren">(</span><em>sphereA</em>, <em>sphereB</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.SphereSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects two spheres using exact calculations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sphereA</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – First sphere to intersect.</li>
+<li><strong>sphereB</strong> (<a class="reference internal" href="Sphere.html#rhino3dm.Sphere" title="rhino3dm.Sphere"><em>rhino3dm.Sphere</em></a>) – Second sphere to intersect.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The intersection type.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">SphereSphereIntersection</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Intersection.LineBox">
+<em class="property">static </em><code class="descname">LineBox</code><span class="sig-paren">(</span><em>line</em>, <em>box</em>, <em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Intersection.LineBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersects an infinite line and an axis aligned bounding box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>box</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – BoundingBox to intersect.</li>
+<li><strong>line</strong> (<a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line"><em>Line</em></a>) – Line for intersection.</li>
+<li><strong>tolerance</strong> (<em>float</em>) – If tolerance &gt; 0.0, then the intersection is performed against a box that has each side moved out by tolerance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the line intersects the box, False if no intersection occurs.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>

@@ -9,6 +9,10 @@ Intersection
 
       [todo] add documentation
 
+   .. py:staticmethod:: LineLine(lineA, lineB, tolerance, finiteSegments)
+
+      [todo] add documentation
+
    .. py:staticmethod:: LinePlane(line, plane)
 
       Intersects a line and a plane. This function only returns True if the
@@ -19,4 +23,72 @@ Intersection
       :param rhino3dm.Plane plane: Plane to intersect.
 
       :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:staticmethod:: PlanePlane(planeA, planeB)
+
+      Intersects two planes and return the intersection line. If the planes are
+      parallel or coincident, no intersection is assumed.
+
+      :param rhino3dm.Plane planeA: First plane for intersection.
+      :param rhino3dm.Plane planeB: Second plane for intersection.
+
+      :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:staticmethod:: PlanePlanePlane(planeA, planeB, planeC)
+
+      Intersects three planes to find the single point they all share.
+
+      :param rhino3dm.Plane planeA: First plane for intersection.
+      :param rhino3dm.Plane planeB: Second plane for intersection.
+      :param rhino3dm.Plane planeC: Third plane for intersection.
+
+      :return: True on success, False on failure. If at least two out of the three planes \
+         are parallel or coincident, failure is assumed.
+      :rtype: bool
+
+   .. py:staticmethod:: PlaneSphere(plane, sphere)
+
+      Intersects a plane with a sphere using exact calculations.
+
+      :param rhino3dm.Plane plane: Plane to intersect.
+      :param rhino3dm.Sphere sphere: Sphere to intersect.
+
+      :return: If  is returned, the intersectionCircle has a radius of zero and the center point \
+         is the point on the plane closest to the sphere.
+      :rtype: PlaneSphereIntersection
+
+   .. py:staticmethod:: LineCircle(line, circle)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: LineSphere(line, sphere)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: LineCylinder(line, cylinder)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: SphereSphere(sphereA, sphereB)
+
+      Intersects two spheres using exact calculations.
+
+      :param rhino3dm.Sphere sphereA: First sphere to intersect.
+      :param rhino3dm.Sphere sphereB: Second sphere to intersect.
+
+      :return: The intersection type.
+      :rtype: SphereSphereIntersection
+
+   .. py:staticmethod:: LineBox(line, box, tolerance)
+
+      Intersects an infinite line and an axis aligned bounding box.
+
+      :param rhino3dm.BoundingBox box: BoundingBox to intersect.
+      :param Line line: Line for intersection.
+      :param float tolerance: If tolerance > 0.0, then the intersection is performed against a box \
+         that has each side moved out by tolerance.
+
+      :return: True if the line intersects the box, False if no intersection occurs.
       :rtype: bool
