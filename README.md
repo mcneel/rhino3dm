@@ -57,14 +57,14 @@ See [our javascript documentation](docs/javascript/RHINO3DM.JS.md) for details
 
 ### Rhino3dm.NET
 
-Rhino3dm.NET (a.k.a. Rhino3dmIO) allows you to write standalone .NET applications.
+Rhino3dm.NET (formerly known as Rhino3dmIO) allows you to write standalone .NET applications.
 
-We are still in transition from compiling Rhino3dmIO using internal tools to use the code in this repo. If you are not interested in compiling Rhino3dm.NET, then check out the [documentation on installing and using Rhino3dmIO packages on nuget](https://developer.rhino3d.com/guides/opennurbs/what-is-rhino3dmio/)
+We are in transition from compiling Rhino3dm using internal tools to use the code in this repo. If you are not interested in compiling Rhino3dm.NET, then check out the [documentation on installing and using Rhino3dmIO packages on nuget](https://developer.rhino3d.com/guides/opennurbs/what-is-rhino3dmio/)
 
 For compiling Rhino3dm.NET from source, see [our .NET documentation](docs/dotnet/RHINO3DM-BUILD.CS.md) for details
 
-### How to Participate
+### More
 
-The libraries are still very new and changing rapidly (with the exception of Rhino3dm.NET). Give them a try or get involved.
-
-Up to date technical information can also be found on [Steve Baer's Blog](https://stevebaer.wordpress.com/)
+Some more details and discussions can be found at:
+  * [Steve Baer's Blog](https://stevebaer.wordpress.com/2018/10/15/rhino3dm-geometry-toolkits-for-net-python-and-javascript/)
+  * [discourse.mcneel.com](https://discourse.mcneel.com/c/serengeti/rhino3dm)
