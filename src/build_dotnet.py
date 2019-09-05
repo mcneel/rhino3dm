@@ -6,12 +6,14 @@ import sys
 import fileinput
 import shutil
 
+
 def system(cmd):
     # copied from setup.py
     rv = os.system(cmd)
     rc = rv if os.name == 'nt' else os.WEXITSTATUS(rv)
     if (rc != 0):
         raise RuntimeError('The command "{}" exited with {}'.format(cmd, rc))
+
 
 def methodgen(dotnetcore):
     # set up args to pass to methodgen application
@@ -93,10 +95,15 @@ def compilerhino3dm(dotnetcore):
 
 if __name__ == '__main__':
     dotnetcore = False
-    if len(sys.argv)>1 and sys.argv[1]=='--core':
+    if len(sys.argv) > 1 and sys.argv[1] == '--core':
         dotnetcore = True
     if sys.platform.startswith('linux'):
         dotnetcore = True
+
+    # make the script always execute from it's directory
+    scriptpath = os.path.realpath(__file__)
+    os.chdir(os.path.dirname(scriptpath))
+
     # always compile and run methodgen first to make sure the pinvoke
     # definitions are in place
     methodgen(dotnetcore)

@@ -7,7 +7,7 @@
 
 ## Usage
 
-Rhino3dm.js requires two files`rhino3dm.wasm` and `rhino3dm.js`.  It is easiest to simply reference the *latest* build directly from our servers:
+Rhino3dm.js requires two files `rhino3dm.wasm` and `rhino3dm.js`.  It is easiest to simply reference the *latest* build directly from our servers:
 
 ```html
 <html>
@@ -72,7 +72,7 @@ There a few samples are available in the [Github Repo Samples folder](https://gi
 
 An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
-<img src="docs/images/rhino3dm_rhinologo.png" width="300"></img>
+<img src="https://mcneel.github.io/rhino3dm/images/rhino3dm_rhinologo.png" width="300"></img>
 
 **rhino3dm.js** is used to read a 3dm file and create an instance of a File3dm class in the browser’s memory.  It then walks through the objects in the model and calls compute.rhino3d.com to create meshes and isocurves for the polysurface. These meshes and isocurves are then added to a three.js scene for display.
 
@@ -80,4 +80,4 @@ Here's [another example](https://observablehq.com/@pearswj/using-rhino3dm-in-obs
 
 ## Build from source
 
-If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source. For detailed instructions go to [rhino3dm.js and rhino3dm.wasm](/docs/javascript/RHINO3DM-BUILD.JS.md)
+If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source. For detailed instructions go to [rhino3dm.js and rhino3dm.wasm](RHINO3DM-BUILD.JS.md)
