@@ -59,7 +59,9 @@ See [our javascript documentation](docs/javascript/RHINO3DM.JS.md) for details
 
 Rhino3dm.NET (a.k.a. Rhino3dmIO) allows you to write standalone .NET applications.
 
-See the [documentation on installing and using Rhino3dmIO packages on nuget](https://developer.rhino3d.com/guides/opennurbs/what-is-rhino3dmio/)
+We are still in transition from compiling Rhino3dmIO using internal tools to use the code in this repo. If you are not interested in compiling Rhino3dm.NET, then check out the [documentation on installing and using Rhino3dmIO packages on nuget](https://developer.rhino3d.com/guides/opennurbs/what-is-rhino3dmio/)
+
+For compiling Rhino3dm.NET from source, see [our .NET documentation](docs/dotnet/RHINO3DM-BUILD.CS.md) for details
 
 ### How to Participate
 
