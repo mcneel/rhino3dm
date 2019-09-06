@@ -1,9 +1,5 @@
 #include "bindings.h"
 
-BND_Plane::BND_Plane()
-{
-  *this = BND_Plane::WorldXY();
-}
 
 BND_Plane::BND_Plane(ON_3dPoint origin, ON_3dVector normal)
 {

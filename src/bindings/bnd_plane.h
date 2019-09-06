@@ -11,7 +11,7 @@ void initPlaneBindings(void* m);
 class BND_Plane
 {
 public:
-  BND_Plane();
+  BND_Plane() = default;
   BND_Plane(ON_3dPoint origin, ON_3dVector normal);
   BND_Plane(ON_3dPoint origin, ON_3dPoint xPoint, ON_3dPoint yPoint);
   BND_Plane(ON_3dPoint origin, ON_3dVector xDirection, ON_3dVector yDirection);
