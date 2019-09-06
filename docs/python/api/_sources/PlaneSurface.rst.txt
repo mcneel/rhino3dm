@@ -9,3 +9,8 @@ PlaneSurface
 
       PlaneSurface constructor
 
+
+   .. py:method:: PlaneSurface()
+
+      PlaneSurface constructor
+

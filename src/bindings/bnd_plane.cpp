@@ -1,5 +1,33 @@
 #include "bindings.h"
 
+
+BND_Plane::BND_Plane(ON_3dPoint origin, ON_3dVector normal)
+{
+  ON_Plane plane(origin, normal);
+  *this = FromOnPlane(plane);
+}
+BND_Plane::BND_Plane(ON_3dPoint origin, ON_3dPoint xPoint, ON_3dPoint yPoint)
+{
+  ON_Plane plane(origin, xPoint, yPoint);
+  *this = FromOnPlane(plane);
+}
+BND_Plane::BND_Plane(ON_3dPoint origin, ON_3dVector xDirection, ON_3dVector yDirection)
+{
+  ON_Plane plane(origin, xDirection, yDirection);
+  *this = FromOnPlane(plane);
+}
+BND_Plane::BND_Plane(double a, double b, double c, double d)
+{
+  ON_PlaneEquation eq;
+  eq.x = a;
+  eq.y = b;
+  eq.z = c;
+  eq.d = d;
+  ON_Plane plane;
+  plane.CreateFromEquation(eq);
+  *this = FromOnPlane(plane);
+}
+
 BND_Plane BND_Plane::FromOnPlane(const ON_Plane& plane)
 {
   BND_Plane wasmPlane;
@@ -149,6 +177,11 @@ void initPlaneBindings(pybind11::module& m)
     .def_static("WorldYZ", &BND_Plane::WorldYZ)
     .def_static("WorldZX", &BND_Plane::WorldZX)
     .def_static("Unset", &BND_Plane::Unset)
+    .def(py::init<>())
+    .def(py::init<ON_3dPoint, ON_3dVector>(), py::arg("origin"), py::arg("normal"))
+    .def(py::init<ON_3dPoint, ON_3dPoint, ON_3dPoint>(), py::arg("origin"), py::arg("xPoint"), py::arg("yPoint"))
+    .def(py::init<ON_3dPoint, ON_3dVector, ON_3dVector>(), py::arg("origin"), py::arg("xDirection"), py::arg("yDirection"))
+    .def(py::init<double, double, double, double>(), py::arg("a"), py::arg("b"), py::arg("c"), py::arg("d"))
     .def_readwrite("Origin", &BND_Plane::m_origin)
     .def_readwrite("XAxis", &BND_Plane::m_xaxis)
     .def_readwrite("YAxis", &BND_Plane::m_yaxis)

@@ -5,6 +5,42 @@ Plane
 
 .. py:class:: Plane
 
+   .. py:method:: Plane()
+
+      Plane constructor
+
+
+   .. py:method:: Plane(origin, normal)
+
+      Constructs a plane from a point and a normal vector.
+
+      :param rhino3dm.Point3d origin: Origin point of the plane.
+      :param rhino3dm.Vector3d normal: Non-zero normal to the plane.
+
+   .. py:method:: Plane(origin, xPoint, yPoint)
+
+      Initializes a plane from three non-colinear points.
+
+      :param rhino3dm.Point3d origin: Origin point of the plane.
+      :param rhino3dm.Point3d xPoint: Second point in the plane. The x-axis will be parallel to x_point-origin.
+      :param rhino3dm.Point3d yPoint: Third point on the plane that is not colinear with the first two points. \
+         yaxis*(y_point-origin) will be > 0.
+
+   .. py:method:: Plane(origin, xDirection, yDirection)
+
+      Constructs a plane from a point and two vectors in the plane.
+
+      :param rhino3dm.Point3d origin: Origin point of the plane.
+      :param rhino3dm.Vector3d xDirection: Non-zero vector in the plane that determines the x-axis direction.
+      :param rhino3dm.Vector3d yDirection: Non-zero vector not parallel to x_dir that is used to determine the \
+         yaxis direction. y_dir does not need to be perpendicular to x_dir.
+
+   .. py:method:: Plane()
+
+      Constructs a plane from an equation
+      Ax+By+Cz+D=0.
+
+
    .. py:staticmethod:: WorldXY()
 
       [todo] add documentation

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Plane &mdash; rhino3dm 0.7.0 documentation</title>
+  <title>Plane &mdash; rhino3dm 0.7.1 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.7.0
+                0.7.1
               </div>
             
           
@@ -243,7 +243,76 @@
 <dl class="class">
 <dt id="rhino3dm.Plane">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Plane</code><a class="headerlink" href="#rhino3dm.Plane" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="staticmethod">
+<dd><dl class="method">
+<dt id="rhino3dm.Plane.Plane">
+<code class="descname">Plane</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Plane.Plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plane constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Plane</code><span class="sig-paren">(</span><em>origin</em>, <em>normal</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a plane from a point and a normal vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>origin</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Origin point of the plane.</li>
+<li><strong>normal</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Non-zero normal to the plane.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Plane</code><span class="sig-paren">(</span><em>origin</em>, <em>xPoint</em>, <em>yPoint</em><span class="sig-paren">)</span></dt>
+<dd><p>Initializes a plane from three non-colinear points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>origin</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Origin point of the plane.</li>
+<li><strong>xPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Second point in the plane. The x-axis will be parallel to x_point-origin.</li>
+<li><strong>yPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Third point on the plane that is not colinear with the first two points. yaxis*(y_point-origin) will be &gt; 0.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Plane</code><span class="sig-paren">(</span><em>origin</em>, <em>xDirection</em>, <em>yDirection</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a plane from a point and two vectors in the plane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>origin</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Origin point of the plane.</li>
+<li><strong>xDirection</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Non-zero vector in the plane that determines the x-axis direction.</li>
+<li><strong>yDirection</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Non-zero vector not parallel to x_dir that is used to determine the yaxis direction. y_dir does not need to be perpendicular to x_dir.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">Plane</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a plane from an equation
+Ax+By+Cz+D=0.</p>
+</dd></dl>
+
+<dl class="staticmethod">
 <dt id="rhino3dm.Plane.WorldXY">
 <em class="property">static </em><code class="descname">WorldXY</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Plane.WorldXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>[todo] add documentation</p>
