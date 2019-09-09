@@ -78,6 +78,7 @@ typedef emscripten::val BND_TUPLE;
 #include "bnd_mesh.h"
 #include "bnd_surface.h"
 #include "bnd_revsurface.h"
+#include "bnd_subd.h"
 #include "bnd_surfaceproxy.h"
 #include "bnd_planesurface.h"
 #include "bnd_brep.h"
