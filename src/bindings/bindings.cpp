@@ -55,6 +55,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initPolylineCurveBindings(m);
   initSurfaceBindings(m);
   initRevSurfaceBindings(m);
+  initSubDBindings(m);
   initSurfaceProxyBindings(m);
   initPlaneSurfaceBindings(m);
   initBrepBindings(m);
