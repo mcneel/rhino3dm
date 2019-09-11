@@ -9,24 +9,22 @@
 [![NuGet](https://img.shields.io/nuget/v/Rhino3dmIO.Desktop.svg?style=flat)](https://www.nuget.org/profiles/McNeel)
 [![npm](https://img.shields.io/npm/v/rhino3dm.svg)](https://www.npmjs.com/package/rhino3dm)
 
-**rhino3dm** is a set of standalone libraries based on the [OpenNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/) geometry library with a ["RhinoCommon"](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) style. This provides the ability to access and manipulate geometry through .NET , Python or JavaScript applications independent of Rhino.  
+**rhino3dm** is a set of libraries based on the [OpenNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/) geometry library with a ["RhinoCommon"](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.  
 
 Functionality includes
 
-- Create, interrogate, and store all geometry types supported in Rhino. This includes points, point clouds, NURBS curves and surfaces, polysurfaces (B-Reps), meshes, annotations, and extrusions.
+- Create, interrogate, and store all geometry types supported in Rhino. This includes points, point clouds, NURBS curves and surfaces, polysurfaces (B-Reps), meshes, annotations, extrusions, and SubDs.
 - Work with non-geometry classes supported in Rhino like layers, object attributes, transforms and viewports
 - Read and write all of the above information to and from the *.3dm* file format
 - Use as a client to make calls into the [Rhino Compute cloud server](https://www.rhino3d.com/compute) for advanced manipulation of geometry objects
 - Available on most platforms (Windows, macOS, Linux)
-
-For bug reports or feature requests see the [contributing guide](CONTRIBUTING.md)
 
 ---
 
 ### rhino3dm.py (Python)
 **rhino3dm.py** is a python package that can be used on all current versions of CPython (both 2.7 and 3.7) and is available on all platforms (Windows, macOS, Linux) [through PyPi.org](https://pypi.org/project/rhino3dm/).
 
-`pip install rhino3dm`
+`pip install --user rhino3dm`
 
 See [our python documentation](docs/python/RHINO3DM.PY.md) for details
 
