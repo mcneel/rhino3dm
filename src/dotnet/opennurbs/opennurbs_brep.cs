@@ -110,6 +110,25 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
+  /// Rebuild types for creating swept surfaces
+  /// </summary>
+  public enum SweepRebuild
+  {
+    /// <summary>
+    /// Do not simplify cross section curves.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Rebuild cross section curves through points.
+    /// </summary>
+    Rebuild = 1,
+    /// <summary>
+    /// Refit cross section curves to tolerance.
+    /// </summary>
+    Refit = 2
+  }
+
+  /// <summary>
   /// Boundary Representation. A surface or polysurface along with trim curve information.
   /// </summary>
   [Serializable]
@@ -1011,7 +1030,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sweep1 function tht fits a surface through a profile curve that define the surface cross-sections
+    /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
     /// and one curve that defines a surface edge.
     /// /// </summary>
     /// <param name="rail">Rail to sweep shapes along</param>
@@ -1029,7 +1048,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sweep1 function tht fits a surface through a profile curve that define the surface cross-sections
+    /// Sweep1 function that fits a surface through profile curves that define the surface cross-sections
     /// and one curve that defines a surface edge.
     /// </summary>
     /// <param name="rail">Rail to sweep shapes along</param>
@@ -1057,7 +1076,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sweep1 function tht fits a surface through a profile curve that define the surface cross-sections
+    /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
     /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
     /// and sweeps each piece separately, then put the results together into a Brep.
     /// </summary>
@@ -1076,7 +1095,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sweep1 function tht fits a surface through a series of profile curves that define the surface cross-sections
+    /// Sweep1 function that fits a surface through a series of profile curves that define the surface cross-sections
     /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
     /// and sweeps each piece separately, then put the results together into a Brep.
     /// </summary>
@@ -1106,7 +1125,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// General 2 rail sweep. If you are not producing the sweep results that you are after, then
-    /// use the SweepTwoRail class with options to generate the swept geometry
+    /// use the SweepTwoRail class with options to generate the swept geometry.
     /// </summary>
     /// <param name="rail1">Rail to sweep shapes along</param>
     /// <param name="rail2">Rail to sweep shapes along</param>
@@ -1121,7 +1140,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// General 2 rail sweep. If you are not producing the sweep results that you are after, then
-    /// use the SweepTwoRail class with options to generate the swept geometry
+    /// use the SweepTwoRail class with options to generate the swept geometry.
     /// </summary>
     /// <param name="rail1">Rail to sweep shapes along</param>
     /// <param name="rail2">Rail to sweep shapes along</param>
@@ -2703,8 +2722,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Determines if point is inside Brep.  This question only makes sense when
-    /// the brep is a closed manifold.  This function does not not check for
+    /// Determines if point is inside a Brep.  This question only makes sense when
+    /// the brep is a closed and manifold.  This function does not not check for
     /// closed or manifold, so result is not valid in those cases.  Intersects
     /// a line through point with brep, finds the intersection point Q closest
     /// to point, and looks at face normal at Q.  If the point Q is on an edge
@@ -4561,9 +4580,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Shrinks the underlying surface of this face. 
-    /// Sometimes the surface used by a face extends far beyond the face's outer boundary.  
-    /// This function remove portions of the surface that extend beyond the face's outer boundary loop.
+    /// Shrinks the underlying untrimmed surface of this Brep face close to trimming boundaries.
+    /// Shrinking a surface is like extending smoothly, only backwards. knot of full multiplicity
+    /// are added where you want the surface to be cut off. Then the remaining control points are
+    /// thrown away.  
     /// </summary>
     /// <param name="disableSide">The side(s) of the surface to not shrink.</param>
     /// <returns>true on success, false on failure.</returns>

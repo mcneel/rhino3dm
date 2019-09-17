@@ -2418,7 +2418,24 @@ namespace Rhino.Geometry
     /// <param name="t">>Parameter of the curve that is closest to testPoint.</param>
     /// <returns>true if the search is successful, false if the search fails.</returns>
     [ConstOperation]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Obsolete("Typo: use LocalClosestPoint")]
     public bool LcoalClosestPoint(Point3d testPoint, double seed, out double t)
+    {
+      return LocalClosestPoint(testPoint, seed, out t);
+    }
+
+    /// <summary>
+    /// Find parameter of the point on a curve that is locally closest to 
+    /// the testPoint.  The search for a local close point starts at
+    /// a seed parameter.
+    /// </summary>
+    /// <param name="testPoint">A point to test against.</param>
+    /// <param name="seed">The seed parameter.</param>
+    /// <param name="t">>Parameter of the curve that is closest to testPoint.</param>
+    /// <returns>true if the search is successful, false if the search fails.</returns>
+    [ConstOperation]
+    public bool LocalClosestPoint(Point3d testPoint, double seed, out double t)
     {
       t = 0.0;
       IntPtr ptr = ConstPointer();

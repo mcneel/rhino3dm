@@ -1569,11 +1569,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs an interpolated curve on a surface, using 2D surface points.
+    /// Returns a curve that interpolates points on a surface. The interpolant lies on the surface.
     /// </summary>
-    /// <param name="points">A list, an array or any enumerable set of 2D points.</param>
-    /// <param name="tolerance">A tolerance value.</param>
-    /// <returns>A new nurbs curve, or null on error.</returns>
+    /// <param name="points">List of at least two UV parameter locations on the surface.</param>
+    /// <param name="tolerance">Tolerance used for the fit of the pushup curve. Generally, the resulting interpolating curve will be within tolerabce of the surface.</param>
+    /// <returns>A new NURBS curve if successful, or null on error.</returns>
     [ConstOperation]
     public NurbsCurve InterpolatedCurveOnSurfaceUV(System.Collections.Generic.IEnumerable<Point2d> points, double tolerance)
     {

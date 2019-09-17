@@ -174,6 +174,34 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Accesses the coordinates of this point.
+    /// </summary>
+    /// <param name="index">Either 0 or 1.</param>
+    /// <returns>If index is 0, the X (first) coordinate. If index is 1, the Y (second) coordinate.</returns>
+    public float this[int index]
+    {
+      get
+      {
+        if (0 == index)
+          return m_x;
+        if (1 == index)
+          return m_y;
+        // IronPython works with indexing is we thrown an IndexOutOfRangeException
+        throw new IndexOutOfRangeException();
+      }
+      set
+      {
+        if (0 == index)
+          X = value;
+        else if (1 == index)
+          Y = value;
+        else
+          throw new IndexOutOfRangeException();
+      }
+    }
+
+
+    /// <summary>
     /// Determines whether two <see cref="Point2f"/> have equal values.
     /// </summary>
     /// <param name="a">The first point.</param>

@@ -572,10 +572,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the greville (edit point) parameter that belongs 
+    /// Gets the Greville parameter that belongs 
     /// to the control point at the specified index.
     /// </summary>
-    /// <param name="index">Index of Greville (Edit) point.</param>
+    /// <param name="index">Index of Greville point.</param>
     [ConstOperation]
     public Point3d GrevillePoint(int index)
     {
@@ -584,7 +584,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets all Greville (Edit point) parameters for this curve.
+    /// Gets all Greville parameters for this curve.
     /// </summary>
     [ConstOperation]
     public double[] GrevilleParameters()
@@ -598,7 +598,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets all Greville (Edit) points for this curve.
+    /// Gets all Greville points for this curve.
     /// </summary>
     [ConstOperation]
     public Point3dList GrevillePoints()
@@ -624,7 +624,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">
     /// The new point locations. The number of points should match 
-    /// the number of point returned by NurbsCurve.GrevillePoints().
+    /// the number of point returned by NurbsCurve.GrevillePoints(false).
     /// </param>
     /// <returns>true if successful, false otherwise.</returns>
     public bool SetGrevillePoints(IEnumerable<Point3d> points)
