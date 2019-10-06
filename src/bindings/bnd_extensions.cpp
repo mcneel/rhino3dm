@@ -645,7 +645,10 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
 }
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
-  ON_ModelComponentReference compref = m_model->DimensionStyleFromIndex(index);
+  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, index);
+  if (compref.IsEmpty())
+    return nullptr;
+
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
   if (modelidef)
@@ -659,7 +662,10 @@ BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::IterIndex(in
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindId(BND_UUID id) const
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->DimensionStyleFromId(_id);
+  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::InstanceDefinition, _id);
+  if (compref.IsEmpty())
+    return nullptr;
+
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
   if (modelidef)
