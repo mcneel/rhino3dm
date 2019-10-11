@@ -52,8 +52,8 @@ BND_DICT BND_Circle::Encode() const
   d["radius"] = Radius();
   d["plane"] = PlaneToDict(m_circle.plane);
 #else
-  d.set("radius", emscripten::val(Radius());
-  d.set("plane", emscripten::val(PlaneToDict(m_circle.plane));
+  d.set("radius", emscripten::val(Radius()));
+  d.set("plane", emscripten::val(PlaneToDict(m_circle.plane)));
 #endif
   return d;
 }
