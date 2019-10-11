@@ -41,6 +41,24 @@ BND_NurbsCurve* BND_Circle::ToNurbsCurve() const
   return new BND_NurbsCurve(nc, nullptr);
 }
 
+BND_DICT BND_Circle::Encode() const
+{
+#if defined(ON_PYTHON_COMPILE)
+  BND_DICT d;
+#else
+  emscripten::val d(emscripten::val::object());
+#endif
+#if defined(ON_PYTHON_COMPILE)
+  d["radius"] = Radius();
+  d["plane"] = PlaneToDict(m_circle.plane);
+#else
+  d.set("radius", emscripten::val(Radius());
+  d.set("plane", emscripten::val(PlaneToDict(m_circle.plane));
+#endif
+  return d;
+}
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initCircleBindings(pybind11::module& m)
@@ -60,7 +78,9 @@ void initCircleBindings(pybind11::module& m)
     .def("ClosestPoint", &BND_Circle::ClosestPoint, py::arg("testPoint"))
     .def("Translate", &BND_Circle::Translate, py::arg("delta"))
     .def("Reverse", &BND_Circle::Reverse)
-    .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve);
+    .def("ToNurbsCurve", &BND_Circle::ToNurbsCurve)
+    .def("Encode", &BND_Circle::Encode)
+    ;
 }
 #endif
 
