@@ -11,3 +11,8 @@ As rhinologo.html but also loads another set of breps and calculates the boolean
 ### [ar.html](https://files.mcneel.com/rhino3dm/js/latest/ar.html)
 
 Print the [hiro marker](https://jeromeetienne.github.io/AR.js/data/images/HIRO.jpg) (or simply open it on your computer screen) then open this sample on a mobile phone and point the camera at the marker.
+
+### Grasshopper
+
+* [DelaunayMesh](https://files.mcneel.com/rhino3dm/js/latest/RESTHopper/Extrusions/index.html)
+* [Extrusions](https://files.mcneel.com/rhino3dm/js/latest/RESTHopper/DelaunayMesh/index.html)
