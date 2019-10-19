@@ -1044,6 +1044,7 @@ void initExtensionsBindings(void*)
     .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot, allow_raw_pointers())
     .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh, allow_raw_pointers())
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
+    .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
     ;
 
   class_<BND_File3dmMaterialTable>("File3dmMaterialTable")
