@@ -231,6 +231,7 @@ public:
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
   #endif
+  std::string WasmToByteArray();
 
   static BND_ONXModel* FromByteArray(int length, const void* buffer);
 

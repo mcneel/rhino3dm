@@ -799,7 +799,17 @@ return std::wstring(L"success");
   const void* buffer = sbuffer.c_str();
   return FromByteArray(length, buffer);
 }
+
 #endif
+std::string BND_ONXModel::WasmToByteArray()
+{
+  ON_Write3dmBufferArchive archive(0, 0,0,0);
+  m_model->Write(archive);
+  const void* buffer = archive.Buffer();
+  std::string rc((const char*)buffer);
+  return rc;
+}
+
 BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
 {
   ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
@@ -1083,6 +1093,7 @@ void initExtensionsBindings(void*)
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
+    .function("toByteArray", &BND_ONXModel::WasmToByteArray)
     .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
