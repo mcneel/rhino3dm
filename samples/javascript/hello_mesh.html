@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Hello Mesh!</title>
+        <style>
+            body { margin: 0; }
+            canvas { width: 100%; height: 100%; }
+            /* input {width: 90%;} */
+            #container {position: relative;}
+            #container canvas, #overlay { position: absolute;}
+            #overlay {z-index: 1; width: 100%}
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="canvas"></div>
+        </div>
+
+        <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
+        <script type="text/javascript" src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+        <script type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+        <script type="text/javascript">
+            rhino3dm().then(async m => {
+                console.log('Loaded rhino3dm.');
+                let rhino = m;
+
+                let url = 'hello_mesh.3dm';
+                let res = await fetch(url);
+                let buffer = await res.arrayBuffer();
+                let arr = new Uint8Array(buffer);
+                let doc = rhino.File3dm.fromByteArray(arr);
+
+                init();
+                let material = new THREE.MeshNormalMaterial();
+
+                let objects = doc.objects();
+                for (let i = 0; i < objects.count; i++) {
+                    // assume model contains only meshes
+                    let mesh = objects.get(i).geometry();
+
+                    console.log(mesh);
+                    console.log(typeof mesh);
+
+                    let threeMesh = meshToThreejs(mesh, material);
+                    scene.add(threeMesh);
+                }
+            });
+
+            // BOILERPLATE //
+
+            var scene, camera, renderer, controls, composer;
+
+            function init(){
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(1,1,1);
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 1, 10000 );
+
+                renderer = new THREE.WebGLRenderer({antialias: true});
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                var canvas = document.getElementById("canvas");
+                canvas.appendChild( renderer.domElement );
+
+                controls = new THREE.OrbitControls( camera, renderer.domElement  );
+
+                camera.position.z = 50;
+
+                window.addEventListener( 'resize', onWindowResize, false );
+
+                animate();
+            }
+
+            var animate = function () {
+                requestAnimationFrame( animate );
+                controls.update();
+                renderer.render( scene, camera );
+            };
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                animate();
+            }
+
+            function meshToThreejs(mesh, material) {
+                var geometry = new THREE.BufferGeometry();
+                var vertices = mesh.vertices();
+                var vertexbuffer = new Float32Array(3 * vertices.count);
+                for( var i=0; i<vertices.count; i++) {
+                    pt = vertices.get(i);
+                    vertexbuffer[i*3] = pt[0];
+                    vertexbuffer[i*3+1] = pt[1];
+                    vertexbuffer[i*3+2] = pt[2];
+                }
+                // itemSize = 3 because there are 3 values (components) per vertex
+                geometry.addAttribute( 'position', new THREE.BufferAttribute( vertexbuffer, 3 ) );
+
+                indices = [];
+                var faces = mesh.faces();
+                for( var i=0; i<faces.count; i++) {
+                    face = faces.get(i);
+                    indices.push(face[0], face[1], face[2]);
+                    if( face[2] != face[3] ) {
+                        indices.push(face[2], face[3], face[0]);
+                    }
+                }
+                geometry.setIndex(indices);
+
+                var normals = mesh.normals();
+                var normalBuffer = new Float32Array(3*normals.count);
+                for( var i=0; i<normals.count; i++) {
+                    pt = normals.get(i);
+                    normalBuffer[i*3] = pt[0];
+                    normalBuffer[i*3+1] = pt[1];
+                    normalBuffer[i*3+2] = pt[1];
+                }
+                geometry.addAttribute( 'normal', new THREE.BufferAttribute( normalBuffer, 3 ) );
+
+                var mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = - Math.PI / 2; // rhino's up == z
+
+                return mesh;
+            }
+        </script>
+    </body>
+</html>
