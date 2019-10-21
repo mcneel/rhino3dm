@@ -46,6 +46,22 @@ BND_Transform BND_Transform::Transpose() const
   return rc;
 }
 
+pybind11::array_t<double> BND_Transform::ToFloatArray()
+{
+	return pybind11::array_t<double>
+		(
+			//looking at pybind11/numpy.h one should be able to leave out the buffer_info type and directly pass the pointer to the array_t constructor, but i couldn't get it to compile
+			pybind11::buffer_info
+			(
+				m_xform.m_xform,
+				sizeof(double),
+				pybind11::format_descriptor<double>::format(),
+				2,
+				std::vector<size_t> { 4, 4 },
+				std::vector<size_t> {4 * sizeof(double), sizeof(double)}
+			)
+		);
+}
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -69,7 +85,8 @@ void initXformBindings(pybind11::module& m)
     .def("TryGetInverse", &BND_Transform::TryGetInverse)
     .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox, py::arg("bbox"))
     .def("Transpose", &BND_Transform::Transpose)
-    ;
+	.def("ToFloatArray", &BND_Transform::ToFloatArray)
+	;
 }
 #endif
 
