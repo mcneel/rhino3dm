@@ -24,6 +24,16 @@ ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
   return ON_UuidFromString(s.c_str());
 }
 
+std::vector<BND_UUID> ON_SimpleArrayUUID_to_Binding(const ON_SimpleArray<ON_UUID>& uuids)
+{
+	std::vector<BND_UUID> guids;
+	for (int i = 0; i < uuids.Count(); i++)
+	{
+		guids.push_back(ON_UUID_to_Binding(uuids[i]));
+	}
+
+	return guids;
+}
 
 #endif
 
