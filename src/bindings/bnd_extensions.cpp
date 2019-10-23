@@ -1,4 +1,5 @@
 #include "bindings.h"
+#include "base64.h"
 
 
 BND_ONXModel::BND_ONXModel()
@@ -735,20 +736,24 @@ std::wstring BND_File3dmStringTable::GetValue(int i) const
   return std::wstring(us.m_string_value.Array());
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_File3dmStringTable::GetKeyValue(int i) const
+BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
 {
   ON_ClassArray<ON_UserString> strings;
   m_model->GetDocumentUserStrings(strings);
   const ON_UserString& us = strings[i];
   std::wstring key(us.m_key.Array());
   std::wstring sval(us.m_string_value.Array());
+#if defined(ON_PYTHON_COMPILE)
   pybind11::tuple rc(2);
   rc[0] = key;
   rc[1] = sval;
+#else
+  emscripten::val rc(emscripten::val::array());
+  rc.set(0, key);
+  rc.set(1, sval);
+#endif
   return rc;
 }
-#endif
 
 std::wstring BND_File3dmStringTable::GetValueFromKey(std::wstring key) const
 {
@@ -801,12 +806,14 @@ return std::wstring(L"success");
 }
 
 #endif
-std::string BND_ONXModel::WasmToByteArray()
+std::string BND_ONXModel::Encode()
 {
-  ON_Write3dmBufferArchive archive(0, 0,0,0);
+  ON_Write3dmBufferArchive archive(0, 0, 0, 0);// on_version__to_write);
   m_model->Write(archive);
-  const void* buffer = archive.Buffer();
-  std::string rc((const char*)buffer);
+  const unsigned char* buffer = (const unsigned char*)archive.Buffer();
+  size_t length = archive.SizeOfArchive();
+
+  std::string rc = base64_encode(buffer, (unsigned int)length);
   return rc;
 }
 
@@ -821,6 +828,15 @@ BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
   }
   return new BND_ONXModel(model);
 }
+
+BND_ONXModel* BND_ONXModel::Decode(std::string buffer)
+{
+  std::string decoded = base64_decode(buffer);
+  int length = (int)decoded.length();
+  const unsigned char* c = (const unsigned char*)&decoded.at(0);
+  return FromByteArray(length, c);
+}
+
 
 bool BND_ONXModel::ReadTest(std::wstring path)
 {
@@ -1027,7 +1043,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("NamedViews", &BND_ONXModel::NamedViews)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
-    .def_static("_TestRead", &BND_ONXModel::ReadTest)
+    .def("Encode", &BND_ONXModel::Encode)
+    .def("Decode", &BND_ONXModel::Decode)
     ;
 }
 #endif
@@ -1037,6 +1054,18 @@ using namespace emscripten;
 
 void initExtensionsBindings(void*)
 {
+  class_<BND_File3dmPlugInData>("File3dmPlugInData")
+    ;
+
+  class_<BND_RDKPlugInData, base<BND_File3dmPlugInData>>("File3dmRdkDocumentData")
+    .function("rdkXml", &BND_RDKPlugInData::RdkDocumentData)
+    ;
+
+  class_<BND_File3dmPlugInDataTable>("File3dmPlugInDataTable")
+    .function("count", &BND_File3dmPlugInDataTable::Count)
+    .function("get", &BND_File3dmPlugInDataTable::GetPlugInData, allow_raw_pointers())
+    ;
+
   class_<BND_FileObject>("File3dmObject")
     .function("attributes", &BND_FileObject::GetAttributes, allow_raw_pointers())
     .function("geometry", &BND_FileObject::GetGeometry, allow_raw_pointers())
@@ -1045,16 +1074,24 @@ void initExtensionsBindings(void*)
   class_<BND_ONXModel_ObjectTable>("File3dmObjectTable")
     .property("count", &BND_ONXModel_ObjectTable::Count)
     .function("get", &BND_ONXModel_ObjectTable::ModelObjectAt, allow_raw_pointers())
-    .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint1)
+    .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint2)
+    .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
+    //.function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, allow_raw_pointers())
+    .function("addArc", &BND_ONXModel_ObjectTable::AddArc, allow_raw_pointers())
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
+    .function("addEllipse", &BND_ONXModel_ObjectTable::AddEllipse, allow_raw_pointers())
     .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
     .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve, allow_raw_pointers())
     .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot, allow_raw_pointers())
+    .function("addSurface", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
+    .function("addExtrusion", &BND_ONXModel_ObjectTable::AddExtrusion, allow_raw_pointers())
     .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh, allow_raw_pointers())
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
+    .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
+    .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
     ;
 
   class_<BND_File3dmMaterialTable>("File3dmMaterialTable")
@@ -1063,6 +1100,14 @@ void initExtensionsBindings(void*)
     .function("add", &BND_File3dmMaterialTable::Add)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
+    ;
+
+  class_<BND_File3dmBitmapTable>("File3dmBitmapTable")
+    .function("count", &BND_File3dmBitmapTable::Count)
+    .function("get", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmBitmapTable::Add)
+    .function("findIndex", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmBitmapTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_File3dmLayerTable>("File3dmLayerTable")
@@ -1090,10 +1135,25 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmInstanceDefinitionTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmViewTable>("File3dmViewTable")
+    .function("count", &BND_File3dmViewTable::Count)
+    .function("get", &BND_File3dmViewTable::GetItem, allow_raw_pointers())
+    .function("set", &BND_File3dmViewTable::SetItem)
+    .function("add", &BND_File3dmViewTable::Add)
+    ;
+
+  class_<BND_File3dmStringTable>("File3dmStringTable")
+    .function("count", &BND_File3dmStringTable::Count)
+    .function("get", &BND_File3dmStringTable::GetKeyValue)
+    .function("getvalue", &BND_File3dmStringTable::GetValueFromKey)
+    .function("set", &BND_File3dmStringTable::SetString)
+    .function("count", &BND_File3dmStringTable::DocumentUserTextCount)
+    .function("delete", &BND_File3dmStringTable::Delete)
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
-    .function("toByteArray", &BND_ONXModel::WasmToByteArray)
     .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
@@ -1104,9 +1164,16 @@ void initExtensionsBindings(void*)
     .function("settings", &BND_ONXModel::Settings)
     .function("objects", &BND_ONXModel::Objects)
     .function("materials", &BND_ONXModel::Materials)
+    .function("bitmaps", &BND_ONXModel::Bitmaps)
     .function("layers", &BND_ONXModel::Layers)
     .function("dimstyles", &BND_ONXModel::DimStyles)
     .function("instanceDefinitions", &BND_ONXModel::InstanceDefinitions)
+    .function("views", &BND_ONXModel::Views)
+    .function("namedViews", &BND_ONXModel::NamedViews)
+    .function("plugInData", &BND_ONXModel::PlugInData)
+    .function("strings", &BND_ONXModel::Strings)
+    .function("encode", &BND_ONXModel::Encode)
+    .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
     ;
 }
 #endif

@@ -1448,11 +1448,11 @@ std::wstring BND_CommonObject::GetUserString(std::wstring key)
   return std::wstring(L"");
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_CommonObject::GetUserStrings() const
+BND_TUPLE BND_CommonObject::GetUserStrings() const
 {
   ON_ClassArray<ON_wString> keys;
   m_object->GetUserStringKeys(keys);
+#if defined(ON_PYTHON_COMPILE)
   pybind11::tuple rc(keys.Count());
   for (int i = 0; i < keys.Count(); i++)
   {
@@ -1463,6 +1463,18 @@ pybind11::tuple BND_CommonObject::GetUserStrings() const
     keyval[1] = std::wstring(sval.Array());
     rc[i] = keyval;
   }
+#else
+  emscripten::val rc(emscripten::val::array());
+  for (int i = 0; i < keys.Count(); i++)
+  {
+    ON_wString sval;
+    m_object->GetUserString(keys[i].Array(), sval);
+    emscripten::val keyval(emscripten::val::array());
+    keyval.set(0, std::wstring(keys[i].Array()));
+    keyval.set(1, std::wstring(sval.Array()));
+    rc.set(i, keyval);
+  }
+#endif
   return rc;
 }
 
@@ -1478,7 +1490,6 @@ std::wstring BND_CommonObject::RdkXml() const
   return rc;
 }
 
-#endif
 
 
 
@@ -1516,6 +1527,8 @@ void initObjectBindings(void*)
     .function("setUserString", &BND_CommonObject::SetUserString)
     .function("getUserString", &BND_CommonObject::GetUserString)
     .property("userStringCount", &BND_CommonObject::UserStringCount)
+    .function("getUserStrings", &BND_CommonObject::GetUserStrings)
+    .function("rdkXml", &BND_CommonObject::RdkXml)
     ;
 
   class_<BND_ArchivableDictionary>("ArchivableDictionary")

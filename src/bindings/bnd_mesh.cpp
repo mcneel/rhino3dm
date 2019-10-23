@@ -232,16 +232,6 @@ BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReferen
   m_mesh = mesh;
 }
 
-int BND_MeshVertexList::Count() const
-{
-  return m_mesh->VertexCount();
-}
-
-int BND_MeshFaceList::Count() const
-{
-  return m_mesh->FaceCount();
-}
-
 void BND_MeshVertexList::SetCount(int value)
 {
   ON_Mesh* pMesh = m_mesh;
@@ -265,18 +255,41 @@ void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
   m_mesh->m_V[i] = pt;
 }
 
-#if defined(__EMSCRIPTEN__)
-emscripten::val BND_MeshFaceList::GetFace(int i) const
+bool BND_MeshFaceList::HasNakedEdges(int index)
+{
+  bool rc = false;
+  const ON_MeshTopology& topology = m_mesh->Topology();
+  const ON_MeshTopologyFace* face_top = topology.m_topf.At(index);
+  if (face_top)
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      int edge = face_top->m_topei[i];
+      if (topology.m_tope[edge].m_topf_count == 1)
+      {
+        rc = true;
+        break;
+      }
+    }
+  }
+  return rc;
+}
+
+BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 {
   ON_MeshFace& face = m_mesh->m_F[i];
-  emscripten::val v(emscripten::val::array());
-  v.call<void>("push", face.vi[0]);
-  v.call<void>("push", face.vi[1]);
-  v.call<void>("push", face.vi[2]);
-  v.call<void>("push", face.vi[3]);
-  return v;
-}
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple rc(4);
+  for( int i=0; i<4; i++ )
+    rc[i] = face.vi[i];
+#else
+  emscripten::val rc(emscripten::val::array());
+  for( int i=0; i<4; i++ )
+    rc.call<void>("push", face.vi[i]);
 #endif
+  return rc;
+}
+
 
 BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
@@ -336,19 +349,6 @@ ON_2fPoint* BND_MeshTextureCoordinateList::end()
   return m_mesh->m_T.At(count - 1);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::list BND_MeshFaceList::GetFace(int i) const
-{
-  pybind11::list rc;
-  ON_MeshFace& face = m_mesh->m_F[i];
-  rc.append(face.vi[0]);
-  rc.append(face.vi[1]);
-  rc.append(face.vi[2]);
-  rc.append(face.vi[3]);
-  return rc;
-}
-#endif
-
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -395,6 +395,16 @@ void initMeshBindings(pybind11::module& m)
   py::class_<BND_MeshFaceList>(m, "MeshFaceList")
     .def("__len__", &BND_MeshFaceList::Count)
     .def("__getitem__", &BND_MeshFaceList::GetFace)
+    .def_property("Count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
+    .def_property_readonly("QuadCount", &BND_MeshFaceList::QuadCount)
+    .def_property_readonly("TriangleCount", &BND_MeshFaceList::TriangleCount)
+    .def_property("Capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
+    .def("ConvertQuadsToTriangles", &BND_MeshFaceList::ConvertQuadsToTriangles)
+    .def("ConvertNonPlanarQuadsToTriangles", &BND_MeshFaceList::ConvertNonPlanarQuadsToTriangles)
+    .def("ConvertTrianglesToQuads", &BND_MeshFaceList::ConvertTrianglesToQuads)
+    .def("CullDegenerateFaces", &BND_MeshFaceList::CullDegenerateFaces)
+    .def("IsHidden", &BND_MeshFaceList::IsHidden)
+    .def("HasNakedEdges", &BND_MeshFaceList::HasNakedEdges)
     ;
 
   py::class_<BND_MeshNormalList>(m, "MeshNormalList")
@@ -446,6 +456,7 @@ void initMeshBindings(pybind11::module& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
+
 void initMeshBindings(void*)
 {
   class_<BND_MeshingParameters>("MeshingParameters")
@@ -487,8 +498,17 @@ void initMeshBindings(void*)
     ;
 
   class_<BND_MeshFaceList>("MeshFaceList")
-    .property("count", &BND_MeshFaceList::Count)
+    .property("count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .function("get", &BND_MeshFaceList::GetFace)
+    .property("quadCount", &BND_MeshFaceList::QuadCount)
+    .property("triangleCount", &BND_MeshFaceList::TriangleCount)
+    .property("capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
+    .function("convertQuadsToTriangles", &BND_MeshFaceList::ConvertQuadsToTriangles)
+    .function("convertNonPlanarQuadsToTriangles", &BND_MeshFaceList::ConvertNonPlanarQuadsToTriangles)
+    .function("convertTrianglesToQuads", &BND_MeshFaceList::ConvertTrianglesToQuads)
+    .function("cullDegenerateFaces", &BND_MeshFaceList::CullDegenerateFaces)
+    .function("isHidden", &BND_MeshFaceList::IsHidden)
+    .function("hasNakedEdges", &BND_MeshFaceList::HasNakedEdges)
     ;
 
   class_<BND_MeshNormalList>("MeshNormalList")

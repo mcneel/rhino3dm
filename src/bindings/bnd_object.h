@@ -19,23 +19,17 @@ public:
   static BND_CommonObject* CreateWrapper(ON_Object* obj, const ON_ModelComponentReference* compref);
   static BND_CommonObject* CreateWrapper(const ON_ModelComponentReference& compref);
 
-#if defined(__EMSCRIPTEN__)
-  emscripten::val toJSON(emscripten::val key);
-  emscripten::val Encode() const;
-  static BND_CommonObject* Decode(emscripten::val jsonObject);
-#endif
+  BND_DICT Encode() const;
+  static BND_CommonObject* Decode(BND_DICT jsonObject);
 
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_CommonObject* Decode(pybind11::dict jsonObject);
+#if defined(__EMSCRIPTEN__)
+  BND_DICT toJSON(BND_DICT key);
 #endif
 
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);
   int UserStringCount() const { return m_object->UserStringCount(); }
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetUserStrings() const;
-#endif
+  BND_TUPLE GetUserStrings() const;
   std::wstring RdkXml() const;
 protected:
   ON_ModelComponentReference m_component_ref; // holds shared pointer for this class
@@ -48,14 +42,10 @@ private:
 class BND_ArchivableDictionary
 {
 public:
-#if defined(ON_PYTHON_COMPILE)
-  static pybind11::dict EncodeFromDictionary(pybind11::dict dict);
-  static pybind11::dict DecodeToDictionary(pybind11::dict jsonObject);
-#endif
+  static BND_DICT EncodeFromDictionary(BND_DICT dict);
+  static BND_DICT DecodeToDictionary(BND_DICT jsonObject);
 
 #if defined(__EMSCRIPTEN__)
-  static emscripten::val EncodeFromDictionary(emscripten::val dict);
-  static emscripten::val DecodeToDictionary(emscripten::val jsonObject);
   static void WriteGeometry(class BND_GeometryBase* geometry);
 #endif
 

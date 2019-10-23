@@ -65,15 +65,11 @@ public:
   double GetRefineAngle() const { return m_mesh_parameters.RefineAngleRadians(); }
   void SetRefineAngle(double d) { m_mesh_parameters.SetRefineAngleRadians(d); }
 
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_MeshingParameters* Decode(pybind11::dict jsonObject);
-#endif
+  BND_DICT Encode() const;
+  static BND_MeshingParameters* Decode(BND_DICT jsonObject);
 
 #if defined(__EMSCRIPTEN__)
   emscripten::val toJSON(emscripten::val key);
-  emscripten::val Encode() const;
-  static BND_MeshingParameters* Decode(emscripten::val jsonObject);
 #endif
 
 };
@@ -88,7 +84,7 @@ public:
   ON_3fPoint* begin();
   ON_3fPoint* end();
 
-  int Count() const;
+  int Count() const { return m_mesh->VertexCount(); }
   void SetCount(int i);
   ON_3fPoint GetVertex(int i) const;
   void SetVertex(int i, ON_3fPoint pt);
@@ -100,13 +96,33 @@ class BND_MeshFaceList
   ON_Mesh* m_mesh = nullptr;
 public:
   BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
-  int Count() const;
-  #if defined(__EMSCRIPTEN__)
-  emscripten::val GetFace(int i) const;
-  #endif
-  #if defined(ON_PYTHON_COMPILE)
-  pybind11::list GetFace(int i) const;
-  #endif
+  int Count() const { return m_mesh->FaceCount(); }
+  void SetCount(int value) {
+    m_mesh->m_F.Reserve(value);
+    m_mesh->m_F.SetCount(value);
+  }
+  int QuadCount() const { return m_mesh->QuadCount(); }
+  int TriangleCount() const { return m_mesh->TriangleCount(); }
+  //int VertexCount() const { return m_mesh->VertexCount(); }
+  int Capacity() const { return m_mesh->m_F.Capacity(); }
+  void SetCapacity(int c) { m_mesh->m_F.SetCapacity(c); }
+  //int DeleteFaces(IEnumerable<int> faceIndexes)
+  //int DeleteFaces(IEnumerable<int> faceIndexes, bool compact)
+  void RemoveAt(int index) { m_mesh->m_F.Remove(index); }
+  //public void RemoveAt(int index, bool compact)
+  bool ConvertQuadsToTriangles() { return m_mesh->ConvertQuadsToTriangles(); }
+  int ConvertNonPlanarQuadsToTriangles(double planarTolerance, double angleToleranceRadians, int splitMethod){ 
+    return m_mesh->ConvertNonPlanarQuadsToTriangles(planarTolerance, angleToleranceRadians, splitMethod);
+  }
+  bool ConvertTrianglesToQuads(double angleToleranceRadians, double minimumDiagonalLengthRatio) {
+    return m_mesh->ConvertTrianglesToQuads(angleToleranceRadians, minimumDiagonalLengthRatio);
+  }
+  int CullDegenerateFaces() { return m_mesh->CullDegenerateFaces(); }
+  bool IsHidden(int faceIndex) { return m_mesh->FaceIsHidden(faceIndex); }
+  bool HasNakedEdges(int faceIndex);
+  //int[] GetTopologicalVertices(int faceIndex)
+
+  BND_TUPLE GetFace(int i) const;
 };
 
 class BND_MeshNormalList
