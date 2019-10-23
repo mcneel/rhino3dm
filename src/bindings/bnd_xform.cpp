@@ -46,21 +46,28 @@ BND_Transform BND_Transform::Transpose() const
   return rc;
 }
 
-pybind11::array_t<double> BND_Transform::ToFloatArray()
+pybind11::tuple BND_Transform::ToFloatArray(bool rowDominant)
 {
-	return pybind11::array_t<double>
+	if (rowDominant)
+	{
+		return pybind11::make_tuple
 		(
-			//looking at pybind11/numpy.h one should be able to leave out the buffer_info type and directly pass the pointer to the array_t constructor, but i couldn't get it to compile
-			pybind11::buffer_info
-			(
-				m_xform.m_xform,
-				sizeof(double),
-				pybind11::format_descriptor<double>::format(),
-				2,
-				std::vector<size_t> { 4, 4 },
-				std::vector<size_t> {4 * sizeof(double), sizeof(double)}
-			)
+			m_xform.m_xform[0][0], m_xform.m_xform[0][1], m_xform.m_xform[0][2], m_xform.m_xform[0][3],
+			m_xform.m_xform[1][0], m_xform.m_xform[1][1], m_xform.m_xform[1][2], m_xform.m_xform[1][3],
+			m_xform.m_xform[2][0], m_xform.m_xform[2][1], m_xform.m_xform[2][2], m_xform.m_xform[2][3],
+			m_xform.m_xform[3][0], m_xform.m_xform[3][1], m_xform.m_xform[3][2], m_xform.m_xform[3][3]
 		);
+	}
+	else
+	{
+		return pybind11::make_tuple
+		(
+			m_xform.m_xform[0][0], m_xform.m_xform[1][0], m_xform.m_xform[2][0], m_xform.m_xform[3][0],
+			m_xform.m_xform[0][1], m_xform.m_xform[1][1], m_xform.m_xform[2][1], m_xform.m_xform[3][1],
+			m_xform.m_xform[0][2], m_xform.m_xform[1][2], m_xform.m_xform[2][2], m_xform.m_xform[3][2],
+			m_xform.m_xform[0][3], m_xform.m_xform[1][3], m_xform.m_xform[2][3], m_xform.m_xform[3][3]
+		);
+	}
 }
 
 #if defined(ON_PYTHON_COMPILE)
