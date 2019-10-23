@@ -207,9 +207,7 @@ public:
   void SetString(std::wstring key, std::wstring value);
   //public void Delete(string section, string entry)
   void Delete(std::wstring key);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetKeyValue(int i) const;
-#endif
+  BND_TUPLE GetKeyValue(int i) const;
 };
 
 class BND_ONXModel
@@ -231,9 +229,10 @@ public:
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
   #endif
+  std::string Encode();
 
   static BND_ONXModel* FromByteArray(int length, const void* buffer);
-
+  static BND_ONXModel* Decode(std::string buffer);
   bool Write(std::wstring path, int version);
   //public bool Write(string path, File3dmWriteOptions options)
   //public bool WriteWithLog(string path, int version, out string errorLog)
