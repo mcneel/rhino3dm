@@ -12,7 +12,6 @@ class BND_InstanceDefinitionGeometry : public BND_CommonObject
 {
 public:
   ON_InstanceDefinition* m_idef = nullptr;
-  std::vector<BND_UUID> m_guids;
 protected:
   void SetTrackedPointer(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref);
 
@@ -22,8 +21,7 @@ public:
   std::wstring Description() const { return std::wstring(m_idef->Description()); }
   std::wstring Name() const { return std::wstring(m_idef->Name()); }
   BND_UUID Id() const { return ON_UUID_to_Binding(m_idef->Id()); }
-  //public Guid[] GetObjectIds()
-  std::vector<BND_UUID>& GetObjectIds() { return m_guids; };
+  BND_TUPLE GetObjectIds() const;
 };
 
 class BND_InstanceReferenceGeometry : public BND_GeometryBase

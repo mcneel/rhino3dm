@@ -3,7 +3,6 @@
 BND_InstanceDefinitionGeometry::BND_InstanceDefinitionGeometry(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(idef, compref);
-  m_guids = ON_SimpleArrayUUID_to_Binding(idef->InstanceGeometryIdList());
 }
 
 void BND_InstanceDefinitionGeometry::SetTrackedPointer(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref)
@@ -17,6 +16,21 @@ BND_InstanceDefinitionGeometry::BND_InstanceDefinitionGeometry()
   SetTrackedPointer(new ON_InstanceDefinition(), nullptr);
 }
 
+BND_TUPLE BND_InstanceDefinitionGeometry::GetObjectIds() const
+{
+  const ON_SimpleArray<ON_UUID>& list = m_idef->InstanceGeometryIdList();
+  int count = list.Count();
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple rc(count);
+  for (int i = 0; i < count; i++)
+    rc[i] = ON_UUID_to_Binding(list[i]);
+#else
+  emscripten::val rc(emscripten::val::array());
+  for (int i = 0; i < count; i++)
+    rc.set(i, ON_UUID_to_Binding(list[i]));
+#endif
+  return rc;
+}
 
 BND_InstanceReferenceGeometry::BND_InstanceReferenceGeometry(ON_InstanceRef* iref, const ON_ModelComponentReference* compref)
 {
@@ -56,9 +70,9 @@ void initInstanceBindings(pybind11::module& m)
   py::class_<BND_InstanceDefinitionGeometry, BND_CommonObject>(m, "InstanceDefinition")
     .def(py::init<>())
     .def_property_readonly("Description", &BND_InstanceDefinitionGeometry::Description)
-	.def_property_readonly("Name", &BND_InstanceDefinitionGeometry::Name)
-	.def_property_readonly("Id", &BND_InstanceDefinitionGeometry::Id)
-	.def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
+    .def_property_readonly("Name", &BND_InstanceDefinitionGeometry::Name)
+    .def_property_readonly("Id", &BND_InstanceDefinitionGeometry::Id)
+    .def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
     ;
 
   py::class_<BND_InstanceReferenceGeometry, BND_GeometryBase>(m, "InstanceReference")
@@ -66,14 +80,6 @@ void initInstanceBindings(pybind11::module& m)
     .def_property_readonly("ParentIdefId", &BND_InstanceReferenceGeometry::ParentIdefId)
     .def_property_readonly("Xform", &BND_InstanceReferenceGeometry::Xform)
     ;
-  //bind opaque std::vector<BND_UUID> and provide functionality (acts ~like a python list)
-  py::class_<std::vector<BND_UUID>>(m, "GuidList")
-	.def(py::init<>())
-	.def("__len__", [](const std::vector<BND_UUID>& self) { return self.size(); })
-	.def("__getitem__", [](const std::vector<BND_UUID>& self, const unsigned int i) { return self[i]; })
-	.def("__iter__", [](std::vector<BND_UUID>& self) {
-			return py::make_iterator(self.begin(), self.end());
-			}, py::keep_alive<0, 1>());
 }
 #endif
 
@@ -85,6 +91,9 @@ void initInstanceBindings(void*)
   class_<BND_InstanceDefinitionGeometry, base<BND_CommonObject>>("InstanceDefinition")
     .constructor<>()
     .property("description", &BND_InstanceDefinitionGeometry::Description)
+    .property("name", &BND_InstanceDefinitionGeometry::Name)
+    .property("id", &BND_InstanceDefinitionGeometry::Id)
+    .function("getObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
     ;
 
   class_<BND_InstanceReferenceGeometry, base<BND_GeometryBase>>("InstanceReference")
