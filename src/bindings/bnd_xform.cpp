@@ -46,11 +46,11 @@ BND_Transform BND_Transform::Transpose() const
   return rc;
 }
 
-pybind11::tuple BND_Transform::ToFloatArray(bool rowDominant)
+auto BND_Transform::ToFloatArray(bool rowDominant)
 {
 	if (rowDominant)
 	{
-		return pybind11::make_tuple
+		return std::make_tuple
 		(
 			m_xform.m_xform[0][0], m_xform.m_xform[0][1], m_xform.m_xform[0][2], m_xform.m_xform[0][3],
 			m_xform.m_xform[1][0], m_xform.m_xform[1][1], m_xform.m_xform[1][2], m_xform.m_xform[1][3],
@@ -60,7 +60,7 @@ pybind11::tuple BND_Transform::ToFloatArray(bool rowDominant)
 	}
 	else
 	{
-		return pybind11::make_tuple
+		return std::make_tuple
 		(
 			m_xform.m_xform[0][0], m_xform.m_xform[1][0], m_xform.m_xform[2][0], m_xform.m_xform[3][0],
 			m_xform.m_xform[0][1], m_xform.m_xform[1][1], m_xform.m_xform[2][1], m_xform.m_xform[3][1],

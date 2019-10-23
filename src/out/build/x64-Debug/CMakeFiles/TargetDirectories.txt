@@ -1,0 +1,7 @@
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/CMakeFiles/zlib_static.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/CMakeFiles/opennurbs_static.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/CMakeFiles/_rhino3dm.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/lib/pybind11/CMakeFiles/rebuild_cache.dir
+C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug/lib/pybind11/CMakeFiles/edit_cache.dir

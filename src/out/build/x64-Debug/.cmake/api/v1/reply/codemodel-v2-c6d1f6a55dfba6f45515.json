@@ -1,0 +1,103 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				},
+				{
+					"build" : "lib/pybind11",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.8.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "lib/pybind11"
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "rhino3dm",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "pybind11",
+					"parentIndex" : 0
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "_rhino3dm::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-_rhino3dm-Debug-dcbbc15c37b96eae9b8f.json",
+					"name" : "_rhino3dm",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "opennurbs_static::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-opennurbs_static-Debug-1c4d769b38e5b61bfcbc.json",
+					"name" : "opennurbs_static",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "zlib_static::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-zlib_static-Debug-d5c70725a3e98dbb20a7.json",
+					"name" : "zlib_static",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/lukas/source/repos/lfertig/rhino3dm/src/out/build/x64-Debug",
+		"source" : "C:/Users/lukas/source/repos/lfertig/rhino3dm/src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}

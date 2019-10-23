@@ -59,5 +59,5 @@ public:
   BND_Transform* TryGetInverse() const;
   BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
-  pybind11::tuple ToFloatArray(bool rowDominant); //passed to python as numpy.ndarray
+  auto ToFloatArray(bool rowDominant); //passed to python as numpy.ndarray
 };
