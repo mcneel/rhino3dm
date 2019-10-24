@@ -56,18 +56,11 @@ void BND_3dmObjectAttributes::SetName(const std::wstring name)
 
 BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
 {
-  int count = m_attributes->GroupCount();
+  const int count = m_attributes->GroupCount();
   const int* groups = m_attributes->GroupList();
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(count);
+  BND_TUPLE rc = CreateTuple(count);
   for (int i = 0; i < count; i++)
-    rc[i] = groups[i];
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  for (int i = 0; i < count; i++)
-    rc.set(i, groups[i]);
-#endif
+    SetTuple<int>(rc, i, groups[i]);
   return rc;
 }
 

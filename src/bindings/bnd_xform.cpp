@@ -46,24 +46,20 @@ BND_Transform BND_Transform::Transpose() const
   return rc;
 }
 
-BND_TUPLE BND_Transform::ToFloatArray(bool rowDominant)
+BND_TUPLE BND_Transform::ToFloatArray(bool rowDominant) const
 {
-#if defined(ON_PYTHON_COMPILE)
-	int count = 16;
-	pybind11::tuple rc(count);
-	if (rowDominant)
-	{
-		for (int i = 0; i < count; i++)
-			rc[i] = m_xform.m_xform[(i - i % 4) / 4][i % 4];
-	}
-	else
-	{
-		for (int i = 0; i < count; i++)
-			rc[i] = m_xform.m_xform[i % 4][(i - i % 4) / 4];
-	}
-#else
-
-#endif	
+  const int count = 16;
+  BND_TUPLE rc = CreateTuple(16);
+  if (rowDominant)
+  {
+    for (int i = 0; i < count; i++)
+      SetTuple<float>(rc, i, (float)m_xform.m_xform[i / 4][i % 4]);
+  }
+  else
+  {
+    for (int i = 0; i < count; i++)
+      SetTuple<float>(rc, i, (float)m_xform.m_xform[i % 4][i / 4]);
+  }
 	return rc;
 }
 
@@ -89,7 +85,7 @@ void initXformBindings(pybind11::module& m)
     .def("TryGetInverse", &BND_Transform::TryGetInverse)
     .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox, py::arg("bbox"))
     .def("Transpose", &BND_Transform::Transpose)
-	.def("ToFloatArray", &BND_Transform::ToFloatArray)
+    .def("ToFloatArray", &BND_Transform::ToFloatArray)
     ;
 }
 #endif

@@ -59,5 +59,5 @@ public:
   BND_Transform* TryGetInverse() const;
   BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
-  BND_TUPLE BND_Transform::ToFloatArray(bool rowDominant);
+  BND_TUPLE ToFloatArray(bool rowDominant) const;
 };
