@@ -1,5 +1,5 @@
 # rhino3dm.js
-**rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
+**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
 
 [![CircleCI](https://circleci.com/gh/mcneel/rhino3dm/tree/master.svg?style=shield&circle-token=53733a2fe2cf99a11808d1e5210bc1aeb3f13ea9)](https://circleci.com/gh/mcneel/rhino3dm/tree/master)
 
@@ -42,7 +42,7 @@ Note: A list of builds is available on our [Circleci project](https://circleci.c
 
 ### Node.js
 
-**rhino3dm.js** is also available on npm; try `npm install rhino3dm`.
+**rhino3dm.js** is available on npm; try `npm install rhino3dm`.
 
 ```js
 $ node
@@ -68,7 +68,7 @@ The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/jav
 
 ## Examples
 
-There a few samples are available in the [Github Repo Samples folder](https://github.com/mcneel/rhino3dm/tree/master/samples/javascript)
+There a few samples are available in the [Github Repo Samples folder](https://github.com/mcneel/rhino3dm/tree/master/docs/javascript/samples)
 
 An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
