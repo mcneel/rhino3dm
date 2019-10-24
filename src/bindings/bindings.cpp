@@ -66,3 +66,13 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initExtensionsBindings(m);
 }
 
+BND_TUPLE CreateTuple(int count)
+{
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple rc(4);
+  return rc;
+#else
+  emscripten::val rc(emscripten::val::array());
+  return rc;
+#endif
+}

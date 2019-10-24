@@ -34,6 +34,17 @@ typedef emscripten::val BND_Color;
 typedef emscripten::val BND_TUPLE;
 #endif
 
+BND_TUPLE CreateTuple(int count);
+template<typename T>
+void SetTuple(BND_TUPLE& tuple, int index, T value)
+{
+#if defined(ON_PYTHON_COMPILE)
+  tuple[index] = value;
+#else
+  tuple.set(index, value);
+#endif
+}
+
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
