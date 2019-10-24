@@ -106,6 +106,27 @@ public:
   //int VertexCount() const { return m_mesh->VertexCount(); }
   int Capacity() const { return m_mesh->m_F.Capacity(); }
   void SetCapacity(int c) { m_mesh->m_F.SetCapacity(c); }
+  //    public void Clear()
+  //    public void Destroy()
+//    public int AddFace(MeshFace face)
+//    public int AddFace(int vertex1, int vertex2, int vertex3)
+//    public int AddFace(int vertex1, int vertex2, int vertex3, int vertex4)
+//    public int[] AddFaces(IEnumerable<MeshFace> faces)
+//    public void Insert(int index, MeshFace face)
+//    public bool SetFace(int index, MeshFace face)
+//    public bool SetFace(int index, int vertex1, int vertex2, int vertex3)
+//    public bool SetFace(int index, int vertex1, int vertex2, int vertex3, int vertex4)
+//    public MeshFace GetFace(int index)
+//    public MeshFace this[int index]
+//    public bool GetFaceVertices(int faceIndex, out Point3f a, out Point3f b, out Point3f c, out Point3f d)
+//    public BoundingBox GetFaceBoundingBox(int faceIndex)
+//    public Point3d GetFaceCenter(int faceIndex)
+//    public int[] AdjacentFaces(int faceIndex)
+//    BND_TUPLE ToIntArray(bool asTriangles) const;
+//    public int[] ToIntArray(bool asTriangles)
+//    public int[] ToIntArray(bool asTriangles, ref List<int> replacedIndices)
+
+
   //int DeleteFaces(IEnumerable<int> faceIndexes)
   //int DeleteFaces(IEnumerable<int> faceIndexes, bool compact)
   void RemoveAt(int index) { m_mesh->m_F.Remove(index); }
@@ -178,7 +199,7 @@ public:
 
   bool IsClosed() const { return m_mesh->IsClosed(); }
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple IsManifold(bool topologicalTest) const;
+  BND_TUPLE IsManifold(bool topologicalTest) const;
 #endif
   bool HasCachedTextureCoordinates() const { return m_mesh->HasCachedTextureCoordinates(); }
 
@@ -214,6 +235,10 @@ public:
   //public IEnumerable<MeshNgon> GetNgonAndFacesEnumerable()
   //public int GetNgonAndFacesCount()
 
+#if defined(ON_WASM_COMPILE)
+  BND_DICT ToThreejsJSON() const;
+  static BND_Mesh* CreateFromThreejsJSON(BND_DICT data);
+#endif
 
 protected:
   void SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref);

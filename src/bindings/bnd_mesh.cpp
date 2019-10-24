@@ -206,6 +206,166 @@ int BND_Mesh::PartitionCount() const
   return 0;
 }
 
+#if defined(ON_WASM_COMPILE)
+BND_DICT BND_Mesh::ToThreejsJSON() const
+{
+  ON_Mesh mesh = *m_mesh;
+  ON_Xform rotation(1);
+  rotation.RotationZYX(0.0, 0.0, -ON_PI/2.0);
+  mesh.Transform(rotation);
+  
+  // build face index array
+  emscripten::val index(emscripten::val::object());
+  emscripten::val indexList(emscripten::val::array());
+  int current = 0;
+  for (int i = 0; i < mesh.m_F.Count(); i++)
+  {
+    const ON_MeshFace& face = mesh.m_F[i];
+    indexList.set(current++, face.vi[0]);
+    indexList.set(current++, face.vi[1]);
+    indexList.set(current++, face.vi[2]);
+    if (face.vi[2] != face.vi[3])
+    {
+      indexList.set(current++, face.vi[2]);
+      indexList.set(current++, face.vi[3]);
+      indexList.set(current++, face.vi[0]);
+    }
+  }
+  index.set("type", "Uint16Array");
+  index.set("array", indexList);
+
+  emscripten::val attributes(emscripten::val::object());
+
+  emscripten::val position(emscripten::val::object());
+  position.set("itemSize", 3);
+  position.set("type", "Float32Array");
+  emscripten::val positionList(emscripten::val::array());
+  for (int i = 0; i < mesh.m_V.Count(); i++)
+  {
+    positionList.set(i * 3, mesh.m_V[i].x);
+    positionList.set(i * 3+1, mesh.m_V[i].y);
+    positionList.set(i * 3+2, mesh.m_V[i].z);
+  }
+  position.set("array", positionList);
+  attributes.set("position", position);
+
+  emscripten::val normal(emscripten::val::object());
+  normal.set("itemSize", 3);
+  normal.set("type", "Float32Array");
+  emscripten::val normalList(emscripten::val::array());
+  if (mesh.m_N.Count() == 0)
+    m_mesh->ComputeVertexNormals();
+  for (int i = 0; i < mesh.m_N.Count(); i++)
+  {
+    normalList.set(i * 3, mesh.m_N[i].x);
+    normalList.set(i * 3 + 1, mesh.m_N[i].y);
+    normalList.set(i * 3 + 2, mesh.m_N[i].z);
+  }
+  normal.set("array", normalList);
+  attributes.set("normal", normal);
+
+  if (mesh.HasTextureCoordinates())
+  {
+    emscripten::val tcs(emscripten::val::object());
+    tcs.set("itemSize", 2);
+    tcs.set("type", "Float32Array");
+    emscripten::val tcList(emscripten::val::array());
+    for (int i = 0; i < mesh.m_T.Count(); i++)
+    {
+      tcList.set(i * 2, mesh.m_T[i].x);
+      tcList.set(i * 2 + 1, mesh.m_T[i].y);
+    }
+    tcs.set("array", tcList);
+    attributes.set("uv", tcs);
+  }
+
+  // need data.index and data.attributes
+  emscripten::val data(emscripten::val::object());
+  data.set("index", index);
+  data.set("attributes", attributes);
+
+  emscripten::val rc(emscripten::val::object());
+  rc.set("data", data);
+  
+  return rc;
+}
+
+
+BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
+{
+  if (emscripten::val::undefined() == data["data"])
+    return nullptr;
+  emscripten::val attributes = data["data"]["attributes"];
+
+  std::vector<int> index_array;
+  emscripten::val index = data["data"]["index"];
+  if (emscripten::val::undefined() != index && emscripten::val::undefined() != index["array"])
+  {
+    index_array = emscripten::vecFromJSArray<int>(index["array"]);
+  }
+
+  std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
+  std::vector<float> normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+
+  std::vector<float> uv_array;
+  if (emscripten::val::undefined() != attributes["uv"])
+  {
+    uv_array = emscripten::vecFromJSArray<float>(attributes["uv"]["array"]);
+  }
+
+  ON_Mesh* mesh = new ON_Mesh();
+
+  bool has_index_array = index_array.size() > 0;
+
+  int face_count = has_index_array ? (int)(index_array.size() / 3) : (int)(position_array.size() / 3);
+
+  mesh->m_F.SetCapacity(face_count);
+  mesh->m_F.SetCount(face_count);
+  for (int i = 0; i < face_count; i++)
+  {
+    ON_MeshFace& face = mesh->m_F[i];
+    if (has_index_array)
+    {
+      face.vi[0] = index_array[i * 3];
+      face.vi[1] = index_array[i * 3 + 1];
+      face.vi[2] = index_array[i * 3 + 2];
+    }
+    else
+    {
+      face.vi[0] = i * 3;
+      face.vi[1] = i * 3 + 1;
+      face.vi[2] = i * 3 + 2;
+    }
+    face.vi[3] = face.vi[2]; //all triangles
+  }
+
+  const int vertex_count = position_array.size() / 3;
+  mesh->m_V.SetCapacity(vertex_count);
+  mesh->m_V.SetCount(vertex_count);
+  memcpy(mesh->m_V.Array(), position_array.data(), sizeof(float) * position_array.size());
+
+  const int normal_count = normal_array.size() / 3;
+  mesh->m_N.SetCapacity(normal_count);
+  mesh->m_N.SetCount(normal_count);
+  memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(float) * normal_array.size());
+
+  const int uv_count = uv_array.size() / 2;
+  if (uv_count > 0)
+  {
+    mesh->m_T.SetCapacity(uv_count);
+    mesh->m_T.SetCount(uv_count);
+    memcpy(mesh->m_T.Array(), uv_array.data(), sizeof(float) * uv_array.size());
+  }
+
+  ON_Xform rotation(1);
+  rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  mesh->Transform(rotation);
+
+  return new BND_Mesh(mesh, nullptr);
+}
+
+#endif
+
 
 
 BND_MeshVertexList::BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
@@ -541,6 +701,8 @@ void initMeshBindings(void*)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)
     .property("partitionCount", &BND_Mesh::PartitionCount)
+    .function("toThreejsJSON", &BND_Mesh::ToThreejsJSON)
+    .class_function("createFromThreejsJSON", &BND_Mesh::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }
 #endif
