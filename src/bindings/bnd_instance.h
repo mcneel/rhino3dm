@@ -22,6 +22,7 @@ public:
   std::wstring Name() const { return std::wstring(m_idef->Name()); }
   BND_UUID Id() const { return ON_UUID_to_Binding(m_idef->Id()); }
   BND_TUPLE GetObjectIds() const;
+  bool IsInstanceGeometryId(BND_UUID id) const { return m_idef->IsInstanceGeometryId(Binding_to_ON_UUID(id));}
 };
 
 class BND_InstanceReferenceGeometry : public BND_GeometryBase
