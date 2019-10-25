@@ -1452,29 +1452,16 @@ BND_TUPLE BND_CommonObject::GetUserStrings() const
 {
   ON_ClassArray<ON_wString> keys;
   m_object->GetUserStringKeys(keys);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(keys.Count());
+  BND_TUPLE rc = CreateTuple(keys.Count());
   for (int i = 0; i < keys.Count(); i++)
   {
     ON_wString sval;
     m_object->GetUserString(keys[i].Array(), sval);
-    pybind11::tuple keyval(2);
-    keyval[0] = std::wstring(keys[i].Array());
-    keyval[1] = std::wstring(sval.Array());
-    rc[i] = keyval;
+    BND_TUPLE keyval = CreateTuple(2);
+    SetTuple(keyval, 0, std::wstring(keys[i].Array()));
+    SetTuple(keyval, 1, std::wstring(sval.Array()));
+    SetTuple(rc, i, keyval);
   }
-#else
-  emscripten::val rc(emscripten::val::array());
-  for (int i = 0; i < keys.Count(); i++)
-  {
-    ON_wString sval;
-    m_object->GetUserString(keys[i].Array(), sval);
-    emscripten::val keyval(emscripten::val::array());
-    keyval.set(0, std::wstring(keys[i].Array()));
-    keyval.set(1, std::wstring(sval.Array()));
-    rc.set(i, keyval);
-  }
-#endif
   return rc;
 }
 

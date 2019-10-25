@@ -5,18 +5,10 @@ BND_TUPLE BND_Intersection::LineLine(const ON_Line& lineA, const ON_Line& lineB)
   double a = 0;
   double b = 0;
   bool success = ON_Intersect(lineA, lineB, &a, &b);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(3);
-  rc[0] = success;
-  rc[1] = a;
-  rc[2] = b;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, a);
-  rc.set(2, b);
-#endif
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, a);
+  SetTuple(rc, 2, b);
   return rc;
 }
 
@@ -44,18 +36,10 @@ BND_TUPLE BND_Intersection::LineLine2(const ON_Line& lineA, const ON_Line& lineB
     }
   }
 
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(3);
-  rc[0] = success;
-  rc[1] = a;
-  rc[2] = b;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, a);
-  rc.set(2, b);
-#endif
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, a);
+  SetTuple(rc, 2, b);
   return rc;
 }
 
@@ -64,16 +48,9 @@ BND_TUPLE BND_Intersection::LinePlane(const ON_Line& line, const BND_Plane& plan
 {
   double a = 0;
   bool success = ON_Intersect(line, plane.ToOnPlane(), &a);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = success;
-  rc[1] = a;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, a);
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, a);
   return rc;
 }
 
@@ -81,17 +58,9 @@ BND_TUPLE BND_Intersection::PlanePlane(const BND_Plane& planeA, const BND_Plane&
 {
   ON_Line line;
   bool success = ON_Intersect(planeA.ToOnPlane(), planeB.ToOnPlane(), line);
-  
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = success;
-  rc[1] = line;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, line);
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, line);
   return rc;
 }
 
@@ -100,16 +69,9 @@ BND_TUPLE BND_Intersection::PlanePlanePlane(const BND_Plane& planeA, const BND_P
   ON_3dPoint point;
   bool success = ON_Intersect(planeA.ToOnPlane(), planeB.ToOnPlane(), planeC.ToOnPlane(), point);
 
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = success;
-  rc[1] = point;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, point);
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, point);
   return rc;
 }
 
@@ -163,16 +125,9 @@ BND_TUPLE BND_Intersection::PlaneSphere(const BND_Plane& plane, const BND_Sphere
 {
   ON_Circle circle;
   int success = ON_Intersect(plane.ToOnPlane(), sphere.m_sphere, circle);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = (PlaneSphereIntersection)success;
-  rc[1] = BND_Circle(circle);
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, (PlaneSphereIntersection)success);
-  rc.set(1, BND_Circle(circle));
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, (PlaneSphereIntersection)success);
+  SetTuple(rc, 1, BND_Circle(circle));
   return rc;
 }
 
@@ -185,42 +140,22 @@ BND_TUPLE BND_Intersection::LineCircle(const ON_Line& line, const BND_Circle& ci
 
   if (!line.IsValid() || !circle.IsValid())
   {
-#if defined(ON_PYTHON_COMPILE)
-    pybind11::tuple rc(5);
-    rc[0] = LineCircleIntersection::None;
-    rc[1] = 0.0;
-    rc[2] = ON_3dPoint(0, 0, 0);
-    rc[3] = 0.0;
-    rc[4] = ON_3dPoint(0, 0, 0);
-#endif
-#if defined(ON_WASM_COMPILE)
-    emscripten::val rc(emscripten::val::array());
-    rc.set(0, LineCircleIntersection::None);
-    rc.set(1, 0.0);
-    rc.set(2, ON_3dPoint(0,0,0));
-    rc.set(3, 0.0);
-    rc.set(4, ON_3dPoint(0,0,0));
-#endif
+    BND_TUPLE rc = CreateTuple(5);
+    SetTuple(rc, 0, LineCircleIntersection::None);
+    SetTuple(rc, 1, 0.0);
+    SetTuple(rc, 2, ON_3dPoint(0, 0, 0));
+    SetTuple(rc, 3, 0.0);
+    SetTuple(rc, 4, ON_3dPoint(0, 0, 0));
     return rc;
   }
 
   int success = ::ON_Intersect(line, circle.m_circle, &t1, point1, &t2, point2);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(5);
-  rc[0] = (LineCircleIntersection)success;
-  rc[1] = t1;
-  rc[2] = point1;
-  rc[3] = t2;
-  rc[4] = point2;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, (LineCircleIntersection)success);
-  rc.set(1, t1);
-  rc.set(2, point1);
-  rc.set(3, t2);
-  rc.set(4, point2);
-#endif
+  BND_TUPLE rc = CreateTuple(5);
+  SetTuple(rc, 0, (LineCircleIntersection)success);
+  SetTuple(rc, 1, t1);
+  SetTuple(rc, 2, point1);
+  SetTuple(rc, 3, t2);
+  SetTuple(rc, 4, point2);
   return rc;
 }
 
@@ -229,18 +164,10 @@ BND_TUPLE BND_Intersection::LineSphere(const ON_Line& line, const BND_Sphere& sp
   ON_3dPoint point1(0, 0, 0);
   ON_3dPoint point2(0, 0, 0);
   int success = ::ON_Intersect(line, sphere.m_sphere, point1, point2);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(3);
-  rc[0] = (LineSphereIntersection)success;
-  rc[1] = point1;
-  rc[2] = point2;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, (LineSphereIntersection)success);
-  rc.set(1, point1);
-  rc.set(2, point2);
-#endif
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, (LineSphereIntersection)success);
+  SetTuple(rc, 1, point1);
+  SetTuple(rc, 2, point2);
   return rc;
 }
 
@@ -249,18 +176,10 @@ BND_TUPLE BND_Intersection::LineCylinder(const ON_Line& line, const BND_Cylinder
   ON_3dPoint point1(0, 0, 0);
   ON_3dPoint point2(0, 0, 0);
   int success = ::ON_Intersect(line, cylinder.m_cylinder, point1, point2);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(3);
-  rc[0] = (LineCylinderIntersection)success;
-  rc[1] = point1;
-  rc[2] = point2;
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, (LineCylinderIntersection)success);
-  rc.set(1, point1);
-  rc.set(2, point2);
-#endif
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, (LineCylinderIntersection)success);
+  SetTuple(rc, 1, point1);
+  SetTuple(rc, 2, point2);
   return rc;
 }
 
@@ -268,22 +187,12 @@ BND_TUPLE BND_Intersection::SphereSphere(const BND_Sphere& sphereA, const BND_Sp
 {
   ON_Circle circle;
   int success = ::ON_Intersect(sphereA.m_sphere, sphereB.m_sphere, circle);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
+  BND_TUPLE rc = CreateTuple(2);
   if (success <= 0 || success > 3)
-    rc[0] = SphereSphereIntersection::None;
+    SetTuple(rc, 0, SphereSphereIntersection::None);
   else
-    rc[0] = (SphereSphereIntersection)success;
-  rc[1] = BND_Circle(circle);
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  if (success <= 0 || success > 3)
-    rc.set(0, SphereSphereIntersection::None);
-  else
-    rc.set(0,(SphereSphereIntersection)success);
-  rc.set(1, BND_Circle(circle));
-#endif
+    SetTuple(rc, 0, (SphereSphereIntersection)success);
+  SetTuple(rc, 1, BND_Circle(circle));
   return rc;
 }
 
@@ -291,16 +200,9 @@ BND_TUPLE BND_Intersection::LineBox(const ON_Line& line, const BND_BoundingBox& 
 {
   ON_Interval i = ON_Interval::EmptyInterval;
   bool success = ::ON_Intersect(box.m_bbox, line, tolerance, &i);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = success;
-  rc[1] = BND_Interval(i);
-#endif
-#if defined(ON_WASM_COMPILE)
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, success);
-  rc.set(1, BND_Interval(i));
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, BND_Interval(i));
   return rc;
 }
 

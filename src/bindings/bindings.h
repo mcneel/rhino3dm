@@ -36,7 +36,7 @@ typedef emscripten::val BND_TUPLE;
 
 BND_TUPLE CreateTuple(int count);
 template<typename T>
-void SetTuple(BND_TUPLE& tuple, int index, T value)
+void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 {
 #if defined(ON_PYTHON_COMPILE)
   tuple[index] = value;

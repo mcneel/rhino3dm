@@ -743,15 +743,9 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
   const ON_UserString& us = strings[i];
   std::wstring key(us.m_key.Array());
   std::wstring sval(us.m_string_value.Array());
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(2);
-  rc[0] = key;
-  rc[1] = sval;
-#else
-  emscripten::val rc(emscripten::val::array());
-  rc.set(0, key);
-  rc.set(1, sval);
-#endif
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, key);
+  SetTuple(rc, 1, sval);
   return rc;
 }
 
