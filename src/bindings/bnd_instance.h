@@ -11,17 +11,18 @@ void initInstanceBindings(void* m);
 class BND_InstanceDefinitionGeometry : public BND_CommonObject
 {
 public:
-  ON_InstanceDefinition* m_idef = nullptr;
+	ON_InstanceDefinition* m_idef = nullptr;
 protected:
-  void SetTrackedPointer(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref);
+	void SetTrackedPointer(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref);
 
 public:
-  BND_InstanceDefinitionGeometry(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref);
-  BND_InstanceDefinitionGeometry();
-  std::wstring Description() const { return std::wstring(m_idef->Description()); }
-  std::wstring Name() const { return std::wstring(m_idef->Name()); }
-  BND_UUID Id() const { return ON_UUID_to_Binding(m_idef->Id()); }
-  BND_TUPLE GetObjectIds() const;
+	BND_InstanceDefinitionGeometry(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref);
+	BND_InstanceDefinitionGeometry();
+	std::wstring Description() const { return std::wstring(m_idef->Description()); }
+	std::wstring Name() const { return std::wstring(m_idef->Name()); }
+	BND_UUID Id() const { return ON_UUID_to_Binding(m_idef->Id()); }
+	BND_TUPLE GetObjectIds() const;
+	bool IsInstanceGeometryId(BND_UUID id) const { return m_idef->IsInstanceGeometryId(Binding_to_ON_UUID(id));}
 };
 
 class BND_InstanceReferenceGeometry : public BND_GeometryBase
