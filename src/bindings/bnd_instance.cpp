@@ -73,7 +73,6 @@ void initInstanceBindings(pybind11::module& m)
     .def_property_readonly("Name", &BND_InstanceDefinitionGeometry::Name)
     .def_property_readonly("Id", &BND_InstanceDefinitionGeometry::Id)
     .def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
-	.def("IsInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId, py::arg("id"))
     ;
 
   py::class_<BND_InstanceReferenceGeometry, BND_GeometryBase>(m, "InstanceReference")
