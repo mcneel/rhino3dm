@@ -69,7 +69,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(4);
+  pybind11::tuple rc(count);
   return rc;
 #else
   emscripten::val rc(emscripten::val::array());
