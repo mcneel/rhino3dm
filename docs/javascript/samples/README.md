@@ -1,6 +1,6 @@
 ## Samples
 
-### [hello_mesh.html](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/01_basic/hello_mesh.html)
+### [hello_mesh.html](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/01_basic/index.html)
 
 ### [hello_mesh_pbr.html](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/02_advanced/index.html)
 
