@@ -1,10 +1,10 @@
 ## Samples
 
-### [hello_mesh.html](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/01_basic/index.html)
+### [simple viewer](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/01_basic/index.html)
 
-### [hello_mesh_pbr.html](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/02_advanced/index.html)
+### [advanced viewer](https://mcneel.github.io/rhino3dm/javascript/samples/viewer/02_advanced/index.html)
 
-### [rhinologo.html](https://mcneel.github.io/rhino3dm/javascript/samples/compute/brep_isocurves/index.html)
+### [Use compute to get isocurves and meshes](https://mcneel.github.io/rhino3dm/javascript/samples/compute/brep_isocurves/index.html)
 
 Loads a 3dm file containing the Rhino logo as a brep, fetches the render mesh and wireframe and loads them into a [three.js](https://threejs.org) scene.
 
