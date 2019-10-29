@@ -811,6 +811,26 @@ std::string BND_ONXModel::Encode()
   return rc;
 }
 
+#if defined(ON_WASM_COMPILE)
+emscripten::val BND_ONXModel::ToByteArray() const
+{
+  ON_Write3dmBufferArchive archive(0, 0, 0, 0);// on_version__to_write);
+  m_model->Write(archive);
+  const unsigned char* buffer = (const unsigned char*)archive.Buffer();
+  size_t length = archive.SizeOfArchive();
+
+  emscripten::val Uint8Array = emscripten::val::global("Uint8Array");
+  emscripten::val rc = Uint8Array.new_(emscripten::val::module_property("HEAPU8")["buffer"], size_t(buffer), length);
+  for (size_t i = 0; i < length; i++)
+  {
+    rc.set(i, buffer[i]);
+  }
+//  rc.call<void>("set", sourceTypedArray);
+//  std::string rc(reinterpret_cast<char const*>(buffer), length);
+  return rc;
+}
+#endif
+
 BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
 {
   ON_Read3dmBufferArchive archive(length, buffer, true, 0, 0);
@@ -1167,6 +1187,7 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("encode", &BND_ONXModel::Encode)
+    .function("toByteArray", &BND_ONXModel::ToByteArray)
     .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
     ;
 }

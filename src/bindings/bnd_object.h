@@ -25,7 +25,7 @@ public:
 #if defined(__EMSCRIPTEN__)
   BND_DICT toJSON(BND_DICT key);
 #endif
-
+  BND_CommonObject* Duplicate() const;
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);
   int UserStringCount() const { return m_object->UserStringCount(); }

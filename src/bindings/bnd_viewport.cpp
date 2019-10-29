@@ -104,31 +104,6 @@ BND_DICT BND_Viewport::GetFrustum() const
   }
   throw pybind11::value_error("Invalid viewport");
 }
-
-void BND_Viewport::SetScreenPort(BND_DICT rect)
-{
-  int x = rect["x"].cast<int>();
-  int y = rect["y"].cast<int>();
-  int width = rect["width"].cast<int>();
-  int height = rect["height"].cast<int>();
-  m_viewport->SetScreenPort(x, x + width, y + height, y);
-}
-
-BND_DICT BND_Viewport::GetScreenPort() const
-{
-  int left, right, bottom, top, near_dist, far_dist;
-  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &near_dist, &far_dist);
-  if (success)
-  {
-    BND_DICT d;
-    d["x"] = left;
-    d["y"] = top;
-    d["width"] = fabs(right - left);
-    d["height"] = fabs(bottom - top);
-    return d;
-  }
-  throw pybind11::value_error("Invalid viewport");
-}
 #endif
 
 #if defined(__EMSCRIPTEN__)
@@ -136,7 +111,7 @@ emscripten::val BND_Viewport::GetFrustum() const
 {
   double left, right, bottom, top, near, far;
   bool success = m_viewport->GetFrustum(&left, &right, &bottom, &top, &near, &far);
-  if( success )
+  if (success)
   {
     emscripten::val v(emscripten::val::object());
     v.set("left", emscripten::val(left));
@@ -150,31 +125,47 @@ emscripten::val BND_Viewport::GetFrustum() const
   return emscripten::val::null();
 }
 
-void BND_Viewport::SetScreenPort(emscripten::val rect)
+#endif
+
+
+void BND_Viewport::SetScreenPort(BND_TUPLE rect)
 {
-  int x = rect["x"].as<int>();
-  int y = rect["y"].as<int>();
-  int width = rect["width"].as<int>();
-  int height = rect["height"].as<int>();
-  m_viewport->SetScreenPort(x, x+width, y+height, y);
+#if defined(ON_PYTHON_COMPILE)
+  int x = rect[0].cast<int>();
+  int y = rect[1].cast<int>();
+  int width = rect[2].cast<int>();
+  int height = rect[3].cast<int>();
+  m_viewport->SetScreenPort(x, x + width, y + height, y);
+#else
+  int x = rect[0].as<int>();
+  int y = rect[1].as<int>();
+  int width = rect[2].as<int>();
+  int height = rect[3].as<int>();
+  m_viewport->SetScreenPort(x, x + width, y + height, y);
+#endif
 }
 
-emscripten::val BND_Viewport::GetScreenPort() const
+BND_TUPLE BND_Viewport::GetScreenPort() const
 {
-  int left, right, bottom, top, near, far;
-  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &near, &far);
-  if( success )
+  int left, right, bottom, top, portNear, portFar;
+  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &portNear, &portFar);
+  BND_TUPLE rc = CreateTuple(4);
+  if (success)
   {
-    emscripten::val v(emscripten::val::object());
-    v.set("x", emscripten::val(left));
-    v.set("y", emscripten::val(top));
-    v.set("width", emscripten::val(fabs(right-left)));
-    v.set("height", emscripten::val(fabs(bottom-top)));
-    return v;
+    SetTuple(rc, 0, left);
+    SetTuple(rc, 1, top);
+    SetTuple(rc, 2, fabs(right - left));
+    SetTuple(rc, 3, fabs(bottom - top));
   }
-  return emscripten::val::null();
+  else
+  {
+    SetTuple(rc, 0, 0);
+    SetTuple(rc, 1, 0);
+    SetTuple(rc, 2, 0);
+    SetTuple(rc, 3, 0);
+  }
+  return rc;
 }
-#endif
 
 double BND_Viewport::ScreenPortAspect() const
 {
