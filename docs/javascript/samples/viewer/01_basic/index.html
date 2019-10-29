@@ -16,8 +16,8 @@
             <a class="github-fork-ribbon left-top" href="https://github.com/mcneel/rhino3dm/blob/master/docs/javascript/samples/hello_mesh.html" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
             <div id="canvas"></div>
         </div>
-        <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
-        <script type="text/javascript" src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+        <script type="text/javascript" src="../../resources/three.min.js"></script>
+        <script type="text/javascript" src="../../resources/OrbitControls.js"></script>
         <script type="text/javascript" src="../../resources/rhino3dm.js"></script>
         <script type="text/javascript">
             let fetchPromise = fetch('../../resources/models/hello_mesh.3dm');
@@ -36,11 +36,12 @@
 
                 let objects = doc.objects();
                 for (let i = 0; i < objects.count; i++) {
-                    // assume model contains only meshes
                     let mesh = objects.get(i).geometry();
-                    console.log(mesh);
-                    let threeMesh = meshToThreejs(mesh, material);
-                    scene.add(threeMesh);
+                    if(mesh instanceof rhino.Mesh) {
+                        // convert all meshes in 3dm model into threejs objects
+                        let threeMesh = meshToThreejs(mesh, material);
+                        scene.add(threeMesh);
+                    }
                 }
             });
 

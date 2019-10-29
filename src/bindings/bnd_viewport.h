@@ -46,17 +46,14 @@ public:
 
 #if defined(ON_PYTHON_COMPILE)
   BND_DICT GetFrustum() const;
-
-  void SetScreenPort(BND_DICT rect);
-  BND_DICT GetScreenPort() const;
 #endif
 
 #if defined(__EMSCRIPTEN__)
   emscripten::val GetFrustum() const;
-
-  void SetScreenPort(emscripten::val rect);
-  emscripten::val GetScreenPort() const;
 #endif
+
+  void SetScreenPort(BND_TUPLE rect);
+  BND_TUPLE GetScreenPort() const;
 
   double ScreenPortAspect() const;
 

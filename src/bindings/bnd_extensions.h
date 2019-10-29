@@ -228,6 +228,7 @@ public:
   #if defined(ON_WASM_COMPILE)
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
+  emscripten::val ToByteArray() const;
   #endif
   std::string Encode();
 

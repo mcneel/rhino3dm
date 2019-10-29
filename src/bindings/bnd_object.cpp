@@ -208,6 +208,12 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(const ON_ModelComponentReferen
   return CreateWrapper(obj, &compref);
 }
 
+BND_CommonObject* BND_CommonObject::Duplicate() const
+{
+  ON_Object* obj = m_object->Duplicate();
+  return CreateWrapper(obj, nullptr);
+}
+
 
 RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int rhinoversion, bool writeuserdata, unsigned int* length)
 {
