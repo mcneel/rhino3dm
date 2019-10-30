@@ -20,3 +20,27 @@ MeshNormalList
    .. py:method:: __iter__()
 
       [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation
+
+   .. py:method:: Destroy()
+
+      [todo] add documentation
+
+   .. py:method:: Add(x, y, z)
+
+      [todo] add documentation
+
+   .. py:method:: ComputeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: UnitizeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: Flip()
+
+      [todo] add documentation

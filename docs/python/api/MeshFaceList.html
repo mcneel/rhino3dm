@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MeshFaceList &mdash; rhino3dm 0.7.1 documentation</title>
+  <title>MeshFaceList &mdash; rhino3dm 0.8.1 documentation</title>
   
 
   
@@ -17,36 +17,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="MeshingParameters" href="MeshingParameters.html" />
     <link rel="prev" title="Mesh" href="Mesh.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -60,7 +58,7 @@
             
             
               <div class="version">
-                0.7.1
+                0.8.1
               </div>
             
           
@@ -164,6 +162,7 @@
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
@@ -243,7 +242,31 @@
 <dl class="class">
 <dt id="rhino3dm.MeshFaceList">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">MeshFaceList</code><a class="headerlink" href="#rhino3dm.MeshFaceList" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><dl class="attribute">
+<dt id="rhino3dm.MeshFaceList.Count">
+<code class="descname">Count</code><a class="headerlink" href="#rhino3dm.MeshFaceList.Count" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the number of mesh faces. When getting this can includes invalid faces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshFaceList.QuadCount">
+<code class="descname">QuadCount</code><a class="headerlink" href="#rhino3dm.MeshFaceList.QuadCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the number of faces that are valid quads (4 corners).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshFaceList.TriangleCount">
+<code class="descname">TriangleCount</code><a class="headerlink" href="#rhino3dm.MeshFaceList.TriangleCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets the number of faces that are valid triangles (3 corners).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshFaceList.Capacity">
+<code class="descname">Capacity</code><a class="headerlink" href="#rhino3dm.MeshFaceList.Capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the total number of mesh triangles and quads the internal data structure can hold without resizing.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.MeshFaceList.__len__">
 <code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.__len__" title="Permalink to this definition">¶</a></dt>
 <dd><p>[todo] add documentation</p>
@@ -253,6 +276,200 @@
 <dt id="rhino3dm.MeshFaceList.__getitem__">
 <code class="descname">__getitem__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.__getitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.Clear">
+<code class="descname">Clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.Clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the Face list on the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.Destroy">
+<code class="descname">Destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+Subsequent calls can add new items.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.AddFace">
+<code class="descname">AddFace</code><span class="sig-paren">(</span><em>vertex1</em>, <em>vertex2</em>, <em>vertex3</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.AddFace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a new mesh face to the end of the mesh face list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The index of the newly added face.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">AddFace</code><span class="sig-paren">(</span><em>vertex1</em>, <em>vertex2</em>, <em>vertex3</em>, <em>vertex4</em><span class="sig-paren">)</span></dt>
+<dd><p>Appends a new mesh face to the end of the mesh face list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The index of the newly added face.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.SetFace">
+<code class="descname">SetFace</code><span class="sig-paren">(</span><em>index</em>, <em>vertex1</em>, <em>vertex2</em>, <em>vertex3</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.SetFace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a face at a specific index of the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded, otherwise false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">SetFace</code><span class="sig-paren">(</span><em>index</em>, <em>vertex1</em>, <em>vertex2</em>, <em>vertex3</em>, <em>vertex4</em><span class="sig-paren">)</span></dt>
+<dd><p>Sets a face at a specific index of the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded, otherwise false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.ConvertQuadsToTriangles">
+<code class="descname">ConvertQuadsToTriangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertQuadsToTriangles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits all quads along the short diagonal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.ConvertNonPlanarQuadsToTriangles">
+<code class="descname">ConvertNonPlanarQuadsToTriangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertNonPlanarQuadsToTriangles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits non-planar quads into two triangles based on given params.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of quads that were converted to triangles.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.ConvertTrianglesToQuads">
+<code class="descname">ConvertTrianglesToQuads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertTrianglesToQuads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins adjacent triangles into quads if the resulting quad is ‘nice’.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.CullDegenerateFaces">
+<code class="descname">CullDegenerateFaces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.CullDegenerateFaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to removes degenerate faces from the mesh.
+Degenerate faces are faces that contains such a combination of indices,
+that their final shape collapsed in a line or point.Before returning, this method also attempts to repair faces by juggling
+vertex indices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of degenerate faces that were removed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.IsHidden">
+<code class="descname">IsHidden</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.IsHidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether a face is hidden.
+A face is hidden if, and only if, at least one of its vertices is hidden.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if hidden, False if fully visible.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshFaceList.HasNakedEdges">
+<code class="descname">HasNakedEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.HasNakedEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if at least one of the face edges are not topologically
+connected to any other faces.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if that face makes the mesh open, otherwise false.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -270,7 +487,7 @@
         <a href="MeshingParameters.html" class="btn btn-neutral float-right" title="MeshingParameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Mesh.html" class="btn btn-neutral float-left" title="Mesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Mesh.html" class="btn btn-neutral" title="Mesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -296,16 +513,26 @@
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

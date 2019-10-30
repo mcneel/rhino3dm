@@ -77,3 +77,10 @@ GeometryBase
       :return: False if object cannot be converted to a deformable object. True if object was \
          already deformable or was converted into a deformable object.
       :rtype: bool
+
+   .. py:method:: Duplicate()
+
+      Constructs a deep (full) copy of this object.
+
+      :return: An object of the same type as this, with the same properties and behavior.
+      :rtype: rhino3dm.GeometryBase

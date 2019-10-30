@@ -88,6 +88,7 @@ Welcome to rhino3dm's documentation!
    RenderSettings
    RevSurface
    Sphere
+   SubD
    Surface
    SurfaceProxy
    Texture

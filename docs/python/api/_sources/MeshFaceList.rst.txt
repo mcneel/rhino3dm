@@ -5,6 +5,22 @@ MeshFaceList
 
 .. py:class:: MeshFaceList
 
+   .. py:attribute:: Count
+
+      int: Gets or sets the number of mesh faces. When getting this can includes invalid faces.
+
+   .. py:attribute:: QuadCount
+
+      int: Gets the number of faces that are valid quads (4 corners).
+
+   .. py:attribute:: TriangleCount
+
+      int: Gets the number of faces that are valid triangles (3 corners).
+
+   .. py:attribute:: Capacity
+
+      int: Gets or sets the total number of mesh triangles and quads the internal data structure can hold without resizing.
+
    .. py:method:: __len__()
 
       [todo] add documentation
@@ -12,3 +28,91 @@ MeshFaceList
    .. py:method:: __getitem__()
 
       [todo] add documentation
+
+   .. py:method:: Clear()
+
+      Clears the Face list on the mesh.
+
+      :rtype: void
+
+   .. py:method:: Destroy()
+
+      Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+      Subsequent calls can add new items.
+
+      :rtype: void
+
+   .. py:method:: AddFace(vertex1, vertex2, vertex3)
+
+      Appends a new mesh face to the end of the mesh face list.
+
+      :return: The index of the newly added face.
+      :rtype: int
+
+   .. py:method:: AddFace(vertex1, vertex2, vertex3, vertex4)
+
+      Appends a new mesh face to the end of the mesh face list.
+
+      :return: The index of the newly added face.
+      :rtype: int
+
+   .. py:method:: SetFace(index, vertex1, vertex2, vertex3)
+
+      Sets a face at a specific index of the mesh.
+
+      :return: True if the operation succeeded, otherwise false.
+      :rtype: bool
+
+   .. py:method:: SetFace(index, vertex1, vertex2, vertex3, vertex4)
+
+      Sets a face at a specific index of the mesh.
+
+      :return: True if the operation succeeded, otherwise false.
+      :rtype: bool
+
+   .. py:method:: ConvertQuadsToTriangles()
+
+      Splits all quads along the short diagonal.
+
+      :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:method:: ConvertNonPlanarQuadsToTriangles()
+
+      Splits non-planar quads into two triangles based on given params.
+
+      :return: Number of quads that were converted to triangles.
+      :rtype: int
+
+   .. py:method:: ConvertTrianglesToQuads()
+
+      Joins adjacent triangles into quads if the resulting quad is 'nice'.
+
+      :return: True on success, False on failure.
+      :rtype: bool
+
+   .. py:method:: CullDegenerateFaces()
+
+      Attempts to removes degenerate faces from the mesh.
+      Degenerate faces are faces that contains such a combination of indices,
+      that their final shape collapsed in a line or point.Before returning, this method also attempts to repair faces by juggling
+      vertex indices.
+
+      :return: The number of degenerate faces that were removed.
+      :rtype: int
+
+   .. py:method:: IsHidden()
+
+      Gets a value indicating whether a face is hidden.
+      A face is hidden if, and only if, at least one of its vertices is hidden.
+
+      :return: True if hidden, False if fully visible.
+      :rtype: bool
+
+   .. py:method:: HasNakedEdges()
+
+      Returns True if at least one of the face edges are not topologically
+      connected to any other faces.
+
+      :return: True if that face makes the mesh open, otherwise false.
+      :rtype: bool

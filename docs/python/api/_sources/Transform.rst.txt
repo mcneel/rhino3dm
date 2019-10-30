@@ -101,3 +101,9 @@ Transform
       Flip row/column values
 
       :rtype: Transform
+
+   .. py:method:: ToFloatArray()
+
+      Return the matrix as a linear array of 16 float values
+
+      :rtype: float[]
