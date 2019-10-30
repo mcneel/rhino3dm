@@ -129,6 +129,10 @@ File3dm
          False if errors occur.
       :rtype: bool
 
-   .. py:staticmethod:: _TestRead()
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: Decode()
 
       [todo] add documentation

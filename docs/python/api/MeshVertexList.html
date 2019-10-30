@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MeshVertexList &mdash; rhino3dm 0.7.1 documentation</title>
+  <title>MeshVertexList &mdash; rhino3dm 0.8.1 documentation</title>
   
 
   
@@ -17,36 +17,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ModelComponent" href="ModelComponent.html" />
     <link rel="prev" title="MeshVertexColorList" href="MeshVertexColorList.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -60,7 +58,7 @@
             
             
               <div class="version">
-                0.7.1
+                0.8.1
               </div>
             
           
@@ -164,6 +162,7 @@
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
@@ -243,7 +242,13 @@
 <dl class="class">
 <dt id="rhino3dm.MeshVertexList">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">MeshVertexList</code><a class="headerlink" href="#rhino3dm.MeshVertexList" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><dl class="attribute">
+<dt id="rhino3dm.MeshVertexList.UseDoublePrecisionVertices">
+<code class="descname">UseDoublePrecisionVertices</code><a class="headerlink" href="#rhino3dm.MeshVertexList.UseDoublePrecisionVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Set to True if the vertices should be stored in double precision</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.MeshVertexList.__len__">
 <code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.__len__" title="Permalink to this definition">¶</a></dt>
 <dd><p>[todo] add documentation</p>
@@ -273,6 +278,170 @@
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.Clear">
+<code class="descname">Clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the Vertex list on the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.Destroy">
+<code class="descname">Destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+Subsequent calls can add new items.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new vertex to the end of the Vertex list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) – X component of new vertex coordinate.</li>
+<li><strong>y</strong> (<em>float</em>) – Y component of new vertex coordinate.</li>
+<li><strong>z</strong> (<em>float</em>) – Z component of new vertex coordinate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The index of the newly added vertex.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.IsHidden">
+<code class="descname">IsHidden</code><span class="sig-paren">(</span><em>vertexIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.IsHidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value indicating whether or not a vertex is hidden.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to query.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the vertex is hidden, False if it is not.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.Hide">
+<code class="descname">Hide</code><span class="sig-paren">(</span><em>vertexIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Hide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hides the vertex at the given index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to hide.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.Show">
+<code class="descname">Show</code><span class="sig-paren">(</span><em>vertexIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the vertex at the given index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to show.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.HideAll">
+<code class="descname">HideAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.HideAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hides all vertices in the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.ShowAll">
+<code class="descname">ShowAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.ShowAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows all vertices in the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.CullUnused">
+<code class="descname">CullUnused</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.CullUnused" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all vertices that are currently not used by the Face list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of unused vertices that were removed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexList.CombineIdentical">
+<code class="descname">CombineIdentical</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.CombineIdentical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges identical vertices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the mesh is changed, in which case the mesh will have fewer vertices than before.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -288,7 +457,7 @@
         <a href="ModelComponent.html" class="btn btn-neutral float-right" title="ModelComponent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="MeshVertexColorList.html" class="btn btn-neutral float-left" title="MeshVertexColorList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="MeshVertexColorList.html" class="btn btn-neutral" title="MeshVertexColorList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -314,16 +483,26 @@
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

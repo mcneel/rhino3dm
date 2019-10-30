@@ -1,0 +1,6 @@
+SubD
+====
+
+.. py:module:: rhino3dm
+
+.. py:class:: SubD
