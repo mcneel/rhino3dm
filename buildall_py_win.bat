@@ -7,3 +7,5 @@ C:\Python27\python.exe setup.py bdist_wheel
 C:\Python27_64bit\python.exe setup.py bdist_wheel
 "C:\Users\sbaer\AppData\Local\Programs\Python\Python37\python.exe" setup.py bdist_wheel
 "C:\Users\sbaer\AppData\Local\Programs\Python\Python37-32\python.exe" setup.py bdist_wheel
+"C:\Users\sbaer\AppData\Local\Programs\Python\Python38\python.exe" setup.py bdist_wheel
+"C:\Users\sbaer\AppData\Local\Programs\Python\Python38-32\python.exe" setup.py bdist_wheel
