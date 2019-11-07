@@ -65,7 +65,7 @@ void initGeometryBindings(void*)
     .property("isDeformable", &BND_GeometryBase::IsDeformable)
     .function("makeDeformable", &BND_GeometryBase::MakeDeformable)
     .property("hasBrepForm", &BND_GeometryBase::HasBrepForm)
-    .function("duplicate", &BND_GeometryBase::Duplicate, allow_raw_pointers())
+    .function("duplicate", &BND_GeometryBase::DuplicateGeometry, allow_raw_pointers())
     ;
 }
 #endif
