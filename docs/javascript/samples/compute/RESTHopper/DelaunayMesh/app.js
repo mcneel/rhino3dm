@@ -72,7 +72,7 @@ function compute(){
     RhinoCompute.computeFetch("grasshopper", args).then(result => {
         console.log(result);
 
-        let data = JSON.parse(result.values[0].Values[0][0].data);
+        let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
         let mesh = rhino.CommonObject.decode(data);
 
         let material = new THREE.MeshBasicMaterial( {wireframe: true, color: 0x00ff00 } );
@@ -90,15 +90,17 @@ var scene, camera, renderer, controls;
 function init(){
     scene = new THREE.Scene();
     scene.background = new THREE.Color(1,1,1);
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 1, 10000 );
-    controls = new THREE.OrbitControls( camera );
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
+    
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    camera.position.z = 50;
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+    camera.position.z = 300;
 
     window.addEventListener( 'resize', onWindowResize, false );
 
