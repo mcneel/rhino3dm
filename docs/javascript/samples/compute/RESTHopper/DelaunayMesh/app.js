@@ -6,7 +6,7 @@ let args = {
 
 let definition = null;
 
-let param1 = new RhinoCompute.Grasshopper.DataTree("RH_IN:102:Points");
+let param1 = new RhinoCompute.Grasshopper.DataTree('RH_IN:102:Points');
 
 rhino3dm().then( async m => {
     console.log('Loaded rhino3dm.');
@@ -58,7 +58,7 @@ function compute(){
     param1.append([0], points);
 
     // clear values
-    trees = [];
+    let trees = [];
     trees.push(param1);
     //console.log(param1);
 

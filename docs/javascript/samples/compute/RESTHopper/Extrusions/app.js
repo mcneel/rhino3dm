@@ -7,17 +7,17 @@ let args = {
 let definition = null;
 
 // get slider values
-let count = document.getElementById("count").value;
-let radius = document.getElementById("radius").value;
-let length = document.getElementById("length").value;
+let count = document.getElementById('count').value;
+let radius = document.getElementById('radius').value;
+let length = document.getElementById('length').value;
 
-let param1 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Length");
+let param1 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Length');
 param1.append([0], [length]);
 
-let param2 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Radius");
+let param2 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Radius');
 param2.append([0], [radius]);
 
-let param3 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Count");
+let param3 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Count');
 param3.append([0], [count]);
 
 rhino3dm().then(async m => {
@@ -50,7 +50,7 @@ rhino3dm().then(async m => {
 function compute(){
 
     // clear values
-    trees = [];
+    let trees = [];
 
     trees.push(param1);
     trees.push(param2);
@@ -80,26 +80,25 @@ function compute(){
 function onSliderChange(){
 
     // get slider values
-    count = document.getElementById("count").value;
-    radius = document.getElementById("radius").value;
-    length = document.getElementById("length").value;
+    count = document.getElementById('count').value;
+    radius = document.getElementById('radius').value;
+    length = document.getElementById('length').value;
 
-    param1 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Length");
+    param1 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Length');
     param1.append([0], [length]);
 
-    param2 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Radius");
+    param2 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Radius');
     param2.append([0], [radius]);
 
-    param3 = new RhinoCompute.Grasshopper.DataTree("RH_IN:201:Count");
+    param3 = new RhinoCompute.Grasshopper.DataTree('RH_IN:201:Count');
     param3.append([0], [count]);
 
     compute();
-
 }
 
 // BOILERPLATE //
 
-var scene, camera, renderer, controls, composer;
+var scene, camera, renderer, controls;
 
 function init(){
     scene = new THREE.Scene();
@@ -109,7 +108,7 @@ function init(){
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
-    var canvas = document.getElementById("canvas");
+    var canvas = document.getElementById('canvas');
     canvas.appendChild( renderer.domElement );
 
     controls = new THREE.OrbitControls( camera, renderer.domElement  );
