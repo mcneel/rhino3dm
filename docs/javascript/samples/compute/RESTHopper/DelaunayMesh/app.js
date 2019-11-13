@@ -4,18 +4,11 @@ let args = {
     values : []
 };
 
-let ptsList = {
-    ParamName : "RH_IN:102:Points",
-    InnerTree : {
-        "{ 0; }": []
-    },
-    Keys : [
-        "{ 0; }"
-    ],
-    Values : []
-};
+let definition = null;
 
-rhino3dm().then(function(m) {
+let param1 = new RhinoCompute.Grasshopper.DataTree("RH_IN:102:Points");
+
+rhino3dm().then( async m => {
     console.log('Loaded rhino3dm.');
     rhino = m; // global
 
@@ -26,20 +19,20 @@ rhino3dm().then(function(m) {
     //RhinoCompute.url = "";
 
     // source a .ghx file in the same directory
-    fetch('DMesh.ghx')
-    .then(response => response.text())
-    .then(text => {
-        args.algo = btoa(text);
-        init();
-        compute();
-    });
+    let url = 'DMesh.ghx';
+    let res = await fetch(url);
+    let text = await res.text();
+    definition = text;
+
+    init();
+    compute();
 });
 
 function compute(){
     
     // generate random points
 
-    let pts = [];
+    let points = [];
     const cntPts = 100;
     const bndX = 100;
     const bndY = 100;
@@ -50,11 +43,9 @@ function compute(){
         let y = Math.random()*(bndY - -bndY) + -bndY;
         let z = Math.random()*(bndZ - -bndZ) + -bndZ;
 
-        let pt = {
-            type : "Rhino.Geometry.Point3d",
-            data : "{\"X\":"+x+",\"Y\":"+y+",\"Z\":"+z+"}"
-        };
-        pts.push(pt);
+        let pt = "{\"X\":"+x+",\"Y\":"+y+",\"Z\":"+z+"}";
+
+        points.push(pt);
 
         //viz in three
         let geo = new THREE.SphereGeometry( 1, 5, 5 );
@@ -64,12 +55,14 @@ function compute(){
         scene.add( sph );
     }
 
-    ptsList.InnerTree["{ 0; }"] = pts;
-    ptsList.Values.push(pts);
-    args.values.push(ptsList);
-    //console.log(args);
+    param1.append([0], points);
 
-    RhinoCompute.computeFetch("grasshopper", args).then(result => {
+    // clear values
+    trees = [];
+    trees.push(param1);
+    //console.log(param1);
+
+    RhinoCompute.Grasshopper.evaluateDefinition(definition, trees).then(result => {
         console.log(result);
 
         let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
@@ -91,7 +84,6 @@ function init(){
     scene = new THREE.Scene();
     scene.background = new THREE.Color(1,1,1);
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
-    
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -131,7 +123,7 @@ function meshToThreejs(mesh, material) {
       vertexbuffer[i*3+2] = pt[2];
     }
     // itemSize = 3 because there are 3 values (components) per vertex
-    geometry.addAttribute( 'position', new THREE.BufferAttribute( vertexbuffer, 3 ) );
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertexbuffer, 3 ) );
   
     indices = [];
     var faces = mesh.faces();
@@ -152,6 +144,6 @@ function meshToThreejs(mesh, material) {
       normalBuffer[i*3+1] = pt[1];
       normalBuffer[i*3+2] = pt[1];
     }
-    geometry.addAttribute( 'normal', new THREE.BufferAttribute( normalBuffer, 3 ) );
+    geometry.setAttribute( 'normal', new THREE.BufferAttribute( normalBuffer, 3 ) );
     return new THREE.Mesh( geometry, material );
 }
