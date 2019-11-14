@@ -47,8 +47,9 @@ jobs:
 
   build_py3:
     docker:
-      - image: mcneel/rhino3dm-dev:latest
+      - image: python:3.8-slim-buster
     steps:
+      - run: apt update && apt install -yy git cmake gcc g++
       - checkout
       - run: git submodule update --init
       - run: python3 --version && cmake --version
