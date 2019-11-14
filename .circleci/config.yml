@@ -55,18 +55,17 @@ jobs:
       - run: python3 --version && cmake --version
       - run: python3 setup.py bdist_wheel
 
-  build_py2_mac:
+  build_py3_mac:
     macos:
-      xcode: "10.2.0"
+      xcode: "11.2.0"
     steps:
       # brew update required to workaround Homebrew/brew#5513
       - run: brew update
       - run: brew install cmake
-      - run: cmake --version
-      - run: python --version
       - checkout
       - run: git submodule update --init
-      - run: python setup.py bdist_wheel
+      - run: python3 --version && cmake --version
+      - run: python3 setup.py bdist_wheel
 
   build_dotnet:
     docker:
@@ -74,13 +73,8 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init
-      - run: python3 --version
-      - run: cmake --version
-      - run:
-          name: Build
-          command: |
-            cd src
-            python3 build_dotnet.py
+      - run: python3 --version && cmake --version && dotnet --version
+      - run: cd src && python3 build_dotnet.py
 
   build_dotnet_amazonlinux2:
     docker:
@@ -88,6 +82,7 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init
+      - run: python3 --version && cmake --version && dotnet --version
       - run: cd src && python3 build_dotnet.py
 
 workflows:
@@ -100,6 +95,6 @@ workflows:
             - build_js
       - build_py2
       - build_py3
-      - build_py2_mac
+      - build_py3_mac
       - build_dotnet
       - build_dotnet_amazonlinux2
