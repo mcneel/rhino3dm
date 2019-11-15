@@ -2,15 +2,11 @@ let model = {
     // main sphere
     sphere: null,
     sphereRadius: 10,
-    // positions
-    positions: [],
     // spheres array to clash with main sphere
     spheres: [],
     spheresRadius: 2,
     // number of spheres to create
     num: 200,
-    // clash data
-    clashes: []
   };
 
 rhino3dm().then( async m => {
@@ -27,12 +23,13 @@ rhino3dm().then( async m => {
 
 function compute() {
 
-    console.log("Creating main sphere");
+    console.log('Creating main sphere');
 
     // create and render 3js sphere
     let mainSphere = new THREE.SphereBufferGeometry(model.sphereRadius, 32, 32);
     let material = new THREE.MeshStandardMaterial({wireframe:true});
     let mainMesh = new THREE.Mesh(mainSphere, material);
+    mainMesh.rotateOnWorldAxis(new THREE.Vector3(1,0,0), THREE.Math.degToRad(-90));
     scene.add(mainMesh);
 
     // create 3dm sphere
@@ -46,52 +43,54 @@ function compute() {
 
 function createClashSpheres() {
 
-    console.log("Creating clash spheres");
+    console.log('Creating clash spheres');
+
+    let pointsGeometry = new THREE.BufferGeometry();
+    let positionBuffer = new Float32Array(3 * model.num);
 
     for (let i = 0; i < model.num; i++) {
         let x = Math.random() * (20 - -20) + -20;
         let y = Math.random() * (20 - -20) + -20;
         let z = Math.random() * (20 - -20) + -20;
 
-        let pt = [x, y, z];
-
-        model.positions.push(pt);
-
         //create 3js clash sphere
         let clashSphere = new THREE.SphereBufferGeometry( model.spheresRadius, 10, 10 );
         clashSphere.translate(x, y, z);
 
         //create 3dm clash sphere
-        let rhinoClashSphere = rhino.Mesh.createFromThreejsJSON( { data: clashSphere } )
+        let rhinoClashSphere = rhino.Mesh.createFromThreejsJSON( { data: clashSphere } );
         model.spheres.push(rhinoClashSphere);
 
-        //create a smaller version of the clash sphere to render
-        let vizSphere = new THREE.SphereBufferGeometry( 0.1, 5, 5 );
-        vizSphere.translate(x, y, z);
-        let mat = new THREE.MeshBasicMaterial( {color: 0xff0000, wireframe: true} );
-        let sph = new THREE.Mesh( vizSphere, mat );
-        scene.add( sph );
+        positionBuffer[i*3] = x;
+        positionBuffer[i*3+1] = y;
+        positionBuffer[i*3+2] = z;
 
     }
+
+    //vizualize the position of the clash spheres
+    pointsGeometry.setAttribute( 'position', new THREE.BufferAttribute( positionBuffer, 3 ) );
+    let points = new THREE.Points(pointsGeometry, new THREE.PointsMaterial( { color: 0xff0000, sizeAttenuation: false, size: 3 } ));
+    scene.add(points);
 
 } 
 
 function doMeshClash() {
 
-    console.log("Running Mesh Clash");
+    console.log('Running mesh clash');
 
-    RhinoCompute.computeFetch("rhino/geometry/intersect/meshclash/search", [model.sphere, model.spheres, 0.1, 5])
-        .then(function (value) {
+    RhinoCompute.computeFetch('rhino/geometry/intersect/meshclash/search', [model.sphere, model.spheres, 0.1, 5])
+        .then(function (result) {
 
-            console.log(value);
-            model.clashes = value;
+            console.log(result);
 
             //add objects to scene
-            for (var i = 0; i < model.clashes.length; i++) {
+            for (var i = 0; i < result.length; i++) {
 
-                let m = rhino.CommonObject.decode(model.clashes[i].MeshB);
+                let m = rhino.CommonObject.decode(result[i].MeshB);
                 let material = new THREE.MeshBasicMaterial({ wireframe: true, color: 0x00ff00 });
                 let threemesh = meshToThreejs(m, material);
+                //need to rotate these
+                threemesh.rotateOnWorldAxis(new THREE.Vector3(1,0,0), THREE.Math.degToRad(-90));
                 scene.add(threemesh);
             }
 
