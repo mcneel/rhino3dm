@@ -18,7 +18,7 @@ As rhinologo.html but also loads another set of breps and calculates the boolean
 
 Print the [hiro marker](https://jeromeetienne.github.io/AR.js/data/images/HIRO.jpg) (or simply open it on your computer screen) then open this sample on a mobile phone and point the camera at the marker.
 
-## [clash_detection](https://mcneel.github.io/rhino3dm/javascript/samples/compute/clash_detection/)
+### [clash_detection](https://mcneel.github.io/rhino3dm/javascript/samples/compute/clash_detection/)
 
 Performs clash detection between a bunch of randomly positioned spheres and one main sphere.
 
