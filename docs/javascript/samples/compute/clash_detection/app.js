@@ -29,21 +29,18 @@ function compute() {
 
     console.log("Creating main sphere");
 
-    let sphere = new rhino.Sphere([0, 0, 0], model.sphereRadius);
+    // create and render 3js sphere
+    let mainSphere = new THREE.SphereBufferGeometry(model.sphereRadius, 32, 32);
+    let material = new THREE.MeshStandardMaterial({wireframe:true});
+    let mainMesh = new THREE.Mesh(mainSphere, material);
+    scene.add(mainMesh);
 
-    RhinoCompute.Mesh.createFromSphere(sphere, 25, 25).then( async value => {
+    // create 3dm sphere
+    let mainRhinoSphere = rhino.Mesh.createFromThreejsJSON( { data: mainSphere } )
+    model.sphere = mainRhinoSphere;
 
-        model.sphere = rhino.CommonObject.decode(value);
-
-        //console.log(model.sphere);
-
-        let material = new THREE.MeshStandardMaterial({wireframe:true});
-        let mesh = meshToThreejs(model.sphere, material);
-        scene.add(mesh);
-
-        createClashSpheres();
-
-    });
+    createClashSpheres();
+    doMeshClash();
 
 }
 
@@ -60,22 +57,20 @@ function createClashSpheres() {
 
         model.positions.push(pt);
 
-        let sphere = new rhino.Sphere([x, y, z], model.spheresRadius);
+        //create 3js clash sphere
+        let clashSphere = new THREE.SphereBufferGeometry( model.spheresRadius, 10, 10 );
+        clashSphere.translate(x, y, z);
 
-        let geo = new THREE.SphereGeometry( 0.1, 5, 5 );
+        //create 3dm clash sphere
+        let rhinoClashSphere = rhino.Mesh.createFromThreejsJSON( { data: clashSphere } )
+        model.spheres.push(rhinoClashSphere);
 
-        geo.translate(x, y, z);
+        //create a smaller version of the clash sphere to render
+        let vizSphere = new THREE.SphereBufferGeometry( 0.1, 5, 5 );
+        vizSphere.translate(x, y, z);
         let mat = new THREE.MeshBasicMaterial( {color: 0xff0000, wireframe: true} );
-        let sph = new THREE.Mesh( geo, mat );
+        let sph = new THREE.Mesh( vizSphere, mat );
         scene.add( sph );
-
-        RhinoCompute.Mesh.createFromSphere(sphere, 10, 10).then( async value => {
-            model.spheres.push(rhino.CommonObject.decode(value));
-
-            if (i == model.num - 1) {
-                doMeshClash();
-            }
-        });
 
     }
 
