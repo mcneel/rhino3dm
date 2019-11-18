@@ -68,7 +68,7 @@ Generates random points and meshes them with the Delaunay component in Grasshopp
 
 [source](https://github.com/mcneel/rhino3dm/tree/master/docs/javascript/samples/compute/RESTHopper/DelaunayMesh)
 
-### [Extrusions](https://mcneel.github.io/rhino3dm/javascript/samples/compute/RESTHopper/DelaunayMesh/index.html)
+### [Extrusions](https://mcneel.github.io/rhino3dm/javascript/samples/compute/RESTHopper/Extrusions/index.html)
 
 ![image](https://user-images.githubusercontent.com/1014562/68939312-912c9000-07a0-11ea-9261-ed2e025bfa45.png)
 
