@@ -354,7 +354,7 @@
             vertexbuffer[i * 3 + 2] = pt[2];
         }
         // itemSize = 3 because there are 3 values (components) per vertex
-        geometry.addAttribute('position', new THREE.BufferAttribute(vertexbuffer, 3));
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertexbuffer, 3));
 
         indices = [];
         var faces = mesh.faces();
@@ -375,7 +375,7 @@
             normalBuffer[i * 3 + 1] = pt[1];
             normalBuffer[i * 3 + 2] = pt[1];
         }
-        geometry.addAttribute('normal', new THREE.BufferAttribute(normalBuffer, 3));
+        geometry.setAttribute('normal', new THREE.BufferAttribute(normalBuffer, 3));
         let newmesh = new THREE.Mesh(geometry, material);
         return newmesh;
 
