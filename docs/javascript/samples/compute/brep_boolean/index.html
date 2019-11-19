@@ -33,10 +33,30 @@
             padding: 10px;
         }
 
+        #loader {
+            border: 5px solid #f3f3f3; /* Light grey */
+            border-top: 5px solid #3d3d3d; /* Grey */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 
 <body>
+<div id="loader"></div> 
 <script src="https://threejs.org/build/three.js"></script>
 <script src="../../resources/OrbitControls.js"></script>
 <script src="../../resources/compute.rhino3d.js"></script>
@@ -146,12 +166,18 @@
 
     async function performDifference()
     {
+        // show spinner
+        document.getElementById('loader').style.display = 'block';
+
         let cutObjects = await RhinoCompute.Brep.createBooleanDifference(logo, cutters, 0.01);
         difference = cutObjects.map(r => Module.CommonObject.decode(r));
         clearScene();
         RHINOLOGO.doc = new jsDoc();
         RHINOLOGO.doc.setBreps(difference);
         RHINOLOGO.doc.computeBrepMeshes();
+
+        // hide spinner
+        //document.getElementById('loader').style.display = 'block';
     }
 
     async function performDifferenceFanOut()
@@ -173,6 +199,10 @@
     }
 
     async function loadBrepsFromUrl(url, bDrawMeshes) {
+
+        // show spinner
+        document.getElementById('loader').style.display = 'block';
+
         let model = await load3dmFromUrl(url);
 
         let objecttable = model.objects();
@@ -371,6 +401,7 @@
 
                 brep["threejs"].push([lines, threemesh]);
             }
+            
         }
     }
 
@@ -448,6 +479,9 @@
                 brep["meshes"] = result.map(r => Module.CommonObject.decode(r));
                 addMeshToScene(brep);
             }
+
+            // hide spinner
+            document.getElementById('loader').style.display = 'none';
         }
 
         highlightMesh(index) {
@@ -488,6 +522,9 @@
                 brep["meshes"] = result.map(r => Module.CommonObject.decode(r));
                 addMeshToScene(brep);
             }
+
+            // hide spinner
+            document.getElementById('loader').style.display = 'none';
         }
 
         async computeBrepWire(index) {
@@ -511,6 +548,8 @@
                 brep["wires"] = result.map(r => Module.CommonObject.decode(r));
                 addWireframeToScene(brep);
             }
+            // hide spinner
+            document.getElementById('loader').style.display = 'none';
         }
     }
 
