@@ -65,6 +65,9 @@ function compute(){
     RhinoCompute.Grasshopper.evaluateDefinition(definition, trees).then(result => {
         console.log(result);
 
+        // remove spinner
+        document.getElementById('loader').remove();
+
         let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
         let mesh = rhino.CommonObject.decode(data);
 

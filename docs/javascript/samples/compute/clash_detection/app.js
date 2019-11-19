@@ -83,6 +83,9 @@ function doMeshClash() {
 
             console.log(result);
 
+            // remove spinner
+            document.getElementById('loader').remove();
+
             //add objects to scene
             for (var i = 0; i < result.length; i++) {
 

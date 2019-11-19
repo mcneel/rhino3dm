@@ -60,6 +60,9 @@ function compute(){
         // RhinoCompute.computeFetch("grasshopper", args).then(result => {
         console.log(result);
 
+        // hide spinner
+        document.getElementById('loader').style.display = 'none';
+
         let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
         let mesh = rhino.CommonObject.decode(data);
 
@@ -78,6 +81,9 @@ function compute(){
 }
 
 function onSliderChange(){
+
+    // show spinner
+    document.getElementById('loader').style.display = 'block';
 
     // get slider values
     count = document.getElementById('count').value;
