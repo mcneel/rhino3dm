@@ -113,6 +113,7 @@ void initXformBindings(void*)
     .function("tryGetInverse", &BND_Transform::TryGetInverse, allow_raw_pointers())
     .function("transformBoundingBox", &BND_Transform::TransformBoundingBox, allow_raw_pointers())
     .function("transpose", &BND_Transform::Transpose)
+    .function("toFloatArray", &BND_Transform::ToFloatArray)
     ;
 }
 #endif
