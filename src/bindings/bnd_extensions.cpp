@@ -446,6 +446,31 @@ BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
   return BND_BoundingBox(m_model->ModelGeometryBoundingBox());
 }
 
+BND_FileObject* BND_ONXModel_ObjectTable::FindId(BND_UUID id) const
+{
+	ON_UUID _id = Binding_to_ON_UUID(id);
+	ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, _id);
+	if (compref.IsEmpty())
+		return nullptr;
+
+	const ON_ModelComponent* model_component = compref.ModelComponent();
+	const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+	if (nullptr == geometryComponent)
+		return nullptr;
+
+	BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(BND_CommonObject::CreateWrapper(compref));
+	if (nullptr == geometry)
+		return nullptr;
+	ON_3dmObjectAttributes* attrs = const_cast<ON_3dmObjectAttributes*>(geometryComponent->Attributes(nullptr));
+	if (nullptr == attrs)
+		return nullptr;
+
+	BND_FileObject* rc = new BND_FileObject();
+	rc->m_attributes = new BND_3dmObjectAttributes(attrs, &compref);
+	rc->m_geometry = geometry;
+	return rc;
+}
+
 void BND_File3dmMaterialTable::Add(const BND_Material& material)
 {
   const ON_Material* m = material.m_material;
@@ -932,6 +957,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
+	.def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> >(m, "__MaterialIterator")

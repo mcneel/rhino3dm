@@ -86,6 +86,7 @@ public:
   BND_CommonObject* ObjectAt(int index);
   BND_3dmObjectAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
+  BND_FileObject* FindId(BND_UUID id) const;
 };
 
 class BND_File3dmMaterialTable
