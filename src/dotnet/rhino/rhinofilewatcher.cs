@@ -17,43 +17,89 @@ namespace Rhino
         g_enable_hook
       );
     }
+
+    internal static void DumpException(Exception exception)
+    {
+      for (var e = exception; e != null; e = e.InnerException)
+      {
+        System.Diagnostics.Debug.WriteLine(e.Message);
+        System.Diagnostics.Debug.WriteLine(e.StackTrace);
+        RhinoApp.WriteLine(e.Message);
+        RhinoApp.WriteLine(e.StackTrace);
+      }
+    }
+
+    internal static void ReportException(Exception exception)
+    {
+      DumpException(exception);
+    }
+
     internal delegate void AttachFileWatcherDelegate(IntPtr pointerToIRhinoFileEventWatcher);
     private static readonly AttachFileWatcherDelegate g_attach_hook = AttachHook;
     private static void AttachHook(IntPtr pointerToIRhinoFileEventWatcher)
     {
-      if (g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
-        return;
-      watcher = new RhinoFileWatcher(pointerToIRhinoFileEventWatcher);;
-      g_watchers[pointerToIRhinoFileEventWatcher] = watcher;
+      try
+      {
+        if (g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
+          return;
+        watcher = new RhinoFileWatcher(pointerToIRhinoFileEventWatcher);
+        g_watchers[pointerToIRhinoFileEventWatcher] = watcher;
+      }
+      catch (Exception exception)
+      {
+        ReportException(exception);
+      }
     }
 
     private static readonly AttachFileWatcherDelegate g_detatch_hook = DetatchHook;
     private static void DetatchHook(IntPtr pointerToIRhinoFileEventWatcher)
     {
-      if (!g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
-        return;
-      g_watchers.Remove(pointerToIRhinoFileEventWatcher);
-      watcher.Dispose();
+      try
+      {
+        if (!g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
+          return;
+        g_watchers.Remove(pointerToIRhinoFileEventWatcher);
+        watcher.Dispose();
+      }
+      catch (Exception exception)
+      {
+        ReportException(exception);
+      }
     }
 
     internal delegate void FileWatcherWatchDelegate(IntPtr pointerToIRhinoFileEventWatcher, IntPtr pathWStringPointer, IntPtr filterWStringPointer);
     private static readonly FileWatcherWatchDelegate g_watch_hook = WatchHook;
     private static void WatchHook(IntPtr pointerToIRhinoFileEventWatcher, IntPtr pathWStringPointer, IntPtr filterWStringPointer)
     {
-      AttachHook(pointerToIRhinoFileEventWatcher);
-      var path = StringWrapper.GetStringFromPointer(pathWStringPointer);
-      var filter = StringWrapper.GetStringFromPointer(filterWStringPointer);
-      g_watchers[pointerToIRhinoFileEventWatcher].Watch(path, filter);
+      try
+      {
+        AttachHook(pointerToIRhinoFileEventWatcher);
+        var path = StringWrapper.GetStringFromPointer(pathWStringPointer);
+        var filter = StringWrapper.GetStringFromPointer(filterWStringPointer);
+        g_watchers[pointerToIRhinoFileEventWatcher].Watch(path, filter);
+      }
+      catch (Exception exception)
+      {
+        ReportException(exception);
+      }
     }
 
     internal delegate int FileWatcherEnableDelegate(IntPtr pointerToIRhinoFileEventWatcher, int enanble, int set);
     private static readonly FileWatcherEnableDelegate g_enable_hook = EnableHook;
     private static int EnableHook(IntPtr pointerToIRhinoFileEventWatcher, int enanble, int set)
     {
-      AttachHook(pointerToIRhinoFileEventWatcher);
-      if (set > 0)
-        g_watchers[pointerToIRhinoFileEventWatcher].Enabled = enanble > 0;
-      return g_watchers[pointerToIRhinoFileEventWatcher].Enabled ? 1 : 0;
+      try
+      {
+        AttachHook(pointerToIRhinoFileEventWatcher);
+        if (set > 0)
+          g_watchers[pointerToIRhinoFileEventWatcher].Enabled = enanble > 0;
+        return g_watchers[pointerToIRhinoFileEventWatcher].Enabled ? 1 : 0;
+      }
+      catch (Exception exception)
+      {
+        ReportException(exception);
+        return 0;
+      }
     }
 
     private static Dictionary<IntPtr, RhinoFileWatcher> g_watchers = new Dictionary<IntPtr, RhinoFileWatcher>();
@@ -63,21 +109,28 @@ namespace Rhino
   {
     internal RhinoFileWatcher(IntPtr pointerToIRhinoFileEventWatcher)
     {
-      Pointer = pointerToIRhinoFileEventWatcher;
-      Watcher = new FileSystemWatcher
+      try
       {
-        // Disable watching
-        EnableRaisingEvents = false,
-        // Watch for changes in LastAccess and LastWrite times, and the renaming of files or directories.
-        NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-      };
-      // Add event handlers.
-      Watcher.Changed += OnChanged;
-      Watcher.Created += OnChanged;
-      Watcher.Deleted += OnChanged;
-      Watcher.Renamed += OnRenamed;
-      // Make sure they watchers are shutdown when closing Rhino
-      RhinoApp.Closing += (sender, args) => Dispose();
+        Pointer = pointerToIRhinoFileEventWatcher;
+        Watcher = new FileSystemWatcher
+        {
+          // Disable watching
+          EnableRaisingEvents = false,
+          // Watch for changes in LastAccess and LastWrite times, and the renaming of files or directories.
+          NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+        };
+        // Add event handlers.
+        Watcher.Changed += OnChanged;
+        Watcher.Created += OnChanged;
+        Watcher.Deleted += OnChanged;
+        Watcher.Renamed += OnRenamed;
+        // Make sure they watchers are shutdown when closing Rhino
+        RhinoApp.Closing += (sender, args) => Dispose();
+      }
+      catch (Exception exception)
+      {
+        RhinoFileEventWatcherHooks.ReportException(exception);
+      }
     }
 
     ~RhinoFileWatcher()
@@ -116,20 +169,13 @@ namespace Rhino
       }
       catch (Exception e)
       {
-        Dump(e);
+        var message = string.IsNullOrWhiteSpace(path)
+          ? UI.Localization.LocalizeString("RhinoFileWatcher.Watch *error* empty path", 39)
+          : string.Format(UI.Localization.LocalizeString("RhinoFileWatcher.Watch *error* parsing path name \"{0}\"", 40), path);
+        RhinoApp.WriteLine(message);
+        RhinoFileEventWatcherHooks.DumpException(e);
         return false;
       }
-    }
-
-    private void Dump(Exception e)
-    {
-      if (e == null)
-        return;
-      System.Diagnostics.Debug.WriteLine(e.Message);
-      System.Diagnostics.Debug.WriteLine(e.StackTrace);
-      RhinoApp.WriteLine(e.Message);
-      RhinoApp.WriteLine(e.StackTrace);
-      Dump(e);
     }
 
     // Define the event handlers.
@@ -165,7 +211,17 @@ namespace Rhino
     public bool Enabled
     {
       get => _enabled;
-      set => Watcher.EnableRaisingEvents = _enabled = value;
+      set
+      {
+        try
+        {
+          Watcher.EnableRaisingEvents = _enabled = value;
+        }
+        catch (Exception e)
+        {
+          RhinoFileEventWatcherHooks.DumpException(e);
+        }
+      }
     }
 
     public void Dispose()

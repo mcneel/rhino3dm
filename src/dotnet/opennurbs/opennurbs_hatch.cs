@@ -305,5 +305,148 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Hatch_ScalePattern(ptr_this, ref xform);
     }
+
+    /// <summary>
+    /// Get gradient fill information for this hatch. If the "GradientType" for
+    /// the fill is None, then this hatch doesn't have any gradient fill.
+    /// </summary>
+    /// <returns></returns>
+    public Rhino.Display.ColorGradient GetGradientFill()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptrColorStopArray = UnsafeNativeMethods.ON_ColorStopArray_New();
+      Point3d startPoint = new Point3d();
+      Point3d endPoint = new Point3d();
+      int gradientType = 0;
+      double repeat = 0;
+      int stopCount = UnsafeNativeMethods.ON_Hatch_GetGradientData(const_ptr_this, ref startPoint, ref endPoint, ref gradientType, ref repeat, ptrColorStopArray);
+      var rc = new Rhino.Display.ColorGradient();
+      rc.StartPoint = startPoint;
+      rc.EndPoint = endPoint;
+      rc.GradientType = (Display.GradientType)gradientType;
+      rc.Repeat = repeat;
+      Display.ColorStop[] stops = new Display.ColorStop[stopCount];
+      for( int i=0; i<stopCount; i++ )
+      {
+        int argb =0;
+        double t = 0;
+        UnsafeNativeMethods.ON_ColorStopArray_Get(ptrColorStopArray, i, ref argb, ref t);
+        var color = System.Drawing.Color.FromArgb(argb);
+        stops[i] = new Display.ColorStop(color, t);
+      }
+      rc.SetColorStops(stops);
+      UnsafeNativeMethods.ON_ColorStopArray_Delete(ptrColorStopArray);
+      return rc;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="fill"></param>
+    public void SetGradientFill(Rhino.Display.ColorGradient fill)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      if( null==fill )
+      {
+        UnsafeNativeMethods.ON_Hatch_SetGradientData(ptr_this, Point3d.Unset, Point3d.Unset, (int)Rhino.Display.GradientType.None, 0, IntPtr.Zero);
+        return;
+      }
+      var stops = fill.GetColorStops();
+      IntPtr ptrColorStopArray = UnsafeNativeMethods.ON_ColorStopArray_New();
+      foreach(var stop in stops)
+      {
+        int argb = stop.Color.ToArgb();
+        UnsafeNativeMethods.ON_ColorStopArray_Append(ptrColorStopArray, argb, stop.Position);
+      }
+      UnsafeNativeMethods.ON_Hatch_SetGradientData(ptr_this, fill.StartPoint, fill.EndPoint, (int)fill.GradientType, fill.Repeat, ptrColorStopArray);
+      UnsafeNativeMethods.ON_ColorStopArray_Delete(ptrColorStopArray);
+    }
+  }
+}
+
+namespace Rhino.Display
+{
+  /// <summary>
+  /// Combination of a color and position. Used in defining gradient fills
+  /// </summary>
+  public struct ColorStop
+  {
+    /// <summary>
+    /// Create color stop from a color and position
+    /// </summary>
+    /// <param name="color"></param>
+    /// <param name="t"></param>
+    public ColorStop(System.Drawing.Color color, double t)
+    {
+      Color = color;
+      Position = t;
+    }
+    /// <summary>
+    /// </summary>
+    public System.Drawing.Color Color { get; set; }
+
+    /// <summary> Parameter that Color is defined at </summary>
+    public double Position { get; set; }
+  }
+
+  /// <summary>
+  /// </summary>
+  public class ColorGradient
+  {
+    List<ColorStop> _stops = new List<ColorStop>();
+
+    /// <summary>
+    /// Gradient fill type associated with this hatch
+    /// </summary>
+    public Rhino.Display.GradientType GradientType
+    {
+      get;
+      set;
+    }
+
+    /// <summary>
+    /// Get sorted list of colors / positions that a gradient is defined over
+    /// </summary>
+    /// <returns></returns>
+    public ColorStop[] GetColorStops()
+    {
+      return _stops.ToArray();
+    }
+
+    /// <summary>
+    /// Set color stops for the gradient
+    /// </summary>
+    /// <param name="stops"></param>
+    public void SetColorStops(IEnumerable<ColorStop> stops)
+    {
+      _stops = new List<ColorStop>(stops);
+    }
+
+    /// <summary>
+    /// Repeat factor for gradient. Factors greater than 1 define a reflected
+    /// repeat factor while values less than -1 define a wrapped repeat factor.
+    /// </summary>
+    public double Repeat
+    {
+      get;
+      set;
+    }
+
+    /// <summary>
+    /// Start point of gradient
+    /// </summary>
+    public Rhino.Geometry.Point3d StartPoint
+    {
+      get;
+      set;
+    }
+
+    /// <summary>
+    /// End point of gradient
+    /// </summary>
+    public Rhino.Geometry.Point3d EndPoint
+    {
+      get;
+      set;
+    }
   }
 }

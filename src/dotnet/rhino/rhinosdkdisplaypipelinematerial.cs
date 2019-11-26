@@ -297,21 +297,21 @@ namespace Rhino.Display
       return UnsafeNativeMethods.CDisplayPipelineMaterial_MaterialPointer(pConstThis, front);
     }
 
-    bool AddTexture(string filename, int which, bool front)
+    bool AddTexture(string filename, Rhino.DocObjects.TextureType which, bool front)
     {
       IntPtr pMaterial = NonConstMaterialPointer(front);
-      return UnsafeNativeMethods.ON_Material_AddTexture(pMaterial, filename, which);
+      return UnsafeNativeMethods.ON_Material_AddTexture(pMaterial, filename, (int)which);
     }
-    bool SetTexture(Rhino.DocObjects.Texture texture, int which, bool front)
+    bool SetTexture(Rhino.DocObjects.Texture texture, Rhino.DocObjects.TextureType which, bool front)
     {
       IntPtr pMaterial = NonConstMaterialPointer(front);
       IntPtr pTexture = texture.ConstPointer();
-      return UnsafeNativeMethods.ON_Material_SetTexture(pMaterial, pTexture, which);
+      return UnsafeNativeMethods.ON_Material_SetTexture(pMaterial, pTexture, (int)which);
     }
-    Rhino.DocObjects.Texture GetTexture(int which, bool front)
+    Rhino.DocObjects.Texture GetTexture(Rhino.DocObjects.TextureType which, bool front)
     {
       IntPtr pConstMaterial = ConstMaterialPointer(front);
-      int index = UnsafeNativeMethods.ON_Material_GetTexture(pConstMaterial, which);
+      int index = UnsafeNativeMethods.ON_Material_GetTexture(pConstMaterial, (int)which);
       if (index >= 0)
         return new Rhino.DocObjects.Texture(index, this, front);
       return null;
@@ -321,15 +321,15 @@ namespace Rhino.Display
     #region Bitmap
     public Rhino.DocObjects.Texture GetBitmapTexture(bool front)
     {
-      return GetTexture(Rhino.DocObjects.Material.idxBitmapTexture, front);
+      return GetTexture(Rhino.DocObjects.TextureType.Bitmap, front);
     }
     public bool SetBitmapTexture(string filename, bool front)
     {
-      return AddTexture(filename, Rhino.DocObjects.Material.idxBitmapTexture, front);
+      return AddTexture(filename, Rhino.DocObjects.TextureType.Bitmap, front);
     }
     public bool SetBitmapTexture(Rhino.DocObjects.Texture texture, bool front)
     {
-      return SetTexture(texture, Rhino.DocObjects.Material.idxBitmapTexture, front);
+      return SetTexture(texture, Rhino.DocObjects.TextureType.Bitmap, front);
     }
     #endregion
 
@@ -340,45 +340,45 @@ namespace Rhino.Display
     /// <returns>The texture, or null if no bump texture has been added to this material.</returns>
     public Rhino.DocObjects.Texture GetBumpTexture(bool front)
     {
-      return GetTexture(Rhino.DocObjects.Material.idxBumpTexture, front);
+      return GetTexture(Rhino.DocObjects.TextureType.Bump, front);
     }
     public bool SetBumpTexture(string filename, bool front)
     {
-      return AddTexture(filename, Rhino.DocObjects.Material.idxBumpTexture, front);
+      return AddTexture(filename, Rhino.DocObjects.TextureType.Bump, front);
     }
     public bool SetBumpTexture(Rhino.DocObjects.Texture texture, bool front)
     {
-      return SetTexture(texture, Rhino.DocObjects.Material.idxBumpTexture, front);
+      return SetTexture(texture, Rhino.DocObjects.TextureType.Bump, front);
     }
     #endregion
 
     #region Environment
     public Rhino.DocObjects.Texture GetEnvironmentTexture(bool front)
     {
-      return GetTexture(Rhino.DocObjects.Material.idxEmapTexture, front);
+      return GetTexture(Rhino.DocObjects.TextureType.Emap, front);
     }
     public bool SetEnvironmentTexture(string filename, bool front)
     {
-      return AddTexture(filename, Rhino.DocObjects.Material.idxEmapTexture, front);
+      return AddTexture(filename, Rhino.DocObjects.TextureType.Emap, front);
     }
     public bool SetEnvironmentTexture(Rhino.DocObjects.Texture texture, bool front)
     {
-      return SetTexture(texture, Rhino.DocObjects.Material.idxEmapTexture, front);
+      return SetTexture(texture, Rhino.DocObjects.TextureType.Emap, front);
     }
     #endregion
 
     #region Transparency
     public Rhino.DocObjects.Texture GetTransparencyTexture(bool front)
     {
-      return GetTexture(Rhino.DocObjects.Material.idxTransparencyTexture, front);
+      return GetTexture(Rhino.DocObjects.TextureType.Transparency, front);
     }
     public bool SetTransparencyTexture(string filename, bool front)
     {
-      return AddTexture(filename, Rhino.DocObjects.Material.idxTransparencyTexture, front);
+      return AddTexture(filename, Rhino.DocObjects.TextureType.Transparency, front);
     }
     public bool SetTransparencyTexture(Rhino.DocObjects.Texture texture, bool front)
     {
-      return SetTexture(texture, Rhino.DocObjects.Material.idxTransparencyTexture, front);
+      return SetTexture(texture, Rhino.DocObjects.TextureType.Transparency, front);
     }
     #endregion
   }

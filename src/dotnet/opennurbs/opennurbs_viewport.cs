@@ -1483,6 +1483,7 @@ namespace Rhino.DocObjects
     {
       UnsafeNativeMethods.ON_Viewport_SetPerspectiveClippingPlaneConstraints(NonConstPointer(), depthBufferBitDepth);
     }
+    */
 
     /// <summary>
     /// Expert user function to control the minimum
@@ -1493,31 +1494,34 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearOverFar(ConstPointer());
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearOverFar(const_ptr_this);
       }
       set
       {
-        UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearOverFar(NonConstPointer(), value);
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearOverFar(ptr_this, value);
       }
     }
 
     /// <summary>
     /// Expert user function to control the minimum
     /// value of near when perspective projections
-    /// are begin used.
+    /// are being used.
     /// </summary>
     public double PerspectiveMinNearDist
     {
       get
       {
-        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearDist(ConstPointer());
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearDist(const_ptr_this);
       }
       set
       {
-        UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearDist(NonConstPointer(), value);
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearDist(ptr_this, value);
       }
     }
-    */
 
     /// <summary>
     /// Sets the viewport's id to the value used to 
@@ -1539,6 +1543,31 @@ namespace Rhino.DocObjects
       //  IntPtr pThis = NonConstPointer();
       //  UnsafeNativeMethods.ON_Viewport_SetViewportId(pThis, value);
       //}
+    }
+
+    /// <summary>
+    /// Transforms the view camera location, direction, and up.
+    /// </summary>
+    /// <param name="xform">Transformation to apply to camera.</param>
+    /// <returns>True if a valid camera was transformed, false if
+    /// invalid camera, frustum, or transformation.</returns>
+    public bool TransformCamera(Transform xform)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Viewport_Transform(ptr_this, ref xform);
+    }
+
+    /// <summary>
+    /// Rotates the view camera.
+    /// </summary>
+    /// <param name="rotationAngleRadians">The amount to rotate expressed in radians.</param>
+    /// <param name="rotationAxis">The axis to rotate around.</param>
+    /// <param name="rotationCenter">The point to rotate around.</param>
+    /// <returns>True if rotation is successful, false otherwise.</returns>
+    public bool RotateCamera(double rotationAngleRadians, Vector3d rotationAxis, Point3d rotationCenter)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Viewport_Rotate(ptr_this, rotationAngleRadians, rotationAxis, rotationCenter);
     }
 
     /*

@@ -360,30 +360,13 @@ namespace Rhino.Geometry
     {
       var ptr_this = NonConstPointer();
 
-      ProgressReporter reporter = null;
-      var progress_report_serial_number = 0;
-      if (progress != null)
-      {
-        reporter = new ProgressReporter(progress);
-        progress_report_serial_number = reporter.SerialNumber;
-        reporter.Enable();
-      }
+      Rhino.Runtime.Interop.MarshalProgressAndCancelToken(cancelToken, progress,
+        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
 
-      ThreadTerminator terminator = null;
-      if (cancelToken != System.Threading.CancellationToken.None)
-      {
-        terminator = new ThreadTerminator();
-        cancelToken.Register(terminator.RequestCancel);
-      }
-      var ptr_terminator = terminator == null ? IntPtr.Zero : terminator.NonConstPointer();
+      var rc = UnsafeNativeMethods.ON_HiddenLineDrawing_Draw2(ptr_this, allowUseThreads, progressInt, ptrTerminator);
 
-      var rc = UnsafeNativeMethods.ON_HiddenLineDrawing_Draw2(ptr_this, allowUseThreads, progress_report_serial_number, ptr_terminator);
-
-      if (reporter != null)
-        reporter.Disable();
-
-      if (terminator != null)
-        terminator.Dispose();
+      if (reporter != null) reporter.Disable();
+      if (terminator != null) terminator.Dispose();
 
       return rc;
     }

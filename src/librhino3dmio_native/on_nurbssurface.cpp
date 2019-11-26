@@ -12,6 +12,11 @@ RH_C_FUNCTION ON_NurbsSurface* ON_NurbsSurface_New2(const ON_NurbsSurface* pCons
   return ON_NurbsSurface::New();
 }
 
+RH_C_FUNCTION ON_NurbsSurface* ON_NurbsSurface_New3()
+{
+  return ON_NurbsSurface::New();
+}
+
 RH_C_FUNCTION void ON_NurbsSurface_CopyFrom(const ON_NurbsSurface* pConstSourceNurbsSurface, ON_NurbsSurface* pDestNurbsSurface)
 {
   if (pConstSourceNurbsSurface && pDestNurbsSurface)

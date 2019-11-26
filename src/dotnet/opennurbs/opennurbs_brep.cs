@@ -128,8 +128,7 @@ namespace Rhino.Geometry
     Refit = 2
   }
 
-  /// <summary>
-  /// Boundary Representation. A surface or polysurface along with trim curve information.
+  /// <summary>  /// Boundary Representation. A surface or polysurface along with trim curve information.
   /// </summary>
   [Serializable]
   public class Brep : GeometryBase
@@ -659,20 +658,16 @@ namespace Rhino.Geometry
     /// </example>
     public static Brep CreateEdgeSurface(IEnumerable<Curve> curves)
     {
-      var nurbs_curves = new NurbsCurve[4];
-      var ptr_nurbscurves = new IntPtr[4];
+      var ptr_curves = new IntPtr[4];
       for (int i = 0; i < 4; i++)
-        ptr_nurbscurves[i] = IntPtr.Zero;
+        ptr_curves[i] = IntPtr.Zero;
       int index = 0;
       foreach (Curve crv in curves)
       {
         if (null == crv)
           continue;
-        NurbsCurve nc = crv as NurbsCurve ?? crv.ToNurbsCurve();
-        if (nc == null)
-          continue;
-        nurbs_curves[index] = nc; // this forces GC to not collect while we are using the pointers
-        ptr_nurbscurves[index] = nc.ConstPointer();
+        ptr_curves[index] = crv.ConstPointer();
+
         index++;
         if (index > 3)
           break;
@@ -680,8 +675,8 @@ namespace Rhino.Geometry
       int count = index;
       if (count < 2 || count > 4)
         return null;
-      IntPtr ptr_brep = UnsafeNativeMethods.RHC_RhinoCreateEdgeSrf(ptr_nurbscurves[0], ptr_nurbscurves[1], ptr_nurbscurves[2], ptr_nurbscurves[3]);
-      GC.KeepAlive(nurbs_curves);
+      IntPtr ptr_brep = UnsafeNativeMethods.RHC_RhinoCreateEdgeSrf(ptr_curves[0], ptr_curves[1], ptr_curves[2], ptr_curves[3]);
+      GC.KeepAlive(curves);
       return IntPtr.Zero == ptr_brep ? null : new Brep(ptr_brep, null);
     }
 
@@ -1031,17 +1026,13 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
-    /// and one curve that defines a surface edge.
-    /// /// </summary>
+    /// and one curve that defines a surface edge. 
+    /// </summary>
     /// <param name="rail">Rail to sweep shapes along</param>
     /// <param name="shape">Shape curve</param>
     /// <param name="closed">Only matters if shape is closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
-    /// <remarks>
-    /// If you are not producing the sweep results that you are after, then
-    /// use the SweepOneRail class with options to generate the swept geometry.
-    /// </remarks>
     public static Brep[] CreateFromSweep(Curve rail, Curve shape, bool closed, double tolerance)
     {
       return CreateFromSweep(rail, new[] { shape }, closed, tolerance);
@@ -1056,10 +1047,6 @@ namespace Rhino.Geometry
     /// <param name="closed">Only matters if shapes are closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
-    /// <remarks>
-    /// If you are not producing the sweep results that you are after, then
-    /// use the SweepOneRail class with options to generate the swept geometry.
-    /// </remarks>
     public static Brep[] CreateFromSweep(Curve rail, IEnumerable<Curve> shapes, bool closed, double tolerance)
     {
       IntPtr const_ptr_rail = rail.ConstPointer();
@@ -1085,10 +1072,6 @@ namespace Rhino.Geometry
     /// <param name="closed">Only matters if shape is closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
-    /// <remarks>
-    /// If you are not producing the sweep results that you are after, then
-    /// use the SweepOneRail class with options to generate the swept geometry.
-    /// </remarks>
     public static Brep[] CreateFromSweepSegmented(Curve rail, Curve shape, bool closed, double tolerance)
     {
       return CreateFromSweepSegmented(rail, new[] { shape }, closed, tolerance);
@@ -1104,10 +1087,6 @@ namespace Rhino.Geometry
     /// <param name="closed">Only matters if shapes are closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
-    /// <remarks>
-    /// If you are not producing the sweep results that you are after, then
-    /// use the SweepOneRail class with options to generate the swept geometry.
-    /// </remarks>
     public static Brep[] CreateFromSweepSegmented(Curve rail, IEnumerable<Curve> shapes, bool closed, double tolerance)
     {
       IntPtr const_ptr_rail = rail.ConstPointer();
@@ -1165,12 +1144,55 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Makes a 2 rail sweep.  Like CreateFromSweep but the result is split where parameterization along a rail changes abruptly
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
     /// </summary>
     /// <param name="rail1">Rail to sweep shapes along</param>
     /// <param name="rail2">Rail to sweep shapes along</param>
     /// <param name="shapes">Shape curves</param>
-    /// <param name="rail_params">Shape parameters</param>
+    /// <param name="start">Optional starting point of sweep. Use Point3d.Unset if you do not want to include a start point.</param>
+    /// <param name="end">Optional ending point of sweep. Use Point3d.Unset if you do not want to include an end point.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
+    /// <param name="rebuild">The rebuild style.</param>
+    /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
+    /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerenace. Otherwise, specify 0.0</param>
+    /// <param name="preserveHeight">Removes the association between the height scaling from the width scaling</param>
+    /// <returns>Array of Brep sweep results</returns>
+    public static Brep[] CreateFromSweep(
+      Curve rail1, 
+      Curve rail2, 
+      IEnumerable<Curve> shapes, 
+      Point3d start,
+      Point3d end,
+      bool closed,
+      double tolerance,
+      SweepRebuild rebuild, 
+      int rebuildPointCount, 
+      double refitTolerance, 
+      bool preserveHeight
+      )
+    {
+      IntPtr const_ptr_rail1 = rail1.ConstPointer();
+      IntPtr const_ptr_rail2 = rail2.ConstPointer();
+      using (var shapearray = new SimpleArrayCurvePointer(shapes))
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_shapes = shapearray.ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.RHC_Rhino2RailSweep2(const_ptr_rail1, const_ptr_rail2, const_ptr_shapes, start, end, closed, tolerance, (int)rebuild, rebuildPointCount, refitTolerance, preserveHeight, ptr_breps);
+        Runtime.CommonObject.GcProtect(rail1, rail2);
+        GC.KeepAlive(shapes);
+        return rc.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Makes a 2 rail sweep. Like CreateFromSweep but the result is split where parameterization along a rail changes abruptly.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along</param>
+    /// <param name="rail2">Rail to sweep shapes along</param>
+    /// <param name="shapes">Shape curves</param>    /// <param name="rail_params">Shape parameters</param>
     /// <param name="closed">Only matters if shapes are closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
@@ -1909,6 +1931,56 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Splits shared areas of Breps and creates separate Breps from the shared and unshared parts.
+    /// </summary>
+    /// <param name="firstBrep">The Brep to split.</param>
+    /// <param name="secondBrep">The cutting Brep.</param>
+    /// <param name="tolerance">Tolerance to use for splitting operation. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>An array of Brep if successful, an empty array on failure.</returns>
+    public static Brep[] CreateBooleanSplit(Brep firstBrep, Brep secondBrep, double tolerance)
+    {
+      if (firstBrep == null) { throw new ArgumentNullException(nameof(firstBrep)); }
+      if (secondBrep == null) { throw new ArgumentNullException(nameof(secondBrep)); }
+      return CreateBooleanSplit(new[] { firstBrep }, new[] { secondBrep }, tolerance);
+    }
+
+    /// <summary>
+    /// Splits shared areas of Breps and creates separate Breps from the shared and unshared parts.
+    /// </summary>
+    /// <param name="firstSet">The Breps to split.</param>
+    /// <param name="secondSet">The cutting Breps.</param>
+    /// <param name="tolerance">Tolerance to use for splitting operation. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>An array of Brep if successful, an empty array on failure.</returns>
+    public static Brep[] CreateBooleanSplit(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance)
+    {
+      if (null == firstSet || null == secondSet)
+        return new Brep[0];
+
+      using (var input_set1 = new SimpleArrayBrepPointer())
+      using (var input_set2 = new SimpleArrayBrepPointer())
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        foreach (var brep in firstSet)
+          input_set1.Add(brep, true);
+
+        foreach (var brep in secondSet)
+          input_set2.Add(brep, true);
+
+        IntPtr const_ptr_inputset1 = input_set1.ConstPointer();
+        IntPtr const_ptr_inputset2 = input_set2.ConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+
+        if (UnsafeNativeMethods.RHC_RhinoBooleanSplit(const_ptr_inputset1, const_ptr_inputset2, tolerance, ptr_output))
+          return output.ToNonConstArray();
+
+        GC.KeepAlive(firstSet);
+        GC.KeepAlive(secondSet);
+
+        return new Brep[0];
+      }
+    }
+
+    /// <summary>
     /// Creates a hollowed out shell from a solid Brep. Function only operates on simple, solid, manifold Breps.
     /// </summary>
     /// <param name="brep">The solid Brep to shell.</param>
@@ -2562,7 +2634,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Finds a point on a brep that is closest to testPoint.
+    /// Finds a point on a Brep that is closest to testPoint.
+    /// The method searches all Brep faces looking for the one closest to testPoint.
+    /// When found, if the closest point falls on the inactive region of the face, then 
+    /// the method finds the face's edge that is closest to testPoint.
     /// </summary>
     /// <param name="testPoint">base point to project to surface.</param>
     /// <param name="closestPoint">location of the closest brep point.</param>
@@ -2746,6 +2821,26 @@ namespace Rhino.Geometry
     {
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.RHC_RhinoIsPointInBrep(const_ptr_this, point, tolerance, strictlyIn);
+    }
+
+    /// <summary>
+    /// Finds a point inside of a solid Brep.
+    /// </summary>
+    /// <param name="tolerance">
+    /// Used for intersecting rays and is not necessarily related to the distance from the brep to the found point.
+    /// When in doubt, use the document's model absolute tolerance.
+    /// </param>
+    /// <param name="point">A point inside the solid Brep.</param>
+    /// <returns>
+    /// Returns false if the input is not solid and manifold, if the Brep's bounding box is less than 2.0 * tolerance wide, 
+    /// or if no point could be found due to ray shooting or other errors. Otherwise, true is returned.
+    /// </returns>
+    [ConstOperation]
+    public bool GetPointInside(double tolerance, out Point3d point)
+    {
+      point = Point3d.Unset;
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoGetPointInSolidBrep(const_ptr_this, tolerance, ref point);
     }
 
     /// <summary>
@@ -4596,6 +4691,21 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_Brep_ShrinkFace(ptr_brep, FaceIndex, (int)disableSide);
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Shrinks the underlying untrimmed surface of this Brep face right to the trimming boundaries.
+    /// Note, shrinking the trimmed surface can sometimes cause problems later since having
+    /// the edges so close to the trimming boundaries can cause commands that use the surface
+    /// edges as input to fail.
+    /// </summary>
+    /// <returns>true on success, false on failure.</returns>
+    public bool ShrinkSurfaceToEdge()
+    {
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoBrepShrinkSurfaceToEdge(ptr_brep, FaceIndex);
+    }
+#endif
+
     /// <summary>
     /// Sets the surface domain of this face.
     /// </summary>
@@ -6248,6 +6358,62 @@ namespace Rhino.Geometry.Collections
       int index = UnsafeNativeMethods.ON_Brep_NewCurveOnFace(ptr_brep, face.FaceIndex, edge.EdgeIndex, rev3d, curve2dIndex);
       return index < 0 ? null : this[index]; // this way the BrepTrim is properly in the list 
     }
+
+    /// <summary>
+    /// Matches the endpoints of all trims in the Brep.
+    /// </summary>
+    /// <returns>true if any trim's 2d curve is changed, false otherwise.</returns>
+    public bool MatchEnds()
+    {
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      return UnsafeNativeMethods.ON_Brep_MatchTrimEnds1(ptr_brep);
+    }
+
+    /// <summary>
+    /// Match the endpoints of a trim to the next and previous trim.
+    /// </summary>
+    /// <param name="trimIndex"></param>
+    /// <returns>true if any trim's 2d curve is changed, false otherwise.</returns>
+    public bool MatchEnds(int trimIndex)
+    {
+      if (trimIndex < 0 || trimIndex > m_brep.Trims.Count)
+        throw new IndexOutOfRangeException(nameof(trimIndex));
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      return UnsafeNativeMethods.ON_Brep_MatchTrimEnds2(ptr_brep, trimIndex);
+    }
+
+    /// <summary>
+    /// Match the end of a trim to the start of the next trim.
+    /// </summary>
+    /// <param name="trim0">The Brep trim.</param>
+    /// <param name="trim1">Trep trim that comes immediately after trim0 in the same loop.</param>
+    /// <returns>true if either trim's 2d curve is changed, false otherwise.</returns>
+    public bool MatchEnds(BrepTrim trim0, BrepTrim trim1)
+    {
+      if (null == trim0)
+        throw new NullReferenceException(nameof(trim0));
+      if (null == trim1)
+        throw new NullReferenceException(nameof(trim1));
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      IntPtr ptr_trim0 = trim0.NonConstPointer();
+      IntPtr ptr_trim1 = trim1.NonConstPointer();
+      return UnsafeNativeMethods.ON_Brep_MatchTrimEnds3(ptr_brep, ptr_trim0, ptr_trim1);
+    }
+
+    /// <summary>
+    /// Match the endpoints of all trims in a loop.
+    /// </summary>
+    /// <param name="loop">The Brep loop.</param>
+    /// <returns>true if any trim's 2d curve is changed, false otherwise.</returns>
+    public bool MatchEnds(BrepLoop loop)
+    {
+      if (null == loop)
+        throw new NullReferenceException(nameof(loop));
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      IntPtr ptr_loop = loop.NonConstPointer();
+      return UnsafeNativeMethods.ON_Brep_MatchTrimEnds4(ptr_brep, ptr_loop);
+    }
+
     #endregion
 
     #region IEnumerable Implementation

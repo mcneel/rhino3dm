@@ -196,6 +196,11 @@ namespace Rhino.Display
       return UnsafeNativeMethods.RhViewSpeedTest(m_runtime_serial_number, frameCount, freezeDrawList, direction, angleDeltaRadians);
     }
 
+    /// <summary>
+    /// Return true if this view is a RhinoPageView.
+    /// </summary>
+    public bool IsPageView => UnsafeNativeMethods.CRhinoView_IsPageView(m_runtime_serial_number);
+
     // [skipping]
     //  bool ScreenCaptureToBitmap( CRhinoDib& dib, BOOL bIncludeCursor = true, BOOL bClientAreaOnly = false);
 

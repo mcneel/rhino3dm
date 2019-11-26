@@ -177,54 +177,84 @@ RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSelf(const ON_Curve*
   return rc;
 }
 
-RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveCurve(const ON_Curve* pCurveA,
-                                                                  const ON_Curve* pCurveB,
-                                                                  double tolerance,
-                                                                  double overlap_tolerance)
+RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveCurve(
+  const ON_Curve* pCurveA,
+  const ON_Curve* pCurveB,
+  double tolerance,
+  double overlap_tolerance,
+  ON_SimpleArray<int>* pInvalid, 
+  ON_TextLog* pTextLog
+)
 {
-
   ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
-  if(pCurveA && pCurveB)
+  if (pCurveA && pCurveB)
   {
     rc = new ON_SimpleArray<ON_X_EVENT>();
     pCurveA->IntersectCurve(pCurveB, *rc, tolerance, overlap_tolerance);
+    if (rc->Count() > 0 && pInvalid)
+    {
+      for (int i = 0; i < rc->Count(); i++)
+      {
+        if (!(*rc)[i].IsValid(pTextLog, tolerance, overlap_tolerance, pCurveA, nullptr, pCurveB, nullptr, nullptr, nullptr, nullptr))
+          pInvalid->Append(i);
+      }
+    }
   }
- 
   return rc;
 }
 
-RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSurface(const ON_Curve* pCurve,
-                                                                    const ON_Surface* pSurface,
-                                                                    double tolerance,
-                                                                    double overlap_tolerance)
+RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSurface(
+  const ON_Curve* pCurve,
+  const ON_Surface* pSurface,
+  double tolerance,
+  double overlap_tolerance,
+  ON_SimpleArray<int>* pInvalid,
+  ON_TextLog* pTextLog
+)
 {
-
   ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
-  if(pCurve && pSurface)
+  if (pCurve && pSurface)
   {
     rc = new ON_SimpleArray<ON_X_EVENT>();
     pCurve->IntersectSurface(pSurface, *rc, tolerance, overlap_tolerance);
+    if (rc->Count() > 0 && pInvalid)
+    {
+      for (int i = 0; i < rc->Count(); i++)
+      {
+        if (!(*rc)[i].IsValid(pTextLog, tolerance, overlap_tolerance, pCurve, nullptr, nullptr, nullptr, pSurface, nullptr, nullptr))
+          pInvalid->Append(i);
+      }
+    }
   }
- 
   return rc;
 }
 
-RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSurface2(const ON_Curve* pCurve,
-                                                                     const ON_Surface* pSurface,
-                                                                     double domain0, 
-                                                                     double domain1,
-                                                                     double tolerance,
-                                                                     double overlap_tolerance)
+RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSurface2(
+  const ON_Curve* pCurve,
+  const ON_Surface* pSurface,
+  double domain0,
+  double domain1,
+  double tolerance,
+  double overlap_tolerance,
+  ON_SimpleArray<int>* pInvalid,
+  ON_TextLog* pTextLog
+)
 {
-
   ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
-  if(pCurve && pSurface)
+  if (pCurve && pSurface)
   {
     ON_Interval domain(domain0, domain1);
     rc = new ON_SimpleArray<ON_X_EVENT>();
     pCurve->IntersectSurface(pSurface, *rc, tolerance, overlap_tolerance, &domain);
+    if (rc->Count() > 0 && pInvalid)
+    {
+      for (int i = 0; i < rc->Count(); i++)
+      {
+        if (!(*rc)[i].IsValid(pTextLog, tolerance, overlap_tolerance, pCurve, &domain, nullptr, nullptr, pSurface, nullptr, nullptr))
+          pInvalid->Append(i);
+      }
+    }
   }
- 
   return rc;
 }
 
@@ -432,16 +462,6 @@ RH_C_FUNCTION ON_SimpleArray<ON_Polyline*>* ON_Intersect_MeshMesh1(const ON_Mesh
     }
   }
   return rc;
-}
-
-RH_C_FUNCTION bool RH_MX_UseNew(bool set, bool value)
-{
-  return Rhino_MX_UseNew(set, value);
-}
-
-RH_C_FUNCTION bool RH_MX_MeshMeshIntersect(const ON_SimpleArray<const ON_Mesh*>* meshes, double tolerance, char mode, ON_SimpleArray<ON_Polyline*>* outputs)
-{
-  return Rhino_MX_MeshMeshIntersect(meshes, tolerance, mode, outputs);
 }
 
 // ON_BoundingBox::MaximumDistance has a copy/paste bug in it in V4. Using local

@@ -1,6 +1,7 @@
 using System;
 using Rhino.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Rhino.Runtime.InteropWrappers;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
@@ -315,6 +316,252 @@ namespace Rhino.Geometry
     /// </summary>
     Parabola = 4
   }
+
+
+#if RHINO_SDK
+  /// <summary>
+  /// For internal use only
+  /// </summary>
+  internal class CurveRegionBoundary : List<CurveSegment>
+  {
+  }
+
+  /// <summary>
+  /// For internal use only
+  /// </summary>
+  internal class CurveRegion : List<CurveRegionBoundary>
+  {
+  }
+
+  /// <summary>
+  /// Represents the results of a Curve.CreateBooleanRegions calculation.
+  /// </summary>
+  [Serializable]
+  public class CurveBooleanRegions : IDisposable
+  {
+    #region Members
+    private Curve[] m_planar_curves;
+    private CurveRegion[] m_curve_regions;
+    private int[] m_point_indices;
+    private double m_tolerance;
+    #endregion
+
+    /// <summary>
+    /// Internal constructor
+    /// </summary>
+    internal CurveBooleanRegions(Curve[] planarCurves, CurveRegion[] curveRegions, int[] pointIndices, double tolerance)
+    {
+      m_planar_curves = planarCurves;
+      m_curve_regions = curveRegions;
+      m_point_indices = pointIndices;
+      m_tolerance = tolerance;
+    }
+
+    /// <summary>
+    /// Protected constructor used in serialization.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected CurveBooleanRegions(SerializationInfo info, StreamingContext context)
+    {
+      // TODO?
+    }
+
+    /// <summary>
+    /// Returns the number of curve regions. A curve region is a collection of
+    /// curves that bound a single connected region of the plane.
+    /// </summary>
+    public int RegionCount => IsValid ? m_curve_regions.Length : 0;
+
+    /// <summary>
+    /// Returns the boundary curves in a curve region. A curve region is a collection of
+    /// curves that bound a single connected region of the plane. Note, the first curve
+    /// is always the outer boundary.
+    /// </summary>
+    /// <param name="regionIndex">The curve region index.</param>
+    /// <returns>An array of boundary curves if successful, an empty array if not successful.</returns>
+    [ConstOperation]
+    public Curve[] RegionCurves(int regionIndex)
+    {
+      var rc = new List<Curve>();
+      if (IsValid && 0 <= regionIndex && regionIndex < m_curve_regions.Length)
+      {
+        try
+        {
+          foreach (var boundary in m_curve_regions[regionIndex])
+          {
+            var curve_segments = new List<Curve>(boundary.Count);
+            foreach (var segment in boundary)
+            {
+              var curve = m_planar_curves[segment.Index].Trim(segment.SubDomain);
+              if (segment.Reversed)
+                curve.Reverse();
+              curve_segments.Add(curve);
+            }
+            var joined_curves = Curve.JoinCurves(curve_segments, 2.1 * m_tolerance);
+            rc.AddRange(joined_curves);
+          }
+        }
+        catch
+        {
+          // ignored
+        }
+      }
+      return rc.Count > 0 ? rc.ToArray() : new Curve[0];
+    }
+
+    /// <summary>
+    /// If this object were created using the Curve.CreateBooleanRegions override that
+    /// accepts a collection of points as input, then this value will be equal to the length
+    /// of the points collection.
+    /// </summary>
+    public int PointCount => IsValid ? m_point_indices.Length : 0;
+
+    /// <summary>
+    /// If this object were created using the Curve.CreateBooleanRegions override that
+    /// accepts a collection of points as input, then you this method to retrieve the
+    /// index of the point contained in a curve region.
+    /// If this.RegionPointIndex(i) = n, then points[i] is contained in this.RegionCurves(n).
+    /// If points[i] is not in any region, then this.RegionPointIndex(i) = -1.
+    /// </summary>
+    /// <param name="pointIndex">The point index.</param>
+    /// <returns>
+    /// The index of the input point contained in the specified region if successful,
+    /// or -1 if points[i] was not used in any region or if not successful.
+    /// </returns>
+    [ConstOperation]
+    public int RegionPointIndex(int pointIndex)
+    {
+      var rc = -1;
+      if (IsValid && 0 <= pointIndex && pointIndex < m_point_indices.Length)
+        rc = m_point_indices[pointIndex];
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns the number of boundary curves in a curve region.
+    /// </summary>
+    /// <param name="regionIndex">The curve region index.</param>
+    /// <returns>The number of boundary curves in the curve region.</returns>
+    [ConstOperation]
+    public int BoundaryCount(int regionIndex)
+    {
+      var rc = 0;
+      if (IsValid && 0 <= regionIndex && regionIndex < m_curve_regions.Length)
+        rc = m_curve_regions[regionIndex].Count;
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns the number of segments in a boundary curve in a curve region.
+    /// </summary>
+    /// <param name="regionIndex">The curve region index.</param>
+    /// <param name="boundaryIndex">The boundary curve index.</param>
+    /// <returns>The number of curve segments in th boundary curves.</returns>
+    [ConstOperation]
+    public int SegmentCount(int regionIndex, int boundaryIndex)
+    {
+      var rc = 0;
+      if (IsValid && 0 <= regionIndex && regionIndex < m_curve_regions.Length)
+      {
+        var region = m_curve_regions[regionIndex];
+        if (0 <= boundaryIndex && boundaryIndex < region.Count)
+          rc = region[boundaryIndex].Count;
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns the details of a segment in a boundary curve in a curve region.
+    /// </summary>
+    /// <param name="regionIndex">The curve region index.</param>
+    /// <param name="boundaryIndex">The boundary curve index.</param>
+    /// <param name="segmmentIndex">The segment index.</param>
+    /// <param name="subDomain">The subdomain of the planar curve used by the segmment.</param>
+    /// <param name="reversed">true if the piece of the planar curve should be reversed.</param>
+    /// <returns>The index of the planar curve used by the specified segment if successful, -1 if not successful.</returns>
+    [ConstOperation]
+    public int SegmentDetails(int regionIndex, int boundaryIndex, int segmmentIndex, out Interval subDomain, out bool reversed)
+    {
+      var rc = -1;
+      subDomain = Interval.Unset;
+      reversed = false;
+      if (IsValid && 0 <= regionIndex && regionIndex < m_curve_regions.Length)
+      {
+        var region = m_curve_regions[regionIndex];
+        if (0 <= boundaryIndex && boundaryIndex < region.Count)
+        {
+          var boundary = region[boundaryIndex];
+          if (0 <= segmmentIndex && segmmentIndex < boundary.Count)
+          {
+            rc = boundary[segmmentIndex].Index;
+            subDomain = boundary[segmmentIndex].SubDomain;
+            reversed = boundary[segmmentIndex].Reversed;
+          }
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns number of planar curves that were calculated by Curve.CreateBooleanRegions.
+    /// </summary>
+    public int PlanarCurveCount => IsValid ? m_planar_curves.Length : 0;
+
+    /// <summary>
+    /// Returns a planar curve that was calculated by Curve.CreateBooleanRegions.
+    /// </summary>
+    /// <param name="planarCurveIndex"></param>
+    /// <returns>The planar curve if succesful, null if not successful.</returns>
+    [ConstOperation]
+    public Curve PlanarCurve(int planarCurveIndex)
+    {
+      Curve rc = null;
+      if (IsValid && 0 <= planarCurveIndex && planarCurveIndex < m_planar_curves.Length)
+      {
+        var curve = m_planar_curves[planarCurveIndex];
+        if (null != curve)
+          rc = curve.DuplicateCurve(); // Copy...
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Internal validator
+    /// </summary>
+    private bool IsValid => 
+      null != m_planar_curves && 
+      null != m_curve_regions && 
+      null != m_point_indices;
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// This method is called with argument true when class user calls Dispose(), 
+    /// while with argument false when the Garbage Collector invokes the finalizer,
+    /// or Finalize() method. You must reclaim all used unmanaged resources in both cases,
+    /// and can use this chance to call Dispose on disposable fields if the argument is true.
+    /// Also, you must call the base virtual method within your overriding method.
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (null != m_planar_curves)
+      {
+        foreach (var curve in m_planar_curves)
+          curve?.Dispose();
+        m_planar_curves = null;
+      }
+    }
+  }
+#endif // RHINO_SDK
+
 
   /// <summary>
   /// Represents a base class that is common to most RhinoCommon curve types.
@@ -1108,7 +1355,7 @@ namespace Rhino.Geometry
       curves.AddRange(subtractors);
 
       using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(curves))
-      using(SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
       {
         IntPtr inputPtr = input.ConstPointer();
         IntPtr outputPtr = output.NonConstPointer();
@@ -1116,6 +1363,98 @@ namespace Rhino.Geometry
         GC.KeepAlive(curveA);
         GC.KeepAlive(subtractors);
         return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Curve Boolean method, which trims and splits curves based on their overlapping regions.
+    /// </summary>
+    /// <param name="curves">The input curves.</param>
+    /// <param name="plane">Regions will be found in the projection of the curves to this plane.</param>
+    /// <param name="points">These points will be projected to plane. All regions that contain at least one of these points will be found.</param>
+    /// <param name="combineRegions">If true, then adjacent regions will be combined.</param>
+    /// <param name="tolerance">Function tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>The curve Boolean regions if successful, null of no successful.</returns>
+    public static CurveBooleanRegions CreateBooleanRegions(IEnumerable<Curve> curves, Plane plane, IEnumerable<Point3d> points, bool combineRegions, double tolerance)
+    {
+      if (null == curves)
+        throw new ArgumentNullException(nameof(curves));
+      if (null == points)
+        throw new ArgumentNullException(nameof(points));
+
+      var pts = new List<Point3d>(points);
+      var pt_array = pts.ToArray();
+
+      using (var in_curves = new SimpleArrayCurvePointer(curves))
+      using (var out_curves = new SimpleArrayCurvePointer())
+      using (var out_regions = new ClassArrayCurveRegion())
+      using (var out_region_ids = new SimpleArrayInt())
+      {
+        var ptr_in_curves = in_curves.ConstPointer();
+        var ptr_out_curves = out_curves.NonConstPointer();
+        var ptr_out_regions = out_regions.NonConstPointer();
+        var ptr_out_region_ids = out_region_ids.NonConstPointer();
+
+        var rc = UnsafeNativeMethods.RHC_RhinoCurveBoolean(
+          ptr_in_curves, 
+          ref plane, 
+          pt_array.Length, 
+          pt_array,
+          combineRegions, 
+          tolerance,
+          ptr_out_curves,
+          ptr_out_regions, 
+          ptr_out_region_ids
+          );
+
+        GC.KeepAlive(curves);
+
+        return rc 
+          ? new CurveBooleanRegions(out_curves.ToNonConstArray(), out_regions.ToArray(), out_region_ids.ToArray(), tolerance)
+          : null;
+      }
+    }
+
+    /// <summary>
+    /// Calculates curve Boolean regions, which trims and splits curves based on their overlapping regions.
+    /// </summary>
+    /// <param name="curves">The input curves.</param>
+    /// <param name="plane">Regions will be found in the projection of the curves to this plane.</param>
+    /// <param name="combineRegions">If true, then adjacent regions will be combined.</param>
+    /// <param name="tolerance">Function tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>The curve Boolean regions if successful, null of no successful.</returns>
+    public static CurveBooleanRegions CreateBooleanRegions(IEnumerable<Curve> curves, Plane plane, bool combineRegions, double tolerance)
+    {
+      if (null == curves)
+        throw new ArgumentNullException(nameof(curves));
+
+      using (var in_curves = new SimpleArrayCurvePointer(curves))
+      using (var out_curves = new SimpleArrayCurvePointer())
+      using (var out_regions = new ClassArrayCurveRegion())
+      using (var out_region_ids = new SimpleArrayInt())
+      {
+        var ptr_in_curves = in_curves.ConstPointer();
+        var ptr_out_curves = out_curves.NonConstPointer();
+        var ptr_out_regions = out_regions.NonConstPointer();
+        var ptr_out_region_ids = out_region_ids.NonConstPointer();
+
+        var rc = UnsafeNativeMethods.RHC_RhinoCurveBoolean(
+          ptr_in_curves,
+          ref plane,
+          0,
+          null,
+          combineRegions,
+          tolerance,
+          ptr_out_curves,
+          ptr_out_regions,
+          ptr_out_region_ids
+        );
+
+        GC.KeepAlive(curves);
+
+        return rc 
+          ? new CurveBooleanRegions(out_curves.ToNonConstArray(), out_regions.ToArray(), new int[0], tolerance) 
+          : null;
       }
     }
 
@@ -2297,6 +2636,44 @@ namespace Rhino.Geometry
     }
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Returns a curve's inflection points. An inflection point is a location on
+    /// a curve at which the sign of the curvature (i.e., the concavity) changes. 
+    /// The curvature at these locations is always 0.
+    /// </summary>
+    /// <returns>An array of points if successful, null if not successful or on error.</returns>
+    public Point3d[] InflectionPoints()
+    {
+      Point3d[] rc = null;
+      using (SimpleArrayPoint3d points = new SimpleArrayPoint3d())
+      {
+        IntPtr pConstThis = ConstPointer();
+        IntPtr pPoints = points.NonConstPointer();
+        if (UnsafeNativeMethods.RHC_RhinoCurveInflectionPoints(pConstThis, pPoints))
+          rc = points.ToArray();
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns a curve's maximum curvature points. The maximum curvature points identify
+    /// where the curvature starts to decrease in both directions from the points.
+    /// </summary>
+    /// <returns>An array of points if successful, null if not successful or on error.</returns>
+    public Point3d[] MaxCurvaturePoints()
+    {
+      Point3d[] rc = null;
+      using (SimpleArrayPoint3d points = new SimpleArrayPoint3d())
+      {
+        IntPtr pConstThis = ConstPointer();
+        IntPtr pPoints = points.NonConstPointer();
+        if (UnsafeNativeMethods.RHC_RhinoCurveMaxCurvaturePoints(pConstThis, pPoints))
+          rc = points.ToArray();
+      }
+      return rc;
+    }
+
     /// <summary>
     /// If IsClosed, just return true. Otherwise, decide if curve can be closed as 
     /// follows: Linear curves polylinear curves with 2 segments, Nurbs with 3 or less 
@@ -4504,6 +4881,130 @@ namespace Rhino.Geometry
       if (!rc)
         return null;
       return curves;
+    }
+
+    /// <summary>
+    /// Offsets a closed curve in the following way: pProject the curve to a plane with given normal.
+    /// Then, loose Offset the projection by distance + blend_radius and trim off self-intersection.
+    /// THen, Offset the remaining curve back in the opposite direction by blend_radius, filling gaps with blends.
+    /// Finally, use the elevations of the input curve to get the correct elevations of the result.
+    /// </summary>
+    /// <param name="distance">The positive distance to offset the curve.</param>
+    /// <param name="blendRadius">
+    /// Positive, typically the same as distance. When the offset results in a self-intersection
+    /// that gets trimmed off at a kink, the kink will be blended out using this radius.
+    /// </param>
+    /// <param name="directionPoint">
+    /// A point that indicates the direction of the offset. If the offset is inward,
+    /// the point's projection to the plane should be well within the curve.
+    /// It will be used to decide which part of the offset to keep if there are self-intersections.
+    /// </param>
+    /// <param name="normal">A vector that indicates the normal of the plane in which the offset will occur.</param>
+    /// <param name="tolerance">Used to determine self-intersections, not offset error.</param>
+    /// <returns>The offset curve if successful.</returns>
+    public Curve RibbonOffset(double distance, double blendRadius, Point3d directionPoint, Vector3d normal, double tolerance)
+    {
+      IntPtr const_ptr = ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoRibbonOffsetCurve(const_ptr, distance, blendRadius, directionPoint, normal, tolerance, IntPtr.Zero, IntPtr.Zero);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Offsets a closed curve in the following way: pProject the curve to a plane with given normal.
+    /// Then, loose Offset the projection by distance + blend_radius and trim off self-intersection.
+    /// THen, Offset the remaining curve back in the opposite direction by blend_radius, filling gaps with blends.
+    /// Finally, use the elevations of the input curve to get the correct elevations of the result.
+    /// </summary>
+    /// <param name="distance">The positive distance to offset the curve.</param>
+    /// <param name="blendRadius">
+    /// Positive, typically the same as distance. When the offset results in a self-intersection
+    /// that gets trimmed off at a kink, the kink will be blended out using this radius.
+    /// </param>
+    /// <param name="directionPoint">
+    /// A point that indicates the direction of the offset. If the offset is inward,
+    /// the point's projection to the plane should be well within the curve.
+    /// It will be used to decide which part of the offset to keep if there are self-intersections.
+    /// </param>
+    /// <param name="normal">A vector that indicates the normal of the plane in which the offset will occur.</param>
+    /// <param name="tolerance">Used to determine self-intersections, not offset error.</param>
+    /// <param name="crossSections">
+    /// Contains lines between input and the offset theat might be useful
+    /// as input to Brep.CreateFromSweep or some other surface creation tool.
+    /// </param>
+    /// <param name="ruledSurfaces">
+    /// Contain ruled surfaces between the input and the parts of the offset that correspond exactly.
+    /// Note, there will be gaps between these at blends.
+    /// </param>
+    /// <returns>The offset curve if successful.</returns>
+    public Curve RibbonOffset(double distance, double blendRadius, Point3d directionPoint, Vector3d normal, double tolerance, out Curve[] crossSections, out Surface[] ruledSurfaces)
+    {
+      crossSections = new Curve[0];
+      ruledSurfaces = new Surface[0];
+
+      SimpleArrayCurvePointer output_curves = new SimpleArrayCurvePointer();
+      IntPtr output_curve_ptr = output_curves.NonConstPointer();
+
+      SimpleArraySurfacePointer output_surfaces = new SimpleArraySurfacePointer();
+      IntPtr output_surface_ptr = output_surfaces.NonConstPointer();
+
+      IntPtr const_ptr = ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoRibbonOffsetCurve(const_ptr, distance, blendRadius, directionPoint, normal, tolerance, output_curve_ptr, output_surface_ptr);
+      if (ptr != IntPtr.Zero)
+      {
+        crossSections = output_curves.ToNonConstArray();
+        ruledSurfaces = output_surfaces.ToNonConstArray();
+      }
+
+      output_curves.Dispose();
+      output_surfaces.Dispose();
+
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Offsets a closed curve in the following way: pProject the curve to a plane with given normal.
+    /// Then, loose Offset the projection by distance + blend_radius and trim off self-intersection.
+    /// THen, Offset the remaining curve back in the opposite direction by blend_radius, filling gaps with blends.
+    /// Finally, use the elevations of the input curve to get the correct elevations of the result.
+    /// </summary>
+    /// <param name="distance">The positive distance to offset the curve.</param>
+    /// <param name="blendRadius">
+    /// Positive, typically the same as distance. When the offset results in a self-intersection
+    /// that gets trimmed off at a kink, the kink will be blended out using this radius.
+    /// </param>
+    /// <param name="directionPoint">
+    /// A point that indicates the direction of the offset. If the offset is inward,
+    /// the point's projection to the plane should be well within the curve.
+    /// It will be used to decide which part of the offset to keep if there are self-intersections.
+    /// </param>
+    /// <param name="normal">A vector that indicates the normal of the plane in which the offset will occur.</param>
+    /// <param name="tolerance">Used to determine self-intersections, not offset error.</param>
+    /// <param name="outputParameters">A list of parameter, paired with curveParameters, from the output curve for creating cross sections.</param>
+    /// <param name="curveParameters">A list of parameter, paired with outputParameters, from the input curve for creating cross sections.</param>
+    /// <returns>The offset curve if successful.</returns>
+    public Curve RibbonOffset(double distance, double blendRadius, Point3d directionPoint, Vector3d normal, double tolerance, out double[] outputParameters, out double[] curveParameters)
+    {
+      outputParameters = new double[0];
+      curveParameters = new double[0];
+
+      SimpleArrayDouble output_parameters = new SimpleArrayDouble();
+      IntPtr output_parameter_ptr = output_parameters.NonConstPointer();
+
+      SimpleArrayDouble curve_parameters = new SimpleArrayDouble();
+      IntPtr curve_parameters_ptr = curve_parameters.NonConstPointer();
+
+      IntPtr const_ptr = ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoRibbonOffsetCurve2(const_ptr, distance, blendRadius, directionPoint, normal, tolerance, output_parameter_ptr, curve_parameters_ptr);
+      if (ptr != IntPtr.Zero)
+      {
+        outputParameters = output_parameters.ToArray();
+        curveParameters = curve_parameters.ToArray();
+      }
+
+      output_parameters.Dispose();
+      curve_parameters.Dispose();
+
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
     /// <summary>

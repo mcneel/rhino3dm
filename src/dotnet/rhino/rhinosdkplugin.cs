@@ -145,7 +145,10 @@ namespace Rhino.PlugIns
           pluginName = title.Title;
         }
 
+        int endpointCount = HostUtils.CustomComputeEndpointCount();
         rc = (PlugIn)System.Activator.CreateInstance(pluginType);
+        if (rc != null && HostUtils.CustomComputeEndpointCount() > endpointCount)
+          rc.Settings.SetBool("HasComputeEndpoint", true);
       }
       catch (Exception ex)
       {
@@ -398,6 +401,29 @@ namespace Rhino.PlugIns
       return null;
     }
 
+    /// <summary>
+    /// Used by compute's startup code to load plugins that have registered custom endpoints
+    /// </summary>
+    public static void LoadComputeExtensionPlugins()
+    {
+      var installedPlugins = GetInstalledPlugIns();
+      foreach (var kvp in installedPlugins)
+      {
+        if (string.Equals(kvp.Value, "IronPython", StringComparison.InvariantCultureIgnoreCase))
+        {
+          Rhino.PlugIns.PlugIn.LoadPlugIn(kvp.Key);
+          continue;
+        }
+
+        var pluginSettings = Rhino.PersistentSettings.FromPlugInId(kvp.Key);
+        if (pluginSettings == null)
+          continue;
+        if (pluginSettings.GetBool("HasComputeEndpoint", false))
+          LoadPlugIn(kvp.Key);
+      }
+    }
+
+
     public static PersistentSettings GetPluginSettings(Guid plugInId, bool load)
     {
       if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) > 0)
@@ -593,7 +619,7 @@ namespace Rhino.PlugIns
     internal delegate int CallWriteDocumentDelegate(int pluginSerialNumber, IntPtr pWriteOptions);
     internal delegate int WriteDocumentDelegate(int pluginSerialNumber, uint docSerialNumber, IntPtr pBinaryArchive, IntPtr pWriteOptions);
     internal delegate int ReadDocumentDelegate(int pluginSerialNumber, uint docSerialNumber, IntPtr pBinaryArchive, IntPtr pReadOptions);
-    internal delegate void OnAddPagesToObjectPropertiesDelegate(int pluginSerialNumber, uint documentRuntimeSerialNumber, IntPtr pageCollection);
+    internal delegate void OnAddPagesToObjectPropertiesDelegate(int pluginSerialNumber, int mode, uint documentRuntimeSerialNumber, IntPtr pageCollection);
     internal delegate void OnAddPagesToOptionsDelegate(int pluginSerialNumber, uint documentRuntimeSerialNumber, IntPtr pageCollection, int addToDocProps);
     internal delegate uint OnPlugInProcDelegate(int plugInSerialNumber, uint message, IntPtr wParam, IntPtr lParam);
 
@@ -655,6 +681,8 @@ namespace Rhino.PlugIns
 
         try
         {
+          int computeEndpointCount = HostUtils.CustomComputeEndpointCount();
+          
           rc = p.OnLoad(ref error_msg);
           p.LoadCalled = true;
 
@@ -671,6 +699,11 @@ namespace Rhino.PlugIns
           // RDK initialization.
           if (rc == LoadReturnCode.Success && p is RenderPlugIn)
             RdkPlugIn.GetRdkPlugIn(p.Id, pluginSerialNumber);
+
+          if (HostUtils.CustomComputeEndpointCount() > computeEndpointCount)
+          {
+            p.Settings.SetBool("HasComputeEndpoint", true);
+          }
         }
         catch (Exception ex)
         {
@@ -847,15 +880,25 @@ namespace Rhino.PlugIns
       return rc;
     }
 
-    private static void InternalAddPagesToObjectProperties(int pluginSerialNumber, uint documentRuntimeSerialNumber, IntPtr collectionPointer)
+    private static void InternalAddPagesToObjectProperties(int pluginSerialNumber, int mode, uint documentRuntimeSerialNumber, IntPtr collectionPointer)
     {
       var plug_in = LookUpBySerialNumber(pluginSerialNumber);
       if (plug_in == null) return;
       try
       {
-        var pages = new List<ObjectPropertiesPage>();
-        plug_in.ObjectPropertiesPages(pages);
-        foreach (var page in pages)
+        var collection = new ObjectPropertiesPageCollection(documentRuntimeSerialNumber);
+        switch (mode)
+        {
+          case 0:
+#pragma warning disable CS0618
+        plug_in.ObjectPropertiesPages(collection.Pages);
+#pragma warning restore CS0618 
+            break;
+          default:
+            plug_in.ObjectPropertiesPages(collection);
+            break;
+        }
+        foreach (var page in collection.Pages)
           RhinoPageHooks.AddNewIPropertiesPanelPageToCollection(collectionPointer, documentRuntimeSerialNumber, page);
       }
       catch (Exception e)
@@ -1140,10 +1183,24 @@ namespace Rhino.PlugIns
     /// Override this function is you want to extend the object properties dialog
     /// </summary>
     /// <param name="pages"></param>
+    [Obsolete("Use ObjectPropertiesPages(ObjectPropertiesPageCollection collection) instead")]
     protected virtual void ObjectPropertiesPages(List<ObjectPropertiesPage> pages)
     {
     }
 
+    /// <summary>
+    /// Override this function is you want to extend the object properties dialog.
+    /// This method will be called each time a new document is created for each
+    /// instance of a object properties panel.  On Windows there will be a single
+    /// panel per document but on Mac there may be many properties panel per
+    /// document.
+    /// </summary>
+    /// <param name="collection">
+    /// Add custom pages by calling collection.Add
+    /// </param>
+    protected virtual void ObjectPropertiesPages(ObjectPropertiesPageCollection collection)
+    {
+    }
     #endregion
 
     #region licensing functions
@@ -2803,6 +2860,22 @@ namespace Rhino.PlugIns
         }
       }
     }
+
+    /// <summary>
+    /// Returns the file types extensions supported for file import and file export plug-in.
+    /// </summary>
+    public string[] FileTypeExtensions
+    {
+      get
+      {
+        using (var list = new ClassArrayString())
+        {
+          var ptr_list = list.NonConstPointer();
+          UnsafeNativeMethods.CRhinoPluginManager_GetFileTypeExtensions(Id, ptr_list);
+          return list.ToArray();
+        }
+      }
+    }
   }
 
 
@@ -3502,6 +3575,17 @@ namespace Rhino.PlugIns
       }
 
       return types;
+    }
+
+    /// <summary>
+    /// This function returns a list of uuid for the render settings pages that should be displayed.
+    /// </summary>
+    /// <returns>
+    /// Return a Id list of of the Render settings sections that will be displayed
+    /// </returns>
+    public List<Guid> GetRenderSettingsSections()
+    {
+      return RenderSettingsSections();
     }
 
 
@@ -4968,6 +5052,14 @@ namespace Rhino.PlugIns
         license_capabilities |= LicenseCapabilities.EvaluationIsExpired;
       if ((filter & (int)LicenseCapabilities.SupportsRhinoAccounts) == (int)LicenseCapabilities.SupportsRhinoAccounts)
         license_capabilities |= LicenseCapabilities.SupportsRhinoAccounts;
+      if ((filter & (int)LicenseCapabilities.SupportsStandalone) == (int)LicenseCapabilities.SupportsStandalone)
+        license_capabilities |= LicenseCapabilities.SupportsStandalone;
+      if ((filter & (int)LicenseCapabilities.SupportsZooPerUser) == (int)LicenseCapabilities.SupportsZooPerUser)
+        license_capabilities |= LicenseCapabilities.SupportsZooPerUser;
+      if ((filter & (int)LicenseCapabilities.SupportsZooPerCore) == (int)LicenseCapabilities.SupportsZooPerCore)
+        license_capabilities |= LicenseCapabilities.SupportsZooPerCore;
+      if (filter > 0xff)
+        throw new ArgumentException("Unexpected license capability");
       return license_capabilities;
     }
 
@@ -5124,14 +5216,20 @@ namespace Rhino.PlugIns
     NoCapabilities = 0x0,
     /// <summary>Shows "Buy a license" button</summary>
     CanBePurchased = 0x1,
-    /// <summary>Shows ""Enter a license" and "Use a Zoo" buttons</summary>
+    /// <summary>OBSOLETE: Shows ""Enter a license" and "Use a Zoo" buttons. Use SupportsStandalone | SupportsZoo instead.</summary>
     CanBeSpecified = 0x2,
     /// <summary>Shows "Evaluate" button</summary>
     CanBeEvaluated = 0x4,
     /// <summary>Shows "Evaluate" button disabled</summary>
     EvaluationIsExpired = 0x8,
-    /// <summary>Supports getting a license from a Rhino Account</summary>
+    /// <summary>Supports getting a license from a Cloud Zoo / Rhino Account</summary>
     SupportsRhinoAccounts = 0x10,
+    /// <summary>Supports single-computer licensing</summary>
+    SupportsStandalone = 0x20,
+    /// <summary>Supports getting a license from a Zoo server</summary>
+    SupportsZooPerUser = 0x40,
+    /// <summary>Supports getting a license from a Zoo server</summary>
+    SupportsZooPerCore = 0x80,
   }
 
   /// <summary>

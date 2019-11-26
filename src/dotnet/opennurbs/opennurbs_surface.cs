@@ -1621,6 +1621,45 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Returns a curve that interpolates points on a surface. The interpolant lies on the surface.
+    /// </summary>
+    /// <param name="points">List of at least two UV parameter locations on the surface.</param>
+    /// <param name="tolerance">Tolerance used for the fit of the pushup curve. Generally, the resulting interpolating curve will be within tolerabce of the surface.</param>
+    /// <param name="closed">If false, the interpolating curve is not closed. If true, the interpolating curve is closed, and the last point and first point should generally not be equal.</param>
+    /// <param name="closedSurfaceHandling">
+    /// If 0, all points must be in the rectangular domain of the surface. If the surface is closed in some direction, 
+    /// then this routine will interpret each point and place it at an appropriate location in the the covering space. 
+    /// This is the simplest option and should give good results. 
+    /// If 1, then more options for more control of handling curves going across seams are available.
+    /// If the surface is closed in some direction, then the points are taken as points in the covering space. 
+    /// Example, if srf.IsClosed(0)=true and srf.IsClosed(1)=false and srf.Domain(0)=srf.Domain(1)=Interval(0,1) 
+    /// then if closedSurfaceHandling=1 a point(u, v) in points can have any value for the u coordinate, but must have 0&lt;=v&lt;=1.  
+    /// In particular, if points = { (0.0,0.5), (2.0,0.5) } then the interpolating curve will wrap around the surface two times in the closed direction before ending at start of the curve.
+    /// If closed=true the last point should equal the first point plus an integer multiple of the period on a closed direction.
+    /// </param>
+    /// <returns>A new NURBS curve if successful, or null on error.</returns>
+    [ConstOperation]
+    public NurbsCurve InterpolatedCurveOnSurfaceUV(System.Collections.Generic.IEnumerable<Point2d> points, double tolerance, bool closed, int closedSurfaceHandling)
+    {
+      if (null == points)
+        return null;
+
+      Rhino.Collections.RhinoList<Point2d> pts = new Rhino.Collections.RhinoList<Point2d>();
+      foreach (Point2d pt in points)
+        pts.Add(pt);
+      int count = pts.Count;
+      if (count < 2)
+        return null;
+
+      IntPtr const_ptr_this = ConstPointer();
+      int is_closed = closed ? 1 : 0;
+      int closed_srf_handling = RhinoMath.Clamp(closedSurfaceHandling, 0, 1);
+
+      IntPtr ptr_nurbscurve = UnsafeNativeMethods.ON_Surface_InterpCrvOnSrf(const_ptr_this, count, pts.m_items, is_closed, tolerance, closed_srf_handling);
+      return CreateGeometryHelper(ptr_nurbscurve, null) as NurbsCurve;
+    }
+
+    /// <summary>
     /// Constructs an interpolated curve on a surface, using 3D points.
     /// </summary>
     /// <param name="points">A list, an array or any enumerable set of points.</param>

@@ -527,11 +527,9 @@ RH_C_FUNCTION OnGeometryTypeConsts ON_Geometry_GetGeometryType( const ON_Object*
     if (pCastTest)
       return idxON_Leader; //38
 
-#if defined(OPENNURBS_SUBD_WIP)
     pCastTest = ON_SubD::Cast(pGeometry);
     if (pCastTest)
       return idxON_SubD; //39
-#endif
 
     pCastTest = ON_DimLinear::Cast(pGeometry);
     if (pCastTest)

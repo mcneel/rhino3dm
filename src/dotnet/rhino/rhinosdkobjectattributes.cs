@@ -288,6 +288,17 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.ON_3dmObjectAttributes_HasDisplayModeOverride(const_ptr_this, viewportId);
     }
 
+    /// <summary>
+    /// Returns the id of the display mode of an objects. Object display modes are view based. Thus, it is possible to have an object display different in different views.
+    /// </summary>
+    /// <param name="viewportId">Id of a Rhino Viewport.</param>
+    /// <returns>A display node id if the object has a display mode override for the viewport; otherwise Guid.Empty is returned.</returns>
+    public Guid GetDisplayModeOverride(Guid viewportId)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetDisplayModeOverride(const_ptr_this, viewportId);
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// By default, objects are drawn using the display mode of the viewport that

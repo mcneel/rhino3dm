@@ -483,11 +483,14 @@ namespace Rhino
     }
 
     internal static SetIntegerDelegate SetColorHook = SetColor;
-    private static int SetColor(uint pointerId, IntPtr keyString, bool setDefault, int agbr)
+    private static int SetColor(uint pointerId, IntPtr keyString, bool setDefault, int abgr)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
       if (helper == null) return 0;
-      var color = Runtime.Interop.ColorFromWin32(agbr);
+      // 13 March 2019 S. Baer
+      // This version pays attention to alpha
+      var color = System.Drawing.Color.FromArgb(255 - ((abgr >> 24) & 0xFF), (abgr & 0xFF), ((abgr >> 8) & 0xFF), ((abgr >> 16) & 0xFF));
+      //var color = Runtime.Interop.ColorFromWin32(agbr);
       if (setDefault)
         helper.Settings.SetDefault(helper.Key, color);
       else
@@ -528,18 +531,25 @@ namespace Rhino
     internal static GetStringDelegate GetStringHook = GetString;
     private static int GetString(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var default_string = IntPtrToString(defaultValue);
-      var rc = 1;
-      string result;
-      if (useDefault)
-        result = helper.Settings.GetString(helper.Key, default_string, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetString(helper.Key, out result, helper.LegacyKeyList) ? 1 : 0);
-      if (rc > 0)
-        UnsafeNativeMethods.ON_wString_Set(value, result);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var default_string = IntPtrToString(defaultValue);
+        var rc = 1;
+        string result;
+        if (useDefault)
+          result = helper.Settings.GetString(helper.Key, default_string, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetString(helper.Key, out result, helper.LegacyKeyList) ? 1 : 0);
+        if (rc > 0)
+          UnsafeNativeMethods.ON_wString_Set(value, result);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
 
     internal delegate int GetRectDelegate(
@@ -560,109 +570,151 @@ namespace Rhino
       IntPtr legacyKeyList,
       int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      var rect = System.Drawing.Rectangle.FromLTRB(left, top, right, bottom);
-      var default_rect = System.Drawing.Rectangle.FromLTRB(defaultLeft, defaultTop, defaultRight, defaultBottom);
-      if (useDefault)
-        rect = helper.Settings.GetRectangle(helper.Key, default_rect, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetRectangle(helper.Key, out rect, helper.LegacyKeyList) ? 1 : 0);
-      if (rc > 0)
+      try
       {
-        left = rect.Left;
-        top = rect.Top;
-        right = rect.Right;
-        bottom = rect.Bottom;
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        var rect = System.Drawing.Rectangle.FromLTRB(left, top, right, bottom);
+        var default_rect = System.Drawing.Rectangle.FromLTRB(defaultLeft, defaultTop, defaultRight, defaultBottom);
+        if (useDefault)
+          rect = helper.Settings.GetRectangle(helper.Key, default_rect, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetRectangle(helper.Key, out rect, helper.LegacyKeyList) ? 1 : 0);
+        if (rc > 0)
+        {
+          left = rect.Left;
+          top = rect.Top;
+          right = rect.Right;
+          bottom = rect.Bottom;
+        }
+        return rc;
       }
-      return rc;
+      catch
+      {
+        return 0;
+      }
     }
 
     internal delegate int GetPointDelegate(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count);
     internal static GetPointDelegate GetPointHook = GetPoint;
     private static int GetPoint(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      var point = new System.Drawing.Point(x, y);
-      var default_point = new System.Drawing.Point(defaultX, defaultY);
-      if (useDefault)
-        point = helper.Settings.GetPoint(helper.Key, default_point, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetPoint(helper.Key, out point, helper.LegacyKeyList) ? 1 : 0);
-      if (rc > 0)
+      try
       {
-        x = point.X;
-        y = point.Y;
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        var point = new System.Drawing.Point(x, y);
+        var default_point = new System.Drawing.Point(defaultX, defaultY);
+        if (useDefault)
+          point = helper.Settings.GetPoint(helper.Key, default_point, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetPoint(helper.Key, out point, helper.LegacyKeyList) ? 1 : 0);
+        if (rc > 0)
+        {
+          x = point.X;
+          y = point.Y;
+        }
+        return rc;
       }
-      return rc;
+      catch
+      {
+        return 0;
+      }
     }
 
     internal static GetPointDelegate GetSizeHook = GetSize;
     private static int GetSize(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      var size = new System.Drawing.Size(x, y);
-      var default_size = new System.Drawing.Size(defaultX, defaultY);
-      if (useDefault)
-        size = helper.Settings.GetSize(helper.Key, default_size, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetSize(helper.Key, out size, helper.LegacyKeyList) ? 1 : 0);
-      if (rc > 0)
+      try
       {
-        x = size.Width;
-        y = size.Height;
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        var size = new System.Drawing.Size(x, y);
+        var default_size = new System.Drawing.Size(defaultX, defaultY);
+        if (useDefault)
+          size = helper.Settings.GetSize(helper.Key, default_size, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetSize(helper.Key, out size, helper.LegacyKeyList) ? 1 : 0);
+        if (rc > 0)
+        {
+          x = size.Width;
+          y = size.Height;
+        }
+        return rc;
       }
-      return rc;
+      catch
+      {
+        return 0;
+      }
     }
 
     internal delegate int GetIntegerDelegate(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count);
     internal static GetIntegerDelegate GetIntegerHook = GetInteger;
     private static int GetInteger(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = helper.Settings.GetInteger(helper.Key, defaultValue, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetInteger(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = helper.Settings.GetInteger(helper.Key, defaultValue, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetInteger(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal delegate int GetUnsignedIntegerDelegate(uint pointerId, IntPtr keyString, ref uint value, bool useDefault, uint defaultValue, IntPtr legacyKeyList, int count);
     internal static GetUnsignedIntegerDelegate GetUnsignedIntegerHook = GetUnsignedInteger;
     private static int GetUnsignedInteger(uint pointerId, IntPtr keyString, ref uint value, bool useDefault, uint defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = helper.Settings.GetUnsignedInteger(helper.Key, defaultValue, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetUnsignedInteger(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = helper.Settings.GetUnsignedInteger(helper.Key, defaultValue, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetUnsignedInteger(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal delegate int GetStringListDelegate(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count);
     internal static GetStringListDelegate GetStringListHook = GetStringList;
     private static int GetStringList(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      string[] strings;
-      var default_strings = StringArrayFromIntPtr(defaultValue);
-      if (useDefault)
-        strings = helper.Settings.GetStringList(helper.Key, defaultValue == IntPtr.Zero ? null : default_strings, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetStringList(helper.Key, out strings, helper.LegacyKeyList) ? 1 : 0);
-      if (rc != 0 && strings != null)
-        foreach (var s in strings)
-          UnsafeNativeMethods.ON_StringArray_Append(value, s);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        string[] strings;
+        var default_strings = StringArrayFromIntPtr(defaultValue);
+        if (useDefault)
+          strings = helper.Settings.GetStringList(helper.Key, defaultValue == IntPtr.Zero ? null : default_strings, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetStringList(helper.Key, out strings, helper.LegacyKeyList) ? 1 : 0);
+        if (rc != 0 && strings != null)
+          foreach (var s in strings)
+            UnsafeNativeMethods.ON_StringArray_Append(value, s);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal delegate int GetStringDictionaryDelegate(
       uint pointerId,
@@ -686,70 +738,98 @@ namespace Rhino
       IntPtr legacyKeyList,
       int legacyCount)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, legacyCount);
-      if (helper == null) return 0;
-      var rc = 1;
-      KeyValuePair<string,string>[] strings;
-      var default_keys = StringArrayFromIntPtr(defaultKeys);
-      var default_values = StringArrayFromIntPtr(defaultValues);
-      KeyValuePair<string, string>[] defaults = null;
-      if (IntPtr.Zero != defaultKeys && IntPtr.Zero != defaultValues)
+      try
       {
-        var count = Math.Min(default_keys.Length, default_values.Length);
-        defaults = new KeyValuePair<string, string>[count];
-        for (var i = 0; i < count; i++)
-          defaults[i] = new KeyValuePair<string, string>(default_keys[i], default_values[i]);
-      }
-      if (useDefault)
-        strings = helper.Settings.GetStringDictionary(helper.Key, defaults, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetStringDictionary(helper.Key, out strings, helper.LegacyKeyList) ? 1 : 0);
-      if (rc != 0 && strings != null)
-        foreach (var item in strings)
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, legacyCount);
+        if (helper == null) return 0;
+        var rc = 1;
+        KeyValuePair<string, string>[] strings;
+        var default_keys = StringArrayFromIntPtr(defaultKeys);
+        var default_values = StringArrayFromIntPtr(defaultValues);
+        KeyValuePair<string, string>[] defaults = null;
+        if (IntPtr.Zero != defaultKeys && IntPtr.Zero != defaultValues)
         {
-          UnsafeNativeMethods.ON_StringArray_Append(keys, item.Key);
-          UnsafeNativeMethods.ON_StringArray_Append(values, item.Value);
+          var count = Math.Min(default_keys.Length, default_values.Length);
+          defaults = new KeyValuePair<string, string>[count];
+          for (var i = 0; i < count; i++)
+            defaults[i] = new KeyValuePair<string, string>(default_keys[i], default_values[i]);
         }
-      return rc;
+        if (useDefault)
+          strings = helper.Settings.GetStringDictionary(helper.Key, defaults, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetStringDictionary(helper.Key, out strings, helper.LegacyKeyList) ? 1 : 0);
+        if (rc != 0 && strings != null)
+          foreach (var item in strings)
+          {
+            UnsafeNativeMethods.ON_StringArray_Append(keys, item.Key);
+            UnsafeNativeMethods.ON_StringArray_Append(values, item.Value);
+          }
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal delegate int GetDoubleDelegate(uint pointerId, IntPtr keyString, ref double value, bool useDefault, double defaultValue, IntPtr legacyKeyList, int count);
     internal static GetDoubleDelegate GetDoubleHook = GetDouble;
     private static int GetDouble(uint pointerId, IntPtr keyString, ref double value, bool useDefault, double defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = helper.Settings.GetDouble(helper.Key, defaultValue, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetDouble(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = helper.Settings.GetDouble(helper.Key, defaultValue, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetDouble(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal static GetIntegerDelegate GetBoolHook = GetBool;
     private static int GetBool(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = (helper.Settings.GetBool(helper.Key, defaultValue != 0, helper.LegacyKeyList) ? 1 : 0);
-      else
+      try
       {
-        var b = value != 0;
-        rc = (helper.Settings.TryGetBool(helper.Key, out b, helper.LegacyKeyList) ? 1 : 0);
-        value = b ? 1 : 0;
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = (helper.Settings.GetBool(helper.Key, defaultValue != 0, helper.LegacyKeyList) ? 1 : 0);
+        else
+        {
+          var b = value != 0;
+          rc = (helper.Settings.TryGetBool(helper.Key, out b, helper.LegacyKeyList) ? 1 : 0);
+          value = b ? 1 : 0;
+        }
+        return rc;
       }
-      return rc;
+      catch
+      {
+        return 0;
+      }
     }
     internal static GetIntegerDelegate GetHideHook = GetHide;
     private static int GetHide(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      bool b;
-      var rc = (helper.Settings.TryGetSettingIsHiddenFromUserInterface(helper.Key, out b, helper.LegacyKeyList) ? 1 : 0);
-      value = b ? 1 : 0;
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        bool b;
+        var rc = (helper.Settings.TryGetSettingIsHiddenFromUserInterface(helper.Key, out b, helper.LegacyKeyList) ? 1 : 0);
+        value = b ? 1 : 0;
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
     internal static PersistentSettingsHiddenProc PersistentSettingsHiddenHook = PersistentSettingsHidden;
     private static int PersistentSettingsHidden(uint pointerId, ref int hide)
@@ -762,44 +842,65 @@ namespace Rhino
     internal static GetIntegerDelegate GetColorHook = GetColor;
     private static int GetColor(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      var color = Runtime.Interop.ColorFromWin32(value);
-      if (useDefault)
-        color = helper.Settings.GetColor(helper.Key, Runtime.Interop.ColorFromWin32(defaultValue), helper.LegacyKeyList);
-      else
-        rc = helper.Settings.TryGetColor(helper.Key, out color, helper.LegacyKeyList) ? 1 : 0;
-      value = color.ToArgb();
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        var color = Runtime.Interop.ColorFromWin32(value);
+        if (useDefault)
+          color = helper.Settings.GetColor(helper.Key, Runtime.Interop.ColorFromWin32(defaultValue), helper.LegacyKeyList);
+        else
+          rc = helper.Settings.TryGetColor(helper.Key, out color, helper.LegacyKeyList) ? 1 : 0;
+        value = color.ToArgb();
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
 
     internal delegate int GetGuidDelegate(uint pointerId, IntPtr keyString, ref Guid value, bool useDefault, Guid defaultValue, IntPtr legacyKeyList, int count);
     internal static GetGuidDelegate GetGuidHook = GetGuid;
     private static int GetGuid(uint pointerId, IntPtr keyString, ref Guid value, bool useDefault, Guid defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = helper.Settings.GetGuid(helper.Key, defaultValue, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetGuid(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = helper.Settings.GetGuid(helper.Key, defaultValue, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetGuid(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
 
     internal delegate int GetPoint3DDelegate(uint pointerId, IntPtr keyString, ref Point3d value, bool useDefault, ref Point3d defaultValue, IntPtr legacyKeyList, int count);
     internal static GetPoint3DDelegate GetPoint3DHook = GetPoint3D;
     private static int GetPoint3D(uint pointerId, IntPtr keyString, ref Point3d value, bool useDefault, ref Point3d defaultValue, IntPtr legacyKeyList, int count)
     {
-      var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
-      if (helper == null) return 0;
-      var rc = 1;
-      if (useDefault)
-        value = helper.Settings.GetPoint3d(helper.Key, defaultValue, helper.LegacyKeyList);
-      else
-        rc = (helper.Settings.TryGetPoint3d(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
-      return rc;
+      try
+      {
+        var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
+        if (helper == null) return 0;
+        var rc = 1;
+        if (useDefault)
+          value = helper.Settings.GetPoint3d(helper.Key, defaultValue, helper.LegacyKeyList);
+        else
+          rc = (helper.Settings.TryGetPoint3d(helper.Key, out value, helper.LegacyKeyList) ? 1 : 0);
+        return rc;
+      }
+      catch
+      {
+        return 0;
+      }
     }
 
     #endregion Get... hooks

@@ -38,6 +38,21 @@ namespace Rhino.DocObjects
     /// Get the annotation base geometry for this object
     /// </summary>
     public AnnotationBase AnnotationGeometry => Geometry as AnnotationBase;
+
+    /// <summary>
+    /// Test if the text in the annotation object contains fields
+    /// that involve length, area, or volume measurements
+    /// </summary>
+    public bool HasMeasurableTextFields
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.CRhinoAnnotationObject_ContainsMeasurableTextFields(ptr_const_this);
+        return rc;
+
+      }
+    }
   }
 
   /// <summary>
@@ -76,6 +91,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoTextDot_InternalCommitChanges;
     }
   }
+
 }
 
 

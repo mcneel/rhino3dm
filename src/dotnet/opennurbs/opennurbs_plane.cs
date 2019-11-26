@@ -31,7 +31,7 @@ namespace Rhino.Geometry
   /// </summary>
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 128)]
   [Serializable]
-  public struct Plane : IEquatable<Plane>, IEpsilonComparable<Plane>, ICloneable, IValidable
+  public struct Plane : IEquatable<Plane>, IEpsilonComparable<Plane>, ICloneable, IValidable, IFormattable
   {
     // This is a special case struct that does not match it's C++ counterpart (ON_Plane)
     // The reason we did this was to remove ON_PlaneEquation from the struct and allow for
@@ -112,7 +112,7 @@ namespace Rhino.Geometry
     {
       get
       {
-        return new Plane {XAxis = new Vector3d(1, 0, 0), YAxis = new Vector3d(0, 1, 0), ZAxis = new Vector3d(0, 0, 1)};
+        return new Plane { XAxis = new Vector3d(1, 0, 0), YAxis = new Vector3d(0, 1, 0), ZAxis = new Vector3d(0, 0, 1) };
       }
     }
 
@@ -123,7 +123,7 @@ namespace Rhino.Geometry
     {
       get
       {
-        return new Plane {XAxis = new Vector3d(0, 1, 0), YAxis = new Vector3d(0, 0, 1), ZAxis = new Vector3d(1, 0, 0)};
+        return new Plane { XAxis = new Vector3d(0, 1, 0), YAxis = new Vector3d(0, 0, 1), ZAxis = new Vector3d(1, 0, 0) };
       }
     }
 
@@ -134,7 +134,7 @@ namespace Rhino.Geometry
     {
       get
       {
-        return new Plane {XAxis = new Vector3d(0, 0, 1), YAxis = new Vector3d(1, 0, 0), ZAxis = new Vector3d(0, 1, 0)};
+        return new Plane { XAxis = new Vector3d(0, 0, 1), YAxis = new Vector3d(1, 0, 0), ZAxis = new Vector3d(0, 1, 0) };
       }
     }
 
@@ -145,7 +145,7 @@ namespace Rhino.Geometry
     {
       get
       {
-        return new Plane {Origin = Point3d.Unset, XAxis = Vector3d.Unset, YAxis = Vector3d.Unset, ZAxis = Vector3d.Unset};
+        return new Plane { Origin = Point3d.Unset, XAxis = Vector3d.Unset, YAxis = Vector3d.Unset, ZAxis = Vector3d.Unset };
       }
     }
     #endregion
@@ -336,6 +336,15 @@ namespace Rhino.Geometry
         Origin, XAxis, YAxis, ZAxis.ToString());
       return rc;
     }
+    /// <inheritdoc />
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      var fo = Origin.ToString(format, formatProvider);
+      var fx = XAxis.ToString(format, formatProvider);
+      var fy = YAxis.ToString(format, formatProvider);
+      var fz = ZAxis.ToString(format, formatProvider);
+      return $"Origin={fo} XAxis={fx}, YAxis={fy}, ZAxis={fz}";
+    }
     #endregion
 
     #region properties
@@ -381,7 +390,7 @@ namespace Rhino.Geometry
     /// </returns>
     public bool UpdateEquation()
     {
-       return UnsafeNativeMethods.ON_Plane_UpdateEquation(ref this);
+      return UnsafeNativeMethods.ON_Plane_UpdateEquation(ref this);
     }
 
     /// <summary>
@@ -396,7 +405,7 @@ namespace Rhino.Geometry
     public double ValueAt(Point3d p)
     {
       var pe = this.GetPlaneEquation();
-      return (pe[0]*p.X + pe[1]*p.Y + pe[2]*p.Z + pe[3]);
+      return (pe[0] * p.X + pe[1] * p.Y + pe[2] * p.Z + pe[3]);
     }
 
     /// <summary>
@@ -704,9 +713,9 @@ namespace Rhino.Geometry
       if (centerOfRotation == Origin)
       {
         Transform rot = Rhino.Geometry.Transform.Rotation(sinAngle, cosAngle, axis, Point3d.Origin);
-        XAxis = rot*XAxis;
-        YAxis = rot*YAxis;
-        ZAxis = rot*ZAxis;
+        XAxis = rot * XAxis;
+        YAxis = rot * YAxis;
+        ZAxis = rot * ZAxis;
         return true;
       }
       Transform rot2 = Rhino.Geometry.Transform.Rotation(sinAngle, cosAngle, axis, centerOfRotation);

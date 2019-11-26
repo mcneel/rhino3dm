@@ -2240,6 +2240,26 @@ namespace Rhino.FileIO
       return list.ToArray();
     }
 
+    /// <summary>
+    /// Finds all File3dmObject that are in a given group.
+    /// </summary>
+    /// <param name="group">A group instance.</param>
+    /// <returns>Array of objects that belong to the specified group or empty array if no objects could be found.</returns>
+    /// <exception cref="ArgumentNullException">If group is null.</exception>
+    public File3dmObject[] FindByGroup(Group group)
+    {
+      if (group == null)
+        throw new ArgumentNullException(nameof(group));
+
+      var group_index = group.Index;
+      var list = new List<File3dmObject>();
+      foreach (var obj in m_parent.Objects)
+      {
+        if (obj.Attributes.GetGroupList().Contains(group_index))
+          list.Add(obj);
+      }
+      return list.Count > 0 ? list.ToArray() : new File3dmObject[0];
+    }
 
     /// <summary>Gets the bounding box containing every object in this table.</summary>
     /// <returns>The computed bounding box.</returns>
@@ -3290,7 +3310,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a material based on Index. This seach type of search is discouraged.
+    /// Retrieves a material based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
@@ -3342,7 +3362,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a Linetype object based on Index. This seach type of search is discouraged.
+    /// Retrieves a Linetype object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
@@ -3397,7 +3417,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a Layer object based on Index. This seach type of search is discouraged.
+    /// Retrieves a Layer object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
@@ -3447,14 +3467,32 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a Group object based on Index. This seach type of search is discouraged.
+    /// Retrieves a Group object based on an index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
-    /// <param name="index">The index to search for.</param>
+    /// <param name="groupIndex">The index to search for.</param>
     /// <returns>A Group object, or null if none was found.</returns>
-    public Group FindIndex(int index)
+    public Group FindIndex(int groupIndex)
     {
-      return __FindIndexInternal(index);
+      return __FindIndexInternal(groupIndex);
+    }
+
+    /// <summary>
+    /// Gets an array of all of the objects in a group.
+    /// </summary>
+    /// <param name="groupIndex">The index of the group in this table.</param>
+    /// <returns>Array of objects that belong to the specified group or empty array if no objects could be found.</returns>
+    public File3dmObject[] GroupMembers(int groupIndex)
+    {
+      var list = new List<File3dmObject>();
+      foreach (var obj in m_parent.Objects)
+      {
+        if (obj.Attributes.GetGroupList().Contains(groupIndex))
+        {
+          list.Add(obj);
+        }
+      }
+      return list.Count > 0 ? list.ToArray() : new File3dmObject[0];
     }
   }
 
@@ -3500,7 +3538,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a DimensionStyle object based on Index. This seach type of search is discouraged.
+    /// Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
@@ -3552,7 +3590,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Retrieves a HatchPattern object based on Index. This seach type of search is discouraged.
+    /// Retrieves a HatchPattern object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>

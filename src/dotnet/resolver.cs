@@ -14,9 +14,29 @@ namespace Rhino.Runtime
       if (null == m_assembly_resolve)
       {
         //Rhino.Runtime.HostUtils.DebugString("Assembly Resolver initialized\n");
-        m_assembly_resolve = CurrentDomain_AssemblyResolve;
+        if (File.Exists(LogFilePath))
+        {
+          // Curtis: Temporary logging to debug assembly directs when running rhino inside
+          // to enable, create the file "RhinoAssemblyResolveLog.txt" on the desktop.
+          File.AppendAllText(LogFilePath, $"*** Started Rhino: {DateTime.Now}\n");
+          m_assembly_resolve = CurrentDomain_AssemblyResolve_WithLogging;
+        }
+        else
+          m_assembly_resolve = CurrentDomain_AssemblyResolve;
         AppDomain.CurrentDomain.AssemblyResolve += m_assembly_resolve;
       }
+    }
+
+    private static string _logFilePath;
+    private static string LogFilePath => _logFilePath ?? (_logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoAssemblyResolveLog.txt"));
+
+    private static Assembly CurrentDomain_AssemblyResolve_WithLogging(object sender, ResolveEventArgs args)
+    {
+      // log any resolved assemblies
+      var assembly = CurrentDomain_AssemblyResolve(sender, args);
+      if (assembly != null)
+        File.AppendAllText(LogFilePath, $"Assembly {args.RequestingAssembly?.FullName}\n\trequires: '{args.Name}'\n\tgot: '{assembly?.FullName}'\n");
+      return assembly;
     }
 
     private static Dictionary<string, Assembly> m_match_dictionary;
