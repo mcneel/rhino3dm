@@ -911,6 +911,31 @@ public:
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowRealtimeRenderProgressBar, value); }
     }
 #endregion
+
+    public enum StereoRenderContextEnum : int
+    {
+      NotApplicable = 0,
+      RenderingLeftEye = 1,
+      RenderingRightEye = 2,
+      RenderingBothEyes = 3 /*RenderingLeftEye | RenderingRightEye*/
+    }
+
+    /// <summary>
+    /// Get or set the stereo render context.
+    /// </summary>
+    public StereoRenderContextEnum StereoRenderContext
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return (StereoRenderContextEnum)UnsafeNativeMethods.CDisplayPipelineAttributes_GetStereoRenderContext(ptr);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_SetStereoRenderContext(ptr, (UnsafeNativeMethods.StereoRenderContext)value);
+      }
+    }
   }
 }
 #endif

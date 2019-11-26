@@ -4,31 +4,25 @@ using System;
 
 namespace Rhino.Input.Custom
 {
-  public enum CylinderConstraint
-  {
-    None = 0,
-    Vertical = 1,
-    AroundCurve = 2
-  }
-
   /// <summary>
-  /// Class provides user interface to define a cylinder.
+  /// Class provides user interface to define a truncated cone.
   /// </summary>
-  public class GetCylinder : IDisposable
-  { 
-    IntPtr m_ptr_argsrhinogetcylinder;
-    public GetCylinder()
+  public class GetTruncatedCone : IDisposable
+  {
+    IntPtr m_ptr_argsrhinogettube;
+
+    public GetTruncatedCone()
     {
-      m_ptr_argsrhinogetcylinder = UnsafeNativeMethods.CArgsRhinoGetCylinder_New();
+      m_ptr_argsrhinogettube = UnsafeNativeMethods.CArgsRhinoGetTubeExtra_New();
     }
 
-    IntPtr ConstPointer() { return m_ptr_argsrhinogetcylinder; }
-    IntPtr NonConstPointer() { return m_ptr_argsrhinogetcylinder; }
+    IntPtr ConstPointer() { return m_ptr_argsrhinogettube; }
+    IntPtr NonConstPointer() { return m_ptr_argsrhinogettube; }
 
     /// <summary>
     /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
     /// </summary>
-    ~GetCylinder()
+    ~GetTruncatedCone()
     {
       Dispose(false);
     }
@@ -52,11 +46,22 @@ namespace Rhino.Input.Custom
     /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
     protected virtual void Dispose(bool disposing)
     {
-      if (IntPtr.Zero != m_ptr_argsrhinogetcylinder)
+      if (IntPtr.Zero != m_ptr_argsrhinogettube)
       {
-        UnsafeNativeMethods.CArgsRhinoGetCylinder_Delete(m_ptr_argsrhinogetcylinder);
-        m_ptr_argsrhinogetcylinder = IntPtr.Zero;
+        UnsafeNativeMethods.CArgsRhinoGetTubeExtra_Delete(m_ptr_argsrhinogettube);
+        m_ptr_argsrhinogettube = IntPtr.Zero;
       }
+    }
+
+    bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+    }
+    void SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which, bool value)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
     }
 
     /// <summary>
@@ -111,49 +116,6 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Determine if the "both sides" option is enabled
-    /// </summary>
-    public bool BothSidesOption
-    {
-      get
-      {
-        IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCylinder_BothSides(const_ptr_this);
-      }
-      set
-      {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.CArgsRhinoGetCylinder_SetBothSides(ptr_this, value);
-      }
-    }
-
-    /// <summary> Height of cylinder </summary>
-    public double Height
-    {
-      get
-      {
-        IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCylinder_Height(const_ptr_this);
-      }
-      set
-      {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.CArgsRhinoGetCylinder_SetHeight(ptr_this, value);
-      }
-    }
-
-    bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
-    }
-    void SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which, bool value)
-    {
-      IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
-    }
-
-    /// <summary>
     /// Gets or sets whether or not the output should be capped.
     /// </summary>
     public bool Cap
@@ -163,49 +125,87 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Prompt for the getting of a cylinder.
+    /// Height of truncated cone.
     /// </summary>
-    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    public double Height
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTubeExtra_Height(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTubeExtra_SetHeight(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// Radius of second circle.
+    /// </summary>
+    public double SecondRadius
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTubeExtra_SecondRadius(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTubeExtra_SetSecondRadius(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a truncated cone.
+    /// </summary>
+    /// <param name="truncatedCone">The truncated cone in Brep form.</param>
     /// <returns>The result of the getting operation.</returns>
-    public Commands.Result Get(out Geometry.Cylinder cylinder)
+    public Commands.Result Get(out Geometry.Brep truncatedCone)
     {
       IntPtr ptr_this = NonConstPointer();
-      cylinder = Geometry.Cylinder.Unset;
-      uint rc = UnsafeNativeMethods.RHC_RhinoGetCylinder(ref cylinder, ptr_this);
+      truncatedCone = new Geometry.Brep();
+      IntPtr ptr_truncated_cone = truncatedCone.NonConstPointer();
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetTcone(ptr_truncated_cone, ptr_this);
       return (Commands.Result)rc;
     }
 
     /// <summary>
-    /// Prompt for the getting of a mesh cylinder.
+    /// Prompt for the getting of a mesh truncated cone.
     /// </summary>
     /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
     /// <param name="aroundFaces">The number of faces in the around direction</param>
-    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    /// <param name="truncatedCone">The truncated cone in Mesh form.</param>
     /// <returns>The result of the getting operation.</returns>
-    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Cylinder cylinder)
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Mesh truncatedCone)
     {
       IntPtr ptr_this = NonConstPointer();
-      cylinder = Geometry.Cylinder.Unset;
-      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinder(ref cylinder, ref verticalFaces, ref aroundFaces, ptr_this);
+      truncatedCone = new Geometry.Mesh();
+      IntPtr ptr_truncated_cone = truncatedCone.NonConstPointer();
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshTcone(ptr_truncated_cone, ref verticalFaces, ref aroundFaces, ptr_this);
       return (Commands.Result)rc;
     }
 
     /// <summary>
-    /// Prompt for the getting of a mesh cylinder.
+    /// Prompt for the getting of a mesh truncated cone.
     /// </summary>
     /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
     /// <param name="aroundFaces">The number of faces in the around direction</param>
-    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
     /// <param name="capStyle">Set to 0 if you don't want the prompt, 3 is tris, 4 is quads.</param>
+    /// 
+    /// <param name="truncatedCone">The truncated cone in Mesh form.</param>
     /// <returns>The result of the getting operation.</returns>
     /// <remarks>The prompt for capStyle will only be seen if it's not zero, aroundFaces is even
     ///          and the solid option is on.
     /// </remarks>
-    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref int capStyle, out Geometry.Cylinder cylinder)
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref int capStyle, out Geometry.Mesh truncatedCone)
     {
       IntPtr ptr_this = NonConstPointer();
-      cylinder = Geometry.Cylinder.Unset;
-      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinderWithCapStyle(ref cylinder, ref verticalFaces, ref aroundFaces, ref capStyle, ptr_this);
+      truncatedCone = new Geometry.Mesh();
+      IntPtr ptr_truncated_cone = truncatedCone.NonConstPointer();
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshTconeWithCapStyle(ptr_truncated_cone, ref verticalFaces, ref capStyle, ref aroundFaces, ptr_this);
       return (Commands.Result)rc;
     }
   }

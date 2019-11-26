@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Rhino.Runtime.InteropWrappers;
+using System.Linq;
+using Rhino.FileIO;
 
 namespace Rhino.Geometry.Intersect
 {
@@ -523,13 +525,13 @@ namespace Rhino.Geometry.Intersect
       GC.KeepAlive(curve);
       return CurveIntersections.Create(pIntersectArray);
     }
+
     /// <summary>
     /// Finds the intersections between two curves. 
     /// </summary>
     /// <param name="curveA">First curve for intersection.</param>
     /// <param name="curveB">Second curve for intersection.</param>
-    /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, 
-    /// an intersection is assumed.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
     /// <example>
@@ -541,17 +543,45 @@ namespace Rhino.Geometry.Intersect
     {
       IntPtr pCurveA = curveA.ConstPointer();
       IntPtr pCurveB = curveB.ConstPointer();
-      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveCurve(pCurveA, pCurveB, tolerance, overlapTolerance);
+      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveCurve(pCurveA, pCurveB, tolerance, overlapTolerance, IntPtr.Zero, IntPtr.Zero);
       Runtime.CommonObject.GcProtect(curveA, curveB);
       return CurveIntersections.Create(pIntersectArray);
     }
+
+    /// <summary>
+    /// Finds the intersections between two curves.
+    /// </summary>
+    /// <param name="curveA">First curve for intersection.</param>
+    /// <param name="curveB">Second curve for intersection.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, an intersection is assumed.</param>
+    /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
+    /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
+    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <returns>A collection of intersection events.</returns>
+    public static CurveIntersections CurveCurveValidate(Curve curveA, Curve curveB, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
+    {
+      invalidIndices = new int[0];
+      textLog = new TextLog();
+      using (SimpleArrayInt output_indices = new SimpleArrayInt())
+      {
+        IntPtr ptr_curve_a = curveA.ConstPointer();
+        IntPtr ptr_curve_b = curveB.ConstPointer();
+        IntPtr ptr_indices = output_indices.NonConstPointer();
+        IntPtr ptr_text_log = textLog.NonConstPointer();
+        IntPtr ptr_intersect_array = UnsafeNativeMethods.ON_Intersect_CurveCurve(ptr_curve_a, ptr_curve_b, tolerance, overlapTolerance, ptr_indices, ptr_text_log);
+        if (ptr_intersect_array != IntPtr.Zero)
+          invalidIndices = output_indices.ToArray();
+        Runtime.CommonObject.GcProtect(curveA, curveB);
+        return CurveIntersections.Create(ptr_intersect_array);
+      }
+    }
+
     /// <summary>
     /// Intersects a curve and an infinite line. 
     /// </summary>
     /// <param name="curve">Curve for intersection.</param>
-    /// <param name="line">Infinite line to intesect.</param>
-    /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, 
-    /// an intersection is assumed.</param>
+    /// <param name="line">Infinite line to intersect.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
     public static CurveIntersections CurveLine(Curve curve, Line line, double tolerance, double overlapTolerance)
@@ -566,20 +596,17 @@ namespace Rhino.Geometry.Intersect
 
       IntPtr pCurveA = curve.ConstPointer();
       IntPtr pCurveB = line_curve.ConstPointer();
-
-      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveCurve(pCurveA, pCurveB, tolerance, overlapTolerance);
+      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveCurve(pCurveA, pCurveB, tolerance, overlapTolerance, IntPtr.Zero, IntPtr.Zero);
       Runtime.CommonObject.GcProtect(curve, line_curve);
-
       return CurveIntersections.Create(pIntersectArray);
-
     }
+
     /// <summary>
     /// Intersects a curve and a surface.
     /// </summary>
     /// <param name="curve">Curve for intersection.</param>
     /// <param name="surface">Surface for intersection.</param>
-    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, 
-    /// an intersection is assumed.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
     /// <example>
@@ -594,19 +621,50 @@ namespace Rhino.Geometry.Intersect
       if (overlapTolerance > 0.0 && overlapTolerance < tolerance)
         overlapTolerance = tolerance;
 
-      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveSurface(pCurve, pSurface, tolerance, overlapTolerance);
+      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveSurface(pCurve, pSurface, tolerance, overlapTolerance, IntPtr.Zero, IntPtr.Zero);
       Runtime.CommonObject.GcProtect(curve, surface);
       return CurveIntersections.Create(pIntersectArray);
     }
 
     /// <summary>
-    /// Intersects a (sub)curve and a surface.
+    /// Intersects a curve and a surface.
     /// </summary>
     /// <param name="curve">Curve for intersection.</param>
-    /// <param name="curveDomain">Domain of surbcurve to take into consideration for Intersections.</param>
     /// <param name="surface">Surface for intersection.</param>
-    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, 
-    /// an intersection is assumed.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
+    /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
+    /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
+    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <returns>A collection of intersection events.</returns>
+    public static CurveIntersections CurveSurfaceValidate(Curve curve, Surface surface, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
+    {
+      invalidIndices = new int[0];
+      textLog = new TextLog();
+
+      if (overlapTolerance > 0.0 && overlapTolerance < tolerance)
+        overlapTolerance = tolerance;
+
+      using (SimpleArrayInt output_indices = new SimpleArrayInt())
+      {
+        IntPtr ptr_curve = curve.ConstPointer();
+        IntPtr ptr_surface = surface.ConstPointer();
+        IntPtr ptr_indices = output_indices.NonConstPointer();
+        IntPtr ptr_text_log = textLog.NonConstPointer();
+        IntPtr ptr_intersect_array = UnsafeNativeMethods.ON_Intersect_CurveSurface(ptr_curve, ptr_surface, tolerance, overlapTolerance, ptr_indices, ptr_text_log);
+        if (ptr_intersect_array != IntPtr.Zero)
+          invalidIndices = output_indices.ToArray();
+        Runtime.CommonObject.GcProtect(curve, surface);
+        return CurveIntersections.Create(ptr_intersect_array);
+      }
+    }
+
+    /// <summary>
+    /// Intersects a sub-curve and a surface.
+    /// </summary>
+    /// <param name="curve">Curve for intersection.</param>
+    /// <param name="curveDomain">Domain of sub-curve to take into consideration for Intersections.</param>
+    /// <param name="surface">Surface for intersection.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
     public static CurveIntersections CurveSurface(Curve curve, Interval curveDomain, Surface surface, double tolerance, double overlapTolerance)
@@ -618,9 +676,47 @@ namespace Rhino.Geometry.Intersect
 
       IntPtr pCurve = curve.ConstPointer();
       IntPtr pSurface = surface.ConstPointer();
-      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveSurface2(pCurve, pSurface, t0, t1, tolerance, overlapTolerance);
+      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveSurface2(pCurve, pSurface, t0, t1, tolerance, overlapTolerance, IntPtr.Zero, IntPtr.Zero);
       Runtime.CommonObject.GcProtect(curve, surface);
       return CurveIntersections.Create(pIntersectArray);
+    }
+
+    /// <summary>
+    /// Intersects a sub-curve and a surface.
+    /// </summary>
+    /// <param name="curve">Curve for intersection.</param>
+    /// <param name="curveDomain">Domain of sub-curve to take into consideration for Intersections.</param>
+    /// <param name="surface">Surface for intersection.</param>
+    /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
+    /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
+    /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
+    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <returns>A collection of intersection events.</returns>
+    public static CurveIntersections CurveSurfaceValidate(Curve curve, Interval curveDomain, Surface surface, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
+    {
+      invalidIndices = new int[0];
+      textLog = new TextLog();
+
+      Interval domain = curve.Domain;
+      double t0 = Math.Max(domain.Min, curveDomain.Min);
+      double t1 = Math.Min(domain.Max, curveDomain.Max);
+      if (t0 >= t1) { return null; }
+
+      if (overlapTolerance > 0.0 && overlapTolerance < tolerance)
+        overlapTolerance = tolerance;
+
+      using (SimpleArrayInt output_indices = new SimpleArrayInt())
+      {
+        IntPtr ptr_curve = curve.ConstPointer();
+        IntPtr ptr_surface = surface.ConstPointer();
+        IntPtr ptr_indices = output_indices.NonConstPointer();
+        IntPtr ptr_text_log = textLog.NonConstPointer();
+        IntPtr ptr_intersect_array = UnsafeNativeMethods.ON_Intersect_CurveSurface2(ptr_curve, ptr_surface, t0, t1, tolerance, overlapTolerance, ptr_indices, ptr_text_log);
+        if (ptr_intersect_array != IntPtr.Zero)
+          invalidIndices = output_indices.ToArray();
+        Runtime.CommonObject.GcProtect(curve, surface);
+        return CurveIntersections.Create(ptr_intersect_array);
+      }
     }
 
     /// <summary>
@@ -906,62 +1002,258 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Quickly intersects two meshes. Overlaps and near misses are ignored.
+    /// This is an old overload kept for compatibility. Overlaps and near misses are ignored.
     /// </summary>
     /// <param name="meshA">First mesh for intersection.</param>
     /// <param name="meshB">Second mesh for intersection.</param>
-    /// <returns>An array of intersection line segments.</returns>
+    /// <returns>An array of intersection line segments, or null.</returns>
+    [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
-      IntPtr ptrA = meshA.ConstPointer();
-      IntPtr ptrB = meshB.ConstPointer();
-      Line[] intersectionLines = new Line[0];
-
-      using (Runtime.InteropWrappers.SimpleArrayLine arr = new Runtime.InteropWrappers.SimpleArrayLine())
+      if (UseNewMeshIntersections)
       {
-        IntPtr pLines = arr.NonConstPointer();
-        int rc = UnsafeNativeMethods.ON_Mesh_IntersectMesh(ptrA, ptrB, pLines);
-        if (rc > 0)
-          intersectionLines = arr.ToArray();
-      }
-      Runtime.CommonObject.GcProtect(meshA, meshB);
+        const double fixed_tolerance = RhinoMath.SqrtEpsilon * 10;
 
-      return intersectionLines;
+        var arr = new[] { meshA, meshB };
+        var made_it = MeshMesh(arr, fixed_tolerance, out Polyline[] result, false, out Polyline[] _, false, out Mesh _, null, System.Threading.CancellationToken.None, null);
+        if (!made_it) return null;
+        return result.SelectMany((pl) => pl.GetSegments()).ToArray();
+      }
+      else
+      {
+        IntPtr ptrA = meshA.ConstPointer();
+        IntPtr ptrB = meshB.ConstPointer();
+        Line[] intersectionLines = new Line[0];
+
+        using (Runtime.InteropWrappers.SimpleArrayLine arr = new Runtime.InteropWrappers.SimpleArrayLine())
+        {
+          IntPtr pLines = arr.NonConstPointer();
+          int rc = UnsafeNativeMethods.ON_Mesh_IntersectMesh(ptrA, ptrB, pLines);
+          if (rc > 0)
+            intersectionLines = arr.ToArray();
+        }
+        Runtime.CommonObject.GcProtect(meshA, meshB);
+
+        return intersectionLines;
+      }
     }
 
     /// <summary>
-    /// Intersects two meshes. Overlaps and near misses are handled.
+    /// Instructs Rhino to provide the new mesh-mesh intersector implementation. This affects also MeshSplit and other commands.
+    /// </summary>
+    internal static bool UseNewMeshIntersections
+    {
+      get
+      {
+        return UnsafeNativeMethods.RH_MX_UseNew(false, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.RH_MX_UseNew(true, value);
+      }
+    }
+
+    private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "NewMeshIntersections.RequestedDiminishTolerancesCoefficient";
+    private const double DiminishMeshIntersectionsTolerancesRequest_DEFAULT = 0.0001;
+
+    /// <summary>
+    /// <para>Offers a requested adjustment coefficient for mesh-mesh intersections tolerances.
+    /// The value can be used to multiply the document absolute tolerance.</para>
+    /// <para>This is only a UI value; it is up to developer to honor (or not) this request, depending on application needs.</para>
+    /// </summary>
+    /// <value><para>Setting the value to 1.0 results in the setting doing nothing.</para>
+    /// <para>Setting the value to 0.0 results in the default value being reset.</para>
+    /// <para>Setting negative values results in an exception.</para></value>
+    /// <remarks>Generally, document tolerances are around 0.001 for objects sized about 100 units.
+    /// However, good mesh triangles for these objects are often a few orders of magnitude smaller than these values.
+    /// This coefficient is provided to translate absolute document tolerances to values more suitable for good mesh intersections.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">When the value is negative.</exception>
+    internal static double MeshIntersectionsTolerancesCoefficient
+    {
+      get
+      {
+        return PersistentSettings.RhinoAppSettings.GetDouble(DiminishMeshIntersectionsTolerancesRequest_CODE, DiminishMeshIntersectionsTolerancesRequest_DEFAULT);
+      }
+      set
+      {
+        if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Value cannot be negative.");
+        if (value == 0) value = DiminishMeshIntersectionsTolerancesRequest_DEFAULT;
+        PersistentSettings.RhinoAppSettings.SetDouble(DiminishMeshIntersectionsTolerancesRequest_CODE, value);
+      }
+    }
+
+    internal static bool MeshMesh_Helper(IEnumerable<Mesh> meshes, double tolerance,
+      bool computeSelfIntersections, bool overlaps_with_intersections, out Polyline[] intersections, 
+      bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
+      FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
+    {
+      if (meshes == null) throw new ArgumentNullException(nameof(meshes));
+      tolerance = Math.Abs(tolerance);
+
+      intersections = null;
+      overlapsPolylinesResult = null;
+      overlapsMeshResult = null;
+
+      Runtime.Interop.MarshalProgressAndCancelToken(cancel, progress,
+        out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
+
+      try
+      {
+        using (var input = new SimpleArrayMeshPointer())
+        {
+          foreach (var mesh in meshes)
+          {
+            if (mesh == null) continue;
+            input.Add(mesh, true);
+          }
+
+          using (var intersections_native = new SimpleArrayArrayPoint3d())
+          using (var overlaps_native = ((overlapsPolylines) ? (overlaps_with_intersections ? intersections_native : new SimpleArrayArrayPoint3d()) : null))
+          {
+            IntPtr mesh_overlaps_ptr = IntPtr.Zero;
+            if (overlapsMesh)
+            {
+              overlapsMeshResult = new Mesh();
+              mesh_overlaps_ptr = overlapsMeshResult.NonConstPointer();
+            }
+            IntPtr overlaps_native_ptr = IntPtr.Zero;
+            if (overlaps_native != null)
+            {
+              overlaps_native_ptr = overlaps_native.NonConstPointer();
+            }
+
+            bool rc = UnsafeNativeMethods.RH_MX_MeshMeshIntersect(computeSelfIntersections,
+              input.ConstPointer(), tolerance, intersections_native.NonConstPointer(), overlaps_native_ptr, mesh_overlaps_ptr,
+              textLog != null ? textLog.NonConstPointer() : IntPtr.Zero, ptr_terminator, progress_report_serial_number);
+
+            GC.KeepAlive(meshes);
+
+            if (!rc)
+            {
+              return false;
+            }
+
+            if (!overlaps_with_intersections && overlaps_native != null && overlaps_native.Count > 0)
+            {
+              Polyline[] output_pls = new Polyline[overlaps_native.Count];
+              for (int i = 0; i < output_pls.Length; i++)
+              {
+                int pca = overlaps_native.PointCountAt(i);
+                var npl = new Polyline(pca);
+
+                for (int j = 0; j < pca; j++)
+                {
+                  npl.Add(overlaps_native[i, j]);
+                }
+
+                output_pls[i] = npl;
+              }
+
+              overlapsPolylinesResult = output_pls;
+            }
+
+            if (intersections_native.Count > 0)
+            {
+              Polyline[] output_pls = new Polyline[intersections_native.Count];
+              for (int i = 0; i < output_pls.Length; i++)
+              {
+                int pca = intersections_native.PointCountAt(i);
+                var npl = new Polyline(pca);
+
+                for (int j = 0; j < pca; j++)
+                {
+                  npl.Add(intersections_native[i, j]);
+                }
+
+                output_pls[i] = npl;
+              }
+
+              intersections = output_pls;
+            }
+          }
+        }
+      }
+      finally
+      {
+        if (reporter != null) reporter.Disable();
+        if (terminator != null) terminator.Dispose();
+      }
+
+      return true;
+    }
+
+
+    /// <summary>
+    /// Intersects meshes. Overlaps and perforations are provided in the output list.
+    /// </summary>
+    /// <param name="meshes">The mesh input list. This cannot be null. Null entries are tolerated.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <param name="intersections">Returns the intersections.</param>
+    /// <param name="overlapsPolylines">If true, overlaps are computed and returned.</param>
+    /// <param name="overlapsPolylinesResult">If requested, overlaps are returned here.</param>
+    /// <param name="overlapsMesh">If true, an overlaps mesh is computed and returned.</param>
+    /// <param name="overlapsMeshResult">If requested, overlaps are returned here.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
+    /// <param name="progress">A progress reporter to inform the user about progress, or null. The reported value is indicative.</param>
+    /// <returns>True, if the operation succeeded, otherwise false.</returns>
+    public static bool MeshMesh(IEnumerable<Mesh> meshes, double tolerance,
+      out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
+      FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
+    {
+      return MeshMesh_Helper(meshes, tolerance, false, false, out intersections,
+        overlapsPolylines, out overlapsPolylinesResult,
+        overlapsMesh, out overlapsMeshResult,
+        textLog, cancel, progress);
+    }
+
+    /// <summary>
+    /// Intersects two meshes. Overlaps and near misses are handled. This is an old method kept for compatibility.
     /// </summary>
     /// <param name="meshA">First mesh for intersection.</param>
     /// <param name="meshB">Second mesh for intersection.</param>
-    /// <param name="tolerance">Intersection tolerance.</param>
-    /// <returns>An array of intersection polylines.</returns>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <returns>An array of intersection and overlaps polylines.</returns>
     public static Polyline[] MeshMeshAccurate(Mesh meshA, Mesh meshB, double tolerance)
     {
-      IntPtr pMeshA = meshA.ConstPointer();
-      IntPtr pMeshB = meshB.ConstPointer();
-      int polylines_created = 0;
-      IntPtr pPolys = UnsafeNativeMethods.ON_Intersect_MeshMesh1(pMeshA, pMeshB, ref polylines_created, tolerance);
-      if (polylines_created < 1 || IntPtr.Zero == pPolys)
-        return null;
-
-      // convert the C++ polylines created into .NET polylines. We can reuse the meshplane functions
-      Polyline[] rc = new Polyline[polylines_created];
-      for (int i = 0; i < polylines_created; i++)
+      if (UseNewMeshIntersections)
       {
-        int point_count = UnsafeNativeMethods.ON_Intersect_MeshPlanes2(pPolys, i);
-        Polyline pl = new Polyline(point_count);
-        if (point_count > 0)
-        {
-          pl.m_size = point_count;
-          UnsafeNativeMethods.ON_Intersect_MeshPlanes3(pPolys, i, point_count, pl.m_items);
-        }
-        rc[i] = pl;
+        var arr = new[] { meshA, meshB };
+        var rc = MeshMesh_Helper(arr, tolerance, false, true,
+          out Polyline[] result, true, out Polyline[] _, false, out Mesh _, null, System.Threading.CancellationToken.None, null);
+        if (!rc) return null;
+        return result;
       }
-      UnsafeNativeMethods.ON_Intersect_MeshPlanes4(pPolys);
+      else
+      {
+        IntPtr pMeshA = meshA.ConstPointer();
+        IntPtr pMeshB = meshB.ConstPointer();
+        int polylines_created = 0;
+        IntPtr pPolys = UnsafeNativeMethods.ON_Intersect_MeshMesh1(pMeshA, pMeshB, ref polylines_created, tolerance);
+        if (polylines_created < 1 || IntPtr.Zero == pPolys)
+          return null;
 
-      Runtime.CommonObject.GcProtect(meshA, meshB);
-      return rc;
+        // convert the C++ polylines created into .NET polylines. We can reuse the meshplane functions
+        Polyline[] rc = new Polyline[polylines_created];
+        for (int i = 0; i < polylines_created; i++)
+        {
+          int point_count = UnsafeNativeMethods.ON_Intersect_MeshPlanes2(pPolys, i);
+          Polyline pl = new Polyline(point_count);
+          if (point_count > 0)
+          {
+            pl.m_size = point_count;
+            UnsafeNativeMethods.ON_Intersect_MeshPlanes3(pPolys, i, point_count, pl.m_items);
+          }
+          rc[i] = pl;
+        }
+        UnsafeNativeMethods.ON_Intersect_MeshPlanes4(pPolys);
+
+        Runtime.CommonObject.GcProtect(meshA, meshB);
+        return rc;
+      }
     }
 
     /// <summary>Finds the first intersection of a ray with a mesh.</summary>

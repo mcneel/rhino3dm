@@ -215,6 +215,29 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Renames a named view.
+    /// </summary>
+    /// <param name="index">Index of the named view in the named view table.</param>
+    /// <param name="newName">The new name.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool Rename(int index, string newName)
+    {
+      return UnsafeNativeMethods.CRhinoDocProperties_RenameNamedView(m_doc.RuntimeSerialNumber, index, newName);
+    }
+
+    /// <summary>
+    /// Renames a named view.
+    /// </summary>
+    /// <param name="oldName">The name of a named view in the named view table.</param>
+    /// <param name="newName">The new name.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool Rename(string oldName, string newName)
+    {
+      int index = FindByName(oldName);
+      return Rename(index, newName);
+    }
+
+    /// <summary>
     /// Sets the MainViewport of a standard RhinoView to a named views settings
     /// </summary>
     /// <param name="index"></param>

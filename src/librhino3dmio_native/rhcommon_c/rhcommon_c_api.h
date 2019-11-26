@@ -204,6 +204,15 @@ ON_Circle FromCircleStruct(const ON_CIRCLE_STRUCT& cs);
 unsigned int ARGB_to_ABGR( unsigned int argb );
 unsigned int ABGR_to_ARGB( unsigned int abgr );
 
+struct ON_CURVE_REGION_BOUNDARY_ELEMENT_STRUCT
+{
+  int m_curve_id;
+  ON_Interval m_subdomain;
+  bool m_bReversed;
+};
+
+void CopyToCurveRegionBoundaryElementStruct(ON_CURVE_REGION_BOUNDARY_ELEMENT_STRUCT& es, const ON_CurveRegionBoundaryElement& element);
+
 class CHack3dPointArray : public ON_Polyline
 {
 public:

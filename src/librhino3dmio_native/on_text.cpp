@@ -111,6 +111,26 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
   }
 }
 
+RH_C_FUNCTION void ON_V6_Annotation_GetPlainTextWithFields(const ON_Annotation* constAnnotation, ON_wString* wstring)
+{
+  if (constAnnotation && wstring)
+  {
+    (*wstring) = constAnnotation->PlainTextWithFields();
+  }
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_GetPlainTextWithRunMap(const ON_Annotation* constAnnotation, ON_wString* wstring, ON_SimpleArray<int>* intrunmap)
+{
+  if (constAnnotation && wstring && intrunmap)
+  {
+    ON_SimpleArray<ON_3dex> runmap;
+    (*wstring) = constAnnotation->PlainTextWithFields(&runmap);
+    int count = runmap.Count();
+    for(int i = 0; i < count; i++)
+      intrunmap->Append(3, &runmap[i].i);
+  }
+}
+
 RH_C_FUNCTION double ON_V6_Annotation_GetFormatWidth(const ON_Annotation* constAnnotation)
 {
   if (constAnnotation)
@@ -184,7 +204,16 @@ RH_C_FUNCTION void ON_V6_Annotation_SetTextString(ON_Annotation* annotation, con
   }
 }
 
-
+RH_C_FUNCTION bool ON_V6_Annotation_RunReplace(ON_Annotation* annotation, const ON_DimStyle* parent_style, const RHMONO_STRING* repl_str, int start_run_idx, int start_run_pos, int end_run_idx, int end_run_pos)
+{
+  bool rc = false;
+  if (annotation)
+  {
+    INPUTSTRINGCOERCE(_str, repl_str);
+    rc = annotation->RunReplaceString(parent_style, _str, start_run_idx, start_run_pos, end_run_idx, end_run_pos);
+  }
+  return rc;
+}
 
 RH_C_FUNCTION void ON_V6_Annotation_ClearPropertyOverride(ON_Annotation* annotation, ON_DimStyle::field field)
 {
@@ -1291,6 +1320,29 @@ RH_C_FUNCTION void ON_V6_Annotation_FormatRtfString(const RHMONO_STRING* rtfstr_
   *rtfstr_out = ON_TextContext::FormatRtfString(str, nullptr, clear_bold, set_bold, clear_italic, set_italic, clear_underline, set_underline, clear_facename, set_facename, str1);
 }
 
+RH_C_FUNCTION bool ON_V6_Annotation_DecimalSeparator(const ON_Annotation* annotation, const ON_DimStyle* parent_style, ON_wString* pString)
+{
+  if (pString)
+  {
+    wchar_t s = ON_wString::DecimalAsPeriod;
+    if (annotation)
+      s = annotation->DecimalSeparator(parent_style);
+    (*pString) += s;
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_SetDecimalSeparator(ON_Annotation* annotation, const ON_DimStyle* parent_style, const RHMONO_STRING* str)
+{
+  if (annotation && str)
+  {
+    INPUTSTRINGCOERCE(_str, str);
+    if (_str && _str[0])
+      annotation->SetDecimalSeparator(parent_style, _str[0]);
+  }
+}
+
 RH_C_FUNCTION ON::TextVerticalAlignment ON_Text_GetTextVerticalAlignment(const ON_Text* text, const ON_DimStyle* parent_style)
 {
   if (text && parent_style)
@@ -1890,6 +1942,13 @@ RH_C_FUNCTION bool ON_TextContext_FormatDistanceAndTolerance(double distance, ON
 {
   if (formatted_string)
     return ON_TextContent::FormatDistanceAndTolerance(distance, units_in, dimstyle, alternate, *formatted_string);
+  return false;
+}
+
+RH_C_FUNCTION bool ON_TextContext_FormatArea(double area, ON::LengthUnitSystem units_in, const ON_DimStyle* dimstyle, bool alternate, ON_wString* formatted_string)
+{
+  if (formatted_string)
+    return ON_TextContent::FormatArea(area, units_in, dimstyle, alternate, *formatted_string);
   return false;
 }
 

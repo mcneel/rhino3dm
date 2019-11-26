@@ -462,8 +462,8 @@ namespace Rhino.Input.Custom
     /// Call to select a single object.
     /// </summary>
     /// <returns>
-    /// Success - objects selected.
-    /// Cancel - user pressed ESCAPE to cancel the get.
+    /// GetResult.Object if an object was selected.
+    /// GetResult.Cancel if the user pressed ESCAPE to cancel the selection.
     /// See GetResults for other possible values that may be returned when options, numbers,
     /// etc., are acceptable responses.
     /// </returns>
@@ -483,8 +483,8 @@ namespace Rhino.Input.Custom
     /// pick, or Sel* command attempts to add more than maximumNumber, then the attempt is ignored.
     /// </param>
     /// <returns>
-    /// Success - objects selected.
-    /// Cancel - user pressed ESCAPE to cancel the get.
+    /// GetResult.Object if one or more objects were selected.
+    /// GetResult.Cancel if the user pressed ESCAPE to cancel the selection.
     /// See GetResults for other possible values that may be returned when options, numbers,
     /// etc., are acceptable responses.
     /// </returns>

@@ -31,12 +31,52 @@ namespace Rhino.Runtime
   /// <summary>
   /// Dictionary style class used for named callbacks from C++ -> .NET
   /// </summary>
-  public class NamedParametersEventArgs : EventArgs
+  public class NamedParametersEventArgs : EventArgs, IDisposable
   {
+    bool m_deleteOnDispose = false;
     internal IntPtr m_pNamedParams;
     internal NamedParametersEventArgs(IntPtr ptr)
     {
       m_pNamedParams = ptr;
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Construct a new named parameter even args. You should dispose this class when you are done with it
+    /// </summary>
+    public NamedParametersEventArgs()
+    {
+      m_pNamedParams = UnsafeNativeMethods.CRhParameterDictionary_New();
+      m_deleteOnDispose = true;
+    }
+
+    /// <summary>
+    /// Finalizer in case Dispose wasn't called
+    /// </summary>
+    ~NamedParametersEventArgs()
+    {
+      Dispose(true);
+    }
+
+    /// <summary>
+    /// Dispose native resources
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(false);
+    }
+
+    void Dispose(bool fromFinalizer)
+    {
+      if (!fromFinalizer)
+        GC.SuppressFinalize(this);
+
+      IntPtr ptr = m_pNamedParams;
+      m_pNamedParams = IntPtr.Zero;
+      if( m_deleteOnDispose && ptr != IntPtr.Zero )
+      {
+        UnsafeNativeMethods.CRhParameterDictionary_Delete(ptr);
+      }
     }
 
     /// <summary>
@@ -56,12 +96,10 @@ namespace Rhino.Runtime
       }
     }
 
-    /// <summary>
-    /// Set a string value for a given key name
-    /// </summary>
+    /// <summary> Set a string value for a given key name </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
-    public void SetString(string name, string value)
+    public void Set(string name, string value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetString(m_pNamedParams, name, value);
     }
@@ -83,7 +121,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
-    public void SetBool(string name, bool value)
+    public void Set(string name, bool value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetBool(m_pNamedParams, name, value);
     }
@@ -105,9 +143,33 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
-    public void SetInt(string name, int value)
+    public void Set(string name, int value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetInt(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Try to get an unsigned int for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    [CLSCompliant(false)]
+    public bool TryGetUnsignedInt(string name, out uint value)
+    {
+      value = 0;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetUnsignedInt(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set an unsigned int for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    [CLSCompliant(false)]
+    public void Set(string name, uint value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetUnsignedInt(m_pNamedParams, name, value);
     }
 
     /// <summary>
@@ -127,9 +189,129 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
-    public void SetDouble(string name, double value)
+    public void Set(string name, double value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetDouble(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Try to get a Point3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public bool TryGetPoint(string name, out Geometry.Point3d value)
+    {
+      value = Rhino.Geometry.Point3d.Unset;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetPoint3d(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set a Point3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    public void Set(string name, Geometry.Point3d value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetPoint3d(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Set geometry for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    public void Set(string name, Geometry.GeometryBase value)
+    {
+      Set(name, new Geometry.GeometryBase[] { value });
+    }
+
+    /// <summary>
+    /// Set a list of geometry for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="values"></param>
+    public void Set(string name, IEnumerable<Geometry.GeometryBase> values)
+    {
+      IntPtr pObjectArray = UnsafeNativeMethods.ON_ObjectArray_New();
+      foreach(var value in values)
+      {
+        IntPtr ptrObject = value.ConstPointer();
+        UnsafeNativeMethods.ON_ObjectArray_Append(pObjectArray, ptrObject);
+      }
+      UnsafeNativeMethods.CRhParameterDictionary_SetObjects(m_pNamedParams, name, pObjectArray);
+      UnsafeNativeMethods.ON_ObjectArray_Delete(pObjectArray);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="values"></param>
+    /// <returns></returns>
+    public bool TryGetGeometry(string name, out Geometry.GeometryBase[] values)
+    {
+      if( !_retrievedObjects.ContainsKey(name) )
+      {
+        IntPtr pObjectArray = UnsafeNativeMethods.ON_ObjectArray_New();
+        bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetObjects(m_pNamedParams, name, pObjectArray);
+        if( rc )
+        {
+          int count = UnsafeNativeMethods.ON_ObjectArray_Count(pObjectArray);
+          var geometry = new Geometry.GeometryBase[count];
+          for( int i=0; i<count; i++ )
+          {
+            IntPtr ptrObject = UnsafeNativeMethods.ON_ObjectArray_Item(pObjectArray, i);
+            geometry[i] = Geometry.GeometryBase.CreateGeometryHelper(ptrObject, null);
+          }
+          _retrievedObjects[name] = geometry;
+        }
+        UnsafeNativeMethods.ON_ObjectArray_Delete(pObjectArray);
+      }
+      return _retrievedObjects.TryGetValue(name, out values);
+    }
+
+    Dictionary<string, Geometry.GeometryBase[]> _retrievedObjects = new Dictionary<string, Geometry.GeometryBase[]>();
+
+    /// <summary>
+    /// Keep internal for now. This is used by the hatch command.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    internal bool TryGetHatchObjects(string name, out List<DocObjects.HatchObject> value)
+    {
+      var rc = false;
+      value = new List<DocObjects.HatchObject>();
+      using (var rhobjs = new Runtime.InternalRhinoObjectArray())
+      {
+        IntPtr ptr_object_array = rhobjs.NonConstPointer();
+        rc = UnsafeNativeMethods.CRhParameterDictionary_GetHatchObjects(m_pNamedParams, name, ptr_object_array);
+        if (rc)
+        {
+          foreach (var rhobj in rhobjs.ToArray())
+          {
+            if (rhobj is DocObjects.HatchObject hatchobj)
+              value.Add(hatchobj);
+          }
+          rc = value.Count > 0;
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Keep internal for now. This is used by the hatch command.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    internal void SetHatchObjects(string name, IEnumerable<DocObjects.HatchObject> value)
+    {
+      using (var rhobjs = new Runtime.InternalRhinoObjectArray(value))
+      {
+        IntPtr ptr_object_array = rhobjs.NonConstPointer();
+        UnsafeNativeMethods.CRhParameterDictionary_SetHatchObjects(m_pNamedParams, name, ptr_object_array);
+      }
     }
   }
 
@@ -420,11 +602,18 @@ namespace Rhino.Runtime
     public abstract object EvaluateExpression(string statements, string expression);
 
     /// <summary>
-    /// Executes a Python file.
+    /// Executes a Python file. The file is executed in a new, __main__ scope.
     /// </summary>
     /// <param name="path">The path to the file.</param>
     /// <returns>true if the file executed. This method can throw scripting-runtime based exceptions.</returns>
     public abstract bool ExecuteFile(string path);
+
+    /// <summary>
+    /// Executes a Python file in the calling script scope. All old variables are kept.
+    /// </summary>
+    /// <param name="path">The path to the file.</param>
+    /// <returns>true if the file executed. This method can throw scripting-runtime based exceptions.</returns>
+    public abstract bool ExecuteFileInScope(string path);
 
     /// <summary>
     /// Executes a Python string.
@@ -741,25 +930,36 @@ namespace Rhino.Runtime
     static Dictionary<string, EventHandler<NamedParametersEventArgs>> _namedCallbacks = new Dictionary<string, EventHandler<NamedParametersEventArgs>>();
     static GCHandle _namedCallbackHandle;
     internal delegate int NamedCallback(IntPtr name, IntPtr ptrNamedParams);
-    static readonly NamedCallback g_named_callback = ExecuteNamedCallback;
+    static readonly NamedCallback g_named_callback = ExecuteNamedCallbackHelper;
+    static IntPtr _namedCallbackFunctionPointer = IntPtr.Zero;
 
-    /// <summary>
-    /// Register a named callback from C++ -> .NET
-    /// </summary>
+    /// <summary>Register a named callback</summary>
     /// <param name="name"></param>
     /// <param name="callback"></param>
     public static void RegisterNamedCallback(string name, EventHandler<NamedParametersEventArgs> callback)
     {
       _namedCallbacks[name] = callback;
-      if( !_namedCallbackHandle.IsAllocated )
+      if (!_namedCallbackHandle.IsAllocated)
       {
         _namedCallbackHandle = GCHandle.Alloc(g_named_callback);
-        IntPtr func = Marshal.GetFunctionPointerForDelegate(g_named_callback);
-        UnsafeNativeMethods.RHC_RhRegisterNamedCallbackProc(func);
+        _namedCallbackFunctionPointer = Marshal.GetFunctionPointerForDelegate(g_named_callback);
       }
+      UnsafeNativeMethods.RHC_RhRegisterNamedCallbackProc(name, _namedCallbackFunctionPointer);
     }
 
-    static int ExecuteNamedCallback(IntPtr name, IntPtr ptrNamedParams)
+    /// <summary>
+    /// Execute a named callback
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="args"></param>
+    public static void ExecuteNamedCallback(string name, NamedParametersEventArgs args)
+    {
+      // Don't directly call the function on our dictionary and instead indirectly call
+      // through C++. This allows for cross AppDomain calls
+      UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
+    }
+
+    static int ExecuteNamedCallbackHelper(IntPtr name, IntPtr ptrNamedParams)
     {
       try
       {
@@ -780,6 +980,36 @@ namespace Rhino.Runtime
       return 0;
     }
 
+    static List<Tuple<string,Type>> _customComputeEndPoints;
+    /// <summary>
+    /// Register a class that can participate as a compute endpoint
+    /// </summary>
+    /// <param name="endpointPath"></param>
+    /// <param name="t"></param>
+    public static void RegisterComputeEndpoint(string endpointPath, Type t)
+    {
+      if (_customComputeEndPoints == null)
+        _customComputeEndPoints = new List<Tuple<string, Type>>();
+      _customComputeEndPoints.Add(new Tuple<string, Type>(endpointPath, t));
+    }
+
+    internal static int CustomComputeEndpointCount()
+    {
+      if (_customComputeEndPoints != null)
+        return _customComputeEndPoints.Count;
+      return 0;
+    }
+    /// <summary>
+    /// Used by compute to define custom endpoints
+    /// </summary>
+    /// <returns></returns>
+    public static Tuple<string, Type>[] GetCustomComputeEndpoints()
+    {
+      if (_customComputeEndPoints != null)
+        return _customComputeEndPoints.ToArray();
+      return new Tuple<string, Type>[0];
+    }
+
 
 #endif
 
@@ -796,6 +1026,27 @@ namespace Rhino.Runtime
       string rhino_common_location = typeof(HostUtils).Assembly.Location;
       directories.Add(System.IO.Path.GetDirectoryName(rhino_common_location));
       directories.AddRange(PlugIn.GetInstalledPlugInFolders());
+
+      // 3 June 2019 S. Baer (RH-48975)
+      // Add the grasshopper components directory so we can find galapagos and kangaroosolver
+      string pathToAdd = null;
+      foreach(var dir in directories)
+      {
+        if(dir.Contains("Grasshopper"))
+        {
+          var path = System.IO.Path.Combine(dir, "Components");
+          if( System.IO.Directory.Exists(path))
+          {
+            pathToAdd = path;
+            break;
+          }
+        }
+      }
+      if( !string.IsNullOrWhiteSpace(pathToAdd) )
+      {
+        directories.Add(pathToAdd);
+      }
+
       // include all auto-install directories (that aren't already included)
       // grasshopper will prune the folders that it doesn't care about
       foreach (var dir in GetActivePlugInVersionFolders(true))
@@ -817,7 +1068,7 @@ namespace Rhino.Runtime
     /// cases. This function is similar to a const_cast in C++ to allow an object
     /// to be made temporarily modifiable without causing RhinoCommon to convert
     /// the class from const to non-const by creating a duplicate.</para>
-    /// 
+    ///
     /// <para>You must call this function with a true parameter, make your
     /// modifications, and then restore the const flag by calling this function
     /// again with a false parameter. If you have any questions, please
@@ -859,9 +1110,15 @@ namespace Rhino.Runtime
     }
 
 #if RHINO_SDK
+    /// <summary>
+    /// Returns true if the host operating system is in dark mode and Rhino
+    /// supports dark mode.
+    /// </summary>
+    public static bool RunningInDarkMode => UnsafeNativeMethods.RHC_RhRunningInDarkMode();
+
     private static string m_device_name;
     /// <summary>
-    /// Name of the computer running Rhino. If the computer is part of a 
+    /// Name of the computer running Rhino. If the computer is part of a
     /// Windows Domain, the computer name has "@[DOMAIN]" appended.
     /// </summary>
     public static string DeviceName
@@ -955,7 +1212,7 @@ namespace Rhino.Runtime
             if (!SerialNumberIsHardwareBased)
               hash16[15] |= 0x1;
 
-            // Set GUID 
+            // Set GUID
             m_device_id = new Guid(hash16);
           }
         }
@@ -1238,7 +1495,7 @@ namespace Rhino.Runtime
 
     static bool m_bSendDebugToRhino; // = false; initialized by runtime
     /// <summary>
-    /// Prints a debug message to the Rhino Command Line. 
+    /// Prints a debug message to the Rhino Command Line.
     /// The message will only appear if the SendDebugToCommandLine property is set to true.
     /// </summary>
     /// <param name="msg">Message to print.</param>
@@ -1253,7 +1510,7 @@ namespace Rhino.Runtime
 #endif
     }
     /// <summary>
-    /// Prints a debug message to the Rhino Command Line. 
+    /// Prints a debug message to the Rhino Command Line.
     /// The message will only appear if the SendDebugToCommandLine property is set to true.
     /// </summary>
     /// <param name="format">Message to format and print.</param>
@@ -1331,7 +1588,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Represents the type of message that is being sent to the OnSendLogMessageToCloud event
     /// </summary>
-    /// 
+    ///
     public enum LogMessageType : int
     {
       /// <summary>
@@ -1463,7 +1720,7 @@ namespace Rhino.Runtime
     /// Parses a plugin and create all the commands defined therein.
     /// </summary>
     /// <param name="plugin">Plugin to harvest for commands.</param>
-    public static void CreateCommands(PlugIn plugin) 
+    public static void CreateCommands(PlugIn plugin)
     {
       if (plugin!=null)
         plugin.InternalCreateCommands();
@@ -1664,6 +1921,218 @@ namespace Rhino.Runtime
     }
 
 #if RHINO_SDK
+    internal static object ParseFieldExpression(string expression, RhinoDoc doc, 
+      Rhino.DocObjects.RhinoObject rhinoObject, Rhino.DocObjects.RhinoObject topLevelRhinoObject,
+      Rhino.DocObjects.InstanceObject immediateParentObject,
+      bool returnFormattedString, out bool parseSucceeded)
+    {
+      parseSucceeded = false;
+      int startIndex = expression.IndexOf("%<");
+      int endIndex = expression.IndexOf(">%");
+      string formula = expression;
+      if (startIndex >=0 && endIndex > startIndex)
+        formula = expression.Substring(startIndex + 2, endIndex - startIndex - 2).Trim();
+
+      formula = formula.Replace("\n", "");
+
+      // tune up old V5 style fields to force every function to have a ()
+      // Skipping ones like "Area" since those always required parentheses
+      string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes" };
+      foreach(var field in oldFields)
+      {
+        if (!formula.StartsWith(field))
+          continue;
+
+        int tokenSearchStart = 0;
+        while(true)
+        {
+          
+          int functionNameStart = formula.IndexOf(field, tokenSearchStart);
+          if (functionNameStart < 0)
+            break;
+          int functionNameEnd = functionNameStart + field.Length - 1;
+
+          bool addParentheses = true;
+          for(int i=functionNameEnd+1; i<formula.Length; i++)
+          {
+            char c = formula[i];
+            if (c == ' ')
+              continue;
+            if (c == '(')
+              addParentheses = false;
+            if (i == (functionNameEnd+1))
+            {
+              // if this is another char, then ignore
+              if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                addParentheses = false;
+            }
+            break;
+          }
+            
+          tokenSearchStart = functionNameStart + field.Length;
+          if(addParentheses)
+          {
+            tokenSearchStart += 2;
+            formula = formula.Insert(functionNameStart + field.Length, "()");
+          }
+        }
+      }
+
+      // I don't think is is possible to write bad things in a single line expression,
+      // but check for import, exec, and clr just to be safe.
+      string[] badwords = { "import", "exec", "clr" };
+      bool containsBadWord = false;
+      foreach (var word in badwords)
+        containsBadWord |= formula.Contains(word);
+
+      if (containsBadWord)
+        return null;
+
+
+      try
+      {
+        if (doc == null)
+          doc = RhinoDoc.ActiveDoc;
+        TextFields.Setup(doc, rhinoObject, topLevelRhinoObject, immediateParentObject);
+        // Force the culture to invarient while running the evaluation
+        var current = System.Threading.Thread.CurrentThread.CurrentCulture;
+        System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        PythonScript py = PythonScript.Create();
+        string statements = "import clr\nfrom math import *\nfrom Rhino.Runtime.TextFields import *\n";
+        object eval_result = py.EvaluateExpression(statements, formula);
+        System.Threading.Thread.CurrentThread.CurrentCulture = current;
+
+        if (null != eval_result)
+        {
+          parseSucceeded = true;
+          if (returnFormattedString)
+          {
+            if (eval_result is double || eval_result is float)
+            {
+              double double_result = (double)eval_result;
+              // We should eventually support some sort of formatting field in the field.
+
+              UnitSystem units;
+              int displayPrecision;
+              if (rhinoObject != null && (rhinoObject.Attributes.Space == DocObjects.ActiveSpace.PageSpace))
+              {
+                units = doc.PageUnitSystem;
+                displayPrecision = doc.PageDistanceDisplayPrecision;
+              }
+              else
+              {
+                units = doc.ModelUnitSystem;
+                displayPrecision = doc.ModelDistanceDisplayPrecision;
+              }
+
+              var annotation = rhinoObject as Rhino.DocObjects.AnnotationObjectBase;
+              // Basic CurveLength expression
+              if (annotation != null && expression.StartsWith("CurveLength", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              {
+                var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+                if (!string.IsNullOrWhiteSpace(stringResult))
+                  return stringResult;
+              }
+
+              if (annotation != null && expression.StartsWith("Area", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              {
+                string stringResult = Rhino.UI.Localization.FormatArea(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+
+                if (!string.IsNullOrWhiteSpace(stringResult))
+                  return stringResult;
+              }
+
+              if (annotation!=null)
+              {
+                displayPrecision = annotation.AnnotationGeometry.DimensionStyle.LengthResolution;
+              }
+
+              string formattedString = Rhino.UI.Localization.FormatNumber(double_result, units, UI.DistanceDisplayMode.Decimal, displayPrecision, false);
+              if (!string.IsNullOrWhiteSpace(formattedString))
+                return formattedString;
+            }
+
+            eval_result = eval_result.ToString();
+          }
+        }
+        return eval_result;
+      }
+      catch // (Exception ex)
+      {
+        // 11 September 2019 John Morse
+        // Return "####" on error instead of English exception string.  Need to
+        // set parseSucceeded to true in this case otherise the expression will
+        // be displayed instead of "####"
+        //return ex.Message;
+        parseSucceeded = true;
+        return "####";
+      }
+    }
+#endif
+
+    /// <summary>
+    /// This function is called from the C++ textfield evaluator
+    /// </summary>
+    /// <param name="ptrFormula"></param>
+    /// <param name="pRhinoObject"></param>
+    /// <param name="ptrParseResult"></param>
+    /// <param name="pTopParent"></param>
+    /// <param name="pImmediateParent">pointer to immediate instance object parent</param>
+    /// <returns></returns>
+    static int EvaluateTextFieldHelper(IntPtr ptrFormula, IntPtr pRhinoObject, IntPtr ptrParseResult, IntPtr pTopParent, IntPtr pImmediateParent)
+    {
+      int rc = 0;
+#if RHINO_SDK
+      RhinoDoc doc = null;
+      var rhobj = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
+      if (rhobj != null)
+        doc = rhobj.Document;
+      Rhino.DocObjects.RhinoObject topParent = null;
+      if (pRhinoObject == pTopParent || pTopParent == IntPtr.Zero)
+        topParent = rhobj;
+      else
+        topParent = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pTopParent);
+
+      Rhino.DocObjects.InstanceObject immediateParent = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pImmediateParent) as Rhino.DocObjects.InstanceObject;
+
+      if (doc == null)
+        doc = RhinoDoc.ActiveDoc;
+
+
+      // Call a function on the TextFields class
+      bool success;
+      string formula = StringWrapper.GetStringFromPointer(ptrFormula);
+
+      string result = ParseFieldExpression(formula, doc, rhobj, topParent, immediateParent, true, out success) as string;
+
+      // Iterate parsed results to see if they contain nested functions
+      
+      int max_iterations = 9;
+      if (!string.IsNullOrWhiteSpace(result))
+      {
+        if (result.StartsWith("%<") && result.EndsWith(">%"))
+        {
+          for (int i = 0; i < max_iterations; i++)
+          {
+            result = ParseFieldExpression(result, doc, rhobj, topParent, immediateParent, true, out success) as string;
+            if (string.IsNullOrEmpty(result))
+              break;
+
+            if (!result.StartsWith("%<") || !result.EndsWith(">%"))
+              break;
+          }
+        }
+      }
+
+
+
+      StringWrapper.SetStringOnPointer(ptrParseResult, result);
+      rc = success ? 1 : 0;
+#endif
+      return rc;
+    }
+
+#if RHINO_SDK
     /// <summary>
     /// Gets the auto install plug-in folder for machine or current user.
     /// </summary>
@@ -1828,13 +2297,16 @@ namespace Rhino.Runtime
 
     internal delegate void SendLogMessageToCloudCallback(LogMessageType msg_type, IntPtr pwStringClass, IntPtr pwStringDesc, IntPtr pwStringError);
     static readonly SendLogMessageToCloudCallback m_send_log_message_to_cloud_callback = SendLogMessageToCloudCallbackProc;
+
+    internal delegate int EvaluateTextFieldCallback(IntPtr formula, IntPtr pRhinoObject, IntPtr parseResult, IntPtr topParent, IntPtr immediateParent);
+    static readonly EvaluateTextFieldCallback m_eval_textfield_callback = EvaluateTextFieldHelper;
 #endif
 
     private static bool m_rhinocommoninitialized;
     private static int m_uiThreadId;
     /// <summary>
-    /// Makes sure all static RhinoCommon components is set up correctly. 
-    /// This happens automatically when a plug-in is loaded, so you probably won't 
+    /// Makes sure all static RhinoCommon components is set up correctly.
+    /// This happens automatically when a plug-in is loaded, so you probably won't
     /// have to call this method.
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
@@ -1865,6 +2337,7 @@ namespace Rhino.Runtime
       DebugString("Initializing RhinoCommon");
       UnsafeNativeMethods.RHC_SetGetNowProc(m_getnow_callback, m_getformattedtime_callback);
       UnsafeNativeMethods.RHC_SetPythonEvaluateCallback(m_evaluate_callback);
+      UnsafeNativeMethods.RHC_SetTextFieldEvalCallback(m_eval_textfield_callback);
       UnsafeNativeMethods.CRhinoCommonPlugInLoader_SetCallbacks(m_loadplugin_callback, m_loadskin_callback, m_buildplugin_list, m_getassembly_id);
       InitializeZooClient();
 
@@ -2392,7 +2865,7 @@ namespace Rhino.Runtime
           entry = entry.Substring(split_index + 1);
         }
 
-        
+
         Type t = e.ObjectType;
         if( typeof(string) == t )
           UnsafeNativeMethods.CRhinoProfileContext_SaveProfileString(pProfileContext, section, entry, e.Value as string);

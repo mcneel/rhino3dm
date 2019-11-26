@@ -526,28 +526,79 @@ namespace Rhino.DocObjects
     public override ModelComponentType ComponentType { get { return ModelComponentType.InstanceDefinition; }
     }
 
+    /// <summary>
+    /// Creates a preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="displayMode">The display mode.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize)
     {
       return CreatePreviewBitmap(definedViewportProjection, displayMode, bitmapSize, false);
     }
 
+    /// <summary>
+    /// Creates a preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="displayMode">The display mode.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
-      IntPtr const_ptr = ConstPointer();
-      IntPtr ptr_rhino_dib = UnsafeNativeMethods.CRhinoInstanceDefinition_GetPreviewBitmap(const_ptr, (int)definedViewportProjection, (int)displayMode, bitmapSize.Width, bitmapSize.Height, applyDpiScaling);
-      var bitmap = RhinoDib.ToBitmap(ptr_rhino_dib, true);
-      return bitmap;
+      return CreatePreviewBitmap(Guid.Empty, definedViewportProjection, displayMode, bitmapSize, applyDpiScaling);
     }
 
+    /// <summary>
+    /// Creates a wireframe preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, System.Drawing.Size bitmapSize)
     {
       return CreatePreviewBitmap(definedViewportProjection, bitmapSize, false);
     }
 
+    /// <summary>
+    /// Creates a wireframe preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
       return CreatePreviewBitmap(definedViewportProjection, DisplayMode.Wireframe, bitmapSize, applyDpiScaling);
     }
+
+    /// <summary>
+    /// Creates a preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="definitionObjectId">Id of one of this definition's objects to draw selected.</param>
+    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="displayMode">The display mode.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    public System.Drawing.Bitmap CreatePreviewBitmap(Guid definitionObjectId, Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
+    {
+      IntPtr const_ptr = ConstPointer();
+      IntPtr ptr_rhino_dib = UnsafeNativeMethods.CRhinoInstanceDefinition_GetPreviewBitmap(
+        const_ptr, 
+        definitionObjectId, 
+        (int)definedViewportProjection, 
+        (int)displayMode, 
+        bitmapSize.Width, 
+        bitmapSize.Height, 
+        applyDpiScaling
+        );
+      var bitmap = RhinoDib.ToBitmap(ptr_rhino_dib, true);
+      return bitmap;
+    }
+
 
     /// <summary>
     /// Returns the archive file status of a linked instance definition.

@@ -219,7 +219,7 @@ namespace Rhino.Commands
       if (doc == null)
         doc = RhinoDoc.ActiveDoc;
       var rc = _proxyCommandCallback(doc, RunMode.Interactive, _proxyObject);
-      args.SetInt("result", (int)rc);
+      args.Set("result", (int)rc);
     }
 
 
@@ -1704,14 +1704,12 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToMesh(m_parent.m_pObjectPairArray, m_index, pConstMesh, pConstAttributes);
     }
 
-#if RHINO_SUBD_WIP
     internal bool UpdateToSubD(Geometry.SubD subD, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstSubD = subD.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSubD(m_parent.m_pObjectPairArray, m_index, pConstSubD, pConstAttributes);
     }
-#endif
 
     public bool UpdateToBrep(Geometry.Brep brep, DocObjects.ObjectAttributes attributes)
     {

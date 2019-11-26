@@ -276,6 +276,51 @@ namespace Rhino.UI
   }
 
   /// <summary>
+  /// Passed to Rhino.PlugIns.PlugIn.ObjectPropertiesPages to allow a plug-in
+  /// to add custom ObjectPropertiesPage pages to the Rhino properties panel.
+  /// </summary>
+  public class ObjectPropertiesPageCollection
+  {
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="documentRuntimeSerailNumber">
+    /// Document associated with the Rhino properties panel.
+    /// </param>
+    internal ObjectPropertiesPageCollection(uint documentRuntimeSerailNumber)
+    {
+      DocumentRuntimeSerailNumber = documentRuntimeSerailNumber;
+    }
+
+    /// <summary>
+    /// Custom page to add
+    /// </summary>
+    /// <param name="page"></param>
+    public void Add(ObjectPropertiesPage page)
+    {
+      if (page == null)
+        throw new ArgumentNullException(nameof(page));
+      Pages.Add(page);
+    }
+    /// <summary>
+    /// Add plug-in pages to this list
+    /// </summary>
+    internal List<ObjectPropertiesPage> Pages { get; } = new List<ObjectPropertiesPage>();
+
+    /// <summary>
+    /// Document associated with the Rhino properties panel.
+    /// </summary>
+    [CLSCompliant(false)]
+    public uint DocumentRuntimeSerailNumber { get; }
+
+    /// <summary>
+    /// Document associated with the Rhino properties panel.
+    /// </summary>
+    public RhinoDoc Document => _doc ?? (_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerailNumber));
+    private RhinoDoc _doc;
+  }
+
+  /// <summary>
   /// Base class used to add object property user interface panels
   /// </summary>
   public abstract class ObjectPropertiesPage

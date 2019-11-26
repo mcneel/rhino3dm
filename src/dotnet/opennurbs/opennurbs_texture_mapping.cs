@@ -180,6 +180,54 @@ namespace Rhino.Render
     }
 
     /// <summary>
+    /// Evaluate the mapping to get a texture coordinate
+    /// </summary>
+    /// <param name="p">Vertex location</param>
+    /// <param name="n">If the mapping projection is ray_projection, then this
+    /// is the vertex unit normal.  Otherwise n is ignored.</param>
+    /// <param name="t">Texture coordinate (u,v,w)</param>
+    /// <returns>
+    /// Nonzero if evaluation is successful.  When the mapping is a box or
+    /// capped cylinder mapping, the value indicates which side was evaluated.
+    /// Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap
+    /// Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
+    /// </returns>
+    public int Evaluate(Point3d p, Vector3d n, out Point3d t)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      t = new Point3d(0, 0, 0);
+      return UnsafeNativeMethods.ON_TextureMapping_Evaluate(const_ptr_this, p, n, ref t);
+    }
+
+    /// <summary>
+    /// Evaluate the mapping to get a texture coordinate
+    /// </summary>
+    /// <param name="p">Vertex location</param>
+    /// <param name="n">If the mapping projection is ray_projection, then this
+    /// is the vertex unit normal.  Otherwise n is ignored.</param>
+    /// <param name="t">Texture coordinate (u,v,w)</param>
+    /// <param name="pXform">
+    /// Transformation to be applied to P before performing the mapping calculation.
+    /// </param>
+    /// <param name="nXform">
+    /// Transformation to be applied to N before performing the mapping
+    /// calculation. One way to calculate nXxform is to use the call
+    /// pXform::GetVectorTransform(nXform).
+    /// </param>
+    /// <returns>
+    /// Nonzero if evaluation is successful.  When the mapping is a box or
+    /// capped cylinder mapping, the value indicates which side was evaluated.
+    /// Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap
+    /// Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
+    /// </returns>
+    public int Evaluate(Point3d p, Vector3d n, out Point3d t, Transform pXform, Transform nXform)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      t = new Point3d(0, 0, 0);
+      return UnsafeNativeMethods.ON_TextureMapping_Evaluate2(const_ptr_this, p, n, ref t, ref pXform, ref nXform);
+    }
+
+    /// <summary>
     /// Get a box projection from the texture mapping.
     /// </summary>
     /// <param name="plane">
@@ -404,6 +452,21 @@ namespace Rhino.Render
       dz = Interval.Unset;
       capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingPlane(ptr, ref plane, ref dx, ref dy, ref dz, ref capped);
+      return success;
+    }
+
+    /// <summary>
+    /// Get custom mapping mesh from this texture mapping.
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <returns>True if custom mapping mesh was returned.</returns>
+    public bool TryGetMappingMesh(out Mesh mesh)
+    {
+      var ptr = ConstPointer();
+      mesh = new Mesh();
+      var success = UnsafeNativeMethods.ON_TextureMapping_CopyCustomMappingMeshPrimitive(ptr, mesh.NonConstPointer());
+      if (!success)
+        mesh = null;
       return success;
     }
 

@@ -826,7 +826,7 @@ RH_C_FUNCTION bool ON_Viewport_Transform(ON_Viewport* pVP, ON_Xform* pXform)
 RH_C_FUNCTION bool ON_Viewport_Rotate(ON_Viewport* pVP,
   double rotation_angle_radians, ON_3DVECTOR_STRUCT rotation_axis, ON_3DPOINT_STRUCT rotation_center)
 {
-  if (pVP && rotation_axis.val && rotation_center.val)
+  if (pVP)
   {
     return pVP->Rotate(rotation_angle_radians, ON_3dVector(rotation_axis.val), ON_3dPoint(rotation_center.val));
   }

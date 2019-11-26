@@ -148,11 +148,10 @@ namespace Rhino.Display
       return rc;
     }
 
-
     /// <summary>
     /// Gets a list of the detail view objects associated with this layout.
     /// </summary>
-    /// <returns>A detail view object array. This can be null, but not empty.</returns>
+    /// <returns>An array of detail view objects if successful, an empty array if the layout has no details.</returns>
     public DetailViewObject[] GetDetailViews()
     {
       IntPtr ptr_list = UnsafeNativeMethods.CRhinoDetailViewArray_New();
@@ -160,7 +159,7 @@ namespace Rhino.Display
       if (count < 1)
       {
         UnsafeNativeMethods.CRhinoDetailViewArray_Delete(ptr_list);
-        return null;
+        return new DetailViewObject[0];
       }
 
       var rc = new DetailViewObject[count];
@@ -179,7 +178,7 @@ namespace Rhino.Display
 
     /// <summary>
     /// Gets or sets the runtime page number and updates the page number for all
-    /// of the other pages. The first page has a value of 0
+    /// of the other pages. The first page has a value of 0.
     /// </summary>
     public int PageNumber
     {
@@ -190,6 +189,46 @@ namespace Rhino.Display
       set
       {
         UnsafeNativeMethods.CRhinoPageView_SetPageNumber(RuntimeSerialNumber, value);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the contents, or description, of the page.
+    /// </summary>
+    public string PageDescription
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoPageView_GetSetDescription(RuntimeSerialNumber, null, ptr_string);
+          return sh.ToString();
+        }
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoPageView_GetSetDescription(RuntimeSerialNumber, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>
+    /// Creates a preview image of the page.
+    /// </summary>
+    /// <param name="size">The size of the preview image.</param>
+    /// <param name="grayScale">Set true to produce a grayscale image, false to produce a color image.</param>
+    /// <returns>A bitmap if successful, null othewise.</returns>
+    public System.Drawing.Bitmap GetPreviewImage(System.Drawing.Size size, bool grayScale)
+    {
+      using (var dib = new RhinoDib())
+      {
+        var ptr_dib = dib.NonConstPointer;
+        if (UnsafeNativeMethods.CRhinoPageView_GetPreviewImage(RuntimeSerialNumber, size.Width, size.Height, grayScale, ptr_dib))
+        {
+          var bitmap = dib.ToBitmap();
+          return bitmap;
+        }
+        return null;
       }
     }
 

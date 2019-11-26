@@ -322,6 +322,13 @@ namespace Rhino.Display
       }
       m_root_node.AppendChild(elem);
     }
+
+    protected override void DrawGradientHatch(DisplayPipeline pipeline, Hatch hatch, DocObjects.HatchPattern pattern, Color[] gradientColors, float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2,
+      bool linearGradient, Color boundaryColor, double pointScale)
+    {
+      //TODO: implement
+      //throw new NotImplementedException();
+    }
   }
 
 
@@ -396,6 +403,18 @@ namespace Rhino.Display
       set
       {
         _doc = value;
+      }
+    }
+
+    public bool RasterMode
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.PrintInfoBool.Raster);
+      }
+      set
+      {
+        SetBool(UnsafeNativeMethods.PrintInfoBool.Raster, value);
       }
     }
 
@@ -626,10 +645,43 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.UsePrintWidths, value); }
     }
 
+    /// <summary>
+    /// scaling factor to apply to object print widths (typically 1.0). This is
+    /// helpful when printing something at 1/2 scale and having all of the curves
+    /// print 1/2 as thick
+    /// </summary>
     public double WireThicknessScale
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.WireThicknessScale); }
       set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.WireThicknessScale, value); }
+    }
+
+    /// <summary>
+    /// size of point objects in millimeters
+    /// if scale &lt;= 0 the size is minimized so points are always drawn as small as possible
+    /// </summary>
+    public double PointSizeMillimeters
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PointSizeMM); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.PointSizeMM, value); }
+    }
+
+    /// <summary>
+    /// arrowhead size in millimeters
+    /// </summary>
+    public double ArrowheadSizeMillimeters
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.ArrowHeadSizeMM); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.ArrowHeadSizeMM, value); }
+    }
+
+    /// <summary>
+    /// Line thickness used to print objects with no defined thickness (in mm)
+    /// </summary>
+    public double DefaultPrintWidthMillimeters
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM, value); }
     }
 
     public enum ColorMode
@@ -652,6 +704,65 @@ namespace Rhino.Display
         UnsafeNativeMethods.CRhinoPrintInfo_SetColorMode(ptrThis, (UnsafeNativeMethods.PrintInfoColorMode)value);
       }
     }
+
+    /// <summary>
+    /// Returns the model scale factor.
+    /// </summary>
+    /// <param name="pageUnits">The current page units.</param>
+    /// <param name="modelUnits">The current model units.</param>
+    /// <returns>The model scale factor.</returns>
+    public double GetModelScale(UnitSystem pageUnits, UnitSystem modelUnits)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoPrintInfo_GetModelScale(ptr_const_this, pageUnits, modelUnits);
+    }
+
+    /// <summary>
+    /// Sets the model scale to a value.
+    /// </summary>
+    /// <param name="scale">The scale value.</param>
+    public void SetModelScaleToValue(double scale)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleToValue(ptr_this, scale);
+    }
+
+    /// <summary>
+    /// Scales the model to fit.
+    /// </summary>
+    /// <param name="promptOnChange">Prompt the user if the model scale will change.</param>
+    public void SetModelScaleToFit(bool promptOnChange)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleToFit(ptr_this, promptOnChange);
+    }
+
+    /// <summary>
+    /// Returns true if the model has been scaled to fit.
+    /// </summary>
+    public bool IsScaleToFit
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.CRhinoPrintInfo_IsScaledToFit(ptr_const_this);
+      }
+    }
+
+    public int ModelScaleType
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.CRhinoPrintInfo_GetModelScaleType(ptr_const_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleType(ptr_this, value);
+      }
+    }
+
 
     #region IDisposable implementation
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>
@@ -707,6 +818,8 @@ namespace Rhino.Runtime
     public delegate void VectorRoundedRectProc(float centerX, float centerY, float pixelWidth, float pixelHeight, float cornerRadius,
       int strokeColor, float strokeWidth, int fillColor);
     public delegate void VectorClipPathProc(int count, IntPtr points, int asBeziers);
+    public delegate void VectorGradientProc(IntPtr pEngine, IntPtr pHatch, float strokeWidth, IntPtr pHatchPattern, int gradientCount, IntPtr colors,
+      IntPtr stops, IntPtr points, int linearGradient, int boundaryColor);
 
     public class Pen
     {
@@ -741,6 +854,7 @@ namespace Rhino.Runtime
     }
 
     protected double Dpi => m_dpi;
+    protected Size PageSize => m_page_size;
 
     public void Draw(IntPtr constPtrPrintInfo, RhinoDoc doc)
     {
@@ -767,6 +881,8 @@ namespace Rhino.Runtime
       handles.Add(GCHandle.Alloc(rounded_rect_proc));
       VectorClipPathProc clippath_proc = ClipPath;
       handles.Add(GCHandle.Alloc(clippath_proc));
+      VectorGradientProc gradient_proc = GradientHatch;
+      handles.Add(GCHandle.Alloc(gradient_proc));
 
       if (doc == null)
         doc = RhinoDoc.ActiveDoc;
@@ -776,7 +892,8 @@ namespace Rhino.Runtime
         docSerialNumber = doc.RuntimeSerialNumber;
 
       UnsafeNativeMethods.CRhinoPrintInfo_VectorCapture(constPtrPrintInfo, setcliprect, draw_polyline, draw_arc, draw_string, draw_bez,
-        fill_poly, path_proc, point_proc, bitmap_proc, rounded_rect_proc, clippath_proc, docSerialNumber);
+        fill_poly, path_proc, point_proc, bitmap_proc, rounded_rect_proc, clippath_proc, gradient_proc, docSerialNumber);
+
       if (m_current_path.Count>1)
         DrawPath();
       foreach (var handle in handles)
@@ -1242,6 +1359,40 @@ namespace Rhino.Runtime
       }
     }
 
+    unsafe void GradientHatch(IntPtr pPipeline, IntPtr pHatch, float strokeWidth, IntPtr pHatchPattern, int gradientCount, IntPtr colors, IntPtr stops,
+      IntPtr points, int linearGradient, int bc)
+    {
+      var dp = new Display.DisplayPipeline(pPipeline);
+      Hatch hatch = Rhino.Geometry.GeometryBase.CreateGeometryHelper(pHatch, null) as Hatch;
+      if (hatch == null || gradientCount < 1)
+        return;
+
+      Rhino.DocObjects.HatchPattern pattern = null;
+      if( pHatchPattern != IntPtr.Zero )
+        pattern = new DocObjects.HatchPattern(pHatchPattern);
+
+      Color[] gradientColors = new Color[gradientCount];
+      float[] gradientStops = new float[gradientCount];
+      int* argbs = (int*)colors.ToPointer();
+      float* pStops = (float*)stops.ToPointer();
+      for( int i=0; i<gradientCount; i++ )
+      {
+        gradientColors[i] = Color.FromArgb(argbs[i]);
+        gradientStops[i] = pStops[i];
+      }
+      Point3d* pts = (Point3d*)points.ToPointer();
+      Point3d gradientPoint1 = new Point3d(pts[0]);
+      Point3d gradientPoint2 = new Point3d(pts[1]);
+      Color boundaryColor = Color.FromArgb(bc);
+      double pointScale = ToPoints(1);
+      DrawGradientHatch(dp, hatch, pattern, gradientColors, gradientStops, gradientPoint1, gradientPoint2, linearGradient != 0, boundaryColor, pointScale);
+
+      hatch.ReleaseNonConstPointer();
+      if (pattern != null)
+        pattern.ReleaseNonConstPointer();
+    }
+
+
     protected abstract void DrawPath(PathPoint[] points, Pen pen, Color brushColor);
     protected abstract void DrawCircle(PointF center, float diameter, Color fillColor, float strokeWidth, Color strokeColor);
     protected abstract void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius);
@@ -1250,6 +1401,8 @@ namespace Rhino.Runtime
     protected abstract void FillPolygon(PointF[] points, Color fillColor);
 
     protected abstract void SetClipPath(PathPoint[] points);
+    protected abstract void DrawGradientHatch(Display.DisplayPipeline pipeline, Hatch hatch, Rhino.DocObjects.HatchPattern pattern, Color[] gradientColors,
+      float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2, bool linearGradient, Color boundaryColor, double pointScale);
 
     protected void PushClipPath(RectangleF rect)
     {

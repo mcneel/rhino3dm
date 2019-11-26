@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -608,7 +609,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 16)]
   [DebuggerDisplay("({m_x}, {m_y})")]
   [Serializable]
-  public struct Point2d : ISerializable, IEquatable<Point2d>, IComparable<Point2d>, IComparable, IEpsilonComparable<Point2d>, IValidable
+  public struct Point2d : ISerializable, IEquatable<Point2d>, IComparable<Point2d>, IComparable, IEpsilonComparable<Point2d>, IValidable, IFormattable
   {
     private double m_x;
     private double m_y;
@@ -1039,6 +1040,12 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1}", X.ToString(culture), Y.ToString(culture));
     }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y);
+    }
 
     /// <summary>
     /// Accesses the coordinates of this point.
@@ -1191,7 +1198,7 @@ namespace Rhino.Geometry
   [Serializable]
   public struct Point3d :
     ISerializable, IEquatable<Point3d>, IComparable<Point3d>, IComparable,
-    IEpsilonComparable<Point3d>, ICloneable, IValidable
+    IEpsilonComparable<Point3d>, ICloneable, IValidable, IFormattable
   {
     #region members
     internal double m_x;
@@ -1914,7 +1921,88 @@ namespace Rhino.Geometry
     public override string ToString()
     {
       var culture = System.Globalization.CultureInfo.InvariantCulture;
-      return String.Format("{0},{1},{2}", m_x.ToString(culture), m_y.ToString(culture), m_z.ToString(culture));
+      return string.Format("{0},{1},{2}", m_x.ToString(culture), m_y.ToString(culture), m_z.ToString(culture));
+    }
+
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return FormatCoordinates(format, formatProvider, m_x, m_y, m_z);
+    }
+
+    /// <summary>
+    /// Utility method for formatting coordinate groups.
+    /// </summary>
+    internal static string FormatCoordinates(string format, IFormatProvider provider, params double[] coordinates)
+    {
+      var fragments = new string[coordinates.Length];
+      for (int i = 0; i < coordinates.Length; i++)
+        fragments[i] = coordinates[i].ToString(format, provider);
+
+      // There's a problem here, if the coordinates are formatted using
+      // commas as decimal separators, then we cannot use commas to
+      // separate the (x,y,z) coordinates from each other.
+      // IFormatProvider *may* be a type of CultureInfo which could
+      // tell us whether the decimal separator is indeed the comma.
+      bool useCommaSeparators = true;
+      if (provider is CultureInfo culture)
+      {
+        if (IsCommaLikeText(culture.NumberFormat.NumberDecimalSeparator))
+          useCommaSeparators = false;
+      }
+      else
+      {
+        // Since the format provider is not a cultureinfo implementation,
+        // format a number to see if it contains any commas:
+        var test = (-12345.67890).ToString(format, provider);
+        if (IsCommaLikeText(test))
+          useCommaSeparators = false;
+      }
+
+      // Either separate the coordinates using commas, or semi-colons.
+      if (useCommaSeparators)
+        return string.Join(",", fragments);
+      else
+        return string.Join(";", fragments);
+    }
+    /// <summary>
+    /// Test whether a string contains any char which looks like a comma.
+    /// </summary>
+    private static bool IsCommaLikeText(string text)
+    {
+      foreach (var c in text)
+        if (IsCommaLikeChar(c))
+          return true;
+      return false;
+    }
+    /// <summary>
+    /// Test whether a char looks like a comma.
+    /// </summary>
+    private static bool IsCommaLikeChar(char character)
+    {
+      // Regular comma.
+      if (character == 0x002C) return true;
+
+      // This happens a lot, may as well speed up the checks.
+      if (character < 0x0600) return false;
+
+      // Arabic decimal separator.
+      if (character == 0x066B) return true;
+
+      // Arabic thousand separator.
+      if (character == 0x066C) return true;
+
+      // Raised comma.
+      if (character == 0x2E34) return true;
+
+      // Small comma.
+      if (character == 0xFE50) return true;
+
+      // Fullwidth comma.
+      if (character == 0xFF0C) return true;
+
+      return false;
     }
 
     /// <summary>
@@ -1957,7 +2045,7 @@ namespace Rhino.Geometry
       double d;
       if (IsValid && other.IsValid)
       {
-        d = (this-other).SquareLength;
+        d = (this - other).SquareLength;
       }
       else
       {
@@ -2100,7 +2188,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 32)]
   [DebuggerDisplay("({m_x}, {m_y}, {m_z}, [{m_w}])")]
   [Serializable]
-  public struct Point4d : ISerializable, IEquatable<Point4d>, IEpsilonComparable<Point4d>, IValidable
+  public struct Point4d : ISerializable, IEquatable<Point4d>, IEpsilonComparable<Point4d>, IValidable, IFormattable
   {
     internal double m_x;
     internal double m_y;
@@ -2441,6 +2529,19 @@ namespace Rhino.Geometry
         return RhinoMath.IsValidDouble(m_x) && RhinoMath.IsValidDouble(m_y) && RhinoMath.IsValidDouble(m_y) && RhinoMath.IsValidDouble(m_w);
       }
     }
+
+    /// <inheritdoc />
+    [ConstOperation]
+    public override string ToString()
+    {
+      return String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", m_x, m_y, m_z, m_w);
+    }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y, m_z, m_w);
+    }
   }
 
   /// <summary>
@@ -2450,7 +2551,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 16)]
   [DebuggerDisplay("({m_x}, {m_y})")]
   [Serializable]
-  public struct Vector2d : ISerializable, IEquatable<Vector2d>, IComparable<Vector2d>, IComparable, IEpsilonComparable<Vector2d>, IValidable
+  public struct Vector2d : ISerializable, IEquatable<Vector2d>, IComparable<Vector2d>, IComparable, IEpsilonComparable<Vector2d>, IValidable, IFormattable
   {
     private double m_x;
     private double m_y;
@@ -2828,6 +2929,12 @@ namespace Rhino.Geometry
     {
       return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1}", X, Y);
     }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y);
+    }
 
     /// <summary>
     /// Gets the value of the vector with components 0,0.
@@ -2884,7 +2991,7 @@ namespace Rhino.Geometry
     [ConstOperation]
     public bool IsTiny(double tolerance)
     {
-        return UnsafeNativeMethods.ON_2dVector_IsTiny(this, tolerance);
+      return UnsafeNativeMethods.ON_2dVector_IsTiny(this, tolerance);
     }
 
     /// <summary>
@@ -2894,7 +3001,7 @@ namespace Rhino.Geometry
     [ConstOperation]
     public bool IsTiny()
     {
-       return IsTiny(RhinoMath.ZeroTolerance);
+      return IsTiny(RhinoMath.ZeroTolerance);
     }
 
     /// <summary>
@@ -2933,7 +3040,7 @@ namespace Rhino.Geometry
   [Serializable]
   public struct Vector3d
     : ISerializable, IEquatable<Vector3d>, IComparable<Vector3d>,
-    IComparable, IEpsilonComparable<Vector3d>, ICloneable, IValidable
+    IComparable, IEpsilonComparable<Vector3d>, ICloneable, IValidable, IFormattable
   {
     #region fields
     internal double m_x;
@@ -3327,48 +3434,48 @@ namespace Rhino.Geometry
     /// <returns>On success, the angle (in radians) between a and b with respect of normal vector; RhinoMath.UnsetValue on failure.</returns>
     public static double VectorAngle(Vector3d v1, Vector3d v2, Vector3d vNormal)
     {
-        if ((Math.Abs(v1.X - v2.X) < 1e-64) && (Math.Abs(v1.Y - v2.Y) < 1e-64) && (Math.Abs(v1.Z - v2.Z) < 1e-64))
-            return 0.0;
+      if ((Math.Abs(v1.X - v2.X) < 1e-64) && (Math.Abs(v1.Y - v2.Y) < 1e-64) && (Math.Abs(v1.Z - v2.Z) < 1e-64))
+        return 0.0;
 
-        double dNumerator = v1 * v2;
-        double dDenominator = v1.Length * v2.Length;
+      double dNumerator = v1 * v2;
+      double dDenominator = v1.Length * v2.Length;
 
-        Vector3d vCross = Vector3d.CrossProduct(v1, v2);
-        vCross.Unitize();
+      Vector3d vCross = Vector3d.CrossProduct(v1, v2);
+      vCross.Unitize();
 
-        if ((Math.Abs(vCross.X - 0.0) < 1e-64) && (Math.Abs(vCross.Y - 0.0) < 1e-64) && (Math.Abs(vCross.Z - 0.0) < 1e-64)) 
-        {
-            if ((Math.Abs(dNumerator - 1.0) < 1e-64))
-                return 0.0;
-            else
-            if ((Math.Abs(dNumerator + 1.0) < 1e-64))
-                return Math.PI;
-        }
-
-        double dDivision = dNumerator / dDenominator;
-
-        if (dDivision > 1.0)
-            dDivision = 1.0;
+      if ((Math.Abs(vCross.X - 0.0) < 1e-64) && (Math.Abs(vCross.Y - 0.0) < 1e-64) && (Math.Abs(vCross.Z - 0.0) < 1e-64))
+      {
+        if ((Math.Abs(dNumerator - 1.0) < 1e-64))
+          return 0.0;
         else
-        if (dDivision < -1.0)
-            dDivision = -1.0;
+        if ((Math.Abs(dNumerator + 1.0) < 1e-64))
+          return Math.PI;
+      }
 
-        if ((Math.Abs(dDivision + 1.0) < 1e-64))
-            return Math.PI;
+      double dDivision = dNumerator / dDenominator;
 
-        double dAngle = Math.Acos(dDivision);
+      if (dDivision > 1.0)
+        dDivision = 1.0;
+      else
+      if (dDivision < -1.0)
+        dDivision = -1.0;
 
-        // Check if vCross is parallel or anti parallel to normal vector.
-        // If anti parallel Angle = 360 - Angle
+      if ((Math.Abs(dDivision + 1.0) < 1e-64))
+        return Math.PI;
 
-        vNormal.Unitize();
+      double dAngle = Math.Acos(dDivision);
 
-        double dDot = vCross * vNormal;
+      // Check if vCross is parallel or anti parallel to normal vector.
+      // If anti parallel Angle = 360 - Angle
 
-        if ((Math.Abs(dDot + 1.0) < 1e-64)) 
-            dAngle = (Math.PI * 2.0) - dAngle;
+      vNormal.Unitize();
 
-        return dAngle;
+      double dDot = vCross * vNormal;
+
+      if ((Math.Abs(dDot + 1.0) < 1e-64))
+        dAngle = (Math.PI * 2.0) - dAngle;
+
+      return dAngle;
     }
 
     /// <summary>
@@ -3376,7 +3483,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A single-precision vector.</param>
     /// <returns>The same vector, expressed using double-precision values.</returns>
-        public static implicit operator Vector3d(Vector3f vector)
+    public static implicit operator Vector3d(Vector3f vector)
     {
       return new Vector3d(vector);
     }
@@ -3764,6 +3871,13 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1},{2}",
         m_x.ToString(culture), m_y.ToString(culture), m_z.ToString(culture));
+    }
+
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y, m_z);
     }
 
     /// <summary>

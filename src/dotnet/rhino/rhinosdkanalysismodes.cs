@@ -10,7 +10,7 @@ namespace Rhino.Display
   /// Represents a base class for visual analysis modes.
   /// <para>This class is abstract.</para>
   /// </summary>
-  public abstract class VisualAnalysisMode
+  public abstract partial class VisualAnalysisMode
   {
     /// <summary>
     /// Contains enumerated values for analysis styles, such as wireframe, texture or false colors..
@@ -272,6 +272,19 @@ namespace Rhino.Display
     }
 
     #endregion
+
+    /// <summary>
+    /// Interactively adjusts surface analysis meshes of objects using a Rhino built-in analysis mode.
+    /// </summary>
+    /// <param name="doc">The Rhino document.</param>
+    /// <param name="analysisModeId">The id of the analysis mode.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public static bool AdjustAnalysisMeshes(RhinoDoc doc, Guid analysisModeId)
+    {
+      if (null == doc)
+        throw new ArgumentNullException(nameof(doc));
+      return UnsafeNativeMethods.CRhinoVisualAnalysisMode_AnalysisAdjustMeshes(doc.RuntimeSerialNumber, analysisModeId);
+    }
 
     /// <summary>
     /// Registers a custom visual analysis mode for use in Rhino.  It is OK to call

@@ -122,6 +122,29 @@ namespace Rhino.Runtime
       return rc;
     }
 
+    /// <summary>You must call Disable on the reporter output if it's not null when you are done with it. It will NOT clean itself.
+    /// You should call Dispose on the terminator if it's not null, because that will keep it alive for the time of the computation.</summary>
+    internal static void MarshalProgressAndCancelToken(System.Threading.CancellationToken cancel, IProgress<double> progress,
+      out IntPtr ptrTerminator, out int progressInt, out ProgressReporter reporter, out ThreadTerminator terminator)
+    {
+      reporter = null;
+      progressInt = 0;
+      if (progress != null)
+      {
+        reporter = new ProgressReporter(progress);
+        progressInt = reporter.SerialNumber;
+        reporter.Enable();
+      }
+
+      terminator = null;
+      if (cancel != System.Threading.CancellationToken.None)
+      {
+        terminator = new ThreadTerminator();
+        cancel.Register(terminator.RequestCancel);
+      }
+      ptrTerminator = terminator == null ? IntPtr.Zero : terminator.NonConstPointer();
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Get a CRhinoPrintInfo* for a given ViewCaptureSettings class

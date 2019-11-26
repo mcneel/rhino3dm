@@ -431,6 +431,25 @@ namespace Rhino.Geometry
         return new NurbsSurface(ptr_nurbs_surface, null);
       return null;
     }
+
+
+    /// <summary>
+    /// Calculates the U, V, and N directions of a NURBS surface at a u,v parameter similar to the method used by Rhino's MoveUVN command.
+    /// </summary>
+    /// <param name="u">The u evalaution parameter.</param>
+    /// <param name="v">The v evalaution parameter.</param>
+    /// <param name="uDir">The U direction.</param>
+    /// <param name="vDir">The V direction.</param>
+    /// <param name="nDir">The N direction.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool UVNDirectionsAt(double u, double v, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
+    {
+      uDir = vDir = nDir = Vector3d.Unset;
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoNurbsSurfaceDirectionsAt(ptr_const_this, u, v, ref uDir, ref vDir, ref nDir);
+    }
+
+
 #endif
     #endregion
 
@@ -445,6 +464,12 @@ namespace Rhino.Geometry
       IntPtr ptr_this = UnsafeNativeMethods.ON_NurbsSurface_New2(const_ptr_other);
       ConstructNonConstObject(ptr_this);
       GC.KeepAlive(other);
+    }
+
+    internal NurbsSurface()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_NurbsSurface_New3();
+      ConstructNonConstObject(ptr);
     }
 
     internal NurbsSurface(IntPtr ptr, object parent)
@@ -1131,6 +1156,36 @@ namespace Rhino.Geometry.Collections
     }
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Calculates the U, V, and N directions of a NURBS surface control point similar to the method used by Rhino's MoveUVN command.
+    /// </summary>
+    /// <param name="u">Index of control-point along surface U direction.</param>
+    /// <param name="v">Index of control-point along surface V direction.</param>
+    /// <param name="uDir">The U direction.</param>
+    /// <param name="vDir">The V direction.</param>
+    /// <param name="nDir">The N direction.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool UVNDirectionsAt(int u, int v, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
+    {
+      uDir = vDir = nDir = Vector3d.Unset;
+      bool rc = false;
+      Point2d pt = GetGrevillePoint(u, v);
+      if (pt.IsValid)
+      {
+        // For periodic surfaces, u and v may be less than Domain(0).Min and Domain(1).Min, 
+        // and in that case the evaluated tangent and normal are completely bogus.
+        // Need to shuffle u and v back into region where the evaluation is kosher.
+        if (pt.X < m_surface.Domain(0).Min)
+          pt.X += m_surface.Domain(0).Length;
+        if (pt.Y < m_surface.Domain(1).Min)
+          pt.Y += m_surface.Domain(1).Length;
+
+        rc = m_surface.UVNDirectionsAt(pt.X, pt.Y, out uDir, out vDir, out nDir);
+      }
+      return rc;
+    }
+
     /// <summary>
     /// Simple check of distance between adjacent control points
     /// </summary>

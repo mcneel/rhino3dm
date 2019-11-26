@@ -502,11 +502,9 @@ namespace Rhino.DocObjects
         case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoDimension: //24
           rc = new DimensionObject(sn);
           break;
-#if RHINO_SUBD_WIP
         case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoSubDObject: // 25
           rc = new SubDObject(sn);
           break;
-#endif
         default:
           rc = new RhinoObject(sn);
           break;
@@ -2094,7 +2092,7 @@ namespace Rhino.DocObjects
         }
 
         m_edited_material_index = Attributes.MaterialIndex;
-        m_edited_material = value.SimulateMaterial(false);
+        m_edited_material = value.SimulatedMaterial(false);
 
         m_edited_material.RenderMaterialInstanceId = value.Id;
 
@@ -2570,6 +2568,17 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Initializes a new object reference from a guid and component index. The
+    /// component index is used to specify a "piece" of the geometry
+    /// </summary>
+    /// <param name="id">The object's Id</param>
+    /// <param name="ci">a portion of the object</param>
+    public ObjRef(Guid id, Geometry.ComponentIndex ci)
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New5(id, ref ci);
+    }
+
+    /// <summary>
     /// Initializes a new object reference from a Rhino object.
     /// </summary>
     /// <param name="rhinoObject">The Rhino object.</param>
@@ -2770,17 +2779,15 @@ namespace Rhino.DocObjects
       return ObjRefToGeometryHelper(p_mesh) as Mesh;
     }
 
-  #if RHINO_SUBD_WIP
     /// <summary>
     /// Gets the SubD if the referenced geometry is one.
     /// </summary>
     /// <returns>A SubD; or null if the referenced object is not a SubD, or on error.</returns>
-    internal SubD SubD()
+    public SubD SubD()
     {
       var p_subd = UnsafeNativeMethods.CRhinoObjRef_SubD(m_ptr);
       return ObjRefToGeometryHelper(p_subd) as SubD;
     }
-  #endif
 
     /// <summary>
     /// Gets the point if the referenced geometry is one.

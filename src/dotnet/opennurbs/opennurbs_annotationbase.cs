@@ -314,6 +314,7 @@ namespace Rhino.Geometry
       }
     }
 
+
     /// <summary>
     /// Color to use for drawing a text mask when it is enabled. If the mask is
     /// enabled and MaskColor is System.Drawing.Color.Transparent, then the
@@ -526,6 +527,41 @@ namespace Rhino.Geometry
 
     }
 
+    /// <summary>
+    /// Set or get the decimal separator c
+    /// </summary>
+    public char DecimalSeparator
+    {
+      get
+      {
+        using (var sh = new StringWrapper())
+        {
+          IntPtr const_ptr_this = ConstPointer();
+          IntPtr styleptr = ConstParentDimStylePointer();
+          IntPtr ptr_string = sh.NonConstPointer;
+          if (UnsafeNativeMethods.ON_V6_Annotation_DecimalSeparator(const_ptr_this, styleptr, ptr_string))
+          {
+            var str = sh.ToString();
+            if (str.Length > 0)
+            {
+              return str[0];
+            }
+          }
+        }
+        GC.KeepAlive(this);
+        return '.';
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        string s = string.Empty;
+        s += value;
+        UnsafeNativeMethods.ON_V6_Annotation_SetDecimalSeparator(ptr_this, styleptr, s);
+        GC.KeepAlive(this);
+      }
+    }
+
 
     #endregion properties originating from dim style that can be overridden
 
@@ -559,6 +595,36 @@ namespace Rhino.Geometry
         var ptr_stringholder = sw.NonConstPointer;
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_GetTextString(const_ptr_this, ptr_stringholder, rich);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary> Return plain text string for this annotation with field expressions unevaluated </summary>
+    string GetPlainTextWithFields()
+    {
+      using (var sw = new StringWrapper())
+      {
+        var ptr_stringholder = sw.NonConstPointer;
+        IntPtr const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithFields(const_ptr_this, ptr_stringholder);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Return plain text string for this annotation with field expressions unevaluated 
+    /// intrunmap is an array of ints in groups of 3: run index, char pos start, length
+    /// </summary>
+    public string GetPlainTextWithRunMap(ref int[] map)
+    {
+      using (var sw = new StringWrapper())
+      {
+        var ptr_stringholder = sw.NonConstPointer;
+        IntPtr const_ptr_this = ConstPointer();
+        var runmap = new SimpleArrayInt();
+        UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithRunMap(const_ptr_this, ptr_stringholder, runmap.m_ptr);
+        map = runmap.ToArray();
+        runmap.Dispose();
         return sw.ToString();
       }
     }
@@ -613,6 +679,15 @@ namespace Rhino.Geometry
         //GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       }
     }
+
+    /// <summary>
+    /// Text stripped of RTF formatting information and with field expressions intact
+    /// </summary>
+    public string PlainTextWithFields
+    {
+      get { return GetPlainTextWithFields(); }
+    }
+
 
 
     /// <summary>
@@ -902,7 +977,35 @@ namespace Rhino.Geometry
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return b;
     }
+
+    /// <summary>
+    /// Replace text within a formatted string
+    /// </summary>
+    /// <param name="repl_string"></param>
+    /// <param name="start_run_idx"></param>
+    /// <param name="start_run_pos"></param>
+    /// <param name="end_run_idx"></param>
+    /// <param name="end_run_pos"></param>
+    /// <returns></returns>
+    public bool RunReplace(
+      string repl_string,
+      int start_run_idx, 
+      int start_run_pos,
+      int end_run_idx,
+      int end_run_pos)
+    {
+      bool rc = false;
+
+      var this_ptr = NonConstPointer();
+      IntPtr styleptr = ConstParentDimStylePointer();
+      rc = UnsafeNativeMethods.ON_V6_Annotation_RunReplace(this_ptr, styleptr, repl_string, start_run_idx, start_run_pos, end_run_idx, end_run_pos);
+
+      return rc;
+    }
+
   }
+
+
 
   /// <summary>
   /// General exception that can be thrown by annotations

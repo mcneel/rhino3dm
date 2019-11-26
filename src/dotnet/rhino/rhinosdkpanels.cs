@@ -482,9 +482,14 @@ namespace Rhino.UI
       get => m_icon;
       set
       {
+        // 14 May 2019 John Morse
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-51884
+        // DO NOT dispose of the panel icon, the plug-in panel may be caching the
+        // icon and disposing of it here can cause ChangePanelIcon to throw a 
+        // System.ObjectDisposedException.
         if (m_icon == value)
           return;
-        m_icon?.Dispose();
+        //m_icon?.Dispose();
         m_icon = value;
       }
     }

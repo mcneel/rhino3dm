@@ -34,6 +34,39 @@ RH_C_FUNCTION void ON_LineArray_CopyValues( const ON_SimpleArray<ON_Line>* pArra
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
+RH_C_FUNCTION ON_SimpleArray<ON_Object*>* ON_ObjectArray_New()
+{
+  return new ON_SimpleArray<ON_Object*>();
+}
+
+RH_C_FUNCTION void ON_ObjectArray_Delete(ON_SimpleArray<ON_Object*>* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+RH_C_FUNCTION void ON_ObjectArray_Append(ON_SimpleArray<ON_Object*>* pArray, ON_Object* pObject)
+{
+  if (pArray && pObject)
+    pArray->Append(pObject);
+}
+
+RH_C_FUNCTION int ON_ObjectArray_Count(const ON_SimpleArray<const ON_Object*>* pArray)
+{
+  if (pArray)
+    return pArray->Count();
+  return 0;
+}
+
+RH_C_FUNCTION ON_Object* ON_ObjectArray_Item(ON_SimpleArray<ON_Object*>* pArray, int index)
+{
+  if (pArray && index >= 0 && index < pArray->Count())
+    return (*pArray)[index];
+  return nullptr;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
 RH_C_FUNCTION ON_SimpleArray<ON_Plane>* ON_PlaneArray_New()
 {
   return new ON_SimpleArray<ON_Plane>();

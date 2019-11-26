@@ -880,6 +880,80 @@ namespace Rhino.Display
 
     //  CRhinoDisplayPipeline* DisplayPipeline(void) const;
 
+    #region user strings
+    /// <summary>
+    /// Attach a user string (key,value combination) to this geometry.
+    /// </summary>
+    /// <param name="key">id used to retrieve this string.</param>
+    /// <param name="value">string associated with key. If null, the key will be removed</param>
+    /// <returns>true on success.</returns>
+    public bool SetUserString(string key, string value)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(ptrThis);
+      using (ViewportInfo vi = new ViewportInfo(ptrViewport))
+      {
+        var rc = vi._SetUserString(key, value);
+        UnsafeNativeMethods.CRhinoViewport_SetVP(ptrThis, vi.ConstPointer(), false);
+        return rc;
+      }
+    }
+    /// <summary>
+    /// Gets a user string.
+    /// </summary>
+    /// <param name="key">id used to retrieve the string.</param>
+    /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    public string GetUserString(string key)
+    {
+      IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(NonConstPointer());
+      using (var sh = new StringHolder())
+      {
+        IntPtr pStringHolder = sh.NonConstPointer();
+        UnsafeNativeMethods.ON_Object_GetUserString(ptrViewport, key, pStringHolder);
+        return sh.ToString();
+      }
+    }
+
+    public int UserStringCount
+    {
+      get
+      {
+        IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(NonConstPointer());
+        return UnsafeNativeMethods.ON_Object_UserStringCount(ptrViewport);
+      }
+    }
+
+    /// <summary>
+    /// Gets an independent copy of the collection of (user text key, user text value) pairs attached to this object.
+    /// </summary>
+    /// <returns>A collection of key strings and values strings. This </returns>
+    public System.Collections.Specialized.NameValueCollection GetUserStrings()
+    {
+      IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(NonConstPointer());
+      using (ViewportInfo vi = new ViewportInfo(ptrViewport))
+      {
+        var rc = vi._GetUserStrings();
+        return rc;
+      }
+    }
+
+    public bool DeleteUserString(string key)
+    {
+      return SetUserString(key, null);
+    }
+
+    public void DeleteAllUserStrings()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(ptrThis);
+      using (ViewportInfo vi = new ViewportInfo(ptrViewport))
+      {
+        vi._DeleteAllUserStrings();
+        UnsafeNativeMethods.CRhinoViewport_SetVP(ptrThis, vi.ConstPointer(), false);
+      }
+    }
+    #endregion
+
     #region Wrappers for ON_Viewport
 
     // from ON_Geometry

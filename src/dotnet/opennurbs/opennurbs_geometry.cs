@@ -300,13 +300,9 @@ namespace Rhino.Geometry
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Leader: // 38
           rc = new Leader(pGeometry, parent);
           break;
-
-#if OPENNURBS_SUBD_WIP
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_SubD: // 39
           rc = new SubD(pGeometry, parent);
           break;
-#endif
-
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DimLinear: //40
           rc = new LinearDimension(pGeometry, parent);
           break;
@@ -722,6 +718,12 @@ namespace Rhino.Geometry
       if (IntPtr.Zero == m_ptr_cache_handle)
         m_ptr_cache_handle = UnsafeNativeMethods.CRhinoCacheHandle_New();
 #endif
+      // 10 Jan 2019 S. BAer (RH-50309)
+      // Use the shallow parent's cache handle if it exists. There
+      // is no need to create a new cache handle when the geometry
+      // is exactly the same
+      if (IntPtr.Zero == m_ptr_cache_handle && m_shallow_parent != null)
+        return m_shallow_parent.CacheHandle();
       return m_ptr_cache_handle;
     }
 

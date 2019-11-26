@@ -28,14 +28,12 @@ void ON_Object_Delete( ON_Object* pObject )
     return;
 #endif
 
-#if defined(OPENNURBS_SUBD_WIP)
   // Protect against accidentally attempting to delete an ON_SubD*
   // Lifetimes of ON_SubD instances in RhinoCommon are always controlled
   // by ON_SubDRef instances
   ON_SubD* subd = dynamic_cast<ON_SubD*>(pObject);
   if(subd != nullptr)
     return;
-#endif
 
   // 9 Sept. 2014 S. Baer
   // Typically in release we leak ON_Objects during shutdown

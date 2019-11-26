@@ -1050,6 +1050,16 @@ namespace Rhino.DocObjects
       }
     }
 
+#if RHINO_SDK
+    public Rhino.Render.PhysicallyBasedMaterial PhysicallyBased
+    {
+      get
+      {
+        return new Render.PhysicallyBasedMaterial(this);
+      }
+    }
+#endif
+
     /// <summary>
     /// Gets or sets how reflective a material is, 0f is no reflection
     /// 1f is 100% reflective.
@@ -1133,25 +1143,34 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Material_Default(ptr_const_this);
     }
 
-    internal const int idxBitmapTexture = 0;
-    internal const int idxBumpTexture = 1;
-    internal const int idxEmapTexture = 2;
-    internal const int idxTransparencyTexture = 3;
-    bool AddTexture(string filename, int which)
+    bool AddTexture(string filename, TextureType which)
     {
       var ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Material_AddTexture(ptr_this, filename, which);
+      return UnsafeNativeMethods.ON_Material_AddTexture(ptr_this, filename, (int)which);
     }
-    bool SetTexture(Texture texture, int which)
+
+    /// <summary>
+    /// Set the texture that corresponds with the specified texture type for this material.
+    /// </summary>
+    /// <param name="texture">An instance of Rhino.DocObjects.Texture</param>
+    /// <param name="which">Use Rhino.DocObjects.TextureType</param>
+    /// <returns></returns>
+    public bool SetTexture(Texture texture, TextureType which)
     {
       var ptr_this = NonConstPointer();
       var ptr_const_texture = texture.ConstPointer();
-      return UnsafeNativeMethods.ON_Material_SetTexture(ptr_this, ptr_const_texture, which);
+      return UnsafeNativeMethods.ON_Material_SetTexture(ptr_this, ptr_const_texture, (int)which);
     }
-    Texture GetTexture(int which)
+
+    /// <summary>
+    /// Get the texture that corresponds with the specified texture type for this material.
+    /// </summary>
+    /// <param name="which"></param>
+    /// <returns></returns>
+    public Texture GetTexture(TextureType which)
     {
       var ptr_const_this = ConstPointer();
-      var index = UnsafeNativeMethods.ON_Material_GetTexture(ptr_const_this, which);
+      var index = UnsafeNativeMethods.ON_Material_GetTexture(ptr_const_this, (int)which);
       if (index >= 0)
         return new Texture(index, this);
       return null;
@@ -1172,17 +1191,20 @@ namespace Rhino.DocObjects
     }
 
     #region Bitmap
+    [Obsolete("Use GetTexture instead")]
     public Texture GetBitmapTexture()
     {
-      return GetTexture(idxBitmapTexture);
+      return GetTexture(TextureType.Bitmap);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(string filename)
     {
-      return AddTexture(filename, idxBitmapTexture);
+      return AddTexture(filename, TextureType.Bitmap);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(Texture texture)
     {
-      return SetTexture(texture, idxBitmapTexture);
+      return SetTexture(texture, TextureType.Bitmap);
     }
     #endregion
 
@@ -1191,47 +1213,56 @@ namespace Rhino.DocObjects
     /// Gets the bump texture of this material.
     /// </summary>
     /// <returns>A texture; or null if no bump texture has been added to this material.</returns>
+    [Obsolete("Use GetTexture instead")]
     public Texture GetBumpTexture()
     {
-      return GetTexture(idxBumpTexture);
+      return GetTexture(TextureType.Bump);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(string filename)
     {
-      return AddTexture(filename, idxBumpTexture);
+      return AddTexture(filename, TextureType.Bump);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(Texture texture)
     {
-      return SetTexture(texture, idxBumpTexture);
+      return SetTexture(texture, TextureType.Bump);
     }
     #endregion
 
     #region Environment
+    [Obsolete("Use GetTexture instead")]
     public Texture GetEnvironmentTexture()
     {
-      return GetTexture(idxEmapTexture);
+      return GetTexture(TextureType.Emap);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(string filename)
     {
-      return AddTexture(filename, idxEmapTexture);
+      return AddTexture(filename, TextureType.Emap);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(Texture texture)
     {
-      return SetTexture(texture, idxEmapTexture);
+      return SetTexture(texture, TextureType.Emap);
     }
     #endregion
 
     #region Transparency
+    [Obsolete("Use GetTexture instead")]
     public Texture GetTransparencyTexture()
     {
-      return GetTexture(idxTransparencyTexture);
+      return GetTexture(TextureType.Transparency);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(string filename)
     {
-      return AddTexture(filename, idxTransparencyTexture);
+      return AddTexture(filename, TextureType.Transparency);
     }
+    [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(Texture texture)
     {
-      return SetTexture(texture, idxTransparencyTexture);
+      return SetTexture(texture, TextureType.Transparency);
     }
     #endregion
 

@@ -632,8 +632,8 @@ namespace Rhino.Runtime
 
 
     #region serialization support
-    const string ARCHIVE_3DM_VERSION = "archive3dm";
-    const string ARCHIVE_OPENNURBS_VERSION = "opennurbs";
+    internal const string ARCHIVE_3DM_VERSION = "archive3dm";
+    internal const string ARCHIVE_OPENNURBS_VERSION = "opennurbs";
     internal static IntPtr SerializeReadON_Object(SerializationInfo info, StreamingContext context)
     {
       //int version = info.GetInt32("version");
@@ -668,14 +668,17 @@ namespace Rhino.Runtime
 #if RHINO_SDK
       int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
 #else
-      int rhino_version = (options != null) ? options.RhinoVersion : 6;
+      int rhino_version = (options != null) ? options.RhinoVersion : 7;
 #endif
       // 28 Aug 2014 S. Baer (RH-28446)
       // We switched to 50,60,70,... type numbers after Rhino 4
       if (rhino_version > 4 && rhino_version < 50)
         rhino_version *= 10;
 
-      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, rhino_version, writeuserdata, ref length);
+      // NOTE: 
+      //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
+      //   if it is too big or the object type requires a different archive version.
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, ref length);
 
       if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
       {
@@ -703,6 +706,110 @@ namespace Rhino.Runtime
     {
       IntPtr pConstThis = ConstPointer();
       SerializeWriteON_Object(pConstThis, info, context);
+    }
+
+    /// <summary>
+    /// Create a CommonObject instance from a Base64 encoded string. This is typically the values
+    /// used when passing common objects around as JSON data
+    /// </summary>
+    /// <param name="archive3dm"></param>
+    /// <param name="opennurbs"></param>
+    /// <param name="base64Data"></param>
+    /// <returns></returns>
+    public static CommonObject FromBase64String(int archive3dm, int opennurbs, string base64Data)
+    {
+      uint opennurbsVersion = (uint)opennurbs;
+      byte[] stream = System.Convert.FromBase64String(base64Data);
+      IntPtr rc = UnsafeNativeMethods.ON_ReadBufferArchive(archive3dm, opennurbsVersion, stream.Length, stream);
+      var obj = CreateCommonObjectHelper(rc);
+      if (null == obj)
+        throw new SerializationException("Unable to read CommonObject from base64 encoded string");
+      return obj;
+    }
+
+    /// <summary>
+    /// Create a CommonObject instance from a JSON dictionary
+    /// </summary>
+    /// <param name="jsonDictionary"></param>
+    /// <returns></returns>
+    public static CommonObject FromJSON(System.Collections.Generic.Dictionary<string,string> jsonDictionary)
+    {
+      int archive3dm = 0;
+      int opennurbs = 0;
+      string data = null;
+      foreach(var kv in jsonDictionary)
+      {
+        string key = kv.Key;
+        if( key.Equals(ARCHIVE_3DM_VERSION, StringComparison.OrdinalIgnoreCase))
+        {
+          archive3dm = int.Parse(kv.Value);
+        }
+        if (key.Equals(ARCHIVE_OPENNURBS_VERSION, StringComparison.OrdinalIgnoreCase))
+        {
+          opennurbs = int.Parse(kv.Value);
+        }
+        if (key.Equals("data", StringComparison.OrdinalIgnoreCase))
+        {
+          data = kv.Value;
+        }
+      }
+
+      if (0 == archive3dm || 0 == opennurbs || data == null)
+        throw new SerializationException("Could not extract keys from disctionary");
+      return FromBase64String(archive3dm, opennurbs, data);
+    }
+
+    /// <summary>
+    /// Create a JSON string representation of this object
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public string ToJSON(Rhino.FileIO.SerializationOptions options)
+    {
+      string json = null;
+      uint length = 0;
+      bool writeuserdata = true;
+      if (options != null)
+        writeuserdata = options.WriteUserData;
+#if RHINO_SDK
+      int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
+#else
+      int rhino_version = (options != null) ? options.RhinoVersion : 7;
+#endif
+      // 28 Aug 2014 S. Baer (RH-28446)
+      // We switched to 50,60,70,... type numbers after Rhino 4
+      if (rhino_version > 4 && rhino_version < 50)
+        rhino_version *= 10;
+
+      // NOTE: 
+      //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
+      //   if it is too big or the object type requires a different archive version.
+      IntPtr pConstOnObject = ConstPointer();
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, ref length);
+      if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
+      {
+        int sz = (int)length;
+        IntPtr pByteArray = UnsafeNativeMethods.ON_WriteBufferArchive_Buffer(pWriteBuffer);
+        byte[] bytearray = new byte[sz];
+        System.Runtime.InteropServices.Marshal.Copy(pByteArray, bytearray, 0, sz);
+        uint archive_opennurbs_version = UnsafeNativeMethods.ON_WriteBufferArchive_OpenNURBSVersion(pWriteBuffer);
+
+        string data = Convert.ToBase64String(bytearray);
+        System.Text.StringBuilder sb = new System.Text.StringBuilder(data.Length + 100);
+        sb.Append($"{{\"version\":10000,\"{ARCHIVE_3DM_VERSION}\":{rhino_version},\"{ARCHIVE_OPENNURBS_VERSION}\":{(int)archive_opennurbs_version},\"data\":\"");
+        sb.Append(data);
+        sb.Append("\"}");
+        json = sb.ToString();
+      }
+      UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
+      return json;
+    }
+
+    static CommonObject CreateCommonObjectHelper(IntPtr pObject)
+    {
+      var geometry = Geometry.GeometryBase.CreateGeometryHelper(pObject, null);
+      // TODO: handle other cases where this pointer is not specifically ON_Geometry
+      return geometry;
     }
     #endregion
   }

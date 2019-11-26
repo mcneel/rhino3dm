@@ -190,9 +190,9 @@ namespace Rhino
     const double PI = 3.141592653589793238462643;
 
     /// <summary>
-    /// Gets the Zero Tolerance constant (1.0e-12).
+    /// Gets the Zero Tolerance constant (2^-32).
     /// </summary>
-    public const double ZeroTolerance = 1.0e-12;
+    public const double ZeroTolerance = 2.3283064365386962890625e-10;
 
     /// <summary>
     /// Gets the Rhino standard Unset value. Use this value rather than Double.NaN when 
@@ -211,6 +211,11 @@ namespace Rhino
     /// <para>This is one degree, expressed in radians.</para>
     /// </summary>
     public const double DefaultAngleTolerance = PI / 180.0;
+
+    /// <summary>
+    /// Default distance tolerance
+    /// </summary>
+    public const double DefaultDistanceToleranceMillimeters = 0.01;
 
     /// <summary>
     /// Gets the single precision floating point number that is considered 'unset' in Rhino.
@@ -1010,14 +1015,10 @@ namespace Rhino
       /// </summary>
       MorphControl = 0x20000,
 
-// intentionally kept in source so developers can see that the unknown geometry they
-// have when reading files in Rhino3dmIO is actually a SubD.
-//#if OPENNURBS_SUBD_WIP
       /// <summary>
       /// A SubD object.
       /// </summary>
       SubD = 0x40000,
-//#endif
 
       /// <summary>
       /// A brep loop.
@@ -1263,8 +1264,6 @@ namespace Rhino.Geometry
     /// </summary>
     ExtrusionPath = 66,
 
-
-#if OPENNURBS_SUBD_WIP
     /// <summary>Targets a SubD vertex pointer Id. Ids are not guaranteed to be sequential.</summary>
     SubdVertex = 71, // SubDVertexPtr.Id, (use ON_SubD.ComponentPtrFromComponentIndex())
 
@@ -1273,7 +1272,6 @@ namespace Rhino.Geometry
 
     /// <summary>Targets a SubD face pointer Id. Ids are not guaranteed to be sequential.</summary>
     SubdFace = 73,   // SubDFacePtr.Id
-#endif
 
     /// <summary>
     /// Targets a linear dimension point index.
@@ -1385,11 +1383,41 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Return true is this component index is the same as the Unset component index
+    /// </summary>
+    /// <returns></returns>
+    public bool IsUnset()
+    {
+      var unset = Unset;
+      return m_index == unset.m_index && m_type == unset.m_type;
+    }
+
+    /// <summary>
     /// The unset value of component index.
     /// </summary>
     public static ComponentIndex Unset
     {
       get { return new ComponentIndex(ComponentIndexType.InvalidType, -1); }
     }
+  }
+}
+
+namespace Rhino.Display
+{
+  ///<summary>
+  ///Style of color gradient
+  ///</summary>
+  public enum GradientType
+  {
+    ///<summary>No gradient</summary>
+    None = 0,
+    ///<summary>Linear (or axial) gradient between two points</summary>
+    Linear = 1,
+    ///<summary>Radial (or spherical) gradient using a center point and a radius</summary>
+    Radial = 2,
+    ///<summary>Disabled linear gradient. Useful for keeping gradient information around, but not having it displayed</summary>
+    LinearDisabled = 3,
+    ///<summary>Disabled radial gradient. Useful for keeping gradient information around, but not having it displayed</summary>
+    RadialDisabled = 4
   }
 }

@@ -1464,6 +1464,38 @@ RH_C_FUNCTION ON_BrepVertex* ON_BrepVertex_GetPointer(ON_Brep* pBrep, int index)
   return nullptr;
 }
 
+RH_C_FUNCTION bool ON_Brep_MatchTrimEnds1(ON_Brep* pBrep)
+{
+  bool rc = false;
+  if (nullptr != pBrep)
+    rc = pBrep->MatchTrimEnds();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Brep_MatchTrimEnds2(ON_Brep* pBrep, int trim_index)
+{
+  bool rc = false;
+  if (nullptr != pBrep && 0 <= trim_index && trim_index < pBrep->m_T.Count())
+    rc = pBrep->MatchTrimEnds(trim_index);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Brep_MatchTrimEnds3(ON_Brep* pBrep, ON_BrepTrim* pBrepTrim0, ON_BrepTrim* pBrepTrim1)
+{
+  bool rc = false;
+  if (nullptr != pBrep && nullptr != pBrepTrim0 && nullptr != pBrepTrim1)
+    rc = pBrep->MatchTrimEnds(*pBrepTrim0, *pBrepTrim1);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Brep_MatchTrimEnds4(ON_Brep* pBrep, ON_BrepLoop* pBrepLoop)
+{
+  bool rc = false;
+  if (nullptr != pBrep && nullptr != pBrepLoop)
+    rc = pBrep->MatchTrimEnds(*pBrepLoop);
+  return rc;
+}
+
 RH_C_FUNCTION int ON_Brep_NewTrim( ON_Brep* pBrep, int curveIndex )
 {
   int rc = -1;
