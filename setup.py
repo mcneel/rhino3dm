@@ -93,7 +93,7 @@ class CMakeBuild(build_ext):
             system("cmake --build . --config Release --target _rhino3dm")
         else:
             system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-            system("make -j4")
+            system("make")
 
         os.chdir(current_dir)
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
