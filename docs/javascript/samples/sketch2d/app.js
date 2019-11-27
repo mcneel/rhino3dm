@@ -39,7 +39,9 @@ function download3dm() {
     doc.objects().add(_model.curves[i], null);
   }
 
-  let buffer = doc.toByteArray();
+  let options = new _rhino3dm.File3dmWriteOptions();
+  options.version = 6;
+  let buffer = doc.toByteArray(options);
   saveByteArray("sketch2d.3dm", buffer);
   doc.delete();
 }
