@@ -836,10 +836,10 @@ std::string BND_ONXModel::Encode2(const BND_File3dmWriteOptions* options)
   if (nullptr == options)
     options = &defaults;
 
-  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), 0);
+  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), ON::Version());
   archive.SetShouldSerializeUserDataDefault(options->SaveUserData());
 
-  m_model->Write(archive);
+  m_model->Write(archive, options->VersionForWriting());
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
 
@@ -860,10 +860,10 @@ emscripten::val BND_ONXModel::ToByteArray2(const BND_File3dmWriteOptions* option
   if (nullptr == options)
     options = &defaults;
 
-  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), 0);
+  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), ON::Version());
   archive.SetShouldSerializeUserDataDefault(options->SaveUserData());
 
-  m_model->Write(archive);
+  m_model->Write(archive, options->VersionForWriting());
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
 
