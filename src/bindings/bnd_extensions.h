@@ -230,8 +230,10 @@ public:
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
   emscripten::val ToByteArray() const;
-  #endif
+  emscripten::val ToByteArray2(const class BND_File3dmWriteOptions* options) const;
+#endif
   std::string Encode();
+  std::string Encode2(const class BND_File3dmWriteOptions* options);
 
   static BND_ONXModel* FromByteArray(int length, const void* buffer);
   static BND_ONXModel* Decode(std::string buffer);
@@ -277,4 +279,18 @@ public:
   //public void DumpToTextLog(TextLog log)
 public:
   static bool ReadTest(std::wstring filepath);
+};
+
+class BND_File3dmWriteOptions
+{
+public:
+  BND_File3dmWriteOptions();
+  int GetVersion() const { return m_version; }
+  void SetVersion(int version) { m_version = version; }
+  int VersionForWriting() const;
+  bool SaveUserData() const { return m_save_user_data; }
+  void SetSaveUserData(bool b) { m_save_user_data = b; }
+private:
+  int m_version = 0;
+  bool m_save_user_data = true;
 };

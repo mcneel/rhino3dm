@@ -827,7 +827,18 @@ return std::wstring(L"success");
 #endif
 std::string BND_ONXModel::Encode()
 {
-  ON_Write3dmBufferArchive archive(0, 0, 0, 0);// on_version__to_write);
+  return Encode2(nullptr);
+}
+
+std::string BND_ONXModel::Encode2(const BND_File3dmWriteOptions* options)
+{
+  BND_File3dmWriteOptions defaults;
+  if (nullptr == options)
+    options = &defaults;
+
+  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), 0);
+  archive.SetShouldSerializeUserDataDefault(options->SaveUserData());
+
   m_model->Write(archive);
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
@@ -836,10 +847,22 @@ std::string BND_ONXModel::Encode()
   return rc;
 }
 
+
 #if defined(ON_WASM_COMPILE)
 emscripten::val BND_ONXModel::ToByteArray() const
 {
-  ON_Write3dmBufferArchive archive(0, 0, 0, 0);// on_version__to_write);
+  return ToByteArray2(nullptr);
+}
+
+emscripten::val BND_ONXModel::ToByteArray2(const BND_File3dmWriteOptions* options) const
+{
+  BND_File3dmWriteOptions defaults;
+  if (nullptr == options)
+    options = &defaults;
+
+  ON_Write3dmBufferArchive archive(0, 0, options->VersionForWriting(), 0);
+  archive.SetShouldSerializeUserDataDefault(options->SaveUserData());
+
   m_model->Write(archive);
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
@@ -850,10 +873,11 @@ emscripten::val BND_ONXModel::ToByteArray() const
   {
     rc.set(i, buffer[i]);
   }
-//  rc.call<void>("set", sourceTypedArray);
-//  std::string rc(reinterpret_cast<char const*>(buffer), length);
+  //  rc.call<void>("set", sourceTypedArray);
+  //  std::string rc(reinterpret_cast<char const*>(buffer), length);
   return rc;
 }
+
 #endif
 
 BND_ONXModel* BND_ONXModel::FromByteArray(int length, const void* buffer)
@@ -884,6 +908,17 @@ bool BND_ONXModel::ReadTest(std::wstring path)
   return rc;
 }
 
+BND_File3dmWriteOptions::BND_File3dmWriteOptions()
+{
+  m_version = ON_BinaryArchive::CurrentArchiveVersion() / 10;
+}
+
+int BND_File3dmWriteOptions::VersionForWriting() const
+{
+  if (m_version < 5)
+    return m_version;
+  return m_version * 10;
+}
 
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
@@ -957,7 +992,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
-	.def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
+    .def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*> >(m, "__MaterialIterator")
@@ -1055,6 +1090,12 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Delete", &BND_File3dmStringTable::Delete, py::arg("key"))
     ;
 
+  py::class_<BND_File3dmWriteOptions>(m, "File3dmWriteOptions")
+    .def(py::init<>())
+    .def_property("Version", &BND_File3dmWriteOptions::GetVersion, &BND_File3dmWriteOptions::SetVersion)
+    .def_property("SaveUserData", &BND_File3dmWriteOptions::SaveUserData, &BND_File3dmWriteOptions::SetSaveUserData)
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
@@ -1084,6 +1125,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def("Encode", &BND_ONXModel::Encode)
+    .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
     ;
 }
@@ -1132,6 +1174,7 @@ void initExtensionsBindings(void*)
     .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
+    .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_File3dmMaterialTable>("File3dmMaterialTable")
@@ -1165,6 +1208,7 @@ void initExtensionsBindings(void*)
     .function("add", &BND_File3dmDimStyleTable::Add)
     .function("findIndex", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
+    .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_File3dmInstanceDefinitionTable>("File3dmInstanceDefinitionTable")
@@ -1191,6 +1235,12 @@ void initExtensionsBindings(void*)
     .function("delete", &BND_File3dmStringTable::Delete)
     ;
 
+  class_<BND_File3dmWriteOptions>("File3dmWriteOptions")
+    .constructor<>()
+    .property("version", &BND_File3dmWriteOptions::GetVersion, &BND_File3dmWriteOptions::SetVersion)
+    .property("saveUserData", &BND_File3dmWriteOptions::SaveUserData, &BND_File3dmWriteOptions::SetSaveUserData)
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
@@ -1213,7 +1263,9 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("encode", &BND_ONXModel::Encode)
+    .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)
+    .function("toByteArray", &BND_ONXModel::ToByteArray2, allow_raw_pointers())
     .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
     ;
 }
