@@ -34,6 +34,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initBoundingBoxBindings(m);
   initBoxBindings(m);
   initGeometryBindings(m);
+  initAnnotationBaseBindings(m);
   initInstanceBindings(m);
   initHatchBindings(m);
   initPointCloudBindings(m);

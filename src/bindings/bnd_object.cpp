@@ -159,6 +159,14 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if (iref)
       return new BND_InstanceReferenceGeometry(iref, compref);
 
+    ON_Annotation* annotation = ON_Annotation::Cast(obj);
+    if (annotation)
+      return new BND_AnnotationBase(annotation, compref);
+
+    ON_TextDot* dot = ON_TextDot::Cast(obj);
+    if (dot)
+      return new BND_TextDot(dot, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
