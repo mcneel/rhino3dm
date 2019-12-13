@@ -72,6 +72,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_texture.h"
 #include "bnd_texture_mapping.h"
 #include "bnd_geometry.h"
+#include "bnd_annotationbase.h"
 #include "bnd_instance.h"
 #include "bnd_hatch.h"
 #include "bnd_pointcloud.h"

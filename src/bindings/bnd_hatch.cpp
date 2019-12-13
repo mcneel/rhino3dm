@@ -24,6 +24,12 @@ void initHatchBindings(pybind11::module& m)
 {
   py::class_<BND_Hatch, BND_GeometryBase>(m, "Hatch")
     .def(py::init<>())
+    .def_property("PatternIndex", &BND_Hatch::GetPatternIndex, &BND_Hatch::SetPatternIndex)
+    .def_property("PatternRotation", &BND_Hatch::GetPatternRotation, &BND_Hatch::SetPatternRotation)
+    .def_property("BasePoint", &BND_Hatch::GetBasePoint, &BND_Hatch::SetBasePoint)
+    .def_property("Plane", &BND_Hatch::GetPlane, &BND_Hatch::SetPlane)
+    .def_property("PatternScale", &BND_Hatch::GetPatternScale, &BND_Hatch::SetPatternScale)
+    .def("ScalePattern", &BND_Hatch::ScalePattern, py::arg("xform"))
     ;
 }
 #endif
@@ -35,6 +41,12 @@ void initHatchBindings(void*)
 {
   class_<BND_Hatch, base<BND_GeometryBase>>("Hatch")
     .constructor<>()
+    .property("patternIndex", &BND_Hatch::GetPatternIndex, &BND_Hatch::SetPatternIndex)
+    .property("patternRotation", &BND_Hatch::GetPatternRotation, &BND_Hatch::SetPatternRotation)
+    .property("basePoint", &BND_Hatch::GetBasePoint, &BND_Hatch::SetBasePoint)
+    .property("plane", &BND_Hatch::GetPlane, &BND_Hatch::SetPlane)
+    .property("patternScale", &BND_Hatch::GetPatternScale, &BND_Hatch::SetPatternScale)
+    .function("scalePattern", &BND_Hatch::ScalePattern)
     ;
 }
 #endif
