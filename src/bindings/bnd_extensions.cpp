@@ -539,15 +539,7 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
 void BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
-  int index = m_model->AddLayer(l->NameAsPointer(), l->Color());
-  ON_ModelComponentReference compref = m_model->LayerFromIndex(index);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
-  if (modellayer)
-  {
-    *modellayer = *l;
-    modellayer->SetIndex(index);
-  }
+  m_model->AddModelComponent(*l);
 }
 
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
