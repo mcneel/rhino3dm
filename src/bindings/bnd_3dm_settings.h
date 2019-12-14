@@ -53,6 +53,7 @@ public:
   //public ViewInfoFocalBlurModes FocalBlurMode
   class BND_Viewport* GetViewport() const;
   void SetViewport(const class BND_Viewport& viewport);
+  BND_UUID NamedViewId() const { return ON_UUID_to_Binding(m_view.m_named_view_id); }
 };
 
 class BND_RenderSettings : public BND_CommonObject

@@ -72,6 +72,7 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property("FocalBlurJitter", &BND_ViewInfo::GetFocalBlurJitter, &BND_ViewInfo::SetFocalBlurJitter)
     .def_property("FocalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
     .def_property("Viewport", &BND_ViewInfo::GetViewport, &BND_ViewInfo::SetViewport)
+	.def_property_readonly("NamedViewId", &BND_ViewInfo::NamedViewId)
     ;
 
   py::class_<BND_RenderSettings, BND_CommonObject>(m, "RenderSettings")
