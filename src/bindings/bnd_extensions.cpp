@@ -604,10 +604,9 @@ BND_Group* BND_File3dmGroupTable::FindIndex(int index)
 	return nullptr;
 }
 
-BND_Group* BND_File3dmGroupTable::FindName(std::wstring name, BND_UUID parentId)
+BND_Group* BND_File3dmGroupTable::FindName(std::wstring name)
 {
-    ON_UUID id = Binding_to_ON_UUID(parentId);
-    ON_ModelComponentReference compref = m_model->ComponentFromName(ON_ModelComponent::Type::Group, id, name.c_str());
+    ON_ModelComponentReference compref = m_model->ComponentFromName(ON_ModelComponent::Type::Group, ON_nil_uuid, name.c_str());
     if (compref.IsEmpty())
         return nullptr;
     const ON_ModelComponent* model_component = compref.ModelComponent();
@@ -1080,7 +1079,7 @@ void initExtensionsBindings(pybind11::module& m)
 	  .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
 	  .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
 	  .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
-      .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"), py::arg("parentId"))
+      .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
 	  ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")

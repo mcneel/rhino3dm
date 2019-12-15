@@ -136,7 +136,7 @@ public:
 	void Add(const class BND_Group& group);
 	class BND_Group* FindIndex(int index);
 	class BND_Group* IterIndex(int index); // helper function for iterator
-    class BND_Group* FindName(std::wstring name, BND_UUID parentId);
+    class BND_Group* FindName(std::wstring name);
 };
 
 class BND_File3dmDimStyleTable
