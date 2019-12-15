@@ -21,7 +21,7 @@ public:
   BND_UUID GetId() const { return ON_UUID_to_Binding(m_group->Id()); }
   void SetId(BND_UUID id) { m_group->SetId(Binding_to_ON_UUID(id)); }
   int GetIndex() const { return m_group->Index(); }
-  //public RhinoObject[] GroupMembers(  int groupIndex);
+  //public File3dmObject[] GroupMembers(int groupIndex)
  
 protected:
   void SetTrackedPointer(ON_Group* group, const ON_ModelComponentReference* compref);

@@ -277,8 +277,7 @@ public:
   //public File3dmLinetypeTable AllLinetypes
   BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
-  BND_File3dmGroupTable Groups() { return BND_File3dmGroupTable(m_model); }
-  //public File3dmGroupTable AllGroups | get;
+  BND_File3dmGroupTable AllGroups() { return BND_File3dmGroupTable(m_model); }
   BND_File3dmDimStyleTable DimStyles() { return BND_File3dmDimStyleTable(m_model); }
   //public File3dmHatchPatternTable AllHatchPatterns | get;
   BND_File3dmInstanceDefinitionTable InstanceDefinitions() { return BND_File3dmInstanceDefinitionTable(m_model); }
