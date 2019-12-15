@@ -579,6 +579,44 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+void BND_File3dmGroupTable::Add(const BND_Group& group)
+{
+	const ON_Group* l = group.m_group;
+	m_model->AddModelComponent(*l);
+}
+
+
+BND_Group* BND_File3dmGroupTable::IterIndex(int index)
+{
+	return FindIndex(index);
+}
+
+BND_Group* BND_File3dmGroupTable::FindIndex(int index)
+{
+	ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::Group, index); //no specific method in ON Extensions, therefore getting component here
+	const ON_ModelComponent* model_component = compref.ModelComponent();
+    if (compref.IsEmpty())
+        return nullptr;
+	ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
+	if (modelgroup)
+		return new BND_Group(modelgroup, &compref);
+	
+	return nullptr;
+}
+
+BND_Group* BND_File3dmGroupTable::FindName(std::wstring name, BND_UUID parentId)
+{
+    ON_UUID id = Binding_to_ON_UUID(parentId);
+    ON_ModelComponentReference compref = m_model->ComponentFromName(ON_ModelComponent::Type::Group, id, name.c_str());
+    if (compref.IsEmpty())
+        return nullptr;
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
+    if (modelgroup)
+        return new BND_Group(modelgroup, &compref);
+    return nullptr;
+}
+
 int BND_File3dmViewTable::Count() const
 {
   return m_named_views ? m_model->m_settings.m_named_views.Count() : m_model->m_settings.m_views.Count();
@@ -1031,6 +1069,19 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmGroupTable&, BND_Group*> >(m, "__GroupIterator")
+	  .def("__iter__", [](PyBNDIterator<BND_File3dmGroupTable&, BND_Group*> &it) -> PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>& { return it; })
+	  .def("__next__", &PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>::next)
+	  ;
+
+  py::class_<BND_File3dmGroupTable>(m, "File3dmGroupTable")
+	  .def("__len__", &BND_File3dmGroupTable::Count)
+	  .def("__getitem__", &BND_File3dmGroupTable::FindIndex)
+	  .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
+	  .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
+	  .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
+      .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"), py::arg("parentId"))
+	  ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> &it) -> PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>& { return it; })
@@ -1110,6 +1161,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
     .def_property_readonly("Bitmaps", &BND_ONXModel::Bitmaps)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
+	.def_property_readonly("Groups", &BND_ONXModel::Groups)
     .def_property_readonly("DimStyles", &BND_ONXModel::DimStyles)
     .def_property_readonly("InstanceDefinitions", &BND_ONXModel::InstanceDefinitions)
     .def_property_readonly("Views", &BND_ONXModel::Views)
