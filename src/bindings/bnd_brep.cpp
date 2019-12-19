@@ -189,12 +189,41 @@ void BND_BrepFace::SetTrackedPointer(ON_BrepFace* brepface, const ON_ModelCompon
   BND_SurfaceProxy::SetTrackedPointer(brepface, compref);
 }
 
+BND_Surface* BND_BrepFace::UnderlyingSurface()
+{
+  ON_Surface* srf = const_cast<ON_Surface*>(m_brepface->SurfaceOf());
+  return new BND_Surface(srf, &m_component_ref);
+}
+
 BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
 {
   ON_Mesh* mesh = const_cast<ON_Mesh*>(m_brepface->Mesh(mt));
   if (nullptr == mesh)
     return nullptr;
   return new BND_Mesh(mesh, &m_component_ref);
+}
+
+BND_BrepSurfaceList BND_Brep::GetSurfaces()
+{
+  return BND_BrepSurfaceList(m_brep, m_component_ref);
+}
+
+BND_BrepSurfaceList::BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_brep = brep;
+}
+
+BND_Surface* BND_BrepSurfaceList::GetSurface(int i)
+{
+  ON_Surface* surface = nullptr;
+  if (i >= 0 && i < m_brep->m_S.Count())
+  {
+    surface = m_brep->m_S[i];
+  }
+  if (nullptr == surface)
+    return nullptr;
+  return new BND_Surface(surface, &m_component_reference);
 }
 
 
@@ -205,12 +234,18 @@ namespace py = pybind11;
 void initBrepBindings(pybind11::module& m)
 {
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
+    .def("UnderlyingSurface", &BND_BrepFace::UnderlyingSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
     .def("__len__", &BND_BrepFaceList::Count)
     .def("__getitem__", &BND_BrepFaceList::GetFace)
+    ;
+  
+  py::class_<BND_BrepSurfaceList>(m, "BrepSurfaceList")
+    .def("__len__", &BND_BrepSurfaceList::Count)
+    .def("__getitem__", &BND_BrepSurfaceList::GetSurface)
     ;
 
   py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
@@ -226,6 +261,7 @@ void initBrepBindings(pybind11::module& m)
     .def_static("CreateFromSurface", &BND_Brep::CreateFromSurface, py::arg("surface"))
     .def_static("CreateTrimmedPlane", &BND_Brep::CreateTrimmedPlane, py::arg("plane"), py::arg("curve"))
     .def_property_readonly("Faces", &BND_Brep::GetFaces)
+    .def_property_readonly("Surfaces", &BND_Brep::GetSurfaces)
     .def_property_readonly("IsSolid", &BND_Brep::IsSolid)
     .def_property_readonly("IsManifold", &BND_Brep::IsManifold)
     .def_property_readonly("IsSurface", &BND_Brep::IsSurface)
@@ -240,12 +276,18 @@ using namespace emscripten;
 void initBrepBindings(void*)
 {
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
+    .function("underlyingSurface", &BND_BrepFace::UnderlyingSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
     .property("count", &BND_BrepFaceList::Count)
     .function("get", &BND_BrepFaceList::GetFace, allow_raw_pointers())
+    ;
+
+  class_<BND_BrepSurfaceList>("BrepSurfaceList")
+    .property("count", &BND_BrepSurfaceList::Count)
+    .function("get", &BND_BrepSurfaceList::GetSurface, allow_raw_pointers())
     ;
 
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")
@@ -261,6 +303,7 @@ void initBrepBindings(void*)
     .class_function("createFromSurface", &BND_Brep::CreateFromSurface, allow_raw_pointers())
     .class_function("createTrimmedPlane", &BND_Brep::CreateTrimmedPlane, allow_raw_pointers())
     .function("faces", &BND_Brep::GetFaces)
+    .function("surfaces", &BND_Brep::GetSurfaces)
     .property("isSolid", &BND_Brep::IsSolid)
     .property("isManifold", &BND_Brep::IsManifold)
     .property("isSurface", &BND_Brep::IsSurface)
