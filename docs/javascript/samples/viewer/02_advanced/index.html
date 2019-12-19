@@ -144,7 +144,7 @@
 
           function meshToThreejs(mesh, material){
             let loader = new THREE.BufferGeometryLoader();
-            var geometry = loader.parse(mesh.toThreejsJSON());
+            var geometry = loader.parse(mesh.toThreejsJSON(true));
             return new THREE.Mesh(geometry, material);
           }
         </script>
