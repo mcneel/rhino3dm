@@ -581,39 +581,39 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
 
 void BND_File3dmGroupTable::Add(const BND_Group& group)
 {
-	const ON_Group* l = group.m_group;
-	m_model->AddModelComponent(*l);
+  const ON_Group* l = group.m_group;
+  m_model->AddModelComponent(*l);
 }
 
 
 BND_Group* BND_File3dmGroupTable::IterIndex(int index)
 {
-	return FindIndex(index);
+  return FindIndex(index);
 }
 
 BND_Group* BND_File3dmGroupTable::FindIndex(int index)
 {
-	ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::Group, index); //no specific method in ON Extensions, therefore getting component here
-	const ON_ModelComponent* model_component = compref.ModelComponent();
-    if (compref.IsEmpty())
-        return nullptr;
-	ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
-	if (modelgroup)
-		return new BND_Group(modelgroup, &compref);
-	
-	return nullptr;
+  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::Group, index); //no specific method in ON Extensions, therefore getting component here
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  if (compref.IsEmpty())
+    return nullptr;
+  ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
+  if (modelgroup)
+    return new BND_Group(modelgroup, &compref);
+
+  return nullptr;
 }
 
 BND_Group* BND_File3dmGroupTable::FindName(std::wstring name)
 {
-    ON_ModelComponentReference compref = m_model->ComponentFromName(ON_ModelComponent::Type::Group, ON_nil_uuid, name.c_str());
-    if (compref.IsEmpty())
-        return nullptr;
-    const ON_ModelComponent* model_component = compref.ModelComponent();
-    ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
-    if (modelgroup)
-        return new BND_Group(modelgroup, &compref);
+  ON_ModelComponentReference compref = m_model->ComponentFromName(ON_ModelComponent::Type::Group, ON_nil_uuid, name.c_str());
+  if (compref.IsEmpty())
     return nullptr;
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
+  if (modelgroup)
+    return new BND_Group(modelgroup, &compref);
+  return nullptr;
 }
 
 int BND_File3dmViewTable::Count() const
@@ -1069,18 +1069,18 @@ void initExtensionsBindings(pybind11::module& m)
     ;
 
   py::class_<PyBNDIterator<BND_File3dmGroupTable&, BND_Group*> >(m, "__GroupIterator")
-	  .def("__iter__", [](PyBNDIterator<BND_File3dmGroupTable&, BND_Group*> &it) -> PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>& { return it; })
-	  .def("__next__", &PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>::next)
-	  ;
+    .def("__iter__", [](PyBNDIterator<BND_File3dmGroupTable&, BND_Group*> &it) -> PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>::next)
+    ;
 
   py::class_<BND_File3dmGroupTable>(m, "File3dmGroupTable")
-	  .def("__len__", &BND_File3dmGroupTable::Count)
-	  .def("__getitem__", &BND_File3dmGroupTable::FindIndex)
-	  .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
-	  .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
-	  .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
-      .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
-	  ;
+    .def("__len__", &BND_File3dmGroupTable::Count)
+    .def("__getitem__", &BND_File3dmGroupTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
+    .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
+    .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
+    .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
+    ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> &it) -> PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>& { return it; })
@@ -1160,7 +1160,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
     .def_property_readonly("Bitmaps", &BND_ONXModel::Bitmaps)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
-	.def_property_readonly("AllGroups", &BND_ONXModel::AllGroups)
+    .def_property_readonly("Groups", &BND_ONXModel::AllGroups)
     .def_property_readonly("DimStyles", &BND_ONXModel::DimStyles)
     .def_property_readonly("InstanceDefinitions", &BND_ONXModel::InstanceDefinitions)
     .def_property_readonly("Views", &BND_ONXModel::Views)
@@ -1245,6 +1245,14 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmGroupTable>("File3dmGroupTable")
+    .function("count", &BND_File3dmGroupTable::Count)
+    .function("get", &BND_File3dmGroupTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmGroupTable::Add)
+    .function("findIndex", &BND_File3dmGroupTable::FindIndex, allow_raw_pointers())
+    .function("findName", &BND_File3dmGroupTable::FindName, allow_raw_pointers())
+    ;
+
   class_<BND_File3dmDimStyleTable>("File3dmDimStyleTable")
     .function("count", &BND_File3dmDimStyleTable::Count)
     .function("get", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
@@ -1299,6 +1307,7 @@ void initExtensionsBindings(void*)
     .function("materials", &BND_ONXModel::Materials)
     .function("bitmaps", &BND_ONXModel::Bitmaps)
     .function("layers", &BND_ONXModel::Layers)
+    .function("groups", &BND_ONXModel::AllGroups)
     .function("dimstyles", &BND_ONXModel::DimStyles)
     .function("instanceDefinitions", &BND_ONXModel::InstanceDefinitions)
     .function("views", &BND_ONXModel::Views)

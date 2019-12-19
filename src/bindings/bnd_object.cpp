@@ -202,6 +202,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   if (render_settings)
     return new BND_RenderSettings(render_settings, compref);
 
+  ON_Group* group = ON_Group::Cast(obj);
+  if (group)
+    return new BND_Group(group, compref);
+
   return new BND_CommonObject(obj, compref);
 }
 

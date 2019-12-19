@@ -22,7 +22,7 @@ public:
   void SetId(BND_UUID id) { m_group->SetId(Binding_to_ON_UUID(id)); }
   int GetIndex() const { return m_group->Index(); }
   //public File3dmObject[] GroupMembers(int groupIndex)
- 
+
 protected:
   void SetTrackedPointer(ON_Group* group, const ON_ModelComponentReference* compref);
 };
