@@ -1,5 +1,30 @@
 #include "bindings.h"
 
+BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_surface = surface;
+}
+
+ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(int indexU, int indexV) const
+{
+  ON_4dPoint pt;
+  m_surface->GetCV(indexU, indexV, pt);
+  return pt;
+}
+
+void BND_NurbsSurfacePointList::SetControlPoint(int indexU, int indexV, ON_4dPoint point)
+{
+  m_surface->SetCV(indexU, indexV, point);
+}
+
+BND_NurbsSurfaceKnotList::BND_NurbsSurfaceKnotList(ON_NurbsSurface* surface, int direction, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_surface = surface;
+  m_direction = direction ? 1 : 0;
+}
+
 BND_NurbsSurface::BND_NurbsSurface(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(nurbssurface, compref);
@@ -75,11 +100,48 @@ BND_NurbsSurface* BND_NurbsSurface::CreateRuledSurface(const class BND_Curve* cu
   return new BND_NurbsSurface(ns, nullptr);
 }
 
+BND_NurbsSurfaceKnotList BND_NurbsSurface::KnotsU()
+{
+  return BND_NurbsSurfaceKnotList(m_nurbssurface, 0, m_component_ref);
+}
+
+BND_NurbsSurfaceKnotList BND_NurbsSurface::KnotsV()
+{
+  return BND_NurbsSurfaceKnotList(m_nurbssurface, 1, m_component_ref);
+}
+
+BND_NurbsSurfacePointList BND_NurbsSurface::Points()
+{
+  return BND_NurbsSurfacePointList(m_nurbssurface, m_component_ref);
+}
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initNurbsSurfaceBindings(pybind11::module& m)
 {
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList")
+    .def("__len__", &BND_NurbsSurfaceKnotList::Count)
+    .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
+    .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
+    .def("InsertKnot", &BND_NurbsSurfaceKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
+    .def("KnotMultiplicity", &BND_NurbsSurfaceKnotList::KnotMultiplicity, py::arg("index"))
+    .def("CreateUniformKnots", &BND_NurbsSurfaceKnotList::CreateUniformKnots, py::arg("knotSpacing"))
+    .def("CreatePeriodicKnots", &BND_NurbsSurfaceKnotList::CreatePeriodicKnots, py::arg("knotSpacing"))
+    .def_property_readonly("IsClampedStart", &BND_NurbsSurfaceKnotList::IsClampedStart)
+    .def_property_readonly("IsClampedEnd", &BND_NurbsSurfaceKnotList::IsClampedEnd)
+    .def("SuperfluousKnot", &BND_NurbsSurfaceKnotList::SuperfluousKnot, py::arg("start"))
+    ;
+
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList")
+    .def("__len__", &BND_NurbsSurfacePointList::Count)
+    .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
+    .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
+    .def("__getitem__", &BND_NurbsSurfacePointList::GetControlPoint)
+    .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint)
+    .def("MakeRational", &BND_NurbsSurfacePointList::MakeRational)
+    .def("MakeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
+    ;
   py::class_<BND_NurbsSurface, BND_Surface>(m, "NurbsSurface")
     .def_static("Create", &BND_NurbsSurface::Create, py::arg("dimension"), py::arg("isRational"), py::arg("order0"), py::arg("order1"), py::arg("controlPointCount0"), py::arg("controlPointCount1"))
     .def_static("CreateFromCone", &BND_NurbsSurface::CreateFromCone, py::arg("cone"))
@@ -93,6 +155,9 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("IncreaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV, py::arg("desiredDegree"))
     .def_property_readonly("OrderU", &BND_NurbsSurface::OrderU)
     .def_property_readonly("OrderV", &BND_NurbsSurface::OrderV)
+    .def_property_readonly("KnotsU", &BND_NurbsSurface::KnotsU)
+    .def_property_readonly("KnotsV", &BND_NurbsSurface::KnotsV)
+    .def_property_readonly("Points", &BND_NurbsSurface::Points)
     ;
 }
 #endif
@@ -102,6 +167,29 @@ using namespace emscripten;
 
 void initNurbsSurfaceBindings(void*)
 {
+  class_<BND_NurbsSurfaceKnotList>("NurbsCurveKnotList")
+    .property("count", &BND_NurbsSurfaceKnotList::Count)
+    .function("get", &BND_NurbsSurfaceKnotList::GetKnot)
+    .function("set", &BND_NurbsSurfaceKnotList::SetKnot)
+    .function("insertKnot", &BND_NurbsSurfaceKnotList::InsertKnot)
+    .function("knotMultiplicity", &BND_NurbsSurfaceKnotList::KnotMultiplicity)
+    .function("createUniformKnots", &BND_NurbsSurfaceKnotList::CreateUniformKnots)
+    .function("createPeriodicKnots", &BND_NurbsSurfaceKnotList::CreatePeriodicKnots)
+    .property("isClampedStart", &BND_NurbsSurfaceKnotList::IsClampedStart)
+    .property("isClampedEnd", &BND_NurbsSurfaceKnotList::IsClampedEnd)
+    .function("superfluousKnot", &BND_NurbsSurfaceKnotList::SuperfluousKnot)
+    ;
+
+  class_<BND_NurbsSurfacePointList>("NurbsSurfacePointList")
+    .property("count", &BND_NurbsSurfacePointList::Count)
+    .property("countU", &BND_NurbsSurfacePointList::CountU)
+    .property("countV", &BND_NurbsSurfacePointList::CountV)
+    .function("get", &BND_NurbsSurfacePointList::GetControlPoint)
+    .function("set", &BND_NurbsSurfacePointList::SetControlPoint)
+    .function("makeRational", &BND_NurbsSurfacePointList::MakeRational)
+    .function("makeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
+    ;
+
   class_<BND_NurbsSurface, base<BND_Surface>>("NurbsSurface")
     .class_function("create", &BND_NurbsSurface::Create, allow_raw_pointers())
     .class_function("createFromCone", &BND_NurbsSurface::CreateFromCone, allow_raw_pointers())
@@ -115,6 +203,9 @@ void initNurbsSurfaceBindings(void*)
     .function("increaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV)
     .property("orderU", &BND_NurbsSurface::OrderU)
     .property("orderV", &BND_NurbsSurface::OrderV)
+    .property("knotsU", &BND_NurbsSurface::KnotsU)
+    .property("knotsV", &BND_NurbsSurface::KnotsV)
+    .property("points", &BND_NurbsSurface::Points)
     ;
 }
 #endif
