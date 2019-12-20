@@ -113,7 +113,7 @@ setup(
 """# rhino3dm.py
 CPython package based on OpenNURBS with a RhinoCommon style
 
-Project Hompage at: https://github.com/mcneel/rhino3dm
+Project Homepage at: https://github.com/mcneel/rhino3dm
 
 ### Supported platforms
 * Python27 - Windows (32 and 64 bit)
