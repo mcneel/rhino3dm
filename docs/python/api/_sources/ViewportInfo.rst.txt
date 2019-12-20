@@ -73,6 +73,15 @@ ViewportInfo
       Setting preserves camera location,
       changes the frustum, but maintains the frustum's aspect.
 
+   .. py:attribute:: Id
+
+      Guid: Sets the viewport's id to the value used to
+      uniquely identify this viewport.
+      There is no approved way to change the viewport
+      id once it is set in order to maintain consistency
+      across multiple viewports and those routines that
+      manage them.
+
    .. py:method:: ChangeToParallelProjection(symmetricFrustum)
 
       Use this function to change projections of valid viewports

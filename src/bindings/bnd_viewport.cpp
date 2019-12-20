@@ -343,6 +343,12 @@ bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 
 }
 
+BND_UUID BND_Viewport::GetId() const
+{
+  return ON_UUID_to_Binding(m_viewport->ViewportId());
+}
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initViewportBindings(pybind11::module& m)
@@ -375,7 +381,9 @@ void initViewportBindings(pybind11::module& m)
     .def_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .def("GetXform", &BND_Viewport::GetXform, py::arg("sourceCoordinateSystem"), py::arg("destinationCoordinateSystem"))
-    .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"));
+    .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"))
+    .def_property_readonly("Id", &BND_Viewport::GetId)
+    ;
 }
 
 #else
@@ -411,6 +419,8 @@ void initViewportBindings(void*)
     .property("cameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .property("camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .function("getXform", &BND_Viewport::GetXform, allow_raw_pointers())
-    .function("dollyExtents", &BND_Viewport::DollyExtents);
+    .function("dollyExtents", &BND_Viewport::DollyExtents)
+    .property("id", &BND_Viewport::GetId)
+    ;
 }
 #endif

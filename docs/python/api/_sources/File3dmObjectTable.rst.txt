@@ -164,3 +164,7 @@ File3dmObjectTable
 
       :return: True on success, False on failure.
       :rtype: bool
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation

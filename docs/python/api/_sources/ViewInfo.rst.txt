@@ -7,7 +7,7 @@ ViewInfo
 
    .. py:attribute:: Name
 
-      str: Gets or sets the name of the NamedView.
+      str: Gets or sets the name of the view.
 
    .. py:attribute:: WallpaperName
 

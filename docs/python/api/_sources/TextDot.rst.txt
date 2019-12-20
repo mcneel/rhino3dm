@@ -1,0 +1,31 @@
+TextDot
+=======
+
+.. py:module:: rhino3dm
+
+.. py:class:: TextDot
+
+   .. py:method:: TextDot()
+
+      TextDot constructor
+
+
+   .. py:attribute:: Point
+
+      rhino3dm.Point3d: Gets or sets the position of the textdot.
+
+   .. py:attribute:: Text
+
+      str: Gets or sets the primiary text of the textdot.
+
+   .. py:attribute:: SecondaryText
+
+      str: Gets or sets the secondary text of the textdot.
+
+   .. py:attribute:: FontHeight
+
+      int: Height of font used for displaying the dot
+
+   .. py:attribute:: FontFace
+
+      str: Font face used for displaying the dot

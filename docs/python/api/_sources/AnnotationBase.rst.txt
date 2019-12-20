@@ -1,0 +1,6 @@
+AnnotationBase
+==============
+
+.. py:module:: rhino3dm
+
+.. py:class:: AnnotationBase
