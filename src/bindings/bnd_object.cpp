@@ -167,6 +167,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if (dot)
       return new BND_TextDot(dot, compref);
 
+    ON_Light* light = ON_Light::Cast(obj);
+    if (light)
+      return new BND_Light(light, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
