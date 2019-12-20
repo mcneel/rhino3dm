@@ -62,6 +62,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initBrepBindings(m);
   initExtrusionBindings(m);
   initNurbsSurfaceBindings(m);
+  initLightBindings(m);
   initSphereBindings(m);
   initViewportBindings(m);
   initGroupBindings(m);

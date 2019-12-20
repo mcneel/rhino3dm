@@ -96,6 +96,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_brep.h"
 #include "bnd_beam.h"
 #include "bnd_nurbssurface.h"
+#include "bnd_light.h"
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"
 #include "bnd_group.h"

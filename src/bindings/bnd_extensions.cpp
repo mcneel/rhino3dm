@@ -373,10 +373,9 @@ void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
 
 int BND_ONXModel_ObjectTable::Count() const
 {
-  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
-  iterator.FirstComponentReference();
-  return iterator.ActiveComponentCount();
-
+  int count = m_model->ActiveComponentCount(ON_ModelComponent::Type::ModelGeometry) +
+    m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::RenderLight);
+  return count;
 }
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
@@ -406,7 +405,13 @@ BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
-  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponent::Type type = ON_ModelComponent::Type::ModelGeometry;
+  if (index >= m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry))
+  {
+    type = ON_ModelComponent::Type::RenderLight;
+    index = index - m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry);
+  }
+  ONX_ModelComponentIterator iterator(*m_model.get(), type);
   ON_ModelComponentReference compref = iterator.FirstComponentReference();
   int current = 0;
   while(current<index)
@@ -421,7 +426,13 @@ BND_3dmObjectAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
 {
   // I know this is dumb. I haven't figured out how to set up enumeration in
   // javascript yet, so this is just here to keep things moving along
-  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponent::Type type = ON_ModelComponent::Type::ModelGeometry;
+  if (index >= m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry))
+  {
+    type = ON_ModelComponent::Type::RenderLight;
+    index = index - m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry);
+  }
+  ONX_ModelComponentIterator iterator(*m_model.get(), type);
   ON_ModelComponentReference compref = iterator.FirstComponentReference();
   int current = 0;
   while (current < index)
