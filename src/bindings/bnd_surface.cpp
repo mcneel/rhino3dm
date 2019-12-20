@@ -16,6 +16,23 @@ void BND_Surface::SetTrackedPointer(ON_Surface* surface, const ON_ModelComponent
   BND_GeometryBase::SetTrackedPointer(surface, compref);
 }
 
+std::tuple<BND_NurbsSurface*, int> BND_Surface::ToNurbsSurface(double tolerance)
+{
+  int accuracy{0};
+  ON_NurbsSurface* p_NurbForm = ON_NurbsSurface::New();
+  if (m_surface != nullptr)
+  {
+    accuracy = m_surface->GetNurbForm(*p_NurbForm, tolerance);
+    if (!accuracy)
+    {
+      delete p_NurbForm;
+      p_NurbForm = nullptr;
+    }
+  }
+  if (p_NurbForm == nullptr)
+    return std::make_tuple(nullptr, 0);
+  return std::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
+}
 
 
 #if defined(ON_PYTHON_COMPILE)
@@ -33,6 +50,8 @@ void initSurfaceBindings(pybind11::module& m)
     .def("IsSingular", &BND_Surface::IsSingular, py::arg("side"))
     .def("IsAtSingularity", &BND_Surface::IsAtSingularity, py::arg("u"), py::arg("v"), py::arg("exact"))
     .def("IsAtSeam", &BND_Surface::IsAtSeam, py::arg("u"), py::arg("v"))
+    .def("ToNurbsSurface", &BND_Surface::ToNurbsSurfaceDefault)
+    .def("ToNurbsSurface", &BND_Surface::ToNurbsSurface, py::arg("tolerance"))
     .def("IsPlanar", &BND_Surface::IsPlanar, py::arg("tolerance")=ON_ZERO_TOLERANCE)
     .def("IsSphere", &BND_Surface::IsSphere, py::arg("tolerance")=ON_ZERO_TOLERANCE)
     .def("IsCylinder", &BND_Surface::IsCylinder, py::arg("tolerance")=ON_ZERO_TOLERANCE)
@@ -58,6 +77,8 @@ void initSurfaceBindings(void*)
     .function("isSingular", &BND_Surface::IsSingular)
     .function("isAtSingularity", &BND_Surface::IsAtSingularity)
     .function("isAtSeam", &BND_Surface::IsAtSeam)
+    .function("toNurbsSurface", &BND_Surface::ToNurbsSurfaceDefault, allow_raw_pointers())
+    //.function("toNurbsSurface", &BND_Surface::ToNurbsSurface)
     .function("isPlanar", &BND_Surface::IsPlanar)
     .function("isSphere", &BND_Surface::IsSphere)
     .function("isCylinder", &BND_Surface::IsCylinder)
