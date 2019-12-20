@@ -102,6 +102,22 @@ Surface
          3 if 1 and 2 are true.
       :rtype: int
 
+   .. py:method:: ToNurbsSurface()
+
+      Gets a NURBS surface representation of this surface. Default
+      tolerance of 0.0 is used.
+
+      :return: NurbsSurface on success, None on failure.
+      :rtype: NurbsSurface
+
+   .. py:method:: ToNurbsSurface(tolerance)
+
+      Gets a NURBS surface representation of this surface. Default
+      tolerance of 0.0 is used.
+
+      :return: NurbsSurface on success, None on failure.
+      :rtype: NurbsSurface
+
    .. py:method:: IsPlanar(tolerance)
 
       Tests a surface to see if it is planar to zero tolerance.
