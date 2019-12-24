@@ -191,11 +191,23 @@ BND_NurbsCurvePointList BND_NurbsCurve::Points()
 namespace py = pybind11;
 void initNurbsCurveBindings(pybind11::module& m)
 {
-  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList")
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
     .def("__len__", &BND_NurbsCurveKnotList::Count)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
     .def("ToList", &BND_NurbsCurveKnotList::ToList)
+    .def_buffer([](BND_NurbsCurveKnotList& kl) -> py::buffer_info
+      {
+        return py::buffer_info
+        (
+          kl.GetCurve()->m_knot,                    /* Pointer to buffer */
+          sizeof(double),                           /* Size of one scalar */
+          py::format_descriptor<double>::format(),  /* Python struct-style format descriptor */
+          1,                                        /* Number of dimensions */
+          {kl.Count()},                             /* Buffer dimensions */
+          {sizeof(double)}                          /* Strides (in bytes) for each index */
+        );
+      })
     .def("InsertKnot", &BND_NurbsCurveKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsCurveKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsCurveKnotList::CreateUniformKnots, py::arg("knotSpacing"))
@@ -206,10 +218,22 @@ void initNurbsCurveBindings(pybind11::module& m)
     ;
   ;
 
-  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList")
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
     .def("__len__", &BND_NurbsCurvePointList::Count)
     .def("__getitem__", &BND_NurbsCurvePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsCurvePointList::SetControlPoint)
+    .def_buffer([](BND_NurbsCurvePointList& pl) -> py::buffer_info
+    {
+      return py::buffer_info
+      (
+        pl.GetCurve()->m_cv,                      /* Pointer to buffer */
+        sizeof(double),                           /* Size of one scalar */
+        py::format_descriptor<double>::format(),  /* Python struct-style format descriptor */
+        2,                                        /* Number of dimensions */
+        {pl.Count(), pl.GetCVDims() },            /* Buffer dimensions */
+        {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
+      );
+    })
     .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
     .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))
     .def("MakeRational", &BND_NurbsCurvePointList::MakeRational)

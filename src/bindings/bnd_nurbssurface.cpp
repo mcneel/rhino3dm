@@ -157,11 +157,23 @@ BND_NurbsSurfacePointList BND_NurbsSurface::Points()
 namespace py = pybind11;
 void initNurbsSurfaceBindings(pybind11::module& m)
 {
-  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList")
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
     .def("__len__", &BND_NurbsSurfaceKnotList::Count)
     .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
     .def("ToList", &BND_NurbsSurfaceKnotList::ToList)
+    .def_buffer([](BND_NurbsSurfaceKnotList& kl) -> py::buffer_info
+      {
+        return py::buffer_info
+        (
+          kl.GetSurface()->m_knot[kl.GetDirection()],  /* Pointer to buffer */
+          sizeof(double),                           /* Size of one scalar */
+          py::format_descriptor<double>::format(),  /* Python struct-style format descriptor */
+          1,                                        /* Number of dimensions */
+          {kl.Count()},                             /* Buffer dimensions */
+          {sizeof(double)}                          /* Strides (in bytes) for each index */
+        );
+      })
     .def("InsertKnot", &BND_NurbsSurfaceKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsSurfaceKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsSurfaceKnotList::CreateUniformKnots, py::arg("knotSpacing"))
@@ -171,12 +183,28 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("SuperfluousKnot", &BND_NurbsSurfaceKnotList::SuperfluousKnot, py::arg("start"))
     ;
 
-  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList")
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::buffer_protocol())
     .def("__len__", &BND_NurbsSurfacePointList::Count)
     .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
     .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
     .def("__getitem__", &BND_NurbsSurfacePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint)
+    .def_buffer([](BND_NurbsSurfacePointList& pl) -> py::buffer_info
+    {
+      return py::buffer_info
+      (
+        pl.GetSurface()->m_cv,                    /* Pointer to buffer */
+        sizeof(double),                           /* Size of one scalar */
+        py::format_descriptor<double>::format(),  /* Python struct-style format descriptor */
+        3,                                        /* Number of dimensions */
+        {pl.CountU(), pl.CountV(), pl.GetCVDims() },  /* Buffer dimensions */
+        {
+          pl.GetSurface()->m_cv_stride[0] * sizeof(double),
+          pl.GetSurface()->m_cv_stride[1] * sizeof(double),
+          sizeof(double)
+        }                                         /* Strides (in bytes) for each index */
+      );
+    })
     .def("MakeRational", &BND_NurbsSurfacePointList::MakeRational)
     .def("MakeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
     ;

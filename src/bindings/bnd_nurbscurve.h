@@ -15,6 +15,8 @@ class BND_NurbsCurvePointList
   ON_NurbsCurve* m_nurbs_curve = nullptr;
 public:
   BND_NurbsCurvePointList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref);
+  ON_NurbsCurve* GetCurve() { return m_nurbs_curve; }
+  int GetCVDims() { return m_nurbs_curve->m_is_rat ? m_nurbs_curve->m_dim + 1 : m_nurbs_curve->m_dim; }
   int Count() const { return m_nurbs_curve->CVCount(); }
   ON_4dPoint GetControlPoint(int index) const;
   void SetControlPoint(int index, ON_4dPoint point);
@@ -42,6 +44,7 @@ class BND_NurbsCurveKnotList
 public:
   BND_NurbsCurveKnotList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref);
   std::vector<double> ToList();
+  ON_NurbsCurve* GetCurve() { return m_nurbs_curve; }
   int Count() const { return m_nurbs_curve->KnotCount(); }
   double GetKnot(int index) const;
   void SetKnot(int index, double k);
