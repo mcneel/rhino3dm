@@ -1,3 +1,4 @@
+#include <vector>
 #include "bindings.h"
 
 #pragma once
@@ -18,8 +19,8 @@ public:
   int CountU() const { return m_surface->CVCount(0); }
   int CountV() const { return m_surface->CVCount(1); }
   int Count() const { return CountU() * CountV(); }
-  ON_4dPoint GetControlPoint(int indexU, int indexV) const;
-  void SetControlPoint(int indexU, int indexV, ON_4dPoint point);
+  ON_4dPoint GetControlPoint(std::tuple<int, int> index) const;
+  void SetControlPoint(std::tuple<int, int> index, ON_4dPoint point);
   //class BND_Polyline* ControlPolygon() const;
   bool MakeRational() { return m_surface->MakeRational(); }
   bool MakeNonRational() { return m_surface->MakeNonRational(); }
@@ -42,9 +43,10 @@ class BND_NurbsSurfaceKnotList
   int m_direction;
 public:
   BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbscurve, int direction, const ON_ModelComponentReference& compref);
+  std::vector<double> ToList();
   int Count() const { return m_surface->KnotCount(m_direction); }
-  double GetKnot(int index) const { return m_surface->Knot(m_direction, index); }
-  void SetKnot(int index, double k) { m_surface->SetKnot(m_direction, index, k); }
+  double GetKnot(int index) const;
+  void SetKnot(int index, double k);
   bool InsertKnot(double value, int multiplicity) { return m_surface->InsertKnot(m_direction, value, multiplicity); }
   int KnotMultiplicity(int index) const { return m_surface->KnotMultiplicity(m_direction, index); }
   bool CreateUniformKnots(double knotSpacing) { return m_surface->MakeClampedUniformKnotVector(m_direction, knotSpacing); }

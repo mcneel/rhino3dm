@@ -1,4 +1,6 @@
+#include <vector>
 #include "bindings.h"
+#include "pybind11/stl.h"
 
 BND_NurbsCurvePointList::BND_NurbsCurvePointList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref)
 {
@@ -8,6 +10,10 @@ BND_NurbsCurvePointList::BND_NurbsCurvePointList(ON_NurbsCurve* nurbscurve, cons
 
 ON_4dPoint BND_NurbsCurvePointList::GetControlPoint(int index) const
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
   ON_4dPoint pt;
   m_nurbs_curve->GetCV(index, pt);
   return pt;
@@ -15,6 +21,10 @@ ON_4dPoint BND_NurbsCurvePointList::GetControlPoint(int index) const
 
 void BND_NurbsCurvePointList::SetControlPoint(int index, ON_4dPoint point)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
   m_nurbs_curve->SetCV(index, point);
 }
 
@@ -27,6 +37,30 @@ BND_NurbsCurveKnotList::BND_NurbsCurveKnotList(ON_NurbsCurve* nurbscurve, const 
   m_nurbs_curve = nurbscurve;
 }
 
+double BND_NurbsCurveKnotList::GetKnot(int index) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  return m_nurbs_curve->Knot(index);
+}
+
+void BND_NurbsCurveKnotList::SetKnot(int index, double k)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  m_nurbs_curve->SetKnot(index, k);
+}
+
+std::vector<double> BND_NurbsCurveKnotList::ToList()
+{
+  return std::vector<double>(
+      m_nurbs_curve->m_knot,
+      m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
+}
 
 BND_NurbsCurve::BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref)
 {
@@ -161,6 +195,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def("__len__", &BND_NurbsCurveKnotList::Count)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
+    .def("ToList", &BND_NurbsCurveKnotList::ToList)
     .def("InsertKnot", &BND_NurbsCurveKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsCurveKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsCurveKnotList::CreateUniformKnots, py::arg("knotSpacing"))

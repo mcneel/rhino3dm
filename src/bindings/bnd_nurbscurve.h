@@ -1,3 +1,4 @@
+#include <vector>
 #include "bindings.h"
 
 #pragma once
@@ -40,9 +41,10 @@ class BND_NurbsCurveKnotList
   ON_NurbsCurve* m_nurbs_curve = nullptr;
 public:
   BND_NurbsCurveKnotList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref);
+  std::vector<double> ToList();
   int Count() const { return m_nurbs_curve->KnotCount(); }
-  double GetKnot(int index) const { return m_nurbs_curve->Knot(index); }
-  void SetKnot(int index, double k) { m_nurbs_curve->SetKnot(index, k); }
+  double GetKnot(int index) const;
+  void SetKnot(int index, double k);
   bool InsertKnot(double value, int multiplicity) { return m_nurbs_curve->InsertKnot(value, multiplicity); }
   int KnotMultiplicity(int index) const { return m_nurbs_curve->KnotMultiplicity(index); }
   bool CreateUniformKnots(double knotSpacing) { return m_nurbs_curve->MakeClampedUniformKnotVector(knotSpacing); }

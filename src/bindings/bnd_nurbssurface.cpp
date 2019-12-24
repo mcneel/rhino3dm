@@ -1,4 +1,6 @@
+#include <vector>
 #include "bindings.h"
+#include "pybind11/stl.h"
 
 BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, const ON_ModelComponentReference& compref)
 {
@@ -6,16 +8,26 @@ BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, c
   m_surface = surface;
 }
 
-ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(int indexU, int indexV) const
+ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(std::tuple<int, int> index) const
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
+      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
   ON_4dPoint pt;
-  m_surface->GetCV(indexU, indexV, pt);
+  m_surface->GetCV(std::get<0>(index), std::get<1>(index), pt);
   return pt;
 }
 
-void BND_NurbsSurfacePointList::SetControlPoint(int indexU, int indexV, ON_4dPoint point)
+void BND_NurbsSurfacePointList::SetControlPoint(std::tuple<int, int> index, ON_4dPoint point)
 {
-  m_surface->SetCV(indexU, indexV, point);
+#if defined(ON_PYTHON_COMPILE)
+  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
+      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  m_surface->SetCV(std::get<0>(index), std::get<1>(index), point);
 }
 
 BND_NurbsSurfaceKnotList::BND_NurbsSurfaceKnotList(ON_NurbsSurface* surface, int direction, const ON_ModelComponentReference& compref)
@@ -23,6 +35,31 @@ BND_NurbsSurfaceKnotList::BND_NurbsSurfaceKnotList(ON_NurbsSurface* surface, int
   m_component_reference = compref;
   m_surface = surface;
   m_direction = direction ? 1 : 0;
+}
+
+double BND_NurbsSurfaceKnotList::GetKnot(int index) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  return m_surface->Knot(m_direction, index);
+}
+
+void BND_NurbsSurfaceKnotList::SetKnot(int index, double k)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index >= Count() || index < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  m_surface->SetKnot(m_direction, index, k);
+}
+
+std::vector<double> BND_NurbsSurfaceKnotList::ToList()
+{
+  return std::vector<double>(
+      m_surface->m_knot[m_direction],
+      m_surface->m_knot[m_direction] + m_surface->KnotCount(m_direction));
 }
 
 BND_NurbsSurface::BND_NurbsSurface(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference* compref)
@@ -124,6 +161,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("__len__", &BND_NurbsSurfaceKnotList::Count)
     .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
+    .def("ToList", &BND_NurbsSurfaceKnotList::ToList)
     .def("InsertKnot", &BND_NurbsSurfaceKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsSurfaceKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsSurfaceKnotList::CreateUniformKnots, py::arg("knotSpacing"))
