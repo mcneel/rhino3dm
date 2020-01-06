@@ -1,6 +1,5 @@
 #include <vector>
 #include "bindings.h"
-#include "pybind11/stl.h"
 
 BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, const ON_ModelComponentReference& compref)
 {
@@ -267,11 +266,11 @@ void initNurbsSurfaceBindings(void*)
     .function("makeNonRational", &BND_NurbsSurface::MakeNonRational)
     .function("increaseDegreeU", &BND_NurbsSurface::IncreaseDegreeU)
     .function("increaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV)
-    .property("orderU", &BND_NurbsSurface::OrderU)
-    .property("orderV", &BND_NurbsSurface::OrderV)
-    .property("knotsU", &BND_NurbsSurface::KnotsU)
-    .property("knotsV", &BND_NurbsSurface::KnotsV)
-    .property("points", &BND_NurbsSurface::Points)
+    //.property("orderU", &BND_NurbsSurface::OrderU)
+    //.property("orderV", &BND_NurbsSurface::OrderV)
+    //.property("knotsU", &BND_NurbsSurface::KnotsU)
+    //.property("knotsV", &BND_NurbsSurface::KnotsV)
+    //.property("points", &BND_NurbsSurface::Points)
     ;
 }
 #endif

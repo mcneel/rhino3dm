@@ -1,6 +1,5 @@
 #include <vector>
 #include "bindings.h"
-#include "pybind11/stl.h"
 
 BND_NurbsCurvePointList::BND_NurbsCurvePointList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref)
 {
