@@ -27,6 +27,10 @@ CMake 3.12.1 is the minimum required CMake version.
 
 * (Windows) If you are on Windows, you can create a Visual Studio project file for editing and compiling code by running the `build_python_project.py` script in the `src` directory. This is the easiest way to add new code to the project.
 
+## Compile and install a development version
+
+* (All platforms) Alternatively, running `pip install -e .` from the root of the repository will compile the Python extension, copy it in `/src/rhino3dm`, and link `/src/rhino3dm` in your installed packages. Rebuilds will be faster than building a binary distribution. To rebuild after modifying the C++ source files, run `python setup.py develop`.
+
 ## Test
 
 * `cd build_{pyver}/stage` and start `python`

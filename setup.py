@@ -44,6 +44,9 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
+        if self.inplace:
+            self.copy_extensions_to_source()
+
     def build_extension(self, ext):
         extdir = os.path.abspath(
             os.path.dirname(self.get_ext_fullpath(ext.name)))
@@ -96,6 +99,8 @@ class CMakeBuild(build_ext):
             system("make")
 
         os.chdir(current_dir)
+        if not os.path.exists(self.build_lib + "/rhino3dm"):
+            os.makedirs(self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
             shutil.copy(file, self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/*.so"):
@@ -113,7 +118,7 @@ setup(
 """# rhino3dm.py
 CPython package based on OpenNURBS with a RhinoCommon style
 
-Project Hompage at: https://github.com/mcneel/rhino3dm
+Project Homepage at: https://github.com/mcneel/rhino3dm
 
 ### Supported platforms
 * Python27 - Windows (32 and 64 bit)
@@ -141,7 +146,7 @@ for obj in model.Objects:
     long_description_content_type="text/markdown",
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    ext_modules=[CMakeExtension('rhino3dm/_rhino3dm')],
+    ext_modules=[CMakeExtension('rhino3dm._rhino3dm')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     include_package_data=True

@@ -15,6 +15,7 @@
 *.so
 *.dylib
 *.dll
+*.pyd
 
 # Fortran module files
 *.mod
@@ -30,6 +31,9 @@
 *.exe
 *.out
 *.app
+
+# Python cache
+__pycache__/
 
 .vscode
 
