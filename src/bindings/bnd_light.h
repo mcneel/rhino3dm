@@ -1,0 +1,73 @@
+#include "bindings.h"
+
+#pragma once
+
+#if defined(ON_PYTHON_COMPILE)
+void initLightBindings(pybind11::module& m);
+#else
+void initLightBindings(void* m);
+#endif
+
+class BND_Light : public BND_GeometryBase
+{
+  ON_Light* m_light = nullptr;
+public:
+  BND_Light();
+  BND_Light(ON_Light* light, const ON_ModelComponentReference* compref);
+
+protected:
+  void SetTrackedPointer(ON_Light* light, const ON_ModelComponentReference* compref);
+
+public:
+  bool IsEnabled() const { return m_light->IsEnabled(); }
+  void SetEnabled(bool on) { m_light->Enable(on); }
+  //    public LightStyle LightStyle{get;set;}
+  bool IsPointLight() const { return m_light->IsPointLight(); }
+  bool IsDirectionalLight() const { return m_light->IsDirectionalLight(); }
+  bool IsSpotLight() const { return m_light->IsSpotLight(); }
+  bool IsLinearLight() const { return m_light->IsLinearLight(); }
+  bool IsRectangularLight() const { return m_light->IsRectangularLight(); }
+  //    public DocObjects.CoordinateSystem CoordinateSystem {get;}
+  ON_3dPoint GetLocation() const { return m_light->m_location; }
+  void SetLocation(ON_3dPoint p) { m_light->m_location = p; }
+  ON_3dVector GetDirection() const { return m_light->m_direction; }
+  void SetDirection(ON_3dVector v) { m_light->m_direction = v; }
+  ON_3dVector GetPerpendicularDirection() const { return m_light->PerpindicularDirection(); }
+  double GetIntensity() const { return m_light->m_intensity; }
+  void SetIntensity(double i) { m_light->m_intensity = i; }
+  double GetPowerWatts() const { return m_light->m_watts; }
+  void SetPowerWatts(double w) { m_light->m_watts = w; }
+  double GetPowerLumens() const { return m_light->PowerLumens(); }
+  void SetPowerLumens(double pl) { m_light->SetPowerLumens(pl); }
+  double GetPowerCandela() const { return m_light->PowerCandela(); }
+  void SetPowerCandela(double pc) { m_light->SetPowerCandela(pc); }
+  //     public System.Drawing.Color Ambient {get;set;}
+  //    public System.Drawing.Color Diffuse {get;set;}
+  //     public System.Drawing.Color Specular {get;set;}
+  void SetAttenuation(double a0, double a1, double a2) { m_light->SetAttenuation(a0, a1, a2); }
+  ON_3dVector GetAttenuationVector() const { return m_light->m_attenuation; }
+  void SetAttenuationVector(ON_3dVector v) { m_light->m_attenuation = v; }
+  double GetAttenuation(double d) const { return m_light->Attenuation(d); }
+  double GetSpotAngleRadians() const { return m_light->SpotAngleRadians(); }
+  void SetSpotAngleRadians(double sa) { m_light->SetSpotAngleRadians(sa); }
+  double GetSpotExponent() const { return m_light->SpotExponent(); }
+  void SetSpotExponent(double se) { m_light->SetSpotExponent(se); }
+  double GetHotSpot() const { return m_light->HotSpot(); }
+  void SetHotSpot(double hs) { m_light->SetHotSpot(hs); }
+  //public bool GetSpotLightRadii(out double innerRadius, out double outerRadius)
+  ON_3dVector GetLength() const { return m_light->Length(); }
+  void SetLength(ON_3dVector l) { m_light->SetLength(l); }
+  ON_3dVector GetWidth() const { return m_light->Width(); }
+  void SetWidth(ON_3dVector w) { m_light->SetWidth(w); }
+  double GetShadowIntensity() const { return m_light->ShadowIntensity(); }
+  void SetShadowIntensity(double si) { m_light->SetShadowIntensity(si); }
+  std::wstring GetName() const { return std::wstring(m_light->m_light_name); }
+  void SetName(std::wstring s) { m_light->SetLightName(s.c_str()); }
+
+  //     public Guid Id {get; set;}
+  //    public static readonly Vector3d ConstantAttenuationVector = new Vector3d(1, 0, 0);
+//    public static readonly Vector3d LinearAttenuationVector = new Vector3d(0, 1, 0);
+//    public static readonly Vector3d InverseSquaredAttenuationVector = new Vector3d(0, 0, 1);
+  //    public enum Attenuation {
+  //    public Attenuation AttenuationType {get;set;}
+};

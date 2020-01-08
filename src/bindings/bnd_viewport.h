@@ -66,6 +66,7 @@ public:
 
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
 
+  BND_UUID GetId() const;
 protected:
   void SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 };

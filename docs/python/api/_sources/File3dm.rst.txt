@@ -59,6 +59,9 @@ File3dm
 
       IList<Layer>: Layers in this file.
 
+   .. py:attribute:: Groups
+
+
    .. py:attribute:: DimStyles
 
       IList<DimensionStyle>: Dimension Styles in this file.
@@ -128,6 +131,10 @@ File3dm
       :return: True if archive is written with no error. \
          False if errors occur.
       :rtype: bool
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
 
    .. py:method:: Encode()
 

@@ -23,7 +23,7 @@ File3dmDimStyleTable
 
    .. py:method:: FindIndex(index)
 
-      Retrieves a DimensionStyle object based on Index. This seach type of search is discouraged.
+      Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
       We are moving towards using only IDs for all tables.
 
       :param int index: The index to search for.

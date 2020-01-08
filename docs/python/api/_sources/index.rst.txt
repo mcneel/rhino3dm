@@ -10,6 +10,7 @@ Welcome to rhino3dm's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   AnnotationBase
    Arc
    ArcCurve
    ArchivableDictionary
@@ -20,6 +21,7 @@ Welcome to rhino3dm's documentation!
    Brep
    BrepFace
    BrepFaceList
+   BrepSurfaceList
    Circle
    CommonObject
    ComponentIndex
@@ -34,6 +36,7 @@ Welcome to rhino3dm's documentation!
    File3dm
    File3dmBitmapTable
    File3dmDimStyleTable
+   File3dmGroupTable
    File3dmInstanceDefinitionTable
    File3dmLayerTable
    File3dmMaterialTable
@@ -45,15 +48,18 @@ Welcome to rhino3dm's documentation!
    File3dmSettings
    File3dmStringTable
    File3dmViewTable
+   File3dmWriteOptions
    FileReference
    Font
    GeometryBase
+   Group
    Hatch
    InstanceDefinition
    InstanceReference
    Intersection
    Interval
    Layer
+   Light
    Line
    LineCurve
    Material
@@ -91,6 +97,7 @@ Welcome to rhino3dm's documentation!
    SubD
    Surface
    SurfaceProxy
+   TextDot
    Texture
    TextureMapping
    Transform

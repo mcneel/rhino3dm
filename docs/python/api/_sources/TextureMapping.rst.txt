@@ -105,4 +105,14 @@ TextureMapping
 
    .. py:method:: Evaluate(p, n)
 
-      [todo] add documentation
+      Evaluate the mapping to get a texture coordinate
+
+      :param rhino3dm.Point3d p: Vertex location
+      :param rhino3dm.Vector3d n: If the mapping projection is ray_projection, then this \
+         is the vertex unit normal.  Otherwise n is ignored.
+
+      :return: Nonzero if evaluation is successful.  When the mapping is a box or \
+         capped cylinder mapping, the value indicates which side was evaluated. \
+         Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap \
+         Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
+      :rtype: int
