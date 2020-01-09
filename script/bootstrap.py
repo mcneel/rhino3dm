@@ -132,6 +132,8 @@ def read_required_versions():
                 archive_suffix = "_windows = "
             if _platform == "darwin":
                 archive_suffix = "_macos = "
+            if _platform == "linux" or _platform == "linux2":
+                archive_suffix = "_linux = "
             archive_string = archive_prefix + " = "
             archive_string_with_platform = archive_prefix + archive_suffix
 
@@ -141,6 +143,8 @@ def read_required_versions():
                 install_notes_suffix = "_windows = "
             if _platform == "darwin":
                 install_notes_suffix = "_macos = "
+            if _platform == "linux" or _platform == "linux2":
+                install_notes_suffix = "_linux = "
             install_notes_string = install_notes_prefix + " = "
             install_notes_string_with_platform = install_notes_prefix + install_notes_suffix
 
@@ -200,6 +204,19 @@ def print_version_comparison(build_tool, running_version):
             + build_tool.currently_using + ". " + install_instructions)
 
     return version_alignment
+
+
+def check_opennurbs():
+    script_folder = os.getcwd()
+    path_to_src = os.path.join(script_folder + "/../" + "src")
+    opennnurbs_3dm_h_path = os.path.join(path_to_src, "lib", "opennurbs", "opennurbs_3dmf.h")
+
+    if not os.path.exists(opennnurbs_3dm_h_path):
+        print_error_message("opennurbs was not found in src/lib/opennurbs.  From the root folder of the project, "
+                            "please run: git submodule update --init")
+        return False
+
+    return True
 
 
 def check_macos(build_tool):
@@ -440,6 +457,8 @@ def main():
     xcode_logging = args.xcodelog
 
     # checks
+    check_opennurbs()
+
     if args.check is not None:
         for check in args.check:
             if check not in valid_platform_args:

@@ -17,9 +17,9 @@ We are currently using macOS 10.15.2. Scripts read this:
 
 #### Git
 
-We are currently using Git 2.23.0. Scripts read this:
+We are currently using Git 2.17.1. Scripts read this:
 
-`git_currently_using = 2.23.0`
+`git_currently_using = 2.17.1`
 `git_install_notes_macos = You can download and install git from https://git-scm.com/downloads.  In order to run the pkg installer, you must right-click and select Open from the drop-down menu to bypass Gatekeeper checks.`
 `git_install_notes_windows = You can download and install git from https://git-scm.com/downloads`
 
@@ -29,8 +29,8 @@ We are currently using Python 2.7.17. Scripts read this:
 
 `python_currently_using = 2.7.17`
 `python_archive_url_macos = https://www.python.org/ftp/python/2.7.17/python-2.7.17-macosx10.9.pkg`
-`python_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi` 
-`python_install_notes = `
+`python_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi`
+`python_install_notes_linux = On Ubuntu, you can install python 2.7 using sudo apt install python`
 
 #### Xcode
 
@@ -60,6 +60,7 @@ We are currently using CMake 3.16.2. Scripts read this:
 `cmake_archive_url_macos = https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Darwin-x86_64.dmg`
 `cmake_archive_url_windows = https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-win64-x64.msi`
 `cmake_install_notes_macos = Once the CMake.app is installed, launch it, and follow the directions in Tools > How to Install for Command Line Use`
+`cmake_install_notes_linux = On Ubuntu, you can install CMake using: sudo snap install cmake --classic`
 
 ## Linux (TODO)
 
