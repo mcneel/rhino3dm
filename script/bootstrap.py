@@ -359,7 +359,7 @@ def check_cmake(build_tool):
 
 def check_handler(check, build_tools):
     if check == "js":
-        print_platform_preamble("Javascript")
+        print_platform_preamble("JavaScript")
         if _platform == "darwin":
             check_macos(build_tools["macos"])
             check_xcode(build_tools["xcode"])
