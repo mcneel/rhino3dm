@@ -209,7 +209,7 @@ def print_version_comparison(build_tool, running_version):
 def check_opennurbs():
     script_folder = os.getcwd()
     path_to_src = os.path.join(script_folder + "/../" + "src")
-    opennnurbs_3dm_h_path = os.path.join(path_to_src, "lib", "opennurbs", "opennurbs_3dmf.h")
+    opennnurbs_3dm_h_path = os.path.join(path_to_src, "lib", "opennurbs", "opennurbs_3dm.h")
 
     if not os.path.exists(opennnurbs_3dm_h_path):
         print_error_message("opennurbs was not found in src/lib/opennurbs.  From the root folder of the project, "
