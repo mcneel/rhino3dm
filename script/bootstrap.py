@@ -239,7 +239,10 @@ def check_python(build_tool):
     print_check_preamble(build_tool)
 
     try:
-        p = subprocess.Popen(['python', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if sys.version_info[0] < 3:
+            p = subprocess.Popen(['python', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        else:
+            p = subprocess.Popen(['python3', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
         print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
         return False
