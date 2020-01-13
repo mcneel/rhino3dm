@@ -20,7 +20,8 @@ from sys import platform as _platform
 
 xcode_logging = False
 valid_platform_args = ["js"]
-#TODO:"android", "ios", "dotnet", "linux", "macos", "python", "windows"
+# TODO: "android", "ios", "dotnet", "linux", "macos", "python", "windows"
+
 
 class BuildTool:
     def __init__(self, name, abbr, currently_using, archive_url, install_notes):
@@ -220,6 +221,10 @@ def check_opennurbs():
 
 
 def check_macos(build_tool):
+    if _platform != 'darwin':
+        print_warning_message("macOS is only supported on macOS...duh.")
+        return False
+
     print_check_preamble(build_tool)
 
     running_version = platform.mac_ver()[0]
@@ -282,6 +287,10 @@ def check_python(build_tool):
 
 
 def check_xcode(build_tool):
+    if _platform != 'darwin':
+        print_warning_message("Xcode is only supported on macOS.")
+        return False
+
     print_check_preamble(build_tool)
 
     try:
@@ -394,6 +403,14 @@ def check_handler(check, build_tools):
         check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
 
+    if check not in valid_platform_args:
+        if check == "all":
+            for tool in build_tools:
+                getattr(sys.modules[__name__], 'check_' + tool)(build_tools[tool])
+        else:
+            getattr(sys.modules[__name__], 'check_' + check)(build_tools[check])
+
+
 # ------------------------------------------------- Downloads ----------------------------------------------------------
 def connected_to_internet(host='http://google.com'):
     try:
@@ -439,20 +456,26 @@ def download_handler(download, build_tools):
 # --------------------------------------------------- Main -------------------------------------------------------------
 def main():
     global valid_platform_args
+    build_tools = read_required_versions()
+
+    # cli metadata
     description = "check for and download developer tools for rhino3dm for a specified platform."
     epilog = ""
 
-    build_tools = read_required_versions()
-
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
-    parser.add_argument('--check', '-c', metavar='<platform>', nargs='+',
-                        help="checks the specified platform(s) for build dependencies. valid platform arguments: all, "
+    parser.add_argument('--platform', '-p', metavar='<platform>', nargs='+',
+                        help="checks the specified platform(s) for build dependencies. valid arguments: all, "
                              + ", ".join(valid_platform_args) + ".")
-    parser.add_argument('--download', '-d', metavar='<tool>', nargs='+',
-                        help="downloads the specified tool(s). valid tool arguments: all, " +
-                             ", ".join(build_tools) + ". You may also specify a platform (" +
-                             ", ".join(valid_platform_args) + ") to download all dependencies for that platform.")
+    parser.add_argument('--check', '-c', metavar='<tool>', nargs='+',
+                        help="checks for the specified tool(s) and checks the version. valid arguments: all, "
+                             + ", ".join(build_tools) + ".")
+
+    # TODO: Download not yet working
+    # parser.add_argument('--download', '-d', metavar='<tool>', nargs='+',
+    #                     help="downloads the specified tool(s). valid tool arguments: all, " +
+    #                          ", ".join(build_tools) + ". You may also specify a platform (" +
+    #                          ", ".join(valid_platform_args) + ") to download all dependencies for that platform.")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
     args = parser.parse_args()
@@ -471,18 +494,37 @@ def main():
     # checks
     check_opennurbs()
 
+    # check platform(s)
+    if args.platform is not None:
+        for target_platform in args.platform:
+            if (target_platform != "all") and (target_platform not in valid_platform_args)\
+                    and (target_platform in build_tools):
+                print_error_message(target_platform + " is not a valid platform argument. valid tool arguments: all, "
+                                    + ", ".join(valid_platform_args) + ". Are you looking for the -c --check argument?")
+                sys.exit(1)
+            elif (target_platform != "all") and (target_platform not in valid_platform_args):
+                print_error_message(target_platform + " is not a valid platform argument. valid tool arguments: all, "
+                                    + ", ".join(valid_platform_args) + ".")
+                sys.exit(1)
+            check_handler(target_platform, build_tools)
+
+    # check tools
     if args.check is not None:
         for check in args.check:
-            if check not in valid_platform_args:
-                print_error_message(check + " is not a valid platform argument. valid platform arguments: all, "
-                                    + ", ".join(valid_platform_args) + ".")
+            if (check != "all") and (check not in build_tools) and (check in valid_platform_args):
+                print_error_message(check + " is not a valid tool argument. valid tool arguments: all, "
+                                    + ", ".join(build_tools) + ". Are you looking for the -p --platform argument?")
+                sys.exit(1)
+            elif (check != "all") and (check not in build_tools):
+                print_error_message(check + " is not a valid tool argument. valid tool arguments: all, "
+                                    + ", ".join(build_tools) + ".")
                 sys.exit(1)
             check_handler(check, build_tools)
 
     # downloads
     if args.download is not None:
         for download in args.download:
-            if (download not in build_tools) and (download not in valid_platform_args):
+            if (download != "all") and (download not in build_tools) and (download not in valid_platform_args):
                 print_error_message(download + " is not a valid tool (or platform) argument. valid arguments: all, "
                                     + ", ".join(build_tools) + ", " + ", ".join(valid_platform_args) + ".")
                 sys.exit(1)
