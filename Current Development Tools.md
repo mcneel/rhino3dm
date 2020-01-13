@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on January 8, 2020
+Last updated by dan@mcneel.com on January 13, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -51,6 +51,7 @@ We are currently using Emscripten 1.39.5. Scripts read this:
 
 `emscripten_currently_using = 1.39.5`
 `emscripten_install_notes = To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must add emscripten to your default shell PATH variable. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html`
+`emscripten_install_notes_windows =  To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must add emscripten to your default shell PATH variable. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html.  Be sure to use the --global flag when running the activate batch file to set all the path variables correctly.`
 
 #### CMake
 
@@ -61,6 +62,7 @@ We are currently using CMake 3.16.2. Scripts read this:
 `cmake_archive_url_windows = https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-win64-x64.msi`
 `cmake_install_notes_macos = Once the CMake.app is installed, launch it, and follow the directions in Tools > How to Install for Command Line Use`
 `cmake_install_notes_linux = On Ubuntu, you can install CMake using: sudo snap install cmake --classic`
+`cmake_install_notes_windows = When installing, be sure to check the box to add CMake to the system path.`
 
 ## Linux (TODO)
 

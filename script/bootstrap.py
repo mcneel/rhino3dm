@@ -197,7 +197,7 @@ def print_version_comparison(build_tool, running_version):
     elif version_alignment > 0:
         print_warning_message(
             build_tool.name + " version " + running_version + " found, a newer version. We are currently using "
-            + build_tool.currently_using + ". " + install_instructions)
+            + build_tool.currently_using + ". ")
     elif version_alignment < 0:
         print_warning_message(
             build_tool.name + " version " + running_version + " found, an older version. We are currently using "
@@ -246,6 +246,9 @@ def check_git(build_tool):
             print_warning_message(err)
             return False
         running_version = running_version.decode('utf-8').splitlines()[0].split('git version ', 1)[1]
+
+    if _platform == "win32":
+        running_version = running_version.split(".windows")[0]
 
     print_version_comparison(build_tool, running_version)
 
@@ -328,14 +331,20 @@ def check_emscripten(build_tool):
     print_check_preamble(build_tool)
 
     try:
-        p = subprocess.Popen(['emcc', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if _platform == "win32":
+            p = subprocess.Popen(['emcc.bat', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        else:
+            p = subprocess.Popen(['emcc', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
         print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
         return False
 
     # emcc -v returns an err in the reverse typical order...
     if sys.version_info[0] < 3:
-        running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
+        if _platform == "win32":
+            running_version = p.communicate()[1].splitlines()[4].split(") ")[1]
+        else:
+            running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
         if not running_version:
             print_error_message(build_tool.name + " not found." + build_tool.install_notes)
             return False
@@ -455,6 +464,9 @@ def main():
 
     global xcode_logging
     xcode_logging = args.xcodelog
+
+    if _platform == "win32":
+        xcode_logging = True
 
     # checks
     check_opennurbs()
