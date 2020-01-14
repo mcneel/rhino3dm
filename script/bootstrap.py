@@ -7,14 +7,23 @@
 
 # ---------------------------------------------------- Imports ---------------------------------------------------------
 
+from __future__ import (division, absolute_import, print_function, unicode_literals)
+
 import subprocess
-import sys
+import sys, os, tempfile, logging
 import argparse
-import os
+import ssl
 import platform
+if sys.version_info >= (3,):
+    import urllib.request as urllib2
+    import urllib.parse as urlparse
+else:
+    import urllib2
+    import urlparse
 import urllib
 from subprocess import Popen, PIPE
 from sys import platform as _platform
+
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -412,6 +421,14 @@ def check_handler(check, build_tools):
 
 
 # ------------------------------------------------- Downloads ----------------------------------------------------------
+def print_platform_download_preamble(platform_target_name):
+    print("")
+    if xcode_logging:
+        print("Download all tools for " + platform_target_name + "...")
+    else:
+        print(bcolors.BOLD + "Download all tools for " + platform_target_name + "..." + bcolors.ENDC)
+
+
 def connected_to_internet(host='http://google.com'):
     try:
         urllib.urlopen(host)
@@ -421,37 +438,79 @@ def connected_to_internet(host='http://google.com'):
         return False
 
 
-# TODO: Adapt this to work in both Python 2 and 3...currently it only works in 2
-# def download_file(url, destination_folder):
-#     file_name = url.split('/')[-1]
-#     u = urllib2.urlopen(url)
-#     f = open(destination_folder + file_name, 'wb')
-#     meta = u.info()
-#     file_size = int(meta.getheaders("Content-Length")[0])
-#     if xcode_logging:
-#         print("Downloading: %s Bytes: %s" % (file_name, file_size))
-#     else:
-#         print(bcolors.BOLD + "Downloading: " + bcolors.ENDC + "%s Bytes: %s" % (file_name, file_size))
-#
-#     file_size_dl = 0
-#     block_sz = 8192
-#     while True:
-#         buffer = u.read(block_sz)
-#         if not buffer:
-#             break
-#
-#         file_size_dl += len(buffer)
-#         f.write(buffer)
-#         status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-#         status = status + chr(8)*(len(status)+1)
-#         print status,
-#
-#     f.close()
+def download_file(url, dest=None):
+    if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
+        ssl._create_default_https_context = ssl._create_unverified_context
+
+    u = urllib2.urlopen(url)
+
+    scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
+    filename = os.path.basename(path)
+    if not filename:
+        filename = 'downloaded.file'
+    if dest:
+        filename = os.path.join(dest, filename)
+
+    with open(filename, 'wb') as f:
+        meta = u.info()
+        meta_func = meta.getheaders if hasattr(meta, 'getheaders') else meta.get_all
+        meta_length = meta_func("Content-Length")
+        file_size = None
+        if meta_length:
+            file_size = int(meta_length[0])
+        print("URL: {0} Bytes: {1}".format(url, file_size))
+
+        file_size_dl = 0
+        block_sz = 8192
+        while True:
+            buffer = u.read(block_sz)
+            if not buffer:
+                break
+
+            file_size_dl += len(buffer)
+            f.write(buffer)
+
+            status = "{0:16}".format(file_size_dl)
+            if file_size:
+                status += "   [{0:6.2f}%]".format(file_size_dl * 100 / file_size)
+            status += chr(13)
+            print(status, end="")
+        print()
+
+    return filename
+
+
+def download_dependency(build_tool):
+    print("")
+    if xcode_logging:
+        print("Downloading " + build_tool.name + "...")
+    else:
+        print(bcolors.BOLD + "Downloading " + build_tool.name + "..." + bcolors.ENDC)
+    destination_folder = os.path.expanduser("~") + '/Downloads/'
+    if build_tool.archive_url:
+        download_file(build_tool.archive_url, destination_folder)
+        print_ok_message('Downloaded to ' + destination_folder + build_tool.archive_url.split('/')[-1])
+    else:
+        print_warning_message(build_tool.name + ' does not have a url on file. ' + build_tool.install_notes)
+        
 
 def download_handler(download, build_tools):
-    # TODO: implement this
-    print("TODO: download_handler")
+    if download == "js":
+        print_platform_download_preamble("JavaScript")
+        if _platform == "darwin":
+            download_dependency(build_tools["macos"])
+            download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["emscripten"])
+        download_dependency(build_tools["cmake"])
 
+    if download not in valid_platform_args:
+        if download == "all":
+            for tool in build_tools:
+                download_dependency(build_tools[tool])
+        else:
+            download_dependency(build_tools[download])
 
 # --------------------------------------------------- Main -------------------------------------------------------------
 def main():
@@ -470,12 +529,10 @@ def main():
     parser.add_argument('--check', '-c', metavar='<tool>', nargs='+',
                         help="checks for the specified tool(s) and checks the version. valid arguments: all, "
                              + ", ".join(build_tools) + ".")
-
-    # TODO: Download not yet working
-    # parser.add_argument('--download', '-d', metavar='<tool>', nargs='+',
-    #                     help="downloads the specified tool(s). valid tool arguments: all, " +
-    #                          ", ".join(build_tools) + ". You may also specify a platform (" +
-    #                          ", ".join(valid_platform_args) + ") to download all dependencies for that platform.")
+    parser.add_argument('--download', '-d', metavar='<tool>', nargs='+',
+                        help="downloads the specified tool(s). valid tool arguments: all, " +
+                             ", ".join(build_tools) + ". You may also specify a platform (" +
+                             ", ".join(valid_platform_args) + ") to download all dependencies for that platform.")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
     args = parser.parse_args()
