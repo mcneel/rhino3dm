@@ -82,3 +82,5 @@ __pycache__/
 /src/docgen/artifacts
 /src/docgen/bin
 /src/methodgen/.vs
+script/.idea
+script/venv
