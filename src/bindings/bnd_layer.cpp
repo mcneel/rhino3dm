@@ -10,11 +10,40 @@ BND_Layer::BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref)
   SetTrackedPointer(layer, compref);
 }
 
+BND_Layer::BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref, std::shared_ptr<ONX_Model>& model)
+{
+  SetTrackedPointer(layer, compref);
+  m_model = model;
+}
 
 void BND_Layer::SetTrackedPointer(ON_Layer* layer, const ON_ModelComponentReference* compref)
 {
   m_layer = layer;
   BND_CommonObject::SetTrackedPointer(layer, compref);
+}
+
+std::wstring BND_Layer::GetFullPath() const
+{
+  ONX_Model* model = m_model.get();
+  if (nullptr == model)
+    return GetName();
+
+  ON_wString fullPath = m_layer->Name();
+  ON_UUID parent_id = m_layer->ParentId();
+  while (ON_UuidIsNotNil(parent_id))
+  {
+    ON_ModelComponentReference compref = model->LayerFromId(parent_id);
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
+    if (nullptr == modellayer)
+      break;
+
+    ON_wString parentName = modellayer->Name();
+    fullPath = parentName + ON_ModelComponent::NamePathSeparator + fullPath;
+    parent_id = modellayer->ParentId();
+  }
+
+  return std::wstring(fullPath.Array());
 }
 
 bool BND_Layer::HasPerViewportSettings(BND_UUID viewportId) const
@@ -76,7 +105,9 @@ void initLayerBindings(pybind11::module& m)
 {
   py::class_<BND_Layer, BND_CommonObject>(m, "Layer")
     .def(py::init<>())
+    .def_property_readonly_static("PathSeparator", &BND_Layer::PathSeparator)
     .def_property("Name", &BND_Layer::GetName, &BND_Layer::SetName)
+    .def_property_readonly("FullPath", &BND_Layer::GetFullPath)
     .def_property("Id", &BND_Layer::GetId, &BND_Layer::SetId)
     .def_property_readonly("Index", &BND_Layer::GetIndex)
     .def_property_readonly("ParentLayerId", &BND_Layer::GetParentLayerId)

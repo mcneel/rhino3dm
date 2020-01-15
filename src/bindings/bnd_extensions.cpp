@@ -552,7 +552,7 @@ BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
@@ -567,7 +567,7 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
@@ -578,7 +578,7 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
