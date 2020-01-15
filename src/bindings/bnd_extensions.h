@@ -83,10 +83,10 @@ public:
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);
   BND_FileObject* IterIndex(int index); // helper function for iterator
-  BND_CommonObject* ObjectAt(int index);
-  BND_3dmObjectAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
   BND_FileObject* FindId(BND_UUID id) const;
+
+  ON_ClassArray<ON_ModelComponentReference> m_compref_cache;
 };
 
 class BND_File3dmMaterialTable
