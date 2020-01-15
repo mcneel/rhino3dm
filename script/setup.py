@@ -71,7 +71,7 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
     parser.add_argument('--platform', '-p', metavar='<platform>', nargs='+',
-                        help="generates the project files for the  platform(s) specified. valid arguments: all, "
+                        help="generates the project files for the platform(s) specified. valid arguments: all, "
                              + ", ".join(valid_platform_args) + ".")
     parser.add_argument('--verbose', '-v', action='store_true',
                         help="show verbose logging messages")
