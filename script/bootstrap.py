@@ -10,7 +10,8 @@
 from __future__ import (division, absolute_import, print_function, unicode_literals)
 
 import subprocess
-import sys, os, tempfile, logging
+import sys
+import os
 import argparse
 import ssl
 import platform
@@ -511,6 +512,7 @@ def download_handler(download, build_tools):
                 download_dependency(build_tools[tool])
         else:
             download_dependency(build_tools[download])
+
 
 # --------------------------------------------------- Main -------------------------------------------------------------
 def main():
