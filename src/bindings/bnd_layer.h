@@ -12,13 +12,17 @@ class BND_Layer : public BND_CommonObject
 {
 public:
   ON_Layer* m_layer = nullptr;
+  std::shared_ptr<ONX_Model> m_model;
 public:
   BND_Layer();
   BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref);
+  BND_Layer(ON_Layer* layer, const ON_ModelComponentReference* compref, std::shared_ptr<ONX_Model>& model);
+
+  static std::wstring PathSeparator() { return std::wstring(ON_ModelComponent::NamePathSeparator.Array()); }
 
   std::wstring GetName() const { return std::wstring(m_layer->NameAsPointer()); }
   void SetName(const std::wstring& name) { m_layer->SetName(name.c_str()); }
-  //public string FullPath{ get; }
+  std::wstring GetFullPath() const;
   BND_UUID GetId() const { return ON_UUID_to_Binding(m_layer->Id()); }
   void SetId(BND_UUID id) { m_layer->SetId(Binding_to_ON_UUID(id)); }
 
