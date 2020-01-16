@@ -521,7 +521,7 @@ def main():
 
     # cli metadata
     description = "check for and download developer tools for rhino3dm for a specified platform."
-    epilog = ""
+    epilog = "supported platforms and tools: " + ", ".join(valid_platform_args) + ", " + ", ".join(build_tools)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
