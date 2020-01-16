@@ -65,6 +65,7 @@ public:
   void SetPlotColor(BND_Color c) { m_attributes->m_plot_color = Binding_to_ON_Color(c); }
   //bool HasMapping() const;
   //I wonder if we could implement the following with a File3dm
+  BND_Color GetDrawColor(class BND_ONXModel* document) const;
   //public System.Drawing.Color DrawColor(RhinoDoc document)
   //public System.Drawing.Color DrawColor(RhinoDoc document, Guid viewportId)
   //public System.Drawing.Color ComputedPlotColor(RhinoDoc document)
