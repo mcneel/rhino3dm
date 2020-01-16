@@ -232,7 +232,7 @@ using namespace emscripten;
 
 void initNurbsSurfaceBindings(void*)
 {
-  class_<BND_NurbsSurfaceKnotList>("NurbsCurveKnotList")
+  class_<BND_NurbsSurfaceKnotList>("NurbsSurfaceKnotList")
     .property("count", &BND_NurbsSurfaceKnotList::Count)
     .function("get", &BND_NurbsSurfaceKnotList::GetKnot)
     .function("set", &BND_NurbsSurfaceKnotList::SetKnot)

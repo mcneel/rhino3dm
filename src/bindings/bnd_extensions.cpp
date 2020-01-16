@@ -378,84 +378,70 @@ int BND_ONXModel_ObjectTable::Count() const
   return count;
 }
 
-BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
+static BND_FileObject* FileObjectFromCompRef(ON_ModelComponentReference& compref)
 {
-  BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(ObjectAt(index));
+  BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(BND_CommonObject::CreateWrapper(compref));
   if (nullptr == geometry)
     return nullptr;
-  BND_3dmObjectAttributes* attrs = AttributesAt(index);
+
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+  if (nullptr == geometryComponent)
+  {
+    delete geometry;
+    return nullptr;
+  }
+
+  ON_3dmObjectAttributes* attrs = const_cast<ON_3dmObjectAttributes*>(geometryComponent->Attributes(nullptr));
   if (nullptr == attrs)
   {
     delete geometry;
     return nullptr;
   }
   BND_FileObject* rc = new BND_FileObject();
-  rc->m_attributes = attrs;
+  rc->m_attributes = new BND_3dmObjectAttributes(attrs, &compref);
   rc->m_geometry = geometry;
   return rc;
+}
+
+BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
+{
+  if (index < 0)
+    return nullptr;
+  if (0 == index)
+    m_compref_cache.Empty(); // clear cache every time we restart counting
+
+  if (m_compref_cache.Count() == 0)
+  {
+    m_compref_cache.Reserve(Count());
+    ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+    ON_ModelComponentReference compref = iterator.FirstComponentReference();
+    while (!compref.IsEmpty())
+    {
+      m_compref_cache.Append(compref);
+      compref = iterator.NextComponentReference();
+    }
+
+    ONX_ModelComponentIterator iterator2(*m_model.get(), ON_ModelComponent::Type::RenderLight);
+    compref = iterator2.FirstComponentReference();
+    while (!compref.IsEmpty())
+    {
+      m_compref_cache.Append(compref);
+      compref = iterator2.NextComponentReference();
+    }
+  }
+
+  if (index < m_compref_cache.Count())
+  {
+    return FileObjectFromCompRef(m_compref_cache[index]);
+  }
+  return nullptr;
 }
 
 // helper function for iterator
 BND_FileObject* BND_ONXModel_ObjectTable::IterIndex(int index)
 {
   return ModelObjectAt(index);
-}
-
-BND_CommonObject* BND_ONXModel_ObjectTable::ObjectAt(int index)
-{
-  if (index < 0)
-    return nullptr;
-  unsigned int uindex = (unsigned int)index;
-  // I know this is dumb. I haven't figured out how to set up enumeration in
-  // javascript yet, so this is just here to keep things moving along
-  ON_ModelComponent::Type type = ON_ModelComponent::Type::ModelGeometry;
-  if (uindex >= m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry))
-  {
-    type = ON_ModelComponent::Type::RenderLight;
-    uindex = uindex - m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry);
-  }
-  ONX_ModelComponentIterator iterator(*m_model.get(), type);
-  ON_ModelComponentReference compref = iterator.FirstComponentReference();
-  unsigned int current = 0;
-  while(current<index)
-  {
-    compref = iterator.NextComponentReference();
-    current++;
-  }
-  return BND_CommonObject::CreateWrapper(compref);
-}
-
-BND_3dmObjectAttributes* BND_ONXModel_ObjectTable::AttributesAt(int index)
-{
-  if (index < 0)
-    return nullptr;
-  unsigned int uindex = (unsigned int)index;
-  // I know this is dumb. I haven't figured out how to set up enumeration in
-  // javascript yet, so this is just here to keep things moving along
-  ON_ModelComponent::Type type = ON_ModelComponent::Type::ModelGeometry;
-  if (uindex >= m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry))
-  {
-    type = ON_ModelComponent::Type::RenderLight;
-    uindex = uindex - m_model->ActiveAndDeletedComponentCount(ON_ModelComponent::Type::ModelGeometry);
-  }
-  ONX_ModelComponentIterator iterator(*m_model.get(), type);
-  ON_ModelComponentReference compref = iterator.FirstComponentReference();
-  unsigned int current = 0;
-  while (current < uindex)
-  {
-    compref = iterator.NextComponentReference();
-    current++;
-  }
-
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
-  if (nullptr == geometryComponent)
-    return nullptr;
-
-  ON_3dmObjectAttributes* attrs = const_cast<ON_3dmObjectAttributes*>(geometryComponent->Attributes(nullptr));
-  if (nullptr == attrs)
-    return nullptr;
-  return new BND_3dmObjectAttributes(attrs, &compref);
 }
 
 BND_BoundingBox BND_ONXModel_ObjectTable::GetBoundingBox() const
@@ -566,7 +552,7 @@ BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
@@ -581,7 +567,7 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
@@ -592,7 +578,7 @@ BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
-    return new BND_Layer(modellayer, &compref);
+    return new BND_Layer(modellayer, &compref, m_model);
   return nullptr;
 }
 
