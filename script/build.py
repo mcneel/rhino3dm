@@ -1,4 +1,4 @@
-# cibuild.py
+# build.py
 # created: January 15, 2020
 #
 # This script builds the native library for rhino3dm for the platforms that we target. It requires that the setup

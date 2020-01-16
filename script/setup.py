@@ -22,7 +22,7 @@ overwrite = False
 valid_platform_args = ["js"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-build_folder = os.path.abspath(os.path.join(script_folder, "..", "src", "build"))
+build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 
@@ -90,7 +90,7 @@ def setup_js():
 
     os.chdir(platform_target_path)
 
-    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" ../.."
+    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" ../../src"
     try:
         p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
