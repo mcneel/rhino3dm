@@ -225,6 +225,7 @@ public:
 
 class BND_ONXModel
 {
+public:
   std::shared_ptr<ONX_Model> m_model;
 public:
   BND_ONXModel();
