@@ -133,9 +133,16 @@ def read_required_versions():
     current_development_tools_file = open(current_development_tools_file_path, "r")
     for line in current_development_tools_file:
         for tool in build_tools:
-            ver_prefix = tool + "_currently_using = "
+            tool_prefix = tool
+            if tool == "python":
+                if sys.version_info[0] < 3:
+                    tool_prefix = tool + "2"
+                else:
+                    tool_prefix = tool + "3"
 
-            archive_prefix = tool + "_archive_url"
+            ver_prefix = tool_prefix + "_currently_using = "
+
+            archive_prefix = tool_prefix + "_archive_url"
             archive_suffix = ''
             if _platform == "win32":
                 archive_suffix = "_windows = "
@@ -146,7 +153,7 @@ def read_required_versions():
             archive_string = archive_prefix + " = "
             archive_string_with_platform = archive_prefix + archive_suffix
 
-            install_notes_prefix = tool + "_install_notes"
+            install_notes_prefix = tool_prefix + "_install_notes"
             install_notes_suffix = ''
             if _platform == "win32":
                 install_notes_suffix = "_windows = "
