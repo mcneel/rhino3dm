@@ -30,7 +30,6 @@ from sys import platform as _platform
 
 xcode_logging = False
 valid_platform_args = ["js"]
-# TODO: "android", "ios", "dotnet", "linux", "macos", "python", "windows"
 
 
 class BuildTool:
@@ -43,7 +42,6 @@ class BuildTool:
 
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
-
 # colors for terminal reporting
 class bcolors:
     HEADER = '\033[95m'

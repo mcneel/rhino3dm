@@ -24,8 +24,8 @@ platform_full_names = {'js': 'JavaScript', 'ios': 'iOS'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 
-# ---------------------------------------------------- Logging ---------------------------------------------------------
 
+# ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
 class bcolors:
     HEADER = '\033[95m'
