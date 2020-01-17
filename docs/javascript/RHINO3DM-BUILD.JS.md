@@ -11,7 +11,7 @@ git submodule update --init
 
 Compiling *rhino3dm.js* can be done on macOS, Linux and Windows (via [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)). The following tools are required...
 
-* [Python](https://www.python.org/) 2 (>2.17.12)
+* [Python](https://www.python.org/) 2 (>2.17.12) or 3 (> 3.6.9)
 * [Emscripten](https://emscripten.org/) - See Emscripten's [Getting started guide](https://emscripten.org/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk) or WebAssembly's [Developer's Guide](https://webassembly.org/getting-started/developers-guide/) .
 * [CMake](https://cmake.org/) (>3.12.2) - _**Note:** The version of CMake distributed with Ubuntu 18.04 LTS isn't new enough so you'll have to [build it from source](https://cmake.org/install/). This may also be true for other package managers._
 
@@ -23,6 +23,8 @@ A number of scripts are used to setup and build rhino3dm:
 - *script/setup.py* - generates the platform-specific project files using CMake
 - *script/cibuild.py* - builds the library project(s)
 
+These scripts support Python 2 and 3 on Windows (linux subsystem), macOS, or Linux (Ubuntu).
+
 ### bootstrap.py
 
 The `script/bootstrap.py` script can be used to check your system for (and, in some cases, download) the necessary tools for a specific build target.  For example, you can run:
@@ -32,8 +34,6 @@ $ python3 bootstrap.py --platform js
 ```
 
 to check for all the tools needed to build the javascript version of rhino3dm.
-
-`bootstrap.py` supports Python 2 and 3 and can be run from Windows, macOS, or Linux.
 
 ### setup.py
 
