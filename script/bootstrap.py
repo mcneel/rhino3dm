@@ -10,7 +10,8 @@
 from __future__ import (division, absolute_import, print_function, unicode_literals)
 
 import subprocess
-import sys, os, tempfile, logging
+import sys
+import os
 import argparse
 import ssl
 import platform
@@ -29,7 +30,6 @@ from sys import platform as _platform
 
 xcode_logging = False
 valid_platform_args = ["js"]
-# TODO: "android", "ios", "dotnet", "linux", "macos", "python", "windows"
 
 
 class BuildTool:
@@ -42,7 +42,6 @@ class BuildTool:
 
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
-
 # colors for terminal reporting
 class bcolors:
     HEADER = '\033[95m'
@@ -512,6 +511,7 @@ def download_handler(download, build_tools):
         else:
             download_dependency(build_tools[download])
 
+
 # --------------------------------------------------- Main -------------------------------------------------------------
 def main():
     global valid_platform_args
@@ -519,7 +519,7 @@ def main():
 
     # cli metadata
     description = "check for and download developer tools for rhino3dm for a specified platform."
-    epilog = ""
+    epilog = "supported platforms and tools: " + ", ".join(valid_platform_args) + ", " + ", ".join(build_tools)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
