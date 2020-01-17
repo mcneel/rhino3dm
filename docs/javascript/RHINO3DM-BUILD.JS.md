@@ -7,7 +7,7 @@ If the pre-compiled libraries above do not work in your situation, you can compi
 git submodule update --init
 ```
 
-### Required Tools
+## Required Tools
 
 Compiling *rhino3dm.js* can be done on macOS, Linux and Windows (via [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)). The following tools are required...
 
@@ -15,30 +15,45 @@ Compiling *rhino3dm.js* can be done on macOS, Linux and Windows (via [Windows Su
 * [Emscripten](https://emscripten.org/) - See Emscripten's [Getting started guide](https://emscripten.org/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk) or WebAssembly's [Developer's Guide](https://webassembly.org/getting-started/developers-guide/) .
 * [CMake](https://cmake.org/) (>3.12.2) - _**Note:** The version of CMake distributed with Ubuntu 18.04 LTS isn't new enough so you'll have to [build it from source](https://cmake.org/install/). This may also be true for other package managers._
 
-### bootstrap
+## Scripts
+
+A number of scripts are used to setup and build rhino3dm:
+
+- *script/bootstrap.py* - checks for (and downloads) the required tools
+- *script/setup.py* - generates the platform-specific project files using CMake
+- *script/cibuild.py* - builds the library project(s)
+
+### bootstrap.py
 
 The `script/bootstrap.py` script can be used to check your system for (and, in some cases, download) the necessary tools for a specific build target.  For example, you can run:
 
 ```bash
-$ python bootstrap.py --platform js
+$ python3 bootstrap.py --platform js
 ```
 
 to check for all the tools needed to build the javascript version of rhino3dm.
 
 `bootstrap.py` supports Python 2 and 3 and can be run from Windows, macOS, or Linux.
 
-### Compile
+### setup.py
 
-After installation, make sure you have `emcmake`, `make`, and `python` on your path. Emscripten provides instructions for [adding the Emscripten tools to your PATH after install](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions).
+The _setup.py_ script uses CMake to generate the make files necessary to build the project.  These projects are generated into _build/javascript_ folder.  To setup a JavaScript build, you can run:
 
 ```bash
-$ cd src
-$ python build_javascript.py
+$ python3 setup.py --platform js
 ```
 
-The build might take a few minutes, but if everything is configured correctly you should now have `rhino3dm.js`, `rhino3dm.wasm` and several samples in the `src/build/artifacts_js` directory.
+### build.py
 
-### Test
+The _build.py_ script run `make` to build the _rhino3dm.js_ and _rhino3dm.wasm_ files to the _build/javascript/artifacts\_js_ folder.  To build, run:
+
+```bash
+$ python3 build.py --platform js --overwrite
+```
+
+The build might take a few minutes, but if everything is configured correctly you should now have _rhino3dm.js_ and _rhino3dm.wasm_ in the _build/javascript/artifacts\_js_ folder.  The script also copies these files to the _docs/javascript/samples/resources_ folder where they can be used for testing.  
+
+## Test
 
 * `cd` to the `docs/javascript/samples` folder.
 
@@ -46,12 +61,13 @@ The build might take a few minutes, but if everything is configured correctly yo
 
 * Go to your browser and navigate to `http://localhost:8080/rhino3dm.html`
 
-* For chrome, right click and select `inspect`. Click on the `console` tab and try typing in the following javascript
-  ```js
-  > sphere = new _rhino3dm.Sphere([1,2,3], 12);
-  > brep = sphere.toBrep();
-  > jsonobject = brep.encode();
-  ```
+* For chrome, right click and select `inspect`. Click on the `console` tab and try typing in the following javascript:
+  
+```js
+> sphere = new _rhino3dm.Sphere([1,2,3], 12);
+> brep = sphere.toBrep();
+> jsonobject = brep.encode();
+```
 
 ## Related Topics
 
