@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on January 13, 2020
+Last updated by dan@mcneel.com on January 17, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -23,14 +23,24 @@ We are currently using Git 2.17.1. Scripts read this:
 `git_install_notes_macos = You can download and install git from https://git-scm.com/downloads.  In order to run the pkg installer, you must right-click and select Open from the drop-down menu to bypass Gatekeeper checks.`
 `git_install_notes_windows = You can download and install git from https://git-scm.com/downloads`
 
-#### Python
+#### Python 2
 
 We are currently using Python 2.7.17. Scripts read this:
 
-`python_currently_using = 2.7.17`
-`python_archive_url_macos = https://www.python.org/ftp/python/2.7.17/python-2.7.17-macosx10.9.pkg`
-`python_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi`
-`python_install_notes_linux = On Ubuntu, you can install python 2.7 using sudo apt install python`
+`python2_currently_using = 2.7.17`
+`python2_archive_url_macos = https://www.python.org/ftp/python/2.7.17/python-2.7.17-macosx10.9.pkg`
+`python2_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi`
+`python2_install_notes_linux = On Ubuntu, you can install python 2 using sudo apt install python`
+
+
+#### Python 3
+
+We are currently using Python 3.7.1. Scripts read this:
+
+`python3_currently_using = 3.7.1`
+`python3_archive_url_macos = https://www.python.org/ftp/python/3.7.1/python-3.7.1-macosx10.9.pkg`
+`python3_archive_url_windows = https://www.python.org/ftp/python/3.7.1/python-3.7.1-amd64.exe`
+`python3_install_notes_linux = On Ubuntu, you can install python 3 using sudo apt install python3`
 
 #### Xcode
 
