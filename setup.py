@@ -53,7 +53,7 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
+        cmake_args = ['-DPYTHON_BUILD=1', '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE:FILEPATH="{}"'.format(sys.executable)]
 
         cfg = 'Debug' if self.debug else 'Release'
@@ -84,7 +84,7 @@ class CMakeBuild(build_ext):
 
         if windows_build:
             bitness = 8 * struct.calcsize("P")
-            command = 'cmake -A -DPYTHON_BUILD=1 {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
+            command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
                                                                                    sys.executable,
                                                                                    ext.sourcedir+"/src")
             system(command)
@@ -95,7 +95,7 @@ class CMakeBuild(build_ext):
                     print(line.replace("WIN32;", "WIN64;"))
             system("cmake --build . --config Release --target _rhino3dm")
         else:
-            system("cmake -DPYTHON_BUILD=1 -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
+            system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
             system("make")
 
         os.chdir(current_dir)
