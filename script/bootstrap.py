@@ -29,7 +29,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js"]
+valid_platform_args = ["js", "python"]
 
 
 class BuildTool:
@@ -418,6 +418,16 @@ def check_handler(check, build_tools):
         check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
 
+    if check == "python":
+        print_platform_preamble("Python")
+        if _platform == "darwin":
+            check_macos(build_tools["macos"])
+            check_xcode(build_tools["xcode"])
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_emscripten(build_tools["emscripten"])
+        check_cmake(build_tools["cmake"])
+
     if check not in valid_platform_args:
         if check == "all":
             for tool in build_tools:
@@ -503,6 +513,16 @@ def download_dependency(build_tool):
 def download_handler(download, build_tools):
     if download == "js":
         print_platform_download_preamble("JavaScript")
+        if _platform == "darwin":
+            download_dependency(build_tools["macos"])
+            download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["emscripten"])
+        download_dependency(build_tools["cmake"])
+
+    if download == "python":
+        print_platform_download_preamble("Python")
         if _platform == "darwin":
             download_dependency(build_tools["macos"])
             download_dependency(build_tools["xcode"])

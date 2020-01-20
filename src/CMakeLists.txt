@@ -4,7 +4,9 @@ project(rhino3dm)
 
 if (EMSCRIPTEN)
   message("Web Assembly Compile")
-else()
+endif()
+
+if (PYTHON_EXECUTABLE)
   message("Python Compile")
   add_subdirectory(lib/pybind11)
 endif()
@@ -57,7 +59,9 @@ endif()
 
 if(EMSCRIPTEN)
   add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC})
-else()
+endif()
+
+if (PYTHON_EXECUTABLE)
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set (CMAKE_CXX_STANDARD 17)
     add_definitions(-DON_RUNTIME_LINUX)
@@ -74,7 +78,9 @@ else()
 endif()
 
 # I plan to mode the following install phase out of this file and into the top
-# level python script for generating wasm
+# level python script for generating wasm 
+# dan@mcneel.com: this is already in the build.py -p js (this can be deleted as soon
+# as the scripts are used in the build process)
 if(EMSCRIPTEN)
   install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
   install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
