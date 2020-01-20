@@ -25,7 +25,7 @@ def createproject():
     """ compile for the platform we are running on """
     os.chdir(build_dir)
     if windows_build:
-        command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" -DPYTHON_BUILD=1 ../..'.format("win32" if bitness==32 else "x64", sys.executable)
+        command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" ../..'.format("win32" if bitness==32 else "x64", sys.executable)
         os.system(command)
         if bitness==64:
             for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
@@ -34,7 +34,7 @@ def createproject():
                 print(line.replace("WIN32;", "WIN64;"))
         #os.system("cmake --build . --config Release --target _rhino3dm")
     else:
-        rv = os.system("cmake -DPYTHON_BUILD=1 -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
+        rv = os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
         if int(rv) > 0: sys.exit(1)
         #rv = os.system("make")
         #if int(rv) > 0: sys.exit(1)

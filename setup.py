@@ -53,7 +53,7 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['-DPYTHON_BUILD=1', '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
+        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE:FILEPATH="{}"'.format(sys.executable)]
 
         cfg = 'Debug' if self.debug else 'Release'
