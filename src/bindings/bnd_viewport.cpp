@@ -382,6 +382,8 @@ void initViewportBindings(pybind11::module& m)
     .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .def("GetXform", &BND_Viewport::GetXform, py::arg("sourceCoordinateSystem"), py::arg("destinationCoordinateSystem"))
     .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"))
+    .def("FrustumCenterPoint", &BND_Viewport::FrustumCenterPoint, py::arg("targetDistance"))
+    .def("TargetDistance", &BND_Viewport::TargetDistance, py::arg("useFrustumCenterFallback"))
     .def_property_readonly("Id", &BND_Viewport::GetId)
     ;
 }
@@ -420,6 +422,8 @@ void initViewportBindings(void*)
     .property("camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .function("getXform", &BND_Viewport::GetXform, allow_raw_pointers())
     .function("dollyExtents", &BND_Viewport::DollyExtents)
+    .function("frustumCenterPoint", &BND_Viewport::FrustumCenterPoint)
+    .function("targetDistance", &BND_Viewport::TargetDistance)
     .property("id", &BND_Viewport::GetId)
     ;
 }
