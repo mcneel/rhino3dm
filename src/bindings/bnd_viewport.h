@@ -65,8 +65,16 @@ public:
   class BND_Transform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
 
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
+  ON_3dPoint FrustumCenterPoint(double targetDistance) const { return m_viewport->FrustumCenterPoint(targetDistance); }
+  //    public Point3d TargetPoint {get;set;}
+  double TargetDistance(bool useFrustumCenterFallback) const { return m_viewport->TargetDistance(useFrustumCenterFallback); }
+  // public double PerspectiveMinNearOverFar {get;set}
+  //     public double PerspectiveMinNearDist {get;set}
 
   BND_UUID GetId() const;
+  //    public bool TransformCamera(Transform xform)
+  //    public bool RotateCamera(double rotationAngleRadians, Vector3d rotationAxis, Point3d rotationCenter)
+
 protected:
   void SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 };
