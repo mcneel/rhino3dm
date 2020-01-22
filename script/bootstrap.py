@@ -295,6 +295,7 @@ def check_python(build_tool):
             print_warning_message(err)
             return False
         running_version = running_version.decode('utf-8').strip().split('Python ')[1]
+    running_version = running_version.rstrip('+') # handle unreleased versions on ubuntu
 
     print_version_comparison(build_tool, running_version)
 
