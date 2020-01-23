@@ -6,7 +6,10 @@
 # See bootstrap script for required tools.  This script cannot be moved from its current location without
 # reworking the relative paths that point to the build locations of the platform project files.
 #
-# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+# See related scripts in this folder for other steps in the process.
+#
+# This script is inspired by - but deviates from - the "Scripts To Rule Them All" pattern:
+# https://github.com/github/scripts-to-rule-them-all
 
 from __future__ import (division, absolute_import, print_function, unicode_literals)
 
