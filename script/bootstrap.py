@@ -225,7 +225,7 @@ def print_version_comparison(build_tool, running_version):
 
 
 def check_opennurbs():
-    script_folder = os.getcwd()
+    script_folder = os.path.dirname(os.path.abspath(__file__))
     path_to_src = os.path.join(script_folder + "/../" + "src")
     opennnurbs_3dm_h_path = os.path.join(path_to_src, "lib", "opennurbs", "opennurbs_3dm.h")
 
