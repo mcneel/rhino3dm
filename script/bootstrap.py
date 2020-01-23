@@ -100,7 +100,7 @@ def compare_versions(v1, v2):
 
 def read_required_versions():
     # check to make sure that the Current Development Tools.md file exists, exit with error if not
-    script_folder = os.getcwd()
+    script_folder = os.path.dirname(os.path.abspath(__file__))
     current_development_tools_file_path = os.path.join(script_folder, '..', 'Current Development Tools.md')
     if not os.path.exists(current_development_tools_file_path):
         print_error_message("Could not find the Current Development Tools.md (rhino3dm) file listing our "

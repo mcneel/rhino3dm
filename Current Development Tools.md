@@ -60,8 +60,8 @@ TODO
 We are currently using Emscripten 1.39.5. Scripts read this:
 
 `emscripten_currently_using = 1.39.5`
-`emscripten_install_notes = To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must add emscripten to your default shell PATH variable. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html`
-`emscripten_install_notes_windows =  To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must add emscripten to your default shell PATH variable. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html.  Be sure to use the --global flag when running the activate batch file to set all the path variables correctly.`
+`emscripten_install_notes = To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html`
+`emscripten_install_notes_windows =  To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal.  You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html.  Be sure to use the --global flag when running the activate batch file to set all the path variables correctly.`
 
 #### CMake
 
