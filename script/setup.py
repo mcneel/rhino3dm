@@ -2,8 +2,10 @@
 # created: January 15, 2020
 #
 # Uses the CMake (https://cmake.org) tools to generate the platform-specific rhino3dm projects
+# See related scripts in this folder for other steps in the process.
 #
-# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+# This script is inspired by - but deviates from - the "Scripts To Rule Them All" pattern:
+# https://github.com/github/scripts-to-rule-them-all
 
 import subprocess
 import sys

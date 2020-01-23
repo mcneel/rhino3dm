@@ -3,7 +3,9 @@
 #
 # This script checks for the necessary tools to construct and build the rhino3dm native and wrapper libraries
 # for all supported platforms.  See related scripts in this folder for other steps in the process.
-# This script uses the "Scripts To Rule Them All" pattern: https://github.com/github/scripts-to-rule-them-all
+#
+# This script is inspired by - but deviates from - the "Scripts To Rule Them All" pattern:
+# https://github.com/github/scripts-to-rule-them-all
 
 # ---------------------------------------------------- Imports ---------------------------------------------------------
 
