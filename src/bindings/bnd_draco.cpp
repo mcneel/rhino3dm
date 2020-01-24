@@ -42,7 +42,7 @@ using namespace emscripten;
 void initDracoBindings(void*)
 {
   class_<BND_Draco>("DracoCompression")
-    .class_function("CompressMesh", &BND_Draco::CompressMesh)
+    .class_function("CompressMesh", &BND_Draco::CompressMesh, allow_raw_pointers())
     ;
 }
 #endif

@@ -93,9 +93,9 @@ if (${RHINO3DM_PY})
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
   endif()
+  target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
 endif()
 
-target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
 
 # I plan to mode the following install phase out of this file and into the top
 # level python script for generating wasm 
