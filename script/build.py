@@ -17,7 +17,6 @@ import subprocess
 import sys
 import os
 import argparse
-import platform
 from sys import platform as _platform
 import shlex
 import shutil
@@ -28,8 +27,8 @@ from subprocess import Popen, PIPE
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS'}
+valid_platform_args = ["js", "macos"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
@@ -104,6 +103,50 @@ def run_command_show_output(command):
 
     rc = process.poll()
     return rc
+
+
+def build_macos():
+    if _platform != "darwin":
+        print_error_message("Building for macOS requires that you run this script on macOS")
+        return False
+
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("macos").lower())
+    native_lib_name = 'librhino3dmio_native'
+    ext = 'dylib'
+    native_lib_filename = native_lib_name + '.' + ext
+    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
+
+    previous_build = os.path.abspath(os.path.join(platform_target_path, "Release"))
+    if os.path.exists(previous_build):
+        if not overwrite:
+            print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            shutil.rmtree(previous_build)
+
+    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+    if not os.path.exists(item_to_check):
+        print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+        return False
+
+    command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
+              ' -arch x86_64 -configuration Release clean build'
+    run_command_show_output(command)
+
+    # Check to see if the build succeeded
+    items_to_check = [native_lib_filename]
+    all_items_built = True
+    for item in items_to_check:
+        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
+        if not os.path.exists(path_to_item):
+            print_error_message("failed to create " + path_to_item)
+            all_items_built = False
+
+    if all_items_built:
+        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
+    else:
+        print_error_message("failed to build all rhino3dm build artifacts.")
+        return False
 
 
 def build_js():

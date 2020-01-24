@@ -32,7 +32,6 @@ We are currently using Python 2.7.17. Scripts read this:
 `python2_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi`
 `python2_install_notes_linux = On Ubuntu, you can install python 2 using sudo apt install python`
 
-
 #### Python 3
 
 We are currently using Python 3.7.1. Scripts read this:
@@ -48,6 +47,14 @@ We are currently using Xcode 11.2.1. Scripts read this:
 
 `xcode_currently_using = 11.2.1` 
 `xcode_install_notes = Xcode can be downloaded for free from the macOS App Store or from https://developer.apple.com/download/ (Apple developer ID required for the latter option).`
+
+#### Mono Framework MDK
+
+We are currently using the Mono Framework MDK 6.4.0.208.  Scripts read this:
+
+`mdk_currently_using = 6.4.0.208`
+`mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.4.0.208.macos10.xamarin.universal.pkg`
+`mdk_install_notes = The Mono.framework does not seem to be installed in the /Library/Frameworks folder or the current version is not set.`
 
 ## Android (TODO)
 
