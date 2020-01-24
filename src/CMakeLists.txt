@@ -1,14 +1,43 @@
 cmake_minimum_required(VERSION 3.10)
-
 project(rhino3dm)
 
+# 24 Jan 2020 S. Baer
+# When I added draco to this project we ended up in a situation where both
+# EMSCRIPTEN and PYTHON_EXECUTABLE were defined which is what we were keying
+# off of to figure out what type of project we should be building. Adding
+# some local cmake varaibles to work around this issue. It seems like we can
+# figure out something cleaner to use in the future as a command line arg
+set(RHINO3DM_JS "NO")
+set(RHINO3DM_PY "NO")
 if (EMSCRIPTEN)
+  set(RHINO3DM_JS "YES")
+else()
+  set(RHINO3DM_PY "YES")
+endif()
+
+# 24 Jan 2020 S. Baer
+# I am having problems with compiling draco support into Python2 on Linux.
+# Removing support for draco on that build until we figure out what we are
+# doing wrong
+set(INCLUDE_DRACO "YES")
+if (${RHINO3DM_PY} AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+  set(INCLUDE_DRACO "NO")
+endif()
+
+
+if (${RHINO3DM_JS})
   message("Web Assembly Compile")
 endif()
 
-if (PYTHON_EXECUTABLE)
+if (${RHINO3DM_PY})
   message("Python Compile")
-  add_subdirectory(lib/pybind11)
+ add_subdirectory(lib/pybind11)
+endif()
+
+# Add draco add_library
+if (${INCLUDE_DRACO})
+  add_subdirectory(lib/draco)
+  include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
 endif()
 
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
@@ -29,7 +58,7 @@ file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.skip" "lib/opennurbs/android
 
 set (CMAKE_CXX_STANDARD 14)
 
-if(EMSCRIPTEN)
+if(${RHINO3DM_JS})
   # we will eventually want the following warnging flags on both compiles
   # for now, just WASM
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
@@ -44,24 +73,26 @@ add_definitions(-DOPENNURBS_FREETYPE_INC_)
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
-if(EMSCRIPTEN)
+if(${RHINO3DM_JS})
   # these shouldn't be necessary in the future as we adjust opennurbs to be
   # emscripten aware
   add_definitions(-DON_32BIT_RUNTIME)
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
 endif()
+if (${INCLUDE_DRACO})
+  add_definitions(-DON_INCLUDE_DRACO)
+endif()
 
-
-if(EMSCRIPTEN)
+if(${RHINO3DM_JS})
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
-if(EMSCRIPTEN)
+if(${RHINO3DM_JS})
   add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC})
 endif()
 
-if (PYTHON_EXECUTABLE)
+if (${RHINO3DM_PY})
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set (CMAKE_CXX_STANDARD 17)
     add_definitions(-DON_RUNTIME_LINUX)
@@ -75,13 +106,17 @@ if (PYTHON_EXECUTABLE)
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
   endif()
+  if(${INCLUDE_DRACO})
+    target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
+  endif()
 endif()
+
 
 # I plan to mode the following install phase out of this file and into the top
 # level python script for generating wasm 
 # dan@mcneel.com: this is already in the build.py -p js (this can be deleted as soon
 # as the scripts are used in the build process)
-if(EMSCRIPTEN)
+if(${RHINO3DM_JS})
   install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
   install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
   install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
