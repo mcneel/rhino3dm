@@ -4,3 +4,6 @@
 [submodule "src/lib/opennurbs"]
 	path = src/lib/opennurbs
 	url = https://github.com/mcneel/opennurbs.git
+[submodule "src/lib/draco"]
+	path = src/lib/draco
+	url = https://github.com/google/draco.git

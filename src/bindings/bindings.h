@@ -101,3 +101,4 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_viewport.h"
 #include "bnd_group.h"
 #include "bnd_extensions.h"
+#include "bnd_draco.h"
