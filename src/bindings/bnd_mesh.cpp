@@ -313,7 +313,12 @@ BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
   }
 
   std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
-  std::vector<float> normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+
+  std::vector<float> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+  }
 
   std::vector<float> uv_array;
   if (emscripten::val::undefined() != attributes["uv"])
