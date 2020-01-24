@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(rhino3dm)
 
-# 24 Jan 2002 S. Baer
+# 24 Jan 2020 S. Baer
 # When I added draco to this project we ended up in a situation where both
 # EMSCRIPTEN and PYTHON_EXECUTABLE were defined which is what we were keying
 # off of to figure out what type of project we should be building. Adding
@@ -15,6 +15,16 @@ else()
   set(RHINO3DM_PY "YES")
 endif()
 
+# 24 Jan 2020 S. Baer
+# I am having problems with compiling draco support into Python2 on Linux.
+# Removing support for draco on that build until we figure out what we are
+# doing wrong
+set(INCLUDE_DRACO "YES")
+if (${RHINO3DM_PY} AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+  set(INCLUDE_DRACO "NO")
+endif()
+
+
 if (${RHINO3DM_JS})
   message("Web Assembly Compile")
 endif()
@@ -25,9 +35,10 @@ if (${RHINO3DM_PY})
 endif()
 
 # Add draco add_library
-add_subdirectory(lib/draco)
-include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
-# link_directories(../draco/build)
+if (${INCLUDE_DRACO})
+  add_subdirectory(lib/draco)
+  include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
+endif()
 
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
 file(GLOB zlib_SRC "lib/opennurbs/zlib/*.h" "lib/opennurbs/zlib/*.c")
@@ -69,7 +80,9 @@ if(${RHINO3DM_JS})
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
 endif()
-
+if (${INCLUDE_DRACO})
+  add_definitions(-DON_INCLUDE_DRACO)
+endif()
 
 if(${RHINO3DM_JS})
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
@@ -93,7 +106,9 @@ if (${RHINO3DM_PY})
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
   endif()
-  target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
+  if(${INCLUDE_DRACO})
+    target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
+  endif()
 endif()
 
 

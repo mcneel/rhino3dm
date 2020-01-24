@@ -1,5 +1,6 @@
 #include "bindings.h"
 
+#if defined(ON_INCLUDE_DRACO)
 #undef max
 #include "../lib/draco/src/draco/core/encoder_buffer.h"
 #include "../lib/draco/src/draco/point_cloud/point_cloud_builder.h"
@@ -24,15 +25,17 @@ BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* mesh)
 {
   return nullptr;
 }
-
+#endif
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDracoBindings(pybind11::module& m)
 {
+#if defined(ON_INCLUDE_DRACO)
   py::class_<BND_Draco>(m, "DracoCompression")
     .def_static("CompressMesh", &BND_Draco::CompressMesh)
     ;
+#endif
 }
 #endif
 
@@ -46,3 +49,4 @@ void initDracoBindings(void*)
     ;
 }
 #endif
+
