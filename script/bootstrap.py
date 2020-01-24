@@ -31,7 +31,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python"]
+valid_platform_args = ["js", "python", "macos"]
 
 
 class BuildTool:
@@ -129,7 +129,12 @@ def read_required_versions():
     # iOS
     #TODO: xamios = BuildTool("Xamarin.iOS", "xamios", "", "")
 
-    build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten)
+    # macOS
+    msbuild = BuildTool("msbuild", "msbuild", "", "", "")
+    mdk = BuildTool("Mono MDK", "mdk", "", "", "")
+
+    build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten,
+                       msbuild=msbuild, mdk=mdk)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -409,6 +414,26 @@ def check_cmake(build_tool):
     return True
 
 
+def check_mdk(build_tool):
+    print_check_preamble(build_tool)
+
+    # check to see if the Mono.framework exists at all...
+    running_mono_framework_version_file_path = '/Library/Frameworks/Mono.framework/Versions/Current/VERSION'
+    if not os.path.exists(running_mono_framework_version_file_path):
+        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        return False
+
+    # read in the contents of /Library/Frameworks/Mono.framework/Versions/Current/VERSION
+    running_mono_framework_version_file = open(running_mono_framework_version_file_path, "r")
+    running_version = ''
+    for line in running_mono_framework_version_file:
+        running_version = line.split('\n', 1)[0]
+
+    print_version_comparison(build_tool, running_version)
+
+    return True
+
+
 def check_handler(check, build_tools):
     if check == "js":
         print_platform_preamble("JavaScript")
@@ -429,6 +454,18 @@ def check_handler(check, build_tools):
         check_python(build_tools["python"])
         check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
+
+    if check == "macos":
+        print_platform_preamble("macOS")
+        if _platform != "darwin":
+            print_error_message("Checking dependencies for macOS requires that you run this script on macOS")
+            return False
+        check_macos(build_tools["macos"])
+        check_xcode(build_tools["xcode"])
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_cmake(build_tools["cmake"])
+        check_mdk(build_tools["mdk"])
 
     if check not in valid_platform_args:
         if check == "all":

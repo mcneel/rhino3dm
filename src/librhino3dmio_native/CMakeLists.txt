@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 
 project(librhino3dmio_native)
 
+if(MACOS_BUILD)
+  message("macOS Compile")
+endif()
+
+if(IOS)
+  message("iOS Compile")
+endif()
+
 file(GLOB bindings_SRC "./*.h" "./*.cpp")
 file(GLOB zlib_SRC "../lib/opennurbs/zlib/*.h" "../lib/opennurbs/zlib/*.c")
 
@@ -37,12 +45,28 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DON_CLANG_CONSTRUCTOR_BUG)
   add_library(librhino3dmio_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
   #target_link_libraries(librhino3dmio_native -luuid)
-else()
-  add_library(zlib_static STATIC ${zlib_SRC})
-  add_library(opennurbs_static STATIC ${opennurbs_SRC})
-  add_library(librhino3dmio_native SHARED ${bindings_SRC})
-  target_link_libraries(librhino3dmio_native PRIVATE zlib_static)
-  target_link_libraries(librhino3dmio_native PRIVATE opennurbs_static)
+endif()
+
+if(MACOS_BUILD)
+  # [dan@mcneel.com]: For now, we're dumping all this into the same target.  Once we get 
+  # a good handle on CMake, these should be compiled as separate CMake targets and linked accordingly.
+  add_library(librhino3dmio_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+endif()
+
+if(IOS)
+  add_library(librhino3dmio_native STATIC ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+  # set_xcode_property is a macro defined in src/ios.toolchain.cmake
+  # set_xcode_property (TARGET XCODE_PROPERTY XCODE_VALUE XCODE_VARIANT)
+  #   A convenience macro for setting xcode specific properties on targets.
+  #   Available variants are: All, Release, RelWithDebInfo, Debug, MinSizeRel
+  #   example: set_xcode_property (myioslib IPHONEOS_DEPLOYMENT_TARGET "3.1" "all").
+  set_xcode_property(librhino3dmio_native SDKROOT "iphoneos" "All")
+  set_xcode_property(librhino3dmio_native TARGETED_DEVICE_FAMILY "Universal" "All")
+  set_xcode_property(librhino3dmio_native EXECUTABLE_EXTENSION "a" "All")
+  set_xcode_property(librhino3dmio_native MACH_O_TYPE "staticlib" "All")
+  set_xcode_property(librhino3dmio_native CODE_SIGN_STYLE "Manual" "All")
+  set_xcode_property(librhino3dmio_native CODE_SIGN_IDENTITY "Developer ID Application" "All")
+  #target_link_libraries(librhino3dmio_native)
 endif()
 
 set_target_properties(librhino3dmio_native PROPERTIES PREFIX "")
