@@ -48,6 +48,7 @@ public:
 
 class BND_PointCloud : public BND_GeometryBase //IEnumerable<PointCloudItem>
 {
+public:
   ON_PointCloud* m_pointcloud = nullptr;
 protected:
   void SetTrackedPointer(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref);
