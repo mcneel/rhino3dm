@@ -511,7 +511,7 @@ if(${RHINO3DM_JS})
 endif()
 
 if(${RHINO3DM_JS})
-  add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${draco_encoder_src})
+  add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${draco_encoder_src} ${draco_decoder_src})
 endif()
 
 if (${RHINO3DM_PY})

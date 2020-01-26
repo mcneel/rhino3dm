@@ -21,6 +21,10 @@ public:
   ~BND_Draco();
 
   static BND_Draco* CompressMesh(const class BND_Mesh* mesh);
+  static class BND_GeometryBase* DecompressByteArray(int length, const char* buffer);
+  static class BND_GeometryBase* DecompressByteArray2(std::string buffer);
+  static class BND_GeometryBase* DecompressBase64(std::string buffer);
 
   bool WriteToFile(std::wstring path);
+  std::string ToBase64String() const;
 };
