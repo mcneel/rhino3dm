@@ -20,10 +20,30 @@ BND_Draco::~BND_Draco()
   delete m_encoder_buffer;
 }
 
+
 BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* m)
+{
+  BND_DracoCompressionOptions defaults;
+  return CompressMesh2(m, defaults);
+}
+
+BND_Draco* BND_Draco::CompressMesh2(const class BND_Mesh* m, const BND_DracoCompressionOptions& compressionOptions)
 {
   if (nullptr == m)
     return nullptr;
+
+  BND_DracoCompressionOptions options = compressionOptions;
+  if (options.m_compression_level < 0)
+    options.m_compression_level = 0;
+  if (options.m_compression_level > 10)
+    options.m_compression_level = 10;
+  if (options.m_normals_quantization_bits > 30)
+    options.m_normals_quantization_bits = 30;
+  if (options.m_position_quantization_bits > 30)
+    options.m_position_quantization_bits = 30;
+  if (options.m_texcoord_quantization_bits > 30)
+    options.m_texcoord_quantization_bits = 30;
+
 
   const ON_Mesh* mesh = m->m_mesh;
   const int triangleCount = mesh->TriangleCount() + mesh->QuadCount() * 2;
@@ -31,47 +51,53 @@ BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* m)
   dracoMesh.SetNumFaces(triangleCount);
   dracoMesh.set_num_points(3 * triangleCount);
 
-  draco::GeometryAttribute va;
-  va.Init(draco::GeometryAttribute::POSITION, nullptr, 3, draco::DT_FLOAT32, false, 3 * sizeof(float), 0);
-  const int VERTEX_ATTRIBUTE_POSITION = dracoMesh.AddAttribute(va, false, mesh->m_V.UnsignedCount());
-  const ON_3fPoint* vertices = mesh->m_V.Array();
-  for (unsigned int i = 0; i < mesh->m_V.UnsignedCount(); i++)
+  int VERTEX_ATTRIBUTE_POSITION = -1;
+  int NORMAL_ATTRIBUTE_POSITION = -1;
+  int TEXCOORD_ATTRIBUTE_POSITION = -1;
+  int COLOR_ATTRIBUTE_POSITION = -1;
   {
-    const ON_3fPoint& vert = vertices[i];
-    dracoMesh.attribute(VERTEX_ATTRIBUTE_POSITION)->SetAttributeValue(draco::AttributeValueIndex(i), &vert.x);
+    draco::GeometryAttribute va;
+    va.Init(draco::GeometryAttribute::POSITION, nullptr, 3, draco::DT_FLOAT32, false, 3 * sizeof(float), 0);
+    VERTEX_ATTRIBUTE_POSITION = dracoMesh.AddAttribute(va, false, mesh->m_V.UnsignedCount());
+    const ON_3fPoint* vertices = mesh->m_V.Array();
+    for (unsigned int i = 0; i < mesh->m_V.UnsignedCount(); i++)
+    {
+      const ON_3fPoint& vert = vertices[i];
+      dracoMesh.attribute(VERTEX_ATTRIBUTE_POSITION)->SetAttributeValue(draco::AttributeValueIndex(i), &vert.x);
+    }
   }
 
-  if (mesh->m_N.Count() == mesh->m_V.Count())
+  if (options.m_include_normals && mesh->m_N.Count() == mesh->m_V.Count())
   {
     draco::GeometryAttribute normal_attrs;
     normal_attrs.Init(draco::GeometryAttribute::NORMAL, nullptr, 3, draco::DT_FLOAT32, false, 3 * sizeof(float), 0);
-    const int VERTEX_ATTRIBUTE_NORMAL = dracoMesh.AddAttribute(normal_attrs, false, mesh->m_N.UnsignedCount());
+    NORMAL_ATTRIBUTE_POSITION = dracoMesh.AddAttribute(normal_attrs, false, mesh->m_N.UnsignedCount());
     const ON_3fVector* normals = mesh->m_N.Array();
     for (unsigned int i = 0; i < mesh->m_N.UnsignedCount(); i++)
     {
       const ON_3fVector& normal = normals[i];
-      dracoMesh.attribute(VERTEX_ATTRIBUTE_NORMAL)->SetAttributeValue(draco::AttributeValueIndex(i), &normal.x);
+      dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetAttributeValue(draco::AttributeValueIndex(i), &normal.x);
     }
   }
 
-  if (mesh->m_T.Count() == mesh->m_V.Count())
+  if (options.m_include_texture_coords && mesh->m_T.Count() == mesh->m_V.Count())
   {
     draco::GeometryAttribute tc_attrs;
     tc_attrs.Init(draco::GeometryAttribute::TEX_COORD, nullptr, 2, draco::DT_FLOAT32, false, 2 * sizeof(float), 0);
-    const int VERTEX_ATTRIBUTE_TC = dracoMesh.AddAttribute(tc_attrs, false, mesh->m_T.UnsignedCount());
+    TEXCOORD_ATTRIBUTE_POSITION = dracoMesh.AddAttribute(tc_attrs, false, mesh->m_T.UnsignedCount());
     const ON_2fPoint* tcs = mesh->m_T.Array();
     for (unsigned int i = 0; i < mesh->m_T.UnsignedCount(); i++)
     {
       const ON_2fPoint& texcoord = tcs[i];
-      dracoMesh.attribute(VERTEX_ATTRIBUTE_TC)->SetAttributeValue(draco::AttributeValueIndex(i), &texcoord.x);
+      dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetAttributeValue(draco::AttributeValueIndex(i), &texcoord.x);
     }
   }
 
-  if (mesh->m_C.Count() == mesh->m_V.Count())
+  if (options.m_include_vertex_colors && mesh->m_C.Count() == mesh->m_V.Count())
   {
     draco::GeometryAttribute color_attrs;
     color_attrs.Init(draco::GeometryAttribute::COLOR, nullptr, 4, draco::DT_UINT8, false, 4 * sizeof(char), 0);
-    const int VERTEX_ATTRIBUTE_COLOR = dracoMesh.AddAttribute(color_attrs, false, mesh->m_C.UnsignedCount());
+    COLOR_ATTRIBUTE_POSITION = dracoMesh.AddAttribute(color_attrs, false, mesh->m_C.UnsignedCount());
     const ON_Color* colors = mesh->m_C.Array();
     for (unsigned int i = 0; i < mesh->m_C.UnsignedCount(); i++)
     {
@@ -81,11 +107,14 @@ BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* m)
       argb[1] = color.Red();
       argb[2] = color.Green();
       argb[3] = color.Blue();
-      dracoMesh.attribute(VERTEX_ATTRIBUTE_COLOR)->SetAttributeValue(draco::AttributeValueIndex(i), argb);
+      dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetAttributeValue(draco::AttributeValueIndex(i), argb);
     }
   }
 
   unsigned int currentPointIndex = 0;
+  unsigned int currentNormalIndex = 0;
+  unsigned int currentTCIndex = 0;
+  unsigned int currentColorIndex = 0;
   const ON_MeshFace* faces = mesh->m_F.Array();
   for (unsigned int i = 0; i < mesh->m_F.UnsignedCount(); i++)
   {
@@ -99,12 +128,51 @@ BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* m)
       dracoMesh.attribute(VERTEX_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentPointIndex++), draco::AttributeValueIndex(face.vi[3]));
       dracoMesh.attribute(VERTEX_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentPointIndex++), draco::AttributeValueIndex(face.vi[0]));
     }
+
+    if (NORMAL_ATTRIBUTE_POSITION >= 0)
+    {
+      dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[0]));
+      dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[1]));
+      dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[2]));
+      if (face.IsQuad())
+      {
+        dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[2]));
+        dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[3]));
+        dracoMesh.attribute(NORMAL_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentNormalIndex++), draco::AttributeValueIndex(face.vi[0]));
+      }
+    }
+
+    if (TEXCOORD_ATTRIBUTE_POSITION >= 0)
+    {
+      dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[0]));
+      dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[1]));
+      dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[2]));
+      if (face.IsQuad())
+      {
+        dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[2]));
+        dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[3]));
+        dracoMesh.attribute(TEXCOORD_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentTCIndex++), draco::AttributeValueIndex(face.vi[0]));
+      }
+    }
+
+    if (COLOR_ATTRIBUTE_POSITION >= 0)
+    {
+      dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[0]));
+      dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[1]));
+      dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[2]));
+      if (face.IsQuad())
+      {
+        dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[2]));
+        dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[3]));
+        dracoMesh.attribute(COLOR_ATTRIBUTE_POSITION)->SetPointMapEntry(draco::PointIndex(currentColorIndex++), draco::AttributeValueIndex(face.vi[0]));
+      }
+    }
   }
 
   // Add faces with identity mapping between vertex and corner indices.
   // Duplicate vertices will get removed later.
   for (int i = 0; i < triangleCount; i++)
-  { 
+  {
     draco::Mesh::Face face;
     for (int c = 0; c < 3; ++c)
       face[c] = 3 * i + c;
@@ -112,7 +180,15 @@ BND_Draco* BND_Draco::CompressMesh(const BND_Mesh* m)
   }
 
   draco::Encoder encoder;
-  encoder.SetSpeedOptions(3, 3);
+  if (options.m_position_quantization_bits > 0)
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, options.m_position_quantization_bits);
+  if (options.m_include_normals && options.m_normals_quantization_bits > 0)
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, options.m_normals_quantization_bits);
+  if (options.m_include_texture_coords && options.m_texcoord_quantization_bits > 0)
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, options.m_texcoord_quantization_bits);
+  const int speed = 10 - options.m_compression_level;
+  encoder.SetSpeedOptions(speed, speed);
+
   BND_Draco* rc = new BND_Draco();
   draco::Status compressResult = encoder.EncodeMeshToBuffer(dracoMesh, rc->m_encoder_buffer);
   if (!compressResult.ok())
@@ -320,28 +396,27 @@ std::string BND_Draco::ToBase64String() const
   return base64_encode((const unsigned char*)m_encoder_buffer->data(), (unsigned int)m_encoder_buffer->size());
 }
 
-
 #endif
-
-/*
-Probably want something like
-- static BND_Draco* compressMesh(mesh, meshCompressionOptions)
-- static BND_Draco* compressPointCloud(pointcloud, pointcloudCompressionOptions)
-- static BND_GeometryBase* decompress(buffer)
-
-- std::string ToBase64String()
-- std::vector<ubyte> AsByteArray()
-- bool Write(std::string path)
-
-*/
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDracoBindings(pybind11::module& m)
 {
 #if defined(ON_INCLUDE_DRACO)
+  py::class_<BND_DracoCompressionOptions>(m, "DracoCompressionOptions")
+    .def(py::init<>())
+    .def_readwrite("CompressionLevel", &BND_DracoCompressionOptions::m_compression_level)
+    .def_readwrite("PositionQuantizationBits", &BND_DracoCompressionOptions::m_position_quantization_bits)
+    .def_readwrite("TextureCoordintateQuantizationBits", &BND_DracoCompressionOptions::m_texcoord_quantization_bits)
+    .def_readwrite("NormalQuantizationBits", &BND_DracoCompressionOptions::m_normals_quantization_bits)
+    .def_readwrite("IncludeNormals", &BND_DracoCompressionOptions::m_include_normals)
+    .def_readwrite("IncludeTextureCoordinates", &BND_DracoCompressionOptions::m_include_texture_coords)
+    .def_readwrite("IncludeVertexColors", &BND_DracoCompressionOptions::m_include_vertex_colors)
+    ;
+
   py::class_<BND_Draco>(m, "DracoCompression")
     .def_static("Compress", &BND_Draco::CompressMesh)
+    .def_static("Compress", &BND_Draco::CompressMesh2)
     .def("Write", &BND_Draco::WriteToFile)
     .def_static("DecompressByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
@@ -359,8 +434,20 @@ using namespace emscripten;
 
 void initDracoBindings(void*)
 {
+  class_<BND_DracoCompressionOptions>("DracoCompressionOptions")
+    .constructor<>()
+    .property("compressionLevel", &BND_DracoCompressionOptions::m_compression_level)
+    .property("positionQuantizationBits", &BND_DracoCompressionOptions::m_position_quantization_bits)
+    .property("textureCoordintateQuantizationBits", &BND_DracoCompressionOptions::m_texcoord_quantization_bits)
+    .property("normalQuantizationBits", &BND_DracoCompressionOptions::m_normals_quantization_bits)
+    .property("includeNormals", &BND_DracoCompressionOptions::m_include_normals)
+    .property("includeTextureCoordinates", &BND_DracoCompressionOptions::m_include_texture_coords)
+    .property("includeVertexColors", &BND_DracoCompressionOptions::m_include_vertex_colors)
+    ;
+
   class_<BND_Draco>("DracoCompression")
     .class_function("compress", &BND_Draco::CompressMesh, allow_raw_pointers())
+    .class_function("compress", &BND_Draco::CompressMesh2, allow_raw_pointers())
     .class_function("decompressByteArray", &BND_Draco::DecompressByteArray2, allow_raw_pointers())
     .class_function("decompressBase64String", &BND_Draco::DecompressBase64, allow_raw_pointers())
     .function("toBase64String", &BND_Draco::ToBase64String)
