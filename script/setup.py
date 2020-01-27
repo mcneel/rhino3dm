@@ -24,6 +24,7 @@ overwrite = False
 valid_platform_args = ["js", "ios", "macos"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 
 
@@ -99,6 +100,66 @@ def print_platform_preamble(platform_target_name):
         print(bcolors.BOLD + "Setting up " + platform_target_name + "..." + bcolors.ENDC)
 
 
+def build_methodgen():
+    print("")
+    if xcode_logging:
+        print("Building MethodGen...")
+    else:
+        print(bcolors.BOLD + "Building MethodGen..." + bcolors.ENDC)
+
+    path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
+
+    command = 'msbuild ' + path_to_methodgen_csproj +' /p:Configuration=Release'
+    run_command_show_output(command)
+
+    # Check to see if the MethodGen.exe was written...
+    item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully built: " + item_to_check)
+    else:
+        print_error_message("failed to build " + item_to_check + " for macOS build")
+        return False
+
+    return True
+
+
+def run_methodgen():
+    print("")
+    if xcode_logging:
+        print("Running MethodGen...")
+    else:
+        print(bcolors.BOLD + "Running MethodGen..." + bcolors.ENDC)
+
+    path_to_methodgen_exe = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
+
+    if not os.path.exists(path_to_methodgen_exe):
+        print_error_message("MethodGen.exe not found.")
+        return False
+
+    command = ''
+    if _platform == "darwin":
+        command = command + 'mono '
+
+    path_to_cpp = os.path.abspath(os.path.join(src_folder, 'librhino3dmio_native'))
+    path_to_cs = os.path.abspath(os.path.join(src_folder, 'dotnet'))
+    path_to_replace = '../lib/opennurbs'
+    item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
+
+    # remove any older file there...
+    if os.path.exists(item_to_check):
+        os.remove(item_to_check)
+
+    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace
+    run_command_show_output(command)
+
+    # Check to see if methodgen succeeded
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully generated: " + item_to_check)
+    else:
+        print_error_message("failed to generate " + item_to_check + " for macOS build")
+        return False
+
+
 def setup_macos():
     if _platform != "darwin":
         print_error_message("Generating project file for macOS requires that you run this script on macOS")
@@ -120,6 +181,17 @@ def setup_macos():
         os.mkdir(platform_target_path)
 
     os.chdir(platform_target_path)
+
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating xcodeproj files for macOS...")
+    else:
+        print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 ../../src/librhino3dmio_native"
     run_command_show_output(command)
@@ -151,6 +223,16 @@ def setup_ios():
 
     os.chdir(platform_target_path)
 
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating xcodeproj files for iOS...")
+    else:
+        print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
     command = "cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native"
     run_command_show_output(command)
 
