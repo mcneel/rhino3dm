@@ -84,3 +84,4 @@ __pycache__/
 /src/methodgen/.vs
 script/.idea
 script/venv
+src/MethodGen.pdb
