@@ -31,7 +31,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python", "macos"]
+valid_platform_args = ["js", "python", "macos", "ios"]
 
 
 class BuildTool:
@@ -127,14 +127,14 @@ def read_required_versions():
     #TODO: xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
 
     # iOS
-    #TODO: xamios = BuildTool("Xamarin.iOS", "xamios", "", "")
+    xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
 
     # macOS
     msbuild = BuildTool("msbuild", "msbuild", "", "", "")
     mdk = BuildTool("Mono MDK", "mdk", "", "", "")
 
     build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten,
-                       msbuild=msbuild, mdk=mdk)
+                       msbuild=msbuild, mdk=mdk, xamios=xamios)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -434,6 +434,28 @@ def check_mdk(build_tool):
     return True
 
 
+def check_xamios(build_tool):
+    print_check_preamble(build_tool)
+
+    # check to see if the Xamarin.iOS.framework exists at all...
+    running_xamios_framework_version_file_path = os.path.join('/', 'Library', 'Frameworks',
+                                                                    'Xamarin.iOS.Framework', "Versions",
+                                                                    "Current", "Version")
+    if not os.path.exists(running_xamios_framework_version_file_path):
+        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        return False
+
+    # read in the contents of /Library/Frameworks/Xamarin.iOS.framework/Versions/Current/VERSION
+    running_xamios_framework_version_file = open(running_xamios_framework_version_file_path, "r")
+    running_version = ''
+    for line in running_xamios_framework_version_file:
+        running_version = line.split('\n', 1)[0]
+
+    print_version_comparison(build_tool, running_version)
+
+    return True
+
+
 def check_handler(check, build_tools):
     if check == "js":
         print_platform_preamble("JavaScript")
@@ -466,6 +488,19 @@ def check_handler(check, build_tools):
         check_python(build_tools["python"])
         check_cmake(build_tools["cmake"])
         check_mdk(build_tools["mdk"])
+
+    if check == "ios":
+        print_platform_preamble("iOS")
+        if _platform != "darwin":
+            print_error_message("Checking dependencies for iOS requires that you run this script on macOS")
+            return False
+        check_macos(build_tools["macos"])
+        check_xcode(build_tools["xcode"])
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_cmake(build_tools["cmake"])
+        check_mdk(build_tools["mdk"])
+        check_xamios(build_tools["xamios"])
 
     if check not in valid_platform_args:
         if check == "all":
@@ -569,6 +604,31 @@ def download_handler(download, build_tools):
         download_dependency(build_tools["python"])
         download_dependency(build_tools["emscripten"])
         download_dependency(build_tools["cmake"])
+
+    if download == "macos":
+        print_platform_download_preamble("macOS")
+        if _platform != "darwin":
+            print_error_message("Downloading dependencies for macOS requires that you run this script on macOS")
+            return False
+        download_dependency(build_tools["macos"])
+        download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["cmake"])
+        download_dependency(build_tools["mdk"])
+
+    if download == "ios":
+        print_platform_download_preamble("iOS")
+        if _platform != "darwin":
+            print_error_message("Downloading dependencies for iOS requires that you run this script on macOS")
+            return False
+        download_dependency(build_tools["macos"])
+        download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["cmake"])
+        download_dependency(build_tools["mdk"])
+        download_dependency(build_tools["xamios"])
 
     if download not in valid_platform_args:
         if download == "all":
