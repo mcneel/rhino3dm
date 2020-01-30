@@ -30,8 +30,8 @@ public:
   ON_3dPoint ClosestPoint(ON_3dPoint point) const { return m_bbox.ClosestPoint(point); }
   //ON_3dPoint ClosestPoint(ON_3dPoint point, bool includeInterior) const
   //ON_3dPoint FurthestPoint(ON_3dPoint point) const
-  //void Inflate(double amount)
-  //void Inflate(double xAmount, double yAmount, double zAmount)
+  void Inflate(double amount) { Inflate3(amount, amount, amount); }
+  void Inflate3(double xAmount, double yAmount, double zAmount);
   bool Contains(ON_3dPoint point) const { return m_bbox.IsPointIn(point); }
   //bool Contains(ON_3dPoint point, bool strict)
   //bool Contains(BoundingBox box)

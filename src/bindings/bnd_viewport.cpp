@@ -16,6 +16,18 @@ void BND_Viewport::SetTrackedPointer(ON_Viewport* viewport, const ON_ModelCompon
   BND_CommonObject::SetTrackedPointer(viewport, compref);
 }
 
+BND_Viewport* BND_Viewport::DefaultTopViewYUp()
+{
+  ON_Viewport* vp = new ON_Viewport(ON_Viewport::DefaultTopViewYUp);
+  return new BND_Viewport(vp, nullptr);
+}
+
+BND_Viewport* BND_Viewport::DefaultPerspectiveViewZUp()
+{
+  ON_Viewport* vp = new ON_Viewport(ON_Viewport::DefaultPerspectiveViewZUp);
+  return new BND_Viewport(vp, nullptr);
+}
+
 void BND_Viewport::SetProjectionToParallel(bool parallel)
 {
   if( parallel )
@@ -206,6 +218,11 @@ BND_Transform* BND_Viewport::GetXform(ON::coordinate_system srcCS, ON::coordinat
   return xf;
 }
 
+bool BND_Viewport::Extents(double halfViewAngleRadians, const class BND_BoundingBox& worldBbox)
+{
+  return m_viewport->Extents(halfViewAngleRadians, worldBbox.m_bbox);
+}
+
 bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 {
   bool rc = false;
@@ -355,6 +372,8 @@ void initViewportBindings(pybind11::module& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
+    .def_static("DefaultTop", &BND_Viewport::DefaultTopViewYUp)
+    .def_static("DefaultPerspective", &BND_Viewport::DefaultPerspectiveViewZUp)
     .def_property_readonly("IsValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .def_property_readonly("isValidCamer", &BND_Viewport::IsValidCamera)
     .def_property_readonly("IsValidFrustum", &BND_Viewport::IsValidFrustum)
@@ -381,6 +400,7 @@ void initViewportBindings(pybind11::module& m)
     .def_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .def("GetXform", &BND_Viewport::GetXform, py::arg("sourceCoordinateSystem"), py::arg("destinationCoordinateSystem"))
+    .def("Extents", &BND_Viewport::Extents, py::arg("halfViewAngleRadians"), py::arg("worldBbox"))
     .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"))
     .def("FrustumCenterPoint", &BND_Viewport::FrustumCenterPoint, py::arg("targetDistance"))
     .def("TargetDistance", &BND_Viewport::TargetDistance, py::arg("useFrustumCenterFallback"))
@@ -396,6 +416,8 @@ void initViewportBindings(void*)
 {
   class_<BND_Viewport, base<BND_CommonObject>>("ViewportInfo")
     .constructor<>()
+    .class_function("defaultTop", &BND_Viewport::DefaultTopViewYUp, allow_raw_pointers())
+    .class_function("defaultPerspective", &BND_Viewport::DefaultPerspectiveViewZUp, allow_raw_pointers())
     .property("isValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .property("isValidCamer", &BND_Viewport::IsValidCamera)
     .property("isValidFrustum", &BND_Viewport::IsValidFrustum)
@@ -421,6 +443,7 @@ void initViewportBindings(void*)
     .property("cameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .property("camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .function("getXform", &BND_Viewport::GetXform, allow_raw_pointers())
+    .function("extents", &BND_Viewport::Extents)
     .function("dollyExtents", &BND_Viewport::DollyExtents)
     .function("frustumCenterPoint", &BND_Viewport::FrustumCenterPoint)
     .function("targetDistance", &BND_Viewport::TargetDistance)
