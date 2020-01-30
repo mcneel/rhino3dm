@@ -17,6 +17,19 @@ BND_BoundingBox::BND_BoundingBox(const ON_BoundingBox& bbox)
 {
 }
 
+void BND_BoundingBox::Inflate3(double xAmount, double yAmount, double zAmount)
+{
+  if (!m_bbox.IsValid())
+    return;
+  m_bbox.m_min.x -= xAmount;
+  m_bbox.m_min.y -= yAmount;
+  m_bbox.m_min.z -= zAmount;
+
+  m_bbox.m_max.x += xAmount;
+  m_bbox.m_max.y += yAmount;
+  m_bbox.m_max.z += zAmount;
+}
+
 bool BND_BoundingBox::Transform(const BND_Transform& xform)
 {
   return m_bbox.Transform(xform.m_xform);
@@ -151,6 +164,8 @@ void initBoundingBoxBindings(pybind11::module& m)
     .def_property_readonly("Volume", &BND_BoundingBox::Volume)
     .def_property_readonly("Diagonal", &BND_BoundingBox::Diagonal)
     .def("ClosestPoint", &BND_BoundingBox::ClosestPoint, py::arg("point"))
+    .def("Inflate", &BND_BoundingBox::Inflate, py::arg("amount"))
+    .def("Inflate", &BND_BoundingBox::Inflate3, py::arg("xAmount"), py::arg("yAmount"), py::arg("zAmount"))
     .def("Contains", &BND_BoundingBox::Contains, py::arg("point"))
     .def("IsDegenerate", &BND_BoundingBox::IsDegenerate, py::arg("tolerance"))
     .def("Transform", &BND_BoundingBox::Transform, py::arg("xform"))
@@ -176,6 +191,8 @@ void initBoundingBoxBindings(void*)
     .property("volume", &BND_BoundingBox::Volume)
     .property("diagonal", &BND_BoundingBox::Diagonal)
     .function("closestPoint", &BND_BoundingBox::ClosestPoint)
+    .function("inflate", &BND_BoundingBox::Inflate)
+    .function("inflate", &BND_BoundingBox::Inflate3)
     .function("contains", &BND_BoundingBox::Contains)
     .function("isDegenerate", &BND_BoundingBox::IsDegenerate)
     .function("transform", &BND_BoundingBox::Transform)

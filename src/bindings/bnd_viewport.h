@@ -16,6 +16,9 @@ public:
   BND_Viewport();
   BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 
+  static BND_Viewport* DefaultTopViewYUp();
+  static BND_Viewport* DefaultPerspectiveViewZUp();
+
   bool IsValidCameraFrame() const { return m_viewport->IsValidCameraFrame(); }
   bool IsValidCamera() const { return m_viewport->IsValidCamera(); }
   bool IsValidFrustum() const { return m_viewport->IsValidFrustum(); }
@@ -64,6 +67,7 @@ public:
 
   class BND_Transform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
 
+  bool Extents(double halfViewAngleRadians, const class BND_BoundingBox& worldBbox);
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
   ON_3dPoint FrustumCenterPoint(double targetDistance) const { return m_viewport->FrustumCenterPoint(targetDistance); }
   //    public Point3d TargetPoint {get;set;}
