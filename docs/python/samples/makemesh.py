@@ -1,5 +1,5 @@
 from rhino3dm import *
-import Tkinter
+import kinter
 import time
 import compute_rhino3d.Mesh
 import compute_rhino3d.Util
@@ -24,7 +24,7 @@ sphere = Sphere(center, 100)
 
 brep = sphere.ToBrep()
 d = compute_rhino3d.Mesh.CreateFromBrep(brep)
-mesh = CommonObject.Decode(d[0])
+mesh = (d[0])
 
 top = Tkinter.Tk()
 
