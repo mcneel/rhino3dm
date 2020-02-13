@@ -12,6 +12,7 @@ class BND_CurveProxy : public BND_Curve
 {
   ON_CurveProxy* m_curveproxy = nullptr;
 protected:
+  BND_CurveProxy() = default;
   void SetTrackedPointer(ON_CurveProxy* curveproxy, const ON_ModelComponentReference* compref);
 
 public:

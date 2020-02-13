@@ -128,6 +128,11 @@ BND_MeshVertexList BND_Mesh::GetVertices()
   return BND_MeshVertexList(m_mesh, m_component_ref);
 }
 
+BND_MeshTopologyEdgeList BND_Mesh::GetTopologyEdges()
+{
+  return BND_MeshTopologyEdgeList(m_mesh, m_component_ref);
+}
+
 BND_MeshFaceList BND_Mesh::GetFaces()
 {
   return BND_MeshFaceList(m_mesh, m_component_ref);
@@ -194,6 +199,15 @@ void ON_Mesh_DestroySurfaceData(ON_Mesh* pMesh)
 void BND_Mesh::ClearSurfaceData()
 {
   ON_Mesh_DestroySurfaceData(m_mesh);
+}
+
+void BND_Mesh::SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy)
+{
+  if (tm)
+  {
+    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
+    m_mesh->SetTextureCoordinates(*tm->m_mapping, xform, lazy);
+  }
 }
 
 int BND_Mesh::PartitionCount() const
@@ -653,6 +667,24 @@ BND_TUPLE BND_MeshFaceList::GetFace(int i) const
   return rc;
 }
 
+BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_mesh = mesh;
+}
+
+ON_Line BND_MeshTopologyEdgeList::EdgeLine(int topologyEdgeIndex) const
+{
+  const ON_MeshTopology& top = m_mesh->Topology();
+  const ON_MeshTopologyEdge& edge = top.m_tope[topologyEdgeIndex];
+  const ON_MeshTopologyVertex& v0 = top.m_topv[edge.m_topvi[0]];
+  const ON_MeshTopologyVertex& v1 = top.m_topv[edge.m_topvi[1]];
+  ON_Line rc;
+  rc.from = m_mesh->m_V[v0.m_vi[0]];
+  rc.to = m_mesh->m_V[v1.m_vi[0]];
+  return rc;
+}
+
 
 BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
@@ -766,6 +798,11 @@ void initMeshBindings(pybind11::module& m)
     .def("CombineIdentical", &BND_MeshVertexList::CombineIdentical)
     ;
 
+  py::class_<BND_MeshTopologyEdgeList>(m, "MeshTopologyEdgeList")
+    .def("__len__", &BND_MeshTopologyEdgeList::Count)
+    .def("EdgeLine", &BND_MeshTopologyEdgeList::EdgeLine, py::arg("topologyEdgeIndex"))
+    ;
+
   py::class_<BND_MeshFaceList>(m, "MeshFaceList")
     .def("__len__", &BND_MeshFaceList::Count)
     .def("__getitem__", &BND_MeshFaceList::GetFace)
@@ -822,6 +859,7 @@ void initMeshBindings(pybind11::module& m)
     .def("IsManifold", &BND_Mesh::IsManifold, py::arg("topologicalTest"))
     .def_property_readonly("HasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
+    .def_property_readonly("TopologyEdges", &BND_Mesh::GetTopologyEdges)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
     .def_property_readonly("Normals", &BND_Mesh::GetNormals)
     .def_property_readonly("VertexColors", &BND_Mesh::VertexColors)
@@ -831,6 +869,7 @@ void initMeshBindings(pybind11::module& m)
     .def("DestroyTopology", &BND_Mesh::DestroyTopology)
     .def("DestroyTree", &BND_Mesh::DestroyTree)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
+    .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -894,6 +933,11 @@ void initMeshBindings(void*)
     .function("combineIdentical", &BND_MeshVertexList::CombineIdentical)
     ;
 
+  class_<BND_MeshTopologyEdgeList>("MeshTopologyEdgeList")
+    .property("count", &BND_MeshTopologyEdgeList::Count)
+    .function("edgeLine", &BND_MeshTopologyEdgeList::EdgeLine)
+    ;
+
   class_<BND_MeshFaceList>("MeshFaceList")
     .property("count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .function("get", &BND_MeshFaceList::GetFace)
@@ -938,6 +982,7 @@ void initMeshBindings(void*)
     .function("isManifold", &BND_Mesh::IsManifold)
     .property("hasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
     .function("vertices", &BND_Mesh::GetVertices)
+    .function("topologyEdges", &BND_Mesh::GetTopologyEdges)
     .function("faces", &BND_Mesh::GetFaces)
     .function("normals", &BND_Mesh::GetNormals)
     .function("textureCoordinates", &BND_Mesh::TextureCoordinates)
@@ -946,6 +991,7 @@ void initMeshBindings(void*)
     .function("destroyTopology", &BND_Mesh::DestroyTopology)
     .function("destroyTree", &BND_Mesh::DestroyTree)
     .function("destroyPartition", &BND_Mesh::DestroyPartition)
+    .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)

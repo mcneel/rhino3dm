@@ -122,6 +122,28 @@ public:
   //    public bool Remove(IEnumerable<int> indices, bool shrinkFaces)
 };
 
+class BND_MeshTopologyEdgeList
+{
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
+public:
+  BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+
+  int Count() const { return m_mesh->Topology().m_tope.Count(); }
+  //public IndexPair GetTopologyVertices(int topologyEdgeIndex)
+  //public int[] GetConnectedFaces(int topologyEdgeIndex)
+  //public int[] GetConnectedFaces(int topologyEdgeIndex, out bool[] faceOrientationMatchesEdgeDirection)
+  //public int[] GetEdgesForFace(int faceIndex)
+  //public int[] GetEdgesForFace(int faceIndex, out bool[] sameOrientation)
+  //public int GetEdgeIndex(int topologyVertex1, int topologyVertex2)
+  ON_Line EdgeLine(int topologyEdgeIndex) const;
+  //public bool CollapseEdge(int topologyEdgeIndex)
+  //public bool IsSwappableEdge(int topologyEdgeIndex)
+  //public bool SwapEdge(int topologyEdgeIndex)
+  //public bool IsHidden(int topologyEdgeIndex)
+
+};
+
 class BND_MeshNormalList
 {
   ON_ModelComponentReference m_component_reference;
@@ -251,7 +273,7 @@ public:
 
   BND_MeshVertexList GetVertices();
   //public Collections.MeshTopologyVertexList TopologyVertices
-  //public Collections.MeshTopologyEdgeList TopologyEdges
+  BND_MeshTopologyEdgeList GetTopologyEdges();
   BND_MeshNormalList GetNormals();
   BND_MeshFaceList GetFaces();
   //public Collections.MeshNgonList Ngons
@@ -266,7 +288,7 @@ public:
   void DestroyTree() { m_mesh->DestroyTree(); }
   void DestroyPartition() { m_mesh->DestroyPartition(); }
   //public bool EvaluateMeshGeometry(Surface surface)
-  //public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy)
+  void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
   //public void SetCachedTextureCoordinates(TextureMapping tm, ref Transform xf)
   //public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
   bool Compact() { return m_mesh->Compact(); }
