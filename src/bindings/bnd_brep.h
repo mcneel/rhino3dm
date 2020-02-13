@@ -7,6 +7,12 @@ void initBrepBindings(pybind11::module& m);
 void initBrepBindings(void* m);
 #endif
 
+class BND_BrepEdge : public BND_CurveProxy {
+  ON_BrepEdge* m_edge;
+public:
+  BND_BrepEdge(ON_BrepEdge* edge, const ON_ModelComponentReference* compref);
+};
+
 class BND_BrepFaceList {
   ON_ModelComponentReference m_component_reference;
   ON_Brep* m_brep = nullptr;
@@ -25,6 +31,16 @@ class BND_BrepSurfaceList {
   BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentReference& compref);
   int Count() const { return m_brep->m_S.Count(); }
   class BND_Surface* GetSurface(int i);
+};
+
+class BND_BrepEdgeList {
+  ON_ModelComponentReference m_component_reference;
+  ON_Brep* m_brep = nullptr;
+
+public:
+  BND_BrepEdgeList(ON_Brep* brep, const ON_ModelComponentReference& compref);
+  int Count() const { return m_brep->m_E.Count(); }
+  class BND_BrepEdge* GetEdge(int i);
 };
 
 class BND_Brep : public BND_GeometryBase
@@ -49,7 +65,7 @@ public:
   BND_Brep();
   //public Collections.BrepVertexList Vertices
   BND_BrepSurfaceList GetSurfaces();
-  //public Collections.BrepEdgeList Edges
+  BND_BrepEdgeList GetEdges();
   //public Collections.BrepTrimList Trims
   //public Collections.BrepLoopList Loops
   BND_BrepFaceList GetFaces();
