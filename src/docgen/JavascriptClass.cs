@@ -388,6 +388,8 @@ namespace docgen
                 return "any";
             if (type.Equals("float"))
                 return "number";
+            if (type.Equals("float[]"))
+                return "number[]";
             if (type.Equals("int[]"))
                 return "number[]";
             if (type.Equals("IEnumberable<Point3d>"))
@@ -406,10 +408,9 @@ namespace docgen
             if (type.Equals("Rhino.Geometry.BoundingBox"))
                 return "BoundingBox";
             if (type.Equals("MeshingParameterTextureRange"))
-                // ( Chuck ) MeshingParameterTextureRange does not currently generate its typescript class.
-                return "any";
-            if (type.Equals("PolylineCurve"))
-                return "Polylinecurve";
+                return "number";
+            if (type.Equals("System.Collections.Generic.IEnumerable<Point3d>"))
+                return "Point3dList";
 
             if (type.Contains("Geometry."))
                 return type.Replace("Geometry.", "");
