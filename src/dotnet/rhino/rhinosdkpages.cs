@@ -73,7 +73,30 @@ namespace Rhino.UI
         (g_activated_delegate = RhinoPageActivatedHook),
         (g_override_supress_enter_escape = RhinoPageOverrideSupressEnterEscapeHook)
       );
+
+      AppDomain.CurrentDomain.ProcessExit += SetRhinoPageHooks_Dtor;
     }
+
+    private static void SetRhinoPageHooks_Dtor(object sender, EventArgs e)
+    {
+      AppDomain.CurrentDomain.ProcessExit -= SetRhinoPageHooks_Dtor;
+
+      UnsafeNativeMethods.CRhCmnPageBase_SetHooks(
+        (g_rhino_page_get_string = null),
+        (g_rhino_page_get_icon = null),
+        (g_rhino_page_get_window = null),
+        (g_rhino_page_minimum_size = null),
+        (g_rhino_page_release = null),
+        (g_rhino_page_refresh = null),
+        (g_host_created = null),
+        (g_size_changed = null),
+        (g_show_delegate = null),
+        (g_show_help = null),
+        (g_activated_delegate = null),
+        (g_override_supress_enter_escape = null)
+      );
+    }
+
 
     internal delegate void RhinoPageGetStringDelegate(IntPtr constPointer, Guid runtimeId, UnsafeNativeMethods.CRhCmnPageBaseGetStringId stringId, IntPtr onWString);
     private static RhinoPageGetStringDelegate g_rhino_page_get_string;

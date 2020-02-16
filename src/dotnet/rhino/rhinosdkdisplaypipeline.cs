@@ -111,6 +111,9 @@ namespace Rhino.Display
     const int idxDrawObject = 6;
     const int idxObjectCulling = 7;
     const int idxPreDrawTransparentObjects = 8;
+    const int idxFrameSizeChanged = 9;
+    const int idxProjectionChanged = 10;
+    const int idxInitFrameBuffer = 11;
 
     private static void ConduitReport(int which)
     {
@@ -171,22 +174,29 @@ namespace Rhino.Display
     private static ConduitCallback m_ObjectCullingCallback;
     private static ConduitCallback m_CalcBoundingBoxCallback;
     private static ConduitCallback m_CalcBoundingBoxZoomExtentsCallback;
+    private static ConduitCallback m_InitFrameBufferCallback;
     private static ConduitCallback m_PreDrawObjectsCallback;
     private static ConduitCallback m_DrawObjectCallback;
     private static ConduitCallback m_PostDrawObjectsCallback;
     private static ConduitCallback m_DrawForegroundCallback;
     private static ConduitCallback m_DrawOverlayCallback;
     private static ConduitCallback m_PreDrawTransparentObjectsCallback;
+    private static ConduitCallback m_ProjectionChangedCallback;
+    internal delegate void DisplayModeChangedCallback(IntPtr pPipeline, Guid changed, Guid old);
+    private static DisplayModeChangedCallback m_DisplayModeChangedCallback;
 
     private static EventHandler<CullObjectEventArgs> m_objectCulling;
     private static EventHandler<CalculateBoundingBoxEventArgs> m_calcbbox;
     private static EventHandler<CalculateBoundingBoxEventArgs> m_calcbbox_zoomextents;
+    private static EventHandler<InitFrameBufferEventArgs> m_init_framebuffer;
     private static EventHandler<DrawEventArgs> m_predrawobjects;
     private static EventHandler<DrawObjectEventArgs> m_drawobject;
     private static EventHandler<DrawEventArgs> m_postdrawobjects;
     private static EventHandler<DrawEventArgs> m_drawforeground;
     private static EventHandler<DrawEventArgs> m_drawoverlay;
     private static EventHandler<DrawEventArgs> m_predrawtransparentobjects;
+    private static EventHandler<DrawEventArgs> m_projectionchanged;
+    private static EventHandler<DisplayModeChangedEventArgs> m_displaymode_changed;
 
     private static void OnObjectCulling(IntPtr pPipeline, IntPtr pConduit)
     {
@@ -226,6 +236,21 @@ namespace Rhino.Display
           m_calcbbox_zoomextents(null, new CalculateBoundingBoxEventArgs(pPipeline, pConduit));
         }
         catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
+
+    private static void OnInitFrameBuffer(IntPtr pPipeline, IntPtr pConduit)
+    {
+      if (m_init_framebuffer != null)
+      {
+        try
+        {
+          m_init_framebuffer(null, new InitFrameBufferEventArgs(pPipeline, pConduit));
+        }
+        catch(Exception ex)
         {
           Runtime.HostUtils.ExceptionReport(ex);
         }
@@ -333,6 +358,35 @@ namespace Rhino.Display
         }
       }
     }
+    private static void OnProjectionChanged(IntPtr pPipeline, IntPtr pConduit)
+    {
+      if( m_projectionchanged != null)
+      {
+        try
+        {
+          m_projectionchanged(null, new DrawEventArgs(pPipeline, pConduit));
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
+
+    private static void OnDisplayModeChanged(IntPtr pPipeline, Guid changedId, Guid oldId)
+    {
+      if( m_displaymode_changed != null)
+      {
+        try
+        {
+          m_displaymode_changed(null, new DisplayModeChangedEventArgs(pPipeline, changedId, oldId));
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
 
 
     public static event EventHandler<CullObjectEventArgs> ObjectCulling
@@ -416,6 +470,32 @@ namespace Rhino.Display
         {
           UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxCalcBoundingBoxZoomExtents, null, m_report);
           m_CalcBoundingBoxZoomExtentsCallback = null;
+        }
+      }
+    }
+
+    public static event EventHandler<InitFrameBufferEventArgs> InitFrameBuffer
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(m_init_framebuffer, value))
+          return;
+
+        if (null == m_init_framebuffer)
+        {
+          m_InitFrameBufferCallback = OnInitFrameBuffer;
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxInitFrameBuffer, m_InitFrameBufferCallback, m_report);
+        }
+        m_init_framebuffer -= value;
+        m_init_framebuffer += value;
+      }
+      remove
+      {
+        m_init_framebuffer -= value;
+        if (m_init_framebuffer == null)
+        {
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxInitFrameBuffer, null, m_report);
+          m_InitFrameBufferCallback = null;
         }
       }
     }
@@ -604,6 +684,63 @@ namespace Rhino.Display
         }
       }
     }
+
+    /// <summary>
+    /// Called when the projection changes for a viewport being drawn.
+    /// </summary>
+    public static event EventHandler<DrawEventArgs> ViewportProjectionChanged
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(m_projectionchanged, value))
+          return;
+
+        if (null == m_projectionchanged)
+        {
+          m_ProjectionChangedCallback = OnProjectionChanged;
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxProjectionChanged, m_ProjectionChangedCallback, m_report);
+        }
+
+        m_projectionchanged -= value;
+        m_projectionchanged += value;
+      }
+      remove
+      {
+        m_projectionchanged -= value;
+        if (m_projectionchanged == null)
+        {
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxProjectionChanged, null, m_report);
+          m_ProjectionChangedCallback = null;
+        }
+      }
+    }
+
+    public static event EventHandler<DisplayModeChangedEventArgs> DisplayModeChanged
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(m_displaymode_changed, value))
+          return;
+
+        if (null == m_displaymode_changed)
+        {
+          m_DisplayModeChangedCallback = OnDisplayModeChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetDisplayModeChangedEventCallback(m_DisplayModeChangedCallback);
+        }
+
+        m_displaymode_changed -= value;
+        m_displaymode_changed += value;
+      }
+      remove
+      {
+        m_displaymode_changed -= value;
+        if (m_displaymode_changed == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetDisplayModeChangedEventCallback(null);
+          m_DisplayModeChangedCallback = null;
+        }
+      }
+    }
     #endregion
 
     #region properties
@@ -655,6 +792,25 @@ namespace Rhino.Display
     /// Gets a value indicating whether or not this pipeline is drawing into an OpenGL context.
     /// </summary>
     public bool IsOpenGL => UnsafeNativeMethods.CRhinoDisplayPipeline_UsesOpenGL(m_ptr);
+
+    /// <summary>
+    /// If Rhino is using OpenGL for display, this function will return
+    /// major.minor version of OpenGL available for this instance of Rhino
+    /// </summary>
+    /// <param name="coreProfile">
+    /// If true, OpenGL is being used in "core profile" mode
+    /// </param>
+    /// <returns>
+    /// major version * 10 + minor version
+    /// For example, OpenGL 4.5 returns 45
+    /// </returns>
+    [CLSCompliant(false)]
+    public static uint AvailableOpenGLVersion(out bool coreProfile)
+    {
+      coreProfile = false;
+      uint level = UnsafeNativeMethods.CRhinoDisplayPipeline_OpenGLVersion(ref coreProfile);
+      return level;
+    }
 
     /// <summary>
     /// Gets a value that indicates whether this pipeline is currently using an 
@@ -828,6 +984,55 @@ namespace Rhino.Display
         }
         return object_stack;
       }
+    }
+
+    /// <summary>
+    /// Opens the pipeline.
+    /// </summary>
+    /// <returns>True if the pipeline was opened, false if it was already open
+    /// or failed to open.</returns>
+    public bool Open()
+    {
+      return UnsafeNativeMethods.CRhinoDisplayPipeline_OpenPipeline(m_ptr);
+    }
+
+    /// <summary>
+    /// Is true of the pipeline is open, false otherwise.
+    /// </summary>
+    public bool IsOpen
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDisplayPipeline_PipelineOpened(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// Closes the pipeline.
+    /// </summary>
+    /// <returns>True if the pipeline was closed, false if it was already closed
+    /// or failed to close.</returns>
+    public bool Close()
+    {
+      return UnsafeNativeMethods.CRhinoDisplayPipeline_ClosePipeline(m_ptr);
+    }
+
+    /// <summary>
+    /// Clones the pipeline. Creates an identical copy of "this" pipeline.
+    /// Copies all conduits from "this" pipeline to the new pipeline.
+    /// </summary>
+    /// <returns>The newly cloned pipeline if successful, null otherwise.
+    /// or failed to close.</returns>
+    public DisplayPipeline Clone(RhinoViewport viewport)
+    {
+      IntPtr ptr_viewport = viewport.NonConstPointer();
+      IntPtr cloned_pipeline = UnsafeNativeMethods.CRhinoDisplayPipeline_ClonePipeline(m_ptr, ptr_viewport);
+      if(cloned_pipeline != IntPtr.Zero)
+      {
+        return new DisplayPipeline(cloned_pipeline);
+      }
+
+      return null;
     }
 
     /// <summary>
@@ -1142,6 +1347,24 @@ namespace Rhino.Display
     #endregion
 
     #region methods
+
+    /// <summary>
+    /// Convert HLSL code to a different shading language
+    /// </summary>
+    /// <param name="hlsl"></param>
+    /// <param name="functionName"></param>
+    /// <param name="targetLanguage"></param>
+    /// <returns></returns>
+    public static string CrossCompileHLSL(string hlsl, string functionName, ShaderLanguage targetLanguage)
+    {
+      using (var outString = new Rhino.Runtime.InteropWrappers.StringWrapper())
+      {
+        IntPtr ptrString = outString.NonConstPointer;
+        UnsafeNativeMethods.RHC_TranslateHLSLFromMem(hlsl, functionName, 0, targetLanguage, ptrString);
+        return outString.ToString();
+      }
+    }
+
     /// <summary>
     /// Returns a value indicating if only points on the side of the surface that
     /// face the camera are displayed.
@@ -1477,6 +1700,36 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Draw a shaded mesh representation of a SubD
+    /// </summary>
+    /// <param name="subd">SubD to draw</param>
+    /// <param name="material">Material to draw faces with</param>
+    public void DrawSubDShaded(SubD subd, DisplayMaterial material)
+    {
+      IntPtr const_ptr_subd = subd.ConstPointer();
+      IntPtr const_ptr_material = IntPtr.Zero;
+      if (null != material)
+        const_ptr_material = material.ConstPointer();
+      IntPtr subd_display = subd.SubDDisplay();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedSubD(m_ptr, const_ptr_subd, const_ptr_material, subd_display);
+    }
+
+    /// <summary>
+    /// Draws all the wireframe curves of a SubD object
+    /// </summary>
+    /// <param name="subd">SubD to draw</param>
+    /// <param name="color">wire color</param>
+    /// <param name="thickness">wire thickness</param>
+    public void DrawSubDWires(SubD subd, System.Drawing.Color color, float thickness)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_subd = subd.ConstPointer();
+      IntPtr subd_display = subd.SubDDisplay();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires(m_ptr, const_ptr_subd, argb, thickness, subd_display);
+
+    }
+
+    /// <summary>
     /// Draws a shaded mesh representation of a brep.
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
@@ -1545,6 +1798,19 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_extrusion = extrusion.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawExtrusion(m_ptr, const_ptr_extrusion, argb, wireDensity);
+    }
+
+    /// <summary>
+    /// Draws a shaded Brep with Zebra stripe preview.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    /// <param name="color">Object color.</param>
+    public void DrawZebraPreview(Brep brep, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = brep.ConstPointer();
+      IntPtr cache = brep.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawZebraPreview(m_ptr, const_ptr_brep, argb, cache);
     }
 
     /// <summary>
@@ -2107,6 +2373,94 @@ namespace Rhino.Display
       IntPtr cache_handle = hatch.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch(ptr_this, const_ptr_hatch, argb_fill, argb_border, cache_handle);
     }
+
+    /// <summary>
+    /// Draw a two point gradient filled hatch
+    /// </summary>
+    /// <param name="hatch"></param>
+    /// <param name="color1"></param>
+    /// <param name="color2"></param>
+    /// <param name="point1"></param>
+    /// <param name="point2"></param>
+    /// <param name="linearGradient"></param>
+    /// <param name="boundaryThickness"></param>
+    /// <param name="boundaryColor"></param>
+    public void DrawGradientHatch(Hatch hatch, System.Drawing.Color color1, System.Drawing.Color color2, Point3d point1, Point3d point2,
+      bool linearGradient, float boundaryThickness, System.Drawing.Color boundaryColor)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_hatch = hatch.ConstPointer();
+      int argb_fill1 = color1.ToArgb();
+      int argb_fill2 = color2.ToArgb();
+      int argb_border = boundaryColor.ToArgb();
+      IntPtr cache_handle = hatch.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch2(ptr_this, const_ptr_hatch, argb_fill1, argb_fill2,
+        point1, point2, linearGradient, boundaryThickness, argb_border, cache_handle);
+      GC.KeepAlive(hatch);
+    }
+
+    public void DrawGradientHatch(Hatch hatch, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
+      bool linearGradient, float repeat, float boundaryThickness, System.Drawing.Color boundaryColor)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_hatch = hatch.ConstPointer();
+      var argbList = new System.Collections.Generic.List<int>();
+      var positionList = new System.Collections.Generic.List<double>();
+      foreach(var stop in stops)
+      {
+        argbList.Add(stop.Color.ToArgb());
+        positionList.Add(stop.Position);
+      }
+      int[] argbs = argbList.ToArray();
+      double[] positions = positionList.ToArray();
+
+      int argb_border = boundaryColor.ToArgb();
+      IntPtr cache_handle = hatch.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch3(ptr_this, const_ptr_hatch, argbs.Length, argbs, positions,
+        point1, point2, linearGradient, repeat, boundaryThickness, argb_border, cache_handle);
+      GC.KeepAlive(hatch);
+    }
+
+    public void DrawGradientMesh(Mesh mesh, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
+      bool linearGradient, float repeat)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_mesh = mesh.ConstPointer();
+      var argbList = new System.Collections.Generic.List<int>();
+      var positionList = new System.Collections.Generic.List<double>();
+      foreach (var stop in stops)
+      {
+        argbList.Add(stop.Color.ToArgb());
+        positionList.Add(stop.Position);
+      }
+      int[] argbs = argbList.ToArray();
+      double[] positions = positionList.ToArray();
+
+      IntPtr cache_handle = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawGradientMesh(ptr_this, const_ptr_mesh, argbs.Length, argbs, positions,
+        point1, point2, linearGradient, repeat, cache_handle);
+      GC.KeepAlive(mesh);
+    }
+
+    public void DrawGradientLines(System.Collections.Generic.IEnumerable<Line> lines, float strokeWidth, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
+      bool linearGradient, float repeat)
+    {
+      IntPtr ptr_this = NonConstPointer();
+
+      var linesList = new System.Collections.Generic.List<Line>(lines);
+      var argbList = new System.Collections.Generic.List<int>();
+      var positionList = new System.Collections.Generic.List<double>();
+      foreach (var stop in stops)
+      {
+        argbList.Add(stop.Color.ToArgb());
+        positionList.Add(stop.Position);
+      }
+      Line[] linesArray = linesList.ToArray();
+      int[] argbs = argbList.ToArray();
+      double[] positions = positionList.ToArray();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawGradientLines(ptr_this, linesArray.Length, linesArray, strokeWidth, argbs.Length, argbs, positions, point1, point2, linearGradient, repeat);
+    }
+
     /// <summary>
     /// Draws the edges of a BoundingBox.
     /// </summary>
@@ -3105,6 +3459,81 @@ namespace Rhino.Display
       m_bbox.Union(box);
       UnsafeNativeMethods.CChannelAttr_GetSetBBox(m_pDisplayConduit, true, ref m_bbox);
     }
+  }
+
+  public class InitFrameBufferEventArgs : EventArgs
+  {
+    IntPtr m_pDisplayPipeline;
+    IntPtr m_pConduit;
+    internal InitFrameBufferEventArgs(IntPtr pDisplayPipeline, IntPtr pConduit)
+    {
+      m_pDisplayPipeline = pDisplayPipeline;
+      m_pConduit = pConduit;
+    }
+
+    public void SetFill(System.Drawing.Color color)
+    {
+      SetFill(color, color, color, color);
+    }
+
+    public void SetFill(System.Drawing.Color top, System.Drawing.Color bottom)
+    {
+      SetFill(top, bottom, top, bottom);
+    }
+
+    public void SetFill(System.Drawing.Color topLeft, System.Drawing.Color bottomLeft, System.Drawing.Color topRight, System.Drawing.Color bottomRight)
+    {
+      int tl = topLeft.ToArgb();
+      int bl = bottomLeft.ToArgb();
+      int tr = topRight.ToArgb();
+      int br = bottomRight.ToArgb();
+      UnsafeNativeMethods.CChannelAttributes_SetFill(m_pConduit, tl, bl, tr, br);
+    }
+  }
+
+  public class DisplayModeChangedEventArgs : EventArgs
+  {
+    internal IntPtr m_ptr_display_pipeline;
+    RhinoViewport m_viewport;
+
+    internal DisplayModeChangedEventArgs(IntPtr pDisplayPipeline, Guid changedDisplayModeId, Guid oldDisplayModeId)
+    {
+      m_ptr_display_pipeline = pDisplayPipeline;
+      ChangedDisplayModeId = changedDisplayModeId;
+      OldDisplayModeId = oldDisplayModeId;
+    }
+    private DisplayModeChangedEventArgs() { }
+
+    public RhinoViewport Viewport
+    {
+      get
+      {
+        if (null == m_viewport)
+        {
+          IntPtr pViewport = UnsafeNativeMethods.CRhinoDisplayPipeline_RhinoViewport(m_ptr_display_pipeline);
+          if (IntPtr.Zero != pViewport)
+            m_viewport = new RhinoViewport(null, pViewport);
+        }
+        return m_viewport;
+      }
+    }
+
+    RhinoDoc m_doc;
+    public RhinoDoc RhinoDoc
+    {
+      get
+      {
+        if (m_doc == null)
+        {
+          uint serial_number = UnsafeNativeMethods.CRhinoDisplayPipeline_RhinoDoc(m_ptr_display_pipeline);
+          m_doc = RhinoDoc.FromRuntimeSerialNumber(serial_number);
+        }
+        return m_doc;
+      }
+    }
+
+    public Guid OldDisplayModeId { get; }
+    public Guid ChangedDisplayModeId { get; }
   }
 
   /// <summary>

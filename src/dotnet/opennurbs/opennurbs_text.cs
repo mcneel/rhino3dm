@@ -3,6 +3,7 @@ using System;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
@@ -255,6 +256,7 @@ namespace Rhino.Geometry
         GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
       }
     }
+
     #endregion properties originating from dim style that can be overridden
 
     /// <summary>

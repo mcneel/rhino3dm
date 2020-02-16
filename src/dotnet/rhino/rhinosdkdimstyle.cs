@@ -591,6 +591,40 @@ namespace Rhino.DocObjects
     }
 
 #region enum properties
+    public DimensionStyle.TextFit FitText
+    {
+      get
+      {
+        IntPtr ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_DimStyle_TextFit(ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_DimStyle_SetTextFit(ptr_this, value);
+      }
+    }
+
+    public DimensionStyle.ArrowFit FitArrow
+    {
+      get
+      {
+        IntPtr ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_DimStyle_ArrowFit(ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_DimStyle_SetArrowFit(ptr_this, value);
+      }
+    }
+
+    public bool ForceDimensionLineBetweenExtensionLines
+    {
+      get { return GetBool(Field.ForceDimLine); }
+      set { SetBool(Field.ForceDimLine, value); }
+    }
+
     int GetInt(Field field)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -870,6 +904,34 @@ namespace Rhino.DocObjects
 
 #region string properties
 
+    public char DecimalSeparator
+    {
+      get
+      {
+        using (var sh = new StringWrapper())
+        {
+          IntPtr const_ptr_this = ConstPointer();
+          IntPtr ptr_string = sh.NonConstPointer;
+          if (UnsafeNativeMethods.ON_DimStyle_DecimalSeparator(const_ptr_this, ptr_string))
+          {
+            var str = sh.ToString();
+            if (str.Length > 0)
+            {
+              return str[0];
+            }
+          }
+        }
+        return '.';
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        string s = string.Empty;
+        s += value;
+        UnsafeNativeMethods.ON_DimStyle_SetDecimalSeparator(ptr_this, s);
+      }
+    }
+
     string GetString(Field field)
     {
       using (var sh = new StringWrapper())
@@ -880,6 +942,7 @@ namespace Rhino.DocObjects
         return sh.ToString();
       }
     }
+
     void SetString(Field field, string s)
     {
       IntPtr ptr_this = NonConstPointer();

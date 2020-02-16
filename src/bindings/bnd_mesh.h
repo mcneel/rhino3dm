@@ -65,15 +65,11 @@ public:
   double GetRefineAngle() const { return m_mesh_parameters.RefineAngleRadians(); }
   void SetRefineAngle(double d) { m_mesh_parameters.SetRefineAngleRadians(d); }
 
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_MeshingParameters* Decode(pybind11::dict jsonObject);
-#endif
+  BND_DICT Encode() const;
+  static BND_MeshingParameters* Decode(BND_DICT jsonObject);
 
 #if defined(__EMSCRIPTEN__)
   emscripten::val toJSON(emscripten::val key);
-  emscripten::val Encode() const;
-  static BND_MeshingParameters* Decode(emscripten::val jsonObject);
 #endif
 
 };
@@ -88,25 +84,64 @@ public:
   ON_3fPoint* begin();
   ON_3fPoint* end();
 
-  int Count() const;
+  int Count() const { return m_mesh->VertexCount(); }
   void SetCount(int i);
+  //    public int Capacity get;set;
   ON_3fPoint GetVertex(int i) const;
   void SetVertex(int i, ON_3fPoint pt);
+  bool UseDoublePrecisionVertices() const { return m_mesh->HasDoublePrecisionVertices(); }
+  void SetUseDoublePrecisionVertices(bool b);
+  void Clear();
+  void Destroy();
+  int Add(float x, float y, float z);
+  //    public int Add(double x, double y, double z)
+  //    public int Add(Point3f vertex)
+  //    public int Add(Point3d vertex)
+  //    public void AddVertices(IEnumerable<Point3d> vertices)
+  //    public void AddVertices(IEnumerable<Point3f> vertices)
+  //bool SetVertex(int index, float x, float y, float z) { return m_mesh->SetVertex(index, ON_3fPoint(x, y, z)); }
+  //    public bool SetVertex(int index, double x, double y, double z, bool updateNormals)
+  //    public bool SetVertex(int index, double x, double y, double z)
+  //    public bool SetVertex(int index, Point3f vertex)
+  //    public bool SetVertex(int index, Point3d vertex)
+  bool IsHidden(int vertexIndex) const;
+  void Hide(int vertexIndex);
+  void Show(int vertexIndex);
+  void HideAll();
+  void ShowAll();
+  int CullUnused() { return m_mesh->CullUnusedVertices(); }
+  bool CombineIdentical(bool ignoreNormals, bool ignoreAdditional) { return m_mesh->CombineIdenticalVertices(ignoreNormals, ignoreAdditional); }
+  //    public int[] GetVertexFaces(int vertexIndex)
+  //    public int[] GetTopologicalIndenticalVertices(int vertexIndex)
+  //    public int[] GetConnectedVertices(int vertexIndex)
+  //    public Point3d Point3dAt(int index)
+  //    public Point3f[] ToPoint3fArray()
+  //    public Point3d[] ToPoint3dArray()
+  //    public float[] ToFloatArray()
+  //    public bool Remove(int index, bool shrinkFaces)
+  //    public bool Remove(IEnumerable<int> indices, bool shrinkFaces)
 };
 
-class BND_MeshFaceList
+class BND_MeshTopologyEdgeList
 {
   ON_ModelComponentReference m_component_reference;
   ON_Mesh* m_mesh = nullptr;
 public:
-  BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
-  int Count() const;
-  #if defined(__EMSCRIPTEN__)
-  emscripten::val GetFace(int i) const;
-  #endif
-  #if defined(ON_PYTHON_COMPILE)
-  pybind11::list GetFace(int i) const;
-  #endif
+  BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+
+  int Count() const { return m_mesh->Topology().m_tope.Count(); }
+  //public IndexPair GetTopologyVertices(int topologyEdgeIndex)
+  //public int[] GetConnectedFaces(int topologyEdgeIndex)
+  //public int[] GetConnectedFaces(int topologyEdgeIndex, out bool[] faceOrientationMatchesEdgeDirection)
+  //public int[] GetEdgesForFace(int faceIndex)
+  //public int[] GetEdgesForFace(int faceIndex, out bool[] sameOrientation)
+  //public int GetEdgeIndex(int topologyVertex1, int topologyVertex2)
+  ON_Line EdgeLine(int topologyEdgeIndex) const;
+  //public bool CollapseEdge(int topologyEdgeIndex)
+  //public bool IsSwappableEdge(int topologyEdgeIndex)
+  //public bool SwapEdge(int topologyEdgeIndex)
+  //public bool IsHidden(int topologyEdgeIndex)
+
 };
 
 class BND_MeshNormalList
@@ -120,8 +155,80 @@ public:
   ON_3fVector* end();
 
   int Count() const;
+  // SetCount
+  //    public int Capacity get;set;
   ON_3fVector GetNormal(int i) const;
   void SetNormal(int i, ON_3fVector v);
+  void Clear();
+  void Destroy();
+  int Add(float x, float y, float z);
+  //    public int Add(double x, double y, double z)
+  //    public int Add(Vector3f normal)
+  //    public int Add(Vector3d normal)
+  //    public bool AddRange(Vector3f[] normals)
+  //    public bool SetNormal(int index, float x, float y, float z)
+  //    public bool SetNormal(int index, double x, double y, double z)
+  //    public bool SetNormal(int index, Vector3f normal)
+  //    public bool SetNormal(int index, Vector3d normal)
+  //    public bool SetNormals(Vector3f[] normals)
+  //    public float[] ToFloatArray()
+  bool ComputeNormals() { return m_mesh->ComputeVertexNormals(); }
+  bool UnitizeNormals() { return m_mesh->UnitizeVertexNormals(); }
+  void Flip() { m_mesh->FlipVertexNormals(); }
+};
+
+class BND_MeshFaceList
+{
+  ON_ModelComponentReference m_component_reference;
+  ON_Mesh* m_mesh = nullptr;
+public:
+  BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+  int Count() const { return m_mesh->FaceCount(); }
+  void SetCount(int value) {
+    m_mesh->m_F.Reserve(value);
+    m_mesh->m_F.SetCount(value);
+  }
+  int QuadCount() const { return m_mesh->QuadCount(); }
+  int TriangleCount() const { return m_mesh->TriangleCount(); }
+  //int VertexCount() const { return m_mesh->VertexCount(); }
+  int Capacity() const { return m_mesh->m_F.Capacity(); }
+  void SetCapacity(int c) { m_mesh->m_F.SetCapacity(c); }
+  void Clear() { m_mesh->m_F.SetCount(0); }
+  void Destroy() { m_mesh->m_F.SetCapacity(0); }
+  //    public int AddFace(MeshFace face)
+  int AddFace(int vertex1, int vertex2, int vertex3) { return AddFace2(vertex1, vertex2, vertex3, vertex3); }
+  int AddFace2(int vertex1, int vertex2, int vertex3, int vertex4);
+  //    public int[] AddFaces(IEnumerable<MeshFace> faces)
+  //    public void Insert(int index, MeshFace face)
+  //    public bool SetFace(int index, MeshFace face)
+  bool SetFace(int index, int vertex1, int vertex2, int vertex3) { return SetFace2(index, vertex1, vertex2, vertex3, vertex3); }
+  bool SetFace2(int index, int vertex1, int vertex2, int vertex3, int vertex4);
+  BND_TUPLE GetFace(int i) const;
+  //    public MeshFace this[int index]
+//    public bool GetFaceVertices(int faceIndex, out Point3f a, out Point3f b, out Point3f c, out Point3f d)
+//    public BoundingBox GetFaceBoundingBox(int faceIndex)
+//    public Point3d GetFaceCenter(int faceIndex)
+//    public int[] AdjacentFaces(int faceIndex)
+//    BND_TUPLE ToIntArray(bool asTriangles) const;
+//    public int[] ToIntArray(bool asTriangles)
+//    public int[] ToIntArray(bool asTriangles, ref List<int> replacedIndices)
+
+
+  //int DeleteFaces(IEnumerable<int> faceIndexes)
+  //int DeleteFaces(IEnumerable<int> faceIndexes, bool compact)
+  void RemoveAt(int index) { m_mesh->m_F.Remove(index); }
+  //public void RemoveAt(int index, bool compact)
+  bool ConvertQuadsToTriangles() { return m_mesh->ConvertQuadsToTriangles(); }
+  int ConvertNonPlanarQuadsToTriangles(double planarTolerance, double angleToleranceRadians, int splitMethod) {
+    return m_mesh->ConvertNonPlanarQuadsToTriangles(planarTolerance, angleToleranceRadians, splitMethod);
+  }
+  bool ConvertTrianglesToQuads(double angleToleranceRadians, double minimumDiagonalLengthRatio) {
+    return m_mesh->ConvertTrianglesToQuads(angleToleranceRadians, minimumDiagonalLengthRatio);
+  }
+  int CullDegenerateFaces() { return m_mesh->CullDegenerateFaces(); }
+  bool IsHidden(int faceIndex) { return m_mesh->FaceIsHidden(faceIndex); }
+  bool HasNakedEdges(int faceIndex);
+  //int[] GetTopologicalVertices(int faceIndex)
 };
 
 class BND_MeshVertexColorList
@@ -161,14 +268,12 @@ public:
   BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref);
 
   bool IsClosed() const { return m_mesh->IsClosed(); }
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple IsManifold(bool topologicalTest) const;
-#endif
+  BND_TUPLE IsManifold(bool topologicalTest) const;
   bool HasCachedTextureCoordinates() const { return m_mesh->HasCachedTextureCoordinates(); }
 
   BND_MeshVertexList GetVertices();
   //public Collections.MeshTopologyVertexList TopologyVertices
-  //public Collections.MeshTopologyEdgeList TopologyEdges
+  BND_MeshTopologyEdgeList GetTopologyEdges();
   BND_MeshNormalList GetNormals();
   BND_MeshFaceList GetFaces();
   //public Collections.MeshNgonList Ngons
@@ -183,7 +288,7 @@ public:
   void DestroyTree() { m_mesh->DestroyTree(); }
   void DestroyPartition() { m_mesh->DestroyPartition(); }
   //public bool EvaluateMeshGeometry(Surface surface)
-  //public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy)
+  void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
   //public void SetCachedTextureCoordinates(TextureMapping tm, ref Transform xf)
   //public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
   bool Compact() { return m_mesh->Compact(); }
@@ -198,6 +303,11 @@ public:
   //public IEnumerable<MeshNgon> GetNgonAndFacesEnumerable()
   //public int GetNgonAndFacesCount()
 
+#if defined(ON_WASM_COMPILE)
+  BND_DICT ToThreejsJSON() const;
+  BND_DICT ToThreejsJSONRotate(bool rotateToYUp) const;
+  static BND_Mesh* CreateFromThreejsJSON(BND_DICT data);
+#endif
 
 protected:
   void SetTrackedPointer(ON_Mesh* mesh, const ON_ModelComponentReference* compref);

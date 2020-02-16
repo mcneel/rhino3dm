@@ -49,4 +49,6 @@ public:
   bool Translate(ON_3dVector delta) { return m_circle.Translate(delta); }
   void Reverse() { m_circle.Reverse(); }
   class BND_NurbsCurve* ToNurbsCurve() const;
+
+  BND_DICT Encode() const;
 };

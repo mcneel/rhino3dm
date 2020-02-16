@@ -48,8 +48,8 @@ public:
   //public Surface[] Split(int direction, double parameter)
   //public Brep ToBrep()
   //public int HasNurbsForm()
-  //public NurbsSurface ToNurbsSurface()
-  //public NurbsSurface ToNurbsSurface(double tolerance, out int accuracy)
+  BND_NurbsSurface* ToNurbsSurfaceDefault() { return std::get<0>(ToNurbsSurface(0.0)); }
+  std::tuple<BND_NurbsSurface*, int> ToNurbsSurface(double tolerance);
   bool IsPlanar(double tolerance = ON_ZERO_TOLERANCE) const { return m_surface->IsPlanar(nullptr, tolerance); }
   //public bool TryGetPlane(out Plane plane)
   //public bool TryGetPlane(out Plane plane, double tolerance)

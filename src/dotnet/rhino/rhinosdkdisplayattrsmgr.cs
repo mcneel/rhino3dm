@@ -188,7 +188,18 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="id">The id of the existing display mode to delete.</param>
     /// <returns>true if successful, false oteherwise.</returns>
+    [Obsolete("Use DisplayModeDescription.DeleteDisplayMode")]
     public static bool DeleteDiplayMode(Guid id)
+    {
+      return DeleteDisplayMode(id);
+    }
+
+    /// <summary>
+    /// Deletes an existing display mode.
+    /// </summary>
+    /// <param name="id">The id of the existing display mode to delete.</param>
+    /// <returns>true if successful, false oteherwise.</returns>
+    public static bool DeleteDisplayMode(Guid id)
     {
       return UnsafeNativeMethods.CRhinoDisplayAttrsMgr_DeleteDescription(id);
     }

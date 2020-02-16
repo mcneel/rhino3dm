@@ -305,7 +305,7 @@ RH_C_FUNCTION void ON_Hatch_LoopCurve3d(const ON_Hatch* pConstHatch, ON_SimpleAr
     }
   }
 }
-/*
+
 RH_C_FUNCTION ON_SimpleArray<ON_ColorStop>* ON_ColorStopArray_New()
 {
   return new ON_SimpleArray<ON_ColorStop>();
@@ -372,4 +372,3 @@ RH_C_FUNCTION void ON_Hatch_SetGradientData(ON_Hatch* hatch, ON_3DPOINT_STRUCT s
     CRhGradientHatch::SetGradientColors(hatch, *stops);
 #endif
 }
-*/

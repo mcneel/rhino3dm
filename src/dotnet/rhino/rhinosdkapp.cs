@@ -447,6 +447,12 @@ namespace Rhino
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino5Id); }
     }
 
+    ///<summary>Gets the ID of Rhino 6.</summary>
+    public static Guid Rhino6Id
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino6Id); }
+    }
+
     ///<summary>Gets the current ID of Rhino.</summary>
     public static Guid CurrentRhinoId
     {
@@ -626,7 +632,6 @@ namespace Rhino
     public static void SetCommandPromptMessage(string prompt)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPromptMessage(prompt);
-      RhinoApp.Wait();
     }
 
     ///<summary>Sets the command prompt in Rhino.</summary>
@@ -637,14 +642,12 @@ namespace Rhino
     public static void SetCommandPrompt(string prompt, string promptDefault)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPrompt(prompt, promptDefault);
-      RhinoApp.Wait();
     }
     ///<summary>Set Rhino command prompt.</summary>
     ///<param name="prompt">The new prompt text.</param>
     public static void SetCommandPrompt(string prompt)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPrompt(prompt, null);
-      RhinoApp.Wait();
     }
 
     ///<summary>Rhino command prompt.</summary>
@@ -699,10 +702,25 @@ namespace Rhino
       UnsafeNativeMethods.CRhinoApp_SendKeystrokes(characters, appendReturn);
     }
 
-    ///<summary>Sets the focus to the main window.</summary>
+    /// <summary>
+    /// Sets the focus to the main window. This function attempts to use the
+    /// ActiveDoc on Mac to figure out which window to set focus to.
+    /// </summary>
     public static void SetFocusToMainWindow()
     {
-      UnsafeNativeMethods.CRhinoApp_SetFocusToMainWindow();
+      SetFocusToMainWindow(RhinoDoc.ActiveDoc);
+    }
+
+    /// <summary>
+    /// Sets the focus to the main windows for a given document
+    /// </summary>
+    /// <param name="doc">
+    /// the document to use for determing a "main window"
+    /// </param>
+    public static void SetFocusToMainWindow(RhinoDoc doc)
+    {
+      uint docSerialNumber = doc == null ? 0 : doc.RuntimeSerialNumber;
+      UnsafeNativeMethods.CRhinoApp_SetFocusToMainWindow(docSerialNumber);
     }
 
     ///<summary>Releases the mouse capture.</summary>
@@ -894,11 +912,14 @@ namespace Rhino
 
 
     /// <summary>
-    /// Gets the WindowHandle of the Rhino main window.
+    /// Gets the HWND of the Rhino main window.
     /// </summary>
     public static IntPtr MainWindowHandle()
     {
-      return UnsafeNativeMethods.CRhinoApp_GetMainFrameHWND();
+      IntPtr hMainWnd = UnsafeNativeMethods.CRhinoApp_GetMainFrameHWND();
+      if (IntPtr.Zero == hMainWnd && Rhino.Runtime.HostUtils.RunningOnWindows)
+        hMainWnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+      return hMainWnd;
     }
 
     static RhinoWindow g_main_window;
@@ -1079,6 +1100,31 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Returns true when Rhino is allowed to access the internet, false otherwise
+    /// </summary>
+    public static bool IsInternetAccessAllowed
+    {
+      get {
+        try
+        {
+          return GetBool(UnsafeNativeMethods.RhinoAppBool.IsInternetAccessAllowed);
+        }
+        catch (System.DllNotFoundException)
+        {
+          return true;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Returns true when Rhino is allowed to access the internet, false otherwise
+    /// </summary>
+    public static int UpdatesAndStatisticsStatus
+    {
+      get { return GetInt(UnsafeNativeMethods.RhinoAppInt.UpdatesAndStatisticsStatus); }
+    }
+
+    /// <summary>
     /// Returns number of days within which validation must occur. Zero when
     ///   validation grace period has expired.
     /// Raises InvalidLicenseTypeException if LicenseType is one of:
@@ -1178,7 +1224,7 @@ namespace Rhino
       }
     }
 
-    #region events
+#region events
     // Callback that doesn't pass any parameters or return values
     internal delegate void RhCmnEmptyCallback();
 
@@ -1479,10 +1525,81 @@ namespace Rhino
       }
     }
 
+    private static RhCmnEmptyCallback m_OnMainLoop;
+    private static void OnMainLoop()
+    {
+      if (m_main_loop_occured != null)
+      {
+        try
+        {
+          m_main_loop_occured(null, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
 
-    #endregion
+    private static EventHandler m_main_loop_occured;
 
-    #region RDK events
+    /// <summary>
+    /// Gets called every loop iteration inside Rhino's main message loop.
+    /// </summary>
+    public static event EventHandler MainLoop
+    {
+      add
+      {
+        lock (m_event_lock)
+        {
+          if (m_main_loop_occured == null)
+          {
+            m_OnMainLoop = OnMainLoop;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnMainLoopCallback(m_OnMainLoop);
+          }
+          m_main_loop_occured -= value;
+          m_main_loop_occured += value;
+        }
+      }
+      remove
+      {
+        lock (m_event_lock)
+        {
+          m_main_loop_occured -= value;
+          if (m_main_loop_occured == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnMainLoopCallback(null);
+            m_OnMainLoop = null;
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// This function makes it so that Rhino's main loop is executed continuously.
+    /// This is useful when Rhino needs to be doing something as often as possible, 
+    /// such as rendering a view at interactive frame rates.
+    /// </summary>
+    /// <returns>
+    /// True if the functionality was enabled successfully, false otherwise.
+    /// </returns>
+    public static bool EnableContinuousMainLoop()
+    {
+      return UnsafeNativeMethods.RhinoMainLoop_EnableContinuousMainLoop();
+    }
+
+    /// <summary>
+    /// This function makes it so that Rhino's main loop is not executed continuously.
+    /// This is default behavior.
+    /// </summary>
+    public static void DisableContinuousMainLoop()
+    {
+      UnsafeNativeMethods.RhinoMainLoop_DisableContinuousMainLoop();
+    }
+
+#endregion
+
+#region RDK events
 
     internal delegate void RhCmnOneUintCallback(uint docSerialNumber);
     private static RhCmnOneUintCallback m_OnNewRdkDocument;
@@ -1710,7 +1827,7 @@ namespace Rhino
       }
     }
 
-    #endregion
+#endregion
 
     static UI.ToolbarFileCollection m_toolbar_files;
     /// <summary>

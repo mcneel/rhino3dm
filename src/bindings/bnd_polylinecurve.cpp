@@ -34,7 +34,7 @@ BND_Polyline* BND_PolylineCurve::ToPolyline() const
 namespace py = pybind11;
 void initPolylineCurveBindings(pybind11::module& m)
 {
-  py::class_<BND_PolylineCurve, BND_Curve>(m, "Polylinecurve")
+  py::class_<BND_PolylineCurve, BND_Curve>(m, "PolylineCurve")
     .def(py::init<>())
     .def(py::init<const BND_Point3dList&>(), py::arg("points"))
     .def_property_readonly("PointCount", &BND_PolylineCurve::PointCount)
@@ -50,8 +50,9 @@ using namespace emscripten;
 
 void initPolylineCurveBindings(void*)
 {
-  class_<BND_PolylineCurve, base<BND_Curve>>("Polylinecurve")
+  class_<BND_PolylineCurve, base<BND_Curve>>("PolylineCurve")
     .constructor<>()
+    .constructor<const BND_Point3dList&>()
     .property("pointCount", &BND_PolylineCurve::PointCount)
     .function("point", &BND_PolylineCurve::Point)
     .function("setPoint", &BND_PolylineCurve::SetPoint)

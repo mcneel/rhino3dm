@@ -80,6 +80,44 @@ namespace Rhino.Geometry
         }
 
         /// <summary>
+        /// Creates new extruded mesh. Returns true if any edges or faces were extruded.
+        /// </summary>
+        /// <param name="extrudedMeshOut">Extruded mesh</param>
+        /// <param name="componentIndicesOut">Component indices of extruded faces and vertices</param>
+        public bool ExtrudedMesh(out Mesh extrudedMeshOut, out List<ComponentIndex> componentIndicesOut)
+        {
+          extrudedMeshOut = new Mesh();
+          var internalComponentIndicesOut = new INTERNAL_ComponentIndexArray();
+          bool ret = UnsafeNativeMethods.RHC_RhinoMeshExtruder_ExtrudedMeshComponentsOut(m_ptr, extrudedMeshOut.NonConstPointer(), internalComponentIndicesOut.NonConstPointer());
+          componentIndicesOut = new List<ComponentIndex>();
+          if (ret)
+          {
+            for (int i = 0; i < internalComponentIndicesOut.Count; i++)
+            {
+              var ci = internalComponentIndicesOut.ToArray()[i];
+              componentIndicesOut.Add(new ComponentIndex(ci.ComponentIndexType, ci.Index));
+            }
+          }
+          return ret;
+        }
+
+        /// <summary>
+        /// Return list of faces that were added to connect transformed edges/faces to non-transformed edges/faces.
+        /// </summary>
+        /// <returns>List of wall faces</returns>
+        public List<int> GetWallFaces()
+        {
+          List<int> res = new List<int>();
+          using (var wallFaces = new SimpleArrayInt())
+          {
+            IntPtr ptr_walFaces = wallFaces.NonConstPointer();
+            UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetWallFaces(m_ptr, ptr_walFaces);
+            res.AddRange(wallFaces.ToArray());
+          }
+          return res;
+        }
+
+        /// <summary>
         /// Transform of extrusion
         /// </summary>
         public Transform Transform

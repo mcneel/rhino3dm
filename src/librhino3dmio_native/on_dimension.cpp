@@ -242,31 +242,61 @@ RH_C_FUNCTION bool ON_V6_DimLinear_GetDisplayLines(
   return rc;
 }
 
-RH_C_FUNCTION ON_Dimension::ForceArrow ON_V6_Dimension_ForceArrowPosition(const ON_DimLinear* dimptr)
+RH_C_FUNCTION bool ON_V6_Dimension_ForceDimLine(
+  const ON_DimLinear* dimptr,
+  const ON_DimStyle* parent_style)
 {
   if (nullptr != dimptr)
-    return dimptr->ForceArrowPosition();
-  return ON_Dimension::ForceArrow::Auto;
+    return dimptr->ForceDimLine(parent_style);
+  return true;
 }
 
-RH_C_FUNCTION void ON_V6_Dimension_SetForceArrowPosition(ON_DimLinear* dimptr, ON_Dimension::ForceArrow force)
+RH_C_FUNCTION void ON_V6_Dimension_SetForceDimLine(
+  ON_DimLinear* dimptr,
+  const ON_DimStyle* parent_style,
+  bool force_dimline)
 {
   if (nullptr != dimptr)
-    dimptr->SetForceArrowPosition(force);
+    dimptr->SetForceDimLine(parent_style, force_dimline);
 }
 
-RH_C_FUNCTION ON_Dimension::ForceText ON_V6_Dimension_ForceTextPosition(const ON_DimLinear* dimptr)
+RH_C_FUNCTION ON_DimStyle::arrow_fit ON_V6_Dimension_ArrowFit(
+  const ON_DimLinear* dimptr, 
+  const ON_DimStyle* parent_style)
 {
   if (nullptr != dimptr)
-    return dimptr->ForceTextPosition();
-  return ON_Dimension::ForceText::Auto;
+    return dimptr->ArrowFit(parent_style);
+  return ON_DimStyle::arrow_fit::Auto;
 }
 
-RH_C_FUNCTION void ON_V6_Dimension_SetForceTextPosition(ON_DimLinear* dimptr, ON_Dimension::ForceText force)
+RH_C_FUNCTION void ON_V6_Dimension_SetArrowFit(
+  ON_DimLinear* dimptr, 
+  const ON_DimStyle* parent_style, 
+  ON_DimStyle::arrow_fit arrowfit)
 {
   if (nullptr != dimptr)
-    dimptr->SetForceTextPosition(force);
+    dimptr->SetArrowFit(parent_style, arrowfit);
 }
+
+RH_C_FUNCTION ON_DimStyle::text_fit ON_V6_Dimension_TextFit(
+  const ON_DimLinear* dimptr,
+  const ON_DimStyle* parent_style)
+{
+  if (nullptr != dimptr)
+    return dimptr->TextFit(parent_style);
+  return ON_DimStyle::text_fit::Auto;
+}
+
+RH_C_FUNCTION void ON_V6_Dimension_SetTextFit(
+  ON_DimLinear* dimptr,
+  const ON_DimStyle* parent_style,
+  ON_DimStyle::text_fit textfit)
+{
+  if (nullptr != dimptr)
+    dimptr->SetTextFit(parent_style, textfit);
+}
+
+
 
 // ON_DimAngular
 RH_C_FUNCTION ON_DimAngular* ON_DimAngular_New()

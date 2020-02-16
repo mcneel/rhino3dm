@@ -54,17 +54,54 @@ void BND_3dmObjectAttributes::SetName(const std::wstring name)
   m_attributes->m_name = name.c_str();
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_3dmObjectAttributes::GetGroupList() const
+BND_Color BND_3dmObjectAttributes::GetDrawColor(class BND_ONXModel* pDoc) const
 {
-  int count = m_attributes->GroupCount();
-  pybind11::tuple rc(count);
+  ONX_Model* model = pDoc ? pDoc->m_model.get() : nullptr;
+  ON_UUID viewport_id = ON_nil_uuid;
+  switch (m_attributes->ColorSource())
+  {
+  case ON::color_from_parent: // use color assigned to layer
+  case ON::color_from_layer: // use color assigned to layer
+    {
+      if (model)
+      {
+        ON_ModelComponentReference compref = model->LayerFromIndex(m_attributes->m_layer_index);
+        const ON_ModelComponent* model_component = compref.ModelComponent();
+        const ON_Layer* modellayer = ON_Layer::Cast(model_component);
+        if (modellayer)
+          return ON_Color_to_Binding(modellayer->PerViewportColor(viewport_id));
+      }
+    }
+    break;
+  case ON::color_from_object: // use color assigned to object
+    return ON_Color_to_Binding(m_attributes->m_color);
+    break;
+  case ON::color_from_material:  // use diffuse render material color
+  {
+    if (model)
+    {
+      ON_ModelComponentReference compref = model->RenderMaterialFromIndex(m_attributes->m_material_index);
+      const ON_ModelComponent* model_component = compref.ModelComponent();
+      const ON_Material* material = ON_Material::Cast(model_component);
+      if (material)
+        return ON_Color_to_Binding(material->Diffuse());
+    }
+  }
+  break;
+  }
+  return ON_Color_to_Binding(m_attributes->m_color);
+}
+
+
+BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
+{
+  const int count = m_attributes->GroupCount();
   const int* groups = m_attributes->GroupList();
+  BND_TUPLE rc = CreateTuple(count);
   for (int i = 0; i < count; i++)
-    rc[i] = groups[i];
+    SetTuple<int>(rc, i, groups[i]);
   return rc;
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,6 +131,7 @@ void init3dmAttributesBindings(pybind11::module& m)
     .def_property("MaterialSource", &BND_3dmObjectAttributes::GetMaterialSource, &BND_3dmObjectAttributes::SetMaterialSource)
     .def_property("ObjectColor", &BND_3dmObjectAttributes::GetObjectColor, &BND_3dmObjectAttributes::SetObjectColor)
     .def_property("PlotColor", &BND_3dmObjectAttributes::GetPlotColor, &BND_3dmObjectAttributes::SetPlotColor)
+    .def("DrawColor", &BND_3dmObjectAttributes::GetDrawColor, py::arg("doc"))
     .def_property("DisplayOrder", &BND_3dmObjectAttributes::GetDisplayOrder, &BND_3dmObjectAttributes::SetDisplayOrder)
     .def_property("PlotWeight", &BND_3dmObjectAttributes::PlotWeight, &BND_3dmObjectAttributes::SetPlotWeight)
     .def_property("ObjectDecoration", &BND_3dmObjectAttributes::GetObjectDecoration, &BND_3dmObjectAttributes::SetObjectDecoration)
@@ -135,6 +173,7 @@ void init3dmAttributesBindings(void*)
     .property("materialSource", &BND_3dmObjectAttributes::GetMaterialSource, &BND_3dmObjectAttributes::SetMaterialSource)
     .property("objectColor", &BND_3dmObjectAttributes::GetObjectColor, &BND_3dmObjectAttributes::SetObjectColor)
     .property("plotColor", &BND_3dmObjectAttributes::GetPlotColor, &BND_3dmObjectAttributes::SetPlotColor)
+    .function("drawColor", &BND_3dmObjectAttributes::GetDrawColor, allow_raw_pointers())
     .property("displayOrder", &BND_3dmObjectAttributes::GetDisplayOrder, &BND_3dmObjectAttributes::SetDisplayOrder)
     .property("plotWeight", &BND_3dmObjectAttributes::PlotWeight, &BND_3dmObjectAttributes::SetPlotWeight)
     .property("objectDecoration", &BND_3dmObjectAttributes::GetObjectDecoration, &BND_3dmObjectAttributes::SetObjectDecoration)
@@ -142,7 +181,7 @@ void init3dmAttributesBindings(void*)
     .property("viewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
     .property("activeSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
     .property("groupCount", &BND_3dmObjectAttributes::GroupCount)
-    //.function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
+    .function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
     .function("addToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .function("removeFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
     .function("removeFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)

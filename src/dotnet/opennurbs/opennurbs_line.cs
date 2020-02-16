@@ -10,7 +10,7 @@ namespace Rhino.Geometry
   /// </summary>
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 48)]
   [Serializable]
-  public struct Line : IEquatable<Line>, IEpsilonComparable<Line>, ICloneable
+  public struct Line : IEquatable<Line>, IEpsilonComparable<Line>, ICloneable, IFormattable
   {
     #region members
     internal Point3d m_from;
@@ -346,13 +346,22 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Contructs the string representation of this line, in the form "From,To".
+    /// Constructs the string representation of this line, in the form "From,To".
     /// </summary>
     /// <returns>A text string.</returns>
     [ConstOperation]
     public override string ToString()
     {
       return string.Format("{0},{1}", From.ToString(), To.ToString());
+    }
+
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      var f0 = From.ToString(format, formatProvider);
+      var f1 = To.ToString(format, formatProvider);
+      return $"{f0},{f1}";
     }
 
     /// <summary>

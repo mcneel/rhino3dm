@@ -13,6 +13,7 @@ using Rhino.Render;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects.Tables;
 using Rhino.FileIO;
+using System.Diagnostics;
 
 namespace Rhino.Commands
 {
@@ -270,11 +271,11 @@ namespace Rhino
       }
     }
   }
-    
+
   /// <summary>
   /// Represents an active model.
   /// </summary>
-  public sealed class RhinoDoc
+  public sealed class RhinoDoc : IDisposable
   {
 #region statics
     /// <summary>
@@ -345,12 +346,369 @@ namespace Rhino
     {
       return UnsafeNativeMethods.CRhinoFileMenu_Open(path);
     }
+
     public static bool ReadFile(string path, FileReadOptions options)
     {
+      if (ActiveDoc == null)
+        return false;
+
       IntPtr const_ptr_options = options.ConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoReadFile(path, const_ptr_options);
+      return UnsafeNativeMethods.RHC_RhinoReadFile(ActiveDoc.RuntimeSerialNumber, path, const_ptr_options);
     }
-    #endregion
+#endregion
+
+    public bool IsHeadless => UnsafeNativeMethods.CRhinoDoc_IsHeadless(RuntimeSerialNumber) != 0;
+
+    public void Dispose()
+    {
+      if (!IsHeadless)
+        return; // Managed by Rhino
+
+      if (RuntimeSerialNumber == 0)
+        return; // Already disposed
+
+      var activeDoc = ActiveDoc;
+      bool changeActiveDoc = false;
+      if (activeDoc != null && activeDoc.RuntimeSerialNumber == this.RuntimeSerialNumber)
+        changeActiveDoc = true;
+
+      GC.SuppressFinalize(this);
+
+      UnsafeNativeMethods.CRhinoDoc_Delete(RuntimeSerialNumber);
+      RuntimeSerialNumber = 0;
+
+      if( changeActiveDoc )
+      {
+        RhinoDoc[] docs = OpenDocuments();
+        if (docs.Length > 0)
+          ActiveDoc = docs[0];
+      }
+    }
+
+    ~RhinoDoc()
+    {
+      Debug.Assert(IsHeadless);
+
+      if (!RhinoApp.IsRunningHeadless)
+      {
+        EventHandler FinalizeOnUIThread = null;
+        RhinoApp.Idle += FinalizeOnUIThread = (sender, args) =>
+        {
+          RhinoApp.Idle -= FinalizeOnUIThread;
+
+          // Destroy the object in UI thread if we are not in Headless mode
+          UnsafeNativeMethods.CRhinoDoc_Delete(RuntimeSerialNumber);
+        };
+      }
+      else
+      {
+        // Destroy the object here if we are in Headless mode
+        UnsafeNativeMethods.CRhinoDoc_Delete(RuntimeSerialNumber);
+      }
+    }
+
+    #region IO Methods
+
+    /// <summary>
+    /// Create a new headless RhinoDoc from a template file
+    /// </summary>
+    /// <param name="file3dmTemplatePath">
+    /// Name of a Rhino model to use as a template to initialize the document.
+    /// If null, an empty document is created
+    /// </param>
+    /// <returns>
+    /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
+    /// lifetime is under your control. 
+    /// </returns>
+    [Obsolete("This function is being removed; use CreateHeadless function instead", true)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static RhinoDoc New(string file3dmTemplatePath)
+    {
+      return CreateHeadless(file3dmTemplatePath);
+    }
+
+    /// <summary>
+    /// Create a new headless RhinoDoc from a template file
+    /// </summary>
+    /// <param name="file3dmTemplatePath">
+    /// Name of a Rhino model to use as a template to initialize the document.
+    /// If null, an empty document is created
+    /// </param>
+    /// <returns>
+    /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
+    /// lifetime is under your control. 
+    /// </returns>
+    public static RhinoDoc CreateHeadless(string file3dmTemplatePath)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      if (!string.IsNullOrWhiteSpace(file3dmTemplatePath))
+      {
+        var info = new System.IO.FileInfo(file3dmTemplatePath);
+
+        if (string.Compare(info.Extension, ".3DM", true) != 0)
+          throw new ArgumentException("Template file path should have a 3DM extension", "file3DMTemplatePath");
+      }
+
+      uint serial_number = UnsafeNativeMethods.CRhinoDoc_New(file3dmTemplatePath);
+      return RhinoDoc.FromRuntimeSerialNumber(serial_number);
+    }
+
+    /// <summary>
+    /// Loads a 3DM file into a new headless RhinoDoc. Load is different than New in that
+    /// load sets the document path
+    /// </summary>
+    /// <param name="file3dmPath">
+    /// Path of a Rhino model to load.
+    /// </param>
+    /// <returns></returns>
+    [Obsolete("This function is being removed; use OpenHeadless function instead", true)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static RhinoDoc Load(string file3dmPath)
+    {
+      return OpenHeadless(file3dmPath);
+    }
+
+    /// <summary>
+    /// Opens a 3DM file into a new headless RhinoDoc.
+    /// </summary>
+    /// <param name="file3dmPath">
+    /// Path of a Rhino model to load.
+    /// </param>
+    /// <returns></returns>
+    public static RhinoDoc OpenHeadless(string file3dmPath)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      if (file3dmPath != null)
+      {
+        var info = new System.IO.FileInfo(file3dmPath);
+
+        if (string.Compare(info.Extension, ".3DM", true) != 0)
+          throw new ArgumentException("Source file path should have a 3DM extension", "file3DMPath");
+      }
+
+      uint serial_number = UnsafeNativeMethods.CRhinoDoc_Load(file3dmPath);
+      return RhinoDoc.FromRuntimeSerialNumber(serial_number);
+    }
+
+    /// <summary>
+    /// Import geometry into a RhinoDoc from a file. This can be any file format
+    /// that Rhino can import
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns>true on success</returns>
+    public bool Import(string filePath)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      var fileInfo = new System.IO.FileInfo(filePath);
+
+      if (!fileInfo.Exists)
+        throw new System.IO.FileNotFoundException(string.Empty, filePath);
+
+      using
+      (
+        var options = new FileReadOptions()
+        {
+          ImportMode = true,
+          BatchMode = true,
+          UseScaleGeometry = true,
+          ScaleGeometry = true
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoReadFile(RuntimeSerialNumber, filePath, const_ptr_options);
+      }
+    }
+
+    /// <summary>
+    /// Save doc to disk using the document's Path
+    /// </summary>
+    /// <returns></returns>
+    public bool Save()
+    {
+      if (string.IsNullOrEmpty(Path))
+        throw new InvalidOperationException("RhinoDoc.Path has no value.");
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = true,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
+      }
+    }
+
+    //public bool SaveIncremental()
+
+    // 20 June 2019 S. Baer
+    // Making private for now. I would like to figure out why we have a version parameter here.
+    bool SaveSmall(int version = 0)
+    {
+      if (string.IsNullOrEmpty(Path))
+        throw new InvalidOperationException("RhinoDoc.Path has no value.");
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = true,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+          WriteGeometryOnly = true,
+          FileVersion = version
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
+      }
+    }
+
+    /// <summary>
+    /// Save doc as a 3dm to a specified path using the current Rhino file version
+    /// </summary>
+    /// <param name="file3dmPath"></param>
+    /// <returns>true on success</returns>
+    public bool SaveAs(string file3dmPath)
+    {
+      return SaveAs(file3dmPath, 0);
+    }
+
+    /// <summary>
+    /// Save doc as a 3dm to a specified path
+    /// </summary>
+    /// <param name="file3dmPath"></param>
+    /// <param name="version">Rhino file version</param>
+    /// <returns>true on success</returns>
+    public bool SaveAs(string file3dmPath, int version)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      var info = new System.IO.FileInfo(file3dmPath);
+
+      if (string.Compare(info.Extension, ".3DM", true) != 0)
+        throw new ArgumentException("Destination file path should have a 3DM extension", "file3DMPath");
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = true,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+          FileVersion = version
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, file3dmPath, const_ptr_options);
+      }
+    }
+
+    /// <summary>
+    /// Save this document as a template
+    /// </summary>
+    /// <param name="file3dmTemplatePath"></param>
+    /// <returns>true on success</returns>
+    public bool SaveAsTemplate(string file3dmTemplatePath)
+    {
+      return SaveAsTemplate(file3dmTemplatePath, 0);
+    }
+
+    /// <summary>
+    /// Save this document as a template to a specific Rhino file version
+    /// </summary>
+    /// <param name="file3dmTemplatePath"></param>
+    /// <param name="version"></param>
+    /// <returns>true on success</returns>
+    public bool SaveAsTemplate(string file3dmTemplatePath, int version)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      var info = new System.IO.FileInfo(file3dmTemplatePath);
+
+      if (string.Compare(info.Extension, ".3DM", true) != 0)
+        throw new ArgumentException("Destination file path should have a 3DM extension", "file3DMTemplatePath");
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = false,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+          FileVersion = version
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, file3dmTemplatePath, const_ptr_options);
+      }
+    }
+
+    /// <summary>
+    /// Export the entire document to a file. All file formats that Rhino can export to
+    /// are supported by this function.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns>true on success</returns>
+    public bool Export(string filePath)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      new System.IO.FileInfo(filePath);
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = false,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, filePath, const_ptr_options);
+      }
+    }
+
+    /// <summary>
+    /// Export selected geometry to a file. All file formats that Rhino can export
+    /// to are supported by this function.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns>true on success</returns>
+    public bool ExportSelected(string filePath)
+    {
+      // This line checks filePath is a valid path, well formated, not too long...
+      new System.IO.FileInfo(filePath);
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = false,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = true,
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, filePath, const_ptr_options);
+      }
+    }
+
+    //public bool ExportWithOrigin(string filePath, Point3d Origin)
 
     /// <summary>
     /// Write information in this document to a file. 
@@ -384,6 +742,7 @@ namespace Rhino
       IntPtr const_ptr_options = options.ConstPointer();
       return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, path, const_ptr_options);
     }
+    #endregion
 
     /// <summary>
     /// Search for a file using Rhino's search path.  Rhino will look in the
@@ -411,6 +770,9 @@ namespace Rhino
     {
       // cast to int until I can get all of the other calls to m_runtime_serial_number switched over
       RuntimeSerialNumber = serialNumber;
+
+      if (!IsHeadless)
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -438,14 +800,21 @@ namespace Rhino
       var iterator = UnsafeNativeMethods.CRhinoDocIterator_New();
       if (iterator != IntPtr.Zero)
       {
-        for (var sn = UnsafeNativeMethods.RhinoDocIterator_FirstOrNext(iterator, 1); sn > 0; sn = UnsafeNativeMethods.RhinoDocIterator_FirstOrNext(iterator, 0))
+        try
         {
-          var doc = RhinoDoc.FromRuntimeSerialNumber(sn);
-          if (doc != null)
-            list.Add(doc);
+          for (var sn = UnsafeNativeMethods.RhinoDocIterator_FirstOrNext(iterator, 1); sn > 0; sn = UnsafeNativeMethods.RhinoDocIterator_FirstOrNext(iterator, 0))
+          {
+            var doc = RhinoDoc.FromRuntimeSerialNumber(sn);
+            if (doc != null)
+              list.Add(doc);
+          }
         }
-        UnsafeNativeMethods.CRhinoDocIterator_Delete(iterator);
+        finally
+        {
+          UnsafeNativeMethods.CRhinoDocIterator_Delete(iterator);
+        }
       }
+
       return list.ToArray();
     }
 
@@ -461,6 +830,13 @@ namespace Rhino
         uint id = UnsafeNativeMethods.CRhinoDoc_ActiveDocId();
         return FromRuntimeSerialNumber(id);
       }
+      set
+      {
+        uint serialNumber = 0;
+        if( value!=null )
+          serialNumber = value.RuntimeSerialNumber;
+        UnsafeNativeMethods.CRhinoDoc_MakeActive(serialNumber);
+      }
     }
 
     [Obsolete("Use FromRuntimeSerialNumber")]
@@ -471,37 +847,75 @@ namespace Rhino
       return FromRuntimeSerialNumber((uint)docId);
     }
 
+    static int HeadlessDocumentCountOnLastCull = 0;
+
     [CLSCompliant(false)]
     public static RhinoDoc FromRuntimeSerialNumber(uint serialNumber)
     {
       if (serialNumber == 0)
         return null;
-      // Hook document closed to remove closed RhinoDoc objects from the
-      // runtime dictionary
-      if (g_on_close_doc_remove == null)
+
+      RhinoDoc value = null;
+      int headless = UnsafeNativeMethods.CRhinoDoc_IsHeadless(serialNumber);
+
+      if (headless == 1)
       {
-        g_on_close_doc_remove = OnCloseDocRemoveFromDictionary;
-        CloseDocument += g_on_close_doc_remove;
+        lock (HeadlessDocuments)
+        {
+          if (HeadlessDocuments.TryGetValue(serialNumber, out WeakReference<RhinoDoc> reference))
+          {
+            reference.TryGetTarget(out value);
+            // if 'value' is null here means the object is collected
+          }
+          else
+          {
+            value = new RhinoDoc(serialNumber);
+            HeadlessDocuments[serialNumber] = new WeakReference<RhinoDoc>(value);
+          }
+
+          // If we have more than 1/8 potential garbage entries we try to cull those entries
+          if (HeadlessDocuments.Count - HeadlessDocumentCountOnLastCull > HeadlessDocuments.Count / 8)
+          {
+            // Remove collected entries
+            foreach (var key in HeadlessDocuments.Where(x => !x.Value.TryGetTarget(out RhinoDoc doc)).Select(x => x.Key).ToArray())
+              HeadlessDocuments.Remove(key);
+
+            HeadlessDocumentCountOnLastCull = HeadlessDocuments.Count;
+          }
+        }
       }
-      // Check to see if there is a document
-      g_docs.TryGetValue(serialNumber, out RhinoDoc value);
-      if (value != null)
-        return value; // Instance found so return it
-      // Create a new instance and add it to the dictionary
-      g_docs[serialNumber] = value = new RhinoDoc(serialNumber);
+      else if (headless == 0)
+      {
+        // Hook document closed to remove closed RhinoDoc objects from the
+        // runtime dictionary
+        if (g_on_close_doc_remove == null)
+        {
+          g_on_close_doc_remove = OnCloseDocRemoveFromDictionary;
+          CloseDocument += g_on_close_doc_remove;
+        }
+
+        // Check to see if there is a document or create and register a new one
+        if (!UIDocuments.TryGetValue(serialNumber, out value))
+        {
+          UIDocuments[serialNumber] = value = new RhinoDoc(serialNumber);
+        }
+      }
+
       return value;
     }
 
-    static readonly Dictionary<uint,RhinoDoc> g_docs = new Dictionary<uint, RhinoDoc>();
+    static readonly Dictionary<uint, RhinoDoc> UIDocuments = new Dictionary<uint, RhinoDoc>();
+    static readonly Dictionary<uint, WeakReference<RhinoDoc>> HeadlessDocuments = new Dictionary<uint, WeakReference<RhinoDoc>>();
 
     private static EventHandler<DocumentEventArgs> g_on_close_doc_remove;
     static void OnCloseDocRemoveFromDictionary(object sender, DocumentEventArgs e)
     {
       // If the document runtime serial number is in the dictionary then remove it
-      if (g_docs.ContainsKey(e.DocumentSerialNumber))
-        g_docs.Remove(e.DocumentSerialNumber);
+      if (UIDocuments.ContainsKey(e.DocumentSerialNumber))
+        UIDocuments.Remove(e.DocumentSerialNumber);
+
       // If all runtime documents are closed then remove the CloseDocument hook
-      if (g_docs.Count < 1)
+      if (UIDocuments.Count < 1)
       {
         CloseDocument -= g_on_close_doc_remove;
         // Setting the hook to null will signal FromRuntimeSerialNumber to set the
@@ -837,7 +1251,7 @@ namespace Rhino
     /// This is not a persistent value.
     /// </summary>
     [CLSCompliant(false)]
-    public uint RuntimeSerialNumber { get; }
+    public uint RuntimeSerialNumber { get; private set; }
 
     public DocObjects.EarthAnchorPoint EarthAnchorPoint
     {
@@ -959,6 +1373,15 @@ namespace Rhino
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelSpaceHatchScale); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelSpaceHatchScale, value); }
+    }
+
+    /// <summary>
+    /// True if hatch scaling is enabled, false if not.
+    /// </summary>
+    public bool ModelSpaceHatchScalingEnabled
+    {
+      get { return UnsafeNativeMethods.CRhinoDocProperties_IsHatchScalingEnabled(RuntimeSerialNumber); }
+      set { UnsafeNativeMethods.CRhinoDocProperties_EnableHatchScaling(RuntimeSerialNumber, value); }
     }
 
     /// <summary>
@@ -1345,6 +1768,20 @@ namespace Rhino
       get { return UnsafeNativeMethods.CRhinoDoc_CurrentUndoRecordSerialNumber(RuntimeSerialNumber); }
     }
 
+    /// <summary> Undo the last action </summary>
+    /// <returns> true on success </returns>
+    public bool Undo()
+    {
+      return UnsafeNativeMethods.CRhinoDoc_Undo(RuntimeSerialNumber);
+    }
+
+    /// <summary> Redo the last action that was "undone" </summary>
+    /// <returns> true on success </returns>
+    public bool Redo()
+    {
+      return UnsafeNativeMethods.CRhinoDoc_Redo(RuntimeSerialNumber);
+    }
+
     static List<CustomUndoCallback> g_custom_undo_callbacks;
     internal delegate void RhinoUndoEventHandlerCallback(Guid commandId, IntPtr actionDescription, int createdByRedo, uint sn);
     internal delegate void RhinoDeleteUndoEventHandlerCallback(uint sn);
@@ -1646,6 +2083,17 @@ namespace Rhino
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Returns true if Rhino is currently running a command.
+    /// </summary>
+    public bool IsCommandRunning
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDoc_InCommand(RuntimeSerialNumber, false) > 0;
+      }
     }
 
 #region events
@@ -2004,7 +2452,44 @@ namespace Rhino
     /// This event is raised after <see cref="EndOpenDocument"/> when the
     /// documents initial views have been created and initialized.
     /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Obsolete("Typo: use EndOpenDocumentInitialViewUpdate")]
     public static event EventHandler<DocumentOpenEventArgs> EndOpenDocumentInitialiViewUpdate
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (m_after_post_read_view_update_document == null)
+          {
+            g_on_end_open_document_initial_view_update = OnEndOpenDocumentInitialiViewUpdate;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnAfterPostReadViewUpdateCallback(g_on_end_open_document_initial_view_update);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_after_post_read_view_update_document -= value;
+          m_after_post_read_view_update_document += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_after_post_read_view_update_document -= value;
+          if (m_after_post_read_view_update_document == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnAfterPostReadViewUpdateCallback(null);
+            g_on_end_open_document_initial_view_update = null;
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// This event is raised after <see cref="EndOpenDocument"/> when the
+    /// documents initial views have been created and initialized.
+    /// </summary>
+    public static event EventHandler<DocumentOpenEventArgs> EndOpenDocumentInitialViewUpdate
     {
       add
       {
@@ -4888,11 +5373,9 @@ namespace Rhino.DocObjects.Tables
         case ObjectType.MorphControl:
           obj_id = AddMorphControl((MorphControl)geometry, attributes, history, reference);
           break;
-#if OPENNURBS_SUBD_WIP
         case ObjectType.SubD:
-          obj_id = AddSubD((SubD)geometry, attributes, history, reference);
+          obj_id = AddSubD(geometry as SubD, attributes, history, reference);
           break;
-#endif
         case ObjectType.Cage:
           throw new NotImplementedException("Add currently does not support cage types.");
         case ObjectType.Phantom:
@@ -5961,40 +6444,43 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddText(m_doc.RuntimeSerialNumber, AnnotationBase.PlainTextToRtf(text), ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes, pHistory, reference);
     }
 
-#if RHINO_SUBD_WIP
     /// <summary>Adds a SubD object to Rhino.</summary>
     /// <param name="subD">A duplicate of this SubD is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
-    Guid AddSubD(SubD subD)
+    public Guid AddSubD(SubD subD)
     {
       return AddSubD(subD, null);
     }
 
     /// <summary>Adds a SubD object to Rhino.</summary>
     /// <param name="subD">A duplicate of this SubD is added to Rhino.</param>
-    /// <param name="attributes">Attributes that will be linked with the surface object.</param>
+    /// <param name="attributes">Attributes that will be linked with the object.</param>
     /// <returns>A unique identifier for the object.</returns>
-    Guid AddSubD(SubD subD, ObjectAttributes attributes)
+    public Guid AddSubD(SubD subD, ObjectAttributes attributes)
     {
       return AddSubD(subD, attributes, null, false);
     }
 
     /// <summary>Adds a SubD object to Rhino.</summary>
     /// <param name="subD">A duplicate of this SubD is added to Rhino.</param>
-    /// <param name="attributes">Attributes that will be linked with the surface object.</param>
-    /// <param name="history">History data records.</param>
-    /// <param name="reference">If a reference, object will not be saved in the document.</param>
+    /// <param name="attributes">Attributes that will be linked with the object.</param>
+    /// <param name="history"></param>
+    /// <param name="reference"></param>
     /// <returns>A unique identifier for the object.</returns>
-    Guid AddSubD(SubD subD, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    public Guid AddSubD(SubD subD, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (subD == null) throw new ArgumentNullException(nameof(subD));
 
-      IntPtr p_const_subd = subD.ConstPointer();
+      IntPtr p_const_subdref = subD.SubDRefPointer();
       IntPtr p_const_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddSubD(m_doc.RuntimeSerialNumber, p_const_subd, p_const_attributes, p_history, reference);
+      IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
+      Guid id = UnsafeNativeMethods.CRhinoDoc_AddSubD(m_doc.RuntimeSerialNumber, p_const_subdref, p_const_attributes, pHistory, reference);
+      if (id != Guid.Empty)
+      {
+        subD.ChangeToConstObject(null);
+      }
+      return id;
     }
-#endif
 
     /// <summary>Adds a surface object to Rhino.</summary>
     /// <param name="surface">A duplicate of this surface is added to Rhino.</param>
@@ -7501,7 +7987,6 @@ namespace Rhino.DocObjects.Tables
       return (IntPtr.Zero != ptr_mesh_object);
     }
 
-#if RHINO_SUBD_WIP
     /// <summary>
     /// Replaces one object with a new SubD object.
     /// </summary>
@@ -7511,16 +7996,17 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the SubD is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
-    internal bool Replace(ObjRef objref, SubD subD)
+    public bool Replace(ObjRef objref, SubD subD)
     {
       if (null == objref || null == subD)
         return false;
       IntPtr ptr_const_objref = objref.ConstPointer();
-      IntPtr ptr_const_subd = subD.ConstPointer();
-      IntPtr ptr_subd_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject7(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_subd);
+      IntPtr ptr_subdref = subD.SubDRefPointer();
+      IntPtr ptr_subd_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject7(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_subdref);
+      if (ptr_subd_object != IntPtr.Zero)
+        subD.ChangeToConstObject(null);
       return (IntPtr.Zero != ptr_subd_object);
     }
-#endif
 
     /// <summary>Replaces one object with new mesh object.</summary>
     /// <param name="objectId">Id of object to be replaced.</param>
@@ -7537,7 +8023,6 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
-#if RHINO_SUBD_WIP
     /// <summary>Replaces one object with new subd object.</summary>
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="subD">
@@ -7545,14 +8030,13 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the mesh is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
-    bool Replace(Guid objectId, SubD subD)
+    public bool Replace(Guid objectId, SubD subD)
     {
       using (var objref = new ObjRef(objectId))
       {
         return Replace(objref, subD);
       }
     }
-#endif
 
     /// <summary>
     /// Replaces one object with new pointcloud object.

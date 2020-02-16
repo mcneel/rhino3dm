@@ -64,7 +64,7 @@ using System.Runtime.InteropServices;
 
 #if RHINO3DMIO_BUILD
 #if !DOTNETCORE
-[assembly: AssemblyVersion("6.0.0.1")]
+[assembly: AssemblyVersion("7.0.0.1")]
 #endif
 #endif
 

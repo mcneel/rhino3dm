@@ -1950,6 +1950,39 @@ namespace Rhino.DocObjects.Tables
       return rc;
     }
 
+    /// <summary>
+    /// Duplicates, or copies, a layer. Duplicated layers are added to the document.
+    /// </summary>
+    /// <param name="layerIndex">The index of the layer to duplicate.</param>
+    /// <param name="duplicateObjects">If true, then layer objects will also be duplicated and added to the document.</param>
+    /// <param name="duplicateSublayers">If true, then all sublayers of the layer will be duplicated.</param>
+    /// <returns>The indices of the newly added layers if successful, an empty array on failure.</returns>
+    public int[] Duplicate(int layerIndex, bool duplicateObjects, bool duplicateSublayers)
+    {
+      return Duplicate(new int[] { layerIndex }, duplicateObjects, duplicateSublayers);
+    }
+
+    /// <summary>
+    /// Duplicates, or copies, one or more layers. Duplicated layers are added to the document.
+    /// </summary>
+    /// <param name="layerIndices">The indices of layers to duplicate.</param>
+    /// <param name="duplicateObjects">If true, then layer objects will also be duplicated and added to the document.</param>
+    /// <param name="duplicateSublayers">If true, then all sublayers of the layer will be duplicated.</param>
+    /// <returns>The indices of the newly added layers if successful, an empty array on failure.</returns>
+    public int[] Duplicate(IEnumerable<int> layerIndices, bool duplicateObjects, bool duplicateSublayers)
+    {
+      using (var in_layers = new SimpleArrayInt(layerIndices))
+      using (var out_layers = new SimpleArrayInt())
+      {
+        var ptr_const_in_layers = in_layers.ConstPointer();
+        var ptr_out_layers = in_layers.NonConstPointer();
+        var rc = UnsafeNativeMethods.RHC_RhinoDuplicateLayers(m_doc.RuntimeSerialNumber, ptr_const_in_layers, duplicateObjects, duplicateSublayers, ptr_out_layers);
+        if (rc > 0)
+          return out_layers.ToArray();
+      }
+      return new int[0];
+    }
+
     public override IEnumerator<Layer> GetEnumerator()
     {
       return base.GetEnumerator();

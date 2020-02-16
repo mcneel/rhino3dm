@@ -12,3 +12,17 @@ InstanceDefinition
 
    .. py:attribute:: Description
 
+
+   .. py:attribute:: Name
+
+
+   .. py:attribute:: Id
+
+
+   .. py:method:: GetObjectIds()
+
+      [todo] add documentation
+
+   .. py:method:: IsInstanceGeometryId(id)
+
+      [todo] add documentation

@@ -4291,10 +4291,10 @@ namespace Rhino
           {
             doc.Load (stream);
           }
-          catch (Exception ex)
+          catch (Exception)
           {
             loaded = false;
-            Runtime.HostUtils.ExceptionReport(new SettingsXmlException (settings_file_name, ex));
+            // Runtime.HostUtils.ExceptionReport(new SettingsXmlException (settings_file_name, ex));
           }
 
           stream.Dispose();
@@ -4512,6 +4512,10 @@ namespace Rhino
     private void WatcherTimerCallback(object state)
     {
       // Ready to raise the SettingsSaved event so kill the timer
+      // 30 July 2019 John Morse - RH-51762
+      // Turn timer off
+      m_watcher_timer?.Change(Timeout.Infinite, Timeout.Infinite);
+      // Dispose of timer
       m_watcher_timer?.Dispose();
       m_watcher_timer = null;
       //

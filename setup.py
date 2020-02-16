@@ -44,6 +44,9 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
+        if self.inplace:
+            self.copy_extensions_to_source()
+
     def build_extension(self, ext):
         extdir = os.path.abspath(
             os.path.dirname(self.get_ext_fullpath(ext.name)))
@@ -96,6 +99,8 @@ class CMakeBuild(build_ext):
             system("make")
 
         os.chdir(current_dir)
+        if not os.path.exists(self.build_lib + "/rhino3dm"):
+            os.makedirs(self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
             shutil.copy(file, self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/*.so"):
@@ -105,7 +110,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='0.4.0',
+    version='0.10.0',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -113,7 +118,7 @@ setup(
 """# rhino3dm.py
 CPython package based on OpenNURBS with a RhinoCommon style
 
-Project Hompage at: https://github.com/mcneel/rhino3dm
+Project Homepage at: https://github.com/mcneel/rhino3dm
 
 ### Supported platforms
 * Python27 - Windows (32 and 64 bit)
@@ -128,11 +133,12 @@ Project Hompage at: https://github.com/mcneel/rhino3dm
 * start `python`
 ```
 from rhino3dm import *
-import requests
-req = requests.get("https://files.mcneel.com/rhino3dm/models/RhinoLogo.3dm"")
+import requests  # pip install requests
+
+req = requests.get("https://files.mcneel.com/TEST/Rhino Logo.3dm")
 model = File3dm.FromByteArray(req.content)
-for i in range(len(model.Objects)):
-    geometry = model.Objects[i].Geometry
+for obj in model.Objects:
+    geometry = obj.Geometry
     bbox = geometry.GetBoundingBox()
     print("{}, {}".format(bbox.Min, bbox.Max))
 ```
@@ -140,7 +146,8 @@ for i in range(len(model.Objects)):
     long_description_content_type="text/markdown",
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    ext_modules=[CMakeExtension('rhino3dm/_rhino3dm')],
+    ext_modules=[CMakeExtension('rhino3dm._rhino3dm')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    include_package_data=True
 )

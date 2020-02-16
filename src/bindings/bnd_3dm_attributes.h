@@ -65,6 +65,7 @@ public:
   void SetPlotColor(BND_Color c) { m_attributes->m_plot_color = Binding_to_ON_Color(c); }
   //bool HasMapping() const;
   //I wonder if we could implement the following with a File3dm
+  BND_Color GetDrawColor(class BND_ONXModel* document) const;
   //public System.Drawing.Color DrawColor(RhinoDoc document)
   //public System.Drawing.Color DrawColor(RhinoDoc document, Guid viewportId)
   //public System.Drawing.Color ComputedPlotColor(RhinoDoc document)
@@ -86,9 +87,7 @@ public:
   void SetSpace(ON::active_space a) { m_attributes->m_space = a; }
 
   int GroupCount() const { return m_attributes->GroupCount(); }
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetGroupList() const;
-#endif
+  BND_TUPLE GetGroupList() const;
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }
   void RemoveFromAllGroups() { m_attributes->RemoveFromAllGroups(); }

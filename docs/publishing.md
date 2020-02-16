@@ -5,7 +5,8 @@
 ### Node.js
 
 1. Build rhino3dm.js and rhino3dm.wasm
-2. Create a new directory and copy in rhino3dm.js and rhino3dm.wasm
+1. Build and run docgen (for type definitions)
+2. Create a new directory and copy in rhino3dm.js, rhino3dm.wasm and rhino3dm.d.ts
 3. Copy in RHINO3DM.JS.md and rename to README.md
 4. Update the version number in package.json and copy that in too
 5. From inside the new directory, run `npm publish` (see note 2)

@@ -107,3 +107,7 @@ Circle
 
       :return: A nurbs curve representation of this circle or None if no such representation could be made.
       :rtype: rhino3dm.NurbsCurve
+
+   .. py:method:: Encode()
+
+      [todo] add documentation

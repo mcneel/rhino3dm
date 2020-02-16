@@ -12,3 +12,7 @@ LineCurve
 
       :param rhino3dm.Point3d from: A start point.
       :param rhino3dm.Point3d to: An end point.
+
+   .. py:attribute:: Line
+
+      Line: Gets or sets the Line value inside this curve.

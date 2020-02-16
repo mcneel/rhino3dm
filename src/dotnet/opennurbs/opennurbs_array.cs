@@ -904,6 +904,107 @@ namespace Rhino.Runtime.InteropWrappers
     }
   }
 
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;ON_PolyLine*&gt;, ON_SimpleArray&lt;ON_3dPointArray*&gt;
+  /// If you are not writing C++ code then this class is not for you.
+  /// </summary>
+  public class SimpleArrayArrayPoint3d : IDisposable
+  {
+    private IntPtr m_ptr;
+
+    /// <summary>
+    /// Gets the const (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The const pointer.</returns>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-const pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-const pointer.</returns>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new empty <see cref="SimpleArrayArrayPoint3d"/> instance.
+    /// </summary>
+    public SimpleArrayArrayPoint3d()
+    {
+      m_ptr = UnsafeNativeMethods.ON_3dPointArrayArray_New(0);
+    }
+
+    /// <summary>
+    /// Gets the amount of polylines in this array.
+    /// </summary>
+    public int Count
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int count = UnsafeNativeMethods.ON_3dPointArrayArray_Count(ptr);
+        return count;
+      }
+    }
+
+    /// <summary>
+    /// Gets the amount of points in a polyline.
+    /// </summary>
+    public int PointCountAt(int index)
+    {
+        IntPtr ptr = ConstPointer();
+        int count = UnsafeNativeMethods.ON_3dPointArrayArray_PointCountAt(ptr, index);
+        return count;
+    }
+
+    /// <summary>
+    /// Gets a point in a polyline.
+    /// </summary>
+    public Point3d this[int index, int pointIndex]
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        Point3d pt = Point3d.Unset;
+        bool rc = UnsafeNativeMethods.ON_3dPointArrayArray_Indexer(ptr, index, pointIndex, ref pt);
+        if (!rc) throw new ArgumentOutOfRangeException("The combination of index and pointIndex is out of bounds.");
+        return pt;
+      }
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayArrayPoint3d()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_3dPointArrayArray_DeleteListAndContent(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
 
   /// <summary>
   /// Wrapper for ON_SimpleArray&lt;ON_Plane&gt;. If you are not writing C++ code
@@ -2570,5 +2671,168 @@ namespace Rhino.Runtime.InteropWrappers
       }
     }
   }
+
+
+  /// <summary>
+  /// For internal use only.
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 32)]
+  public struct CurveSegment // a.k.a. ON_CurveRegionBoundaryElement
+  {
+    #region Members
+    private int m_index;
+    private Interval m_subdomain;
+    private bool m_reversed;
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The index of the curve used by this boundary element.
+    /// </summary>
+    public int Index => m_index;
+
+    /// <summary>
+    /// The subdomain of the curve used by this boundary element.
+    /// </summary>
+    public Interval SubDomain => m_subdomain;
+
+    /// <summary>
+    /// True if this piece of the curve should be reversed.
+    /// </summary>
+    public bool Reversed => m_reversed;
+
+    #endregion
+  }
+  
+  internal class ClassArrayCurveRegion : IDisposable
+  {
+    IntPtr m_ptr; // ON_ClassArray<ON_CurveRegion>*
+
+    /// <summary>
+    /// Gets the const (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The const pointer.</returns>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-const pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-const pointer.</returns>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="ClassArrayCurveRegion"/> instance.
+    /// </summary>
+    public ClassArrayCurveRegion()
+    {
+      m_ptr = UnsafeNativeMethods.ON_ClassArrayCurveRegion_New();
+    }
+
+    /// <summary>
+    /// Gets the number of curve regions in this array.
+    /// </summary>
+    public int RegionCount
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionCount(ptr);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of boundaries in a specified region.
+    /// </summary>
+    public int RegionBoundaryCount(int regionIndex)
+    {
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryCount(ptr, regionIndex);
+    }
+
+    /// <summary>
+    /// Returns the number of boundaries elements in a specified region boundary.
+    /// </summary>
+    public int RegionBoundaryElementCount(int regionIndex, int boundaryIndex)
+    {
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryElementCount(ptr, regionIndex, boundaryIndex);
+    }
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array
+    /// </summary>
+    public CurveRegion[] ToArray()
+    {
+      var rc = new List<CurveRegion>();
+      var region_count = RegionCount;
+      for (var ri = 0; ri < region_count; ri++)
+      {
+        var region = new CurveRegion();
+        var region_boundary_count = RegionBoundaryCount(ri);
+        for (var rbi = 0; rbi < region_boundary_count; rbi++)
+        { 
+          var elements = CopyRegionBoundaryElements(ri, rbi);
+          if (elements.Length > 0)
+          {
+            var boundary = new CurveRegionBoundary();
+            boundary.AddRange(elements);
+            region.Add(boundary);
+          }
+        }
+        if (region.Count > 0)
+          rc.Add(region);
+      }
+      return rc.Count > 0 ? rc.ToArray() : new CurveRegion[0];
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    public CurveSegment[] CopyRegionBoundaryElements(int regionIndex, int boundaryIndex)
+    {
+      int count = RegionBoundaryElementCount(regionIndex, boundaryIndex);
+      if (count < 1)
+        return new CurveSegment[0];
+      var rc = new CurveSegment[count];
+      UnsafeNativeMethods.ON_ClassArrayCurveRegion_CopyRegionBoundaryElements(m_ptr, regionIndex, boundaryIndex, count, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~ClassArrayCurveRegion()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// This method is called with argument true when class user calls Dispose(), 
+    /// while with argument false when the Garbage Collector invokes the finalizer,
+    /// or Finalize() method. You must reclaim all used unmanaged resources in both cases,
+    /// and can use this chance to call Dispose on disposable fields if the argument is true.
+    /// Also, you must call the base virtual method within your overriding method.
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_ClassArrayCurveRegion_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+  }
+
 #endif
 }

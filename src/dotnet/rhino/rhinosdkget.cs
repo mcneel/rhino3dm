@@ -2734,11 +2734,33 @@ namespace Rhino.Input.Custom
     }
 
     public string ProgressMessage { get; set; }
+    /// <summary>
+    /// Awaits a particular task to finish.
+    /// </summary>
+    /// <param name="task">The task.</param>
+    /// <param name="doc">A document to set progress reporting.</param>
+    /// <returns>A result enumeration.</returns>
+    public Result Wait(Task task, RhinoDoc doc)
+    {
+      return WaitAll(new[] { task }, doc);
+    }
+    /// <summary>
+    /// Awaits a particular task to finish.
+    /// </summary>
+    /// <param name="task">The task.</param>
+    /// <param name="doc">A document to set progress reporting.</param>
+    /// <returns>A result enumeration.</returns>
     public Result Wait<TResult>(Task<TResult> task, RhinoDoc doc)
     {
       return WaitAll(new[] { task }, doc);
     }
-    public Result WaitAll<TResult>(IEnumerable<Task<TResult>> tasks, RhinoDoc doc)
+    /// <summary>
+    /// Awaits some tasks to finish.
+    /// </summary>
+    /// <param name="tasks">The tasks.</param>
+    /// <param name="doc">A document to set progress reporting.</param>
+    /// <returns>A result enumeration.</returns>
+    public Result WaitAll(IEnumerable<Task> tasks, RhinoDoc doc)
     {
       if (m_progress_reporting)
       {
@@ -2751,7 +2773,7 @@ namespace Rhino.Input.Custom
       }
       AcceptNothing(true);
       SetWaitDuration(300);
-      List<Task<TResult>> incomplete_tasks = new List<Task<TResult>>(tasks);
+      var incomplete_tasks = new List<Task>(tasks);
       Task[] tasks_to_run = new Task[incomplete_tasks.Count];
       for (int i = 0; i < tasks_to_run.Length; i++)
         tasks_to_run[i] = incomplete_tasks[i];
@@ -2786,7 +2808,7 @@ namespace Rhino.Input.Custom
         }
         bool redraw = false;
 
-        List<Task<TResult>> completed = new List<Task<TResult>>();
+        var completed = new List<Task>();
         for (int i = incomplete_tasks.Count - 1; i >= 0; i--)
         {
           var task = incomplete_tasks[i];
@@ -2807,7 +2829,7 @@ namespace Rhino.Input.Custom
           }
         }
 
-        if( Math.Abs(m_new_progress_value-m_old_progress_value) > 0.01 )
+        if (Math.Abs(m_new_progress_value - m_old_progress_value) > 0.01)
         {
           StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, (int)(m_new_progress_value * 100.0), true);
           m_old_progress_value = m_new_progress_value;
@@ -2823,6 +2845,16 @@ namespace Rhino.Input.Custom
       cursor.Clear();
       StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
       return Commands.Result.Success;
+    }
+    /// <summary>
+    /// Awaits some tasks to finish.
+    /// </summary>
+    /// <param name="tasks">The tasks.</param>
+    /// <param name="doc">A document to set progress reporting.</param>
+    /// <returns>A result enumeration.</returns>
+    public Result WaitAll<TResult>(IEnumerable<Task<TResult>> tasks, RhinoDoc doc)
+    {
+      return WaitAll((IEnumerable<Task>)tasks, doc);
     }
 
     readonly Progress<double> m_progress;

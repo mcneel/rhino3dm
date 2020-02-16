@@ -28,97 +28,27 @@ internal partial class UnsafeNativeMethods
     Init();
   }
 
-  static void Init()
+  private static bool g_paths_set = false;
+  public static void Init()
   {
-    bool onWindows = false;
-    bool onMac = false;
-    bool onLinux = false;
+    if (!g_paths_set)
     {
-      // https://stackoverflow.com/questions/38790802/determine-operating-system-in-net-core
-      // General purpose technique to detemine platform. This should get moved into HostUtils
+      var assembly_name = System.Reflection.Assembly.GetExecutingAssembly().Location;
+      string dir_name = System.IO.Path.GetDirectoryName(assembly_name);
 
-      string windir = Environment.GetEnvironmentVariable ("windir");
-      if (!string.IsNullOrEmpty (windir) && windir.Contains (@"\") && System.IO.Directory.Exists (windir)) {
-        onWindows = true;
-      } else if (System.IO.File.Exists (@"/proc/sys/kernel/ostype")) {
-        string osType = System.IO.File.ReadAllText (@"/proc/sys/kernel/ostype");
-        if (osType.StartsWith ("Linux", StringComparison.OrdinalIgnoreCase)) {
-          // Note: Android gets here too
-          onLinux = true;
-        } else {
-          // do nothing ??
-        }
-      } else if (System.IO.File.Exists (@"/System/Library/CoreServices/SystemVersion.plist")) {
-        // Note: iOS gets here too
-        onMac = true;
-      } else {
-        // do nothing ??
-      }
-    }
-
-    string extension = ".dll";
-    if (onMac)
-      extension = ".dylib";
-    if (onLinux)
-      extension = ".so";
-
-
-    // 1. check to see if the native library is in the same directory as this assembly
-    //    If the library exists in this location, always choose to use that
-    var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly ().Location;
-    string assemblyDirectory = System.IO.Path.GetDirectoryName (assemblyPath);
-    var nativeLibraryPath = System.IO.Path.Combine (assemblyDirectory, "librhino3dmio_native" + extension);
-    if (System.IO.File.Exists (nativeLibraryPath))
-      return;
-
-
-    {
-
-      string resourceName = null;
-      string tempPath = null;
-
-      if (onWindows)
+      switch(Environment.OSVersion.Platform)
       {
-        string env_path = Environment.GetEnvironmentVariable ("path");
-        resourceName = Environment.Is64BitProcess ?
-          "Rhino.win64_native.librhino3dmio_native.dll" :
-          "Rhino.win32_native.librhino3dmio_native.dll";
-        tempPath = System.IO.Path.Combine (System.IO.Path.GetTempPath (), Environment.Is64BitProcess ?
-          "rhino3dm_win64" : "rhino3dm_win32");
-
-        Environment.SetEnvironmentVariable ("path", env_path + ";" + tempPath);
-      }
-
-      if(onMac)
-      {
-        resourceName = "Rhino.macos_native.librhino3dmio_native.dylib";
-        tempPath = System.IO.Path.Combine (System.IO.Path.GetTempPath (), Environment.Is64BitProcess ?
-          "rhino3dm_macos64" : "rhino3dm_macos32");
-        string env_path = Environment.GetEnvironmentVariable ("DYLD_FRAMEWORK_PATH");
-        Environment.SetEnvironmentVariable ("DYLD_FRAMEWORK_PATH", env_path + ";" + tempPath);
-      }
-
-      if (!string.IsNullOrEmpty(resourceName) && !string.IsNullOrEmpty(tempPath))
-      {
-        // attempt to extract dll as embedded resource
-        var assembly = typeof (Import).Assembly;
-        var stream = assembly.GetManifestResourceStream (resourceName);
-        if (!System.IO.Directory.Exists (tempPath))
-          System.IO.Directory.CreateDirectory (tempPath);
-
-        int index = resourceName.IndexOf ("librhino3dm", StringComparison.InvariantCultureIgnoreCase);
-
-        var path = System.IO.Path.Combine (tempPath, resourceName.Substring(index));
-        try {
-          using (var fs = new System.IO.FileStream (path, System.IO.FileMode.OpenOrCreate)) {
-            stream.CopyTo (fs);
+        case PlatformID.Win32NT:
+          {
+            string env_path = Environment.GetEnvironmentVariable("path");
+            var sub_directory = Environment.Is64BitProcess ? "\\Win64" : "\\Win32";
+            Environment.SetEnvironmentVariable("path", env_path + ";" + dir_name + sub_directory);
           }
-        } catch (Exception) {
-        }
-
-        stream.Close ();
-
+          break;
+        default:
+          break; // This is solved on Mac by using a config file
       }
+      g_paths_set = true;
     }
   }
 #endif
@@ -143,7 +73,7 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoUiHooks_SetLocalizationLocaleId(Rhino.UI.Localization.SetCurrentLanguageIdDelegate hook);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void RHC_RhRegisterNamedCallbackProc(IntPtr callback);
+  internal static extern void RHC_RhRegisterNamedCallbackProc([MarshalAs(UnmanagedType.LPWStr)]string name, IntPtr callback);
 
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -160,6 +90,9 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RHC_SetPythonEvaluateCallback(Rhino.Runtime.HostUtils.EvaluateExpressionCallback callback);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void RHC_SetTextFieldEvalCallback(Rhino.Runtime.HostUtils.EvaluateTextFieldCallback callback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RHC_SetGetNowProc(Rhino.Runtime.HostUtils.GetNowCallback callback, Rhino.Runtime.HostUtils.GetFormattedTimeCallback formattedTimCallback);
@@ -405,10 +338,16 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetDetailEventCallback(Rhino.Display.RhinoPageView.PageViewCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetDisplayModeChangedEventCallback(Rhino.Display.DisplayPipeline.DisplayModeChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetTransformObjectsCallback(Rhino.RhinoDoc.RhinoTransformObjectsCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetOnMainLoopCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern uint CRhinoGetObject_GetObjects(IntPtr ptr, int min, int max, Rhino.Input.Custom.GetObject.GeometryFilterCallback cb);
@@ -719,7 +658,6 @@ internal partial class UnsafeNativeMethods
                                                                Rhino.RDK.Delegates.SETUINTGUIDBOOLPROC showchooselayersdlg,
                                                                Rhino.RDK.Delegates.NEWRENDERFRAMEPROC newrenderframe,
                                                                Rhino.RDK.Delegates.SETBOOLUINT showttmappingmesheditordockbar,
-                                                               Rhino.RDK.Delegates.SHOWPEPOPTIONSPROC ShowPepOptionsDof,
                                                                Rhino.RDK.Delegates.SHOWRENDERINGOPENFILEDLGPROC ShowRenderOpenFileDlg,
                                                                Rhino.RDK.Delegates.SHOWRENDERINGSAVEFILEDLGPROC ShowRenderSaveFileDlg,
                                                                Rhino.RDK.Delegates.SHOWCONTENTTYPEBROWSERPROC ShowContentTypeBrowser,
@@ -729,9 +667,6 @@ internal partial class UnsafeNativeMethods
                                                                Rhino.RDK.Delegates.SHOWPREVIEWPROPERTIESDLGPROC ShowPreviewPropertiesDlg,
                                                                Rhino.RDK.Delegates.CHOOSECONTENTPROC ChooseContent,
                                                                Rhino.RDK.Delegates.PEPPICKPOINTONIMAGEPROC PepPickPointOnImage,
-                                                               Rhino.RDK.Delegates.SHOWPEPOPTIONSPROC ShowPepOptionsFog,
-                                                               Rhino.RDK.Delegates.SHOWPEPOPTIONSPROC ShowPepOptionsGlow,
-                                                               Rhino.RDK.Delegates.SHOWPEPOPTIONSPROC ShowPepOptionsGlare,
                                                                Rhino.RDK.Delegates.SHOWLAYERMATERIALDIALOGPROC ShowLayerMaterialDialog,
                                                                Rhino.RDK.Delegates.PROMPTFORIMAGEDRAGOPTIONSDLGPROC PromptForImageDragOptionsDlg,
                                                                Rhino.RDK.Delegates.PROMPTFOROPENACTIONSDLGPROC PromptForOpenActionsDlg,
@@ -739,7 +674,23 @@ internal partial class UnsafeNativeMethods
                                                                Rhino.RDK.Delegates.OPENNAMEDVIEWANIMATIONSETTINGSDLG OpenNamedViewAnimationSettingsDlg,
                                                                Rhino.RDK.Delegates.PEPPICKRECTANGLEONIMAGEPROC PepPickRectangleOnImage,
                                                                Rhino.RDK.Delegates.SHOWCONTENTCTRLPROPDLGPROC ShowContentCtrlPropDlg,
-                                                               Rhino.RDK.Delegates.CREATEINPLACERENDERVIEWPROC CreateInPlaceRenderView);
+                                                               Rhino.RDK.Delegates.CREATEINPLACERENDERVIEWPROC CreateInPlaceRenderView,
+                                                               Rhino.RDK.Delegates.ADDCONTENTAUTOMATICUISECTIONPROC AddContentAutomaticUISection,
+                                                               Rhino.RDK.Delegates.SHOWNAMEDVIEWPROPERTIESDLG ShowNamedItemPropertiesDlg,
+                                                               Rhino.RDK.Delegates.ONPLUGINLOADEDPROC OnPlugInLoaded,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsFog,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionGlow,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsGlare,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsDOF,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsGamma,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingNone,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingBlackWhitePoint,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingLogarithmic,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingFilmic,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingFilmicAdvanced,
+                                                               Rhino.RDK.Delegates.NEWRENDERSETTINGPAGEPROC NewRenderSettingsPage,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsDithering,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsWatermark);
 
 
 
@@ -1026,11 +977,13 @@ internal partial class UnsafeNativeMethods
     [MarshalAs(UnmanagedType.LPWStr)] string caption,
     Guid tabId,
     Guid pluginId,
+    Guid renderEngineId,
     bool initialShow,
     bool alwaysShow,
     Rhino.Render.RenderPanels.CreatePanelCallback createProc,
     Rhino.Render.RenderPanels.VisiblePanelCallback visibleProc,
-    Rhino.Render.RenderPanels.DestroyPanelCallback destroyProc);
+    Rhino.Render.RenderPanels.DestroyPanelCallback destroyProc,
+    Rhino.Render.RenderPanels.SetControllerPanelCallback setcontrollerProc);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void Rdk_SetAsyncRenderContextCallbacks(
@@ -1050,7 +1003,9 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.VOID_SETINTINTINT_PROC SetImageSize,
     Rhino.RDK.Delegates.VOID_INTBOOL_PROC Refresh,
     Rhino.RDK.Delegates.SAVERENDERIMAGEASPROC SaveAs,
-    Rhino.RDK.Delegates.BOOL_INT_PROC CopyToClipboard);
+    Rhino.RDK.Delegates.BOOL_INT_PROC CopyToClipboard,
+    Rhino.RDK.Delegates.PICKPOINTONRENDERIMAGEPROC PickPoint,
+    Rhino.RDK.Delegates.PICKRECTANGLEONRENDERIMAGEPROC PickRectangle);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhCmnRdkRenderPlugIn_RegisterCustomDockBarTab(
@@ -1058,11 +1013,13 @@ internal partial class UnsafeNativeMethods
     [MarshalAs(UnmanagedType.LPWStr)] string caption,
     Guid tabId,
     Guid pluginId,
+    Guid renderEngineId,
     IntPtr icon,
     Rhino.Render.RenderPanels.CreatePanelCallback createProc,
     Rhino.Render.RenderPanels.VisiblePanelCallback visibleProc,
     Rhino.Render.RenderPanels.DestroyPanelCallback destroyProc,
-    Rhino.Render.RenderPanels.VisiblePanelCallback doHelpProc);
+    Rhino.Render.RenderPanels.VisiblePanelCallback doHelpProc,
+    Rhino.Render.RenderPanels.SetControllerPanelCallback setcontrollerProc);
 
   #endregion
 
@@ -1218,6 +1175,7 @@ internal partial class UnsafeNativeMethods
     Rhino.Runtime.ViewCaptureWriter.VectorBitmapProc bitmapCallback,
     Rhino.Runtime.ViewCaptureWriter.VectorRoundedRectProc roundedRectCallback,
     Rhino.Runtime.ViewCaptureWriter.VectorClipPathProc pathProc,
+    Rhino.Runtime.ViewCaptureWriter.VectorGradientProc gradientProc,
     uint docSerialNumber);
 
 
@@ -1228,7 +1186,13 @@ internal partial class UnsafeNativeMethods
   internal static extern void RhCmn_PropertiesEditor_SetDisplayPageHook(Guid id, IntPtr proc);
 
   [DllImport (Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void RhCmn_PropertiesEditor_SetRemovePageHook(Guid id, IntPtr proc);
+
+  [DllImport (Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RhCmn_PropertiesEditor_SetLoadPagesHook (Guid id, IntPtr proc);
+
+  [DllImport (Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void RhCmn_PropertiesEditor_SetLoadPlugInPagesHook(Guid id, IntPtr proc);
 
   [DllImport (Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RhCmn_PropertiesEditor_SeIncludeInNavHook (Guid id, IntPtr proc);
@@ -1246,5 +1210,10 @@ internal partial class UnsafeNativeMethods
     Rhino.RhinoFileEventWatcherHooks.FileWatcherEnableDelegate enable
   );
   #endregion
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_PostEffectUI_SetCallbacks(
+    Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC addsection
+  );
 #endif
 }

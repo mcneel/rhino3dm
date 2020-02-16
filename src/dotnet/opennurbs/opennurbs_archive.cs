@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Rhino.Runtime.InteropWrappers;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Rhino.Collections
 {
@@ -26,7 +28,8 @@ namespace Rhino.Collections
   /// <para>   |- ENDCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
   /// <para>ENDCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
   /// </remarks>
-  public class ArchivableDictionary : ICloneable, IDictionary<string, object>
+  [Serializable]
+  public class ArchivableDictionary : ICloneable, IDictionary<string, object>, ISerializable
   {
     private enum ItemType : int
     {
@@ -94,7 +97,8 @@ namespace Rhino.Collections
       OnGeometry = 47,
       OnObjRef = 48,
       ArrayObjRef = 49,
-      MAXVALUE = 49
+      ArrayGeometry = 50,
+      MAXVALUE = 50
     }
 
     int m_version;
@@ -178,6 +182,68 @@ namespace Rhino.Collections
     }
 
     /// <summary>
+    /// Protected constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected ArchivableDictionary(SerializationInfo info, StreamingContext context)
+    {
+      //int version = info.GetInt32("version");
+      int archive_3dm_version = info.GetInt32(Rhino.Runtime.CommonObject.ARCHIVE_3DM_VERSION);
+      int archive_opennurbs_version_int = info.GetInt32(Rhino.Runtime.CommonObject.ARCHIVE_OPENNURBS_VERSION);
+      uint archive_opennurbs_version = (uint)archive_opennurbs_version_int;
+      byte[] stream = info.GetValue("data", typeof(byte[])) as byte[];
+      IntPtr ptrReadBufferArchive = UnsafeNativeMethods.ON_ReadBufferArchiveFromStream(archive_3dm_version, archive_opennurbs_version, stream.Length, stream);
+      if (IntPtr.Zero == ptrReadBufferArchive)
+        throw new SerializationException("Unable to read ArchivableDictionary from binary archive");
+
+      FileIO.BinaryArchiveReader reader = new FileIO.BinaryArchiveReader(ptrReadBufferArchive);
+      Read(reader, this);
+      UnsafeNativeMethods.ON_ReadBufferArchive_Delete(ptrReadBufferArchive);
+    }
+
+    /// <summary>
+    /// Populates a System.Runtime.Serialization.SerializationInfo with the data needed to serialize the target object.
+    /// </summary>
+    /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
+    /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+    public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      Rhino.FileIO.SerializationOptions options = context.Context as Rhino.FileIO.SerializationOptions;
+
+      bool writeuserdata = true;
+      if (options != null)
+        writeuserdata = options.WriteUserData;
+      int rhino_version = (options != null) ? options.RhinoVersion : 6;
+
+      // 28 Aug 2014 S. Baer (RH-28446)
+      // We switched to 50,60,70,... type numbers after Rhino 4
+      if (rhino_version > 4 && rhino_version < 50)
+        rhino_version *= 10;
+
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewMemoryWriter(rhino_version);
+
+      if (pWriteBuffer != IntPtr.Zero)
+      {
+        FileIO.BinaryArchiveWriter writer = new FileIO.BinaryArchiveWriter(pWriteBuffer);
+        this.Write(writer);
+        int sz = (int)UnsafeNativeMethods.ON_WriteBufferArchive_SizeOfArchive(pWriteBuffer);
+        IntPtr pByteArray = UnsafeNativeMethods.ON_WriteBufferArchive_Buffer(pWriteBuffer);
+        byte[] bytearray = new byte[sz];
+        System.Runtime.InteropServices.Marshal.Copy(pByteArray, bytearray, 0, sz);
+
+        info.AddValue("version", 10000);
+        info.AddValue(Rhino.Runtime.CommonObject.ARCHIVE_3DM_VERSION, rhino_version);
+        uint archive_opennurbs_version = UnsafeNativeMethods.ON_WriteBufferArchive_OpenNURBSVersion(pWriteBuffer);
+        info.AddValue(Rhino.Runtime.CommonObject.ARCHIVE_OPENNURBS_VERSION, (int)archive_opennurbs_version);
+        info.AddValue("data", bytearray);
+      }
+      UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
+    }
+
+
+    /// <summary>
     /// If this dictionary is part of userdata (or is a UserDictionary), then
     /// this is the parent user data. null if this dictionary is not part of
     /// userdata
@@ -211,8 +277,9 @@ namespace Rhino.Collections
     ///The archive to read from. The archive position should be at the beginning of
     ///the dictionary
     ///</param>
+    ///<param name="dict">optional</param>
     ///<returns>new filled dictionary on success. null on failure.</returns>
-    internal static ArchivableDictionary Read(FileIO.BinaryArchiveReader archive)
+    internal static ArchivableDictionary Read(FileIO.BinaryArchiveReader archive, ArchivableDictionary dict=null)
     {
       Guid dictionary_id;
       uint version;
@@ -227,7 +294,8 @@ namespace Rhino.Collections
         return null;
       }
 
-      ArchivableDictionary dict = new ArchivableDictionary((int)version, dictionary_name);
+      if( dict == null )
+        dict = new ArchivableDictionary((int)version, dictionary_name);
 
       const int MAX_ITYPE = (int)ItemType.MAXVALUE;
       while( true )
@@ -572,6 +640,14 @@ namespace Rhino.Collections
 #endif
           }
           break;
+        case ItemType.ArrayGeometry: //50
+          {
+
+            var geometryArray = archive.ReadGeometryArray();
+            if (geometryArray != null)
+              rc = Set(key, geometryArray);
+          }
+          break;
       }
       return rc;
     }
@@ -764,6 +840,9 @@ namespace Rhino.Collections
           archive.WriteObjRefArray((IEnumerable<DocObjects.ObjRef>)val);
 #endif
           break;
+        case ItemType.ArrayGeometry: //50
+          archive.WriteGeometryArray((IEnumerable<Geometry.GeometryBase>)val);
+          break;
       }
       bool rc = archive.EndWriteDictionaryEntry();
       return rc;    
@@ -824,6 +903,38 @@ namespace Rhino.Collections
         if (null == rc)
           return null;
         return ((DictionaryItem)rc).m_value;
+      }
+      set
+      {
+        if (value is int)
+          Set(key, (int)value);
+        else if (value is long)
+          Set(key, (long)value);
+        else if (value is bool)
+          Set(key, (bool)value);
+        else if (value is double)
+          Set(key, (double)value);
+        else if (value is string)
+          Set(key, value as string);
+        else if (value is Geometry.GeometryBase)
+          Set(key, value as Geometry.GeometryBase);
+        else if (value is IEnumerable<Geometry.GeometryBase>)
+          Set(key, value as IEnumerable<Geometry.GeometryBase>);
+        else if( value is IEnumerable<object>)
+        {
+          var geometryList = new List<Geometry.GeometryBase>();
+          foreach(var item in value as IEnumerable<object>)
+          {
+            Geometry.GeometryBase g = item as Geometry.GeometryBase;
+            if (g != null)
+              geometryList.Add(g);
+            else
+              throw new NotSupportedException("You must use the SetXXX() methods to set the content of this archive.");
+          }
+          Set(key, geometryList);
+        }
+        else
+          throw new NotSupportedException("You must use the SetXXX() methods to set the content of this archive.");
       }
     }
 
@@ -1703,6 +1814,8 @@ namespace Rhino.Collections
     public bool Set(string key, IEnumerable<DocObjects.ObjRef> val) { return SetItem(key, ItemType.ArrayObjRef, val); }
 #endif
 
+    public bool Set(string key, IEnumerable<Geometry.GeometryBase> val) { return SetItem(key, ItemType.ArrayGeometry, val); }
+
     bool SetItem(string key, ItemType it, object val)
     {
       if (string.IsNullOrEmpty(key) || val == null || it == ItemType.Undefined)
@@ -1947,7 +2060,7 @@ namespace Rhino.Collections
       }
       set
       {
-        throw new NotSupportedException("You must use the SetXXX() methods to set the content of this archive.");
+        this[key] = value;
       }
     }
 
@@ -2623,6 +2736,23 @@ namespace Rhino.FileIO
     }
 #endif //RHINO_SDK
 #endif
+
+    public void WriteGeometryArray(IEnumerable<Geometry.GeometryBase> geometry)
+    {
+      int count = 0;
+      foreach (var g in geometry)
+        count++;
+
+      WriteInt(count);
+
+      foreach (var g in geometry)
+      {
+        WriteGeometry(g);
+        if (m_write_error_occured)
+          throw new BinaryArchiveException("WriteStringArray failed");
+      }
+    }
+
 
     /// <summary>
     /// Writes a <see cref="Rhino.Geometry.Interval"/> value to the archive.
@@ -3802,6 +3932,24 @@ namespace Rhino.FileIO
       return Geometry.GeometryBase.CreateGeometryHelper(ptr_geometry, null);
     }
 
+    public Geometry.GeometryBase[] ReadGeometryArray()
+    {
+      Geometry.GeometryBase[] rc = null;
+      int count = ReadInt();
+      if (count >= 0)
+      {
+        rc = new Geometry.GeometryBase[count];
+        for (int i = 0; i < count; i++)
+        {
+          rc[i] = ReadGeometry();
+        }
+        if (m_read_error_occured)
+          throw new BinaryArchiveException("ReadGeometryArray failed");
+      }
+      return rc;
+
+    }
+
     /// <summary>
     /// Reads a <see cref="Rhino.Render.RenderSettings"/>-derived object from the archive.
     /// </summary>
@@ -4049,7 +4197,7 @@ namespace Rhino.FileIO
 #if RHINO_SDK
       RhinoVersion = RhinoApp.ExeVersion;
 #else
-      RhinoVersion = 5;
+      RhinoVersion = 7;
 #endif
       WriteUserData = true;
     }

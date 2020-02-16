@@ -904,6 +904,138 @@ namespace Rhino.ApplicationSettings
     }
   }
 
+  /// <summary>
+  /// Represents a snapshot of <see cref="DraftAngleAnalysisSettings"/>
+  /// </summary>
+  public class DraftAngleAnalysisSettingsState
+  {
+    internal DraftAngleAnalysisSettingsState() { }
+
+    /// <summary>
+    /// The angle range.
+    /// </summary>
+    public Interval AngleRange { get; set; }
+
+    /// <summary>
+    /// Show isoparametric curves.
+    /// </summary>
+    public bool ShowIsoCurves { get; set; }
+
+    /// <summary>
+    /// The up direction.
+    /// </summary>
+    public Vector3d UpDirection { get; set; }
+  }
+
+  /// <summary>
+  /// 
+  /// </summary>
+  public static class DraftAngleAnalysisSettings
+  {
+    static DraftAngleAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_New(current);
+      DraftAngleAnalysisSettingsState rc = new DraftAngleAnalysisSettingsState();
+
+      Interval angle_range = new Interval(0.0, 5.0);
+      if (UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_AngleRange(ptr_settings, ref angle_range, false))
+        rc.AngleRange = angle_range;
+
+      rc.ShowIsoCurves = UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_ShowIsoCurves(ptr_settings, false, false);
+
+      var up_direction = Vector3d.ZAxis;
+      if (UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_UpDirection(ptr_settings, ref up_direction, false))
+        return rc;
+
+      UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    public static DraftAngleAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    public static DraftAngleAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    public static void UpdateFromState(DraftAngleAnalysisSettingsState state)
+    {
+      AngleRange = state.AngleRange;
+      ShowIsoCurves = state.ShowIsoCurves;
+      UpDirection = state.UpDirection;
+    }
+
+    /// <summary>
+    /// The angle range.
+    /// </summary>
+    public static Interval AngleRange
+    {
+      get
+      {
+        Interval rc = new Interval(0.0, 5.0);
+        UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_AngleRange(IntPtr.Zero, ref rc, false);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_AngleRange(IntPtr.Zero, ref value, true);
+      }
+    }
+
+    /// <summary>
+    /// Show isoparametric curves.
+    /// </summary>
+    public static bool ShowIsoCurves
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_ShowIsoCurves(IntPtr.Zero, false, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_ShowIsoCurves(IntPtr.Zero, value, true);
+      }
+    }
+
+    /// <summary>
+    /// The up direction.
+    /// </summary>
+    public static Vector3d UpDirection
+    {
+      get
+      {
+        var rc = Vector3d.ZAxis;
+        UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_UpDirection(IntPtr.Zero, ref rc, false);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_UpDirection(IntPtr.Zero, ref value, true);
+      }
+    }
+  }
+
   /// <summary>Represents a snapshot of <see cref="EdgeAnalysisSettings"/>.</summary>
   public class EdgeAnalysisSettingsState
   {
@@ -3954,6 +4086,204 @@ namespace Rhino.ApplicationSettings
       return rc;
     }
   }
+
+
+  /// <summary>
+  /// Represents a snapshot of <see cref="SelectionFilterSettings"/>.
+  /// </summary>
+  public class SelectionFilterSettingsState
+  {
+    /// <summary>
+    /// Internal constructor
+    /// </summary>
+    internal SelectionFilterSettingsState() { }
+
+    /// <summary>
+    /// The global geometry type filter controls which types of geometry will be be filtered.
+    /// Note, the filter can be a bitwise combination of multiple object types.
+    /// </summary>
+    [CLSCompliant(false)]
+    public Rhino.DocObjects.ObjectType GlobalGeometryFilter { get; set; }
+
+    /// <summary>
+    /// The one-shot geometry type filter controls which types of geometry will be be filtered for one selection.
+    /// Note, the filter can be a bitwise combination of multiple object types.
+    /// </summary>
+    [CLSCompliant(false)]
+    public Rhino.DocObjects.ObjectType OneShotGeometryFilter { get; set; }
+
+    /// <summary>
+    /// Enables or disables the global object selection filter.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Enables or disabled sub-object selection.
+    /// </summary>
+    public bool SubObjectSelect { get; set; }
+  }
+
+  /// <summary>
+  /// Selection filter settings restrict any selection mode (SelWindow, SelCrossing, SelAll, etc.) to specified object types.
+  /// Note, selection filter settings are not persistent.
+  /// </summary>
+  public static class SelectionFilterSettings
+  {
+    private enum FilterValue : int
+    {
+      GlobalFilter = 0,
+      OneShotFilter = 1
+    }
+
+    private enum BoolValue : int
+    {
+      Enabled = 0,
+      SubObjectSelect = 1
+    }
+
+    private static SelectionFilterSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_New(current);
+      SelectionFilterSettingsState rc = new SelectionFilterSettingsState();
+
+      uint global_filter = (uint)Rhino.DocObjects.ObjectType.AnyObject; // default
+      if (UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(ptr_settings, (int)FilterValue.GlobalFilter, ref global_filter, false))
+        rc.GlobalGeometryFilter = (Rhino.DocObjects.ObjectType)global_filter;
+
+      uint one_shot_filter = (uint)Rhino.DocObjects.ObjectType.None; // default
+      if (UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(ptr_settings, (int)FilterValue.OneShotFilter, ref one_shot_filter, false))
+        rc.OneShotGeometryFilter = (Rhino.DocObjects.ObjectType)one_shot_filter;
+
+      bool enabled = true; // default
+      if (UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(ptr_settings, (int)BoolValue.Enabled, ref enabled, false))
+        rc.Enabled = enabled;
+
+      bool sub_object_select = false; // default
+      if (UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(ptr_settings, (int)BoolValue.SubObjectSelect, ref sub_object_select, false))
+        rc.SubObjectSelect = sub_object_select;
+
+      UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    public static SelectionFilterSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    public static SelectionFilterSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    public static void UpdateFromState(SelectionFilterSettingsState state)
+    {
+      // Test before setting to reduce excessive application settings events
+      if (GlobalGeometryFilter != state.GlobalGeometryFilter)
+        GlobalGeometryFilter = state.GlobalGeometryFilter;
+      if (OneShotGeometryFilter != state.OneShotGeometryFilter)
+        OneShotGeometryFilter = state.OneShotGeometryFilter;
+      if (Enabled != state.Enabled)
+        Enabled = state.Enabled;
+      if (SubObjectSelect != state.SubObjectSelect)
+        SubObjectSelect = state.SubObjectSelect;
+    }
+
+    /// <summary>
+    /// The global geometry type filter controls which types of geometry will be be filtered.
+    /// Note, the filter can be a bitwise combination of multiple object types.
+    /// </summary>
+    [CLSCompliant(false)]
+    public static Rhino.DocObjects.ObjectType GlobalGeometryFilter
+    {
+      get
+      {
+        uint global_filter = (uint)Rhino.DocObjects.ObjectType.AnyObject; // default
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(IntPtr.Zero, (int)FilterValue.GlobalFilter, ref global_filter, false);
+        return (Rhino.DocObjects.ObjectType)global_filter;
+      }
+      set
+      {
+        uint global_filter = (uint)value;
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(IntPtr.Zero, (int)FilterValue.GlobalFilter, ref global_filter, true);
+      }
+    }
+
+    /// <summary>
+    /// The one-shot geometry type filter controls which types of geometry will be be filtered for one selection.
+    /// Note, the filter can be a bitwise combination of multiple object types.
+    /// </summary>
+    [CLSCompliant(false)]
+    public static Rhino.DocObjects.ObjectType OneShotGeometryFilter
+    {
+      get
+      {
+        uint one_shot_filter = (uint)Rhino.DocObjects.ObjectType.None; // default
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(IntPtr.Zero, (int)FilterValue.OneShotFilter, ref one_shot_filter, false);
+        return (Rhino.DocObjects.ObjectType)one_shot_filter;
+      }
+      set
+      {
+        uint one_shot_filter = (uint)value;
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Filter(IntPtr.Zero, (int)FilterValue.OneShotFilter, ref one_shot_filter, true);
+      }
+    }
+
+    /// <summary>
+    /// Enables or disables the global object selection filter.
+    /// </summary>
+    public static bool Enabled
+    {
+      get
+      {
+        bool enabled = true; // default
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(IntPtr.Zero, (int)BoolValue.Enabled, ref enabled, false);
+        return enabled;
+      }
+      set
+      {
+        bool enabled = value;
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(IntPtr.Zero, (int)BoolValue.Enabled, ref enabled, true);
+      }
+    }
+
+    /// <summary>
+    /// Enables or disabled sub-object selection.
+    /// </summary>
+    public static bool SubObjectSelect
+    {
+      get
+      {
+        bool sub_object_select = false; // default
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(IntPtr.Zero, (int)BoolValue.SubObjectSelect, ref sub_object_select, false);
+        return sub_object_select;
+      }
+      set
+      {
+        bool sub_object_select = value;
+        UnsafeNativeMethods.CRhinoAppSelectionFilterSettings_Bool(IntPtr.Zero, (int)BoolValue.SubObjectSelect, ref sub_object_select, true);
+      }
+    }
+  }
+
 }
 
 #endif

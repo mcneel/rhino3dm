@@ -83,9 +83,10 @@ public:
   int Count() const;
   BND_FileObject* ModelObjectAt(int index);
   BND_FileObject* IterIndex(int index); // helper function for iterator
-  BND_CommonObject* ObjectAt(int index);
-  BND_3dmObjectAttributes* AttributesAt(int index);
   BND_BoundingBox GetBoundingBox() const;
+  BND_FileObject* FindId(BND_UUID id) const;
+
+  ON_ClassArray<ON_ModelComponentReference> m_compref_cache;
 };
 
 class BND_File3dmMaterialTable
@@ -124,6 +125,18 @@ public:
   class BND_Layer* FindIndex(int index);
   class BND_Layer* IterIndex(int index); // helper function for iterator
   class BND_Layer* FindId(BND_UUID id);
+};
+
+class BND_File3dmGroupTable
+{
+	std::shared_ptr<ONX_Model> m_model;
+public:
+	BND_File3dmGroupTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+	int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Group); }
+	void Add(const class BND_Group& group);
+	class BND_Group* FindIndex(int index);
+	class BND_Group* IterIndex(int index); // helper function for iterator
+  class BND_Group* FindName(std::wstring name);
 };
 
 class BND_File3dmDimStyleTable
@@ -207,13 +220,12 @@ public:
   void SetString(std::wstring key, std::wstring value);
   //public void Delete(string section, string entry)
   void Delete(std::wstring key);
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple GetKeyValue(int i) const;
-#endif
+  BND_TUPLE GetKeyValue(int i) const;
 };
 
 class BND_ONXModel
 {
+public:
   std::shared_ptr<ONX_Model> m_model;
 public:
   BND_ONXModel();
@@ -230,10 +242,14 @@ public:
   #if defined(ON_WASM_COMPILE)
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
-  #endif
+  emscripten::val ToByteArray() const;
+  emscripten::val ToByteArray2(const class BND_File3dmWriteOptions* options) const;
+#endif
+  std::string Encode();
+  std::string Encode2(const class BND_File3dmWriteOptions* options);
 
   static BND_ONXModel* FromByteArray(int length, const void* buffer);
-
+  static BND_ONXModel* Decode(std::string buffer);
   bool Write(std::wstring path, int version);
   //public bool Write(string path, File3dmWriteOptions options)
   //public bool WriteWithLog(string path, int version, out string errorLog)
@@ -262,7 +278,7 @@ public:
   //public File3dmLinetypeTable AllLinetypes
   BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
-  //public File3dmGroupTable AllGroups | get;
+  BND_File3dmGroupTable AllGroups() { return BND_File3dmGroupTable(m_model); }
   BND_File3dmDimStyleTable DimStyles() { return BND_File3dmDimStyleTable(m_model); }
   //public File3dmHatchPatternTable AllHatchPatterns | get;
   BND_File3dmInstanceDefinitionTable InstanceDefinitions() { return BND_File3dmInstanceDefinitionTable(m_model); }
@@ -276,4 +292,18 @@ public:
   //public void DumpToTextLog(TextLog log)
 public:
   static bool ReadTest(std::wstring filepath);
+};
+
+class BND_File3dmWriteOptions
+{
+public:
+  BND_File3dmWriteOptions();
+  int GetVersion() const { return m_version; }
+  void SetVersion(int version) { m_version = version; }
+  int VersionForWriting() const;
+  bool SaveUserData() const { return m_save_user_data; }
+  void SetSaveUserData(bool b) { m_save_user_data = b; }
+private:
+  int m_version = 0;
+  bool m_save_user_data = true;
 };

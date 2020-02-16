@@ -19,6 +19,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initPolylineBindings(m);
   initPlaneBindings(m);
   initObjectBindings(m);
+  initModelComponentBindings(m);
   init3dmSettingsBindings(m);
   init3dmAttributesBindings(m);
   initBitmapBindings(m);
@@ -33,6 +34,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initBoundingBoxBindings(m);
   initBoxBindings(m);
   initGeometryBindings(m);
+  initAnnotationBaseBindings(m);
   initInstanceBindings(m);
   initHatchBindings(m);
   initPointCloudBindings(m);
@@ -54,13 +56,27 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initPolylineCurveBindings(m);
   initSurfaceBindings(m);
   initRevSurfaceBindings(m);
+  initSubDBindings(m);
   initSurfaceProxyBindings(m);
   initPlaneSurfaceBindings(m);
   initBrepBindings(m);
   initExtrusionBindings(m);
   initNurbsSurfaceBindings(m);
+  initLightBindings(m);
   initSphereBindings(m);
   initViewportBindings(m);
+  initGroupBindings(m);
   initExtensionsBindings(m);
+  initDracoBindings(m);
 }
 
+BND_TUPLE CreateTuple(int count)
+{
+#if defined(ON_PYTHON_COMPILE)
+  pybind11::tuple rc(count);
+  return rc;
+#else
+  emscripten::val rc(emscripten::val::array());
+  return rc;
+#endif
+}

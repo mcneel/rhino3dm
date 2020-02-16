@@ -5,6 +5,13 @@ BrepFace
 
 .. py:class:: BrepFace
 
+   .. py:method:: UnderlyingSurface()
+
+      Gets the untrimmed surface that is the base of this face.
+
+      :return: A surface, or None on error.
+      :rtype: rhino3dm.Surface
+
    .. py:method:: GetMesh(meshType)
 
       Obtains a reference to a specified type of mesh for this brep face.

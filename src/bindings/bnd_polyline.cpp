@@ -1,5 +1,12 @@
 #include "bindings.h"
 
+BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
+{
+  int count = (int)points.size();
+  const ON_3dPoint* pts = points.data();
+  m_polyline.Append(count, pts);
+}
+
 ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
@@ -101,6 +108,7 @@ void initPolylineBindings(pybind11::module& m)
   py::class_<BND_Point3dList>(m, "Point3dList")
     .def(py::init<>())
     .def(py::init<int>(), py::arg("initialCapacity"))
+    .def(py::init<const std::vector<ON_3dPoint>&>(), py::arg("points"))
     .def_property("Capacity", &BND_Point3dList::GetCapacity, &BND_Point3dList::SetCapacity)
     .def_property("Count", &BND_Point3dList::GetCount, &BND_Point3dList::SetCount)
     .def("__len__", &BND_Point3dList::GetCount)
@@ -120,6 +128,7 @@ void initPolylineBindings(pybind11::module& m)
   py::class_<BND_Polyline,BND_Point3dList>(m, "Polyline")
     .def(py::init<>())
     .def(py::init<int>(), py::arg("initialCapacity"))
+    .def(py::init<const std::vector<ON_3dPoint>&>(), py::arg("collection"))
     .def_property_readonly("IsValid", &BND_Polyline::IsValid)
     .def_property_readonly("SegmentCount", &BND_Polyline::SegmentCount)
     .def_property_readonly("IsClosed", &BND_Polyline::IsClosed)

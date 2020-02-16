@@ -12,7 +12,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 8)]
   [DebuggerDisplay("({m_x}, {m_y})")]
   [Serializable]
-  public struct Point2f : IEquatable<Point2f>, IComparable<Point2f>, IComparable, IEpsilonFComparable<Point2f>, IValidable
+  public struct Point2f : IEquatable<Point2f>, IComparable<Point2f>, IComparable, IEpsilonFComparable<Point2f>, IValidable, IFormattable
   {
     #region members
     internal float m_x;
@@ -172,6 +172,40 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1}", m_x.ToString(culture), m_y.ToString(culture));
     }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y);
+    }
+
+    /// <summary>
+    /// Accesses the coordinates of this point.
+    /// </summary>
+    /// <param name="index">Either 0 or 1.</param>
+    /// <returns>If index is 0, the X (first) coordinate. If index is 1, the Y (second) coordinate.</returns>
+    public float this[int index]
+    {
+      get
+      {
+        if (0 == index)
+          return m_x;
+        if (1 == index)
+          return m_y;
+        // IronPython works with indexing is we thrown an IndexOutOfRangeException
+        throw new IndexOutOfRangeException();
+      }
+      set
+      {
+        if (0 == index)
+          X = value;
+        else if (1 == index)
+          Y = value;
+        else
+          throw new IndexOutOfRangeException();
+      }
+    }
+
 
     /// <summary>
     /// Determines whether two <see cref="Point2f"/> have equal values.
@@ -312,7 +346,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 12)]
   [DebuggerDisplay("({m_x}, {m_y}, {m_z})")]
   [Serializable]
-  public struct Point3f : IEquatable<Point3f>, IComparable<Point3f>, IComparable, IEpsilonFComparable<Point3f>, IValidable
+  public struct Point3f : IEquatable<Point3f>, IComparable<Point3f>, IComparable, IEpsilonFComparable<Point3f>, IValidable, IFormattable
   {
     internal float m_x;
     internal float m_y;
@@ -459,6 +493,12 @@ namespace Rhino.Geometry
     public override string ToString()
     {
       return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1},{2}", m_x, m_y, m_z);
+    }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y, m_z);
     }
 
     /// <summary>
@@ -642,6 +682,17 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Converts a single-precision point in a single-precision vector.
+    /// Needs explicit casting to help retain precision.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>The resulting point.</returns>
+    public static explicit operator Vector3f(Point3f point)
+    {
+      return new Vector3f(point.X, point.Y, point.Z);
+    }
+
+    /// <summary>
     /// Multiplies a point by a factor.
     /// </summary>
     /// <param name="point">A point.</param>
@@ -673,7 +724,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 8)]
   [DebuggerDisplay("({m_x}, {m_y})")]
   [Serializable]
-  public struct Vector2f : IEquatable<Vector2f>, IComparable<Vector2f>, IComparable, IEpsilonFComparable<Vector2f>, IValidable
+  public struct Vector2f : IEquatable<Vector2f>, IComparable<Vector2f>, IComparable, IEpsilonFComparable<Vector2f>, IValidable, IFormattable
   {
     internal float m_x;
     internal float m_y;
@@ -813,6 +864,12 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1}", m_x.ToString(culture), m_y.ToString(culture));
     }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y);
+    }
 
     /// <summary>
     /// Determines whether two vectors have equal values.
@@ -941,7 +998,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 12)]
   [DebuggerDisplay("({m_x}, {m_y}, {m_z})")]
   [Serializable]
-  public struct Vector3f : IEquatable<Vector3f>, IComparable<Vector3f>, IComparable, IEpsilonFComparable<Vector3f>, IValidable
+  public struct Vector3f : IEquatable<Vector3f>, IComparable<Vector3f>, IComparable, IEpsilonFComparable<Vector3f>, IValidable, IFormattable
   {
     #region members
     internal float m_x;
@@ -1159,6 +1216,12 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1},{2}",
         m_x.ToString(culture), m_y.ToString(culture), m_z.ToString(culture));
+    }
+    /// <inheritdoc />
+    [ConstOperation]
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y, m_z);
     }
 
     /// <summary>

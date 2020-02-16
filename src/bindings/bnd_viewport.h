@@ -16,6 +16,9 @@ public:
   BND_Viewport();
   BND_Viewport(ON_Viewport* viewport, const ON_ModelComponentReference* compref);
 
+  static BND_Viewport* DefaultTopViewYUp();
+  static BND_Viewport* DefaultPerspectiveViewZUp();
+
   bool IsValidCameraFrame() const { return m_viewport->IsValidCameraFrame(); }
   bool IsValidCamera() const { return m_viewport->IsValidCamera(); }
   bool IsValidFrustum() const { return m_viewport->IsValidFrustum(); }
@@ -46,17 +49,14 @@ public:
 
 #if defined(ON_PYTHON_COMPILE)
   BND_DICT GetFrustum() const;
-
-  void SetScreenPort(BND_DICT rect);
-  BND_DICT GetScreenPort() const;
 #endif
 
 #if defined(__EMSCRIPTEN__)
   emscripten::val GetFrustum() const;
-
-  void SetScreenPort(emscripten::val rect);
-  emscripten::val GetScreenPort() const;
 #endif
+
+  void SetScreenPort(BND_TUPLE rect);
+  BND_TUPLE GetScreenPort() const;
 
   double ScreenPortAspect() const;
 
@@ -67,7 +67,17 @@ public:
 
   class BND_Transform* GetXform(ON::coordinate_system srcCS, ON::coordinate_system destCS);
 
+  bool Extents(double halfViewAngleRadians, const class BND_BoundingBox& worldBbox);
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
+  ON_3dPoint FrustumCenterPoint(double targetDistance) const { return m_viewport->FrustumCenterPoint(targetDistance); }
+  //    public Point3d TargetPoint {get;set;}
+  double TargetDistance(bool useFrustumCenterFallback) const { return m_viewport->TargetDistance(useFrustumCenterFallback); }
+  // public double PerspectiveMinNearOverFar {get;set}
+  //     public double PerspectiveMinNearDist {get;set}
+
+  BND_UUID GetId() const;
+  //    public bool TransformCamera(Transform xform)
+  //    public bool RotateCamera(double rotationAngleRadians, Vector3d rotationAxis, Point3d rotationCenter)
 
 protected:
   void SetTrackedPointer(ON_Viewport* viewport, const ON_ModelComponentReference* compref);

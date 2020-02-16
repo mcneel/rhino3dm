@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Runtime.InteropWrappers
@@ -255,14 +256,60 @@ namespace Rhino.Geometry.Intersect
 #if RHINO_SDK
 
   /// <summary>
+  /// Represents an element which is part of a curve region boundary.
+  /// </summary>
+  public struct MeshInterference
+  {
+    #region Members
+    private int m_index_a;
+    private int m_index_b;
+    private Point3d[] m_hit_points;
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The index of the first clashing, or interfering object.
+    /// </summary>
+    public int IndexA
+    {
+      get { return m_index_a; }
+      set { m_index_a = value; }
+    }
+
+    /// <summary>
+    /// The index of the second clashing, or interfering object.
+    /// </summary>
+    public int IndexB
+    {
+      get { return m_index_b; }
+      set { m_index_b = value; }
+    }
+
+    /// <summary>
+    /// Array of hit points where the objects of IndexA and IndexB interfere.
+    /// </summary>
+    public Point3d[] HitPoints
+    {
+      get { return m_hit_points; }
+      set { m_hit_points = value; }
+    }
+
+    #endregion
+  }
+
+
+  /// <summary>
   /// Represents a particular instance of a clash or intersection between two meshes.
   /// </summary>
   public class MeshClash
   {
+    #region Members
     Mesh m_mesh_a;
     Mesh m_mesh_b;
     Point3d m_P = Point3d.Unset;
     double m_radius;
+    #endregion
 
     private MeshClash() { }
 
@@ -278,7 +325,7 @@ namespace Rhino.Geometry.Intersect
 
     /// <summary>
     /// If valid, then the sphere centered at ClashPoint of ClashRadius
-    /// distance interesects the clashing meshes.
+    /// distance intersects the clashing meshes.
     /// </summary>
     public Point3d ClashPoint { get { return m_P; } }
 
@@ -372,6 +419,120 @@ namespace Rhino.Geometry.Intersect
     public static MeshClash[] Search(Mesh meshA, Mesh meshB, double distance, int maxEventCount)
     {
       return Search(new Mesh[] { meshA }, new Mesh[] { meshB }, distance, maxEventCount);
+    }
+
+    /// <summary>
+    /// Searches for locations where the distance from a RhinoObject, in one set of objects,
+    /// is less than the specified distance to another RhinoObject in a second set of objects.
+    /// This function uses the object's mesh to calculate the interferences.
+    /// Acceptable object types include: BrepObject, ExtrusionObject, MeshObject, and SubDObject. 
+    /// </summary>
+    /// <param name="setA">The first set of Rhino objects.</param>
+    /// <param name="setB">The second set of Rhino objects.</param>
+    /// <param name="distance">The largest distance at which a clash can occur.</param>
+    /// <returns>An array of mesh interference object if successful, or an empty array on failure.</returns>
+    public static MeshInterference[] Search(IEnumerable<RhinoObject> setA, IEnumerable<RhinoObject> setB, double distance)
+    {
+      return Search(setA, setB, distance, MeshType.Render, MeshingParameters.FastRenderMesh);
+    }
+
+    /// <summary>
+    /// Searches for locations where the distance from a RhinoObject, in one set of objects,
+    /// is less than the specified distance to another RhinoObject in a second set of objects.
+    /// This function uses the object's mesh to calculate the interferences.
+    /// Acceptable object types include: BrepObject, ExtrusionObject, MeshObject, and SubDObject. 
+    /// </summary>
+    /// <param name="setA">The first set of Rhino objects.</param>
+    /// <param name="setB">The second set of Rhino objects.</param>
+    /// <param name="distance">The largest distance at which a clash can occur.</param>
+    /// <param name="meshType">The type of mesh to be used for the calculation.</param>
+    /// <param name="meshingParameters">The meshing parameters used to generate meshes for the calculation.</param>
+    /// <returns>An array of mesh interference object if successful, or an empty array on failure.</returns>
+    public static MeshInterference[] Search(IEnumerable<RhinoObject> setA, IEnumerable<RhinoObject> setB, double distance, MeshType meshType, MeshingParameters meshingParameters)
+    {
+      using (var set_a_array = new Runtime.InternalRhinoObjectArray(setA))
+      using (var set_b_array = new Runtime.InternalRhinoObjectArray(setB))
+      {
+        var ptr_set_a = set_a_array.NonConstPointer();
+        var ptr_set_b = set_b_array.NonConstPointer();
+        var ptr_mp = meshingParameters.ConstPointer();
+        var ptr_clash_events = UnsafeNativeMethods.RhObjectClashEventArray_New(); // new
+        var count = UnsafeNativeMethods.RHC_CRhClashDetect_TestClash(ptr_set_a, ptr_set_b, distance, (int)meshType, ptr_mp, ptr_clash_events);
+
+        var rc = new MeshInterference[count];
+        for (var i = 0; i < count; i++)
+        {
+          var index_a = -1;
+          var index_b = -1;
+          var hit_points = new SimpleArrayPoint3d(); // new
+          var ptr_hit_points = hit_points.NonConstPointer();
+          var mi = new MeshInterference();
+          if (UnsafeNativeMethods.RhObjectClashEventArray_GetAt(ptr_clash_events, i, ref index_a, ref index_b, ptr_hit_points))
+          {
+            mi.IndexA = index_a;
+            mi.IndexB = index_b;
+            mi.HitPoints = hit_points.Count > 0 ? hit_points.ToArray() : new Point3d[0];
+          }
+          else
+          {
+            mi.IndexA = -1;
+            mi.IndexB = -1;
+            mi.HitPoints = new Point3d[0];
+          }
+          hit_points.Dispose(); // delete
+          rc[i] = mi;
+        }
+
+        UnsafeNativeMethods.RhObjectClashEventArray_Delete(ptr_clash_events); // delete
+        GC.KeepAlive(setA);
+        GC.KeepAlive(setB);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Finds all of the mesh faces on each of two Rhino objects that interfere within a clash distance.
+    /// This function uses the object's mesh to calculate the interferences.
+    /// Acceptable object types include: BrepObject, ExtrusionObject, MeshObject, and SubDObject. 
+    /// </summary>
+    /// <param name="objA">The first Rhino object.</param>
+    /// <param name="objB">The second Rhino object.</param>
+    /// <param name="distance">The largest distance at which a clash can occur.</param>
+    /// <returns>The resulting meshes are sub-meshes of the input meshes if successful, or an empty array on error.</returns>
+    public static Mesh[] FindDetail(RhinoObject objA, RhinoObject objB, double distance)
+    {
+      return FindDetail(objA, objB, distance, MeshType.Render, MeshingParameters.FastRenderMesh);
+    }
+
+    /// <summary>
+    /// Finds all of the mesh faces on each of two Rhino objects that interfere within a clash distance.
+    /// This function uses the object's mesh to calculate the interferences.
+    /// Acceptable object types include: BrepObject, ExtrusionObject, MeshObject, and SubDObject. 
+    /// </summary>
+    /// <param name="objA">The first Rhino object.</param>
+    /// <param name="objB">The second Rhino object.</param>
+    /// <param name="distance">The largest distance at which a clash can occur.</param>
+    /// <param name="meshType">The type of mesh to be used for the calculation.</param>
+    /// <param name="meshingParameters">The meshing parameters used to generate meshes for the calculation.</param>
+    /// <returns>The resulting meshes are sub-meshes of the input meshes if successful, or an empty array on error.</returns>
+    public static Mesh[] FindDetail(RhinoObject objA, RhinoObject objB, double distance, MeshType meshType, MeshingParameters meshingParameters)
+    {
+      if (null == objA)
+        throw new ArgumentNullException(nameof(objA));
+      if (null == objB)
+        throw new ArgumentNullException(nameof(objB));
+
+      using (var out_meshes = new SimpleArrayMeshPointer())
+      {
+        var ptr_obj_a = objA.ConstPointer();
+        var ptr_obj_b = objB.ConstPointer();
+        var ptr_mp = meshingParameters.ConstPointer();
+        var ptr_out_meshes = out_meshes.NonConstPointer();
+        var count = UnsafeNativeMethods.RHC_CRhClashDetect_FindClashDetail(ptr_obj_a, ptr_obj_b, distance, (int)meshType, ptr_mp, ptr_out_meshes);
+        GC.KeepAlive(objA);
+        GC.KeepAlive(objB);
+        return count > 0 ? out_meshes.ToNonConstArray() : new Mesh[0];
+      }
     }
   }
 #endif

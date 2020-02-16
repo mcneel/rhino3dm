@@ -112,6 +112,12 @@ namespace Rhino.FileIO
       set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.BatchMode, value); }
     }
 
+    public bool SuppressAllInput
+    {
+      get;
+      set;
+    }
+
     /// <summary>
     /// If true, the file written should include only geometry File Writing Plug-in supports it.
     /// </summary>

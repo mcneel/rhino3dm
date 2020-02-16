@@ -4,13 +4,12 @@ using Rhino.Runtime;
 
 namespace Rhino.Geometry.Intersect
 {
-#if RHINO_SDK
   /// <summary>
   /// Provides all the information for a single Curve Intersection event.
   /// </summary>
   public class IntersectionEvent
   {
-  #region members
+    #region members
     internal int m_type; // 1 == ccx_point
                          // 2 == ccx_overlap
                          // 3 == csx_point
@@ -27,9 +26,9 @@ namespace Rhino.Geometry.Intersect
     internal double m_b1; //Parameter on B (or last parameter of overlap) (or last U parameter on surface)
     internal double m_b2; //First V parameter on surface
     internal double m_b3; //Last V parameter on surface
-  #endregion
+    #endregion
 
-  #region properties
+    #region properties
     /// <summary>
     /// All curve intersection events are either a single point or an overlap.
     /// </summary>
@@ -165,21 +164,88 @@ namespace Rhino.Geometry.Intersect
         vDomain = new Interval(m_b2, m_b3);
       }
     }
-  #endregion
+
+    /// <summary>
+    /// Compare intersection events.
+    /// </summary>
+    /// <param name="eventA">The first intersection event to compare.</param>
+    /// <param name="eventB">The second intersection event to compare.</param>
+    /// <param name="relativePointTolerance">The comparison tolerance. If RhinoMath.UnsetValue, then RhinoMath.SqrtEpsilon is used.</param>
+    /// <returns>true if the two inputs represent the same intersection, false otherwise.</returns>
+    public static bool CompareEquivalent(IntersectionEvent eventA, IntersectionEvent eventB, double relativePointTolerance)
+    {
+      return CompareEquivalent(eventA, eventB, relativePointTolerance, null);
+    }
+
+    /// <summary>
+    /// Compare intersection events.
+    /// </summary>
+    /// <param name="eventA">The first intersection event to compare.</param>
+    /// <param name="eventB">The second intersection event to compare.</param>
+    /// <param name="relativePointTolerance">The comparison tolerance. If RhinoMath.UnsetValue, then RhinoMath.SqrtEpsilon is used.</param>
+    /// <param name="log">If not null and false is returned, then a description of the error is appended to log.</param>
+    /// <returns></returns>
+    public static bool CompareEquivalent(IntersectionEvent eventA, IntersectionEvent eventB, double relativePointTolerance, Rhino.FileIO.TextLog log)
+    {
+      // compare to match
+      if (relativePointTolerance == RhinoMath.UnsetValue)
+        relativePointTolerance = RhinoMath.SqrtEpsilon;
+
+      bool rc = true;
+      if (eventA.m_type != eventB.m_type)
+      {
+        if (log != null)
+          log.Print("Event types mismatch.");
+        rc = false;
+      }
+      else
+      {
+        for (int ei = 0; ei < 2; ei++)
+        {
+          if (ei == 1 && eventA.m_type != 4) // ON_X_EVENT::TYPE::csx_overlap
+            continue;
+
+          Point3d AActual = (ei == 0) ? eventA.m_A0 : eventA.m_A1;
+          Point3d BActual = (ei == 0) ? eventA.m_B0 : eventA.m_B1;
+          Point3d AExp = (ei == 0) ? eventB.m_A0 : eventB.m_A1;
+          Point3d BExp = (ei == 0) ? eventB.m_B0 : eventB.m_B1;
+
+          double sz = AExp.MaximumCoordinate;
+          double dist = AActual.DistanceTo(AExp);
+          if (dist > relativePointTolerance * (1 + sz))
+          {
+            if (log != null)
+              log.Print("Event mismatch. Distance between expected and actual m_A{0} was {1}.\n", ei * 2, dist);
+            rc = false;
+          }
+
+          dist = BActual.DistanceTo(BExp);
+          if (dist > relativePointTolerance * (1 + sz))
+          {
+            if (log != null)
+              log.Print("Event mismatch. Distance between expected and actual m_B{0} was {1}.\n", ei * 2, dist);
+            rc = false;
+          }
+        }
+      }
+      return rc;
+    }
+    #endregion
   }
 
+#if RHINO_SDK
   /// <summary>
   /// Maintains an ordered list of Curve Intersection results.
   /// </summary>
   public class CurveIntersections : IDisposable, IList<IntersectionEvent>
   {
-  #region members
+    #region members
     IntPtr m_ptr; //ON_SimpleArray<ON_X_EVENT>
     IntersectionEvent[] m_events; // = null; initialized by runtime
     int m_count;
-  #endregion
+    #endregion
 
-  #region constructor
+    #region constructor
     internal static CurveIntersections Create(IntPtr pIntersectionArray)
     {
       if (IntPtr.Zero == pIntersectionArray)
@@ -233,9 +299,9 @@ namespace Rhino.Geometry.Intersect
         m_events = null;
       }
     }
-  #endregion
+    #endregion
 
-  #region properties
+    #region properties
     /// <summary>
     /// Gets the number of recorded intersection events.
     /// </summary>
@@ -273,9 +339,9 @@ namespace Rhino.Geometry.Intersect
         ref x.m_type, ref x.m_A0, ref x.m_A1, ref x.m_B0, ref x.m_B1,
         ref x.m_a0, ref x.m_a1, ref x.m_b0, ref x.m_b1, ref x.m_b2, ref x.m_b3);
     }
-  #endregion
+    #endregion
 
-  #region methods
+    #region methods
     private IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
@@ -323,9 +389,9 @@ namespace Rhino.Geometry.Intersect
         yield return this[i];
       }
     }
-  #endregion
+    #endregion
 
-  #region explicit implementations of IList<IntersectionEvent> and its base types
+    #region explicit implementations of IList<IntersectionEvent> and its base types
       //that did not seem necessary in normal usage
 
     /// <summary>
@@ -447,7 +513,7 @@ namespace Rhino.Geometry.Intersect
     {
       return GetEnumerator();
     }
-  #endregion
+    #endregion
   }
 #endif
 }

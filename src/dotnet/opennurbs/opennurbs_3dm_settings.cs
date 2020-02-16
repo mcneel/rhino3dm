@@ -418,7 +418,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets the name of the NamedView.
+    /// Gets or sets the name of the view.
     /// </summary>
     public string Name
     {

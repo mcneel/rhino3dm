@@ -128,6 +128,11 @@ BND_MeshVertexList BND_Mesh::GetVertices()
   return BND_MeshVertexList(m_mesh, m_component_ref);
 }
 
+BND_MeshTopologyEdgeList BND_Mesh::GetTopologyEdges()
+{
+  return BND_MeshTopologyEdgeList(m_mesh, m_component_ref);
+}
+
 BND_MeshFaceList BND_Mesh::GetFaces()
 {
   return BND_MeshFaceList(m_mesh, m_component_ref);
@@ -148,18 +153,16 @@ BND_MeshTextureCoordinateList BND_Mesh::TextureCoordinates()
   return BND_MeshTextureCoordinateList(m_mesh, m_component_ref);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_Mesh::IsManifold(bool topologicalTest) const
+BND_TUPLE BND_Mesh::IsManifold(bool topologicalTest) const
 {
   bool oriented = false;
   bool hasboundary = false;
-  pybind11::tuple rc(3);
-  rc[0] = m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary);
-  rc[1] = oriented;
-  rc[2] = hasboundary;
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple<bool>(rc, 0, m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary));
+  SetTuple<bool>(rc, 1, oriented);
+  SetTuple<bool>(rc, 2, hasboundary);
   return rc;
 }
-#endif
 
 static void ON_Mesh_DestroyTextureData(ON_Mesh* pMesh)
 {
@@ -198,6 +201,15 @@ void BND_Mesh::ClearSurfaceData()
   ON_Mesh_DestroySurfaceData(m_mesh);
 }
 
+void BND_Mesh::SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy)
+{
+  if (tm)
+  {
+    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
+    m_mesh->SetTextureCoordinates(*tm->m_mapping, xform, lazy);
+  }
+}
+
 int BND_Mesh::PartitionCount() const
 {
   const ON_MeshPartition* pPartition = m_mesh->Partition();
@@ -205,6 +217,181 @@ int BND_Mesh::PartitionCount() const
     return pPartition->m_part.Count();
   return 0;
 }
+
+#if defined(ON_WASM_COMPILE)
+BND_DICT BND_Mesh::ToThreejsJSON() const
+{
+  return ToThreejsJSONRotate(false);
+}
+BND_DICT BND_Mesh::ToThreejsJSONRotate(bool rotateToYUp) const
+{
+  ON_Mesh* pMesh = m_mesh;
+  ON_Mesh tempMesh;
+  if (rotateToYUp)
+  {
+    tempMesh = *m_mesh;
+    ON_Xform rotation(1);
+    rotation.RotationZYX(0.0, 0.0, -ON_PI / 2.0);
+    tempMesh.Transform(rotation);
+    pMesh = &tempMesh;
+  }
+  
+  // build face index array
+  emscripten::val index(emscripten::val::object());
+  emscripten::val indexList(emscripten::val::array());
+  int current = 0;
+  for (int i = 0; i < pMesh->m_F.Count(); i++)
+  {
+    const ON_MeshFace& face = pMesh->m_F[i];
+    indexList.set(current++, face.vi[0]);
+    indexList.set(current++, face.vi[1]);
+    indexList.set(current++, face.vi[2]);
+    if (face.vi[2] != face.vi[3])
+    {
+      indexList.set(current++, face.vi[2]);
+      indexList.set(current++, face.vi[3]);
+      indexList.set(current++, face.vi[0]);
+    }
+  }
+  index.set("type", "Uint16Array");
+  index.set("array", indexList);
+
+  emscripten::val attributes(emscripten::val::object());
+
+  emscripten::val position(emscripten::val::object());
+  position.set("itemSize", 3);
+  position.set("type", "Float32Array");
+  emscripten::val positionList(emscripten::val::array());
+  for (int i = 0; i < pMesh->m_V.Count(); i++)
+  {
+    positionList.set(i * 3, pMesh->m_V[i].x);
+    positionList.set(i * 3+1, pMesh->m_V[i].y);
+    positionList.set(i * 3+2, pMesh->m_V[i].z);
+  }
+  position.set("array", positionList);
+  attributes.set("position", position);
+
+  emscripten::val normal(emscripten::val::object());
+  normal.set("itemSize", 3);
+  normal.set("type", "Float32Array");
+  emscripten::val normalList(emscripten::val::array());
+  if (pMesh->m_N.Count() == 0)
+    pMesh->ComputeVertexNormals();
+  for (int i = 0; i < pMesh->m_N.Count(); i++)
+  {
+    normalList.set(i * 3, pMesh->m_N[i].x);
+    normalList.set(i * 3 + 1, pMesh->m_N[i].y);
+    normalList.set(i * 3 + 2, pMesh->m_N[i].z);
+  }
+  normal.set("array", normalList);
+  attributes.set("normal", normal);
+
+  if (pMesh->HasTextureCoordinates())
+  {
+    emscripten::val tcs(emscripten::val::object());
+    tcs.set("itemSize", 2);
+    tcs.set("type", "Float32Array");
+    emscripten::val tcList(emscripten::val::array());
+    for (int i = 0; i < pMesh->m_T.Count(); i++)
+    {
+      tcList.set(i * 2, pMesh->m_T[i].x);
+      tcList.set(i * 2 + 1, pMesh->m_T[i].y);
+    }
+    tcs.set("array", tcList);
+    attributes.set("uv", tcs);
+  }
+
+  // need data.index and data.attributes
+  emscripten::val data(emscripten::val::object());
+  data.set("index", index);
+  data.set("attributes", attributes);
+
+  emscripten::val rc(emscripten::val::object());
+  rc.set("data", data);
+  
+  return rc;
+}
+
+
+BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
+{
+  if (emscripten::val::undefined() == data["data"])
+    return nullptr;
+  emscripten::val attributes = data["data"]["attributes"];
+
+  std::vector<int> index_array;
+  emscripten::val index = data["data"]["index"];
+  if (emscripten::val::undefined() != index && emscripten::val::undefined() != index["array"])
+  {
+    index_array = emscripten::vecFromJSArray<int>(index["array"]);
+  }
+
+  std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
+
+  std::vector<float> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+  }
+
+  std::vector<float> uv_array;
+  if (emscripten::val::undefined() != attributes["uv"])
+  {
+    uv_array = emscripten::vecFromJSArray<float>(attributes["uv"]["array"]);
+  }
+
+  ON_Mesh* mesh = new ON_Mesh();
+
+  bool has_index_array = index_array.size() > 0;
+
+  int face_count = has_index_array ? (int)(index_array.size() / 3) : (int)(position_array.size() / 3);
+
+  mesh->m_F.SetCapacity(face_count);
+  mesh->m_F.SetCount(face_count);
+  for (int i = 0; i < face_count; i++)
+  {
+    ON_MeshFace& face = mesh->m_F[i];
+    if (has_index_array)
+    {
+      face.vi[0] = index_array[i * 3];
+      face.vi[1] = index_array[i * 3 + 1];
+      face.vi[2] = index_array[i * 3 + 2];
+    }
+    else
+    {
+      face.vi[0] = i * 3;
+      face.vi[1] = i * 3 + 1;
+      face.vi[2] = i * 3 + 2;
+    }
+    face.vi[3] = face.vi[2]; //all triangles
+  }
+
+  const int vertex_count = position_array.size() / 3;
+  mesh->m_V.SetCapacity(vertex_count);
+  mesh->m_V.SetCount(vertex_count);
+  memcpy(mesh->m_V.Array(), position_array.data(), sizeof(float) * position_array.size());
+
+  const int normal_count = normal_array.size() / 3;
+  mesh->m_N.SetCapacity(normal_count);
+  mesh->m_N.SetCount(normal_count);
+  memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(float) * normal_array.size());
+
+  const int uv_count = uv_array.size() / 2;
+  if (uv_count > 0)
+  {
+    mesh->m_T.SetCapacity(uv_count);
+    mesh->m_T.SetCount(uv_count);
+    memcpy(mesh->m_T.Array(), uv_array.data(), sizeof(float) * uv_array.size());
+  }
+
+  ON_Xform rotation(1);
+  rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  mesh->Transform(rotation);
+
+  return new BND_Mesh(mesh, nullptr);
+}
+
+#endif
 
 
 
@@ -232,16 +419,6 @@ BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReferen
   m_mesh = mesh;
 }
 
-int BND_MeshVertexList::Count() const
-{
-  return m_mesh->VertexCount();
-}
-
-int BND_MeshFaceList::Count() const
-{
-  return m_mesh->FaceCount();
-}
-
 void BND_MeshVertexList::SetCount(int value)
 {
   ON_Mesh* pMesh = m_mesh;
@@ -265,18 +442,249 @@ void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
   m_mesh->m_V[i] = pt;
 }
 
-#if defined(__EMSCRIPTEN__)
-emscripten::val BND_MeshFaceList::GetFace(int i) const
+void BND_MeshVertexList::SetUseDoublePrecisionVertices(bool use)
+{
+  if (use)
+  {
+    if (!m_mesh->HasDoublePrecisionVertices())
+    {
+      m_mesh->DoublePrecisionVertices();
+    }
+  }
+  else
+  {
+    m_mesh->DestroyDoublePrecisionVertices();
+  }
+}
+
+static void ON_Mesh_RepairHiddenArray(ON_Mesh* pMesh)
+{
+  if (!pMesh)
+    return;
+
+  int v_count = pMesh->m_V.Count();
+  int h_count = pMesh->m_H.Count();
+
+  // No hidden flags equals a valid mesh.
+  // An equal amount of vertices and hidden flags equal a valid mesh.
+  if (0 == h_count || v_count == h_count)
+    return;
+
+  if (h_count > v_count)
+  {
+    // Remove the trailing hidden flags.
+    pMesh->m_H.SetCount(v_count);
+  }
+  else
+  {
+    // Add new hidden flags to account for unhandled vertices.
+    int count_to_add = v_count - h_count;
+    pMesh->m_H.SetCapacity(v_count);
+    for (int i = 0; i < count_to_add; i++)
+    {
+      pMesh->m_H.Append(false);
+    }
+  }
+}
+
+void BND_MeshVertexList::Clear()
+{
+  m_mesh->m_V.SetCount(0);
+  ON_Mesh_RepairHiddenArray(m_mesh);
+}
+
+void BND_MeshVertexList::Destroy()
+{
+  const bool hasDoublePrecisionVerts = m_mesh->HasDoublePrecisionVertices();
+  m_mesh->m_V.SetCapacity(0);
+  if (hasDoublePrecisionVerts)
+    m_mesh->DoublePrecisionVertices().SetCapacity(0);
+}
+
+int BND_MeshVertexList::Add(float x, float y, float z)
+{
+  m_mesh->SetVertex(m_mesh->VertexCount(), ON_3fPoint(x, y, z));
+  return m_mesh->VertexCount() - 1;
+}
+
+bool BND_MeshVertexList::IsHidden(int index) const
+{
+  bool rc = false;
+  if (m_mesh && index >= 0 && index < m_mesh->m_H.Count())
+  {
+    rc = m_mesh->m_H[index];
+  }
+  return rc;
+}
+
+enum MeshHiddenVertexOpConst : int
+{
+  mhvoHideVertex = 0,
+  mhvoShowVertex = 1,
+  mhvoHideAll = 2,
+  mhvoShowAll = 3,
+  mhvoEnsureHiddenList = 4,
+  mhvoCleanHiddenList = 5
+};
+
+static void ON_Mesh_HiddenVertexOp(ON_Mesh* pMesh, int index, MeshHiddenVertexOpConst op)
+{
+  if (!pMesh)
+    return;
+
+  if (mhvoHideVertex == op || mhvoShowVertex == op)
+  {
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-51975
+    // Show (false) or hide (true) the vertex at [index]
+    bool hide = (mhvoHideVertex == op);
+    if (index >= 0 && index < pMesh->m_H.Count())
+      pMesh->m_H[index] = hide;
+  }
+  else if (mhvoHideAll == op || mhvoShowAll == op)
+  {
+    // Show (false) or hide (true) all vertices
+    bool hide = (mhvoHideAll == op);
+    int count = pMesh->m_H.Count();
+    for (int i = 0; i < count; i++)
+      pMesh->m_H[i] = hide;
+  }
+  else if (mhvoEnsureHiddenList == op)
+  {
+    // Make sure the m_H array contains the same amount of entries as the m_V array. 
+    // This function leaves the contents of m_H untouched, so they will be garbage when 
+    // the function grew the m_H array.
+    int count = pMesh->m_V.Count();
+    if (pMesh->m_H.Count() != count)
+    {
+      pMesh->m_H.SetCapacity(count);
+      pMesh->m_H.SetCount(count);
+    }
+  }
+  else if (mhvoCleanHiddenList == op)
+  {
+    // If the m_H array contains only false values, erase it.
+    int count = pMesh->m_H.Count();
+    if (count > 0)
+    {
+      bool clean = true;
+      for (int i = 0; i < count; i++)
+      {
+        if (pMesh->m_H[i])
+        {
+          clean = false;
+          break;
+        }
+      }
+
+      if (clean)
+        pMesh->m_H.SetCount(0);
+    }
+  }
+}
+
+void BND_MeshVertexList::Hide(int index)
+{
+  ON_Mesh_HiddenVertexOp(m_mesh, index, MeshHiddenVertexOpConst::mhvoHideVertex);
+}
+
+void BND_MeshVertexList::Show(int index)
+{
+  ON_Mesh_HiddenVertexOp(m_mesh, index, MeshHiddenVertexOpConst::mhvoShowVertex);
+}
+
+void BND_MeshVertexList::HideAll()
+{
+  ON_Mesh_HiddenVertexOp(m_mesh, 0, MeshHiddenVertexOpConst::mhvoHideAll);
+}
+
+void BND_MeshVertexList::ShowAll()
+{
+  ON_Mesh_HiddenVertexOp(m_mesh, 0, MeshHiddenVertexOpConst::mhvoShowAll);
+}
+
+void BND_MeshNormalList::Clear()
+{
+  m_mesh->m_N.SetCount(0);
+  ON_Mesh_RepairHiddenArray(m_mesh);
+}
+
+void BND_MeshNormalList::Destroy()
+{
+  m_mesh->m_N.SetCapacity(0);
+}
+
+int BND_MeshNormalList::Add(float x, float y, float z)
+{
+  int index = m_mesh->m_N.Count();
+  m_mesh->SetVertexNormal(index, ON_3fVector(x, y, z));
+  return index;
+}
+
+
+int BND_MeshFaceList::AddFace2(int vertex1, int vertex2, int vertex3, int vertex4)
+{
+  int rc = -1;
+  int faceIndex = m_mesh->m_F.Count();
+  if (m_mesh->SetQuad(faceIndex, vertex1, vertex2, vertex3, vertex4))
+    rc = faceIndex;
+  m_mesh->DestroyRuntimeCache();
+  return rc;
+}
+
+bool BND_MeshFaceList::SetFace2(int index, int vertex1, int vertex2, int vertex3, int vertex4)
+{
+  bool rc = m_mesh->SetQuad(index, vertex1, vertex2, vertex3, vertex4);
+  m_mesh->DestroyRuntimeCache();
+  return rc;
+}
+
+bool BND_MeshFaceList::HasNakedEdges(int index)
+{
+  bool rc = false;
+  const ON_MeshTopology& topology = m_mesh->Topology();
+  const ON_MeshTopologyFace* face_top = topology.m_topf.At(index);
+  if (face_top)
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      int edge = face_top->m_topei[i];
+      if (topology.m_tope[edge].m_topf_count == 1)
+      {
+        rc = true;
+        break;
+      }
+    }
+  }
+  return rc;
+}
+
+BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 {
   ON_MeshFace& face = m_mesh->m_F[i];
-  emscripten::val v(emscripten::val::array());
-  v.call<void>("push", face.vi[0]);
-  v.call<void>("push", face.vi[1]);
-  v.call<void>("push", face.vi[2]);
-  v.call<void>("push", face.vi[3]);
-  return v;
+  BND_TUPLE rc = CreateTuple(4);
+  for (int i = 0; i < 4; i++)
+    SetTuple<int>(rc, i, face.vi[i]);
+  return rc;
 }
-#endif
+
+BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_mesh = mesh;
+}
+
+ON_Line BND_MeshTopologyEdgeList::EdgeLine(int topologyEdgeIndex) const
+{
+  const ON_MeshTopology& top = m_mesh->Topology();
+  const ON_MeshTopologyEdge& edge = top.m_tope[topologyEdgeIndex];
+  const ON_MeshTopologyVertex& v0 = top.m_topv[edge.m_topvi[0]];
+  const ON_MeshTopologyVertex& v1 = top.m_topv[edge.m_topvi[1]];
+  ON_Line rc;
+  rc.from = m_mesh->m_V[v0.m_vi[0]];
+  rc.to = m_mesh->m_V[v1.m_vi[0]];
+  return rc;
+}
+
 
 BND_MeshNormalList::BND_MeshNormalList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
@@ -336,19 +744,6 @@ ON_2fPoint* BND_MeshTextureCoordinateList::end()
   return m_mesh->m_T.At(count - 1);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::list BND_MeshFaceList::GetFace(int i) const
-{
-  pybind11::list rc;
-  ON_MeshFace& face = m_mesh->m_F[i];
-  rc.append(face.vi[0]);
-  rc.append(face.vi[1]);
-  rc.append(face.vi[2]);
-  rc.append(face.vi[3]);
-  return rc;
-}
-#endif
-
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -390,11 +785,43 @@ void initMeshBindings(pybind11::module& m)
     .def("__setitem__", &BND_MeshVertexList::SetVertex)
     .def("__iter__", [](BND_MeshVertexList &s) { return py::make_iterator(s.begin(), s.end()); },
       py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
+    .def_property("UseDoublePrecisionVertices", &BND_MeshVertexList::UseDoublePrecisionVertices, &BND_MeshVertexList::SetUseDoublePrecisionVertices)
+    .def("Clear", &BND_MeshVertexList::Clear)
+    .def("Destroy", &BND_MeshVertexList::Destroy)
+    .def("Add", &BND_MeshVertexList::Add, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("IsHidden", &BND_MeshVertexList::IsHidden, py::arg("vertexIndex"))
+    .def("Hide", &BND_MeshVertexList::Hide, py::arg("vertexIndex"))
+    .def("Show", &BND_MeshVertexList::Show, py::arg("vertexIndex"))
+    .def("HideAll", &BND_MeshVertexList::HideAll)
+    .def("ShowAll", &BND_MeshVertexList::ShowAll)
+    .def("CullUnused", &BND_MeshVertexList::CullUnused)
+    .def("CombineIdentical", &BND_MeshVertexList::CombineIdentical)
+    ;
+
+  py::class_<BND_MeshTopologyEdgeList>(m, "MeshTopologyEdgeList")
+    .def("__len__", &BND_MeshTopologyEdgeList::Count)
+    .def("EdgeLine", &BND_MeshTopologyEdgeList::EdgeLine, py::arg("topologyEdgeIndex"))
     ;
 
   py::class_<BND_MeshFaceList>(m, "MeshFaceList")
     .def("__len__", &BND_MeshFaceList::Count)
     .def("__getitem__", &BND_MeshFaceList::GetFace)
+    .def_property("Count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
+    .def_property_readonly("QuadCount", &BND_MeshFaceList::QuadCount)
+    .def_property_readonly("TriangleCount", &BND_MeshFaceList::TriangleCount)
+    .def_property("Capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
+    .def("Clear", &BND_MeshFaceList::Clear)
+    .def("Destroy", &BND_MeshFaceList::Destroy)
+    .def("AddFace", &BND_MeshFaceList::AddFace, py::arg("vertex1"), py::arg("vertex2"), py::arg("vertex3"))
+    .def("AddFace", &BND_MeshFaceList::AddFace2, py::arg("vertex1"), py::arg("vertex2"), py::arg("vertex3"), py::arg("vertex4"))
+    .def("SetFace", &BND_MeshFaceList::SetFace, py::arg("index"), py::arg("vertex1"), py::arg("vertex2"), py::arg("vertex3"))
+    .def("SetFace", &BND_MeshFaceList::SetFace2, py::arg("index"), py::arg("vertex1"), py::arg("vertex2"), py::arg("vertex3"), py::arg("vertex4"))
+    .def("ConvertQuadsToTriangles", &BND_MeshFaceList::ConvertQuadsToTriangles)
+    .def("ConvertNonPlanarQuadsToTriangles", &BND_MeshFaceList::ConvertNonPlanarQuadsToTriangles)
+    .def("ConvertTrianglesToQuads", &BND_MeshFaceList::ConvertTrianglesToQuads)
+    .def("CullDegenerateFaces", &BND_MeshFaceList::CullDegenerateFaces)
+    .def("IsHidden", &BND_MeshFaceList::IsHidden)
+    .def("HasNakedEdges", &BND_MeshFaceList::HasNakedEdges)
     ;
 
   py::class_<BND_MeshNormalList>(m, "MeshNormalList")
@@ -404,6 +831,12 @@ void initMeshBindings(pybind11::module& m)
     .def("__iter__", [](BND_MeshNormalList &s) { return py::make_iterator(s.begin(),
         s.end()); },
          py::keep_alive<0, 1>())
+    .def("Clear", &BND_MeshNormalList::Clear)
+    .def("Destroy", &BND_MeshNormalList::Destroy)
+    .def("Add", &BND_MeshNormalList::Add, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("ComputeNormals", &BND_MeshNormalList::ComputeNormals)
+    .def("UnitizeNormals", &BND_MeshNormalList::UnitizeNormals)
+    .def("Flip", &BND_MeshNormalList::Flip)
     ;
 
   py::class_<BND_MeshVertexColorList>(m, "MeshVertexColorList")
@@ -426,6 +859,7 @@ void initMeshBindings(pybind11::module& m)
     .def("IsManifold", &BND_Mesh::IsManifold, py::arg("topologicalTest"))
     .def_property_readonly("HasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
+    .def_property_readonly("TopologyEdges", &BND_Mesh::GetTopologyEdges)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
     .def_property_readonly("Normals", &BND_Mesh::GetNormals)
     .def_property_readonly("VertexColors", &BND_Mesh::VertexColors)
@@ -435,6 +869,7 @@ void initMeshBindings(pybind11::module& m)
     .def("DestroyTopology", &BND_Mesh::DestroyTopology)
     .def("DestroyTree", &BND_Mesh::DestroyTree)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
+    .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -445,6 +880,7 @@ void initMeshBindings(pybind11::module& m)
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
+
 
 void initMeshBindings(void*)
 {
@@ -484,17 +920,54 @@ void initMeshBindings(void*)
     .function("setCount", &BND_MeshVertexList::SetCount)
     .function("get", &BND_MeshVertexList::GetVertex)
     .function("set", &BND_MeshVertexList::SetVertex)
+    .property("useDoublePrecisionVertices", &BND_MeshVertexList::UseDoublePrecisionVertices, &BND_MeshVertexList::SetUseDoublePrecisionVertices)
+    .function("clear", &BND_MeshVertexList::Clear)
+    .function("destroy", &BND_MeshVertexList::Destroy)
+    .function("add", &BND_MeshVertexList::Add)
+    .function("isHidden", &BND_MeshVertexList::IsHidden)
+    .function("hide", &BND_MeshVertexList::Hide)
+    .function("show", &BND_MeshVertexList::Show)
+    .function("hideAll", &BND_MeshVertexList::HideAll)
+    .function("showAll", &BND_MeshVertexList::ShowAll)
+    .function("cullUnused", &BND_MeshVertexList::CullUnused)
+    .function("combineIdentical", &BND_MeshVertexList::CombineIdentical)
+    ;
+
+  class_<BND_MeshTopologyEdgeList>("MeshTopologyEdgeList")
+    .property("count", &BND_MeshTopologyEdgeList::Count)
+    .function("edgeLine", &BND_MeshTopologyEdgeList::EdgeLine)
     ;
 
   class_<BND_MeshFaceList>("MeshFaceList")
-    .property("count", &BND_MeshFaceList::Count)
+    .property("count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .function("get", &BND_MeshFaceList::GetFace)
+    .property("quadCount", &BND_MeshFaceList::QuadCount)
+    .property("triangleCount", &BND_MeshFaceList::TriangleCount)
+    .property("capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
+    .function("clear", &BND_MeshFaceList::Clear)
+    .function("destroy", &BND_MeshFaceList::Destroy)
+    .function("addFace", &BND_MeshFaceList::AddFace)
+    .function("addFace", &BND_MeshFaceList::AddFace2)
+    .function("setFace", &BND_MeshFaceList::SetFace)
+    .function("setFace", &BND_MeshFaceList::SetFace2)
+    .function("convertQuadsToTriangles", &BND_MeshFaceList::ConvertQuadsToTriangles)
+    .function("convertNonPlanarQuadsToTriangles", &BND_MeshFaceList::ConvertNonPlanarQuadsToTriangles)
+    .function("convertTrianglesToQuads", &BND_MeshFaceList::ConvertTrianglesToQuads)
+    .function("cullDegenerateFaces", &BND_MeshFaceList::CullDegenerateFaces)
+    .function("isHidden", &BND_MeshFaceList::IsHidden)
+    .function("hasNakedEdges", &BND_MeshFaceList::HasNakedEdges)
     ;
 
   class_<BND_MeshNormalList>("MeshNormalList")
     .property("count", &BND_MeshNormalList::Count)
     .function("get", &BND_MeshNormalList::GetNormal)
     .function("set", &BND_MeshNormalList::SetNormal)
+    .function("clear", &BND_MeshNormalList::Clear)
+    .function("destroy", &BND_MeshNormalList::Destroy)
+    .function("add", &BND_MeshNormalList::Add)
+    .function("computeNormals", &BND_MeshNormalList::ComputeNormals)
+    .function("unitizeNormals", &BND_MeshNormalList::UnitizeNormals)
+    .function("flip", &BND_MeshNormalList::Flip)
     ;
 
   class_<BND_MeshTextureCoordinateList>("MeshTextureCoordinateList")
@@ -506,9 +979,10 @@ void initMeshBindings(void*)
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
     .constructor<>()
     .property("isClosed", &BND_Mesh::IsClosed)
-    //.function("isManifold", &BND_Mesh::IsManifold)
+    .function("isManifold", &BND_Mesh::IsManifold)
     .property("hasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
     .function("vertices", &BND_Mesh::GetVertices)
+    .function("topologyEdges", &BND_Mesh::GetTopologyEdges)
     .function("faces", &BND_Mesh::GetFaces)
     .function("normals", &BND_Mesh::GetNormals)
     .function("textureCoordinates", &BND_Mesh::TextureCoordinates)
@@ -517,10 +991,14 @@ void initMeshBindings(void*)
     .function("destroyTopology", &BND_Mesh::DestroyTopology)
     .function("destroyTree", &BND_Mesh::DestroyTree)
     .function("destroyPartition", &BND_Mesh::DestroyPartition)
+    .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)
     .property("partitionCount", &BND_Mesh::PartitionCount)
+    .function("toThreejsJSON", &BND_Mesh::ToThreejsJSON)
+    .function("toThreejsJSON", &BND_Mesh::ToThreejsJSONRotate)
+    .class_function("createFromThreejsJSON", &BND_Mesh::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }
 #endif

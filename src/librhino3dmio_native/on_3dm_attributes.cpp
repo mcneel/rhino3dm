@@ -360,6 +360,22 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasDisplayModeOverride(const ON_3dmObj
   return rc;
 }
 
+RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_GetDisplayModeOverride(const ON_3dmObjectAttributes* pConstObjectAttributes, ON_UUID viewportId)
+{
+  ON_UUID rc = ON_nil_uuid;
+  if (pConstObjectAttributes)
+  {
+    ON_UUID dmr_id;
+    if (pConstObjectAttributes->FindDisplayMaterialId(viewportId, &dmr_id))
+    {
+      //make sure dmr is not the "invisible in detail" id
+      if (dmr_id != ON_DisplayMaterialRef::m_invisible_in_detail_id)
+        rc = dmr_id;
+    }
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_3dmObjectAttributes_UseDisplayMode(ON_3dmObjectAttributes* pObjectAttributes, ON_UUID rhinoViewportId, ON_UUID modeId)
 {
   bool rc = false;

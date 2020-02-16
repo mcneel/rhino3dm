@@ -100,6 +100,40 @@ RH_C_FUNCTION ON::LengthUnitSystem ON_DimStyle_LengthUnitsFromDimStyleUnits(ON_D
   return ON_DimStyle::LengthUnitSystemFromLengthDisplay(style_units);
 }
 
+RH_C_FUNCTION ON_DimStyle::arrow_fit ON_DimStyle_ArrowFit(const ON_DimStyle* dimstyle)
+{
+  if (nullptr != dimstyle)
+  {
+    return dimstyle->ArrowFit();
+  }
+  return ON_DimStyle::arrow_fit::Auto;
+}
+
+RH_C_FUNCTION void ON_DimStyle_SetArrowFit(ON_DimStyle* dimstyle, ON_DimStyle::arrow_fit arrowfit)
+{
+  if (nullptr != dimstyle)
+  {
+    dimstyle->SetArrowFit(arrowfit);
+  }
+}
+
+RH_C_FUNCTION ON_DimStyle::text_fit ON_DimStyle_TextFit(const ON_DimStyle* dimstyle)
+{
+  if (nullptr != dimstyle)
+  {
+    return dimstyle->TextFit();
+  }
+  return ON_DimStyle::text_fit::Auto;
+}
+
+RH_C_FUNCTION void ON_DimStyle_SetTextFit(ON_DimStyle* dimstyle, ON_DimStyle::text_fit textfit)
+{
+  if (nullptr != dimstyle)
+  {
+    dimstyle->SetTextFit(textfit);
+  }
+}
+
 #pragma region uuid fields
 
 RH_C_FUNCTION ON_UUID ON_DimStyle_GetGuid(const ON_DimStyle* constDimStyle, ON_DimStyle::field field)
@@ -177,6 +211,8 @@ RH_C_FUNCTION bool ON_DimStyle_GetBool(const ON_DimStyle* constDimStyle, ON_DimS
       return constDimStyle->AlternateBelow();
     case ON_DimStyle::field::TextUnderlined:
       return constDimStyle->TextUnderlined();
+    case ON_DimStyle::field::ForceDimLine:
+      return constDimStyle->ForceDimLine();
 
     default:
       break;
@@ -223,6 +259,9 @@ RH_C_FUNCTION void ON_DimStyle_SetBool(ON_DimStyle* dimstyle, ON_DimStyle::field
       break;
     case ON_DimStyle::field::TextUnderlined:
       dimstyle->SetTextUnderlined(val);
+      break;
+    case ON_DimStyle::field::ForceDimLine:
+      dimstyle->SetForceDimLine(val);
       break;
     default:
       return;
@@ -541,6 +580,8 @@ RH_C_FUNCTION int ON_DimStyle_GetInt(const ON_DimStyle* constDimStyle, ON_DimSty
       return constDimStyle->AlternateToleranceResolution();
     case ON_DimStyle::field::MaskColorSource:
       return (int)constDimStyle->MaskFillType();
+//    case ON_DimStyle::field::MaskFrameType:
+//      return (int)constDimStyle->MaskFrameType();
     case ON_DimStyle::field::DimscaleSource:
       return constDimStyle->DimScaleSource();
     case ON_DimStyle::field::TextmoveLeader:
@@ -694,6 +735,13 @@ RH_C_FUNCTION void ON_DimStyle_SetInt(ON_DimStyle* dimstyle, ON_DimStyle::field 
         dimstyle->SetMaskFillType(mask_type);
     }
     break;
+    //case ON_DimStyle::field::MaskFrameType:
+    //{
+    //  const ON_TextMask::MaskFrame mask_frame = ON_TextMask::MaskFrameFromUnsigned((unsigned int)i);
+    //  if (static_cast<const unsigned int>(mask_frame) == (unsigned int)i)
+    //    dimstyle->SetMaskFrameType(mask_frame);
+    //}
+    //break;
     case ON_DimStyle::field::DimscaleSource:
       dimstyle->SetDimScaleSource(i);
       break;
@@ -966,6 +1014,29 @@ RH_C_FUNCTION void ON_DimStyle_SetColor(ON_DimStyle* dimstyle, ON_DimStyle::fiel
 }
 
 #pragma region string fields
+
+RH_C_FUNCTION bool ON_DimStyle_DecimalSeparator(const ON_DimStyle* dimstyle, ON_wString* pString)
+{
+  if (pString)
+  {
+    wchar_t s = ON_wString::DecimalAsPeriod;
+    if (dimstyle)
+      s = dimstyle->DecimalSeparator();
+    (*pString) += s;
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_DimStyle_SetDecimalSeparator(ON_DimStyle* dimstyle, const RHMONO_STRING* str)
+{
+  if (dimstyle && str)
+  {
+    INPUTSTRINGCOERCE(_str, str);
+    if(_str && _str[0])
+      dimstyle->SetDecimalSeparator(_str[0]);
+  }
+}
 
 RH_C_FUNCTION void ON_DimStyle_GetString(const ON_DimStyle* constDimStyle, ON_DimStyle::field field, ON_wString* pString)
 {

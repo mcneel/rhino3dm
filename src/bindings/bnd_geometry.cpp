@@ -46,6 +46,7 @@ void initGeometryBindings(pybind11::module& m)
     .def_property_readonly("IsDeformable", &BND_GeometryBase::IsDeformable)
     .def("MakeDeformable", &BND_GeometryBase::MakeDeformable)
     .def_property_readonly("HasBrepForm", &BND_GeometryBase::HasBrepForm)
+    .def("Duplicate", &BND_GeometryBase::Duplicate)
     ;
 }
 #endif
@@ -64,6 +65,7 @@ void initGeometryBindings(void*)
     .property("isDeformable", &BND_GeometryBase::IsDeformable)
     .function("makeDeformable", &BND_GeometryBase::MakeDeformable)
     .property("hasBrepForm", &BND_GeometryBase::HasBrepForm)
+    .function("duplicate", &BND_GeometryBase::DuplicateGeometry, allow_raw_pointers())
     ;
 }
 #endif

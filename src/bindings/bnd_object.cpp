@@ -159,6 +159,18 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if (iref)
       return new BND_InstanceReferenceGeometry(iref, compref);
 
+    ON_Annotation* annotation = ON_Annotation::Cast(obj);
+    if (annotation)
+      return new BND_AnnotationBase(annotation, compref);
+
+    ON_TextDot* dot = ON_TextDot::Cast(obj);
+    if (dot)
+      return new BND_TextDot(dot, compref);
+
+    ON_Light* light = ON_Light::Cast(obj);
+    if (light)
+      return new BND_Light(light, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
@@ -194,6 +206,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
   if (render_settings)
     return new BND_RenderSettings(render_settings, compref);
 
+  ON_Group* group = ON_Group::Cast(obj);
+  if (group)
+    return new BND_Group(group, compref);
+
   return new BND_CommonObject(obj, compref);
 }
 
@@ -206,6 +222,12 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(const ON_ModelComponentReferen
 
   ON_Object* obj = const_cast<ON_Geometry*>(geometryComponent->Geometry(nullptr));
   return CreateWrapper(obj, &compref);
+}
+
+BND_CommonObject* BND_CommonObject::Duplicate() const
+{
+  ON_Object* obj = m_object->Duplicate();
+  return CreateWrapper(obj, nullptr);
 }
 
 
@@ -1426,7 +1448,7 @@ BND_CommonObject* BND_CommonObject::Decode(BND_DICT jsonObject)
   std::string decoded = base64_decode(buffer);
   int rhinoversion = IntFromDict(jsonObject,"archive3dm");
   int opennurbsversion = IntFromDict(jsonObject,"opennurbs");
-  int length = decoded.length();
+  int length = (int)decoded.length();
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   ON_Object* obj = ON_ReadBufferArchive(rhinoversion, opennurbsversion, length, c);
   return CreateWrapper(obj, nullptr);
@@ -1448,20 +1470,19 @@ std::wstring BND_CommonObject::GetUserString(std::wstring key)
   return std::wstring(L"");
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::tuple BND_CommonObject::GetUserStrings() const
+BND_TUPLE BND_CommonObject::GetUserStrings() const
 {
   ON_ClassArray<ON_wString> keys;
   m_object->GetUserStringKeys(keys);
-  pybind11::tuple rc(keys.Count());
+  BND_TUPLE rc = CreateTuple(keys.Count());
   for (int i = 0; i < keys.Count(); i++)
   {
     ON_wString sval;
     m_object->GetUserString(keys[i].Array(), sval);
-    pybind11::tuple keyval(2);
-    keyval[0] = std::wstring(keys[i].Array());
-    keyval[1] = std::wstring(sval.Array());
-    rc[i] = keyval;
+    BND_TUPLE keyval = CreateTuple(2);
+    SetTuple(keyval, 0, std::wstring(keys[i].Array()));
+    SetTuple(keyval, 1, std::wstring(sval.Array()));
+    SetTuple(rc, i, keyval);
   }
   return rc;
 }
@@ -1478,7 +1499,6 @@ std::wstring BND_CommonObject::RdkXml() const
   return rc;
 }
 
-#endif
 
 
 
@@ -1516,6 +1536,8 @@ void initObjectBindings(void*)
     .function("setUserString", &BND_CommonObject::SetUserString)
     .function("getUserString", &BND_CommonObject::GetUserString)
     .property("userStringCount", &BND_CommonObject::UserStringCount)
+    .function("getUserStrings", &BND_CommonObject::GetUserStrings)
+    .function("rdkXml", &BND_CommonObject::RdkXml)
     ;
 
   class_<BND_ArchivableDictionary>("ArchivableDictionary")

@@ -23,6 +23,13 @@ namespace Rhino.FileIO
       m_pTextLog = UnsafeNativeMethods.ON_TextLog_New(m_pString);
     }
 
+    private TextLog(IntPtr pTextLog, IntPtr pString, bool bDelete)
+    {
+      m_pTextLog = pTextLog;
+      m_pString = pString;
+      m_bDelete = bDelete;
+    }
+
     /// <summary>
     /// Creates a text log that writes all text to a file. If no filename is
     /// provided, then text is written to StdOut
@@ -192,5 +199,30 @@ namespace Rhino.FileIO
       m_pTextLog = IntPtr.Zero;
       m_pString = IntPtr.Zero;
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Returns a reference to a TextLog that prints to the Rhino command line.
+    /// Each new command line reference holds its own indents.
+    /// </summary>
+    /// <remarks>All Print methods of this instance are guaranteeed to be thread safe.
+    /// Other methods are not guaranteed to be thread safe.</remarks>
+    public static TextLog NewCommandLine() => new CommandLineTextLog();
+
+    private class CommandLineTextLog : TextLog
+    {
+      internal static IntPtr GetNewCommandLinePtr() => UnsafeNativeMethods.ON_TextLog_GetNewCRhinoDump();
+
+      internal CommandLineTextLog() : base(GetNewCommandLinePtr(), IntPtr.Zero, true)
+      {
+      }
+
+      static CommandLineTextLog() => g_instance = new CommandLineTextLog();
+
+      internal static CommandLineTextLog g_instance;
+
+      public override string ToString() => string.Empty;
+    }
+#endif
   }
 }

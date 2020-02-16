@@ -17,4 +17,8 @@ protected:
 public:
   BND_Point();
   BND_Point(ON_Point* point, const ON_ModelComponentReference* compref);
+  BND_Point(ON_3dPoint location);
+
+  ON_3dPoint GetLocation() const { return m_point->point; }
+  void SetLocation(ON_3dPoint loc) { m_point->point = loc; }
 };

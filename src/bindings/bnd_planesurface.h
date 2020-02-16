@@ -17,4 +17,5 @@ protected:
 public:
   BND_PlaneSurface();
   BND_PlaneSurface(ON_PlaneSurface* planesurface, const ON_ModelComponentReference* compref);
+  BND_PlaneSurface(const class BND_Plane& plane, const class BND_Interval& xExtents, const class BND_Interval& yExtents);
 };

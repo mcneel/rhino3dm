@@ -783,11 +783,11 @@ RH_C_FUNCTION void ON_ReadBufferArchive_Delete(ON_Read3dmBufferArchive* pReadBuf
     delete pReadBufferArchive;
 }
 
-RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int rhinoversion, bool writeuserdata, unsigned int* length)
+RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, unsigned int* length)
 {
   ON_Write3dmBufferArchive* rc = nullptr;
 
-  if( pConstObject && length )
+  if( pConstObject && length && nullptr != rhinoversion)
   {
     ON_UserDataHolder holder;
     if( !writeuserdata )
@@ -795,10 +795,21 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON
     *length = 0;
     size_t sz = pConstObject->SizeOf() + 512; // 256 was too small on x86 builds to account for extra data written
 
-    // figure out the appropriate version number
-    unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
+    // 23 Oct 2019 - If .NET user passes a huge value, just clamp it and continue.
+    const int current_3dm_version = ON_BinaryArchive::CurrentArchiveVersion();
+    if (*rhinoversion > current_3dm_version)
+      *rhinoversion = current_3dm_version;
 
-    rc = new ON_Write3dmBufferArchive(sz, 0, rhinoversion, on_version__to_write);
+    if (*rhinoversion < 70 && nullptr != ON_SubD::Cast(pConstObject))
+    {
+      // SubD objects require at least a version 7 3dm archive.
+      *rhinoversion = 70;
+    }
+
+    // figure out the appropriate version number
+    unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
+
+    rc = new ON_Write3dmBufferArchive(sz, 0, *rhinoversion, on_version__to_write);
     if( rc->WriteObject(pConstObject) )
     {
       *length = (unsigned int)rc->SizeOfArchive();

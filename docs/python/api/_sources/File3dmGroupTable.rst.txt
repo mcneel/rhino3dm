@@ -1,0 +1,41 @@
+File3dmGroupTable
+=================
+
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmGroupTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(group)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a Group object based on an index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int groupIndex: The index to search for.
+
+      :return: A Group object, or None if none was found.
+      :rtype: Group
+
+   .. py:method:: FindName(name)
+
+      Finds a Group given its name.
+
+      :param str name: The name of the Group to be searched.
+
+      :return: A Group, or None on error.
+      :rtype: Group

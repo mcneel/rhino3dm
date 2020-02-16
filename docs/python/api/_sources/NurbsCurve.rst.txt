@@ -137,9 +137,9 @@ NurbsCurve
 
    .. py:method:: GrevillePoint(index)
 
-      Gets the greville (edit point) parameter that belongs
+      Gets the Greville parameter that belongs
       to the control point at the specified index.
 
-      :param int index: Index of Greville (Edit) point.
+      :param int index: Index of Greville point.
 
       :rtype: rhino3dm.Point3d

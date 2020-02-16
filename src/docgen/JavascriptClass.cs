@@ -169,6 +169,11 @@ namespace docgen
             var js = new StringBuilder();
             js.AppendLine("declare module 'rhino3dm' {");
 
+            // Declare default export promise
+            js.AppendLine();
+            js.AppendLine("\texport default function rhino3dm() : Promise<RhinoModule>;");
+
+            // Declare enums
             var keys = BindingClass.AllJavascriptEnums.Keys.ToList();
             keys.Sort();
             foreach(var key in keys)
@@ -186,9 +191,29 @@ namespace docgen
                 js.AppendLine("\t}");
             }
 
+            // Declare parent module
+            js.AppendLine();
+            js.AppendLine("\tclass RhinoModule {");
+
+            // Add enum property helpers
+            foreach (var key in keys)
+            {
+                var jsenum = BindingClass.AllJavascriptEnums[key];
+                js.AppendLine($"\t\t{jsenum.Name}: typeof {jsenum.Name}");
+            }
+
             keys = BindingClass.AllJavascriptClasses.Keys.ToList();
             keys.Sort();
 
+            // Add class property helpers
+            foreach (var key in keys)
+            {
+                var jsclass = GetJS(key);
+                js.AppendLine($"\t\t{jsclass.ClassName}: typeof {jsclass.ClassName};");
+            }
+            js.AppendLine("\t}");
+
+            // Declare all classes
             foreach (var key in keys)
             {
                 js.AppendLine();
@@ -200,6 +225,7 @@ namespace docgen
                     js.Append($" extends {jsclass.BaseClass}");
                 js.AppendLine(" {");
 
+                // Declare properties
                 foreach (var prop in jsclass.Properties)
                 {
                     PropertyDeclarationSyntax propDecl = null;
@@ -232,6 +258,41 @@ namespace docgen
                     js.AppendLine($"\t\t{prop}: {proptype};");
                 }
 
+                // Declare constructor
+                foreach (var constructor in jsclass.Constructors)
+                {
+                    var c = rhcommon.GetConstructor(constructor);
+                    var doccomment = rhcommon.DocComment;
+                    if (c == null)
+                        continue;
+                    ConstructorDeclarationSyntax constructorDecl = c.Item1;
+                    doccomment = c.Item2;
+
+                    if (constructorDecl != null)
+                    {
+                        js.AppendLine();
+                        js.Append("\t\tconstructor(");
+
+                        if (constructorDecl.ParameterList != null)
+                        {
+                            string parameters = "";
+                            var p = constructorDecl.ParameterList.Parameters;
+                            for (int i = 0; i < p.Count; i++)
+                            {
+                                parameters += p[i].Identifier + ": " + ToTypeScriptType(p[i].Type.ToString()) + (i == p.Count - 1 ? "" : ", ");
+                            }
+
+                            js.Append(parameters);
+                        }
+
+                        js.Append(");");
+                        
+                    }
+
+                    js.AppendLine();
+                }
+
+                // Declare methods
                 foreach (var (isStatic, method, args) in jsclass.Methods)
                 {
                     MethodDeclarationSyntax methodDecl = null;

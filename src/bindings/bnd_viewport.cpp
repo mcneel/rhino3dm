@@ -16,6 +16,18 @@ void BND_Viewport::SetTrackedPointer(ON_Viewport* viewport, const ON_ModelCompon
   BND_CommonObject::SetTrackedPointer(viewport, compref);
 }
 
+BND_Viewport* BND_Viewport::DefaultTopViewYUp()
+{
+  ON_Viewport* vp = new ON_Viewport(ON_Viewport::DefaultTopViewYUp);
+  return new BND_Viewport(vp, nullptr);
+}
+
+BND_Viewport* BND_Viewport::DefaultPerspectiveViewZUp()
+{
+  ON_Viewport* vp = new ON_Viewport(ON_Viewport::DefaultPerspectiveViewZUp);
+  return new BND_Viewport(vp, nullptr);
+}
+
 void BND_Viewport::SetProjectionToParallel(bool parallel)
 {
   if( parallel )
@@ -104,31 +116,6 @@ BND_DICT BND_Viewport::GetFrustum() const
   }
   throw pybind11::value_error("Invalid viewport");
 }
-
-void BND_Viewport::SetScreenPort(BND_DICT rect)
-{
-  int x = rect["x"].cast<int>();
-  int y = rect["y"].cast<int>();
-  int width = rect["width"].cast<int>();
-  int height = rect["height"].cast<int>();
-  m_viewport->SetScreenPort(x, x + width, y + height, y);
-}
-
-BND_DICT BND_Viewport::GetScreenPort() const
-{
-  int left, right, bottom, top, near_dist, far_dist;
-  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &near_dist, &far_dist);
-  if (success)
-  {
-    BND_DICT d;
-    d["x"] = left;
-    d["y"] = top;
-    d["width"] = fabs(right - left);
-    d["height"] = fabs(bottom - top);
-    return d;
-  }
-  throw pybind11::value_error("Invalid viewport");
-}
 #endif
 
 #if defined(__EMSCRIPTEN__)
@@ -136,7 +123,7 @@ emscripten::val BND_Viewport::GetFrustum() const
 {
   double left, right, bottom, top, near, far;
   bool success = m_viewport->GetFrustum(&left, &right, &bottom, &top, &near, &far);
-  if( success )
+  if (success)
   {
     emscripten::val v(emscripten::val::object());
     v.set("left", emscripten::val(left));
@@ -150,31 +137,47 @@ emscripten::val BND_Viewport::GetFrustum() const
   return emscripten::val::null();
 }
 
-void BND_Viewport::SetScreenPort(emscripten::val rect)
+#endif
+
+
+void BND_Viewport::SetScreenPort(BND_TUPLE rect)
 {
-  int x = rect["x"].as<int>();
-  int y = rect["y"].as<int>();
-  int width = rect["width"].as<int>();
-  int height = rect["height"].as<int>();
-  m_viewport->SetScreenPort(x, x+width, y+height, y);
+#if defined(ON_PYTHON_COMPILE)
+  int x = rect[0].cast<int>();
+  int y = rect[1].cast<int>();
+  int width = rect[2].cast<int>();
+  int height = rect[3].cast<int>();
+  m_viewport->SetScreenPort(x, x + width, y + height, y);
+#else
+  int x = rect[0].as<int>();
+  int y = rect[1].as<int>();
+  int width = rect[2].as<int>();
+  int height = rect[3].as<int>();
+  m_viewport->SetScreenPort(x, x + width, y + height, y);
+#endif
 }
 
-emscripten::val BND_Viewport::GetScreenPort() const
+BND_TUPLE BND_Viewport::GetScreenPort() const
 {
-  int left, right, bottom, top, near, far;
-  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &near, &far);
-  if( success )
+  int left, right, bottom, top, portNear, portFar;
+  bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &portNear, &portFar);
+  BND_TUPLE rc = CreateTuple(4);
+  if (success)
   {
-    emscripten::val v(emscripten::val::object());
-    v.set("x", emscripten::val(left));
-    v.set("y", emscripten::val(top));
-    v.set("width", emscripten::val(fabs(right-left)));
-    v.set("height", emscripten::val(fabs(bottom-top)));
-    return v;
+    SetTuple(rc, 0, left);
+    SetTuple(rc, 1, top);
+    SetTuple(rc, 2, fabs(right - left));
+    SetTuple(rc, 3, fabs(bottom - top));
   }
-  return emscripten::val::null();
+  else
+  {
+    SetTuple(rc, 0, 0);
+    SetTuple(rc, 1, 0);
+    SetTuple(rc, 2, 0);
+    SetTuple(rc, 3, 0);
+  }
+  return rc;
 }
-#endif
 
 double BND_Viewport::ScreenPortAspect() const
 {
@@ -213,6 +216,11 @@ BND_Transform* BND_Viewport::GetXform(ON::coordinate_system srcCS, ON::coordinat
     return nullptr;
   }
   return xf;
+}
+
+bool BND_Viewport::Extents(double halfViewAngleRadians, const class BND_BoundingBox& worldBbox)
+{
+  return m_viewport->Extents(halfViewAngleRadians, worldBbox.m_bbox);
 }
 
 bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
@@ -352,12 +360,20 @@ bool BND_Viewport::DollyExtents(const BND_BoundingBox& bbox, double border)
 
 }
 
+BND_UUID BND_Viewport::GetId() const
+{
+  return ON_UUID_to_Binding(m_viewport->ViewportId());
+}
+
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initViewportBindings(pybind11::module& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
+    .def_static("DefaultTop", &BND_Viewport::DefaultTopViewYUp)
+    .def_static("DefaultPerspective", &BND_Viewport::DefaultPerspectiveViewZUp)
     .def_property_readonly("IsValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .def_property_readonly("isValidCamer", &BND_Viewport::IsValidCamera)
     .def_property_readonly("IsValidFrustum", &BND_Viewport::IsValidFrustum)
@@ -384,7 +400,12 @@ void initViewportBindings(pybind11::module& m)
     .def_property("CameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .def_property("Camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .def("GetXform", &BND_Viewport::GetXform, py::arg("sourceCoordinateSystem"), py::arg("destinationCoordinateSystem"))
-    .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"));
+    .def("Extents", &BND_Viewport::Extents, py::arg("halfViewAngleRadians"), py::arg("worldBbox"))
+    .def("DollyExtents", &BND_Viewport::DollyExtents, py::arg("bbox"), py::arg("border"))
+    .def("FrustumCenterPoint", &BND_Viewport::FrustumCenterPoint, py::arg("targetDistance"))
+    .def("TargetDistance", &BND_Viewport::TargetDistance, py::arg("useFrustumCenterFallback"))
+    .def_property_readonly("Id", &BND_Viewport::GetId)
+    ;
 }
 
 #else
@@ -395,6 +416,8 @@ void initViewportBindings(void*)
 {
   class_<BND_Viewport, base<BND_CommonObject>>("ViewportInfo")
     .constructor<>()
+    .class_function("defaultTop", &BND_Viewport::DefaultTopViewYUp, allow_raw_pointers())
+    .class_function("defaultPerspective", &BND_Viewport::DefaultPerspectiveViewZUp, allow_raw_pointers())
     .property("isValidCameraFrame", &BND_Viewport::IsValidCameraFrame)
     .property("isValidCamer", &BND_Viewport::IsValidCamera)
     .property("isValidFrustum", &BND_Viewport::IsValidFrustum)
@@ -420,6 +443,11 @@ void initViewportBindings(void*)
     .property("cameraAngle", &BND_Viewport::GetCameraAngle, &BND_Viewport::SetCameraAngle)
     .property("camera35mmLensLength", &BND_Viewport::GetCamera35mmLensLength, &BND_Viewport::SetCamera35mmLensLength)
     .function("getXform", &BND_Viewport::GetXform, allow_raw_pointers())
-    .function("dollyExtents", &BND_Viewport::DollyExtents);
+    .function("extents", &BND_Viewport::Extents)
+    .function("dollyExtents", &BND_Viewport::DollyExtents)
+    .function("frustumCenterPoint", &BND_Viewport::FrustumCenterPoint)
+    .function("targetDistance", &BND_Viewport::TargetDistance)
+    .property("id", &BND_Viewport::GetId)
+    ;
 }
 #endif

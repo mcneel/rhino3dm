@@ -31,11 +31,16 @@ RH_C_FUNCTION bool ON_Mesh_EvaluateMeshGeometry(ON_Mesh* pMesh, const ON_Surface
   return rc;
 }
 
-RH_C_FUNCTION void ON_Mesh_UnlockMeshData(ON_Mesh* pMesh)
+RH_C_FUNCTION void ON_Mesh_UnlockMeshData(ON_Mesh* pMesh, bool singlePrecisionVerticesMightBeUnsynced)
 {
   if (pMesh)
   {
     pMesh->DestroyRuntimeCache();
+
+    if (singlePrecisionVerticesMightBeUnsynced && pMesh->HasSinglePrecisionVertices())
+    {
+      pMesh->UpdateSinglePrecisionVertices();
+    }
   }
 }
 
@@ -895,10 +900,22 @@ RH_C_FUNCTION int ON_Mesh_DeleteFace(ON_Mesh* pMesh, int count, /*ARRAY*/const i
   return init_ct;
 }
 
-RH_C_FUNCTION ON_3fPoint* ON_Mesh_VertexArray_Pointer(ON_Mesh* pMesh)
+RH_C_FUNCTION void* ON_Mesh_VertexArray_Pointer(ON_Mesh* pMesh, int which)
 {
   if (pMesh)
-    return pMesh->m_V.Array();
+  {
+    switch (which)
+    {
+    case 0:
+      return pMesh->m_V.Array();
+    case 1:
+      return pMesh->m_dV.Array();
+    case 2:
+      return pMesh->m_N.Array();
+    case 3:
+      return pMesh->m_F.Array();
+    }
+  }
   return nullptr;
 }
 
@@ -950,6 +967,21 @@ RH_C_FUNCTION bool ON_Mesh_GetFace(const ON_Mesh* pConstMesh, int face_index, ON
   {
     *face = pConstMesh->m_F[face_index];
     rc = true;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Mesh_GetFaces(const ON_Mesh* pConstMesh, int count, /*ARRAY*/int* faces)
+{
+  bool rc = false;
+  if (pConstMesh && faces)
+  {
+    const int faceCount = pConstMesh->m_F.Count();
+    if (4 * faceCount == count)
+    {
+      memcpy(faces, pConstMesh->m_F.Array(), count * sizeof(int));
+      rc = true;
+    }
   }
   return rc;
 }
@@ -1815,7 +1847,9 @@ RH_C_FUNCTION void ON_Mesh_SetTopologyVertex(ON_Mesh* pMesh, int index, ON_3FPOI
       for (int i = 0; i < count; i++)
       {
         int vertex = vi[i];
-        pMesh->m_V[vertex] = _pt;
+        //https://mcneel.myjetbrains.com/youtrack/issue/RH-53108
+        //pMesh->m_V[vertex] = _pt;
+        pMesh->SetVertex(vertex, _pt);
       }
     }
   }
@@ -2159,6 +2193,12 @@ RH_C_FUNCTION int ON_Mesh_GetClosestPoint2(const ON_Mesh* pMesh, ON_3DPOINT_STRU
     }
   }
   return rc;
+}
+
+RH_C_FUNCTION void ON_Mesh_PullCurveToMesh(const ON_Curve* curve, const ON_Mesh* mesh, ON_PolylineCurve** polylineNonConstPtr_Ptr, double tolerance)
+{
+  if (polylineNonConstPtr_Ptr)
+    *polylineNonConstPtr_Ptr = ::RhinoPullCurveToMesh(curve, mesh, tolerance);
 }
 
 struct ON_MESHPOINT_STRUCT
@@ -2630,6 +2670,30 @@ RH_C_FUNCTION ON_UUID ON_TextureMapping_GetId(const ON_TextureMapping* pTextureM
   return pTextureMapping->Id();
 }
 
+RH_C_FUNCTION int ON_TextureMapping_Evaluate(const ON_TextureMapping* pTextureMapping, ON_3DPOINT_STRUCT p, ON_3DVECTOR_STRUCT n, ON_3dPoint* t)
+{
+  int rc = 0;
+  if (pTextureMapping && t)
+  {
+    ON_3dPoint _p(p.val);
+    ON_3dVector _n(n.val);
+    rc = pTextureMapping->Evaluate(_p, _n, t);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION int ON_TextureMapping_Evaluate2(const ON_TextureMapping* pTextureMapping, ON_3DPOINT_STRUCT p, ON_3DVECTOR_STRUCT n, ON_3dPoint* t, const ON_Xform* pXform, const ON_Xform* nXform)
+{
+  int rc = 0;
+  if (pTextureMapping && t && pXform && nXform)
+  {
+    ON_3dPoint _p(p.val);
+    ON_3dVector _n(n.val);
+    rc = pTextureMapping->Evaluate(_p, _n, t, *pXform, *nXform);
+  }
+  return rc;
+}
+
 enum TextureMappingType : int
 {
   tmtNoMapping = 0,
@@ -2822,6 +2886,17 @@ RH_C_FUNCTION bool ON_TextureMapping_SetMeshMappingPrimitive(ON_TextureMapping* 
   return rc;
 }
 
+RH_C_FUNCTION bool ON_TextureMapping_CopyCustomMappingMeshPrimitive(const ON_TextureMapping* pTextureMapping, ON_Mesh* pMesh)
+{
+  if (pTextureMapping == nullptr || pMesh == nullptr)
+    return false;
+  const ON_Mesh* pCustomMappingMesh = pTextureMapping->CustomMappingMeshPrimitive();
+  if (pCustomMappingMesh == nullptr)
+    return false;
+  *pMesh = *pCustomMappingMesh;
+  return true;
+}
+
 #if !defined(RHINO3DMIO_BUILD)
 static const ON_MappingRef* GetValidMappingRef(const CRhinoObject* pObject, bool withChannels)
 {
@@ -2838,7 +2913,6 @@ static const ON_MappingRef* GetValidMappingRef(const CRhinoObject* pObject, bool
   // Try with the current renderer first.
   const ON_MappingRef* pRef = attr.MappingRef(RhinoApp().GetDefaultRenderApp());
 
-  // 5DC0192D-73DC-44F5-9141-8E72542E792D
   ON_UUID uuidRhinoRender = RhinoApp().RhinoRenderPlugInUUID();
   if (nullptr == pRef)
   {

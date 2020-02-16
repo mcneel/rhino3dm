@@ -11,6 +11,7 @@
 
 #if defined(ON_PYTHON_COMPILE)
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")
 #endif
@@ -25,11 +26,24 @@
 #if defined(ON_PYTHON_COMPILE)
 typedef pybind11::dict BND_DICT;
 typedef pybind11::tuple BND_Color;
+typedef pybind11::tuple BND_TUPLE;
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
 typedef emscripten::val BND_Color;
+typedef emscripten::val BND_TUPLE;
 #endif
+
+BND_TUPLE CreateTuple(int count);
+template<typename T>
+void SetTuple(BND_TUPLE& tuple, int index, const T& value)
+{
+#if defined(ON_PYTHON_COMPILE)
+  tuple[index] = value;
+#else
+  tuple.set(index, value);
+#endif
+}
 
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
@@ -58,6 +72,7 @@ typedef emscripten::val BND_Color;
 #include "bnd_texture.h"
 #include "bnd_texture_mapping.h"
 #include "bnd_geometry.h"
+#include "bnd_annotationbase.h"
 #include "bnd_instance.h"
 #include "bnd_hatch.h"
 #include "bnd_pointcloud.h"
@@ -75,11 +90,15 @@ typedef emscripten::val BND_Color;
 #include "bnd_mesh.h"
 #include "bnd_surface.h"
 #include "bnd_revsurface.h"
+#include "bnd_subd.h"
 #include "bnd_surfaceproxy.h"
 #include "bnd_planesurface.h"
 #include "bnd_brep.h"
 #include "bnd_beam.h"
 #include "bnd_nurbssurface.h"
+#include "bnd_light.h"
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"
+#include "bnd_group.h"
 #include "bnd_extensions.h"
+#include "bnd_draco.h"

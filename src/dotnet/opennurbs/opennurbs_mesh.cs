@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Rhino.Collections;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
@@ -1078,6 +1079,75 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
+  /// Parameters for QuadRemesh method
+  /// </summary>
+  public class QuadRemeshParameters
+  {
+    /// <summary>
+    /// The number of quads to try to achieve in the final remeshed object
+    /// </summary>
+    public int TargetQuadCount { get; set; } = 2000;
+
+    /// <summary>
+    /// Larger values results in for quad sizes that adjust to match input curvature.
+    /// Smaller values results in more uniform quad sizes at the risk of less feature preservation.
+    /// Range [0 - 100]
+    /// </summary>
+    public double AdaptiveSize { get; set; } = 50;
+
+    /// <summary>
+    /// Respect the original Target Quad Count value as much as possible.
+    /// True returns more quads than TargetQuadCount depending on amount of high-curvature areas.
+    /// </summary>
+    public bool AdaptiveQuadCount { get; set; } = true;
+
+    /// <summary>
+    /// When enabled the hard edges in models will be retained.
+    /// </summary>
+    public bool DetectHardEdges { get; set; } = true;
+
+    /*
+    /// <summary>
+    ///  When enabled, it will return an edge loop where normals are creased (Un-welded) on the input mesh
+    /// </summary>
+    public bool UseIndexedNormals { get; set; } = true;
+    */
+
+    /// <summary>
+    /// 0 = Approximate
+    /// 1 = Interpolate Edge Ring
+    /// 2 = Interpolate Edge Loop
+    /// This value is ignored if Guide Curves are not supplied
+    /// </summary>
+    public int GuideCurveInfluence { get; set; } = 0;
+
+    /// <summary>
+    /// 0=off, 1=On(Smart), 2=On(Strict) :
+    /// Mesh array's created from Breps will have their brep face edge boundaries retained.
+    /// Smart - Small or insignificant input faces are ignored.
+    /// Strict - All input faces are factored in remeshed result.
+    /// </summary>
+    public int PreserveMeshArrayEdgesMode { get; set; } = 0;
+
+    /// <summary> Symmetry axis to use for symmetric remeshing </summary>
+    public QuadRemeshSymmetryAxis SymmetryAxis { get; set; } = QuadRemeshSymmetryAxis.None;
+  }
+
+  /// <summary> Symmetrical meshing axis </summary>
+  [Flags]
+  public enum QuadRemeshSymmetryAxis
+  {
+    /// <summary> No symmetric remeshing</summary>
+    None = 0,
+    /// <summary> Symmetry across X axis</summary>
+    X = 1,
+    /// <summary> Symmetry across Y axis</summary>
+    Y = 2,
+    /// <summary> Symmetry across Z axis</summary>
+    Z = 4
+  }
+
+  /// <summary>
   /// Represents a geometry type that is defined by vertices and faces.
   /// <para>This is often called a face-vertex mesh.</para>
   /// </summary>
@@ -1252,16 +1322,47 @@ namespace Rhino.Geometry
       return new Mesh(ptr, null);
     }
 
-    /// <summary>Constructs a mesh cylinder</summary>
+    /// <summary>Constructs a capped mesh cylinder.</summary>
     /// <param name="cylinder"></param>
-    /// <param name="vertical">Number of faces in the top-to-bottom direction</param>
-    /// <param name="around">Number of faces around the cylinder</param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the cylinder.</param>
     /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
-    /// <returns></returns>
+    /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
     public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around)
     {
       if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
       IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCylinder(ref cylinder, vertical, around);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
+
+    /// <summary>Constructs a mesh cylinder.</summary>
+    /// <param name="cylinder"></param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the cylinder.</param>
+    /// <param name="capBottom">If true end at Cylinder.Height1 should be capped.</param>
+    /// <param name="capTop">If true end at Cylinder.Height2 should be capped.</param>
+    /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
+    /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop)
+    {
+      if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCylinder2(ref cylinder, vertical, around, capBottom, capTop);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
+
+    /// <summary>Constructs a mesh cylinder.</summary>
+    /// <param name="cylinder"></param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the cylinder.</param>
+    /// <param name="capBottom">If true end at Cylinder.Height1 should be capped.</param>
+    /// <param name="capTop">If true end at Cylinder.Height2 should be capped.</param>
+    /// <param name="quadCaps">If true and it's possible to make quad caps, ie. around is even, then caps will have quad faces.</param>
+    /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
+    /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop, bool quadCaps)
+    {
+      if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCylinderWithQuadCaps(ref cylinder, vertical, around, capBottom, capTop, quadCaps);
       return CreateGeometryHelper(ptr_mesh, null) as Mesh;
     }
 
@@ -1287,6 +1388,36 @@ namespace Rhino.Geometry
     {
       if (!cone.IsValid) { throw new ArgumentException("cone is invalid"); }
       IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCone(ref cone, vertical, around, solid);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
+
+    /// <summary>Constructs a mesh cone.</summary>
+    /// <param name="cone"></param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the cone.</param>
+    /// <param name="solid">If false the mesh will be open with no faces on the circular planar portion.</param>
+    /// <param name="quadCaps">If true and it's possible to make quad caps, ie. around is even, then caps will have quad faces.</param>
+    /// <exception cref="ArgumentException">Thrown when cone is invalid.</exception>
+    /// <returns>A valid mesh if successful.</returns>
+    public static Mesh CreateFromCone(Cone cone, int vertical, int around, bool solid, bool quadCaps)
+    {
+      if (!cone.IsValid) { throw new ArgumentException("cone is invalid"); }
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshConeWithQuadCaps(ref cone, vertical, around, solid, quadCaps);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
+
+    /// <summary>
+    /// Constructs a mesh torus.
+    /// </summary>
+    /// <param name="torus">The torus.</param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the torus.</param>
+    /// <exception cref="ArgumentException">Thrown when torus is invalid.</exception>
+    /// <returns>Returns a mesh torus if successful, null otherwise.</returns>
+    public static Mesh CreateFromTorus(Torus torus, int vertical, int around)
+    {
+      if (!torus.IsValid) { throw new ArgumentException("torus is invalid"); }
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshTorus(ref torus, vertical, around);
       return CreateGeometryHelper(ptr_mesh, null) as Mesh;
     }
 
@@ -1459,6 +1590,38 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Create a mesh from a SubD limit surface
+    /// </summary>
+    /// <param name="subd"></param>
+    /// <param name="displayDensity"></param>
+    /// <returns></returns>
+    public static Mesh CreateFromSubD(SubD subd, int displayDensity)
+    {
+      IntPtr constPtrSubD = subd.ConstPointer();
+      IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_ToLimitSurfaceMesh(constPtrSubD, (uint)displayDensity);
+      if (IntPtr.Zero != ptrMesh)
+        return new Mesh(ptrMesh, null);
+      GC.KeepAlive(subd);
+      return null;
+    }
+
+    /// <summary>
+    /// Create a mesh from a SubD control net
+    /// </summary>
+    /// <param name="subd"></param>
+    /// <returns></returns>
+    public static Mesh CreateFromSubDControlNet(SubD subd)
+    {
+      IntPtr constPtrSubD = subd.ConstPointer();
+      IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_GetControlNetMesh(constPtrSubD);
+      if (IntPtr.Zero != ptrMesh)
+        return new Mesh(ptrMesh, null);
+      GC.KeepAlive(subd);
+      return null;
+
+    }
+
+    /// <summary>
     /// Construct a mesh patch from a variety of input geometry.
     /// </summary>
     /// <param name="outerBoundary">(optional: can be null) Outer boundary
@@ -1556,22 +1719,17 @@ namespace Rhino.Geometry
       if (innerBothSideCurves != null)
       {
         foreach (var crv in innerBothSideCurves)
-          if (crv.IsClosed)
+        {
+          PolylineCurve polyline_crv = crv as PolylineCurve;
+          if (polyline_crv != null)
           {
-            PolylineCurve polyline_crv = crv as PolylineCurve;
-            if (polyline_crv != null)
-            {
-              bothSideCrvs.Add(polyline_crv);
-            }
-            else
-            {
-              bothSideCrvs.Add(crv.ToPolyline(0, 0, angleToleranceRadians, 0, 0, 0, 0, 0, true));
-            }
+            bothSideCrvs.Add(polyline_crv);
           }
           else
           {
-            throw new ArgumentException("innerBothSideCurves", "One or more of the curves is null or not closed.");
+            bothSideCrvs.Add(crv.ToPolyline(0, 0, angleToleranceRadians, 0, 0, 0, 0, 0, true));
           }
+        }
       }
 
       IntPtr const_ptr_surface = pullbackSurface == null ? IntPtr.Zero : pullbackSurface.ConstPointer();
@@ -1726,11 +1884,11 @@ namespace Rhino.Geometry
       MeshPipeCapStyle capType, bool faceted, IEnumerable<Interval> intervals = null)
     {
       if (curve == null)
-        throw new ArgumentNullException("curve");
+        throw new ArgumentNullException(nameof(curve));
       if (!Enum.IsDefined(typeof(MeshPipeCapStyle), capType))
-        throw new ArgumentOutOfRangeException("capType");
+        throw new ArgumentOutOfRangeException(nameof(capType));
       if (radius <= 0.0)
-        throw new ArgumentOutOfRangeException("radius");
+        throw new ArgumentOutOfRangeException(nameof(radius));
 
       var const_curve_ptr = curve.ConstPointer();
       IntPtr intervals_ptr = IntPtr.Zero;
@@ -1758,6 +1916,89 @@ namespace Rhino.Geometry
       GC.KeepAlive(curve);
 
       return IntPtr.Zero == ptr_mesh ? null : new Mesh(ptr_mesh, null);
+    }
+
+    /// <summary>
+    /// Constructs a new extrusion from a curve.
+    /// </summary>
+    /// <param name="curve">A curve to extrude.</param>
+    /// <param name="direction">The direction of extrusion.</param>
+    /// <param name="parameters">The parameters of meshing.</param>
+    /// <param name="boundingBox">The bounding box controls the length of the estrusion.</param>
+    /// <returns>A new mesh, or null on failure.</returns>
+    public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters,
+      BoundingBox boundingBox)
+    {
+      if (curve == null)
+        throw new ArgumentNullException(nameof(curve));
+      if (direction.IsZero || !direction.IsValid)
+        throw new ArgumentException(nameof(direction));
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      if (!boundingBox.IsValid)
+        throw new ArgumentNullException(nameof(boundingBox));
+
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_Mesh_CreateFromCurveExtrusion(
+        curve.ConstPointer(), ref direction, parameters.ConstPointer(), ref boundingBox);
+
+      GC.KeepAlive(curve);
+      GC.KeepAlive(parameters);
+
+      return IntPtr.Zero == ptr_mesh ? null : new Mesh(ptr_mesh, null);
+    }
+
+    /// <summary>Repairs meshes with vertices that are too near, using a tolerance value.</summary>
+    /// <param name="meshes">The meshes to be repared.</param>
+    /// <param name="tolerance">A minimum distance for clean vertices.</param>
+    /// <returns>A valid meshes array if successful. If no change was required, some meshes can be null. Otherwise, null, when no changes were done.</returns>
+    /// <remarks><seealso cref="RequireIterativeCleanup"/></remarks>
+    public static Mesh[] CreateFromIterativeCleanup(IEnumerable<Mesh> meshes, double tolerance)
+    {
+      if (meshes == null) throw new ArgumentNullException(nameof(meshes));
+      tolerance = Math.Abs(tolerance);
+
+      Mesh[] meshes_inputs = RhinoListHelpers.GetConstArray(meshes, out int count);
+      var input_ptrs = new IntPtr[count];
+      for (int i = 0; i < count; i++) input_ptrs[i] = meshes_inputs[i].ConstPointer();
+
+      SimpleArrayMeshPointer results = new SimpleArrayMeshPointer();
+
+      var inputs_intptrs = GCHandle.Alloc(input_ptrs, GCHandleType.Pinned);
+      bool result = UnsafeNativeMethods.RHC_MeshArrayIterativeCleanup(inputs_intptrs.AddrOfPinnedObject(), count, tolerance, results.NonConstPointer());
+      inputs_intptrs.Free();
+      GC.KeepAlive(meshes_inputs);
+
+      var array = results.ToNonConstArray(); //required in all cases, or the possible new meshes will leak in case of failure
+      if (results.Count == 0 || result == false) return null;
+      return array;
+    }
+
+
+    /// <summary>
+    /// Analyzes some meshes, and determines if a pass of CreateFromIterativeCleanup would change the array.
+    /// <para>All available cleanup steps are used. Currently available cleanup steps are:</para>
+    /// <para>- mending of single precision coincidence even though double precision vertices differ.</para>
+    /// <para>- union of nearly identical vertices, irrespectively of their origin.</para>
+    /// <para>- removal of t-joints along edges.</para>
+    /// </summary>
+    /// <param name="meshes">A list, and array or any enumerable of meshes.</param>
+    /// <param name="tolerance">A 3d distance. This is usually a value of about 10e-7 magnitude.</param>
+    /// <returns>True if meshes would be changed, otherwise false.</returns>
+    /// <remarks><seealso cref="Rhino.Geometry.Mesh.CreateFromIterativeCleanup"/></remarks>
+    public static bool RequireIterativeCleanup(IEnumerable<Mesh> meshes, double tolerance)
+    {
+      if (meshes == null) throw new ArgumentNullException(nameof(meshes));
+
+      Mesh[] meshes_inputs = RhinoListHelpers.GetConstArray(meshes, out int count);
+      var input_ptrs = new IntPtr[count];
+      for (int i = 0; i < count; i++) input_ptrs[i] = meshes_inputs[i].ConstPointer();
+
+      var inputs_intptrs = GCHandle.Alloc(input_ptrs, GCHandleType.Pinned);
+      bool result = UnsafeNativeMethods.RHC_MeshArrayRequireIterativeCleanup(inputs_intptrs.AddrOfPinnedObject(), count, tolerance);
+      inputs_intptrs.Free();
+      GC.KeepAlive(meshes_inputs);
+
+      return result;
     }
 
 #endif
@@ -1815,7 +2056,7 @@ namespace Rhino.Geometry
     /// <summary> Clear local cache on non const calls </summary>
     protected override void NonConstOperation()
     {
-      if( OneShotNonConstCallback!=null )
+      if (OneShotNonConstCallback != null)
       {
         OneShotNonConstCallback(this, EventArgs.Empty);
         OneShotNonConstCallback = null;
@@ -2320,7 +2561,7 @@ namespace Rhino.Geometry
       using (var indices = new SimpleArrayInt(vertexIndices))
       {
         IntPtr ptr_indices = indices.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int) coordinateSystem, ref plane);
+        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
       }
     }
 
@@ -2491,7 +2732,7 @@ namespace Rhino.Geometry
       using (var meshes = new SimpleArrayMeshPointer())
       {
         IntPtr ptr_mesh_array = meshes.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit(const_ptr_this, ptr_mesh_array, ref plane);
+        UnsafeNativeMethods.RHC_RhinoMeshSplitWithPlane(const_ptr_this, ptr_mesh_array, ref plane);
         return meshes.ToNonConstArray();
       }
     }
@@ -2503,44 +2744,72 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Mesh[] Split(Mesh mesh)
     {
-      using (var input_meshes = new SimpleArrayMeshPointer())
-      using (var splitters = new SimpleArrayMeshPointer())
-      using (var meshes = new SimpleArrayMeshPointer())
-      {
-        input_meshes.Add(this, true);
-        splitters.Add(mesh, true);
-        IntPtr const_ptr_input_meshes = input_meshes.ConstPointer();
-        IntPtr const_ptr_splitters = splitters.ConstPointer();
-        IntPtr ptr_result_meshes = meshes.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, ptr_result_meshes);
-        GC.KeepAlive(mesh);
-        return meshes.ToNonConstArray();
-      }
+      return Split(new Mesh[] { mesh });
+    }
+    /// <summary>
+    /// Split a mesh with a collection of meshes.
+    /// Does not split at coplanar intersections.
+    /// </summary>
+    /// <param name="meshes">Meshes to split with.</param>
+    /// <returns>An array of mesh segments representing the split result.</returns>
+    [ConstOperation]
+    public Mesh[] Split(IEnumerable<Mesh> meshes) {
+      return Split(meshes, RhinoMath.SqrtEpsilon * 10, false, null, CancellationToken.None, null);
     }
     /// <summary>
     /// Split a mesh with a collection of meshes.
     /// </summary>
     /// <param name="meshes">Meshes to split with.</param>
-    /// <returns>An array of mesh segments representing the split result.</returns>
+    /// <param name="tolerance">A value for intersection tolerance.
+    /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
+    /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// </param>
+    /// <param name="splitAtCoplanar">If false, coplanar areas will not be separated.</param>
+    /// <param name="textLog">A text log to write onto.</param>
+    /// <param name="cancel">A cancellation token.</param>
+    /// <param name="progress">A progress reporter item. This can be null.</param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
     [ConstOperation]
-    public Mesh[] Split(IEnumerable<Mesh> meshes)
+    public Mesh[] Split(IEnumerable<Mesh> meshes, double tolerance, bool splitAtCoplanar, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
     {
-      using (var input_meshes = new SimpleArrayMeshPointer())
-      using (var splitters = new SimpleArrayMeshPointer())
-      using (var on_meshes = new SimpleArrayMeshPointer())
+      Interop.MarshalProgressAndCancelToken(cancel, progress,
+        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
+
+      try
       {
-        input_meshes.Add(this, true);
-        foreach (var mesh in meshes)
+        using (var input_meshes = new SimpleArrayMeshPointer())
+        using (var splitters = new SimpleArrayMeshPointer())
+        using (var on_meshes = new SimpleArrayMeshPointer())
         {
-          if (mesh != null)
-            splitters.Add(mesh, true);
+          input_meshes.Add(this, true);
+          foreach (var mesh in meshes)
+          {
+            if (mesh != null)
+              splitters.Add(mesh, true);
+          }
+          IntPtr const_ptr_input_meshes = input_meshes.ConstPointer();
+          IntPtr const_ptr_splitters = splitters.ConstPointer();
+          IntPtr ptr_result_meshes = on_meshes.NonConstPointer();
+          int results = UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, tolerance, splitAtCoplanar, ptr_result_meshes,
+            textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
+          GC.KeepAlive(meshes);
+          GC.KeepAlive(textLog);
+          GC.KeepAlive(progress);
+          var rc = on_meshes.ToNonConstArray();
+
+          if ((cancel != null && cancel.IsCancellationRequested) || results < 0)
+          {
+            for (int i = 0; i < rc.Length; i++) rc[i].Dispose();
+            rc = null;
+          }
+
+          return rc;
         }
-        IntPtr const_ptr_input_meshes = input_meshes.ConstPointer();
-        IntPtr const_ptr_splitters = splitters.ConstPointer();
-        IntPtr ptr_result_meshes = on_meshes.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, ptr_result_meshes);
-        GC.KeepAlive(meshes);
-        return on_meshes.ToNonConstArray();
+      }
+      finally
+      {
+        if (reporter != null) reporter.Disable();
+        if (terminator != null) terminator.Dispose();
       }
     }
 
@@ -2959,6 +3228,91 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Gets a polyline approximation of the input curve and then moves its control points to the closest point on the mesh.
+    /// Then it "connects the points" over edges so that a polyline on the mesh is formed.
+    /// </summary>
+    /// <param name="curve">A curve to pull.</param>
+    /// <param name="tolerance">A tolerance value.</param>
+    /// <returns>A polyline curve, or null if none could be constructed.</returns>
+    [ConstOperation]
+    public PolylineCurve PullCurve(Curve curve, double tolerance)
+    {
+      if (curve == null) throw new ArgumentNullException(nameof(curve));
+
+      IntPtr new_polyline_crv_ptr = IntPtr.Zero;
+      IntPtr mesh_constptr = ConstPointer();
+      IntPtr curve_constptr = curve.ConstPointer();
+      UnsafeNativeMethods.ON_Mesh_PullCurveToMesh(curve_constptr, mesh_constptr, ref new_polyline_crv_ptr, tolerance);
+      GC.KeepAlive(curve);
+
+      if (new_polyline_crv_ptr == IntPtr.Zero) return null;
+
+      return new PolylineCurve(new_polyline_crv_ptr, null, -1);
+    }
+
+    /// <summary>
+    /// Splits a mesh by adding edges in correspondance with input polylines, and divides the mesh at partitioned areas.
+    /// Polyline segments that are measured not to be on the mesh will be ignored.
+    /// </summary>
+    /// <param name="curves">An array, a list or any enumerable of polyline curves.</param>
+    /// <param name="tolerance">A tolerance value.</param>
+    /// <returns>An array of meshes, or null if no change would happen.</returns>
+    [ConstOperation]
+    public Mesh[] SplitWithProjectedPolylines(IEnumerable<PolylineCurve> curves, double tolerance)
+    {
+      return SplitWithProjectedPolylines(curves, tolerance, null, CancellationToken.None, null);
+    }
+
+    /// <summary>
+    /// Splits a mesh by adding edges in correspondance with input polylines, and divides the mesh at partitioned areas.
+    /// Polyline segments that are measured not to be on the mesh will be ignored.
+    /// </summary>
+    /// <param name="curves">An array, a list or any enumerable of polyline curves.</param>
+    /// <param name="tolerance">A tolerance value.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
+    /// <param name="progress">A progress reporter to inform the user about progress. The reported value is indicative.</param>
+    /// <returns>An array of meshes, or null if no change would happen.</returns>
+    [ConstOperation]
+    public Mesh[] SplitWithProjectedPolylines(IEnumerable<PolylineCurve> curves, double tolerance, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
+    {
+      if (curves == null) throw new ArgumentNullException(nameof(curves));
+      RhinoList<IntPtr> polyline_curve_const_ptrs = new RhinoList<IntPtr>();
+      foreach(var curve in curves)
+      {
+        polyline_curve_const_ptrs.Add(curve.ConstPointer());
+      }
+
+      if (polyline_curve_const_ptrs.Count == 0) return null;
+
+      var meshes_results = new SimpleArrayMeshPointer();
+      IntPtr new_polyline_crv_ptr = IntPtr.Zero;
+      IntPtr mesh_constptr = ConstPointer();
+      IntPtr meshes_results_simple_array_ptr = meshes_results.NonConstPointer();
+
+      Interop.MarshalProgressAndCancelToken(cancel, progress,
+        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(polyline_curve_const_ptrs.m_items, GCHandleType.Pinned);
+        UnsafeNativeMethods.RH_MX_SplitWithProjectedPolylines(Marshal.UnsafeAddrOfPinnedArrayElement(polyline_curve_const_ptrs.m_items, 0),
+          polyline_curve_const_ptrs.Count, mesh_constptr, tolerance, meshes_results_simple_array_ptr, textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
+        handle.Free();
+        GC.KeepAlive(curves);
+        GC.KeepAlive(textLog);
+        GC.KeepAlive(progress);
+      }
+      finally
+      {
+        if (reporter != null) reporter.Disable();
+        if (terminator != null) terminator.Dispose();
+      }
+
+      if (meshes_results.Count == 0) return null;
+      return meshes_results.ToNonConstArray();
+    }
+
+    /// <summary>
     /// Makes a new mesh with vertices offset a distance in the opposite direction of the existing vertex normals.
     /// Same as Mesh.Offset(distance, false)
     /// </summary>
@@ -2983,7 +3337,7 @@ namespace Rhino.Geometry
     {
       Vector3d direction = Vector3d.Unset;
       IntPtr const_ptr_this = ConstPointer();
-      IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction);
+      IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction, IntPtr.Zero);
       if (IntPtr.Zero == ptr_new_mesh)
         return null;
       return new Mesh(ptr_new_mesh, null);
@@ -3002,10 +3356,36 @@ namespace Rhino.Geometry
     public Mesh Offset(double distance, bool solidify, Vector3d direction)
     {
       IntPtr const_ptr_this = ConstPointer();
-      IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction);
+      IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction, IntPtr.Zero);
       if (IntPtr.Zero == ptr_new_mesh)
         return null;
       return new Mesh(ptr_new_mesh, null);
+    }
+
+    /// <summary>
+    /// Makes a new mesh with vertices offset a distance along the direction parameter.
+    /// Optionally, based on the value of solidify, adds the input mesh and a ribbon of faces along any naked edges.
+    /// If solidify is false it acts exactly as the Offset(distance) function. Returns list of wall faces, i.e. the
+    /// faces that connect original and offset mesh when solidified.
+    /// </summary>
+    /// <param name="distance">A distance value.</param>
+    /// <param name="solidify">true if the mesh should be solidified.</param>
+    /// <param name="direction">Direction of offset for all vertices.</param>
+    /// <param name="wallFacesOut">Returns list of wall faces.</param>
+    /// <returns>A new mesh on success, or null on failure.</returns>
+    [ConstOperation]
+    public Mesh Offset(double distance, bool solidify, Vector3d direction, out List<int> wallFacesOut)
+    {
+      using (SimpleArrayInt wfo = new SimpleArrayInt())
+      {
+        wallFacesOut = new List<int>();
+        IntPtr const_ptr_this = ConstPointer();
+        IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction, wfo.NonConstPointer());
+        if (IntPtr.Zero == ptr_new_mesh)
+          return null;
+        wallFacesOut.AddRange(wfo.ToArray());
+        return new Mesh(ptr_new_mesh, null);
+      }
     }
 
     /// <summary>
@@ -3473,43 +3853,176 @@ namespace Rhino.Geometry
 
     #endregion
 
-    //[skipping]
-    //  bool SetTextureCoordinates( 
-    //  bool EvaluateMeshGeometry( const ON_Surface& ); // evaluate surface at tcoords
-    //  int GetVertexEdges( 
-    //  int GetMeshEdges( 
-
-    //[skipping]
-    // bool SwapEdge( int topei );
-    //  void DestroyHiddenVertexArray();
-    //  const bool* HiddenVertexArray() const;
-    //  void SetVertexHiddenFlag( int meshvi, bool bHidden );
-    //  bool VertexIsHidden( int meshvi ) const;
-    //  bool FaceIsHidden( int meshvi ) const;
-    //  const ON_MeshTopology& Topology() const;
-    //  void DestroyTopology();
-    //  const ON_MeshPartition* Partition() const;
-    //  void DestroyPartition();
-
-
-    // [skipping]
-    //  ON_3fVectorArray m_N;
-    //  ON_3fVectorArray m_FN;
-    //  ON_MappingTag m_Ttag; // OPTIONAL tag for values in m_T[]
-    //  ON_2fPointArray m_T;  // OPTIONAL texture coordinates for each vertex
-    //  ON_2dPointArray m_S;
-    //  ON_Interval m_srf_domain[2]; // surface evaluation domain.
-    //  double m_srf_scale[2];
-    //  ON_Interval m_packed_tex_domain[2];
-    //  bool m_packed_tex_rotate;
-    //  bool HasPackedTextureRegion() const;
-    //  ON_SimpleArray<ON_SurfaceCurvature> m_K;  // OPTIONAL surface curvatures
-    //  ON_MappingTag m_Ctag; // OPTIONAL tag for values in m_C[]
-    //  ON_SimpleArray<bool> m_H; // OPTIONAL vertex visibility.
-    //  int m_hidden_count;       // number of vertices that are hidden
-    //  const ON_Object* m_parent; // runtime parent geometry (use ...::Cast() to get it)
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Create QuadRemesh from a Brep
+    /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
+    /// </summary>
+    /// <param name="brep"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    public static Mesh QuadRemeshBrep(Brep brep, QuadRemeshParameters parameters)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings,new Curve[]{}, null, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Create Quad Remesh from a Brep
+    /// </summary>
+    /// <param name="brep">
+    /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
+    /// </param>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <returns></returns>
+    public static Mesh QuadRemeshBrep(Brep brep, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, guideCurves, null, CancellationToken.None);
+    }
+
+
+    /// <summary>
+    /// Quad remesh this brep async
+    /// </summary>
+    /// <param name="brep">
+    /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
+    /// </param>
+    /// <param name="parameters"></param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    public static Task<Mesh> QuadRemeshBrepAsync(Brep brep, QuadRemeshParameters parameters, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, new Curve[]{}, progress, cancelToken), cancelToken);
+    }
+
+    /// <summary>
+    /// Quad remesh this brep async
+    /// </summary>
+    /// <param name="brep">
+    /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
+    /// </param>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    public static Task<Mesh> QuadRemeshBrepAsync(Brep brep, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, guideCurves, progress, cancelToken), cancelToken);
+    }
+
+    /// <summary>
+    /// Quad remesh this mesh
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    public Mesh QuadRemesh(QuadRemeshParameters parameters)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, new Curve[]{}, null, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Quad remesh this mesh
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <returns></returns>
+    public Mesh QuadRemesh(QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, guideCurves, null, CancellationToken.None);
+    }
+
+    
+    /// <summary>
+    /// Quad remesh this mesh async
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    public Task<Mesh> QuadRemeshAsync(QuadRemeshParameters parameters, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings,new Curve[]{}, progress, cancelToken), cancelToken);
+    }
+
+    /// <summary>
+    /// Quad remesh this mesh async
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    public Task<Mesh> QuadRemeshAsync(QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, guideCurves, progress, cancelToken), cancelToken);
+    }
+
+    /// <summary>
+    /// Quad remesh this mesh async
+    /// </summary>
+    /// <param name="faceBlocks"></param>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    public Task<Mesh> QuadRemeshAsync(IEnumerable<int> faceBlocks, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,faceBlocks, settings, guideCurves, progress, cancelToken), cancelToken);
+    }
+
     /// <summary>
     /// Reduce polygon count
     /// </summary>
@@ -3589,21 +4102,8 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
 
-      ThreadTerminator terminator = null;
-      if (cancelToken != CancellationToken.None)
-      {
-        terminator = new ThreadTerminator();
-        cancelToken.Register(terminator.RequestCancel);
-      }
-      IntPtr ptr_terminator = terminator == null ? IntPtr.Zero : terminator.NonConstPointer();
-      ProgressReporter reporter = null;
-      int progress_report_serial_number = 0;
-      if (progress != null)
-      {
-        reporter = new ProgressReporter(progress);
-        progress_report_serial_number = reporter.SerialNumber;
-        reporter.Enable();
-      }
+      Rhino.Runtime.Interop.MarshalProgressAndCancelToken(cancelToken, progress,
+        out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
 
       bool rc;
       using (var sw = new StringWrapper())
@@ -3613,10 +4113,8 @@ namespace Rhino.Geometry
           ptr_terminator, progress_report_serial_number, ptr_string, IntPtr.Zero, IntPtr.Zero, false);
         problemDescription = sw.ToString();
       }
-      if (terminator != null)
-        terminator.Dispose();
-      if (reporter != null)
-        reporter.Disable();
+      if (terminator != null) terminator.Dispose();
+      if (reporter != null) reporter.Disable();
       return rc;
     }
 
@@ -3638,21 +4136,8 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
 
-      ThreadTerminator terminator = null;
-      if (parameters.CancelToken != CancellationToken.None)
-      {
-        terminator = new ThreadTerminator();
-        parameters.CancelToken.Register(terminator.RequestCancel);
-      }
-      IntPtr ptr_terminator = terminator == null ? IntPtr.Zero : terminator.NonConstPointer();
-      ProgressReporter reporter = null;
-      int progress_report_serial_number = 0;
-      if (parameters.ProgressReporter != null)
-      {
-        reporter = new ProgressReporter(parameters.ProgressReporter);
-        progress_report_serial_number = reporter.SerialNumber;
-        reporter.Enable();
-      }
+      Interop.MarshalProgressAndCancelToken(parameters.CancelToken, parameters.ProgressReporter,
+        out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
 
       SimpleArrayInt faceTags = new SimpleArrayInt(parameters.FaceTags);
       IntPtr ptr_face_tags = faceTags.Count == 0 ? IntPtr.Zero : faceTags.NonConstPointer();
@@ -3686,10 +4171,8 @@ namespace Rhino.Geometry
             parameters.FaceTags = faceTags.ToArray();
         }
       }
-      if (terminator != null)
-        terminator.Dispose();
-      if (reporter != null)
-        reporter.Disable();
+      if (terminator != null) terminator.Dispose();
+      if (reporter != null) reporter.Disable();
       return rc;
     }
 
@@ -3809,6 +4292,30 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Gets the self intersections of this mesh.
+    /// </summary>
+    /// <param name="tolerance"></param>
+    /// <param name="intersections"></param>
+    /// <param name="overlapsPolylines"></param>
+    /// <param name="overlapsPolylinesResult"></param>
+    /// <param name="overlapsMesh"></param>
+    /// <param name="overlapsMeshResult"></param>
+    /// <param name="textLog"></param>
+    /// <param name="cancel"></param>
+    /// <param name="progress"></param>
+    /// <returns></returns>
+    public bool GetSelfIntersections(double tolerance,
+      out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
+      FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
+    {
+      var list = new RhinoList<Mesh>(1) { this };
+      return Intersect.Intersection.MeshMesh_Helper(
+        list, tolerance, true, false, out intersections,
+        overlapsPolylines, out overlapsPolylinesResult,
+        overlapsMesh, out overlapsMeshResult, textLog, cancel, progress);
+    }
+
 #endif
   }
 
@@ -3821,6 +4328,8 @@ namespace Rhino.Geometry
   public sealed class MeshUnsafeLock : IDisposable
   {
     Mesh m_mesh;
+    bool m_got_single = false;
+    bool m_got_double = false;
 
     internal MeshUnsafeLock(Mesh parent, bool writable)
     {
@@ -3832,22 +4341,109 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Retrieves a pointer to the raw mesh vertex array, which uses coordinates
-    /// defined with single precision floating point numbers.
+    /// defined with single precision floating point numbers, or null if none is available.
     /// </summary>
-    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).
+    /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
-    /// and item length-1 is the last valid one.</returns>
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not use single precision vertices.</exception>
+    /// <remarks>When running this method for writing, it is up to the caller to ensure that the mesh has no
+    /// double precision array that needs to be synchronized. Otherwise, also the double precision array must be synchronized.</remarks>
     [CLSCompliant(false)]
     public unsafe Point3f* VertexPoint3fArray(out int length)
     {
       if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      m_got_single = true;
 
       IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
-      IntPtr ptr_vertex_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh);
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 0);
 
-      length = m_mesh.Vertices.Count;
+      if (ptr_array != null)
+        length = m_mesh.Vertices.Count;
+      else
+        length = 0;
 
-      return (Point3f*)ptr_vertex_array.ToPointer();
+      return (Point3f*)ptr_array.ToPointer();
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw mesh vertex array, which uses coordinates
+    /// defined with double precision floating point numbers, or throws an exception if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not use double precision vertices.</exception>
+    /// <remarks>When running this method for writing and if the mesh has also a single precision array, the array is synchronized if the pointer to the
+    /// single precision array was not requested. Otherwise, it is up to the caller to ensure that the mesh vertices are kept synchronized, by setting both arrays to 
+    /// the required values.</remarks>
+    [CLSCompliant(false)]
+    public unsafe Point3d* VertexPoint3dArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      m_got_double = true;
+      if (!m_mesh.Vertices.UseDoublePrecisionVertices) throw new InvalidOperationException("The mesh does not use double precision vertices.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 1);
+
+      if (ptr_array != null)
+        length = m_mesh.Vertices.Count;
+      else
+        length = 0;
+
+      return (Point3d*)ptr_array.ToPointer();
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw mesh vertex normal array, which uses vectors
+    /// defined with single precision floating point numbers, or throws an exception if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not have vertex normals.</exception>
+    [CLSCompliant(false)]
+    public unsafe Vector3f* NormalVector3fArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      if (m_mesh.Normals.Count == 0) throw new InvalidOperationException("The mesh does not have vertex normals.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 2);
+
+      if (ptr_array != null)
+        length = m_mesh.Normals.Count;
+      else
+        length = 0;
+
+      return (Vector3f*)ptr_array.ToPointer();
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw faces array, which uses 4 integers for each face.
+    /// <see cref="MeshFace"/>.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not have face normals.</exception>
+    [CLSCompliant(false)]
+    public unsafe MeshFace* FacesArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      if (m_mesh.Faces.Count == 0) throw new InvalidOperationException("The mesh does not have faces.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 3);
+
+      if (ptr_array != null)
+        length = m_mesh.Faces.Count;
+      else
+        length = 0;
+
+      return (MeshFace*)ptr_array.ToPointer();
     }
 
     void IDisposable.Dispose()
@@ -3862,8 +4458,9 @@ namespace Rhino.Geometry
     {
       if (!Writable || m_mesh == null) return;
 
+      bool might_need_to_synchronize_single = m_got_double && !m_got_single;
       IntPtr ptr_this = m_mesh.NonConstPointer();
-      UnsafeNativeMethods.ON_Mesh_UnlockMeshData(ptr_this);
+      UnsafeNativeMethods.ON_Mesh_UnlockMeshData(ptr_this, might_need_to_synchronize_single);
 
       m_mesh = null;
     }
@@ -3943,21 +4540,26 @@ namespace Rhino.Geometry.Collections
     {
       get
       {
-        if (index < 0 || index >= Count)
-          throw new IndexOutOfRangeException();
-
         var rc = new Point3d();
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, index, ref rc);
+        if( !UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, index, ref rc))
+        {
+          // return false means an error occurred at the C wrapper level
+          // the C function makes sure that index is in the correct range so we
+          // really only need to double check when the function returns false
+          if (index < 0 || index >= Count)
+            throw new IndexOutOfRangeException();
+        }
         return new Point3f((float)rc.X, (float)rc.Y, (float)rc.Z);
       }
       set
       {
-        if (index < 0 || index >= Count)
-          throw new IndexOutOfRangeException();
-
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
-        UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, value.m_x, value.m_y, value.m_z);
+        if( !UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, value.m_x, value.m_y, value.m_z))
+        {
+          if (index < 0 || index >= Count)
+            throw new IndexOutOfRangeException();
+        }
       }
     }
 
@@ -4301,7 +4903,9 @@ namespace Rhino.Geometry.Collections
       }
 
       var ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.RHC_MeshVerticesAlign(ptr_mesh, distance, Count, which_vertices_array);
+      var rval = UnsafeNativeMethods.RHC_MeshVerticesAlign(ptr_mesh, distance, Count, which_vertices_array);
+      GC.KeepAlive(m_mesh);
+      return rval;
     }
 
     /// <summary>
@@ -4783,7 +5387,13 @@ namespace Rhino.Geometry.Collections
     public IEnumerator<Point3f> GetEnumerator()
     {
       int count = Count;
-      for (int i = 0; i < count; i++) yield return this[i];
+      IntPtr const_ptr_mesh = m_mesh.ConstPointer();
+      for (int i = 0; i < count; i++)
+      {
+        var rc = new Point3d();
+        UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, i, ref rc);
+        yield return new Point3f((float)rc.X, (float)rc.Y, (float)rc.Z);
+      }
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -5531,12 +6141,13 @@ namespace Rhino.Geometry.Collections
     {
       get
       {
-        if (index < 0 || index >= Count)
-          throw new IndexOutOfRangeException();
-
         var rc = new Vector3f();
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, index, ref rc, false);
+        if( !UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, index, ref rc, false))
+        {
+          if (index < 0 || index >= Count)
+            throw new IndexOutOfRangeException();
+        }
         return rc;
       }
       set
@@ -5878,8 +6489,13 @@ namespace Rhino.Geometry.Collections
     public IEnumerator<Vector3f> GetEnumerator()
     {
       var count = Count;
+      IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       for (int i = 0; i < count; i++)
-        yield return this[i];
+      {
+        var rc = new Vector3f();
+        UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, i, ref rc, false);
+        yield return rc;
+      }
     }
     IEnumerator IEnumerable.GetEnumerator()
     {
@@ -6269,8 +6885,32 @@ namespace Rhino.Geometry.Collections
     /// <param name="asTriangles">If set to <c>true</c> as triangles.</param>
     public int[] ToIntArray(bool asTriangles)
     {
-      List<int> rep = null;
-      return ToIntArray(asTriangles, ref rep);
+      int elementCount = Count * 4;
+      int[] rc = new int[elementCount];
+      IntPtr const_ptr_this = m_mesh.ConstPointer();
+      UnsafeNativeMethods.ON_Mesh_GetFaces(const_ptr_this, elementCount, rc);
+      if( asTriangles )
+      {
+        List<int> triangles = new List<int>(elementCount * 2);
+        for(int i=0; i<elementCount; i++)
+        {
+          int a = rc[i++];
+          int b = rc[i++];
+          int c = rc[i++];
+          int d = rc[i];
+          triangles.Add(a);
+          triangles.Add(b);
+          triangles.Add(c);
+          if(c!=d)
+          {
+            triangles.Add(c);
+            triangles.Add(d);
+            triangles.Add(a);
+          }
+        }
+        rc = triangles.ToArray();
+      }
+      return rc;
     }
 
     /// <summary>
@@ -10336,5 +10976,8 @@ namespace Rhino.Geometry
     /// </summary>
     public int MemoryLimit { get; set; }
   }
+
+
+  
 #endif
 }

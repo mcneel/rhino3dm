@@ -146,6 +146,13 @@ void initDefines(pybind11::module& m)
     .value("AnyObject", ON::any_object)
     ;
 
+  py::enum_<ON::coordinate_system>(m, "CoordinateSystem")
+    .value("World", ON::coordinate_system::world_cs)
+    .value("Camera", ON::coordinate_system::camera_cs)
+    .value("Clip", ON::coordinate_system::clip_cs)
+    .value("Screen", ON::coordinate_system::screen_cs)
+    ;
+
   py::enum_<ON::mesh_type>(m, "MeshType")
     .value("Default", ON::default_mesh)
     .value("Render", ON::render_mesh)

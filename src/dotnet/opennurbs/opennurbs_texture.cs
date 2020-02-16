@@ -16,17 +16,113 @@ namespace Rhino.DocObjects
     /// </summary>
     None = 0,
     /// <summary>
-    /// Standard image texture
+    /// Deprecated - this should be diffuse
     /// </summary>
     Bitmap = 1,
+    /// <summary>
+    /// The diffuse color of the material, ideally the albedo.
+    /// </summary>
+    Diffuse = 1,
     /// <summary>
     /// bump map
     /// </summary>
     Bump = 2,
     /// <summary>
+    /// Deprecated - see Opacity.  This has always actually meant opacity in Rhino, so there is nothing to change.
+    /// </summary>
+    Transparency = 3,
+    /// <summary>
     /// value = alpha
     /// </summary>
-    Transparency = 3
+    Opacity = 3,
+    /// <summary>
+    /// Emap/Environment texture
+    /// </summary>
+    Emap = 4,
+    /// <summary>
+    /// Physically based materials only - base color.  Re-uses diffuse texture slot.
+    /// </summary>
+    PBR_BaseColor = 1,
+    /// <summary>
+    /// Physically based materials only - subsurface (greyscale)
+    /// </summary>
+    PBR_Subsurface = 10,
+    /// <summary>
+    /// Physically based materials only - subsurface scattering
+    /// </summary>
+    PBR_SubsurfaceScattering = 11,
+    /// <summary>
+    /// Physically based materials only - subsurface scattering radius (greyscale)
+    /// </summary>
+    PBR_SubsurfaceScatteringRadius = 12,
+    /// <summary>
+    /// Physically based materials only - metallic (greyscale)
+    /// </summary>
+    PBR_Metallic = 13,
+    /// <summary>
+    /// Physically based materials only - specular (greyscale)
+    /// </summary>
+    PBR_Specular = 14,
+    /// <summary>
+    /// Physically based materials only - specular tint (greyscale)
+    /// </summary>
+    PBR_SpecularTint = 15,
+    /// <summary>
+    /// Physically based materials only - roughness (greyscale)
+    /// </summary>
+    PBR_Roughness = 16,
+    /// <summary>
+    /// Physically based materials only - anisotropic (greyscale)
+    /// </summary>
+    PBR_Anisotropic = 17,
+    /// <summary>
+    /// Physically based materials only - anisotropic rotation 0 = 0, 255 = 360
+    /// </summary>
+    PBR_Anisotropic_Rotation = 18,
+    /// <summary>
+    /// Physically based materials only - sheen (greyscale)
+    /// </summary>
+    PBR_Sheen = 19,
+    /// <summary>
+    /// Physically based materials only - sheen tint (greyscale)
+    /// </summary>
+    PBR_SheenTint = 20,
+    /// <summary>
+    /// Physically based materials only - clearcoat (greyscale)
+    /// </summary>
+    PBR_Clearcoat = 21,
+    /// <summary>
+    /// Physically based materials only - clearcoat roughness (greyscale)
+    /// </summary>
+    PBR_ClearcoatRoughness = 22,
+    /// <summary>
+    /// Physically based materials only - ior (greyscale - remaps from 1.0 to 2.0)
+    /// </summary>
+    PBR_OpacityIor = 23,
+    /// <summary>
+    /// Physically based materials only - transparency roughness (greyscale)
+    /// </summary>
+    PBR_OpacityRoughness = 24,
+    /// <summary>
+    /// Physically based materials only - emission (greyscale)
+    /// </summary>
+    PBR_Emission = 25,
+    /// <summary>
+    /// Physically based materials only - occulusion (greyscale)
+    /// </summary>
+    PBR_AmbientOcclusion = 26,
+    //// <summary>
+    //// Physically based materials only - smudge (greyscale)
+    //// </summary>
+    //PBR_Smudge = 27,
+    /// <summary>
+    /// Physically based materials only - normal 8-bit RGB, alpha is ignored
+    /// </summary>
+    PBR_Displacement = 28,
+    /// <summary>
+    /// Physically based materials only - clearcoat normal  or bump (normal map, RGB)
+    /// </summary>
+    PBR_ClearcoatBump = 29
   }
 
   /// <summary>

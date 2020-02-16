@@ -152,35 +152,86 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_Dimension_SetDistanceScale(NonConstPointer(), value); }
     }
 
-    public ForceArrow ForceArrowPosition // Only works on Linear and Angular dimensions
+    [Obsolete]
+    public ForceArrow ForceArrowPosition
     {
-      get
-      {
-        IntPtr dimptr = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_ForceArrowPosition(dimptr);
-      }
-      set
-      {
-        IntPtr dimptr = NonConstPointer();
-        UnsafeNativeMethods.ON_V6_Dimension_SetForceArrowPosition(dimptr, value);
-      }
+      get { return ForceArrow.Auto; }
+      set {}
     }
 
-    public ForceText ForceTextPosition // Only works on Linear and Angular dimensions
+    [Obsolete]
+    public ForceText ForceTextPosition
     {
-      get
-      {
-        IntPtr dimptr = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_ForceTextPosition(dimptr);
-      }
-      set
-      {
-        IntPtr dimptr = NonConstPointer();
-        UnsafeNativeMethods.ON_V6_Dimension_SetForceTextPosition(dimptr, value);
-      }
+      get { return ForceText.Auto; }
+      set {}
     }
 
     #region properties originating from dim style that can be overridden
+
+    public bool ForceDimLine
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        return UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Dimension_SetForceDimLine(dimptr, styleptr, value);
+      }
+    }
+
+    public DimensionStyle.ArrowFit ArrowFit // Only works on Linear and Angular dimensions
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        return UnsafeNativeMethods.ON_V6_Dimension_ArrowFit(dimptr, styleptr);
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Dimension_SetArrowFit(dimptr, styleptr, value);
+      }
+    }
+
+    public bool ForceDimensionLineBetweenExtensionLines
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        return UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Dimension_SetForceDimLine(dimptr, styleptr, value);
+      }
+    }
+
+    public DimensionStyle.TextFit TextFit // Only works on Linear /*and Angular*/ dimensions
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        return UnsafeNativeMethods.ON_V6_Dimension_TextFit(dimptr, styleptr);
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Dimension_SetTextFit(dimptr, styleptr, value);
+      }
+    }
+
     public virtual TextOrientation TextOrientation
     {
       get

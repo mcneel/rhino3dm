@@ -16,6 +16,15 @@ BND_InstanceDefinitionGeometry::BND_InstanceDefinitionGeometry()
   SetTrackedPointer(new ON_InstanceDefinition(), nullptr);
 }
 
+BND_TUPLE BND_InstanceDefinitionGeometry::GetObjectIds() const
+{
+  const ON_SimpleArray<ON_UUID>& list = m_idef->InstanceGeometryIdList();
+  int count = list.Count();
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+    SetTuple(rc, i, ON_UUID_to_Binding(list[i]));
+  return rc;
+}
 
 BND_InstanceReferenceGeometry::BND_InstanceReferenceGeometry(ON_InstanceRef* iref, const ON_ModelComponentReference* compref)
 {
@@ -55,6 +64,10 @@ void initInstanceBindings(pybind11::module& m)
   py::class_<BND_InstanceDefinitionGeometry, BND_CommonObject>(m, "InstanceDefinition")
     .def(py::init<>())
     .def_property_readonly("Description", &BND_InstanceDefinitionGeometry::Description)
+    .def_property_readonly("Name", &BND_InstanceDefinitionGeometry::Name)
+    .def_property_readonly("Id", &BND_InstanceDefinitionGeometry::Id)
+    .def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
+    .def("IsInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId, py::arg("id"))
     ;
 
   py::class_<BND_InstanceReferenceGeometry, BND_GeometryBase>(m, "InstanceReference")
@@ -73,6 +86,10 @@ void initInstanceBindings(void*)
   class_<BND_InstanceDefinitionGeometry, base<BND_CommonObject>>("InstanceDefinition")
     .constructor<>()
     .property("description", &BND_InstanceDefinitionGeometry::Description)
+    .property("name", &BND_InstanceDefinitionGeometry::Name)
+    .property("id", &BND_InstanceDefinitionGeometry::Id)
+    .function("getObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
+    .function("isInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId)
     ;
 
   class_<BND_InstanceReferenceGeometry, base<BND_GeometryBase>>("InstanceReference")

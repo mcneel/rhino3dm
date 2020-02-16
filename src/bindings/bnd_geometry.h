@@ -34,4 +34,6 @@ public:
   //public ComponentIndex ComponentIndex()
 
   int Dimension() const { return m_geometry->Dimension(); }
+
+  BND_GeometryBase* DuplicateGeometry() const { return dynamic_cast<BND_GeometryBase*>(Duplicate()); }
 };

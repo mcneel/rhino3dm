@@ -11,6 +11,9 @@ namespace Rhino.Input.Custom
     AroundCurve = 2
   }
 
+  /// <summary>
+  /// Class provides user interface to define a cone.
+  /// </summary>
   public class GetCone : IDisposable
   { 
     IntPtr m_ptr_argsrhinogetcone;
@@ -168,6 +171,9 @@ namespace Rhino.Input.Custom
       UnsafeNativeMethods.CArgsRhinoGetCone_SetBool(ptr_this, which, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether or not the output should be capped.
+    /// </summary>
     public bool Cap
     {
       get
@@ -188,14 +194,50 @@ namespace Rhino.Input.Custom
       set { SetBool(UnsafeNativeMethods.GetConeBoolConsts.AllowAngleInput, value); }
     }
 
-    /// <summary> Perform the 'get' operation. </summary>
-    /// <param name="cone"></param>
-    /// <returns></returns>
+    /// <summary> 
+    /// Prompt for the getting of a cone. 
+    /// </summary>
+    /// <param name="cone">The cone geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
     public Commands.Result Get(out Geometry.Cone cone)
     {
       IntPtr ptr_this = NonConstPointer();
       cone = Geometry.Cone.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCone(ref cone, ptr_this);
+      return (Commands.Result)rc;
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a mesh cone.
+    /// </summary>
+    /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
+    /// <param name="aroundFaces">The number of faces in the around direction</param>
+    /// <param name="cone">The cone geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Cone cone)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      cone = Geometry.Cone.Unset;
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCone(ref cone, ref verticalFaces, ref aroundFaces, ptr_this);
+      return (Commands.Result)rc;
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a mesh cone.
+    /// </summary>
+    /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
+    /// <param name="aroundFaces">The number of faces in the around direction</param>
+    /// <param name="capStyle">Set to 0 if you don't want the prompt, 3 is tris, 4 is quads.</param>
+    /// <param name="cone">The cone geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
+    /// <remarks>The prompt for capStyle will only be seen if it's not zero, aroundFaces is even
+    ///          and the solid option is on.
+    /// </remarks>
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref int capStyle, out Geometry.Cone cone)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      cone = Geometry.Cone.Unset;
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshConeWithCapStyle(ref cone, ref verticalFaces, ref aroundFaces, ref capStyle, ptr_this);
       return (Commands.Result)rc;
     }
   }

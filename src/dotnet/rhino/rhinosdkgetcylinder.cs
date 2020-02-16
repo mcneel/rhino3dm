@@ -11,6 +11,9 @@ namespace Rhino.Input.Custom
     AroundCurve = 2
   }
 
+  /// <summary>
+  /// Class provides user interface to define a cylinder.
+  /// </summary>
   public class GetCylinder : IDisposable
   { 
     IntPtr m_ptr_argsrhinogetcylinder;
@@ -150,20 +153,59 @@ namespace Rhino.Input.Custom
       UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether or not the output should be capped.
+    /// </summary>
     public bool Cap
     {
       get { return GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap); }
       set { SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap, value); }
     }
 
-    /// <summary> Perform the 'get' operation. </summary>
-    /// <param name="cylinder"></param>
-    /// <returns></returns>
+    /// <summary>
+    /// Prompt for the getting of a cylinder.
+    /// </summary>
+    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
     public Commands.Result Get(out Geometry.Cylinder cylinder)
     {
       IntPtr ptr_this = NonConstPointer();
       cylinder = Geometry.Cylinder.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCylinder(ref cylinder, ptr_this);
+      return (Commands.Result)rc;
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a mesh cylinder.
+    /// </summary>
+    /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
+    /// <param name="aroundFaces">The number of faces in the around direction</param>
+    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Cylinder cylinder)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      cylinder = Geometry.Cylinder.Unset;
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinder(ref cylinder, ref verticalFaces, ref aroundFaces, ptr_this);
+      return (Commands.Result)rc;
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a mesh cylinder.
+    /// </summary>
+    /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
+    /// <param name="aroundFaces">The number of faces in the around direction</param>
+    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    /// <param name="capStyle">Set to 0 if you don't want the prompt, 3 is tris, 4 is quads.</param>
+    /// <returns>The result of the getting operation.</returns>
+    /// <remarks>The prompt for capStyle will only be seen if it's not zero, aroundFaces is even
+    ///          and the solid option is on.
+    /// </remarks>
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref int capStyle, out Geometry.Cylinder cylinder)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      cylinder = Geometry.Cylinder.Unset;
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinderWithCapStyle(ref cylinder, ref verticalFaces, ref aroundFaces, ref capStyle, ptr_this);
       return (Commands.Result)rc;
     }
   }

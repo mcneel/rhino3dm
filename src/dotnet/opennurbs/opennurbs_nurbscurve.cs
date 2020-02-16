@@ -55,6 +55,21 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Calculates the u, V, and N directions of a NURBS curve at a parameter similar to the method used by Rhino's MoveUVN command.
+    /// </summary>
+    /// <param name="t">The evalaution parameter.</param>
+    /// <param name="uDir">The U direction.</param>
+    /// <param name="vDir">The V direction.</param>
+    /// <param name="nDir">The N direction.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool UVNDirectionsAt(double t, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
+    {
+      uDir = vDir = nDir = Vector3d.Unset;
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoNurbsCurveDirectionsAt(ptr_const_this, t, ref uDir, ref vDir, ref nDir);
+    }
+
+    /// <summary>
     /// For expert use only. From the input curves, make an array of compatible NURBS curves.
     /// </summary>
     /// <param name="curves">The input curves.</param>
@@ -134,6 +149,34 @@ namespace Rhino.Geometry
     {
       var ptr_nurbs_curve = UnsafeNativeMethods.TLC_DeformableArc(ref arc, degree, cvCount);
       return CreateGeometryHelper(ptr_nurbs_curve, null) as NurbsCurve;
+    }
+
+    /// <summary>
+    /// Construct an H-spline from a sequence of interpolation points
+    /// </summary>
+    /// <param name="points">Points to interpolate</param>
+    /// <returns></returns>
+    public static NurbsCurve CreateHSpline(IEnumerable<Point3d> points)
+    {
+      return CreateHSpline(points, Vector3d.Unset, Vector3d.Unset);
+    }
+
+    /// <summary>
+    /// Construct an H-spline from a sequence of interpolation points and
+    /// optional start and end derivative information
+    /// </summary>
+    /// <param name="points">Points to interpolate</param>
+    /// <param name="startTangent">Unit tangent vector or Unset</param>
+    /// <param name="endTangent">Unit tangent vector or Unset</param>
+    /// <returns></returns>
+    public static NurbsCurve CreateHSpline(IEnumerable<Point3d> points, Vector3d startTangent, Vector3d endTangent)
+    {
+      var pts = new List<Point3d>(points);
+      var pointsArray = pts.ToArray();
+      IntPtr rc = UnsafeNativeMethods.RHC_RhinoCreateHSpline(pointsArray, pointsArray.Length, startTangent, endTangent);
+      if (rc == IntPtr.Zero)
+        return null;
+      return new NurbsCurve(rc, null, -1);
     }
 #endif
 
@@ -572,10 +615,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the greville (edit point) parameter that belongs 
+    /// Gets the Greville parameter that belongs 
     /// to the control point at the specified index.
     /// </summary>
-    /// <param name="index">Index of Greville (Edit) point.</param>
+    /// <param name="index">Index of Greville point.</param>
     [ConstOperation]
     public Point3d GrevillePoint(int index)
     {
@@ -584,7 +627,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets all Greville (Edit point) parameters for this curve.
+    /// Gets all Greville parameters for this curve.
     /// </summary>
     [ConstOperation]
     public double[] GrevilleParameters()
@@ -598,7 +641,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets all Greville (Edit) points for this curve.
+    /// Gets all Greville points for this curve.
     /// </summary>
     [ConstOperation]
     public Point3dList GrevillePoints()
@@ -620,11 +663,33 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
-    /// Sets all Greville (Edit) points for this curve.
+    /// Gets Greville points for this curve.
+    /// </summary>
+    /// <param name="all">If true, then all Greville points are returnd. If false, only edit points are returned.</param>
+    /// <returns>A list of points if successful, null otherwise.</returns>
+    [ConstOperation]
+    public Point3dList GrevillePoints(bool all)
+    {
+      if (all)
+        return GrevillePoints();
+
+      using (var out_points = new SimpleArrayPoint3d())
+      {
+        IntPtr ptr_out_points = out_points.NonConstPointer();
+        IntPtr ptr_const_curve = ConstPointer();
+        bool rc = UnsafeNativeMethods.TLC_GetEditNurbsCurvePoints(ptr_const_curve, ptr_out_points);
+        if (rc)
+          return new Point3dList(out_points.ToArray());
+      }  
+      return null;
+    }
+
+    /// <summary>
+    /// Sets all Greville edit points for this curve.
     /// </summary>
     /// <param name="points">
     /// The new point locations. The number of points should match 
-    /// the number of point returned by NurbsCurve.GrevillePoints().
+    /// the number of point returned by NurbsCurve.GrevillePoints(false).
     /// </param>
     /// <returns>true if successful, false otherwise.</returns>
     public bool SetGrevillePoints(IEnumerable<Point3d> points)
@@ -1176,6 +1241,7 @@ namespace Rhino.Geometry.Collections
     }
 
 #if RHINO_SDK
+
     /// <summary> Remove multiple knots from this curve. </summary>
     /// <param name="minimumMultiplicity">
     /// Remove knots with multiplicity > minimumKnotMultiplicity.
@@ -1678,6 +1744,36 @@ namespace Rhino.Geometry.Collections
       }
       return rc;
     }
+
+    /// <summary>
+    /// Calculates the U, V, and N directions of a NURBS curve control point similar to the method used by Rhino's MoveUVN command.
+    /// </summary>
+    /// <param name="index">Index of control point.</param>
+    /// <param name="uDir">The U direction.</param>
+    /// <param name="vDir">The V direction.</param>
+    /// <param name="nDir">The N direction.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool UVNDirectionsAt(int index, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
+    {
+      uDir = vDir = nDir = Vector3d.Unset;
+      bool rc = false;
+      if (index >= 0 && index < Count)
+      {
+        double t = m_curve.GrevilleParameter(index);
+        if (RhinoMath.IsValidDouble(t))
+        {
+          // For periodic curves, t may be less than Domain.Min, 
+          // and in that case the evaluated tangent and normal are completely bogus.
+          // Need to shuffle t back into region where the evaluation is kosher.
+          if (t < m_curve.Domain.Min)
+            t += m_curve.Domain.Length;
+
+          rc = m_curve.UVNDirectionsAt(t, out uDir, out vDir, out nDir);
+        }
+      }
+      return rc;
+    }
+
 #endif
 
     #endregion
