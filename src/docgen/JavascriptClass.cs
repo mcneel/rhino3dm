@@ -379,28 +379,46 @@ namespace docgen
                 return "string";
             if (type.Equals("Interval"))
                 return "number[]";
-            if (type.Equals("IEnumerable<GeometryBase>"))
-                return "GeometryBase[]";
-            if (type.Equals("IEnumerable<ObjectAttributes>"))
-                return "ObjectAttributes[]";
+            if (type.Equals("Geometry.Surface"))
+                return "Surface";
+            if (type.Equals("Geometry.Extrusion"))
+                return "Extrusion";
+            if (type.Equals("MeshFace"))
+                // ( Chuck ) MeshFace does not currently generate its typescript class.
+                return "any";
+            if (type.Equals("float"))
+                return "number";
+            if (type.Equals("float[]"))
+                return "number[]";
+            if (type.Equals("int[]"))
+                return "number[]";
+            if (type.Equals("IEnumberable<Point3d>"))
+                return "Point3d[]";
+            if (type.Equals("Vector3d[]"))
+                // ( Chuck ) Vector3d does not currently generate its typescript class.
+                return "any[]";
+            if (type.Equals("System.Drawing.Color") || type.Equals("System.Drawing.Rectangle"))
+                return "number[]";
+            if (type.Equals("Color[]"))
+                return "number[][]";
+            if (type.Equals("Color"))
+                return "number[]";
             if (type.Equals("DocObjects.Material"))
                 return "Material";
             if (type.Equals("Rhino.Geometry.BoundingBox"))
                 return "BoundingBox";
-            if (type.Equals("Geometry.Curve"))
-                return "Curve";
-            if (type.Equals("Geometry.Mesh"))
-                return "Mesh";
-            if (type.Equals("Geometry.Brep"))
-                return "Brep";
             if (type.Equals("MeshingParameterTextureRange"))
                 return "number";
             if (type.Equals("System.Collections.Generic.IEnumerable<Point3d>"))
                 return "Point3dList";
-            if (type.Equals("PolylineCurve"))
-                return "Polylinecurve";
-            if (type.Equals("System.Drawing.Color") || type.Equals("System.Drawing.Rectangle"))
-                return "number[]";
+
+            if (type.Contains("Geometry."))
+                return type.Replace("Geometry.", "");
+            if (type.Contains("System.Collections.Generic.IEnumerable"))
+                return type.Replace("System.Collections.Generic.IEnumerable<", "").Replace(">", "[]");
+            if (type.Contains("IEnumerable"))
+                return type.Replace("IEnumerable<", "").Replace(">", "[]");
+            
             return type;
         }
 
