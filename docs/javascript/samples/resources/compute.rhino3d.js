@@ -1,7 +1,7 @@
 var RhinoCompute = {
     version: "0.9.0",
 
-    url: "https://compute.rhino3d.com/",
+    url: "https://staging.compute.rhino3d.com/",
 
     authToken: null,
 
