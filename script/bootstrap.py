@@ -129,12 +129,10 @@ def read_required_versions():
     # iOS
     xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
 
-    # macOS
-    msbuild = BuildTool("msbuild", "msbuild", "", "", "")
+    # macOS    
     mdk = BuildTool("Mono MDK", "mdk", "", "", "")
 
-    build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten,
-                       msbuild=msbuild, mdk=mdk, xamios=xamios)
+    build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten, mdk=mdk, xamios=xamios)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
