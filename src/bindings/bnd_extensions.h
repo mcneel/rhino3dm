@@ -290,6 +290,8 @@ public:
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)
+  BND_TUPLE GetEmbeddedFilePaths();
+  std::string GetEmbeddedFileAsBase64(std::wstring path);
 public:
   static bool ReadTest(std::wstring filepath);
 };
