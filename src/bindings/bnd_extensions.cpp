@@ -1,6 +1,163 @@
 #include "bindings.h"
 #include "base64.h"
 
+// TODO: Move some of this functionality into core opennurbs
+static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
+{
+  if (!archive.ReadMode())
+    return false;
+
+  bool rc = false;
+  unsigned int buffer_crc0 = 0;
+  unsigned int buffer_crc1 = 0;
+  char method = 0;
+
+  size_t sizeof__outbuffer;
+  if (!archive.ReadCompressedBufferSize(&sizeof__outbuffer))
+    return false;
+  
+  if (0 == sizeof__outbuffer)
+    return true;
+
+  if (!archive.ReadInt(&buffer_crc0)) // 32 bit crc of uncompressed buffer
+    return false;
+
+  if (!archive.ReadChar(&method))
+    return false;
+
+  if (method != 0 && method != 1)
+    return false;
+
+  switch (method)
+  {
+  case 0: // uncompressed
+    rc = archive.SeekForward(sizeof__outbuffer);
+    break;
+  case 1: // compressed
+    {
+    ON__UINT32 tcode = 0;
+    ON__INT64  big_value = 0;
+    rc = archive.BeginRead3dmBigChunk(&tcode, &big_value);
+    if (rc)
+      rc = archive.EndRead3dmChunk();
+    }
+    break;
+  }
+
+  return rc;
+}
+
+
+static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON_wString>& paths, const wchar_t* specificPath, ON_SimpleArray<unsigned char>* pathBuffer)
+{
+  if (!ONX_Model::IsRDKDocumentInformation(docud))
+    return false;
+
+  ON_Read3dmBufferArchive a(docud.m_goo.m_value, docud.m_goo.m_goo, false, docud.m_usertable_3dm_version, docud.m_usertable_opennurbs_version);
+
+  int version = 0;
+  if (!a.ReadInt(&version))
+    return false;
+
+  if (4 != version)
+    return false;
+
+  //Read out the document data, and throw it away.
+  {
+    int slen = 0;
+    if (!a.ReadInt(&slen))
+      return 0;
+    if (slen <= 0)
+      return 0;
+    if (slen + 4 > docud.m_goo.m_value)
+      return 0;
+    ON_String s;
+    s.SetLength(slen);
+    if (!a.ReadChar(slen, s.Array()))
+      return 0;
+  }
+
+  unsigned int iCount = 0;
+  if (!a.ReadInt(&iCount))
+    return false;
+
+  ON_SimpleArray<unsigned char> buffer;
+
+  int path_count = 0;
+  for (unsigned int i = 0; i < iCount; i++)
+  {
+    ON_wString sPath;
+    if (!a.ReadString(sPath))
+      return false;
+
+    if (specificPath && pathBuffer && sPath.EqualOrdinal(specificPath, false))
+    {
+      size_t size;
+      if (!a.ReadCompressedBufferSize(&size))
+        return false;
+
+      bool bFailedCRC = false;
+      pathBuffer->Reserve(size);
+      if (!a.ReadCompressedBuffer(size, pathBuffer->Array(), &bFailedCRC))
+        return false;
+
+      pathBuffer->SetCount((int)size);
+      return true;
+    }
+    else
+    {
+      SeekPastCompressedBuffer(a);
+    }
+
+    paths.Append(sPath);
+    path_count++;
+  }
+
+  return path_count > 0;
+}
+
+std::string BND_ONXModel::GetEmbeddedFileAsBase64(std::wstring path)
+{
+  ON_ClassArray<ON_wString> paths;
+  ON_SimpleArray<ONX_Model_UserData*>& userdata_table = m_model->m_userdata_table;
+  ON_SimpleArray<unsigned char> buffer;
+  for (int i = 0; i < userdata_table.Count(); i++)
+  {
+    ONX_Model_UserData* ud = userdata_table[i];
+    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, path.c_str(), &buffer))
+      break;
+  }
+
+  std::string rc;
+  if (buffer.Count() > 0)
+  {
+    rc = base64_encode(buffer.Array(), buffer.UnsignedCount());
+  }
+  return rc;
+}
+
+BND_TUPLE BND_ONXModel::GetEmbeddedFilePaths()
+{
+  ON_ClassArray<ON_wString> paths;
+  ON_SimpleArray<ONX_Model_UserData*>& userdata_table = m_model->m_userdata_table;
+  for (int i = 0; i < userdata_table.Count(); i++)
+  {
+    ONX_Model_UserData* ud = userdata_table[i];
+    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr))
+      break;
+  }
+  int count = paths.Count();
+
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+  {
+    std::wstring path(paths[i].Array());
+    SetTuple(rc, i, path);
+  }
+  return rc;
+}
+
+///////////////////////////////////////////////
 
 BND_ONXModel::BND_ONXModel()
 {
@@ -1173,6 +1330,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
+    .def("EmbeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
+    .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
     ;
 }
 #endif
@@ -1322,6 +1481,8 @@ void initExtensionsBindings(void*)
     .function("toByteArray", &BND_ONXModel::ToByteArray)
     .function("toByteArray", &BND_ONXModel::ToByteArray2, allow_raw_pointers())
     .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
+    .function("embeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
+    .function("getEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
     ;
 }
 #endif

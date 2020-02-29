@@ -22,6 +22,14 @@ void BND_Material::SetTrackedPointer(ON_Material* material, const ON_ModelCompon
   BND_CommonObject::SetTrackedPointer(material, compref);
 }
 
+BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
+{
+  BND_PhysicallyBasedMaterial* pbr = new BND_PhysicallyBasedMaterial();
+  pbr->m_material = m_material;
+  pbr->m_component_ref = this->m_component_ref;
+  return pbr;
+}
+
 static BND_Texture* GetTextureHelper(const ON_Material* mat, ON_Texture::TYPE t)
 {
   int index = mat->FindTexture(nullptr, t);
@@ -94,12 +102,38 @@ bool BND_Material::SetTransparencyTexture2(const BND_Texture& texture)
   return SetTextureHelper(m_material, texture.m_texture, ON_Texture::TYPE::transparency_texture);
 }
 
+
+bool BND_PhysicallyBasedMaterial::Supported() const
+{
+  return m_material->PhysicallyBased().Supported();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initMaterialBindings(pybind11::module& m)
 {
+  py::class_<BND_PhysicallyBasedMaterial>(m, "PhysicallyBasedMaterial")
+    .def_property_readonly("Supported", &BND_PhysicallyBasedMaterial::Supported)
+    .def_property("Subsurface", &BND_PhysicallyBasedMaterial::Subsurface, &BND_PhysicallyBasedMaterial::SetSubsurface)
+    .def_property("SubsurfaceScatteringRadius", &BND_PhysicallyBasedMaterial::SubsurfaceScatteringRadius, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringRadius)
+    .def_property("Metallic", &BND_PhysicallyBasedMaterial::Metallic, &BND_PhysicallyBasedMaterial::SetMetallic)
+    .def_property("Specular", &BND_PhysicallyBasedMaterial::Specular, &BND_PhysicallyBasedMaterial::SetSpecular)
+    .def_property("ReflectiveIOR", &BND_PhysicallyBasedMaterial::ReflectiveIOR, &BND_PhysicallyBasedMaterial::SetReflectiveIOR)
+    .def_property("SpecularTint", &BND_PhysicallyBasedMaterial::SpecularTint, &BND_PhysicallyBasedMaterial::SetSpecularTint)
+    .def_property("Roughness", &BND_PhysicallyBasedMaterial::Roughness, &BND_PhysicallyBasedMaterial::SetRoughness)
+    .def_property("Anisotropic", &BND_PhysicallyBasedMaterial::Anisotropic, &BND_PhysicallyBasedMaterial::SetAnisotropic)
+    .def_property("AnisotropicRotation", &BND_PhysicallyBasedMaterial::AnisotropicRotation, &BND_PhysicallyBasedMaterial::SetAnisotropicRotation)
+    .def_property("Sheen", &BND_PhysicallyBasedMaterial::Sheen, &BND_PhysicallyBasedMaterial::SetSheen)
+    .def_property("SheenTint", &BND_PhysicallyBasedMaterial::SheenTint, &BND_PhysicallyBasedMaterial::SetSheenTint)
+    .def_property("Clearcoat", &BND_PhysicallyBasedMaterial::Clearcoat, &BND_PhysicallyBasedMaterial::SetClearcoat)
+    .def_property("ClearcoatRoughness", &BND_PhysicallyBasedMaterial::ClearcoatRoughness, &BND_PhysicallyBasedMaterial::SetClearcoatRoughness)
+    .def_property("OpacityIOR", &BND_PhysicallyBasedMaterial::OpacityIOR, &BND_PhysicallyBasedMaterial::SetOpacityIOR)
+    .def_property("Opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
+    .def_property("OpacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
+    ;
+
   py::class_<BND_Material, BND_CommonObject>(m, "Material")
     .def(py::init<>())
     .def(py::init<const BND_Material&>(), py::arg("other"))
@@ -134,6 +168,7 @@ void initMaterialBindings(pybind11::module& m)
     .def("GetTransparencyTexture", &BND_Material::GetTransparencyTexture)
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture, py::arg("filename"))
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2, py::arg("texture"))
+    .def_property_readonly("PhysicallyBased", &BND_Material::PhysicallyBased)
     ;
 }
 #endif
@@ -143,6 +178,26 @@ using namespace emscripten;
 
 void initMaterialBindings(void*)
 {
+  class_<BND_PhysicallyBasedMaterial>("PhysicallyBasedMaterial")
+    .property("supported", &BND_PhysicallyBasedMaterial::Supported)
+    .property("subsurface", &BND_PhysicallyBasedMaterial::Subsurface, &BND_PhysicallyBasedMaterial::SetSubsurface)
+    .property("subsurfaceScatteringRadius", &BND_PhysicallyBasedMaterial::SubsurfaceScatteringRadius, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringRadius)
+    .property("metallic", &BND_PhysicallyBasedMaterial::Metallic, &BND_PhysicallyBasedMaterial::SetMetallic)
+    .property("specular", &BND_PhysicallyBasedMaterial::Specular, &BND_PhysicallyBasedMaterial::SetSpecular)
+    .property("reflectiveIOR", &BND_PhysicallyBasedMaterial::ReflectiveIOR, &BND_PhysicallyBasedMaterial::SetReflectiveIOR)
+    .property("specularTint", &BND_PhysicallyBasedMaterial::SpecularTint, &BND_PhysicallyBasedMaterial::SetSpecularTint)
+    .property("roughness", &BND_PhysicallyBasedMaterial::Roughness, &BND_PhysicallyBasedMaterial::SetRoughness)
+    .property("anisotropic", &BND_PhysicallyBasedMaterial::Anisotropic, &BND_PhysicallyBasedMaterial::SetAnisotropic)
+    .property("anisotropicRotation", &BND_PhysicallyBasedMaterial::AnisotropicRotation, &BND_PhysicallyBasedMaterial::SetAnisotropicRotation)
+    .property("sheen", &BND_PhysicallyBasedMaterial::Sheen, &BND_PhysicallyBasedMaterial::SetSheen)
+    .property("sheenTint", &BND_PhysicallyBasedMaterial::SheenTint, &BND_PhysicallyBasedMaterial::SetSheenTint)
+    .property("clearcoat", &BND_PhysicallyBasedMaterial::Clearcoat, &BND_PhysicallyBasedMaterial::SetClearcoat)
+    .property("clearcoatRoughness", &BND_PhysicallyBasedMaterial::ClearcoatRoughness, &BND_PhysicallyBasedMaterial::SetClearcoatRoughness)
+    .property("opacityIOR", &BND_PhysicallyBasedMaterial::OpacityIOR, &BND_PhysicallyBasedMaterial::SetOpacityIOR)
+    .property("opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
+    .property("opacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
+    ;
+
   class_<BND_Material, base<BND_CommonObject>>("Material")
     .constructor<>()
     .constructor<const BND_Material&>()
@@ -177,6 +232,7 @@ void initMaterialBindings(void*)
     .function("getTransparencyTexture", &BND_Material::GetTransparencyTexture, allow_raw_pointers())
     .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture)
     //.function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
+    .function("physicallyBased", &BND_Material::PhysicallyBased, allow_raw_pointers())
     ;
 }
 #endif
