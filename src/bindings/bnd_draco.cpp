@@ -4,6 +4,8 @@
 #if defined(ON_INCLUDE_DRACO)
 #undef max
 #undef min
+#undef OK
+#undef ERROR
 #include "../lib/draco/src/draco/mesh/mesh.h"
 #include "../lib/draco/src/draco/compression/encode.h"
 #include "../lib/draco/src/draco/compression/decode.h"
