@@ -663,6 +663,18 @@ BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+BND_Material* BND_File3dmMaterialTable::FromAttributes(const BND_3dmObjectAttributes* attributes)
+{
+  if (nullptr == attributes)
+    return nullptr;
+  ON_ModelComponentReference compref = m_model->RenderMaterialFromAttributes(*attributes->m_attributes);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
+  if (modelmaterial)
+    return new BND_Material(modelmaterial, &compref);
+  return nullptr;
+}
+
 void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
 {
   const ON_Bitmap* b = bitmap.m_bitmap;
@@ -1196,6 +1208,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
     .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
+    .def("FindFromAttributes", &BND_File3dmMaterialTable::FromAttributes)
     ;
 
   py::class_<PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> >(m, "__ImageIterator")
@@ -1388,6 +1401,7 @@ void initExtensionsBindings(void*)
     .function("add", &BND_File3dmMaterialTable::Add)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
+    .function("findFromAttributes", &BND_File3dmMaterialTable::FromAttributes, allow_raw_pointers())
     ;
 
   class_<BND_File3dmBitmapTable>("File3dmBitmapTable")
