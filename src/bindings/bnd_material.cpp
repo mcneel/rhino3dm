@@ -19,7 +19,7 @@ BND_Material::BND_Material(ON_Material* material, const ON_ModelComponentReferen
 void BND_Material::SetTrackedPointer(ON_Material* material, const ON_ModelComponentReference* compref)
 {
   m_material = material;
-  BND_CommonObject::SetTrackedPointer(material, compref);
+  BND_ModelComponent::SetTrackedPointer(material, compref);
 }
 
 BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
@@ -38,6 +38,12 @@ static BND_Texture* GetTextureHelper(const ON_Material* mat, ON_Texture::TYPE t)
     return nullptr;
   return new BND_Texture(new ON_Texture(*texture), nullptr);
 }
+
+BND_Texture* BND_Material::GetTexture(ON_Texture::TYPE t) const
+{
+  return GetTextureHelper(m_material, t);
+}
+
 
 BND_Texture* BND_Material::GetBitmapTexture() const
 {
@@ -134,7 +140,7 @@ void initMaterialBindings(pybind11::module& m)
     .def_property("OpacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
     ;
 
-  py::class_<BND_Material, BND_CommonObject>(m, "Material")
+  py::class_<BND_Material, BND_ModelComponent>(m, "Material")
     .def(py::init<>())
     .def(py::init<const BND_Material&>(), py::arg("other"))
     .def_property("RenderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
@@ -156,6 +162,7 @@ void initMaterialBindings(pybind11::module& m)
     .def_property("ReflectionColor", &BND_Material::GetReflectionColor, &BND_Material::SetReflectionColor)
     .def_property("TransparentColor", &BND_Material::GetTransparentColor, &BND_Material::SetTransparentColor)
     .def("Default", &BND_Material::Default)
+    .def("GetTexture", &BND_Material::GetTexture, py::arg("which"))
     .def("GetBitmapTexture", &BND_Material::GetBitmapTexture)
     .def("SetBitmapTexture", &BND_Material::SetBitmapTexture, py::arg("filename"))
     .def("SetBitmapTexture", &BND_Material::SetBitmapTexture2, py::arg("texture"))
@@ -198,7 +205,7 @@ void initMaterialBindings(void*)
     .property("opacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
     ;
 
-  class_<BND_Material, base<BND_CommonObject>>("Material")
+  class_<BND_Material, base<BND_ModelComponent>>("Material")
     .constructor<>()
     .constructor<const BND_Material&>()
     .property("renderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
@@ -220,6 +227,7 @@ void initMaterialBindings(void*)
     .property("reflectionColor", &BND_Material::GetReflectionColor, &BND_Material::SetReflectionColor)
     .property("transparentColor", &BND_Material::GetTransparentColor, &BND_Material::SetTransparentColor)
     .function("default", &BND_Material::Default)
+    .function("getTexture", &BND_Material::GetTexture, allow_raw_pointers())
     .function("getBitmapTexture", &BND_Material::GetBitmapTexture, allow_raw_pointers())
     .function("setBitmapTexture", &BND_Material::SetBitmapTexture)
     //.function("setBitmapTexture", &BND_Material::SetBitmapTexture2)

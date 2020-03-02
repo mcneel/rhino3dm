@@ -8,6 +8,10 @@ class BND_ModelComponent : public BND_CommonObject
 protected:
   BND_ModelComponent();
   void SetTrackedPointer(ON_ModelComponent* modelComponent, const ON_ModelComponentReference* compref);
+
+public:
+  BND_UUID GetId() const;
+  void SetId(BND_UUID id);
 };
 
 
