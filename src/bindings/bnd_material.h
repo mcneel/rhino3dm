@@ -8,7 +8,7 @@ void initMaterialBindings(pybind11::module& m);
 void initMaterialBindings(void* m);
 #endif
 
-class BND_Material : public BND_CommonObject
+class BND_Material : public BND_ModelComponent
 {
 public:
   ON_Material* m_material = nullptr;
@@ -63,6 +63,7 @@ public:
   BND_Color GetTransparentColor() const { return ON_Color_to_Binding(m_material->m_transparent); }
   void SetTransparentColor(const BND_Color& c) { m_material->m_transparent = Binding_to_ON_Color(c); }
   void Default() { *m_material = ON_Material::Default; }
+  class BND_Texture* GetTexture(ON_Texture::TYPE t) const;
   //public Texture[] GetTextures()
   class BND_Texture* GetBitmapTexture() const;
   bool SetBitmapTexture(std::wstring filename);
