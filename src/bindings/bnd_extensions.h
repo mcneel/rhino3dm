@@ -99,6 +99,7 @@ public:
   class BND_Material* FindIndex(int index);
   class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);
+  class BND_Material* FromAttributes(const class BND_3dmObjectAttributes* attributes);
 };
 
 class BND_File3dmBitmapTable
