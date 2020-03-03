@@ -1101,6 +1101,22 @@ BND_ONXModel* BND_ONXModel::Decode(std::string buffer)
   return FromByteArray(length, c);
 }
 
+std::wstring BND_ONXModel::RdkXml() const
+{
+  std::wstring rc;
+  ON_wString s;
+  int count = m_model->m_userdata_table.Count();
+  for (int i = 0; i < count; i++)
+  {
+    ONX_Model_UserData* ud = m_model->m_userdata_table[i];
+    if (ud && ONX_Model::GetRDKDocumentInformation(*ud, s))
+    {
+      rc = s.Array();
+      break;
+    }
+  }
+  return rc;
+}
 
 bool BND_ONXModel::ReadTest(std::wstring path)
 {
@@ -1345,6 +1361,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Decode", &BND_ONXModel::Decode)
     .def("EmbeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
+    .def("RdkXml", &BND_ONXModel::RdkXml)
     ;
 }
 #endif
@@ -1497,6 +1514,7 @@ void initExtensionsBindings(void*)
     .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
     .function("embeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
     .function("getEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
+    .function("rdkXml", &BND_ONXModel::RdkXml)
     ;
 }
 #endif
