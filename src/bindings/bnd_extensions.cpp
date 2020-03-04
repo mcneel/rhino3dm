@@ -48,7 +48,8 @@ static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
 }
 
 
-static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON_wString>& paths, const wchar_t* specificPath, ON_SimpleArray<unsigned char>* pathBuffer)
+static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON_wString>& paths,
+  const wchar_t* specificPath, ON_SimpleArray<unsigned char>* pathBuffer, bool strictSearch)
 {
   if (!ONX_Model::IsRDKDocumentInformation(docud))
     return false;
@@ -82,6 +83,9 @@ static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON
     return false;
 
   ON_SimpleArray<unsigned char> buffer;
+  ON_wString searchFilename;
+  if (specificPath && pathBuffer)
+    ON_FileSystemPath::SplitPath(specificPath, nullptr, nullptr, &searchFilename);
 
   int path_count = 0;
   for (unsigned int i = 0; i < iCount; i++)
@@ -90,24 +94,32 @@ static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON
     if (!a.ReadString(sPath))
       return false;
 
-    if (specificPath && pathBuffer && sPath.EqualOrdinal(specificPath, false))
+    if (specificPath && pathBuffer)
     {
-      size_t size;
-      if (!a.ReadCompressedBufferSize(&size))
-        return false;
+      bool pathMatch = sPath.EqualOrdinal(specificPath, !strictSearch);
+      if (!pathMatch && !strictSearch)
+      {
+        ON_wString filename;
+        ON_FileSystemPath::SplitPath(sPath, nullptr, nullptr, &filename);
+        pathMatch = filename.EqualOrdinal(searchFilename, true);
+      }
+      if (pathMatch)
+      {
+        size_t size;
+        if (!a.ReadCompressedBufferSize(&size))
+          return false;
 
-      bool bFailedCRC = false;
-      pathBuffer->Reserve(size);
-      if (!a.ReadCompressedBuffer(size, pathBuffer->Array(), &bFailedCRC))
-        return false;
+        bool bFailedCRC = false;
+        pathBuffer->Reserve(size);
+        if (!a.ReadCompressedBuffer(size, pathBuffer->Array(), &bFailedCRC))
+          return false;
 
-      pathBuffer->SetCount((int)size);
-      return true;
+        pathBuffer->SetCount((int)size);
+        return true;
+      }
     }
-    else
-    {
-      SeekPastCompressedBuffer(a);
-    }
+
+    SeekPastCompressedBuffer(a);
 
     paths.Append(sPath);
     path_count++;
@@ -118,13 +130,18 @@ static bool GetRDKEmbeddedFileHelper(ONX_Model_UserData& docud, ON_ClassArray<ON
 
 std::string BND_ONXModel::GetEmbeddedFileAsBase64(std::wstring path)
 {
+  return GetEmbeddedFileAsBase64Strict(path, false);
+}
+
+std::string BND_ONXModel::GetEmbeddedFileAsBase64Strict(std::wstring path, bool strict)
+{
   ON_ClassArray<ON_wString> paths;
   ON_SimpleArray<ONX_Model_UserData*>& userdata_table = m_model->m_userdata_table;
   ON_SimpleArray<unsigned char> buffer;
   for (int i = 0; i < userdata_table.Count(); i++)
   {
     ONX_Model_UserData* ud = userdata_table[i];
-    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, path.c_str(), &buffer))
+    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, path.c_str(), &buffer, strict))
       break;
   }
 
@@ -143,7 +160,7 @@ BND_TUPLE BND_ONXModel::GetEmbeddedFilePaths()
   for (int i = 0; i < userdata_table.Count(); i++)
   {
     ONX_Model_UserData* ud = userdata_table[i];
-    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr))
+    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr, false))
       break;
   }
   int count = paths.Count();
@@ -1361,6 +1378,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Decode", &BND_ONXModel::Decode)
     .def("EmbeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
+    .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64Strict)
     .def("RdkXml", &BND_ONXModel::RdkXml)
     ;
 }
@@ -1514,6 +1532,7 @@ void initExtensionsBindings(void*)
     .class_function("decode", &BND_ONXModel::Decode, allow_raw_pointers())
     .function("embeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
     .function("getEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
+    .function("getEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64Strict)
     .function("rdkXml", &BND_ONXModel::RdkXml)
     ;
 }

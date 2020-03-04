@@ -293,6 +293,7 @@ public:
   //public void DumpToTextLog(TextLog log)
   BND_TUPLE GetEmbeddedFilePaths();
   std::string GetEmbeddedFileAsBase64(std::wstring path);
+  std::string GetEmbeddedFileAsBase64Strict(std::wstring path, bool strict);
   std::wstring RdkXml() const;
 public:
   static bool ReadTest(std::wstring filepath);
