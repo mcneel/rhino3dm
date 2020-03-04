@@ -282,27 +282,8 @@ def check_git(build_tool):
 
 def check_python(build_tool):
     print_check_preamble(build_tool)
-
-    try:
-        if sys.version_info[0] < 3:
-            p = subprocess.Popen(['python', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        else:
-            p = subprocess.Popen(['python3', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    except OSError:
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
-        return False
-
-    if sys.version_info[0] < 3:
-        running_version = p.communicate()[1].splitlines()[0].split('Python ', 1)[1]
-    else:
-        running_version, err = p.communicate()
-        if err:
-            print_warning_message(err)
-            return False
-        running_version = running_version.decode('utf-8').strip().split('Python ')[1]
-
+    running_version = ".".join([str(sys.version_info.major), str(sys.version_info.minor), str(sys.version_info.micro)])    
     print_version_comparison(build_tool, running_version)
-
     return True
 
 
