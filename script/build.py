@@ -173,6 +173,14 @@ def build_ios():
     native_lib_filename = native_lib_name + '.' + ext
     xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
 
+    previous_build = os.path.abspath(os.path.join(platform_target_path, "Release"))
+    if os.path.exists(previous_build):
+        if not overwrite:
+            print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            shutil.rmtree(previous_build)
+
     if not os.path.exists(os.path.join(platform_target_path, "Release")):
         os.mkdir(os.path.join(platform_target_path, "Release"))
 
