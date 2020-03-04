@@ -82,8 +82,12 @@ def print_platform_preamble(platform_target_name):
         print(bcolors.BOLD + "Building " + platform_target_name + "..." + bcolors.ENDC)
 
 
-def run_command(command):
-    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
+def run_command(command, suppress_errors=False):
+    if suppress_errors == True:                
+        dev_null = open(os.devnull, 'w')
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+    else:
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
     
     while True:
         line = process.stdout.readline()               
@@ -97,7 +101,7 @@ def run_command(command):
                 if verbose:
                     line = line.decode('utf-8').strip()
                     print(line)
-        else:
+        elif suppress_errors == False:
             error = process.stderr.readline()                
             if error:
                 if sys.version_info[0] < 3:
@@ -246,7 +250,9 @@ def build_js():
             print_error_message("unable to run make clean in " + platform_target_path)
             return False
 
-    run_command("make")
+    # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
+    # we'll pass suppress_errors argument as True here...
+    run_command("make", True)
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
