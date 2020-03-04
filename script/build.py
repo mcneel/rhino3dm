@@ -82,24 +82,33 @@ def print_platform_preamble(platform_target_name):
         print(bcolors.BOLD + "Building " + platform_target_name + "..." + bcolors.ENDC)
 
 
-def run_command_show_output(command):
-    if verbose:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
-    else:
-        dev_null = open(os.devnull, 'w')  # sending to dev/null here because sending everything to pipe causes hang
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+def run_command(command):
+    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
+    
     while True:
-        output = process.stdout.readline()
-        if not output:
-            break
-        if len(output) == 0 and process.poll() is not None:
-            break
-        if output:
+        line = process.stdout.readline()               
+        if process.poll() is not None:
+            break   
+        if line:
             if sys.version_info[0] < 3:
-                print(output.strip())
+                if verbose:
+                    print(line.strip())
             else:
-                output = output.decode('utf-8').strip()
-                print(output)
+                if verbose:
+                    line = line.decode('utf-8').strip()
+                    print(line)
+        else:
+            error = process.stderr.readline()                
+            if error:
+                if sys.version_info[0] < 3:
+                    print_error_message(error.strip())
+                    sys.exit(1)
+                else:
+                    error = error.decode('utf-8').strip()
+                    print_error_message(error)
+                    sys.exit(1)
+            else:
+                continue
 
     rc = process.poll()
     return rc
