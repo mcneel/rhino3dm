@@ -68,24 +68,37 @@ def print_ok_message(ok_message):
               bcolors.ENDC)
 
 
-def run_command_show_output(command):
-    if verbose:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
-    else:
-        dev_null = open(os.devnull, 'w')  # sending to dev/null here because sending everything to pipe causes hang
+def run_command(command, suppress_errors=False):
+    if suppress_errors == True:                
+        dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+    else:
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
+    
     while True:
-        output = process.stdout.readline()
-        if not output:
-            break
-        if len(output) == 0 and process.poll() is not None:
-            break
-        if output:
+        line = process.stdout.readline()               
+        if process.poll() is not None:
+            break   
+        if line:
             if sys.version_info[0] < 3:
-                print(output.strip())
+                if verbose:
+                    print(line.strip())
             else:
-                output = output.decode('utf-8').strip()
-                print(output)
+                if verbose:
+                    line = line.decode('utf-8').strip()
+                    print(line)
+        elif suppress_errors == False:
+            error = process.stderr.readline()                
+            if error:
+                if sys.version_info[0] < 3:
+                    print_error_message(error.strip())
+                    sys.exit(1)
+                else:
+                    error = error.decode('utf-8').strip()
+                    print_error_message(error)
+                    sys.exit(1)
+            else:
+                continue
 
     rc = process.poll()
     return rc
@@ -101,16 +114,15 @@ def print_platform_preamble(platform_target_name):
 
 
 def build_methodgen():
-    print("")
     if xcode_logging:
-        print("Building MethodGen...")
+        print(" Building MethodGen...")
     else:
-        print(bcolors.BOLD + "Building MethodGen..." + bcolors.ENDC)
+        print(bcolors.BOLD + " Building MethodGen..." + bcolors.ENDC)
 
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
 
     command = 'msbuild ' + path_to_methodgen_csproj +' /p:Configuration=Release'
-    run_command_show_output(command)
+    run_command(command)
 
     # Check to see if the MethodGen.exe was written...
     item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
@@ -124,11 +136,10 @@ def build_methodgen():
 
 
 def run_methodgen():
-    print("")
     if xcode_logging:
-        print("Running MethodGen...")
+        print(" Running MethodGen...")
     else:
-        print(bcolors.BOLD + "Running MethodGen..." + bcolors.ENDC)
+        print(bcolors.BOLD + " Running MethodGen..." + bcolors.ENDC)
 
     path_to_methodgen_exe = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
 
@@ -150,7 +161,7 @@ def run_methodgen():
         os.remove(item_to_check)
 
     command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace
-    run_command_show_output(command)
+    run_command(command)
 
     # Check to see if methodgen succeeded
     if os.path.exists(item_to_check):
@@ -194,7 +205,7 @@ def setup_macos():
         print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 ../../src/librhino3dmio_native"
-    run_command_show_output(command)
+    run_command(command)
 
     # Check to see if the CMakeFiles were written...
     if os.path.exists(item_to_check):
@@ -234,7 +245,7 @@ def setup_ios():
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
     command = "cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native"
-    run_command_show_output(command)
+    run_command(command)
 
     # Check to see if the CMakeFiles were written...
     if os.path.exists(item_to_check):
