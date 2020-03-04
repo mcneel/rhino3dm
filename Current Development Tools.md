@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on January 29, 2020
+Last updated by dan@mcneel.com on March 3, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -10,9 +10,9 @@ The following are shared between multiple platform targets...
 
 #### macOS
 
-We are currently using macOS 10.15.2. Scripts read this:
+We are currently using macOS 10.15.3. Scripts read this:
 
-`macos_currently_using = 10.15.2`
+`macos_currently_using = 10.15.3`
 `macos_install_notes = The exact version likely does not matter.  You may not need to update/roll-back macOS if your version is close enough.`
 
 #### Git
@@ -43,17 +43,17 @@ We are currently using Python 3.7.1. Scripts read this:
 
 #### Xcode
 
-We are currently using Xcode 11.2.1. Scripts read this:
+We are currently using Xcode 11.3.1. Scripts read this:
 
-`xcode_currently_using = 11.2.1`
+`xcode_currently_using = 11.3.1`
 `xcode_install_notes = Xcode can be downloaded for free from the macOS App Store or from https://developer.apple.com/download/ (Apple developer ID required for the latter option).`
 
 #### Mono Framework MDK
 
-We are currently using the Mono Framework MDK 6.4.0.208.  Scripts read this:
+We are currently using the Mono Framework MDK 6.6.0.155.  Scripts read this:
 
-`mdk_currently_using = 6.4.0.208`
-`mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.4.0.208.macos10.xamarin.universal.pkg`
+`mdk_currently_using = 6.6.0.155`
+`mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.6.0.155.macos10.xamarin.universal.pkg`
 `mdk_install_notes = The Mono.framework does not seem to be installed in the /Library/Frameworks folder or the current version is not set.`
 
 ## Android (TODO)
@@ -93,10 +93,10 @@ TODO
 
 #### Xamarin.iOS
 
-We are currently using Xamarin.iOS 13.6.0.12.  Scripts read this:
+We are currently using Xamarin.iOS 13.10.0.17.  Scripts read this:
 
-`xamios_currently_using = 13.6.0.12`
-`xamios_archive_url = https://dl.xamarin.com/MonoTouch/Mac/xamarin.ios-13.6.0.12.pkg`
+`xamios_currently_using = 13.10.0.17`
+`xamios_archive_url = https://dl.xamarin.com/MonoTouch/Mac/xamarin.ios-13.10.0.17.pkg`
 
 
 ## Python (TODO)
