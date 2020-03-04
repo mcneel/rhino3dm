@@ -27,7 +27,7 @@ from subprocess import Popen, PIPE
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "macos"]
+valid_platform_args = ["js", "macos", "ios"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
@@ -140,7 +140,70 @@ def build_macos():
 
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
               ' -arch x86_64 -configuration Release clean build'
-    run_command_show_output(command)
+    run_command(command)
+
+    # Check to see if the build succeeded
+    items_to_check = [native_lib_filename]
+    all_items_built = True
+    for item in items_to_check:
+        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
+        if not os.path.exists(path_to_item):
+            print_error_message("failed to create " + path_to_item)
+            all_items_built = False
+
+    if all_items_built:
+        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
+    else:
+        print_error_message("failed to build all rhino3dm build artifacts.")
+        return False
+
+
+def build_ios():
+    if _platform != "darwin":
+        print_error_message("Building for iOS requires that you run this script on macOS")
+        return False
+
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
+    native_lib_name = 'librhino3dmio_native'
+    ext = 'a'
+    native_lib_filename = native_lib_name + '.' + ext
+    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
+
+    if not os.path.exists(os.path.join(platform_target_path, "Release")):
+        os.mkdir(os.path.join(platform_target_path, "Release"))
+
+    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+    if not os.path.exists(item_to_check):
+        print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+        return False
+
+    print(" Compiling x86_64 (Simulator)...")
+    command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
+             ' -sdk iphonesimulator -arch x86_64 -configuration Release clean build'
+    run_command(command)
+    if os.path.exists(os.path.join(platform_target_path, "Release-iphonesimulator", native_lib_filename)):
+        shutil.move(os.path.join(platform_target_path, "Release-iphonesimulator", native_lib_filename), os.path.join(platform_target_path, "Release", native_lib_name + "-x86_64.a"))
+        shutil.rmtree(os.path.join(platform_target_path, "Release-iphonesimulator"))
+        print_ok_message("Successfully created x64_86 (Simulator) version.")
+    else:
+        print_error_message("Failed")
+        sys.exit(1)
+
+    print(" Compiling arm64 version...")
+    command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
+              ' -sdk iphoneos -arch arm64 -configuration Release clean build'
+    run_command(command)
+    if os.path.exists(os.path.join(platform_target_path, "Release-iphoneos", native_lib_filename)):
+        shutil.move(os.path.join(platform_target_path, "Release-iphoneos", native_lib_filename), os.path.join(platform_target_path, "Release", native_lib_name + "-arm64.a"))
+        shutil.rmtree(os.path.join(platform_target_path, "Release-iphoneos"))
+        print_ok_message("Successfully created arm64 version.")
+    else:
+        print_error_message("Failed")
+        sys.exit(1)
+
+    print(" Creating Universal Binary...")
+    command = 'lipo -create -output ' + os.path.join(platform_target_path, "Release", native_lib_filename) + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-x86_64.a") + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-arm64.a")
+    run_command(command)    
 
     # Check to see if the build succeeded
     items_to_check = [native_lib_filename]
@@ -183,7 +246,7 @@ def build_js():
             print_error_message("unable to run make clean in " + platform_target_path)
             return False
 
-    run_command_show_output("make")
+    run_command("make")
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
