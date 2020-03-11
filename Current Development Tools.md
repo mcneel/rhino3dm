@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on March 3, 2020
+Last updated by dan@mcneel.com on March 11, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -8,14 +8,14 @@ Last updated by dan@mcneel.com on March 3, 2020
 
 The following are shared between multiple platform targets...
 
-#### macOS
+### macOS
 
 We are currently using macOS 10.15.3. Scripts read this:
 
 `macos_currently_using = 10.15.3`
 `macos_install_notes = The exact version likely does not matter.  You may not need to update/roll-back macOS if your version is close enough.`
 
-#### Git
+### Git
 
 We are currently using Git 2.17.1. Scripts read this:
 
@@ -23,7 +23,7 @@ We are currently using Git 2.17.1. Scripts read this:
 `git_install_notes_macos = You can download and install git from https://git-scm.com/downloads.  In order to run the pkg installer, you must right-click and select Open from the drop-down menu to bypass Gatekeeper checks.`
 `git_install_notes_windows = You can download and install git from https://git-scm.com/downloads`
 
-#### Python 2
+### Python 2
 
 We are currently using Python 2.7.17. Scripts read this:
 
@@ -32,7 +32,7 @@ We are currently using Python 2.7.17. Scripts read this:
 `python2_archive_url_windows = https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi`
 `python2_install_notes_linux = On Ubuntu, you can install python 2 using sudo apt install python`
 
-#### Python 3
+### Python 3
 
 We are currently using Python 3.7.1. Scripts read this:
 
@@ -41,14 +41,14 @@ We are currently using Python 3.7.1. Scripts read this:
 `python3_archive_url_windows = https://www.python.org/ftp/python/3.7.1/python-3.7.1-amd64.exe`
 `python3_install_notes_linux = On Ubuntu, you can install python 3 using sudo apt install python3`
 
-#### Xcode
+### Xcode
 
 We are currently using Xcode 11.3.1. Scripts read this:
 
 `xcode_currently_using = 11.3.1`
 `xcode_install_notes = Xcode can be downloaded for free from the macOS App Store or from https://developer.apple.com/download/ (Apple developer ID required for the latter option).`
 
-#### Mono Framework MDK
+### Mono Framework MDK
 
 We are currently using the Mono Framework MDK 6.6.0.155.  Scripts read this:
 
@@ -56,13 +56,27 @@ We are currently using the Mono Framework MDK 6.6.0.155.  Scripts read this:
 `mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.6.0.155.macos10.xamarin.universal.pkg`
 `mdk_install_notes = The Mono.framework does not seem to be installed in the /Library/Frameworks folder or the current version is not set.`
 
-## Android (TODO)
+## Android
 
-TODO
+### Android NDK
+
+We are currently using the Android NDK 15.2.4203891 (r15c).  Scripts read this:
+
+`ndk_currently_using = 15.3.4203891`
+`ndk_archive_url = https://dl.google.com/android/repository/android-ndk-r15c-darwin-x86_64.zip`
+`ndk_install_notes = TODO`
+
+### Xamarin.Android
+
+We are currently using the Xamarin.Android Framework 10.1.3.  Scripts read this:
+
+`xamandroid_currently_using = 10.1.3`
+`xamandroid_archive_url = https://dl.xamarin.com/MonoforAndroid/Mac/xamarin.android-10.1.3-12.pkg`
+`xamandroid_install_notes = TODO`
 
 ## Javascript
 
-#### Emscripten
+### Emscripten
 
 We are currently using Emscripten 1.39.5. Scripts read this:
 
@@ -70,7 +84,7 @@ We are currently using Emscripten 1.39.5. Scripts read this:
 `emscripten_install_notes = To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html`
 `emscripten_install_notes_windows =  To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal.  You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html.  Be sure to use the --global flag when running the activate batch file to set all the path variables correctly.`
 
-#### CMake
+### CMake
 
 We are currently using CMake 3.16.2. Scripts read this:
 
@@ -91,13 +105,12 @@ TODO
 
 ## iOS
 
-#### Xamarin.iOS
+### Xamarin.iOS
 
 We are currently using Xamarin.iOS 13.10.0.17.  Scripts read this:
 
 `xamios_currently_using = 13.10.0.17`
 `xamios_archive_url = https://dl.xamarin.com/MonoTouch/Mac/xamarin.ios-13.10.0.17.pkg`
-
 
 ## Python (TODO)
 
@@ -106,7 +119,6 @@ TODO
 ## Windows (TODO)
 
 TODO
-
 
 ---
 

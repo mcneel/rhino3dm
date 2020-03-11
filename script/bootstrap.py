@@ -14,8 +14,12 @@ from __future__ import (division, absolute_import, print_function, unicode_liter
 import subprocess
 import sys
 import os
+from os import listdir
+from os.path import isfile, isdir, join
 import argparse
 import ssl
+import re
+import glob
 import platform
 if sys.version_info >= (3,):
     import urllib.request as urllib2
@@ -31,7 +35,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python", "macos", "ios"]
+valid_platform_args = ["js", "python", "macos", "ios", "android"]
 
 
 class BuildTool:
@@ -85,6 +89,12 @@ def print_ok_message(ok_message):
 
 # ------------------------------------------------- Versions -----------------------------------------------------------
 
+def split_by_numbers(x):
+    r = re.compile('(\d+)')
+    l = r.split(x)
+    return [int(y) if y.isdigit() else y for y in l]
+
+
 def normalize_version(v):
     parts = [int(x) for x in v.split(".")]
     while parts[-1] == 0:
@@ -119,20 +129,30 @@ def read_required_versions():
     emscripten = BuildTool("Emscripten", "emscripten", "", "", "")
 
     # Android
+    ndk = BuildTool("Android NDK", "ndk", "", "", "")
+    xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
     #TODO: vs = BuildTool("Visual Studio for Mac", "vs", "", "", "")
     #TODO: dotnet = BuildTool(".NET SDK", "dotnet", "", "", "")
     #TODO: msbuild = BuildTool("msbuild", "msbuild", "", "", "")
     #TODO: mdk = BuildTool("Mono MDK", "mdk", "", "", "")
-    #TODO: ndk = BuildTool("Android NDK", "ndk", "", "", "")
-    #TODO: xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
-
+    
     # iOS
     xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
 
     # macOS    
     mdk = BuildTool("Mono MDK", "mdk", "", "", "")
 
-    build_tools = dict(macos=macos, xcode=xcode, git=git, python=python, cmake=cmake, emscripten=emscripten, mdk=mdk, xamios=xamios)
+    # create the build tools dictionary
+    build_tools = dict(macos=macos, 
+                       xcode=xcode, 
+                       git=git, 
+                       python=python, 
+                       cmake=cmake, 
+                       emscripten=emscripten, 
+                       mdk=mdk, 
+                       xamios=xamios, 
+                       ndk=ndk, 
+                       xamandroid=xamandroid)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -435,6 +455,109 @@ def check_xamios(build_tool):
     return True
 
 
+def check_ndk(build_tool):
+    print_check_preamble(build_tool)
+
+    # figure out where the NDK might be installed - multiple versions are 
+    # frequently installed, so we need to figure out which is the root folder
+    # containing these versions...
+    ndk_root_path = ''
+    ndk_root_path_spaceless = ''
+    drive_prefix = ''
+    android_ndk_path = ''
+    if _platform == "win32":
+        program_files = os.environ["ProgramW6432"]
+        ndk_root_path = os.path.join(program_files, "Android", "ndk")
+        drive_prefix = os.path.splitdrive(sys.executable)[0]
+        ndk_root_path_spaceless = drive_prefix + '\\' + 'Android\\' + 'ndk\\'
+    if _platform == "darwin":
+        home = os.path.expanduser("~")
+        ndk_root_path = os.path.join(home, "Library", "Developer", "Xamarin", "android-ndk")
+
+    if not os.path.exists(ndk_root_path):
+        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        return False
+ 
+    # we are going to search the root folder for valid ndk versions, so we need to set up
+    # a search pattern that is per-platform
+    ndk_build_sub_search = ''
+    if _platform == "win32":
+        ndk_build_sub_search = "\\android-ndk-r??\\ndk-build"
+    if _platform == "darwin":
+        ndk_build_sub_search = "/android-ndk-r??/ndk-build"
+    
+    versions_found = dict()
+    if glob.glob(ndk_root_path + ndk_build_sub_search):
+        ndk_build_sub_search = '' 
+        has_ndk = True
+        path_to_search = ndk_root_path
+
+        only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+        
+        for folder in only_folders:
+            if folder.startswith("android-ndk-r"):
+                version_id = folder.split("android-ndk-")[1]
+                # create a path to source.properites
+                ver_info_file = os.path.join(ndk_root_path, folder, "source.properties")
+                if os.path.exists(ver_info_file):
+                    src_props_file = open(ver_info_file, "r")
+                    for line in src_props_file:
+                        if "Pkg.Revision =" in line:
+                            build_number = line.strip().split('= ')[1]
+                            versions_found[version_id] = build_number
+                    src_props_file.close()
+
+    if not versions_found:
+        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        return False       
+
+    # check to see if we have the current NDK version in the list
+    running_version = ''
+    for version_id, build_number in versions_found.items():
+        if build_number == build_tool.currently_using:
+            running_version = build_number
+            android_ndk_path = os.path.join(ndk_root_path, "android-ndk-" + version_id, '')
+    
+    # if we don't find a match, get the highest version we can find...
+    if not running_version:
+        sorted_versions_found = sorted(versions_found, key=split_by_numbers)
+        if sorted_versions_found:
+            version_id = sorted_versions_found[-1]
+            running_version = versions_found[version_id]
+            android_ndk_path = os.path.join(ndk_root_path, "android-ndk-" + version_id, '')
+
+    print_version_comparison(build_tool, running_version)
+
+    android_env_variable = os.environ.get('ANDROID_NDK') #
+    if not android_env_variable or os.environ.get('ANDROID_NDK') != android_ndk_path:
+        print_warning_message('The NDK was found but the ANDROID_NDK variable is not properly set.  Setting to ' + android_ndk_path + ' now.')
+        os.environ["ANDROID_NDK"] = android_ndk_path
+    
+    return android_ndk_path
+
+
+def check_xamandroid(build_tool):
+    print_check_preamble(build_tool)
+
+    # check to see if the Xamarin.Android.framework exists at all...
+    running_xamandroid_framework_version_file_path = os.path.join('/', 'Library', 'Frameworks',
+                                                                    'Xamarin.Android.Framework', "Versions",
+                                                                    "Current", "Version")
+    if not os.path.exists(running_xamandroid_framework_version_file_path):
+        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        return False
+
+    # read in the contents of /Library/Frameworks/Xamarin.Android.framework/Versions/Current/VERSION
+    running_xamandroid_framework_version_file = open(running_xamandroid_framework_version_file_path, "r")
+    running_version = ''
+    for line in running_xamandroid_framework_version_file:
+        running_version = line.split('\n', 1)[0]
+
+    print_version_comparison(build_tool, running_version)
+
+    return True
+
+
 def check_handler(check, build_tools):
     if check == "js":
         print_platform_preamble("JavaScript")
@@ -480,6 +603,18 @@ def check_handler(check, build_tools):
         check_cmake(build_tools["cmake"])
         check_mdk(build_tools["mdk"])
         check_xamios(build_tools["xamios"])
+
+    if check == "android":
+        print_platform_preamble("Android")
+        if _platform == "darwin":
+            check_macos(build_tools["macos"])
+            check_xcode(build_tools["xcode"])
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_cmake(build_tools["cmake"])
+        check_mdk(build_tools["mdk"])
+        check_ndk(build_tools["ndk"])
+        check_xamandroid(build_tools["xamandroid"])
 
     if check not in valid_platform_args:
         if check == "all":
@@ -661,11 +796,11 @@ def main():
         for target_platform in args.platform:
             if (target_platform != "all") and (target_platform not in valid_platform_args)\
                     and (target_platform in build_tools):
-                print_error_message(target_platform + " is not a valid platform argument. valid tool arguments: all, "
+                print_error_message(target_platform + " is not a valid platform argument. valid platform arguments: all, "
                                     + ", ".join(valid_platform_args) + ". Are you looking for the -c --check argument?")
                 sys.exit(1)
             elif (target_platform != "all") and (target_platform not in valid_platform_args):
-                print_error_message(target_platform + " is not a valid platform argument. valid tool arguments: all, "
+                print_error_message(target_platform + " is not a valid platform argument. valid platform arguments: all, "
                                     + ", ".join(valid_platform_args) + ".")
                 sys.exit(1)
             check_handler(target_platform, build_tools)
