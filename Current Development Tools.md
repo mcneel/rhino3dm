@@ -75,7 +75,7 @@ We are currently using the Android NDK 15.2.4203891 (r15c).  Scripts read this:
 We are currently using the Xamarin.Android Framework 10.1.3.  Scripts read this:
 
 `xamandroid_currently_using = 10.1.3`
-`xamandroid_archive_url = https://dl.xamarin.com/MonoforAndroid/Mac/xamarin.android-10.1.3-12.pkg`
+`xamandroid_archive_url = https://dl.xamarin.com/MonoforAndroid/Mac/xamarin.android-10.1.3.7.pkg`
 
 ## Javascript
 

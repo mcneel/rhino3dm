@@ -131,6 +131,8 @@ def read_required_versions():
     # Android
     ndk = BuildTool("Android NDK", "ndk", "", "", "")
     xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
+ 
+    # TODO:
     #TODO: vs = BuildTool("Visual Studio for Mac", "vs", "", "", "")
     #TODO: dotnet = BuildTool(".NET SDK", "dotnet", "", "", "")
     #TODO: msbuild = BuildTool("msbuild", "msbuild", "", "", "")
@@ -747,6 +749,18 @@ def download_handler(download, build_tools):
         download_dependency(build_tools["cmake"])
         download_dependency(build_tools["mdk"])
         download_dependency(build_tools["xamios"])
+
+    if download == "android":
+        print_platform_download_preamble("Android")
+        if _platform == "darwin":                      
+            download_dependency(build_tools["macos"])
+            download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["cmake"])
+        download_dependency(build_tools["mdk"])
+        download_dependency(build_tools["ndk"])
+        download_dependency(build_tools["xamandroid"])
 
     if download not in valid_platform_args:
         if download == "all":
