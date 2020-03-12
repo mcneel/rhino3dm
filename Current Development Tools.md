@@ -62,9 +62,13 @@ We are currently using the Mono Framework MDK 6.6.0.155.  Scripts read this:
 
 We are currently using the Android NDK 15.2.4203891 (r15c).  Scripts read this:
 
-`ndk_currently_using = 15.3.4203891`
-`ndk_archive_url = https://dl.google.com/android/repository/android-ndk-r15c-darwin-x86_64.zip`
-`ndk_install_notes = TODO`
+`ndk_currently_using = 15.2.4203891`
+`ndk_archive_url_macos = https://dl.google.com/android/repository/android-ndk-r15c-darwin-x86_64.zip`
+`ndk_archive_url_linux = TODO`
+`ndk_archive_url_windows = TODO`
+`ndk_install_notes_macos = To install the NDK, decompress the folder, then move it to /Users/~/Library/Developer/Xamarin/android-ndk/.  Next, add the following line to your ~/.bash_profile: export ANDROID_NDK="/Users/~/Library/Developer/Xamarin/android-ndk/android-ndk-r15c/"`
+`ndk_install_notes_linux = TODO`
+`ndk_install_notes_windows = TODO`
 
 ### Xamarin.Android
 
@@ -72,7 +76,6 @@ We are currently using the Xamarin.Android Framework 10.1.3.  Scripts read this:
 
 `xamandroid_currently_using = 10.1.3`
 `xamandroid_archive_url = https://dl.xamarin.com/MonoforAndroid/Mac/xamarin.android-10.1.3-12.pkg`
-`xamandroid_install_notes = TODO`
 
 ## Javascript
 

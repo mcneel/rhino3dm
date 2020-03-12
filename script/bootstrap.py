@@ -220,18 +220,22 @@ def print_check_preamble(build_tool):
         print(bcolors.BOLD + "Checking " + build_tool.name + "..." + bcolors.ENDC)
 
 
-def print_version_comparison(build_tool, running_version):
-    print("  This system is running " + build_tool.name + " " + running_version)
-    print("  We are currently using " + build_tool.name + " " + build_tool.currently_using)
-
-    version_alignment = compare_versions(running_version, build_tool.currently_using)
-
+def format_install_instructions(build_tool):
     install_instructions = ''
     if build_tool.archive_url:
         install_instructions = install_instructions + "You can download " + build_tool.name + " from: " \
                                + build_tool.archive_url
     if build_tool.install_notes:
         install_instructions = install_instructions + " " + build_tool.install_notes
+
+    return install_instructions
+
+
+def print_version_comparison(build_tool, running_version):
+    print("  This system is running " + build_tool.name + " " + running_version)
+    print("  We are currently using " + build_tool.name + " " + build_tool.currently_using)
+
+    version_alignment = compare_versions(running_version, build_tool.currently_using)
 
     if version_alignment == 0:
         print_ok_message(build_tool.name + " version " + running_version + " found.")
@@ -242,7 +246,7 @@ def print_version_comparison(build_tool, running_version):
     elif version_alignment < 0:
         print_warning_message(
             build_tool.name + " version " + running_version + " found, an older version. We are currently using "
-            + build_tool.currently_using + ". " + install_instructions)
+            + build_tool.currently_using + ". " + format_install_instructions(build_tool))
 
     return version_alignment
 
@@ -280,7 +284,7 @@ def check_git(build_tool):
     try:
         p = subprocess.Popen(['git', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     if sys.version_info[0] < 3:
@@ -318,7 +322,7 @@ def check_xcode(build_tool):
         p = subprocess.Popen(['xcodebuild', '-version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
         print_error_message("Error running xcodebuild -version. Do you have Xcode installed? "
-                            + build_tool.install_notes)
+                            + format_install_instructions(build_tool))
         return False
 
     warning_message_one = "Xcode appears to be in the Applications folder, but Xcode does not know which build " \
@@ -366,7 +370,7 @@ def check_emscripten(build_tool):
         else:
             p = subprocess.Popen(['emcc', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     # emcc -v returns an err in the reverse typical order...
@@ -376,7 +380,7 @@ def check_emscripten(build_tool):
         else:
             running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
         if not running_version:
-            print_error_message(build_tool.name + " not found." + build_tool.install_notes)
+            print_error_message(build_tool.name + " not found." + format_install_instructions(build_tool))
             return False
     else:
         err, running_version = p.communicate()
@@ -396,7 +400,7 @@ def check_cmake(build_tool):
     try:
         p = subprocess.Popen(['cmake', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     if sys.version_info[0] < 3:
@@ -419,7 +423,7 @@ def check_mdk(build_tool):
     # check to see if the Mono.framework exists at all...
     running_mono_framework_version_file_path = '/Library/Frameworks/Mono.framework/Versions/Current/VERSION'
     if not os.path.exists(running_mono_framework_version_file_path):
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     # read in the contents of /Library/Frameworks/Mono.framework/Versions/Current/VERSION
@@ -441,7 +445,7 @@ def check_xamios(build_tool):
                                                                     'Xamarin.iOS.Framework', "Versions",
                                                                     "Current", "Version")
     if not os.path.exists(running_xamios_framework_version_file_path):
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     # read in the contents of /Library/Frameworks/Xamarin.iOS.framework/Versions/Current/VERSION
@@ -475,7 +479,7 @@ def check_ndk(build_tool):
         ndk_root_path = os.path.join(home, "Library", "Developer", "Xamarin", "android-ndk")
 
     if not os.path.exists(ndk_root_path):
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
  
     # we are going to search the root folder for valid ndk versions, so we need to set up
@@ -508,7 +512,7 @@ def check_ndk(build_tool):
                     src_props_file.close()
 
     if not versions_found:
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False       
 
     # check to see if we have the current NDK version in the list
@@ -544,7 +548,7 @@ def check_xamandroid(build_tool):
                                                                     'Xamarin.Android.Framework', "Versions",
                                                                     "Current", "Version")
     if not os.path.exists(running_xamandroid_framework_version_file_path):
-        print_error_message(build_tool.name + " not found. " + build_tool.install_notes)
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
 
     # read in the contents of /Library/Frameworks/Xamarin.Android.framework/Versions/Current/VERSION
