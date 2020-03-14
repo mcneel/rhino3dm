@@ -160,7 +160,8 @@ BND_TUPLE BND_ONXModel::GetEmbeddedFilePaths()
   for (int i = 0; i < userdata_table.Count(); i++)
   {
     ONX_Model_UserData* ud = userdata_table[i];
-    if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr, false))
+    if (ud && m_model->GetRDKEmbeddedFilePaths(*ud, paths))
+    //if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr, false))
       break;
   }
   int count = paths.Count();
