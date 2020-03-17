@@ -21,12 +21,11 @@ import shutil
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "ios", "macos"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS'}
+valid_platform_args = ["js", "ios", "macos", "android"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
-
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -69,6 +68,7 @@ def print_ok_message(ok_message):
 
 
 def run_command(command, suppress_errors=False):
+    verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
         dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
@@ -301,6 +301,54 @@ def setup_js():
         print_ok_message("make files have been written to: " + platform_target_path)
     else:
         print_error_message("failed to configure and generate CMakeFiles for JavaScript build")
+
+    os.chdir(script_folder)
+
+
+def setup_android():
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
+
+    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+    if os.path.exists(item_to_check):
+        if not overwrite:
+            print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            shutil.rmtree(platform_target_path)
+
+    if not os.path.exists(platform_target_path):
+        os.mkdir(platform_target_path)
+
+    os.chdir(platform_target_path)
+
+     # methogen
+    build_methodgen()
+    run_methodgen()
+
+    #https://developer.android.com/ndk/guides/cmake.html
+    #The Android toolchain file is in: <NDK>/build/cmake/android.toolchain.cmake
+    # TODO: Setup needs to call the bootstrap script to get the NDK path
+    # generate the project files    
+    print("")
+    if xcode_logging:
+        print("Generating Makefiles files for Android...")
+    else:
+        print(bcolors.BOLD + "Generating Makefiles files for Android..." + bcolors.ENDC)
+    
+
+    #TODO: CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
+    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
+    
+    command = "cmake -DCMAKE_TOOLCHAIN_FILE=/Users/dan/Library/Developer/Xamarin/android-ndk/android-ndk-r21/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../src/librhino3dmio_native"
+    run_command(command)
+
+    #TODO: It's still producing a .a file, when I believe these need to be static-object (so) files
+
+    # Check to see if the CMakeFiles were written...
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully wrote: " + item_to_check)
+    else:
+        print_error_message("failed to configure and generate " + target_file_name + " for iOS build")
 
     os.chdir(script_folder)
 
