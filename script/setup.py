@@ -15,6 +15,7 @@ from sys import platform as _platform
 from subprocess import Popen, PIPE
 import shlex
 import shutil
+import imp
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -26,6 +27,10 @@ platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'andr
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
+path_to_this_file = os.path.realpath(__file__)
+path_to_scripts_folder = os.path.dirname(path_to_this_file)
+
+bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -306,8 +311,18 @@ def setup_js():
 
 
 def setup_android():
+    # https://developer.android.com/ndk/guides/cmake.html
+    # The Android toolchain file is in: <NDK>/build/cmake/android.toolchain.cmake
+    # We need to call the bootstrap script to figure out which ndk is currently in use, in order
+    # to set the ndk path
+    build_tools = bootstrap.read_required_versions()
+    android_ndk_path = bootstrap.check_ndk(build_tools["ndk"])
+    android_toolchain_path = os.path.join(android_ndk_path, "build", "cmake", "android.toolchain.cmake")
+    
+    # setup the build folders and clean previous builds if necessary...
+    # TODO: CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
+    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
     platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
-
     item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
     if os.path.exists(item_to_check):
         if not overwrite:
@@ -321,25 +336,17 @@ def setup_android():
 
     os.chdir(platform_target_path)
 
-     # methogen
+    # methogen
     build_methodgen()
     run_methodgen()
 
-    #https://developer.android.com/ndk/guides/cmake.html
-    #The Android toolchain file is in: <NDK>/build/cmake/android.toolchain.cmake
-    # TODO: Setup needs to call the bootstrap script to get the NDK path
-    # generate the project files    
     print("")
     if xcode_logging:
         print("Generating Makefiles files for Android...")
     else:
         print(bcolors.BOLD + "Generating Makefiles files for Android..." + bcolors.ENDC)
     
-
-    #TODO: CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
-    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
-    
-    command = "cmake -DCMAKE_TOOLCHAIN_FILE=/Users/dan/Library/Developer/Xamarin/android-ndk/android-ndk-r21/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../src/librhino3dmio_native"
+    command = "cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../src/librhino3dmio_native"
     run_command(command)
 
     #TODO: It's still producing a .a file, when I believe these need to be static-object (so) files
