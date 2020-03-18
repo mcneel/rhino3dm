@@ -15,7 +15,11 @@ from sys import platform as _platform
 from subprocess import Popen, PIPE
 import shlex
 import shutil
-import imp
+if sys.version_info[0] < 3:
+    import imp
+else:
+    from importlib.machinery import SourceFileLoader
+import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -30,7 +34,10 @@ build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 path_to_this_file = os.path.realpath(__file__)
 path_to_scripts_folder = os.path.dirname(path_to_this_file)
 
-bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
+if sys.version_info[0] < 3:
+    bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
+else:
+    bootstrap = SourceFileLoader('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py")).load_module()
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -188,7 +195,8 @@ def setup_macos():
     item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
     if os.path.exists(item_to_check):
         if not overwrite:
-            print_warning_message("A configuration already appears in " + item_to_check + ". Use --overwrite to replace.")
+            print_warning_message("A configuration already appears in " + item_to_check + 
+                                  ". Use --overwrite to replace.")
             return False
         if overwrite:
             shutil.rmtree(platform_target_path)
@@ -229,7 +237,8 @@ def setup_ios():
     item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
     if os.path.exists(item_to_check):
         if not overwrite:
-            print_warning_message("A configuration already appears in " + item_to_check + ". Use --overwrite to replace.")
+            print_warning_message("A configuration already appears in " + item_to_check + 
+                                  ". Use --overwrite to replace.")
             return False
         if overwrite:
             shutil.rmtree(platform_target_path)
@@ -249,7 +258,8 @@ def setup_ios():
         print("Generating xcodeproj files for iOS...")
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
-    command = "cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native"
+    command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
+               "-DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native")
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -318,44 +328,64 @@ def setup_android():
     build_tools = bootstrap.read_required_versions()
     android_ndk_path = bootstrap.check_ndk(build_tools["ndk"])
     android_toolchain_path = os.path.join(android_ndk_path, "build", "cmake", "android.toolchain.cmake")
-    
-    # setup the build folders and clean previous builds if necessary...
-    # TODO: CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
-    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
+
+    # construct the android build folder if we don't already have it.  since we'll be generating CMake projects to 
+    # subfolders for each app_abi, this is different the other platforms we support...
     platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+    item_to_check = os.path.abspath(platform_target_path)
     if os.path.exists(item_to_check):
         if not overwrite:
-            print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
+            print_warning_message("Build folders are already in " + item_to_check + ". Use --overwrite to replace.")
             return False
         if overwrite:
             shutil.rmtree(platform_target_path)
 
     if not os.path.exists(platform_target_path):
         os.mkdir(platform_target_path)
-
-    os.chdir(platform_target_path)
+        time.sleep(1) # there can be a race-condition creating and deleting the folders
 
     # methogen
     build_methodgen()
     run_methodgen()
 
-    print("")
-    if xcode_logging:
-        print("Generating Makefiles files for Android...")
-    else:
-        print(bcolors.BOLD + "Generating Makefiles files for Android..." + bcolors.ENDC)
+    # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
+    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
+    app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
+    for app_abi in app_abis:
+        # setup the build folders and clean previous builds if necessary...
+        platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi)
+        item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+        if os.path.exists(item_to_check):
+            if not overwrite:
+                print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
+                return False
+            if overwrite:
+                shutil.rmtree(platform_target_path)
+                time.sleep(2) # there can be a race-condition creating and deleting the folders
+
+        if not os.path.exists(platform_target_path):
+            os.mkdir(platform_target_path)
+            time.sleep(2) # there can be a race-condition creating and deleting the folders
+
+        os.chdir(platform_target_path)
+        
+        time.sleep(1) # there can be a race-condition creating and deleting the folders
+
+        print("")
+        if xcode_logging:
+            print("Generating Makefiles files for Android (" + app_abi + ")...")
+        else:
+            print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
     
-    command = "cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../src/librhino3dmio_native"
-    run_command(command)
+        command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../../src/librhino3dmio_native")
+        run_command(command)
 
-    #TODO: It's still producing a .a file, when I believe these need to be static-object (so) files
-
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + target_file_name + " for iOS build")
+        # Check to see if the CMakeFiles were written...
+        if os.path.exists(item_to_check):
+            print_ok_message("successfully wrote: " + item_to_check)
+        else:
+            print_error_message("failed to configure and generate " + item_to_check + " for Android (" + app_abi + ")")
 
     os.chdir(script_folder)
 
@@ -371,6 +401,15 @@ def setup_handler(platform_target):
     else:
         print_platform_preamble(platform_full_names.get(platform_target))
         getattr(sys.modules[__name__], 'setup_' + platform_target)()
+
+
+def delete_cache_file():
+    # delete the bootstrapc cache file
+    global path_to_this_file
+    global path_to_scripts_folder
+    path_to_bootstrapc_file = os.path.join(path_to_scripts_folder, "bootstrap.pyc")
+    if os.path.exists(path_to_bootstrapc_file):
+        os.remove(path_to_bootstrapc_file)
 
 
 # --------------------------------------------------- Main -------------------------------------------------------------
@@ -421,6 +460,8 @@ def main():
                                     + ", ".join(valid_platform_args) + ".")
                 sys.exit(1)
             setup_handler(platform_target)
+
+    delete_cache_file()
 
 
 if __name__ == "__main__":
