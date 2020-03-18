@@ -16,6 +16,7 @@ from subprocess import Popen, PIPE
 import shlex
 import shutil
 import imp
+import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -251,8 +252,8 @@ def setup_ios():
         print("Generating xcodeproj files for iOS...")
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
-    command = "cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED \
-               -DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native"
+    command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
+               "-DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native")
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -358,6 +359,8 @@ def setup_android():
             os.mkdir(platform_target_path)
 
         os.chdir(platform_target_path)
+        
+        time.sleep(1) # there can be a race-condition creating and deleting the folders
 
         print("")
         if xcode_logging:
@@ -365,8 +368,8 @@ def setup_android():
         else:
             print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
     
-        command = "cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + \
-                  " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../../src/librhino3dmio_native"
+        command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../../src/librhino3dmio_native")
         run_command(command)
 
         # Check to see if the CMakeFiles were written...
@@ -450,6 +453,7 @@ def main():
             setup_handler(platform_target)
 
     delete_cache_file()
+
 
 if __name__ == "__main__":
     main()
