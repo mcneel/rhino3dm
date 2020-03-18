@@ -15,7 +15,10 @@ from sys import platform as _platform
 from subprocess import Popen, PIPE
 import shlex
 import shutil
-import imp
+if sys.version_info[0] < 3:
+    import imp
+else:
+    from importlib.machinery import SourceFileLoader
 import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
@@ -31,7 +34,10 @@ build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 path_to_this_file = os.path.realpath(__file__)
 path_to_scripts_folder = os.path.dirname(path_to_this_file)
 
-bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
+if sys.version_info[0] < 3:
+    bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
+else:
+    bootstrap = SourceFileLoader('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py")).load_module()
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -336,6 +342,7 @@ def setup_android():
 
     if not os.path.exists(platform_target_path):
         os.mkdir(platform_target_path)
+        time.sleep(1) # there can be a race-condition creating and deleting the folders
 
     # methogen
     build_methodgen()
@@ -354,9 +361,11 @@ def setup_android():
                 return False
             if overwrite:
                 shutil.rmtree(platform_target_path)
+                time.sleep(2) # there can be a race-condition creating and deleting the folders
 
         if not os.path.exists(platform_target_path):
             os.mkdir(platform_target_path)
+            time.sleep(2) # there can be a race-condition creating and deleting the folders
 
         os.chdir(platform_target_path)
         
