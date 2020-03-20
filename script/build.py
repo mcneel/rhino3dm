@@ -27,8 +27,8 @@ from subprocess import Popen, PIPE
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "macos", "ios"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS'}
+valid_platform_args = ["js", "macos", "ios", "android"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
@@ -189,7 +189,7 @@ def build_ios():
         print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
         return False
 
-    print(" Compiling x86_64 (Simulator)...")
+    print(" Building x86_64 (Simulator)...")
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
              ' -sdk iphonesimulator -arch x86_64 -configuration Release clean build'
     run_command(command)
@@ -201,7 +201,7 @@ def build_ios():
         print_error_message("Failed")
         sys.exit(1)
 
-    print(" Compiling arm64 version...")
+    print(" Building arm64 version...")
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
               ' -sdk iphoneos -arch arm64 -configuration Release clean build'
     run_command(command)
@@ -213,7 +213,7 @@ def build_ios():
         print_error_message("Failed")
         sys.exit(1)
 
-    print(" Creating Universal Binary...")
+    print(" Building Universal Binary...")
     command = 'lipo -create -output ' + os.path.join(platform_target_path, "Release", native_lib_filename) + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-x86_64.a") + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-arm64.a")
     run_command(command)    
 
@@ -232,6 +232,41 @@ def build_ios():
         print_error_message("failed to build all rhino3dm build artifacts.")
         return False
 
+
+def build_android():
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
+    native_lib_name = 'librhino3dmio_native'
+    ext = 'a' # TODO: We probably need this to be a static object (.so) file instead.
+    native_lib_filename = native_lib_name + '.' + ext
+
+    # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
+    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
+    #app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
+    app_abis = ['armeabi-v7a']
+    for app_abi in app_abis:
+        platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi)         
+        item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
+        if not os.path.exists(item_to_check):
+            print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+            continue
+        
+        # check for a previous build
+        previous_build = os.path.abspath(os.path.join(platform_target_path, native_lib_filename))
+        if os.path.exists(previous_build):
+            if not overwrite:
+                print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
+                continue
+            if overwrite:
+                os.remove(previous_build)
+                
+        print(" Building Android (" + app_abi + ")...")
+        os.chdir(platform_target_path)
+        run_command("make", True)
+        
+    # TODO: Lipo all the different abi targets into a single .so file
+
+    os.chdir(script_folder)
+    
 
 def build_js():
     platform_target_path = os.path.join(build_folder, platform_full_names.get("js").lower())
