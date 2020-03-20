@@ -236,13 +236,13 @@ def build_ios():
 def build_android():
     platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
     native_lib_name = 'librhino3dmio_native'
-    ext = 'a' # TODO: We probably need this to be a static object (.so) file instead.
+    ext = 'so'
     native_lib_filename = native_lib_name + '.' + ext
 
     # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
     # It is recommended to use different build directories for each ABI to avoid collisions between builds.
-    #app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
-    app_abis = ['armeabi-v7a']
+    app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
+    
     for app_abi in app_abis:
         platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi)         
         item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
@@ -262,8 +262,6 @@ def build_android():
         print(" Building Android (" + app_abi + ")...")
         os.chdir(platform_target_path)
         run_command("make", True)
-        
-    # TODO: Lipo all the different abi targets into a single .so file
 
     os.chdir(script_folder)
     
