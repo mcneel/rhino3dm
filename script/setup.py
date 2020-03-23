@@ -378,7 +378,7 @@ def setup_android():
             print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
     
         command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
-                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_static ../../../src/librhino3dmio_native")
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared ../../../src/librhino3dmio_native")
         run_command(command)
 
         # Check to see if the CMakeFiles were written...
