@@ -263,7 +263,13 @@ def build_android():
         os.chdir(platform_target_path)
         run_command("make", True)
 
-    os.chdir(script_folder)
+        # Check to see if the build succeeded
+        path_to_item = os.path.abspath(os.path.join(platform_target_path, native_lib_filename))
+        if os.path.exists(path_to_item):
+            print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
+        else:
+            print_error_message("failed to create " + path_to_item)
+            return False
     
 
 def build_js():
