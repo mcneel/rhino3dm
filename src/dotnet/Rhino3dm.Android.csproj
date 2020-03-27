@@ -6,14 +6,13 @@
     <ProjectGuid>{35C20F5E-15AD-4DE2-91E1-63C1437CF6C1}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>Rhino3dmIO.Android</RootNamespace>
-    <AssemblyName>Rhino3dmIO.Android</AssemblyName>
+    <RootNamespace>Rhino3dm.Android</RootNamespace>
+    <AssemblyName>Rhino3dm.Android</AssemblyName>
     <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,22 +29,22 @@
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c android -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p android -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p android -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/setup.py -p android -x -v</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.so (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p android -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p android -x -v -o</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
@@ -67,21 +66,23 @@
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c android -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p android -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p android -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/setup.py -p android -x -v</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.so (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p android -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p android -x -v -o</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
     </CustomCommands>
