@@ -239,6 +239,15 @@ def build_android():
     ext = 'so'
     native_lib_filename = native_lib_name + '.' + ext
 
+    # check to see if a libs folder exists
+    libs_folder_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("android").lower(), "libs"))
+    if os.path.exists(libs_folder_path):
+        if not overwrite:
+            print_warning_message("build already appears in " + libs_folder_path + ". Use --overwrite to replace.")
+            return False
+        else:
+            shutil.rmtree(libs_folder_path)
+            
     # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
     # It is recommended to use different build directories for each ABI to avoid collisions between builds.
     app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
@@ -270,7 +279,18 @@ def build_android():
         else:
             print_error_message("failed to create " + path_to_item)
             return False
-    
+
+    # package it all up the way that Android likes it - in a libs folder - for easier reference into the .csproj
+    if not os.path.exists(libs_folder_path):
+        os.mkdir(libs_folder_path)
+        
+    for app_abi in app_abis:
+        libs_abi_path = os.path.abspath(os.path.join(libs_folder_path, app_abi))
+        os.mkdir(os.path.join(libs_folder_path, app_abi))
+        source = os.path.abspath(os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi, native_lib_filename))
+        destination = os.path.abspath(os.path.join(libs_abi_path, native_lib_filename))
+        shutil.move(source, destination)        
+
 
 def build_js():
     platform_target_path = os.path.join(build_folder, platform_full_names.get("js").lower())
