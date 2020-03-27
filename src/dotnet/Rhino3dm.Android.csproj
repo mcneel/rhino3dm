@@ -801,16 +801,16 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="..\..\..\..\src4\bin\rhino3dmio\build\Release-android\libs\arm64-v8a\librhino3dmio_native.so">
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\arm64-v8a\librhino3dmio_native.so">
       <Link>libs\arm64-v8a\librhino3dmio_native.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\..\..\src4\bin\rhino3dmio\build\Release-android\libs\armeabi-v7a\librhino3dmio_native.so">
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\armeabi-v7a\librhino3dmio_native.so">
       <Link>libs\armeabi-v7a\librhino3dmio_native.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\..\..\src4\bin\rhino3dmio\build\Release-android\libs\x86_64\librhino3dmio_native.so">
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\x86_64\librhino3dmio_native.so">
       <Link>libs\x86_64\librhino3dmio_native.so</Link>
     </EmbeddedNativeLibrary>
-	<EmbeddedNativeLibrary Include="..\..\..\..\src4\bin\rhino3dmio\build\Release-android\libs\x86\librhino3dmio_native.so">
+	<EmbeddedNativeLibrary Include="..\..\build\android\libs\x86\librhino3dmio_native.so">
       <Link>libs\x86\librhino3dmio_native.so</Link>
     </EmbeddedNativeLibrary>
   </ItemGroup>
