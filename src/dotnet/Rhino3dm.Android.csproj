@@ -35,8 +35,8 @@
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Setup</name>
-          <command>python ${ProjectDir}/../../script/setup.py -p android -x -v</command>
+          <name>Setup for native build (overwrite)</name>
+          <command>python ${ProjectDir}/../../script/setup.py -p android -x -v -o</command>
           <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
