@@ -172,7 +172,7 @@ def run_methodgen():
     if os.path.exists(item_to_check):
         os.remove(item_to_check)
 
-    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace
+    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dmio"
     run_command(command)
 
     # Check to see if methodgen succeeded
