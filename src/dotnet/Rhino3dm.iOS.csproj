@@ -25,21 +25,23 @@
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c ios -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p ios -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p ios -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <name>Setup for native build (overwrite)</name>
+          <command>python ${ProjectDir}/../../script/setup.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.a (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p ios -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
     </CustomCommands>
@@ -57,21 +59,23 @@
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c ios -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p ios -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p ios -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <name>Setup for native build (overwrite)</name>
+          <command>python ${ProjectDir}/../../script/setup.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.a (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p ios -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
     </CustomCommands>
@@ -328,7 +332,7 @@
     <ObjcBindingCoreSource Include="Structs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\bin\rhino3dmio\build\Release-ios\librhino3dmio_native.a">
+    <NativeReference Include="..\..\build\ios\Release\librhino3dmio_native.a">
       <Kind>Static</Kind>
       <SmartLink>False</SmartLink>
       <ForceLoad>True</ForceLoad>
