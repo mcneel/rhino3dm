@@ -6,8 +6,8 @@
     <ProjectGuid>{1E82F7EA-863D-4AE0-AD80-74E660CF71FF}</ProjectGuid>
     <ProjectTypeGuids>{8FFB629D-F513-41CE-95D2-7ECE97B6EEEC};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>Rhino3dmIO.iOS</RootNamespace>
-    <AssemblyName>Rhino3dmIO.iOS</AssemblyName>
+    <RootNamespace>Rhino3dm.iOS</RootNamespace>
+    <AssemblyName>Rhino3dm.iOS</AssemblyName>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -19,27 +19,29 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>0219;0414</NoWarn>
+    <NoWarn>0219;0414;0649</NoWarn>
     <CustomCommands>
       <CustomCommands>
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c ios -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p ios -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p ios -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <name>Setup for native build (overwrite)</name>
+          <command>python ${ProjectDir}/../../script/setup.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.a (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p ios -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
     </CustomCommands>
@@ -51,27 +53,29 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>0219;0414</NoWarn>
+    <NoWarn>0219;0414;0649</NoWarn>
     <CustomCommands>
       <CustomCommands>
         <Command>
           <type>Custom</type>
           <name>Bootstrap</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/bootstrap -c ios -x</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/bootstrap.py -p ios -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Setup</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/setup -p ios -x -v</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <name>Setup for native build (overwrite)</name>
+          <command>python ${ProjectDir}/../../script/setup.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
         </Command>
         <Command>
           <type>Custom</type>
           <name>Build librhino3dmio_native.a (overwrite)</name>
-          <command>python ${ProjectDir}/Rhino3dmIO/script/cibuild -p ios -x -v -o</command>
-          <workingdir>${ProjectDir}/Rhino3dmIO/script/</workingdir>
+          <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
+          <workingdir>${ProjectDir}/../../script/</workingdir>
+          <externalConsole>True</externalConsole>
         </Command>
       </CustomCommands>
     </CustomCommands>
@@ -81,6 +85,7 @@
     <Reference Include="Xamarin.iOS" />
     <Reference Include="OpenTK-1.0" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing.Common" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoNativeEnums.cs" />
@@ -132,6 +137,7 @@
     <Compile Include="opennurbs\opennurbs_geometry.cs" />
     <Compile Include="opennurbs\opennurbs_group.cs" />
     <Compile Include="opennurbs\opennurbs_hatch.cs" />
+    <Compile Include="opennurbs\opennurbs_hiddenlinedrawing.cs" />
     <Compile Include="opennurbs\opennurbs_iepsiloncomparable.cs" />
     <Compile Include="opennurbs\opennurbs_instance.cs" />
     <Compile Include="opennurbs\opennurbs_intersect.cs" />
@@ -168,6 +174,7 @@
     <Compile Include="opennurbs\opennurbs_pluginlist.cs" />
     <Compile Include="opennurbs\opennurbs_plus.cs" />
     <Compile Include="opennurbs\opennurbs_plus_registry.cs" />
+    <Compile Include="opennurbs\opennurbs_plus_sil.cs" />
     <Compile Include="opennurbs\opennurbs_point.cs" />
     <Compile Include="opennurbs\opennurbs_pointcloud.cs" />
     <Compile Include="opennurbs\opennurbs_pointgeometry.cs" />
@@ -205,32 +212,12 @@
     <Compile Include="opennurbs\opennurbs_xform.cs" />
     <Compile Include="opennurbs\opennurbs_zlib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RDK\groundplane.cs" />
     <Compile Include="RDK\rdk_color.cs" />
-    <Compile Include="RDK\rdk_content.cs" />
-    <Compile Include="RDK\rdk_contentfield.cs" />
-    <Compile Include="RDK\rdk_content_factories.cs" />
-    <Compile Include="RDK\rdk_content_list.cs" />
-    <Compile Include="RDK\rdk_custom_render_meshes.cs" />
-    <Compile Include="RDK\rdk_decals.cs" />
-    <Compile Include="RDK\rdk_environment.cs" />
-    <Compile Include="RDK\rdk_globals.cs" />
-    <Compile Include="RDK\rdk_material.cs" />
-    <Compile Include="RDK\rdk_plugin.cs" />
-    <Compile Include="RDK\rdk_preview_scene.cs" />
-    <Compile Include="RDK\rdk_rendermesh_iterator.cs" />
-    <Compile Include="RDK\rdk_render_plugin_info.cs" />
-    <Compile Include="RDK\rdk_render_window.cs" />
-    <Compile Include="RDK\rdk_sdkrender.cs" />
-    <Compile Include="RDK\rdk_simulated_environment.cs" />
-    <Compile Include="RDK\rdk_texture.cs" />
-    <Compile Include="RDK\rdk_undo.cs" />
-    <Compile Include="RDK\rdk_variant.cs" />
-    <Compile Include="RDK\simulatedtexture.cs" />
-    <Compile Include="RDK\sun.cs" />
     <Compile Include="resolver.cs" />
     <Compile Include="rhino\Interpolator.cs" />
+    <Compile Include="rhino\persistentsettingshooks.cs" />
     <Compile Include="rhino\RhinoColors.cs" />
+    <Compile Include="rhino\rhinofilewatcher.cs" />
     <Compile Include="rhino\rhinosdkanalysismodes.cs" />
     <Compile Include="rhino\rhinosdkannotationobject.cs" />
     <Compile Include="rhino\rhinosdkapp.cs" />
@@ -253,6 +240,7 @@
     <Compile Include="rhino\rhinosdkdib.cs" />
     <Compile Include="rhino\rhinosdkdigitizerinfo.cs" />
     <Compile Include="rhino\rhinosdkdigitizermanager.cs" />
+    <Compile Include="rhino\rhinosdkdimension.cs" />
     <Compile Include="rhino\rhinosdkdimstyle.cs" />
     <Compile Include="rhino\rhinosdkdimstylecombobox.cs" />
     <Compile Include="rhino\rhinosdkdirectorymanager.cs" />
@@ -275,10 +263,16 @@
     <Compile Include="rhino\rhinosdkfileutilities.cs" />
     <Compile Include="rhino\rhinosdkfont.cs" />
     <Compile Include="rhino\rhinosdkget.cs" />
+    <Compile Include="rhino\rhinosdkgetarc.cs" />
+    <Compile Include="rhino\rhinosdkgetcircle.cs" />
+    <Compile Include="rhino\rhinosdkgetcone.cs" />
+    <Compile Include="rhino\rhinosdkgetcylinder.cs" />
     <Compile Include="rhino\rhinosdkgetfiledialog.cs" />
+    <Compile Include="rhino\rhinosdkgetline.cs" />
     <Compile Include="rhino\rhinosdkgetobject.cs" />
     <Compile Include="rhino\rhinosdkgetplane.cs" />
     <Compile Include="rhino\rhinosdkgetpoint.cs" />
+    <Compile Include="rhino\rhinosdkgetpolyline.cs" />
     <Compile Include="rhino\rhinosdkgetstring.cs" />
     <Compile Include="rhino\rhinosdkgetxform.cs" />
     <Compile Include="rhino\rhinosdkgrips.cs" />
@@ -290,10 +284,13 @@
     <Compile Include="rhino\rhinosdkhistoryrecordtable.cs" />
     <Compile Include="rhino\rhinosdkinstance.cs" />
     <Compile Include="rhino\rhinosdklayer.cs" />
+    <Compile Include="rhino\rhinosdkleader.cs" />
+    <Compile Include="rhino\rhinosdkleaderstyle.cs" />
     <Compile Include="rhino\rhinosdklight.cs" />
     <Compile Include="rhino\rhinosdklinetype.cs" />
     <Compile Include="rhino\rhinosdkloft.cs" />
     <Compile Include="rhino\rhinosdkmaterial.cs" />
+    <Compile Include="rhino\rhinosdkmeshextruder.cs" />
     <Compile Include="rhino\rhinosdkmeshobject.cs" />
     <Compile Include="rhino\rhinosdkmouse.cs" />
     <Compile Include="rhino\rhinosdkobject.cs" />
@@ -302,21 +299,27 @@
     <Compile Include="rhino\rhinosdkobjectpropertiesdialogpage.cs" />
     <Compile Include="rhino\rhinosdkoptionsdialogpage.cs" />
     <Compile Include="rhino\rhinosdkpagelayoutview.cs" />
+    <Compile Include="rhino\rhinosdkpages.cs" />
+    <Compile Include="rhino\rhinosdkpanels.cs" />
     <Compile Include="rhino\rhinosdkpick.cs" />
     <Compile Include="rhino\rhinosdkplugin.cs" />
     <Compile Include="rhino\rhinosdkpointobject.cs" />
     <Compile Include="rhino\rhinosdkpolyedge.cs" />
     <Compile Include="rhino\rhinosdkprintinfo.cs" />
+    <Compile Include="rhino\rhinosdksnapshotsclient.cs" />
     <Compile Include="rhino\rhinosdkstackeddialogpage.cs" />
+    <Compile Include="rhino\rhinosdksubdobject.cs" />
     <Compile Include="rhino\rhinosdksweep.cs" />
+    <Compile Include="rhino\rhinosdktext.cs" />
     <Compile Include="rhino\rhinosdkuifile.cs" />
     <Compile Include="rhino\rhinosdkuiprofilecontext.cs" />
     <Compile Include="rhino\rhinosdkunrollsrf.cs" />
     <Compile Include="rhino\rhinosdkview.cs" />
     <Compile Include="rhino\rhinosdkviewport.cs" />
+    <Compile Include="rhino\rhinosdkworksession.cs" />
+    <Compile Include="RhinoMobile\ColorExtensions.cs" />            
     <Compile Include="UI\Localization.cs" />
     <Compile Include="UnsafeNativeMethods.cs" />
-    <Compile Include="RhinoMobile\ColorExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RDN_StrongName.snk" />
@@ -328,7 +331,7 @@
     <ObjcBindingCoreSource Include="Structs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\bin\rhino3dmio\build\Release-ios\librhino3dmio_native.a">
+    <NativeReference Include="..\..\build\ios\Release\librhino3dmio_native.a">
       <Kind>Static</Kind>
       <SmartLink>False</SmartLink>
       <ForceLoad>True</ForceLoad>
