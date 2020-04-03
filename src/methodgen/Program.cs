@@ -41,6 +41,11 @@ namespace MethodGen
         dir_cs = args[1];
         if (args.Length > 2)
           opennurbsPathReplacement = args[2];
+        if (args.Length > 3)
+        {
+          if (string.Equals(args[3], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
+            rhino3dmio_build = true;
+        }
       }
       else
       {
