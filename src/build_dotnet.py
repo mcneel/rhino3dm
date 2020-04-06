@@ -17,7 +17,7 @@ def system(cmd):
 
 def methodgen(dotnetcore):
     # set up args to pass to methodgen application
-    dir_cpp = os.getcwd() + '/librhino3dmio_native'
+    dir_cpp = os.getcwd() + '/librhino3dm_native'
     dir_cs = os.getcwd() + '/dotnet'
     path_replace = '../lib/opennurbs'
     args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
@@ -68,7 +68,7 @@ def create_cpp_project(bitness, compile):
         if bitness == 64:
             arch = " Win64"
         args = '-G "Visual Studio 15 2017{0}"'.format(arch)
-        system('cmake ' + args + ' ../../librhino3dmio_native')
+        system('cmake ' + args + ' ../../librhino3dm_native')
         if bitness == 64:
             for line in fileinput.input("librhino3dmio_native.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
@@ -77,7 +77,7 @@ def create_cpp_project(bitness, compile):
         if compile:
             system("cmake --build . --config Release --target librhino3dmio_native")
     else:
-        system("cmake ../../librhino3dmio_native")
+        system("cmake ../../librhino3dm_native")
         if compile:
             system("make")
 

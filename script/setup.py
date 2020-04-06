@@ -163,7 +163,7 @@ def run_methodgen():
     if _platform == "darwin":
         command = command + 'mono '
 
-    path_to_cpp = os.path.abspath(os.path.join(src_folder, 'librhino3dmio_native'))
+    path_to_cpp = os.path.abspath(os.path.join(src_folder, 'librhino3dm_native'))
     path_to_cs = os.path.abspath(os.path.join(src_folder, 'dotnet'))
     path_to_replace = '../lib/opennurbs'
     item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
@@ -217,7 +217,7 @@ def setup_macos():
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
-    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 ../../src/librhino3dmio_native"
+    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 ../../src/librhino3dm_native"
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -259,7 +259,7 @@ def setup_ios():
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
     command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
-               "-DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dmio_native")
+               "-DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dm_native")
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -378,7 +378,7 @@ def setup_android():
             print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
     
         command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
-                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared ../../../src/librhino3dmio_native")
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared ../../../src/librhino3dm_native")
         run_command(command)
 
         # Check to see if the CMakeFiles were written...
