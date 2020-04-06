@@ -62,7 +62,7 @@ using System.Runtime.InteropServices;
 // March 2013 Rhino V6 version = 6.0.0.1
 // 29 Aug 2017 - switch to automated assembly versioning
 
-#if RHINO3DMIO_BUILD
+#if RHINO3DM_BUILD
 #if !DOTNETCORE
 [assembly: AssemblyVersion("7.0.0.1")]
 #endif
@@ -74,7 +74,7 @@ using System.Runtime.InteropServices;
 // replace RhinoCommon.dll.
 // [assembly: AssemblyFileVersion("6.0.0.1")]
 
-#if MONO_BUILD && RHINO3DMIO_BUILD
+#if MONO_BUILD && RHINO3DM_BUILD
 //Mobile platform build has non-compliant classes
 [assembly: System.CLSCompliant(false)]
 #else

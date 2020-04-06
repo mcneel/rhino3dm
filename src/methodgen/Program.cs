@@ -23,15 +23,15 @@ namespace MethodGen
 
     static int Main(string[] args)
     {
-      bool rhino3dmio_build = false;
+      bool rhino3dm_build = false;
       bool rhinocommon_build = false;
       string dir_cpp;
       string dir_cs;
       string opennurbsPathReplacement = "";
 
-      if (1 == args.Length && string.Equals(args[0], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
+      if (1 == args.Length && string.Equals(args[0], "rhino3dm", StringComparison.InvariantCultureIgnoreCase))
       {
-        rhino3dmio_build = true;
+        rhino3dm_build = true;
         // find directories for rhcommon_c and RhinoCommon
         GetProjectDirectories(out dir_cpp, out dir_cs, false);
       }
@@ -43,8 +43,8 @@ namespace MethodGen
           opennurbsPathReplacement = args[2];
         if (args.Length > 3)
         {
-          if (string.Equals(args[3], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
-            rhino3dmio_build = true;
+          if (string.Equals(args[3], "rhino3dm", StringComparison.InvariantCultureIgnoreCase))
+            rhino3dm_build = true;
         }
       }
       else
@@ -102,14 +102,14 @@ namespace MethodGen
       string[] files = System.IO.Directory.GetFiles(dir_cpp, "*.cpp");
       foreach (var file in files)
       {
-        if (rhino3dmio_build && (System.IO.Path.GetFileName(file).StartsWith("rh_") || System.IO.Path.GetFileName(file).StartsWith("tl_")))
+        if (rhino3dm_build && (System.IO.Path.GetFileName(file).StartsWith("rh_") || System.IO.Path.GetFileName(file).StartsWith("tl_")))
           continue;
-        nmd.BuildDeclarations(file, rhino3dmio_build, opennurbsPathReplacement);
+        nmd.BuildDeclarations(file, rhino3dm_build, opennurbsPathReplacement);
       }
       // get all of the .h files
       files = System.IO.Directory.GetFiles(dir_cpp, "*.h");
       foreach (var file in files)
-        nmd.BuildDeclarations(file, rhino3dmio_build, opennurbsPathReplacement);
+        nmd.BuildDeclarations(file, rhino3dm_build, opennurbsPathReplacement);
 
       string output_file_methods = System.IO.Path.Combine(dir_cs, "AutoNativeMethods.cs");
       nmd.Write(output_file_methods, "lib");

@@ -32,6 +32,7 @@ platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'andr
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
+native_lib_name = 'librhino3dm_native'
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -124,7 +125,7 @@ def build_macos():
         return False
 
     platform_target_path = os.path.join(build_folder, platform_full_names.get("macos").lower())
-    native_lib_name = 'librhino3dmio_native'
+    global native_lib_name
     ext = 'dylib'
     native_lib_filename = native_lib_name + '.' + ext
     xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
@@ -168,7 +169,7 @@ def build_ios():
         return False
 
     platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
-    native_lib_name = 'librhino3dmio_native'
+    global native_lib_name
     ext = 'a'
     native_lib_filename = native_lib_name + '.' + ext
     xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
@@ -235,7 +236,7 @@ def build_ios():
 
 def build_android():
     platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
-    native_lib_name = 'librhino3dmio_native'
+    global native_lib_name
     ext = 'so'
     native_lib_filename = native_lib_name + '.' + ext
 

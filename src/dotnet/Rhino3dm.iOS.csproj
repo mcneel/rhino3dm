@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;RHINO3DMIO_BUILD;MONO_BUILD;MOBILE_BUILD</DefineConstants>
+    <DefineConstants>DEBUG;RHINO3DM_BUILD;MONO_BUILD;MOBILE_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -38,7 +38,7 @@
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Build librhino3dmio_native.a (overwrite)</name>
+          <name>Build librhino3dm_native.a (overwrite)</name>
           <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
           <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
@@ -49,7 +49,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>RHINO3DMIO_BUILD;MONO_BUILD;MOBILE_BUILD</DefineConstants>
+    <DefineConstants>RHINO3DM_BUILD;MONO_BUILD;MOBILE_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -72,7 +72,7 @@
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Build librhino3dmio_native.a (overwrite)</name>
+          <name>Build librhino3dm_native.a (overwrite)</name>
           <command>python ${ProjectDir}/../../script/build.py -p ios -v -o -x</command>
           <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
@@ -331,7 +331,7 @@
     <ObjcBindingCoreSource Include="Structs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\build\ios\Release\librhino3dmio_native.a">
+    <NativeReference Include="..\..\build\ios\Release\librhino3dm_native.a">
       <Kind>Static</Kind>
       <SmartLink>False</SmartLink>
       <ForceLoad>True</ForceLoad>

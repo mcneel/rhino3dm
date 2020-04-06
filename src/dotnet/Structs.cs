@@ -1,5 +1,5 @@
 ﻿using System;
 
-namespace Rhino3dmIO.iOS
+namespace Rhino3dm.iOS
 {
 }

@@ -17,7 +17,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>$(SolutionDir)$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;RHINO3DMIO_BUILD</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;RHINO3DM_BUILD</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -28,7 +28,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>$(SolutionDir)$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE;RHINO3DMIO_BUILD</DefineConstants>
+    <DefineConstants>TRACE;RHINO3DM_BUILD</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -280,19 +280,19 @@
     <None Include="RDN_StrongName.snk" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup Condition="exists('..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll')">
-    <EmbeddedResource Include="..\build\librhino3dmio_native_32\Release\librhino3dmio_native.dll">
-      <Link>win32_native\librhino3dmio_native.dll</Link>
+  <ItemGroup Condition="exists('..\build\librhino3dm_native_32\Release\librhino3dm_native.dll')">
+    <EmbeddedResource Include="..\build\librhino3dm_native_32\Release\librhino3dm_native.dll">
+      <Link>win32_native\librhino3dm_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="exists('..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll')">
-    <EmbeddedResource Include="..\build\librhino3dmio_native_64\Release\librhino3dmio_native.dll">
-      <Link>win64_native\librhino3dmio_native.dll</Link>
+  <ItemGroup Condition="exists('..\build\librhino3dm_native_64\Release\librhino3dm_native.dll')">
+    <EmbeddedResource Include="..\build\librhino3dm_native_64\Release\librhino3dm_native.dll">
+      <Link>win64_native\librhino3dm_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="exists('..\build\librhino3dmio_native_64\librhino3dmio_native.dylib')">
-    <EmbeddedResource Include="..\build\librhino3dmio_native_64\librhino3dmio_native.dylib">
-      <Link>macos_native\librhino3dmio_native.dylib</Link>
+  <ItemGroup Condition="exists('..\build\librhino3dm_native_64\librhino3dm_native.dylib')">
+    <EmbeddedResource Include="..\build\librhino3dm_native_64\librhino3dm_native.dylib">
+      <Link>macos_native\librhino3dm_native.dylib</Link>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

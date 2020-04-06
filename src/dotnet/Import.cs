@@ -6,13 +6,13 @@
 
 class Import
 {
-#if RHINO3DMIO_BUILD
+#if RHINO3DM_BUILD
   #if __IOS__
     public const string lib = "__Internal";
     public const string librdk = "__Internal";
 #else
-    public const string lib = "librhino3dmio_native";
-    public const string librdk = "librhino3dmio_native";
+    public const string lib = "librhino3dm_native";
+    public const string librdk = "librhino3dm_native";
 #endif
 #else // RhinoCommon build...
 #if MONO_BUILD // RhinoCommon build for macOS

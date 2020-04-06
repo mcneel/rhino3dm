@@ -102,9 +102,9 @@ using Rhino.Runtime.InteropWrappers;
       }
     }
 
-    public bool BuildDeclarations(string cppFilePath, bool rhino3dmIoBuild, string opennurbsPathReplacement)
+    public bool BuildDeclarations(string cppFilePath, bool rhino3dmBuild, string opennurbsPathReplacement)
     {
-      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmIoBuild, opennurbsPathReplacement);
+      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmBuild, opennurbsPathReplacement);
       if (d!=null)
         m_declarations.Add(d);
       return (d != null);
@@ -121,14 +121,14 @@ using Rhino.Runtime.InteropWrappers;
     static string StripNonOpennurbsBlocks(string source)
     {
       // I know this is terrible and doesn't support nested ifdefs. This is only
-      // used for Rhino3dmIo building
+      // used for Rhino3dm building
       var lines = source.Split(g_any_newline);
       var sb = new StringBuilder();
       bool in_skip_block = false;
       foreach (var line in lines)
       {
-        if (line.StartsWith("#if !defined(RHINO3DMIO_BUILD)", StringComparison.OrdinalIgnoreCase) ||
-            line.StartsWith("#ifndef RHINO3DMIO_BUILD")
+        if (line.StartsWith("#if !defined(RHINO3DM_BUILD)", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("#ifndef RHINO3DM_BUILD")
            )
         {
           in_skip_block = true;
@@ -145,7 +145,7 @@ using Rhino.Runtime.InteropWrappers;
       return sb.ToString();
     }
 
-    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmIoBuild, string opennurbsPathReplacement)
+    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmBuild, string opennurbsPathReplacement)
     {
       const string RH_C_FUNCTION = "RH_C_FUNCTION";
       const string RH_C_PREPROC = "RH_C_PREPROCESSOR";
@@ -158,11 +158,11 @@ using Rhino.Runtime.InteropWrappers;
         source_code = source_code.Replace("../../../opennurbs", opennurbsPathReplacement);
 
       // 3 August 2017 S. Baer
-      // rhino3dmIoBuild really means "run an extremely crude preprocessor that I don't trust"
+      // rhino3dmBuild really means "run an extremely crude preprocessor that I don't trust"
       // I don't want this code executing for regular Rhino builds and really need to rethink
       // how we distinguish between functions available in a Rhino build versus an OpenNURBS build
       // Current thought is the use a new macro like ON_C_FUNCTION
-      if (rhino3dmIoBuild)
+      if (rhino3dmBuild)
       {
         source_code = StripNonOpennurbsBlocks(source_code);
       }

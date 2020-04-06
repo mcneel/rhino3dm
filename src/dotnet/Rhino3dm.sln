@@ -23,6 +23,6 @@ Global
 		SolutionGuid = {C78CBB86-C105-494A-AF45-14B9FD9E46A6}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ..\examples\rhino3dmio\example_read_mac\example_read_mac.csproj
+		StartupItem = ..\examples\rhino3dm\example_read_mac\example_read_mac.csproj
 	EndGlobalSection
 EndGlobal
