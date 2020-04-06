@@ -1226,7 +1226,7 @@ RH_C_FUNCTION void ON_V6_Annotation_SetSignedOrdinate(ON_Annotation* annotation,
     annotation->SetSignedOrdinate(parent_style, allowsigned);
 }
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 RH_C_FUNCTION double ON_V6_Annotation_GetDimScale(unsigned int doc_sn, const ON_DimStyle* dimstyle, const CRhinoViewport* vport)
 {
   double scale = 1.0;

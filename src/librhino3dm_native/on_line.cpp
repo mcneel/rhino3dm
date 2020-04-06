@@ -50,7 +50,7 @@ RH_C_FUNCTION bool ON_Line_InPlane( const ON_Line* pConstLine, ON_PLANE_STRUCT* 
 }
 
 
-#if !defined(RHINO3DMIO_BUILD) //not available in standalone opennurbs
+#if !defined(RHINO3DM_BUILD) //not available in standalone opennurbs
 // 7-Feb-2013 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-16086
 RH_C_FUNCTION bool RHC_RhGetTanPerpPoint( const ON_Curve* pConstCurve0, const ON_Curve* pConstCurve1, double* t0, double* t1, bool perpendicular0, bool perpendicular1, ON_Line* pLine )
 {

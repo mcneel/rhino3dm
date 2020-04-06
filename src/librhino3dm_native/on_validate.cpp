@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 #include "../../../opennurbs/opennurbs_plus_validate.h"
 
 RH_C_FUNCTION bool ONC_ValidateSurfaceCVSpacing(const ON_NurbsSurface* pConstNurbsSurface, double closeTol, double stackTol,

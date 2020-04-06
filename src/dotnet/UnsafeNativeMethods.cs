@@ -22,7 +22,7 @@ internal partial class UnsafeNativeMethods
     }
   }
 
-#if RHINO3DMIO_BUILD
+#if RHINO3DM_BUILD
   static UnsafeNativeMethods()
   {
     Init();

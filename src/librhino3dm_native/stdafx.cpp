@@ -10,24 +10,24 @@
 #define ON_NEW_MFC_EARLY_ALLOCATION_MAX 0
 #define ON_NEW_MFC_EARLY_ALLOCATION_MIN 2
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 #include "../../../opennurbs/opennurbs_plus_memory_new.cpp"
 #endif
 
-#if defined(RHINO3DMIO_BUILD)
-class Rhino3dmIoInitializer
+#if defined(RHINO3DM_BUILD)
+class Rhino3dmInitializer
 {
 public:
-  Rhino3dmIoInitializer()
+  Rhino3dmInitializer()
   {
     ON::Begin();
   }
 
-  ~Rhino3dmIoInitializer()
+  ~Rhino3dmInitializer()
   {
     ON::End();
   }
 };
 
-static Rhino3dmIoInitializer theInitializer;
+static Rhino3dmInitializer theInitializer;
 #endif

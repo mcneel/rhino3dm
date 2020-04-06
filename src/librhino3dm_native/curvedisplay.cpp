@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "curvedisplay.h"
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 class CRhCmnCurveDisplay
 {
 public:

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if defined(ON_RUNTIME_APPLE) && !defined(RHINO3DMIO_BUILD)
+#if defined(ON_RUNTIME_APPLE) && !defined(RHINO3DM_BUILD)
 #import "../../../rhino4/MacOS/NSImage+QuickLook.h"
 #endif
 
@@ -2591,7 +2591,7 @@ RH_C_FUNCTION void ONX_Model_UserDataTable_Clear(ONX_Model* pModel)
     pModel->m_userdata_table.Empty();
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ONX_Model_ReadPreviewImage(const RHMONO_STRING* path, CRhinoDib* pRhinoDib)
 {
   bool rc = false;
@@ -2656,7 +2656,7 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
   return rc;
 }
 
-#if !defined(RHINO3DMIO_BUILD) && defined(ON_RUNTIME_APPLE)
+#if !defined(RHINO3DM_BUILD) && defined(ON_RUNTIME_APPLE)
 RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
 {
   INPUTSTRINGCOERCE(_path, path);
@@ -2766,7 +2766,7 @@ RH_C_FUNCTION void ON_WindowsBitmap_SizeAndColorDepth(const ON_WindowsBitmap* pB
   }
 }
 
-// 16-Aug-2018 Dale Fugier. The commented code (below) is fast. But Rhino3dmIO isn't
+// 16-Aug-2018 Dale Fugier. The commented code (below) is fast. But Rhino3dm isn't
 // build with the "Allow unsafe code" option. So this block of code causes a build error.
 // If somebody complains about this being slow, we can revisit this.
 //RH_C_FUNCTION void ON_WindowsBitmap_CopyBytes(const ON_WindowsBitmap* pBitmap, void* systemBitmapBytes, int lineLength, int bitsPerPixel)

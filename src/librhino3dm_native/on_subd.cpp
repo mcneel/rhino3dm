@@ -112,7 +112,7 @@ RH_C_FUNCTION ON_SubDEdge* ON_SubD_AddEdge(ON_SubD* pSubD, const ON_SubD::EdgeTa
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, unsigned int mesh_density )
 {
@@ -274,7 +274,7 @@ RH_C_FUNCTION void ON_ToSubDParameters_SetMaximumConvexCornerAngleRadians(ON_ToS
 }
 
 // not available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_ToSubDParameters_InterpolateMeshVertices(const ON_ToSubDParameters* constParameters)
 {
@@ -442,7 +442,7 @@ RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag(ON_SubDEdge* edgePtr, const ON_SubD::E
     edgePtr->m_edge_tag = tag;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_NurbsCurve* ON_SubDEdge_LimitCurve(const ON_SubDEdge* constEdge, bool clamped)
 {
   if (constEdge)
@@ -506,7 +506,7 @@ RH_C_FUNCTION const ON_SubDFace* ON_SubDFace_GetNext(const ON_SubDFace* constFac
   return face;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
 {
   if (constFace && pPointOut)

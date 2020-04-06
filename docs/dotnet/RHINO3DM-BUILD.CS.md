@@ -23,10 +23,10 @@ CMake 3.12.1 is the minimum required CMake version.
 
 ## What needs to be compiled
 The compilation process involves several different pieces that eventually make up rhino3dm as a whole
-  * CMake is used to compile the opennurbs and pinvoke `C` functions into a .DLL, .DYLIB, or .SO depending on what platform you are running on. The compiled native code is compiled to a binary named `rhino3dmio_native` or `librhino3dmio_native` depending on the platform you are targetting.
+  * CMake is used to compile the opennurbs and pinvoke `C` functions into a .DLL, .DYLIB, or .SO depending on what platform you are running on. The compiled native code is compiled to a binary named `rhino3dm_native` or `librhino3dm_native` depending on the platform you are targetting.
   * A .NET project named methodgen is compiled and executed to generate the C# pInvoke declarations based on the native code exports
   * A .NET project named rhino3dm is compiled using msbuild or dotnet for .NET core compiles
-  * On Windows, the rhino3dmio_native.dll is embedded into the Rhino3dm.dll to allow for a single file
+  * On Windows, the rhino3dm_native.dll is embedded into the Rhino3dm.dll to allow for a single file
 
 ## Compile
 

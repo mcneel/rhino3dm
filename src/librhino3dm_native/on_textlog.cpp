@@ -80,7 +80,7 @@ RH_C_FUNCTION void ON_TextLog_Print(ON_TextLog* pTextLog, const RHMONO_STRING* _
   }
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_TextLog* ON_TextLog_GetNewCRhinoDump()
 {
   return new CRhinoDump();

@@ -552,7 +552,7 @@ RH_C_FUNCTION ON_3dmRenderSettings* ON_3dmRenderSettings_New(const ON_3dmRenderS
 RH_C_FUNCTION const ON_3dmRenderSettings* ON_3dmRenderSettings_ConstPointer(unsigned int docSerialNumber)
 {
   const ON_3dmRenderSettings* rc = nullptr;
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(docSerialNumber);
   if( pDoc )
     rc = &(pDoc->Properties().RenderSettings());
@@ -844,7 +844,7 @@ RH_C_FUNCTION ON_3dmAnimationProperties* ON_3dmAnimationProperties_New(const ON_
 RH_C_FUNCTION const ON_3dmAnimationProperties* ON_3dmAnimationProperties_ConstPointer(unsigned int docSerialNumber)
 {
   const ON_3dmAnimationProperties* rc = nullptr;
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(docSerialNumber);
   if( pDoc )
     rc = &(pDoc->Properties().AnimationProperties());

@@ -76,7 +76,7 @@ typedef ON_Geometry ON_GeometryImpl;
 typedef ON_LineCurve ON_LineCurveImpl;
 typedef ON_Object ON_ObjectImpl;
 typedef ON_wString ON_wStringImpl;
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 typedef ON_SimpleArray<CRhinoObjectPair> ON_SimpleArray_CRhinoObjectPairImpl;
 typedef CArgsRhinoGetCircle CArgsRhinoGetCircleImpl;
 typedef CRhinoPlugIn CRhinoPlugInImpl;
@@ -143,7 +143,7 @@ RH_C_FUNCTION ON_LineCurveImpl* ON_LineCurve_New2(ON_2DPOINT_STRUCT from, ON_2DP
 RH_C_FUNCTION ON_LineCurveImpl* ON_LineCurve_New3(ON_3DPOINT_STRUCT from, ON_3DPOINT_STRUCT to);
 
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Geometry_IsMorphable(const ON_GeometryImpl* constGeometry);
 RH_C_FUNCTION int CRhinoPlugIn_New(GUID id, const RHMONO_STRING* name, const RHMONO_STRING* version, enum PlugInType kind, int loadtime);

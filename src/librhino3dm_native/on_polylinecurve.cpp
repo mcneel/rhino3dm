@@ -90,7 +90,7 @@ RH_C_FUNCTION void ON_SimpleArray_PolylineCurve_Delete(ON_SimpleArray<ON_Polylin
 }
 
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_PolylineCurve_Draw(const ON_PolylineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
 {
   if( pCrv && pDisplayPipeline )

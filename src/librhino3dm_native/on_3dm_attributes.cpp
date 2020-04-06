@@ -581,7 +581,7 @@ enum DisplayModeSpecialType : int
 
 RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpecialType displayModeSpecialType)
 {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   ON_UUID id;
   switch (displayModeSpecialType)
   {

@@ -32,7 +32,7 @@ RH_C_FUNCTION bool ON_Surface_SetDomain(ON_Surface* pSurface, int direction, ON_
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Surface_GetSurfaceSize( const ON_Surface* pConstSurface, double* width, double* height)
 {
@@ -289,7 +289,7 @@ RH_C_FUNCTION ON_Curve* ON_Surface_IsoCurve(const ON_Surface* pConstSurface, int
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_Curve* ON_Surface_Pushup(const ON_Surface* pConstSurface, const ON_Curve* pCurve2d, double tolerance, ON_INTERVAL_STRUCT curve2dSubdomain)
 {
@@ -371,7 +371,7 @@ RH_C_FUNCTION bool ON_Surface_EvCurvature( const ON_Surface* pConstSurface,
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Surface_GetClosestPoint( const ON_Surface* pConstSurface, ON_3DPOINT_STRUCT test_point, double* s, double* t )
 {
@@ -434,7 +434,7 @@ RH_C_FUNCTION bool ON_Surface_TranslateParameter(const ON_Surface* constSurfaceP
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_Surface* ON_Surface_Offset( const ON_Surface* pConstSurface, double offset, double tolerance)
 {
@@ -547,7 +547,7 @@ RH_C_FUNCTION ON_SumSurface* ON_SumSurface_Create(const ON_Curve* pConstCurveA, 
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION int ON_Surface_ClosestSide( const ON_Surface* pConstSurface, double u, double v )
 {
@@ -591,7 +591,7 @@ RH_C_FUNCTION int ON_Surface_ClosestSide( const ON_Surface* pConstSurface, doubl
 ////////////////////////////////////////////////////////////////////////////////////
 // Meshing and mass property calculations are not available in stand alone opennurbs
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_Mesh* ON_Surface_CreateMesh(const ON_Surface* pConstSurface, const ON_MeshParameters* pConstMeshingParameters)
 {

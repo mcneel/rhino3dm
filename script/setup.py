@@ -172,7 +172,7 @@ def run_methodgen():
     if os.path.exists(item_to_check):
         os.remove(item_to_check)
 
-    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dmio"
+    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
     run_command(command)
 
     # Check to see if methodgen succeeded
@@ -190,7 +190,7 @@ def setup_macos():
 
     platform_target_path = os.path.join(build_folder, platform_full_names.get("macos").lower())
 
-    target_file_name = "librhino3dmio_native.xcodeproj"
+    target_file_name = "librhino3dm_native.xcodeproj"
 
     item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
     if os.path.exists(item_to_check):
@@ -232,7 +232,7 @@ def setup_macos():
 def setup_ios():
     platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
 
-    target_file_name = "librhino3dmio_native.xcodeproj"
+    target_file_name = "librhino3dm_native.xcodeproj"
 
     item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
     if os.path.exists(item_to_check):
@@ -381,6 +381,8 @@ def setup_android():
                    " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared ../../../src/librhino3dm_native")
         run_command(command)
 
+        time.sleep(2) # there can be a race-condition when generating the files on Android
+        
         # Check to see if the CMakeFiles were written...
         if os.path.exists(item_to_check):
             print_ok_message("successfully wrote: " + item_to_check)

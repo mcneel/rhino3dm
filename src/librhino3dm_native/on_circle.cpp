@@ -108,7 +108,7 @@ RH_C_FUNCTION bool ON_Circle_TryFitTTT(const ON_Curve* c1, const ON_Curve* c2, c
                                        double seed1, double seed2, double seed3, 
                                        ON_CIRCLE_STRUCT* circleFit)
 {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   if (!c1 || !c2 || !c3) { return false; }
   if (!circleFit) { return false; }
 
@@ -131,7 +131,7 @@ RH_C_FUNCTION bool ON_Circle_TryFitTT(const ON_Curve* c1, const ON_Curve* c2,
                                       double seed1, double seed2,
                                       ON_CIRCLE_STRUCT* circleFit)
 {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   if (!c1 || !c2) { return false; }
   if (!circleFit) { return false; }
 

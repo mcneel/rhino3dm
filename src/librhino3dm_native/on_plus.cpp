@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD) // only available in rhino.exe
+#if !defined(RHINO3DM_BUILD) // only available in rhino.exe
 
 RH_C_FUNCTION ON_SimpleArray<ON_ClashEvent>* ON_SimpleArray_ClashEvent_New()
 {

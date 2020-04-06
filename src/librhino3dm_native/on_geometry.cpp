@@ -73,7 +73,7 @@ static void ON_Brep_GetTightCurveBoundingBox_Helper( const ON_Curve& crv, ON_Bou
     bbox.Union(tempbox);
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 // Add the isocurves of a BrepFace to the partial boundingbox result.
 static void ON_Brep_GetTightIsoCurveBoundingBox_Helper( const TL_Brep& tlbrep, const ON_BrepFace& face, ON_BoundingBox& bbox, const ON_Xform* xform, int dir )
 {
@@ -247,7 +247,7 @@ RH_C_FUNCTION bool ON_Geometry_GetTightBoundingBox(const ON_Geometry* ptr, ON_Bo
     if(!useXform || (xform && xform->IsIdentity()))
       xform = nullptr;
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
     {
       // OpenNURBS doesn't have a tight bounding box function for ON_Breps and we
       // want to make this work in V4, V5 and V6...
@@ -307,7 +307,7 @@ RH_C_FUNCTION bool ON_Geometry_GetBool(ON_Geometry* pGeometry, int which)
       break;
     case idxIsMorphable:
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
       rc = pGeometry->IsMorphable();
 #endif
       break;
@@ -328,7 +328,7 @@ bool ON_Geometry_MakeDeformable(ON_Geometry* geometry)
   return false;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 bool ON_Geometry_IsMorphable(const ON_Geometry* constGeometry)
 {

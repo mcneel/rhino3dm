@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if defined(__APPLE__) && defined(RHINO3DMIO_BUILD)
+#if defined(__APPLE__) && defined(RHINO3DM_BUILD)
 ON_wString unichar2on(const unichar* inStr)
 {
   // get length of inStr

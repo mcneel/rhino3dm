@@ -312,7 +312,7 @@ RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_P
   if( pConstCurve && plane )
   {
     ON_Plane temp;
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
     rc = pConstCurve->FrameAt(t, temp)?true:false;
 #else // rhino.exe build
     if( zero_twisting )
@@ -326,7 +326,7 @@ RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_P
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Curve_GetClosestPoint( const ON_Curve* pCurve, ON_3DPOINT_STRUCT test_point, double* t, double maximum_distance)
 {
@@ -535,7 +535,7 @@ RH_C_FUNCTION bool ON_Curve_IsContinuous(const ON_Curve* curvePtr, int continuit
 // Meshing, intersections and mass property calculations are not available in
 // stand alone opennurbs
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 
 RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Curve_IntersectPlane(const ON_Curve* pConstCurve, ON_PLANE_STRUCT* plane, double tolerance)
 {
@@ -616,7 +616,7 @@ RH_C_FUNCTION bool ON_CurveProxy_IsReversed( const ON_CurveProxy* pConstCurvePro
   return false;
 }
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 
 RH_C_FUNCTION int RHC_RhinoIsCurveConicSection(const ON_Curve* pConstCurve, ON_3dPoint* pFocus1, ON_3dPoint* pFocus2, ON_3dPoint* pCenter)
 {

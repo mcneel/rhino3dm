@@ -5,7 +5,7 @@
 
 #pragma once
 
-#if defined(_WIN32) && !defined(RHINO3DMIO_BUILD)
+#if defined(_WIN32) && !defined(RHINO3DM_BUILD)
 
 #define RHINO_SDK_MFC
 
@@ -21,16 +21,16 @@
 #define VC_EXTRALEAN		      // Exclude rarely-used stuff from Windows headers
 #endif
 
-#endif //(_WIN32) && !(RHINO3DMIO_BUILD)
+#endif //(_WIN32) && !(RHINO3DM_BUILD)
 
-#if defined (__APPLE__) && !defined(RHINO3DMIO_BUILD)
+#if defined (__APPLE__) && !defined(RHINO3DM_BUILD)
 #define RHINO_SDK_MFC
 #include "../../../rhino4/RhinoCorePlugInStdAfx.h"
 #include "../../../rhino4/AfxMac.h"
 #include "../../../rhino4/MacOS/MacHelpers.h"
 #endif
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 #if defined(_WIN32)
 #include "../../../rhino4/SDK/inc/RhinoSdkUiFile.h"

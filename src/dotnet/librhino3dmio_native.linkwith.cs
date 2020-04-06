@@ -7,6 +7,6 @@
 
 #if __IOS__
 using ObjCRuntime;
-[assembly: LinkWith("librhino3dmio_native.a", LinkTarget.Simulator64 | LinkTarget.Arm64, ForceLoad = true, IsCxx = true)]
+[assembly: LinkWith("librhino3dm_native.a", LinkTarget.Simulator64 | LinkTarget.Arm64, ForceLoad = true, IsCxx = true)]
 #endif
 

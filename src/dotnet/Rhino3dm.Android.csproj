@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;RHINO3DMIO_BUILD;MONO_BUILD;__ANDROID__;MOBILE_BUILD</DefineConstants>
+    <DefineConstants>DEBUG;RHINO3DM_BUILD;MONO_BUILD;__ANDROID__;MOBILE_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AndroidLinkMode>None</AndroidLinkMode>
@@ -42,7 +42,7 @@
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Build librhino3dmio_native.so (overwrite)</name>
+          <name>Build librhino3dm_native.so (overwrite)</name>
           <command>python ${ProjectDir}/../../script/build.py -p android -x -v -o</command>
           <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
@@ -56,7 +56,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>RHINO3DMIO_BUILD;MONO_BUILD;__ANDROID__;MOBILE_BUILD</DefineConstants>
+    <DefineConstants>RHINO3DM_BUILD;MONO_BUILD;__ANDROID__;MOBILE_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
@@ -80,7 +80,7 @@
         </Command>
         <Command>
           <type>Custom</type>
-          <name>Build librhino3dmio_native.so (overwrite)</name>
+          <name>Build librhino3dm_native.so (overwrite)</name>
           <command>python ${ProjectDir}/../../script/build.py -p android -x -v -o</command>
           <workingdir>${ProjectDir}/../../script/</workingdir>
           <externalConsole>True</externalConsole>
@@ -335,17 +335,17 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="..\..\build\android\libs\arm64-v8a\librhino3dmio_native.so">
-      <Link>libs\arm64-v8a\librhino3dmio_native.so</Link>
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\arm64-v8a\librhino3dm_native.so">
+      <Link>libs\arm64-v8a\librhino3dm_native.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\build\android\libs\armeabi-v7a\librhino3dmio_native.so">
-      <Link>libs\armeabi-v7a\librhino3dmio_native.so</Link>
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\armeabi-v7a\librhino3dm_native.so">
+      <Link>libs\armeabi-v7a\librhino3dm_native.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\build\android\libs\x86_64\librhino3dmio_native.so">
-      <Link>libs\x86_64\librhino3dmio_native.so</Link>
+    <EmbeddedNativeLibrary Include="..\..\build\android\libs\x86_64\librhino3dm_native.so">
+      <Link>libs\x86_64\librhino3dm_native.so</Link>
     </EmbeddedNativeLibrary>
-	<EmbeddedNativeLibrary Include="..\..\build\android\libs\x86\librhino3dmio_native.so">
-      <Link>libs\x86\librhino3dmio_native.so</Link>
+	<EmbeddedNativeLibrary Include="..\..\build\android\libs\x86\librhino3dm_native.so">
+      <Link>libs\x86\librhino3dm_native.so</Link>
     </EmbeddedNativeLibrary>
   </ItemGroup>
   <ItemGroup>

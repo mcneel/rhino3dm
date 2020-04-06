@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 // ray shooter and mesh/mesh intersect not supported in stand alone OpenNURBS
 #include "../../../rhino4/mesh_boolean_v7.h"
 #endif
@@ -163,7 +163,7 @@ RH_C_FUNCTION void ON_Intersect_MeshPlanes4(ON_SimpleArray<ON_Polyline*>* pPolyl
 
 ///////////////////////////////////////////////////////////////////////////////
 // ray shooter and mesh/mesh intersect not supported in stand alone OpenNURBS
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSelf(const ON_Curve* pCurve, double tolerance)
 {

@@ -78,7 +78,7 @@
 const wchar_t* _variablename = _parametername;
 #endif // _WIN32
 
-#if !defined (RHINO3DMIO_BUILD)
+#if !defined (RHINO3DM_BUILD)
 #if defined (__APPLE__)
 typedef CGImageRef HBITMAP_OR_CGIMAGE;
 typedef NSImage* HBITMAP_OR_NSIMAGE;
@@ -95,7 +95,7 @@ typedef HBITMAP HBITMAP_OR_NSIMAGE;
 #define RH_C_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 #define RH_EXPORT __attribute__ ((visibility ("default")))
 
-#if defined (RHINO3DMIO_BUILD)
+#if defined (RHINO3DM_BUILD)
 #define CALLBACK
 typedef signed char     BOOL;
 typedef const wchar_t*  LPCTSTR;
@@ -151,7 +151,7 @@ typedef signed char     BOOL;
 #endif // ON_COMPILER_ANDROIDNDK
 
 // Only applicable for when compiled for running inside Rhino
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 // Always call this function instead of ActiveDoc so
 // we have a single place to fix up code to work on Mac multi-doc build
 RH_CPP_FUNCTION CRhinoDoc* RhDocFromId( int id );
@@ -231,7 +231,7 @@ public:
 };
 
 
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
 class CRhCmnStringHolder
 #else
 class RH_EXPORT CRhCmnStringHolder

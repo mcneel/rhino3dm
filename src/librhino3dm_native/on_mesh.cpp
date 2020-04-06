@@ -608,7 +608,7 @@ RH_C_FUNCTION int ON_Mesh_GetInt(const ON_Mesh* pConstMesh, enum MeshIntConst wh
       rc = pConstMesh->HiddenVertexCount();
       break;
     case micDisjointMeshCount:
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
     {
       ON_SimpleArray<ON_Mesh*> meshes;
       rc = RhinoSplitDisjointMesh(pConstMesh, meshes, true);
@@ -1069,7 +1069,7 @@ RH_C_FUNCTION bool ON_Mesh_NakedEdgePoints(const ON_Mesh* pMesh, /*ARRAY*/int* n
 RH_C_FUNCTION bool ON_Mesh_IsPointInside(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT point, double tolerance, bool strictlyin)
 {
   bool rc = false;
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
   // do nothing, not supported
 #else
   // 27 March 2012 - S. Baer
@@ -1383,7 +1383,7 @@ RH_C_FUNCTION int ON_Mesh_GetConnectedVertices(const ON_Mesh* pMesh, ON_SimpleAr
   return rc;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION double ON_Mesh_Volume(const ON_Mesh* pConstMesh)
 {
   if (nullptr != pConstMesh)
@@ -2134,7 +2134,7 @@ RH_C_FUNCTION int ON_MeshTopologyVertex_ConnectedEdgesCount(const ON_Mesh* pCons
 // ClosestPoint, Intersection, and mass property calculations are not
 // provided in stand alone OpenNURBS
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION int ON_Mesh_GetClosestPoint(const ON_Mesh* ptr, ON_3DPOINT_STRUCT p, ON_3dPoint* q, double max_dist)
 {
   int rc = -1;
@@ -2897,7 +2897,7 @@ RH_C_FUNCTION bool ON_TextureMapping_CopyCustomMappingMeshPrimitive(const ON_Tex
   return true;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 static const ON_MappingRef* GetValidMappingRef(const CRhinoObject* pObject, bool withChannels)
 {
   // Helper function - implementation only.
@@ -3135,7 +3135,7 @@ static bool GetBrepFaceCorners(const ON_BrepFace& face, ON_SimpleArray<ON_3fPoin
 
 RH_C_FUNCTION ON_Mesh* ON_Mesh_BrepToMeshSimple(const ON_Brep* pBrep)
 {
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
   return NULL;
 #else
   if (!pBrep)
@@ -3613,7 +3613,7 @@ RH_C_FUNCTION const ON_MeshNgon* ON_Mesh_NgonIterator_FirstNgon(
   return ngon;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION int ON_Mesh_AddNgon_Boundary(ON_Mesh* meshPtr, /*ARRAY*/ const int* vertices, const int verticesLength)
 {
   if (!meshPtr || !vertices || verticesLength < 3) return -1;

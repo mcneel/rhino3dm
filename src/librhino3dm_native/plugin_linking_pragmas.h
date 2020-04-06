@@ -6,7 +6,7 @@
 
 #if !defined(__APPLE__) && !defined(__ANDROID__) && !defined(CMAKE_BUILD)
 
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
 
 #pragma message( " --- linking required Win libs" )
 #pragma comment(lib, "Advapi32.lib")

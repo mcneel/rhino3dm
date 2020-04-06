@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION double ON_Quaternion_Length( const ON_Quaternion* q)
 {

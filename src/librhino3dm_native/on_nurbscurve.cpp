@@ -319,7 +319,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_Reparameterize(ON_NurbsCurve* pCurve, double c)
   return rc;
 }
 
-#if !defined(RHINO3DMIO_BUILD)  //not available in opennurbs build
+#if !defined(RHINO3DM_BUILD)  //not available in opennurbs build
 
 RH_C_FUNCTION bool RHC_RhinoCreateSpiral0(ON_3DPOINT_STRUCT axis_start, ON_3DVECTOR_STRUCT axis_dir, ON_3DPOINT_STRUCT radius_point, double pitch, double turn_count, double radius0, double radius1, ON_NurbsCurve* pCurve)
 {

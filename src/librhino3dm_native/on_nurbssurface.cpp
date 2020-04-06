@@ -429,7 +429,7 @@ RH_C_FUNCTION void ON_MorphControl_SetBool(ON_MorphControl* pMorphControl, bool 
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_MorphControl_MorphGeometry(const ON_MorphControl* pConstMorphControl, ON_Geometry* pGeometry)
 {

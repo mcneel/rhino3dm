@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION void ON_MassProperties_Delete( ON_MassProperties* ptr )
 {

@@ -56,7 +56,7 @@ def methodgen(dotnetcore):
 
 def create_cpp_project(bitness, compile):
     # staging and compilation occurs in the build directory
-    build_dir = "build/librhino3dmio_native_{0}".format(bitness)
+    build_dir = "build/librhino3dm_native_{0}".format(bitness)
     if not os.path.exists(build_dir):
         if(not os.path.exists("build")):
             os.mkdir("build")
@@ -70,12 +70,12 @@ def create_cpp_project(bitness, compile):
         args = '-G "Visual Studio 15 2017{0}"'.format(arch)
         system('cmake ' + args + ' ../../librhino3dm_native')
         if bitness == 64:
-            for line in fileinput.input("librhino3dmio_native.vcxproj", inplace=1):
+            for line in fileinput.input("librhino3dm_native.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
             for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
         if compile:
-            system("cmake --build . --config Release --target librhino3dmio_native")
+            system("cmake --build . --config Release --target librhino3dm_native")
     else:
         system("cmake ../../librhino3dm_native")
         if compile:

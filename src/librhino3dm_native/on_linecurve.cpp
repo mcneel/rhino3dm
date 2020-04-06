@@ -41,7 +41,7 @@ RH_C_FUNCTION void ON_LineCurve_GetSetLine(ON_LineCurve* pCurve, bool set, ON_Li
   }
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_LineCurve_Draw(const ON_LineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
 {
   if( pCrv && pDisplayPipeline )

@@ -4,7 +4,7 @@ RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_defines.h")
 
 RH_C_FUNCTION void ON_Begin()
 {
-#if defined(RHINO3DMIO_BUILD) // don't call Begin when running in Rhino
+#if defined(RHINO3DM_BUILD) // don't call Begin when running in Rhino
   ON::Begin();
 #endif
 }

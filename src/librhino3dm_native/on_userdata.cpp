@@ -411,7 +411,7 @@ struct CUserDataHolderPiece
 };
 
 static ON_SimpleArray<CUserDataHolderPiece> m_all_holders;
-#if defined(RHINO3DMIO_BUILD)
+#if defined(RHINO3DM_BUILD)
 class ON_SleepLockFake
 {
 public:

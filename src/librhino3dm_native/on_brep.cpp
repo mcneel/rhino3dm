@@ -38,7 +38,7 @@ RH_C_FUNCTION int ON_BrepEdge_EdgeCurveIndex(const ON_BrepEdge* pConstEdge)
 }
 
 // IsSmoothManifoldEdge is not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_BrepEdge_IsSmoothManifoldEdge(const ON_BrepEdge* pConstBrepEdge, double angle_tol)
 {
@@ -305,7 +305,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_New(const ON_Brep* pOther)
   return ON_Brep::New();
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 class CRhHackBrep : public CRhinoBrepObject
 {
 public:
@@ -319,7 +319,7 @@ RH_C_FUNCTION bool ON_Brep_IsDuplicate(const ON_Brep* pConstBrep1, const ON_Brep
   if( pConstBrep1 && pConstBrep2 )
   {
     tolerance = 0;// unused right now
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
     if( pConstBrep1==pConstBrep2 )
       return true;
     // Really lame that the Rhino SDK requires CRhinoObjects for
@@ -505,7 +505,7 @@ RH_C_FUNCTION void ON_Brep_Flip(ON_Brep* pBrep)
     pBrep->Flip();
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Brep_GetTrimParameter(const ON_Brep* pConstBrep, int trimindex, double edgeparam, double* trimparam)
 {
@@ -530,7 +530,7 @@ RH_C_FUNCTION bool ON_Brep_GetEdgeParameter(const ON_Brep* pConstBrep, int trimi
 #endif
 
 // SplitKinkyFaces is not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Brep_SplitKinkyFaces(ON_Brep* pBrep, double tolerance, bool compact)
 {
@@ -607,7 +607,7 @@ RH_C_FUNCTION bool ON_Brep_ShrinkFace(ON_Brep* pBrep, int face_index, int disabl
   return rc;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool RHC_RhinoBrepShrinkSurfaceToEdge(ON_Brep* pBrep, int face_index)
 {
   bool rc = false;
@@ -715,7 +715,7 @@ RH_C_FUNCTION const ON_BrepFace* ON_Brep_BrepFacePointer( const ON_Brep* pConstB
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION void ON_Brep_RebuildTrimsForV2(ON_Brep* pBrep, ON_BrepFace* pBrepFace, const ON_NurbsSurface* pConstNurbsSurface)
 {
@@ -772,7 +772,7 @@ RH_C_FUNCTION void ON_BrepFace_SetIsReversed( ON_BrepFace* pBrepFace, bool rever
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_BrepFace_ChangeSurface( ON_Brep* pBrep, int face_index, int surface_index )
 {
@@ -994,7 +994,7 @@ RH_C_FUNCTION int ON_Brep_EdgeTrimCount( const ON_Brep* pConstBrep, int edge_ind
   return rc;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION int ON_Brep_EdgeConcavity( const ON_BrepEdge* ptr_const_edge, double t, double cos_tol )
 {
@@ -1197,7 +1197,7 @@ RH_C_FUNCTION int ON_Brep_FaceFaceIndices( const ON_Brep* pConstBrep, int face_i
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_Brep* ON_Brep_CopyTrims( const ON_BrepFace* pConstBrepFace, const ON_Surface* pConstSurface, double tolerance)
 {
@@ -1646,7 +1646,7 @@ RH_C_FUNCTION bool ON_Brep_FlipReversedSurfaces(ON_Brep* pBrep)
 }
 
 // not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION bool ON_Brep_SplitClosedFaces(ON_Brep* pBrep, int min_degree)
 {
@@ -1770,7 +1770,7 @@ RH_C_FUNCTION bool ON_Brep_CullUnused(ON_Brep* pBrep, enum BrepCullUnused which)
 //}
 
 // Region topology information is not currently available in stand alone OpenNURBS build
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION const ON_BrepRegion* ON_Brep_BrepRegion(const ON_Brep* constBrep, int index)
 {
@@ -1897,7 +1897,7 @@ RH_C_FUNCTION int ON_BrepFaceSide_Face(const ON_Brep* pConstBrep, int region_ind
 ////////////////////////////////////////////////////////////////////////////////////
 // Meshing and mass property calculations are not available in stand alone opennurbs
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_MassProperties* ON_Brep_MassProperties(bool bArea, const ON_Brep* pBrep, bool bVolume, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double relativeTolerance, double absoluteTolerance)
 {
@@ -2207,7 +2207,7 @@ RH_C_FUNCTION void ON_Brep_SetTolerancesBoxesAndFlags(ON_Brep* pBrep,
 {
   if (nullptr != pBrep)
   {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
     TL_Brep::Promote(pBrep);
 #endif
 

@@ -192,7 +192,7 @@ RH_C_FUNCTION void ON_Hatch_SetPlane(ON_Hatch* pHatch, ON_PLANE_STRUCT ps)
 ////////////////////////////////////////////////////////////////////////////////////
 // Meshing and mass property calculations are not available in stand alone opennurbs
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_MassProperties* ON_Hatch_AreaMassProperties(const ON_Hatch* pConstHatch, double rel_tol, double abs_tol)
 {
   ON_MassProperties* rc = nullptr;
@@ -246,7 +246,7 @@ RH_C_FUNCTION ON_MassProperties* ON_Hatch_AreaMassProperties(const ON_Hatch* pCo
 }
 #endif
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_Hatch_Explode(const ON_Hatch* pConstHatch,
                                     const CRhinoObject* pConstParentRhinoObject,
                                     ON_SimpleArray<ON_Geometry*>* pOutputGeometry)
@@ -343,7 +343,7 @@ RH_C_FUNCTION void ON_ColorStopArray_Append(ON_SimpleArray<ON_ColorStop>* stops,
 RH_C_FUNCTION int ON_Hatch_GetGradientData(const ON_Hatch* pConstHatch, ON_3dPoint* startPoint, ON_3dPoint* endPoint,
   int* gradientType, double* repeat, ON_SimpleArray<ON_ColorStop>* stops)
 {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   if (startPoint)
     *startPoint = CRhGradientHatch::GetPoint(0, pConstHatch);
   if (endPoint)
@@ -363,7 +363,7 @@ RH_C_FUNCTION int ON_Hatch_GetGradientData(const ON_Hatch* pConstHatch, ON_3dPoi
 
 RH_C_FUNCTION void ON_Hatch_SetGradientData(ON_Hatch* hatch, ON_3DPOINT_STRUCT startPt, ON_3DPOINT_STRUCT endPt, int gradientType, double repeat, const ON_SimpleArray<ON_ColorStop>* stops)
 {
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
   CRhGradientHatch::SetPoint(hatch, true, ON_3dPoint(startPt.val));
   CRhGradientHatch::SetPoint(hatch, false, ON_3dPoint(endPt.val));
   CRhGradientHatch::SetGradientType(hatch, (ON_GradientType)gradientType);

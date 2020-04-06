@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 #include "../../../rhino4/RhDimensionPreview.h"
 #endif
 
@@ -73,7 +73,7 @@ RH_C_FUNCTION void ON_Dimstyle_SetTextStyle(ON_DimStyle* pointerToDimStyle, cons
     pointerToDimStyle->SetFont(constPointerToTextStyle->Font());
 }
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 RH_C_FUNCTION CRhinoDib* ON_Dimstyle_GetPreview_Bitmap(const ON_DimStyle* constDimStyle, int width, int height)
 {
   ON_FPU_ClearExceptionStatus();
@@ -498,7 +498,7 @@ RH_C_FUNCTION double ON_Dimstyle_GetScaleRightLength_mm(const ON_DimStyle* dimst
   return d;
 }
 
-#if !defined(RHINO3DMIO_BUILD) //in rhino.exe
+#if !defined(RHINO3DM_BUILD) //in rhino.exe
 RH_C_FUNCTION double ON_Dimstyle_GetScaleLeftLength_mm_FromId(unsigned int doc_sn, ON_UUID id)
 {
   double s = 1.0;

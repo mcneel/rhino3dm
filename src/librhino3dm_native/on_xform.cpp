@@ -288,7 +288,7 @@ RH_C_FUNCTION bool ON_Xform_GetEulerZYZ(const ON_Xform* xf, double* alpha, doubl
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 typedef void (CALLBACK* MORPHPOINTPROC)(ON_3DPOINT_STRUCT point, ON_3dPoint* out_point);
 
 class CCustomSpaceMorph : public ON_SpaceMorph

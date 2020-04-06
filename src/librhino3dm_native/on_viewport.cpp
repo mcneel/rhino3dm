@@ -686,7 +686,7 @@ RH_C_FUNCTION int ON_Viewport_SetViewportId(ON_Viewport* pVP, ON_UUID id)
 	return 0;
 }
 
-#if !defined(RHINO3DMIO_BUILD)
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_Viewport* ON_Viewport_New2(const CRhinoViewport* pRhinoViewport)
 {
   if( pRhinoViewport )
