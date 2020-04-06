@@ -1,8 +1,8 @@
 # rhino3dm build process outline [draft]
 
-Last updated by dan@mcneel.com on January 29, 2020
+Last updated by dan@mcneel.com on April 6, 2020
 
-**WARNING**: This is currently a work-in-progress draft.
+**WARNING**: This is currently a work-in-progress draft.  Some of the information may not be up-to-date with current state of the script.  This warning will be removed once (we believe) we have it working.  **NOT ALL PLATFORMS ARE SUPPORTED WITH THESE SCRIPTS** (yet...see table below).
 
 The build process for rhino3dm is run on [CircleCi](https://circleci.com/).  All changes to build configuration settings should be made from the [CircleCI rhino3dm project](link needed).  That said, this process can be tested locally.
 
@@ -14,6 +14,7 @@ We build and publish rhino3dm for a number of platforms:
 
 - Windows (Desktop)
 - macOS (Desktop)
+- Linux (Desktop)
 - iOS
 - Android
 - JavaScript
@@ -23,34 +24,89 @@ The steps to create rhino3dm are as follows:
 
 1. Check for the required build tools ([bootstrap.py](#bootstrap))
 2. Setup the native library platform projects by generating them using CMake ([setup.py](#setup.py))
-3. Build the native library projects and wrapper projects ([build.py](#build.py))
-4. Build and publish the various packages (CircleCI?)
+3. Build the native library projects ([build.py](#build.py))
+4. (for .NET) Build the wrapper projects (TODO: Currently, this needs to be done manually)
+5. Build and publish the various packages (CircleCI supported for Python and Javascript).  Support for the .NET projects is coming soon.
 
 ## Scripts
 
 These scripts are used to setup and build rhino3dm:
 
-- *script/bootstrap*.py - checks for (and download) the required tools
+- *script/bootstrap.py* - checks for (and downloads) the required tools
 - *script/setup.py* - generates the platform-specific project files for the native libraries
-- *script/build.py* - builds the native library project(s) and the wrapper projects
+- *script/build.py* - builds the native library project(s)
 
 The scripts can be run from Python 2 or Python 3.
 
-The following table's first column shows the platforms you would like to target.  The right three columns show the operating system you are using.  
+The following table's first column shows the platform you would like to target.  The right three columns show the operating system you are running.
 
-|            |    Windows/WLS     |       Linux        |       macOS        |
-| ---------: | :----------------: | :----------------: | :----------------: |
-|    Windows |      planned       |                    |                    |
-|      Linux |                    |      planned       |                    |
-|      macOS |                    |                    | :white_check_mark: |
-|        iOS |                    |                    |      planned       |
-|    Android |      planned       |      planned       |      planned       |
-| JavaScript | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-|     Python |      planned       |      planned       |      planned       |
+| Platform Target |       Windows       |       Linux        |       macOS        |
+| --------------: | :-----------------: | :----------------: | :----------------: |
+|         Windows |     in progress     |                    |                    |
+|           Linux |                     |    in progress     |                    |
+|           macOS |                     |                    | :white_check_mark: |
+|             iOS |                     |                    | :white_check_mark: |
+|         Android |     in progress     |    in progress     | :white_check_mark: |
+|      JavaScript | :white_check_mark:* | :white_check_mark: | :white_check_mark: |
+|          Python |       planned       |      planned       |      planned       |
 
- As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems (is that true, can macOS build for Linux?)  Android, JavaScript, and Python targets can be built from any platform.  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
+*requires [Windows Linux Subsystem](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-### Bootstrap.py
+As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems (is that true, can macOS build for Linux?)  Android, JavaScript, and Python targets can be built from any platform.  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
+
+### bootstrap.py
 
 There many necessary tools to build rhino3dm.  These are listed in the [Current Developer Tools](../Current%20Developer%20Tools.md) in the root folder of this repository.  The _bootstrap.py_ script reads from the _Current Development Tools.md files_ and checks the system to make sure these tools are present.  You can also use this script to download the tools if you do not have them (when available).
 
+You can run the _bootstrap.py_ script like this:
+
+`python bootstrap.py -p js`
+
+to check for all the necessary tools to build for JavaScript.
+
+### setup.py
+
+The _setup_ script uses [CMake](https://cmake.org/) to read the platform-specific native library projects.  These projects are generated into the _build/[platform]/_ folder where they are used to build the native libraries.
+
+You can run the _setup.py_ script like this:
+
+`python setup.py -p js`
+
+to generate the project files to build for JavaScript.
+
+### build.py
+
+Once you have run the _setup.py_ script for a particular platform, you can use the _build.py_ script to generate the native library.  The native library project is built into the same _build/[platform]/_ folder, sometimes in a subfolder, depending on the platform being targeted.
+
+You can run the _setup.py_ script like this:
+
+`python setup.py -p js`
+
+to build the native binary for JavaScript.
+
+## Wrapper projects
+
+There are .NET wrapper projects that wrap the native libraries in the _src/dotnet_ folder...
+
+- _Rhino3dm.csproj_ - for Windows and macOS
+- _Rhino3dm.core.csproj_ - for Linux
+- _Rhino3dm.iOS.csproj_ - for iOS
+- _Rhino3dm.Android.csproj_ - for Android
+
+**TODO**: We plan to build these projects as part of a continuous integration process, but this has not yet been done. However, in the case of the mobile projects (iOS and Android) there are "Custom Commands" added to each of the respective projects that can be run from within _Visual Studio for Mac_ from the _Project_ menu, in case you would like to build this locally for some reason.
+
+### Package
+
+**TODO**: We plan to package these projects as part of a continuous delivery process, but this has not yet been done.
+
+### Publish
+
+**TODO**: We plan to publish these projects as part of a continuous delivery process, but this has not yet been done.
+
+The final destination for these packages will be: https://www.nuget.org/profiles/McNeel (currently, these are being built from internal source, but we plan to switch to use this repository in the near future.)
+
+---
+
+## Related Topics
+
+- [Current Development Tools (Rhino3dm)](../Current%20Development%20Tools.md)
