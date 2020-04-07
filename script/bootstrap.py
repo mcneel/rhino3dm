@@ -377,10 +377,7 @@ def check_emscripten(build_tool):
 
     # emcc -v returns an err in the reverse typical order...
     if sys.version_info[0] < 3:
-        if _platform == "win32":
-            running_version = p.communicate()[1].splitlines()[4].split(") ")[1]
-        else:
-            running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
+        running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
         if not running_version:
             print_error_message(build_tool.name + " not found." + format_install_instructions(build_tool))
             return False
