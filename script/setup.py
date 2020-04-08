@@ -26,8 +26,8 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "ios", "macos", "android"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android'}
+valid_platform_args = ["js", "ios", "macos", "android", "windows"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
@@ -132,8 +132,14 @@ def build_methodgen():
         print(bcolors.BOLD + " Building MethodGen..." + bcolors.ENDC)
 
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
-
-    command = 'msbuild ' + path_to_methodgen_csproj +' /p:Configuration=Release'
+    msbuild_path = 'msbuild'
+    # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
+    if _platform == "win32" or _platform == "win64":
+        build_tools = bootstrap.read_required_versions()
+        msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
+        path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
+    
+    command = msbuild_path + ' ' + path_to_methodgen_csproj +' /p:Configuration=Release'
     run_command(command)
 
     # Check to see if the MethodGen.exe was written...
@@ -154,6 +160,9 @@ def run_methodgen():
         print(bcolors.BOLD + " Running MethodGen..." + bcolors.ENDC)
 
     path_to_methodgen_exe = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
+    # On Windows, we need to flip the path separators to appease run_command()
+    if _platform == "win32" or _platform == "win64":
+        path_to_methodgen_exe = path_to_methodgen_exe.replace('\\', '//')
 
     if not os.path.exists(path_to_methodgen_exe):
         print_error_message("MethodGen.exe not found.")
@@ -165,6 +174,10 @@ def run_methodgen():
 
     path_to_cpp = os.path.abspath(os.path.join(src_folder, 'librhino3dm_native'))
     path_to_cs = os.path.abspath(os.path.join(src_folder, 'dotnet'))
+    # On Windows, we need to flip the path separators to appease run_command()
+    if _platform == "win32" or _platform == "win64":
+        path_to_cpp = path_to_cpp.replace('\\', '//')
+        path_to_cs = path_to_cs.replace('\\', '//')     
     path_to_replace = '../lib/opennurbs'
     item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
 
@@ -391,6 +404,46 @@ def setup_android():
 
     os.chdir(script_folder)
 
+
+def setup_windows():
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
+
+    target_file_name = "librhino3dm_native.vcxproj"
+
+    item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
+    if os.path.exists(item_to_check):
+        if not overwrite:
+            print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            shutil.rmtree(platform_target_path)
+
+    if not os.path.exists(platform_target_path):
+        os.mkdir(platform_target_path)
+
+    os.chdir(platform_target_path)
+
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating vcxproj files for Windows native build...")
+    else:
+        print(bcolors.BOLD + "Generating vcxproj files for Windows native build" + bcolors.ENDC)
+    command = ("cmake -G \"Visual Studio 15 2017\" ../../src/librhino3dm_native")
+    run_command(command)
+
+    # Check to see if the target files were written...
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully wrote: " + item_to_check)
+    else:
+        print_error_message("failed to configure and generate " + item_to_check + " for Windows build")
+
+    os.chdir(script_folder)
+    
 
 def setup_handler(platform_target):
     if not os.path.exists(build_folder):
