@@ -91,5 +91,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
   target_link_libraries(librhino3dm_native app-glue ${log-lib})
 endif()
 
+if (WIN32)
+  add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
+endif()
+
 set_target_properties(librhino3dm_native PROPERTIES PREFIX "")
 

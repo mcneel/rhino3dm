@@ -653,7 +653,7 @@ def check_msbuild(build_tool):
         return False
 
     print_version_comparison(build_tool, running_version)
-    return True
+    return msbuild_path
 
 
 def check_handler(check, build_tools):
