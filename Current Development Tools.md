@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on April 1, 2020
+Last updated by dan@mcneel.com on April 8, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -119,9 +119,15 @@ We are currently using Xamarin.iOS 13.14.1.39.  Scripts read this:
 
 TODO
 
-## Windows (TODO)
+## Windows
 
-TODO
+### msbuild
+
+We are currently using msbuild 4.8.3752.0.  Scripts read this:
+
+`msbuild_currently_using = 4.8.3752.0`
+`msbuild_archive_url_windows = https://go.microsoft.com/fwlink/?linkid=2088631`
+`msbuild_install_notes_windows = however MSBuild is installed as part of the .NET Framework and should already be installed with Windows.  If the installation is damaged or corrupt, it can be reinstalled manually.`
 
 ---
 
