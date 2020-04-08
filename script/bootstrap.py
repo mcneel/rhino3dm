@@ -35,7 +35,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python", "macos", "ios", "android"]
+valid_platform_args = ["js", "python", "macos", "ios", "android", "windows"]
 
 
 class BuildTool:
@@ -135,14 +135,15 @@ def read_required_versions():
     # TODO:
     #TODO: vs = BuildTool("Visual Studio for Mac", "vs", "", "", "")
     #TODO: dotnet = BuildTool(".NET SDK", "dotnet", "", "", "")
-    #TODO: msbuild = BuildTool("msbuild", "msbuild", "", "", "")
-    #TODO: mdk = BuildTool("Mono MDK", "mdk", "", "", "")
     
     # iOS
     xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
 
     # macOS    
     mdk = BuildTool("Mono MDK", "mdk", "", "", "")
+
+    # Windows
+    msbuild = BuildTool("msbuild", "msbuild", "", "", "")
 
     # create the build tools dictionary
     build_tools = dict(macos=macos, 
@@ -154,7 +155,8 @@ def read_required_versions():
                        mdk=mdk, 
                        xamios=xamios, 
                        ndk=ndk, 
-                       xamandroid=xamandroid)
+                       xamandroid=xamandroid,
+                       msbuild=msbuild)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -561,6 +563,102 @@ def check_xamandroid(build_tool):
     return True
 
 
+def check_msbuild(build_tool):
+    print_check_preamble(build_tool)
+
+    # prepare to do some searching
+    drive_prefix = os.path.splitdrive(sys.executable)[0]
+    program_files = os.environ.get("PROGRAMFILES(X86)")
+
+    running_version = ''
+    msbuild_path = ''
+
+    # Check for the Visual Studio MSBuild
+    if not msbuild_path:
+        visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
+        if os.path.exists(visual_studio_path):
+            versions_found = []
+            vs_ver_subsearch = "\\20??\\Professional"
+            if glob.glob(visual_studio_path + vs_ver_subsearch):
+                path_to_search = visual_studio_path
+                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+        
+                for folder in only_folders:
+                    if folder.startswith("20"):
+                        versions_found.append(folder)
+
+            if versions_found:
+                latest_version = str(max(versions_found))
+                path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
+                if os.path.exists(path_to_search):
+                    msbuild_path = path_to_search
+        
+    # Check for the .NET Framework MSBuild
+    if not msbuild_path:
+        dotnet_framework_path = os.path.join(drive_prefix, "\\", "Windows", "Microsoft.NET", "Framework")
+        if os.path.exists(dotnet_framework_path):
+            versions_found = dict()
+            dotnet_ver_subsearch = "\\v*\\MSBuild.exe"
+            if glob.glob(dotnet_framework_path + dotnet_ver_subsearch):
+                path_to_search = dotnet_framework_path
+                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+        
+                for folder in only_folders:
+                    if folder.startswith("v"):
+                        version_id = folder.split("v")[1]
+                        versions_found[version_id] = folder
+
+            if versions_found:
+                sorted_versions_found = sorted(versions_found, key=split_by_numbers)
+                if sorted_versions_found:
+                    version_id = sorted_versions_found[-1]
+                    path_to_search = os.path.join(dotnet_framework_path, versions_found[version_id], "MSBuild.exe")
+                    if os.path.exists(path_to_search):
+                        msbuild_path = path_to_search
+
+    #Check if msbuild is in the path
+    if not msbuild_path:
+        try:
+            p = subprocess.Popen(['where', 'msbuild'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            if sys.version_info[0] < 3:
+                response = p.communicate()
+                if "Could not find files" not in response:
+                    if "MSBuild.exe" in response:
+                        msbuild_path = response
+            else:
+                err, response = p.communicate()
+                if "Could not find files" not in response:
+                    if "MSBuild.exe" in response:
+                        msbuild_path = response
+        except:
+            msbuild_path = ''
+
+    if not msbuild_path:
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
+        return False
+
+    # Check the msbuild version
+    try:
+        p = subprocess.Popen([msbuild_path, '/Version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if sys.version_info[0] < 3:
+            running_version = p.communicate()[0].splitlines()[-1].strip()
+        else:
+            running_version, err = p.communicate()
+            if err:
+                print_warning_message(err)
+                return
+            running_version = running_version.decode('utf-8').splitlines()[-1].strip()
+    except:
+        running_version = ''
+
+    if not running_version:
+        print_error_message("unable to determine the version of " + build_tool.name)
+        return False
+
+    print_version_comparison(build_tool, running_version)
+    return True
+
+
 def check_handler(check, build_tools):
     if check == "js":
         print_platform_preamble("JavaScript")
@@ -618,6 +716,16 @@ def check_handler(check, build_tools):
         check_mdk(build_tools["mdk"])
         check_ndk(build_tools["ndk"])
         check_xamandroid(build_tools["xamandroid"])
+
+    if check == "windows":
+        print_platform_preamble("Windows")
+        if _platform != "win32" and _platform != "win64":
+            print_error_message("Checking dependencies for Windows requires that you run this script on Windows")
+            return False
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_cmake(build_tools["cmake"])
+        check_msbuild(build_tools["msbuild"])
 
     if check not in valid_platform_args:
         if check == "all":

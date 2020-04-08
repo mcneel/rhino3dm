@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on April 1, 2020
+Last updated by dan@mcneel.com on April 7, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -121,7 +121,13 @@ TODO
 
 ## Windows (TODO)
 
-TODO
+### msbuild
+
+We are currently using msbuild 16.4.0.56107.  Scripts read this:
+
+`msbuild_currently_using = 16.4.0.56107`
+`msbuild_archive_url_windows = https://todo`
+`msbuild_install_notes_windows = TODO`
 
 ---
 
