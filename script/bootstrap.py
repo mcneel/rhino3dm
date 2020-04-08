@@ -124,6 +124,7 @@ def read_required_versions():
     git = BuildTool("Git", "git", "", "", "")
     python = BuildTool("Python", "python", "", "", "")
     cmake = BuildTool("CMake", "cmake", "", "", "")
+    mdk = BuildTool("Mono MDK", "mdk", "", "", "")
 
     # Javascript
     emscripten = BuildTool("Emscripten", "emscripten", "", "", "")
@@ -132,16 +133,12 @@ def read_required_versions():
     ndk = BuildTool("Android NDK", "ndk", "", "", "")
     xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
  
-    # TODO:
-    #TODO: vs = BuildTool("Visual Studio for Mac", "vs", "", "", "")
+    # Linux
     #TODO: dotnet = BuildTool(".NET SDK", "dotnet", "", "", "")
     
     # iOS
     xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
-
-    # macOS    
-    mdk = BuildTool("Mono MDK", "mdk", "", "", "")
-
+ 
     # Windows
     msbuild = BuildTool("msbuild", "msbuild", "", "", "")
 
@@ -573,26 +570,6 @@ def check_msbuild(build_tool):
     running_version = ''
     msbuild_path = ''
 
-    # Check for the Visual Studio MSBuild
-    if not msbuild_path:
-        visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
-        if os.path.exists(visual_studio_path):
-            versions_found = []
-            vs_ver_subsearch = "\\20??\\Professional"
-            if glob.glob(visual_studio_path + vs_ver_subsearch):
-                path_to_search = visual_studio_path
-                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        
-                for folder in only_folders:
-                    if folder.startswith("20"):
-                        versions_found.append(folder)
-
-            if versions_found:
-                latest_version = str(max(versions_found))
-                path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
-                if os.path.exists(path_to_search):
-                    msbuild_path = path_to_search
-        
     # Check for the .NET Framework MSBuild
     if not msbuild_path:
         dotnet_framework_path = os.path.join(drive_prefix, "\\", "Windows", "Microsoft.NET", "Framework")
@@ -615,6 +592,26 @@ def check_msbuild(build_tool):
                     path_to_search = os.path.join(dotnet_framework_path, versions_found[version_id], "MSBuild.exe")
                     if os.path.exists(path_to_search):
                         msbuild_path = path_to_search
+
+    # Check for the Visual Studio MSBuild
+    if not msbuild_path:
+        visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
+        if os.path.exists(visual_studio_path):
+            versions_found = []
+            vs_ver_subsearch = "\\20??\\Professional"
+            if glob.glob(visual_studio_path + vs_ver_subsearch):
+                path_to_search = visual_studio_path
+                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+        
+                for folder in only_folders:
+                    if folder.startswith("20"):
+                        versions_found.append(folder)
+
+            if versions_found:
+                latest_version = str(max(versions_found))
+                path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
+                if os.path.exists(path_to_search):
+                    msbuild_path = path_to_search
 
     #Check if msbuild is in the path
     if not msbuild_path:
