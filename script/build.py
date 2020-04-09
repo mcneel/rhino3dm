@@ -1,8 +1,8 @@
 # build.py
 # created: January 15, 2020
 #
-# This script builds the native library for rhino3dm for the platforms that we target. It requires that the setup
-# script has previously been run in order to generate the project files for the the specific platform(s).
+# This script builds the native (and wrapper) libraries for rhino3dm for the platforms that we target. It requires that 
+# the setup script has previously been run in order to generate the project files for the target platform(s).
 # See bootstrap script for required tools.  This script cannot be moved from its current location without
 # reworking the relative paths that point to the build locations of the platform project files.
 #
@@ -30,8 +30,10 @@ overwrite = False
 valid_platform_args = ["js", "macos", "ios", "android", "windows"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows': "Windows"}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
+librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 native_lib_name = 'librhino3dm_native'
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
@@ -412,8 +414,8 @@ def main():
     global valid_platform_args
 
     # cli metadata
-    description = "builds the native libraries for rhino3dm"
-    epilog = ""
+    description = "builds the libraries for rhino3dm"
+    epilog = "supported platforms: " + ", ".join(valid_platform_args)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
