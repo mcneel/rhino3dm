@@ -31,13 +31,12 @@ platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'andr
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
-path_to_this_file = os.path.realpath(__file__)
-path_to_scripts_folder = os.path.dirname(path_to_this_file)
+librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 
 if sys.version_info[0] < 3:
-    bootstrap = imp.load_source('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py"))
+    bootstrap = imp.load_source('bootstrap', os.path.join(script_folder, "bootstrap.py"))
 else:
-    bootstrap = SourceFileLoader('bootstrap', os.path.join(path_to_scripts_folder, "bootstrap.py")).load_module()
+    bootstrap = SourceFileLoader('bootstrap', os.path.join(script_folder, "bootstrap.py")).load_module()
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -172,7 +171,7 @@ def run_methodgen():
     if _platform == "darwin":
         command = command + 'mono '
 
-    path_to_cpp = os.path.abspath(os.path.join(src_folder, 'librhino3dm_native'))
+    path_to_cpp = librhino3dm_native_folder
     path_to_cs = os.path.abspath(os.path.join(src_folder, 'dotnet'))
     # On Windows, we need to flip the path separators to appease run_command()
     if _platform == "win32" or _platform == "win64":
@@ -230,7 +229,7 @@ def setup_macos():
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
-    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 ../../src/librhino3dm_native"
+    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -276,7 +275,7 @@ def setup_ios():
     else:
         print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
     command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
-               "-DDEPLOYMENT_TARGET=9.3 ../../src/librhino3dm_native")
+               "-DDEPLOYMENT_TARGET=9.3 " + librhino3dm_native_folder)
     run_command(command)
 
     # Check to see if the CMakeFiles were written...
@@ -395,7 +394,7 @@ def setup_android():
             print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
     
         command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
-                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared ../../../src/librhino3dm_native")
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared " + librhino3dm_native_folder)
         run_command(command)
 
         time.sleep(2) # there can be a race-condition when generating the files on Android
@@ -441,7 +440,7 @@ def setup_windows():
         print("Generating vcxproj files for Windows native build...")
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows native build" + bcolors.ENDC)
-    command = ("cmake -G \"Visual Studio 15 2017\" ../../src/librhino3dm_native")
+    command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
     run_command(command)
 
     # Check to see if the target files were written...
@@ -468,9 +467,7 @@ def setup_handler(platform_target):
 
 def delete_cache_file():
     # delete the bootstrapc cache file
-    global path_to_this_file
-    global path_to_scripts_folder
-    path_to_bootstrapc_file = os.path.join(path_to_scripts_folder, "bootstrap.pyc")
+    path_to_bootstrapc_file = os.path.join(script_folder, "bootstrap.pyc")
     if os.path.exists(path_to_bootstrapc_file):
         os.remove(path_to_bootstrapc_file)
 
