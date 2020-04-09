@@ -92,7 +92,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 if (WIN32)
-  add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
+  add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
 endif()
 
 set_target_properties(librhino3dm_native PROPERTIES PREFIX "")

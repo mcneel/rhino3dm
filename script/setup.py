@@ -243,6 +243,10 @@ def setup_macos():
 
 
 def setup_ios():
+    if _platform != "darwin":
+        print_error_message("Generating project file for iOS requires that you run this script on macOS")
+        return False
+
     platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
 
     target_file_name = "librhino3dm_native.xcodeproj"
@@ -406,6 +410,10 @@ def setup_android():
 
 
 def setup_windows():
+    if _platform != "win32" and _platform != "win64":
+        print_error_message("Generating project file for Windows requires that you run this script on Windows")
+        return False
+    
     platform_target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
 
     target_file_name = "librhino3dm_native.vcxproj"

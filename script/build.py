@@ -27,8 +27,8 @@ from subprocess import Popen, PIPE
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "macos", "ios", "android"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android'}
+valid_platform_args = ["js", "macos", "ios", "android", "windows"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows': "Windows"}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
@@ -172,7 +172,7 @@ def build_ios():
     global native_lib_name
     ext = 'a'
     native_lib_filename = native_lib_name + '.' + ext
-    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
+    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name + '.xcodeproj'))
 
     previous_build = os.path.abspath(os.path.join(platform_target_path, "Release"))
     if os.path.exists(previous_build):
@@ -354,7 +354,45 @@ def build_js():
             if os.path.exists(destination_path):
                 print_ok_message("copied " + item + " to: " + destination_path)
 
-    os.chdir(script_folder)
+
+def build_windows():
+    if _platform != "win32" and _platform != "win64":
+        print_error_message("Building for Windows requires that you run this script on Windows")
+        return False
+
+    platform_target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
+    global native_lib_name
+    ext = 'dll'
+    native_lib_filename = native_lib_name + '.' + ext
+    vcxproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name + '.vcxproj'))
+
+    release_folder = os.path.abspath(os.path.join(platform_target_path, "Release"))
+    previous_build = os.path.abspath(os.path.join(release_folder, native_lib_filename))
+    if os.path.exists(previous_build):
+        if not overwrite:
+            print_warning_message("build already appears in " + release_folder + ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            shutil.rmtree(release_folder)
+
+    os.chdir(platform_target_path)
+    
+    run_command("cmake --build . --config Release --target librhino3dm_native", False)
+
+    # Check to see if the build succeeded
+    items_to_check = [native_lib_filename]
+    all_items_built = True
+    for item in items_to_check:
+        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
+        if not os.path.exists(path_to_item):
+            print_error_message("failed to create " + path_to_item)
+            all_items_built = False
+
+    if all_items_built:
+        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
+    else:
+        print_error_message("failed to build all rhino3dm build artifacts.")
+        return False
 
 
 def build_handler(platform_target):
