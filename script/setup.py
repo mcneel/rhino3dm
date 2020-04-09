@@ -440,6 +440,8 @@ def setup_windows():
         print("Generating vcxproj files for Windows native build...")
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows native build" + bcolors.ENDC)
+    global librhino3dm_native_folder
+    librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
     command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
     run_command(command)
 
