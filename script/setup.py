@@ -30,7 +30,7 @@ valid_platform_args = ["js", "ios", "macos", "android", "windows"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
-build_folder = os.path.abspath(os.path.join(script_folder, "..", "build"))
+build_folder = os.path.abspath(os.path.join(src_folder, "build"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 
 if sys.version_info[0] < 3:
@@ -303,7 +303,7 @@ def setup_js():
 
     os.chdir(platform_target_path)
 
-    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" ../../src"
+    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" " + src_folder
     try:
         p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
