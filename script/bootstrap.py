@@ -563,6 +563,11 @@ def check_xamandroid(build_tool):
 def check_msbuild(build_tool):
     print_check_preamble(build_tool)
 
+    # msbuild ships with the mdk on macOS and Linux, so that check should suffice there.
+    if _platform != "win32" and _platform != "win64":
+        print_warning_message("Checking for " + build_tool.name + " requires that you run this script on Windows.")
+        return False
+
     # prepare to do some searching
     drive_prefix = os.path.splitdrive(sys.executable)[0]
     program_files = os.environ.get("PROGRAMFILES(X86)")
