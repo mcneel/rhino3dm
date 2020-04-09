@@ -71,4 +71,4 @@ The build might take a few minutes, but if everything is configured correctly yo
 
 ## Related Topics
 
-- [Current Development Tools](../../Current Development Tools.md) - This file (which is used by bootstrap) lists the current build tools and versions we have tested with.
+- [Current Development Tools](../../Current%20Development%20Tools.md) - This file (which is used by bootstrap) lists the current build tools and versions we have tested with.
