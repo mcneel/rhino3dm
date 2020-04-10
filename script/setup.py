@@ -78,6 +78,8 @@ def print_ok_message(ok_message):
               bcolors.ENDC)
 
 
+# ------------------------------------------------ Command Runner ------------------------------------------------------
+
 def run_command(command, suppress_errors=False):
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
