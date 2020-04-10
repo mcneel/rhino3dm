@@ -21,6 +21,7 @@ from sys import platform as _platform
 import shlex
 import shutil
 from subprocess import Popen, PIPE
+import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -121,48 +122,63 @@ def run_command(command, suppress_errors=False):
     return rc
 
 
+def check_for_setup_files(item_to_check):
+    if not os.path.exists(item_to_check):
+        print_error_message(item_to_check + " was not found. Did you run setup.py?")
+        return False
+    else:
+        return True
+
+
+def overwrite_check(item_to_check):
+    if os.path.exists(item_to_check):
+        if not overwrite:
+            print_warning_message("A build already appears in " + item_to_check + 
+                                  ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            if os.path.isfile(item_to_check):
+                os.remove(item_to_check)
+            if os.path.isdir(item_to_check):
+                shutil.rmtree(item_to_check)
+                time.sleep(2) # avoid any race-conditions with large folders
+            return True
+    else:
+        return True
+
+
+def build_did_succeed(item_to_check):
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully built: " + item_to_check)
+        return True
+    else:
+        print_error_message("failed to build: " + item_to_check)
+        return False
+
+
 def build_macos():
     if _platform != "darwin":
         print_error_message("Building for macOS requires that you run this script on macOS")
         return False
 
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("macos").lower())
+    target_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("macos").lower()))
     global native_lib_name
     ext = 'dylib'
     native_lib_filename = native_lib_name + '.' + ext
-    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name +'.xcodeproj'))
+    xcodeproj_path = os.path.abspath(os.path.join(target_path, native_lib_name +'.xcodeproj'))
 
-    previous_build = os.path.abspath(os.path.join(platform_target_path, "Release"))
-    if os.path.exists(previous_build):
-        if not overwrite:
-            print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(previous_build)
+    if not check_for_setup_files(xcodeproj_path):
+        return False
 
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-    if not os.path.exists(item_to_check):
-        print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))
+    if not overwrite_check(item_to_check):
         return False
 
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
               ' -arch x86_64 -configuration Release clean build'
     run_command(command)
 
-    # Check to see if the build succeeded
-    items_to_check = [native_lib_filename]
-    all_items_built = True
-    for item in items_to_check:
-        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
-        if not os.path.exists(path_to_item):
-            print_error_message("failed to create " + path_to_item)
-            all_items_built = False
-
-    if all_items_built:
-        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
-    else:
-        print_error_message("failed to build all rhino3dm build artifacts.")
-        return False
+    return build_did_succeed(item_to_check)
 
 
 def build_ios():
@@ -170,154 +186,124 @@ def build_ios():
         print_error_message("Building for iOS requires that you run this script on macOS")
         return False
 
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
+    target_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("ios").lower()))
     global native_lib_name
     ext = 'a'
     native_lib_filename = native_lib_name + '.' + ext
-    xcodeproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name + '.xcodeproj'))
+    xcodeproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.xcodeproj'))
 
-    previous_build = os.path.abspath(os.path.join(platform_target_path, "Release"))
-    if os.path.exists(previous_build):
-        if not overwrite:
-            print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(previous_build)
-
-    if not os.path.exists(os.path.join(platform_target_path, "Release")):
-        os.mkdir(os.path.join(platform_target_path, "Release"))
-
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-    if not os.path.exists(item_to_check):
-        print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+    if not check_for_setup_files(xcodeproj_path):
         return False
+
+    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))
+    if not overwrite_check(item_to_check):
+        return False
+
+    if not os.path.exists(os.path.join(target_path, "Release")):
+        os.mkdir(os.path.join(target_path, "Release"))
 
     print(" Building x86_64 (Simulator)...")
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
              ' -sdk iphonesimulator -arch x86_64 -configuration Release clean build'
     run_command(command)
-    if os.path.exists(os.path.join(platform_target_path, "Release-iphonesimulator", native_lib_filename)):
-        shutil.move(os.path.join(platform_target_path, "Release-iphonesimulator", native_lib_filename), os.path.join(platform_target_path, "Release", native_lib_name + "-x86_64.a"))
-        shutil.rmtree(os.path.join(platform_target_path, "Release-iphonesimulator"))
+    if os.path.exists(os.path.join(target_path, "Release-iphonesimulator", native_lib_filename)):
+        shutil.move(os.path.join(target_path, "Release-iphonesimulator", native_lib_filename), os.path.join(target_path, "Release", native_lib_name + "-x86_64.a"))
+        shutil.rmtree(os.path.join(target_path, "Release-iphonesimulator"))
         print_ok_message("Successfully created x64_86 (Simulator) version.")
     else:
         print_error_message("Failed")
-        sys.exit(1)
+        return False
 
     print(" Building arm64 version...")
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
               ' -sdk iphoneos -arch arm64 -configuration Release clean build'
     run_command(command)
-    if os.path.exists(os.path.join(platform_target_path, "Release-iphoneos", native_lib_filename)):
-        shutil.move(os.path.join(platform_target_path, "Release-iphoneos", native_lib_filename), os.path.join(platform_target_path, "Release", native_lib_name + "-arm64.a"))
-        shutil.rmtree(os.path.join(platform_target_path, "Release-iphoneos"))
+    if os.path.exists(os.path.join(target_path, "Release-iphoneos", native_lib_filename)):
+        shutil.move(os.path.join(target_path, "Release-iphoneos", native_lib_filename), os.path.join(target_path, "Release", native_lib_name + "-arm64.a"))
+        shutil.rmtree(os.path.join(target_path, "Release-iphoneos"))
         print_ok_message("Successfully created arm64 version.")
     else:
         print_error_message("Failed")
-        sys.exit(1)
+        return False
 
     print(" Building Universal Binary...")
-    command = 'lipo -create -output ' + os.path.join(platform_target_path, "Release", native_lib_filename) + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-x86_64.a") + ' ' + os.path.join(platform_target_path, "Release", native_lib_name + "-arm64.a")
+    command = 'lipo -create -output ' + os.path.join(target_path, "Release", native_lib_filename) + ' ' + os.path.join(target_path, "Release", native_lib_name + "-x86_64.a") + ' ' + os.path.join(target_path, "Release", native_lib_name + "-arm64.a")
     run_command(command)    
 
-    # Check to see if the build succeeded
-    items_to_check = [native_lib_filename]
-    all_items_built = True
-    for item in items_to_check:
-        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
-        if not os.path.exists(path_to_item):
-            print_error_message("failed to create " + path_to_item)
-            all_items_built = False
-
-    if all_items_built:
-        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
-    else:
-        print_error_message("failed to build all rhino3dm build artifacts.")
-        return False
+    return build_did_succeed(item_to_check)
 
 
 def build_android():
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
+    target_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("android").lower()))
     global native_lib_name
     ext = 'so'
     native_lib_filename = native_lib_name + '.' + ext
 
     # check to see if a libs folder exists
-    libs_folder_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("android").lower(), "libs"))
-    if os.path.exists(libs_folder_path):
-        if not overwrite:
-            print_warning_message("build already appears in " + libs_folder_path + ". Use --overwrite to replace.")
-            return False
-        else:
-            shutil.rmtree(libs_folder_path)
+    libs_folder_path = os.path.abspath(os.path.join(target_path, "libs"))
+    if not overwrite_check(libs_folder_path):
+        return False
             
     # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
     # It is recommended to use different build directories for each ABI to avoid collisions between builds.
     app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
-    
     for app_abi in app_abis:
-        platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi)         
-        item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-        if not os.path.exists(item_to_check):
-            print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
-            continue
+        abi_target_path = os.path.join(target_path, app_abi)         
+        item_to_check = os.path.abspath(os.path.join(abi_target_path, "Makefile"))
+        if not check_for_setup_files(item_to_check):
+            return False
         
         # check for a previous build
-        previous_build = os.path.abspath(os.path.join(platform_target_path, native_lib_filename))
-        if os.path.exists(previous_build):
-            if not overwrite:
-                print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
-                continue
-            if overwrite:
-                os.remove(previous_build)
+        item_to_check = os.path.abspath(os.path.join(abi_target_path, native_lib_filename))
+        if not overwrite_check(item_to_check):
+            return False
                 
         print(" Building Android (" + app_abi + ")...")
-        os.chdir(platform_target_path)
+        os.chdir(abi_target_path)
         run_command("make", True)
 
         # Check to see if the build succeeded
-        path_to_item = os.path.abspath(os.path.join(platform_target_path, native_lib_filename))
-        if os.path.exists(path_to_item):
-            print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
-        else:
-            print_error_message("failed to create " + path_to_item)
+        if not build_did_succeed(item_to_check):
             return False
 
     # package it all up the way that Android likes it - in a libs folder - for easier reference into the .csproj
     if not os.path.exists(libs_folder_path):
         os.mkdir(libs_folder_path)
-        
+
+    all_builds_succeeded = False    
     for app_abi in app_abis:
         libs_abi_path = os.path.abspath(os.path.join(libs_folder_path, app_abi))
         os.mkdir(os.path.join(libs_folder_path, app_abi))
-        source = os.path.abspath(os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi, native_lib_filename))
+        source = os.path.abspath(os.path.join(target_path, app_abi, native_lib_filename))
         destination = os.path.abspath(os.path.join(libs_abi_path, native_lib_filename))
-        shutil.move(source, destination)        
+        shutil.move(source, destination)
+        if build_did_succeed(destination):
+            continue
+        else:
+            all_builds_succeeded = False
+            break
+
+    return all_builds_succeeded            
 
 
 def build_js():
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("js").lower())
+    target_path = os.path.join(build_folder, platform_full_names.get("js").lower())
+    item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
 
-    previous_build = os.path.abspath(os.path.join(platform_target_path, "artifacts_js"))
-    if os.path.exists(previous_build):
-        if not overwrite:
-            print_warning_message("build already appears in " + previous_build + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(previous_build)
-
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-    if not os.path.exists(item_to_check):
-        print_error_message("CMakeFiles not found in " + item_to_check + ". Did you run setup.py?")
+    if not check_for_setup_files(item_to_check):
         return False
 
-    os.chdir(platform_target_path)
+    item_to_check = os.path.abspath(os.path.join(target_path, "artifacts_js"))
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
 
     if overwrite:
         try:
             subprocess.Popen(['make', 'clean'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         except OSError:
-            print_error_message("unable to run make clean in " + platform_target_path)
+            print_error_message("unable to run make clean in " + target_path)
             return False
 
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
@@ -328,12 +314,13 @@ def build_js():
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
     all_items_built = True
     for item in items_to_check:
-        path_to_item = os.path.abspath(os.path.join(platform_target_path, item))
+        path_to_item = os.path.abspath(os.path.join(target_path, item))
         if not os.path.exists(path_to_item):
             print_error_message("failed to create " + path_to_item)
             all_items_built = False
+            break
         else:
-            artifacts_folder_path = os.path.abspath(os.path.join(platform_target_path, "artifacts_js"))
+            artifacts_folder_path = os.path.abspath(os.path.join(target_path, "artifacts_js"))
             if not os.path.exists(artifacts_folder_path):
                 os.mkdir(artifacts_folder_path)
             shutil.move(path_to_item, os.path.abspath(os.path.join(artifacts_folder_path, item)))
@@ -346,7 +333,7 @@ def build_js():
 
     # Copy artifacts into samples folder
     for item in items_to_check:
-        artifacts_folder_path = os.path.abspath(os.path.join(platform_target_path, "artifacts_js"))
+        artifacts_folder_path = os.path.abspath(os.path.join(target_path, "artifacts_js"))
         path_to_item = os.path.abspath(os.path.join(artifacts_folder_path, item))
         if os.path.exists(path_to_item):
             resources_path = os.path.abspath(os.path.join(docs_folder, platform_full_names.get("js").lower(),
@@ -362,39 +349,24 @@ def build_windows():
         print_error_message("Building for Windows requires that you run this script on Windows")
         return False
 
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
+    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
     global native_lib_name
     ext = 'dll'
     native_lib_filename = native_lib_name + '.' + ext
-    vcxproj_path = os.path.abspath(os.path.join(platform_target_path, native_lib_name + '.vcxproj'))
+    vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
 
-    release_folder = os.path.abspath(os.path.join(platform_target_path, "Release"))
-    previous_build = os.path.abspath(os.path.join(release_folder, native_lib_filename))
-    if os.path.exists(previous_build):
-        if not overwrite:
-            print_warning_message("build already appears in " + release_folder + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(release_folder)
+    if not check_for_setup_files(vcxproj_path):
+        return False
+    
+    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))    
+    if not overwrite_check(item_to_check):
+        return False
 
-    os.chdir(platform_target_path)
+    os.chdir(target_path)
     
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
 
-    # Check to see if the build succeeded
-    items_to_check = [native_lib_filename]
-    all_items_built = True
-    for item in items_to_check:
-        path_to_item = os.path.abspath(os.path.join(platform_target_path, "Release", item))
-        if not os.path.exists(path_to_item):
-            print_error_message("failed to create " + path_to_item)
-            all_items_built = False
-
-    if all_items_built:
-        print_ok_message("built target " + native_lib_filename + " succeeded. see: " + path_to_item)
-    else:
-        print_error_message("failed to build all rhino3dm build artifacts.")
-        return False
+    return build_did_succeed(item_to_check)
 
 
 def build_handler(platform_target):

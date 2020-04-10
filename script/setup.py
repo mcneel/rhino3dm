@@ -78,6 +78,8 @@ def print_ok_message(ok_message):
               bcolors.ENDC)
 
 
+# ------------------------------------------------ Command Runner ------------------------------------------------------
+
 def run_command(command, suppress_errors=False):
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
@@ -122,6 +124,42 @@ def print_platform_preamble(platform_target_name):
         print("Setting up " + platform_target_name + "...")
     else:
         print(bcolors.BOLD + "Setting up " + platform_target_name + "..." + bcolors.ENDC)
+
+
+def check_or_create_path(target_path):
+    try:
+        if not os.path.exists(target_path):
+            os.mkdir(target_path)
+    except:
+        return ''
+    
+    return target_path
+
+
+def overwrite_check(item_to_check):
+    if os.path.exists(item_to_check):
+        if not overwrite:
+            print_warning_message("A configuration already appears in " + item_to_check + 
+                                  ". Use --overwrite to replace.")
+            return False
+        if overwrite:
+            if os.path.isfile(item_to_check):
+                os.remove(item_to_check)
+            if os.path.isdir(item_to_check):
+                shutil.rmtree(item_to_check)
+                time.sleep(2) # avoid any race-conditions with large folders
+            return True
+    else:
+        return True
+
+
+def setup_did_succeed(item_to_check):
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully wrote: " + item_to_check)
+        return True
+    else:
+        print_error_message("failed to configure and generate " + item_to_check)
+        return False
 
 
 def build_methodgen():
@@ -200,27 +238,14 @@ def setup_macos():
         print_error_message("Generating project file for macOS requires that you run this script on macOS")
         return False
 
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("macos").lower())
-
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("macos").lower()))
     target_file_name = "librhino3dm_native.xcodeproj"
 
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
-    if os.path.exists(item_to_check):
-        if not overwrite:
-            print_warning_message("A configuration already appears in " + item_to_check + 
-                                  ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(platform_target_path)
-
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
-    os.chdir(platform_target_path)
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+    
+    os.chdir(target_path)
 
     # generate the project files
     print("")
@@ -231,14 +256,12 @@ def setup_macos():
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
+    
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + target_file_name + " for macOS build")
-
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
 
 
 def setup_ios():
@@ -246,27 +269,14 @@ def setup_ios():
         print_error_message("Generating project file for iOS requires that you run this script on macOS")
         return False
 
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("ios").lower())
-
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("ios").lower()))
     target_file_name = "librhino3dm_native.xcodeproj"
 
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
-    if os.path.exists(item_to_check):
-        if not overwrite:
-            print_warning_message("A configuration already appears in " + item_to_check + 
-                                  ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(platform_target_path)
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
 
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
-    os.chdir(platform_target_path)
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
+    os.chdir(target_path)
 
     # generate the project files
     print("")
@@ -278,30 +288,21 @@ def setup_ios():
                "-DDEPLOYMENT_TARGET=9.3 " + librhino3dm_native_folder)
     run_command(command)
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + target_file_name + " for iOS build")
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)     
 
 
 def setup_js():
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("js").lower())
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("js").lower()))
+    item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
 
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-    if os.path.exists(item_to_check):
-        if not overwrite:
-            print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(platform_target_path)
-
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
-    os.chdir(platform_target_path)
+    if not overwrite_check(item_to_check):
+        return False
+    
+    os.chdir(target_path)
 
     command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" " + src_folder
     try:
@@ -327,13 +328,7 @@ def setup_js():
         elif err:
             print_error_message(err)
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("make files have been written to: " + platform_target_path)
-    else:
-        print_error_message("failed to configure and generate CMakeFiles for JavaScript build")
-
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
 
 
 def setup_android():
@@ -347,51 +342,26 @@ def setup_android():
 
     # construct the android build folder if we don't already have it.  since we'll be generating CMake projects to 
     # subfolders for each app_abi, this is different the other platforms we support...
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower())
-    item_to_check = os.path.abspath(platform_target_path)
-    if os.path.exists(item_to_check):
-        if not overwrite:
-            print_warning_message("Build folders are already in " + item_to_check + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(platform_target_path)
-
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-        time.sleep(1) # there can be a race-condition creating and deleting the folders
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("android").lower()))
 
     # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
     # It is recommended to use different build directories for each ABI to avoid collisions between builds.
     app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
     for app_abi in app_abis:
         # setup the build folders and clean previous builds if necessary...
-        platform_target_path = os.path.join(build_folder, platform_full_names.get("android").lower(), app_abi)
-        item_to_check = os.path.abspath(os.path.join(platform_target_path, "CMakeFiles"))
-        if os.path.exists(item_to_check):
-            if not overwrite:
-                print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
-                return False
-            if overwrite:
-                shutil.rmtree(platform_target_path)
-                time.sleep(2) # there can be a race-condition creating and deleting the folders
+        abi_target_path = check_or_create_path(os.path.join(target_path, app_abi))
+        item_to_check = os.path.abspath(os.path.join(abi_target_path, "Makefile"))
 
-        if not os.path.exists(platform_target_path):
-            os.mkdir(platform_target_path)
-            time.sleep(2) # there can be a race-condition creating and deleting the folders
+        if not overwrite_check(item_to_check):
+            return False
 
-        os.chdir(platform_target_path)
-        
-        time.sleep(1) # there can be a race-condition creating and deleting the folders
+        os.chdir(abi_target_path)
 
         print("")
         if xcode_logging:
-            print("Generating Makefiles files for Android (" + app_abi + ")...")
+            print("Generating Makefile for Android (" + app_abi + ")...")
         else:
-            print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
+            print(bcolors.BOLD + "Generating Makefile Android (" + app_abi + ")..." + bcolors.ENDC)
     
         command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
                    " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared " + librhino3dm_native_folder)
@@ -399,13 +369,12 @@ def setup_android():
 
         time.sleep(2) # there can be a race-condition when generating the files on Android
         
-        # Check to see if the CMakeFiles were written...
-        if os.path.exists(item_to_check):
-            print_ok_message("successfully wrote: " + item_to_check)
-        else:
-            print_error_message("failed to configure and generate " + item_to_check + " for Android (" + app_abi + ")")
+        if not setup_did_succeed(item_to_check):
+            break
 
-    os.chdir(script_folder)
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
 
 def setup_windows():
@@ -413,26 +382,14 @@ def setup_windows():
         print_error_message("Generating project file for Windows requires that you run this script on Windows")
         return False
     
-    platform_target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
-
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
     target_file_name = "librhino3dm_native.vcxproj"
 
-    item_to_check = os.path.abspath(os.path.join(platform_target_path, target_file_name))
-    if os.path.exists(item_to_check):
-        if not overwrite:
-            print_warning_message("CMakeFiles already appear in " + item_to_check + ". Use --overwrite to replace.")
-            return False
-        if overwrite:
-            shutil.rmtree(platform_target_path)
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
 
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
-    os.chdir(platform_target_path)
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
+    os.chdir(target_path)
 
     # generate the project files
     print("")
@@ -445,13 +402,11 @@ def setup_windows():
     command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
     run_command(command)
 
-    # Check to see if the target files were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + item_to_check + " for Windows build")
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
     
 
 def setup_handler(platform_target):
