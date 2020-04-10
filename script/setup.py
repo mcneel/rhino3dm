@@ -350,7 +350,7 @@ def setup_android():
     for app_abi in app_abis:
         # setup the build folders and clean previous builds if necessary...
         abi_target_path = check_or_create_path(os.path.join(target_path, app_abi))
-        item_to_check = os.path.abspath(os.path.join(abi_target_path, "MakeFile"))
+        item_to_check = os.path.abspath(os.path.join(abi_target_path, "Makefile"))
 
         if not overwrite_check(item_to_check):
             return False
@@ -359,9 +359,9 @@ def setup_android():
 
         print("")
         if xcode_logging:
-            print("Generating Makefiles files for Android (" + app_abi + ")...")
+            print("Generating Makefile for Android (" + app_abi + ")...")
         else:
-            print(bcolors.BOLD + "Generating Makefiles files Android (" + app_abi + ")..." + bcolors.ENDC)
+            print(bcolors.BOLD + "Generating Makefile Android (" + app_abi + ")..." + bcolors.ENDC)
     
         command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
                    " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared " + librhino3dm_native_folder)
