@@ -124,6 +124,25 @@ def print_platform_preamble(platform_target_name):
         print(bcolors.BOLD + "Setting up " + platform_target_name + "..." + bcolors.ENDC)
 
 
+def check_build_path(platform_target):
+    platform_target_path = os.path.join(build_folder, platform_target)
+    try:
+        if not os.path.exists(platform_target_path):
+            os.mkdir(platform_target_path)
+    except:
+        return False
+    
+    return True
+
+
+# def overwrite_check(item_to_check):
+#     #TODO:
+
+
+# def setup_did_succeed(item_to_check):
+#     #TODO:
+
+
 def build_methodgen():
     if xcode_logging:
         print(" Building MethodGen...")
@@ -213,9 +232,6 @@ def setup_macos():
         if overwrite:
             shutil.rmtree(platform_target_path)
 
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
     os.chdir(platform_target_path)
 
     # methogen
@@ -259,9 +275,6 @@ def setup_ios():
         if overwrite:
             shutil.rmtree(platform_target_path)
 
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
     os.chdir(platform_target_path)
 
     # methogen
@@ -297,9 +310,6 @@ def setup_js():
             return False
         if overwrite:
             shutil.rmtree(platform_target_path)
-
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
 
     os.chdir(platform_target_path)
 
@@ -355,10 +365,6 @@ def setup_android():
             return False
         if overwrite:
             shutil.rmtree(platform_target_path)
-
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-        time.sleep(1) # there can be a race-condition creating and deleting the folders
 
     # methogen
     build_methodgen()
@@ -425,9 +431,6 @@ def setup_windows():
         if overwrite:
             shutil.rmtree(platform_target_path)
 
-    if not os.path.exists(platform_target_path):
-        os.mkdir(platform_target_path)
-
     os.chdir(platform_target_path)
 
     # methogen
@@ -461,9 +464,11 @@ def setup_handler(platform_target):
     if platform_target == "all":
         for target in valid_platform_args:
             print_platform_preamble(platform_full_names.get(target))
+            check_build_path(platform_full_names.get(target).lower())
             getattr(sys.modules[__name__], 'setup_' + target)()
     else:
         print_platform_preamble(platform_full_names.get(platform_target))
+        check_build_path(platform_full_names.get(platform_target).lower())
         getattr(sys.modules[__name__], 'setup_' + platform_target)()
 
 
