@@ -153,8 +153,13 @@ def overwrite_check(item_to_check):
         return True
 
 
-# def setup_did_succeed(item_to_check):
-#     #TODO:
+def setup_did_succeed(item_to_check):
+    if os.path.exists(item_to_check):
+        print_ok_message("successfully wrote: " + item_to_check)
+        return True
+    else:
+        print_error_message("failed to configure and generate " + item_to_check)
+        return False
 
 
 def build_methodgen():
@@ -242,10 +247,6 @@ def setup_macos():
     
     os.chdir(target_path)
 
-    # methogen
-    build_methodgen()
-    run_methodgen()
-
     # generate the project files
     print("")
     if xcode_logging:
@@ -255,14 +256,12 @@ def setup_macos():
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
+    
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + target_file_name + " for macOS build")
-
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
 
 
 def setup_ios():
@@ -279,10 +278,6 @@ def setup_ios():
 
     os.chdir(target_path)
 
-    # methogen
-    build_methodgen()
-    run_methodgen()
-
     # generate the project files
     print("")
     if xcode_logging:
@@ -293,18 +288,16 @@ def setup_ios():
                "-DDEPLOYMENT_TARGET=9.3 " + librhino3dm_native_folder)
     run_command(command)
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + target_file_name + " for iOS build")
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)     
 
 
 def setup_js():
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("js").lower()))
-    item_to_check = os.path.abspath(os.path.join(target_path, "CMakeFiles"))
+    item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
 
     if not overwrite_check(item_to_check):
         return False
@@ -335,13 +328,7 @@ def setup_js():
         elif err:
             print_error_message(err)
 
-    # Check to see if the CMakeFiles were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("make files have been written to: " + target_path)
-    else:
-        print_error_message("failed to configure and generate CMakeFiles for JavaScript build")
-
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
 
 
 def setup_android():
@@ -356,10 +343,6 @@ def setup_android():
     # construct the android build folder if we don't already have it.  since we'll be generating CMake projects to 
     # subfolders for each app_abi, this is different the other platforms we support...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("android").lower()))
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
 
     # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
     # It is recommended to use different build directories for each ABI to avoid collisions between builds.
@@ -386,13 +369,12 @@ def setup_android():
 
         time.sleep(2) # there can be a race-condition when generating the files on Android
         
-        # Check to see if the CMakeFiles were written...
-        if os.path.exists(item_to_check):
-            print_ok_message("successfully wrote: " + item_to_check)
-        else:
-            print_error_message("failed to configure and generate " + item_to_check + " for Android (" + app_abi + ")")
+        if not setup_did_succeed(item_to_check):
+            break
 
-    os.chdir(script_folder)
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
 
 def setup_windows():
@@ -409,10 +391,6 @@ def setup_windows():
 
     os.chdir(target_path)
 
-    # methogen
-    build_methodgen()
-    run_methodgen()
-
     # generate the project files
     print("")
     if xcode_logging:
@@ -424,13 +402,11 @@ def setup_windows():
     command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
     run_command(command)
 
-    # Check to see if the target files were written...
-    if os.path.exists(item_to_check):
-        print_ok_message("successfully wrote: " + item_to_check)
-    else:
-        print_error_message("failed to configure and generate " + item_to_check + " for Windows build")
+    # methogen
+    build_methodgen()
+    run_methodgen()
 
-    os.chdir(script_folder)
+    return setup_did_succeed(item_to_check)
     
 
 def setup_handler(platform_target):
