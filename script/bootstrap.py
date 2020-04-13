@@ -575,29 +575,6 @@ def check_msbuild(build_tool):
     running_version = ''
     msbuild_path = ''
 
-    # Check for the .NET Framework MSBuild
-    if not msbuild_path:
-        dotnet_framework_path = os.path.join(drive_prefix, "\\", "Windows", "Microsoft.NET", "Framework")
-        if os.path.exists(dotnet_framework_path):
-            versions_found = dict()
-            dotnet_ver_subsearch = "\\v*\\MSBuild.exe"
-            if glob.glob(dotnet_framework_path + dotnet_ver_subsearch):
-                path_to_search = dotnet_framework_path
-                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        
-                for folder in only_folders:
-                    if folder.startswith("v"):
-                        version_id = folder.split("v")[1]
-                        versions_found[version_id] = folder
-
-            if versions_found:
-                sorted_versions_found = sorted(versions_found, key=split_by_numbers)
-                if sorted_versions_found:
-                    version_id = sorted_versions_found[-1]
-                    path_to_search = os.path.join(dotnet_framework_path, versions_found[version_id], "MSBuild.exe")
-                    if os.path.exists(path_to_search):
-                        msbuild_path = path_to_search
-
     # Check for the Visual Studio MSBuild
     if not msbuild_path:
         visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
@@ -634,6 +611,29 @@ def check_msbuild(build_tool):
                         msbuild_path = response
         except:
             msbuild_path = ''
+
+    # Check for the .NET Framework MSBuild (probably not the wisest to use though)
+    if not msbuild_path:
+        dotnet_framework_path = os.path.join(drive_prefix, "\\", "Windows", "Microsoft.NET", "Framework")
+        if os.path.exists(dotnet_framework_path):
+            versions_found = dict()
+            dotnet_ver_subsearch = "\\v*\\MSBuild.exe"
+            if glob.glob(dotnet_framework_path + dotnet_ver_subsearch):
+                path_to_search = dotnet_framework_path
+                only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
+        
+                for folder in only_folders:
+                    if folder.startswith("v"):
+                        version_id = folder.split("v")[1]
+                        versions_found[version_id] = folder
+
+            if versions_found:
+                sorted_versions_found = sorted(versions_found, key=split_by_numbers)
+                if sorted_versions_found:
+                    version_id = sorted_versions_found[-1]
+                    path_to_search = os.path.join(dotnet_framework_path, versions_found[version_id], "MSBuild.exe")
+                    if os.path.exists(path_to_search):
+                        msbuild_path = path_to_search
 
     if not msbuild_path:
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
