@@ -22,7 +22,11 @@ import shlex
 import shutil
 from subprocess import Popen, PIPE
 import time
-
+if sys.version_info[0] < 3:
+    import imp
+else:
+    from importlib.machinery import SourceFileLoader
+import time
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
@@ -38,6 +42,10 @@ docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 native_lib_name = 'librhino3dm_native'
 
+if sys.version_info[0] < 3:
+    bootstrap = imp.load_source('bootstrap', os.path.join(script_folder, "bootstrap.py"))
+else:
+    bootstrap = SourceFileLoader('bootstrap', os.path.join(script_folder, "bootstrap.py")).load_module()
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
 class bcolors:
@@ -185,7 +193,7 @@ def build_macos():
     print(" Building Rhino3dm.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
-    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
+    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -248,7 +256,7 @@ def build_ios():
     print(" Building Rhino3dm.iOS.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.iOS.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
-    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
+    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.iOS.dll"))
@@ -309,7 +317,7 @@ def build_android():
     print(" Building Rhino3dm.Android.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.Android.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
-    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
+    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.Android.dll"))
@@ -380,10 +388,12 @@ def build_windows():
         print_error_message("Building for Windows requires that you run this script on Windows")
         return False
 
-    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
     global native_lib_name
     ext = 'dll'
     native_lib_filename = native_lib_name + '.' + ext
+
+    print(" Building Windows 32-bit native library...")
+    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32")
     vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
 
     if not check_for_setup_files(vcxproj_path):
@@ -397,7 +407,38 @@ def build_windows():
     
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
 
-    #TODO: Run msbuild to build .NET wrapper project
+    if not build_did_succeed(item_to_check):                
+        return False
+
+    print(" Building Windows 64-bit native library...")
+    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64")
+    vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
+
+    if not check_for_setup_files(vcxproj_path):
+        return False
+    
+    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))    
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+    
+    run_command("cmake --build . --config Release --target librhino3dm_native", False)
+
+    if not build_did_succeed(item_to_check):                
+        return False
+
+    # print(" Building Rhino3dm.dll...")
+    build_tools = bootstrap.read_required_versions()
+    msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
+    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet")).replace('\\', '//')
+    
+    command = msbuild_path + ' ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    run_command(command)
+
+    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -416,6 +457,13 @@ def build_handler(platform_target):
         did_succeed.append(rv)
 
     return all(item == True for (item) in did_succeed)
+
+
+def delete_cache_file():
+    # delete the bootstrapc cache file
+    path_to_bootstrapc_file = os.path.join(script_folder, "bootstrap.pyc")
+    if os.path.exists(path_to_bootstrapc_file):
+        os.remove(path_to_bootstrapc_file)
 
 
 # --------------------------------------------------- Main -------------------------------------------------------------
@@ -466,6 +514,8 @@ def main():
                 sys.exit(1)
             rv = build_handler(platform_target)
             did_succeed.append(rv)
+
+    delete_cache_file()
 
     sys.exit(0) if all(item == True for (item) in did_succeed) else sys.exit(1)
 

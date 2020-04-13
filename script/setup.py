@@ -465,7 +465,6 @@ def setup_handler(platform_target):
     return all(item == True for (item) in did_succeed)
    
 
-
 def delete_cache_file():
     # delete the bootstrapc cache file
     path_to_bootstrapc_file = os.path.join(script_folder, "bootstrap.pyc")

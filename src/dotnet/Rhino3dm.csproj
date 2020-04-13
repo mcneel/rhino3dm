@@ -280,13 +280,13 @@
     <None Include="RDN_StrongName.snk" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup Condition="exists('..\build\librhino3dm_native_32\Release\librhino3dm_native.dll')">
-    <EmbeddedResource Include="..\build\librhino3dm_native_32\Release\librhino3dm_native.dll">
+  <ItemGroup Condition="exists('..\build\windows\win32\Release\librhino3dm_native.dll')">
+    <EmbeddedResource Include="..\build\windows\win32\Release\librhino3dm_native.dll">
       <Link>win32_native\librhino3dm_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="exists('..\build\librhino3dm_native_64\Release\librhino3dm_native.dll')">
-    <EmbeddedResource Include="..\build\librhino3dm_native_64\Release\librhino3dm_native.dll">
+  <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
+    <EmbeddedResource Include="..\build\windows\win64\Release\librhino3dm_native.dll">
       <Link>win64_native\librhino3dm_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
