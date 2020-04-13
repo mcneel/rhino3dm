@@ -27,6 +27,8 @@ xcode_logging = False
 verbose = False
 overwrite = False
 valid_platform_args = ["js", "ios", "macos", "android", "windows"]
+bitness = "32"
+valid_bitness_args = ["32", "64"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
@@ -396,12 +398,13 @@ def setup_windows():
 
     os.chdir(target_path)
 
+    global bitness
     # generate the project files
     print("")
     if xcode_logging:
-        print("Generating vcxproj files for Windows native build...")
+        print("Generating vcxproj files for Windows " + bitness + "-bit native build...")
     else:
-        print(bcolors.BOLD + "Generating vcxproj files for Windows native build" + bcolors.ENDC)
+        print(bcolors.BOLD + "Generating vcxproj files for Windows " + bitness + "-bit native build..." + bcolors.ENDC)
     global librhino3dm_native_folder
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
     command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
@@ -451,7 +454,7 @@ def main():
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
-    parser.add_argument('--platform', '-p', metavar='<platform>', nargs='+',
+    parser.add_argument('--platform', '-p', metavar='<platform>', nargs='?',
                         help="generates the project files for the platform(s) specified. valid arguments: all, "
                              + ", ".join(valid_platform_args) + ".")
     parser.add_argument('--verbose', '-v', action='store_true',
@@ -460,6 +463,11 @@ def main():
                         help="overwrite existing configurations (if found)")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
+    if _platform == "win32" or _platform == "win64":
+        parser.add_argument('--bitness', '-b', metavar='<bitness>', nargs="?",
+                        help="(Windows only) generates the project files with a specific bitness. valid arguments: "
+                             + " and ".join(valid_bitness_args) + ".")
+    
     args = parser.parse_args()
 
     # User has not entered any arguments...
@@ -470,7 +478,7 @@ def main():
     global xcode_logging
     xcode_logging = args.xcodelog
 
-    if _platform == "win32":
+    if _platform == "win32" or _platform == "win64":
         xcode_logging = True
 
     global verbose
@@ -480,6 +488,16 @@ def main():
     overwrite = args.overwrite
 
     os.chdir(script_folder)
+
+    global bitness
+    # did the user pass a bitness argument?
+    if _platform == "win32" or _platform == "win64":
+        if args.bitness is not None:
+            if args.bitness not in valid_bitness_args:
+                print_error_message(args.bitness + " is not a valid bitness argument.  valid arguments: "
+                             + " and ".join(valid_bitness_args) + ".")
+                sys.exit(1)
+            bitness = str
 
     # setup platform(s)
     did_succeed = []
