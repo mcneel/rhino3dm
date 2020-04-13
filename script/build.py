@@ -370,15 +370,19 @@ def build_windows():
 
 
 def build_handler(platform_target):
+    did_succeed = []
+
     if platform_target == "all":
         for target in valid_platform_args:
             print_platform_preamble(platform_full_names.get(target))
-            getattr(sys.modules[__name__], 'build_' + target)()
+            rv = getattr(sys.modules[__name__], 'build_' + target)()
+            did_succeed.append(rv)
     else:
         print_platform_preamble(platform_full_names.get(platform_target))
-        getattr(sys.modules[__name__], 'build_' + platform_target)()
+        rv = getattr(sys.modules[__name__], 'build_' + platform_target)()
+        did_succeed.append(rv)
 
-    os.chdir(script_folder)
+    return all(item == True for (item) in did_succeed)
 
 
 # --------------------------------------------------- Main -------------------------------------------------------------
@@ -420,13 +424,17 @@ def main():
     overwrite = args.overwrite
 
     # build platform(s)
+    did_succeed = []
     if args.platform is not None:
         for platform_target in args.platform:
             if (platform_target != "all") and (platform_target not in valid_platform_args):
                 print_error_message(platform_target + " is not a valid platform argument. valid tool arguments: all, "
                                     + ", ".join(valid_platform_args) + ".")
                 sys.exit(1)
-            build_handler(platform_target)
+            rv = build_handler(platform_target)
+            did_succeed.append(rv)
+
+    sys.exit(0) if all(item == True for (item) in did_succeed) else sys.exit(1)
 
 
 if __name__ == "__main__":
