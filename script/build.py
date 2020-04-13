@@ -283,22 +283,27 @@ def build_android():
     if not os.path.exists(libs_folder_path):
         os.mkdir(libs_folder_path)
 
-    all_builds_succeeded = False    
+    did_succeed = []
     for app_abi in app_abis:
         libs_abi_path = os.path.abspath(os.path.join(libs_folder_path, app_abi))
         os.mkdir(os.path.join(libs_folder_path, app_abi))
         source = os.path.abspath(os.path.join(target_path, app_abi, native_lib_filename))
         destination = os.path.abspath(os.path.join(libs_abi_path, native_lib_filename))
         shutil.move(source, destination)
-        if build_did_succeed(destination):
-            continue
-        else:
-            all_builds_succeeded = False
-            break
+        rv = build_did_succeed(destination)
+        did_succeed.append(rv)
 
-    #TODO: Run msbuild to build .NET wrapper project
+    if not all(item == True for (item) in did_succeed):                
+        return False
 
-    return all_builds_succeeded            
+    print(" Building Rhino3dm.Android.dll...")
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.Android.csproj"))
+    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release'
+    run_command(command)
+
+    item_to_check = os.path.abspath(os.path.join(dotnet_folder, "bin", "Release", "Rhino3dm.Android.dll"))
+
+    return build_did_succeed(item_to_check)
 
 
 def build_js():
