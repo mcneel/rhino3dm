@@ -15,6 +15,7 @@ from sys import platform as _platform
 from subprocess import Popen, PIPE
 import shlex
 import shutil
+import fileinput
 if sys.version_info[0] < 3:
     import imp
 else:
@@ -27,8 +28,6 @@ xcode_logging = False
 verbose = False
 overwrite = False
 valid_platform_args = ["js", "ios", "macos", "android", "windows"]
-bitness = "32"
-valid_bitness_args = ["32", "64"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
@@ -389,7 +388,11 @@ def setup_windows():
         print_error_message("Generating project file for Windows requires that you run this script on Windows")
         return False
     
+    global librhino3dm_native_folder
+    
+    # 32 bit version...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32"))
     target_file_name = "librhino3dm_native.vcxproj"
 
     item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
@@ -397,18 +400,44 @@ def setup_windows():
         return False
 
     os.chdir(target_path)
-
-    global bitness
+ 
     # generate the project files
     print("")
     if xcode_logging:
-        print("Generating vcxproj files for Windows " + bitness + "-bit native build...")
+        print("Generating vcxproj files for Windows 32-bit native build...")
     else:
-        print(bcolors.BOLD + "Generating vcxproj files for Windows " + bitness + "-bit native build..." + bcolors.ENDC)
-    global librhino3dm_native_folder
+        print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
     command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
     run_command(command)
+
+    # 64 bit version...
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64"))
+    target_file_name = "librhino3dm_native.vcxproj"
+
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+ 
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating vcxproj files for Windows 64-bit native build...")
+    else:
+        print(bcolors.BOLD + "Generating vcxproj files for Windows 64-bit native build..." + bcolors.ENDC)
+    librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
+    command = ("cmake -G \"Visual Studio 15 2017 Win64\" " + librhino3dm_native_folder)
+    run_command(command)
+
+    # Munge the project file to support 64 bit
+    for line in fileinput.input("librhino3dm_native.vcxproj", inplace=1):
+        print(line.replace("WIN32;", "WIN64;"))
+    #TODO: [dan]: it is unclear how opennurbs_static.vcxproj is generated
+    #build_dotnet.py fails in the same way
+    #for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
+    #   print(line.replace("WIN32;", "WIN64;"))
 
     # methogen
     build_methodgen()
@@ -454,7 +483,7 @@ def main():
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
-    parser.add_argument('--platform', '-p', metavar='<platform>', nargs='?',
+    parser.add_argument('--platform', '-p', metavar='<platform>', nargs='+',
                         help="generates the project files for the platform(s) specified. valid arguments: all, "
                              + ", ".join(valid_platform_args) + ".")
     parser.add_argument('--verbose', '-v', action='store_true',
@@ -463,10 +492,6 @@ def main():
                         help="overwrite existing configurations (if found)")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
-    if _platform == "win32" or _platform == "win64":
-        parser.add_argument('--bitness', '-b', metavar='<bitness>', nargs="?",
-                        help="(Windows only) generates the project files with a specific bitness. valid arguments: "
-                             + " and ".join(valid_bitness_args) + ".")
     
     args = parser.parse_args()
 
@@ -488,16 +513,6 @@ def main():
     overwrite = args.overwrite
 
     os.chdir(script_folder)
-
-    global bitness
-    # did the user pass a bitness argument?
-    if _platform == "win32" or _platform == "win64":
-        if args.bitness is not None:
-            if args.bitness not in valid_bitness_args:
-                print_error_message(args.bitness + " is not a valid bitness argument.  valid arguments: "
-                             + " and ".join(valid_bitness_args) + ".")
-                sys.exit(1)
-            bitness = str
 
     # setup platform(s)
     did_succeed = []
