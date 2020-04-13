@@ -1,6 +1,6 @@
 # rhino3dm build process outline [draft]
 
-Last updated by dan@mcneel.com on April 6, 2020
+Last updated by dan@mcneel.com on April 13, 2020
 
 **WARNING**: This is currently a work-in-progress draft.  Some of the information may not be up-to-date with current state of the script.  This warning will be removed once (we believe) we have it working.  **NOT ALL PLATFORMS ARE SUPPORTED WITH THESE SCRIPTS** (yet...see table below).
 
@@ -42,7 +42,7 @@ The following table's first column shows the platform you would like to target. 
 
 | Platform Target |       Windows       |       Linux        |       macOS        |
 | --------------: | :-----------------: | :----------------: | :----------------: |
-|         Windows |     in progress     |                    |                    |
+|         Windows | :white_check_mark:  |                    |                    |
 |           Linux |                     |    in progress     |                    |
 |           macOS |                     |                    | :white_check_mark: |
 |             iOS |                     |                    | :white_check_mark: |
@@ -52,7 +52,7 @@ The following table's first column shows the platform you would like to target. 
 
 *requires [Windows Linux Subsystem](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems (is that true, can macOS build for Linux?)  Android, JavaScript, and Python targets can be built from any platform.  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
+As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems.   Android, JavaScript, and Python targets can be built from any platform (or that is the plan).  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
 
 ### bootstrap.py
 
@@ -89,7 +89,7 @@ to build the native binary for JavaScript.
 There are .NET wrapper projects that wrap the native libraries in the _src/dotnet_ folder...
 
 - _Rhino3dm.csproj_ - for Windows and macOS
-- _Rhino3dm.core.csproj_ - for Linux
+- _Rhino3dm.core.csproj_ - for Linux (and dotnet core)
 - _Rhino3dm.iOS.csproj_ - for iOS
 - _Rhino3dm.Android.csproj_ - for Android
 
