@@ -123,11 +123,11 @@ TODO
 
 ### msbuild
 
-We are currently using msbuild 4.8.3752.0.  Scripts read this:
+We are currently using msbuild 16.4.0.56107.  Scripts read this:
 
-`msbuild_currently_using = 4.8.3752.0`
-`msbuild_archive_url_windows = https://go.microsoft.com/fwlink/?linkid=2088631`
-`msbuild_install_notes_windows = however MSBuild is installed as part of the .NET Framework and should already be installed with Windows.  If the installation is damaged or corrupt, it can be reinstalled manually.`
+`msbuild_currently_using = 16.4.0.56107`
+`msbuild_archive_url_windows = https://visualstudio.microsoft.com/downloads/`
+`msbuild_install_notes_windows = MSBuild is installed as part of Visual Studio.`
 
 ---
 
