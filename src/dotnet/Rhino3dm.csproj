@@ -290,8 +290,8 @@
       <Link>win64_native\librhino3dm_native.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="exists('..\build\librhino3dm_native_64\librhino3dm_native.dylib')">
-    <EmbeddedResource Include="..\build\librhino3dm_native_64\librhino3dm_native.dylib">
+  <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
+    <EmbeddedResource Include="..\build\macos\Release\librhino3dm_native.dylib">
       <Link>macos_native\librhino3dm_native.dylib</Link>
     </EmbeddedResource>
   </ItemGroup>

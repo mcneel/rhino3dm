@@ -179,7 +179,16 @@ def build_macos():
               ' -arch x86_64 -configuration Release clean build'
     run_command(command)
 
-    #TODO: Run msbuild to build .NET wrapper project
+    if not build_did_succeed(item_to_check):                
+        return False
+
+    print(" Building Rhino3dm.dll...")
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
+    run_command(command)
+
+    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -238,10 +247,11 @@ def build_ios():
 
     print(" Building Rhino3dm.iOS.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.iOS.csproj"))
-    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release'
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
-    item_to_check = os.path.abspath(os.path.join(dotnet_folder, "bin", "Release", "Rhino3dm.iOS.dll"))
+    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.iOS.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -298,10 +308,11 @@ def build_android():
 
     print(" Building Rhino3dm.Android.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.Android.csproj"))
-    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release'
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
-    item_to_check = os.path.abspath(os.path.join(dotnet_folder, "bin", "Release", "Rhino3dm.Android.dll"))
+    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.Android.dll"))
 
     return build_did_succeed(item_to_check)
 
