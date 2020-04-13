@@ -232,6 +232,8 @@ def run_methodgen():
         print_error_message("failed to generate " + item_to_check + " for macOS build")
         return False
 
+    return True
+
 
 def setup_macos():
     if _platform != "darwin":
@@ -372,9 +374,12 @@ def setup_android():
         if not setup_did_succeed(item_to_check):
             break
 
+    rv = True
     # methogen
-    build_methodgen()
-    run_methodgen()
+    rv = build_methodgen()
+    rv = run_methodgen()
+
+    return rv
 
 
 def setup_windows():
@@ -413,13 +418,20 @@ def setup_handler(platform_target):
     if not os.path.exists(build_folder):
         os.mkdir(build_folder)
 
+    did_succeed = []
+
     if platform_target == "all":
         for target in valid_platform_args:
             print_platform_preamble(platform_full_names.get(target))
-            getattr(sys.modules[__name__], 'setup_' + target)()
+            rv = getattr(sys.modules[__name__], 'setup_' + target)()
+            did_succeed.append(rv)            
     else:
         print_platform_preamble(platform_full_names.get(platform_target))
-        getattr(sys.modules[__name__], 'setup_' + platform_target)()
+        rv = getattr(sys.modules[__name__], 'setup_' + platform_target)()
+        did_succeed.append(rv)
+
+    return all(item == True for (item) in did_succeed)
+   
 
 
 def delete_cache_file():
@@ -470,16 +482,20 @@ def main():
     os.chdir(script_folder)
 
     # setup platform(s)
+    did_succeed = []
     if args.platform is not None:
         for platform_target in args.platform:
             if (platform_target != "all") and (platform_target not in valid_platform_args):
                 print_error_message(platform_target + " is not a valid platform argument. valid tool arguments: all, "
                                     + ", ".join(valid_platform_args) + ".")
                 sys.exit(1)
-            setup_handler(platform_target)
+            rv = setup_handler(platform_target)
+            did_succeed.append(rv)
 
     delete_cache_file()
 
+    sys.exit(0) if all(item == True for (item) in did_succeed) else sys.exit(1)
+    
 
 if __name__ == "__main__":
     main()
