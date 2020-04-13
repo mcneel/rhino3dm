@@ -32,6 +32,7 @@ valid_platform_args = ["js", "macos", "ios", "android", "windows"]
 platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows': "Windows"}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
+dotnet_folder = os.path.abspath(os.path.join(src_folder, "dotnet"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
 docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
@@ -178,6 +179,8 @@ def build_macos():
               ' -arch x86_64 -configuration Release clean build'
     run_command(command)
 
+    #TODO: Run msbuild to build .NET wrapper project
+
     return build_did_succeed(item_to_check)
 
 
@@ -229,6 +232,16 @@ def build_ios():
     print(" Building Universal Binary...")
     command = 'lipo -create -output ' + os.path.join(target_path, "Release", native_lib_filename) + ' ' + os.path.join(target_path, "Release", native_lib_name + "-x86_64.a") + ' ' + os.path.join(target_path, "Release", native_lib_name + "-arm64.a")
     run_command(command)    
+
+    if not build_did_succeed(item_to_check):                
+        return False
+
+    print(" Building Rhino3dm.iOS.dll...")
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.iOS.csproj"))
+    command = 'msbuild ' + csproj_path + ' /t:Rebuild /p:Configuration=Release'
+    run_command(command)
+
+    item_to_check = os.path.abspath(os.path.join(dotnet_folder, "bin", "Release", "Rhino3dm.iOS.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -282,6 +295,8 @@ def build_android():
         else:
             all_builds_succeeded = False
             break
+
+    #TODO: Run msbuild to build .NET wrapper project
 
     return all_builds_succeeded            
 
@@ -365,6 +380,8 @@ def build_windows():
     os.chdir(target_path)
     
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
+
+    #TODO: Run msbuild to build .NET wrapper project
 
     return build_did_succeed(item_to_check)
 
