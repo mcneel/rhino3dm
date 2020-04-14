@@ -32,8 +32,8 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "macos", "ios", "android", "windows"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows': "Windows"}
+valid_platform_args = ["js", "macos", "ios", "android", "windows", "linux"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows': 'Windows', 'linux': 'Linux'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 dotnet_folder = os.path.abspath(os.path.join(src_folder, "dotnet"))
@@ -428,7 +428,7 @@ def build_windows():
     if not build_did_succeed(item_to_check):                
         return False
 
-    # print(" Building Rhino3dm.dll...")
+    print(" Building Rhino3dm.dll...")
     build_tools = bootstrap.read_required_versions()
     msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
@@ -442,6 +442,47 @@ def build_windows():
 
     return build_did_succeed(item_to_check)
 
+
+def build_linux():
+    if _platform != "linux" and _platform != "linux2":
+        print_error_message("Building for Linux requires that you run this script on Linux")
+        return False
+
+    global native_lib_name
+    ext = 'so'
+    native_lib_filename = native_lib_name + '.' + ext
+
+    target_path = os.path.abspath(os.path.join(build_folder, platform_full_names.get("linux").lower()))
+    makefile_path = os.path.abspath(os.path.join(target_path, "Makefile"))
+    
+    if not check_for_setup_files(makefile_path):
+        return False
+
+    item_to_check = os.path.abspath(os.path.join(target_path, native_lib_filename))    
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+
+    print(" Building Linux native library...")
+    command = 'make'
+    run_command(command, True)
+
+    if not build_did_succeed(item_to_check):                
+        return False
+
+    print(" Building Rhino3dm.dll...")
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.core.csproj"))
+    target_path = os.path.join(build_folder, platform_full_names.get("linux").lower())
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+
+    command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    run_command(command)
+
+    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
+
+    return build_did_succeed(item_to_check)
+    
 
 def build_handler(platform_target):
     did_succeed = []

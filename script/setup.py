@@ -27,8 +27,8 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "ios", "macos", "android", "windows"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
+valid_platform_args = ["js", "ios", "macos", "android", "windows", "linux"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows', 'linux':'Linux'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
@@ -170,23 +170,43 @@ def build_methodgen():
         print(bcolors.BOLD + " Building MethodGen..." + bcolors.ENDC)
 
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
-    msbuild_path = 'msbuild'
-    # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
-    if _platform == "win32" or _platform == "win64":
-        build_tools = bootstrap.read_required_versions()
-        msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
-        path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
-    
-    command = msbuild_path + ' ' + path_to_methodgen_csproj +' /p:Configuration=Release'
-    run_command(command)
 
-    # Check to see if the MethodGen.exe was written...
-    item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
+    # On Linux, we compile methodgen with dotnet core SDK
+    if _platform == "linux" or _platform == "linux2":
+        methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
+        methodgen_src_path = os.path.abspath(os.path.join(src_folder, 'methodgen'))
+        src_files = os.listdir(methodgen_src_path)
+        for file_name in src_files:
+            if file_name.endswith('.cs'):
+                full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
+                if os.path.isfile(full_path):
+                    shutil.copy(full_path, methodgen_build_dir)
+            if file_name.endswith('.core'):
+                full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
+                if os.path.isfile(full_path):
+                    shutil.copy(full_path, methodgen_build_dir + '/methodgen.csproj')
+        command = "dotnet build " + methodgen_build_dir
+        run_command(command)
+
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp2.2", "methodgen.dll")
+    else:
+        msbuild_path = 'msbuild'
+        # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
+        if _platform == "win32" or _platform == "win64":
+            build_tools = bootstrap.read_required_versions()
+            msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
+            path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
+        
+        command = msbuild_path + ' ' + path_to_methodgen_csproj +' /p:Configuration=Release'
+        run_command(command)
+
+        # Check to see if the MethodGen.exe was written...
+        item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
+        
     if os.path.exists(item_to_check):
         print_ok_message("successfully built: " + item_to_check)
     else:
-        print_error_message("failed to build " + item_to_check + " for macOS build")
-        return False
+        print_error_message("failed to build " + item_to_check)
 
     return True
 
@@ -197,19 +217,6 @@ def run_methodgen():
     else:
         print(bcolors.BOLD + " Running MethodGen..." + bcolors.ENDC)
 
-    path_to_methodgen_exe = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
-    # On Windows, we need to flip the path separators to appease run_command()
-    if _platform == "win32" or _platform == "win64":
-        path_to_methodgen_exe = path_to_methodgen_exe.replace('\\', '//')
-
-    if not os.path.exists(path_to_methodgen_exe):
-        print_error_message("MethodGen.exe not found.")
-        return False
-
-    command = ''
-    if _platform == "darwin":
-        command = command + 'mono '
-
     path_to_cpp = librhino3dm_native_folder
     path_to_cs = os.path.abspath(os.path.join(src_folder, 'dotnet'))
     # On Windows, we need to flip the path separators to appease run_command()
@@ -219,18 +226,41 @@ def run_methodgen():
     path_to_replace = '../lib/opennurbs'
     item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
 
+    # On Linux, we execute methodgen with dotnet core SDK
+    if _platform == "linux" or _platform == "linux2":
+        methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
+        path_to_methodgen_executable = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp2.2", "methodgen.dll")
+        if not os.path.exists(path_to_methodgen_executable):
+            print_error_message(path_to_methodgen_executable + " not found.")
+            return False
+        
+        command = 'dotnet '
+    else:
+        path_to_methodgen_executable = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
+        # On Windows, we need to flip the path separators to appease run_command()
+        if _platform == "win32" or _platform == "win64":
+            path_to_methodgen_executable = path_to_methodgen_executable.replace('\\', '//')
+
+        if not os.path.exists(path_to_methodgen_executable):
+            print_error_message("MethodGen.exe not found.")
+            return False
+
+        command = ''
+        if _platform == "darwin":
+            command = command + 'mono '
+
     # remove any older file there...
     if os.path.exists(item_to_check):
         os.remove(item_to_check)
 
-    command = command + path_to_methodgen_exe + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
+    command = command + path_to_methodgen_executable + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
     run_command(command)
 
     # Check to see if methodgen succeeded
     if os.path.exists(item_to_check):
         print_ok_message("successfully generated: " + item_to_check)
     else:
-        print_error_message("failed to generate " + item_to_check + " for macOS build")
+        print_error_message("failed to generate " + item_to_check)
         return False
 
     return True
@@ -444,7 +474,38 @@ def setup_windows():
     run_methodgen()
 
     return setup_did_succeed(item_to_check)
+
+
+def setup_linux():
+    if _platform != "linux":
+        print_error_message("Generating project file for Linux requires that you run this script on Linux")
+        return False
+
+    global librhino3dm_native_folder
+
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("linux").lower()))
+    target_file_name = "Makefile"
     
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+
+    print("")
+    if xcode_logging:
+        print("Generating Makefile for Linux native build...")
+    else:
+        print(bcolors.BOLD + "Generating Makefile for Linux native build..." + bcolors.ENDC)
+    command = ("cmake " + librhino3dm_native_folder)
+    run_command(command)
+    
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    return setup_did_succeed(item_to_check)
+
 
 def setup_handler(platform_target):
     if not os.path.exists(build_folder):
