@@ -428,7 +428,7 @@ def build_windows():
     if not build_did_succeed(item_to_check):                
         return False
 
-    # print(" Building Rhino3dm.dll...")
+    print(" Building Rhino3dm.dll...")
     build_tools = bootstrap.read_required_versions()
     msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
