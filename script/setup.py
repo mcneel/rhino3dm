@@ -27,8 +27,8 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "ios", "macos", "android", "windows"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows'}
+valid_platform_args = ["js", "ios", "macos", "android", "windows", "linux"]
+platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows', 'linux':'Linux'}
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
@@ -444,7 +444,38 @@ def setup_windows():
     run_methodgen()
 
     return setup_did_succeed(item_to_check)
+
+
+def setup_linux():
+    if _platform != "linux":
+        print_error_message("Generating project file for Linux requires that you run this script on Linux")
+        return False
+
+    global librhino3dm_native_folder
+
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("linux").lower()))
+    target_file_name = "Makefile"
     
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+
+    print("")
+    if xcode_logging:
+        print("Generating Makefile for Linux native build...")
+    else:
+        print(bcolors.BOLD + "Generating Makefile for Linux native build..." + bcolors.ENDC)
+    command = ("cmake " + librhino3dm_native_folder)
+    run_command(command)
+    
+    # TODO: methogen
+    #build_methodgen()
+    #run_methodgen()
+
+    return setup_did_succeed(item_to_check)
+
 
 def setup_handler(platform_target):
     if not os.path.exists(build_folder):
