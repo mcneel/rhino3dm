@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on April 8, 2020
+Last updated by dan@mcneel.com on April 14, 2020
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -98,9 +98,15 @@ We are currently using CMake 3.16.2. Scripts read this:
 `cmake_install_notes_linux = On Ubuntu, you can install CMake using: sudo snap install cmake --classic`
 `cmake_install_notes_windows = When installing, be sure to check the box to add CMake to the system path.`
 
-## Linux (TODO)
+## Linux
 
-TODO
+### dotnet
+
+We are currently using the .NET Core SDK 3.1.201.  Scripts read this:
+
+`dotnet_currently_using = 3.1.201`
+`dotnet_archive_url_macos = https://dotnet.microsoft.com/download/dotnet-core/thank-you/sdk-3.1.201-macos-x64-installer`
+`dotnet_install_notes_linux = On Ubuntu, you can install the dotnet SDK using the apt-get package manager.  Follow these instructions: https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804`
 
 ## macOS (TODO)
 

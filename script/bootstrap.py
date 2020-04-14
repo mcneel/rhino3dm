@@ -35,7 +35,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python", "macos", "ios", "android", "windows"]
+valid_platform_args = ["js", "python", "macos", "ios", "android", "windows", "linux"]
 
 
 class BuildTool:
@@ -142,6 +142,9 @@ def read_required_versions():
     # Windows
     msbuild = BuildTool("msbuild", "msbuild", "", "", "")
 
+    # Linux
+    dotnet = BuildTool("dotnet Core SDK", "dotnet", "", "", "")
+
     # create the build tools dictionary
     build_tools = dict(macos=macos, 
                        xcode=xcode, 
@@ -153,7 +156,8 @@ def read_required_versions():
                        xamios=xamios, 
                        ndk=ndk, 
                        xamandroid=xamandroid,
-                       msbuild=msbuild)
+                       msbuild=msbuild,
+                       dotnet=dotnet)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -661,6 +665,64 @@ def check_msbuild(build_tool):
     return msbuild_path
 
 
+def check_dotnet(build_tool):
+    print_check_preamble(build_tool)
+
+    try:
+        p = subprocess.Popen(['which', 'dotnet'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+        if sys.version_info[0] < 3:
+            output = p.communicate()
+            if not output[0] and not output[1]:
+                print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
+                return False
+        else:
+            output, err = p.communicate()
+            if not output and not err:    
+                print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
+                return False
+    except OSError:
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
+        return False
+
+    running_version = ''
+
+    # check to see if there are any sdks in the list that match the currently used one
+    dotnet_sdks = []
+    dotnet_listsdks_process = subprocess.Popen(['dotnet', '--list-sdks'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    if sys.version_info[0] < 3:
+        dotnet_sdks = dotnet_listsdks_process.communicate()[0].splitlines()
+    else:
+        dotnet_listsdks_output, err = dotnet_listsdks_process.communicate()
+        if err:
+            print_error_message(err)
+            return False
+        
+        dotnet_sdks = dotnet_listsdks_output.decode('utf').splitlines()
+
+    for sdk in dotnet_sdks:
+        version_number = sdk.split(' [')[0]
+        if build_tool.currently_using in str(sdk):
+            running_version = build_tool.currently_using
+
+    # fall-back: check the version on the system...
+    if not running_version:
+        dotnet_version_process = subprocess.Popen(['dotnet', '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if sys.version_info[0] < 3:
+            running_version = dotnet_version_process.communicate()[0].strip()
+        else:
+            dotnet_version_output, err = dotnet_version_process.communicate()
+            running_version = dotnet_version_output.decode('utf-8').strip()
+
+    if not running_version:
+        print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
+        return False
+
+    print_version_comparison(build_tool, running_version)
+
+    return True
+
+
 def check_handler(check, build_tools):
     if check == "js":
         print_platform_preamble("JavaScript")
@@ -728,6 +790,16 @@ def check_handler(check, build_tools):
         check_python(build_tools["python"])
         check_cmake(build_tools["cmake"])
         check_msbuild(build_tools["msbuild"])
+
+    if check == "linux":
+        print_platform_preamble("Linux")
+        if _platform != "linux" and _platform != "linux2":
+            print_error_message("Checking dependencies for Linux requires that you run this script on Linux.")
+            return False
+        check_git(build_tools["git"])
+        check_python(build_tools["python"])
+        check_cmake(build_tools["cmake"])
+        check_dotnet(build_tools["dotnet"])
 
     if check not in valid_platform_args:
         if check == "all":
