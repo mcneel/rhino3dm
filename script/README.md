@@ -40,15 +40,61 @@ The scripts can be run from Python 2 or Python 3.
 
 The following table's first column shows the platform you would like to target.  The right three columns show the operating system you are running.
 
-| Platform Target |       Windows       |       Linux        |       macOS        |
-| --------------: | :-----------------: | :----------------: | :----------------: |
-|         Windows | :white_check_mark:  |                    |                    |
-|           Linux |                     |    in progress     |                    |
-|           macOS |                     |                    | :white_check_mark: |
-|             iOS |                     |                    | :white_check_mark: |
-|         Android |     in progress     |    in progress     | :white_check_mark: |
-|      JavaScript | :white_check_mark:* | :white_check_mark: | :white_check_mark: |
-|          Python |       planned       |      planned       |      planned       |
+<table>
+  <thead>
+    <tr>
+      <th colspan=2></th>
+      <th align="center">Windows</th>
+      <th align="center">Linux</th>
+      <th align="center">macOS</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan=5>.NET</td>
+      <td align="right">Windows</td>
+      <td align="center">✅</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td align="right">Linux</td>
+      <td></td>
+      <td align="center"><em>in progress</em></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td align="right">macOS</td>
+      <td></td>
+      <td></td>
+      <td align="center">✅</td>
+    </tr>
+    <tr>
+      <td align="right">iOS</td>
+      <td></td>
+      <td></td>
+      <td align="center">✅</td>
+    </tr>
+    <tr>
+      <td align="right">Android</td>
+      <td align="center"><em>in progress</em></td>
+      <td align="center"><em>in progress</em></td>
+      <td align="center">✅</td>
+    </tr>
+    <tr>
+      <td align="right" colspan=2>JavaScript</td>
+      <td align="center">✅*</td>
+      <td align="center">✅</td>
+      <td align="center">✅</td>
+    </tr>
+    <tr>
+      <td align="right" colspan=2>Python</td>
+      <td align="center"><em>planned</em></td>
+      <td align="center"><em>planned</em></td>
+      <td align="center"><em>planned</em></td>
+    </tr>
+  </tbody>
+</table>
 
 *requires [Windows Linux Subsystem](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
