@@ -36,7 +36,10 @@ from sys import platform as _platform
 
 xcode_logging = False
 valid_platform_args = ["js", "python", "macos", "ios", "android", "windows", "linux"]
-
+submodules = ["opennurbs", "draco", "pybind11"]
+script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
+lib_folder = os.path.abspath(os.path.join(src_folder, "lib"))
 
 class BuildTool:
     def __init__(self, name, abbr, currently_using, archive_url, install_notes):
@@ -109,8 +112,7 @@ def compare_versions(v1, v2):
 
 
 def read_required_versions():
-    # check to make sure that the Current Development Tools.md file exists, exit with error if not
-    script_folder = os.path.dirname(os.path.abspath(__file__))
+    # check to make sure that the Current Development Tools.md file exists, exit with error if not    
     current_development_tools_file_path = os.path.join(script_folder, '..', 'Current Development Tools.md')
     if not os.path.exists(current_development_tools_file_path):
         print_error_message("Could not find the Current Development Tools.md (rhino3dm) file listing our "
@@ -256,16 +258,14 @@ def print_version_comparison(build_tool, running_version):
     return version_alignment
 
 
-def check_opennurbs():
-    script_folder = os.path.dirname(os.path.abspath(__file__))
-    path_to_src = os.path.join(script_folder + "/../" + "src")
-    opennnurbs_3dm_h_path = os.path.join(path_to_src, "lib", "opennurbs", "opennurbs_3dm.h")
-
-    if not os.path.exists(opennnurbs_3dm_h_path):
-        print_error_message("opennurbs was not found in src/lib/opennurbs.  From the root folder of the project, "
-                            "please run: git submodule update --init")
-        return False
-
+def check_submodules():
+    for submodule in submodules:
+        path_to_submodule = os.path.abspath(os.path.join(lib_folder, submodule))
+        path_to_git = os.path.abspath(os.path.join(path_to_submodule, '.git'))
+        if not os.path.exists(path_to_git):
+            print_error_message("submodule at: " + path_to_submodule + " does not appear to be initialized.  Please run: git submodule update --init")
+            return False
+    
     return True
 
 
@@ -985,8 +985,9 @@ def main():
     if _platform == "win32":
         xcode_logging = True
 
-    # checks
-    check_opennurbs()
+    # check submodules
+    if not check_submodules():
+        sys.exit(1)
 
     # check platform(s)
     if args.platform is not None:
