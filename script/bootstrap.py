@@ -369,27 +369,24 @@ def check_xcode(build_tool):
 def check_emscripten(build_tool):
     print_check_preamble(build_tool)
 
+    emcc = 'emcc.bat' if _platform == 'win32' else 'emcc'
     try:
-        if _platform == "win32":
-            p = subprocess.Popen(['emcc.bat', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        else:
-            p = subprocess.Popen(['emcc', '-v'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p = subprocess.Popen([emcc, '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
-
-    # emcc -v returns an err in the reverse typical order...
+        
     if sys.version_info[0] < 3:
-        running_version = p.communicate()[1].splitlines()[0].split(") ")[1]
+        running_version = p.communicate()[0].splitlines()[0].split()[4]
         if not running_version:
             print_error_message(build_tool.name + " not found." + format_install_instructions(build_tool))
             return False
     else:
-        err, running_version = p.communicate()
+        running_version, err = p.communicate()
         if err:
             print_error_message(err)
             return False
-        running_version = running_version.decode('utf-8').splitlines()[0].split(") ")[1]
+        running_version = running_version.decode('utf-8').splitlines()[0].split()[4]
 
     print_version_comparison(build_tool, running_version)
 
