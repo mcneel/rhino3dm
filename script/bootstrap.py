@@ -134,9 +134,6 @@ def read_required_versions():
     # Android
     ndk = BuildTool("Android NDK", "ndk", "", "", "")
     xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
- 
-    # Linux
-    #TODO: dotnet = BuildTool(".NET SDK", "dotnet", "", "", "")
     
     # iOS
     xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
