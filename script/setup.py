@@ -477,7 +477,7 @@ def setup_windows():
 
 
 def setup_linux():
-    if _platform != "linux":
+    if _platform != "linux" and _platform != "linux2":
         print_error_message("Generating project file for Linux requires that you run this script on Linux")
         return False
 
