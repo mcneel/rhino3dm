@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>RHINO3DM_BUILD DOTNETCORE</DefineConstants>
     <AssemblyName>Rhino3dm</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
 </Project>
