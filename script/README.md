@@ -59,7 +59,7 @@ The following table's first column shows the platform you would like to target. 
     <tr>
       <td align="right">Linux</td>
       <td></td>
-      <td align="center"><em>needs testing</em></td>
+      <td align="center">✅</td>
       <td></td>
     </tr>
     <tr>
@@ -77,7 +77,7 @@ The following table's first column shows the platform you would like to target. 
     <tr>
       <td align="right">Android</td>
       <td align="center"><em>in progress</em></td>
-      <td align="center"><em>in progress</em></td>
+      <td></td>
       <td align="center">✅</td>
     </tr>
     <tr>
