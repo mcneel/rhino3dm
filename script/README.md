@@ -42,10 +42,15 @@ The following table's first column shows the platform you would like to target. 
 <table>
   <thead>
     <tr>
-      <th colspan=2></th>
-      <th align="center">Windows</th>
-      <th align="center">Linux</th>
-      <th align="center">macOS</th>
+    <th></th>
+    <th></th>
+    <th colspan="3">Your Operating System</th>
+  </tr>
+    <tr>
+      <td colspan=2></td>
+      <td align="center">Windows</td>
+      <td align="center">Linux</td>
+      <td align="center">macOS</td>
     </tr>
   </thead>
   <tbody>
@@ -97,7 +102,7 @@ The following table's first column shows the platform you would like to target. 
 
 *requires [Windows Linux Subsystem](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems.   Android, JavaScript, and Python targets can be built from any platform (or that is the plan).  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
+As you can see, targeting the three desktop platforms requires that you run the scripts on those operating systems. JavaScript and Python targets can be built on any operating system (or that is the plan).  With the exception of the Windows (Desktop) target, Windows users must use the Windows Linus Subsystem (WLS).
 
 ### bootstrap.py
 
