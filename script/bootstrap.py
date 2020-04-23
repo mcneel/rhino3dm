@@ -878,6 +878,16 @@ def download_dependency(build_tool):
         
 
 def download_handler(download, build_tools):
+    if download == "windows":
+        print_platform_download_preamble("Windows")
+        if _platform != "win32" and _platform != "win64":
+            print_error_message("Downloading dependencies for Windows requires that you run this script on Windows")
+            return False
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])        
+        download_dependency(build_tools["cmake"])
+        download_dependency(build_tools["msbuild"])
+
     if download == "js":
         print_platform_download_preamble("JavaScript")
         if _platform == "darwin":
