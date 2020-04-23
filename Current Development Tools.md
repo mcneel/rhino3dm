@@ -113,9 +113,9 @@ We are currently using macOS 10.15.3. Scripts read this:
 
 ### Xcode
 
-We are currently using Xcode 11.3.1. Scripts read this:
+We are currently using Xcode 11.4. Scripts read this:
 
-`xcode_currently_using = 11.3.1`
+`xcode_currently_using = 11.4`
 `xcode_install_notes = Xcode can be downloaded for free from the macOS App Store or from https://developer.apple.com/download/ (Apple developer ID required for the latter option).`
 
 ### Mono Framework MDK
