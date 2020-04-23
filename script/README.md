@@ -1,10 +1,10 @@
-# rhino3dm build process outline [draft]
+# rhino3dm build scripts
 
-Last updated by dan@mcneel.com on April 20, 2020
+Last updated by dan@mcneel.com on April 22, 2020
 
-**WARNING**: This is currently a work-in-progress draft.  Some of the information may not be up-to-date with current state of the script.  This warning will be removed once (we believe) we have it working.  **NOT ALL PLATFORMS ARE SUPPORTED WITH THESE SCRIPTS** (yet...see table below).
+This folder contains scripts that can used to build rhino3dm for the supported platforms.  The build process for rhino3dm is run on [CircleCi](https://circleci.com/).  That said, this process can be tested locally by using these scripts.
 
-The build process for rhino3dm is run on [CircleCi](https://circleci.com/).  All changes to build configuration settings should be made from the [CircleCI rhino3dm project](link needed).  That said, this process can be tested locally.
+**WARNING**: Targeting python is not yet supported from these scripts, but is planned.
 
 ## Overview
 
@@ -44,7 +44,7 @@ The following table's first column shows the platform you would like to target. 
     <tr>
     <th></th>
     <th></th>
-    <th colspan="3">Your Operating System</th>
+    <th colspan="3" align="center">Your Operating System</th>
   </tr>
     <tr>
       <td colspan=2></td>
@@ -81,7 +81,7 @@ The following table's first column shows the platform you would like to target. 
     </tr>
     <tr>
       <td align="right">Android</td>
-      <td align="center"><em>in progress</em></td>
+      <td></td>
       <td></td>
       <td align="center">✅</td>
     </tr>
