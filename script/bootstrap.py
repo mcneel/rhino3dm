@@ -35,7 +35,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["js", "python", "macos", "ios", "android", "windows", "linux"]
+valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
 submodules = ["opennurbs", "draco", "pybind11"]
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
@@ -120,43 +120,43 @@ def read_required_versions():
                             current_development_tools_file_path + "\n Exiting script.")
         sys.exit(1)
 
-    # Shared
-    macos = BuildTool("macOS", "macos", "", "", "")
-    xcode = BuildTool("Xcode", "xcode", "", "", "")
-    git = BuildTool("Git", "git", "", "", "")
-    python = BuildTool("Python", "python", "", "", "")
-    cmake = BuildTool("CMake", "cmake", "", "", "")
-    mdk = BuildTool("Mono MDK", "mdk", "", "", "")
-
-    # Javascript
-    emscripten = BuildTool("Emscripten", "emscripten", "", "", "")
-
-    # Android
-    ndk = BuildTool("Android NDK", "ndk", "", "", "")
-    xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
-    
-    # iOS
-    xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
- 
     # Windows
     msbuild = BuildTool("msbuild", "msbuild", "", "", "")
 
     # Linux
     dotnet = BuildTool("dotnet Core SDK", "dotnet", "", "", "")
 
+   # iOS
+    xamios = BuildTool("Xamarin.iOS", "xamios", "", "", "")
+ 
+    # Android
+    ndk = BuildTool("Android NDK", "ndk", "", "", "")
+    xamandroid = BuildTool("Xamarin.Android", "xamandroid", "", "", "")
+    
+    # Javascript
+    emscripten = BuildTool("Emscripten", "emscripten", "", "", "")
+
+    # Shared
+    git = BuildTool("Git", "git", "", "", "")
+    python = BuildTool("Python", "python", "", "", "")
+    cmake = BuildTool("CMake", "cmake", "", "", "")
+    mdk = BuildTool("Mono MDK", "mdk", "", "", "")
+    macos = BuildTool("macOS", "macos", "", "", "")
+    xcode = BuildTool("Xcode", "xcode", "", "", "")
+
     # create the build tools dictionary
-    build_tools = dict(macos=macos, 
-                       xcode=xcode, 
-                       git=git, 
-                       python=python, 
-                       cmake=cmake, 
-                       emscripten=emscripten, 
-                       mdk=mdk, 
+    build_tools = dict(msbuild=msbuild, 
+                       dotnet=dotnet, 
+                       macos=macos, 
                        xamios=xamios, 
                        ndk=ndk, 
-                       xamandroid=xamandroid,
-                       msbuild=msbuild,
-                       dotnet=dotnet)
+                       xamandroid=xamandroid, 
+                       emscripten=emscripten, 
+                       git=git, 
+                       python=python, 
+                       cmake=cmake,                  
+                       mdk=mdk, 
+                       xcode=xcode)
 
     # open and read Current Development Tools.md and load required versions
     current_development_tools_file = open(current_development_tools_file_path, "r")
@@ -718,25 +718,25 @@ def check_dotnet(build_tool):
 
 
 def check_handler(check, build_tools):
-    if check == "js":
-        print_platform_preamble("JavaScript")
-        if _platform == "darwin":
-            check_macos(build_tools["macos"])
-            check_xcode(build_tools["xcode"])
+    if check == "windows":
+        print_platform_preamble("Windows")
+        if _platform != "win32" and _platform != "win64":
+            print_error_message("Checking dependencies for Windows requires that you run this script on Windows")
+            return False
         check_git(build_tools["git"])
         check_python(build_tools["python"])
-        check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
+        check_msbuild(build_tools["msbuild"])
 
-    if check == "python":
-        print_platform_preamble("Python")
-        if _platform == "darwin":
-            check_macos(build_tools["macos"])
-            check_xcode(build_tools["xcode"])
+    if check == "linux":
+        print_platform_preamble("Linux")
+        if _platform != "linux" and _platform != "linux2":
+            print_error_message("Checking dependencies for Linux requires that you run this script on Linux.")
+            return False
         check_git(build_tools["git"])
         check_python(build_tools["python"])
-        check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
+        check_dotnet(build_tools["dotnet"])
 
     if check == "macos":
         print_platform_preamble("macOS")
@@ -765,35 +765,37 @@ def check_handler(check, build_tools):
 
     if check == "android":
         print_platform_preamble("Android")
-        if _platform == "darwin":
-            check_macos(build_tools["macos"])
-            check_xcode(build_tools["xcode"])
+        if _platform != "darwin":
+            print_error_message("Checking dependencies for Android requires that you run this script on macOS")
+            return False
+        check_macos(build_tools["macos"])
+        check_xcode(build_tools["xcode"])
         check_git(build_tools["git"])
         check_python(build_tools["python"])
         check_cmake(build_tools["cmake"])
         check_mdk(build_tools["mdk"])
         check_ndk(build_tools["ndk"])
         check_xamandroid(build_tools["xamandroid"])
-
-    if check == "windows":
-        print_platform_preamble("Windows")
-        if _platform != "win32" and _platform != "win64":
-            print_error_message("Checking dependencies for Windows requires that you run this script on Windows")
-            return False
+    
+    if check == "js":
+        print_platform_preamble("JavaScript")
+        if _platform == "darwin":
+            check_macos(build_tools["macos"])
+            check_xcode(build_tools["xcode"])
         check_git(build_tools["git"])
         check_python(build_tools["python"])
+        check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
-        check_msbuild(build_tools["msbuild"])
 
-    if check == "linux":
-        print_platform_preamble("Linux")
-        if _platform != "linux" and _platform != "linux2":
-            print_error_message("Checking dependencies for Linux requires that you run this script on Linux.")
-            return False
+    if check == "python":
+        print_platform_preamble("Python")
+        if _platform == "darwin":
+            check_macos(build_tools["macos"])
+            check_xcode(build_tools["xcode"])
         check_git(build_tools["git"])
         check_python(build_tools["python"])
+        check_emscripten(build_tools["emscripten"])
         check_cmake(build_tools["cmake"])
-        check_dotnet(build_tools["dotnet"])
 
     if check not in valid_platform_args:
         if check == "all":
@@ -888,25 +890,15 @@ def download_handler(download, build_tools):
         download_dependency(build_tools["cmake"])
         download_dependency(build_tools["msbuild"])
 
-    if download == "js":
-        print_platform_download_preamble("JavaScript")
-        if _platform == "darwin":
-            download_dependency(build_tools["macos"])
-            download_dependency(build_tools["xcode"])
+    if download == "linux":
+        print_platform_download_preamble("Linux")
+        if _platform != "linux" and _platform != "linux2":
+            print_error_message("Downloading dependencies for Linux requires that you run this script on Linux")
+            return False
         download_dependency(build_tools["git"])
         download_dependency(build_tools["python"])
-        download_dependency(build_tools["emscripten"])
         download_dependency(build_tools["cmake"])
-
-    if download == "python":
-        print_platform_download_preamble("Python")
-        if _platform == "darwin":
-            download_dependency(build_tools["macos"])
-            download_dependency(build_tools["xcode"])
-        download_dependency(build_tools["git"])
-        download_dependency(build_tools["python"])
-        download_dependency(build_tools["emscripten"])
-        download_dependency(build_tools["cmake"])
+        download_dependency(build_tools["dotnet"])
 
     if download == "macos":
         print_platform_download_preamble("macOS")
@@ -944,6 +936,26 @@ def download_handler(download, build_tools):
         download_dependency(build_tools["mdk"])
         download_dependency(build_tools["ndk"])
         download_dependency(build_tools["xamandroid"])
+
+    if download == "js":
+        print_platform_download_preamble("JavaScript")
+        if _platform == "darwin":
+            download_dependency(build_tools["macos"])
+            download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["emscripten"])
+        download_dependency(build_tools["cmake"])
+
+    if download == "python":
+        print_platform_download_preamble("Python")
+        if _platform == "darwin":
+            download_dependency(build_tools["macos"])
+            download_dependency(build_tools["xcode"])
+        download_dependency(build_tools["git"])
+        download_dependency(build_tools["python"])
+        download_dependency(build_tools["emscripten"])
+        download_dependency(build_tools["cmake"])
 
     if download not in valid_platform_args:
         if download == "all":
