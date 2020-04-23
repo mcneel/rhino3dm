@@ -27,8 +27,8 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
-valid_platform_args = ["js", "ios", "macos", "android", "windows", "linux"]
-platform_full_names = {'js': 'JavaScript', 'ios': 'iOS', 'macos': 'macOS', 'android': 'Android', 'windows':'Windows', 'linux':'Linux'}
+valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
+platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript' }
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
@@ -106,10 +106,12 @@ def run_command(command, suppress_errors=False):
             if error:
                 if sys.version_info[0] < 3:
                     print_error_message(error.strip())
+                    delete_cache_file()
                     sys.exit(1)
                 else:
                     error = error.decode('utf-8').strip()
                     print_error_message(error)
+                    delete_cache_file()
                     sys.exit(1)
             else:
                 continue
@@ -266,153 +268,6 @@ def run_methodgen():
     return True
 
 
-def setup_macos():
-    if _platform != "darwin":
-        print_error_message("Generating project file for macOS requires that you run this script on macOS")
-        return False
-
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("macos").lower()))
-    target_file_name = "librhino3dm_native.xcodeproj"
-
-    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
-    if not overwrite_check(item_to_check):
-        return False
-    
-    os.chdir(target_path)
-
-    # generate the project files
-    print("")
-    if xcode_logging:
-        print("Generating xcodeproj files for macOS...")
-    else:
-        print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
-
-    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
-    run_command(command)
-    
-    # methogen
-    build_methodgen()
-    run_methodgen()
-
-    return setup_did_succeed(item_to_check)
-
-
-def setup_ios():
-    if _platform != "darwin":
-        print_error_message("Generating project file for iOS requires that you run this script on macOS")
-        return False
-
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("ios").lower()))
-    target_file_name = "librhino3dm_native.xcodeproj"
-
-    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
-    if not overwrite_check(item_to_check):
-        return False
-
-    os.chdir(target_path)
-
-    # generate the project files
-    print("")
-    if xcode_logging:
-        print("Generating xcodeproj files for iOS...")
-    else:
-        print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
-    command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
-               "-DDEPLOYMENT_TARGET=9.3 " + librhino3dm_native_folder)
-    run_command(command)
-
-    # methogen
-    build_methodgen()
-    run_methodgen()
-
-    return setup_did_succeed(item_to_check)     
-
-
-def setup_js():
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("js").lower()))
-    item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
-
-    if not overwrite_check(item_to_check):
-        return False
-    
-    os.chdir(target_path)
-
-    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" " + src_folder
-    try:
-        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    except OSError:
-        print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
-        return False
-
-    if sys.version_info[0] < 3:
-        output = p.communicate()[0]
-        if output:
-            if verbose:
-                print(output)
-        else:
-            print_error_message("failed to run emcmake cmake.")
-    else:
-        output, err = p.communicate()
-        output = output.decode('utf-8')
-        err = err.decode('utf-8')
-        if output:
-            if verbose:
-                print(output)
-        elif err:
-            print_error_message(err)
-
-    return setup_did_succeed(item_to_check)
-
-
-def setup_android():
-    # https://developer.android.com/ndk/guides/cmake.html
-    # The Android toolchain file is in: <NDK>/build/cmake/android.toolchain.cmake
-    # We need to call the bootstrap script to figure out which ndk is currently in use, in order
-    # to set the ndk path
-    build_tools = bootstrap.read_required_versions()
-    android_ndk_path = bootstrap.check_ndk(build_tools["ndk"])
-    android_toolchain_path = os.path.join(android_ndk_path, "build", "cmake", "android.toolchain.cmake")
-
-    # construct the android build folder if we don't already have it.  since we'll be generating CMake projects to 
-    # subfolders for each app_abi, this is different the other platforms we support...
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("android").lower()))
-
-    # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
-    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
-    app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
-    for app_abi in app_abis:
-        # setup the build folders and clean previous builds if necessary...
-        abi_target_path = check_or_create_path(os.path.join(target_path, app_abi))
-        item_to_check = os.path.abspath(os.path.join(abi_target_path, "Makefile"))
-
-        if not overwrite_check(item_to_check):
-            return False
-
-        os.chdir(abi_target_path)
-
-        print("")
-        if xcode_logging:
-            print("Generating Makefile for Android (" + app_abi + ")...")
-        else:
-            print(bcolors.BOLD + "Generating Makefile Android (" + app_abi + ")..." + bcolors.ENDC)
-    
-        command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
-                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared " + librhino3dm_native_folder)
-        run_command(command)
-
-        time.sleep(2) # there can be a race-condition when generating the files on Android
-        
-        if not setup_did_succeed(item_to_check):
-            break
-
-    rv = True
-    # methogen
-    rv = build_methodgen()
-    rv = run_methodgen()
-
-    return rv
-
-
 def setup_windows():
     if _platform != "win32" and _platform != "win64":
         print_error_message("Generating project file for Windows requires that you run this script on Windows")
@@ -507,6 +362,153 @@ def setup_linux():
     return setup_did_succeed(item_to_check)
 
 
+def setup_macos():
+    if _platform != "darwin":
+        print_error_message("Generating project file for macOS requires that you run this script on macOS")
+        return False
+
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("macos").lower()))
+    target_file_name = "librhino3dm_native.xcodeproj"
+
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+    
+    os.chdir(target_path)
+
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating xcodeproj files for macOS...")
+    else:
+        print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
+
+    command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
+    run_command(command)
+    
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    return setup_did_succeed(item_to_check)
+
+
+def setup_ios():
+    if _platform != "darwin":
+        print_error_message("Generating project file for iOS requires that you run this script on macOS")
+        return False
+
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("ios").lower()))
+    target_file_name = "librhino3dm_native.xcodeproj"
+
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
+
+    os.chdir(target_path)
+
+    # generate the project files
+    print("")
+    if xcode_logging:
+        print("Generating xcodeproj files for iOS...")
+    else:
+        print(bcolors.BOLD + "Generating xcodeproj files for iOS..." + bcolors.ENDC)
+    command = ("cmake -G \"Xcode\" -DCMAKE_TOOLCHAIN_FILE=../../src/ios.toolchain.cmake -DPLATFORM=OS64COMBINED " + 
+               "-DDEPLOYMENT_TARGET=9.3 " + librhino3dm_native_folder)
+    run_command(command)
+
+    # methogen
+    build_methodgen()
+    run_methodgen()
+
+    return setup_did_succeed(item_to_check)
+
+
+def setup_android():
+    # https://developer.android.com/ndk/guides/cmake.html
+    # The Android toolchain file is in: <NDK>/build/cmake/android.toolchain.cmake
+    # We need to call the bootstrap script to figure out which ndk is currently in use, in order
+    # to set the ndk path
+    build_tools = bootstrap.read_required_versions()
+    android_ndk_path = bootstrap.check_ndk(build_tools["ndk"])
+    android_toolchain_path = os.path.join(android_ndk_path, "build", "cmake", "android.toolchain.cmake")
+
+    # construct the android build folder if we don't already have it.  since we'll be generating CMake projects to 
+    # subfolders for each app_abi, this is different the other platforms we support...
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("android").lower()))
+
+    # CMake builds for a single target per build. To target more than one Android ABI, you must build once per ABI. 
+    # It is recommended to use different build directories for each ABI to avoid collisions between builds.
+    app_abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86']
+    for app_abi in app_abis:
+        # setup the build folders and clean previous builds if necessary...
+        abi_target_path = check_or_create_path(os.path.join(target_path, app_abi))
+        item_to_check = os.path.abspath(os.path.join(abi_target_path, "Makefile"))
+
+        if not overwrite_check(item_to_check):
+            return False
+
+        os.chdir(abi_target_path)
+
+        print("")
+        if xcode_logging:
+            print("Generating Makefile for Android (" + app_abi + ")...")
+        else:
+            print(bcolors.BOLD + "Generating Makefile Android (" + app_abi + ")..." + bcolors.ENDC)
+    
+        command = ("cmake -DCMAKE_TOOLCHAIN_FILE=" + android_toolchain_path + " -DANDROID_ABI=" + app_abi + 
+                   " -DANDROID_PLATFORM=android-24 -DCMAKE_ANDROID_STL_TYPE=c++_shared " + librhino3dm_native_folder)
+        run_command(command)
+
+        time.sleep(2) # there can be a race-condition when generating the files on Android
+        
+        if not setup_did_succeed(item_to_check):
+            break
+
+    rv = True
+    # methogen
+    rv = build_methodgen()
+    rv = run_methodgen()
+
+    return rv
+
+
+def setup_js():
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("js").lower()))
+    item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
+
+    if not overwrite_check(item_to_check):
+        return False
+    
+    os.chdir(target_path)
+
+    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" " + src_folder
+    try:
+        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    except OSError:
+        print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
+        return False
+
+    if sys.version_info[0] < 3:
+        output = p.communicate()[0]
+        if output:
+            if verbose:
+                print(output)
+        else:
+            print_error_message("failed to run emcmake cmake.")
+    else:
+        output, err = p.communicate()
+        output = output.decode('utf-8')
+        err = err.decode('utf-8')
+        if output:
+            if verbose:
+                print(output)
+        elif err:
+            print_error_message(err)
+
+    return setup_did_succeed(item_to_check)
+
+
 def setup_handler(platform_target):
     if not os.path.exists(build_folder):
         os.mkdir(build_folder)
@@ -558,6 +560,7 @@ def main():
     # User has not entered any arguments...
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
+        delete_cache_file()
         sys.exit(1)
 
     global xcode_logging
@@ -581,6 +584,7 @@ def main():
             if (platform_target != "all") and (platform_target not in valid_platform_args):
                 print_error_message(platform_target + " is not a valid platform argument. valid tool arguments: all, "
                                     + ", ".join(valid_platform_args) + ".")
+                delete_cache_file()
                 sys.exit(1)
             rv = setup_handler(platform_target)
             did_succeed.append(rv)

@@ -86,3 +86,4 @@ script/.idea
 script/venv
 src/MethodGen.pdb
 src/dotnet/Resources/Resource.designer.cs
+script/bootstrap.pyc
