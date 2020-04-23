@@ -871,7 +871,10 @@ def download_dependency(build_tool):
         print("Downloading " + build_tool.name + "...")
     else:
         print(bcolors.BOLD + "Downloading " + build_tool.name + "..." + bcolors.ENDC)
-    destination_folder = os.path.expanduser("~") + '/Downloads/'
+    downloads_folder = '/Downloads/'
+    if _platform == "win32" or _platform == "win64":
+        downloads_folder = '\\Downloads\\'
+    destination_folder = os.path.expanduser("~") + downloads_folder
     if build_tool.archive_url:
         download_file(build_tool.archive_url, destination_folder)
         print_ok_message('Downloaded to ' + destination_folder + build_tool.archive_url.split('/')[-1])

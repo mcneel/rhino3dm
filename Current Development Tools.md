@@ -8,11 +8,10 @@ Last updated by dan@mcneel.com on April 23, 2020
 
 ### msbuild
 
-We are currently using msbuild 16.4.0.56107.  Scripts read this:
+We are currently using msbuild 16.5.0.12403.  Scripts read this:
 
-`msbuild_currently_using = 16.4.0.56107`
-`msbuild_archive_url_windows = https://visualstudio.microsoft.com/downloads/`
-`msbuild_install_notes_windows = MSBuild is installed as part of Visual Studio.`
+`msbuild_currently_using = 16.5.0.12403`
+`msbuild_install_notes_windows = MSBuild is installed as part of Visual Studio, which can be downloaded from: https://visualstudio.microsoft.com/downloads/`
 
 ## Linux
 
