@@ -119,10 +119,12 @@ def run_command(command, suppress_errors=False):
             if error:
                 if sys.version_info[0] < 3:
                     print_error_message(error.strip())
+                    delete_cache_file()
                     sys.exit(1)
                 else:
                     error = error.decode('utf-8').strip()
                     print_error_message(error)
+                    delete_cache_file()
                     sys.exit(1)
             else:
                 continue
@@ -531,6 +533,7 @@ def main():
     # User has not entered any arguments...
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
+        delete_cache_file()
         sys.exit(1)
 
     global xcode_logging
@@ -552,6 +555,7 @@ def main():
             if (platform_target != "all") and (platform_target not in valid_platform_args):
                 print_error_message(platform_target + " is not a valid platform argument. valid tool arguments: all, "
                                     + ", ".join(valid_platform_args) + ".")
+                delete_cache_file()
                 sys.exit(1)
             rv = build_handler(platform_target)
             did_succeed.append(rv)
