@@ -366,6 +366,21 @@ def check_xcode(build_tool):
 def check_emscripten(build_tool):
     print_check_preamble(build_tool)
 
+    # check to make sure that the $EMSDK path variable has been set
+    if _platform != "win32" and _platform != "win64":
+        emsdk_path = ''
+        cmd = 'echo $EMSDK'
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        if sys.version_info[0] < 3:
+            emsdk_path = p.communicate()[0].strip()                
+        else:
+            emsdk_path, err = p.communicate()
+            emsdk_path = emsdk_path.strip()
+            
+        if not emsdk_path:
+            print_error_message(build_tool.name + " EMSDK path not set." + format_install_instructions(build_tool))
+            return False
+        
     emcc = 'emcc.bat' if _platform == 'win32' else 'emcc'
     try:
         p = subprocess.Popen([emcc, '--version'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
