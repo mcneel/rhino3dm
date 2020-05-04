@@ -1,6 +1,6 @@
 # rhino3dm build scripts
 
-Last updated by dan@mcneel.com on April 22, 2020
+Last updated by dan@mcneel.com on May 4, 2020
 
 This folder contains scripts that can used to build rhino3dm for the supported platforms.  The build process for rhino3dm is run on [CircleCi](https://circleci.com/).  That said, this process can be tested locally by using these scripts.
 
@@ -22,9 +22,9 @@ We build and publish rhino3dm for a number of platforms:
 
 The steps to create rhino3dm are as follows:
 
-1. Check for the required build tools ([bootstrap.py](#bootstrap))
-2. Setup the native library platform projects by generating them using CMake ([setup.py](#setup.py))
-3. Build the native library projects and wrapper projects ([build.py](#build.py))
+1. Check for the required build tools ([bootstrap.py](#bootstrappy))
+2. Setup the native library platform projects by generating them using CMake ([setup.py](#setuppy))
+3. Build the native library projects and wrapper projects ([build.py](#buildpy))
 5. Build and publish the various packages (CircleCI supported for Python and Javascript).  Support for the .NET projects is coming soon.
 
 ## Scripts
