@@ -18,7 +18,7 @@ Rhino3dm.js requires two files `rhino3dm.wasm` and `rhino3dm.js`.  It is easiest
       // NOTE: the rhino3dm library is compiled with the MODULARIZE
       // option to avoid collisions with other web assemblies
       // here's one way of using it...
-      rhino3dm.then((Module) => {
+      rhino3dm().then((Module) => {
         sphere = new Module.Sphere([1,2,3], 12)
         // more stuff
       })
