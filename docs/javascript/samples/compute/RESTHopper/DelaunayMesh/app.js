@@ -21,8 +21,8 @@ rhino3dm().then( async m => {
     // source a .ghx file in the same directory
     let url = 'DMesh.ghx';
     let res = await fetch(url);
-    let text = await res.text();
-    definition = text;
+    let buffer = await res.arrayBuffer();
+    definition = new Uint8Array(buffer);
 
     init();
     compute();

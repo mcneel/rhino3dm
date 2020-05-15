@@ -30,18 +30,12 @@ rhino3dm().then(async m => {
     // if you have a different Rhino.Compute server, add the URL here:
     //RhinoCompute.url = "";
 
-    // load a .gh (binary) file!
-     let url = 'BranchNodeRnd.gh';
-     let res = await fetch(url);
-     let buffer = await res.arrayBuffer();
-     let arr = new Uint8Array(buffer);
-     definition = arr;
-
-    // try this instead to load a .ghx (xml) file!
-    //let url = 'BranchNodeRnd.ghx';
-    //let res = await fetch(url);
-    //let text = await res.text();
-    //definition = text;
+    // load a grasshopper file!
+    let url = 'BranchNodeRnd.gh';
+    let res = await fetch(url);
+    let buffer = await res.arrayBuffer();
+    let arr = new Uint8Array(buffer);
+    definition = arr;
 
     init();
     compute();
