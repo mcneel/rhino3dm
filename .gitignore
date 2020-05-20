@@ -83,7 +83,7 @@ __pycache__/
 /src/docgen/bin
 /src/methodgen/.vs
 script/.idea
-script/venv
+venv/
 src/MethodGen.pdb
 src/dotnet/Resources/Resource.designer.cs
 script/bootstrap.pyc
