@@ -421,7 +421,7 @@ def check_cmake(build_tool):
         if err:
             print_warning_message(err)
             return
-        running_version = running_version.decode('utf-8').splitlines()[0].strip().split('cmake version ')[1]
+        running_version = re.split(r'cmake3? version ', running_version.decode('utf-8').splitlines()[0].strip())[1]
 
     print_version_comparison(build_tool, running_version)
 
