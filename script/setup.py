@@ -293,7 +293,7 @@ def setup_windows():
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 15 2017\" " + librhino3dm_native_folder)
+    command = ("cmake -G \"Visual Studio 16 2019\" -A Win32 " + librhino3dm_native_folder)
     run_command(command)
 
     # 64 bit version...
@@ -313,7 +313,7 @@ def setup_windows():
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows 64-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 15 2017 Win64\" " + librhino3dm_native_folder)
+    command = ("cmake -G \"Visual Studio 16 2019\" -A x64 " + librhino3dm_native_folder)
     run_command(command)
 
     # Munge the project file to support 64 bit
