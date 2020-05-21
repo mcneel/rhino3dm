@@ -2,8 +2,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !DOTNETCORE
 // General Information about an assembly is controlled through the following 
+#if !DOTNETCORE && MOBILE_BUILD
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Rhino3dm")]
@@ -63,7 +63,7 @@ using System.Runtime.InteropServices;
 // 29 Aug 2017 - switch to automated assembly versioning
 
 #if RHINO3DM_BUILD
-#if !DOTNETCORE
+#if !DOTNETCORE && MOBILE_BUILD
 [assembly: AssemblyVersion("7.0.0.1")]
 #endif
 #endif

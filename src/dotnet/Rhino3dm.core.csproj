@@ -1,10 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <DefineConstants>RHINO3DM_BUILD DOTNETCORE</DefineConstants>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);RHINO3DM_BUILD</DefineConstants>
+    <!-- TODO: replace DOTNETCORE with NETSTANDARD2_0 and remove line below -->
+    <!-- (see https://docs.microsoft.com/en-us/nuget/create-packages/multiple-target-frameworks-project-file) -->
+    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">$(DefineConstants);DOTNETCORE</DefineConstants>
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Rhino</RootNamespace>
   </PropertyGroup>
 
 </Project>
