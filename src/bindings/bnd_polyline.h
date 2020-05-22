@@ -35,6 +35,10 @@ public:
   void SetAllZ(double zValue);
   //public static int ClosestIndexInList(IList<Point3d> list, Point3d testPoint)
   //public static Point3d ClosestPointInList(IList<Point3d> list, Point3d testPoint)
+
+#if defined(ON_PYTHON_COMPILE)
+  static BND_Point3dList FromPythonObject(pybind11::object points);
+#endif
 };
 
 class BND_Polyline : public BND_Point3dList

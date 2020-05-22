@@ -40,6 +40,44 @@ void BND_Point3dList::SetAllZ(double zValue)
     m_polyline[i].z = zValue;
 }
 
+#if defined(ON_PYTHON_COMPILE)
+BND_Point3dList BND_Point3dList::FromPythonObject(pybind11::object points)
+{
+  BND_Point3dList list;
+  pybind11::tuple _tuple;
+  pybind11::list _list;
+
+  // I realize this is dumb and not the appropriate way to cast, but I can't
+  // figure out how to dynamic_cast<> object types in pybind11
+  if (pybind11::isinstance(points, _tuple.get_type()) || pybind11::isinstance(points, _list.get_type()))
+  {
+    for (auto item : points)
+    {
+      if (pybind11::isinstance(item, _tuple.get_type()))
+      {
+        _tuple = item.cast<pybind11::tuple>();
+        list.Add(_tuple[0].cast<double>(), _tuple[1].cast<double>(), _tuple[2].cast<double>());
+      }
+      else if (pybind11::isinstance(item, _list.get_type()))
+      {
+        _list = item.cast<pybind11::list>();
+        list.Add(_list[0].cast<double>(), _list[1].cast<double>(), _list[2].cast<double>());
+      }
+      else
+      {
+        ON_3dPoint point = item.cast<ON_3dPoint>();
+        list.Add(point.x, point.y, point.z);
+      }
+    }
+  }
+  else
+  {
+    list = points.cast<BND_Point3dList>();
+  }
+
+  return list;
+}
+#endif
 
 double BND_Polyline::ClosestParameter(const ON_3dPoint& testPoint) const
 {

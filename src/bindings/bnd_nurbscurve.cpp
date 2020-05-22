@@ -157,14 +157,8 @@ BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Poin
 #if defined(ON_PYTHON_COMPILE)
 BND_NurbsCurve* BND_NurbsCurve::Create2(bool periodic, int degree, pybind11::object points)
 {
-  BND_Point3dList list;
-  for (auto item : points)
-  {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
-  }
+  BND_Point3dList list = BND_Point3dList::FromPythonObject(points);
   return Create(periodic, degree, list);
-
 }
 #endif
 

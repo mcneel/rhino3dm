@@ -430,12 +430,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, co
 #if defined(ON_PYTHON_COMPILE)
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes)
 {
-  BND_Point3dList list;
-  for (auto item : points)
-  {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
-  }
+  BND_Point3dList list = BND_Point3dList::FromPythonObject(points);
   return AddPolyline(list, attributes);
 }
 #endif

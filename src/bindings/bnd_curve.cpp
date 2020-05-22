@@ -37,12 +37,7 @@ BND_Curve* BND_Curve::CreateControlPointCurve(const BND_Point3dList& points, int
 #if defined(ON_PYTHON_COMPILE)
 BND_Curve* BND_Curve::CreateControlPointCurve2(pybind11::object points, int degree)
 {
-  BND_Point3dList list;
-  for (auto item : points)
-  {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
-  }
+  BND_Point3dList list = BND_Point3dList::FromPythonObject(points);
   return CreateControlPointCurve(list, degree);
 }
 #endif
