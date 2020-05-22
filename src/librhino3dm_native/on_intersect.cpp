@@ -339,83 +339,149 @@ RH_C_FUNCTION int ON_RayShooter_OneSurface(ON_3DPOINT_STRUCT _point, ON_3DVECTOR
   return rc;
 }
 
-RH_C_FUNCTION int ON_RayShooter_ShootRay(ON_3DPOINT_STRUCT _point, ON_3DVECTOR_STRUCT _direction,
-                                           const ON_SimpleArray<const ON_Geometry*>* pConstGeometryArray,
-                                           ON_SimpleArray<ON_3dPoint>* pPoints, int maxReflections)
+RH_C_FUNCTION int ON_RayShooter_ShootRay(
+  const ON_SimpleArray<const ON_Geometry*>* pConstGeometry,
+  ON_3DPOINT_STRUCT _point,
+  ON_3DVECTOR_STRUCT _direction,
+  int max_reflections,
+  ON_SimpleArray<ON_3dPoint>* pPoints,
+  ON_SimpleArray<int>* pBreps,
+  ON_SimpleArray<int>* pComponents
+  )
 {
   int rc = 0;
-  ON_3dPoint point(_point.val[0], _point.val[1], _point.val[2]);
-  ON_3dVector direction(_direction.val[0], _direction.val[1], _direction.val[2]);
 
-  // Currently only supports surfaces and breps with untrimmed faces.
-  // Add support for meshes and trimmed breps
+  ON_3dPoint P(_point.val[0], _point.val[1], _point.val[2]);
+  ON_3dVector D(_direction.val[0], _direction.val[1], _direction.val[2]);
 
-  int count = pConstGeometryArray?pConstGeometryArray->Count():0;
-  if( count<1 )
-    return 0;
-  ON_SimpleArray<const ON_SurfaceTreeNode*> snode_list(count);
-  for ( int i=0; i<count; i++ )
+  if (nullptr == pConstGeometry ||
+      nullptr == pPoints        ||
+      max_reflections <= 0      ||
+      !P.IsValid()              || 
+      !D.Unitize()
+    )
+    return rc;
+
+  bool bReturnHits = (nullptr != pBreps && nullptr != pComponents);
+
+  ON_SimpleArray<const ON_SurfaceTreeNode*> stree_list;
+  std::map<unsigned int, ON_2dex> stree_map;
+
+  for (int i = 0; i < pConstGeometry->Count(); i++)
   {
-    const ON_Geometry* pGeometry = (*pConstGeometryArray)[i];
-    const ON_Surface* surface = ON_Surface::Cast(pGeometry);
-    if ( surface )
+    const ON_Geometry* geometry = (*pConstGeometry)[i];
+    if (geometry)
     {
-      const ON_SurfaceTree* stree = surface->SurfaceTree();
-      if ( stree )
-        snode_list.Append(stree);
-      continue;
-    }
-    const ON_Brep* brep = ON_Brep::Cast(pGeometry);
-    if( brep )
-    {
-      for( int fi=0; fi<brep->m_F.Count(); fi++ )
+      const ON_Surface* surface = ON_Surface::Cast(geometry);
+      if (surface)
       {
-        const ON_SurfaceTree* stree = brep->m_F[fi].SurfaceTree();
-        if( stree )
-        snode_list.Append(stree);
+        const ON_SurfaceTree* stree = surface->SurfaceTree();
+        if (stree)
+        {
+          stree_list.Append(stree);
+          if (bReturnHits)
+          {
+            ON_2dex dex(i, ON_UNSET_INT_INDEX);
+            stree_map[stree->m_treesn] = dex;
+          }
+        }
+        continue;
       }
-      continue;
+      const ON_Brep* brep = ON_Brep::Cast(geometry);
+      if (brep)
+      {
+        for (int fi = 0; fi < brep->m_F.Count(); fi++)
+        {
+          ON_BrepFace* face = brep->Face(fi);
+          if (face)
+          {
+            const ON_SurfaceTree* stree = face->SurfaceTree();
+            if (stree)
+            {
+              stree_list.Append(stree);
+              if (bReturnHits)
+              {
+                ON_2dex dex(i, fi);
+                stree_map[stree->m_treesn] = dex;
+              }
+            }
+          }
+        }
+      }
     }
   }
-  if( snode_list.Count()<1 )
-    return 0;
 
-  if( pPoints && maxReflections>0 && point.IsValid() && direction.Unitize() )
+  if (0 == stree_list.Count())
+    return rc;
+
+  ON_RayShooter ray;
+  ON_X_EVENT hit;
+  ON_3dPoint Q = P;
+  ON_3dVector R = D;
+
+  for (int i = 0; i <= max_reflections; i++)
   {
-    ON_RayShooter shooter;
-    ON_X_EVENT hit;
-    ON_3dPoint Q = point;
-    ON_3dVector R = direction;
-    for( int i=0; i<maxReflections; i++ )
+    ON_3dVector T = R;
+    if (!T.Unitize())
+      break;
+
+    // Shoot the ray
+    memset(&hit, 0, sizeof(hit));
+    if (!ray.Shoot(Q, T, stree_list.Count(), stree_list.Array(), hit))
+      break;
+
+    // Get the "hit" surface tree node
+    const ON_SurfaceTreeNode* stn = hit.m_snodeB[0];
+    if (nullptr == stn)
+      stn = hit.m_snodeB[1];
+    if (nullptr == stn)
+      break;
+
+    // Look up the surface or face based on the surface tree node's serial number
+    if (bReturnHits)
     {
-      memset(&hit,0,sizeof(hit));
-      ON_3dVector T = R;
-      if( !T.Unitize() )
-        break;
-      if( !shooter.Shoot(Q,T,snode_list,hit) )
-        break;
-      Q = hit.m_A[0];
-      pPoints->Append(Q);
-      if( !hit.m_snodeB[0] )
-        break;
-
-      ON_3dVector N = hit.m_B[1]; // surface normal
-      double d = -2.0*(N.x*T.x + N.y*T.y + N.z*T.z);
-      R.x = T.x + d*N.x;
-      R.y = T.y + d*N.y;
-      R.z = T.z + d*N.z;
-
-      // Part of the fix for RR 22717.  See opennurbs_plus_xray.cpp
-      // for the rest of the fix.
-      d = hit.m_A[0].DistanceTo( hit.m_B[0] );
-      shooter.m_min_travel_distance = d;
-      if( shooter.m_min_travel_distance < 1.0e-8 )
-        shooter.m_min_travel_distance = 1.0e-8;
+      ON_2dex dex = ON_2dex::Unset;
+      std::map<unsigned int, ON_2dex>::const_iterator pos = stree_map.find(stn->m_treesn);
+      if (pos != stree_map.end())
+        dex = stree_map[stn->m_treesn];
+      pBreps->Append(dex.i);
+      pComponents->Append(dex.j);
     }
-    rc = pPoints->Count();
+
+    Q = hit.m_B[0]; // surface point
+
+    // Add next set of out values
+    pPoints->Append(Q);
+
+    // Set R = reflection direction
+    ON_3dVector N = hit.m_B[1]; // surface normal
+    double d = -2.0 * (N.x * T.x + N.y * T.y + N.z * T.z);
+    R.x = T.x + d * N.x;
+    R.y = T.y + d * N.y;
+    R.z = T.z + d * N.z;
+
+    // Part of the fix for RR 22717.  See opennurbs_plus_xray.cpp
+    // for the rest of the fix.
+    ray.m_min_travel_distance = hit.m_A[0].DistanceTo(hit.m_B[0]);
+    if (ray.m_min_travel_distance < 1.0e-8)
+      ray.m_min_travel_distance = 1.0e-8;
   }
+
+  int point_count = pPoints->Count();
+  if (bReturnHits)
+  {
+    rc = (point_count == pBreps->Count() && point_count == pComponents->Count()) 
+      ? point_count 
+      : 0;
+  }
+  else
+  {
+    rc = point_count;
+  }
+
   return rc;
 }
+
 
 RH_C_FUNCTION ON_SimpleArray<ON_Polyline*>* ON_Intersect_MeshMesh1(const ON_Mesh* pConstMeshA, const ON_Mesh* pConstMeshB, int* polyline_count, double tolerance)
 {

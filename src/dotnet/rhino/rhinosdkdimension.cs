@@ -1,4 +1,4 @@
-﻿#if RHINO_SDK
+#if RHINO_SDK
 
 namespace Rhino.DocObjects
 {
@@ -13,6 +13,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the dimension geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.LinearDimension LinearDimensionGeometry => Geometry as Geometry.LinearDimension;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()
@@ -32,6 +33,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the dimension geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.AngularDimension AngularDimensionGeometry => Geometry as Geometry.AngularDimension;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()
@@ -51,6 +53,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the dimension geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.RadialDimension RadialDimensionGeometry => Geometry as Geometry.RadialDimension;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()
@@ -70,6 +73,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the dimension geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.OrdinateDimension OrdinateDimensionGeometry => Geometry as Geometry.OrdinateDimension;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()
@@ -89,6 +93,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the dimension geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.Centermark CentermarkGeometry => Geometry as Geometry.Centermark;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()

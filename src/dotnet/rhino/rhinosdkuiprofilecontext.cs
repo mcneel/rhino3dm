@@ -28,6 +28,7 @@ namespace Rhino.Runtime
     /// <param name="fileName">
     /// Used to generate registry key unique to this file name
     /// </param>
+    /// <since>6.3</since>
     void LogSuccess(string fileName);
 
     /// <summary>
@@ -40,6 +41,7 @@ namespace Rhino.Runtime
     /// <param name="exception">
     /// The exception causing this event
     /// </param>
+    /// <since>6.3</since>
     void LogFailure(string fileName, Exception exception);
 
     /// <summary>
@@ -56,6 +58,7 @@ namespace Rhino.Runtime
     /// Number
     /// </param>
     /// <returns></returns>
+    /// <since>6.3</since>
     void GeErrorInfo(string fileName, out int successCount, out int failureCount);
   }
 
@@ -76,10 +79,11 @@ namespace Rhino.Runtime
   /// </summary>
   interface ISettingsService
   {
+    /// <since>6.2</since>
     void TestHarness();
     /// <summary>
-    /// If true then WriteToPlist and ReadFromPlist are alled to serialize settings
-    /// otherwise; WriteSettings and ReadSettings are called using XML in a memroy
+    /// If true then WriteToPlist and ReadFromPlist are called to serialize settings
+    /// otherwise; WriteSettings and ReadSettings are called using XML in a memory
     /// stream.
     /// </summary>
     /// <value><c>true</c> if supports plist; otherwise, <c>false</c>.</value>
@@ -101,16 +105,19 @@ namespace Rhino.Runtime
     /// prior to the current user section.  If this is true any settings read from
     /// AllUsers will be marked as read-only at runtime
     /// </summary>
+    /// <since>6.2</since>
     bool SupportsAllUsers { get; }
     /// <summary>
     /// Return true if the settings system should use file watchers when reading settings
     /// to determine when settings have changed so changed events can be raised.
     /// </summary>
+    /// <since>6.2</since>
     bool UseFileWatchers { get; }
     /// <summary>
     /// Return true if settings changed events should be raised immediately after writing
     /// the settings file.
     /// </summary>
+    /// <since>6.2</since>
     bool RaiseChangedEventAfterWriting { get; }
     /// <summary>
     /// Writes the settings to OS specific location.
@@ -135,7 +142,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Writes the settings.
     /// </summary>
-    /// <returns><c>true</c>, if settings was writed, <c>false</c> otherwise.</returns>
+    /// <returns><c>true</c>, if settings was written, <c>false</c> otherwise.</returns>
     /// <param name="isShuttingDown">If set to <c>true</c> is shutting down.</param>
     /// <param name="settings">Settings.</param>
     /// <param name="commandSettings">Command settings.</param>
@@ -143,7 +150,7 @@ namespace Rhino.Runtime
     bool WriteToPlist(bool isShuttingDown, PersistentSettings settings, Dictionary<string, PersistentSettings> commandSettings, Action<bool, bool> writing);
     /// <summary>
     /// Check to see if a setting value exist in a key and if it does create a new
-    /// SettingValue and iniialize its ValueString using the plist value.
+    /// SettingValue and initialize its ValueString using the plist value.
     /// </summary>
     /// <param name="persistentSettings">Persistent settings containing the key.</param>
     /// <param name="key">Setting value key name.</param>
@@ -175,10 +182,11 @@ namespace Rhino.Runtime
     /// Returns null if the file does not exist or could not be read, a valid
     /// Stream otherwise.
     /// </returns>
+    /// <since>6.2</since>
     Stream ReadSettings(string fileName);
     /// <summary>
     /// Read settings directly from some system provided archive.  This is used
-    /// on Mac to read settings from the com.mcneel.rhinoceros.plist
+    /// on Mac to read settings from the com.mcneel.rhinoceros.ver.plist
     /// </summary>
     /// <returns><c>true</c>, if read settings was directed, <c>false</c> otherwise.</returns>
     /// <param name="plugInId">Plug in identifier.</param>
@@ -191,6 +199,7 @@ namespace Rhino.Runtime
     /// <param name="fileName">
     /// Full path to settings to delete.
     /// </param>
+    /// <since>6.2</since>
     void DeleteSettingsFile(string fileName);
 
     /// <summary>
@@ -210,7 +219,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Called when a new setting value is added to the runtime
     /// dictionary, Mac Rhino should check the PLIST for the
-    /// key and initialze it with the current key value
+    /// key and initialize it with the current key value
     /// </summary>
     /// <param name="settingValue">Setting value.</param>
     void OnAddSettingValue(SettingValue settingValue);
@@ -261,8 +270,8 @@ namespace Rhino.Runtime
 
 #region ISettingsService properties
     /// <summary>
-    /// If true then WriteToPlist and ReadFromPlist are alled to serialize settings
-    /// otherwise; WriteSettings and ReadSettings are called using XML in a memroy
+    /// If true then WriteToPlist and ReadFromPlist are called to serialize settings
+    /// otherwise; WriteSettings and ReadSettings are called using XML in a memory
     /// stream.
     /// </summary>
     /// <value><c>true</c> if supports plist; otherwise, <c>false</c>.</value>
@@ -304,7 +313,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Writes the settings.
     /// </summary>
-    /// <returns><c>true</c>, if settings was writed, <c>false</c> otherwise.</returns>
+    /// <returns><c>true</c>, if settings was written, <c>false</c> otherwise.</returns>
     /// <param name="isShuttingDown">If set to <c>true</c> is shutting down.</param>
     /// <param name="settings">Settings.</param>
     /// <param name="commandSettings">Command settings.</param>
@@ -315,7 +324,7 @@ namespace Rhino.Runtime
     }
     /// <summary>
     /// Check to see if a setting value exist in a key and if it does create a new
-    /// SettingValue and iniialize its ValueString using the plist value.
+    /// SettingValue and initialize its ValueString using the plist value.
     /// </summary>
     /// <param name="persistentSettings">Persistent settings containing the key.</param>
     /// <param name="key">Setting value key name.</param>
@@ -341,7 +350,7 @@ namespace Rhino.Runtime
 
     /// <summary>
     /// Read settings directly from some system provided archive.  This is used
-    /// on Mac to read settings from the com.mcneel.rhinoceros.plist
+    /// on Mac to read settings from the com.mcneel.rhinoceros.ver.plist
     /// </summary>
     /// <returns><c>true</c>, if read settings was directed, <c>false</c> otherwise.</returns>
     /// <param name="plugInId">Plug in identifier.</param>
@@ -510,7 +519,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Called when a new setting value is added to the runtime
     /// dictionary, Mac Rhino should check the PLIST for the
-    /// key and initialze it with the current key value
+    /// key and initialize it with the current key value
     /// </summary>
     /// <param name="settingValue">Setting value.</param>
     public void OnAddSettingValue(SettingValue settingValue) { }
@@ -715,6 +724,7 @@ namespace Rhino
     /// <returns>
     /// Returns true if it is a XML string list otherwise return false.
     /// </returns>
+    /// <since>6.0</since>
     public static bool IsStringList(string s)
     {
       return (!string.IsNullOrEmpty(s) && s.Contains("<list"));
@@ -728,6 +738,7 @@ namespace Rhino
     /// <returns>
     /// Returns true if it is a XML key value pair list otherwise return false.
     /// </returns>
+    /// <since>6.0</since>
     public static bool IsStringDictionary(string s)
     {
       return (!string.IsNullOrEmpty(s) && s.Contains("<dictionary"));
@@ -746,6 +757,7 @@ namespace Rhino
     /// Returns true if the string is not empty and properly formatted as a
     /// string list otherwise returns false.
     /// </returns>
+    /// <since>6.0</since>
     public static bool TryParseStringList(string s, out string[] value)
     {
       if (!IsStringList(s))
@@ -780,6 +792,7 @@ namespace Rhino
     /// Returns a properly formatted XML string that represents the list of
     /// strings.
     /// </returns>
+    /// <since>6.0</since>
     public static string ToString(string[] values)
     {
       using (var string_writer = new StringWriter())
@@ -898,15 +911,16 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Converts an enum value string (integer as string) to
-    /// a enum value name.
+    /// Converts an enumerated value string (integer as string) to
+    /// a enumerated value name.
     /// </summary>
-    /// <param name="type">The enum type</param>
-    /// <param name="intValueAsString">enum integer value as string</param>
+    /// <param name="type">The enumerated type</param>
+    /// <param name="intValueAsString">enumerated integer value as string</param>
     /// <param name="value">Output value, will be null on error</param>
     /// <returns>
-    /// Returns true if the the successfully converted or false if not.
+    /// Returns true if the successfully converted or false if not.
     /// </returns>
+    /// <since>6.0</since>
     public static bool TryParseEnum(Type type, string intValueAsString, out string value)
     {
       value = null;
@@ -924,15 +938,16 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Converts an enum value name to its integer
+    /// Converts an enumerated value name to its integer
     /// equivalent.
     /// </summary>
-    /// <param name="type">The enum type</param>
-    /// <param name="enumValueName">Enum value name as string</param>
+    /// <param name="type">The enumerated type</param>
+    /// <param name="enumValueName">Enumerated value name as string</param>
     /// <param name="value">Output value, will get set to -1 on error</param>
     /// <returns>
-    /// Returns true if the the successfully converted or false if not.
+    /// Returns true if the successfully converted or false if not.
     /// </returns>
+    /// <since>6.0</since>
     public static bool TryParseEnum(Type type, string enumValueName, out int value)
     {
       value = -1;
@@ -951,6 +966,7 @@ namespace Rhino
     /// <returns>
     /// Returns the double value as a settings file formatted string.
     /// </returns>
+    /// <since>6.10</since>
     public static string ToString(double value) => SettingValue.DoubleToString(value);
 
     /// <summary>
@@ -972,6 +988,7 @@ namespace Rhino
     /// <returns>
     /// Returns true if s was converted successfully; otherwise, false..
     /// </returns>
+    /// <since>6.10</since>
     public static bool TryParseDouble(string s, out double value) => SettingValue.TryGetDouble(s, out value);
   }
 
@@ -1836,6 +1853,7 @@ namespace Rhino
     /// or false if a different instance of Rhino has modified the settings
     /// file.
     /// </summary>
+    /// <since>6.0</since>
     public bool SavedByThisRhino { get; private set; }
 
     /// <summary>
@@ -1843,6 +1861,7 @@ namespace Rhino
     /// </summary>
     /// <seealso cref="Rhino.PlugIns.PlugIn.Settings"/>
     /// <seealso cref="Rhino.PlugIns.PlugIn.SettingsSaved"/>
+    /// <since>6.0</since>
     public PersistentSettings PlugInSettings
     {
       get
@@ -1859,6 +1878,7 @@ namespace Rhino
     /// English command to find settings for
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public PersistentSettings CommandSettings(string englishCommandName)
     {
       var settings = m_plug_in_settings.CommandSettings(englishCommandName);
@@ -1878,6 +1898,7 @@ namespace Rhino
       Cancel = false;
     }
 
+    /// <since>5.0</since>
     public bool Cancel { get; set; }
   }
 
@@ -1905,6 +1926,7 @@ namespace Rhino
   public class PersistentSettings : ISerializable
   {
     private static Runtime.ISettingsService g_service_implementation;
+    /// <since>6.1</since>
     internal static Runtime.ISettingsService Service
     {
       get
@@ -1926,7 +1948,7 @@ namespace Rhino
     /// <summary>
     /// Check to see if the settings dictionary contains the specified key
     /// </summary>
-    /// <returns><c>true</c>, if key was containsed, <c>false</c> otherwise.</returns>
+    /// <returns><c>true</c>, if key was contained, <c>false</c> otherwise.</returns>
     /// <param name="key">Key.</param>
     internal bool ContainsKey(string key) => m_settings.ContainsKey(key);
 
@@ -1946,6 +1968,7 @@ namespace Rhino
     /// <summary>
     /// If false then values will appear in the EditOptions window
     /// </summary>
+    /// <since>6.0</since>
     public bool HiddenFromUserInterface { get; set; }
 
     /// <summary>
@@ -1959,6 +1982,7 @@ namespace Rhino
     /// Returns persistent settings for the specified key or throws an
     /// exception if the key is invalid.
     /// </returns>
+    /// <since>6.0</since>
     public PersistentSettings GetChild(string key)
     {
       PersistentSettings rc;
@@ -1974,13 +1998,14 @@ namespace Rhino
     /// </summary>
     /// <param name="key">[in] Key name</param>
     /// <param name="value">
-    /// [out] Will be set the the child settings if the key is valid otherwise
+    /// [out] Will be set the child settings if the key is valid otherwise
     /// it will be null.
     /// </param>
     /// <returns>
     /// Returns true if the key exists and value was set otherwise; returns
     /// false.
     /// </returns>
+    /// <since>6.0</since>
     public bool TryGetChild(string key, out PersistentSettings value)
     {
       var success = m_children.TryGetValue(key, out value);
@@ -1990,6 +2015,7 @@ namespace Rhino
     /// <summary>
     /// Gets a collection containing the keys in the settings dictionary.
     /// </summary>
+    /// <since>6.0</since>
     public ICollection<string> Keys
     {
       get
@@ -2004,6 +2030,7 @@ namespace Rhino
     /// <summary>
     /// Gets a collection containing the keys in the settings dictionary.
     /// </summary>
+    /// <since>6.0</since>
     public ICollection<string> ChildKeys
     {
       get
@@ -2027,6 +2054,7 @@ namespace Rhino
     /// setting.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool TryGetSettingType(string key, out Type type)
     {
       SettingValue value;
@@ -2050,6 +2078,7 @@ namespace Rhino
     /// A KeyNotFoundException exception is thrown if the key is not found in
     /// the settings dictionary.
     /// </exception>
+    /// <since>6.0</since>
     public Type GetSettingType(string key)
     {
       Type result;
@@ -2070,6 +2099,7 @@ namespace Rhino
     /// setting.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool TryGetSettingIsReadOnly(string key, out bool value)
     {
       SettingValue setting_value;
@@ -2092,6 +2122,7 @@ namespace Rhino
     /// A KeyNotFoundException exception is thrown if the key is not found in
     /// the settings dictionary.
     /// </exception>
+    /// <since>6.0</since>
     public bool GetSettingIsReadOnly(string key)
     {
       bool result;
@@ -2112,6 +2143,7 @@ namespace Rhino
     /// setting.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool TryGetSettingIsHiddenFromUserInterface(string key, out bool value)
     {
       return TryGetSettingIsHiddenFromUserInterface(key, out value, null);
@@ -2131,6 +2163,7 @@ namespace Rhino
     /// <param name="legacyKeyList">
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool TryGetSettingIsHiddenFromUserInterface(string key, out bool value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(null, key, legacyKeyList);
@@ -2152,6 +2185,7 @@ namespace Rhino
     /// A KeyNotFoundException exception is thrown if the key is not found in
     /// the settings dictionary.
     /// </exception>
+    /// <since>6.0</since>
     public bool GetSettingIsHiddenFromUserInterface(string key)
     {
       return GetSettingIsHiddenFromUserInterface(key, null);
@@ -2173,6 +2207,7 @@ namespace Rhino
     /// A KeyNotFoundException exception is thrown if the key is not found in
     /// the settings dictionary.
     /// </exception>
+    /// <since>6.0</since>
     public bool GetSettingIsHiddenFromUserInterface(string key, IEnumerable<string> legacyKeyList)
     {
       bool result;
@@ -2185,6 +2220,7 @@ namespace Rhino
     /// 
     /// </summary>
     /// <param name="key"></param>
+    /// <since>6.0</since>
     public void HideSettingFromUserInterface(string key)
     {
       SettingValue setting_value;
@@ -2204,6 +2240,7 @@ namespace Rhino
     /// empty <see cref="PersistentSettings"/> child key is added and the new
     /// settings are returned.
     /// </returns>
+    /// <since>6.0</since>
     public PersistentSettings AddChild(string key)
     {
       PersistentSettings result;
@@ -2218,6 +2255,7 @@ namespace Rhino
     /// Call this method to delete a child settings key.
     /// </summary>
     /// <param name="key"></param>
+    /// <since>6.0</since>
     public void DeleteChild(string key)
     {
       if (m_children.ContainsKey(key))
@@ -2240,6 +2278,7 @@ namespace Rhino
 
     private readonly PersistentSettings AllUserSettings;
 
+    /// <since>5.0</since>
     public static PersistentSettings FromPlugInId(Guid pluginId)
     {
 #if RHINO_SDK
@@ -2251,6 +2290,7 @@ namespace Rhino
     }
 
     static PersistentSettings _rhinoAppSettings;
+    /// <since>6.14</since>
     public static PersistentSettings RhinoAppSettings
     {
       get
@@ -2390,6 +2430,7 @@ namespace Rhino
     /// <exception cref="InvalidCastException">If type parameter T is not
     /// the right specialization for <see cref="PersistentSettingsEventArgs{T}"/>.</exception>
     /// <returns>A valid validator, or null if no validator was found.</returns>
+    /// <since>5.0</since>
     public EventHandler<PersistentSettingsEventArgs<T>> GetValidator<T>(string key)
     {
       Delegate validator;
@@ -2411,6 +2452,7 @@ namespace Rhino
       return typedValidator;
     }
 
+    /// <since>6.0</since>
     public bool ContainsChangedValues()
     {
       // http://mcneel.myjetbrains.com/youtrack/issue/RH-30428
@@ -2422,6 +2464,7 @@ namespace Rhino
       return (null != m_children && m_children.Any(child => child.Value.ContainsChangedValues()));
     }
 
+    /// <since>6.0</since>
     public void ClearChangedFlag()
     {
       foreach (var key_value_pair in m_settings)
@@ -2431,6 +2474,7 @@ namespace Rhino
       ItemDeletedSinceSave = false;
     }
 
+    /// <since>5.0</since>
     public bool ContainsModifiedValues(PersistentSettings allUserSettings)
     {
       if (null != m_settings && m_settings.Count > 0)
@@ -2529,11 +2573,13 @@ namespace Rhino
       return value;
     }
 
+    /// <since>6.0</since>
     public bool TryGetGuid(string key, out Guid value)
     {
       return TryGetGuid(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetGuid(string key, out Guid value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(Guid), key, legacyKeyList);
@@ -2543,11 +2589,13 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetBool(string key, out bool value)
     {
       return TryGetBool(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetBool(string key, out bool value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(bool), key, legacyKeyList);
@@ -2557,6 +2605,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool GetBool(string key)
     {
       bool rc;
@@ -2565,6 +2614,7 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a bool.");
     }
 
+    /// <since>5.0</since>
     public bool GetBool(string key, bool defaultValue)
     {
       return GetBool(key, defaultValue, null);
@@ -2590,6 +2640,7 @@ namespace Rhino
         setAction(setting);
     }
 
+    /// <since>6.0</since>
     public bool GetBool(string key, bool defaultValue, IEnumerable<string> legacyKeyList)
     {
       bool rc;
@@ -2603,11 +2654,13 @@ namespace Rhino
       return GetBool(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetByte(string key, out byte value)
     {
       return TryGetByte(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetByte(string key, out byte value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(byte), key, legacyKeyList);
@@ -2617,6 +2670,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public byte GetByte(string key)
     {
       byte rc;
@@ -2625,11 +2679,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a byte.");
     }
 
+    /// <since>5.0</since>
     public byte GetByte(string key, byte defaultValue)
     {
       return GetByte(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public byte GetByte(string key, byte defaultValue, IEnumerable<string> legacyKeyList)
     {
       byte rc;
@@ -2643,11 +2699,13 @@ namespace Rhino
       return GetByte(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetInteger(string key, out int value)
     {
       return TryGetInteger(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetInteger(string key, out int value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(int), key, legacyKeyList);
@@ -2657,6 +2715,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public int GetInteger(string key)
     {
       int rc;
@@ -2665,11 +2724,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not an integer.");
     }
 
+    /// <since>5.0</since>
     public int GetInteger(string key, int defaultValue)
     {
       return GetInteger(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public int GetInteger(string key, int defaultValue, int bound, bool boundIsLower)
     {
       var rc = GetInteger(key, defaultValue);
@@ -2680,6 +2741,7 @@ namespace Rhino
       return rc;
     }
 
+    /// <since>6.0</since>
     public int GetInteger(string key, int defaultValue, int lowerBound, int upperBound)
     {
       var rc = GetInteger(key, defaultValue);
@@ -2691,6 +2753,7 @@ namespace Rhino
     }
 
 
+    /// <since>6.0</since>
     public int GetInteger(string key, int defaultValue, IEnumerable<string> legacyKeyList)
     {
       int rc;
@@ -2704,12 +2767,14 @@ namespace Rhino
       return GetInteger(key);
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool TryGetUnsignedInteger(string key, out uint value)
     {
       return TryGetUnsignedInteger(key, out value, null);
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public bool TryGetUnsignedInteger(string key, out uint value, IEnumerable<string> legacyKeyList)
     {
@@ -2720,6 +2785,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint GetUnsignedInteger(string key)
     {
@@ -2729,12 +2795,14 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not an unsigned integer.");
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint GetUnsignedInteger(string key, uint defaultValue)
     {
       return GetUnsignedInteger(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint GetUnsignedInteger(string key, uint defaultValue, IEnumerable<string> legacyKeyList)
     {
@@ -2749,11 +2817,13 @@ namespace Rhino
       return GetUnsignedInteger(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetDouble(string key, out double value)
     {
       return TryGetDouble(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetDouble(string key, out double value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(double), key, legacyKeyList);
@@ -2763,6 +2833,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public double GetDouble(string key)
     {
       double rc;
@@ -2771,11 +2842,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a double.");
     }
 
+    /// <since>5.0</since>
     public double GetDouble(string key, double defaultValue)
     {
       return GetDouble(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public double GetDouble(string key, double defaultValue, IEnumerable<string> legacyKeyList)
     {
       double rc;
@@ -2789,11 +2862,13 @@ namespace Rhino
       return GetDouble(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetChar(string key, out char value)
     {
       return TryGetChar(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetChar(string key, out char value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(char), key, legacyKeyList);
@@ -2803,6 +2878,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public char GetChar(string key)
     {
       char rc;
@@ -2811,11 +2887,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a char.");
     }
 
+    /// <since>5.0</since>
     public char GetChar(string key, char defaultValue)
     {
       return GetChar(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public char GetChar(string key, char defaultValue, IEnumerable<string> legacyKeyList)
     {
       char rc;
@@ -2829,11 +2907,13 @@ namespace Rhino
       return GetChar(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetString(string key, out string value)
     {
       return TryGetString(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetString(string key, out string value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(string), key, legacyKeyList);
@@ -2843,6 +2923,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public string GetString(string key)
     {
       string rc;
@@ -2851,11 +2932,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a string.");
     }
 
+    /// <since>5.0</since>
     public string GetString(string key, string defaultValue)
     {
       return GetString(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public string GetString(string key, string defaultValue, IEnumerable<string> legacyKeyList)
     {
       string rc;
@@ -2884,6 +2967,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>6.0</since>
     public KeyValuePair<string, string>[] GetStringDictionary(string key)
     {
       KeyValuePair<string, string>[] rc;
@@ -2911,11 +2995,13 @@ namespace Rhino
       return GetStringDictionary(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetStringList(string key, out string[] value)
     {
       return TryGetStringList(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetStringList(string key, out string[] value, IEnumerable<string> legacyKeyList)
     {
 
@@ -2929,6 +3015,7 @@ namespace Rhino
       return sv.TryGetStringList(false, root_string, out value);
     }
 
+    /// <since>5.0</since>
     public string[] GetStringList(string key)
     {
       var sv = TryGetSettingsValue(typeof(string[]), key, null);
@@ -2940,11 +3027,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a string list.");
     }
 
+    /// <since>5.0</since>
     public string[] GetStringList(string key, string[] defaultValue)
     {
       return GetStringList(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public string[] GetStringList(string key, string[] defaultValue, IEnumerable<string> legacyKeyList)
     {
       string[] rc;
@@ -2958,11 +3047,13 @@ namespace Rhino
       return GetStringList(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetDate(string key, out DateTime value)
     {
       return TryGetDate(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetDate(string key, out DateTime value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(DateTime), key, legacyKeyList);
@@ -2972,6 +3063,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public DateTime GetDate(string key)
     {
       DateTime rc;
@@ -2980,11 +3072,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a DateTime.");
     }
 
+    /// <since>5.0</since>
     public DateTime GetDate(string key, DateTime defaultValue)
     {
       return GetDate(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public DateTime GetDate(string key, DateTime defaultValue, IEnumerable<string> legacyKeyList)
     {
       DateTime rc;
@@ -2998,11 +3092,13 @@ namespace Rhino
       return GetDate(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetColor(string key, out Color value)
     {
       return TryGetColor(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetColor(string key, out Color value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(Color), key, legacyKeyList);
@@ -3012,6 +3108,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public Color GetColor(string key)
     {
       Color rc;
@@ -3020,11 +3117,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Color.");
     }
 
+    /// <since>5.0</since>
     public Color GetColor(string key, Color defaultValue)
     {
       return GetColor(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public Color GetColor(string key, Color defaultValue, IEnumerable<string> legacyKeyList)
     {
       Color rc;
@@ -3038,6 +3137,7 @@ namespace Rhino
       return GetColor(key);
     }
 
+    /// <since>6.0</since>
     public Guid GetGuid(string key)
     {
       Guid rc;
@@ -3046,11 +3146,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Guid.");
     }
 
+    /// <since>6.0</since>
     public Guid GetGuid(string key, Guid defaultValue)
     {
       return GetGuid(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public Guid GetGuid(string key, Guid defaultValue, IEnumerable<string> legacyKeyList)
     {
       Guid rc;
@@ -3064,11 +3166,13 @@ namespace Rhino
       return GetGuid(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetPoint(string key, out System.Drawing.Point value)
     {
       return TryGetPoint(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetPoint(string key, out System.Drawing.Point value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(System.Drawing.Point), key, legacyKeyList);
@@ -3078,6 +3182,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Point GetPoint(string key)
     {
       System.Drawing.Point rc;
@@ -3086,11 +3191,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Point.");
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Point GetPoint(string key, System.Drawing.Point defaultValue)
     {
       return GetPoint(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public System.Drawing.Point GetPoint(string key, System.Drawing.Point defaultValue,
       IEnumerable<string> legacyKeyList)
     {
@@ -3105,11 +3212,13 @@ namespace Rhino
       return GetPoint(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetPoint3d(string key, out Point3d value)
     {
       return TryGetPoint3d(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetPoint3d(string key, out Point3d value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(Point3d), key, legacyKeyList);
@@ -3119,6 +3228,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public Point3d GetPoint3d(string key)
     {
       Point3d rc;
@@ -3127,11 +3237,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Point3d.");
     }
 
+    /// <since>5.0</since>
     public Point3d GetPoint3d(string key, Point3d defaultValue)
     {
       return GetPoint3d(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public Point3d GetPoint3d(string key, Point3d defaultValue, IEnumerable<string> legacyKeyList)
     {
       Point3d rc;
@@ -3145,11 +3257,13 @@ namespace Rhino
       return GetPoint3d(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetSize(string key, out Size value)
     {
       return TryGetSize(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetSize(string key, out Size value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(Size), key, legacyKeyList);
@@ -3159,6 +3273,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public Size GetSize(string key)
     {
       Size rc;
@@ -3167,11 +3282,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Size.");
     }
 
+    /// <since>5.0</since>
     public Size GetSize(string key, Size defaultValue)
     {
       return GetSize(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public Size GetSize(string key, Size defaultValue, IEnumerable<string> legacyKeyList)
     {
       Size rc;
@@ -3185,11 +3302,13 @@ namespace Rhino
       return GetSize(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetRectangle(string key, out Rectangle value)
     {
       return TryGetRectangle(key, out value, null);
     }
 
+    /// <since>6.0</since>
     public bool TryGetRectangle(string key, out Rectangle value, IEnumerable<string> legacyKeyList)
     {
       var sv = TryGetSettingsValue(typeof(Rectangle), key, legacyKeyList);
@@ -3199,6 +3318,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public Rectangle GetRectangle(string key)
     {
       Rectangle rc;
@@ -3207,11 +3327,13 @@ namespace Rhino
       throw new NotSupportedException("Key '" + key + "' value type is not a Rectangle.");
     }
 
+    /// <since>5.0</since>
     public Rectangle GetRectangle(string key, Rectangle defaultValue)
     {
       return GetRectangle(key, defaultValue, null);
     }
 
+    /// <since>6.0</since>
     public Rectangle GetRectangle(string key, Rectangle defaultValue, IEnumerable<string> legacyKeyList)
     {
       Rectangle rc;
@@ -3225,6 +3347,7 @@ namespace Rhino
       return GetRectangle(key);
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out bool value)
     {
       SettingValue sv;
@@ -3234,6 +3357,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out byte value)
     {
       SettingValue sv;
@@ -3243,6 +3367,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out int value)
     {
       SettingValue sv;
@@ -3252,6 +3377,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out double value)
     {
       SettingValue sv;
@@ -3261,6 +3387,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out char value)
     {
       SettingValue sv;
@@ -3270,6 +3397,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out string value)
     {
       SettingValue sv;
@@ -3279,6 +3407,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out string[] value)
     {
       if (m_settings.ContainsKey(key))
@@ -3292,6 +3421,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out DateTime value)
     {
       SettingValue sv;
@@ -3301,6 +3431,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out Color value)
     {
       SettingValue sv;
@@ -3310,6 +3441,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out Point3d value)
     {
       SettingValue sv;
@@ -3319,6 +3451,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out Size value)
     {
       SettingValue sv;
@@ -3328,6 +3461,7 @@ namespace Rhino
       return false;
     }
 
+    /// <since>5.0</since>
     public bool TryGetDefault(string key, out Rectangle value)
     {
       SettingValue sv;
@@ -3338,11 +3472,12 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Get a stored enum value, or return default value if not found
+    /// Get a stored enumerated value, or return default value if not found
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetEnumValue<T>(T defaultValue)
       where T : struct, IConvertible
@@ -3352,12 +3487,13 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Gets a stored enum value using a custom key, or return default value if not found. 
+    /// Gets a stored enumerated value using a custom key, or return default value if not found. 
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="key"> </param>
     /// <param name="defaultValue"> </param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetEnumValue<T>(String key, T defaultValue)
       where T : struct, IConvertible
@@ -3374,12 +3510,13 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Get a stored enum value using a custom key.
+    /// Get a stored enumerated value using a custom key.
     /// </summary>
     /// <param name="key"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns> 
     /// <exception cref="KeyNotFoundException"></exception>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetEnumValue<T>(String key)
       where T : struct, IConvertible
@@ -3394,18 +3531,19 @@ namespace Rhino
       {
         return value;
       }
-      var error_message = String.Format("Value for key={0} for enum type {1} not found.", key, enum_type.Name);
+      var error_message = String.Format("Value for key={0} for enumerated type {1} not found.", key, enum_type.Name);
       throw new KeyNotFoundException(error_message);
     }
 
     /// <summary>
-    /// Attempt to get the stored value for an enum setting using a custom key. Note: the enum value ALWAYS gets assigned!
+    /// Attempt to get the stored value for an enumerated setting using a custom key. Note: the enumerated value ALWAYS gets assigned!
     /// Be sure to check for success of this method to prevent erroneous use of the value.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="key"> </param>
     /// <param name="enumValue"></param>
     /// <returns>true if successful</returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public bool TryGetEnumValue<T>(String key, out T enumValue)
       where T : struct, IConvertible
@@ -3420,42 +3558,50 @@ namespace Rhino
       return value != null && value.TryGetEnum<T>(false, out enumValue);
     }
 
+    /// <since>6.0</since>
     public void SetGuid(string key, Guid value)
     {
       GetValue(key, typeof(Guid)).SetGuid(false, value, GetValidator<Guid>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetBool(string key, bool value)
     {
       GetValue(key, typeof(bool)).SetBool(false, value, GetValidator<bool>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetByte(string key, byte value)
     {
       GetValue(key, typeof(byte)).SetByte(false, value, GetValidator<byte>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetInteger(string key, int value)
     {
       GetValue(key, typeof(int)).SetInteger(false, value, GetValidator<int>(key), true);
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public void SetUnsignedInteger(string key, uint value)
     {
       GetValue(key, typeof(uint)).SetUnsignedInteger(false, value, GetValidator<uint>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDouble(string key, double value)
     {
       GetValue(key, typeof(double)).SetDouble(false, value, GetValidator<double>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetChar(string key, char value)
     {
       GetValue(key, typeof(char)).SetChar(false, value, GetValidator<char>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetString(string key, string value)
     {
       GetValue(key, typeof(string)).SetString(false, value, GetValidator<string>(key), true);
@@ -3465,6 +3611,7 @@ namespace Rhino
     /// Adding this string to a string list when calling SetStringList will cause the ProgramData setting to
     /// get inserted at that location in the list.
     /// </summary>
+    /// <since>5.0</since>
     public static string StringListRootKey
     {
       get { return SettingValue.StringListRootKey; }
@@ -3476,6 +3623,7 @@ namespace Rhino
     /// </summary>
     /// <param name="key">The string key.</param>
     /// <param name="value">An array of values to set.</param>
+    /// <since>5.0</since>
     public void SetStringList(string key, string[] value)
     {
       GetValue(key, typeof(string[])).SetStringList(false, value, GetValidator<string[]>(key), true);
@@ -3486,6 +3634,7 @@ namespace Rhino
       GetValue(key, typeof(KeyValuePair<string, string>[])).SetStringDictionary(false, value, GetValidator<KeyValuePair<string, string>[]>(key), true);
     }
 
+    /// <since>5.0</since>
     public void DeleteItem(string key)
     {
       if (m_settings.ContainsKey(key))
@@ -3503,61 +3652,73 @@ namespace Rhino
       }
     }
 
+    /// <since>5.0</since>
     public void SetDate(string key, DateTime value)
     {
       GetValue(key, typeof(DateTime)).SetDate(false, value, GetValidator<DateTime>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetColor(string key, Color value)
     {
       GetValue(key, typeof(Color)).SetColor(false, value, GetValidator<Color>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetPoint3d(string key, Point3d value)
     {
       GetValue(key, typeof(Point3d)).SetPoint3d(false, value, GetValidator<Point3d>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetRectangle(string key, Rectangle value)
     {
       GetValue(key, typeof(Rectangle)).SetRectangle(false, value, GetValidator<Rectangle>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetSize(string key, Size value)
     {
       GetValue(key, typeof(Size)).SetSize(false, value, GetValidator<Size>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetPoint(string key, System.Drawing.Point value)
     {
       GetValue(key, typeof(System.Drawing.Point)).SetPoint(false, value, GetValidator<System.Drawing.Point>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, bool value)
     {
       GetValue(key, typeof(bool)).SetBool(true, value, GetValidator<bool>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, byte value)
     {
       GetValue(key, typeof(byte)).SetByte(true, value, GetValidator<byte>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, int value)
     {
       GetValue(key, typeof(int)).SetInteger(true, value, GetValidator<int>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, double value)
     {
       GetValue(key, typeof(double)).SetDouble(true, value, GetValidator<double>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, char value)
     {
       GetValue(key, typeof(char)).SetChar(true, value, GetValidator<char>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, string value)
     {
       GetValue(key, typeof(string)).SetString(true, value, GetValidator<string>(key), true);
@@ -3568,51 +3729,60 @@ namespace Rhino
       GetValue(key, typeof(KeyValuePair<string, string>[])).SetStringDictionary(true, value, GetValidator<KeyValuePair<string, string>[]>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, string[] value)
     {
       GetValue(key, typeof(string[])).SetStringList(true, value, GetValidator<string[]>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, DateTime value)
     {
       GetValue(key, typeof(DateTime)).SetDate(true, value, GetValidator<DateTime>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, Color value)
     {
       GetValue(key, typeof(Color)).SetColor(true, value, GetValidator<Color>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, Rectangle value)
     {
       GetValue(key, typeof(Rectangle)).SetRectangle(true, value, GetValidator<Rectangle>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, Size value)
     {
       GetValue(key, typeof(Size)).SetSize(true, value, GetValidator<Size>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, System.Drawing.Point value)
     {
       GetValue(key, typeof(System.Drawing.Point)).SetPoint(true, value, GetValidator<System.Drawing.Point>(key), true);
     }
 
+    /// <since>5.0</since>
     public void SetDefault(string key, Point3d value)
     {
       GetValue(key, typeof(Point3d)).SetPoint3d(true, value, GetValidator<Point3d>(key), true);
     }
 
+    /// <since>6.0</since>
     public void SetDefault(string key, Guid value)
     {
       GetValue(key, typeof(Guid)).SetGuid(true, value, GetValidator<Guid>(key), true);
     }
 
     /// <summary>
-    /// Set an enum value in the settings.
+    /// Set an enumerated value in the settings.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="enumValue"></param>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public void SetEnumValue<T>(T enumValue)
       where T : struct, IConvertible
@@ -3622,11 +3792,12 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Set an enum value in the settings using a custom key
+    /// Set an enumerated value in the settings using a custom key
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="key"> </param>
     /// <param name="value"></param>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public void SetEnumValue<T>(String key, T value)
       where T : struct, IConvertible
@@ -3839,16 +4010,21 @@ namespace Rhino
       var plug_in = PlugIns.PlugIn.Find(plugInId);
       try
       {
+        // 11 December 2019 John Morse
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-55242
+        // Check to see if the plugInId is in the dirty (need to be saved list) which indicates
+        // it is about to be written again so don't need to read it right now
+        var dirty = g_changed_settings?.FirstOrDefault(item => item.PlugInId == plugInId) != null;
         // Invoke the settings changed event
         if (null == plug_in)
         {
           // C++ Plug-in
-          PersistentSettingsHooks.InvokeSetingsSaved(plugInId, isWriting);
+          PersistentSettingsHooks.InvokeSetingsSaved(plugInId, isWriting, dirty);
         }
         else
         {
           // .NET plug-in
-          plug_in.InvokeSetingsSaved(plug_in, isWriting);
+          plug_in.InvokeSetingsSaved(plug_in, isWriting, dirty);
         }
       }
       catch (Exception e)
@@ -4719,15 +4895,15 @@ namespace Rhino
     /// Write the specified settings to a MemoryStream
     /// </summary>
     /// <param name="settings">
-    /// The settings to write, if null the XML document's settins section will be empty
-    /// otherwise; it will contain any settings that are not equal to thier default value.
+    /// The settings to write, if null the XML document's settings section will be empty
+    /// otherwise; it will contain any settings that are not equal to their default value.
     /// </param>
     /// <param name="commandSettings">
     /// Should be null when writing window positions XML file.  If writing plug-in settings
     /// then pass the commands dictionary.
     /// </param>
     /// <returns>
-    /// Returns a stream containg the settings XML document on success otherwise; null.
+    /// Returns a stream containing the settings XML document on success otherwise; null.
     /// </returns>
     Stream ToStream(PersistentSettings settings, Dictionary<string, PersistentSettings>commandSettings)
     {

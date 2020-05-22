@@ -10,7 +10,7 @@ using System.Text;
 namespace Rhino.FileIO
 {
   /// <summary>
-  /// Manages a reference to an existing or nonexisting file,
+  /// Manages a reference to an existing or non-existing file,
   /// using either or both absolute or relative paths.
   /// Once constructed, this class is immutable.
   /// </summary>
@@ -22,6 +22,7 @@ namespace Rhino.FileIO
     /// Constructs a new instance of the FileReference class,
     /// given a fullPath, a relativePath a content hash and a status value.
     /// </summary>
+    /// <since>6.0</since>
     public FileReference(
       string fullPath,
       string relativePath,
@@ -59,6 +60,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="fullPath">A full path.</param>
     /// <returns>A file reference to the specified path.</returns>
+    /// <since>6.0</since>
     public static FileReference CreateFromFullPath(string fullPath)
     {
       return CreateFromFullAndRelativePaths(fullPath, null);
@@ -70,6 +72,7 @@ namespace Rhino.FileIO
     /// <param name="fullPath">A full path. This parameter cannot be null.</param>
     /// <param name="relativePath">A relative path. This parameter can be null.</param>
     /// <returns>A file reference to the specified paths.</returns>
+    /// <since>6.0</since>
     public static FileReference CreateFromFullAndRelativePaths(string fullPath, string relativePath)
     {
       if (fullPath == null) throw new ArgumentNullException("fullPath");
@@ -82,6 +85,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the absolute path of this file reference.
     /// </summary>
+    /// <since>6.0</since>
     public string FullPath
     {
       get
@@ -93,6 +97,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the relative path of this file reference.
     /// </summary>
+    /// <since>6.0</since>
     public string RelativePath
     {
       get
@@ -111,13 +116,14 @@ namespace Rhino.FileIO
           return holder.ToString();
         }
 
-        throw new ApplicationException("Error occurred while marshalling path.");
+        throw new ApplicationException("Error occurred while marshaling path.");
       }
     }
 
     /// <summary>
     /// Gets the content hash.
     /// </summary>
+    /// <since>6.0</since>
     public ContentHash ContentHash
     {
       get
@@ -126,7 +132,7 @@ namespace Rhino.FileIO
 
         ContentHash hash = Rhino.FileIO.ContentHash.ReadPtr(hash_ptr);
 
-        if (hash == null) throw new ApplicationException("Error occurred while marshalling ContentHash.");
+        if (hash == null) throw new ApplicationException("Error occurred while marshaling ContentHash.");
 
         return hash;
       }
@@ -135,6 +141,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the file reference status.
     /// </summary>
+    /// <since>6.0</since>
     public FileReferenceStatus FullPathStatus
     {
       get
@@ -148,6 +155,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns an indication of the fact that the reference is actually set to a non-null value.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsSet
     {
       get
@@ -160,6 +168,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Reclaims unmanaged resources used by this object.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -194,12 +203,12 @@ namespace Rhino.FileIO
 
 
   /// <summary>
-  /// Contains information that is useful to uniquly identify an object name.
+  /// Contains information that is useful to uniquely identify an object name.
   /// <remarks>This object is immutable.</remarks>
   /// </summary>
   public class NameHash : ICloneable, IEquatable<NameHash>
   {
-    /// <summary>SHA-1 hash of ordinal minimum mapped unicode (UTF-32) code points.</summary>
+    /// <summary>SHA-1 hash of ordinal minimum mapped Unicode (UTF-32) code points.</summary>
     readonly byte[] m_sha1_hash;
 
     /// <summary> m_flags - used internally </summary>
@@ -212,8 +221,9 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new NameHash, representing a piece of text.
     /// </summary>
-    /// <param name="name">A name. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="name">A name. This can be null and can refer to a non-existing path.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public NameHash(string name) : this(name, Guid.Empty)
     {
     }
@@ -221,9 +231,10 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new NameHash, representing a piece of text.
     /// </summary>
-    /// <param name="name">A name. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="name">A name. This can be null and can refer to a non-existing path.</param>
     /// <param name="parentId">The id of the parent layer. This is only useful with layers.</param>
     /// <returns>A new hash</returns>
+    /// <since>6.0</since>
     public NameHash(string name, Guid parentId) : this(name, parentId, true)
     {
     }
@@ -231,10 +242,11 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new NameHash, representing a piece of text.
     /// </summary>
-    /// <param name="name">A name. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="name">A name. This can be null and can refer to a non-existing path.</param>
     /// <param name="parentId">The id of the parent layer. This is only useful with layers.</param>
     /// <param name="type">Calls <see cref="DocObjects.ModelComponent.ModelComponentTypeIgnoresCase"/> to determine if case should be used in search.</param>
     /// <returns>A new hash</returns>
+    /// <since>6.0</since>
     public NameHash(string name, Guid parentId, DocObjects.ModelComponentType type) : this(name, parentId, DocObjects.ModelComponent.ModelComponentTypeIgnoresCase(type))
     {
     }
@@ -242,10 +254,11 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new NameHash, representing a piece of text.
     /// </summary>
-    /// <param name="name">A name. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="name">A name. This can be null and can refer to a non-existing path.</param>
     /// <param name="parentId">The id of the parent layer. This is only useful with layers.</param>
     /// <param name="ignoreCase">All manifest searches currently ignore case, except for groups.</param>
     /// <returns>A new hash</returns>
+    /// <since>6.0</since>
     public NameHash(string name, Guid parentId, bool ignoreCase)
     {
       IntPtr content_ptr = UnsafeNativeMethods.ON_NameHash_CreateNameHash(parentId, name, ignoreCase);
@@ -330,8 +343,9 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Gets the 20-bytes long SHA-1 hash of ordinal minimum mapped unicode (UTF-32) code points.
+    /// Gets the 20-bytes long SHA-1 hash of ordinal minimum mapped Unicode (UTF-32) code points.
     /// </summary>
+    /// <since>6.0</since>
     public byte[] Sha1Hash
     {
       get
@@ -343,6 +357,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the NameHash flags. In some cases = number of mapped code points.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint MappedCodePoints
     {
@@ -355,6 +370,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Only useful if this participates in a tree structure, as with layers.
     /// </summary>
+    /// <since>6.0</since>
     public Guid ParentId
     {
       get
@@ -364,7 +380,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Be resposible: call Dispose()
+    /// Be responsible: call Dispose()
     /// </summary>
     internal IntPtrSafeHandle GetDisposableHandle()
     {
@@ -387,7 +403,7 @@ namespace Rhino.FileIO
           hash.m_parent_id);
 
         if (UnsafePointer == IntPtr.Zero)
-          throw new NotSupportedException("An error happened when constructing a marshalled ON_NameHash.");
+          throw new NotSupportedException("An error happened when constructing a marshaled ON_NameHash.");
       }
 
       internal NameHashUnmanagedHandle(IntPtr createdPtr)
@@ -404,8 +420,9 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new NameHash, representing the name of a file.
     /// </summary>
-    /// <param name="path">A path. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="path">A path. This can be null and can refer to a non-existing path.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static NameHash CreateFilePathHash(string path)
     {
       IntPtr content_ptr = UnsafeNativeMethods.ON_NameHash_CreateFilePathHash(path);
@@ -415,6 +432,7 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <since>6.0</since>
     object ICloneable.Clone()
     {
       return Clone();
@@ -425,6 +443,7 @@ namespace Rhino.FileIO
     /// Because content hash is immutable, this can be used as a deep copy.
     /// </summary>
     /// <returns>A different instance of the same name hash.</returns>
+    /// <since>6.0</since>
     public NameHash Clone()
     {
       return this;
@@ -435,6 +454,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="other">The other name hash to compare.</param>
     /// <returns>True if the two hashes are equal.</returns>
+    /// <since>6.0</since>
     public bool Equals(NameHash other)
     {
       if (other == null)
@@ -479,6 +499,7 @@ namespace Rhino.FileIO
     /// <param name="left">The first hash.</param>
     /// <param name="right">The second hash.</param>
     /// <returns>True if they are equal by value, otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator ==(NameHash left, NameHash right)
     {
       if ((object)left == null) return (object)right == null;
@@ -491,6 +512,7 @@ namespace Rhino.FileIO
     /// <param name="left">The first hash.</param>
     /// <param name="right">The second hash.</param>
     /// <returns>True if they are different by value, otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator !=(NameHash left, NameHash right)
     {
       return !(left == right);
@@ -502,7 +524,7 @@ namespace Rhino.FileIO
 
 
   /// <summary>
-  /// Contains information that is useful to uniquly identify an object.
+  /// Contains information that is useful to uniquely identify an object.
   /// <remarks>This object is immutable.</remarks>
   /// </summary>
   public class ContentHash : ICloneable, IEquatable<ContentHash>
@@ -608,6 +630,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the 20-bytes long SHA1 hash of the name.
     /// </summary>
+    /// <since>6.0</since>
     public byte[] Sha1NameHash
     {
       get
@@ -619,6 +642,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the length of the content, in bytes.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public ulong ByteCount
     {
@@ -631,6 +655,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the 20-bytes long SHA1 hash of the content.
     /// </summary>
+    /// <since>6.0</since>
     public byte[] Sha1ContentHash
     {
       get
@@ -642,6 +667,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the hash time, rounded to seconds.
     /// </summary>
+    /// <since>6.0</since>
     public DateTime HashTime
     {
       get
@@ -651,7 +677,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Be resposible: call Dispose()
+    /// Be responsible: call Dispose()
     /// </summary>
     internal IntPtrSafeHandle GetDisposableHandle()
     {
@@ -670,7 +696,7 @@ namespace Rhino.FileIO
           hash.m_contentLastModifiedTime);
 
         if (UnsafePointer == IntPtr.Zero)
-          throw new NotSupportedException("An error happened when constructing a marshalled ON_ContentHash.");
+          throw new NotSupportedException("An error happened when constructing a marshaled ON_ContentHash.");
       }
 
       internal ContentHashUnmanagedHandle(IntPtr createdPtr)
@@ -687,8 +713,9 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates a new ContentHash, representing the content of a file.
     /// </summary>
-    /// <param name="path">A path. This can be null and can refer to a nonexisting path.</param>
+    /// <param name="path">A path. This can be null and can refer to a non-existing path.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static ContentHash CreateFromFile(string path)
     {
       IntPtr content_ptr = UnsafeNativeMethods.ON_ContentHash_CreateFromFile(path);
@@ -698,6 +725,7 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <since>6.0</since>
     object ICloneable.Clone()
     {
       return Clone();
@@ -708,6 +736,7 @@ namespace Rhino.FileIO
     /// Because content hash is immutable, this can be used as a deep copy.
     /// </summary>
     /// <returns>A different instance of the same content hash.</returns>
+    /// <since>6.0</since>
     public ContentHash Clone()
     {
       return this;
@@ -718,6 +747,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="other">The other content hash to compare.</param>
     /// <returns>True if the two hashes are equal.</returns>
+    /// <since>6.0</since>
     public bool Equals(ContentHash other)
     {
       if (other == null)
@@ -765,6 +795,7 @@ namespace Rhino.FileIO
     /// <param name="left">The first hash.</param>
     /// <param name="right">The second hash.</param>
     /// <returns>True if they are equal by value, otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator ==(ContentHash left, ContentHash right)
     {
       if ((object)left == null) return (object)right == null;
@@ -777,6 +808,7 @@ namespace Rhino.FileIO
     /// <param name="left">The first hash.</param>
     /// <param name="right">The second hash.</param>
     /// <returns>True if they are different by value, otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator !=(ContentHash left, ContentHash right)
     {
       return !(left == right);
@@ -803,6 +835,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Constructs a new instance of the SHA1 algorithm.
     /// </summary>
+    /// <since>6.0</since>
     public SHA1OpenNURBS()
     {
       m_non_const_ptr = UnsafeNativeMethods.ON_SHA1_New(IntPtr.Zero);
@@ -816,6 +849,7 @@ namespace Rhino.FileIO
     /// Resets this instance of the algorithm, so that it can be used again.
     /// It is not required to call this method after creation.
     /// </summary>
+    /// <since>6.0</since>
     public override void Initialize()
     {
       if (m_disposed) throw new ObjectDisposedException("SHA1OpenNURBS");
@@ -888,6 +922,7 @@ namespace Rhino.FileIO
     /// <param name="input"></param>
     /// <returns>A 20-byte long SHA1 hash.</returns>
     /// <exception cref="ArgumentNullException">When input is null.</exception>
+    /// <since>6.0</since>
     public static byte[] StringHash(string input)
     {
       if (input == null)

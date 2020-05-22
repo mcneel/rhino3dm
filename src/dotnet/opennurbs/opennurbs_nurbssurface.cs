@@ -32,6 +32,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createsurfaceexample.cs' lang='cs'/>
     /// <code source='examples\py\ex_createsurfaceexample.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static NurbsSurface Create(int dimension, bool isRational, int order0, int order1, int controlPointCount0, int controlPointCount1)
     {
       if (dimension < 1 || order0 < 2 || order1 < 2 || controlPointCount0 < order0 || controlPointCount1 < order1)
@@ -47,6 +48,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="cone">A cone value.</param>
     /// <returns>A new NURBS surface, or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromCone(Cone cone)
     {
       IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_Cone_GetNurbForm(ref cone);
@@ -60,6 +62,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="cylinder">A cylinder value.</param>
     /// <returns>A new NURBS surface, or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromCylinder(Cylinder cylinder)
     {
       IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_Cylinder_GetNurbForm(ref cylinder);
@@ -73,6 +76,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="sphere">A sphere value.</param>
     /// <returns>A new NURBS surface, or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromSphere(Sphere sphere)
     {
       IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_Sphere_GetNurbsForm(ref sphere);
@@ -86,6 +90,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="torus">A torus value.</param>
     /// <returns>A new NURBS surface, or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromTorus(Torus torus)
     {
       IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_Torus_GetNurbForm(ref torus);
@@ -100,6 +105,7 @@ namespace Rhino.Geometry
     /// <param name="curveA">First curve.</param>
     /// <param name="curveB">Second curve.</param>
     /// <returns>A ruled surface on success or null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateRuledSurface(Curve curveA, Curve curveB)
     {
       if (curveA == null) { throw new ArgumentNullException("curveA"); }
@@ -127,15 +133,16 @@ namespace Rhino.Geometry
     /// <param name="fixedPoints">Surface points to interpolate given by parameters. These must be distinct.</param>
     /// <param name="tolerance">Relative tolerance used by the solver. When in doubt, use a tolerance of 0.0.</param>
     /// <param name="periodic">When true constructs a smoothly closed curve.</param>
-    /// <param name="initCount">Maximum number of points to insert beteween fixed points on the first level.</param>
+    /// <param name="initCount">Maximum number of points to insert between fixed points on the first level.</param>
     /// <param name="levels">The number of levels (between 1 and 3) to be used in multi-level solver. Use 1 for single level solve.</param>
     /// <returns>
     /// A sequence of surface points, given by surface parameters, if successful.
-    /// The number of output points is approximatelely: 2 ^ (level-1) * initCount * fixedPoints.Count.
+    /// The number of output points is approximately: 2 ^ (level-1) * initCount * fixedPoints.Count.
     /// </returns>
     /// <remarks>
     /// To create a curve from the output points, use Surface.CreateCurveOnSurface.
     /// </remarks>
+    /// <since>6.3</since>
     public static Point2d[] CreateCurveOnSurfacePoints(Surface surface, IEnumerable<Point2d> fixedPoints, double tolerance, bool periodic, int initCount, int levels)
     {
       if (surface == null)
@@ -160,13 +167,14 @@ namespace Rhino.Geometry
     /// Fit a sequence of 2d points on a surface to make a curve on the surface.
     /// </summary>
     /// <param name="surface">Surface on which to construct curve.</param>
-    /// <param name="points">Parameter space coodinates of the points to interpolate.</param>
+    /// <param name="points">Parameter space coordinates of the points to interpolate.</param>
     /// <param name="tolerance">Curve should be within tolerance of surface and points.</param>
     /// <param name="periodic">When true make a periodic curve.</param>
     /// <returns>A curve interpolating the points if successful, null on error.</returns>
     /// <remarks>
     /// To produce the input points, use Surface.CreateCurveOnSurfacePoints.
     /// </remarks>
+    /// <since>6.3</since>
     public static NurbsCurve CreateCurveOnSurface(Surface surface, IEnumerable<Point2d> points, double tolerance, bool periodic)
     {
       if (surface == null)
@@ -191,7 +199,8 @@ namespace Rhino.Geometry
     /// <param name="surface1">The second surface.</param>
     /// <param name="nurb0">The first output NURBS surface.</param>
     /// <param name="nurb1">The second output NURBS surface.</param>
-    /// <returns>true if successsful, false on failure.</returns>
+    /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.0</since>
     public static bool MakeCompatible(Surface surface0, Surface surface1, out NurbsSurface nurb0, out NurbsSurface nurb1)
     {
       nurb0 = null;
@@ -225,6 +234,7 @@ namespace Rhino.Geometry
     /// <param name="vDegree">Degree of surface in V direction.</param>
     /// <returns>A NurbsSurface on success or null on failure.</returns>
     /// <remarks>uCount multiplied by vCount must equal the number of points supplied.</remarks>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromPoints(IEnumerable<Point3d> points, int uCount, int vCount, int uDegree, int vDegree)
     {
       if (null == points) { throw new ArgumentNullException("points"); }
@@ -233,7 +243,7 @@ namespace Rhino.Geometry
       Point3d[] point_array = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out total_count);
       if (total_count < 4)
       {
-        throw new InvalidOperationException("Insufficient points for a nurbs surface");
+        throw new InvalidOperationException("Insufficient points for a NURBS surface");
       }
 
       if ((uCount * vCount) != total_count)
@@ -266,6 +276,7 @@ namespace Rhino.Geometry
     /// <param name="vClosed">true if the surface should be closed in the V direction.</param>
     /// <returns>A NurbsSurface on success or null on failure.</returns>
     /// <remarks>uCount multiplied by vCount must equal the number of points supplied.</remarks>
+    /// <since>5.0</since>
     public static NurbsSurface CreateThroughPoints(IEnumerable<Point3d> points, int uCount, int vCount, int uDegree, int vDegree, bool uClosed, bool vClosed)
     {
       if (null == points) { throw new ArgumentNullException("points"); }
@@ -274,7 +285,7 @@ namespace Rhino.Geometry
       Point3d[] point_array = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out total_count);
       if (total_count < 4)
       {
-        throw new InvalidOperationException("Insufficient points for a nurbs surface");
+        throw new InvalidOperationException("Insufficient points for a NURBS surface");
       }
 
       if ((uCount * vCount) != total_count)
@@ -309,6 +320,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_srfpt.cs' lang='cs'/>
     /// <code source='examples\py\ex_srfpt.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromCorners(Point3d corner1, Point3d corner2, Point3d corner3, Point3d corner4)
     {
       return CreateFromCorners(corner1, corner2, corner3, corner4, 0.0);
@@ -322,6 +334,7 @@ namespace Rhino.Geometry
     /// <param name="corner4">The fourth corner.</param>
     /// <param name="tolerance">Minimum edge length without collapsing to a singularity.</param>
     /// <returns>The resulting surface or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromCorners(Point3d corner1, Point3d corner2, Point3d corner3, Point3d corner4, double tolerance)
     {
       IntPtr ptr_surface = UnsafeNativeMethods.RHC_RhinoCreateSurfaceFromCorners(corner1, corner2, corner3, corner4, tolerance);
@@ -336,6 +349,7 @@ namespace Rhino.Geometry
     /// <param name="corner2">The second corner.</param>
     /// <param name="corner3">The third corner.</param>
     /// <returns>The resulting surface or null on error.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateFromCorners(Point3d corner1, Point3d corner2, Point3d corner3)
     {
       return CreateFromCorners(corner1, corner2, corner3, corner3, 0.0);
@@ -349,6 +363,7 @@ namespace Rhino.Geometry
     /// <param name="axis">Axis of revolution.</param>
     /// <param name="scaleHeight">If true, surface will be locally scaled.</param>
     /// <returns>A NurbsSurface or null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateRailRevolvedSurface(Curve profile, Curve rail, Line axis, bool scaleHeight)
     {
       IntPtr const_ptr_profile = profile.ConstPointer();
@@ -365,27 +380,28 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="uCurves">An array, a list or any enumerable set of U curves.</param>
     /// <param name="uContinuityStart">
-    /// continuity at first U segment, 0 = loose, 1 = pos, 2 = tan, 3 = curvature.
+    /// continuity at first U segment, 0 = loose, 1 = position, 2 = tan, 3 = curvature.
     /// </param>
     /// <param name="uContinuityEnd">
-    /// continuity at last U segment, 0 = loose, 1 = pos, 2 = tan, 3 = curvature.
+    /// continuity at last U segment, 0 = loose, 1 = position, 2 = tan, 3 = curvature.
     /// </param>
     /// <param name="vCurves">An array, a list or any enumerable set of V curves.</param>
     /// <param name="vContinuityStart">
-    /// continuity at first V segment, 0 = loose, 1 = pos, 2 = tan, 3 = curvature.
+    /// continuity at first V segment, 0 = loose, 1 = position, 2 = tan, 3 = curvature.
     /// </param>
     /// <param name="vContinuityEnd">
-    /// continuity at last V segment, 0 = loose, 1 = pos, 2 = tan, 3 = curvature.
+    /// continuity at last V segment, 0 = loose, 1 = position, 2 = tan, 3 = curvature.
     /// </param>
     /// <param name="edgeTolerance">tolerance to use along network surface edge.</param>
     /// <param name="interiorTolerance">tolerance to use for the interior curves.</param>
     /// <param name="angleTolerance">angle tolerance to use.</param>
     /// <param name="error">
     /// If the NurbsSurface could not be created, the error value describes where
-    /// the failure occured.  0 = success,  1 = curve sorter failed, 2 = network initializing failed,
+    /// the failure occurred.  0 = success,  1 = curve sorter failed, 2 = network initializing failed,
     /// 3 = failed to build surface, 4 = network surface is not valid.
     /// </param>
     /// <returns>A NurbsSurface or null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateNetworkSurface(IEnumerable<Curve> uCurves, int uContinuityStart, int uContinuityEnd,
                                                     IEnumerable<Curve> vCurves, int vContinuityStart, int vContinuityEnd,
                                                     double edgeTolerance, double interiorTolerance, double angleTolerance,
@@ -405,19 +421,20 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Builds a surface from an autosorted network of curves/edges.
+    /// Builds a surface from an auto-sorted network of curves/edges.
     /// </summary>
     /// <param name="curves">An array, a list or any enumerable set of curves/edges, sorted automatically into U and V curves.</param>
-    /// <param name="continuity">continuity along edges, 0 = loose, 1 = pos, 2 = tan, 3 = curvature.</param>
+    /// <param name="continuity">continuity along edges, 0 = loose, 1 = position, 2 = tan, 3 = curvature.</param>
     /// <param name="edgeTolerance">tolerance to use along network surface edge.</param>
     /// <param name="interiorTolerance">tolerance to use for the interior curves.</param>
     /// <param name="angleTolerance">angle tolerance to use.</param>
     /// <param name="error">
     /// If the NurbsSurface could not be created, the error value describes where
-    /// the failure occured.  0 = success,  1 = curve sorter failed, 2 = network initializing failed,
+    /// the failure occurred.  0 = success,  1 = curve sorter failed, 2 = network initializing failed,
     /// 3 = failed to build surface, 4 = network surface is not valid.
     /// </param>
     /// <returns>A NurbsSurface or null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsSurface CreateNetworkSurface(IEnumerable<Curve> curves, int continuity,
                                                     double edgeTolerance, double interiorTolerance, double angleTolerance,
                                                     out int error)
@@ -436,12 +453,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Calculates the U, V, and N directions of a NURBS surface at a u,v parameter similar to the method used by Rhino's MoveUVN command.
     /// </summary>
-    /// <param name="u">The u evalaution parameter.</param>
-    /// <param name="v">The v evalaution parameter.</param>
+    /// <param name="u">The u evaluation parameter.</param>
+    /// <param name="v">The v evaluation parameter.</param>
     /// <param name="uDir">The U direction.</param>
     /// <param name="vDir">The V direction.</param>
     /// <param name="nDir">The N direction.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool UVNDirectionsAt(double u, double v, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
     {
       uDir = vDir = nDir = Vector3d.Unset;
@@ -458,6 +476,7 @@ namespace Rhino.Geometry
     /// Initializes a new NURBS surface by copying the values from another surface.
     /// </summary>
     /// <param name="other">Another surface.</param>
+    /// <since>5.0</since>
     public NurbsSurface(NurbsSurface other)
     {
       IntPtr const_ptr_other = other.ConstPointer();
@@ -503,6 +522,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createsurfaceexample.cs' lang='cs'/>
     /// <code source='examples\py\ex_createsurfaceexample.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.NurbsSurfaceKnotList KnotsU
     {
       get { return m_knots_u ?? (m_knots_u = new Collections.NurbsSurfaceKnotList(this, 0)); }
@@ -516,6 +536,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createsurfaceexample.cs' lang='cs'/>
     /// <code source='examples\py\ex_createsurfaceexample.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.NurbsSurfaceKnotList KnotsV
     {
       get { return m_knots_v ?? (m_knots_v = new Collections.NurbsSurfaceKnotList(this, 1)); }
@@ -531,14 +552,16 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createsurfaceexample.cs' lang='cs'/>
     /// <code source='examples\py\ex_createsurfaceexample.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.NurbsSurfacePointList Points
     {
       get { return m_points ?? (m_points = new Collections.NurbsSurfacePointList(this)); }
     }
 
     /// <summary>
-    /// Gets a value indicating whether or not the nurbs surface is rational.
+    /// Gets a value indicating whether or not the NURBS surface is rational.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRational
     {
       get
@@ -552,6 +575,7 @@ namespace Rhino.Geometry
     /// Makes this surface rational.
     /// </summary>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool MakeRational()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -562,6 +586,7 @@ namespace Rhino.Geometry
     /// Makes this surface non-rational.
     /// </summary>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool MakeNonRational()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -579,6 +604,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_nurbssurfaceincreasedegree.cs' lang='cs'/>
     /// <code source='examples\py\ex_nurbssurfaceincreasedegree.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public bool IncreaseDegreeU(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -596,6 +622,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_nurbssurfaceincreasedegree.cs' lang='cs'/>
     /// <code source='examples\py\ex_nurbssurfaceincreasedegree.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public bool IncreaseDegreeV(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -607,6 +634,7 @@ namespace Rhino.Geometry
     /// Copies this NURBS surface from another NURBS surface.
     /// </summary>
     /// <param name="other">The other NURBS surface to use as source.</param>
+    /// <since>5.0</since>
     public void CopyFrom(NurbsSurface other)
     {
       IntPtr const_ptr_other = other.ConstPointer();
@@ -666,6 +694,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(NurbsSurface other, double epsilon)
     {
@@ -695,6 +724,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the order in the U direction.
     /// </summary>
+    /// <since>5.0</since>
     public int OrderU
     {
       get { return GetIntDir(idxOrder, 0); }
@@ -703,6 +733,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the order in the V direction.
     /// </summary>
+    /// <since>5.0</since>
     public int OrderV
     {
       get { return GetIntDir(idxOrder, 1); }
@@ -712,7 +743,7 @@ namespace Rhino.Geometry
   //  public class ON_MorphControl : ON_Geometry { }
 
   /// <summary>
-  /// Represents a geometry that is able to control the morphing behaviour of some other geometry.
+  /// Represents a geometry that is able to control the morphing behavior of some other geometry.
   /// </summary>
   [Serializable]
   public class MorphControl : GeometryBase
@@ -736,6 +767,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="originCurve">The origin curve for morphing.</param>
     /// <param name="targetCurve">The target curve for morphing.</param>
+    /// <since>5.0</since>
     public MorphControl(NurbsCurve originCurve, NurbsCurve targetCurve)
     {
       IntPtr const_ptr_curve0 = originCurve.ConstPointer();
@@ -768,6 +800,7 @@ namespace Rhino.Geometry
     /// The default is 0.0 and any value &lt;= 0.0 is ignored by morphing functions.
     /// The value returned by Tolerance does not affect the way meshes and points are morphed.
     /// </summary>
+    /// <since>5.0</since>
     public double SpaceMorphTolerance
     {
       get
@@ -788,6 +821,7 @@ namespace Rhino.Geometry
     /// is true, the tolerance may be ignored. The QuickPreview value does not
     /// affect the way meshes and points are morphed. The default is false.
     /// </summary>
+    /// <since>5.0</since>
     public bool QuickPreview
     {
       get
@@ -804,10 +838,11 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// true if the morph should be done in a way that preserves the structure
-    /// of the geometry.  In particular, for NURBS objects, true  eans that
+    /// of the geometry.  In particular, for NURBS objects, true  means that
     /// only the control points are moved.  The PreserveStructure value does not
     /// affect the way meshes and points are morphed. The default is false.
     /// </summary>
+    /// <since>5.0</since>
     public bool PreserveStructure
     {
       get
@@ -826,6 +861,7 @@ namespace Rhino.Geometry
     /// Returns the morph control's curve.  While this should never be null, the 
     /// calling function should check.  
     /// </summary>
+    /// <since>6.0</since>
     public NurbsCurve Curve
     {
       get
@@ -845,6 +881,7 @@ namespace Rhino.Geometry
     /// Returns the morph control's surface.  While this should never be null, the 
     /// calling function should check.  
     /// </summary>
+    /// <since>6.0</since>
     public NurbsSurface Surface
     {
       get
@@ -865,6 +902,7 @@ namespace Rhino.Geometry
     /// <summary>Applies the space morph to geometry.</summary>
     /// <param name="geometry">The geometry to be morphed.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Morph(GeometryBase geometry)
     {
       // dont' copy a const geometry if we don't have to
@@ -879,13 +917,307 @@ namespace Rhino.Geometry
     }
 #endif
   }
+
+
+  /// <summary>
+  /// Create an ON_NurbsSurface satisfying Hermite interpolation conditions at a grid of points.
+  /// </summary>
+  public class HermiteSurface : IDisposable
+  {
+    IntPtr m_ptr; // ON_HermiteSurface*
+
+    /// <summary>
+    /// Gets the const (immutable) pointer of this class.
+    /// </summary>
+    /// <returns>The const pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr ConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Gets the non-const pointer (for modification) of this class.
+    /// </summary>
+    /// <returns>The non-const pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr NonConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="HermiteSurface"/> instance.
+    /// </summary>
+    /// <since>7.0</since>
+    public HermiteSurface()
+    {
+      m_ptr = UnsafeNativeMethods.ON_HermiteSurface_New();
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="HermiteSurface"/> instance.
+    /// </summary>
+    /// <param name="uCount">The number of parameters in the "u" direction.</param>
+    /// <param name="vCount">The number of parameters in the "v" direction.</param>
+    /// <since>7.0</since>
+    public HermiteSurface(int uCount, int vCount)
+    {
+      m_ptr = UnsafeNativeMethods.ON_HermiteSurface_New2(uCount, vCount);
+    }
+
+    /// <summary>
+    /// Returns true if the all of values in all of the internal data structures contain valid values, false otherwise.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_HermiteSurface_IsValid(ptr_const_this);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of parameters in the "u" direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int UCount
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of parameters in the "v" direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int VCount
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, false);
+      }
+    }
+
+    /// <summary>
+    /// Gets the "u" parameter at an index. These parameters are strictly increasing.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <returns>The parameter.</returns>
+    /// <since>7.0</since>
+    public double UParameterAt(int index)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      double parameter = RhinoMath.UnsetValue;
+      UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, true, false, index, ref parameter);
+      return parameter;
+    }
+
+    /// <summary>
+    /// Sets the "u" parameter at an index. These parameters are strictly increasing.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <param name="parameter">The parameter value.</param>
+    /// <since>7.0</since>
+    public void SetUParameterAt(int index, double parameter)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, true, true, index, ref parameter);
+    }
+
+    /// <summary>
+    /// Gets the "v" parameter at an index. These parameters are strictly increasing.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <returns>The parameter.</returns>
+    /// <since>7.0</since>
+    public double VParameterAt(int index)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      double parameter = RhinoMath.UnsetValue;
+      UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, false, false, index, ref parameter);
+      return parameter;
+    }
+
+    /// <summary>
+    /// Sets the "v" parameter at an index. These parameters are strictly increasing.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <param name="parameter">The parameter value.</param>
+    /// <since>7.0</since>
+    public void SetVParameterAt(int index, double parameter)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, false, true, index, ref parameter);
+    }
+
+    /// <summary>
+    /// Gets the interpolation point at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <returns>The point location.</returns>
+    /// <since>7.0</since>
+    public Point3d PointAt(int uIndex, int vIndex)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      Point3d point = Point3d.Unset;
+      UnsafeNativeMethods.ON_HermiteSurface_PointAt(ptr_this, uIndex, vIndex, false, ref point);
+      return point;
+    }
+
+    /// <summary>
+    /// Sets the interpolation point at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <param name="point">The point location.</param>
+    /// <since>7.0</since>
+    public void SetPointAt(int uIndex, int vIndex, Point3d point)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_PointAt(ptr_this, uIndex, vIndex, true, ref point);
+    }
+
+    /// <summary>
+    /// Get the "u" tangent direction (actually first derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <returns>The tangent direction.</returns>
+    /// <since>7.0</since>
+    public Vector3d UTangentAt(int uIndex, int vIndex)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      Vector3d tangent = Vector3d.Unset;
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 0, uIndex, vIndex, false, ref tangent);
+      return tangent;
+    }
+
+    /// <summary>
+    /// Set the "u" tangent direction (actually first derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <param name="tangent">The tangent direction.</param>
+    /// <since>7.0</since>
+    public void SetUTangentAt(int uIndex, int vIndex, Vector3d tangent)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 0, uIndex, vIndex, true, ref tangent);
+    }
+
+    /// <summary>
+    /// Get the "v" tangent direction (actually first derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <returns>The tangent direction.</returns>
+    /// <since>7.0</since>
+    public Vector3d VTangentAt(int uIndex, int vIndex)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      Vector3d tangent = Vector3d.Unset;
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 1, uIndex, vIndex, false, ref tangent);
+      return tangent;
+    }
+
+    /// <summary>
+    /// Set the "v" tangent direction (actually first derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <param name="tangent">The tangent direction.</param>
+    /// <since>7.0</since>
+    public void SetVTangentAt(int uIndex, int vIndex, Vector3d tangent)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 1, uIndex, vIndex, true, ref tangent);
+    }
+
+    /// <summary>
+    /// Get the twist direction (mixed second partial derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <returns>The twist direction.</returns>
+    /// <since>7.0</since>
+    public Vector3d TwistAt(int uIndex, int vIndex)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      Vector3d tangent = Vector3d.Unset;
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 2, uIndex, vIndex, false, ref tangent);
+      return tangent;
+    }
+
+    /// <summary>
+    /// Set the twist direction (mixed second partial derivative) to interpolate at the u,v parameter location.
+    /// </summary>
+    /// <param name="uIndex">The "u" index.</param>
+    /// <param name="vIndex">The "v" index.</param>
+    /// <param name="twist">The twist direction.</param>
+    /// <since>7.0</since>
+    public void SetTwistAt(int uIndex, int vIndex, Vector3d twist)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 2, uIndex, vIndex, true, ref twist);
+    }
+
+    /// <summary>
+    /// Constructs a NURBS surface satisfying the Hermite interpolation conditions.
+    /// </summary>
+    /// <returns>A NURBS surface is successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public NurbsSurface ToNurbsSurface()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_HermiteSurface_NurbsSurface(ptr_this);
+      if (IntPtr.Zero == ptr_nurbs_surface)
+        return null;
+      return new NurbsSurface(ptr_nurbs_surface, null);
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~HermiteSurface()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_HermiteSurface_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
 }
 
 
 namespace Rhino.Geometry.Collections
 {
   /// <summary>
-  /// Provides access to the control points of a nurbs surface.
+  /// Provides access to the control points of a NURBS surface.
   /// </summary>
   public sealed class NurbsSurfacePointList : IEnumerable<ControlPoint>, IEpsilonComparable<NurbsSurfacePointList>
   {
@@ -902,6 +1234,7 @@ namespace Rhino.Geometry.Collections
     /// completes, call EnsurePrivateCopy to make sure that this class is not tied to the document. You can
     /// call this function as many times as you want.
     /// </summary>
+    /// <since>5.0</since>
     public void EnsurePrivateCopy()
     {
       m_surface.EnsurePrivateCopy();
@@ -911,6 +1244,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of control points in the U direction of this surface.
     /// </summary>
+    /// <since>5.0</since>
     public int CountU
     {
       get
@@ -922,6 +1256,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of control points in the V direction of this surface.
     /// </summary>
+    /// <since>5.0</since>
     public int CountV
     {
       get
@@ -946,6 +1281,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="u">Index of control point in the surface U direction.</param>
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <returns>A Surface UV coordinate on success, Point2d.Unset on failure.</returns>
+    /// <since>5.0</since>
     public Point2d GetGrevillePoint(int u, int v)
     {
       ValidateIndices(u, v);
@@ -961,6 +1297,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="u">Index of control point in the surface U direction.</param>
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <returns>The control point at the given (u, v) index.</returns>
+    /// <since>5.0</since>
     public ControlPoint GetControlPoint(int u, int v)
     {
       Point4d point;
@@ -974,6 +1311,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <param name="cp">The control point to set.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetControlPoint(int u, int v, ControlPoint cp)
     {
       return SetPoint(u, v, cp.m_vertex);
@@ -986,6 +1324,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <param name="cp">The control point location to set (weight is assumed to be 1.0).</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use one of the SetPoint() overrides")]
     public bool SetControlPoint(int u, int v, Point3d cp)
     {
@@ -1002,6 +1341,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y coordinate of control point.</param>
     /// <param name="z">Z coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetPoint(int u, int v, double x, double y, double z)
     {
       return SetPoint(u, v, new Point3d(x, y, z));
@@ -1022,6 +1362,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>6.0</since>
     public bool SetPoint(int u, int v, double x, double y, double z, double weight)
     {
       return SetPoint(u, v, new Point4d(x, y, z, weight));
@@ -1035,6 +1376,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <param name="point">Coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetPoint(int u, int v, Point3d point)
     {
       ValidateIndices(u, v);
@@ -1054,6 +1396,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>6.0</since>
     public bool SetPoint(int u, int v, Point4d point)
     {
       ValidateIndices(u, v);
@@ -1070,6 +1413,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="point">Coordinates of the control point.</param>
     /// <param name="weight">Weight of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetPoint(int u, int v, Point3d point, double weight)
     {
       double w = weight != 1.0 && weight != 0.0 ? weight : 1.0;
@@ -1084,6 +1428,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v">Index of control point in the surface V direction.</param>
     /// <param name="point">Coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool GetPoint(int u, int v, out Point3d point)
     {
       point = new Point3d();
@@ -1104,6 +1449,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use the override that returns world 3-D, or Euclidean, coordinates.
     /// </remarks>
+    /// <since>6.0</since>
     public bool GetPoint(int u, int v, out Point4d point)
     {
       point = new Point4d();
@@ -1120,6 +1466,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v">Index of control-point along surface V direction.</param>
     /// <param name="weight">The control point weight.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool SetWeight(int u, int v, double weight)
     {
       ValidateIndices(u, v);
@@ -1134,6 +1481,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="u">Index of control-point along surface U direction.</param>
     /// <param name="v">Index of control-point along surface V direction.</param>
     /// <returns>The control point weight if successful, Rhino.Math.UnsetValue otherwise.</returns>
+    /// <since>6.0</since>
     public double GetWeight(int u, int v)
     {
       ValidateIndices(u, v);
@@ -1146,6 +1494,7 @@ namespace Rhino.Geometry.Collections
     /// For rational curves, PointSize = Surface.Dimension + 1. 
     /// For non-rational curves, PointSize = Surface.Dimension.
     /// </summary>
+    /// <since>6.9</since>
     public int PointSize
     {
       get
@@ -1166,6 +1515,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="vDir">The V direction.</param>
     /// <param name="nDir">The N direction.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool UVNDirectionsAt(int u, int v, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
     {
       uDir = vDir = nDir = Vector3d.Unset;
@@ -1194,6 +1544,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="closeIndices"></param>
     /// <param name="stackedIndices"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool ValidateSpacing(double closeTolerance, double stackTolerance, out IndexPair[] closeIndices, out IndexPair[] stackedIndices)
     {
       bool rc;
@@ -1308,6 +1659,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public bool EpsilonEquals(NurbsSurfacePointList other, double epsilon)
     {
       if (null == other) throw new ArgumentNullException("other");
@@ -1338,7 +1690,7 @@ namespace Rhino.Geometry.Collections
     }
   }
   /// <summary>
-  /// Provides access to the knot vector of a nurbs surface.
+  /// Provides access to the knot vector of a NURBS surface.
   /// </summary>
   public sealed class NurbsSurfaceKnotList : IEnumerable<double>, Rhino.Collections.IRhinoTable<double>, IEpsilonComparable<NurbsSurfaceKnotList>
   {
@@ -1356,6 +1708,7 @@ namespace Rhino.Geometry.Collections
 #region properties
 
     /// <summary>Gets the total number of knots in this curve.</summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -1365,6 +1718,7 @@ namespace Rhino.Geometry.Collections
     }
 
     /// <summary>Determines if a knot vector is clamped.</summary>
+    /// <since>5.0</since>
     public bool ClampedAtStart
     {
       get
@@ -1374,6 +1728,7 @@ namespace Rhino.Geometry.Collections
       }
     }
     /// <summary>Determines if a knot vector is clamped.</summary>
+    /// <since>5.0</since>
     public bool ClampedAtEnd
     {
       get
@@ -1390,6 +1745,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="start">true if the query targets the first knot. Otherwise, the last knot.</param>
     /// <returns>A component.</returns>
+    /// <since>5.0</since>
     public double SuperfluousKnot(bool start)
     {
       IntPtr const_ptr_surface = m_surface.ConstPointer();
@@ -1426,6 +1782,7 @@ namespace Rhino.Geometry.Collections
     /// completes, call EnsurePrivateCopy to make sure that this class is not tied to the document. You can
     /// call this function as many times as you want.
     /// </summary>
+    /// <since>5.0</since>
     public void EnsurePrivateCopy()
     {
       m_surface.EnsurePrivateCopy();
@@ -1437,6 +1794,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="value">Knot value to insert.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool InsertKnot(double value)
     {
       return InsertKnot(value, 1);
@@ -1449,6 +1807,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="value">Knot value to insert.</param>
     /// <param name="multiplicity">Multiplicity of knot to insert.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool InsertKnot(double value, int multiplicity)
     {
       IntPtr ptr = m_surface.NonConstPointer();
@@ -1458,6 +1817,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>Get knot multiplicity.</summary>
     /// <param name="index">Index of knot to query.</param>
     /// <returns>The multiplicity (valence) of the knot.</returns>
+    /// <since>5.0</since>
     public int KnotMultiplicity(int index)
     {
       IntPtr ptr = m_surface.ConstPointer();
@@ -1471,6 +1831,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="knotSpacing">Spacing of subsequent knots.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool CreateUniformKnots(double knotSpacing)
     {
       IntPtr ptr = m_surface.NonConstPointer();
@@ -1484,6 +1845,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="knotSpacing">Spacing of subsequent knots.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool CreatePeriodicKnots(double knotSpacing)
     {
       IntPtr ptr = m_surface.NonConstPointer();
@@ -1505,6 +1867,7 @@ namespace Rhino.Geometry.Collections
     /// surface is restricted to be &lt;= tolerance.
     /// </param>
     /// <returns>number of knots removed on success. 0 if no knots were removed</returns>
+    /// <since>6.0</since>
     public int RemoveMultipleKnots(int minimumMultiplicity, int maximumMultiplicity, double tolerance)
     {
       IntPtr ptr_surface = m_surface.NonConstPointer();
@@ -1518,6 +1881,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index0">The starting knot index, where Degree-1 &lt; index0 &lt; index1 &lt;= Points.Count-1.</param>
     /// <param name="index1">The ending knot index, where Degree-1 &lt; index0 &lt; index1 &lt;= Points.Count-1.</param>
     /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.0</since>
     public bool RemoveKnots(int index0, int index1)
     {
       IntPtr ptr_surface = m_surface.NonConstPointer();
@@ -1530,6 +1894,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="u">The u parameter on the surface that is closest to the knot to be removed.</param>
     /// <param name="v">The v parameter on the surface that is closest to the knot to be removed.</param>
     /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.0</since>
     public bool RemoveKnotsAt(double u, double v)
     {
       // This is an "easy to use for scripters" function that emulates the RemoveKnot command.
@@ -1603,6 +1968,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public bool EpsilonEquals(NurbsSurfaceKnotList other, double epsilon)
     {
       if (null == other) throw new ArgumentNullException("other");

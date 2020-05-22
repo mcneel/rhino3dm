@@ -9,6 +9,7 @@ namespace Rhino.DocObjects
     internal ExtrusionObject(uint serialNumber)
       : base(serialNumber) { }
 
+    /// <since>5.0</since>
     public Extrusion ExtrusionGeometry
     {
       get
@@ -17,6 +18,7 @@ namespace Rhino.DocObjects
         return rc;
       }
     }
+    /// <since>5.0</since>
     public Extrusion DuplicateExtrusionGeometry()
     {
       Extrusion rc = DuplicateGeometry() as Extrusion;

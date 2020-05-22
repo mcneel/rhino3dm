@@ -16,6 +16,7 @@ namespace Rhino.DocObjects
 
     internal CurveObject() { }
 
+    /// <since>5.0</since>
     public Curve CurveGeometry
     {
       get
@@ -25,6 +26,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public Curve DuplicateCurveGeometry()
     {
       Curve rc = DuplicateGeometry() as Curve;
@@ -56,6 +58,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     ~CustomCurveObject() { Dispose(false); }
+    /// <since>5.0</since>
     public new void Dispose()
     {
       base.Dispose();

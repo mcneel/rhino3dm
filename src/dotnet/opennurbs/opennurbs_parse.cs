@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 using System;
 using Microsoft.Win32;
 
@@ -27,6 +27,7 @@ namespace Rhino.Input
     /// <returns> 
     /// Count of characters parsed or 0 for failure
     /// </returns>
+    /// <since>6.0</since>
     public static int ParseLengthExpession(
       string expression,
       StringParserSettings parse_settings_in,
@@ -81,8 +82,9 @@ namespace Rhino.Input
     ///  The output value is in the unit system specified in output_unit_system
     /// </param>
     /// <returns>
-    ///  Returns the count of characters that were parsed or 0 if the operation was unsuccesful
+    ///  Returns the count of characters that were parsed or 0 if the operation was unsuccessful
     /// </returns>
+    /// <since>6.0</since>
     public static int ParseLengthExpession(
       string expression,
       int start_offset,
@@ -115,6 +117,7 @@ namespace Rhino.Input
       return rc;
     }
 
+    /// <since>6.0</since>
     public static bool ParseAngleExpressionDegrees(
       string expression,
       out double angle_degrees
@@ -136,6 +139,7 @@ namespace Rhino.Input
       return 0 < rc;
     }
 
+    /// <since>6.0</since>
     public static bool ParseAngleExpressionRadians(
       string expression,
       out double angle_radians
@@ -156,6 +160,7 @@ namespace Rhino.Input
       return 0 < rc;
     }
 
+    /// <since>6.0</since>
     public static int ParseAngleExpession(
       string expression,
       int start_offset,
@@ -207,8 +212,9 @@ namespace Rhino.Input
     /// </param>
     /// <returns>
     /// Count of characters in expression parsed
-    /// if ParseNumber() returns 0, parse was unsuccesful
+    /// if ParseNumber() returns 0, parse was unsuccessful
     /// </returns>
+    /// <since>6.0</since>
     public static int ParseNumber(
       string expression,
       int max_count,
@@ -237,6 +243,7 @@ namespace Rhino.Input
     private readonly bool m_is_const;
     private IntPtr m_ptr_parse_settings; // ON_ParseSettings*
 
+    /// <since>6.0</since>
     public StringParserSettings()
     {
       m_ptr_parse_settings = UnsafeNativeMethods.ON_ParseSettings_New();
@@ -265,6 +272,7 @@ namespace Rhino.Input
       Dispose(false);
     }
 
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -288,6 +296,7 @@ namespace Rhino.Input
     ///   points and need to be thoughtfully considered in
     ///   most parsing situations.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings DefaultParseSettings { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_DefaultSettings());
 
     /// <summary>
@@ -299,6 +308,7 @@ namespace Rhino.Input
     ///   points and need to be thoughtfully considered in
     ///   most parsing situations.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsRadians { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_DefaultSettingsInRadians());
 
     /// <summary>
@@ -310,12 +320,14 @@ namespace Rhino.Input
     ///  points and need to be thoughtfully considered in
     ///   most parsing situations.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsDegrees { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_DefaultSettingsInDegrees()); 
 
     /// <summary>
     /// - The integer settings parse and optional unary + or unary - and
     ///   then parses one or more digits.Parsing stops after the last digit.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsIntegerNumber { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_IntegerNumberSettings());
 
     /// <summary>
@@ -326,6 +338,7 @@ namespace Rhino.Input
     ///   have a unary + or - preceding the digits.Parsing stops after
     ///   the last digit in the denominator.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsRationalNumber
     {
       get { return new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_RationalNumberSettings()); }
@@ -336,6 +349,7 @@ namespace Rhino.Input
     ///   and then parse a number that can be integer, decimal, or
     ///   scientific e notation.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsDoubleNumber { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_DoubleNumberSettings());
 
     /// <summary>
@@ -343,35 +357,41 @@ namespace Rhino.Input
     ///   and then parse a number that can be integer, decimal, 
     ///   scientific e notation or pi.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsRealNumber { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_RealNumberSettings());
 
     /// <summary>
     /// - ON_ParseSetting::FalseSettings has all parsing options
     ///   set to false.
-    /// - A common use of ON_ParseSettings FalseSettings is to intialize
+    /// - A common use of ON_ParseSettings FalseSettings is to initialize
     ///   ON_ParseSettings classes that are used to report what happened
     ///   during parsing.Any parsing results value set to true after
-    ///   parsing indicates that type of parsing occured.
+    ///   parsing indicates that type of parsing occurred.
     /// </summary>
+    /// <since>6.0</since>
     public static StringParserSettings ParseSettingsEmpty { get; } = new StringParserSettings(UnsafeNativeMethods.ON_ParseSettings_EmptySettings());
 
+    /// <since>6.0</since>
     public AngleUnitSystem DefaultAngleUnitSystem
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_GetDefaultAngleUnitSystem(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetDefaultAngleUnitSystem(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public UnitSystem DefaultLengthUnitSystem
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_GetDefaultLengthUnitSystem(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetDefaultLengthUnitSystem(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public void SetAllFieldsToFalse()
     {
       UnsafeNativeMethods.ON_ParseSettings_SetAllToFalse(NonConstPointer());
     }
 
+    /// <since>6.0</since>
     public void SetAllExpressionSettingsToFalse()
     {
       UnsafeNativeMethods.ON_ParseSettings_SetAllExpressionSettingsToFalse(NonConstPointer());
@@ -379,180 +399,210 @@ namespace Rhino.Input
     
     #region properties
 
+    /// <since>6.0</since>
     public bool ParseLeadingWhiteSpace
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseLeadingWhiteSpace(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseLeadingWhiteSpace(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseArithmeticExpression
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseArithmeticExpression(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseArithmeticExpression(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseMathFunctions
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseMathFunctions(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseMathFunctions(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseExplicitFormulaExpression
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseExplicitFormulaExpression(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseExplicitFormulaExpression(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseUnaryMinus
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseUnaryMinus(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryMinus(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseUnaryPlus
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseUnaryPlus(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryPlus(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSignificandIntegerPart
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandIntegerPart(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandIntegerPart(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSignificandFractionalPart
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandFractionalPart(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandFractionalPart(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSignificandDigitSeparators
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandDigitSeparators(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandDigitSeparators(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseScientificENotation
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseScientificENotation(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseScientificENotation(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseDAsExponentInScientificENotation
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseDAsExponentInScientificENotation(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseDAsExponentInScientificENotation(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseFullStopAsDecimalPoint
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDecimalPoint(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDecimalPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseFullStopAsDigitSeparator
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDigitSeparator(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDigitSeparator(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseCommaAsDecimalPoint
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDecimalPoint(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDecimalPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseCommaAsDigitSeparator
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDigitSeparator(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDigitSeparator(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSpaceAsDigitSeparator
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSpaceAsDigitSeparator(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSpaceAsDigitSeparator(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseHyphenMinusAsNumberDash
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseHyphenMinusAsNumberDash(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenMinusAsNumberDash(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseHyphenAsNumberDash
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseHyphenAsNumberDash(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenAsNumberDash(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseRationalNumber
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseRationalNumber(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseRationalNumber(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParsePi
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParsePi(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParsePi(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseMultiplication
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseMultiplication(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseMultiplication(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseDivision
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseDivision(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseDivision(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseAddition
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseAddition(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseAddition(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSubtraction
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSubtraction(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSubtraction(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParsePairedParentheses
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParsePairedParentheses(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParsePairedParentheses(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseIntegerDashFraction
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseIntegerDashFraction(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseIntegerDashFraction(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseFeetInches
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseFeetInches(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseFeetInches(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseArcDegreesMinutesSeconds
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseArcDegreesMinutesSeconds(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseArcDegreesMinutesSeconds(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public bool ParseSurveyorsNotation
     {
       get { return UnsafeNativeMethods.ON_ParseSettings_ParseSurveyorsNotation(ConstPointer()); }
       set { UnsafeNativeMethods.ON_ParseSettings_SetParseSurveyorsNotation(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint PreferedLocaleId
     {

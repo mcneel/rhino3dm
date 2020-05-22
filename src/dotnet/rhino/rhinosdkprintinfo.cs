@@ -14,6 +14,7 @@ namespace Rhino.Display
 {
   public class ViewCapture
   {
+    /// <since>6.0</since>
     public ViewCapture()
     {
       ScaleScreenItems = true;
@@ -21,6 +22,7 @@ namespace Rhino.Display
       RealtimeRenderPasses = -1;
     }
 
+    /// <since>6.0</since>
     public Bitmap CaptureToBitmap(RhinoView sourceView)
     {
         using (var dib = new Runtime.InteropWrappers.RhinoDib())
@@ -36,17 +38,27 @@ namespace Rhino.Display
     }
 
     /// <summary> Width of capture in Pixels </summary>
+    /// <since>6.0</since>
     public int  Width { get; set; }
     /// <summary> Height of capture in Pixels </summary>
+    /// <since>6.0</since>
     public int  Height { get; set; }
+    /// <since>6.0</since>
     public bool ScaleScreenItems { get; set; }
+    /// <since>6.0</since>
     public bool DrawGrid { get; set; }
+    /// <since>6.0</since>
     public bool DrawAxes { get; set; }
+    /// <since>6.0</since>
     public bool DrawGridAxes { get; set; }
+    /// <since>6.0</since>
     public bool TransparentBackground { get; set; }
+    /// <since>6.0</since>
     public bool Preview {get; set; }
+    /// <since>6.0</since>
     public int  RealtimeRenderPasses {get;set;}
 
+    /// <since>6.0</since>
     public static Bitmap CaptureToBitmap(ViewCaptureSettings settings)
     {
       using (var dib = new Runtime.InteropWrappers.RhinoDib())
@@ -62,6 +74,7 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <since>6.0</since>
     public static System.Xml.XmlDocument CaptureToSvg(ViewCaptureSettings settings)
     {
       if (null == settings)
@@ -97,6 +110,10 @@ namespace Rhino.Display
 
   class SvgWriter : Runtime.ViewCaptureWriter
   {
+    static void AppendAttribute(System.Xml.XmlDocument doc, System.Xml.XmlElement element, string name, double value)
+    {
+      AppendAttribute(doc, element, name, value.ToString(CultureInfo.InvariantCulture));
+    }
     public static void AppendAttribute(System.Xml.XmlDocument doc, System.Xml.XmlElement element, string name, string value)
     {
       var attr = doc.CreateAttribute(name);
@@ -172,6 +189,12 @@ namespace Rhino.Display
         float width = (pen != null && pen.Width > 0) ? pen.Width : 0;
         attrib.Value = width.ToString(CultureInfo.InvariantCulture);
         elem.Attributes.Append(attrib);
+        if (pen != null && pen.Width > 0 && pen.Color.A < 255)
+        {
+          attrib = m_doc.CreateAttribute("stroke-opacity");
+          attrib.Value = (pen.Color.A / 255.0).ToString(CultureInfo.InvariantCulture);
+          elem.Attributes.Append(attrib);
+        }
 
         if (brushColor == Color.Empty)
         {
@@ -185,9 +208,7 @@ namespace Rhino.Display
           attrib.Value = ColorTranslator.ToHtml(brushColor);
           elem.Attributes.Append(attrib);
 
-          attrib = m_doc.CreateAttribute("fill-opacity");
-          attrib.Value = "1.0";
-          elem.Attributes.Append(attrib);
+          AppendAttribute(m_doc, elem, "fill-opacity", brushColor.A / 255.0);
         }
 
         m_root_node.AppendChild(elem);
@@ -217,8 +238,8 @@ namespace Rhino.Display
       float heightPoint, Font font)
     {
       var elem = m_doc.CreateElement("text");
-      AppendAttribute(m_doc, elem, "x", x.ToString(CultureInfo.InvariantCulture));
-      AppendAttribute(m_doc, elem, "y", y.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "x", x);
+      AppendAttribute(m_doc, elem, "y", y);
       if (Math.Abs(angle) > 0.1)
       {
         string transform = $"rotate({angle.ToString(CultureInfo.InvariantCulture)} {x.ToString(CultureInfo.InvariantCulture)},{y.ToString(CultureInfo.InvariantCulture)})";
@@ -237,7 +258,9 @@ namespace Rhino.Display
         AppendAttribute(m_doc, elem, "text-decoration", "underline");
       if (font.Strikeout)
         AppendAttribute(m_doc, elem, "text-decoration", "line-through");
-      AppendAttribute(m_doc, elem, "font-size", string.Format(CultureInfo.InvariantCulture, "{0}", heightPoint));
+      if (textColor.A < 255)
+        AppendAttribute(m_doc, elem, "fill-opacity", textColor.A / 255.0);
+      AppendAttribute(m_doc, elem, "font-size", heightPoint);
       elem.InnerText = text;
       m_root_node.AppendChild(elem);
     }
@@ -267,9 +290,7 @@ namespace Rhino.Display
       attrib.Value = ColorTranslator.ToHtml(fillColor);
       elem.Attributes.Append(attrib);
 
-      attrib = m_doc.CreateAttribute("fill-opacity");
-      attrib.Value = "1.0";
-      elem.Attributes.Append(attrib);
+      AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
 
       attrib = m_doc.CreateAttribute("points");
       StringBuilder sb = new StringBuilder();
@@ -287,16 +308,18 @@ namespace Rhino.Display
     protected override void DrawCircle(PointF center, float diameter, Color fillColor, float strokeWidth, Color strokeColor)
     {
       var elem = m_doc.CreateElement("circle");
-      AppendAttribute(m_doc, elem, "cx", center.X.ToString(CultureInfo.InvariantCulture));
-      AppendAttribute(m_doc, elem, "cy", center.Y.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "cx", center.X);
+      AppendAttribute(m_doc, elem, "cy", center.Y);
       float radius = diameter * 0.5f;
-      AppendAttribute(m_doc, elem, "r", radius.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "r", radius);
       AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(strokeColor));
-      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth);
+      if (strokeColor.A < 255)
+        AppendAttribute(m_doc, elem, "stroke-opacity", strokeColor.A / 255.0);
       if (fillColor != Color.Empty)
       {
         AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
-        AppendAttribute(m_doc, elem, "fill-opacity", "1.0");
+        AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
       }
       m_root_node.AppendChild(elem);
     }
@@ -304,21 +327,23 @@ namespace Rhino.Display
     protected override void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius)
     {
       var elem = m_doc.CreateElement("rect");
-      AppendAttribute(m_doc, elem, "x", rect.Left.ToString(CultureInfo.InvariantCulture));
-      AppendAttribute(m_doc, elem, "y", rect.Top.ToString(CultureInfo.InvariantCulture));
-      AppendAttribute(m_doc, elem, "width", rect.Width.ToString(CultureInfo.InvariantCulture));
-      AppendAttribute(m_doc, elem, "height", rect.Height.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "x", rect.Left);
+      AppendAttribute(m_doc, elem, "y", rect.Top);
+      AppendAttribute(m_doc, elem, "width", rect.Width);
+      AppendAttribute(m_doc, elem, "height", rect.Height);
       AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(strokeColor));
-      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth);
+      if (strokeColor.A < 255)
+        AppendAttribute(m_doc, elem, "stroke-opacity", strokeColor.A / 255.0);
       if (cornerRadius > 0)
       {
-        AppendAttribute(m_doc, elem, "rx", cornerRadius.ToString(CultureInfo.InvariantCulture));
-        AppendAttribute(m_doc, elem, "ry", cornerRadius.ToString(CultureInfo.InvariantCulture));
+        AppendAttribute(m_doc, elem, "rx", cornerRadius);
+        AppendAttribute(m_doc, elem, "ry", cornerRadius);
       }
       if (fillColor != Color.Empty)
       {
         AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
-        AppendAttribute(m_doc, elem, "fill-opacity", "1.0");
+        AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
       }
       m_root_node.AppendChild(elem);
     }
@@ -344,11 +369,13 @@ namespace Rhino.Display
     internal IntPtr ConstPointer() { return m_ptr_print_info; }
     internal IntPtr NonConstPointer() { return m_ptr_print_info; }
 
+    /// <since>6.0</since>
     public ViewCaptureSettings()
     {
       m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
     }
 
+    /// <since>6.0</since>
     public ViewCaptureSettings(RhinoView sourceView, Size mediaSize, double dpi)
     {
       m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
@@ -358,6 +385,7 @@ namespace Rhino.Display
       SetLayout(mediaSize, new Rectangle(0, 0, mediaSize.Width, mediaSize.Height));
     }
 
+    /// <since>6.0</since>
     public ViewCaptureSettings(RhinoPageView sourcePageView, double dpi)
     {
       m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
@@ -374,6 +402,7 @@ namespace Rhino.Display
       SetLayout(media_size, new Rectangle(0, 0, media_size.Width, media_size.Height));
     }
 
+    /// <since>6.15</since>
     public void SetViewport(RhinoViewport viewport)
     {
       if (_viewport != null)
@@ -389,6 +418,7 @@ namespace Rhino.Display
     }
 
     RhinoDoc _doc;
+    /// <since>6.15</since>
     public RhinoDoc Document
     {
       get
@@ -406,6 +436,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.17</since>
     public bool RasterMode
     {
       get
@@ -418,6 +449,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public void SetLayout(Size mediaSize, Rectangle cropRectangle)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -426,6 +458,7 @@ namespace Rhino.Display
     }
 
     /// <summary> Total size of the image or page in dots </summary>
+    /// <since>6.0</since>
     public Size MediaSize
     {
       get
@@ -440,6 +473,7 @@ namespace Rhino.Display
     }
 
     /// <summary> Capture "density" in dots per inch </summary>
+    /// <since>6.0</since>
     public double Resolution
     {
       get
@@ -459,6 +493,7 @@ namespace Rhino.Display
     }
 
     /// <summary> Actual area of output rectangle that view capture is sent to. </summary>
+    /// <since>6.0</since>
     public Rectangle CropRectangle
     {
       get
@@ -485,6 +520,7 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>6.2</since>
     public bool GetMargins(UnitSystem lengthUnits, out double left, out double top, out double right, out double bottom)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -505,18 +541,21 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>6.2</since>
     public bool SetMargins(UnitSystem lengthUnits, double left, double top, double right, double bottom)
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.CRhinoPrintInfo_SetMargins(ptr_this, lengthUnits, left, top, right, bottom);
     }
 
+    /// <since>6.2</since>
     public void SetOffset(UnitSystem lengthUnits, bool fromMargin, double x, double y)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetOffset(ptr_this, lengthUnits, fromMargin, x, y);
     }
 
+    /// <since>6.2</since>
     public void GetOffset(UnitSystem lengthUnits, out bool fromMargin, out double x, out double y)
     {
       fromMargin = false;
@@ -534,6 +573,7 @@ namespace Rhino.Display
       Center = UnsafeNativeMethods.PrintInfoAnchor.Center
     }
 
+    /// <since>6.2</since>
     public AnchorLocation OffsetAnchor
     {
       get
@@ -574,71 +614,83 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoPrintInfo_SetDouble(ptr_this, which, val);
     }
 
+    /// <since>6.0</since>
     public bool IsValid
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.IsValid); }
     }
 
+    /// <since>6.0</since>
     public bool DrawBackground
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawBackground); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawBackground, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawGrid
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawGrid); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawGrid, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawAxis
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawAxis); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawAxis, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawLockedObjects
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawLockedObjects); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawLockedObjects, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawMargins
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawMargins); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawMargins, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawSelectedObjectsOnly
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawOnlySelectedObjects); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawOnlySelectedObjects, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawClippingPlanes
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawClippingPlanes); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawClippingPlanes, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawLights
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawLights); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawLights, value); }
     }
 
+    /// <since>6.2</since>
     public bool DrawBackgroundBitmap
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawBackgroundBitmap); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawBackgroundBitmap, value); }
     }
 
+    /// <since>6.2</since>
     public bool DrawWallpaper
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.DrawWallpaper); }
       set { SetBool(UnsafeNativeMethods.PrintInfoBool.DrawWallpaper, value); }
     }
 
+    /// <since>6.15</since>
     public bool UsePrintWidths
     {
       get { return GetBool(UnsafeNativeMethods.PrintInfoBool.UsePrintWidths); }
@@ -650,6 +702,7 @@ namespace Rhino.Display
     /// helpful when printing something at 1/2 scale and having all of the curves
     /// print 1/2 as thick
     /// </summary>
+    /// <since>6.15</since>
     public double WireThicknessScale
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.WireThicknessScale); }
@@ -660,6 +713,7 @@ namespace Rhino.Display
     /// size of point objects in millimeters
     /// if scale &lt;= 0 the size is minimized so points are always drawn as small as possible
     /// </summary>
+    /// <since>6.15</since>
     public double PointSizeMillimeters
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PointSizeMM); }
@@ -669,6 +723,7 @@ namespace Rhino.Display
     /// <summary>
     /// arrowhead size in millimeters
     /// </summary>
+    /// <since>6.15</since>
     public double ArrowheadSizeMillimeters
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.ArrowHeadSizeMM); }
@@ -678,6 +733,7 @@ namespace Rhino.Display
     /// <summary>
     /// Line thickness used to print objects with no defined thickness (in mm)
     /// </summary>
+    /// <since>6.15</since>
     public double DefaultPrintWidthMillimeters
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM); }
@@ -691,6 +747,7 @@ namespace Rhino.Display
       BlackAndWhite
     }
 
+    /// <since>6.8</since>
     public ColorMode OutputColor
     {
       get
@@ -711,6 +768,7 @@ namespace Rhino.Display
     /// <param name="pageUnits">The current page units.</param>
     /// <param name="modelUnits">The current model units.</param>
     /// <returns>The model scale factor.</returns>
+    /// <since>6.21</since>
     public double GetModelScale(UnitSystem pageUnits, UnitSystem modelUnits)
     {
       IntPtr ptr_const_this = ConstPointer();
@@ -721,6 +779,7 @@ namespace Rhino.Display
     /// Sets the model scale to a value.
     /// </summary>
     /// <param name="scale">The scale value.</param>
+    /// <since>6.21</since>
     public void SetModelScaleToValue(double scale)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -731,6 +790,7 @@ namespace Rhino.Display
     /// Scales the model to fit.
     /// </summary>
     /// <param name="promptOnChange">Prompt the user if the model scale will change.</param>
+    /// <since>6.21</since>
     public void SetModelScaleToFit(bool promptOnChange)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -740,6 +800,7 @@ namespace Rhino.Display
     /// <summary>
     /// Returns true if the model has been scaled to fit.
     /// </summary>
+    /// <since>6.21</since>
     public bool IsScaleToFit
     {
       get
@@ -749,6 +810,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.21</since>
     public int ModelScaleType
     {
       get
@@ -766,6 +828,7 @@ namespace Rhino.Display
 
     #region IDisposable implementation
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -807,6 +870,7 @@ namespace Rhino.Runtime
   public abstract class ViewCaptureWriter
   {
     public delegate void SetClipRectProc(ref int left, ref int top, ref int right, ref int bottom);
+    public delegate void FillProc(int topl, int bottoml, int topr, int bottomr);
     public delegate void VectorPolylineProc(int argb, float thickness, int dashed, int count, IntPtr points);
     public delegate void VectorArcProc(int argb, float thickness, int dashed, ref Arc arc);
     public delegate void VectorStringProc(IntPtr constPtrString, int argbTextColor, double x, double y, float angle, int alignment, float heightPixels, IntPtr constPtrFont);
@@ -823,7 +887,9 @@ namespace Rhino.Runtime
 
     public class Pen
     {
+      /// <since>6.0</since>
       public Color Color { get; internal set; }
+      /// <since>6.0</since>
       public float Width { get; internal set; }
     }
     public enum PointType
@@ -835,7 +901,9 @@ namespace Rhino.Runtime
     }
     public struct PathPoint
     {
+      /// <since>6.0</since>
       public PointF Location { get; set; }
+      /// <since>6.0</since>
       public PointType PointType { get; set; }
     }
 
@@ -846,6 +914,7 @@ namespace Rhino.Runtime
     List<PathPoint> m_current_path = new List<PathPoint>();
     Size m_page_size;
 
+    /// <since>6.0</since>
     public ViewCaptureWriter(double dpi, Size pageSize)
     {
       m_dpi = dpi;
@@ -856,11 +925,14 @@ namespace Rhino.Runtime
     protected double Dpi => m_dpi;
     protected Size PageSize => m_page_size;
 
+    /// <since>6.15</since>
     public void Draw(IntPtr constPtrPrintInfo, RhinoDoc doc)
     {
       List<GCHandle> handles = new List<GCHandle>();
       SetClipRectProc setcliprect = StartDetail;
       handles.Add(GCHandle.Alloc(setcliprect));
+      FillProc fill = ClearRect;
+      handles.Add(GCHandle.Alloc(fill));
       VectorPolylineProc draw_polyline = DrawPolyline;
       handles.Add(GCHandle.Alloc(draw_polyline));
       VectorArcProc draw_arc = DrawArc;
@@ -891,7 +963,7 @@ namespace Rhino.Runtime
       if (doc != null)
         docSerialNumber = doc.RuntimeSerialNumber;
 
-      UnsafeNativeMethods.CRhinoPrintInfo_VectorCapture(constPtrPrintInfo, setcliprect, draw_polyline, draw_arc, draw_string, draw_bez,
+      UnsafeNativeMethods.CRhinoPrintInfo_VectorCapture(constPtrPrintInfo, setcliprect, fill, draw_polyline, draw_arc, draw_string, draw_bez,
         fill_poly, path_proc, point_proc, bitmap_proc, rounded_rect_proc, clippath_proc, gradient_proc, docSerialNumber);
 
       if (m_current_path.Count>1)
@@ -945,6 +1017,16 @@ namespace Rhino.Runtime
       m_in_detail = !m_in_detail;
     }
 
+    void ClearRect(int topl, int bottoml, int topr, int bottomr)
+    {
+      // 24 Nov 2019 S. Baer (RH-55672)
+      // Only support solid fills for V6. We are already at 6.21 and the only mention
+      // of this issue has been for a solid fill.
+      var topLeftColor = Color.FromArgb(topl);
+      var rect = Rectangle.FromLTRB(0, 0, m_page_size.Width, m_page_size.Height);
+      DrawRectangle(rect, topLeftColor, 0, Color.Empty, 0);
+    }
+
     void DrawScreenText(IntPtr constPtrString, int argbTextColor, double x, double y, float angle, int horizontalAlignment, float heightPixels, IntPtr constPtrFont)
     {
       DrawPath(); // this is a good point to 'flush' the path
@@ -955,6 +1037,11 @@ namespace Rhino.Runtime
       var onfont = Interop.FontFromPointer(constPtrFont);
       float height_points = (float)ToPoints(heightPixels);
       DrawScreenText(text, text_color, x, y, angle, horizontalAlignment, height_points, onfont);
+    }
+
+    protected void Flush()
+    {
+      DrawPath();
     }
 
     void DrawPath()

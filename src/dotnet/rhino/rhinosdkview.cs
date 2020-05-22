@@ -21,6 +21,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="serialNumber"></param>
     /// <returns>RhinoView or null if no view exists for a given serial number</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public static RhinoView FromRuntimeSerialNumber(uint serialNumber)
     {
@@ -56,6 +57,7 @@ namespace Rhino.Display
     }
 
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber => m_runtime_serial_number;
 
@@ -63,26 +65,31 @@ namespace Rhino.Display
     /// <summary>
     /// Gets the window handle that this view is bound to.
     /// </summary>
+    /// <since>5.0</since>
     public IntPtr Handle => UnsafeNativeMethods.CRhinoView_HWND(m_runtime_serial_number);
 
     /// <summary>
     /// Gets the display pipeline used for this view.
     /// </summary>
+    /// <since>6.0</since>
     public DisplayPipeline DisplayPipeline => new DisplayPipeline(UnsafeNativeMethods.CRhinoView_DisplayPipeline(m_runtime_serial_number));
 
     /// <summary>
     /// Gets the RealtimeDisplayMode active for this view. null if the view doesn't have a RealtimeDisplayMode set.
     /// </summary>
+    /// <since>6.0</since>
     public RealtimeDisplayMode RealtimeDisplayMode => RealtimeDisplayMode.GetRealtimeViewport(UnsafeNativeMethods.Rdk_RealtimeDisplayMode_RealtimeDisplayMode_FromView(m_runtime_serial_number), false);
 
     /// <summary>
-    /// Gets the size and location of the view including its nonclient elements, in pixels, relative to the parent control.
+    /// Gets the size and location of the view including its non-client elements, in pixels, relative to the parent control.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle Bounds => ClientRectangle;
 
     /// <summary>
     /// Gets the rectangle that represents the client area of the view. 
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle ClientRectangle
     {
       get
@@ -96,6 +103,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets the rectangle that represents the client area of the view in screen coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle ScreenRectangle
     {
       get
@@ -109,6 +117,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the size of the view
     /// </summary>
+    /// <since>6.0</since>
     public System.Drawing.Size Size
     {
       get
@@ -126,6 +135,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="screenPoint">The 2D screen point.</param>
     /// <returns>A 2D point in client coordinates.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Point ScreenToClient(System.Drawing.Point screenPoint)
     {
       System.Drawing.Rectangle screen = ScreenRectangle;
@@ -134,6 +144,7 @@ namespace Rhino.Display
       return new System.Drawing.Point(x,y);
     }
 
+    /// <since>5.8</since>
     public Geometry.Point2d ScreenToClient(Geometry.Point2d screenPoint)
     {
       System.Drawing.Rectangle screen = ScreenRectangle;
@@ -142,6 +153,7 @@ namespace Rhino.Display
       return new Geometry.Point2d(x, y);
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Point ClientToScreen(System.Drawing.Point clientPoint)
     {
       System.Drawing.Rectangle screen = ScreenRectangle;
@@ -150,6 +162,7 @@ namespace Rhino.Display
       return new System.Drawing.Point(x, y);
     }
 
+    /// <since>5.0</since>
     public Geometry.Point2d ClientToScreen(Geometry.Point2d clientPoint)
     {
       System.Drawing.Rectangle screen = ScreenRectangle;
@@ -171,6 +184,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void Redraw()
     {
       UnsafeNativeMethods.CRhinoView_Redraw(m_runtime_serial_number);
@@ -178,8 +192,9 @@ namespace Rhino.Display
 
     /// <summary>
     /// Gets or sets the 'drawing enabled' flag. By default, drawing is enabled.
-    /// <para>There are some rare situations where scipts want to disable drawing for a while.</para>
+    /// <para>There are some rare situations where scripts want to disable drawing for a while.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool EnableDrawing
     {
       get
@@ -191,6 +206,7 @@ namespace Rhino.Display
       set { UnsafeNativeMethods.CRhinoView_EnableDrawing(true, ref value); }
     }
 
+    /// <since>5.8</since>
     public double SpeedTest(int frameCount, bool freezeDrawList, int direction, double angleDeltaRadians)
     {
       return UnsafeNativeMethods.RhViewSpeedTest(m_runtime_serial_number, frameCount, freezeDrawList, direction, angleDeltaRadians);
@@ -199,6 +215,7 @@ namespace Rhino.Display
     /// <summary>
     /// Return true if this view is a RhinoPageView.
     /// </summary>
+    /// <since>7.0</since>
     public bool IsPageView => UnsafeNativeMethods.CRhinoView_IsPageView(m_runtime_serial_number);
 
     // [skipping]
@@ -207,12 +224,13 @@ namespace Rhino.Display
     ///<summary>Creates a bitmap preview image of model.</summary>
     ///<param name='imagePath'>
     ///[in] The name of the bitmap file to create.  The extension of the imagePath controls
-    ///the format of the bitmap file created (bmp, tga, jpg, pcx, png, tif).
+    ///the format of the bitmap file created (BMP, TGA, JPG, PCX, PNG, TIF).
     ///</param>
     ///<param name='size'>[in] The width and height of the bitmap in pixels.</param>
     ///<param name="ignoreHighlights">true if highlighted elements should be drawn normally.</param>
     ///<param name="drawConstructionPlane">true if the CPlane should be drawn.</param>
     ///<returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool CreateWireframePreviewImage(string imagePath,
                                             System.Drawing.Size size,
                                             bool ignoreHighlights,
@@ -231,13 +249,14 @@ namespace Rhino.Display
     ///<summary>Creates a bitmap preview image of model.</summary>
     ///<param name='imagePath'>
     ///[in] The name of the bitmap file to create.  The extension of the imagePath controls
-    ///the format of the bitmap file created (bmp, tga, jpg, pcx, png, tif).
+    ///the format of the bitmap file created (BMP, TGA, JPG, PCX, PNG, TIF).
     ///</param>
     ///<param name='size'>[in] The width and height of the bitmap in pixels.</param>
     ///<param name="ignoreHighlights">true if highlighted elements should be drawn normally.</param>
     ///<param name="drawConstructionPlane">true if the CPlane should be drawn.</param>
     /// <param name="useGhostedShading">true if ghosted shading (partially transparent shading) should be used.</param>
     ///<returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool CreateShadedPreviewImage(string imagePath,
                                          System.Drawing.Size size,
                                          bool ignoreHighlights,
@@ -262,6 +281,7 @@ namespace Rhino.Display
     /// Capture View contents to a bitmap.
     /// </summary>
     /// <returns>The bitmap of the complete view.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap()
     {
       return CaptureToBitmap(ClientRectangle.Size);
@@ -272,6 +292,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="size">Size of Bitmap to capture to.</param>
     /// <returns>The bitmap of the specified part of the view.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(System.Drawing.Size size)
     {
       using(var dib = new Runtime.InteropWrappers.RhinoDib())
@@ -292,8 +313,9 @@ namespace Rhino.Display
     /// <param name="size">The width and height of the returned bitmap.</param>
     /// <param name="grid">true if the construction plane grid should be visible.</param>
     /// <param name="worldAxes">true if the world axis should be visible.</param>
-    /// <param name="cplaneAxes">true if the construction plane close the the grid should be visible.</param>
+    /// <param name="cplaneAxes">true if the construction plane close the grid should be visible.</param>
     /// <returns>A new bitmap.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(System.Drawing.Size size, bool grid, bool worldAxes, bool cplaneAxes)
     {
       using(var dib = new Runtime.InteropWrappers.RhinoDib())
@@ -313,13 +335,14 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="grid">true if the construction plane grid should be visible.</param>
     /// <param name="worldAxes">true if the world axis should be visible.</param>
-    /// <param name="cplaneAxes">true if the construction plane close the the grid should be visible.</param>
+    /// <param name="cplaneAxes">true if the construction plane close the grid should be visible.</param>
     /// <returns>A new bitmap.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_screencaptureview.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(bool grid, bool worldAxes, bool cplaneAxes)
     {
       return CaptureToBitmap(ClientRectangle.Size, grid, worldAxes, cplaneAxes);
@@ -332,6 +355,7 @@ namespace Rhino.Display
     /// <param name="size">The width and height of the returned bitmap.</param>
     /// <param name="mode">The display mode.</param>
     /// <returns>A new bitmap.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(System.Drawing.Size size, DisplayModeDescription mode)
     {
       var attr = new DisplayPipelineAttributes(mode);
@@ -344,6 +368,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="mode">The display mode.</param>
     /// <returns>A new bitmap.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(DisplayModeDescription mode)
     {
       return CaptureToBitmap(ClientRectangle.Size, mode);
@@ -356,6 +381,7 @@ namespace Rhino.Display
     /// <param name="size">The width and height of the returned bitmap.</param>
     /// <param name="attributes">The specific display mode attributes.</param>
     /// <returns>A new bitmap.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(System.Drawing.Size size, DisplayPipelineAttributes attributes)
     {
       IntPtr const_ptr_attributes = attributes.ConstPointer();
@@ -377,11 +403,13 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="attributes">The specific display mode attributes.</param>
     /// <returns>A new bitmap.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(DisplayPipelineAttributes attributes)
     {
       return CaptureToBitmap(ClientRectangle.Size, attributes);
     }
 
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get
@@ -402,6 +430,7 @@ namespace Rhino.Display
     /// detail viewports.
     /// The MainViewport will always return this RhinoView's m_vp.
     /// </summary>
+    /// <since>5.0</since>
     public RhinoViewport MainViewport
     {
       get
@@ -426,12 +455,14 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public virtual RhinoViewport ActiveViewport => MainViewport;
 
     /// <summary>
     /// Returns viewport ID for the active viewport. Faster than ActiveViewport function when
     /// working with page views.
     /// </summary>
+    /// <since>5.0</since>
     public Guid ActiveViewportID
     {
       get
@@ -454,6 +485,7 @@ namespace Rhino.Display
     /// <summary>
     /// Visibility of the viewport title window.
     /// </summary>
+    /// <since>5.0</since>
     public bool TitleVisible
     {
       get
@@ -466,6 +498,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>5.0</since>
     public bool Maximized
     {
       get
@@ -481,8 +514,9 @@ namespace Rhino.Display
     /// <summary>
     /// Floating state of RhinoView.
     /// if true, then the view will be in a floating frame window. Otherwise
-    /// the view will be embeded in the main frame.
+    /// the view will be embedded in the main frame.
     /// </summary>
+    /// <since>5.0</since>
     public bool Floating
     {
       get
@@ -500,6 +534,7 @@ namespace Rhino.Display
     /// class after calling Close.
     /// </summary>
     /// <returns>true on success</returns>
+    /// <since>5.0</since>
     public bool Close()
     {
       uint serial_number = Document.RuntimeSerialNumber;
@@ -511,6 +546,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="bIncludeMovement">If captured, test if the mouse has moved between mouse button down and mouse button up.</param>
     /// <returns>true if captured, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool MouseCaptured(bool bIncludeMovement)
     {
       return UnsafeNativeMethods.CRhinoView_IsMouseCaptured(m_runtime_serial_number, bIncludeMovement);
@@ -526,6 +562,9 @@ namespace Rhino.Display
     private static EventHandler<ViewEventArgs> g_destroy_view;
     private static EventHandler<ViewEventArgs> g_setactive_view;
     private static EventHandler<ViewEventArgs> g_rename_view;
+
+    private static ViewCallback g_on_view_modified;
+    private static EventHandler<ViewEventArgs> g_view_modified;
 
     //typedef int (CALLBACK* RHMOUSEEVENTCALLBACK_PROC)(unsigned int viewSerialNumber, unsigned int flags, int x, int y, int cancel);
     internal delegate int MouseCallback(uint viewSerialNumber, uint flags, int x, int y, int cancel);
@@ -567,6 +606,7 @@ namespace Rhino.Display
     private static void OnDestroyView(IntPtr pView)  { ViewEventHelper(g_destroy_view, pView); }
     private static void OnSetActiveView(IntPtr pView){ ViewEventHelper(g_setactive_view, pView); }
     private static void OnRenameView(IntPtr pView)   { ViewEventHelper(g_rename_view, pView); }
+    private static void OnViewModified(IntPtr pView) { ViewEventHelper(g_view_modified, pView); }
 
     private static int MouseCallbackHelper(EventHandler<UI.MouseCallbackEventArgs> handler, uint viewSerialNumber, uint flags, int x, int y, int cancel)
     {
@@ -600,6 +640,7 @@ namespace Rhino.Display
     private static int OnMouseHover(uint viewSerialNumber, uint flags, int x, int y, int cancel) { return MouseCallbackHelper(g_mouse_hover, viewSerialNumber, flags, x, y, cancel); }
     private static int OnMouseLeave(uint viewSerialNumber, uint flags, int x, int y, int cancel) { return MouseCallbackHelper(g_mouse_leave, viewSerialNumber, flags, x, y, cancel); }
 
+    /// <since>5.0</since>
     public static event EventHandler<ViewEventArgs> Create
     {
       add
@@ -620,6 +661,7 @@ namespace Rhino.Display
         g_on_create_view = null;
       }
     }
+    /// <since>5.0</since>
     public static event EventHandler<ViewEventArgs> Destroy
     {
       add
@@ -640,6 +682,7 @@ namespace Rhino.Display
         g_on_destroy_view = null;
       }
     }
+    /// <since>5.0</since>
     public static event EventHandler<ViewEventArgs> SetActive
     {
       add
@@ -660,6 +703,7 @@ namespace Rhino.Display
         g_on_set_active_view = null;
       }
     }
+    /// <since>5.0</since>
     public static event EventHandler<ViewEventArgs> Rename
     {
       add
@@ -678,6 +722,27 @@ namespace Rhino.Display
         if (g_rename_view != null) return;
         UnsafeNativeMethods.CRhinoEventWatcher_SetRenameViewCallback(null, Runtime.HostUtils.m_ew_report);
         g_on_rename_view = null;
+      }
+    }
+    /// <since>7.0</since>
+    public static event EventHandler<ViewEventArgs> Modified
+    {
+      add
+      {
+        if (g_view_modified == null)
+        {
+          g_on_view_modified = OnViewModified;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetViewModifiedEventCallback(g_on_view_modified);
+        }
+        g_view_modified += value;
+      }
+      remove
+      {
+        // ReSharper disable once DelegateSubtraction - This is fine for single subtraction
+        g_view_modified -= value;
+        if (g_view_modified != null) return;
+        UnsafeNativeMethods.CRhinoEventWatcher_SetViewModifiedEventCallback(null);
+        g_on_view_modified = null;
       }
     }
 
@@ -921,6 +986,7 @@ namespace Rhino.Display
     }
 
     RhinoView m_view;
+    /// <since>5.0</since>
     public RhinoView View
     {
       get
@@ -946,6 +1012,7 @@ namespace Rhino.Display
     /// <summary>
     /// The page view on which a different detail object was set active.
     /// </summary>
+    /// <since>5.0</since>
     public RhinoPageView PageView
     {
       get
@@ -961,6 +1028,7 @@ namespace Rhino.Display
     /// equal to Guid.Empty, then the active detail object is the page
     /// view itself.
     /// </summary>
+    /// <since>5.0</since>
     public Guid NewActiveDetailId { get; private set; }
 
     /// <summary>
@@ -968,6 +1036,7 @@ namespace Rhino.Display
     /// is equal to Guid.Empty, then the active detail object was the
     /// page view itself.
     /// </summary>
+    /// <since>5.0</since>
     public Guid OldActiveDetailId { get; private set; }
   }
 }

@@ -20,6 +20,7 @@ namespace Rhino.UI
     /// <param name="page">
     /// Page sending the message
     /// </param>
+    /// <since>6.0</since>
     public ObjectPropertiesPageEventArgs(ObjectPropertiesPage page)
     {
       Page = page;
@@ -27,18 +28,21 @@ namespace Rhino.UI
     /// <summary>
     /// The page sending these arguments
     /// </summary>
+    /// <since>6.0</since>
     public ObjectPropertiesPage Page { get; }
 
     /// <summary>
     /// Gets the runtime serial number.
     /// </summary>
     /// <value>The runtime serial number.</value>
+    /// <since>6.14</since>
     [CLSCompliant(false)]
     public uint EventRuntimeSerialNumber => UnsafeNativeMethods.PropertiesEditor_Interop_ArgsEventRuntimeSerialNumber();
 
     /// <summary>
     /// Return a list of Rhino objects to be processed by this object properties page
     /// </summary>
+    /// <since>6.0</since>
     public RhinoObject[] Objects => GetObjects(Page?.SupportedTypes ?? ObjectType.AnyObject);
 
     internal static ObjectType TypeFilter(Type type)
@@ -80,6 +84,7 @@ namespace Rhino.UI
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool IncludesObjectsType<T>() where T : RhinoObject
     {
       return IncludesObjectsType<T>(Page?.AllObjectsMustBeSupported ?? Runtime.HostUtils.RunningOnOSX);
@@ -94,6 +99,7 @@ namespace Rhino.UI
     /// otherwise; only a single object has to be of the specified type
     /// </param>
     /// <returns></returns>
+    /// <since>6.7</since>
     public bool IncludesObjectsType<T>(bool allMustMatch) where T : RhinoObject
     {
       var filter = allMustMatch ? ObjectType.AnyObject : TypeFilter(typeof(T));
@@ -121,6 +127,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="objectTypes"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public bool IncludesObjectsType(ObjectType objectTypes) => IncludesObjectsType(objectTypes, Page?.AllObjectsMustBeSupported ?? Runtime.HostUtils.RunningOnOSX);
 
@@ -133,6 +140,7 @@ namespace Rhino.UI
     /// otherwise; only a single object has to be of the specified type
     /// </param>
     /// <returns></returns>
+    /// <since>6.7</since>
     [CLSCompliant (false)]
     public bool IncludesObjectsType(ObjectType objectTypes, bool allMustMatch)
     {
@@ -145,6 +153,7 @@ namespace Rhino.UI
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>6.0</since>
     public T[] GetObjects<T>() where T : RhinoObject
     {
       var type = typeof(T);
@@ -175,6 +184,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public RhinoObject[] GetObjects(ObjectType filter)
     {
@@ -202,6 +212,7 @@ namespace Rhino.UI
     /// 
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public int ObjectCount
     {
       get
@@ -214,6 +225,7 @@ namespace Rhino.UI
     /// <summary>
     /// 
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint ObjectTypes
     {
@@ -227,6 +239,7 @@ namespace Rhino.UI
     /// <summary>
     /// Active view
     /// </summary>
+    /// <since>6.0</since>
     public RhinoView View
     {
       get
@@ -240,6 +253,7 @@ namespace Rhino.UI
     /// <summary>
     /// Active viewport
     /// </summary>
+    /// <since>6.0</since>
     public RhinoViewport Viewport
     {
       get
@@ -258,6 +272,7 @@ namespace Rhino.UI
     /// <summary>
     /// Document containing the objects and views
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint DocRuntimeSerialNumber
     {
@@ -272,6 +287,7 @@ namespace Rhino.UI
     /// <summary>
     /// Document containing the objects and views
     /// </summary>
+    /// <since>6.0</since>
     public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(DocRuntimeSerialNumber);
   }
 
@@ -296,6 +312,7 @@ namespace Rhino.UI
     /// Custom page to add
     /// </summary>
     /// <param name="page"></param>
+    /// <since>7.0</since>
     public void Add(ObjectPropertiesPage page)
     {
       if (page == null)
@@ -310,12 +327,14 @@ namespace Rhino.UI
     /// <summary>
     /// Document associated with the Rhino properties panel.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public uint DocumentRuntimeSerailNumber { get; }
 
     /// <summary>
     /// Document associated with the Rhino properties panel.
     /// </summary>
+    /// <since>7.0</since>
     public RhinoDoc Document => _doc ?? (_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerailNumber));
     private RhinoDoc _doc;
   }
@@ -328,14 +347,15 @@ namespace Rhino.UI
     #region Virtual methods, should be made abstract when obsolete properties are removed
     /// <summary>
     /// Icon to display in the object properties tab control.  Will not get called
-    /// if PageIconEmbeddedResourceString is overriden and provides a string for a 
-    /// successfully loaded icon resrouce.
+    /// if PageIconEmbeddedResourceString is overridden and provides a string for a 
+    /// successfully loaded icon resource.
     /// </summary>
     /// <param name="sizeInPixels">
     /// The requested icon size in pixels, DPI scaling has been applied.  The
     /// default value is 24 X DPI scale.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual System.Drawing.Icon PageIcon(System.Drawing.Size sizeInPixels)
     {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -350,6 +370,7 @@ namespace Rhino.UI
     /// (OBSOLETE - Override PageIcon instead)
     /// Icon to display in the object properties tab control
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Override PageIcon instead")]
     public virtual System.Drawing.Icon Icon { get; }
     #endregion Abstract properties changed to virtual properties and made obsolete
@@ -361,6 +382,7 @@ namespace Rhino.UI
     /// System.Windows.FrameworkElement or Eto.Forms.Control.  Mac Rhino
     /// supports controls that are derived from NSview or Eto.Forms.Control.
     /// </summary>
+    /// <since>5.0</since>
     public virtual object PageControl
     {
       get 
@@ -383,12 +405,14 @@ namespace Rhino.UI
     /// <summary>
     /// English string used to describe this page
     /// </summary>
+    /// <since>5.0</since>
     public abstract string EnglishPageTitle { get; }
     #endregion Abstract properties
 
     /// <summary>
     /// Override to specify which objects this page supports
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public virtual ObjectType SupportedTypes => ObjectType.AnyObject;
 
@@ -400,14 +424,24 @@ namespace Rhino.UI
     /// 
     /// Override if you wish to change the above behavior.
     /// </summary>
+    /// <since>6.7</since>
     [CLSCompliant (false)]
     public virtual bool AllObjectsMustBeSupported => Runtime.HostUtils.RunningOnOSX;
+
+    /// <summary>
+    /// The page navigation control adds buttons in the order the pages are 
+    /// processed, override this method and return a sort index to move the button
+    /// to the beginning of the list.  By default this returns -1 which puts the
+    /// button at the end of the list.
+    /// </summary>
+    public virtual int Index => -1;
 
     #region Public virtual methods
     /// <summary>
     /// Called when the parent container is initially created.
     /// </summary>
     /// <param name="hwndParent"></param>
+    /// <since>5.0</since>
     public virtual void OnCreateParent(IntPtr hwndParent) { }
     /// <summary>
     /// Called when the parent containers client rectangle size has changed and
@@ -415,6 +449,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="width"></param>
     /// <param name="height"></param>
+    /// <since>5.0</since>
     public virtual void OnSizeParent(int width, int height) { }
     ///<summary>Called when this page is activated/deactivated.</summary>
     ///<param name="active">
@@ -425,11 +460,13 @@ namespace Rhino.UI
     ///activated otherwise will not allow you to change the current page.
     ///Default returns true.  The return value is currently ignored.
     ///</returns>
+    /// <since>5.0</since>
     public virtual bool OnActivate(bool active) { return true; }
     /// <summary>
     /// Called when the F1 key or help button is pressed, override to display
     /// plug-in specific help for this page.
     /// </summary>
+    /// <since>5.0</since>
     public virtual void OnHelp() { }
     /// <summary>
     /// Called when the selected objects list changes, return true if the
@@ -437,6 +474,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="rhObj"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     [Obsolete("ShouldDisplay(RhinoObject rhObj) is obsolete, override ShouldDisplay(ObjectPropertiesPageEventArgs e) instead")]
     public virtual bool ShouldDisplay(RhinoObject rhObj)
     {
@@ -450,6 +488,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual bool ShouldDisplay(ObjectPropertiesPageEventArgs e)
     {
 #pragma warning disable 618
@@ -462,6 +501,7 @@ namespace Rhino.UI
     /// object list.
     /// </summary>
     /// <param name="rhObj"></param>
+    /// <since>5.0</since>
     [Obsolete("InitializeControls is obsolete, override UpdatePage instead")]
     public virtual void InitializeControls(RhinoObject rhObj) { }
 
@@ -471,6 +511,7 @@ namespace Rhino.UI
     /// object list.
     /// </summary>
     /// <param name="e"></param>
+    /// <since>6.0</since>
     public virtual void UpdatePage(ObjectPropertiesPageEventArgs e)
     {
 #pragma warning disable 618
@@ -487,6 +528,7 @@ namespace Rhino.UI
     /// <param name="callbackAction">
     /// Called when it is safe to modify objects.
     /// </param>
+    /// <since>6.0</since>
     public void ModifyPage(Action<ObjectPropertiesPageEventArgs> callbackAction)
     {
       RhinoPageHooks.ObjectPropertiesModifyPage(this, callbackAction);
@@ -497,6 +539,7 @@ namespace Rhino.UI
     /// should override this method and return true.  This is ignored for view
     /// pages.  The default implementation returns false.
     /// </summary>
+    /// <since>6.0</since>
     public virtual bool SupportsSubObjects => false;
 
     #endregion Public virtual methods
@@ -506,21 +549,24 @@ namespace Rhino.UI
     /// Localized page description string, returns the EnglishPageTitle by
     /// default.
     /// </summary>
+    /// <since>5.0</since>
     public virtual string LocalPageTitle => EnglishPageTitle;
 
     /// <summary>
     /// Override this and return the page you want to replace a specific object
     /// properties page.
     /// </summary>
+    /// <since>5.11</since>
     public virtual PropertyPageType PageType => PropertyPageType.Custom;
 
     /// <summary>
     /// Resource string for a embedded icon resource in the assembly containing
     /// the page instance.  If this returns a valid resource and Rhino can
-    /// load the icon the loaed icon will get used directly otherwise;
+    /// load the icon the loaded icon will get used directly otherwise;
     /// the PageIcon method will get called.
     /// </summary>
     /// <value>The page icon embedded resource string.</value>
+    /// <since>6.4</since>
     public virtual string PageIconEmbeddedResourceString => null;
 
     /// <summary>
@@ -532,6 +578,7 @@ namespace Rhino.UI
     /// List of objects selected by the Properties command.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [Obsolete("RunScript(RhinoDoc doc, RhinoObject[] objectList) is obsolete, override RunScript(ObjectPropertiesPageEventArgs e) instead")]
     public virtual Commands.Result RunScript(RhinoDoc doc, RhinoObject[] objectList)
     {
@@ -548,6 +595,7 @@ namespace Rhino.UI
     /// Provides access to the selected object list and document.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual Commands.Result RunScript(ObjectPropertiesPageEventArgs e)
     {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -562,6 +610,7 @@ namespace Rhino.UI
     /// <summary>
     /// Return a list of Rhino objects to be processed by this object properties page
     /// </summary>
+    /// <since>5.11</since>
     public RhinoObject[] SelectedObjects => GetSelectedObjects(SupportedTypes);
 
     internal static ObjectType TypeFilter(Type type)
@@ -574,6 +623,7 @@ namespace Rhino.UI
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool AnySelectedObject<T>() where T : RhinoObject
     {
       return AnySelectedObject<T>(AllObjectsMustBeSupported);
@@ -588,6 +638,7 @@ namespace Rhino.UI
     /// otherwise; only a single object has to be of the specified type
     /// </param>
     /// <returns></returns>
+    /// <since>6.7</since>
     public bool AnySelectedObject<T>(bool allMustMatch) where T : RhinoObject
     {
       var type = typeof (T);
@@ -616,6 +667,7 @@ namespace Rhino.UI
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>6.0</since>
     public T[] GetSelectedObjects<T>() where T : RhinoObject
     {
       var type = typeof(T);
@@ -646,6 +698,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public RhinoObject[] GetSelectedObjects(ObjectType filter)
     {

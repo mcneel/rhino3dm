@@ -17,9 +17,10 @@ namespace Rhino.Geometry
   {
     #region statics
     /// <summary>
-    /// Gets a non-rational, degree 1 Nurbs curve representation of the line.
+    /// Gets a non-rational, degree 1 NURBS curve representation of the line.
     /// </summary>
     /// <returns>Curve on success, null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsCurve CreateFromLine(Line line)
     {
       if (!line.IsValid) { return null; }
@@ -36,10 +37,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a rational degree 2 NURBS curve representation
     /// of the arc. Note that the parameterization of NURBS curve
-    /// does not match arc's transcendental paramaterization.
+    /// does not match arc's transcendental parameterization.
     /// </summary>
     /// <param name="arc"></param>
     /// <returns>Curve on success, null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsCurve CreateFromArc(Arc arc)
     {
       IntPtr ptr_nurbs_curve = UnsafeNativeMethods.ON_NurbsCurve_New(IntPtr.Zero);
@@ -57,11 +59,12 @@ namespace Rhino.Geometry
     /// <summary>
     /// Calculates the u, V, and N directions of a NURBS curve at a parameter similar to the method used by Rhino's MoveUVN command.
     /// </summary>
-    /// <param name="t">The evalaution parameter.</param>
+    /// <param name="t">The evaluation parameter.</param>
     /// <param name="uDir">The U direction.</param>
     /// <param name="vDir">The V direction.</param>
     /// <param name="nDir">The N direction.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool UVNDirectionsAt(double t, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
     {
       uDir = vDir = nDir = Vector3d.Unset;
@@ -80,6 +83,7 @@ namespace Rhino.Geometry
     /// <param name="refitTolerance">The refit tolerance.</param>
     /// <param name="angleTolerance">The angle tolerance in radians.</param>
     /// <returns>The output NURBS surfaces if successful.</returns>
+    /// <since>6.0</since>
     public static NurbsCurve[] MakeCompatible(IEnumerable<Curve> curves, Point3d startPt, Point3d endPt,
       int simplifyMethod, int numPoints, double refitTolerance, double angleTolerance)
     {
@@ -109,12 +113,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Createsa a parabola from vertex and end points.
+    /// Creates a parabola from vertex and end points.
     /// </summary>
     /// <param name="vertex">The vertex point.</param>
     /// <param name="startPoint">The start point.</param>
     /// <param name="endPoint">The end point</param>
     /// <returns>A 2 degree NURBS curve if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public static NurbsCurve CreateParabolaFromVertex(Point3d vertex, Point3d startPoint, Point3d endPoint)
     {
       IntPtr ptr_nurbs_curve = UnsafeNativeMethods.RHC_RhinoCreateParabolaFromVertex(vertex, startPoint, endPoint);
@@ -130,6 +135,7 @@ namespace Rhino.Geometry
     /// <param name="startPoint">The start point.</param>
     /// <param name="endPoint">The end point</param>
     /// <returns>A 2 degree NURBS curve if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public static NurbsCurve CreateParabolaFromFocus(Point3d focus, Point3d startPoint, Point3d endPoint)
     {
       IntPtr ptr_nurbs_curve = UnsafeNativeMethods.RHC_RhinoCreateParabolaFromFocus(focus, startPoint, endPoint);
@@ -139,12 +145,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Create a uniform non-ratonal cubic NURBS approximation of an arc.
+    /// Create a uniform non-rational cubic NURBS approximation of an arc.
     /// </summary>
     /// <param name="arc"></param>
     /// <param name="degree">&gt;=1</param>
-    /// <param name="cvCount">cv count &gt;=5</param>
+    /// <param name="cvCount">CV count &gt;=5</param>
     /// <returns>NURBS curve approximation of an arc on success</returns>
+    /// <since>6.0</since>
     public static NurbsCurve CreateFromArc(Arc arc, int degree, int cvCount)
     {
       var ptr_nurbs_curve = UnsafeNativeMethods.TLC_DeformableArc(ref arc, degree, cvCount);
@@ -156,6 +163,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">Points to interpolate</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static NurbsCurve CreateHSpline(IEnumerable<Point3d> points)
     {
       return CreateHSpline(points, Vector3d.Unset, Vector3d.Unset);
@@ -169,6 +177,7 @@ namespace Rhino.Geometry
     /// <param name="startTangent">Unit tangent vector or Unset</param>
     /// <param name="endTangent">Unit tangent vector or Unset</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static NurbsCurve CreateHSpline(IEnumerable<Point3d> points, Vector3d startTangent, Vector3d endTangent)
     {
       var pts = new List<Point3d>(points);
@@ -178,17 +187,62 @@ namespace Rhino.Geometry
         return null;
       return new NurbsCurve(rc, null, -1);
     }
+
+    /// <summary>
+    /// Computes planar rail sweep frames at specified parameters.
+    /// </summary>
+    /// <param name="parameters">A collection of curve parameters.</param>
+    /// <param name="normal">Unit normal to the plane.</param>
+    /// <returns>An array of planes if successful, or an empty array on failure.</returns>
+    /// <since>7.0</since>
+    public Plane[] CreatePlanarRailFrames(IEnumerable<double> parameters, Vector3d normal)
+    {
+      using (var in_params = new SimpleArrayDouble(parameters))
+      using (var out_frames = new SimpleArrayPlane())
+      {
+        var ptr_this = ConstPointer();
+        var ptr_in_params = in_params.ConstPointer();
+        var ptr_out_frames = out_frames.NonConstPointer();
+        var rc = UnsafeNativeMethods.TLC_GetPlanarRailFrames(ptr_this, ptr_in_params, normal, ptr_out_frames);
+        if (rc)
+          return out_frames.ToArray();
+        return new Plane[0];
+      }
+    }
+
+    /// <summary>
+    /// Computes relatively parallel rail sweep frames at specified parameters.
+    /// </summary>
+    /// <param name="parameters">A collection of curve parameters.</param>
+    /// <returns>An array of planes if successful, or an empty array on failure.</returns>
+    /// <since>7.0</since>
+    public Plane[] CreateRailFrames(IEnumerable<double> parameters)
+    {
+      using (var in_params = new SimpleArrayDouble(parameters))
+      using (var out_frames = new SimpleArrayPlane())
+      {
+        var ptr_this = ConstPointer();
+        var ptr_in_params = in_params.ConstPointer();
+        var ptr_out_frames = out_frames.NonConstPointer();
+        var rc = UnsafeNativeMethods.TLC_GetRailFrames(ptr_this, ptr_in_params, ptr_out_frames);
+        if (rc)
+          return out_frames.ToArray();
+        return new Plane[0];
+      }
+    }
+
 #endif
 
     /// <summary>
     /// Gets a rational degree 2 NURBS curve representation
     /// of the circle. Note that the parameterization of NURBS curve
-    /// does not match circle's transcendental paramaterization.  
+    /// does not match circle's transcendental parameterization.  
     /// Use GetRadianFromNurbFormParameter() and
     /// GetParameterFromRadian() to convert between the NURBS curve 
     /// parameter and the transcendental parameter.
     /// </summary>
     /// <returns>Curve on success, null on failure.</returns>
+    /// <since>5.0</since>
     public static NurbsCurve CreateFromCircle(Circle circle)
     {
       IntPtr ptr_nurbs_curve = UnsafeNativeMethods.ON_NurbsCurve_New(IntPtr.Zero);
@@ -203,12 +257,13 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Create a uniform non-ratonal cubic NURBS approximation of a circle.
+    /// Create a uniform non-rational cubic NURBS approximation of a circle.
     /// </summary>
     /// <param name="circle"></param>
     /// <param name="degree">&gt;=1</param>
-    /// <param name="cvCount">cv count &gt;=5</param>
+    /// <param name="cvCount">CV count &gt;=5</param>
     /// <returns>NURBS curve approximation of a circle on success</returns>
+    /// <since>6.0</since>
     public static NurbsCurve CreateFromCircle(Circle circle, int degree, int cvCount)
     {
       var ptr_nurbs_curve = UnsafeNativeMethods.TLC_DeformableCircle(ref circle, degree, cvCount);
@@ -219,9 +274,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a rational degree 2 NURBS curve representation of the ellipse.
     /// <para>Note that the parameterization of the NURBS curve does not match
-    /// with the transcendental paramaterization of the ellipsis.</para>
+    /// with the transcendental parameterization of the ellipsis.</para>
     /// </summary>
-    /// <returns>A nurbs curve representation of this ellipse or null if no such representation could be made.</returns>
+    /// <returns>A NURBS curve representation of this ellipse or null if no such representation could be made.</returns>
+    /// <since>5.0</since>
     public static NurbsCurve CreateFromEllipse(Ellipse ellipse)
     {
       NurbsCurve nc = CreateFromCircle(new Circle(ellipse.Plane, 1.0));
@@ -252,9 +308,10 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curveA">First curve used in comparison.</param>
     /// <param name="curveB">Second curve used in comparison.</param>
-    /// <param name="ignoreParameterization">if true, parameterization and orientaion are ignored.</param>
+    /// <param name="ignoreParameterization">if true, parameterization and orientation are ignored.</param>
     /// <param name="tolerance">tolerance to use when comparing control points.</param>
     /// <returns>true if curves are similar within tolerance.</returns>
+    /// <since>5.0</since>
     public static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
     {
       IntPtr const_ptr_a = curveA.ConstPointer();
@@ -282,6 +339,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addnurbscurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnurbscurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static NurbsCurve Create(bool periodic, int degree, System.Collections.Generic.IEnumerable<Point3d> points)
     {
       if (degree < 1)
@@ -316,6 +374,7 @@ namespace Rhino.Geometry
     /// Initializes a NURBS curve by copying its values from another NURBS curve.
     /// </summary>
     /// <param name="other">The other curve. This value can be null.</param>
+    /// <since>5.0</since>
     public NurbsCurve(NurbsCurve other)
     {
       IntPtr const_ptr_other = IntPtr.Zero;
@@ -349,6 +408,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="degree">Degree of curve. Must be equal to or larger than 1 and smaller than or equal to 11.</param>
     /// <param name="pointCount">Number of control-points.</param>
+    /// <since>5.0</since>
     public NurbsCurve(int degree, int pointCount)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_NurbsCurve_New(IntPtr.Zero);
@@ -368,6 +428,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addnurbscircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnurbscircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public NurbsCurve(int dimension, bool rational, int order, int pointCount)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_NurbsCurve_New(IntPtr.Zero);
@@ -400,6 +461,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the order of the curve. Order = Degree + 1.
     /// </summary>
+    /// <since>5.0</since>
     public int Order
     {
       get { return GetInt(idxOrder); }
@@ -409,6 +471,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not the curve is rational. 
     /// Rational curves have control-points with custom weights.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRational
     {
       get
@@ -419,21 +482,23 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets access to the knots (or "knot vector") of this nurbs curve.
+    /// Gets access to the knots (or "knot vector") of this NURBS curve.
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addnurbscircle.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addnurbscircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnurbscircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.NurbsCurveKnotList Knots
     {
       get { return m_knots ?? (m_knots = new Rhino.Geometry.Collections.NurbsCurveKnotList(this)); }
     }
 
     /// <summary>
-    /// Gets access to the control points of this nurbs curve.
+    /// Gets access to the control points of this NURBS curve.
     /// </summary>
+    /// <since>5.0</since>
     public Collections.NurbsCurvePointList Points
     {
       get { return m_points ?? (m_points = new Collections.NurbsCurvePointList(this)); }
@@ -488,13 +553,14 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Set end condition of a nurbs curve to point, tangent and curvature.
+    /// Set end condition of a NURBS curve to point, tangent and curvature.
     /// </summary>
     /// <param name="bSetEnd">true: set end of curve, false: set start of curve </param>
-    /// <param name="continuity">Position: set strart or end point, Tangency: set point and tangent, Curvature: set point, tangent and curvature </param>
+    /// <param name="continuity">Position: set start or end point, Tangency: set point and tangent, Curvature: set point, tangent and curvature </param>
     /// <param name="point">point to set </param>
     /// <param name="tangent">tangent to set</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetEndCondition(
       bool bSetEnd,
       NurbsCurveEndConditionType continuity,
@@ -506,14 +572,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Set end condition of a nurbs curve to point, tangent and curvature.
+    /// Set end condition of a NURBS curve to point, tangent and curvature.
     /// </summary>
     /// <param name="bSetEnd">true: set end of curve, false: set start of curve </param>
-    /// <param name="continuity">Position: set strart or end point, Tangency: set point and tangent, Curvature: set point, tangent and curvature </param>
+    /// <param name="continuity">Position: set start or end point, Tangency: set point and tangent, Curvature: set point, tangent and curvature </param>
     /// <param name="point">point to set </param>
     /// <param name="tangent">tangent to set</param>
     /// <param name="curvature">curvature to set</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetEndCondition(
       bool bSetEnd,
       NurbsCurveEndConditionType continuity,
@@ -547,6 +614,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_nurbscurveincreasedegree.cs' lang='cs'/>
     /// <code source='examples\py\ex_nurbscurveincreasedegree.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IncreaseDegree(int desiredDegree)
     {
       IntPtr ptr = NonConstPointer();
@@ -554,8 +622,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns true if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)
+    /// Returns true if the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree)
     /// </summary>
+    /// <since>5.0</since>
     public bool HasBezierSpans
     {
       get
@@ -566,14 +635,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Clamps ends and adds knots so the NURBS curve has bezier spans 
-    /// (all distinct knots have multiplitity = degree).
+    /// Clamps ends and adds knots so the NURBS curve has Bezier spans 
+    /// (all distinct knots have multiplicity = degree).
     /// </summary>
     /// <param name="setEndWeightsToOne">
     /// If true and the first or last weight is not one, then the first and
-    /// last spans are reparameterized so that the end weights are one.
+    /// last spans are re-parameterized so that the end weights are one.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool MakePiecewiseBezier(bool setEndWeightsToOne)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -581,11 +651,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Use a linear fractional transformation to reparameterize the NURBS curve.
+    /// Use a linear fractional transformation to re-parameterize the NURBS curve.
     /// This does not change the curve's domain.
     /// </summary>
     /// <param name="c">
-    /// reparameterization constant (generally speaking, c should be > 0). The
+    /// re-parameterization constant (generally speaking, c should be > 0). The
     /// control points and knots are adjusted so that
     /// output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ).
     /// Note that lambda(0) = 0, lambda(1) = 1, lambda'(t) > 0, 
@@ -593,8 +663,9 @@ namespace Rhino.Geometry
     /// </param>
     /// <returns>true if successful.</returns>
     /// <remarks>
-    /// The cv and knot values are values are changed so that output_nurbs(t) = input_nurbs(lambda(t)).
+    /// The CV and knot values are values are changed so that output_nurbs(t) = input_nurbs(lambda(t)).
     /// </remarks>
+    /// <since>5.0</since>
     public bool Reparameterize(double c)
     {
       IntPtr ptr = NonConstPointer();
@@ -607,6 +678,7 @@ namespace Rhino.Geometry
     /// to the control point at the specified index.
     /// </summary>
     /// <param name="index">Index of Greville (Edit) point.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public double GrevilleParameter(int index)
     {
@@ -619,6 +691,7 @@ namespace Rhino.Geometry
     /// to the control point at the specified index.
     /// </summary>
     /// <param name="index">Index of Greville point.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d GrevillePoint(int index)
     {
@@ -629,6 +702,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets all Greville parameters for this curve.
     /// </summary>
+    /// <since>5.0</since>
     [ConstOperation]
     public double[] GrevilleParameters()
     {
@@ -643,6 +717,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets all Greville points for this curve.
     /// </summary>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3dList GrevillePoints()
     {
@@ -665,8 +740,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets Greville points for this curve.
     /// </summary>
-    /// <param name="all">If true, then all Greville points are returnd. If false, only edit points are returned.</param>
+    /// <param name="all">If true, then all Greville points are returns. If false, only edit points are returned.</param>
     /// <returns>A list of points if successful, null otherwise.</returns>
+    /// <since>6.18</since>
     [ConstOperation]
     public Point3dList GrevillePoints(bool all)
     {
@@ -692,6 +768,7 @@ namespace Rhino.Geometry
     /// the number of point returned by NurbsCurve.GrevillePoints(false).
     /// </param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.4</since>
     public bool SetGrevillePoints(IEnumerable<Point3d> points)
     {
       if (null == points)
@@ -712,6 +789,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(NurbsCurve other, double epsilon)
     {
@@ -773,7 +851,7 @@ namespace Rhino.Geometry
     /// <param name="axisStart">Helix's axis starting point or center of spiral.</param>
     /// <param name="axisDir">Helix's axis vector or normal to spiral's plane.</param>
     /// <param name="radiusPoint">
-    /// Point used only to get a vector that is perpedicular to the axis. In
+    /// Point used only to get a vector that is perpendicular to the axis. In
     /// particular, this vector must not be (anti)parallel to the axis vector.
     /// </param>
     /// <param name="pitch">
@@ -781,13 +859,14 @@ namespace Rhino.Geometry
     /// between the helix's "threads".
     /// </param>
     /// <param name="turnCount">The number of turns in spiral or helix. Positive
-    /// values produce counter-clockwise orientation, negitive values produce
+    /// values produce counter-clockwise orientation, negative values produce
     /// clockwise orientation. Note, for a helix, turnCount * pitch = length of
     /// the helix's axis.
     /// </param>
     /// <param name="radius0">The starting radius.</param>
     /// <param name="radius1">The ending radius.</param>
     /// <returns>NurbsCurve on success, null on failure.</returns>
+    /// <since>5.2</since>
     public static NurbsCurve CreateSpiral(Point3d axisStart, Vector3d axisDir, Point3d radiusPoint,
       double pitch, double turnCount, double radius0, double radius1)
     {
@@ -809,7 +888,7 @@ namespace Rhino.Geometry
     /// <param name="t0">Starting portion of rail curve's domain to sweep along.</param>
     /// <param name="t1">Ending portion of rail curve's domain to sweep along.</param>
     /// <param name="radiusPoint">
-    /// Point used only to get a vector that is perpedicular to the axis. In
+    /// Point used only to get a vector that is perpendicular to the axis. In
     /// particular, this vector must not be (anti)parallel to the axis vector.
     /// </param>
     /// <param name="pitch">
@@ -820,21 +899,22 @@ namespace Rhino.Geometry
     /// The turn count. If != 0, then the resulting helix will have this many
     /// turns. If = 0, then pitch must be != 0 and the approximate distance
     /// between turns will be set to pitch. Positive values produce counter-clockwise
-    /// orientation, negitive values produce clockwise orientation.
+    /// orientation, negative values produce clockwise orientation.
     /// </param>
     /// <param name="radius0">
-    /// The starting radius. At least one radii must benonzero. Negative values
+    /// The starting radius. At least one radii must be nonzero. Negative values
     /// are allowed.
     /// </param>
     /// <param name="radius1">
-    /// The ending radius. At least ont radii must be nonzero. Negative values
+    /// The ending radius. At least one radii must be nonzero. Negative values
     /// are allowed.
     /// </param>
     /// <param name="pointsPerTurn">
-    /// Number of points to intepolate per turn. Must be greater than 4.
+    /// Number of points to interpolate per turn. Must be greater than 4.
     /// When in doubt, use 12.
     /// </param>
     /// <returns>NurbsCurve on success, null on failure.</returns>
+    /// <since>5.2</since>
     public static NurbsCurve CreateSpiral(Curve railCurve, double t0, double t1, Point3d radiusPoint, double pitch,
       double turnCount, double radius0, double radius1, int pointsPerTurn)
     {
@@ -888,7 +968,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="x">X coordinate of the control point.</param>
     /// <param name="y">Y coordinate of the control point.</param>
-    /// <param name="z">Z coordinate of the control pointt.</param>
+    /// <param name="z">Z coordinate of the control point.</param>
+    /// <since>5.0</since>
     public ControlPoint(double x, double y, double z)
     {
       m_vertex = new Point4d(x, y, z, 1.0);
@@ -906,6 +987,7 @@ namespace Rhino.Geometry
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>5.0</since>
     public ControlPoint(double x, double y, double z, double weight)
     {
       m_vertex = new Point4d(x, y, z, weight);
@@ -916,6 +998,7 @@ namespace Rhino.Geometry
     /// The 4-D representation of this is (x, y, z, 1.0).
     /// </summary>
     /// <param name="pt">Coordinates of the control point.</param>
+    /// <since>5.0</since>
     public ControlPoint(Point3d pt)
     {
       m_vertex = new Point4d(pt.X, pt.Y, pt.Z, 1.0);
@@ -927,6 +1010,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="euclideanPt">Coordinates of the control point.</param>
     /// <param name="weight">Weight factor of the control point. You should not use weights less than or equal to zero.</param>
+    /// <since>5.0</since>
     public ControlPoint(Point3d euclideanPt, double weight)
     {
       double w = (weight != 1.0 && weight != 0.0) ? weight : 1.0;
@@ -942,6 +1026,7 @@ namespace Rhino.Geometry
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>5.0</since>
     public ControlPoint(Point4d pt)
     {
       m_vertex = pt;
@@ -950,6 +1035,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the predefined, unset control point.
     /// </summary>
+    /// <since>5.0</since>
     public static ControlPoint Unset
     {
       get
@@ -969,6 +1055,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets world 3-D, or Euclidean location of the control point. 
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Location
     {
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-37341
@@ -990,6 +1077,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X coordinate of the control point.
     /// </summary>
+    /// <since>6.0</since>
     public double X
     {
       get { return m_vertex.m_x; }
@@ -999,6 +1087,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y coordinate of the control point.
     /// </summary>
+    /// <since>6.0</since>
     public double Y
     {
       get { return m_vertex.m_y; }
@@ -1008,6 +1097,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z coordinate of the control point.
     /// </summary>
+    /// <since>6.0</since>
     public double Z
     {
       get { return m_vertex.m_z; }
@@ -1017,6 +1107,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the weight of this control point.
     /// </summary>
+    /// <since>5.0</since>
     public double Weight
     {
       get { return m_vertex.m_w; }
@@ -1030,6 +1121,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(ControlPoint other, double epsilon)
     {
@@ -1041,6 +1133,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">The other point.</param>
     /// <returns>True if the other control point exactly matches this one.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Equals(ControlPoint other)
     {
@@ -1052,7 +1145,7 @@ namespace Rhino.Geometry
 namespace Rhino.Geometry.Collections
 {
   /// <summary>
-  /// Provides access to the knot vector of a nurbs curve.
+  /// Provides access to the knot vector of a NURBS curve.
   /// </summary>
   public sealed class NurbsCurveKnotList :
     IEnumerable<double>, IRhinoTable<double>, IEpsilonComparable<NurbsCurveKnotList>,
@@ -1070,6 +1163,7 @@ namespace Rhino.Geometry.Collections
     #region properties
 
     /// <summary>Total number of knots in this curve.</summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -1108,6 +1202,7 @@ namespace Rhino.Geometry.Collections
     /// completes, call EnsurePrivateCopy to make sure that this class is not tied to the document. You can
     /// call this function as many times as you want.
     /// </summary>
+    /// <since>5.0</since>
     public void EnsurePrivateCopy()
     {
       m_curve.EnsurePrivateCopy();
@@ -1124,6 +1219,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\cs\ex_insertknot.cs' lang='cs'/>
     /// <code source='examples\py\ex_insertknot.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool InsertKnot(double value)
     {
       return InsertKnot(value, 1);
@@ -1136,6 +1232,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="value">Knot value to insert.</param>
     /// <param name="multiplicity">Multiplicity of knot to insert.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool InsertKnot(double value, int multiplicity)
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1145,6 +1242,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>Get knot multiplicity.</summary>
     /// <param name="index">Index of knot to query.</param>
     /// <returns>The multiplicity (valence) of the knot.</returns>
+    /// <since>5.0</since>
     public int KnotMultiplicity(int index)
     {
       IntPtr ptr = m_curve.ConstPointer();
@@ -1158,6 +1256,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="knotSpacing">Spacing of subsequent knots.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool CreateUniformKnots(double knotSpacing)
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1171,6 +1270,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="knotSpacing">Spacing of subsequent knots.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool CreatePeriodicKnots(double knotSpacing)
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1181,6 +1281,7 @@ namespace Rhino.Geometry.Collections
     /// Gets a value indicating whether or not the knot vector is clamped at the start of the curve. 
     /// Clamped curves start at the first control-point. This requires fully multiple knots.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsClampedStart
     {
       get
@@ -1194,6 +1295,7 @@ namespace Rhino.Geometry.Collections
     /// Gets a value indicating whether or not the knot vector is clamped at the end of the curve. 
     /// Clamped curves are coincident with the first and last control-point. This requires fully multiple knots.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsClampedEnd
     {
       get
@@ -1216,6 +1318,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="end">Curve end to clamp.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ClampEnd(CurveEnd end)
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1234,6 +1337,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="start">true if the query targets the first knot. Otherwise, the last knot.</param>
     /// <returns>A component.</returns>
+    /// <since>5.0</since>
     public double SuperfluousKnot(bool start)
     {
       IntPtr const_ptr_curve = m_curve.ConstPointer();
@@ -1256,6 +1360,7 @@ namespace Rhino.Geometry.Collections
     /// curve is restricted to be &lt;= tolerance. 
     /// </param>
     /// <returns>number of knots removed on success. 0 if no knots were removed</returns>
+    /// <since>6.0</since>
     public int RemoveMultipleKnots(int minimumMultiplicity, int maximumMultiplicity, double tolerance)
     {
       IntPtr ptr_curve = m_curve.NonConstPointer();
@@ -1269,6 +1374,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index0">The starting knot index, where Degree-1 &lt; index0 &lt; index1 &lt;= Points.Count-1.</param>
     /// <param name="index1">The ending knot index, where Degree-1 &lt; index0 &lt; index1 &lt;= Points.Count-1.</param>
     /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.0</since>
     public bool RemoveKnots(int index0, int index1)
     {
       IntPtr ptr_curve = m_curve.NonConstPointer();
@@ -1280,6 +1386,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="t">The parameter on the curve that is closest to the knot to be removed.</param>
     /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.0</since>
     public bool RemoveKnotAt(double t)
     {
       // This is an "easy to use for scripters" function that emulates the RemoveKnot command.
@@ -1335,6 +1442,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="other">The other list.</param>
     /// <param name="epsilon">The epsilon value.</param>
     /// <returns>True if values are, orderly, equal within epsilon. False otherwise.</returns>
+    /// <since>5.4</since>
     public bool EpsilonEquals(NurbsCurveKnotList other, double epsilon)
     {
       if (null == other)
@@ -1363,6 +1471,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="item">The value.</param>
     /// <returns>The index, or -1 if no index is found.</returns>
+    /// <since>6.0</since>
     public int IndexOf(double item)
     {
       return GenericIListImplementation.IndexOf<double>(this, item);
@@ -1373,6 +1482,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="item">The item.</param>
     /// <returns>true if present, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Contains(double item)
     {
       return IndexOf(item) != -1;
@@ -1383,6 +1493,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="array">The array to copy to.</param>
     /// <param name="arrayIndex">The index into copy will begin.</param>
+    /// <since>6.0</since>
     public void CopyTo(double[] array, int arrayIndex)
     {
       GenericIListImplementation.CopyTo<double>(this, array, arrayIndex);
@@ -1415,7 +1526,7 @@ namespace Rhino.Geometry.Collections
   }
 
   /// <summary>
-  /// Provides access to the control points of a nurbs curve.
+  /// Provides access to the control points of a NURBS curve.
   /// </summary>
   public class NurbsCurvePointList :
     IEnumerable<ControlPoint>, IRhinoTable<ControlPoint>, IEpsilonComparable<NurbsCurvePointList>,
@@ -1435,6 +1546,7 @@ namespace Rhino.Geometry.Collections
     /// completes, call EnsurePrivateCopy to make sure that this class is not tied to the document. You can
     /// call this function as many times as you want.
     /// </summary>
+    /// <since>5.0</since>
     public void EnsurePrivateCopy()
     {
       m_curve.EnsurePrivateCopy();
@@ -1444,6 +1556,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of control points in this curve.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -1489,6 +1602,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the length of the polyline connecting all control points.
     /// </summary>
+    /// <since>5.0</since>
     public double ControlPolygonLength
     {
       get
@@ -1504,6 +1618,7 @@ namespace Rhino.Geometry.Collections
     /// points than control-points.
     /// </summary>
     /// <returns>A polyline connecting all control points.</returns>
+    /// <since>5.0</since>
     public Polyline ControlPolygon()
     {
       int count = Count;
@@ -1529,9 +1644,10 @@ namespace Rhino.Geometry.Collections
     /// <returns>true on success, false on failure.</returns>
     ///<remarks>
     /// The domain, Euclidean locations of the control points, and locus of the curve
-    /// do not change, but the weights, homogeneous cv values and internal knot values
+    /// do not change, but the weights, homogeneous CV values and internal knot values
     /// may change. If w0 and w1 are 1 and the curve is not rational, the curve is not changed.
     ///</remarks>
+    /// <since>5.0</since>
     public bool ChangeEndWeights(double w0, double w1)
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1542,6 +1658,7 @@ namespace Rhino.Geometry.Collections
     /// Converts the curve to a Rational NURBS curve. Rational NURBS curves have weighted control points.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool MakeRational()
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1552,6 +1669,7 @@ namespace Rhino.Geometry.Collections
     /// Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool MakeNonRational()
     {
       IntPtr ptr = m_curve.NonConstPointer();
@@ -1575,6 +1693,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y coordinate of control point.</param>
     /// <param name="z">Z coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetPoint(int index, double x, double y, double z)
     {
       return SetPoint(index, new Point3d(x, y, z));
@@ -1594,6 +1713,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>5.0</since>
     public bool SetPoint(int index, double x, double y, double z, double weight)
     {
       return SetPoint(index, new Point4d(x, y, z, weight));
@@ -1606,6 +1726,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of control point to set.</param>
     /// <param name="point">Coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetPoint(int index, Point3d point)
     {
       ValidateIndex(index);
@@ -1624,6 +1745,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use an override that accepts world 3-D, or Euclidean, coordinates as input.
     /// </remarks>
+    /// <since>5.0</since>
     public bool SetPoint(int index, Point4d point)
     {
       ValidateIndex(index);
@@ -1639,6 +1761,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="point">Coordinates of the control point.</param>
     /// <param name="weight">Weight of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool SetPoint(int index, Point3d point, double weight)
     {
       double w = weight != 1.0 && weight != 0.0 ? weight : 1.0;
@@ -1652,6 +1775,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of control point to get.</param>
     /// <param name="point">Coordinate of control point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool GetPoint(int index, out Point3d point)
     {
       point = new Point3d();
@@ -1671,6 +1795,7 @@ namespace Rhino.Geometry.Collections
     /// For expert use only. If you do not understand homogeneous coordinates, then
     /// use the override that returns world 3-D, or Euclidean, coordinates.
     /// </remarks>
+    /// <since>6.0</since>
     public bool GetPoint(int index, out Point4d point)
     {
       point = new Point4d();
@@ -1686,6 +1811,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of control point to set.</param>
     /// <param name="weight">The control point weight.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool SetWeight(int index, double weight)
     {
       ValidateIndex(index);
@@ -1699,6 +1825,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="index">Index of control point to get.</param>
     /// <returns>The control point weight if successful, Rhino.Math.UnsetValue otherwise.</returns>
+    /// <since>6.0</since>
     public double GetWeight(int index)
     {
       ValidateIndex(index);
@@ -1711,6 +1838,7 @@ namespace Rhino.Geometry.Collections
     /// For rational curves, PointSize = Curve.Dimension + 1. 
     /// For non-rational curves, PointSize = Curve.Dimension.
     /// </summary>
+    /// <since>6.9</since>
     public int PointSize
     {
       get
@@ -1729,6 +1857,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="closeIndices">indices of 'close' points are returned in this array</param>
     /// <param name="stackedIndices">indices of 'stacked' points are returned in this array</param>
     /// <returns>true if close or stacked indices are found</returns>
+    /// <since>6.0</since>
     public bool ValidateSpacing(double closeTolerance, double stackTolerance, out int[] closeIndices, out int[] stackedIndices)
     {
       bool rc;
@@ -1753,6 +1882,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="vDir">The V direction.</param>
     /// <param name="nDir">The N direction.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool UVNDirectionsAt(int index, out Vector3d uDir, out Vector3d vDir, out Vector3d nDir)
     {
       uDir = vDir = nDir = Vector3d.Unset;
@@ -1795,6 +1925,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public bool EpsilonEquals(NurbsCurvePointList other, double epsilon)
     {
       if (null == other) throw new ArgumentNullException("other");
@@ -1835,6 +1966,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="item">The exact item to search for.</param>
     /// <returns>The index.</returns>
+    /// <since>6.0</since>
     public int IndexOf(ControlPoint item)
     {
       return GenericIListImplementation.IndexOf<ControlPoint>(this, item);
@@ -1865,6 +1997,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="item">The exact item to search for.</param>
     /// <returns>A boolean value.</returns>
+    /// <since>6.0</since>
     public bool Contains(ControlPoint item)
     {
       return IndexOf(item) != -1;
@@ -1875,6 +2008,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="array">The array to copy to.</param>
     /// <param name="arrayIndex">The index in which the copy will begin.</param>
+    /// <since>6.0</since>
     public void CopyTo(ControlPoint[] array, int arrayIndex)
     {
       GenericIListImplementation.CopyTo<ControlPoint>(this, array, arrayIndex);
@@ -1901,7 +2035,7 @@ namespace Rhino.Geometry.Collections
 //  int     m_is_rat;         // 1 for rational B-splines. (Rational control
 //                            // vertices use homogeneous form.)
 //                            // 0 for non-rational B-splines. (Control
-//                            // verticies do not have a weight coordinate.)
+//                            // vertices do not have a weight coordinate.)
 
 //  int     m_order;          // order = degree+1 (>=2)
 

@@ -72,8 +72,6 @@ def create_cpp_project(bitness, compile):
         if bitness == 64:
             for line in fileinput.input("librhino3dm_native.vcxproj", inplace=1):
                 print(line.replace("WIN32;", "WIN64;"))
-            for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
-                print(line.replace("WIN32;", "WIN64;"))
         if compile:
             system("cmake --build . --config Release --target librhino3dm_native")
     else:

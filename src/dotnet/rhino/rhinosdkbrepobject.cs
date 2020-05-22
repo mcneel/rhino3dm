@@ -6,7 +6,7 @@ using Rhino.Geometry;
 namespace Rhino.DocObjects
 {
   /// <summary>
-  /// Represents a <see cref="Rhino.Geometry.Brep">brep</see> in a document.
+  /// Represents a <see cref="Rhino.Geometry.Brep">Brep</see> in a document.
   /// </summary>
   public class BrepObject : RhinoObject
   {
@@ -16,8 +16,9 @@ namespace Rhino.DocObjects
     internal BrepObject(bool custom) { }
 
     /// <summary>
-    /// Gets the brep geometry linked with this object.
+    /// Gets the Brep geometry linked with this object.
     /// </summary>
+    /// <since>5.0</since>
     public Brep BrepGeometry
     {
       get
@@ -28,9 +29,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Constructs a new deep copy of the brep geometry.
+    /// Constructs a new deep copy of the Brep geometry.
     /// </summary>
     /// <returns>The copy of the geometry.</returns>
+    /// <since>5.0</since>
     public Brep DuplicateBrepGeometry()
     {
       Brep rc = DuplicateGeometry() as Brep;
@@ -54,6 +56,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the surface geometry linked with this object.
     /// </summary>
+    /// <since>5.0</since>
     public Surface SurfaceGeometry
     {
       get
@@ -67,6 +70,7 @@ namespace Rhino.DocObjects
     /// Constructs a new deep copy of the surface geometry.
     /// </summary>
     /// <returns>The copy of the geometry.</returns>
+    /// <since>5.0</since>
     public Surface DuplicateSurfaceGeometry()
     {
       Surface rc = DuplicateGeometry() as Surface;

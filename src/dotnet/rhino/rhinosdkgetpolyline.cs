@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 using System;
 using Rhino.Runtime.InteropWrappers;
 
@@ -11,6 +11,7 @@ namespace Rhino.Input.Custom
   public class GetPolyline : IDisposable
   {
     IntPtr m_ptr_argsrhinogetpolyline;
+    /// <since>6.0</since>
     public GetPolyline()
     {
       m_ptr_argsrhinogetpolyline = UnsafeNativeMethods.CArgsRhinoGetPolyline_New();
@@ -30,6 +31,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -58,6 +60,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="polyline"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public Commands.Result Get(out Geometry.Polyline polyline)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -89,6 +92,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting first point</summary>
+    /// <since>6.0</since>
     public string FirstPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.FirstPointPrompt); }
@@ -96,12 +100,14 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting second point</summary>
+    /// <since>6.0</since>
     public string SecondPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.SecondPointPrompt); }
       set { SetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.SecondPointPrompt, value); }
     }
     /// <summary>Prompt when getting third point</summary>
+    /// <since>6.0</since>
     public string ThirdPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.ThirdPointPrompt); }
@@ -109,12 +115,14 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting fourth point</summary>
+    /// <since>6.0</since>
     public string FourthPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.FourthPointPrompt); }
       set { SetStringHelper(UnsafeNativeMethods.ArgsGetPolylineStringConsts.FourthPointPrompt, value); }
     }
 
+    /// <since>6.0</since>
     public int MinPointCount
     {
       get
@@ -132,6 +140,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>6.0</since>
     public int MaxPointCount
     {
       get
@@ -154,6 +163,7 @@ namespace Rhino.Input.Custom
     /// the start point interactive picking
     /// </summary>
     /// <param name="point"></param>
+    /// <since>6.0</since>
     public void SetFirstPoint(Geometry.Point3d point)
     {
       IntPtr ptr_this = NonConstPointer();

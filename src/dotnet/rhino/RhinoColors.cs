@@ -26,6 +26,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>5.0</since>
     public ColorHSL(System.Drawing.Color rgb)
     {
       m_a = 1.0 - Clip(rgb.A);
@@ -37,6 +38,7 @@ namespace Rhino.Display
     /// <param name="hue">Hue channel value. Hue channels rotate between 0.0 and 1.0.</param>
     /// <param name="saturation">Saturation channel value. Channel will be limited to 0~1.</param>
     /// <param name="luminance">Luminance channel value. Channel will be limited to 0~1.</param>
+    /// <since>5.0</since>
     public ColorHSL(double hue, double saturation, double luminance)
     {
       m_h = (float)hue;
@@ -51,6 +53,7 @@ namespace Rhino.Display
     /// <param name="hue">Hue channel value. Hue channels rotate between 0.0 and 1.0.</param>
     /// <param name="saturation">Saturation channel value. Channel will be limited to 0~1.</param>
     /// <param name="luminance">Luminance channel value. Channel will be limited to 0~1.</param>
+    /// <since>5.0</since>
     public ColorHSL(double alpha, double hue, double saturation, double luminance)
     {
       m_h = (float)hue;
@@ -64,6 +67,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The HSL equivalent of the CMYK color.</returns>
+    /// <since>5.0</since>
     public static ColorHSL CreateFromCMYK(ColorCMYK cmyk)
     {
       return new ColorHSL(cmyk);
@@ -73,6 +77,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The HSL equivalent of the XYZ color.</returns>
+    /// <since>5.0</since>
     public static ColorHSL CreateFromXYZ(ColorXYZ xyz)
     {
       return new ColorHSL(xyz);
@@ -82,6 +87,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The HSL equivalent of the LAB color.</returns>
+    /// <since>5.0</since>
     public static ColorHSL CreateFromLAB(ColorLAB lab)
     {
       return new ColorHSL(lab);
@@ -91,6 +97,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The HSL equivalent of the LCH color.</returns>
+    /// <since>5.0</since>
     public static ColorHSL CreateFromLCH(ColorLCH lch)
     {
       return new ColorHSL(lch);
@@ -101,6 +108,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsv">Target color in HSV space.</param>
     /// <returns>The HSL equivalent of the HSV color.</returns>
+    /// <since>6.0</since>
     public static ColorHSL CreateFromHSV(ColorHSV hsv)
     {
       return new ColorHSL(hsv);
@@ -126,6 +134,7 @@ namespace Rhino.Display
     /// Gets or sets the hue channel value. 
     /// Hue channels rotate between 0.0 and 1.0.
     /// </summary>
+    /// <since>5.0</since>
     public double H
     {
       get { return m_h; }
@@ -135,6 +144,7 @@ namespace Rhino.Display
     /// Gets or sets the saturation channel value. 
     /// Saturation channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double S
     {
       get { return m_s; }
@@ -144,6 +154,7 @@ namespace Rhino.Display
     /// Gets or sets the luminance channel value. 
     /// Luminance channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double L
     {
       get { return m_l; }
@@ -153,6 +164,7 @@ namespace Rhino.Display
     /// Gets or sets the alpha channel value. 
     /// Alpha channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double A
     {
       get { return 1.0 - m_a; }
@@ -172,6 +184,7 @@ namespace Rhino.Display
     /// Convert HSL color to an equivalent System.Drawing.Color.
     /// </summary>
     /// <returns>A .Net framework library color value.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Color ToArgbColor()
     {
       byte a = (byte)(255.0 * A);
@@ -206,6 +219,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>5.0</since>
     public ColorCMYK(System.Drawing.Color rgb)
     {
       double c0, m0, y0;
@@ -222,6 +236,7 @@ namespace Rhino.Display
     /// <param name="cyan">Cyan channel hint.</param>
     /// <param name="magenta">Magenta channel hint.</param>
     /// <param name="yellow">Yellow channel hint.</param>
+    /// <since>5.0</since>
     public ColorCMYK(double cyan, double magenta, double yellow)
     {
       m_a = 0.0;
@@ -253,6 +268,7 @@ namespace Rhino.Display
     /// <param name="magenta">Magenta channel value. Magenta channels are limited to the 0.0 and 1.0 range.</param>
     /// <param name="yellow">Yellow channel value. Yellow channels are limited to the 0.0 and 1.0 range.</param>
     /// <param name="key">Key channel value. Key channels are limited to the 0.0 and 1.0 range.</param>
+    /// <since>5.0</since>
     public ColorCMYK(double cyan, double magenta, double yellow, double key)
     {
       m_c = Clip(cyan);
@@ -269,6 +285,7 @@ namespace Rhino.Display
     /// <param name="magenta">Magenta channel value. Magenta channels are limited to the 0.0 and 1.0 range.</param>
     /// <param name="yellow">Yellow channel value. Yellow channels are limited to the 0.0 and 1.0 range.</param>
     /// <param name="key">Key channel value. Key channels are limited to the 0.0 and 1.0 range.</param>
+    /// <since>5.0</since>
     public ColorCMYK(double alpha, double cyan, double magenta, double yellow, double key)
     {
       m_c = Clip(cyan);
@@ -283,6 +300,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The CMYK equivalent of the HSL color.</returns>
+    /// <since>5.0</since>
     public static ColorCMYK CreateFromHSL(ColorHSL hsl)
     {
       return new ColorCMYK(hsl);
@@ -292,6 +310,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The CMYK equivalent of the XYZ color.</returns>
+    /// <since>5.0</since>
     public static ColorCMYK CreateFromXYZ(ColorXYZ xyz)
     {
       return new ColorCMYK(xyz);
@@ -301,6 +320,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The CMYK equivalent of the LAB color.</returns>
+    /// <since>5.0</since>
     public static ColorCMYK CreateFromLAB(ColorLAB lab)
     {
       return new ColorCMYK(lab);
@@ -310,6 +330,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The CMYK equivalent of the LCH color.</returns>
+    /// <since>5.0</since>
     public static ColorCMYK CreateFromLCH(ColorLCH lch)
     {
       return new ColorCMYK(lch);
@@ -320,6 +341,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsv">Target color in HSV space.</param>
     /// <returns>The CMYK equivalent of the HSV color.</returns>
+    /// <since>6.0</since>
     public static ColorCMYK CreateFromHSV(ColorHSV hsv)
     {
       return new ColorCMYK(hsv);
@@ -351,6 +373,7 @@ namespace Rhino.Display
     /// Gets or sets the Cyan channel value. 
     /// Cyan channels are limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double C
     {
       get { return m_c; }
@@ -360,6 +383,7 @@ namespace Rhino.Display
     /// Gets or sets the Magenta channel value. 
     /// Magenta channels are limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double M
     {
       get { return m_m; }
@@ -369,6 +393,7 @@ namespace Rhino.Display
     /// Gets or sets the Yellow channel value. 
     /// Yellow channels are limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double Y
     {
       get { return m_y; }
@@ -378,6 +403,7 @@ namespace Rhino.Display
     /// Gets or sets the Key channel value. 
     /// Key channels are limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double K
     {
       get { return m_k; }
@@ -387,6 +413,7 @@ namespace Rhino.Display
     /// Gets or sets the Alpha channel value. 
     /// Alpha channels are limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double A
     {
       get { return 1.0 - m_a; }
@@ -428,6 +455,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>5.0</since>
     public ColorXYZ(System.Drawing.Color rgb)
     {
       m_a = 1.0 - ((double)rgb.A / 255.0);
@@ -439,6 +467,7 @@ namespace Rhino.Display
     /// <param name="x">X channel value, channel will be limited to 0~1.</param>
     /// <param name="y">Y channel value, channel will be limited to 0~1.</param>
     /// <param name="z">Z channel value, channel will be limited to 0~1.</param>
+    /// <since>5.0</since>
     public ColorXYZ(double x, double y, double z)
     {
       m_x = Clip(x);
@@ -453,6 +482,7 @@ namespace Rhino.Display
     /// <param name="x">X channel value, channel will be limited to 0~1.</param>
     /// <param name="y">Y channel value, channel will be limited to 0~1.</param>
     /// <param name="z">Z channel value, channel will be limited to 0~1.</param>
+    /// <since>5.0</since>
     public ColorXYZ(double alpha, double x, double y, double z)
     {
       m_x = Clip(x);
@@ -505,7 +535,7 @@ namespace Rhino.Display
     //  g *= 100.0;
     //  b *= 100.0;
 
-    //  //Observer. = 2°, Illuminant = D65
+    //  //Observer. = 2ï¿½, Illuminant = D65
     //  newColor.m_x = r * 0.4124 + g * 0.3576 + b * 0.1805;
     //  newColor.m_y = r * 0.2126 + g * 0.7152 + b * 0.0722;
     //  newColor.m_z = r * 0.0193 + g * 0.1192 + b * 0.9505;
@@ -518,6 +548,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The XYZ equivalent of the HSL color.</returns>
+    /// <since>5.0</since>
     public static ColorXYZ CreateFromHSL(ColorHSL hsl)
     {
       return new ColorXYZ(hsl);
@@ -527,6 +558,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The XYZ equivalent of the CMYK color.</returns>
+    /// <since>5.0</since>
     public static ColorXYZ CreateFromCMYK(ColorCMYK cmyk)
     {
       return new ColorXYZ(cmyk);
@@ -536,6 +568,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The XYZ equivalent of the LAB color.</returns>
+    /// <since>5.0</since>
     public static ColorXYZ CreateFromLAB(ColorLAB lab)
     {
       double x, y, z;
@@ -547,6 +580,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The XYZ equivalent of the LCH color.</returns>
+    /// <since>5.0</since>
     public static ColorXYZ CreateFromLCH(ColorLCH lch)
     {
       return CreateFromLAB(ColorLAB.CreateFromLCH(lch));
@@ -557,6 +591,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsv">Target color in HSV space.</param>
     /// <returns>The XYZ equivalent of the HSV color.</returns>
+    /// <since>6.0</since>
     public static ColorXYZ CreateFromHSV(ColorHSV hsv)
     {
       return new ColorXYZ(hsv);
@@ -583,6 +618,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or set the X channel value. Channel will be limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double X
     {
       get { return m_x; }
@@ -591,6 +627,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or set the Y channel value. Channel will be limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double Y
     {
       get { return m_y; }
@@ -599,6 +636,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or set the Z channel value. Channel will be limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double Z
     {
       get { return m_z; }
@@ -607,6 +645,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or set the Alpha channel value. Channel will be limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double A
     {
       get { return 1.0 - m_a; }
@@ -648,6 +687,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>5.0</since>
     public ColorLAB(System.Drawing.Color rgb)
     {
       this = CreateFromXYZ(new ColorXYZ(rgb));
@@ -655,6 +695,7 @@ namespace Rhino.Display
     /// <summary>
     /// Constructs a new instance of ColorLAB with custom channel values.
     /// </summary>
+    /// <since>5.0</since>
     public ColorLAB(double lightness, double a, double b)
     {
       m_l = Clip(lightness);
@@ -665,6 +706,7 @@ namespace Rhino.Display
     /// <summary>
     /// Constructs a new instance of ColorLAB with custom channel values.
     /// </summary>
+    /// <since>5.0</since>
     public ColorLAB(double alpha, double lightness, double a, double b)
     {
       m_l = Clip(lightness);
@@ -687,6 +729,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The LAB equivalent of the HSL color.</returns>
+    /// <since>5.0</since>
     public static ColorLAB CreateFromHSL(ColorHSL hsl)
     {
       return CreateFromXYZ(ColorXYZ.CreateFromHSL(hsl));
@@ -696,6 +739,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The LAB equivalent of the CMYK color.</returns>
+    /// <since>5.0</since>
     public static ColorLAB CreateFromCMYK(ColorCMYK cmyk)
     {
       return new ColorLAB(cmyk);
@@ -705,6 +749,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The LAB equivalent of the XYZ color.</returns>
+    /// <since>5.0</since>
     public static ColorLAB CreateFromXYZ(ColorXYZ xyz)
     {
       double l, a, b;
@@ -718,6 +763,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The LAB equivalent of the LCH color.</returns>
+    /// <since>5.0</since>
     public static ColorLAB CreateFromLCH(ColorLCH lch)
     {
       double l, a, b;
@@ -732,6 +778,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsv">Target color in HSV space.</param>
     /// <returns>The LAB equivalent of the HSV color.</returns>
+    /// <since>6.0</since>
     public static ColorLAB CreateFromHSV(ColorHSV hsv)
     {
       return new ColorLAB(hsv);
@@ -756,6 +803,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the lightness channel. The channel is limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double L
     {
       get { return m_l; }
@@ -764,6 +812,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Base channel. The channel is limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double A
     {
       get { return m_a; }
@@ -772,6 +821,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Opponent channel. The channel is limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double B
     {
       get { return m_b; }
@@ -780,6 +830,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Alpha channel. The channel is limited to 0~1.
     /// </summary>
+    /// <since>5.0</since>
     public double Alpha
     {
       get { return 1.0 - m_alpha; }
@@ -822,6 +873,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>5.0</since>
     public ColorLCH(System.Drawing.Color rgb)
     {
       this = CreateFromLAB(new ColorLAB(rgb));
@@ -832,6 +884,7 @@ namespace Rhino.Display
     /// <param name="lightness">Value of lightness channel. This channel is limited to 0~1.</param>
     /// <param name="chroma">Value of chroma channel. This channel is limited to -1~1.</param>
     /// <param name="hue">Value of chroma channel. This channel is limited to 0~360.</param>
+    /// <since>5.0</since>
     public ColorLCH(double lightness, double chroma, double hue)
     {
       m_l = ClipL(lightness);
@@ -846,6 +899,7 @@ namespace Rhino.Display
     /// <param name="lightness">Value of Lightness channel. This channel is limited to 0~1.</param>
     /// <param name="chroma">Value of Chroma channel. This channel is limited to -1~1.</param>
     /// <param name="hue">Value of Hue channel. This channel is limited to 0~360.</param>
+    /// <since>5.0</since>
     public ColorLCH(double alpha, double lightness, double chroma, double hue)
     {
       m_l = ClipL(lightness);
@@ -859,6 +913,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The LCH equivalent of the HSL color.</returns>
+    /// <since>5.0</since>
     public static ColorLCH CreateFromHSL(ColorHSL hsl)
     {
       return CreateFromLAB(ColorLAB.CreateFromHSL(hsl));
@@ -868,6 +923,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The LCH equivalent of the CMYK color.</returns>
+    /// <since>5.0</since>
     public static ColorLCH CreateFromCMYK(ColorCMYK cmyk)
     {
       return new ColorLCH(cmyk);
@@ -877,6 +933,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The LCH equivalent of the XYZ color.</returns>
+    /// <since>5.0</since>
     public static ColorLCH CreateFromXYZ(ColorXYZ xyz)
     {
       return CreateFromLAB(ColorLAB.CreateFromXYZ(xyz));
@@ -886,6 +943,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The LCH equivalent of the LAB color.</returns>
+    /// <since>5.0</since>
     public static ColorLCH CreateFromLAB(ColorLAB lab)
     {
       double l, c, h;
@@ -914,6 +972,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Lightness channel.
     /// </summary>
+    /// <since>5.0</since>
     public double L
     {
       get { return m_l; }
@@ -922,6 +981,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Chroma channel. Chroma is defined from -1.0 to +1.0.
     /// </summary>
+    /// <since>5.0</since>
     public double C
     {
       get { return m_c; }
@@ -930,6 +990,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Hue channel. The hue channel is limited to the 0~360 degree range.
     /// </summary>
+    /// <since>5.0</since>
     public double H
     {
       get { return m_h; }
@@ -938,6 +999,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the Alpha channel. The Alpha channel is limited to the 0~1 range.
     /// </summary>
+    /// <since>5.0</since>
     public double A
     {
       get { return 1.0 - m_a; }
@@ -968,6 +1030,7 @@ namespace Rhino.Display
     /// <summary>
     /// Ensure the Chromaticity of this color is positive. 
     /// </summary>
+    /// <since>5.0</since>
     public void MakePositive()
     {
       if (C < 0)
@@ -983,7 +1046,7 @@ namespace Rhino.Display
   /// Represents an HSV (Hue, Saturation, Value) color with double precision floating point channels. 
   /// HSV colors (also sometimes called HSB, where B means Brightness) are similar to HSL colors in that they
   /// represent colors in a cylindrical color space, and are intended to provide intuitive means to edit the 
-  /// brightness of a particular color over RGB color space where each each color channel would need to be 
+  /// brightness of a particular color over RGB color space where each color channel would need to be 
   /// modified to affect the color brightness.
   /// </summary>
   [Serializable]
@@ -1006,6 +1069,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">RGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
+    /// <since>6.0</since>
     public ColorHSV(System.Drawing.Color rgb)
     {
       m_a = 1.0 - Clip(rgb.A);
@@ -1018,6 +1082,7 @@ namespace Rhino.Display
     /// <param name="hue">Hue channel value. Hue channels rotate between 0.0 and 1.0.</param>
     /// <param name="saturation">Saturation channel value. Channel will be limited to 0~1.</param>
     /// <param name="value">Value (Brightness) channel value. Channel will be limited to 0~1.</param>
+    /// <since>6.0</since>
     public ColorHSV(double hue, double saturation, double value)
     {
       m_h = (float)hue;
@@ -1033,6 +1098,7 @@ namespace Rhino.Display
     /// <param name="hue">Hue channel value. Hue channels rotate between 0.0 and 1.0.</param>
     /// <param name="saturation">Saturation channel value. Channel will be limited to 0~1.</param>
     /// <param name="value">Value (Brightness) channel value. Channel will be limited to 0~1.</param>
+    /// <since>6.0</since>
     public ColorHSV(double alpha, double hue, double saturation, double value)
     {
       m_h = (float)hue;
@@ -1046,6 +1112,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The HSV equivalent of the HSL color.</returns>
+    /// <since>6.0</since>
     public static ColorHSV CreateFromHSL(ColorHSL hsl)
     {
       return new ColorHSV(hsl);
@@ -1055,6 +1122,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The HSV equivalent of the CMYK color.</returns>
+    /// <since>6.0</since>
     public static ColorHSV CreateFromCMYK(ColorCMYK cmyk)
     {
       return new ColorHSV(cmyk);
@@ -1065,6 +1133,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The HSV equivalent of the XYZ color.</returns>
+    /// <since>6.0</since>
     public static ColorHSV CreateFromXYZ(ColorXYZ xyz)
     {
       return new ColorHSV(xyz);
@@ -1074,6 +1143,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The HSV equivalent of the LAB color.</returns>
+    /// <since>6.0</since>
     public static ColorHSV CreateFromLAB(ColorLAB lab)
     {
       return new ColorHSV(lab);
@@ -1083,6 +1153,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The HSV equivalent of the LCH color.</returns>
+    /// <since>6.0</since>
     public static ColorHSV CreateFromLCH(ColorLCH lch)
     {
       return new ColorHSV(lch);
@@ -1112,6 +1183,7 @@ namespace Rhino.Display
     /// Gets or sets the hue channel value. 
     /// Hue channels rotate between 0.0 and 1.0.
     /// </summary>
+    /// <since>6.0</since>
     public double H
     {
       get { return m_h; }
@@ -1121,6 +1193,7 @@ namespace Rhino.Display
     /// Gets or sets the saturation channel value. 
     /// Saturation channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>6.0</since>
     public double S
     {
       get { return m_s; }
@@ -1130,6 +1203,7 @@ namespace Rhino.Display
     /// Gets or sets the value (brightness) channel value. 
     /// Value channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>6.0</since>
     public double V
     {
       get { return m_v; }
@@ -1139,6 +1213,7 @@ namespace Rhino.Display
     /// Gets or sets the alpha channel value. 
     /// Alpha channels are limited to a 0~1 range.
     /// </summary>
+    /// <since>6.0</since>
     public double A
     {
       get { return 1.0 - m_a; }
@@ -1158,6 +1233,7 @@ namespace Rhino.Display
     /// Convert HSV color to an equivalent System.Drawing.Color.
     /// </summary>
     /// <returns>A .Net framework library color value.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Color ToArgbColor()
     {
       byte a = (byte)(255.0 * A);

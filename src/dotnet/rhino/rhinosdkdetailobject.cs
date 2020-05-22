@@ -18,6 +18,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns the detail view geometry.
     /// </summary>
+    /// <since>5.0</since>
     public Rhino.Geometry.DetailView DetailGeometry
     {
       get
@@ -35,6 +36,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the active state of the detail view.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsActive
     {
       get
@@ -52,12 +54,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the detail view's viewport.
     /// </summary>
+    /// <since>5.0</since>
     public Rhino.Display.RhinoViewport Viewport
     {
       get { return m_viewport ?? (m_viewport = new Rhino.Display.RhinoViewport(this)); }
     }
     Rhino.Display.RhinoViewport m_viewport;
 
+    /// <since>5.0</since>
     public bool CommitViewportChanges()
     {
       bool rc = false;
@@ -82,6 +86,7 @@ namespace Rhino.DocObjects
     ///  2. The viewport projection title that is part of the viewport
     ///  This function combines these two strings to create a single "description" string in the form of attribute_name - projection_title.
     /// </summary>
+    /// <since>7.0</since>
     public string DescriptiveTitle
     {
       get
@@ -100,6 +105,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the world coordinate to page coordinate transformation.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.Transform WorldToPageTransform
     {
       get
@@ -114,6 +120,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns the page coordinate to world coordinate transformation.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.Transform PageToWorldTransform
     {
       get
@@ -163,6 +170,7 @@ namespace Rhino.DocObjects
     /// <param name="format">The scale format.</param>
     /// <param name="value">The formatted string</param>
     /// <returns>true if successful, false otherwise</returns>
+    /// <since>7.0</since>
     public bool GetFormattedScale(ScaleFormat format, out string value)
     {
       value = null;

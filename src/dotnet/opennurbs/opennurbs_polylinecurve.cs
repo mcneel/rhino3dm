@@ -19,6 +19,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new empty polyline curve.
     /// </summary>
+    /// <since>5.0</since>
     public PolylineCurve()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PolylineCurve_New(IntPtr.Zero);
@@ -29,6 +30,7 @@ namespace Rhino.Geometry
     /// Initializes a new polyline curve by copying its content from another polyline curve.
     /// </summary>
     /// <param name="other">Another polyline curve.</param>
+    /// <since>5.0</since>
     public PolylineCurve(PolylineCurve other)
     {
       IntPtr pOther= IntPtr.Zero;
@@ -44,6 +46,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">A list, an array or any enumerable set of points to copy from.
     /// This includes a <see cref="Polyline"/> object.</param>
+    /// <since>5.0</since>
     public PolylineCurve(System.Collections.Generic.IEnumerable<Point3d> points)
     {
       int count;
@@ -105,6 +108,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of points in this polyline.
     /// </summary>
+    /// <since>5.0</since>
     public int PointCount
     {
       get
@@ -119,6 +123,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">An index.</param>
     /// <returns>A point.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d Point(int index)
     {
@@ -134,6 +139,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">An index.</param>
     /// <param name="point">A point location to set.</param>
+    /// <since>5.0</since>
     public void SetPoint(int index, Point3d point)
     {
       IntPtr ptr = NonConstPointer();
@@ -146,6 +152,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">An index.</param>
     /// <returns>A parameter.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public double Parameter(int index)
     {
@@ -161,6 +168,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">An index.</param>
     /// <param name="parameter">A parameter to set.</param>
+    /// <since>6.0</since>
     public void SetParameter(int index, double parameter)
     {
       IntPtr ptr = NonConstPointer();
@@ -171,6 +179,7 @@ namespace Rhino.Geometry
     /// Returns the underlying Polyline, or points.
     /// </summary>
     /// <returns>The Polyline if successful, null of the curve has no points.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Polyline ToPolyline()
     {

@@ -11,6 +11,7 @@ namespace Rhino.Input.Custom
   {
     IntPtr m_ptr_argsrhinogettorus;
 
+    /// <since>7.0</since>
     public GetTorus()
     {
       m_ptr_argsrhinogettorus = UnsafeNativeMethods.CArgsRhinoGetTorus_New();
@@ -30,6 +31,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -68,6 +70,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Default radius or diameter (based on InDiameterMode)
     /// </summary>
+    /// <since>7.0</since>
     public double DefaultSize
     {
       get
@@ -83,8 +86,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Determines if the "size" value is reperesenting a radius or diameter
+    /// Determines if the "size" value is representing a radius or diameter
     /// </summary>
+    /// <since>7.0</since>
     public bool InDiameterMode
     {
       get { return GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode); }
@@ -92,8 +96,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Second radius opion. The first radius chosen sets the inner dimension of the torus and the second radius is constrained to be outside of the first radius.
+    /// Second radius option. The first radius chosen sets the inner dimension of the torus and the second radius is constrained to be outside of the first radius.
     /// </summary>
+    /// <since>7.0</since>
     public bool FixInnerRadius
     {
       get
@@ -109,8 +114,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Second radius opion. Determines if the second "size" value is reperesenting a radius or diameter
+    /// Second radius option. Determines if the second "size" value is representing a radius or diameter
     /// </summary>
+    /// <since>7.0</since>
     public bool InSecondDiameterMode
     {
       get
@@ -128,6 +134,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Second radius or diameter (based on InSecondDiameterMode)
     /// </summary>
+    /// <since>7.0</since>
     public double SecondSize
     {
       get
@@ -147,6 +154,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="torus">The torus geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result Get(out Geometry.Torus torus)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -162,6 +170,7 @@ namespace Rhino.Input.Custom
     /// <param name="aroundFaces">The number of faces in the around direction</param>
     /// <param name="torus">The torus geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Torus torus)
     {
       IntPtr ptr_this = NonConstPointer();

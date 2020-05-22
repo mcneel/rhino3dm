@@ -16,6 +16,7 @@ namespace Rhino.ApplicationSettings
     /// When history recording is enabled, new objects keep a record of how they
     /// were constructed so that they can be updated if an input object changes.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RecordingEnabled
     {
       get
@@ -29,9 +30,10 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// When history update is enabled, dependant objects are automatically updated
+    /// When history update is enabled, dependent objects are automatically updated
     /// when an antecedent is modified.
     /// </summary>
+    /// <since>5.0</since>
     public static bool UpdateEnabled
     {
       get
@@ -48,6 +50,7 @@ namespace Rhino.ApplicationSettings
     /// When history object locking is enabled, objects with history on them act as if
     /// they were locked and the only way to modify these objects is to edit their inputs.
     /// </summary>
+    /// <since>5.0</since>
     public static bool ObjectLockingEnabled
     {
       get
@@ -63,6 +66,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays a warning dialog when an action is taken that breaks the link between the output and input objects. 
     /// </summary>
+    /// <since>6.10</since>
     public static bool BrokenRecordWarningEnabled
     {
       get

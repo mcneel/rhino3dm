@@ -27,6 +27,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="center">A center point.</param>
     /// <param name="radius">A radius value.</param>
+    /// <since>5.0</since>
     public Sphere(Point3d center, double radius)
     {
       m_plane = Plane.WorldXY;
@@ -37,10 +38,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new sphere given the plane of the equator circle and radius.
     /// </summary>
-    /// <param name="equatorialPlane">A plane that will be intesecting
+    /// <param name="equatorialPlane">A plane that will be intersecting
     /// the sphere at the same distance from both poles (parameterization
-    /// singularieties).</param>
+    /// singularities).</param>
     /// <param name="radius">A radius value.</param>
+    /// <since>5.0</since>
     public Sphere(Plane equatorialPlane, double radius)
     {
       m_plane = equatorialPlane;
@@ -50,6 +52,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a sphere with invalid members.
     /// </summary>
+    /// <since>5.0</since>
     public static Sphere Unset
     {
       get { return new Sphere(Point3d.Unset, RhinoMath.UnsetValue); }
@@ -61,6 +64,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">Points to fit. The collection must contain at least two points.</param>
     /// <returns>The Sphere that best approximates the points or Sphere.Unset on failure.</returns>
+    /// <since>5.0</since>
     public static Sphere FitSphereToPoints(System.Collections.Generic.IEnumerable<Point3d> points)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -117,6 +121,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value that indicates whether the sphere is valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -126,9 +131,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the world aligned boundingbox for this Sphere. 
+    /// Gets the world aligned bounding box for this Sphere. 
     /// If the Sphere is Invalid, an empty box is returned.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -145,6 +151,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the diameter for this sphere.
     /// </summary>
+    /// <since>5.0</since>
     public double Diameter
     {
       get { return 2.0 * m_radius; }
@@ -154,6 +161,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Radius for this sphere.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius
     {
       get { return m_radius; }
@@ -163,6 +171,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Equatorial plane for this sphere.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("This property has been replaced by Equ*A*torialPlane."),
      System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Plane EquitorialPlane
@@ -174,6 +183,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Equatorial plane for this sphere.
     /// </summary>
+    /// <since>6.0</since>
     public Plane EquatorialPlane
     {
       get
@@ -189,6 +199,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the center point of the sphere.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       get
@@ -206,6 +217,7 @@ namespace Rhino.Geometry
     /// <para>This is the parameterization singularity that can be obtained,
     /// at V value +Math.Pi/2.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Point3d NorthPole
     {
       get
@@ -219,6 +231,7 @@ namespace Rhino.Geometry
     /// <para>This is the parameterization singularity that can be obtained,
     /// at V value -Math.Pi/2.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Point3d SouthPole
     {
       get
@@ -236,6 +249,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="radians">An angle in radians for the parallel.</param>
     /// <returns>A circle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Circle LatitudeRadians(double radians)
     {
@@ -251,6 +265,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="degrees">An angle in degrees for the meridian.</param>
     /// <returns>A circle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Circle LatitudeDegrees(double degrees)
     {
@@ -263,6 +278,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="radians">An angle in radians.</param>
     /// <returns>A circle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Circle LongitudeRadians(double radians)
     {
@@ -277,6 +293,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="degrees">An angle in degrees.</param>
     /// <returns>A circle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Circle LongitudeDegrees(double degrees)
     {
@@ -287,6 +304,7 @@ namespace Rhino.Geometry
     /// <param name="longitudeRadians">A number within the interval [0, 2pi].</param>
     /// <param name="latitudeRadians">A number within the interval [-pi/2,pi/2].</param>
     /// <returns>A point value.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double longitudeRadians, double latitudeRadians)
     {
@@ -299,6 +317,7 @@ namespace Rhino.Geometry
     /// <param name="longitudeRadians">A number within the interval [0, 2pi].</param>
     /// <param name="latitudeRadians">A number within the interval [-pi/2, pi/2].</param>
     /// <returns>A vector.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d NormalAt(double longitudeRadians, double latitudeRadians)
     {
@@ -312,6 +331,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">Point to project onto Sphere.</param>
     /// <returns>Point on sphere surface closest to testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -327,6 +347,7 @@ namespace Rhino.Geometry
     /// <param name="longitudeRadians">The longitudinal angle (in radians; 0.0 to 2pi) where the sphere approaches testPoint best.</param>
     /// <param name="latitudeRadians">The latitudinal angle (in radians; -0.5pi to +0.5pi) where the sphere approaches testPoint best.</param>
     /// <returns>true on success, false on failure. This function will fail if the point it coincident with the sphere center.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool ClosestParameter(Point3d testPoint, out double longitudeRadians, out double latitudeRadians)
     {
@@ -374,6 +395,7 @@ namespace Rhino.Geometry
     /// <param name="cosAngle">cos(angle)</param>
     /// <param name="axisOfRotation">The direction of the axis of rotation.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axisOfRotation)
     {
       return Rotate(sinAngle, cosAngle, axisOfRotation, m_plane.Origin);
@@ -385,6 +407,7 @@ namespace Rhino.Geometry
     /// <param name="angleRadians">Angle of rotation (in radians)</param>
     /// <param name="axisOfRotation">Rotation axis.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angleRadians, Vector3d axisOfRotation)
     {
       double sinAngle = Math.Sin(angleRadians);
@@ -400,6 +423,7 @@ namespace Rhino.Geometry
     /// <param name="axisOfRotation">Axis of rotation.</param>
     /// <param name="centerOfRotation">Center of rotation.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axisOfRotation, Point3d centerOfRotation)
     {
       return m_plane.Rotate(sinAngle, cosAngle, axisOfRotation, centerOfRotation);
@@ -412,6 +436,7 @@ namespace Rhino.Geometry
     /// <param name="axisOfRotation">Axis of rotation.</param>
     /// <param name="centerOfRotation">Center of rotation.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angleRadians, Vector3d axisOfRotation, Point3d centerOfRotation)
     {
       double sinAngle = Math.Sin(angleRadians);
@@ -424,6 +449,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="delta">Motion vector.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public bool Translate(Vector3d delta)
     {
       return m_plane.Translate(delta);
@@ -435,6 +461,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="xform">Transformation matrix to apply.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       Circle xc = new Circle(m_plane, m_radius);
@@ -451,6 +478,7 @@ namespace Rhino.Geometry
     /// Converts this sphere is it Brep representation
     /// </summary>
     /// <returns></returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Brep ToBrep()
     {
@@ -462,6 +490,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling NurbsSurface.CreateFromSphere().
     /// </summary>
     /// <returns>A nurbs surface representation of this sphere or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsSurface ToNurbsSurface()
     {
@@ -473,6 +502,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling RevSurface.CreateFromSphere().
     /// </summary>
     /// <returns>A surface of revolution representation of this sphere or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public RevSurface ToRevSurface()
     {
@@ -486,6 +516,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Sphere other, double epsilon)
     {

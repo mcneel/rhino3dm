@@ -130,6 +130,7 @@ namespace Rhino
     }
 
     /// <summary></summary>
+    /// <since>5.0</since>
     public IntPtr Handle
     {
       get { return m_handle; }
@@ -139,12 +140,14 @@ namespace Rhino
     /// </summary>
     /// <param name="method"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public void Invoke(Delegate method)
     {
       RhinoApp.InvokeOnUiThread(method);
     }
 
     /// <summary> See Control.InvokeRequired </summary>
+    /// <since>5.0</since>
     public bool InvokeRequired
     {
       get
@@ -173,6 +176,7 @@ namespace Rhino
     ///Rhino will only load plug-ins that were build with exactly the
     ///same version of the SDK.
     ///</summary>
+    /// <since>5.0</since>
     public static int SdkVersion
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.SdkVersion); }
@@ -181,13 +185,14 @@ namespace Rhino
     ///<summary>
     ///Rhino SDK 9 digit SDK service release number in the form YYYYMMDDn
     ///
-    ///Service service release of the Rhino SDK supported by this executable. Rhino will only
+    ///Service release of the Rhino SDK supported by this executable. Rhino will only
     ///load plug-ins that require a service release of &lt;= this release number.
     ///For example, SR1 will load all plug-ins made with any SDK released up through and including
     ///the SR1 SDK. But, SR1 will not load a plug-in built using the SR2 SDK. If an &quot;old&quot; Rhino
     ///tries to load a &quot;new&quot; plug-in, the user is told that they have to get a free Rhino.exe
     ///update in order for the plug-in to load. Rhino.exe updates are available from http://www.rhino3d.com.
     ///</summary>
+    /// <since>5.0</since>
     public static int SdkServiceRelease
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.SdkServiceRelease); }
@@ -196,6 +201,7 @@ namespace Rhino
     ///<summary>
     ///Major version of Rhino executable 4, 5, ...
     ///</summary>
+    /// <since>5.0</since>
     public static int ExeVersion
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.ExeVersion); }
@@ -207,6 +213,7 @@ namespace Rhino
     ///this function returns &quot;0&quot; if Rhino V4SR0 is running and returns
     ///&quot;1&quot; if Rhino V4SR1 is running.
     ///</summary>
+    /// <since>5.0</since>
     public static int ExeServiceRelease
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.ExeServiceRelease); }
@@ -215,6 +222,7 @@ namespace Rhino
     /// <summary>
     /// Gets the build date.
     /// </summary>
+    /// <since>5.0</since>
     public static DateTime BuildDate
     {
       get
@@ -234,6 +242,7 @@ namespace Rhino
     /// McNeel version control revision identifier at the time this version
     /// of Rhino was built.
     /// </summary>
+    /// <since>5.0</since>
     public static string VersionControlRevision
     {
       get
@@ -249,12 +258,14 @@ namespace Rhino
 
     static Version g_version;
     /// <summary> File version of the main Rhino process </summary>
+    /// <since>5.9</since>
     public static Version Version
     {
       get { return g_version ?? (g_version = new Version(RhinoBuildConstants.VERSION_STRING)); }
     }
 
     /// <summary>Gets the product serial number, as seen in Rhino's ABOUT dialog box.</summary>
+    /// <since>5.0</since>
     public static string SerialNumber
     {
       get
@@ -269,6 +280,7 @@ namespace Rhino
     }
 
     /// <summary>Gets the name of the user that owns the license or lease.</summary>
+    /// <since>6.0</since>
     public static string LicenseUserName
     {
       get
@@ -283,6 +295,7 @@ namespace Rhino
     }
 
     /// <summary>Gets the name of the organization of the user that owns the license or lease.</summary>
+    /// <since>6.0</since>
     public static string LicenseUserOrganization
     {
       get
@@ -297,6 +310,7 @@ namespace Rhino
     }
 
     /// <summary>Gets the type of installation (product edition) of the license or lease.</summary>
+    /// <since>6.0</since>
     public static string InstallationTypeString
     {
       get
@@ -311,6 +325,7 @@ namespace Rhino
     }
 
     /// <summary>Gets the application name.</summary>
+    /// <since>5.0</since>
     public static string Name
     {
       get
@@ -325,6 +340,7 @@ namespace Rhino
     }
 
     /// <summary>Gets license the node type.</summary>
+    /// <since>5.0</since>
     public static LicenseNode NodeType
     {
       get
@@ -335,6 +351,7 @@ namespace Rhino
     }
 
     ///<summary>Gets the product installation type, as seen in Rhino's ABOUT dialog box.</summary>
+    /// <since>5.0</since>
     public static Installation InstallationType
     {
       get
@@ -347,6 +364,7 @@ namespace Rhino
     /// <summary>
     /// Gets the current Registry scheme name.
     /// </summary>
+    /// <since>6.0</since>
     public static string SchemeName
     {
       get
@@ -367,6 +385,7 @@ namespace Rhino
     /// <returns>The data directory.</returns>
     /// <param name="localUser">If set to <c>true</c> local user.</param>
     /// <param name="forceDirectoryCreation">If set to <c>true</c> force directory creation.</param>
+    /// <since>6.0</since>
     public static string GetDataDirectory(bool localUser, bool forceDirectoryCreation)
     {
       return GetDataDirectory (localUser, forceDirectoryCreation, string.Empty);
@@ -382,6 +401,7 @@ namespace Rhino
     /// Sub directory, will get appended to the end of the data directory.  if forceDirectoryCreation
     /// is true then this directory will get created and writable.
     /// </param>
+    /// <since>6.0</since>
     public static string GetDataDirectory(bool localUser, bool forceDirectoryCreation, string subDirectory)
     {
       if (Runtime.HostUtils.RunningOnOSX)
@@ -406,6 +426,7 @@ namespace Rhino
     /// <summary>
     /// directory
     /// </summary>
+    /// <since>6.7</since>
     public static System.IO.DirectoryInfo GetExecutableDirectory()
     {
       using (var sw = new StringWrapper())
@@ -424,48 +445,56 @@ namespace Rhino
 
 
     ///<summary>Gets the ID of Rhino 2.</summary>
+    /// <since>5.0</since>
     public static Guid Rhino2Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino2Id); }
     }
 
     ///<summary>Gets the ID of Rhino 3.</summary>
+    /// <since>5.0</since>
     public static Guid Rhino3Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino3Id); }
     }
 
     ///<summary>Gets the ID of Rhino 4.</summary>
+    /// <since>5.0</since>
     public static Guid Rhino4Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino4Id); }
     }
 
     ///<summary>Gets the ID of Rhino 5.</summary>
+    /// <since>5.0</since>
     public static Guid Rhino5Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino5Id); }
     }
 
     ///<summary>Gets the ID of Rhino 6.</summary>
+    /// <since>7.0</since>
     public static Guid Rhino6Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino6Id); }
     }
 
     ///<summary>Gets the current ID of Rhino.</summary>
+    /// <since>5.0</since>
     public static Guid CurrentRhinoId
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.CurrentRhinoId); }
     }
 
     /// <summary>Is Rhino currently being executed through automation</summary>
+    /// <since>5.0</since>
     public static bool IsRunningAutomated
     {
       get { return UnsafeNativeMethods.CRhinoApp_IsAutomated(); }
     }
 
     /// <summary>Is Rhino currently being executed in headless mode</summary>
+    /// <since>6.1</since>
     public static bool IsRunningHeadless
     {
       get { return UnsafeNativeMethods.CRhinoApp_IsHeadless(); }
@@ -474,6 +503,7 @@ namespace Rhino
     /// <summary>
     /// Is Rhino currently using custom, user-interface Skin.
     /// </summary>
+    /// <since>6.2</since>
     public static bool IsSkinned
     {
       get { return UnsafeNativeMethods.CRhinoApp_IsSkinned(); }
@@ -482,6 +512,7 @@ namespace Rhino
     //static bool IsRhinoId( System::Guid id );
     static readonly object g_lock_object = new object();
     ///<summary>Print formatted text in the command window.</summary>
+    /// <since>5.0</since>
     public static void Write(string message)
     {
       lock (g_lock_object)
@@ -500,6 +531,7 @@ namespace Rhino
       /// <summary>
       /// Returns Encoding Unicode.
       /// </summary>
+      /// <since>6.0</since>
       public override Encoding Encoding
       {
         get
@@ -511,6 +543,7 @@ namespace Rhino
       /// <summary>
       /// Writes a string to the command line.
       /// </summary>
+      /// <since>6.0</since>
       public override void Write(string value)
       {
         RhinoApp.Write(value);
@@ -519,6 +552,7 @@ namespace Rhino
       /// <summary>
       /// Writes a char to the command line.
       /// </summary>
+      /// <since>6.0</since>
       public override void Write(char value)
       {
         RhinoApp.Write(char.ToString(value));
@@ -527,6 +561,7 @@ namespace Rhino
       /// <summary>
       /// Writes a char buffer to the command line.
       /// </summary>
+      /// <since>6.0</since>
       public override void Write(char[] buffer, int index, int count)
       {
         RhinoApp.Write(new string(buffer, index, count));
@@ -536,6 +571,7 @@ namespace Rhino
       /// Provided to give a simple way to IronPython to call this class.
       /// </summary>
       /// <param name="str">The text.</param>
+      /// <since>6.0</since>
       [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
       [CLSCompliant(false)]
       public void write(string str)
@@ -547,6 +583,7 @@ namespace Rhino
     /// <summary>
     /// Provides a TextWriter that can write to the command line.
     /// </summary>
+    /// <since>6.0</since>
     public static CommandLineTextWriter CommandLineOut
     {
       get
@@ -557,22 +594,26 @@ namespace Rhino
 
 
     ///<summary>Print formatted text in the command window.</summary>
+    /// <since>5.0</since>
     public static void Write(string format, object arg0)
     {
       Write(String.Format(System.Globalization.CultureInfo.InvariantCulture, format, arg0));
     }
     ///<summary>Print formatted text in the command window.</summary>
+    /// <since>5.0</since>
     public static void Write(string format, object arg0, object arg1)
     {
       Write(String.Format(System.Globalization.CultureInfo.InvariantCulture, format, arg0, arg1));
     }
     ///<summary>Print formatted text in the command window.</summary>
+    /// <since>5.0</since>
     public static void Write(string format, object arg0, object arg1, object arg2)
     {
       Write(String.Format(System.Globalization.CultureInfo.InvariantCulture, format, arg0, arg1, arg2));
     }
 
     ///<summary>Print a newline in the command window.</summary>
+    /// <since>5.0</since>
     public static void WriteLine()
     {
       Write("\n");
@@ -583,6 +624,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static void WriteLine(string message)
     {
       Write(message + "\n");
@@ -593,19 +635,56 @@ namespace Rhino
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static void WriteLine(string format, object arg0)
     {
       Write(format + "\n", arg0);
     }
     ///<summary>Print formatted text with a newline in the command window.</summary>
+    /// <since>5.0</since>
     public static void WriteLine(string format, object arg0, object arg1)
     {
       Write(format + "\n", arg0, arg1);
     }
     ///<summary>Print formatted text with a newline in the command window.</summary>
+    /// <since>5.0</since>
     public static void WriteLine(string format, object arg0, object arg1, object arg2)
     {
       Write(format + "\n", arg0, arg1, arg2);
+    }
+
+    /// <summary>
+    /// Enable or disable capturing of the strings sent to the CommandWindow through
+    /// Write and WriteLine calls
+    /// </summary>
+    /// <since>7.0</since>
+    public static bool CommandWindowCaptureEnabled
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoApp_CaptureCommandWindowPrintEnabled();
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoApp_CaptureCommandWindowPrint(value);
+      }
+    }
+
+    /// <summary>
+    /// Get list of strings sent to the command window through calls to Write or WriteLine
+    /// when capturing has been enabled
+    /// </summary>
+    /// <param name="clearBuffer">Clear the captured buffer after this call</param>
+    /// <returns>array of captured strings</returns>
+    /// <since>7.0</since>
+    public static string[] CapturedCommandWindowStrings(bool clearBuffer)
+    {
+      using(var strings = new ClassArrayString())
+      {
+        IntPtr pStrings = strings.NonConstPointer();
+        UnsafeNativeMethods.CRhinoApp_CommandWindowCapturedStrings(pStrings, clearBuffer);
+        return strings.ToArray();
+      }
     }
 
     /// <summary>
@@ -615,6 +694,7 @@ namespace Rhino
     /// come on a separate line.
     /// </summary>
     /// <param name="str">The string to print to the Output window.</param>
+    /// <since>6.0</since>
     public static void OutputDebugString(string str)
     {
       UnsafeNativeMethods.RHC_OutputDebugString(str);
@@ -629,6 +709,7 @@ namespace Rhino
     /// specify the text that appears in the command prompt window.
     /// </summary>
     /// <param name="prompt">A literal text for the command prompt window.</param>
+    /// <since>6.0</since>
     public static void SetCommandPromptMessage(string prompt)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPromptMessage(prompt);
@@ -639,18 +720,21 @@ namespace Rhino
     ///<param name="promptDefault">
     /// Text that appears in angle brackets and indicates what will happen if the user pressed ENTER.
     ///</param>
+    /// <since>5.0</since>
     public static void SetCommandPrompt(string prompt, string promptDefault)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPrompt(prompt, promptDefault);
     }
     ///<summary>Set Rhino command prompt.</summary>
     ///<param name="prompt">The new prompt text.</param>
+    /// <since>5.0</since>
     public static void SetCommandPrompt(string prompt)
     {
       UnsafeNativeMethods.CRhinoApp_SetCommandPrompt(prompt, null);
     }
 
     ///<summary>Rhino command prompt.</summary>
+    /// <since>5.0</since>
     public static string CommandPrompt
     {
       get
@@ -671,6 +755,7 @@ namespace Rhino
     /// <summary>
     /// Text in Rhino's command history window.
     /// </summary>
+    /// <since>5.0</since>
     public static string CommandHistoryWindowText
     {
       get
@@ -689,6 +774,7 @@ namespace Rhino
     /// <summary>
     /// Clear the text in Rhino's command history window.
     /// </summary>
+    /// <since>5.0</since>
     public static void ClearCommandHistoryWindow()
     {
       UnsafeNativeMethods.CRhinoApp_ClearCommandHistoryWindowText();
@@ -697,6 +783,7 @@ namespace Rhino
     ///<summary>Sends a string of printable characters, including spaces, to Rhino&apos;s command line.</summary>
     ///<param name='characters'>[in] A string to characters to send to the command line. This can be null.</param>
     ///<param name='appendReturn'>[in] Append a return character to the end of the string.</param>
+    /// <since>5.0</since>
     public static void SendKeystrokes(string characters, bool appendReturn)
     {
       UnsafeNativeMethods.CRhinoApp_SendKeystrokes(characters, appendReturn);
@@ -706,6 +793,7 @@ namespace Rhino
     /// Sets the focus to the main window. This function attempts to use the
     /// ActiveDoc on Mac to figure out which window to set focus to.
     /// </summary>
+    /// <since>5.0</since>
     public static void SetFocusToMainWindow()
     {
       SetFocusToMainWindow(RhinoDoc.ActiveDoc);
@@ -715,8 +803,9 @@ namespace Rhino
     /// Sets the focus to the main windows for a given document
     /// </summary>
     /// <param name="doc">
-    /// the document to use for determing a "main window"
+    /// the document to use for determining a "main window"
     /// </param>
+    /// <since>6.16</since>
     public static void SetFocusToMainWindow(RhinoDoc doc)
     {
       uint docSerialNumber = doc == null ? 0 : doc.RuntimeSerialNumber;
@@ -724,6 +813,7 @@ namespace Rhino
     }
 
     ///<summary>Releases the mouse capture.</summary>
+    /// <since>5.0</since>
     public static bool ReleaseMouseCapture()
     {
       return UnsafeNativeMethods.CRhinoApp_ReleaseCapture();
@@ -748,6 +838,7 @@ namespace Rhino
     //}
 
     ///<summary>Exits, or closes, Rhino.</summary>
+    /// <since>5.0</since>
     public static void Exit()
     {
       UnsafeNativeMethods.CRhinoApp_Exit();
@@ -771,11 +862,12 @@ namespace Rhino
     ///<exception cref="System.ApplicationException">
     /// If RunScript is being called while inside an event watcher.
     ///</exception>
+    /// <since>5.0</since>
     public static bool RunScript(string script, bool echo)
     {
       if (InEventWatcher)
       {
-        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to dicuss why you need to do this.";
+        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to discuss why you need to do this.";
         throw new ApplicationException(msg);
       }
       int echo_mode = echo ? 1 : 0;
@@ -787,7 +879,8 @@ namespace Rhino
     /// </summary>
     /// <param name="document">Document to execute the command for</param>
     /// <param name="commandName">Name of command to run.  Use command's localized name or preface with an underscore.</param>
-    /// <returns>Returns the reult of the command.</returns>
+    /// <returns>Returns the result of the command.</returns>
+    /// <since>6.0</since>
     public static Commands.Result ExecuteCommand(RhinoDoc document, string commandName)
     {
       return (Commands.Result)UnsafeNativeMethods.CRhinoApp_ExecuteCommand(document.RuntimeSerialNumber, commandName);
@@ -810,11 +903,12 @@ namespace Rhino
     ///<exception cref="System.ApplicationException">
     /// If RunScript is being called while inside an event watcher.
     ///</exception>
+    /// <since>5.0</since>
     public static bool RunScript(string script, string mruDisplayString, bool echo)
     {
       if (InEventWatcher)
       {
-        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to dicuss why you need to do this.";
+        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to discuss why you need to do this.";
         throw new ApplicationException(msg);
       }
       int echo_mode = echo ? 1 : 0;
@@ -835,11 +929,12 @@ namespace Rhino
     /// If RunScript is being called while inside an event watcher.
     ///</exception>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool RunMenuScript(string script)
     {
       if (InEventWatcher)
       {
-        const string msg = "Do not call RunMenuScript inside of an event watcher.  Contact steve@mcneel.com to dicuss why you need to do this.";
+        const string msg = "Do not call RunMenuScript inside of an event watcher.  Contact steve@mcneel.com to discuss why you need to do this.";
         throw new ApplicationException(msg);
       }
       return UnsafeNativeMethods.CRhinoApp_RunMenuScript(script);
@@ -849,6 +944,7 @@ namespace Rhino
     /// Pauses to keep Windows message pump alive so views will update
     /// and windows will repaint.
     /// </summary>
+    /// <since>5.0</since>
     public static void Wait()
     {
       UnsafeNativeMethods.CRhinoApp_Wait(0);
@@ -858,21 +954,43 @@ namespace Rhino
     static readonly InvokeHelper g_invoke_helper = new InvokeHelper();
 
     /// <summary>
-    /// 
+    /// Execute a function on the main UI thread.
     /// </summary>
-    /// <param name="method"></param>
-    /// <param name="args"></param>
+    /// <param name="method">function to execute</param>
+    /// <param name="args">parameters to pass to the function</param>
+    /// <since>6.0</since>
     public static void InvokeOnUiThread(Delegate method, params object[] args)
     {
-      g_invoke_helper.Invoke(method, args);
+      // 10 Jan 2020 S. Baer (RH-48366)
+      // We get quite a few crashes in our persistent settings save routine which
+      // ends up calling this function. Adding a test for InvokeRequired so we can
+      // just directly call the method when on a UI thread. This may not fix the
+      // crash, but it should simplify the callstack to hopefully give us a better
+      // idea of what is going on.
+      if( InvokeRequired )
+      {
+        g_invoke_helper.Invoke(method, args);
+      }
+      else
+      {
+        try
+        {
+          method.DynamicInvoke(args);
+        }
+        catch(Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
     }
 
     static bool m_done;
     static Exception m_ex;
     /// <summary>
-    /// Work-In-Progess. Testing this with our unit test framework
+    /// Work-In-Progress. Testing this with our unit test framework
     /// </summary>
     /// <param name="action"></param>
+    /// <since>6.0</since>
     public static void InvokeAndWait(Action action)
     {
       // lame implementation, just a start
@@ -902,6 +1020,7 @@ namespace Rhino
     /// <summary>
     /// Returns true if we are currently not running on the main user interface thread
     /// </summary>
+    /// <since>6.0</since>
     public static bool InvokeRequired
     {
       get
@@ -914,6 +1033,7 @@ namespace Rhino
     /// <summary>
     /// Gets the HWND of the Rhino main window.
     /// </summary>
+    /// <since>5.0</since>
     public static IntPtr MainWindowHandle()
     {
       IntPtr hMainWnd = UnsafeNativeMethods.CRhinoApp_GetMainFrameHWND();
@@ -925,6 +1045,7 @@ namespace Rhino
     static RhinoWindow g_main_window;
 
     /// <summary> Main Rhino Window </summary>
+    /// <since>5.0</since>
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use MainWindowHandle or RhinoEtoApp.MainWindow in Rhino.UI")]
     public static System.Windows.Forms.IWin32Window MainWindow()
@@ -941,6 +1062,7 @@ namespace Rhino
     /// <summary>
     /// Same as MainWindow function, but provides the concrete class instead of an interface
     /// </summary>
+    /// <since>5.0</since>
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use MainWindowHandle or RhinoEtoApp.MainWindow in Rhino.UI")]
     public static RhinoWindow MainApplicationWindow
@@ -960,6 +1082,7 @@ namespace Rhino
     /// <returns>
     /// Result of PlugIn.GetPlugInObject for a given plug-in on success.
     /// </returns>
+    /// <since>5.0</since>
     public static object GetPlugInObject(Guid pluginId)
     {
       if (pluginId == Guid.Empty)
@@ -1005,6 +1128,7 @@ namespace Rhino
     /// <returns>
     /// Result of PlugIn.GetPlugInObject for a given plug-in on success.
     /// </returns>
+    /// <since>5.0</since>
     public static object GetPlugInObject(string plugin)
     {
       Guid plugin_id;
@@ -1024,6 +1148,7 @@ namespace Rhino
     /// <seealso cref="Installation"/>
     /// <param name="licenseType"></param>
     /// <returns>true if licenseType is an evaluation license. false otherwise</returns>
+    /// <since>5.6</since>
     public static bool IsInstallationEvaluation(Installation licenseType)
     {
       return (licenseType == Installation.Evaluation ||
@@ -1037,6 +1162,7 @@ namespace Rhino
     /// <param name="licenseType"></param>
     /// <seealso cref="Installation"/>
     /// <returns>true if licenseType is a commercial license. false otherwise</returns>
+    /// <since>5.6</since>
     public static bool IsInstallationCommercial(Installation licenseType)
     {
       return (licenseType == Installation.Commercial     ||
@@ -1054,6 +1180,7 @@ namespace Rhino
     /// <param name="licenseType"></param>
     /// <seealso cref="Installation"/>
     /// <returns>true if licenseType is a beta license. false otherwise</returns>
+    /// <since>5.6</since>
     public static bool IsInstallationBeta(Installation licenseType)
     {
       return (licenseType == Installation.Beta || licenseType == Installation.BetaLab);
@@ -1064,6 +1191,7 @@ namespace Rhino
     ///   true if the license will expire
     ///   false otherwise
     /// </summary>
+    /// <since>5.6</since>
     public static bool LicenseExpires
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.LicenseExpires); }
@@ -1071,9 +1199,10 @@ namespace Rhino
 
     /// <summary>
     /// Returns
-    ///   true if Rhino is compiled a s Pre-release build (Beta, WIP)
+    ///   true if Rhino is compiled a s pre-release build (Beta, WIP)
     ///   false otherwise
     /// </summary>
+    /// <since>6.0</since>
     public static bool IsPreRelease
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsPreRelease); }
@@ -1084,6 +1213,7 @@ namespace Rhino
     ///   true if the license is validated
     ///   false otherwise
     /// </summary>
+    /// <since>5.6</since>
     public static bool IsLicenseValidated
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsLicenseValidated); }
@@ -1094,14 +1224,16 @@ namespace Rhino
     ///   true if rhino is currently using the Cloud Zoo
     ///   false otherwise
     /// </summary>
+    /// <since>6.0</since>
     public static bool IsCloudZooNode
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsCloudZooNode); }
     }
 
     /// <summary>
-    /// Returns true when Rhino is allowed to access the internet, false otherwise
+    /// Returns true when Rhino is allowed to access the Internet, false otherwise
     /// </summary>
+    /// <since>6.15</since>
     public static bool IsInternetAccessAllowed
     {
       get {
@@ -1117,8 +1249,21 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true when Rhino is allowed to access the internet, false otherwise
+    /// Returns true when Rhino is allowed to save, false otherwise
+    /// Conditions where Rhino is not allowed to save are: when evaluation licenses are expired;
+    /// when a Cloud Zoo lease is expired; when a license is shared by a single user on multiple
+    /// computers, and the current computer is not active.
     /// </summary>
+    /// <since>7.0</since>
+    public static bool CanSave
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoAppBool.RhinoCanSave); }
+    }
+
+    /// <summary>
+    /// Returns true when Rhino is allowed to access the Internet, false otherwise
+    /// </summary>
+    /// <since>6.15</since>
     public static int UpdatesAndStatisticsStatus
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.UpdatesAndStatisticsStatus); }
@@ -1133,6 +1278,7 @@ namespace Rhino
     ///   Viewer
     ///   Unknown
     /// </summary>
+    /// <since>5.6</since>
     public static int ValidationGracePeriodDaysLeft
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.ValidationGracePeriodDaysLeft); }
@@ -1144,6 +1290,7 @@ namespace Rhino
     /// Raises InvalidLicenseTypeException if LicenseExpires
     /// would return false.
     /// </summary>
+    /// <since>5.6</since>
     public static int DaysUntilExpiration
     {
       get { return GetInt(UnsafeNativeMethods.RhinoAppInt.DaysUntilExpiration); }
@@ -1155,6 +1302,7 @@ namespace Rhino
     /// <param name="standAlone">True to ask for a stand-alone license, false to ask the user for a license from the Zoo</param>
     /// <param name="parentWindow">Parent window for the user interface dialog.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool AskUserForRhinoLicense(bool standAlone, object parentWindow)
     {
       var handle_parent = UI.Dialogs.Service.ObjectToWindowHandle(parentWindow, true);
@@ -1165,8 +1313,9 @@ namespace Rhino
     /// <summary>
     /// Display UI asking the user to enter a license for the product specified by licenseId.
     /// </summary>
-    /// <param name="pluginId">Guid identifying the plugin that is requesting a change of license key</param>
+    /// <param name="pluginId">Guid identifying the plug-in that is requesting a change of license key</param>
     /// <returns>true on success, false otherwise</returns>
+    /// <since>6.0</since>
     public static bool ChangeLicenseKey(Guid pluginId)
     {
       return UnsafeNativeMethods.CRhinoApp_ChangeLicenseKey(pluginId);
@@ -1176,6 +1325,7 @@ namespace Rhino
     /// Refresh the license used by Rhino. This allows any part of Rhino to ensure that the most current version of the license file on disk is in use.
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool RefreshRhinoLicense()
     {
       return UnsafeNativeMethods.CRhinoApp_RefreshRhinoLicense();
@@ -1184,6 +1334,7 @@ namespace Rhino
     /// <summary>
     /// Logs in to the cloud zoo.
     /// </summary>
+    /// <since>6.0</since>
     public static bool LoginToCloudZoo()
     {
       return Rhino.PlugIns.LicenseUtils.ZooClient.LoginToCloudZoo();
@@ -1192,6 +1343,7 @@ namespace Rhino
     /// <summary>
     /// Returns the name of the logged in user, or null if the user is not logged in.
     /// </summary>
+    /// <since>6.0</since>
     public static string LoggedInUserName
     {
       get
@@ -1204,6 +1356,7 @@ namespace Rhino
     /// Returns the logged in user's avatar picture. 
     /// Returns a default avatar if the user does not have an avatar or if the avatar could not be fetched.
     /// </summary>
+    /// <since>6.0</since>
     public static System.Drawing.Image LoggedInUserAvatar
     {
       get
@@ -1216,12 +1369,31 @@ namespace Rhino
     /// Returns true if the user is logged in; else returns false.
     /// A logged in user does not guarantee that the auth tokens managed by the CloudZooManager instance are valid.
     /// </summary>
+    /// <since>6.0</since>
     public static bool UserIsLoggedIn
     {
       get
       {
         return Rhino.PlugIns.LicenseUtils.ZooClient.UserIsLoggedIn;
       }
+    }
+
+    /// <summary>
+    /// Returns true if Rhino is in the process of closing, false otherwise.
+    /// This can be true even before the Closing event fires, such as when RhinoDoc.CloseDocument event is called.
+    /// </summary>
+    public static bool IsClosing
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsClosing); }
+    }
+
+    /// <summary>
+    /// Returns true if Rhino is in the process of exiting, false otherwise.
+    /// This can be true even before the Closing event fires, such as when RhinoDoc.CloseDocument event is called.
+    /// </summary>
+    public static bool IsExiting
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsExiting); }
     }
 
 #region events
@@ -1248,6 +1420,7 @@ namespace Rhino
     /// <summary>
     /// Can add or removed delegates that are raised when the escape key is clicked.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler EscapeKeyPressed
     {
       add
@@ -1301,6 +1474,7 @@ namespace Rhino
     /// <summary>
     /// Can add or removed delegates that are raised by a keyboard event.
     /// </summary>
+    /// <since>5.2</since>
     public static event KeyboardHookEvent KeyboardEvent
     {
       add
@@ -1343,8 +1517,9 @@ namespace Rhino
     private static readonly object m_event_lock = new object();
 
     /// <summary>
-    /// Is raised when the apllication is fully initialized.
+    /// Is raised when the application is fully initialized.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler Initialized
     {
       add
@@ -1396,6 +1571,7 @@ namespace Rhino
     /// <summary>
     /// Is raised when the application is about to close.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler Closing
     {
       add
@@ -1447,6 +1623,7 @@ namespace Rhino
     /// <summary>
     /// Is raised when settings are changed.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler AppSettingsChanged
     {
       add
@@ -1496,6 +1673,7 @@ namespace Rhino
     /// <summary>
     /// Occurs when the application finishes processing and is about to enter the idle state
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler Idle
     {
       add
@@ -1546,6 +1724,7 @@ namespace Rhino
     /// <summary>
     /// Gets called every loop iteration inside Rhino's main message loop.
     /// </summary>
+    /// <since>7.0</since>
     public static event EventHandler MainLoop
     {
       add
@@ -1576,6 +1755,21 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Fires when the license state has changed
+    /// </summary>
+    /// <since>7.0</since>
+    public static event EventHandler<Rhino.Runtime.LicenseStateChangedEventArgs> LicenseStateChanged;
+
+    internal static void FireLicenseStateChangedEvent(object sender, Rhino.Runtime.NamedParametersEventArgs args)
+    {
+      bool canSave = false;
+      args.TryGetBool("CanSave", out canSave);
+      var licenseStateChangedArgs = new Runtime.LicenseStateChangedEventArgs(canSave);
+
+      LicenseStateChanged?.Invoke(null, licenseStateChangedArgs);
+    }
+
+    /// <summary>
     /// This function makes it so that Rhino's main loop is executed continuously.
     /// This is useful when Rhino needs to be doing something as often as possible, 
     /// such as rendering a view at interactive frame rates.
@@ -1583,6 +1777,7 @@ namespace Rhino
     /// <returns>
     /// True if the functionality was enabled successfully, false otherwise.
     /// </returns>
+    /// <since>7.0</since>
     public static bool EnableContinuousMainLoop()
     {
       return UnsafeNativeMethods.RhinoMainLoop_EnableContinuousMainLoop();
@@ -1592,6 +1787,7 @@ namespace Rhino
     /// This function makes it so that Rhino's main loop is not executed continuously.
     /// This is default behavior.
     /// </summary>
+    /// <since>7.0</since>
     public static void DisableContinuousMainLoop()
     {
       UnsafeNativeMethods.RhinoMainLoop_DisableContinuousMainLoop();
@@ -1617,6 +1813,7 @@ namespace Rhino
     /// <summary>
     /// Monitors when RDK document information is rebuilt.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RdkNewDocument
     {
       add
@@ -1655,6 +1852,7 @@ namespace Rhino
     /// <summary>
     /// Monitors when RDK global settings are modified.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RdkGlobalSettingsChanged
     {
       add
@@ -1693,6 +1891,7 @@ namespace Rhino
     /// <summary>
     /// Monitors when RDK thumbnails are updated.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RdkUpdateAllPreviews
     {
       add
@@ -1730,6 +1929,7 @@ namespace Rhino
     /// <summary>
     /// Monitors when the RDK thumbnail cache images are changed.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RdkCacheImageChanged
     {
       add
@@ -1766,6 +1966,7 @@ namespace Rhino
     /// <summary>
     /// Monitors when Rhino's current renderer changes.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RendererChanged
     {
       add
@@ -1803,8 +2004,9 @@ namespace Rhino
     internal static EventHandler m_client_plugin_unloading;
 
     /// <summary>
-    /// Monitors when RDK client plugins are unloaded.
+    /// Monitors when RDK client plug-ins are unloaded.
     /// </summary>
+    /// <since>5.1</since>
     public static event EventHandler RdkPlugInUnloading
     {
       add
@@ -1833,6 +2035,7 @@ namespace Rhino
     /// <summary>
     /// Collection of currently open toolbar files in the application
     /// </summary>
+    /// <since>5.0</since>
     public static UI.ToolbarFileCollection ToolbarFiles
     {
       get { return m_toolbar_files ?? (m_toolbar_files = new Rhino.UI.ToolbarFileCollection()); }
@@ -1842,6 +2045,7 @@ namespace Rhino
     /// Verifies that Rhino is running in full screen mode. 
     /// </summary>
     /// <returns>true if Rhino is running full screen, false otherwise.</returns>
+    /// <since>6.0</since>
     public static bool InFullScreen()
     {
       return UnsafeNativeMethods.CRhinoApp_InFullscreen();
@@ -1850,6 +2054,7 @@ namespace Rhino
     /// <summary>
     /// Default font used to render user interface
     /// </summary>
+    /// <since>6.0</since>
     public static Font DefaultUiFont
     {
       get { return null; }
@@ -1859,6 +2064,7 @@ namespace Rhino
     /// Verifies that Rhino is running on VMWare
     /// </summary>
     /// <returns>true if Rhino is running in Windows on VMWare, false otherwise</returns>
+    /// <since>6.0</since>
     public static bool RunningOnVMWare()
     {
       return UnsafeNativeMethods.Rh_RunningOnVMWare();
@@ -1868,6 +2074,7 @@ namespace Rhino
     /// Find out if Rhino is running in a remote session
     /// </summary>
     /// <returns>true if Rhino is running in a RDP session, false otherwise</returns>
+    /// <since>6.0</since>
     public static bool RunningInRdp()
     {
       return UnsafeNativeMethods.Rh_RunningInRdp();
@@ -1880,6 +2087,7 @@ namespace Rhino
     /// <param name="obj"></param>
     /// <param name="topParentObject"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string ParseTextField(string formula, RhinoObject obj, RhinoObject topParentObject )
     {
       if (topParentObject == null)
@@ -1912,6 +2120,7 @@ namespace Rhino.UI
     /// Overrides all cursor tooltip panes.
     /// </summary>
     /// <param name="tooltip">The text to show.</param>
+    /// <since>5.0</since>
     public static void SetToolTip(string tooltip)
     {
       UnsafeNativeMethods.CRhinoApp_SetCursorTooltip(tooltip);
@@ -1920,6 +2129,7 @@ namespace Rhino.UI
     /// <summary>
     /// Retrieves the position of the mouse cursor, in screen coordinates
     /// </summary>
+    /// <since>5.8</since>
     public static Point2d Location
     {
       get
@@ -1940,6 +2150,7 @@ namespace Rhino.UI
     /// Sets the distance pane to a distance value.
     /// </summary>
     /// <param name="distance">The distance value.</param>
+    /// <since>5.0</since>
     public static void SetDistancePane(double distance)
     {
       UnsafeNativeMethods.CRhinoApp_SetStatusBarDistancePane(distance);
@@ -1949,6 +2160,7 @@ namespace Rhino.UI
     /// Sets the number pane to a number value
     /// </summary>
     /// <param name="number"></param>
+    /// <since>6.0</since>
     public static void SetNumberPane(double number)
     {
       UnsafeNativeMethods.CRhinoApp_SetStatusBarNumberPane(number);
@@ -1958,6 +2170,7 @@ namespace Rhino.UI
     /// Sets the point pane to a point value.
     /// </summary>
     /// <param name="point">The point value.</param>
+    /// <since>5.0</since>
     public static void SetPointPane(Point3d point)
     {
       UnsafeNativeMethods.CRhinoApp_SetStatusBarPointPane(point);
@@ -1967,6 +2180,7 @@ namespace Rhino.UI
     /// Sets the message pane to a message.
     /// </summary>
     /// <param name="message">The message value.</param>
+    /// <since>5.0</since>
     public static void SetMessagePane(string message)
     {
       UnsafeNativeMethods.CRhinoApp_SetStatusBarMessagePane(message);
@@ -1975,6 +2189,7 @@ namespace Rhino.UI
     /// <summary>
     /// Removes the message from the message pane.
     /// </summary>
+    /// <since>5.0</since>
     public static void ClearMessagePane()
     {
       SetMessagePane(null);
@@ -1987,7 +2202,7 @@ namespace Rhino.UI
     /// <param name="upperLimit">The upper limit of the progress meter's range.</param>
     /// <param name="label">The short description of the progress (e.g. "Calculating", "Meshing", etc)</param>
     /// <param name="embedLabel">
-    /// If true, then the label will be embeded in the progress meter.
+    /// If true, then the label will be embedded in the progress meter.
     /// If false, then the label will appear to the left of the progress meter.
     /// </param>
     /// <param name="showPercentComplete">
@@ -1998,6 +2213,7 @@ namespace Rhino.UI
     /// 0 - The progress meter was not created.
     /// -1 - The progress meter was not created because some other process has already created it.
     /// </returns>
+    /// <since>5.0</since>
     public static int ShowProgressMeter(int lowerLimit, int upperLimit, string label, bool embedLabel, bool showPercentComplete)
     {
       return ShowProgressMeter(0, lowerLimit, upperLimit, label, embedLabel, showPercentComplete);
@@ -2011,7 +2227,7 @@ namespace Rhino.UI
     /// <param name="upperLimit">The upper limit of the progress meter's range.</param>
     /// <param name="label">The short description of the progress (e.g. "Calculating", "Meshing", etc)</param>
     /// <param name="embedLabel">
-    /// If true, then the label will be embeded in the progress meter.
+    /// If true, then the label will be embedded in the progress meter.
     /// If false, then the label will appear to the left of the progress meter.
     /// </param>
     /// <param name="showPercentComplete">
@@ -2022,6 +2238,7 @@ namespace Rhino.UI
     /// 0 - The progress meter was not created.
     /// -1 - The progress meter was not created because some other process has already created it.
     /// </returns>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public static int ShowProgressMeter(uint docSerialNumber, int lowerLimit, int upperLimit, string label, bool embedLabel, bool showPercentComplete)
     {
@@ -2040,6 +2257,7 @@ namespace Rhino.UI
     /// <returns>
     /// The previous position if successful.
     /// </returns>
+    /// <since>5.0</since>
     public static int UpdateProgressMeter(int position, bool absolute)
     {
       return UpdateProgressMeter(0, position, absolute);
@@ -2058,6 +2276,7 @@ namespace Rhino.UI
     /// <returns>
     /// The previous position if successful.
     /// </returns>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public static int UpdateProgressMeter(uint docSerialNumber, int position, bool absolute)
     {
@@ -2067,6 +2286,7 @@ namespace Rhino.UI
     /// <summary>
     /// Ends, or hides, Rhino's status bar progress meter.
     /// </summary>
+    /// <since>5.0</since>
     public static void HideProgressMeter()
     {
       HideProgressMeter(0);
@@ -2076,6 +2296,7 @@ namespace Rhino.UI
     /// Ends, or hides, Rhino's status bar progress meter.
     /// </summary>
     /// <param name="docSerialNumber">The document runtime serial number.</param>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public static void HideProgressMeter(uint docSerialNumber)
     {

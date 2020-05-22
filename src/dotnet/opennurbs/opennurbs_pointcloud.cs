@@ -9,7 +9,7 @@ using Rhino.Runtime;
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Represents a single item in a pointcloud. A PointCloud item 
+  /// Represents a single item in a point cloud. A PointCloud item 
   /// always has a location, but it has an optional normal vector and color.
   /// </summary>
   public class PointCloudItem
@@ -32,6 +32,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the location of this point cloud item.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Location
     {
       get
@@ -50,6 +51,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X component of this point cloud item location.
     /// </summary>
+    /// <since>5.0</since>
     public double X
     {
       get
@@ -66,6 +68,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y component of this point cloud item location.
     /// </summary>
+    /// <since>5.0</since>
     public double Y
     {
       get
@@ -82,6 +85,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z component of this point cloud item location.
     /// </summary>
+    /// <since>5.0</since>
     public double Z
     {
       get
@@ -99,6 +103,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the normal vector for this point cloud item.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Normal
     {
       get
@@ -117,6 +122,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the color of this point cloud item.
     /// </summary>
+    /// <since>5.0</since>
     public Color Color
     {
       get
@@ -135,6 +141,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the hidden flag of this point cloud item.
     /// </summary>
+    /// <since>5.0</since>
     public bool Hidden
     {
       get
@@ -154,6 +161,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the index of this point cloud item.
     /// </summary>
+    /// <since>5.0</since>
     public int Index
     {
       get { return m_index; }
@@ -179,6 +187,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the <see cref="PointCloud"/> class
     /// that is empty.
     /// </summary>
+    /// <since>5.0</since>
     public PointCloud()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_New();
@@ -188,8 +197,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PointCloud"/> class,
-    /// copying (Merge) the content of another pointcloud.
+    /// copying (Merge) the content of another point cloud.
     /// </summary>
+    /// <since>5.0</since>
     public PointCloud(PointCloud other)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_New();
@@ -206,6 +216,7 @@ namespace Rhino.Geometry
     /// copying the content from a set of points.
     /// </summary>
     /// <param name="points">A list or an array of Point3d, or any object that implements <see cref="IEnumerable{Point3d}"/>.</param>
+    /// <since>5.0</since>
     public PointCloud(IEnumerable<Point3d> points)
     {
       int count;
@@ -248,8 +259,9 @@ namespace Rhino.Geometry
 
     #region properties
     /// <summary>
-    /// Gets the number of points in this pointcloud.
+    /// Gets the number of points in this point cloud.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -276,6 +288,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of points that have their Hidden flag set.
     /// </summary>
+    /// <since>5.0</since>
     public int HiddenPointCount
     {
       get
@@ -291,8 +304,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets a value indicating whether or not the points in this 
-    /// pointcloud have colors assigned to them.
+    /// point cloud have colors assigned to them.
     /// </summary>
+    /// <since>5.0</since>
     public bool ContainsColors
     {
       get
@@ -304,8 +318,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets a value indicating whether or not the points in this 
-    /// pointcloud have normals assigned to them.
+    /// point cloud have normals assigned to them.
     /// </summary>
+    /// <since>5.0</since>
     public bool ContainsNormals
     {
       get
@@ -316,8 +331,9 @@ namespace Rhino.Geometry
     }
     /// <summary>
     /// Gets a value indicating whether or not the points in this 
-    /// pointcloud have hidden flags assigned to them.
+    /// point cloud have hidden flags assigned to them.
     /// </summary>
+    /// <since>5.0</since>
     public bool ContainsHiddenFlags
     {
       get
@@ -332,6 +348,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Destroys the color information in this point cloud.
     /// </summary>
+    /// <since>5.0</since>
     public void ClearColors()
     {
       if (!ContainsColors)
@@ -343,6 +360,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Destroys the normal vector information in this point cloud.
     /// </summary>
+    /// <since>5.0</since>
     public void ClearNormals()
     {
       if (!ContainsNormals)
@@ -354,6 +372,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Destroys the hidden flag information in this point cloud.
     /// </summary>
+    /// <since>5.0</since>
     public void ClearHiddenFlags()
     {
       if (!ContainsHiddenFlags)
@@ -367,6 +386,7 @@ namespace Rhino.Geometry
     /// Appends a new PointCloudItem to the end of this point cloud.
     /// </summary>
     /// <returns>The newly appended item.</returns>
+    /// <since>5.0</since>
     public PointCloudItem AppendNew()
     {
       Add(Point3d.Origin);
@@ -377,6 +397,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">Index of new item.</param>
     /// <returns>The newly inserted item.</returns>
+    /// <since>5.0</since>
     public PointCloudItem InsertNew(int index)
     {
       Insert(index, Point3d.Origin);
@@ -384,9 +405,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Copies the point values of another pointcloud into this one.
+    /// Copies the point values of another point cloud into this one.
     /// </summary>
     /// <param name="other">PointCloud to merge with this one.</param>
+    /// <since>5.0</since>
     public void Merge(PointCloud other)
     {
       IntPtr const_ptr_other = other.ConstPointer();
@@ -398,6 +420,7 @@ namespace Rhino.Geometry
     /// Append a new point to the end of the list.
     /// </summary>
     /// <param name="point">Point to append.</param>
+    /// <since>5.0</since>
     public void Add(Point3d point)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -408,6 +431,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Point to append.</param>
     /// <param name="normal">Normal vector of new point.</param>
+    /// <since>5.0</since>
     public void Add(Point3d point, Vector3d normal)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -418,6 +442,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Point to append.</param>
     /// <param name="color">Color of new point.</param>
+    /// <since>5.0</since>
     public void Add(Point3d point, Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -429,6 +454,7 @@ namespace Rhino.Geometry
     /// <param name="point">Point to append.</param>
     /// <param name="normal">Normal vector of new point.</param>
     /// <param name="color">Color of new point.</param>
+    /// <since>5.0</since>
     public void Add(Point3d point, Vector3d normal, Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -438,6 +464,7 @@ namespace Rhino.Geometry
     /// Appends a collection of points to this point cloud.
     /// </summary>
     /// <param name="points">Points to append.</param>
+    /// <since>5.0</since>
     public void AddRange(IEnumerable<Point3d> points)
     {
       int count;
@@ -455,6 +482,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentException">thrown if points and normals have differing numbers of elements</exception>
     /// <param name="points">Points to append.</param>
     /// <param name="normals">Normal Vectors to append.</param>
+    /// <since>6.0</since>
     public void AddRange(IEnumerable<Point3d> points, IEnumerable<Vector3d> normals)
     {
       int point_count;
@@ -479,6 +507,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">Points to append.</param>
     /// <param name="colors">Colors to append.</param>
+    /// <since>6.0</since>
     public void AddRange(IEnumerable<Point3d> points, IEnumerable<Color> colors)
     {
       int count;
@@ -517,6 +546,7 @@ namespace Rhino.Geometry
     /// <param name="points">Points to append.</param>
     /// <param name="colors">Colors to append.</param>
     /// <param name="normals">Normal Vectors to append.</param>
+    /// <since>6.0</since>
     public void AddRange(IEnumerable<Point3d> points, IEnumerable<Vector3d> normals, IEnumerable<Color> colors)
     {
       int point_count;
@@ -545,6 +575,7 @@ namespace Rhino.Geometry
     /// <summary>Inserts a new point into the point list.</summary>
     /// <param name="index">Insertion index.</param>
     /// <param name="point">Point to append.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Point3d point)
     {
       if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
@@ -558,6 +589,7 @@ namespace Rhino.Geometry
     /// <param name="index">Insertion index.</param>
     /// <param name="point">Point to append.</param>
     /// <param name="normal">Normal vector of new point.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Point3d point, Vector3d normal)
     {
       if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
@@ -573,6 +605,7 @@ namespace Rhino.Geometry
     /// <param name="index">Insertion index.</param>
     /// <param name="point">Point to append.</param>
     /// <param name="color">Color of new point.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Point3d point, Color color)
     {
       if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
@@ -588,6 +621,7 @@ namespace Rhino.Geometry
     /// <param name="point">Point to append.</param>
     /// <param name="normal">Normal vector of new point.</param>
     /// <param name="color">Color of new point.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Point3d point, Vector3d normal, Color color)
     {
       if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
@@ -601,6 +635,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">Index at which to insert the new collection.</param>
     /// <param name="points">Points to append.</param>
+    /// <since>5.0</since>
     public void InsertRange(int index, IEnumerable<Point3d> points)
     {
       if (index < 0) { throw new IndexOutOfRangeException("Index must be larger than or equal to zero"); }
@@ -619,6 +654,7 @@ namespace Rhino.Geometry
     /// Remove the point at the given index.
     /// </summary>
     /// <param name="index">Index of point to remove.</param>
+    /// <since>5.0</since>
     public void RemoveAt(int index)
     {
       if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
@@ -632,6 +668,7 @@ namespace Rhino.Geometry
     /// Copy all the point coordinates in this point cloud to an array.
     /// </summary>
     /// <returns>An array containing all the points in this point cloud.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] GetPoints()
     {
@@ -650,6 +687,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">The index.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Point3d PointAt(int index)
     {
@@ -667,6 +705,7 @@ namespace Rhino.Geometry
     /// Copy all the normal vectors in this point cloud to an array.
     /// </summary>
     /// <returns>An array containing all the normals in this point cloud.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d[] GetNormals()
     {
@@ -683,6 +722,7 @@ namespace Rhino.Geometry
     /// Copy all the point colors in this point cloud to an array.
     /// </summary>
     /// <returns>An array containing all the colors in this point cloud.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Color[] GetColors()
     {
@@ -706,6 +746,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">.</param>
     /// <returns>Index of point in the point cloud on success. -1 on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int ClosestPoint(Point3d testPoint)
     {
@@ -789,19 +830,22 @@ namespace Rhino.Geometry
     /// Returns an enumerator and list indexer over point cloud locations. 
     /// </summary>
     /// <returns>The read-only list. This is a reference to the present point cloud.</returns>
+    /// <since>6.0</since>
     public IReadOnlyList<Point3d> AsReadOnlyListOfPoints()
     {
       return new PointCloudPoints(this);
     }
 
     /// <summary>
-    /// Gets an enumerator that allows to modify each pointcloud point.
+    /// Gets an enumerator that allows to modify each point cloud point.
     /// </summary>
     /// <returns>A instance of <see cref="IEnumerator{PointCloudItem}"/>.</returns>
+    /// <since>5.0</since>
     public IEnumerator<PointCloudItem> GetEnumerator()
     {
       return new PointCloudItemEnumerator(this);
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();

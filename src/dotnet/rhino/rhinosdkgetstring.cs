@@ -16,6 +16,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GetString()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetString_New();
@@ -29,6 +30,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -39,6 +41,7 @@ namespace Rhino.Input.Custom
 
     /// <summary>Returns the string that the user typed. By default, space does not stop input.</summary>
     /// <returns>The result type. If the user typed a string, this is <see cref="GetResult.String"/>.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult GetLiteralString()
     {
@@ -54,6 +57,7 @@ namespace Rhino.Input.Custom
   /// </summary>
   public class GetOption : GetBaseClass
   {
+    /// <since>5.0</since>
     public GetOption()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetOption_New();
@@ -65,6 +69,7 @@ namespace Rhino.Input.Custom
     /// a valid option. Use Option() the determine which option.
     /// </summary>
     /// <returns>If the user chose an option, then <see cref="GetResult.Option"/>; another enumeration value otherwise.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -83,6 +88,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GetNumber()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetNumber_New();
@@ -96,6 +102,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -117,6 +124,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetLowerLimit(double lowerLimit, bool strictlyGreaterThan)
     {
       IntPtr ptr = NonConstPointer();
@@ -129,6 +137,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="upperLimit">largest acceptable number.</param>
     /// <param name="strictlyLessThan">If true, then the returned number will be &lt; upper_limit.</param>
+    /// <since>5.0</since>
     public void SetUpperLimit( double upperLimit, bool strictlyLessThan )
     {
       IntPtr ptr = NonConstPointer();
@@ -140,6 +149,7 @@ namespace Rhino.Input.Custom
   /// <summary>Used to get integer numbers.</summary>
   public class GetInteger : GetBaseClass
   {
+    /// <since>5.0</since>
     public GetInteger()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetInteger_New();
@@ -150,6 +160,7 @@ namespace Rhino.Input.Custom
     /// Call to get an integer.
     /// </summary>
     /// <returns>If the user chose a number, then <see cref="GetResult.Number"/>; another enumeration value otherwise.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -158,6 +169,7 @@ namespace Rhino.Input.Custom
       return (GetResult)rc;
     }
 
+    /// <since>5.0</since>
     public new int Number()
     {
       IntPtr ptr = NonConstPointer();
@@ -172,6 +184,7 @@ namespace Rhino.Input.Custom
     /// <param name="strictlyGreaterThan">
     /// If true, then the returned number will be > lower_limit.
     /// </param>
+    /// <since>5.0</since>
     public void SetLowerLimit( int lowerLimit, bool strictlyGreaterThan )
     {
       IntPtr ptr = NonConstPointer();
@@ -184,6 +197,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="upperLimit">largest acceptable number.</param>
     /// <param name="strictlyLessThan">If true, then the returned number will be &lt; upper_limit.</param>
+    /// <since>5.0</since>
     public void SetUpperLimit( int upperLimit, bool strictlyLessThan )
     {
       IntPtr ptr = NonConstPointer();

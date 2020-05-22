@@ -40,12 +40,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs an array of <see cref="Hatch">hatches</see> from a set of curves.
     /// </summary>
-    /// <param name="curves">An array, a list or any enumarable set of <see cref="Curve"/>.</param>
+    /// <param name="curves">An array, a list or any enumerable set of <see cref="Curve"/>.</param>
     /// <param name="hatchPatternIndex">The index of the hatch pattern in the document hatch pattern table.</param>
     /// <param name="rotationRadians">The relative rotation of the pattern.</param>
     /// <param name="scale">A scaling factor.</param>
     /// <returns>An array of hatches. The array might be empty on error.</returns>
     /// <exception cref="ArgumentNullException">If curves is null.</exception>
+    /// <since>5.0</since>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Hatch[] Create(IEnumerable<Curve> curves, int hatchPatternIndex, double rotationRadians, double scale)
     {
@@ -57,13 +58,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs an array of <see cref="Hatch">hatches</see> from a set of curves.
     /// </summary>
-    /// <param name="curves">An array, a list or any enumarable set of <see cref="Curve"/>.</param>
+    /// <param name="curves">An array, a list or any enumerable set of <see cref="Curve"/>.</param>
     /// <param name="hatchPatternIndex">The index of the hatch pattern in the document hatch pattern table.</param>
     /// <param name="rotationRadians">The relative rotation of the pattern.</param>
     /// <param name="scale">A scaling factor.</param>
     /// <param name="tolerance"></param>
     /// <returns>An array of hatches. The array might be empty on error.</returns>
     /// <exception cref="ArgumentNullException">If curves is null.</exception>
+    /// <since>6.0</since>
     public static Hatch[] Create(IEnumerable<Curve> curves, int hatchPatternIndex, double rotationRadians, double scale, double tolerance)
     {
       if (curves == null) throw new ArgumentNullException("curves");
@@ -100,6 +102,7 @@ namespace Rhino.Geometry
     /// <param name="rotationRadians">The relative rotation of the pattern.</param>
     /// <param name="scale">A scaling factor.</param>
     /// <returns>An array of hatches. The array might be empty on error.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Hatch[] Create(Curve curve, int hatchPatternIndex, double rotationRadians, double scale)
     {
@@ -122,6 +125,7 @@ namespace Rhino.Geometry
     /// <param name="scale">A scaling factor.</param>
     /// <param name="tolerance"></param>
     /// <returns>An array of hatches. The array might be empty on error.</returns>
+    /// <since>6.0</since>
     public static Hatch[] Create(Curve curve, int hatchPatternIndex, double rotationRadians, double scale, double tolerance)
     {
       return Create(new Curve[] { curve }, hatchPatternIndex, rotationRadians, scale, tolerance);
@@ -135,6 +139,7 @@ namespace Rhino.Geometry
     /// <param name="bounds"></param>
     /// <param name="lines"></param>
     /// <param name="solidBrep"></param>
+    /// <since>5.6</since>
     [ConstOperation]
     public void CreateDisplayGeometry(DocObjects.HatchPattern pattern, double patternScale, out Curve[] bounds, out Line[] lines, out Brep solidBrep)
     {
@@ -162,6 +167,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_explodehatch.cs' lang='cs'/>
     /// <code source='examples\py\ex_explodehatch.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public GeometryBase[] Explode()
     {
@@ -190,6 +196,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="outer">true to get the outer curves, false to get the inner curves</param>
     /// <returns></returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve[] Get3dCurves(bool outer)
     {
@@ -210,6 +217,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_replacehatchpattern.cs' lang='cs'/>
     /// <code source='examples\py\ex_replacehatchpattern.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int PatternIndex
     {
       get
@@ -227,6 +235,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the relative rotation of the pattern.
     /// </summary>
+    /// <since>5.0</since>
     public double PatternRotation
     {
       get
@@ -242,8 +251,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the hatchpattern basepoint
+    /// Gets or sets the hatch pattern base point
     /// </summary>
+    /// <since>6.11</since>
     public Point3d BasePoint
     {
       get
@@ -263,6 +273,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the hatch plane
     /// </summary>
+    /// <since>6.11</since>
     public Plane Plane
     {
       get
@@ -282,6 +293,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the scaling factor of the pattern.
     /// </summary>
+    /// <since>5.0</since>
     public double PatternScale
     {
       get
@@ -300,6 +312,7 @@ namespace Rhino.Geometry
     /// Scale the hatch's pattern
     /// </summary>
     /// <param name="xform"></param>
+    /// <since>6.11</since>
     public void ScalePattern(Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -311,6 +324,7 @@ namespace Rhino.Geometry
     /// the fill is None, then this hatch doesn't have any gradient fill.
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Rhino.Display.ColorGradient GetGradientFill()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -342,6 +356,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// </summary>
     /// <param name="fill"></param>
+    /// <since>7.0</since>
     public void SetGradientFill(Rhino.Display.ColorGradient fill)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -375,6 +390,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="color"></param>
     /// <param name="t"></param>
+    /// <since>7.0</since>
     public ColorStop(System.Drawing.Color color, double t)
     {
       Color = color;
@@ -382,9 +398,11 @@ namespace Rhino.Display
     }
     /// <summary>
     /// </summary>
+    /// <since>7.0</since>
     public System.Drawing.Color Color { get; set; }
 
     /// <summary> Parameter that Color is defined at </summary>
+    /// <since>7.0</since>
     public double Position { get; set; }
   }
 
@@ -397,6 +415,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gradient fill type associated with this hatch
     /// </summary>
+    /// <since>7.0</since>
     public Rhino.Display.GradientType GradientType
     {
       get;
@@ -407,6 +426,7 @@ namespace Rhino.Display
     /// Get sorted list of colors / positions that a gradient is defined over
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public ColorStop[] GetColorStops()
     {
       return _stops.ToArray();
@@ -416,6 +436,7 @@ namespace Rhino.Display
     /// Set color stops for the gradient
     /// </summary>
     /// <param name="stops"></param>
+    /// <since>7.0</since>
     public void SetColorStops(IEnumerable<ColorStop> stops)
     {
       _stops = new List<ColorStop>(stops);
@@ -425,6 +446,7 @@ namespace Rhino.Display
     /// Repeat factor for gradient. Factors greater than 1 define a reflected
     /// repeat factor while values less than -1 define a wrapped repeat factor.
     /// </summary>
+    /// <since>7.0</since>
     public double Repeat
     {
       get;
@@ -434,6 +456,7 @@ namespace Rhino.Display
     /// <summary>
     /// Start point of gradient
     /// </summary>
+    /// <since>7.0</since>
     public Rhino.Geometry.Point3d StartPoint
     {
       get;
@@ -443,6 +466,7 @@ namespace Rhino.Display
     /// <summary>
     /// End point of gradient
     /// </summary>
+    /// <since>7.0</since>
     public Rhino.Geometry.Point3d EndPoint
     {
       get;

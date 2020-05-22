@@ -26,6 +26,7 @@ namespace Rhino.Input.Custom
     readonly bool m_is_const;
     IntPtr m_ptr_pick_context; // CRhinoPickContext*
 
+    /// <since>5.0</since>
     public PickContext()
     {
       m_ptr_pick_context = UnsafeNativeMethods.CRhinoPickContext_New();
@@ -51,6 +52,7 @@ namespace Rhino.Input.Custom
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -68,10 +70,11 @@ namespace Rhino.Input.Custom
 
     /// <summary>
     /// This view can be a model view or a page view. When view is a page view,
-    /// then you need to distingish between the viewports MainViewport() and
+    /// then you need to distinguish between the viewports MainViewport() and
     /// ActiveViewport().  When m_view is a model view, both MainViewport() and
     /// ActiveViewport() return the world view's viewport.
     /// </summary>
+    /// <since>5.0</since>
     public Display.RhinoView View
     {
       get
@@ -91,6 +94,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// pick chord starts on near clipping plane and ends on far clipping plane.
     /// </summary>
+    /// <since>5.0</since>
     public Geometry.Line PickLine
     {
       get
@@ -108,6 +112,7 @@ namespace Rhino.Input.Custom
     }
 
 
+    /// <since>5.0</since>
     public PickStyle PickStyle
     {
       get
@@ -122,6 +127,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public PickMode PickMode
     {
       get
@@ -137,8 +143,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Thue if GroupObjects should be added to the pick list
+    /// True if GroupObjects should be added to the pick list
     /// </summary>
+    /// <since>5.0</since>
     public bool PickGroupsEnabled
     {
       get
@@ -154,8 +161,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// True if the user had activated subobject selection
+    /// True if the user had activated sub-object selection
     /// </summary>
+    /// <since>5.0</since>
     public bool SubObjectSelectionEnabled
     {
       get
@@ -171,6 +179,7 @@ namespace Rhino.Input.Custom
     }
 
     GetObject m_cached_get_object;
+    /// <since>5.0</since>
     public GetObject GetObjectUsed
     {
       get
@@ -191,6 +200,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public void SetPickTransform(Geometry.Transform transform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -202,6 +212,7 @@ namespace Rhino.Input.Custom
     /// SetClippingPlanes and View fields must be called before calling
     /// UpdateClippingPlanes().
     /// </summary>
+    /// <since>5.0</since>
     public void UpdateClippingPlanes()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -218,8 +229,9 @@ namespace Rhino.Input.Custom
     /// hit if the object's bounding box is completely inside of the pick frustum.
     /// </param>
     /// <returns>
-    /// False if bbox is invalid or box does not intersect the pick frustum
+    /// False if bounding box is invalid or box does not intersect the pick frustum
     /// </returns>
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.BoundingBox box, out bool boxCompletelyInFrustum)
     {
       boxCompletelyInFrustum = false;
@@ -239,6 +251,7 @@ namespace Rhino.Input.Custom
     /// SMALLER values are CLOSER to the pick point
     /// </param>
     /// <returns>true if there is a hit</returns>
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.Point3d point, out double depth, out double distance)
     {
       depth = -1;
@@ -247,6 +260,7 @@ namespace Rhino.Input.Custom
       return UnsafeNativeMethods.CRhinoPickContext_PickPoint(const_ptr_this, point, ref depth, ref distance);
     }
 
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.Point3d[] points, out int pointIndex, out double depth, out double distance)
     {
       pointIndex = -1;
@@ -258,6 +272,7 @@ namespace Rhino.Input.Custom
       return UnsafeNativeMethods.CRhinoPickContext_PickPointCloud(const_ptr_this, points.Length, points, ref pointIndex, ref depth, ref distance);
     }
 
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.PointCloud cloud, out int pointIndex, out double depth, out double distance)
     {
       pointIndex = -1;
@@ -268,6 +283,7 @@ namespace Rhino.Input.Custom
       return UnsafeNativeMethods.CRhinoPickContext_PickPointCloud2(const_ptr_this, const_ptr_cloud, ref pointIndex, ref depth, ref distance);
     }
 
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.Line line, out double t, out double depth, out double distance)
     {
       t = -1;
@@ -277,6 +293,7 @@ namespace Rhino.Input.Custom
       return UnsafeNativeMethods.CRhinoPickContext_PickLine2(const_ptr_this, line.From, line.To, ref t, ref depth, ref distance);
     }
 
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.BezierCurve bezier, out double t, out double depth, out double distance)
     {
       t = -1;
@@ -287,6 +304,7 @@ namespace Rhino.Input.Custom
       return UnsafeNativeMethods.CRhinoPickContext_PickBezier(const_ptr_this, const_ptr_bezier, ref t, ref depth, ref distance);
     }
 
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.NurbsCurve curve, out double t, out double depth, out double distance)
     {
       t = -1;
@@ -306,7 +324,7 @@ namespace Rhino.Input.Custom
     /// </param>
     /// <param name="hitTextureCoordinate">
     /// If the mesh has texture coordinates, set to the texture coordinate of the hit
-    /// point.  Note that the texture coodinates can be set in many different ways
+    /// point.  Note that the texture coordinates can be set in many different ways
     /// and this information is useless unless you know how the texture coordinates
     /// are set on this particular mesh.
     /// </param>
@@ -327,6 +345,7 @@ namespace Rhino.Input.Custom
     /// corresponds to
     /// </param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.Mesh mesh, MeshPickStyle pickStyle, out Geometry.Point3d hitPoint, out Geometry.Point2d hitSurfaceUV, out Geometry.Point2d hitTextureCoordinate,
       out double depth, out double distance, out MeshHitFlag hitFlag, out int hitIndex)
     {
@@ -365,6 +384,7 @@ namespace Rhino.Input.Custom
     /// corresponds to
     /// </param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool PickFrustumTest(Geometry.Mesh mesh, MeshPickStyle pickStyle, out Geometry.Point3d hitPoint, out double depth, out double distance, out MeshHitFlag hitFlag, out int hitIndex)
     {
       hitPoint = Geometry.Point3d.Unset;
@@ -384,6 +404,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns>indices of mesh topology vertices that were picked</returns>
+    /// <since>5.0</since>
     public int[] PickMeshTopologyVertices(Geometry.Mesh mesh)
     {
       using (var indices = new Runtime.InteropWrappers.SimpleArrayInt())

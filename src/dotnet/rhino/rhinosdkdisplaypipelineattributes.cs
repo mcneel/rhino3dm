@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -100,6 +100,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoProfileContext_Delete(ptr_profile_context);
     }
 
+    /// <since>5.0</since>
     [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
@@ -115,6 +116,7 @@ namespace Rhino.Display
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -132,24 +134,28 @@ namespace Rhino.Display
 
 
     #region General display overrides...
+    /// <since>5.0</since>
     public bool XrayAllObjects
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.XrayAllOjbjects); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.XrayAllOjbjects, value); }
     }
 
+    /// <since>5.0</since>
     public bool IgnoreHighlights
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IgnoreHighlights); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IgnoreHighlights, value); }
     }
 
+    /// <since>5.0</since>
     public bool DisableConduits
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DisableConduits); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DisableConduits, value); }
     }
 
+    /// <since>5.0</since>
     public bool DisableTransparency
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DisableTransparency); }
@@ -158,12 +164,14 @@ namespace Rhino.Display
     #endregion
 
     #region General dynamic/runtime object drawing attributes
+    /// <since>5.0</since>
     public Color ObjectColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.ObjectColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ObjectColor, value); }
     }
 
+    /// <since>5.0</since>
     public bool ShowGrips
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowGrips); }
@@ -194,10 +202,69 @@ namespace Rhino.Display
     /// <summary>
     /// Get or set the frame buffer fill mode.
     /// </summary>
+    /// <since>6.0</since>
     public FrameBufferFillMode FillMode
     {
       get { return GetFillMode(); }
       set { SetFillMode((UnsafeNativeMethods.FrameBufferFillMode)value); }
+    }
+
+    /// <summary>
+    /// Set fill mode to solid color and set the fill color
+    /// </summary>
+    /// <param name="singleColor"></param>
+    /// <since>6.23</since>
+    public void SetFill(Color singleColor)
+    {
+      SetFill(singleColor, singleColor, singleColor, singleColor);
+    }
+
+    /// <summary>
+    /// Set fill mode to two color and set the colors
+    /// </summary>
+    /// <param name="gradientTop"></param>
+    /// <param name="gradientBottom"></param>
+    /// <since>6.23</since>
+    public void SetFill(Color gradientTop, Color gradientBottom)
+    {
+      SetFill(gradientTop, gradientBottom, gradientTop, gradientBottom);
+    }
+
+    /// <summary>
+    /// Set the fill mode to four color gradient and set the colors
+    /// </summary>
+    /// <param name="gradientTopLeft"></param>
+    /// <param name="gradientBottomLeft"></param>
+    /// <param name="gradientTopRight"></param>
+    /// <param name="gradientBottomRight"></param>
+    /// <since>6.23</since>
+    public void SetFill(Color gradientTopLeft, Color gradientBottomLeft, Color gradientTopRight, Color gradientBottomRight)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetFillColors(ptr_this,
+        gradientTopLeft.ToArgb(), gradientBottomLeft.ToArgb(), gradientTopRight.ToArgb(), gradientBottomRight.ToArgb());
+    }
+
+    /// <summary>
+    /// Get fill colors used for clearing the frame buffer
+    /// </summary>
+    /// <param name="topLeft"></param>
+    /// <param name="bottomLeft"></param>
+    /// <param name="topRight"></param>
+    /// <param name="bottomRight"></param>
+    /// <since>6.23</since>
+    public void GetFill(out Color topLeft, out Color bottomLeft, out Color topRight, out Color bottomRight)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      int tl = 0;
+      int bl = 0;
+      int tr = 0;
+      int br = 0;
+      UnsafeNativeMethods.CDisplayPipelineAttributes_GetFillColors(const_ptr_this, ref tl, ref bl, ref tr, ref br);
+      topLeft = Color.FromArgb(tl);
+      topRight = Color.FromArgb(tr);
+      bottomLeft = Color.FromArgb(bl);
+      bottomRight = Color.FromArgb(br);
     }
 
     public enum BoundingBoxDisplayMode : int
@@ -207,6 +274,7 @@ namespace Rhino.Display
       OnAlways = UnsafeNativeMethods.DisplayPipelineAttributesBBox.BBoxOnAlways
     }
 
+    /// <since>6.1</since>
     public BoundingBoxDisplayMode BoundingBoxMode
     {
       get
@@ -221,6 +289,7 @@ namespace Rhino.Display
       }
     }
     /// <summary>Show clipping planes.</summary>
+    /// <since>6.4</since>
     public bool ShowClippingPlanes
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClippingPlanes); }
@@ -239,36 +308,42 @@ namespace Rhino.Display
 
       //bool m_bUseDefaultGrid; <-skipped. Not used in Rhino
 
+      /// <since>5.0</since>
       public bool UseDocumentGrid
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseDocumentGrid); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseDocumentGrid, value); }
       }
 
+      /// <since>5.0</since>
       public bool DrawGrid
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawGrid); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawGrid, value); }
       }
 
+      /// <since>5.0</since>
       public bool DrawGridAxes
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawAxes); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawAxes, value); }
       }
 
+      /// <since>5.0</since>
       public bool DrawZAxis
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawZAxis); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawZAxis, value); }
       }
 
+      /// <since>5.0</since>
       public bool DrawWorldAxes
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawWorldAxes); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawWorldAxes, value); }
       }
 
+      /// <since>5.0</since>
       public bool ShowGridOnTop
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowGridOnTop); }
@@ -276,6 +351,7 @@ namespace Rhino.Display
       }
       //bool m_bShowTransGrid;
 
+      /// <since>5.0</since>
       public bool BlendGrid
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BlendGrid); }
@@ -283,6 +359,7 @@ namespace Rhino.Display
       }
 
       //int m_nGridTrans;
+      /// <since>5.0</since>
       public bool DrawTransparentGridPlane
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawTransGridPlane); }
@@ -295,16 +372,19 @@ namespace Rhino.Display
       //COLORREF              m_GridPlaneColor;
       //int                   m_nPlaneVisibility;
       //int                   m_nWorldAxesColor;
+      /// <since>5.0</since>
       public Color WorldAxisColorX
       {
         get { return m_parent.GetColor(UnsafeNativeMethods.DisplayAttrsColor.WxColor); }
         set { m_parent.SetColor(UnsafeNativeMethods.DisplayAttrsColor.WxColor, value); }
       }
+      /// <since>5.0</since>
       public Color WorldAxisColorY
       {
         get { return m_parent.GetColor(UnsafeNativeMethods.DisplayAttrsColor.WyColor); }
         set { m_parent.SetColor(UnsafeNativeMethods.DisplayAttrsColor.WyColor, value); }
       }
+      /// <since>5.0</since>
       public Color WorldAxisColorZ
       {
         get { return m_parent.GetColor(UnsafeNativeMethods.DisplayAttrsColor.WzColor); }
@@ -329,11 +409,13 @@ namespace Rhino.Display
 
       //bool                  m_bUseDefaultScale; <-skipped. Not used in Rhino
 
+      /// <since>5.0</since>
       public double HorizontalViewportScale
       {
         get { return m_parent.GetDouble(idx_dHorzScale); }
         set { m_parent.SetDouble(idx_dHorzScale, value); }
       }
+      /// <since>5.0</since>
       public double VerticalViewportScale
       {
         get { return m_parent.GetDouble(idx_dVertScale); }
@@ -347,6 +429,7 @@ namespace Rhino.Display
     }
 
     ViewDisplayAttributes m_view_specific_attributes;
+    /// <since>5.0</since>
     public ViewDisplayAttributes ViewSpecificAttributes
     {
       get { return m_view_specific_attributes ?? (m_view_specific_attributes = new ViewDisplayAttributes(this)); }
@@ -368,6 +451,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets whether objects ought to be drawn using their assigned rendering material.
     /// </summary>
+    /// <since>6.0</since>
     public bool UseAssignedObjectMaterial
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseObjectMaterial); }
@@ -375,6 +459,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets whether objects ought to be drawn using a custom color.
     /// </summary>
+    /// <since>6.0</since>
     public bool UseCustomObjectColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.OverrideObjectColor); }
@@ -382,6 +467,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets whether objects ought to be drawn using a custom material.
     /// </summary>
+    /// <since>6.0</since>
     public bool UseCustomObjectMaterial
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomFrontMaterial); }
@@ -437,6 +523,7 @@ namespace Rhino.Display
     
     #region Curves specific attributes...
     /// <summary>Draw curves</summary>
+    /// <since>5.1</since>
     public bool ShowCurves
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowCurves); }
@@ -446,6 +533,7 @@ namespace Rhino.Display
     /// <summary>
     /// Use a single color for drawing curves
     /// </summary>
+    /// <since>6.3</since>
     public bool UseSingleCurveColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleCurveColor); }
@@ -454,6 +542,7 @@ namespace Rhino.Display
 
     //bool m_bUseDefaultCurve; -- doesn't appear to be used in display pipelane
     /// <summary>Pixel thickness for curves</summary>
+    /// <since>5.1</since>
     public int CurveThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CurveThickness); }
@@ -464,6 +553,7 @@ namespace Rhino.Display
     //bool m_bCurveKappaHair;
     //bool m_bSingleCurveColor;
     /// <summary>Color used for drawing curves</summary>
+    /// <since>5.1</since>
     public System.Drawing.Color CurveColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.CurveColor); }
@@ -477,6 +567,7 @@ namespace Rhino.Display
     //bool m_bUseDefaultShading;
 
     /// <summary>Draw shaded meshes and surfaces. Set to false to use Flat Shading.</summary>
+    /// <since>5.1</since>
     public bool ShadingEnabled
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShadeSurface); }
@@ -484,6 +575,7 @@ namespace Rhino.Display
     }
 
     /// <summary>Shade using vertex colors.</summary>
+    /// <since>6.4</since>
     public bool ShadeVertexColors
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShadeVertexColors); }
@@ -507,6 +599,7 @@ namespace Rhino.Display
     //bool m_bUseDefaultIso;
     //bool m_bShowIsocurves;
     /// <summary>Draw surface ISO curves.</summary>
+    /// <since>6.4</since>
     public bool ShowIsoCurves
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowIsoCurves); }
@@ -531,18 +624,21 @@ namespace Rhino.Display
     // edges....
     //bool m_bUseDefaultEdges;
     /// <summary>Show surface edges.</summary>
+    /// <since>6.4</since>
     public bool ShowSurfaceEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSurfaceEdges); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSurfaceEdges, value); }
     }
     /// <summary>Show tangent edges.</summary>
+    /// <since>6.4</since>
     public bool ShowTangentEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowTangentEdges); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowTangentEdges, value); }
     }
     /// <summary>Show tangent seams.</summary>
+    /// <since>6.4</since>
     public bool ShowTangentSeams
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowTangentSeams); }
@@ -552,6 +648,7 @@ namespace Rhino.Display
     //bool m_bShowEdgeEndpoints;
 
     /// <summary> Thickness for surface edges </summary>
+    /// <since>6.1</since>
     public int SurfaceEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeThickness); }
@@ -593,6 +690,7 @@ namespace Rhino.Display
     */
 
     /// <summary>Locked object are drawn behind other objects</summary>
+    /// <since>5.1</since>
     public bool LockedObjectsDrawBehindOthers
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.LockedObjectsBehind); }
@@ -610,6 +708,7 @@ namespace Rhino.Display
       }
 
       //bool m_bUseDefaultMesh; <-skipped. Not used in Rhino
+      /// <since>5.0</since>
       public bool HighlightMeshes
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HighlightMeshes); }
@@ -619,6 +718,7 @@ namespace Rhino.Display
       /// <summary>
       /// Color.Empty means that we are NOT using a single color for all mesh wires.
       /// </summary>
+      /// <since>5.0</since>
       public Color AllMeshWiresColor
       {
         // This is a combination of
@@ -639,6 +739,7 @@ namespace Rhino.Display
         }
       }
 
+      /// <since>5.0</since>
       public int MeshWireThickness
       {
         get { return m_parent.GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshWireThickness); }
@@ -647,11 +748,13 @@ namespace Rhino.Display
 
       //UINT m_nMeshWirePattern;
 
+      /// <since>5.0</since>
       public bool ShowMeshWires
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshWires); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshWires, value); }
       }
+      /// <since>5.0</since>
       public bool ShowMeshVertices
       {
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshVertices); }
@@ -680,6 +783,7 @@ namespace Rhino.Display
     }
 
     MeshDisplayAttributes m_MeshSpecificAttributes;
+    /// <since>5.0</since>
     public MeshDisplayAttributes MeshSpecificAttributes
     {
       get { return m_MeshSpecificAttributes ?? (m_MeshSpecificAttributes = new MeshDisplayAttributes(this)); }
@@ -690,12 +794,14 @@ namespace Rhino.Display
     #region Dimensions & Text specific attributes...
     //bool m_bUseDefaultText;
     /// <summary>Show text.</summary>
+    /// <since>6.4</since>
     public bool ShowText
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowText); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowText, value); }
     }
     /// <summary>Show annotations.</summary>
+    /// <since>6.4</since>
     public bool ShowAnnotations
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowAnnotations); }
@@ -708,6 +814,7 @@ namespace Rhino.Display
     #region Lights & Lighting specific attributes...
     //bool m_bUseDefaultLights;
     /// <summary>Show light widgets.</summary>
+    /// <since>6.4</since>
     public bool ShowLights
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowLights); }
@@ -719,6 +826,7 @@ namespace Rhino.Display
     //ELightingScheme m_eLightingScheme;
     //bool m_bUseDefaultEnvironment;
     //int m_nLuminosity;
+    /// <since>6.3</since>
     public Color AmbientLightingColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.AmbientColor); }
@@ -728,6 +836,7 @@ namespace Rhino.Display
     //int m_eShadowMapType;
     //int m_nShadowMapSize;
     //int m_nNumSamples;
+    /// <since>6.3</since>
     public Color ShadowColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.ShadowColor); }
@@ -736,6 +845,7 @@ namespace Rhino.Display
     //ON_3dVector m_ShadowBias;
     //double m_fShadowBlur;
     /// <summary>Cast shadows.</summary>
+    /// <since>6.4</since>
     public bool CastShadows
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.Shadows); }
@@ -748,12 +858,14 @@ namespace Rhino.Display
 
     #region Points specific attributes...
     /// <summary>Show points.</summary>
+    /// <since>6.4</since>
     public bool ShowPoints
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPoints); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPoints, value); }
     }
 
+    /// <since>6.0</since>
     public PointStyle PointStyle
     {
       get
@@ -770,6 +882,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public float PointRadius
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.PointSize); }
@@ -798,6 +911,7 @@ namespace Rhino.Display
     //int m_nPCGripSize;
     //ERhinoPointStyle m_ePCGripStyle;
     /// <summary>Show point clouds.</summary>
+    /// <since>6.4</since>
     public bool ShowPointClouds
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPointClouds); }
@@ -814,6 +928,7 @@ public:
   bool                m_bLayersFollowLockUsage;
 */
 
+    /// <since>5.0</since>
     public Guid Id
     {
       get
@@ -823,6 +938,7 @@ public:
       }
     }
 
+    /// <since>5.0</since>
     public string EnglishName
     {
       get
@@ -842,6 +958,7 @@ public:
       }
     }
 
+    /// <since>5.0</since>
     public string LocalName
     {
       get
@@ -867,6 +984,7 @@ public:
       RenderOverlays = 6,
     }
 
+    /// <since>6.5</since>
     public ContextsForDraw ContextForDraw
     {
       get
@@ -878,11 +996,12 @@ public:
 
     #region realtime display integration
     /// <summary>
-    /// Get the ID of the realtime display engine attached to the view. This will be
-    /// Guid.Empty if no realtime display engine is in use. This can be the case for instance
-    /// when starting a _Render session for a realtime viewport integration. That still would
+    /// Get the ID of the real-time display engine attached to the view. This will be
+    /// Guid.Empty if no real-time display engine is in use. This can be the case for instance
+    /// when starting a _Render session for a real-time viewport integration. That still would
     /// cause this ID to be Guid.Empty.
     /// </summary>
+    /// <since>6.0</since>
     public Guid RealtimeDisplayId
     {
       // added for https://mcneel.myjetbrains.com/youtrack/issue/RH-39449
@@ -894,8 +1013,9 @@ public:
     }
 
     /// <summary>
-    /// Get or set the realtime passes amount
+    /// Get or set the real-time passes amount
     /// </summary>
+    /// <since>6.0</since>
     public int RealtimeRenderPasses
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.RealtimeRenderPasses); }
@@ -905,6 +1025,7 @@ public:
     /// <summary>
     /// Get or set whether the display is used for preview rendering or not.
     /// </summary>
+    /// <since>6.0</since>
     public bool ShowRealtimeRenderProgressBar
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowRealtimeRenderProgressBar); }
@@ -923,6 +1044,7 @@ public:
     /// <summary>
     /// Get or set the stereo render context.
     /// </summary>
+    /// <since>7.0</since>
     public StereoRenderContextEnum StereoRenderContext
     {
       get

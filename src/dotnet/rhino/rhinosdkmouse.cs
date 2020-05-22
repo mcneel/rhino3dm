@@ -48,11 +48,13 @@ namespace Rhino.UI
       m_point = new System.Drawing.Point(x, y);
     }
 
+    /// <since>5.0</since>
     public Display.RhinoView View
     {
       get { return m_view ?? (m_view = Display.RhinoView.FromRuntimeSerialNumber(m_view_serial_number)); }
     }
 
+    /// <since>6.0</since>
     public MouseButton MouseButton
     {
       get
@@ -68,6 +70,7 @@ namespace Rhino.UI
       }
     }
 
+    /// <since>5.0</since>
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public System.Windows.Forms.MouseButtons Button
     {
@@ -84,16 +87,19 @@ namespace Rhino.UI
       }
     }
 
+    /// <since>6.0</since>
     public bool ShiftKeyDown
     {
       get { return (m_flags & MK_SHIFT) == MK_SHIFT; }
     }
 
+    /// <since>6.0</since>
     public bool CtrlKeyDown
     {
       get { return (m_flags & MK_CONTROL) == MK_CONTROL; }
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Point ViewportPoint
     {
       get { return m_point; }
@@ -107,7 +113,7 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the beginning of handling of a mouse move event in Rhino.
     /// If you don't want the default Rhino functionality to be run, then set
-    /// Cancel to true on the passed in event args.
+    /// Cancel to true on the passed in event arguments.
     /// Base class implementation of this function does nothing.
     /// </summary>
     /// <param name="e"></param>
@@ -116,9 +122,9 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the end of handling of a mouse move event in Rhino.
     /// All of the default Rhino mouse move functionality has already been
-    /// executed unless a MouseCallback has set Cancel to true for the event args.
-    /// You can tell if this is the case by inpecting the Cancel property in
-    /// the event args parameter.
+    /// executed unless a MouseCallback has set Cancel to true for the event arguments.
+    /// You can tell if this is the case by inspecting the Cancel property in
+    /// the event arguments parameter.
     /// Base class implementation of this function does nothing.
     /// </summary>
     /// <param name="e"></param>
@@ -127,7 +133,7 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the beginning of handling of a mouse down event in Rhino.
     /// If you don't want the default Rhino functionality to be run, then set
-    /// Cancel to true on the passed in event args
+    /// Cancel to true on the passed in event arguments
     /// Base class implementation of this function does nothing
     /// </summary>
     /// <param name="e"></param>
@@ -136,9 +142,9 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the end of handling of a mouse down event in Rhino.
     /// All of the default Rhino mouse down functionality has already been
-    /// executed unless a MouseCallback has set Cancel to true for the event args.
-    /// You can tell if this is the case by inpecting the Cancel property in
-    /// the event args parameter.
+    /// executed unless a MouseCallback has set Cancel to true for the event arguments.
+    /// You can tell if this is the case by inspecting the Cancel property in
+    /// the event arguments parameter.
     /// Base class implementation of this function does nothing
     /// </summary>
     /// <param name="e"></param>
@@ -147,7 +153,7 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the beginning of handling of a mouse up event in Rhino.
     /// If you don't want the default Rhino functionality to be run, then set
-    /// Cancel to true on the passed in event args
+    /// Cancel to true on the passed in event arguments
     /// Base class implementation of this function does nothing
     /// </summary>
     /// <param name="e"></param>
@@ -156,9 +162,9 @@ namespace Rhino.UI
     /// <summary>
     /// Called at the end of handling of a mouse up event in Rhino.
     /// All of the default Rhino mouse down functionality has already been
-    /// executed unless a MouseCallback has set Cancel to true for the event args.
-    /// You can tell if this is the case by inpecting the Cancel property in
-    /// the event args parameter.
+    /// executed unless a MouseCallback has set Cancel to true for the event arguments.
+    /// You can tell if this is the case by inspecting the Cancel property in
+    /// the event arguments parameter.
     /// Base class implementation of this function does nothing
     /// </summary>
     /// <param name="e"></param>
@@ -172,6 +178,7 @@ namespace Rhino.UI
     protected virtual void OnMouseHover(MouseCallbackEventArgs e) { }
     
     bool m_enabled;
+    /// <since>5.0</since>
     public bool Enabled
     {
       get

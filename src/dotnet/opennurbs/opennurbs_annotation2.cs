@@ -116,10 +116,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Initializes a new textdot based on the text and the location.
+    /// Initializes a new text dot based on the text and the location.
     /// </summary>
     /// <param name="text">Text.</param>
     /// <param name="location">A position.</param>
+    /// <since>5.0</since>
     public TextDot(string text, Point3d location)
     {
       IntPtr ptr_this = UnsafeNativeMethods.ON_TextDot_New(text, location);
@@ -127,8 +128,9 @@ namespace Rhino.Geometry
     }
     
     /// <summary>
-    /// Gets or sets the position of the textdot.
+    /// Gets or sets the position of the text dot.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Point
     {
       get
@@ -146,8 +148,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the primiary text of the textdot.
+    /// Gets or sets the primary text of the text dot.
     /// </summary>
+    /// <since>5.0</since>
     public string Text
     {
       get
@@ -168,8 +171,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the secondary text of the textdot.
+    /// Gets or sets the secondary text of the text dot.
     /// </summary>
+    /// <since>6.0</since>
     public string SecondaryText
     {
       get
@@ -192,6 +196,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Height of font used for displaying the dot
     /// </summary>
+    /// <since>5.2</since>
     public int FontHeight
     {
       get
@@ -207,6 +212,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Font face used for displaying the dot</summary>
+    /// <since>5.2</since>
     public string FontFace
     {
       get

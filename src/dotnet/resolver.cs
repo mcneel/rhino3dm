@@ -313,6 +313,7 @@ namespace Rhino.Runtime
     /// If at all possible, you should consider only registering individual files.
     /// </summary>
     /// <param name="folder">Path of folder to include during Assembly Resolver events.</param>
+    /// <since>5.0</since>
     public static void AddSearchFolder(string folder)
     {
       // ? is it smart to discard the folder this early on?
@@ -331,6 +332,7 @@ namespace Rhino.Runtime
     /// so it should probably be a dll, rhp or exe.
     /// </summary>
     /// <param name="file">Path of file to include during Assembly Resolver events.</param>
+    /// <since>5.0</since>
     public static void AddSearchFile(string file)
     {
       // ? is it smart to discard the file this early on?

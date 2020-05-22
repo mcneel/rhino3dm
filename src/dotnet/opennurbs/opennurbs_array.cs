@@ -61,7 +61,7 @@ namespace Rhino.Runtime.InteropWrappers
 
   /// <summary>
   /// This class is used to pass strings back and forth between managed
-  /// and unmanaged code.  This should not be be needed by plug-ins.
+  /// and unmanaged code.  This should not be needed by plug-ins.
   /// <para>If you are just dealing with an ON_wString*,
   /// use <see cref="Rhino.Runtime.InteropWrappers.StringWrapper"/></para>
   /// </summary>
@@ -73,16 +73,19 @@ namespace Rhino.Runtime.InteropWrappers
     /// never need this.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.8</since>
     public IntPtr ConstPointer() { return m_ptr; }
     /// <summary>
     /// C++ pointer used to access the ON_wString, managed plug-ins should
     /// never need this.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.8</since>
     public IntPtr NonConstPointer() { return m_ptr; }
     /// <summary>
     /// Constructor
     /// </summary>
+    /// <since>5.8</since>
     public StringHolder()
     {
       m_ptr = UnsafeNativeMethods.StringHolder_New();
@@ -97,6 +100,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// IDispose implementation
     /// </summary>
+    /// <since>5.8</since>
     public void Dispose()
     {
       Dispose(true);
@@ -127,6 +131,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="pStringHolder"></param>
     /// <returns>Null if pStringHolder has no reference, otherwise, the string. This may be an empty string, if setting an empty string is possible.</returns>
+    /// <since>5.8</since>
     public static string GetString(IntPtr pStringHolder)
     {
       IntPtr pString = UnsafeNativeMethods.StringHolder_Get(pStringHolder);
@@ -143,20 +148,23 @@ namespace Rhino.Runtime.InteropWrappers
     internal IntPtr m_ptr; // ON_SimpleArray<int>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayInt"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayInt()
     {
       m_ptr = UnsafeNativeMethods.ON_IntArray_New(null,0);
@@ -166,6 +174,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new <see cref="SimpleArrayInt"/> class
     /// </summary>
     /// <param name="values">initial set of integers to add to the array</param>
+    /// <since>5.9</since>
     public SimpleArrayInt(IEnumerable<int> values)
     {
       if (values == null)
@@ -183,6 +192,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_IntArray_Count(m_ptr); }
@@ -192,6 +202,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public int[] ToArray()
     {
       int count = Count;
@@ -213,6 +224,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -238,20 +250,23 @@ namespace Rhino.Runtime.InteropWrappers
     internal IntPtr m_ptr; // ON_SimpleArray<unsigned int>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayInt"/> class.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayUint()
     {
       m_ptr = UnsafeNativeMethods.ON_UintArray_New(0);
@@ -260,7 +275,8 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayInt"/> class.
     /// </summary>
-    /// <param name="values">A list, an array or any collection of unsigned ints that implements the enumerable interface.</param>
+    /// <param name="values">A list, an array or any collection of unsigned integers that implements the enumerable interface.</param>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public SimpleArrayUint(System.Collections.Generic.IEnumerable<uint> values)
     {
@@ -273,6 +289,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of elements in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_UintArray_Count(m_ptr); }
@@ -281,6 +298,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of elements in this array.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint UnsignedCount
     {
@@ -291,6 +309,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint[] ToArray()
     {
@@ -313,6 +332,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -340,20 +360,23 @@ namespace Rhino.Runtime.InteropWrappers
     internal IntPtr m_ptr; // ON_SimpleArray<ON_UUID*>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayGuidPointer"/> class.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayGuidPointer()
     {
       m_ptr = UnsafeNativeMethods.ON_UUIDPtrArray_New();
@@ -380,6 +403,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_UUIDPtrArray_Count(m_ptr); }
@@ -389,6 +413,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     public Guid[] ToArray()
     {
       var count = Count;
@@ -413,6 +438,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -438,20 +464,23 @@ namespace Rhino.Runtime.InteropWrappers
     internal IntPtr m_ptr; // ON_SimpleArray<ON_UUID>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayGuid"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayGuid()
     {
       m_ptr = UnsafeNativeMethods.ON_UUIDArray_New();
@@ -470,6 +499,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Appends a new <see cref="Guid"/> at the end of this array.
     /// </summary>
+    /// <since>6.0</since>
     public void Append(Guid uuid)
     {
       var non_const_ptr = NonConstPointer();
@@ -487,6 +517,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_UUIDArray_Count(m_ptr); }
@@ -496,6 +527,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Guid[] ToArray()
     {
       int count = Count;
@@ -517,6 +549,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -542,20 +575,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Interval>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayInterval"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayInterval()
     {
       m_ptr = UnsafeNativeMethods.ON_IntervalArray_New();
@@ -564,6 +600,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Adds a new <see cref="Interval"/> at the end of this array.
     /// </summary>
+    /// <since>6.0</since>
     public void Add(Interval interval)
     {
       var non_const_ptr = NonConstPointer();
@@ -573,6 +610,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_IntervalArray_Count(m_ptr); }
@@ -582,6 +620,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Interval[] ToArray()
     {
       int count = Count;
@@ -603,6 +642,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -628,20 +668,23 @@ namespace Rhino.Runtime.InteropWrappers
     private IntPtr m_ptr; // ON_SimpleArray<double>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayDouble"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayDouble()
     {
       m_ptr = UnsafeNativeMethods.ON_DoubleArray_New();
@@ -650,6 +693,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayDouble"/> instance, with items.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayDouble(System.Collections.Generic.IEnumerable<double> items)
     {
       // 17-Sep-2015 Dale Fugier http://mcneel.myjetbrains.com/youtrack/issue/RH-31413
@@ -663,6 +707,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_DoubleArray_Count(m_ptr); }
@@ -672,6 +717,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public double[] ToArray()
     {
       int count = Count;
@@ -693,6 +739,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -718,20 +765,23 @@ namespace Rhino.Runtime.InteropWrappers
     private IntPtr m_ptr;
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.6</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.6</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new empty <see cref="SimpleArrayPoint3d"/> instance.
     /// </summary>
+    /// <since>5.6</since>
     public SimpleArrayPoint2d()
     {
       m_ptr = UnsafeNativeMethods.ON_2dPointArray_New(0);
@@ -746,6 +796,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of points in this array.
     /// </summary>
+    /// <since>5.6</since>
     public int Count
     {
       get
@@ -760,6 +811,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.6</since>
     public Point2d[] ToArray()
     {
       int count = Count;
@@ -782,6 +834,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.6</since>
     public void Dispose()
     {
       Dispose(true);
@@ -816,20 +869,23 @@ namespace Rhino.Runtime.InteropWrappers
     private IntPtr m_ptr;
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new empty <see cref="SimpleArrayPoint3d"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayPoint3d()
     {
       m_ptr = UnsafeNativeMethods.ON_3dPointArray_New(0);
@@ -844,6 +900,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of points in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -858,6 +915,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Point3d[] ToArray()
     {
       int count = Count;
@@ -880,6 +938,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -913,20 +972,23 @@ namespace Rhino.Runtime.InteropWrappers
     private IntPtr m_ptr;
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>7.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>7.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new empty <see cref="SimpleArrayArrayPoint3d"/> instance.
     /// </summary>
+    /// <since>7.0</since>
     public SimpleArrayArrayPoint3d()
     {
       m_ptr = UnsafeNativeMethods.ON_3dPointArrayArray_New(0);
@@ -935,6 +997,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of polylines in this array.
     /// </summary>
+    /// <since>7.0</since>
     public int Count
     {
       get
@@ -948,6 +1011,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of points in a polyline.
     /// </summary>
+    /// <since>7.0</since>
     public int PointCountAt(int index)
     {
         IntPtr ptr = ConstPointer();
@@ -981,6 +1045,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1015,18 +1080,20 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Plane>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer()
     {
       return m_ptr;
     }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer()
     {
       return m_ptr;
@@ -1035,6 +1102,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayLine"/> instance.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayPlane()
     {
       m_ptr = UnsafeNativeMethods.ON_PlaneArray_New();
@@ -1043,6 +1111,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of lines in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_PlaneArray_Count(m_ptr); }
@@ -1052,6 +1121,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     public Plane[] ToArray()
     {
       int count = Count;
@@ -1073,6 +1143,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -1099,18 +1170,20 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Line>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer()
     {
       return m_ptr;
     }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer()
     {
       return m_ptr;
@@ -1119,6 +1192,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayLine"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayLine()
     {
       m_ptr = UnsafeNativeMethods.ON_LineArray_New();
@@ -1127,6 +1201,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of lines in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_LineArray_Count(m_ptr); }
@@ -1136,6 +1211,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Line[] ToArray()
     {
       int count = Count;
@@ -1157,6 +1233,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -1182,20 +1259,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_2dex>
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArray2dex"/> class.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArray2dex()
     {
       m_ptr = UnsafeNativeMethods.ON_2dexArray_New(null,0);
@@ -1205,6 +1285,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new <see cref="SimpleArray2dex"/> class
     /// </summary>
     /// <param name="values">initial set of integer pairs to add to the array</param>
+    /// <since>6.0</since>
     public SimpleArray2dex(IEnumerable<IndexPair> values)
     {
       if (values == null)
@@ -1222,6 +1303,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_2dexArray_Count(m_ptr); }
@@ -1231,6 +1313,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     public IndexPair[] ToArray()
     {
       int count = Count;
@@ -1252,6 +1335,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -1269,7 +1353,7 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
   /// <summary>
-  /// Wrapper for a C++ ON_SimpleArray of ON_Surface* or const ON_Surface*.  If
+  /// Wrapper for a C++ ON_SimpleArray of ON_Surface* or constant ON_Surface*.  If
   /// you are not writing C++ code then this class is not for you.
   /// </summary>
   public class SimpleArraySurfacePointer : IDisposable
@@ -1277,20 +1361,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; //ON_SimpleArray<ON_Surface*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArraySurfacePointer"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArraySurfacePointer()
     {
       m_ptr = UnsafeNativeMethods.ON_SurfaceArray_New();
@@ -1298,9 +1385,10 @@ namespace Rhino.Runtime.InteropWrappers
 
     /// <summary>
     /// Copies the unmanaged array to a managed counterpart.
-    /// Elements are made non-const.
+    /// Elements are made non-constant.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Surface[] ToNonConstArray()
     {
       int count = UnsafeNativeMethods.ON_SurfaceArray_Count(m_ptr);
@@ -1328,6 +1416,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1353,7 +1442,7 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
   /// <summary>
-  /// Wrapper for a C++ ON_SimpleArray of ON_Curve* or const ON_Curve*.  If you are not
+  /// Wrapper for a C++ ON_SimpleArray of ON_Curve* or constant ON_Curve*.  If you are not
   /// writing C++ code, then you can ignore this class.
   /// </summary>
   public class SimpleArrayCurvePointer : IDisposable
@@ -1361,20 +1450,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; //ON_SimpleArray<ON_Curve*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayCurvePointer"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayCurvePointer()
     {
       m_ptr = UnsafeNativeMethods.ON_CurveArray_New(0);
@@ -1384,6 +1476,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new <see cref="SimpleArrayCurvePointer"/> instance, from a set of input curves.
     /// </summary>
     /// <param name="curves">A list, an array or any collection of curves that implements the enumerable interface.</param>
+    /// <since>5.0</since>
     public SimpleArrayCurvePointer(System.Collections.Generic.IEnumerable<Curve> curves)
     {
       int initial_capacity = 0;
@@ -1408,6 +1501,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Curve[] ToNonConstArray()
     {
       int count = UnsafeNativeMethods.ON_CurveArray_Count(m_ptr);
@@ -1435,6 +1529,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1460,7 +1555,7 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
   /// <summary>
-  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Geometry*&gt;* or ON_SimpleArray&lt;const ON_Geometry*&gt;.
+  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Geometry*&gt;* or ON_SimpleArray&lt;constant ON_Geometry*&gt;.
   /// If you are not writing C++ code, then this class is not for you.
   /// </summary>
   public class SimpleArrayGeometryPointer : IDisposable
@@ -1468,20 +1563,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; //ON_SimpleArray<ON_Geometry*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayGeometryPointer"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayGeometryPointer()
     {
       m_ptr = UnsafeNativeMethods.ON_GeometryArray_New(0);
@@ -1491,6 +1589,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Create an ON_SimpleArray&lt;ON_Geometry*&gt; filled with items in geometry
     /// </summary>
     /// <param name="geometry"></param>
+    /// <since>5.0</since>
     public SimpleArrayGeometryPointer(System.Collections.Generic.IEnumerable<GeometryBase> geometry)
     {
       m_ptr = UnsafeNativeMethods.ON_GeometryArray_New(0);
@@ -1506,6 +1605,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Expects all of the items in the IEnumerable to be GeometryBase types
     /// </summary>
     /// <param name="geometry"></param>
+    /// <since>5.0</since>
     public SimpleArrayGeometryPointer(System.Collections.IEnumerable geometry)
     {
       m_ptr = UnsafeNativeMethods.ON_GeometryArray_New(0);
@@ -1525,6 +1625,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public GeometryBase[] ToNonConstArray()
     {
       int count = UnsafeNativeMethods.ON_GeometryArray_Count(m_ptr);
@@ -1548,6 +1649,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1574,7 +1676,7 @@ namespace Rhino.Runtime.InteropWrappers
 
   /// <summary>
   /// Represents a wrapper to an unmanaged array of mesh pointers.
-  /// <para>Wrapper for a C++ ON_SimpleArray of ON_Mesh* or const ON_Mesh*. If you are not
+  /// <para>Wrapper for a C++ ON_SimpleArray of ON_Mesh* or constant ON_Mesh*. If you are not
   /// writing C++ code then this class is not for you.</para>
   /// </summary>
   public class SimpleArrayMeshPointer : IDisposable
@@ -1583,20 +1685,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Mesh*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayMeshPointer"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayMeshPointer()
     {
       m_ptr = UnsafeNativeMethods.ON_MeshArray_New();
@@ -1611,6 +1716,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of meshes in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -1626,6 +1732,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="mesh">A mesh to add.</param>
     /// <param name="asConst">Whether this mesh should be treated as non-modifiable.</param>
+    /// <since>5.0</since>
     public void Add(Geometry.Mesh mesh, bool asConst)
     {
       if (null != mesh)
@@ -1649,6 +1756,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1672,6 +1780,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Geometry.Mesh[] ToNonConstArray()
     {
       int count = Count;
@@ -1709,7 +1818,7 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
   /// <summary>
-  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Brep*&gt; or ON_SimpleArray&lt;const ON_Brep*&gt;
+  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Brep*&gt; or ON_SimpleArray&lt;constant ON_Brep*&gt;
   /// If you are not writing C++ code then this class is not for you.
   /// </summary>
   public class SimpleArrayBrepPointer : IDisposable
@@ -1717,20 +1826,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Brep*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayBrepPointer"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public SimpleArrayBrepPointer()
     {
       m_ptr = UnsafeNativeMethods.ON_BrepArray_New();
@@ -1739,6 +1851,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of breps in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -1754,6 +1867,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="brep">A brep to add.</param>
     /// <param name="asConst">Whether this brep should be treated as non-modifiable.</param>
+    /// <since>5.0</since>
     public void Add(Geometry.Brep brep, bool asConst)
     {
       if (null != brep)
@@ -1777,6 +1891,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1800,6 +1915,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Geometry.Brep[] ToNonConstArray()
     {
       int count = Count;
@@ -1827,20 +1943,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Linetype*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.6</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.6</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayLinetypePointer"/> instance.
     /// </summary>
+    /// <since>6.6</since>
     public SimpleArrayLinetypePointer()
     {
       m_ptr = UnsafeNativeMethods.ON_LinetypeArray_New();
@@ -1849,6 +1968,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of linetypes in this array.
     /// </summary>
+    /// <since>6.6</since>
     public int Count
     {
       get
@@ -1870,6 +1990,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.6</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1893,6 +2014,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.6</since>
     public DocObjects.Linetype[] ToNonConstArray()
     {
       int count = Count;
@@ -1912,7 +2034,7 @@ namespace Rhino.Runtime.InteropWrappers
   
 
   /// <summary>
-  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Extrusion*&gt; or ON_SimpleArray&lt;const ON_Extrusion*&gt;
+  /// Wrapper for a C++ ON_SimpleArray&lt;ON_Extrusion*&gt; or ON_SimpleArray&lt;constant ON_Extrusion*&gt;
   /// If you are not writing C++ code then this class is not for you.
   /// </summary>
   public class SimpleArrayExtrusionPointer : IDisposable
@@ -1920,20 +2042,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<ON_Extrusion*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayExtrusionPointer"/> instance.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayExtrusionPointer()
     {
       m_ptr = UnsafeNativeMethods.ON_ExtrusionArray_New();
@@ -1942,6 +2067,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of Extrusions in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -1957,6 +2083,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="extrusion">A extrusion to add.</param>
     /// <param name="asConst">Whether this extrusion should be treated as non-modifiable.</param>
+    /// <since>6.0</since>
     public void Add(Geometry.Extrusion extrusion, bool asConst)
     {
       if (null != extrusion)
@@ -1980,6 +2107,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2003,6 +2131,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     public Geometry.Extrusion[] ToNonConstArray()
     {
       int count = Count;
@@ -2030,20 +2159,23 @@ namespace Rhino.Runtime.InteropWrappers
     bool delete;
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayBinaryArchiveReader"/> class.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayBinaryArchiveReader()
     {
       m_ptr = UnsafeNativeMethods.ON_BinaryArchiveArray_New();
@@ -2053,6 +2185,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayBinaryArchiveReader"/> class.
     /// </summary>
+    /// <since>6.0</since>
     public SimpleArrayBinaryArchiveReader(IntPtr p)
     {
       m_ptr = p;
@@ -2062,6 +2195,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Adds a new <see cref="Interval"/> at the end of this array.
     /// </summary>
+    /// <since>6.0</since>
     public void Add(BinaryArchiveReader reader)
     {
       var non_const_ptr = NonConstPointer();
@@ -2072,6 +2206,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_BinaryArchiveArray_Count(m_ptr); }
@@ -2082,6 +2217,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public BinaryArchiveReader Get(int index)
     {
       IntPtr p = UnsafeNativeMethods.ON_BufferArray_Get(m_ptr, index);
@@ -2100,6 +2236,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -2126,17 +2263,20 @@ namespace Rhino.Runtime.InteropWrappers
   {
     IntPtr m_ptr; // ON_ClassArray<ON_wString>*
 
-    /// <summary>Gets the const (immutable) pointer of this array.</summary>
-    /// <returns>The const pointer.</returns>
+    /// <summary>Gets the constant (immutable) pointer of this array.</summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
-    /// <summary>Gets the non-const pointer (for modification) of this array.</summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <summary>Gets the non-constant pointer (for modification) of this array.</summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="ClassArrayString"/> instance.
     /// </summary>
+    /// <since>6.0</since>
     public ClassArrayString()
     {
       m_ptr = UnsafeNativeMethods.ON_StringArray_New();
@@ -2145,6 +2285,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of strings in this array.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -2158,6 +2299,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Adds a string to the list.
     /// </summary>
     /// <param name="s">A string to add.</param>
+    /// <since>6.0</since>
     public void Add(string s)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2175,6 +2317,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2196,6 +2339,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>6.0</since>
     public string[] ToArray()
     {
       int count = Count;
@@ -2227,20 +2371,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_ClassArray<CRhinoObjRef>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="ClassArrayObjRef"/> instance.
     /// </summary>
+    /// <since>5.0</since>
     public ClassArrayObjRef()
     {
       m_ptr = UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_New();
@@ -2250,6 +2397,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new instances from a set of ObjRefs
     /// </summary>
     /// <param name="objrefs">An array, a list or any enumerable set of Rhino object references.</param>
+    /// <since>5.0</since>
     public ClassArrayObjRef(System.Collections.Generic.IEnumerable<Rhino.DocObjects.ObjRef> objrefs)
     {
       m_ptr = UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_New();
@@ -2262,6 +2410,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of CRhinoObjRef instances in this array.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -2275,6 +2424,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Adds an ObjRef to the list.
     /// </summary>
     /// <param name="objref">An ObjRef to add.</param>
+    /// <since>5.0</since>
     public void Add(Rhino.DocObjects.ObjRef objref)
     {
       if (null != objref)
@@ -2296,6 +2446,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2315,6 +2466,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
     public Rhino.DocObjects.ObjRef[] ToNonConstArray()
     {
       int count = Count;
@@ -2343,20 +2495,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_ClassArray<ON_ObjRef>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.8</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.8</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="ClassArrayOnObjRef"/> instance.
     /// </summary>
+    /// <since>5.8</since>
     public ClassArrayOnObjRef()
     {
       m_ptr = UnsafeNativeMethods.ON_ClassArrayON_ObjRef_New();
@@ -2366,6 +2521,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new instances from a set of ObjRefs
     /// </summary>
     /// <param name="objrefs">An array, a list or any enumerable set of Rhino object references.</param>
+    /// <since>5.8</since>
     public ClassArrayOnObjRef(System.Collections.Generic.IEnumerable<Rhino.DocObjects.ObjRef> objrefs)
     {
       m_ptr = UnsafeNativeMethods.ON_ClassArrayON_ObjRef_New();
@@ -2378,6 +2534,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of ObjRef instances in this array.
     /// </summary>
+    /// <since>5.8</since>
     public int Count
     {
       get
@@ -2391,6 +2548,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Adds an ObjRef to the list.
     /// </summary>
     /// <param name="objref">An ObjRef to add.</param>
+    /// <since>5.8</since>
     public void Add(DocObjects.ObjRef objref)
     {
       if (null != objref)
@@ -2412,6 +2570,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.8</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2431,6 +2590,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Copies the unmanaged array to a managed counterpart.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>5.8</since>
     public DocObjects.ObjRef[] ToNonConstArray()
     {
       int count = Count;
@@ -2592,20 +2752,23 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_SimpleArray<CRhinoClippingPlaneObject*>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
+    /// <since>6.7</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>6.7</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayClippingPlaneObjectPointer"/> instance.
     /// </summary>
+    /// <since>6.7</since>
     public SimpleArrayClippingPlaneObjectPointer()
     {
       m_ptr = UnsafeNativeMethods.CRhinoClippingPlaneObjectArray_New();
@@ -2614,6 +2777,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of clipping planes in this array.
     /// </summary>
+    /// <since>6.7</since>
     public int Count
     {
       get
@@ -2629,6 +2793,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// </summary>
     /// <param name="clippingplane">A clipping plane to add.</param>
     /// <param name="asConst">Whether this clipping plane should be treated as non-modifiable.</param>
+    /// <since>6.7</since>
     public void Add(DocObjects.ClippingPlaneObject clippingplane, bool asConst)
     {
       if (null != clippingplane)
@@ -2652,6 +2817,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.7</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2690,16 +2856,19 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// The index of the curve used by this boundary element.
     /// </summary>
+    /// <since>7.0</since>
     public int Index => m_index;
 
     /// <summary>
-    /// The subdomain of the curve used by this boundary element.
+    /// The sub-domain of the curve used by this boundary element.
     /// </summary>
+    /// <since>7.0</since>
     public Interval SubDomain => m_subdomain;
 
     /// <summary>
     /// True if this piece of the curve should be reversed.
     /// </summary>
+    /// <since>7.0</since>
     public bool Reversed => m_reversed;
 
     #endregion
@@ -2710,15 +2879,15 @@ namespace Rhino.Runtime.InteropWrappers
     IntPtr m_ptr; // ON_ClassArray<ON_CurveRegion>*
 
     /// <summary>
-    /// Gets the const (immutable) pointer of this array.
+    /// Gets the constant (immutable) pointer of this array.
     /// </summary>
-    /// <returns>The const pointer.</returns>
+    /// <returns>The constant pointer.</returns>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
-    /// Gets the non-const pointer (for modification) of this array.
+    /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
-    /// <returns>The non-const pointer.</returns>
+    /// <returns>The non-constant pointer.</returns>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>

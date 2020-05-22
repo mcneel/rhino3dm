@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -54,6 +54,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create a new instance of SubD geometry
     /// </summary>
+    /// <since>7.0</since>
     public SubD()
     {
       m_ptr_subd_ref = UnsafeNativeMethods.ON_SubDRef_New();
@@ -111,6 +112,18 @@ namespace Rhino.Geometry
     {
       base.OnSwitchToNonConst();
 
+      // make sure m_ptr_subd_ref points at the correct m_ptr
+      IntPtr ptr = NonConstPointer();
+      if (ptr != IntPtr.Zero)
+      {
+        IntPtr ptr_subd_from_ref = UnsafeNativeMethods.ON_SubDRef_ConstPointerSubD(m_ptr_subd_ref);
+        if( ptr != ptr_subd_from_ref )
+        {
+          UnsafeNativeMethods.ON_SubDRef_Delete(m_ptr_subd_ref);
+          m_ptr_subd_ref = UnsafeNativeMethods.ON_SubDRef_CreateAndAttach(ptr);
+        }
+      }
+
       // update runtime serial number
       IntPtr const_ptr_subd = UnsafeNativeMethods.ON_SubDRef_ConstPointerSubD(m_ptr_subd_ref);
       RuntimeSerialNumber = UnsafeNativeMethods.ON_SubD_RuntimeSerialNumber(const_ptr_subd);
@@ -166,6 +179,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// All faces in this SubD
     /// </summary>
+    /// <since>7.0</since>
     public Collections.SubDFaceList Faces
     {
       get
@@ -180,6 +194,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// All vertices in this SubD
     /// </summary>
+    /// <since>7.0</since>
     public Collections.SubDVertexList Vertices
     {
       get
@@ -194,6 +209,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// All edges in this SubD
     /// </summary>
+    /// <since>7.0</since>
     public Collections.SubDEdgeList Edges
     {
       get
@@ -208,6 +224,7 @@ namespace Rhino.Geometry
     /// Test subd to see if the active level is a solid.  
     /// A "solid" is a closed oriented manifold, or a closed oriented manifold.
     /// </summary>
+    /// <since>7.0</since>
     public bool IsSolid
     {
       get
@@ -223,6 +240,7 @@ namespace Rhino.Geometry
     /// Create a Brep based on this SubD geometry
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Brep ToBrep()
     {
       return Brep.TryConvertBrep(this);
@@ -233,6 +251,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static SubD CreateFromMesh(Mesh mesh)
     {
       return CreateFromMesh(mesh, null);
@@ -244,6 +263,7 @@ namespace Rhino.Geometry
     /// <param name="mesh"></param>
     /// <param name="options"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static SubD CreateFromMesh(Mesh mesh, SubDCreationOptions options)
     {
       IntPtr const_ptr_mesh = mesh.ConstPointer();
@@ -259,6 +279,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Clear cached information that depends on the location of vertex control points
     /// </summary>
+    /// <since>7.0</since>
     public void ClearEvaluationCache()
     {
       var const_ptr_this = ConstPointer();
@@ -275,6 +296,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// Number of vertices and edges that were changed during the update.
     /// </returns>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public uint UpdateAllTagsAndSectorCoefficients()
     {
@@ -297,6 +319,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="count">Number of times to subdivide (must be greater than 0)</param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool Subdivide(int count)
     {
       if (count < 1)
@@ -318,6 +341,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create default options
     /// </summary>
+    /// <since>7.0</since>
     public SubDCreationOptions() : this(0)
     {
     }
@@ -330,6 +354,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// No interior creases and no corners.
     /// </summary>
+    /// <since>7.0</since>
     public static SubDCreationOptions Smooth
     {
       get
@@ -343,6 +368,7 @@ namespace Rhino.Geometry
     /// where the vertex normal directions at one end differ by at 
     /// least 30 degrees.
     /// </summary>
+    /// <since>7.0</since>
     public static SubDCreationOptions InteriorCreaseAtMeshCrease
     {
       get
@@ -354,6 +380,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create an interior sub-D crease along all coincident input mesh edges.
     /// </summary>
+    /// <since>7.0</since>
     public static SubDCreationOptions InteriorCreaseAtMeshEdge
     {
       get
@@ -366,6 +393,7 @@ namespace Rhino.Geometry
     /// Look for convex corners at sub-D vertices with 2 edges that have an
     /// included angle &lt;= 90 degrees.
     /// </summary>
+    /// <since>7.0</since>
     public static SubDCreationOptions ConvexCornerAtMeshCorner
     {
       get
@@ -383,8 +411,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Delete unmanager pointer for this
+    /// Delete unmanaged pointer for this
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       if (m_ptr != IntPtr.Zero)
@@ -395,6 +424,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// how interior creases are treated
     /// </summary>
+    /// <since>7.0</since>
     public InteriorCreaseOption InteriorCreaseTest
     {
       get
@@ -413,6 +443,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// how convex corners are treated
     /// </summary>
+    /// <since>7.0</since>
     public ConvexCornerOption ConvexCornerTest
     {
       get
@@ -434,8 +465,9 @@ namespace Rhino.Geometry
     /// generate sub-D creases.
     /// If the input mesh has vertex normals, and the angle between vertex
     /// normals is &gt; MinimumCreaseAngleRadians at an end of a coincident
-    /// input mesh edge, the the correspondeing sub-D edge will be a crease.
+    /// input mesh edge, the corresponding sub-D edge will be a crease.
     /// </summary>
+    /// <since>7.0</since>
     public double MinimumCreaseAngleRadians
     {
       get
@@ -456,6 +488,7 @@ namespace Rhino.Geometry
     /// vertex is &lt;= MaximumConvexCornerEdgeCount edges and the corner angle
     /// is &lt;= MaximumConvexCornerAngleRadians.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public uint MaximumConvexCornerEdgeCount
     {
@@ -477,6 +510,7 @@ namespace Rhino.Geometry
     /// vertex is &lt;= MaximumConvexCornerEdgeCount edges and the corner angle
     /// is &lt;= MaximumConvexCornerAngleRadians.
     /// </summary>
+    /// <since>7.0</since>
     public double MaximumConvexCornerAngleRadians
     {
       get
@@ -496,6 +530,7 @@ namespace Rhino.Geometry
     /// If false, input mesh vertex locations will be used to set subd vertex control net locations.
     /// If true, input mesh vertex locations will be used to set subd vertex limit surface locations.
     /// </summary>
+    /// <since>7.0</since>
     public bool InterpolateMeshVertices
     {
       get
@@ -534,12 +569,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Unique id within the parent SubD for this item
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public uint Id { get; }
 
     /// <summary>
-    /// SubD that this component belonds to
+    /// SubD that this component belongs to
     /// </summary>
+    /// <since>7.0</since>
     public SubD ParentSubD { get; }
 
     internal IntPtr ConstPointer()
@@ -586,6 +623,7 @@ namespace Rhino.Geometry
     /// Number of edges for this face. Note that EdgeCount is always the same
     /// as VertexCount. Two properties are provided simply for clarity.
     /// </summary>
+    /// <since>7.0</since>
     public int EdgeCount
     {
       get
@@ -599,15 +637,38 @@ namespace Rhino.Geometry
     /// Number of vertices for this face. Note that EdgeCount is always the same
     /// as VertexCount. Two properties are provided simply for clarity.
     /// </summary>
+    /// <since>7.0</since>
     public int VertexCount
     {
       get { return EdgeCount; }
+    }
+
+    /// <summary>
+    /// If per-face color is "Empty", then this face does not have a custom color
+    /// </summary>
+    public System.Drawing.Color PerFaceColor
+    {
+      get
+      {
+        IntPtr const_face_ptr = ConstPointer();
+        int argb = 0;
+        if (!UnsafeNativeMethods.ON_SubDFace_GetPerFaceColor(const_face_ptr, ref argb))
+          return System.Drawing.Color.Empty;
+        return System.Drawing.Color.FromArgb(argb);
+      }
+      set
+      {
+        IntPtr ptr_face = NonConstPointer();
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.ON_SubDFace_SetPerFaceColor(ptr_face, argb);
+      }
     }
 
 #if RHINO_SDK
     /// <summary>
     /// Get the limit surface point location at the center of the face
     /// </summary>
+    /// <since>7.0</since>
     public Point3d LimitSurfaceCenterPoint
     {
       get
@@ -626,6 +687,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDEdge EdgeAt(int index)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -645,6 +707,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool EdgeDirectionMatchesFaceOrientation(int index)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -656,6 +719,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDVertex VertexAt(int index)
     {
       var const_ptr_this = ConstPointer();
@@ -689,6 +753,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Location of the "control net" point that this SubDVertex represents
     /// </summary>
+    /// <since>7.0</since>
     public Point3d ControlNetPoint
     {
       get
@@ -706,6 +771,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary> Number of edges for this vertex </summary>
+    /// <since>7.0</since>
     public int EdgeCount
     {
       get
@@ -715,6 +781,7 @@ namespace Rhino.Geometry
       }
     }
     /// <summary> Number of faces for this vertex </summary>
+    /// <since>7.0</since>
     public int FaceCount
     {
       get
@@ -727,6 +794,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Next vertex in linked list of vertices on this level
     /// </summary>
+    /// <since>7.0</since>
     public SubDVertex Next
     {
       get
@@ -744,6 +812,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Previous vertex in linked list of vertices on this level
     /// </summary>
+    /// <since>7.0</since>
     public SubDVertex Previous
     {
       get
@@ -764,6 +833,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDEdge EdgeAt(int index)
     {
       if (index < 0)
@@ -785,6 +855,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// All edges that this vertex is part of
     /// </summary>
+    /// <since>7.0</since>
     public IEnumerable<SubDEdge> Edges
     {
       get
@@ -813,6 +884,7 @@ namespace Rhino.Geometry
 
     #region properties
     /// <summary> Number of faces for this edge </summary>
+    /// <since>7.0</since>
     public int FaceCount
     {
       get
@@ -825,6 +897,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Line representing the control net end points
     /// </summary>
+    /// <since>7.0</since>
     public Line ControlNetLine
     {
       get
@@ -836,6 +909,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Start vertex for this edge
     /// </summary>
+    /// <since>7.0</since>
     public SubDVertex VertexFrom
     {
       get
@@ -852,6 +926,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// End vertex for this edge
     /// </summary>
+    /// <since>7.0</since>
     public SubDVertex VertexTo
     {
       get
@@ -868,6 +943,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// identifies the type of subdivision edge
     /// </summary>
+    /// <since>7.0</since>
     public SubDEdgeTag Tag
     {
       get
@@ -889,6 +965,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDFace FaceAt(int index)
     {
       if (index < 0)
@@ -909,7 +986,7 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Get a cubic, uniform, nonrational, NURBS curve that is on the
+    /// Get a cubic, uniform, non-rational, NURBS curve that is on the
     /// edge's limit curve.
     /// </summary>
     /// <param name="clampEnds">
@@ -917,6 +994,7 @@ namespace Rhino.Geometry
     /// Otherwise the end knots are(-2,-1,0,...., k1, k1+1, k1+2).
     /// </param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public NurbsCurve ToNurbsCurve(bool clampEnds)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -946,6 +1024,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of SubD vertices.
     /// </summary>
+    /// <since>7.0</since>
     public int Count
     {
       get
@@ -958,6 +1037,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// First vertex in this linked list of vertices
     /// </summary>
+    /// <since>7.0</since>
     public SubDVertex First
     {
       get
@@ -977,6 +1057,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public SubDVertex Find(uint id)
     {
@@ -992,6 +1073,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDVertex Find(int id)
     {
       if (id < 0)
@@ -1006,6 +1088,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="vertex">Location of new vertex.</param>
     /// <returns>The newly added vertex.</returns>
     /// <exception cref="ArgumentOutOfRangeException">If tag is unset or non-defined.</exception>
+    /// <since>7.0</since>
     public SubDVertex Add(SubDVertexTag tag, Point3d vertex)
     {
       if (!SubD.IsSubDVertexTagDefined(tag))
@@ -1036,6 +1119,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of SubD edges.
     /// </summary>
+    /// <since>7.0</since>
     public int Count
     {
       get
@@ -1051,6 +1135,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public SubDEdge Find(uint id)
     {
@@ -1066,6 +1151,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDEdge Find(int id)
     {
       if (id < 0)
@@ -1077,11 +1163,13 @@ namespace Rhino.Geometry.Collections
     /// Implementation of IEnumerable
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public IEnumerator<SubDEdge> GetEnumerator()
     {
       return EdgeEnumerator().GetEnumerator();
     }
 
+    /// <since>7.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return EdgeEnumerator().GetEnumerator();
@@ -1109,6 +1197,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="v0">First vertex.</param>
     /// <param name="v1">Second vertex.</param>
     /// <exception cref="ArgumentOutOfRangeException">If tag is unset or non-defined.</exception>
+    /// <since>7.0</since>
     public SubDEdge Add(SubDEdgeTag tag, SubDVertex v0, SubDVertex v1)
     {
       if (!SubD.IsSubDEdgeTagDefined(tag))
@@ -1143,6 +1232,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of SubD faces.
     /// </summary>
+    /// <since>7.0</since>
     public int Count
     {
       get
@@ -1158,6 +1248,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public SubDFace Find(uint id)
     {
@@ -1173,6 +1264,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public SubDFace Find(int id)
     {
       if (id < 0)
@@ -1184,11 +1276,13 @@ namespace Rhino.Geometry.Collections
     /// Implementation of IEnumerable
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public IEnumerator<SubDFace> GetEnumerator()
     {
       return GetFaceEnumerator().GetEnumerator();
     }
 
+    /// <since>7.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetFaceEnumerator().GetEnumerator();
@@ -1197,11 +1291,20 @@ namespace Rhino.Geometry.Collections
     IEnumerable<SubDFace> GetFaceEnumerator()
     {
       IntPtr const_ptr_subd = m_subd.ConstPointer();
+      bool parentSubdIsNonConst = m_subd.IsNonConst;
       uint id = 0;
       IntPtr const_ptr_face = UnsafeNativeMethods.ON_SubD_FirstFace(const_ptr_subd, ref id);
       while (const_ptr_face != IntPtr.Zero)
       {
-        yield return new SubDFace(m_subd, const_ptr_face, id);
+        var face = new SubDFace(m_subd, const_ptr_face, id);
+        yield return face;
+        if(parentSubdIsNonConst != m_subd.IsNonConst)
+        {
+          // subd changed from const to non-const. This enumerator needs
+          // to update to reflect this change. The face will have a different
+          // pointer value
+          const_ptr_face = face.ConstPointer();
+        }
         const_ptr_face = UnsafeNativeMethods.ON_SubDFace_GetNext(const_ptr_face, ref id);
       }
     }
@@ -1210,7 +1313,7 @@ namespace Rhino.Geometry.Collections
     /// Adds a new edge to the end of the edge list.
     /// </summary>
     /// <param name="edges">edges to add</param>
-    /// <param name="directions">The direction each of these edges has, ralated to the face.
+    /// <param name="directions">The direction each of these edges has, related to the face.
     /// True means that the edge is reversed compared to the counter-clockwise order of the face.
     /// <para>This argument can be null. In this case, no edge is considered reversed.</para></param>
     /// <exception cref="ArgumentOutOfRangeException">If tag is unset or non-defined.</exception>

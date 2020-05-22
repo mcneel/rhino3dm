@@ -33,6 +33,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new instance.
     /// </summary>
+    /// <since>5.0</since>
     public ViewportInfo()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_Viewport_New(IntPtr.Zero);
@@ -43,6 +44,7 @@ namespace Rhino.DocObjects
     ///  Initializes a new instance by copying values from another instance.
     /// </summary>
     /// <param name="other">The other viewport info.</param>
+    /// <since>5.0</since>
     public ViewportInfo(ViewportInfo other)
     {
       IntPtr const_ptr_other_vp = other.ConstPointer();
@@ -55,6 +57,7 @@ namespace Rhino.DocObjects
     /// Copies all of the ViewportInfo data from an existing RhinoViewport.
     /// </summary>
     /// <param name="rhinoViewport">A viewport to copy.</param>
+    /// <since>5.0</since>
     public ViewportInfo(Display.RhinoViewport rhinoViewport)
     {
       IntPtr const_ptr_other_vp = rhinoViewport.ConstPointer();
@@ -68,6 +71,7 @@ namespace Rhino.DocObjects
     /// <param name="direction">The camera direction.</param>
     /// <param name="up">The camera up direction.</param>
     /// <returns>The camera rotation angle in radians.</returns>
+    /// <since>6.8</since>
     public static double CalculateCameraRotationAngle(Vector3d direction, Vector3d up)
     {
       return UnsafeNativeMethods.RHC_RhUpVectorToAngleRadians(direction, up);
@@ -80,6 +84,7 @@ namespace Rhino.DocObjects
     /// <param name="direction">The camera direction.</param>
     /// <param name="angle">The camera rotation angle in radians.</param>
     /// <returns>The camera up direction.</returns>
+    /// <since>6.8</since>
     public static Vector3d CalculateCameraUpDirection(Point3d location, Vector3d direction, double angle)
     {
       Vector3d rc = new Vector3d();
@@ -126,6 +131,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets a value that indicates whether the camera is valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValidCamera
     {
       get { return GetBool(idxIsValidCamera); }
@@ -134,6 +140,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets a value that indicates whether the frustum is valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValidFrustum
     {
       get { return GetBool(idxIsValidFrustum); }
@@ -142,6 +149,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get or set whether this projection is perspective.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsPerspectiveProjection
     {
       get { return GetBool(idxIsPerspectiveProjection); }
@@ -155,6 +163,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get or set whether this projection is parallel.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsParallelProjection
     {
       get { return GetBool(idxIsParallelProjection); }
@@ -168,6 +177,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets a value that indicates whether this projection is a two-point perspective.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsTwoPointPerspectiveProjection
     {
       get { return IsPerspectiveProjection && IsCameraUpLocked && IsFrustumLeftRightSymmetric && !IsFrustumTopBottomSymmetric; }
@@ -185,6 +195,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="symmetricFrustum">true if you want the resulting frustum to be symmetric.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ChangeToParallelProjection(bool symmetricFrustum)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -203,7 +214,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="targetDistance">
     /// If RhinoMath.UnsetValue this parameter is ignored.
-    /// Otherwise it must be > 0 and indicates which plane in the current view frustum should be perserved.
+    /// Otherwise it must be > 0 and indicates which plane in the current view frustum should be preserved.
     /// </param>
     /// <param name="symmetricFrustum">
     /// true if you want the resulting frustum to be symmetric.
@@ -214,6 +225,7 @@ namespace Rhino.DocObjects
     /// is perspective or lens_length is &lt;= 0.0,
     /// then this parameter is ignored.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ChangeToPerspectiveProjection( double targetDistance, bool symmetricFrustum, double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -233,7 +245,7 @@ namespace Rhino.DocObjects
     /// <param name="targetDistance">
     /// If RhinoMath.UnsetValue this parameter is ignored.  Otherwise
     /// it must be > 0 and indicates which plane in the current 
-    /// view frustum should be perserved.
+    /// view frustum should be preserved.
     /// </param>
     /// <param name="up">
     /// The locked up direction. Pass Vector3d.Zero if you want to use the world
@@ -248,6 +260,7 @@ namespace Rhino.DocObjects
     /// then this parameter is ignored.
     /// </param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ChangeToTwoPointPerspectiveProjection(double targetDistance, Vector3d up, double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -257,6 +270,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the camera location (position) point.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d CameraLocation
     {
       get
@@ -272,6 +286,7 @@ namespace Rhino.DocObjects
     /// Sets the camera location (position) point.
     /// </summary>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetCameraLocation(Point3d location)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -281,6 +296,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the direction that the camera faces.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CameraDirection
     {
       get
@@ -297,6 +313,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="direction">A new direction.</param>
     /// <returns>true if the direction was set; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SetCameraDirection(Vector3d direction)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -306,6 +323,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the camera up vector.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CameraUp
     {
       get
@@ -322,6 +340,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="up">A new direction.</param>
     /// <returns>true if the direction was set; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SetCameraUp(Vector3d up)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -340,6 +359,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value that indicates whether the camera location is unmodifiable.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCameraLocationLocked
     {
       get { return GetBool(idxIsCameraLocationLocked); }
@@ -349,6 +369,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value that indicates whether the direction that the camera faces is unmodifiable.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCameraDirectionLocked
     {
       get { return GetBool(idxIsCameraDirectionLocked); }
@@ -358,6 +379,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value that indicates whether the camera up vector is unmodifiable.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCameraUpLocked
     {
       get { return GetBool(idxIsCameraUpLocked); }
@@ -367,6 +389,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value that indicates whether the camera frustum has a vertical symmetry axis.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsFrustumLeftRightSymmetric
     {
       get { return GetBool(idxIsFrustumLeftRightSymmetric); }
@@ -380,6 +403,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value that indicates whether the camera frustum has a horizontal symmetry axis.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsFrustumTopBottomSymmetric
     {
       get { return GetBool(idxIsFrustumTopBottomSymmetric); }
@@ -393,6 +417,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Unlocks the camera vectors and location.
     /// </summary>
+    /// <since>5.0</since>
     public void UnlockCamera()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -402,6 +427,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Unlocks frustum horizontal and vertical symmetries.
     /// </summary>
+    /// <since>5.0</since>
     public void UnlockFrustumSymmetry()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -416,6 +442,7 @@ namespace Rhino.DocObjects
     /// <param name="cameraY">An out parameter that will be filled with the Y vector during the call.</param>
     /// <param name="cameraZ">An out parameter that will be filled with the Z vector during the call.</param>
     /// <returns>true if current camera orientation is valid; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool GetCameraFrame(out Point3d location,  out Vector3d cameraX, out Vector3d cameraY, out Vector3d cameraZ)
     {
       location = new Point3d(0, 0, 0);
@@ -429,6 +456,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the unit "to the right" vector.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CameraX
     {
       get 
@@ -443,6 +471,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the unit "up" vector.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CameraY
     {
       get
@@ -457,6 +486,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the unit vector in -CameraDirection.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CameraZ
     {
       get
@@ -469,6 +499,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary> Default z=up perspective camera direction </summary>
+    /// <since>6.0</since>
     static public Vector3d DefaultCameraDirection
     {
       get
@@ -491,6 +522,7 @@ namespace Rhino.DocObjects
     /// <param name="nearDistance">A new near distance value.</param>
     /// <param name="farDistance">A new far distance value.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetFrustum(double left, double right, double bottom, double top, double nearDistance, double farDistance)
     {
       return UnsafeNativeMethods.ON_Viewport_SetFrustum(NonConstPointer(), left, right, bottom, top, nearDistance, farDistance);
@@ -506,6 +538,7 @@ namespace Rhino.DocObjects
     /// <param name="nearDistance">A near distance value that will be filled during the call.</param>
     /// <param name="farDistance">A far distance value that will be filled during the call.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool GetFrustum(out double left, out double right, out double bottom, out double top, out double nearDistance, out double farDistance)
     {
       left = 0;
@@ -526,6 +559,7 @@ namespace Rhino.DocObjects
     /// want to call SetFrustumAspect() with the value returned by 
     /// GetScreenPortAspect().
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumAspect
     {
       get
@@ -546,6 +580,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the frustum center point.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d FrustumCenter
     {
       get
@@ -575,54 +610,64 @@ namespace Rhino.DocObjects
     /// Gets the frustum left value. This is -right if the frustum has a vertical symmetry axis.
     /// <para>This number is usually negative.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumLeft { get { return GetDouble(idxFrustumLeft); } }
 
     /// <summary>
     /// Gets the frustum right value. This is -left if the frustum has a vertical symmetry axis.
     /// <para>This number is usually positive.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumRight { get { return GetDouble(idxFrustumRight); } }
 
     /// <summary>
     /// Gets the frustum bottom value. This is -top if the frustum has a horizontal symmetry axis.
     /// <para>This number is usually negative.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumBottom { get { return GetDouble(idxFrustumBottom); } }
 
     /// <summary>
     /// Gets the frustum top value. This is -bottom if the frustum has a horizontal symmetry axis.
     /// <para>This number is usually positive.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumTop { get { return GetDouble(idxFrustumTop); } }
 
     /// <summary>
     /// Gets the frustum near-cutting value.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumNear { get { return GetDouble(idxFrustumNear); } }
 
     /// <summary>
     /// Gets the frustum far-cutting value.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumFar { get { return GetDouble(idxFrustumFar); } }
 
     /// <summary>
     /// Gets the frustum width. This is <see cref="FrustumRight"/> - <see cref="FrustumLeft"/>.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumWidth    { get { return FrustumRight - FrustumLeft; } }
 
     /// <summary>
     /// Gets the frustum height. This is <see cref="FrustumTop"/> - <see cref="FrustumBottom"/>.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumHeight   { get { return FrustumTop - FrustumBottom; } }
 
     /// <summary>
     /// Gets the frustum minimum diameter, or the minimum between <see cref="FrustumWidth"/> and <see cref="FrustumHeight"/>.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumMinimumDiameter { get { return GetDouble(idxFrustumMinimumDiameter); } }
 
     /// <summary>
     /// Gets the frustum maximum diameter, or the maximum between <see cref="FrustumWidth"/> and <see cref="FrustumHeight"/>.
     /// </summary>
+    /// <since>5.0</since>
     public double FrustumMaximumDiameter { get { return GetDouble(idxFrustumMaximumDiameter); } }
 
     /// <summary>
@@ -630,6 +675,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="boundingBox">A bounding box to use.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetFrustumNearFar(BoundingBox boundingBox)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -642,6 +688,7 @@ namespace Rhino.DocObjects
     /// <param name="center">A center point.</param>
     /// <param name="radius">A radius value.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetFrustumNearFar(Point3d center, double radius)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -654,6 +701,7 @@ namespace Rhino.DocObjects
     /// <param name="nearDistance">The new near distance.</param>
     /// <param name="farDistance">The new far distance.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetFrustumNearFar(double nearDistance, double farDistance)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -676,6 +724,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// Returns true if the viewport has now a frustum with the specified symmetries.
     /// </returns>
+    /// <since>5.0</since>
     public bool ChangeToSymmetricFrustum(bool isLeftRightSymmetric, bool isTopBottomSymmetric, double targetDistance)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -688,15 +737,16 @@ namespace Rhino.DocObjects
     /// the viewport is a perspective projection, then it intersects
     /// the semi infinite frustum volume with the bounding box and
     /// returns the near and far distances of the intersection.
-    /// If the viewport is a parallel projection, it instersects the
-    /// infinte view region with the bounding box and returns the
+    /// If the viewport is a parallel projection, it intersects the
+    /// infinite view region with the bounding box and returns the
     /// near and far distances of the projection.
     /// </summary>
     /// <param name="point">A point to measure.</param>
     /// <param name="distance">distance of the point (can be &lt; 0)</param>
     /// <returns>true if the bounding box intersects the view frustum and
     /// near_dist/far_dist were set.
-    /// false if the bounding box does not intesect the view frustum.</returns>
+    /// false if the bounding box does not intersect the view frustum.</returns>
+    /// <since>5.0</since>
     public bool GetPointDepth(Point3d point, out double distance)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -712,17 +762,18 @@ namespace Rhino.DocObjects
     /// projection, the it intersects the semi infinite frustum
     /// volume with the bounding box and returns the near and far
     /// distances of the intersection.  If the viewport is a parallel
-    /// projection, it instersects the infinte view region with the
+    /// projection, it intersects the infinite view region with the
     /// bounding box and returns the near and far distances of the
     /// projection.
     /// </summary>
     /// <param name="bbox">The bounding box to sample.</param>
     /// <param name="nearDistance">Near distance of the box. This value can be zero or 
-    /// negative when the camera location is inside bbox.</param>
+    /// negative when the camera location is inside box.</param>
     /// <param name="farDistance">Far distance of the box. This value can be equal to 
     /// near_dist, zero or negative when the camera location is in front of the bounding box.</param>
     /// <returns>true if the bounding box intersects the view frustum and near_dist/far_dist were set. 
-    /// false if the bounding box does not intesect the view frustum.</returns>
+    /// false if the bounding box does not intersect the view frustum.</returns>
+    /// <since>5.0</since>
     public bool GetBoundingBoxDepth(BoundingBox bbox, out double nearDistance, out double farDistance)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -738,7 +789,8 @@ namespace Rhino.DocObjects
     /// <param name="nearDistance">Near distance of the sphere (can be &lt; 0)</param>
     /// <param name="farDistance">Far distance of the sphere (can be equal to near_dist)</param>
     /// <returns>true if the sphere intersects the view frustum and near_dist/far_dist were set.
-    /// false if the sphere does not intesect the view frustum.</returns>
+    /// false if the sphere does not intersect the view frustum.</returns>
+    /// <since>5.0</since>
     public bool GetSphereDepth(Sphere sphere, out double nearDistance, out double farDistance)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -771,6 +823,7 @@ namespace Rhino.DocObjects
     /// If target_dist &gt; 0, it is used as described in the
     /// description of the min_near_over_far parameter.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool SetFrustumNearFar(double nearDistance, double farDistance, double minNearDistance, double minNearOverFar, double targetDistance)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -800,6 +853,7 @@ namespace Rhino.DocObjects
     /// normal points out of the frustum towards the camera
     /// location.
     /// </summary>
+    /// <since>5.0</since>
     public Plane FrustumNearPlane
     {
       get { return GetPlane(idxNearPlane); }
@@ -812,38 +866,43 @@ namespace Rhino.DocObjects
     /// camera direction ray and the far clipping plane. The plane's
     /// normal points into the frustum towards the camera location.
     /// </summary>
+    /// <since>5.0</since>
     public Plane FrustumFarPlane
     {
       get { return GetPlane(idxFarPlane); }
     }
 
     /// <summary>
-    /// Gets the frustum left plane that separates visibile from off-screen.
+    /// Gets the frustum left plane that separates visible from off-screen.
     /// </summary>
+    /// <since>5.0</since>
     public Plane FrustumLeftPlane
     {
       get { return GetPlane(idxLeftPlane); }
     }
 
     /// <summary>
-    /// Gets the frustum right plane that separates visibile from off-screen.
+    /// Gets the frustum right plane that separates visible from off-screen.
     /// </summary>
+    /// <since>5.0</since>
     public Plane FrustumRightPlane
     {
       get { return GetPlane(idxRightPlane); }
     }
 
     /// <summary>
-    /// Gets the frustum bottom plane that separates visibile from off-screen.
+    /// Gets the frustum bottom plane that separates visible from off-screen.
     /// </summary>
+    /// <since>5.0</since>
     public Rhino.Geometry.Plane FrustumBottomPlane
     {
       get { return GetPlane(idxBottomPlane); }
     }
 
     /// <summary>
-    /// Gets the frustum top plane that separates visibile from off-screen.
+    /// Gets the frustum top plane that separates visible from off-screen.
     /// </summary>
+    /// <since>5.0</since>
     public Plane FrustumTopPlane
     {
       get { return GetPlane(idxTopPlane); }
@@ -858,6 +917,7 @@ namespace Rhino.DocObjects
     /// Four corner points on success.
     /// Empty array if viewport is not valid.
     /// </returns>
+    /// <since>5.0</since>
     public Point3d[] GetNearPlaneCorners()
     {
       var left_bottom = new Point3d();
@@ -879,6 +939,7 @@ namespace Rhino.DocObjects
     /// Four corner points on success.
     /// Empty array if viewport is not valid.
     /// </returns>
+    /// <since>5.0</since>
     public Point3d[] GetFarPlaneCorners()
     {
       var left_bottom = new Point3d();
@@ -916,6 +977,7 @@ namespace Rhino.DocObjects
     /// <param name="near">A near value.</param>
     /// <param name="far">A far value.</param>
     /// <returns>true if input is valid.</returns>
+    /// <since>5.0</since>
     public bool SetScreenPort(int left, int right, int bottom, int top, int near, int far)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -930,6 +992,7 @@ namespace Rhino.DocObjects
     /// <param name="near">The near value.</param>
     /// <param name="far">The far value.</param>
     /// <returns>true if input is valid.</returns>
+    /// <since>5.0</since>
     public bool SetScreenPort(System.Drawing.Rectangle windowRectangle, int near, int far)
     {
       return SetScreenPort(windowRectangle.Left, windowRectangle.Right, windowRectangle.Bottom, windowRectangle.Top, near, far);
@@ -941,6 +1004,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="windowRectangle">A new rectangle.</param>
     /// <returns>true if input is valid.</returns>
+    /// <since>5.0</since>
     public bool SetScreenPort(System.Drawing.Rectangle windowRectangle)
     {
       return SetScreenPort(windowRectangle, 0, 0);
@@ -953,6 +1017,7 @@ namespace Rhino.DocObjects
     /// <param name="top"></param>
     /// <param name="right"></param>
     /// <param name="bottom"></param>
+    /// <since>6.0</since>
     public void GetScreenPortLocation(out int left, out int top, out int right, out int bottom)
     {
       var rect = ScreenPort;
@@ -969,6 +1034,7 @@ namespace Rhino.DocObjects
     /// <param name="near">The near value. This out parameter is assigned during the call.</param>
     /// <param name="far">The far value. This out parameter is assigned during the call.</param>
     /// <returns>The rectangle, or <see cref="System.Drawing.Rectangle.Empty">Empty</see> rectangle on error.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle GetScreenPort(out int near, out int far)
     {
       int left = 0;
@@ -991,6 +1057,7 @@ namespace Rhino.DocObjects
     /// See documentation for <see cref="SetScreenPort(int, int, int, int, int, int)">SetScreenPort</see>.
     /// </summary>
     /// <returns>The rectangle, or <see cref="System.Drawing.Rectangle.Empty">Empty</see> rectangle on error.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle GetScreenPort()
     {
       int near;
@@ -1001,6 +1068,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get or set the screen port. <see cref="SetScreenPort(System.Drawing.Rectangle)"/> and <seealso cref="GetScreenPort()"/>
     /// </summary>
+    /// <since>6.0</since>
     public System.Drawing.Rectangle ScreenPort
     {
       get
@@ -1014,9 +1082,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets the sceen aspect ratio.
+    /// Gets the screen aspect ratio.
     /// <para>This is width / height.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double ScreenPortAspect
     {
       get
@@ -1036,6 +1105,7 @@ namespace Rhino.DocObjects
     /// <param name="halfVerticalAngleRadians">1/2 of vertical subtended angle. This out parameter is assigned during this call.</param>
     /// <param name="halfHorizontalAngleRadians">1/2 of horizontal subtended angle. This out parameter is assigned during this call.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool GetCameraAngles(out double halfDiagonalAngleRadians, out double halfVerticalAngleRadians, out double halfHorizontalAngleRadians)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -1048,6 +1118,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the 1/2 smallest angle. See <see cref="GetCameraAngles"/> for more information.
     /// </summary>
+    /// <since>5.0</since>
     public double CameraAngle
     {
       get
@@ -1072,6 +1143,7 @@ namespace Rhino.DocObjects
     /// Setting preserves camera location,
     /// changes the frustum, but maintains the frustum's aspect.
     /// </summary>
+    /// <since>5.0</since>
     public double Camera35mmLensLength
     {
       get
@@ -1095,6 +1167,7 @@ namespace Rhino.DocObjects
     /// <param name="sourceSystem">The coordinate system to map from.</param>
     /// <param name="destinationSystem">The coordinate system to map into.</param>
     /// <returns>The 4x4 transformation matrix (acts on the left).</returns>
+    /// <since>5.0</since>
     public Transform GetXform(CoordinateSystem sourceSystem, CoordinateSystem destinationSystem)
     {
       var matrix = new Transform();
@@ -1111,6 +1184,7 @@ namespace Rhino.DocObjects
     /// <param name="screenX">(screenx,screeny) = screen location.</param>
     /// <param name="screenY">(screenx,screeny) = screen location.</param>
     /// <returns>3d world coordinate line segment starting on the near clipping plane and ending on the far clipping plane.</returns>
+    /// <since>5.1</since>
     public Line GetFrustumLine( double screenX, double screenY)
     {
       var line = new Line();
@@ -1126,6 +1200,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="screenPoint">screen location</param>
     /// <returns>3d world coordinate line segment starting on the near clipping plane and ending on the far clipping plane.</returns>
+    /// <since>5.1</since>
     public Line GetFrustumLine(System.Drawing.Point screenPoint)
     {
       return GetFrustumLine(screenPoint.X, screenPoint.Y);
@@ -1137,6 +1212,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="screenPoint">screen location</param>
     /// <returns>3d world coordinate line segment starting on the near clipping plane and ending on the far clipping plane.</returns>
+    /// <since>5.1</since>
     public Line GetFrustumLine(System.Drawing.PointF screenPoint)
     {
       return GetFrustumLine(screenPoint.X, screenPoint.Y);
@@ -1147,6 +1223,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="pointInFrustum">point in viewing frustum.</param>
     /// <returns>number of pixels per world unit at the 3d point.</returns>
+    /// <since>5.1</since>
     public double GetWorldToScreenScale(Point3d pointInFrustum)
     {
       double d = 0.0;
@@ -1159,12 +1236,13 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Extends this viewport view to include a bounding box.
     /// <para>Use Extents() as a quick way to set a viewport to so that bounding
-    /// volume is inside of a viewports frustrum.
+    /// volume is inside of a viewports frustum.
     /// The view angle is used to determine the position of the camera.</para>
     /// </summary>
     /// <param name="halfViewAngleRadians">1/2 smallest subtended view angle in radians.</param>
     /// <param name="bbox">A bounding box in 3d world coordinates.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool Extents(double halfViewAngleRadians, BoundingBox bbox)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1174,12 +1252,13 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Extends this viewport view to include a sphere.
     /// <para>Use Extents() as a quick way to set a viewport to so that bounding
-    /// volume is inside of a viewports frustrum.
+    /// volume is inside of a viewports frustum.
     /// The view angle is used to determine the position of the camera.</para>
     /// </summary>
     /// <param name="halfViewAngleRadians">1/2 smallest subtended view angle in radians.</param>
     /// <param name="sphere">A sphere in 3d world coordinates.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool Extents(double halfViewAngleRadians, Sphere sphere)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1192,11 +1271,12 @@ namespace Rhino.DocObjects
     /// using a mouse to manipulate a view.
     /// ZoomToScreenRect() may change camera and frustum settings.</para>
     /// </summary>
-    /// <param name="left">Screen coord.</param>
-    /// <param name="top">Screen coord.</param>
-    /// <param name="right">Screen coord.</param>
-    /// <param name="bottom">Screen coord.</param>
+    /// <param name="left">Screen coordinate.</param>
+    /// <param name="top">Screen coordinate.</param>
+    /// <param name="right">Screen coordinate.</param>
+    /// <param name="bottom">Screen coordinate.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ZoomToScreenRect(int left, int top, int right, int bottom)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1211,6 +1291,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="windowRectangle">The new window rectangle in screen space.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ZoomToScreenRect(System.Drawing.Rectangle windowRectangle)
     {
       return ZoomToScreenRect(windowRectangle.Left, windowRectangle.Top, windowRectangle.Right, windowRectangle.Bottom);
@@ -1225,6 +1306,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="dollyVector">dolly vector in world coordinates.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool DollyCamera(Vector3d dollyVector)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1234,12 +1316,13 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets a world coordinate dolly vector that can be passed to DollyCamera().
     /// </summary>
-    /// <param name="screenX0">Screen coords of start point.</param>
-    /// <param name="screenY0">Screen coords of start point.</param>
-    /// <param name="screenX1">Screen coords of end point.</param>
-    /// <param name="screenY1">Screen coords of end point.</param>
+    /// <param name="screenX0">Screen coordinates of start point.</param>
+    /// <param name="screenY0">Screen coordinates of start point.</param>
+    /// <param name="screenX1">Screen coordinates of end point.</param>
+    /// <param name="screenY1">Screen coordinates of end point.</param>
     /// <param name="projectionPlaneDistance">Distance of projection plane from camera. When in doubt, use 0.5*(frus_near+frus_far).</param>
     /// <returns>The world coordinate dolly vector.</returns>
+    /// <since>5.0</since>
     public Vector3d GetDollyCameraVector(int screenX0, int screenY0, int screenX1, int screenY1, double projectionPlaneDistance)
     {
       var v = new Vector3d();
@@ -1256,6 +1339,7 @@ namespace Rhino.DocObjects
     /// <param name="screen1">End point.</param>
     /// <param name="projectionPlaneDistance">Distance of projection plane from camera. When in doubt, use 0.5*(frus_near+frus_far).</param>
     /// <returns>The world coordinate dolly vector.</returns>
+    /// <since>5.0</since>
     public Vector3d GetDollyCameraVector(System.Drawing.Point screen0, System.Drawing.Point screen1, double projectionPlaneDistance)
     {
       return GetDollyCameraVector(screen0.X, screen0.Y, screen1.X, screen1.Y, projectionPlaneDistance);
@@ -1266,6 +1350,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="dollyDistance">Distance to move in camera direction.</param>
     /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool DollyFrustum(double dollyDistance)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1279,11 +1364,12 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="geometry"></param>
     /// <param name="border">
-    /// If border > 1.0, then the fustum in enlarged by this factor
+    /// If border > 1.0, then the frustum in enlarged by this factor
     /// to provide a border around the view.  1.1 works well for
     /// parallel projections; 0.0 is suggested for perspective projections.
     /// </param>
     /// <returns>True if successful.</returns>
+    /// <since>5.6</since>
     public bool DollyExtents(IEnumerable<GeometryBase> geometry, double border)
     {
       var world_2_camera = GetXform(CoordinateSystem.World, CoordinateSystem.Camera);
@@ -1303,11 +1389,12 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="cameraCoordinateBoundingBox"></param>
     /// <param name="border">
-    /// If border > 1.0, then the fustum in enlarged by this factor
+    /// If border > 1.0, then the frustum in enlarged by this factor
     /// to provide a border around the view.  1.1 works well for
     /// parallel projections; 0.0 is suggested for perspective projections.
     /// </param>
     /// <returns>True if successful.</returns>
+    /// <since>5.6</since>
     public bool DollyExtents(BoundingBox cameraCoordinateBoundingBox, double border)
     {
       bool rc = false;
@@ -1336,6 +1423,7 @@ namespace Rhino.DocObjects
     /// If you want to compress the view projection across the viewing
     /// plane, then set x = 0.5, y = 1.0, and z = 1.0.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.SizeF ViewScale
     {
       get
@@ -1403,6 +1491,7 @@ namespace Rhino.DocObjects
     /// as the targetDistance.</param>
     /// <returns>A point on the frustum's central axis.  If the viewport or input
     /// is not valid, then ON_3dPoint::UnsetPoint is returned.</returns>
+    /// <since>5.0</since>
     public Point3d FrustumCenterPoint( double targetDistance ) 
     {
       Point3d point = Point3d.Unset;
@@ -1420,6 +1509,7 @@ namespace Rhino.DocObjects
     /// You must explicitly call one SetTargetPoint() functions to set
     /// the target point.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d TargetPoint
     {
       get
@@ -1450,6 +1540,7 @@ namespace Rhino.DocObjects
     /// If the target point is on the visible side of the camera,
     /// a positive value is returned.  ON_UNSET_VALUE is returned
     /// when the input of view is not valid.</returns>
+    /// <since>5.0</since>
     public double TargetDistance( bool useFrustumCenterFallback )
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -1490,6 +1581,7 @@ namespace Rhino.DocObjects
     /// ratio of near/far when perspective projections
     /// are begin used.
     /// </summary>
+    /// <since>7.0</since>
     public double PerspectiveMinNearOverFar
     {
       get
@@ -1509,6 +1601,7 @@ namespace Rhino.DocObjects
     /// value of near when perspective projections
     /// are being used.
     /// </summary>
+    /// <since>7.0</since>
     public double PerspectiveMinNearDist
     {
       get
@@ -1531,6 +1624,7 @@ namespace Rhino.DocObjects
     /// across multiple viewports and those routines that 
     /// manage them.
     /// </summary>
+    /// <since>5.0</since>
     public Guid Id
     {
       get
@@ -1551,6 +1645,7 @@ namespace Rhino.DocObjects
     /// <param name="xform">Transformation to apply to camera.</param>
     /// <returns>True if a valid camera was transformed, false if
     /// invalid camera, frustum, or transformation.</returns>
+    /// <since>7.0</since>
     public bool TransformCamera(Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1564,6 +1659,7 @@ namespace Rhino.DocObjects
     /// <param name="rotationAxis">The axis to rotate around.</param>
     /// <param name="rotationCenter">The point to rotate around.</param>
     /// <returns>True if rotation is successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool RotateCamera(double rotationAngleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       IntPtr ptr_this = NonConstPointer();

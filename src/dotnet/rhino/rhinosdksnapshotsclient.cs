@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 #if RHINO_SDK
 
 using System;
@@ -17,13 +17,14 @@ namespace Rhino.DocObjects.SnapShots
   }
 
   /// <summary>
-  /// This is the abstract interface class for for all Snapshot clients.
+  /// This is the abstract interface class for all Snapshot clients.
   /// </summary>
   public abstract class SnapShotsClient : IDisposable
   {
     private IntPtr m_cpp;
     private int m_sn;
 
+    /// <since>6.0</since>
     public IntPtr CppPointer
     {
       get
@@ -32,6 +33,7 @@ namespace Rhino.DocObjects.SnapShots
       }
     }
 
+    /// <since>6.0</since>
     public int SerialNumber
     {
       get
@@ -47,6 +49,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <summary>
     /// SnapShotsClient constructor
     /// </summary>
+    /// <since>6.0</since>
     public SnapShotsClient()
     {
       // create new generic controll, serial_number as parameter
@@ -60,6 +63,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <summary>
     /// SnapShotsClient Dispose
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       if (!disposed)
@@ -75,6 +79,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <summary>
     /// Function used to register snapshots client
     /// </summary>
+    /// <since>6.0</since>
     public static bool RegisterSnapShotClient(SnapShotsClient client)
     {
       return UnsafeNativeMethods.CRdkCmnSnapShotClient_RhSnapshotsRegister(client.CppPointer);
@@ -84,6 +89,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined application category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string ApplicationCategory()
     {
       string category = "";
@@ -99,6 +105,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined document category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string DocumentCategory()
     {
       string category = "";
@@ -114,6 +121,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined rendering category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string RenderingCategory()
     {
       string category = "";
@@ -129,6 +137,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined views category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string ViewsCategory()
     {
       string category = "";
@@ -144,6 +153,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined objects category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string ObjectsCategory()
     {
       string category = "";
@@ -159,6 +169,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined layers category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string LayersCategory()
     {
       string category = "";
@@ -174,6 +185,7 @@ namespace Rhino.DocObjects.SnapShots
     /// Predefined lights category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string LightsCategory()
     {
       string category = "";
@@ -189,27 +201,32 @@ namespace Rhino.DocObjects.SnapShots
     /// The plug-in id that registers this client.
     /// </summary>
     /// <returns>The plug-in id that registers this client.</returns>
+    /// <since>6.0</since>
     public abstract Guid PlugInId();
     /// <summary>
     /// The unique id of this client.
     /// </summary>
     /// <returns>The unique id of this client.</returns>
+    /// <since>6.0</since>
     public abstract Guid ClientId();
     /// <summary>
     /// The category of this client. Usually one of the above predefined categories like e.g
     /// object, rendering or application category
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public abstract string Category();
     /// <summary>
     /// The client's name.
     /// </summary>
     /// <returns>The client's name.</returns>
+    /// <since>6.0</since>
     public abstract string Name();
     /// <summary>
     /// Defines if the client supports document user data or not
     /// </summary>
     /// <returns> true if the client saves/restores document user data.</returns>
+    /// <since>6.0</since>
     public abstract bool SupportsDocument();
     /// <summary>
     /// Called when the user saves a snapshot and SupportDocument() returns true.
@@ -217,6 +234,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="doc">doc is the current document</param>
     /// <param name="archive"> archive is the archive to write the data to</param>
     /// <returns>true if successful, otherwise false</returns>
+    /// <since>6.0</since>
     public abstract bool SaveDocument(RhinoDoc doc, BinaryArchiveWriter archive);
     /// <summary>
     /// Called when the user restores a snapshot and SupportDocument() returns true.
@@ -224,17 +242,20 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="doc">doc is the current document</param>
     /// <param name="archive">archive is the archive to read the data from</param>
     /// <returns>true if successful, otherwise false</returns>
+    /// <since>6.0</since>
     public abstract bool RestoreDocument(RhinoDoc doc, BinaryArchiveReader archive);
     /// <summary>
     /// Returns true if the client saves/restores object user data.
     /// </summary>
     /// <returns>true if the client saves/restores object user data.</returns>
+    /// <since>6.0</since>
     public abstract bool SupportsObjects();
     /// <summary>
     ///  Returns true if the client saves/restores object user data for the given object.
     /// </summary>
     /// <param name="doc_object">doc_object is the given object</param>
     /// <returns> true if the client saves/restores object user data for the given object.</returns>
+    /// <since>6.0</since>
     public abstract bool SupportsObject(Rhino.DocObjects.RhinoObject doc_object);
     /// <summary>
     /// Called when the user saves a snapshot and SupportsObjects() and SupportsObject(Rhino.DocObjects.RhinoObject doc_object) returns true.
@@ -245,6 +266,7 @@ namespace Rhino.DocObjects.SnapShots
     /// After that the matrix is updated when the object is transformed(scale, rotate etc.).</param>
     /// <param name="archive">archive is the archive to write the data to.</param>
     /// <returns>true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool SaveObject(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, BinaryArchiveWriter archive);
     /// <summary>
     /// Called when the user restores a snapshot and SupportsObjects() and SupportsObject(Rhino.DocObjects.RhinoObject doc_object) returns true.
@@ -255,22 +277,26 @@ namespace Rhino.DocObjects.SnapShots
     /// After that the matrix is updated when the object is transformed(scale, rotate etc.).</param>
     /// <param name="archive">archive is the archive to read the data from.</param>
     /// <returns>true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool RestoreObject(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, BinaryArchiveReader archive);
     /// <summary>
     /// Called after all clients restored their data.
     /// </summary>
     /// <param name="doc"></param>
+    /// <since>6.0</since>
     public abstract void SnapshotRestored(RhinoDoc doc);
     /// <summary>
     /// Returns true if the client allows animation.
     /// </summary>
     /// <returns>true if the client allows animation.</returns>
+    /// <since>6.0</since>
     public abstract bool SupportsAnimation();
     /// <summary>
     /// Called once at the start of an animation.
     /// </summary>
     /// <param name="doc">doc is the current document.</param>
     /// <param name="iFrames">iFrames is the number of frames to be animated.</param>
+    /// <since>6.0</since>
     public abstract void AnimationStart(RhinoDoc doc, int iFrames);
     /// <summary>
     /// Called once at the start of an animation.
@@ -279,6 +305,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <returns>true if successful, otherwise</returns>
+    /// <since>6.0</since>
     public abstract bool PrepareForDocumentAnimation(RhinoDoc doc, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop);
     /// <summary>
     /// Called once at the start of an animation. This can be used to extend the scene bounding box to avoid clipping.
@@ -287,15 +314,17 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <param name="bbox">bbox is the current scene bounding box.</param>
+    /// <since>6.0</since>
     public abstract void ExtendBoundingBoxForDocumentAnimation(RhinoDoc doc, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop, ref Rhino.Geometry.BoundingBox bbox);
     /// <summary>
     /// Called for each frame. Starting at 0.0.
     /// </summary>
     /// <param name="doc">doc is the current document.</param>
-    /// <param name="dPos">dPos is is the current frame. Starting at 0.0.</param>
+    /// <param name="dPos">dPos is the current frame. Starting at 0.0.</param>
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <returns>true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool AnimateDocument(RhinoDoc doc, double dPos, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop);
     /// <summary>
     /// Called once at the start of an animation.
@@ -307,6 +336,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <returns>true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool PrepareForObjectAnimation(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop);
     /// <summary>
     /// Called once at the start of an animation. This can be used to extend the scene bounding box to avoid clipping.
@@ -318,6 +348,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <param name="bbox">bbox is the current scene bounding box.</param>
+    /// <since>6.0</since>
     public abstract void ExtendBoundingBoxForObjectAnimation(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop, ref Rhino.Geometry.BoundingBox bbox);
     /// <summary>
     /// Called for each frame. Starting at 0.0.
@@ -326,16 +357,18 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="doc_object">doc_obj is the current object.</param>
     /// <param name="transform">transform is a transformation matrix. The matrix is set to identity the first time an object is associated with a snapshot.
     /// After that the matrix is updated when the object is transformed(scale, rotate etc.).</param>
-    /// <param name="dPos">dPos is is the current frame. Starting at 0.0.</param>
+    /// <param name="dPos">dPos is the current frame. Starting at 0.0.</param>
     /// <param name="archive_start">archive_start is a archive to the data of the starting position.</param>
     /// <param name="archive_stop">archive_stop is a archive to the data of the ending position.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public abstract bool AnimateObject(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, double dPos, BinaryArchiveReader archive_start, BinaryArchiveReader archive_stop);
     /// <summary>
     /// Called once at the end of an animation.
     /// </summary>
     /// <param name="doc">doc is the current document.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public abstract bool AnimationStop(RhinoDoc doc);
     /// <summary>
     /// Called for every object that is associated with a snapshot and gets transformed in Rhino. This is getting called for each stored snapshot and gives the client the possibility to update the stored data.
@@ -346,6 +379,7 @@ namespace Rhino.DocObjects.SnapShots
     /// After that the matrix is updated when the object is transformed(scale, rotate etc.).</param>
     /// <param name="archive">archive is a archive which can be used to update the stored data.</param>
     /// <returns>true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool ObjectTransformNotification(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, ref Rhino.Geometry.Transform transform, BinaryArchiveReader archive);
     /// <summary>
     /// Called before restoring a snapshot. Warns the user if the current model state is not already saved.
@@ -355,6 +389,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_array">archive_array is a list of client data.</param>
     /// <param name="text_log">text_log is used to list the missing items that cannot be found in the current model.</param>
     /// <returns>return true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool IsCurrentModelStateInAnySnapshot(RhinoDoc doc, BinaryArchiveReader archive, SimpleArrayBinaryArchiveReader archive_array, TextLog text_log = null);
     /// <summary>
     /// Called before restoring a snapshot. Warns the user if the current model state is not already saved.
@@ -365,6 +400,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <param name="archive_array">archive_array is a list of client data.</param>
     /// <param name="text_log">text_log is used to list the missing items that cannot be found in the current model.</param>
     /// <returns>return true if successful, otherwise false.</returns>
+    /// <since>6.0</since>
     public abstract bool IsCurrentModelStateInAnySnapshot(RhinoDoc doc, Rhino.DocObjects.RhinoObject doc_object, BinaryArchiveReader archive, SimpleArrayBinaryArchiveReader archive_array, TextLog text_log = null);
     private static SnapShotsClient FromSerialNumber(int serial)
     {

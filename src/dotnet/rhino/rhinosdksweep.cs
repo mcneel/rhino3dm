@@ -7,7 +7,7 @@ namespace Rhino.Geometry
 {
   /// <summary>
   /// Utility class for generating Breps by sweeping cross section curves over a single rail curve. 
-  /// Note, this class has been superceeded by the Rhino.Geometry.Brep.CreateFromSweep static functions.
+  /// Note, this class has been superseded by the Rhino.Geometry.Brep.CreateFromSweep static functions.
   /// </summary>
   public class SweepOneRail
   {
@@ -23,49 +23,60 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_sweep1.cs' lang='cs'/>
     /// <code source='examples\py\ex_sweep1.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public SweepOneRail()
     {
     }
 
+    /// <since>5.0</since>
     public bool IsFreeform
     {
       get { return !m_roadlike_up.IsValid; }
     }
 
+    /// <since>5.0</since>
     public bool IsRoadlike
     {
       get { return m_roadlike_up.IsValid; }
     }
 
+    /// <since>5.0</since>
     public bool IsRoadlikeTop
     {
       get { return m_roadlike_up == Vector3d.ZAxis; }
     }
+    /// <since>5.0</since>
     public bool IsRoadlikeFront
     {
       get { return m_roadlike_up == Vector3d.YAxis; }
     }
+    /// <since>5.0</since>
     public bool IsRoadlineRight
     {
       get { return m_roadlike_up == Vector3d.XAxis; }
     }
+    /// <since>5.0</since>
     public void SetToRoadlikeTop()
     {
       SetRoadlikeUpDirection(Vector3d.ZAxis);
     }
+    /// <since>5.0</since>
     public void SetToRoadlikeFront()
     {
       SetRoadlikeUpDirection(Vector3d.YAxis);
     }
+    /// <since>5.0</since>
     public void SetToRoadlikeRight()
     {
       SetRoadlikeUpDirection(Vector3d.XAxis);
     }
+    /// <since>5.0</since>
     public void SetRoadlikeUpDirection(Vector3d up)
     {
       m_roadlike_up = up;
     }
 
+    /// <since>5.0</since>
     public double SweepTolerance
     {
       get
@@ -82,6 +93,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>5.0</since>
     public double AngleToleranceRadians
     {
       get
@@ -101,6 +113,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// 0: don't miter,  1: intersect surfaces and trim sweeps,  2: rotate shapes at kinks and don't trim.
     /// </summary>
+    /// <since>5.0</since>
     public int MiterType
     {
       get { return m_miter_type; }
@@ -111,6 +124,7 @@ namespace Rhino.Geometry
     /// If the input rail is closed, ClosedSweep determines if the swept breps will also
     /// be closed.
     /// </summary>
+    /// <since>5.0</since>
     public bool ClosedSweep
     {
       get { return m_bClosed; }
@@ -123,6 +137,7 @@ namespace Rhino.Geometry
     /// If false, the sweep stays constant at the ends and changes more
     /// rapidly in the middle.
     /// </summary>
+    /// <since>5.1</since>
     public bool GlobalShapeBlending
     {
       get { return m_shape_blending == 1; }
@@ -130,11 +145,13 @@ namespace Rhino.Geometry
     }
 
     #region no simplify
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail, Curve crossSection)
     {
       return PerformSweep(rail, new Curve[] { crossSection });
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail, Curve crossSection, double crossSectionParameter)
     {
       return PerformSweep(rail, new Curve[] { crossSection }, new double[] { crossSectionParameter });
@@ -145,6 +162,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_sweep1.cs' lang='cs'/>
     /// <code source='examples\py\ex_sweep1.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail, IEnumerable<Curve> crossSections)
     {
       List<double> rail_params = new List<double>();
@@ -221,6 +239,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters)
     {
       List<Curve> sections = new List<Curve>(crossSections);
@@ -247,16 +266,19 @@ namespace Rhino.Geometry
     #endregion
 
     #region refit
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail, Curve crossSection, double refitTolerance)
     {
       return PerformSweepRefit(rail, new Curve[] { crossSection }, refitTolerance);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail, Curve crossSection, double crossSectionParameter, double refitTolerance)
     {
       return PerformSweepRefit(rail, new Curve[] { crossSection }, new double[] { crossSectionParameter }, refitTolerance);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail, IEnumerable<Curve> crossSections, double refitTolerance)
     {
       List<double> rail_params = new List<double>();
@@ -270,6 +292,7 @@ namespace Rhino.Geometry
       return PerformSweepRefit(rail, crossSections, rail_params, refitTolerance);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters, double refitTolerance)
     {
       ArgsSweep1 sweep = ArgsSweep1.Construct(rail, crossSections, crossSectionParameters, m_roadlike_up, m_bClosed, m_sweep_tol, m_angle_tol, m_miter_type);
@@ -285,16 +308,19 @@ namespace Rhino.Geometry
     #endregion
 
     #region rebuild
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail, Curve crossSection, int rebuildCount)
     {
       return PerformSweepRebuild(rail, new Curve[] { crossSection }, rebuildCount);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail, Curve crossSection, double crossSectionParameter, int rebuildCount)
     {
       return PerformSweepRebuild(rail, new Curve[] { crossSection }, new double[] { crossSectionParameter }, rebuildCount);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail, IEnumerable<Curve> crossSections, int rebuildCount)
     {
       List<double> rail_params = new List<double>();
@@ -308,6 +334,7 @@ namespace Rhino.Geometry
       return PerformSweepRebuild(rail, crossSections, rail_params, rebuildCount);
     }
 
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters, int rebuildCount)
     {
       ArgsSweep1 sweep = ArgsSweep1.Construct(rail, crossSections, crossSectionParameters, m_roadlike_up, m_bClosed, m_sweep_tol, m_angle_tol, m_miter_type);
@@ -325,7 +352,7 @@ namespace Rhino.Geometry
 
   /// <summary>
   /// Utility class for generating Breps by sweeping cross section curves over two rail curves.
-  /// Note, this class has been superceeded by the Rhino.Geometry.Brep.CreateFromSweep static functions.
+  /// Note, this class has been superseded by the Rhino.Geometry.Brep.CreateFromSweep static functions.
   /// </summary>
   public class SweepTwoRail
   {
@@ -333,6 +360,7 @@ namespace Rhino.Geometry
     double m_sweep_tol = -1;
     double m_angle_tol = -1;
 
+    /// <since>5.0</since>
     public SweepTwoRail()
     {
     }
@@ -340,6 +368,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the sweeping tolerance.
     /// </summary>
+    /// <since>5.0</since>
     public double SweepTolerance
     {
       get
@@ -357,6 +386,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the angle tolerance in radians.
     /// </summary>
+    /// <since>5.0</since>
     public double AngleToleranceRadians
     {
       get
@@ -374,11 +404,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Removes the association between the height scaling from the width scaling.
     /// </summary>
+    /// <since>5.0</since>
     public bool MaintainHeight { get; set; } // false is the proper default
 
     /// <summary>
     /// If the input rails are closed, ClosedSweep determines if the swept Breps will also be closed.
     /// </summary>
+    /// <since>5.0</since>
     public bool ClosedSweep
     {
       get { return m_bClosed; }
@@ -394,11 +426,13 @@ namespace Rhino.Geometry
     /// <param name="rail2">Rail to sweep shapes along</param>
     /// <param name="crossSection">Shape curve</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection)
     {
       return PerformSweep(rail1, rail2, new Curve[] { crossSection });
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2)
     {
@@ -415,6 +449,7 @@ namespace Rhino.Geometry
     /// <param name="rail2">Rail to sweep shapes along</param>
     /// <param name="crossSections">Shape curves</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
@@ -445,6 +480,7 @@ namespace Rhino.Geometry
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.None, 0, 0.0, MaintainHeight);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweep(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters1, IEnumerable<double> crossSectionParameters2)
     {
@@ -473,11 +509,13 @@ namespace Rhino.Geometry
     /// <param name="crossSection">Shape curve</param>
     /// <param name="refitTolerance">Refit tolerance</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double refitTolerance)
     {
       return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, refitTolerance);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, double refitTolerance)
     {
@@ -495,6 +533,7 @@ namespace Rhino.Geometry
     /// <param name="crossSections">Shape curves</param>
     /// <param name="refitTolerance">Refit tolerance</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, double refitTolerance)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
@@ -515,6 +554,7 @@ namespace Rhino.Geometry
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.Refit, 0, refitTolerance, MaintainHeight);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, double refitTolerance)
     {
@@ -543,11 +583,13 @@ namespace Rhino.Geometry
     /// <param name="crossSection">Shape curve</param>
     /// <param name="rebuildCount">Rebuild point count</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, int rebuildCount)
     {
       return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, rebuildCount);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, int rebuildCount)
     {
@@ -565,6 +607,7 @@ namespace Rhino.Geometry
     /// <param name="crossSections">Shape curves</param>
     /// <param name="rebuildCount">Rebuild point count</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, int rebuildCount)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
@@ -585,6 +628,7 @@ namespace Rhino.Geometry
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.Rebuild, rebuildCount, 0.0, MaintainHeight);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, int rebuildCount)
     {

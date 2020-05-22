@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using Rhino.Geometry;
 using Rhino.Display;
+using System.Collections.Generic;
 
 #if RHINO_SDK
 namespace Rhino.Input.Custom
@@ -13,14 +14,24 @@ namespace Rhino.Input.Custom
   /// </summary>
   public class GetPoint : GetBaseClass
   {
+    internal readonly string m_contextName = null;
+    internal readonly object m_contextObject = null;
+    internal int m_callCount = 0; // number of times Get has been called for this instance
     /// <summary>Create a new GetPoint.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addline.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
-    public GetPoint()
+    /// <since>5.0</since>
+    public GetPoint() :this(null, null)
     {
+    }
+
+    public GetPoint(string contextName, object contextObject)
+    {
+      m_contextName = contextName;
+      m_contextObject = contextObject;
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetPoint_New();
       Construct(ptr);
     }
@@ -43,12 +54,14 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetBasePoint(Point3d basePoint, bool showDistanceInStatusBar)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_SetBasePoint(ptr, basePoint, showDistanceInStatusBar);
     }
 
+    /// <since>5.0</since>
     public bool TryGetBasePoint(out Point3d basePoint)
     {
       IntPtr ptr = ConstPointer();
@@ -59,6 +72,7 @@ namespace Rhino.Input.Custom
       return rc;
     }
 
+    /// <since>6.0</since>
     public bool GetPlanarConstraint(ref RhinoViewport vp, out Plane plane)
     {
       IntPtr ptr = ConstPointer();
@@ -85,6 +99,7 @@ namespace Rhino.Input.Custom
     /// is > 0, then the picked point is constrained to be this distance
     /// from the base point.
     /// </remarks>
+    /// <since>5.0</since>
     public void ConstrainDistanceFromBasePoint(double distance)
     {
       IntPtr ptr = NonConstPointer();
@@ -95,6 +110,7 @@ namespace Rhino.Input.Custom
     /// Color used by CRhinoGetPoint::DynamicDraw to draw the current point and
     /// the line from the base point to the current point.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color DynamicDrawColor
     {
       get
@@ -117,6 +133,7 @@ namespace Rhino.Input.Custom
     /// happening.
     /// </summary>
     /// <param name="cursor"></param>
+    /// <since>6.0</since>
     public void SetCursor(UI.CursorStyle cursor)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -129,6 +146,7 @@ namespace Rhino.Input.Custom
     /// <param name="enable">If true then object snap cursors (plus sign with "near", "end", etc.) 
     /// are used when the point snaps to a object. 
     /// </param>
+    /// <since>6.0</since>
     public void EnableObjectSnapCursors(bool enable)
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.EnableObjectSnapCursors, enable);
@@ -153,6 +171,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawLineFromPoint(Point3d startPoint, bool showDistanceInStatusBar)
     {
       IntPtr ptr = NonConstPointer();
@@ -171,19 +190,21 @@ namespace Rhino.Input.Custom
     /// <param name="enable">
     /// if true, a dynamic line is drawn from the DrawLineFromPoint startPoint to the point being picked.
     /// </param>
+    /// <since>5.0</since>
     public void EnableDrawLineFromPoint( bool enable )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.EnableDrawLineFromPoint, enable);
     }
 
     /// <summary>
-    /// The default functionality of the getpoint operation is to perform a redraw on exit.
+    /// The default functionality of the GetPoint operation is to perform a redraw on exit.
     /// Calling this function with true turns off automatic redraw at the end of GetPoint.
     /// May be needed in some commands for flicker free feedback.
     /// When set to true, the caller is responsible for cleaning up the screen
     /// after GetPoint.
     /// </summary>
     /// <param name="noRedraw"></param>
+    /// <since>6.0</since>
     public void EnableNoRedrawOnExit(bool noRedraw)
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.NoRedrawOnExit, noRedraw);
@@ -196,6 +217,7 @@ namespace Rhino.Input.Custom
     /// if true, then GetPoint pays attention to the Rhino "ortho snap" and "planar snap" settings
     /// reported by ModelAidSettings.Ortho and ModelAidSettings.Planar.
     /// </param>
+    /// <since>5.0</since>
     public void PermitOrthoSnap( bool permit )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.PermitOrthoSnap, permit);
@@ -205,17 +227,18 @@ namespace Rhino.Input.Custom
     /// Control the availability of the built-in "From" option. By default, the "From" option is enabled.
     /// </summary>
     /// <param name="permit">
-    /// if true, then the "From" option is automatically avaiable in GetPoint.
+    /// if true, then the "From" option is automatically available in GetPoint.
     /// </param>
     /// <remarks>
     /// The GetPoint "From" option is never visible on the command line and the user must
     /// type the complete option name to activate the "From" option. When the GetPoint "From"
     /// snap is enabled, the user set/change the base point during GetPoint by typing "From" and
     /// picking a point.
-    /// A related option is the builit-in distance from base point constraint that is can be set
+    /// A related option is the built-in distance from base point constraint that is can be set
     /// before GetPoint is called by passing a value to GetPoint::ConstrainDistanceFromBasePoint 
     /// or during GetPoint by entering a number.
     /// </remarks>
+    /// <since>5.0</since>
     public void PermitFromOption( bool permit )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.PermitFromOption, permit);
@@ -227,15 +250,16 @@ namespace Rhino.Input.Custom
     /// "Between", "OnCrv", "OnSrf", ".x", ".y", ".z", ".xy", etc.
     /// </summary>
     /// <param name="permit">
-    /// if true, then the built-in contraint options are automatically avaiable in GetPoint.
+    /// if true, then the built-in constraint options are automatically available in GetPoint.
     /// </param>
     /// <remarks>
-    /// By default, these built-in constraint options are availble unless an explicit
+    /// By default, these built-in constraint options are available unless an explicit
     /// constraint is added by calling one of the GetPoint::Constrain functions. Calling
     /// GetPoint::ClearConstraints automatically enables the built-in constraint options.
     /// The built-in constraint options are never visible on the command line and the
     /// user must type the complete option name to activate these options.
     /// </remarks>
+    /// <since>5.0</since>
     public void PermitConstraintOptions( bool permit )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.PermitConstraintOptions, permit);
@@ -246,6 +270,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="permit">If true, then the built-in tab key mode is available.</param>
     /// <remarks>By default, use of the tab key is supported.</remarks>
+    /// <since>5.0</since>
     public void PermitTabMode( bool permit )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.PermitTabMode, permit);
@@ -259,6 +284,7 @@ namespace Rhino.Input.Custom
     /// 1: fixed plane elevator mode (like the Line command)
     /// 2: cplane elevator mode (like object dragging)
     /// </param>
+    /// <since>5.0</since>
     public void PermitElevatorMode(int permitMode)
     {
       IntPtr ptr = NonConstPointer();
@@ -266,10 +292,11 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// By default, object snaps like "end", "near", etc. are controled by the user.
+    /// By default, object snaps like "end", "near", etc. are controlled by the user.
     /// If you want to disable this ability, then call PermitObjectSnap(false).
     /// </summary>
     /// <param name="permit">true to permit snapping to objects.</param>
+    /// <since>5.0</since>
     public void PermitObjectSnap( bool permit )
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.PermitObjectSnap, permit);
@@ -288,6 +315,7 @@ namespace Rhino.Input.Custom
     /// If you want the user to be able to snap to additional points, then use
     /// GetPoint::AddSnapPoints to specify the locations of these additional points.
     /// </remarks>
+    /// <since>5.0</since>
     public int AddSnapPoint(Point3d point)
     {
       IntPtr ptr = NonConstPointer();
@@ -304,6 +332,7 @@ namespace Rhino.Input.Custom
     /// If you want the user to be able to snap to additional points, then use
     /// GetPoint::AddSnapPoints to specify the locations of these additional points.
     /// </remarks>
+    /// <since>5.0</since>
     public int AddSnapPoints(Point3d[] points)
     {
       if( null == points || points.Length<1)
@@ -325,6 +354,7 @@ namespace Rhino.Input.Custom
     /// can be many snap points. For example, when polylines are drawn the start point is a
     /// construction point and the other points are snap points.
     /// </remarks>
+    /// <since>5.0</since>
     public int AddConstructionPoint(Point3d point)
     {
       IntPtr ptr = NonConstPointer();
@@ -342,6 +372,7 @@ namespace Rhino.Input.Custom
     /// can be many snap points. For example, when polylines are drawn the start point is a
     /// construction point and the other points are snap points.
     /// </remarks>
+    /// <since>5.0</since>
     public int AddConstructionPoints(Point3d[] points)
     {
       if (null == points || points.Length < 1)
@@ -357,8 +388,9 @@ namespace Rhino.Input.Custom
     /// <remarks>
     /// When point osnap is enabled, GetPoint will snap to points in the Rhino model.
     /// If you want the user to be able to snap to additional points, then use GetPoint::AddSnapPoints
-    /// tp specify the locations of these additional points.
+    /// to specify the locations of these additional points.
     /// </remarks>
+    /// <since>5.0</since>
     public void ClearSnapPoints()
     {
       IntPtr ptr = NonConstPointer();
@@ -375,6 +407,7 @@ namespace Rhino.Input.Custom
     /// are drawn the start point is a construction point and the other points are
     /// snap points.
     /// </remarks>
+    /// <since>5.0</since>
     public void ClearConstructionPoints()
     {
       IntPtr ptr = NonConstPointer();
@@ -385,6 +418,7 @@ namespace Rhino.Input.Custom
     /// Gets current snap points.
     /// </summary>
     /// <returns>An array of points.</returns>
+    /// <since>5.0</since>
     public Point3d[] GetSnapPoints()
     {
       Runtime.InteropWrappers.SimpleArrayPoint3d pts = new Runtime.InteropWrappers.SimpleArrayPoint3d();
@@ -407,6 +441,7 @@ namespace Rhino.Input.Custom
     /// are drawn the start point is a construction point and the other points are
     /// snap points.
     /// </remarks>
+    /// <since>5.0</since>
     public Point3d[] GetConstructionPoints()
     {
       Runtime.InteropWrappers.SimpleArrayPoint3d pts = new Runtime.InteropWrappers.SimpleArrayPoint3d();
@@ -435,6 +470,7 @@ namespace Rhino.Input.Custom
     /// The tangent bar is drawn by GetPoint::DynamicDraw. If you override GetPoint::DynamicDraw,
     /// then you must call the base class function.
     /// </remarks>
+    /// <since>5.0</since>
     public void EnableCurveSnapTangentBar(bool drawTangentBarAtSnapPoint, bool drawEndPoints)
     {
       IntPtr ptr = NonConstPointer();
@@ -449,6 +485,7 @@ namespace Rhino.Input.Custom
     /// <param name="drawEndPoints">
     /// true to draw points at the end of the tangent bar.
     /// </param>
+    /// <since>5.0</since>
     public void EnableCurveSnapPerpBar(bool drawPerpBarAtSnapPoint, bool drawEndPoints)
     {
       IntPtr ptr = NonConstPointer();
@@ -467,6 +504,7 @@ namespace Rhino.Input.Custom
     /// The tangent bar is drawn by GetPoint::DynamicDraw. If you override GetPoint::DynamicDraw,
     /// then you must call the base class function.
     /// </remarks>
+    /// <since>5.0</since>
     public void EnableCurveSnapArrow(bool drawDirectionArrowAtSnapPoint, bool reverseArrow)
     {
       IntPtr ptr = NonConstPointer();
@@ -479,6 +517,7 @@ namespace Rhino.Input.Custom
     /// then enable the snap to curves option.
     /// </summary>
     /// <param name="enable">Whether points should be enabled.</param>
+    /// <since>5.0</since>
     public void EnableSnapToCurves(bool enable)
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.EnableSnapToCurves, enable);
@@ -493,6 +532,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Constrain(Point3d from, Point3d to)
     {
       IntPtr ptr = NonConstPointer();
@@ -506,6 +546,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_constrainedcopy.cs' lang='cs'/>
     /// <code source='examples\py\ex_constrainedcopy.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Constrain(Line line)
     {
       return Constrain(line.From, line.To);
@@ -514,6 +555,7 @@ namespace Rhino.Input.Custom
     /// <summary>Constrains the picked point to lie on an arc.</summary>
     /// <param name="arc">An arc to use as constraint.</param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Arc arc)
     {
       IntPtr ptr = NonConstPointer();
@@ -522,6 +564,7 @@ namespace Rhino.Input.Custom
     /// <summary>Constrains the picked point to lie on a circle.</summary>
     /// <param name="circle">A circle to use as constraint.</param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Circle circle)
     {
       IntPtr ptr = NonConstPointer();
@@ -531,6 +574,7 @@ namespace Rhino.Input.Custom
     /// <param name="plane">A plane to use as constraint.</param>
     /// <param name="allowElevator">true if elevator mode should be allowed at user request.</param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Plane plane, bool allowElevator)
     {
       IntPtr ptr = NonConstPointer();
@@ -539,6 +583,7 @@ namespace Rhino.Input.Custom
     /// <summary>Constrains the picked point to lie on a sphere.</summary>
     /// <param name="sphere">A sphere to use as constraint.</param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Sphere sphere)
     {
       IntPtr ptr = NonConstPointer();
@@ -547,6 +592,7 @@ namespace Rhino.Input.Custom
     /// <summary>Constrains the picked point to lie on a cylinder.</summary>
     /// <param name="cylinder">A cylinder to use as constraint.</param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Cylinder cylinder)
     {
       IntPtr ptr = NonConstPointer();
@@ -567,6 +613,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_insertknot.cs' lang='cs'/>
     /// <code source='examples\py\ex_insertknot.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Constrain(Curve curve, bool allowPickingPointOffObject)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -587,6 +634,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Constrain(Surface surface, bool allowPickingPointOffObject)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -609,6 +657,7 @@ namespace Rhino.Input.Custom
     /// the cursor is not on the object.
     /// </param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Brep brep, int wireDensity, int faceIndex, bool allowPickingPointOffObject)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -625,6 +674,7 @@ namespace Rhino.Input.Custom
     /// the cursor is not on the object.
     /// </param>
     /// <returns>true if constraint could be applied.</returns>
+    /// <since>5.0</since>
     public bool Constrain(Mesh mesh, bool allowPickingPointOffObject)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -650,6 +700,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool ConstrainToConstructionPlane(bool throughBasePoint)
     {
       IntPtr ptr = NonConstPointer();
@@ -660,6 +711,7 @@ namespace Rhino.Input.Custom
     /// Constrains point to lie on a plane that is parallel to the
     /// viewing plane and passes through the view's target point.
     /// </summary>
+    /// <since>5.0</since>
     public void ConstrainToTargetPlane()
     {
       EnableItem(UnsafeNativeMethods.GetPointEnable.ConstrainToTargetPlane, true);
@@ -673,6 +725,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="plane">The plane used for the plane - virtual CPlane intersection.</param>
     /// <returns>true if the operation succeeded; false otherwise.</returns>
+    /// <since>5.0</since>
     public bool ConstrainToVirtualCPlaneIntersection(Plane plane)
     {
       IntPtr ptr = NonConstPointer();
@@ -688,6 +741,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void ClearConstraints()
     {
       IntPtr ptr = NonConstPointer();
@@ -700,6 +754,7 @@ namespace Rhino.Input.Custom
     /// should interrupt your work because the mouse has moved again.
     /// </summary>
     /// <returns>true if you should interrupt your work; false otherwise.</returns>
+    /// <since>5.0</since>
     public bool InterruptMouseMove()
     {
       IntPtr ptr = ConstPointer();
@@ -775,6 +830,7 @@ namespace Rhino.Input.Custom
     /// periodically call InterruptMouseMove() to see if you should stop. If the view is such
     /// that the 2d screen point can't be mapped to a 3d point, the 'point' argument will be Unset.
     /// </summary>
+    /// <since>5.0</since>
     public event EventHandler<GetPointMouseEventArgs> MouseMove;
 
     /// <summary>Calls the <see cref="MouseMove"/> event and can/should be called by overriding implementation.</summary>
@@ -795,6 +851,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public object Tag { get; set; }
 
     /// <summary>
@@ -802,6 +859,7 @@ namespace Rhino.Input.Custom
     /// the initial point occurs. This function is not called during ordinary point getting because
     /// the mouse down event terminates an ordinary point get and returns a GetResult.Point result.
     /// </summary>
+    /// <since>5.0</since>
     public event EventHandler<GetPointMouseEventArgs> MouseDown;
 
     /// <summary>Default calls the MouseDown event.</summary>
@@ -820,6 +878,7 @@ namespace Rhino.Input.Custom
     /// If you are drawing anything that takes a long time, periodically call 
     /// InterruptMouseMove() to see if you should stop.
     /// </summary>
+    /// <since>5.0</since>
     public event EventHandler<GetPointDrawEventArgs> DynamicDraw;
 
     /// <summary>Default calls the DynamicDraw event.</summary>
@@ -845,6 +904,7 @@ namespace Rhino.Input.Custom
     /// scene needs to be fully regenerated every frame where the standard
     /// DynamicDraw event draws temporary decorations (geometry) on top of a static scene.
     /// </summary>
+    /// <since>5.0</since>
     public bool FullFrameRedrawDuringGet { get; set; }
 
     /// <summary>
@@ -853,6 +913,7 @@ namespace Rhino.Input.Custom
     /// NOTE: You must set FullFrameRedrawDuringGet to true in order for this
     /// event to be called.
     /// </summary>
+    /// <since>5.0</since>
     public event EventHandler<DrawEventArgs> PostDrawObjects;
 
     /// <summary>
@@ -877,6 +938,7 @@ namespace Rhino.Input.Custom
     /// If true, the point is returned when the left mouse button goes up.
     /// </param>
     /// <returns><see cref="GetResult.Point"/> if the user chose a point; other enumeration value otherwise.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get(bool onMouseUp)
     {
@@ -892,9 +954,20 @@ namespace Rhino.Input.Custom
     /// </param>
     /// <param name="get2DPoint">If true then get a 2d point otherwise get a 2d point</param>
     /// <returns><see cref="GetResult.Point"/> if the user chose a 3d point; <see cref="GetResult.Point2d"/> if the user chose a 2d point; other enumeration value otherwise.</returns>
+    /// <since>5.12</since>
     [CLSCompliant(false)]
     public GetResult Get(bool onMouseUp, bool get2DPoint)
     {
+      m_callCount++;
+      GetContextCallback callback = GetContextCallback.FromCallback(m_contextName);
+      if (callback != null )
+      {
+        GetContextArgs args = new GetContextArgs(this);
+        callback.BeforeGetPoint(this, onMouseUp, get2DPoint, args);
+        var overrideResult = this.Result();
+        if (overrideResult != GetResult.NoResult)
+          return overrideResult;
+      }
       var old = m_active_gp;
       m_active_gp = this;
 
@@ -909,7 +982,7 @@ namespace Rhino.Input.Custom
       }
       else
       {
-        if( IsFunctionOverridden("OnPostDrawObjects"))
+        if( IsFunctionOverridden("OnPostDrawObjects") || PostDrawObjects!=null)
           post_draw_cb = GetPointPostDrawObjectsCallback;
       }
 
@@ -978,6 +1051,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -985,10 +1059,25 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// Gets the type of object snap used to obtain the point.
+    /// </summary>
+    /// <since>6.24</since>
+    public Rhino.ApplicationSettings.OsnapModes OsnapEventType
+    {
+      get
+      {
+        IntPtr ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CRhinoGetPoint_SnapEventMode(ptr_this);
+        return (Rhino.ApplicationSettings.OsnapModes)rc;
+      }
+    }
+
+    /// <summary>
     /// Call this function to see if the point was on an object. If the point was
     /// on an object an ObjRef is returned; otherwise null is returned.
     /// </summary>
     /// <returns>A point object reference.</returns>
+    /// <since>5.0</since>
     public DocObjects.ObjRef PointOnObject()
     {
       var rc = new DocObjects.ObjRef();
@@ -1016,6 +1105,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_insertknot.cs' lang='cs'/>
     /// <code source='examples\py\ex_insertknot.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Curve PointOnCurve(out double t)
     {
       t = RhinoMath.UnsetValue;
@@ -1034,6 +1124,7 @@ namespace Rhino.Input.Custom
     /// <param name="u">If the point was on a surface, then the u parameter.</param>
     /// <param name="v">If the point was on a surface, then the v parameter.</param>
     /// <returns>The surface or null if the point was not on a surface.</returns>
+    /// <since>6.0</since>
     public Surface PointOnSurface(out double u, out double v)
     {
       u = RhinoMath.UnsetValue;
@@ -1052,6 +1143,7 @@ namespace Rhino.Input.Custom
     /// <param name="u">If the point was on a Brep face, then the u parameter.</param>
     /// <param name="v">If the point was on a Brep face, then the v parameter.</param>
     /// <returns>The Brep face or null if the point was not on a Brep face.</returns>
+    /// <since>6.0</since>
     public BrepFace PointOnBrep(out double u, out double v)
     {
       u = RhinoMath.UnsetValue;
@@ -1080,6 +1172,7 @@ namespace Rhino.Input.Custom
       m_source = source;
     }
 
+    /// <since>5.0</since>
     public Point3d CurrentPoint
     {
       get { return m_point; }
@@ -1093,6 +1186,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GetPoint Source { get { return m_source; } }
   }
 
@@ -1117,16 +1211,20 @@ namespace Rhino.Input.Custom
       m_source = source;
     }
 
+    /// <since>5.0</since>
     public GetPoint Source { get { return m_source; } }
 
+    /// <since>5.0</since>
     public RhinoViewport Viewport
     {
       get { return m_viewport ?? (m_viewport = new RhinoViewport(null, m_pRhinoViewport)); }
     }
+    /// <since>5.0</since>
     public Point3d Point
     {
       get{ return m_point; }
     }
+    /// <since>5.0</since>
     public System.Drawing.Point WindowPoint
     {
       get{ return m_windowPoint; }
@@ -1139,6 +1237,7 @@ namespace Rhino.Input.Custom
     const int MK_CONTROL = 0x0008;
     const int MK_MBUTTON = 0x0010;
 
+    /// <since>5.0</since>
     public bool LeftButtonDown
     {
       get
@@ -1146,6 +1245,7 @@ namespace Rhino.Input.Custom
         return (m_flags & MK_LBUTTON) == MK_LBUTTON;
       }
     }
+    /// <since>5.0</since>
     public bool RightButtonDown
     {
       get
@@ -1153,6 +1253,7 @@ namespace Rhino.Input.Custom
         return (m_flags & MK_RBUTTON) == MK_RBUTTON;
       }
     }
+    /// <since>5.0</since>
     public bool ShiftKeyDown
     {
       get
@@ -1160,6 +1261,7 @@ namespace Rhino.Input.Custom
         return (m_flags & MK_SHIFT) == MK_SHIFT;
       }
     }
+    /// <since>5.0</since>
     public bool ControlKeyDown
     {
       get
@@ -1167,6 +1269,7 @@ namespace Rhino.Input.Custom
         return (m_flags & MK_CONTROL) == MK_CONTROL;
       }
     }
+    /// <since>5.0</since>
     public bool MiddleButtonDown
     {
       get
@@ -1175,221 +1278,130 @@ namespace Rhino.Input.Custom
       }
     }
   }
+
+  public class GetContextArgs
+  {
+    GetPoint m_gp;
+    internal GetContextArgs(GetPoint gp)
+    {
+      m_gp = gp;
+    }
+
+    /// <summary>
+    /// Name of the context that this get operation is happening under
+    /// </summary>
+    public string ContextName
+    {
+      get
+      {
+        return m_gp.m_contextName;
+      }
+    }
+
+    /// <summary>
+    /// Optional object that may be associated with this get operation
+    /// </summary>
+    public object ContextObject
+    {
+      get
+      {
+        return m_gp.m_contextObject;
+      }
+    }
+
+    /// <summary>
+    /// Number of times Get() has been called for a given getter
+    /// </summary>
+    public int CallCount
+    {
+      get
+      {
+        return m_gp.m_callCount;
+      }
+    }
+
+    public void SetPoint(Point3d point)
+    {
+      IntPtr ptr_getpoint = m_gp.NonConstPointer();
+      UnsafeNativeMethods.CRhinoGetPoint_SetResultPoint(ptr_getpoint, point);
+    }
+
+    [CLSCompliant(false)]
+    public void SetGetResult(GetResult result)
+    {
+      IntPtr ptr_getpoint = m_gp.NonConstPointer();
+      UnsafeNativeMethods.CRhinoGetPoint_SetResult(ptr_getpoint, (uint)result);
+    }
+  }
+
+  public abstract class GetContextCallback
+  {
+    internal static GetContextCallback FromCallback(string name)
+    {
+      if( m_callbacks != null && !string.IsNullOrWhiteSpace(name) )
+      {
+        GetContextCallback cb;
+        if (m_callbacks.TryGetValue(name, out cb))
+          return cb;
+      }
+      return null;
+    }
+
+    // Simple single callback support for now
+    static Dictionary<string, GetContextCallback> m_callbacks;
+
+    public void EnableForContext(string contextName)
+    {
+      if (m_callbacks == null)
+        m_callbacks = new Dictionary<string, GetContextCallback>();
+      m_callbacks[contextName] = this;
+    }
+
+    public void DisableForContext(string contextName)
+    {
+      if( m_callbacks != null && m_callbacks.ContainsKey(contextName) )
+      {
+        m_callbacks.Remove(contextName);
+        if (m_callbacks.Count == 0)
+          m_callbacks = null;
+      }
+    }
+
+    public void DisableForAllContexts()
+    {
+      if (m_callbacks != null)
+      {
+        List<string> keys = new List<string>(m_callbacks.Keys);
+        foreach(var key in keys)
+        {
+          if( m_callbacks.ContainsKey(key) && m_callbacks[key] == this)
+          {
+            m_callbacks.Remove(key);
+          }
+        }
+        if (m_callbacks.Count == 0)
+          m_callbacks = null;
+      }
+    }
+
+    /// <summary>
+    /// Called before a GetPoint() operation. Setting the point or result
+    /// on the input arguments will cause the default GetPoint operation to be
+    /// skipped and results will immediately be returned to the caller of
+    /// the initial GetPoint.
+    /// </summary>
+    /// <param name="gp"></param>
+    /// <param name="onMouseUp"></param>
+    /// <param name="get2DPoint"></param>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    [CLSCompliant(false)]
+    public virtual void BeforeGetPoint(GetPoint gp, bool onMouseUp, bool get2DPoint, GetContextArgs args)
+    {
+    }
+
+  }
 }
 
-
-//  /*
-//  Description:
-//    By default, object snap cursors are enabled.
-//  Parameters:
-//    bEnableObjectSnapCursors - [in]
-//  Returns:
-//    True if object snap cursors (plus sign with "near", "end", etc.)
-//    are used when the point snaps to a object.  
-//  */
-//  void EnableObjectSnapCursors(BOOL bEnableObjectSnapCursors=true);
-
-
-//  /*
-//  Description:
-//    After setting up options and so on, call CRhinoGetPoint::Get2dPoint
-//    to get a 2d point in a view window. 
-//  Parameters:
-//    pView - [in] if pView is not NULL, then the 2d point will be in
-//                 this view.  Otherwise, the 2d point can be in any view.
-//    bOnMouseUp - [in] if true, the point will be returned on the mouse 
-//                      up event.
-//  Returns:
-//    The type of input that was specified.  If CRhinoGet::point2d is
-//    returned, then use CRhinoGetPoint::Point2d to get the value
-//    of the 2d point and CRhinoGetPoint::View() to get the view
-//    that contains the 2d point.
-//  */
-//  CRhinoGet::result Get2dPoint(
-//           CRhinoView* pView = NULL,
-//           bool bOnMouseUp = false
-//           );
-
-//  /*
-//  Description:
-//    After setting up options and so on, call CRhinoGetPoint::Get2dRectangle
-//    to get a 2d rectanble in a view window. 
-//  Parameters:
-//    pView - [in] if pView is not NULL, then the 2d rectangle will be in
-//                 this view.  Otherwise, the 2d rectangle can be in any view.
-//    corner - [in] if pView is not NULL and corner is not NULL, then
-//                 corner will be the location of the first corner.
-//    bCentered - [in] if true, the first point will be the center of the
-//                 rectangle.
-//    pen_style - [in] pen style used to draw dynamic rectangle
-//    second_prompt - [in] default automatically comes up with the
-//                         right string.  If you are very hard to
-//                         satisfy, you can supply your own.
-//  Returns:
-//    The type of input that was specified.  If CRhinoGet::rect2d is
-//    returned, then use CRhinoGetPoint::Rectangle2d to get the value
-//    of the 2d point and CRhinoGetPoint::View() to get the view
-//    that contains the 2d point.
-//  */
-//  CRhinoGet::result Get2dRectangle( 
-//              CRhinoView* pView = NULL, 
-//              const POINT* corner = NULL,
-//              BOOL bCentered = false,
-//              int pen_style = PS_SOLID,
-//              bool bClampToView = true,
-//              const wchar_t* second_prompt=NULL
-//              );
-
-
-//  /*
-//  Description:
-//    After setting up options and so on, call CRhinoGetPoint::Get2dLine
-//    to get a 2d line in a view window.
-//  Parameters:
-//    pView - [in] if pView is not NULL, then the 2d line will be in
-//                 this view.  Otherwise, the 2d line can be in any view.
-//    corner - [in] if pView is not NULL and corner is not NULL, then
-//                 corner will be the location of the start point
-//    bCentered - [in] if true, the first point will be the center of the
-//                 line.
-//    pen_style - [in] pen style used to draw dynamic line. If PS_NULL,
-//                     then no dynamic line is drawn
-//    bClampToView - [in] if true, then the endpoints are constrained
-//                        to be in the view.  If false, then the
-//                        endpoints can be outside of the view.
-//  Returns:
-//    The type of input that was specified.  If CRhinoGet::rect2d is
-//    returned, then use CRhinoGetPoint::Rectangle2d to get the value
-//    of the 2d point and CRhinoGetPoint::View() to get the view
-//    that contains the 2d point.
-//  */
-//  CRhinoGet::result Get2dLine(
-//              CRhinoView* pView = NULL, 
-//              const POINT* corner = NULL,
-//              BOOL bCentered = false,
-//              int pen_style = PS_SOLID,
-//              bool bClampToView = true
-//              );
-
-//  // Description:
-//  //   Use to determine if point was on an edge curve of a brep.
-//  // Parameters:
-//  //   edge_parameter - [out] edge parameter of pick point
-//  //   pTrim - [out] the associated trim
-//  // Remarks:
-//  //   An edge can be a boundary or interior edge.  Boundary edges have a
-//  //   single trim.  Interior edges have multiple trims.  If you need
-//  //   information about the surface, then examine the trim.
-//  // Example:
-//  //   CRhinoGetPoint gp;
-//  //   gp.GetPoint();
-//  //   if ( gp.Result() == CRhinoGet::point )
-//  //   {
-//  //     double edge_t;
-//  //     double trim_t;
-//  //     const ON_BrepTrim* pTrim = NULL;
-//  //     const ON_BrepEdge* pEdge = gp.PointOnEdge( &edge_t, pTrim );
-//  //     if ( pEdge )
-//  //     {
-//  //       const ON_Surface* pSurface pEdge->Brep()->SurfaceOf(*pTrim);
-//  //     }
-//  //   }
-//  // Remarks:
-//  //   If you do not need trim or surface information, then use
-//  //   CRhinoGetPoint::PointOnCurve.
-//  // Returns:
-//  //   NULL or edge the point was on.
-//  const ON_BrepEdge* PointOnEdge(
-//            double* edge_parameter, 
-//            const ON_BrepTrim*& pTrim 
-//            ) const;
-
-//  // Description:
-//  //   Use to determine if point was on a surface.
-//  //
-//  // Parameters:
-//  //   u - [out]
-//  //   v - [out] if the point was on a surface, then the (*u,*v) are
-//  //        the surface parameters for the point.  The point
-//  //        returned by Point() is the same as surface->PointAt(*u,*v).
-//  //
-//  // Returns:
-//  //   pointer to a surface or NULL if the point was not on a surface.
-//  const ON_Surface* PointOnSurface(double* u, double* v) const;
-
-
-//  // Description:
-//  //   Use to determine if point was on a brep (face).
-//  //
-//  // Parameters:
-//  //   u - [out]
-//  //   v - [out] if the point was on a face, then the (*u,*v) are
-//  //        the face parameters for the point.
-//  //
-//  // Returns:
-//  //   pointer to a brep or NULL if the point was not on a brep.
-//  const ON_BrepFace* PointOnBrep( double* u, double* v) const;
-
-
-//  /*
-//  Returns:
-//    True if mouse moved during the call to GetPoint();
-//  */
-//  bool MouseMoved() const;
-
-//  /*
-//  Description:
-//    Used internally. Do not call. No support is available.
-//  */
-//  bool GetView3dPoint( UINT nPointingDevice,
-//                       CRhinoView& view, 
-//                       UINT_PTR nFlags, 
-//                       ON_3dPoint device_point,
-//                       const ON_Line& world_line,
-//                       ON_3dPoint& world_point
-//                       );
-
-//  /*
-//  Description:
-//    This setting turns off automatic redraw at the end of GetPoint.
-//    May be needed in some commands for flicker free feedback.
-//    When true the caller is responsible for cleaning up the screen
-//    after GetPoint. The default is false.
-//  Parameters:
-//    bNoRedrawOnExit - [in]
-//  */
-//  void EnableNoRedrawOnExit( bool bNoRedrawOnExit = true);
-
-//protected:
-//  /*
-//  Parameters:
-//    elevator - [out] if the getter is in elevator mode, this
-//                     line defines the base and top of the elevator.
-//  Returns:
-//    True if point getter is currently in elevator mode.
-//  */
-//  bool InElevatorMode( ON_Line& elevator ) const;
-
-//protected:
-//  // virtual CRhinoGet::GetCS override
-//  ON_Plane GetCS( bool bWorldCoordinates, bool bRelativeCoordinates );
-
-//protected:
-//  // when a snap or constraint requires tracking line(s),
-//  // m_tracking_line_count >= 0.  If you override DynamicDraw,
-//  // then draw these lines using RhinoApp().AppSettings().TrackingColor()
-//  // The default tracking color is white.
-//  ON_SimpleArray<ON_Line> m_tracking_lines;
-
-//  // when a snap or constraint requires feedback line(s),
-//  // m_feedback_line_count >= 0.  If you override DynamicDraw,
-//  // then draw these lines using RhinoApp().AppSettings().FeedbackColor()
-//  // The default feedback color is black.
-//  ON_SimpleArray<ON_Line> m_feedback_lines;
-
-//protected:
-//  ON_3dPointArray m_construction_points;
-//  ON_3dPointArray m_point_osnap_points; 
-//  ON_3dPointArray m_int_osnap_points; 
 
 #endif

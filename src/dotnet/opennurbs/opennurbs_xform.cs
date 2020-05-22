@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Rhino.Runtime;
 
@@ -25,6 +25,7 @@ namespace Rhino.Geometry
     /// Initializes a new transform matrix with a specified value along the diagonal.
     /// </summary>
     /// <param name="diagonalValue">Value to assign to all diagonal cells except M33 which is set to 1.0.</param>
+    /// <since>5.0</since>
     public Transform(double diagonalValue)
       : this()
     {
@@ -38,6 +39,7 @@ namespace Rhino.Geometry
     /// Initializes a new transform matrix with a specified value.
     /// </summary>
     /// <param name="value">Value to assign to all cells.</param>
+    /// <since>6.0</since>
     public Transform(Transform value)
     {
       m_00 = value.m_00;
@@ -61,6 +63,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a new identity transform matrix. An identity matrix defines no transformation.
     /// </summary>
+    /// <since>5.0</since>
     public static Transform Identity
     {
       get
@@ -77,6 +80,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// ZeroTransformation diagonal = (0,0,0,1)
     /// </summary>
+    /// <since>6.1</since>
     public static Transform ZeroTransformation
     {
       get
@@ -90,6 +94,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an XForm filled with RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Transform Unset
     {
       get
@@ -129,6 +134,7 @@ namespace Rhino.Geometry
     /// RotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll)
     /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
     /// </remarks>
+    /// <since>6.11</since>
     public static Transform RotationZYX(double yaw, double pitch, double roll)
     {
       Transform xf = Identity;
@@ -146,8 +152,9 @@ namespace Rhino.Geometry
     /// <remarks>
     /// RotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma)
     /// where R_*(angle) is rotation of angle radians about the corresponding *-world coordinate axis.
-    /// Note, alpha and gamma are in the range (-pi, pi] while beta in in the range [0, pi]
+    /// Note, alpha and gamma are in the range (-pi, pi] while beta in the range [0, pi]
     /// </remarks>
+    /// <since>6.11</since>
     public static Transform RotationZYZ(double alpha, double beta, double gamma)
     {
       Transform xf = Identity;
@@ -165,13 +172,14 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_constrainedcopy.cs' lang='cs'/>
     /// <code source='examples\py\ex_constrainedcopy.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Transform Translation(Vector3d motion)
     {
       return Translation(motion.m_x, motion.m_y, motion.m_z);
     }
 
     /// <summary>
-    /// Constructs a new translation (move) tranformation. 
+    /// Constructs a new translation (move) transformation. 
     /// Right column is (dx, dy, dz, 1.0).
     /// </summary>
     /// <param name="dx">Distance to translate (move) geometry along the world X axis.</param>
@@ -183,6 +191,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_transformbrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_transformbrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Transform Translation(double dx, double dy, double dz)
     {
       Transform xf = Identity;
@@ -198,6 +207,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="diagonal">The diagonal values.</param>
     /// <returns>A transformation with diagonal (d0,d1,d2,1.0).</returns>
+    /// <since>6.12</since>
     public static Transform Diagonal(Vector3d diagonal)
     {
       return Diagonal(diagonal.m_x, diagonal.m_y, diagonal.m_z);
@@ -210,6 +220,7 @@ namespace Rhino.Geometry
     /// <param name="d1">Transform.M11 value.</param>
     /// <param name="d2">Transform.M22 value.</param>
     /// <returns>A transformation with diagonal (d0,d1,d2,1.0).</returns>
+    /// <since>6.12</since>
     public static Transform Diagonal(double d0, double d1, double d2)
     {
       Transform xf = Identity;
@@ -225,6 +236,7 @@ namespace Rhino.Geometry
     /// <param name="anchor">Defines the anchor point of the scaling operation.</param>
     /// <param name="scaleFactor">Scaling factor in all directions.</param>
     /// <returns>A transform matrix which scales geometry uniformly around the anchor point.</returns>
+    /// <since>5.0</since>
     public static Transform Scale(Point3d anchor, double scaleFactor)
     {
       return Scale(new Plane(anchor, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0)), scaleFactor, scaleFactor, scaleFactor);
@@ -238,6 +250,7 @@ namespace Rhino.Geometry
     /// <param name="yScaleFactor">Scaling factor along the anchor plane Y-Axis direction.</param>
     /// <param name="zScaleFactor">Scaling factor along the anchor plane Z-Axis direction.</param>
     /// <returns>A transformation matrix which scales geometry non-uniformly.</returns>
+    /// <since>5.0</since>
     public static Transform Scale(Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor)
     {
       Transform xf = Identity;
@@ -253,6 +266,7 @@ namespace Rhino.Geometry
     /// <param name="rotationAxis">Axis direction of rotation.</param>
     /// <param name="rotationCenter">Center point of rotation.</param>
     /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <since>5.0</since>
     public static Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
     {
       Transform xf = Identity;
@@ -266,6 +280,7 @@ namespace Rhino.Geometry
     /// <param name="angleRadians">Angle (in Radians) of the rotation.</param>
     /// <param name="rotationCenter">Center point of rotation. Rotation axis is vertical.</param>
     /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <since>5.0</since>
     public static Transform Rotation(double angleRadians, Point3d rotationCenter)
     {
       return Rotation(angleRadians, new Vector3d(0, 0, 1), rotationCenter);
@@ -278,6 +293,7 @@ namespace Rhino.Geometry
     /// <param name="rotationAxis">Axis direction of rotation operation.</param>
     /// <param name="rotationCenter">Center point of rotation. Rotation axis is vertical.</param>
     /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <since>5.0</since>
     public static Transform Rotation(double angleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       return Rotation(Math.Sin(angleRadians), Math.Cos(angleRadians), rotationAxis, rotationCenter);
@@ -290,6 +306,7 @@ namespace Rhino.Geometry
     /// <param name="endDirection">An end direction.</param>
     /// <param name="rotationCenter">A rotation center.</param>
     /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <since>5.0</since>
     public static Transform Rotation(Vector3d startDirection, Vector3d endDirection, Point3d rotationCenter)
     {
       if (Math.Abs(startDirection.Length - 1.0) > RhinoMath.SqrtEpsilon)
@@ -319,6 +336,7 @@ namespace Rhino.Geometry
     /// <param name="y1">Second "to" vector.</param>
     /// <param name="z1">Third "to" vector.</param>
     /// <returns>A rotation transformation value.</returns>
+    /// <since>5.0</since>
     public static Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0,
       Vector3d x1, Vector3d y1, Vector3d z1)
     {
@@ -348,6 +366,7 @@ namespace Rhino.Geometry
     /// <param name="pointOnMirrorPlane">Point on the mirror plane.</param>
     /// <param name="normalToMirrorPlane">Normal vector to the mirror plane.</param>
     /// <returns>A transformation matrix which mirrors geometry in a specified plane.</returns>
+    /// <since>5.0</since>
     public static Transform Mirror(Point3d pointOnMirrorPlane, Vector3d normalToMirrorPlane)
     {
       Transform xf = new Transform();
@@ -360,6 +379,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mirrorPlane">Plane that defines the mirror orientation and position.</param>
     /// <returns>A transformation matrix which mirrors geometry in a specified plane.</returns>
+    /// <since>5.0</since>
     public static Transform Mirror(Plane mirrorPlane)
     {
       return Mirror(mirrorPlane.Origin, mirrorPlane.ZAxis);
@@ -375,6 +395,7 @@ namespace Rhino.Geometry
     /// A transformation matrix which orients geometry from one coordinate system to another on success.
     /// Transform.Unset on failure.
     /// </returns>
+    /// <since>5.0</since>
     public static Transform ChangeBasis(Plane plane0, Plane plane1)
     {
       Transform rc = Transform.Identity;
@@ -389,6 +410,7 @@ namespace Rhino.Geometry
     /// <param name="plane0">The plane to orient from.</param>
     /// <param name="plane1">the plane to orient to.</param>
     /// <returns>The translation transformation if successful, Transform.Unset on failure.</returns>
+    /// <since>5.0</since>
     public static Transform PlaneToPlane(Plane plane0, Plane plane1)
     {
       Transform rc = Transform.Identity;
@@ -410,6 +432,7 @@ namespace Rhino.Geometry
     /// A transformation matrix which orients geometry from one coordinate system to another on success.
     /// Transform.Unset on failure.
     /// </returns>
+    /// <since>5.0</since>
     public static Transform ChangeBasis(Vector3d initialBasisX, Vector3d initialBasisY, Vector3d initialBasisZ,
       Vector3d finalBasisX, Vector3d finalBasisY, Vector3d finalBasisZ)
     {
@@ -424,6 +447,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">Plane onto which everything will be perpendicularly projected.</param>
     /// <returns>A transformation matrix which projects geometry onto a specified plane.</returns>
+    /// <since>5.0</since>
     public static Transform PlanarProjection(Plane plane)
     {
       Transform rc = Transform.Identity;
@@ -436,6 +460,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Plane to project onto.</param>
     /// <param name="direction">Projection direction, must not be parallel to the plane.</param>
     /// <returns>Projection transformation or identity transformation if projection could not be calculated.</returns>
+    /// <since>6.0</since>
     public static Transform ProjectAlong(Plane plane, Vector3d direction)
     {
       if (!plane.IsValid || !direction.IsValid || direction.IsZero)
@@ -479,6 +504,7 @@ namespace Rhino.Geometry
     /// <param name="y">Shearing vector along plane y-axis.</param>
     /// <param name="z">Shearing vector along plane z-axis.</param>
     /// <returns>A transformation matrix which shear geometry.</returns>
+    /// <since>5.0</since>
     public static Transform Shear(Plane plane, Vector3d x, Vector3d y, Vector3d z)
     {
       Transform rc = Transform.Identity;
@@ -493,9 +519,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Determines if two transformations are equal in value.
     /// </summary>
-    /// <param name="a">A tranform.</param>
-    /// <param name="b">Another tranform.</param>
+    /// <param name="a">A transform.</param>
+    /// <param name="b">Another transform.</param>
     /// <returns>true if transforms are equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Transform a, Transform b)
     {
       return a.m_00 == b.m_00 && a.m_01 == b.m_01 && a.m_02 == b.m_02 && a.m_03 == b.m_03 &&
@@ -507,9 +534,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Determines if two transformations are different in value.
     /// </summary>
-    /// <param name="a">A tranform.</param>
-    /// <param name="b">Another tranform.</param>
+    /// <param name="a">A transform.</param>
+    /// <param name="b">Another transform.</param>
     /// <returns>true if transforms are different; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Transform a, Transform b)
     {
       return a.m_00 != b.m_00 || a.m_01 != b.m_01 || a.m_02 != b.m_02 || a.m_03 != b.m_03 ||
@@ -525,6 +553,7 @@ namespace Rhino.Geometry
     /// <param name="b">Second transformation.</param>
     /// <returns>A transformation matrix that combines the effect of both input transformations. 
     /// The resulting Transform gives the same result as though you'd first apply A then B.</returns>
+    /// <since>5.0</since>
     public static Transform operator *(Transform a, Transform b)
     {
       Transform xf = new Transform();
@@ -555,7 +584,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="m">A transformation.</param>
     /// <param name="p">A point.</param>
-    /// <returns>The tranformed point.</returns>
+    /// <returns>The transformed point.</returns>
+    /// <since>5.0</since>
     public static Point3d operator *(Transform m, Point3d p)
     {
       double x = p.m_x; // optimizer should put x,y,z in registers
@@ -581,7 +611,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="m">A transformation.</param>
     /// <param name="v">A vector.</param>
-    /// <returns>The tranformed vector.</returns>
+    /// <returns>The transformed vector.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator *(Transform m, Vector3d v)
     {
       double x = v.m_x; // optimizer should put x,y,z in registers
@@ -602,6 +633,7 @@ namespace Rhino.Geometry
     /// <param name="b">Second transformation.</param>
     /// <returns>A transformation matrix that combines the effect of both input transformations. 
     /// The resulting Transform gives the same result as though you'd first apply B then A.</returns>
+    /// <since>5.0</since>
     public static Transform Multiply(Transform a, Transform b)
     {
       return a * b;
@@ -611,43 +643,59 @@ namespace Rhino.Geometry
     #region properties
     #region accessor properties
     /// <summary>Gets or sets this[0,0].</summary>
+    /// <since>5.0</since>
     public double M00 { get { return m_00; } set { m_00 = value; } }
     /// <summary>Gets or sets this[0,1].</summary>
+    /// <since>5.0</since>
     public double M01 { get { return m_01; } set { m_01 = value; } }
     /// <summary>Gets or sets this[0,2].</summary>
+    /// <since>5.0</since>
     public double M02 { get { return m_02; } set { m_02 = value; } }
     /// <summary>Gets or sets this[0,3].</summary>
+    /// <since>5.0</since>
     public double M03 { get { return m_03; } set { m_03 = value; } }
 
     /// <summary>Gets or sets this[1,0].</summary>
+    /// <since>5.0</since>
     public double M10 { get { return m_10; } set { m_10 = value; } }
     /// <summary>Gets or sets this[1,1].</summary>
+    /// <since>5.0</since>
     public double M11 { get { return m_11; } set { m_11 = value; } }
     /// <summary>Gets or sets this[1,2].</summary>
+    /// <since>5.0</since>
     public double M12 { get { return m_12; } set { m_12 = value; } }
     /// <summary>Gets or sets this[1,3].</summary>
+    /// <since>5.0</since>
     public double M13 { get { return m_13; } set { m_13 = value; } }
 
     /// <summary>Gets or sets this[2,0].</summary>
+    /// <since>5.0</since>
     public double M20 { get { return m_20; } set { m_20 = value; } }
     /// <summary>Gets or sets this[2,1].</summary>
+    /// <since>5.0</since>
     public double M21 { get { return m_21; } set { m_21 = value; } }
     /// <summary>Gets or sets this[2,2].</summary>
+    /// <since>5.0</since>
     public double M22 { get { return m_22; } set { m_22 = value; } }
     /// <summary>Gets or sets this[2,3].</summary>
+    /// <since>5.0</since>
     public double M23 { get { return m_23; } set { m_23 = value; } }
 
     /// <summary>Gets or sets this[3,0].</summary>
+    /// <since>5.0</since>
     public double M30 { get { return m_30; } set { m_30 = value; } }
     /// <summary>Gets or sets this[3,1].</summary>
+    /// <since>5.0</since>
     public double M31 { get { return m_31; } set { m_31 = value; } }
     /// <summary>Gets or sets this[3,2].</summary>
+    /// <since>5.0</since>
     public double M32 { get { return m_32; } set { m_32 = value; } }
     /// <summary>Gets or sets this[3,3].</summary>
+    /// <since>5.0</since>
     public double M33 { get { return m_33; } set { m_33 = value; } }
 
     /// <summary>
-    /// Gets or sets the matrix value at the given row and column indixes.
+    /// Gets or sets the matrix value at the given row and column indices.
     /// </summary>
     /// <param name="row">Index of row to access, must be 0, 1, 2 or 3.</param>
     /// <param name="column">Index of column to access, must be 0, 1, 2 or 3.</param>
@@ -749,6 +797,7 @@ namespace Rhino.Geometry
     #endregion
 
     /// <summary>Return true if this Transform is the identity transform</summary>
+    /// <since>6.0</since>
     public bool IsIdentity
     {
       get { return this == Identity; }
@@ -758,6 +807,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not this Transform is a valid matrix. 
     /// A valid transform matrix is not allowed to have any invalid numbers.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -772,8 +822,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// True if matrix is Zero4x4, ZeroTransformation, or some other type of
-    /// zero.The value xform[3][3] can be anything.
+    /// zero. The value xform[3][3] can be anything.
     /// </summary>
+    /// <since>6.1</since>
     public bool IsZero
     {
       get
@@ -795,6 +846,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// True if all values are 0
     /// </summary>
+    /// <since>6.1</since>
     public bool IsZero4x4
     {
       get
@@ -806,6 +858,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// True if all values are 0 and M33 is 1
     /// </summary>
+    /// <since>6.1</since>
     public bool IsZeroTransformation
     {
       get
@@ -819,6 +872,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="zeroTolerance">The zero tolerance.</param>
     /// <returns>Returns true if all values are 0 and M33 is 1 within tolerance.</returns>
+    /// <since>6.12</since>
     [ConstOperation]
     public bool IsZeroTransformaton(double zeroTolerance)
     {
@@ -830,6 +884,7 @@ namespace Rhino.Geometry
     /// The easiest way to think of Similarity is that any circle, when transformed, 
     /// remains a circle. Whereas a non-similarity Transform deforms circles into ellipses.
     /// </summary>
+    /// <since>5.0</since>
     public TransformSimilarityType SimilarityType
     {
       get
@@ -841,10 +896,11 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets a value indicating whether or not the Transform maintains similarity. 
-    /// A similarity transformation can be broken into a sequence of a dialation, translation, rotation, and a reflection.
+    /// A similarity transformation can be broken into a sequence of a dilation, translation, rotation, and a reflection.
     /// </summary>
     /// <param name="tolerance">The evaluation tolerance.</param>
     /// <returns>The similarity type.</returns>
+    /// <since>6.12</since>
     [ConstOperation]
     public TransformSimilarityType IsSimilarity(double tolerance)
     {
@@ -854,19 +910,20 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Decomposes a similarity transformation. The transformation must be affine.
-    /// A similarity transformation can be broken into a sequence of a dialation, translation, rotation, and a reflection.
+    /// A similarity transformation can be broken into a sequence of a dilation, translation, rotation, and a reflection.
     /// </summary>
     /// <param name="translation">Translation vector.</param>
-    /// <param name="dilation">Dialation, where dilation lt; 0 if this is an orientation reversing similarity.</param>
+    /// <param name="dilation">Dilation, where dilation lt; 0 if this is an orientation reversing similarity.</param>
     /// <param name="rotation">A proper rotation transformation, where R*Transpose(R)=I and Determinant(R)=1.</param>
     /// <param name="tolerance">The evaluation tolerance.</param>
     /// <returns>The similarity type.</returns>
     /// <remarks>
     /// If X.DecomposeSimilarity(T, d, R, tol) !=0 then X ~ Translation(T)*Diagonal(d)*R
 		/// note when d gt;0 the transformation is orientation preserving.
-    /// If dilation lt; 0 then Diagonal(dilation) is actually a reflection combined with a true dialation, or
+    /// If dilation lt; 0 then Diagonal(dilation) is actually a reflection combined with a true dilation, or
     /// Diagonal(dilation) = Diagonal(-1) * Diagonal(|diagonal|).
     /// </remarks>
+    /// <since>6.12</since>
     [ConstOperation]
     public TransformSimilarityType DecomposeSimilarity(out Vector3d translation, out double dilation, out Transform rotation, double tolerance)
     {
@@ -882,6 +939,7 @@ namespace Rhino.Geometry
     /// A rigid transformation can be broken into  a proper rotation and a translation,
     /// while an isometry transformation could also include a reflection.
     /// </summary>
+    /// <since>6.12</since>
     public TransformRigidType RigidType
     {
       get
@@ -898,6 +956,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="tolerance">The evaluation tolerance.</param>
     /// <returns>The rigid type.</returns>
+    /// <since>6.12</since>
     [ConstOperation]
     public TransformRigidType IsRigid(double tolerance)
     {
@@ -906,7 +965,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Decomposes a rigid transformation. The transfomration must be affine.
+    /// Decomposes a rigid transformation. The transformation must be affine.
     /// </summary>
     /// A rigid transformation can be broken into  a proper rotation and a translation,
     /// while an isometry transformation could also include a reflection.
@@ -919,6 +978,7 @@ namespace Rhino.Geometry
     /// If X.DecomposeRigid(T, R) is -1, then X ~ Transform(-1) * Translation(T)*R.
     /// DecomposeRigid will find the closest rotation to the linear part of this transformation.
     /// </remarks>
+    /// <since>6.12</since>
     [ConstOperation]
     public TransformRigidType DecomposeRigid(out Vector3d translation, out Transform rotation, double tolerance)
     {
@@ -932,6 +992,7 @@ namespace Rhino.Geometry
     /// Tests for an affine transformation.
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// </summary>
+    /// <since>6.12</since>
     public bool IsAffine
     {
       get
@@ -944,6 +1005,7 @@ namespace Rhino.Geometry
     /// Tests for a linear transformation.
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// </summary>
+    /// <since>6.12</since>
     public bool IsLinear
     {
       get
@@ -964,6 +1026,7 @@ namespace Rhino.Geometry
     /// If X.DecomposeAffine(T, L) is true then X == Translation(T)*L.
     /// DecomposeAffine(T,L) succeeds for all affine transformations and is a simple copying of values.
     /// </remarks>
+    /// <since>6.12</since>
     [ConstOperation]
     public bool DecomposeAffine(out Vector3d translation, out Transform linear)
     {
@@ -985,6 +1048,7 @@ namespace Rhino.Geometry
     /// DecomposeAffine(L, T) may fail for affine transformations if L is not invertible,
     /// and is more computationally expensive then X.DecomposeAffine(T, L).
     /// </remarks>
+    /// <since>6.12</since>
     [ConstOperation]
     public bool DecomposeAffine(out Transform linear, out Vector3d translation)
     {
@@ -1003,6 +1067,7 @@ namespace Rhino.Geometry
     /// <param name="orthogonal">Orthogonal basis.</param>
     /// <param name="diagonal">Diagonal elements of a Diagonal transformation.</param>
     /// <returns>True if successful decomposition.</returns>
+    /// <since>6.12</since>
     [ConstOperation]
     public bool DecomposeAffine(out Vector3d translation, out Transform rotation, out Transform orthogonal, out Vector3d diagonal)
     {
@@ -1016,6 +1081,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if this is a proper rotation. 
     /// </summary>
+    /// <since>6.12</since>
     public bool IsRotation
     {
       get
@@ -1025,16 +1091,18 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Replaces the last row with (0 0 0 1), discarding any perspecive part of this transform
+    /// Replaces the last row with (0 0 0 1), discarding any perspective part of this transform
     /// </summary>
+    /// <since>6.12</since>
     public void Affineize()
     {
       UnsafeNativeMethods.ON_Xform_Affineize(ref this);
     }
 
     /// <summary>
-    /// Affineize() and replaces the last column with (0 0 0 1)^T, discarding any translation part of this transform.
+    /// Affinitize() and replaces the last column with (0 0 0 1)^T, discarding any translation part of this transform.
     /// </summary>
+    /// <since>6.12</since>
     public void Linearize()
     {
       UnsafeNativeMethods.ON_Xform_Linearize(ref this);
@@ -1046,6 +1114,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="tolerance">The evaluation tolerance</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.12</since>
     public bool Orthogonalize(double tolerance)
     {
       return UnsafeNativeMethods.ON_Xform_Orthogonalize(ref this, tolerance);
@@ -1053,7 +1122,7 @@ namespace Rhino.Geometry
 
     /// <summary>
 		/// A Symmetric linear transformation can be decomposed A = Q * Diag * Q ^ T, where Diag is a diagonal
-    /// transformation. Diag[i][i] is an eigenvalue of A and the i-th coulmn of Q is a corresponding
+    /// transformation. Diag[i][i] is an eigenvalue of A and the i-th column of Q is a corresponding
     /// unit length eigenvector. Note, this transformation must be Linear and Symmetric.
     /// </summary>
     /// <param name="matrix">An orthonormal matrix of eigenvectors (Q).</param>
@@ -1063,6 +1132,7 @@ namespace Rhino.Geometry
     /// If success, this== Q*Diagonal(diagonal) * QT, where QT == Q.Transpose().
     /// If L.IsLinear and LT==L.Transpose then LT*L is symmetric and is a common source of symmetric transformations.
     /// </remarks>
+    /// <since>6.12</since>
     [ConstOperation]
     public bool DecomposeSymmetric(out Transform matrix, out Vector3d diagonal)
     {
@@ -1074,6 +1144,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The determinant of this 4x4 matrix.
     /// </summary>
+    /// <since>5.0</since>
     public double Determinant
     {
       get
@@ -1095,6 +1166,7 @@ namespace Rhino.Geometry
     /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
     /// If false, then this is not a rotation.
     /// </returns>
+    /// <since>6.11</since>
     [ConstOperation]
     public bool GetYawPitchRoll(out double yaw, out double pitch, out double roll)
     {
@@ -1114,8 +1186,9 @@ namespace Rhino.Geometry
     /// If false, then this is not a rotation.
     /// </returns>
     /// <remarks>
-    /// Note, alpha and gamma are in the range (-pi, pi] while beta in in the range [0, pi]
+    /// Note, alpha and gamma are in the range (-pi, pi] while beta in the range [0, pi]
     /// </remarks>
+    /// <since>6.11</since>
     [ConstOperation]
     public bool GetEulerZYZ(out double alpha, out double beta, out double gamma)
     {
@@ -1124,11 +1197,12 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes a new boundingbox that is the smallest axis aligned
-    /// boundingbox that contains the transformed result of its 8 original corner
+    /// Computes a new bounding box that is the smallest axis aligned
+    /// bounding box that contains the transformed result of its 8 original corner
     /// points.
     /// </summary>
     /// <returns>A new bounding box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox TransformBoundingBox(BoundingBox bbox)
     {
@@ -1138,10 +1212,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Given a list, an array or any enumerable set of points, computes a new array of tranformed points.
+    /// Given a list, an array or any enumerable set of points, computes a new array of transformed points.
     /// </summary>
     /// <param name="points">A list, an array or any enumerable set of points to be left untouched and copied.</param>
     /// <returns>A new array.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] TransformList(System.Collections.Generic.IEnumerable<Point3d> points)
     {
@@ -1171,6 +1246,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Another transform.</param>
     /// <returns>true if other has the same value as this transform; otherwise, false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Transform other)
     {
@@ -1215,6 +1291,7 @@ namespace Rhino.Geometry
     /// If false is returned and this Transform is Invalid, inserveTransform will be set to this Transform. 
     /// If false is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool TryGetInverse(out Transform inverseTransform)
     {
@@ -1229,6 +1306,7 @@ namespace Rhino.Geometry
     /// Flip row/column values
     /// </summary>
     /// <returns></returns>
+    /// <since>5.9</since>
     [ConstOperation]
     public Transform Transpose()
     {
@@ -1248,6 +1326,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="rowDominant"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     [ConstOperation]
     public float[] ToFloatArray(bool rowDominant)
     {
@@ -1271,6 +1350,7 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <since>6.0</since>
     object ICloneable.Clone()
     {
       return Clone();
@@ -1281,6 +1361,7 @@ namespace Rhino.Geometry
     /// be accomplished by a simple assignment.
     /// </summary>
     /// <returns>A deep copy of this data structure.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Transform Clone()
     {
@@ -1295,6 +1376,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Another transform.</param>
     /// <returns>-1 if this &lt; other; 0 if both are equal; 1 otherwise.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Transform other)
     {
@@ -1396,6 +1478,7 @@ namespace Rhino.Geometry
     /// <summary>Apply the space morph to geometry.</summary>
     /// <param name="geometry">Geometry to morph.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Morph(GeometryBase geometry)
     {
       return PerformGeometryMorph(geometry);
@@ -1406,6 +1489,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">Plane to morph.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool Morph(ref Plane plane)
     {
       return PerformPlaneMorph(ref plane);
@@ -1416,6 +1500,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// true if the geometry can be morphed by calling SpaceMorph.Morph(geometry)
     /// </summary>
+    /// <since>5.0</since>
     public static bool IsMorphable(GeometryBase geometry)
     {
       if (null == geometry)
@@ -1431,6 +1516,7 @@ namespace Rhino.Geometry
     /// <summary>Morphs an Euclidean point. <para>This method is abstract.</para></summary>
     /// <param name="point">A point that will be morphed by this function.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.0</since>
     public abstract Point3d MorphPoint(Point3d point);
 
     /// <summary>
@@ -1439,6 +1525,7 @@ namespace Rhino.Geometry
     /// morphing functions. The Tolerance value does not affect the way meshes and points
     /// are morphed.
     /// </summary>
+    /// <since>5.0</since>
     public double Tolerance
     {
       get { return m_tolerance; }
@@ -1452,6 +1539,7 @@ namespace Rhino.Geometry
     /// The QuickPreview value does not affect the way meshes and points are morphed.
     /// The default is false.
     /// </summary>
+    /// <since>5.0</since>
     public bool QuickPreview
     {
       get { return m_bQuickPreview; }
@@ -1464,6 +1552,7 @@ namespace Rhino.Geometry
     /// The PreserveStructure value does not affect the way meshes and points are morphed.
     /// The default is false.
     /// </summary>
+    /// <since>5.0</since>
     public bool PreserveStructure
     {
       get { return m_bPreserveStructure; }
@@ -1532,6 +1621,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Constructs a twist space morph.
     /// </summary>
+    /// <since>5.1</since>
     public TwistSpaceMorph()
     {
       m_space_morph = UnsafeNativeMethods.CRhinoTwistSpaceMorph_New();
@@ -1547,6 +1637,7 @@ namespace Rhino.Geometry.Morphs
     }
 
     /// <summary>Axis to rotate about.</summary>
+    /// <since>5.1</since>
     public Line TwistAxis
     {
       get
@@ -1566,6 +1657,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Twist angle in radians.
     /// </summary>
+    /// <since>5.1</since>
     public double TwistAngleRadians
     {
       get
@@ -1584,6 +1676,7 @@ namespace Rhino.Geometry.Morphs
     /// If true, the deformation is constant throughout the object, even if the axis is shorter than the object. 
     /// If false, the deformation takes place only the length of the axis.
     /// </summary>
+    /// <since>5.1</since>
     public bool InfiniteTwist
     {
       get
@@ -1601,6 +1694,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point. <para>This method is abstract.</para></summary>
     /// <param name="point">A point that will be morphed by this function.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.1</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -1618,6 +1712,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.1</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1660,6 +1755,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="point">Point to bend through.</param>
     /// <param name="straight">If false, then point determines the region to bend. If true, only the spine region is bent.</param>
     /// <param name="symmetric">If false, then only one end of the object bends. If true, then the object will bend symmetrically around the center if you start the spine in the middle of the object.</param>
+    /// <since>5.9</since>
     public BendSpaceMorph(Point3d start, Point3d end, Point3d point, bool straight, bool symmetric)
     {
       double tolerance = 0;
@@ -1686,6 +1782,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="angle">Bend angle in radians.</param>
     /// <param name="straight">If false, then point determines the region to bend. If true, only the spine region is bent.</param>
     /// <param name="symmetric">If false, then only one end of the object bends. If true, then the object will bend symmetrically around the center if you start the spine in the middle of the object.</param>
+    /// <since>5.9</since>
     public BendSpaceMorph(Point3d start, Point3d end, Point3d point, double angle, bool straight, bool symmetric)
     {
       double tolerance = 0;
@@ -1706,6 +1803,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get { return (m_space_morph != IntPtr.Zero); }
@@ -1714,6 +1812,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -1731,6 +1830,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1774,6 +1874,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="endRadius">Radius at end point.</param>
     /// <param name="bFlat">If true, then a one-directional, one-dimensional taper is created.</param>
     /// <param name="infiniteTaper">If false, the deformation takes place only the length of the axis. If true, the deformation happens throughout the object, even if the axis is shorter.</param>
+    /// <since>5.9</since>
     public TaperSpaceMorph(Point3d start, Point3d end, double startRadius, double endRadius, bool bFlat, bool infiniteTaper)
     {
       double tolerance = 0;
@@ -1794,6 +1895,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get { return (m_space_morph != IntPtr.Zero); }
@@ -1802,6 +1904,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -1819,6 +1922,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1871,6 +1975,7 @@ namespace Rhino.Geometry.Morphs
     /// smoothly from 0 at radius0 to m_a at radius1, and everything inside of the circle of radius radius1 is rotated by angle.
     /// </para>
     /// </remarks>
+    /// <since>5.9</since>
     public MaelstromSpaceMorph(Plane plane, double radius0, double radius1, double angle)
     {
       double tolerance = 0;
@@ -1891,6 +1996,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get
@@ -1902,6 +2008,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -1919,6 +2026,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1959,6 +2067,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="start">Start of stretch axis.</param>
     /// <param name="end">End of stretch axis.></param>
     /// <param name="point">End of new stretch axis.</param>
+    /// <since>5.9</since>
     public StretchSpaceMorph(Point3d start, Point3d end, Point3d point)
     {
       double tolerance = 0;
@@ -1982,6 +2091,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="start">Start of stretch axis.</param>
     /// <param name="end">End of stretch axis.></param>
     /// <param name="length">Length of new stretch axis.</param>
+    /// <since>5.9</since>
     public StretchSpaceMorph(Point3d start, Point3d end, double length)
     {
       double tolerance = 0;
@@ -2002,6 +2112,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get
@@ -2013,6 +2124,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -2030,6 +2142,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2065,10 +2178,11 @@ namespace Rhino.Geometry.Morphs
     IntPtr NonConstPointer() { return m_space_morph; }
 
     /// <summary>
-    /// Constructs a sporph space morph.
+    /// Constructs a Sporph space morph.
     /// </summary>
     /// <param name="surface0">Base surface.</param>
     /// <param name="surface1">Target surface.</param>
+    /// <since>5.9</since>
     public SporphSpaceMorph(Surface surface0, Surface surface1)
     {
       double tolerance = 0;
@@ -2092,12 +2206,13 @@ namespace Rhino.Geometry.Morphs
     }
 
     /// <summary>
-    /// Constructs a sporph space morph.
+    /// Constructs a Sporph space morph.
     /// </summary>
     /// <param name="surface0">Base surface.</param>
     /// <param name="surface1">Target surface.</param>
     /// <param name="surface0Param">U,V parameter on surface0 used for orienting.</param>
     /// <param name="surface1Param">U,V parameter on surface1 used for orienting.</param>
+    /// <since>5.9</since>
     public SporphSpaceMorph(Surface surface0, Surface surface1, Point2d surface0Param, Point2d surface1Param)
     {
       double tolerance = 0;
@@ -2123,6 +2238,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get
@@ -2134,6 +2250,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -2151,6 +2268,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2191,6 +2309,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="curve0">Base curve.</param>
     /// <param name="curve1">Target curve.</param>
     /// <param name="preventStretching"></param>
+    /// <since>5.9</since>
     public FlowSpaceMorph(Curve curve0, Curve curve1, bool preventStretching)
     {
       double tolerance = 0;
@@ -2221,6 +2340,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="reverseCurve0">If true, then direction of curve0 is reversed.</param>
     /// <param name="reverseCurve1">If true, then direction of curve1 is reversed.</param>
     /// <param name="preventStretching">If true, the length of the objects along the curve directions are not changed. If false, objects are stretched or compressed in the curve direction so that the relationship to the target curve is the same as it is to the base curve.</param>
+    /// <since>5.9</since>
     public FlowSpaceMorph(Curve curve0, Curve curve1, bool reverseCurve0, bool reverseCurve1, bool preventStretching)
     {
       double tolerance = 0;
@@ -2246,6 +2366,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get
@@ -2257,6 +2378,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -2274,6 +2396,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2314,6 +2437,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="plane">Source plane of deformation.</param>
     /// <param name="surface">Surface to wrap objects onto.</param>
     /// <param name="surfaceParam">U,V parameter on surface used for orienting.</param>
+    /// <since>5.9</since>
     public SplopSpaceMorph(Plane plane, Surface surface, Point2d surfaceParam)
     {
       double tolerance = 0;
@@ -2342,6 +2466,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="surface">Surface to wrap objects onto.</param>
     /// <param name="surfaceParam">U,V parameter on surface used for orienting.</param>
     /// <param name="scale">Scale factor.</param>
+    /// <since>5.9</since>
     public SplopSpaceMorph(Plane plane, Surface surface, Point2d surfaceParam, double scale)
     {
       double tolerance = 0;
@@ -2371,6 +2496,7 @@ namespace Rhino.Geometry.Morphs
     /// <param name="surfaceParam">U,V parameter on surface used for orienting.</param>
     /// <param name="scale">Scale factor. To ignore, use Rhino.RhinoMath.UnsetValue.</param>
     /// <param name="angle">Rotation angle in radians. To ignore, use Rhino.RhinoMath.UnsetValue.</param>
+    /// <since>5.9</since>
     public SplopSpaceMorph(Plane plane, Surface surface, Point2d surfaceParam, double scale, double angle)
     {
       double tolerance = 0;
@@ -2395,6 +2521,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Returns true if the space morph definition is valid, false otherwise.
     /// </summary>
+    /// <since>5.9</since>
     public bool IsValid
     {
       get
@@ -2406,6 +2533,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>Morphs an Euclidean point.</summary>
     /// <param name="point">A point that will be morphed by this object.</param>
     /// <returns>Resulting morphed point.</returns>
+    /// <since>5.9</since>
     public override Point3d MorphPoint(Point3d point)
     {
       UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
@@ -2423,6 +2551,7 @@ namespace Rhino.Geometry.Morphs
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.9</since>
     public void Dispose()
     {
       Dispose(true);

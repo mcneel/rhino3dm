@@ -8,7 +8,7 @@ using IndexDistance = System.Collections.Generic.KeyValuePair<int, double>; //th
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Represents event data that is passed when when an item that meets certain 
+  /// Represents event data that is passed when an item that meets certain 
   /// criteria is found and the passed RTree event is raised.
   /// </summary>
   public class RTreeEventArgs : EventArgs
@@ -28,38 +28,45 @@ namespace Rhino.Geometry
     /// Gets the identifier of the found item.
     /// </summary>
     /// <exception cref="System.OverflowException">If, on 64-bit platforms, the value of this instance is too large or too small to be represented as a 32-bit signed integer.</exception>
+    /// <since>5.0</since>
     public int Id { get { return m_element_a.ToInt32(); } }
 
     /// <summary>
     /// Gets the identifier pointer of the found item.
     /// </summary>
+    /// <since>5.0</since>
     public IntPtr IdPtr { get { return m_element_a; } }
 
     /// <summary>
     /// Gets or sets a value that determines if the search should be conducted farther.
     /// </summary>
+    /// <since>5.0</since>
     public bool Cancel { get; set; }
 
     /// <summary>
     /// If search is using two r-trees, IdB is element b in the search.
     /// </summary>
+    /// <since>5.0</since>
     public int IdB { get { return m_element_b.ToInt32(); } }
 
     /// <summary>
     /// If search is using two r-trees, IdB is the element b pointer in the search.
     /// </summary>
+    /// <since>5.0</since>
     public IntPtr IdBPtr { get { return m_element_b; } }
 
     /// <summary>
     /// Gets or sets an arbitrary object that can be attached to this event args.
     /// This object will "stick" through a single search and can represent user-defined state.
     /// </summary>
+    /// <since>5.0</since>
     public object Tag { get; set; }
 
     /// <summary>
     /// Sphere bounds used during a search. You can modify the sphere in a search callback to
     /// help reduce the bounds to search.
     /// </summary>
+    /// <since>5.0</since>
     public Sphere SearchSphere
     {
       get
@@ -80,6 +87,7 @@ namespace Rhino.Geometry
     /// Bounding box bounds used during a search. You may modify the box in a search callback
     /// to help reduce the bounds to search.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox SearchBoundingBox
     {
       get
@@ -102,8 +110,8 @@ namespace Rhino.Geometry
   /// R-tree algorithm by Toni Gutman.
   /// </summary>
   /// <remarks>
-  /// The opennurbs rtree code is a modifed version of the free and unrestricted
-  /// R-tree implementation obtianed from http://www.superliminal.com/sources/sources.htm .
+  /// The opennurbs rtree code is a modified version of the free and unrestricted
+  /// R-tree implementation obtained from http://www.superliminal.com/sources/sources.htm .
   /// </remarks>
   public class RTree : IDisposable
   {
@@ -117,6 +125,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_closestpoint.cs' lang='cs'/>
     /// <code source='examples\py\ex_closestpoint.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RTree()
     {
       m_ptr = UnsafeNativeMethods.ON_RTree_New();
@@ -133,6 +142,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mesh">A mesh.</param>
     /// <returns>A new tree, or null on error.</returns>
+    /// <since>5.0</since>
     public static RTree CreateMeshFaceTree(Mesh mesh)
     {
       if (mesh == null) throw new ArgumentNullException(nameof(mesh));
@@ -154,10 +164,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a new tree with an element for each pointcloud point.
+    /// Constructs a new tree with an element for each point cloud point.
     /// </summary>
-    /// <param name="cloud">A pointcloud.</param>
+    /// <param name="cloud">A point cloud.</param>
     /// <returns>A new tree, or null on error.</returns>
+    /// <since>5.0</since>
     public static RTree CreatePointCloudTree(PointCloud cloud)
     {
       if (cloud == null) throw new ArgumentNullException(nameof(cloud));
@@ -177,10 +188,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a new tree with an element for each pointcloud point.
+    /// Constructs a new tree with an element for each point cloud point.
     /// </summary>
     /// <param name="points">Points.</param>
     /// <returns>A new tree, or null on error.</returns>
+    /// <since>6.0</since>
     public static RTree CreateFromPointArray(IEnumerable<Point3d> points)
     {
       return CreateFromPointArray(points, out _, out _);
@@ -214,6 +226,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_closestpoint.cs' lang='cs'/>
     /// <code source='examples\py\ex_closestpoint.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Insert(Point3d point, int elementId)
     {
       return Insert(new BoundingBox(point, point), elementId);
@@ -223,6 +236,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A pointer.</param>
     /// <returns>true if element was successfully inserted.</returns>
+    /// <since>5.0</since>
     public bool Insert(Point3d point, IntPtr elementId)
     {
       return Insert(new BoundingBox(point, point), elementId);
@@ -232,6 +246,7 @@ namespace Rhino.Geometry
     /// <param name="box">A bounding box.</param>
     /// <param name="elementId">A number.</param>
     /// <returns>true if element was successfully inserted.</returns>
+    /// <since>5.0</since>
     public bool Insert(BoundingBox box, int elementId)
     {
       return Insert(box, new IntPtr(elementId));
@@ -241,6 +256,7 @@ namespace Rhino.Geometry
     /// <param name="box">A bounding box.</param>
     /// <param name="elementId">A pointer.</param>
     /// <returns>true if element was successfully inserted.</returns>
+    /// <since>5.0</since>
     public bool Insert(BoundingBox box, IntPtr elementId)
     {
       m_count = -1; 
@@ -252,6 +268,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A number.</param>
     /// <returns>true if element was successfully inserted.</returns>
+    /// <since>5.0</since>
     public bool Insert(Point2d point, int elementId)
     {
       return Insert(new Point3d(point.X, point.Y, 0), elementId);
@@ -261,6 +278,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A pointer.</param>
     /// <returns>true if element was successfully inserted.</returns>
+    /// <since>5.0</since>
     public bool Insert(Point2d point, IntPtr elementId)
     {
       return Insert(new Point3d(point.X, point.Y, 0), elementId);
@@ -270,6 +288,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A number.</param>
     /// <returns>true if element was successfully removed.</returns>
+    /// <since>5.0</since>
     public bool Remove(Point3d point, int elementId)
     {
       return Remove(new BoundingBox(point, point), elementId);
@@ -279,6 +298,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A pointer.</param>
     /// <returns>true if element was successfully removed.</returns>
+    /// <since>5.0</since>
     public bool Remove(Point3d point, IntPtr elementId)
     {
       return Remove(new BoundingBox(point, point), elementId);
@@ -288,6 +308,7 @@ namespace Rhino.Geometry
     /// <param name="box">A bounding box.</param>
     /// <param name="elementId">A number.</param>
     /// <returns>true if element was successfully removed.</returns>
+    /// <since>5.0</since>
     public bool Remove(BoundingBox box, int elementId)
     {
       return Remove(box, new IntPtr(elementId));
@@ -297,6 +318,7 @@ namespace Rhino.Geometry
     /// <param name="box">A bounding box.</param>
     /// <param name="elementId">A pointer.</param>
     /// <returns>true if element was successfully removed.</returns>
+    /// <since>5.0</since>
     public bool Remove(BoundingBox box, IntPtr elementId)
     {
       m_count = -1; 
@@ -308,6 +330,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="elementId">A number.</param>
     /// <returns>true if element was successfully removed.</returns>
+    /// <since>5.0</since>
     public bool Remove(Point2d point, int elementId)
     {
       return Remove(new Point3d(point.X, point.Y, 0), elementId);
@@ -316,6 +339,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Removes all elements.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       m_count = -1; 
@@ -326,6 +350,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of items in this tree.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -386,6 +411,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <since>5.0</since>
     public bool Search(BoundingBox box, EventHandler<RTreeEventArgs> callback)
     {
       return Search(box, callback, null);
@@ -401,6 +427,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <since>5.0</since>
     public bool Search(BoundingBox box, EventHandler<RTreeEventArgs> callback, object tag)
     {
       IntPtr pConstTree = ConstPointer();
@@ -433,6 +460,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <since>5.0</since>
     public bool Search(Sphere sphere, EventHandler<RTreeEventArgs> callback)
     {
       return Search(sphere, callback, null);
@@ -452,6 +480,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_closestpoint.cs' lang='cs'/>
     /// <code source='examples\py\ex_closestpoint.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Search(Sphere sphere, EventHandler<RTreeEventArgs> callback, object tag)
     {
       IntPtr pConstTree = ConstPointer();
@@ -489,6 +518,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched.  It is possible no results were found.
     /// </returns>
+    /// <since>5.0</since>
     public static bool SearchOverlaps(RTree treeA, RTree treeB, double tolerance, EventHandler<RTreeEventArgs> callback)
     {
       IntPtr pConstTreeA = treeA.ConstPointer();
@@ -528,6 +558,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -566,6 +597,7 @@ namespace Rhino.Geometry
     /// <param name="needlePts">Points to search for.</param>
     /// <param name="limitDistance">The maximum allowed distance.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> PointCloudClosestPoints(PointCloud pointcloud, IEnumerable<Point3d> needlePts, double limitDistance)
     {
       var tree = RTree.CreatePointCloudTree(pointcloud);
@@ -580,6 +612,7 @@ namespace Rhino.Geometry
     /// <param name="needlePts">Points to search for.</param>
     /// <param name="limitDistance">The maximum allowed distance.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point3dClosestPoints(IEnumerable<Point3d> hayPoints, IEnumerable<Point3d> needlePts, double limitDistance)
     {
       var tree = CreateFromPointArray(hayPoints, out Point3d[] oversized_pts_array, out _);
@@ -650,13 +683,14 @@ namespace Rhino.Geometry
     //-- Types assisting k-neighbor search
 
     /// <summary>
-    /// Finds a certain amout of points in a list of 3D points that are the k-closest to a test point.
+    /// Finds a certain amount of points in a list of 3D points that are the k-closest to a test point.
     /// </summary>
     /// <param name="pointcloud">A point cloud to be searched.</param>
     /// <param name="needlePts">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="RhinoList.PointCloudKNeighbors(PointCloud, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> PointCloudKNeighbors(PointCloud pointcloud, IEnumerable<Point3d> needlePts, int amount)
     {
       var tree = RTree.CreatePointCloudTree(pointcloud);
@@ -665,13 +699,14 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Finds a certain amout of points in a list of 3D points that are the k-closest to a test point.
+    /// Finds a certain amount of points in a list of 3D points that are the k-closest to a test point.
     /// </summary>
     /// <param name="hayPoints">A series of points.</param>
     /// <param name="needlePts">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="RhinoList.Point3dKNeighbors(IEnumerable{Point3d}, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point3dKNeighbors(IEnumerable<Point3d> hayPoints, IEnumerable<Point3d> needlePts, int amount)
     {
       var tree = CreateFromPointArray(hayPoints, out Point3d[] oversized_pts_array, out _);

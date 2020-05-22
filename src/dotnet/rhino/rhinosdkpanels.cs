@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -256,7 +256,7 @@ namespace Rhino.UI
 
     private static readonly StatePanelCallback g_on_show_panel_callback = OnShowPanelCallback;
     /// <summary>
-    /// This has morphed into a message proc, was originally a call back for
+    /// This has morphed into a message procedure, was originally a call back for
     /// the OnShow virtual method but was enhanced to handle IsCreated as well
     /// </summary>
     /// <param name="panelTypeGuid"></param>
@@ -680,7 +680,7 @@ namespace Rhino.UI
         // Call the default constructor if args is null or empty otherwise
         // call the constructor passing a single uint
         var panel_object = Activator.CreateInstance(panelType, constructor_args);
-        var native_pointer = StackedDialogPage.Service.GetNativePageWindow(panel_object, out object host);
+        var native_pointer = StackedDialogPage.Service.GetNativePageWindow(panel_object, true, out object host);
         return native_pointer == IntPtr.Zero
                  ? null 
                  : new PanelInstance(panel_object, native_pointer, host, documentSerailNumber);

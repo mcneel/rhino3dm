@@ -41,6 +41,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -71,6 +72,7 @@ namespace Rhino.Geometry
     /// <param name="closedPlanarCurve">Curve to measure.</param>
     /// <returns>The AreaMassProperties for the given curve or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When closedPlanarCurve is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Curve closedPlanarCurve)
     {
       const double absolute_tolerance = 1.0e-6;
@@ -84,6 +86,7 @@ namespace Rhino.Geometry
     /// <param name="planarTolerance">absolute tolerance used to insure the closed curve is planar</param>
     /// <returns>The AreaMassProperties for the given curve or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When closedPlanarCurve is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Curve closedPlanarCurve, double planarTolerance)
     {
       if (closedPlanarCurve == null)
@@ -103,6 +106,7 @@ namespace Rhino.Geometry
     /// <param name="hatch">Hatch to measure.</param>
     /// <returns>The AreaMassProperties for the given hatch or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When hatch is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Hatch hatch)
     {
       if (hatch == null)
@@ -122,6 +126,7 @@ namespace Rhino.Geometry
     /// <param name="mesh">Mesh to measure.</param>
     /// <returns>The AreaMassProperties for the given Mesh or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When mesh is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Mesh mesh)
     {
       return Compute(mesh, true, true, true, true);
@@ -137,6 +142,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate area product moments.</param>
     /// <returns>The AreaMassProperties for the given Mesh or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When mesh is null.</exception>
+    /// <since>6.3</since>
     public static AreaMassProperties Compute(Mesh mesh, bool area, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (mesh == null)
@@ -154,6 +160,7 @@ namespace Rhino.Geometry
     /// <param name="brep">Brep to measure.</param>
     /// <returns>The AreaMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Brep brep)
     {
       return Compute(brep, true, true, true, true);
@@ -169,6 +176,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate area product moments.</param>
     /// <returns>The AreaMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>6.3</since>
     public static AreaMassProperties Compute(Brep brep, bool area, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (brep == null)
@@ -188,6 +196,7 @@ namespace Rhino.Geometry
     /// <param name="surface">Surface to measure.</param>
     /// <returns>The AreaMassProperties for the given Surface or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When surface is null.</exception>
+    /// <since>5.0</since>
     public static AreaMassProperties Compute(Surface surface)
     {
       return Compute(surface, true, true, true, true);
@@ -203,6 +212,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate area product moments.</param>
     /// <returns>The AreaMassProperties for the given Surface or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When surface is null.</exception>
+    /// <since>6.3</since>
     public static AreaMassProperties Compute(Surface surface, bool area, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (surface == null)
@@ -222,6 +232,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="geometry">Objects to include in the area computation.</param>
     /// <returns>The Area properties for the entire collection or null on failure.</returns>
+    /// <since>5.1</since>
     public static AreaMassProperties Compute(IEnumerable<GeometryBase> geometry)
     {
       return Compute(geometry, true, true, true, true);
@@ -237,6 +248,7 @@ namespace Rhino.Geometry
     /// <param name="secondMoments">true to calculate area second moments.</param>
     /// <param name="productMoments">true to calculate area product moments.</param>
     /// <returns>The AreaMassProperties for the entire collection or null on failure.</returns>
+    /// <since>6.3</since>
     public static AreaMassProperties Compute(IEnumerable<GeometryBase> geometry, bool area, bool firstMoments, bool secondMoments, bool productMoments)
     {
       const double relative_tolerance = 1.0e-6;
@@ -259,6 +271,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the area solution.
     /// </summary>
+    /// <since>5.0</since>
     public double Area
     {
       get { return UnsafeNativeMethods.ON_MassProperties_Area(m_ptr); }
@@ -267,6 +280,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the uncertainty in the area calculation.
     /// </summary>
+    /// <since>5.0</since>
     public double AreaError
     {
       get { return UnsafeNativeMethods.ON_MassProperties_MassError(m_ptr); }
@@ -275,6 +289,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the area centroid in the world coordinate system.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Centroid
     {
       get
@@ -289,6 +304,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the uncertainty in the centroid calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidError
     {
       get
@@ -310,6 +326,7 @@ namespace Rhino.Geometry
     const int idx_cc_secondmoments = 5;
     const int idx_cc_momentsofinertia = 6;
     const int idx_cc_radiiofgyration = 7;
+    const int idx_cc_productmoments = 8;
 
     bool GetMoments(int which, out Vector3d moment, out Vector3d error)
     {
@@ -326,6 +343,7 @@ namespace Rhino.Geometry
     /// Y is integral of "y dm" over the area
     /// Z is integral of "z dm" over the area.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesFirstMoments
     {
       get
@@ -339,6 +357,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates first moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesFirstMomentsError
     {
       get
@@ -355,6 +374,7 @@ namespace Rhino.Geometry
     /// Y is integral of "yy dm" over the area
     /// Z is integral of "zz dm" over the area.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesSecondMoments
     {
       get
@@ -367,6 +387,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesSecondMomentsError
     {
       get
@@ -383,6 +404,7 @@ namespace Rhino.Geometry
     /// Y is integral of "yz dm" over the area
     /// Z is integral of "zx dm" over the area.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesProductMoments
     {
       get
@@ -395,6 +417,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesProductMomentsError
     {
       get
@@ -412,11 +435,12 @@ namespace Rhino.Geometry
     /// Z = integral of (z^2 + y^2) dm.
     /// </summary>
     /// <remarks>
-    /// What is meant by "moments of intertia" varies widely in textbooks and papers.
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Summary section.
     /// Some applications may want the values from WorldCoordinatesSecondMoments
     /// instead of the values returned here.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesMomentsOfInertia
     {
       get
@@ -429,6 +453,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates moments of inertia calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesMomentsOfInertiaError
     {
       get
@@ -449,6 +474,7 @@ namespace Rhino.Geometry
     /// What is meant by "radii of gyration" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Returns section.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesRadiiOfGyration
     {
       get
@@ -466,6 +492,7 @@ namespace Rhino.Geometry
     /// Z = integral of (z-z0)^2 dm
     /// where (x0,y0,z0) = centroid.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesSecondMoments
     {
       get
@@ -478,12 +505,37 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in centroid coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesSecondMomentsError
     {
       get
       {
         Vector3d moment, error;
         GetMoments(idx_cc_secondmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Product moments with respect to centroid coordinate system.
+    /// </summary>
+    public Vector3d CentroidCoordinatesProductMoments
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in product moments with respect to centroid coordinate system.
+    /// </summary>
+    public Vector3d CentroidCoordinatesProductMomentsError
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
         return error;
       }
     }
@@ -496,11 +548,12 @@ namespace Rhino.Geometry
     /// where (x0,y0,z0) = centroid.
     /// </summary>
     /// <remarks>
-    /// What is meant by "moments of intertia" varies widely in textbooks and papers.
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Summary section.
     /// Some applications may want the values from WorldCoordinatesSecondMoments
     /// instead of the values returned here.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesMomentsOfInertia
     {
       get
@@ -513,6 +566,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in centroid coordinates moments of inertia calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesMomentsOfInertiaError
     {
       get
@@ -534,6 +588,7 @@ namespace Rhino.Geometry
     /// What is meant by "radii of gyration" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Returns section.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesRadiiOfGyration
     {
       get
@@ -545,7 +600,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments and principal axes with repect to world coordinates. 
+    /// Calculates the principal moments and principal axes with respect to world coordinates. 
     /// These are simply the eigenvalues and eigenvectors of the world coordinate inertia matrix.
     /// </summary>
     /// <param name="x">Principal moment.</param>
@@ -555,6 +610,7 @@ namespace Rhino.Geometry
     /// <param name="z">Principal moment.</param>
     /// <param name="zaxis">Principal axis for z.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.9</since>
     public bool WorldCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
     {
       x = RhinoMath.UnsetValue;
@@ -568,7 +624,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments and principal axes with repect to centroid coordinates. 
+    /// Calculates the principal moments and principal axes with respect to centroid coordinates. 
     /// These are simply the eigenvalues and eigenvectors of the centroid coordinate inertia matrix.
     /// </summary>
     /// <param name="x">Principal moment.</param>
@@ -578,6 +634,7 @@ namespace Rhino.Geometry
     /// <param name="z">Principal moment.</param>
     /// <param name="zaxis">Principal axis for z.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.9</since>
     public bool CentroidCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
     {
       x = RhinoMath.UnsetValue;
@@ -641,6 +698,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -671,6 +729,7 @@ namespace Rhino.Geometry
     /// <param name="mesh">Mesh to measure.</param>
     /// <returns>The VolumeMassProperties for the given Mesh or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When mesh is null.</exception>
+    /// <since>5.0</since>
     public static VolumeMassProperties Compute(Mesh mesh)
     {
       return Compute(mesh, true, true, true, true);
@@ -686,6 +745,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate volume product moments.</param>
     /// <returns>The VolumeMassProperties for the given Mesh or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When Mesh is null.</exception>
+    /// <since>6.3</since>
     public static VolumeMassProperties Compute(Mesh mesh, bool volume, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (mesh == null)
@@ -703,6 +763,7 @@ namespace Rhino.Geometry
     /// <param name="brep">Brep to measure.</param>
     /// <returns>The VolumeMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>5.0</since>
     public static VolumeMassProperties Compute(Brep brep)
     {
       return Compute(brep, true, true, true, true);
@@ -718,6 +779,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate volume product moments.</param>
     /// <returns>The VolumeMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>6.3</since>
     public static VolumeMassProperties Compute(Brep brep, bool volume, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (brep == null)
@@ -737,6 +799,7 @@ namespace Rhino.Geometry
     /// <param name="surface">Surface to measure.</param>
     /// <returns>The VolumeMassProperties for the given Surface or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When surface is null.</exception>
+    /// <since>5.0</since>
     public static VolumeMassProperties Compute(Surface surface)
     {
       return Compute(surface, true, true, true, true);
@@ -752,6 +815,7 @@ namespace Rhino.Geometry
     /// <param name="productMoments">true to calculate volume product moments.</param>
     /// <returns>The VolumeMassProperties for the given Surface or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When surface is null.</exception>
+    /// <since>6.3</since>
     public static VolumeMassProperties Compute(Surface surface, bool volume, bool firstMoments, bool secondMoments, bool productMoments)
     {
       if (surface == null)
@@ -771,6 +835,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="geometry">Objects to include in the area computation.</param>
     /// <returns>The VolumeMassProperties for the entire collection or null on failure.</returns>
+    /// <since>6.3</since>
     public static VolumeMassProperties Compute(IEnumerable<GeometryBase> geometry)
     {
       return Compute(geometry, true, true, true, true);
@@ -786,6 +851,7 @@ namespace Rhino.Geometry
     /// <param name="secondMoments">true to calculate volume second moments.</param>
     /// <param name="productMoments">true to calculate volume product moments.</param>
     /// <returns>The VolumeMassProperties for the entire collection or null on failure.</returns>
+    /// <since>6.3</since>
     public static VolumeMassProperties Compute(IEnumerable<GeometryBase> geometry, bool volume, bool firstMoments, bool secondMoments, bool productMoments)
     {
       const double relative_tolerance = 1.0e-6;
@@ -812,6 +878,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_meshvolume.cs' lang='cs'/>
     /// <code source='examples\py\ex_meshvolume.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public double Volume
     {
       get { return UnsafeNativeMethods.ON_MassProperties_Mass(m_ptr); }
@@ -825,6 +892,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_meshvolume.cs' lang='cs'/>
     /// <code source='examples\py\ex_meshvolume.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public double VolumeError
     {
       get { return UnsafeNativeMethods.ON_MassProperties_MassError(m_ptr); }
@@ -833,6 +901,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the volume centroid in the world coordinate system.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Centroid
     {
       get
@@ -847,6 +916,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the uncertainty in the Centroid calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidError
     {
       get
@@ -868,6 +938,7 @@ namespace Rhino.Geometry
     const int idx_cc_secondmoments = 5;
     const int idx_cc_momentsofinertia = 6;
     const int idx_cc_radiiofgyration = 7;
+    const int idx_cc_productmoments = 8;
 
     bool GetMoments(int which, out Vector3d moment, out Vector3d error)
     {
@@ -884,6 +955,7 @@ namespace Rhino.Geometry
     /// Y is integral of "y dm" over the volume
     /// Z is integral of "z dm" over the volume.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesFirstMoments
     {
       get
@@ -897,6 +969,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates first moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesFirstMomentsError
     {
       get
@@ -913,6 +986,7 @@ namespace Rhino.Geometry
     /// Y is integral of "yy dm" over the area
     /// Z is integral of "zz dm" over the area.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesSecondMoments
     {
       get
@@ -925,6 +999,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesSecondMomentsError
     {
       get
@@ -941,6 +1016,7 @@ namespace Rhino.Geometry
     /// Y is integral of "yz dm" over the area
     /// Z is integral of "zx dm" over the area.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesProductMoments
     {
       get
@@ -953,6 +1029,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesProductMomentsError
     {
       get
@@ -970,11 +1047,12 @@ namespace Rhino.Geometry
     /// Z = integral of (z^2 + y^2) dm.
     /// </summary>
     /// <remarks>
-    /// What is meant by "moments of intertia" varies widely in textbooks and papers.
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Summary section.
     /// Some applications may want the values from WorldCoordinatesSecondMoments
     /// instead of the values returned here.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesMomentsOfInertia
     {
       get
@@ -987,6 +1065,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in world coordinates moments of inertia calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesMomentsOfInertiaError
     {
       get
@@ -1007,6 +1086,7 @@ namespace Rhino.Geometry
     /// What is meant by "radii of gyration" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Returns section.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d WorldCoordinatesRadiiOfGyration
     {
       get
@@ -1024,6 +1104,7 @@ namespace Rhino.Geometry
     /// Z = integral of (z-z0)^2 dm
     /// where (x0,y0,z0) = centroid.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesSecondMoments
     {
       get
@@ -1036,12 +1117,37 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in centroid coordinates second moments calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesSecondMomentsError
     {
       get
       {
         Vector3d moment, error;
         GetMoments(idx_cc_secondmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Product moments with respect to centroid coordinate system.
+    /// </summary>
+    public Vector3d CentroidCoordinatesProductMoments
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in product moments with respect to centroid coordinate system.
+    /// </summary>
+    public Vector3d CentroidCoordinatesProductMomentsError
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
         return error;
       }
     }
@@ -1054,11 +1160,12 @@ namespace Rhino.Geometry
     /// where (x0,y0,z0) = centroid.
     /// </summary>
     /// <remarks>
-    /// What is meant by "moments of intertia" varies widely in textbooks and papers.
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Summary section.
     /// Some applications may want the values from WorldCoordinatesSecondMoments
     /// instead of the values returned here.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesMomentsOfInertia
     {
       get
@@ -1071,6 +1178,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in centroid coordinates moments of inertia calculation.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesMomentsOfInertiaError
     {
       get
@@ -1092,6 +1200,7 @@ namespace Rhino.Geometry
     /// What is meant by "radii of gyration" varies widely in textbooks and papers.
     /// The values returned here are the integrals listed in the Returns section.
     /// </remarks>
+    /// <since>5.0</since>
     public Vector3d CentroidCoordinatesRadiiOfGyration
     {
       get
@@ -1109,6 +1218,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="summand">mass properties to add.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Sum(VolumeMassProperties summand)
     {
       IntPtr pSum = summand.ConstPointer();

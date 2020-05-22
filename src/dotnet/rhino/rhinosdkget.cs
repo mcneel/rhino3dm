@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 #if RHINO_SDK
 
 using System;
@@ -76,6 +76,7 @@ namespace Rhino.Input
     /// but invalid characters.  If the converted string is one or more
     /// characters in length then the converted value is returned.
     /// </returns>
+    /// <since>6.0</since>
     public static string StringToCommandOptionName(string stringToConvert)
     {
       if (string.IsNullOrWhiteSpace(stringToConvert))
@@ -103,10 +104,11 @@ namespace Rhino.Input
     /// <returns>
     /// Returns null if the strings are null or empty or if they contain
     /// nothing but invalid characters.  If the converted string is one or more
-    /// charcters in length then a <see cref="LocalizeStringPair"/> is returned
+    /// characters in length then a <see cref="LocalizeStringPair"/> is returned
     /// characters the converted string values.  If the localized string is
     /// null or empty then the English string is used as the localized value.
     /// </returns>
+    /// <since>6.0</since>
     public static LocalizeStringPair StringToCommandOptionName(string englishString, string localizedString)
     {
       if (string.IsNullOrWhiteSpace(englishString) && string.IsNullOrWhiteSpace(localizedString))
@@ -137,17 +139,20 @@ namespace Rhino.Input
     /// Returns true if the document is current in a "Get" operation.
     /// </summary>
     /// <returns>true if a getter is currently active.</returns>
+    /// <since>5.0</since>
     public static bool InGet(RhinoDoc doc)
     {
       return doc.InGet;
     }
 
     /// <summary>Returns true if currently in a GetPoint.Get()</summary>
+    /// <since>6.0</since>
     public static bool InGetPoint(RhinoDoc doc)
     {
       return doc.InGetPoint;
     }
     /// <summary>Returns true if currently in a GetObject.GetObjects()</summary>
+    /// <since>6.0</since>
     public static bool InGetObject(RhinoDoc doc)
     {
       return doc.InGetObject;
@@ -200,6 +205,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_addnamedview.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnamedview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetPoint(string prompt, bool acceptNothing, out Point3d point)
     {
       point = new Point3d();
@@ -215,6 +221,7 @@ namespace Rhino.Input
     /// <param name="acceptNothing">true if nothing else should be accepted.</param>
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>A command result based on user choice.</returns>
+    /// <since>5.0</since>
     public static Result GetPointOnMesh(Guid meshObjectId, string prompt, bool acceptNothing, out Point3d point)
     {
       point = new Point3d();
@@ -237,6 +244,7 @@ namespace Rhino.Input
     /// <param name="acceptNothing">true if nothing else should be accepted.</param>
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>The command result based on user choice.</returns>
+    /// <since>5.0</since>
     public static Result GetPointOnMesh(MeshObject meshObject, string prompt, bool acceptNothing, out Point3d point)
     {
       return GetPointOnMesh(meshObject.Id, prompt, acceptNothing, out point);
@@ -254,6 +262,7 @@ namespace Rhino.Input
     /// <remarks>
     /// If you need options or more advanced user interface, then use GetColor class.
     /// </remarks>
+    /// <since>5.0</since>
     public static Result GetColor(string prompt, bool acceptNothing, ref Color color)
     {
       int argb = color.ToArgb();
@@ -280,6 +289,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static Result GetOneObject(string prompt, bool acceptNothing, ObjectType filter, out ObjRef rhObject)
     {
@@ -312,6 +322,7 @@ namespace Rhino.Input
     /// <remarks>
     /// If you need options or more advanced user interface, then use GetObject class.
     /// </remarks>
+    /// <since>5.0</since>
     public static Result GetOneObject(string prompt, bool acceptNothing, GetObjectGeometryFilter filter, out ObjRef objref)
     {
       objref = null;
@@ -347,6 +358,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_booleandifference.cs' lang='cs'/>
     /// <code source='examples\py\ex_booleandifference.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static Result GetMultipleObjects(string prompt, bool acceptNothing, ObjectType filter, out ObjRef[] rhObjects)
     {
@@ -378,6 +390,7 @@ namespace Rhino.Input
     /// <remarks>
     /// If you need options or more advanced user interface, then use GetObject class.
     /// </remarks>
+    /// <since>5.0</since>
     public static Result GetMultipleObjects(string prompt, bool acceptNothing, GetObjectGeometryFilter filter, out ObjRef[] rhObjects)
     {
       rhObjects = null;
@@ -412,6 +425,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_addnamedview.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnamedview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetString(string prompt, bool acceptNothing, ref string outputString)
     {
       uint rc = 0;
@@ -421,17 +435,18 @@ namespace Rhino.Input
       return (Result)rc;
     }
 
-    /// <summary>Easy to use bool getter.</summary>
+    /// <summary>Easy to use Boolean getter.</summary>
     /// <param name="prompt">Command prompt.</param>
     /// <param name="acceptNothing">If true, the user can press enter.</param>
     /// <param name="offPrompt">The 'false/off' message.</param>
     /// <param name="onPrompt">The 'true/on' message.</param>
-    /// <param name="boolValue">Default bool value set to this and returned here.</param>
+    /// <param name="boolValue">Default Boolean value set to this and returned here.</param>
     /// <returns>The getter result based on user choice.
     /// <para>Commands.Result.Success - got value.</para>
     /// <para>Commands.Result.Nothing - user pressed enter.</para>
-    /// <para>Commands.Result.Cancel - user cancelled value getting.</para>
+    /// <para>Commands.Result.Cancel - user canceled value getting.</para>
     /// </returns>
+    /// <since>5.0</since>
     public static Result GetBool(string prompt, bool acceptNothing, string offPrompt, string onPrompt, ref bool boolValue)
     {
       using (GetOption get = new GetOption())
@@ -480,6 +495,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetNumber(string prompt, bool acceptNothing, ref double outputNumber, double lowerLimit, double upperLimit)
     {
       uint rc = UnsafeNativeMethods.RhinoSdkGet_RhinoGetNumber(prompt, acceptNothing, false, ref outputNumber, lowerLimit, upperLimit);
@@ -503,6 +519,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetNumber(string prompt, bool acceptNothing, ref double outputNumber)
     {
       return GetNumber(prompt, acceptNothing, ref outputNumber, RhinoMath.UnsetValue, RhinoMath.UnsetValue);
@@ -521,6 +538,7 @@ namespace Rhino.Input
     /// Commands.Result.Nothing - user pressed enter
     /// Commands.Result.Cancel - user cancel number getting.
     /// </returns>
+    /// <since>5.0</since>
     public static Result GetInteger(string prompt, bool acceptNothing, ref int outputNumber)
     {
       return GetInteger(prompt, acceptNothing, ref outputNumber, int.MinValue, int.MaxValue);
@@ -540,6 +558,7 @@ namespace Rhino.Input
     /// Commands.Result.Nothing - user pressed enter
     /// Commands.Result.Cancel - user cancel number getting.
     /// </returns>
+    /// <since>5.0</since>
     public static Result GetInteger(string prompt, bool acceptNothing, ref int outputNumber, int lowerLimit, int upperLimit)
     {
       double output = outputNumber;
@@ -567,6 +586,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_splitbrepwithplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_splitbrepwithplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetPlane(out Plane plane)
     {
       plane = Plane.Unset;
@@ -582,6 +602,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_addclippingplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_addclippingplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetRectangle(out Point3d[] corners)
     {
       corners = new Point3d[4];
@@ -595,6 +616,7 @@ namespace Rhino.Input
     /// <param name="firstPrompt"></param>
     /// <param name="corners">corners of the rectangle in counter-clockwise order.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>6.0</since>
     public static Result GetRectangle(string firstPrompt, out Point3d[] corners)
     {
       corners = new Point3d[4];
@@ -614,6 +636,7 @@ namespace Rhino.Input
     /// <param name="yCount">Count in the y direction.</param>
     /// <param name="corners">corners of the rectangle in counter-clockwise order.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>6.0</since>
     public static Result GetRectangleWithCounts(int xMin, ref int xCount, int yMin, ref int yCount, out Point3d[] corners)
     {
       corners = new Point3d[4];
@@ -630,8 +653,9 @@ namespace Rhino.Input
     /// <param name="yCount">Count in the y direction.</param>
     /// <param name="zMin">Minimum value allowed for count in the z direction.</param>
     /// <param name="zCount">Count in the z direction.</param>
-    /// <param name="corners">corners of the bottom rectangle in counter-clockwise order, followed by top recatngle.</param>
+    /// <param name="corners">corners of the bottom rectangle in counter-clockwise order, followed by top rectangle.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>6.0</since>
     public static Result GetBoxWithCounts(int xMin, ref int xCount, int yMin, ref int yCount, int zMin, ref int zCount, out Point3d[] corners)
     {
       corners = new Point3d[8];
@@ -649,6 +673,7 @@ namespace Rhino.Input
     /// <param name="prompts">Optional prompts to display while getting points. May be null.</param>
     /// <param name="corners">Corners of the rectangle in counter-clockwise order will be assigned to this out parameter during this call.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>5.0</since>
     public static Result GetRectangle(GetBoxMode mode, Point3d firstPoint, IEnumerable<string> prompts, out Point3d[] corners)
     {
       corners = new Point3d[4];
@@ -686,6 +711,7 @@ namespace Rhino.Input
     /// view that the user selected the window in.
     /// </param>
     /// <returns>Success or Cancel.</returns>
+    /// <since>5.0</since>
     public static Result Get2dRectangle(bool solidPen, out Rectangle rectangle, out RhinoView rectView)
     {
       rectangle = Rectangle.Empty;
@@ -706,6 +732,7 @@ namespace Rhino.Input
     /// </summary>
     /// <param name="box">If the result is Success, this parameter will be filled out.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>5.0</since>
     public static Result GetBox(out Box box)
     {
       return GetBox(out box, GetBoxMode.All, Point3d.Unset, null, null, null);
@@ -721,6 +748,7 @@ namespace Rhino.Input
     /// <param name="prompt2">Optional second prompt. Supply null to use the default prompt.</param>
     /// <param name="prompt3">Optional third prompt. Supply null to use the default prompt.</param>
     /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>5.0</since>
     public static Result GetBox(out Box box, GetBoxMode mode, Point3d basePoint, string prompt1, string prompt2, string prompt3)
     {
       Point3d[] corners = new Point3d[8];
@@ -811,11 +839,13 @@ namespace Rhino.Input
       }
     }
 
+    /// <since>5.0</since>
     public static Result GetGrips(out GripObject[] grips, string prompt)
     {
       return GetGripsHelper(out grips, prompt, false);
     }
 
+    /// <since>5.0</since>
     public static Result GetGrip(out GripObject grip, string prompt)
     {
       grip = null;
@@ -826,6 +856,7 @@ namespace Rhino.Input
       return rc;
     }
 
+    /// <since>5.0</since>
     public static Result GetSpiral(out NurbsCurve spiral)
     {
       spiral = null;
@@ -838,6 +869,7 @@ namespace Rhino.Input
       return command_rc;
     }
 
+    /// <since>5.0</since>
     public static Result GetHelix(out NurbsCurve helix)
     {
       helix = null;
@@ -850,6 +882,7 @@ namespace Rhino.Input
       return command_rc;
     }
 
+    /// <since>5.0</since>
     public static Result GetLine(out Line line)
     {
       line = new Line();
@@ -859,6 +892,7 @@ namespace Rhino.Input
       return rc;
     }
 
+    /// <since>5.9</since>
     public static Result GetPolyline(out Polyline polyline)
     {
       polyline = null;
@@ -872,6 +906,7 @@ namespace Rhino.Input
       }
     }
 
+    /// <since>6.0</since>
     public static Result GetPolygon(ref int numberSides, ref bool inscribed, out Polyline polyline)
     {
       polyline = null;
@@ -885,6 +920,7 @@ namespace Rhino.Input
       }
     }
 
+    /// <since>5.0</since>
     public static Result GetArc(out Arc arc)
     {
       arc = new Arc();
@@ -895,6 +931,7 @@ namespace Rhino.Input
       return command_rc;
     }
 
+    /// <since>5.0</since>
     public static Result GetCircle(out Circle circle)
     {
       circle = new Circle();
@@ -910,6 +947,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_addlineardimension.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlineardimension.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetLinearDimension(out LinearDimension dimension)
     {
       uint command_rc = 0;
@@ -931,6 +969,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_addnamedview.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnamedview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Result GetView(string commandPrompt, out RhinoView view)
     {
       uint command_rc = 0;
@@ -948,6 +987,7 @@ namespace Rhino.Input
     /// <param name="defaultAngleRadians"></param>
     /// <param name="angleRadians"></param>
     /// <returns></returns>
+    /// <since>5.2</since>
     public static Result GetAngle(string commandPrompt, Point3d basePoint, Point3d referencePoint,
                                            double defaultAngleRadians, out double angleRadians)
     {
@@ -977,6 +1017,7 @@ namespace Rhino.Input
       tga = 32,
     }
 
+    /// <since>6.0</since>
     public static BitmapFileTypes AllBitmapFileTypes
     {
       get
@@ -992,6 +1033,7 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_extractthumbnail.cs' lang='cs'/>
     /// <code source='examples\py\ex_extractthumbnail.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public static string GetFileName(GetFileNameMode mode, string defaultName, string title, object parent, BitmapFileTypes fileTypes)
     {
       using (var sh = new StringHolder())
@@ -1008,11 +1050,13 @@ namespace Rhino.Input
     /// <code source='examples\cs\ex_extractthumbnail.cs' lang='cs'/>
     /// <code source='examples\py\ex_extractthumbnail.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public static string GetFileName(GetFileNameMode mode, string defaultName, string title, object parent)
     {
       return GetFileName(mode, defaultName, title, parent, AllBitmapFileTypes);
     }
 
+    /// <since>5.0</since>
     public static string GetFileNameScripted(GetFileNameMode mode, string defaultName)
     {
       using (var sh = new StringHolder())
@@ -1023,6 +1067,7 @@ namespace Rhino.Input
       }
     }
 
+    /// <since>6.1</since>
     public static Result GetPrintWindow(ref ViewCaptureSettings settings)
     {
       IntPtr ptrSettings = settings.NonConstPointer();
@@ -1078,7 +1123,7 @@ namespace Rhino.Input
     ///</summary>
     CustomMessage = 14,
     ///<summary>
-    ///The getter waited for the amount of time specifed in RhinoGet::SetWaitDuration()
+    ///The getter waited for the amount of time specified in RhinoGet::SetWaitDuration()
     ///and then gave up.
     ///</summary>
     Timeout = 15,
@@ -1105,7 +1150,7 @@ namespace Rhino.Input
     User4 = 0xFFFFFFFC,
     User5 = 0xFFFFFFFB,
 
-    /// <summary>Stop now, do not cleaup, just return ASAP.</summary>
+    /// <summary>Stop now, do not cleanup, just return ASAP.</summary>
     ExitRhino = 0x0FFFFFFF
   }
 }
@@ -1156,6 +1201,7 @@ namespace Rhino.Input.Custom
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1188,6 +1234,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetCommandPrompt(string prompt)
     {
       IntPtr ptr = NonConstPointer();
@@ -1197,7 +1244,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Sets message that describes what default value will be used if the user presses enter.
     /// This description appears in angle brackets &lt;> in the command prompt window. You do
-    /// not need to provide a default value description unless you explicity enable AcceptNothing.
+    /// not need to provide a default value description unless you explicitly enable AcceptNothing.
     /// </summary>
     /// <param name="defaultValue">description of default value.</param>
     /// <example>
@@ -1215,6 +1262,7 @@ namespace Rhino.Input.Custom
     /// SetDefaultNumber, or SetDefaultString. SetCommandPromptDefault and AcceptNothing can be used
     /// for providing more advanced UI behavior.
     /// </remarks>
+    /// <since>5.0</since>
     public void SetCommandPromptDefault(string defaultValue)
     {
       IntPtr ptr = NonConstPointer();
@@ -1231,6 +1279,7 @@ namespace Rhino.Input.Custom
     /// returned and RhinoGet.GotDefault() will return true. Calling SetDefaultPoint will clear any previous
     /// calls to SetDefaultString or SetDefaultNumber.
     /// </remarks>
+    /// <since>5.0</since>
     public void SetDefaultPoint(Point3d point)
     {
       IntPtr ptr = NonConstPointer();
@@ -1247,6 +1296,7 @@ namespace Rhino.Input.Custom
     /// GetResult.Number is returned and RhinoGet.GotDefault() will return true. Calling
     /// SetDefaultNumber will clear any previous calls to SetDefaultString or SetDefaultPoint.
     /// </remarks>
+    /// <since>5.0</since>
     public void SetDefaultNumber(double defaultNumber)
     {
       IntPtr ptr = NonConstPointer();
@@ -1263,6 +1313,7 @@ namespace Rhino.Input.Custom
     /// GetResult.Number is returned and CRhinoGet.GotDefault() will return true. Calling
     /// SetDefaultNumber will clear any previous calls to SetDefaultString or SetDefaultPoint.
     /// </remarks>
+    /// <since>5.0</since>
     public void SetDefaultInteger(int defaultValue)
     {
       IntPtr ptr = NonConstPointer();
@@ -1286,6 +1337,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetDefaultString(string defaultValue)
     {
       IntPtr ptr = NonConstPointer();
@@ -1302,6 +1354,7 @@ namespace Rhino.Input.Custom
     /// GetResult.Color is returned and RhinoGet.GotDefault() will return true. Calling
     /// SetDefaultColor will clear any previous calls to SetDefaultString or SetDefaultPoint.
     /// </remarks>
+    /// <since>5.0</since>
     public void SetDefaultColor(Color defaultColor)
     {
       IntPtr ptr = NonConstPointer();
@@ -1314,6 +1367,7 @@ namespace Rhino.Input.Custom
     /// the user making a decision, the GetResult.Timeout code is returned.
     /// </summary>
     /// <param name="milliseconds">Number of milliseconds to wait.</param>
+    /// <since>5.0</since>
     public void SetWaitDuration(int milliseconds)
     {
       if (milliseconds <= 0) { return; }
@@ -1326,6 +1380,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Clears any defaults set using SetDefaultPoint, SetDefaultNumber, SetDefaultString, or SetCommandPromptDefault.
     /// </summary>
+    /// <since>5.0</since>
     public void ClearDefault()
     {
       IntPtr ptr = NonConstPointer();
@@ -1337,6 +1392,7 @@ namespace Rhino.Input.Custom
     /// or string set using SetDefaultPoint, SetDefaultNumber, or SetDefaultString.
     /// </summary>
     /// <returns>true if the result if the default point, number or string set. Otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool GotDefault()
     {
       IntPtr ptr = ConstPointer();
@@ -1355,6 +1411,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_advanceddisplay.cs' lang='cs'/>
     /// <code source='examples\py\ex_advanceddisplay.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOption(string englishOption)
     {
       return AddOption(englishOption, null, false);
@@ -1366,6 +1423,7 @@ namespace Rhino.Input.Custom
     /// <param name="englishOption">Must only consist of letters and numbers (no characters list periods, spaces, or dashes).</param>
     /// <param name="englishOptionValue">The option value in English, visualized after an equality sign.</param>
     /// <returns>Option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOption(string englishOption, string englishOptionValue)
     {
       return AddOption(englishOption, englishOptionValue, false);
@@ -1378,6 +1436,7 @@ namespace Rhino.Input.Custom
     /// <param name="englishOptionValue">The option value in English, visualized after an equality sign.</param>
     /// <param name="hiddenOption">If true, the option is not displayed on the command line and the full option name must be typed in order to activate the option.</param>
     /// <returns>Option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>6.9</since>
     public int AddOption(string englishOption, string englishOptionValue, bool hiddenOption)
     {
       IntPtr ptr = NonConstPointer();
@@ -1389,6 +1448,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="optionName">Must only consist of letters and numbers (no characters list periods, spaces, or dashes).</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOption(LocalizeStringPair optionName)
     {
       return AddOption(optionName, null, false);
@@ -1400,6 +1460,7 @@ namespace Rhino.Input.Custom
     /// <param name="optionName">Must only consist of letters and numbers (no characters list periods, spaces, or dashes).</param>
     /// <param name="optionValue">The localized value visualized after an equality sign.</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOption(LocalizeStringPair optionName, LocalizeStringPair optionValue)
     {
       return AddOption(optionName, optionValue, false);
@@ -1412,6 +1473,7 @@ namespace Rhino.Input.Custom
     /// <param name="optionValue">The localized value visualized after an equality sign.</param>
     /// <param name="hiddenOption">If true, the option is not displayed on the command line and the full option name must be typed in order to activate the option.</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>6.9</since>
     public int AddOption(LocalizeStringPair optionName, LocalizeStringPair optionValue, bool hiddenOption)
     {
       string val_english = null;
@@ -1455,6 +1517,7 @@ namespace Rhino.Input.Custom
     /// <returns>
     /// option index value (&gt;0) or 0 if option cannot be added.
     /// </returns>
+    /// <since>5.0</since>
     public int AddOptionDouble(string englishName, ref OptionDouble numberValue, string prompt)
     {
       return AddOptionDouble(new LocalizeStringPair(englishName, englishName), ref numberValue, prompt);
@@ -1474,6 +1537,7 @@ namespace Rhino.Input.Custom
     /// <returns>
     /// option index value (&gt;0) or 0 if option cannot be added.
     /// </returns>
+    /// <since>5.0</since>
     public int AddOptionDouble(LocalizeStringPair optionName, ref OptionDouble numberValue, string prompt)
     {
       IntPtr ptr = NonConstPointer();
@@ -1496,6 +1560,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionDouble(string englishName, ref OptionDouble numberValue)
     {
       return AddOptionDouble(englishName, ref numberValue, null);
@@ -1516,6 +1581,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionDouble(LocalizeStringPair optionName, ref OptionDouble numberValue)
     {
       return AddOptionDouble(optionName, ref numberValue, null);
@@ -1535,6 +1601,7 @@ namespace Rhino.Input.Custom
     /// <returns>
     /// option index value (&gt;0) or 0 if option cannot be added.
     /// </returns>
+    /// <since>5.0</since>
     public int AddOptionInteger(string englishName, ref OptionInteger intValue, string prompt)
     {
       return AddOptionInteger(new LocalizeStringPair(englishName, englishName), ref intValue, prompt);
@@ -1554,6 +1621,7 @@ namespace Rhino.Input.Custom
     /// <returns>
     /// option index value (&gt;0) or 0 if option cannot be added.
     /// </returns>
+    /// <since>5.0</since>
     public int AddOptionInteger(LocalizeStringPair optionName, ref OptionInteger intValue, string prompt)
     {
       IntPtr ptr = NonConstPointer();
@@ -1577,6 +1645,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionInteger(string englishName, ref OptionInteger intValue)
     {
       return AddOptionInteger(englishName, ref intValue, null);
@@ -1597,6 +1666,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionInteger(LocalizeStringPair optionName, ref OptionInteger intValue)
     {
       return AddOptionInteger(optionName, ref intValue, null);
@@ -1609,6 +1679,7 @@ namespace Rhino.Input.Custom
     /// <param name="colorValue">The current color value.</param>
     /// <param name="prompt">option prompt shown if the user selects this option</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOptionColor(LocalizeStringPair optionName, ref OptionColor colorValue, string prompt)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1623,6 +1694,7 @@ namespace Rhino.Input.Custom
     /// <param name="optionName">option description</param>
     /// <param name="colorValue">The current color value.</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOptionColor(LocalizeStringPair optionName, ref OptionColor colorValue)
     {
       return AddOptionColor(optionName, ref colorValue, null);
@@ -1635,6 +1707,7 @@ namespace Rhino.Input.Custom
     /// <param name="colorValue">The current color value.</param>
     /// <param name="prompt">The command prompt will show this during picking.</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOptionColor(string englishName, ref OptionColor colorValue, string prompt)
     {
       return AddOptionColor(new LocalizeStringPair(englishName, englishName), ref colorValue, prompt);
@@ -1646,6 +1719,7 @@ namespace Rhino.Input.Custom
     /// <param name="englishName">option description</param>
     /// <param name="colorValue">The current color value.</param>
     /// <returns>option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>5.0</since>
     public int AddOptionColor(string englishName, ref OptionColor colorValue)
     {
       return AddOptionColor(new LocalizeStringPair(englishName, englishName), ref colorValue, null);
@@ -1664,6 +1738,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionToggle(string englishName, ref OptionToggle toggleValue)
     {
       return AddOptionToggle(new LocalizeStringPair(englishName, englishName), ref toggleValue);
@@ -1682,6 +1757,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionToggle(LocalizeStringPair optionName, ref OptionToggle toggleValue)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1705,6 +1781,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_objectdisplaymode.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdisplaymode.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionList(string englishOptionName, IEnumerable<string> listValues, int listCurrentIndex)
     {
       using (var strings = new ClassArrayString())
@@ -1732,6 +1809,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_objectdisplaymode.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdisplaymode.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddOptionList(LocalizeStringPair optionName, IEnumerable<LocalizeStringPair> listValues, int listCurrentIndex)
     {
       using(var english_strings = new ClassArrayString())
@@ -1751,13 +1829,14 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Adds a choice of enum values as list option 
+    /// Adds a choice of enumerated values as list option 
     /// </summary>
-    /// <typeparam name="T">The enum type</typeparam>
+    /// <typeparam name="T">The enumerated type</typeparam>
     /// <param name="englishOptionName">The name of the option</param>
     /// <param name="defaultValue">The default value</param>
-    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enum type.</exception>
+    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enumerated type.</exception>
     /// <returns>Option index</returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public int AddOptionEnumList<T>(string englishOptionName, T defaultValue) 
         where T : struct, IConvertible
@@ -1766,14 +1845,15 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Adds a choice of enum values as list option. Allows to include only some enum values.
+    /// Adds a choice of enumerated values as list option. Allows to include only some enumerated values.
     /// </summary>
-    /// <typeparam name="T">The enum type</typeparam>
+    /// <typeparam name="T">The enumerated type</typeparam>
     /// <param name="englishOptionName">The name of the option</param>
     /// <param name="defaultValue">The default value</param>
-    /// <param name="include">An array of enum values to use. This argument can also be null; in this case, the whole enum is used.</param>
-    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enum type.</exception>
+    /// <param name="include">An array of enumerated values to use. This argument can also be null; in this case, the whole enumerated is used.</param>
+    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enumerated type.</exception>
     /// <returns>Option index</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public int AddOptionEnumList<T>(string englishOptionName, T defaultValue, T[] include)
         where T : struct, IConvertible
@@ -1793,13 +1873,14 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Adds a list of enum values as option list. Use enumSelection[go.Option.CurrentListOptionIndex] to retrieve selection.
+    /// Adds a list of enumerated values as option list. Use enumSelection[go.Option.CurrentListOptionIndex] to retrieve selection.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="englishOptionName"></param>
     /// <param name="enumSelection"></param>
     /// <param name="listCurrentIndex"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public int AddOptionEnumSelectionList<T>(string englishOptionName, IEnumerable<T> enumSelection, int listCurrentIndex)
         where T : struct, IConvertible
@@ -1815,13 +1896,14 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Returns the selected enum value. Use this in combination with <see cref="AddOptionEnumList{T}(string, T)"/>.
+    /// Returns the selected enumerated value. Use this in combination with <see cref="AddOptionEnumList{T}(string, T)"/>.
     /// <para>This must be called directly after having called a Get method, and having obtained a <see cref="GetResult.Option"/> value.</para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <exception cref="ArgumentException">Gets thrown if type T is not an enum type.</exception>
-    /// <exception cref="IndexOutOfRangeException">If 0 &gt;= CurrentListOptionIndex or CurrentListOptionIndex &gt; N where N is the number of enum values.</exception>
+    /// <exception cref="ArgumentException">Gets thrown if type T is not an enumerated type.</exception>
+    /// <exception cref="IndexOutOfRangeException">If 0 &gt;= CurrentListOptionIndex or CurrentListOptionIndex &gt; N where N is the number of enumerated values.</exception>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetSelectedEnumValue<T>()
         where T : struct, IConvertible
@@ -1839,14 +1921,15 @@ namespace Rhino.Input.Custom
 
 
     /// <summary>
-    /// Returns the selected enum value by looking at the list of values from which to select.
+    /// Returns the selected enumerated value by looking at the list of values from which to select.
     /// Use this in combination with <see cref="AddOptionEnumSelectionList{T}"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="selectionList"> </param>
-    /// <exception cref="ArgumentException">Gets thrown if type T is not an enum type.</exception>
-    /// <exception cref="IndexOutOfRangeException">If 0 &gt;= CurrentListOptionIndex or CurrentListOptionIndex &gt; N where N is the number of enum values.</exception>
+    /// <exception cref="ArgumentException">Gets thrown if type T is not an enumerated type.</exception>
+    /// <exception cref="IndexOutOfRangeException">If 0 &gt;= CurrentListOptionIndex or CurrentListOptionIndex &gt; N where N is the number of enumerated values.</exception>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetSelectedEnumValueFromSelectionList<T>(IEnumerable<T> selectionList)
         where T : struct, IConvertible
@@ -1859,7 +1942,7 @@ namespace Rhino.Input.Custom
         int index = Option().CurrentListOptionIndex;
         if (index >= values.Count || index < 0)
         {
-            String msg = String.Format("GetSelectedEnumValue received incorrect index i [{0}]: i should be 0 <= i < N, where N is number of enum values in {1}. N = {2}",
+            String msg = String.Format("GetSelectedEnumValue received incorrect index i [{0}]: i should be 0 <= i < N, where N is number of enumerated values in {1}. N = {2}",
                 index, enum_type.Name, values.Count);
             throw new IndexOutOfRangeException(msg);
         }
@@ -1871,6 +1954,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void ClearCommandOptions()
     {
       IntPtr ptr = NonConstPointer();
@@ -1901,6 +1985,7 @@ namespace Rhino.Input.Custom
     /// want to disable this feature, then call EnableTransparentCommands(false)
     /// before calling GetString, GetPoint, GetObject, etc.
     /// </remarks>
+    /// <since>5.0</since>
     public void EnableTransparentCommands(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.EnableTransparentCommands, enable);
@@ -1918,6 +2003,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void AcceptNothing(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptNothing, enable);
@@ -1928,6 +2014,7 @@ namespace Rhino.Input.Custom
     /// GetObject.GetObjects(), etc., then call AcceptUndo(true) beforehand.
     /// </summary>
     /// <param name="enable">true if user is able to choose the 'Undo' option.</param>
+    /// <since>5.0</since>
     public void AcceptUndo(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptUndo, enable);
@@ -1939,6 +2026,7 @@ namespace Rhino.Input.Custom
     /// can correctly enable the Done button.
     /// </summary>
     /// <param name="enable"></param>
+    /// <since>6.0</since>
     public void AcceptEnterWhenDone(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptEnterWhenDone, enable);
@@ -1957,6 +2045,7 @@ namespace Rhino.Input.Custom
     /// If you are using GetPoint and you want "0" to return (0,0,0) instead of the number zero, 
     /// then set acceptZero = false.
     /// </param>
+    /// <since>5.0</since>
     public void AcceptNumber(bool enable, bool acceptZero)
     {
       IntPtr ptr = NonConstPointer();
@@ -1970,6 +2059,7 @@ namespace Rhino.Input.Custom
     /// to get the value of the point.
     /// </summary>
     /// <param name="enable">true if user is able to type in a point.</param>
+    /// <since>5.0</since>
     public void AcceptPoint(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptPoint, enable);
@@ -1984,6 +2074,7 @@ namespace Rhino.Input.Custom
     /// be able to type in r,g,b colors but will be able to type color names.
     /// </summary>
     /// <param name="enable">true if user is able to type a color.</param>
+    /// <since>5.0</since>
     public void AcceptColor(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptColor, enable);
@@ -1996,18 +2087,21 @@ namespace Rhino.Input.Custom
     /// GetResult.String is returned and you can use RhinoGet.String() to get the value of the string.
     /// </summary>
     /// <param name="enable">true if user is able to type a string.</param>
+    /// <since>5.0</since>
     public void AcceptString(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetBool.AcceptString, enable);
     }
 
     const uint custom_message_id = 0xC001;
+    /// <since>5.0</since>
     public void AcceptCustomMessage(bool enable)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_AcceptCustomMessage(ptr_this, custom_message_id, enable);
     }
 
+    /// <since>5.0</since>
     public static void PostCustomMessage( object messageData )
     {
       m_message_data = messageData;
@@ -2016,6 +2110,7 @@ namespace Rhino.Input.Custom
     static object m_message_data;
     object m_local_message_data;
 
+    /// <since>5.0</since>
     public object CustomMessage()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -2033,6 +2128,7 @@ namespace Rhino.Input.Custom
 
     /// <summary>Returns result of the Get*() call.</summary>
     /// <returns>The result of the last Get*() call.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Result()
     {
@@ -2050,6 +2146,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Result CommandResult()
     {
       IntPtr ptr = ConstPointer();
@@ -2063,6 +2160,7 @@ namespace Rhino.Input.Custom
     // exception instead of calling into unmanaged memory that
     // is no longer valid
     internal CommandLineOption m_option;// = null; initialized to null by runtime
+    /// <since>5.0</since>
     public CommandLineOption Option()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -2076,6 +2174,7 @@ namespace Rhino.Input.Custom
       return m_option;
     }
 
+    /// <since>5.0</since>
     public int OptionIndex()
     {
       CommandLineOption op = Option();
@@ -2093,6 +2192,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public double Number()
     {
       IntPtr ptr = ConstPointer();
@@ -2108,6 +2208,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string StringResult()
     {
       IntPtr ptr = ConstPointer();
@@ -2126,6 +2227,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Point3d Point()
     {
       Point3d rc = new Point3d();
@@ -2138,6 +2240,7 @@ namespace Rhino.Input.Custom
     /// Gets a direction if Get*() returns GetResult.Point (Set by some digitizers, but in general it's (0,0,0).
     /// </summary>
     /// <returns>The vector chosen by the user.</returns>
+    /// <since>5.0</since>
     public Vector3d Vector()
     {
       IntPtr ptr = ConstPointer();
@@ -2148,6 +2251,7 @@ namespace Rhino.Input.Custom
 
     /// <summary>Gets a color if Get*() returns GetResult.Color.</summary>
     /// <returns>The color chosen by the user.</returns>
+    /// <since>5.0</since>
     public Color Color()
     {
       IntPtr ptr = ConstPointer();
@@ -2164,6 +2268,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoView View()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -2175,13 +2280,14 @@ namespace Rhino.Input.Custom
     const int idxRectangle2d = 1;
     /// <summary>
     /// If the get was a GetObjects() and the mouse was used to select the objects,
-    /// then the returned rect has left &lt; right and top &lt; bottom. This rect
+    /// then the returned rectangle has left &lt; right and top &lt; bottom. This rectangle
     /// is the Windows GDI screen coordinates of the picking rectangle.
     /// RhinoViewport.GetPickXform( pick_rect, pick_xform )
     /// will calculate the picking transformation that was used.
     /// In all other cases, left=right=top=bottom=0;
     /// </summary>
     /// <returns>The picking rectangle; or 0 in the specified cases.</returns>
+    /// <since>5.0</since>
     public Rectangle PickRectangle()
     {
       int[] lrtb = new int[4];
@@ -2195,6 +2301,7 @@ namespace Rhino.Input.Custom
     /// (0,0) = upper left corner of window.
     /// </summary>
     /// <returns>The location.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Point Point2d()
     {
       IntPtr ptr = ConstPointer();
@@ -2214,6 +2321,7 @@ namespace Rhino.Input.Custom
     /// (0,0) = upper left corner of window.
     /// </summary>
     /// <returns>The rectangle.</returns>
+    /// <since>5.0</since>
     public Rectangle Rectangle2d()
     {
       int[] lrtb = new int[4];
@@ -2228,6 +2336,7 @@ namespace Rhino.Input.Custom
     /// <para>(0,0) = upper left corner of window.</para>
     /// </summary>
     /// <returns>An array with two 2D points.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Point[] Line2d()
     {
       int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
@@ -2251,6 +2360,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="optionName">The string to be tested.</param>
     /// <returns>true if string can be used as an option name.</returns>
+    /// <since>5.0</since>
     public static bool IsValidOptionName(string optionName)
     {
       if (String.IsNullOrEmpty(optionName))
@@ -2264,6 +2374,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="optionValue">The string to be tested.</param>
     /// <returns>true if string can be used as an option value.</returns>
+    /// <since>5.0</since>
     public static bool IsValidOptionValueName(string optionValue)
     {
       if (String.IsNullOrEmpty(optionValue))
@@ -2275,6 +2386,7 @@ namespace Rhino.Input.Custom
     internal IntPtr m_ptr; // const CRhinoCommandOption*
     internal CommandLineOption() { }
 
+    /// <since>5.0</since>
     public int Index
     {
       get
@@ -2288,6 +2400,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int CurrentListOptionIndex
     {
       get
@@ -2296,16 +2409,57 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <summary>
+    /// The English command option name
+    /// </summary>
+    /// <since>5.0</since>
     public string EnglishName
     {
       get
       {
-        IntPtr ptr_name = UnsafeNativeMethods.CRhinoCommandOption_EnglishName(m_ptr);
-        if (IntPtr.Zero == ptr_name)
-          return String.Empty;
-        return Marshal.PtrToStringUni(ptr_name);
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoCommandOption_EnglishName(m_ptr, ptr_string);
+          return sh.ToString();
+        }
       }
     }
+
+    /// <summary>
+    /// The localized command option name
+    /// </summary>
+    /// <since>6.24</since>
+    public string LocalName
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoCommandOption_LocalName(m_ptr, ptr_string);
+          return sh.ToString();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Assigned by RhinoGet.Get if an option value is specified in a script or by a command window control.
+    /// </summary>
+    /// <since>6.24</since>
+    public string StringOptionValue
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoCommandOption_StringOptionValue(m_ptr, ptr_string);
+          return sh.ToString();
+        }
+      }
+    }
+
   }
 
   public class OptionToggle : IDisposable
@@ -2320,6 +2474,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public OptionToggle(bool initialValue, string offValue, string onValue)
     {
       m_initialValue = initialValue;
@@ -2327,6 +2482,7 @@ namespace Rhino.Input.Custom
       m_onValue = new LocalizeStringPair(onValue, onValue);
     }
 
+    /// <since>5.0</since>
     public OptionToggle(bool initialValue, LocalizeStringPair offValue, LocalizeStringPair onValue)
     {
       m_initialValue = initialValue;
@@ -2338,6 +2494,7 @@ namespace Rhino.Input.Custom
     {
       Dispose(false);
     }
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2358,6 +2515,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool CurrentValue
     {
       get
@@ -2376,6 +2534,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public bool InitialValue
     {
       get { return m_initialValue; }
@@ -2399,6 +2558,7 @@ namespace Rhino.Input.Custom
     internal readonly double m_lowerLimit;
     internal readonly double m_upperLimit;
 
+    /// <since>5.0</since>
     public OptionDouble(double initialValue)
     {
       m_initialValue = initialValue;
@@ -2416,6 +2576,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public OptionDouble(double initialValue, double lowerLimit, double upperLimit)
     {
       m_initialValue = initialValue;
@@ -2431,6 +2592,7 @@ namespace Rhino.Input.Custom
     /// If false, limit sets the upper limit and lower limit is undefined.
     /// </param>
     /// <param name="limit">The lower limit if setLowerLimit is true; otherwise, the upper limit.</param>
+    /// <since>5.0</since>
     public OptionDouble(double initialValue, bool setLowerLimit, double limit)
     {
       m_initialValue = initialValue;
@@ -2450,6 +2612,7 @@ namespace Rhino.Input.Custom
     {
       Dispose(false);
     }
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2471,6 +2634,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public double CurrentValue
     {
       get
@@ -2489,6 +2653,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public double InitialValue
     {
       get { return m_initialValue; }
@@ -2512,6 +2677,7 @@ namespace Rhino.Input.Custom
     internal readonly double m_lowerLimit;
     internal readonly double m_upperLimit;
 
+    /// <since>5.0</since>
     public OptionInteger(int initialValue)
     {
       m_initialValue = initialValue;
@@ -2519,7 +2685,7 @@ namespace Rhino.Input.Custom
       m_upperLimit = RhinoMath.UnsetValue;
     }
     /// <summary>
-    /// Initializes a new instance of the <see cref="OptionInteger"/> class wiht both lower and upper limits.
+    /// Initializes a new instance of the <see cref="OptionInteger"/> class with both lower and upper limits.
     /// </summary>
     /// <param name="initialValue">The initial value.</param>
     /// <param name="lowerLimit">The minimum value.</param>
@@ -2529,6 +2695,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public OptionInteger(int initialValue, int lowerLimit, int upperLimit)
     {
       m_initialValue = initialValue;
@@ -2545,6 +2712,7 @@ namespace Rhino.Input.Custom
     /// </param>
     /// <param name="limit">If <c>setLowerLimit</c> is true, then <c>limit</c> is the minimum value.
     /// Otherwise, it is the maximum.</param>
+    /// <since>5.0</since>
     public OptionInteger(int initialValue, bool setLowerLimit, int limit)
     {
       m_initialValue = initialValue;
@@ -2564,6 +2732,7 @@ namespace Rhino.Input.Custom
     {
       Dispose(false);
     }
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2584,6 +2753,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
     /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int CurrentValue
     {
       get
@@ -2602,6 +2772,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public int InitialValue
     {
       get { return m_initialValue; }
@@ -2623,6 +2794,7 @@ namespace Rhino.Input.Custom
     internal IntPtr m_pOptionHolder = IntPtr.Zero;
     Color m_initialValue;
 
+    /// <since>5.0</since>
     public OptionColor(Color initialValue)
     {
       m_initialValue = initialValue;
@@ -2632,6 +2804,7 @@ namespace Rhino.Input.Custom
     {
       Dispose(false);
     }
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2647,6 +2820,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public Color CurrentValue
     {
       get
@@ -2667,6 +2841,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public Color InitialValue
     {
       get { return m_initialValue; }
@@ -2688,19 +2863,24 @@ namespace Rhino.Input.Custom
 
   public class TaskCompleteEventArgs : EventArgs
   {
+    /// <since>6.0</since>
     public TaskCompleteEventArgs(Task task, RhinoDoc doc)
     {
       Task = task;
       Doc = doc;
       Redraw = false;
     }
+    /// <since>6.0</since>
     public Task Task { get; set; }
+    /// <since>6.0</since>
     public RhinoDoc Doc { get; set; }
+    /// <since>6.0</since>
     public bool Redraw { get; set; }
   }
 
   public class GetCancel : GetBaseClass
   {
+    /// <since>6.0</since>
     public GetCancel()
     {
       m_progress = new Progress<double>(OnProgress);
@@ -2717,22 +2897,26 @@ namespace Rhino.Input.Custom
     }
 
     readonly CancellationTokenSource m_token_source = new CancellationTokenSource();
+    /// <since>6.0</since>
     public CancellationToken Token
     {
       get { return m_token_source.Token; }
     }
 
+    /// <since>6.0</since>
     public event EventHandler<TaskCompleteEventArgs> TaskCompleted;
 
     double m_old_progress_value;
     double m_new_progress_value;
     bool m_progress_reporting;
+    /// <since>6.0</since>
     public bool ProgressReporting
     {
       get { return m_progress_reporting; }
       set { m_progress_reporting = value; }
     }
 
+    /// <since>6.0</since>
     public string ProgressMessage { get; set; }
     /// <summary>
     /// Awaits a particular task to finish.
@@ -2740,6 +2924,7 @@ namespace Rhino.Input.Custom
     /// <param name="task">The task.</param>
     /// <param name="doc">A document to set progress reporting.</param>
     /// <returns>A result enumeration.</returns>
+    /// <since>7.0</since>
     public Result Wait(Task task, RhinoDoc doc)
     {
       return WaitAll(new[] { task }, doc);
@@ -2750,6 +2935,7 @@ namespace Rhino.Input.Custom
     /// <param name="task">The task.</param>
     /// <param name="doc">A document to set progress reporting.</param>
     /// <returns>A result enumeration.</returns>
+    /// <since>6.0</since>
     public Result Wait<TResult>(Task<TResult> task, RhinoDoc doc)
     {
       return WaitAll(new[] { task }, doc);
@@ -2760,6 +2946,7 @@ namespace Rhino.Input.Custom
     /// <param name="tasks">The tasks.</param>
     /// <param name="doc">A document to set progress reporting.</param>
     /// <returns>A result enumeration.</returns>
+    /// <since>7.0</since>
     public Result WaitAll(IEnumerable<Task> tasks, RhinoDoc doc)
     {
       if (m_progress_reporting)
@@ -2798,7 +2985,7 @@ namespace Rhino.Input.Custom
           }
           catch (Exception)
           {
-            RhinoApp.WriteLine("cancelled");
+            RhinoApp.WriteLine("canceled");
           }
           m_new_progress_value = -1;
           m_old_progress_value = -1;
@@ -2858,6 +3045,7 @@ namespace Rhino.Input.Custom
     }
 
     readonly Progress<double> m_progress;
+    /// <since>6.0</since>
     public IProgress<double> Progress
     {
       get

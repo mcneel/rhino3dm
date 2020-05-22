@@ -20,6 +20,7 @@ namespace Rhino.Display
 
 
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);

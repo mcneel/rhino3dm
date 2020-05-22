@@ -8,7 +8,8 @@ namespace Rhino.DocObjects
 {
   public class FontQuartet
   {
-    internal FontQuartet(string name, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
+    // make constructor public after conversation with Steve on slack #dev channel on March 9th 2020
+    public FontQuartet(string name, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
     {
       QuartetName = name;
       HasRegularFont = supportsRegular;
@@ -16,10 +17,15 @@ namespace Rhino.DocObjects
       HasItalicFont = supportsItalic;
       HasBoldItalicFont = supportsBoldItalic;
     }
+    /// <since>6.7</since>
     public string QuartetName { get; private set; }
+    /// <since>6.7</since>
     public bool HasRegularFont { get; private set; }
+    /// <since>6.7</since>
     public bool HasBoldFont { get; private set; }
+    /// <since>6.7</since>
     public bool HasItalicFont { get; private set; }
+    /// <since>6.7</since>
     public bool HasBoldItalicFont { get; private set; }
     // incremental search in Eto DropDown doesn't work unless ToString() is overridden
     public override string ToString() => QuartetName ?? "";
@@ -32,13 +38,16 @@ namespace Rhino.DocObjects
     readonly IntPtr m_managed_font;
     internal IntPtr ConstPointer() { return m_managed_font; }
 
+    /// <since>6.0</since>
     public Font(string familyName) : this(familyName, FontWeight.Normal, FontStyle.Upright, false, false) { }
 
+    /// <since>6.0</since>
     public Font(string familyName, FontWeight weight, FontStyle style, bool underlined, bool strikethrough)
     {
       m_managed_font = UnsafeNativeMethods.ON_Font_GetManagedFont(familyName, weight, style, underlined, strikethrough);
     }
 
+    /// <since>6.7</since>
     public static Font FromQuartetProperties(string quartetName, bool bold, bool italic)
     {
       IntPtr managed_font = UnsafeNativeMethods.ON_Font_FromQuartetProperties(quartetName, bold, italic);
@@ -52,7 +61,8 @@ namespace Rhino.DocObjects
       m_managed_font = managedFont;
     }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !MOBILE_BUILD
+    /// <since>5.0</since>
     public static string[] AvailableFontFaceNames()
     {
       string[] rc = null;
@@ -74,11 +84,13 @@ namespace Rhino.DocObjects
       return rc;
     }
 
+    /// <since>6.5</since>
     public static Font[] InstalledFonts()
     {
       return InstalledFonts(null);
     }
 
+    /// <since>6.5</since>
     public static Font[] InstalledFonts(string familyName)
     {
       IntPtr ptrFontArray = UnsafeNativeMethods.ON_Font_GetInstalledFontList(familyName);
@@ -94,6 +106,7 @@ namespace Rhino.DocObjects
       return fonts;
     }
 
+    /// <since>6.7</since>
     public static FontQuartet[] InstalledFontsAsQuartets()
     {
       int quartetCount = UnsafeNativeMethods.ON_FontList_QuartetCount();
@@ -116,6 +129,7 @@ namespace Rhino.DocObjects
     }
 #endif
 
+    /// <since>6.7</since>
     public string QuartetName
     {
       get
@@ -129,6 +143,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.12</since>
     public string EnglishQuartetName
     {
       get
@@ -143,8 +158,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns Facename
+    /// Returns Face name
     /// </summary>
+    /// <since>5.0</since>
     public string FaceName
     {
       get
@@ -159,8 +175,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns English Facename
+    /// Returns English Face name
     /// </summary>
+    /// <since>6.9</since>
     public string EnglishFaceName
     {
       get
@@ -175,8 +192,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns Windows Logfont Facename
+    /// Returns Windows LOGFONT Face name
     /// </summary>
+    /// <since>6.5</since>
     public string LogfontName
     {
       get
@@ -191,13 +209,15 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns concatinated Family and Face names
+    /// Returns concatenated Family and Face names
     /// </summary>
+    /// <since>6.9</since>
     public string FamilyPlusFaceName => FamilyName + (string.IsNullOrEmpty(FaceName) ? "" : " " + FaceName);
 
     /// <summary>
     /// Returns the Font PostScriptName - "Apple font name"
     /// </summary>
+    /// <since>6.5</since>
     public string PostScriptName
     {
       get
@@ -215,6 +235,7 @@ namespace Rhino.DocObjects
     /// Returns the Font RichTextFontName used in RTF strings:
     /// {\\fonttbl...{\\fN RichTextFontName;}...}
     /// </summary>
+    /// <since>6.5</since>
     public string RichTextFontName
     {
       get
@@ -232,6 +253,7 @@ namespace Rhino.DocObjects
     /// Returns a long description that includes family, face, weight, stretch and style information. 
     /// Generally not useful for finding matching fonts.
     /// </summary>
+    /// <since>6.5</since>
     public string Description
     {
       get
@@ -245,6 +267,7 @@ namespace Rhino.DocObjects
       }
     }
     
+    /// <since>5.0</since>
     public bool Bold
     {
       get
@@ -255,17 +278,28 @@ namespace Rhino.DocObjects
     }
 
     //public bool Bold => (int)Weight > (int)FontWeight.Medium;
+    /// <since>5.0</since>
     public bool Italic => Style == FontStyle.Italic;
+    /// <since>6.0</since>
     public bool Underlined => UnsafeNativeMethods.ON_Font_IsUnderlined(m_managed_font);
+    /// <since>6.0</since>
     public bool Strikeout => UnsafeNativeMethods.ON_Font_IsStrikeout(m_managed_font);
+    /// <since>6.10</since>
     public bool IsEngravingFont => UnsafeNativeMethods.ON_Font_IsEngravingFont(m_managed_font);
+    /// <since>6.5</since>
     public bool IsSymbolFont => UnsafeNativeMethods.ON_Font_IsSymbolFont(m_managed_font);
+    /// <since>6.5</since>
     public bool IsSingleStrokeFont => UnsafeNativeMethods.ON_Font_IsSingleStrokeFont(m_managed_font);
+    /// <since>6.5</since>
     public bool IsSimulated => UnsafeNativeMethods.ON_Font_IsSimulated(m_managed_font);
+    /// <since>6.0</since>
     public FontStyle Style => UnsafeNativeMethods.ON_Font_Style(m_managed_font);
+    /// <since>6.0</since>
     public FontWeight Weight => UnsafeNativeMethods.ON_Font_Weight(m_managed_font);
+    /// <since>6.0</since>
     public double PointSize => UnsafeNativeMethods.ON_Font_PointSize(m_managed_font);
 
+    /// <since>6.5</since>
     public string FamilyName
     {
       get
@@ -279,6 +313,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.9</since>
     public string EnglishFamilyName
     {
       get
@@ -307,9 +342,11 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this table.</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document { get; }
 
     /// <summary>Number of fonts in the table.</summary>
+    /// <since>5.0</since>
     public int Count => Document.DimStyles.Count;
 
     /// <summary>
@@ -318,6 +355,7 @@ namespace Rhino.DocObjects.Tables
     /// font is never deleted.
     /// Returns: Zero based font index of the current font.
     /// </summary>
+    /// <since>5.0</since>
     public int CurrentIndex => Document.DimStyles.CurrentIndex;
 
     /// <summary>
@@ -345,6 +383,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_textjustify.cs' lang='cs'/>
     /// <code source='examples\py\ex_textjustify.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int FindOrCreate(string face, bool bold, bool italic)
     {
       return UnsafeNativeMethods.CRhinoDimStyleTable_FindOrCreate(Document.RuntimeSerialNumber, face, bold, italic, IntPtr.Zero);
@@ -360,6 +399,7 @@ namespace Rhino.DocObjects.Tables
     /// the settings other than face, bold and italic are copied from the template_style
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public int FindOrCreate(string face, bool bold, bool italic, DimensionStyle template_style)
     {
       return UnsafeNativeMethods.CRhinoDimStyleTable_FindOrCreate(Document.RuntimeSerialNumber, face, bold, italic, template_style.ConstPointer());
@@ -368,12 +408,14 @@ namespace Rhino.DocObjects.Tables
 #region enumerator
 
     // for IEnumerable<Font>
+    /// <since>5.0</since>
     public IEnumerator<Font> GetEnumerator()
     {
       return new Collections.TableEnumerator<FontTable, Font>(this);
     }
 
     // for IEnumerable
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return new Collections.TableEnumerator<FontTable, Font>(this);

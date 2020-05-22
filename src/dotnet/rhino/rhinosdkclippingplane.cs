@@ -20,6 +20,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the clipping plane surface.
     /// </summary>
+    /// <since>5.0</since>
     public Rhino.Geometry.ClippingPlaneSurface ClippingPlaneGeometry
     {
       get
@@ -35,6 +36,7 @@ namespace Rhino.DocObjects
     /// <param name="viewport">The viewport to add.</param>
     /// <param name="commit">Commit the change. When in doubt, set this parameter to true.</param>
     /// <returns>true if the viewport was added, false if the viewport is already in the list.</returns>
+    /// <since>6.1</since>
     public bool AddClipViewport(Rhino.Display.RhinoViewport viewport, bool commit)
     {
       if (null == viewport)
@@ -57,6 +59,7 @@ namespace Rhino.DocObjects
     /// <param name="viewport">The viewport to remove.</param>
     /// <param name="commit">Commit the change. When in doubt, set this parameter to true.</param>
     /// <returns>true if the viewport was removed, false if the viewport was not in the list.</returns>
+    /// <since>6.1</since>
     public bool RemoveClipViewport(Rhino.Display.RhinoViewport viewport, bool commit)
     {
       if (null == viewport)

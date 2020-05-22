@@ -13,6 +13,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the leader geometry for this object.
     /// </summary>
+    /// <since>6.0</since>
     public Geometry.Leader LeaderGeometry
     {
       get

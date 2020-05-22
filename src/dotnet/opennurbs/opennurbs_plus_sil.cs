@@ -105,6 +105,83 @@ namespace Rhino.Geometry
     #endregion
 
     #region static methods
+
+    /// <summary>
+    /// Computes draft curve silhouettes of a shape.
+    /// </summary>
+    /// <param name="geometry">Geometry whose silhouettes need to be computed. Can be Brep, BrepFace, Mesh, or Extrusion.</param>
+    /// <param name="draftAngle">The draft angle in radians. Draft angle can be a positive or negative value.</param>
+    /// <param name="pullDirection">3d direction for the mold to be pulled in, directed away from the object.</param>
+    /// <param name="tolerance">
+    /// Tolerance to use for determining projecting relationships. 
+    /// Surfaces and curves that are closer than tolerance, may be treated as projecting. 
+    /// When in doubt use RhinoDoc.ModelAbsoluteTolerance.
+    /// </param>
+    /// <param name="angleToleranceRadians">
+    /// Angular tolerance to use for determining projecting relationships.
+    /// A surface normal N that satisfies N o cameraDirection &lt; Sin(angleToleranceRadians) may be considered projecting. 
+    /// When in doubt use RhinoDoc.ModelAngleToleranceRadians.
+    /// </param>
+    /// <returns>Array of silhouette curves.</returns>
+    /// <since>7.0</since>
+    public static Silhouette[] ComputeDraftCurve(
+      GeometryBase geometry,
+      double draftAngle,
+      Vector3d pullDirection,
+      double tolerance,
+      double angleToleranceRadians
+      )
+    {
+      return ComputeDraftCurve(geometry, draftAngle, pullDirection, tolerance, angleToleranceRadians, System.Threading.CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Computes draft curve silhouettes of a shape.
+    /// </summary>
+    /// <param name="geometry">Geometry whose silhouettes need to be computed. Can be Brep, BrepFace, Mesh, or Extrusion.</param>
+    /// <param name="draftAngle">The draft angle in radians. Draft angle can be a positive or negative value.</param>
+    /// <param name="pullDirection">3d direction for the mold to be pulled in, directed away from the object.</param>
+    /// <param name="tolerance">
+    /// Tolerance to use for determining projecting relationships. 
+    /// Surfaces and curves that are closer than tolerance, may be treated as projecting. 
+    /// When in doubt use RhinoDoc.ModelAbsoluteTolerance.
+    /// </param>
+    /// <param name="angleToleranceRadians">
+    /// Angular tolerance to use for determining projecting relationships.
+    /// A surface normal N that satisfies N o cameraDirection &lt; Sin(angleToleranceRadians) may be considered projecting. 
+    /// When in doubt use RhinoDoc.ModelAngleToleranceRadians.
+    /// </param>
+    /// <param name="cancelToken">Computation cancellation token.</param>
+    /// <returns>Array of silhouette curves.</returns>
+    /// <since>7.0</since>
+    public static Silhouette[] ComputeDraftCurve(
+      GeometryBase geometry,
+      double draftAngle,
+      Vector3d pullDirection,
+      double tolerance,
+      double angleToleranceRadians,
+      System.Threading.CancellationToken cancelToken
+      )
+    {
+      IntPtr const_ptr_geometry = geometry.ConstPointer();
+
+      ThreadTerminator terminator = null;
+      if (cancelToken != System.Threading.CancellationToken.None)
+      {
+        terminator = new ThreadTerminator();
+        cancelToken.Register(terminator.RequestCancel);
+      }
+      IntPtr ptr_terminator = terminator == null ? IntPtr.Zero : terminator.NonConstPointer();
+
+      IntPtr ptr_silhouettes = UnsafeNativeMethods.TLC_Sillhouette3(const_ptr_geometry, draftAngle, pullDirection, tolerance, angleToleranceRadians, ptr_terminator);
+      Silhouette[] rc = FromClassArray(ptr_silhouettes);
+      UnsafeNativeMethods.TLC_SilhouetteArrayDelete(ptr_silhouettes);
+      if (terminator != null)
+        terminator.Dispose();
+      GC.KeepAlive(geometry);
+      return rc;
+    }
+
     /// <summary>
     /// Compute silhouettes of a shape for a perspective projection.
     /// </summary>
@@ -118,6 +195,7 @@ namespace Rhino.Geometry
     /// A surface normal N that satisfies N o cameraDirection &lt; Sin(angleToleranceRadians) may be considered projecting. 
     /// When in doubt use RhinoDoc.ModelAngleToleranceRadians.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -143,6 +221,7 @@ namespace Rhino.Geometry
     /// <param name="clippingPlanes">Optional collection of clipping planes.</param>
     /// <param name="cancelToken">Computation cancellation token.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -194,6 +273,7 @@ namespace Rhino.Geometry
     /// A surface normal N that satisfies N o cameraDirection &lt; Sin(angleToleranceRadians) may be considered projecting. 
     /// When in doubt use RhinoDoc.ModelAngleToleranceRadians.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -219,6 +299,7 @@ namespace Rhino.Geometry
     /// <param name="clippingPlanes">Optional collection of clipping planes.</param>
     /// <param name="cancelToken">Computation cancellation token.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -269,6 +350,7 @@ namespace Rhino.Geometry
     /// A surface normal N that satisfies N o cameraDirection &lt; Sin(angleToleranceRadians) may be considered projecting. 
     /// When in doubt use RhinoDoc.ModelAngleToleranceRadians.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -294,6 +376,7 @@ namespace Rhino.Geometry
     /// <param name="clippingPlanes">Optional collection of clipping planes.</param>
     /// <param name="cancelToken">Computation cancellation token.</param>
     /// <returns>Array of silhouette curves.</returns>
+    /// <since>6.0</since>
     public static Silhouette[] Compute(
       GeometryBase geometry,
       SilhouetteType silhouetteType,
@@ -330,6 +413,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the type of this silhouette curve.
     /// </summary>
+    /// <since>6.0</since>
     public SilhouetteType SilhouetteType
     {
       get;
@@ -340,6 +424,7 @@ namespace Rhino.Geometry
     /// Gets the component index corresponding with this silhouette curve.
     /// This field is only set when the entire silhouette curve is part of some geometry component.
     /// </summary>
+    /// <since>6.0</since>
     public ComponentIndex GeometryComponentIndex
     {
       get;
@@ -349,6 +434,7 @@ namespace Rhino.Geometry
     /// <summary> 
     /// 3D curve representing the shape of the silhouette.
     /// </summary>
+    /// <since>6.0</since>
     public Curve Curve
     {
       get;

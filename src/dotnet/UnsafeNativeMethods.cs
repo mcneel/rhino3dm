@@ -266,6 +266,9 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetOnAfterPostReadViewUpdateCallback(Rhino.RhinoDoc.DocumentIoCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetViewModifiedEventCallback(Rhino.Display.RhinoView.ViewCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetBeginSaveDocumentCallback(Rhino.RhinoDoc.DocumentIoCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -412,11 +415,21 @@ internal partial class UnsafeNativeMethods
   //int Rdk_Globals_ShowColorPicker(HWND hWnd, ON_4FVECTOR_STRUCT v, bool bUseAlpha, ON_4fPoint* pColor)
   // Z:\dev\github\mcneel\rhino\src4\DotNetSDK\rhinocommon\c_rdk\rdk_plugin.cpp line 1430
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern int Rdk_Globals_ShowColorPickerNewEx(
+    IntPtr hWnd,
+    Rhino.Display.Color4f vColor,
+    [MarshalAs(UnmanagedType.U1)]bool bUseAlpha,
+    ref Rhino.Display.Color4f pColor,
+    Rhino.UI.Dialogs.OnColorChangedEvent colorCallback,
+    IntPtr named_color_list);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern int Rdk_Globals_ShowColorPickerEx(
     IntPtr hWnd,
     Rhino.Display.Color4f vColor,
     [MarshalAs(UnmanagedType.U1)]bool bUseAlpha,
     ref Rhino.Display.Color4f pColor,
+    IntPtr pointerToNamedArgs,
     Rhino.UI.Dialogs.OnColorChangedEvent colorCallback);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -492,6 +505,9 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRdkCmnEventWatcher_SetUndoRedoEventCallback(Rhino.Render.UndoRedo.RdkUndoRedoCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRdkCmnEventWatcher_SetUndoRedoEndedEventCallback(Rhino.Render.UndoRedo.RdkUndoRedoEndedCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetGroundPlaneChangedEventCallback(Rhino.Render.GroundPlane.RdkGroundPlaneSettingsChangedCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -505,6 +521,9 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetOnRenderWindowClonedEventCallback(Rhino.Render.RenderWindow.ClonedEventCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCallback);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRdkCmnEventWatcher_SetOnCustomEventCallback(Rhino.Render.CustomEvent.RdkCustomEventCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCallback);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetContentListClearingEventCallback(Rhino.Render.RenderContentTableEventForwarder.ContentListClearingCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
@@ -690,9 +709,102 @@ internal partial class UnsafeNativeMethods
                                                                Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingFilmicAdvanced,
                                                                Rhino.RDK.Delegates.NEWRENDERSETTINGPAGEPROC NewRenderSettingsPage,
                                                                Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsDithering,
-                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsWatermark);
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsWatermark,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsHueSatLum,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsBriCon,
+                                                               Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsMultiplier,
+                                                               Rhino.RDK.Delegates.PEPRENDERSETTINGSPAGEPROC AttachRenderPostEffectsPage);
 
+  // EarlyPostEffectPlugIn
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnEarlyPostEffectPlugIn_SetCallbacks(Rhino.RDK.Delegates.SHOWNPROC shown,
+                                                                            Rhino.RDK.Delegates.SETSHOWNPROC setshown,
+                                                                            Rhino.RDK.Delegates.ONPROC on,
+                                                                            Rhino.RDK.Delegates.SETONPROC seton,
+                                                                            Rhino.RDK.Delegates.FIXEDPROC fixedd,
+                                                                            Rhino.RDK.Delegates.CANEXECUTEPROC canexecute,
+                                                                            Rhino.RDK.Delegates.REQUIREDCHANNELSPROC requiredchannels,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGDELAYMSPROC executewhilerenderingdelaysms,
+                                                                            Rhino.RDK.Delegates.SUPPORTSHDRDATAPROC supportshdrdata,
+                                                                            Rhino.RDK.Delegates.READFROMDOCUMENTDEFAULTSPROC readfromdocumentdefaults,
+                                                                            Rhino.RDK.Delegates.WRITETODOCUMENTDEFAULTSPROC writetodocumentdefaults,
+                                                                            Rhino.RDK.Delegates.CRCPROC crc,
+                                                                            Rhino.RDK.Delegates.UUIDPROC uuid,
+                                                                            Rhino.RDK.Delegates.LOCALNAMEPROC localname,
+                                                                            Rhino.RDK.Delegates.USAGEFLAGSPROC usageflags,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGOPTIONSPROC executewhilerenderingoptions,
+                                                                            Rhino.RDK.Delegates.EXECUTEPROC execute,
+                                                                            Rhino.RDK.Delegates.GETPARAMPROC getparam,
+                                                                            Rhino.RDK.Delegates.SETPARAMPROC setparam,
+                                                                            Rhino.RDK.Delegates.READSTATEPROC readstate,
+                                                                            Rhino.RDK.Delegates.WRITESTATEPROC writestate,
+                                                                            Rhino.RDK.Delegates.RESETTOFACTORYDEFAULTSPROC resettofactorydefaults,
+                                                                            Rhino.RDK.Delegates.ADDUISECTIONSPROC adduiseections,
+                                                                            Rhino.RDK.Delegates.DISPLAYHELPPROC displayhelp,
+                                                                            Rhino.RDK.Delegates.CANDISPLAYHELPPROC candisplayhelp);
 
+  // LatePostEffectPlugIn
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnLatePostEffectPlugIn_SetCallbacks(Rhino.RDK.Delegates.SHOWNPROC shown,
+                                                                            Rhino.RDK.Delegates.SETSHOWNPROC setshown,
+                                                                            Rhino.RDK.Delegates.ONPROC on,
+                                                                            Rhino.RDK.Delegates.SETONPROC seton,
+                                                                            Rhino.RDK.Delegates.FIXEDPROC fixedd,
+                                                                            Rhino.RDK.Delegates.CANEXECUTEPROC canexecute,
+                                                                            Rhino.RDK.Delegates.REQUIREDCHANNELSPROC requiredchannels,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGDELAYMSPROC executewhilerenderingdelaysms,
+                                                                            Rhino.RDK.Delegates.SUPPORTSHDRDATAPROC supportshdrdata,
+                                                                            Rhino.RDK.Delegates.READFROMDOCUMENTDEFAULTSPROC readfromdocumentdefaults,
+                                                                            Rhino.RDK.Delegates.WRITETODOCUMENTDEFAULTSPROC writetodocumentdefaults,
+                                                                            Rhino.RDK.Delegates.CRCPROC crc,
+                                                                            Rhino.RDK.Delegates.UUIDPROC uuid,
+                                                                            Rhino.RDK.Delegates.LOCALNAMEPROC localname,
+                                                                            Rhino.RDK.Delegates.USAGEFLAGSPROC usageflags,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGOPTIONSPROC executewhilerenderingoptions,
+                                                                            Rhino.RDK.Delegates.EXECUTEPROC execute,
+                                                                            Rhino.RDK.Delegates.GETPARAMPROC getparam,
+                                                                            Rhino.RDK.Delegates.SETPARAMPROC setparam,
+                                                                            Rhino.RDK.Delegates.READSTATEPROC readstate,
+                                                                            Rhino.RDK.Delegates.WRITESTATEPROC writestate,
+                                                                            Rhino.RDK.Delegates.RESETTOFACTORYDEFAULTSPROC resettofactorydefaults,
+                                                                            Rhino.RDK.Delegates.ADDUISECTIONSPROC adduiseections,
+                                                                            Rhino.RDK.Delegates.DISPLAYHELPPROC displayhelp,
+                                                                            Rhino.RDK.Delegates.CANDISPLAYHELPPROC candisplayhelp);
+
+  // ToneMappingPostEffectPlugIn
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnToneMappingPostEffectPlugIn_SetCallbacks(
+                                                                            Rhino.RDK.Delegates.CANEXECUTEPROC canexecute,
+                                                                            Rhino.RDK.Delegates.REQUIREDCHANNELSPROC requiredchannels,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGDELAYMSPROC executewhilerenderingdelaysms,
+                                                                            Rhino.RDK.Delegates.SUPPORTSHDRDATAPROC supportshdrdata,
+                                                                            Rhino.RDK.Delegates.READFROMDOCUMENTDEFAULTSPROC readfromdocumentdefaults,
+                                                                            Rhino.RDK.Delegates.WRITETODOCUMENTDEFAULTSPROC writetodocumentdefaults,
+                                                                            Rhino.RDK.Delegates.CRCPROC crc,
+                                                                            Rhino.RDK.Delegates.UUIDPROC uuid,
+                                                                            Rhino.RDK.Delegates.LOCALNAMEPROC localname,
+                                                                            Rhino.RDK.Delegates.USAGEFLAGSPROC usageflags,
+                                                                            Rhino.RDK.Delegates.EXECUTEWHILERENDERINGOPTIONSPROC executewhilerenderingoptions,
+                                                                            Rhino.RDK.Delegates.EXECUTEPROC execute,
+                                                                            Rhino.RDK.Delegates.GETPARAMPROC getparam,
+                                                                            Rhino.RDK.Delegates.SETPARAMPROC setparam,
+                                                                            Rhino.RDK.Delegates.READSTATEPROC readstate,
+                                                                            Rhino.RDK.Delegates.WRITESTATEPROC writestate,
+                                                                            Rhino.RDK.Delegates.RESETTOFACTORYDEFAULTSPROC resettofactorydefaults,
+                                                                            Rhino.RDK.Delegates.ADDUISECTIONSPROC adduiseections,
+                                                                            Rhino.RDK.Delegates.DISPLAYHELPPROC displayhelp,
+                                                                            Rhino.RDK.Delegates.CANDISPLAYHELPPROC candisplayhelp,
+                                                                            Rhino.RDK.Delegates.SETMANAGERPROC setmanager);
+  // CmnPostEffectFactory
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnPostEffectFactory_SetCallbacks(Rhino.RDK.Delegates.NEWPOSTEFFECTPROC newposteffect,
+                                                                        Rhino.RDK.Delegates.PEFUUIDPROC pluginid);
+
+  // CmnPostEffectJob
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnPostEffectJob_SetCallbacks(Rhino.RDK.Delegates.CLONEPOSTEFFECTJOBPROC clone,
+                                                                    Rhino.RDK.Delegates.DELETETHISPOSTEFFECTJOB delete,
+                                                                    Rhino.RDK.Delegates.EXECUTEPOSTEFFECTJOB execute);
 
   // FloatingPreviewManager
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -886,7 +998,7 @@ internal partial class UnsafeNativeMethods
     Rhino.Render.RealtimeDisplayMode.HudShowControlsCallback hudShowControls,
     Rhino.Render.RealtimeDisplayMode.HudShowCallback hudShow,
     Rhino.Render.RealtimeDisplayMode.HudStartTimeCallback hudStartTime,
-
+    Rhino.Render.RealtimeDisplayMode.HudStartTimeMSCallback hudStartTimeMS,
     Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudPlayButtonPressed,
     Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudPauseButtonPressed,
     Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudLockButtonPressed,
@@ -1165,6 +1277,7 @@ internal partial class UnsafeNativeMethods
   [return: MarshalAs(UnmanagedType.Bool)]
   internal static extern bool CRhinoPrintInfo_VectorCapture(IntPtr constPrintInfo,
     Rhino.Runtime.ViewCaptureWriter.SetClipRectProc clipRectProc,
+    Rhino.Runtime.ViewCaptureWriter.FillProc fillProc,
     Rhino.Runtime.ViewCaptureWriter.VectorPolylineProc polylineCallback,
     Rhino.Runtime.ViewCaptureWriter.VectorArcProc arcCallback,
     Rhino.Runtime.ViewCaptureWriter.VectorStringProc stringCallback,

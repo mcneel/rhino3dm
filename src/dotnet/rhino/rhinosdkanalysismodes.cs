@@ -5,7 +5,6 @@ using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Display
 {
-
   /// <summary>
   /// Represents a base class for visual analysis modes.
   /// <para>This class is abstract.</para>
@@ -213,6 +212,7 @@ namespace Rhino.Display
     /// Id for Rhino's built-in edge analysis mode. Brep and mesh edges are
     /// shown in a selected color.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoEdgeAnalysisModeId
     {
       get { return new Guid("197B765D-CDA3-4411-8A0A-AD8E0891A918"); }
@@ -222,6 +222,7 @@ namespace Rhino.Display
     /// Id for Rhino's built-in curvature graphs analysis mode. Curvature hair
     /// is shown on curves and surfaces.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoCurvatureGraphAnalysisModeId
     {
       get { return new Guid("DF59A9CF-E517-4846-9232-D9AE56A9D13D"); }
@@ -231,6 +232,7 @@ namespace Rhino.Display
     /// Id for Rhino's built-in zebra stripe analysis mode. Zebra stripes are
     /// shown on surfaces and meshes.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoZebraStripeAnalysisModeId
     {
       get { return new Guid("0CCA817C-95D0-4b79-B5D7-CEB5A2975CE0"); }
@@ -238,8 +240,9 @@ namespace Rhino.Display
 
     /// <summary>
     /// Id for Rhino's built-in emap analysis mode.  An environment map is
-    /// shown on sufaces and meshes.
+    /// shown on surfaces and meshes.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoEmapAnalysisModeId
     {
       get { return new Guid("DAEF834E-E978-4f7b-9026-A432C678C189"); }
@@ -249,6 +252,7 @@ namespace Rhino.Display
     /// Id for Rhino's built-in curvature color analysis mode.  Surface curvature
     /// is shown using false color mapping.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoCurvatureColorAnalyisModeId
     {
       get { return new Guid("639E9144-1C1A-4bba-8248-D330F50D7B69"); }
@@ -258,6 +262,7 @@ namespace Rhino.Display
     /// Id for Rhino's built-in draft angle analysis mode.  Draft angle is 
     /// displayed using false colors.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoDraftAngleAnalysisModeId
     {
       get { return new Guid("F08463F4-22E2-4cf1-B810-F01925446D71"); }
@@ -266,11 +271,21 @@ namespace Rhino.Display
     /// <summary>
     /// Id for Rhino's built-in thickness analysis mode.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid RhinoThicknessAnalysisModeId
     {
       get { return new Guid("B28E5435-D299-4933-A95D-3783C496FC66"); }
     }
 
+    //0xa5cc27f6, 0xe169, 0x443a, { 0x87, 0xed, 0xc1, 0x6, 0x57, 0xff, 0x4b, 0xc9
+    /// <summary>
+    /// Id for Rhino's built-in edge continuity analysis mode.
+    /// </summary>
+    /// <since>7.0</since>
+    public static Guid RhinoEdgeContinuityAlalysisModeId
+    {
+      get { return new Guid("A5CC27F6-E169-443A-87ED-C10657FF4BC9"); }
+    }
     #endregion
 
     /// <summary>
@@ -279,6 +294,7 @@ namespace Rhino.Display
     /// <param name="doc">The Rhino document.</param>
     /// <param name="analysisModeId">The id of the analysis mode.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public static bool AdjustAnalysisMeshes(RhinoDoc doc, Guid analysisModeId)
     {
       if (null == doc)
@@ -297,6 +313,7 @@ namespace Rhino.Display
     /// <returns>
     /// An instance of registered analysis mode on success.
     /// </returns>
+    /// <since>5.0</since>
     public static VisualAnalysisMode Register(Type customAnalysisModeType)
     {
       if( !customAnalysisModeType.IsSubclassOf(typeof(VisualAnalysisMode)) )
@@ -344,6 +361,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="id">The globally unique identifier to search for.</param>
     /// <returns>The found visual analysis mode, or null if it was not found, or on error.</returns>
+    /// <since>5.0</since>
     public static VisualAnalysisMode Find(Guid id)
     {
       VisualAnalysisMode rc = FindLocal(id);
@@ -367,6 +385,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="t">A visual analysis mode type.</param>
     /// <returns>A visual analysis mode on success, or null on error.</returns>
+    /// <since>5.0</since>
     public static VisualAnalysisMode Find(Type t)
     {
       return Find(t.GUID);
@@ -382,11 +401,13 @@ namespace Rhino.Display
     /// Gets the name of the analysis mode. It is used by the _What command and the object
     /// properties details window to describe the object.
     /// </summary>
+    /// <since>5.0</since>
     public abstract string Name { get; }
 
     /// <summary>
     /// Gets the visual analysis mode style.
     /// </summary>
+    /// <since>5.0</since>
     public abstract AnalysisStyle Style { get; }
 
     internal Guid m_id = Guid.Empty;
@@ -396,6 +417,7 @@ namespace Rhino.Display
     /// The Guid is specified with the <see cref="System.Runtime.InteropServices.GuidAttribute">GuidAttribute</see>
     /// applied to the class.
     /// </summary>
+    /// <since>5.0</since>
     public Guid Id
     {
       get
@@ -411,7 +433,8 @@ namespace Rhino.Display
     /// in modes this opens or closes the modeless dialog that controls the
     /// analysis mode's display settings.
     /// </summary>
-    /// <param name="on">true if the inferface should be shown; false if it should be concealed.</param>
+    /// <param name="on">true if the interface should be shown; false if it should be concealed.</param>
+    /// <since>5.0</since>
     public virtual void EnableUserInterface(bool on) {}
 
     /// <summary>
@@ -419,6 +442,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="obj">The object to be tested.</param>
     /// <returns>true if this mode can indeed be used on the object; otherwise false.</returns>
+    /// <since>5.0</since>
     public virtual bool ObjectSupportsAnalysisMode(Rhino.DocObjects.RhinoObject obj)
     {
       IntPtr pConstPointer = ConstPointer();
@@ -432,6 +456,7 @@ namespace Rhino.Display
     /// setting.
     /// <para>The default is false.</para>
     /// </summary>
+    /// <since>5.0</since>
     public virtual bool ShowIsoCurves
     {
       get { return false; }
@@ -444,7 +469,7 @@ namespace Rhino.Display
     /// </summary>
     /// <remarks>
     /// Shaded analysis modes that use texture mapping, like zebra and emap,
-    /// override this function set the tex, diffuse_color, and EnableLighting
+    /// override this function set the texture, diffuse_color, and EnableLighting
     /// parameter.
     /// </remarks>
     /// <param name="obj">The object for which to set up attributes.</param>

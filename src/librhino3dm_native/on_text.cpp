@@ -102,7 +102,11 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
     if (constAnnotation)
     {
       if (rich)
-        (*wstring) = constAnnotation->RichText();
+      {
+        const ON_TextContent* text_content = constAnnotation->Text();
+        if(nullptr != text_content)
+          (*wstring) = text_content->PlatformRichTextFromRuns();
+      }
       else
         (*wstring) = constAnnotation->PlainText();
     }
@@ -681,6 +685,20 @@ RH_C_FUNCTION void ON_V6_Annotation_SetMaskFillType(ON_Annotation* annotation, c
 {
   if (nullptr != annotation)
     annotation->SetMaskFillType(parent_style, source);
+}
+
+RH_C_FUNCTION ON_TextMask::MaskFrame ON_V6_Annotation_MaskFrameType(const ON_Annotation* annotation, const ON_DimStyle* parent_style)
+{
+  if (nullptr != annotation)
+    return annotation->MaskFrameType(parent_style);
+  else
+    return ON_DimStyle::Default.MaskFrameType();
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_SetMaskFrameType(ON_Annotation* annotation, const ON_DimStyle* parent_style, ON_TextMask::MaskFrame  source)
+{
+  if (nullptr != annotation)
+    annotation->SetMaskFrameType(parent_style, source);
 }
 
 RH_C_FUNCTION int ON_V6_Annotation_MaskColor(const ON_Annotation* annotation, const ON_DimStyle* parent_style)
@@ -1741,6 +1759,27 @@ RH_C_FUNCTION bool ON_Annotation_GetAnnotationBoundingBox(const ON_Annotation* c
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Annotation_IsAllBold(const ON_Annotation* ptr)
+{
+  if (nullptr != ptr)
+    return ptr->IsAllBold();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Annotation_IsAllItalic(const ON_Annotation* ptr)
+{
+  if (nullptr != ptr)
+    return ptr->IsAllItalic();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Annotation_IsAllUnderlined(const ON_Annotation* ptr)
+{
+  if (nullptr != ptr)
+    return ptr->IsAllUnderlined();
+  return false;
+}
+
 // ON_TextRun
 //---------------------------------------------------------------------
 
@@ -1949,6 +1988,13 @@ RH_C_FUNCTION bool ON_TextContext_FormatArea(double area, ON::LengthUnitSystem u
 {
   if (formatted_string)
     return ON_TextContent::FormatArea(area, units_in, dimstyle, alternate, *formatted_string);
+  return false;
+}
+
+RH_C_FUNCTION bool ON_TextContext_FormatVolume(double volume, ON::LengthUnitSystem units_in, const ON_DimStyle* dimstyle, bool alternate, ON_wString* formatted_string)
+{
+  if (formatted_string)
+    return ON_TextContent::FormatVolume(volume, units_in, dimstyle, alternate, *formatted_string);
   return false;
 }
 

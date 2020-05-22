@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 #if RHINO_SDK
 using System;
 using Rhino.Geometry;
@@ -13,7 +13,7 @@ namespace Rhino.Display
   }
 
   /// <summary>
-  /// Baising applied to geometry to attempt to get coplanar items
+  /// Biasing applied to geometry to attempt to get coplanar items
   /// to draw on top of or below other geometry
   /// </summary>
   public enum ZBiasMode
@@ -114,6 +114,7 @@ namespace Rhino.Display
     const int idxFrameSizeChanged = 9;
     const int idxProjectionChanged = 10;
     const int idxInitFrameBuffer = 11;
+    const int idxPostDrawObject = 12;
 
     private static void ConduitReport(int which)
     {
@@ -177,6 +178,7 @@ namespace Rhino.Display
     private static ConduitCallback m_InitFrameBufferCallback;
     private static ConduitCallback m_PreDrawObjectsCallback;
     private static ConduitCallback m_DrawObjectCallback;
+    private static ConduitCallback m_PostDrawObjectCallback;
     private static ConduitCallback m_PostDrawObjectsCallback;
     private static ConduitCallback m_DrawForegroundCallback;
     private static ConduitCallback m_DrawOverlayCallback;
@@ -191,6 +193,7 @@ namespace Rhino.Display
     private static EventHandler<InitFrameBufferEventArgs> m_init_framebuffer;
     private static EventHandler<DrawEventArgs> m_predrawobjects;
     private static EventHandler<DrawObjectEventArgs> m_drawobject;
+    private static EventHandler<DrawObjectEventArgs> m_postdrawobject;
     private static EventHandler<DrawEventArgs> m_postdrawobjects;
     private static EventHandler<DrawEventArgs> m_drawforeground;
     private static EventHandler<DrawEventArgs> m_drawoverlay;
@@ -308,6 +311,23 @@ namespace Rhino.Display
         }
       }
     }
+    private static void OnPostDrawObject(IntPtr pPipeline, IntPtr pConduit)
+    {
+      if (m_postdrawobject != null)
+      {
+        try
+        {
+          var e = new DrawObjectEventArgs(pPipeline, pConduit);
+          m_postdrawobject(null, e);
+          if (e.m_rhino_object != null)
+            e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
     private static void OnPostDrawObjects(IntPtr pPipeline, IntPtr pConduit)
     {
       if (m_postdrawobjects != null)
@@ -389,6 +409,7 @@ namespace Rhino.Display
     }
 
 
+    /// <since>5.3</since>
     public static event EventHandler<CullObjectEventArgs> ObjectCulling
     {
       add
@@ -417,6 +438,7 @@ namespace Rhino.Display
     }
 
 
+    /// <since>5.0</since>
     public static event EventHandler<CalculateBoundingBoxEventArgs> CalculateBoundingBox
     {
       add
@@ -447,6 +469,7 @@ namespace Rhino.Display
     /// <summary>
     /// Calculate a bounding to include in the Zoom Extents command.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<CalculateBoundingBoxEventArgs> CalculateBoundingBoxZoomExtents
     {
       add
@@ -474,6 +497,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.18</since>
     public static event EventHandler<InitFrameBufferEventArgs> InitFrameBuffer
     {
       add
@@ -503,6 +527,7 @@ namespace Rhino.Display
     /// <summary>
     /// Called before objects are been drawn. Depth writing and testing are on.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DrawEventArgs> PreDrawObjects
     {
       add
@@ -532,6 +557,7 @@ namespace Rhino.Display
     /// <summary>
     /// Called before transparent objects have been drawn. Depth writing and testing are on.
     /// </summary>
+    /// <since>6.12</since>
     public static event EventHandler<DrawEventArgs> PreDrawTransparentObjects
     {
       add
@@ -561,8 +587,9 @@ namespace Rhino.Display
     /// <summary>
     /// Called right before an individual object is being drawn. NOTE: Do not use this event
     /// unless you absolutely need to.  It is called for every object in the document and can
-    /// slow disply down if a large number of objects exist in the document
+    /// slow display down if a large number of objects exist in the document
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DrawObjectEventArgs> PreDrawObject
     {
       add
@@ -590,9 +617,42 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Called right after an individual object has been drawn. NOTE: Do not use this event
+    /// unless you absolutely need to.  It is called for every object in the document and can
+    /// slow display down if a large number of objects exist in the document
+    /// </summary>
+    /// <since>7.0</since>
+    public static event EventHandler<DrawObjectEventArgs> PostDrawObject
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(m_postdrawobject, value))
+          return;
+
+        if (null == m_postdrawobject)
+        {
+          m_PostDrawObjectCallback = OnPostDrawObject;
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObject, m_PostDrawObjectCallback, m_report);
+        }
+        m_postdrawobject -= value;
+        m_postdrawobject += value;
+      }
+      remove
+      {
+        m_postdrawobject -= value;
+        if (m_postdrawobject == null)
+        {
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObject, null, m_report);
+          m_PostDrawObjectCallback = null;
+        }
+      }
+    }
+
+    /// <summary>
     /// Called after all non-highlighted objects have been drawn. Depth writing and testing are
     /// still turned on. If you want to draw without depth writing/testing, see DrawForeground.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DrawEventArgs> PostDrawObjects
     {
       add
@@ -629,6 +689,7 @@ namespace Rhino.Display
     /// the event declaration without breaking the SDK. Cast to a DrawForegroundEventArgs
     /// if you need it.
     /// </remarks>
+    /// <since>5.0</since>
     public static event EventHandler<DrawEventArgs> DrawForeground
     {
       add
@@ -659,6 +720,7 @@ namespace Rhino.Display
     /// If Rhino is in a feedback mode, the draw overlay call allows for temporary geometry to be drawn on top of
     /// everything in the scene. This is similar to the dynamic draw routine that occurs with custom get point.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DrawEventArgs> DrawOverlay
     {
       add
@@ -688,6 +750,7 @@ namespace Rhino.Display
     /// <summary>
     /// Called when the projection changes for a viewport being drawn.
     /// </summary>
+    /// <since>6.18</since>
     public static event EventHandler<DrawEventArgs> ViewportProjectionChanged
     {
       add
@@ -715,6 +778,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.18</since>
     public static event EventHandler<DisplayModeChangedEventArgs> DisplayModeChanged
     {
       add
@@ -745,8 +809,9 @@ namespace Rhino.Display
 
     #region properties
     /// <summary>
-    /// Gets the size of the framebuffer that this pipeline is drawing to.
+    /// Gets the size of the frame buffer that this pipeline is drawing to.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Size FrameSize
     {
       get
@@ -758,8 +823,9 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Gets the contents of the framebuffer that this pipeline is drawing to.
+    /// Gets the contents of the frame buffer that this pipeline is drawing to.
     /// </summary>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap FrameBuffer
     {
       get
@@ -779,6 +845,7 @@ namespace Rhino.Display
     /// Gets the curve thickness as defined by the current display mode. 
     /// Note: this only applies to curve objects, Brep and Mesh wires may have different settings.
     /// </summary>
+    /// <since>5.0</since>
     public int DefaultCurveThickness
     {
       get 
@@ -791,6 +858,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets a value indicating whether or not this pipeline is drawing into an OpenGL context.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsOpenGL => UnsafeNativeMethods.CRhinoDisplayPipeline_UsesOpenGL(m_ptr);
 
     /// <summary>
@@ -804,6 +872,7 @@ namespace Rhino.Display
     /// major version * 10 + minor version
     /// For example, OpenGL 4.5 returns 45
     /// </returns>
+    /// <since>6.21</since>
     [CLSCompliant(false)]
     public static uint AvailableOpenGLVersion(out bool coreProfile)
     {
@@ -813,10 +882,21 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Make a "default" OpenGL context current
+    /// </summary>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public static bool MakeDefaultOpenGLContextCurrent()
+    {
+      return UnsafeNativeMethods.CRhinoDisplayEngine_ActivateDefaultGLContext();
+    }
+
+    /// <summary>
     /// Gets a value that indicates whether this pipeline is currently using an 
     /// engine that is performing stereo style drawing. Stereo drawing is for 
     /// providing an "enhanced 3-D" effect through stereo viewing devices.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsStereoMode
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.InStereoMode); }
@@ -825,6 +905,7 @@ namespace Rhino.Display
     /// Gets a value that indicates whether this pipeline 
     /// is currently drawing for printing purposes.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsPrinting
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.IsPrinting); }
@@ -834,6 +915,7 @@ namespace Rhino.Display
     /// Gets a value that indicates whether this pipeline is currently drawing
     /// for ViewCaptureToFile or ViewCaptureToClipboard
     /// </summary>
+    /// <since>6.0</since>
     public bool IsInViewCapture
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.IsViewCapturing); }
@@ -845,6 +927,7 @@ namespace Rhino.Display
     /// an operation like panning or rotating. The pipeline will drop some level of detail
     /// while inside a dynamic display state to keep the frame rate as high as possible.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDynamicDisplay
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.ViewInDynamicDisplay); }
@@ -856,6 +939,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets whether or not this pipeline supports shaded meshes.
     /// </summary>
+    /// <since>5.0</since>
     public bool SupportsShading
     {
       get
@@ -878,6 +962,7 @@ namespace Rhino.Display
     /// <para>1 = right</para>
     /// If stereo mode is not enables, this property always returns 0.
     /// </summary>
+    /// <since>5.0</since>
     public int StereoProjection
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetInt(m_ptr, UnsafeNativeMethods.DisplayPipelineInt.ActiveStereoProjection); }
@@ -887,6 +972,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the current model transformation that is applied to vertices when drawing.
     /// </summary>
+    /// <since>5.0</since>
     public Transform ModelTransform
     {
       get
@@ -903,6 +989,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets a value that indicates whether the Model Transform is an Identity transformation.
     /// </summary>
+    /// <since>5.0</since>
     public bool ModelTransformIsIdentity
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.ModelTransformIsIdentity); }
@@ -914,6 +1001,7 @@ namespace Rhino.Display
     /// function, but some special display effects can be achieved through 
     /// drawing with multiple passes.
     /// </summary>
+    /// <since>5.0</since>
     public int RenderPass
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetInt(m_ptr, UnsafeNativeMethods.DisplayPipelineInt.RenderPass); }
@@ -922,14 +1010,16 @@ namespace Rhino.Display
     /// <summary>
     /// Gets the current nested viewport drawing level. 
     /// This is used to know if you are currently inside the drawing of a nested viewport (detail object in Rhino). 
-    /// <para>Nest level = 0 Drawing is occuring in a standard Rhino viewport or on the page viewport.</para>
-    /// <para>Nest level = 1 Drawing is occuring inside a detail view object.</para>
+    /// <para>Nest level = 0 Drawing is occurring in a standard Rhino viewport or on the page viewport.</para>
+    /// <para>Nest level = 1 Drawing is occurring inside a detail view object.</para>
     /// </summary>
+    /// <since>5.0</since>
     public int NestLevel
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetInt(m_ptr, UnsafeNativeMethods.DisplayPipelineInt.NestLevel); }
     }
 
+    /// <since>6.7</since>
     public DocObjects.RhinoObject ActiveTopLevelObject
     {
       get
@@ -939,6 +1029,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.7</since>
     public DocObjects.RhinoObject ActiveObject
     {
       get
@@ -948,6 +1039,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.7</since>
     public int ActiveObjectNestingLevel
     {
       get
@@ -956,6 +1048,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.7</since>
     public DocObjects.RhinoObject[] ActiveObjectNestingStack
     {
       get
@@ -991,6 +1084,7 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>True if the pipeline was opened, false if it was already open
     /// or failed to open.</returns>
+    /// <since>7.0</since>
     public bool Open()
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_OpenPipeline(m_ptr);
@@ -999,6 +1093,7 @@ namespace Rhino.Display
     /// <summary>
     /// Is true of the pipeline is open, false otherwise.
     /// </summary>
+    /// <since>7.0</since>
     public bool IsOpen
     {
       get
@@ -1012,6 +1107,7 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>True if the pipeline was closed, false if it was already closed
     /// or failed to close.</returns>
+    /// <since>7.0</since>
     public bool Close()
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_ClosePipeline(m_ptr);
@@ -1023,6 +1119,7 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>The newly cloned pipeline if successful, null otherwise.
     /// or failed to close.</returns>
+    /// <since>7.0</since>
     public DisplayPipeline Clone(RhinoViewport viewport)
     {
       IntPtr ptr_viewport = viewport.NonConstPointer();
@@ -1043,6 +1140,7 @@ namespace Rhino.Display
     /// brep).  See DrawingSurfaces to check and see if the shaded mesh representation
     /// of the geometry is going to be drawn.
     /// </summary>
+    /// <since>5.0</since>
     public bool DrawingWires
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.DrawingWires); }
@@ -1050,6 +1148,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets a value that indicates whether the pipeline is currently in a grip drawing operation.
     /// </summary>
+    /// <since>5.0</since>
     public bool DrawingGrips
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.DrawingGrips); }
@@ -1063,6 +1162,7 @@ namespace Rhino.Display
     /// See DrawingWires to check and see if the wireframe representation of the
     /// geometry is going to be drawn.
     /// </summary>
+    /// <since>5.0</since>
     public bool DrawingSurfaces
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.DrawingSurfaces); }
@@ -1074,6 +1174,7 @@ namespace Rhino.Display
     /// mesh drawing...at this point the redraw mechanism will make sure everything will 
     /// work the next time around.
     /// </summary>
+    /// <since>5.0</since>
     public bool ShadingRequired
     {
       get { return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.ShadingRequired); }
@@ -1081,6 +1182,7 @@ namespace Rhino.Display
     }
 
     RhinoViewport m_viewport;
+    /// <since>5.0</since>
     public RhinoViewport Viewport
     {
       get
@@ -1097,6 +1199,7 @@ namespace Rhino.Display
     }
 
     DisplayPipelineAttributes m_display_attrs;
+    /// <since>5.3</since>
     public DisplayPipelineAttributes DisplayPipelineAttributes
     {
       get { return m_display_attrs ?? (m_display_attrs = new DisplayPipelineAttributes(this)); }
@@ -1113,6 +1216,7 @@ namespace Rhino.Display
     /// pipeline is drawing to is at a DPI of 96, this value is one. On high
     /// DPI monitors, this value will commonly be greater than one.
     /// </summary>
+    /// <since>6.0</since>
     public float DpiScale
     {
       get
@@ -1128,6 +1232,7 @@ namespace Rhino.Display
     /// Push a model transformation on the engine's model transform stack.
     /// </summary>
     /// <param name="xform">Transformation to push.</param>
+    /// <since>5.0</since>
     public void PushModelTransform(Transform xform)
     {
       if( MeshCacheEnabled )
@@ -1138,6 +1243,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a model transformation off the engine's model transform stack.
     /// </summary>
+    /// <since>5.0</since>
     public void PopModelTransform()
     {
       if (MeshCacheEnabled)
@@ -1146,11 +1252,12 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Enable or disable the DepthTesting behaviour of the engine. 
+    /// Enable or disable the DepthTesting behavior of the engine. 
     /// When DepthTesting is disabled, objects in front will no 
     /// longer occlude objects behind them.
     /// </summary>
     /// <param name="enable">true to enable DepthTesting, false to disable.</param>
+    /// <since>5.0</since>
     public void EnableDepthTesting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1159,10 +1266,11 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Enable or disable the DepthWriting behaviour of the engine. 
+    /// Enable or disable the DepthWriting behavior of the engine. 
     /// When DepthWriting is disabled, drawn geometry does not affect the Z-Buffer.
     /// </summary>
     /// <param name="enable">true to enable DepthWriting, false to disable.</param>
+    /// <since>5.0</since>
     public void EnableDepthWriting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1171,9 +1279,10 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Enable or disable the ColorWriting behaviour of the engine. 
+    /// Enable or disable the ColorWriting behavior of the engine. 
     /// </summary>
     /// <param name="enable">true to enable ColorWriting, false to disable.</param>
+    /// <since>5.0</since>
     public void EnableColorWriting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1185,6 +1294,7 @@ namespace Rhino.Display
     /// Enable or disable the Lighting logic of the engine. 
     /// </summary>
     /// <param name="enable">true to enable Lighting, false to disable.</param>
+    /// <since>5.0</since>
     public void EnableLighting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1196,6 +1306,7 @@ namespace Rhino.Display
     /// Get lights that this pipeline is current using
     /// </summary>
     /// <returns></returns>
+    /// <since>6.3</since>
     public Light[] GetLights()
     {
       int count = UnsafeNativeMethods.CRhinoDisplayPipeline_LightCount(m_ptr);
@@ -1209,6 +1320,7 @@ namespace Rhino.Display
     /// Enable or disable the Clipping Plane logic of the engine. 
     /// </summary>
     /// <param name="enable">true to enable Clipping Planes, false to disable.</param>
+    /// <since>5.0</since>
     public void EnableClippingPlanes(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1222,6 +1334,7 @@ namespace Rhino.Display
     /// <param name="point">point on the plane</param>
     /// <param name="normal">vector perpendicular to the plane</param>
     /// <returns>index for the added clipping plane</returns>
+    /// <since>6.3</since>
     public int AddClippingPlane(Point3d point, Vector3d normal)
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_AddClippingPlane(m_ptr, point, normal);
@@ -1231,6 +1344,7 @@ namespace Rhino.Display
     /// Remove a clipping plane from the pipeline for this frame
     /// </summary>
     /// <param name="index"></param>
+    /// <since>6.3</since>
     public void RemoveClippingPlane(int index)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_RemoveClippingPlane(m_ptr, index);
@@ -1240,6 +1354,7 @@ namespace Rhino.Display
     /// Push a DepthTesting flag on the engine's stack.
     /// </summary>
     /// <param name="enable">DepthTesting flag.</param>
+    /// <since>5.0</since>
     public void PushDepthTesting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1250,6 +1365,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a DepthTesting flag off the engine's stack.
     /// </summary>
+    /// <since>5.0</since>
     public void PopDepthTesting()
     {
       if (MeshCacheEnabled)
@@ -1261,6 +1377,7 @@ namespace Rhino.Display
     /// Push a DepthWriting flag on the engine's stack.
     /// </summary>
     /// <param name="enable">DepthWriting flag.</param>
+    /// <since>5.0</since>
     public void PushDepthWriting(bool enable)
     {
       if (MeshCacheEnabled)
@@ -1271,6 +1388,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a DepthWriting flag off the engine's stack.
     /// </summary>
+    /// <since>5.0</since>
     public void PopDepthWriting()
     {
       if (MeshCacheEnabled)
@@ -1282,6 +1400,7 @@ namespace Rhino.Display
     /// Push a ClipTesting flag on the engine's stack.
     /// </summary>
     /// <param name="enable">ClipTesting flag.</param>
+    /// <since>5.0</since>
     [Obsolete("Use PushDepthTesting")]
     public void PushClipTesting(bool enable)
     {
@@ -1293,6 +1412,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a ClipTesting flag off the engine's stack.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use PopDepthTesting")]
     public void PopClipTesting()
     {
@@ -1305,6 +1425,7 @@ namespace Rhino.Display
     /// Push a FaceCull flag on the engine's stack.
     /// </summary>
     /// <param name="mode">FaceCull flag.</param>
+    /// <since>5.0</since>
     public void PushCullFaceMode(CullFaceMode mode)
     {
       if (MeshCacheEnabled)
@@ -1315,6 +1436,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a FaceCull flag off the engine's stack.
     /// </summary>
+    /// <since>5.0</since>
     public void PopCullFaceMode()
     {
       if (MeshCacheEnabled)
@@ -1322,6 +1444,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_Pop(m_ptr, idxCullFaceMode);
     }
 
+    /// <since>5.0</since>
     public DepthMode DepthMode
     {
       get { return (DepthMode)UnsafeNativeMethods.CRhinoDisplayPipeline_GetInt(m_ptr, UnsafeNativeMethods.DisplayPipelineInt.DepthMode); }
@@ -1333,6 +1456,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>5.0</since>
     public ZBiasMode ZBiasMode
     {
       get { return (ZBiasMode)UnsafeNativeMethods.CRhinoDisplayPipeline_GetInt(m_ptr, UnsafeNativeMethods.DisplayPipelineInt.ZBiasMode); }
@@ -1349,12 +1473,28 @@ namespace Rhino.Display
     #region methods
 
     /// <summary>
+    /// Gets the current model and page view draw list serial numbers, which can
+    /// be used to determine if a model or page view needs to be redrawn.
+    /// </summary>
+    /// <param name="modelSerialNumber">The current model draw list serial number.</param>
+    /// <param name="pageSerialNumber">The current page view draw list serial number.</param>
+    /// <since>7.0</since>
+    [CLSCompliant(false)]
+    public static void GetDrawListSerialNumbers(out uint modelSerialNumber, out uint pageSerialNumber)
+    {
+      modelSerialNumber = 0;
+      pageSerialNumber = 0;
+      UnsafeNativeMethods.RhGetDrawListSerialNumbers(ref modelSerialNumber, ref pageSerialNumber);
+    }
+
+    /// <summary>
     /// Convert HLSL code to a different shading language
     /// </summary>
     /// <param name="hlsl"></param>
     /// <param name="functionName"></param>
     /// <param name="targetLanguage"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static string CrossCompileHLSL(string hlsl, string functionName, ShaderLanguage targetLanguage)
     {
       using (var outString = new Rhino.Runtime.InteropWrappers.StringWrapper())
@@ -1369,11 +1509,20 @@ namespace Rhino.Display
     /// Returns a value indicating if only points on the side of the surface that
     /// face the camera are displayed.
     /// </summary>
-    /// <returns>true if backfaces of surface and mesh control polygons are culled.
+    /// <returns>true if back faces of surface and mesh control polygons are culled.
     /// This value is determined by the _CullControlPolygon command.</returns>
+    /// <since>5.0</since>
     public static bool CullControlPolygon()
     {
       return UnsafeNativeMethods.RHC_RhinoCullControlPolygon();
+    }
+
+    /// <summary>
+    /// Force the pipeline to immediately flush any cached geometry to the display
+    /// </summary>
+    public void Flush()
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Flush(m_ptr);
     }
 
     /// <summary>
@@ -1382,6 +1531,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="worldCoordinate">Point to test for visibility.</param>
     /// <returns>true if the point is visible, false if it is not.</returns>
+    /// <since>5.0</since>
     public bool IsVisible(Point3d worldCoordinate)
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_IsVisible1(m_ptr, worldCoordinate);
@@ -1390,7 +1540,7 @@ namespace Rhino.Display
     /// <summary>
     /// Test a given object for visibility inside the view frustum under the current viewport and model 
     /// transformation settings. This function calls a virtual IsVisibleFinal function that 
-    /// subclassed pipelines can add extra tests to. In the base class, this test only tests 
+    /// sub-classed pipelines can add extra tests to. In the base class, this test only tests 
     /// visibility based on the objects world coordinates location and does not pay attention 
     /// to the object's attributes.
     /// 
@@ -1401,6 +1551,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rhinoObject">Object to test.</param>
     /// <returns>true if the object is visible, false if not.</returns>
+    /// <since>5.0</since>
     public bool IsVisible(DocObjects.RhinoObject rhinoObject)
     {
       IntPtr pRhinoObject = rhinoObject.ConstPointer();
@@ -1413,6 +1564,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="bbox">Box to test for visibility.</param>
     /// <returns>true if at least some portion of the box is visible, false if not.</returns>
+    /// <since>5.0</since>
     public bool IsVisible(BoundingBox bbox)
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_IsVisible2(m_ptr, ref bbox);
@@ -1430,6 +1582,7 @@ namespace Rhino.Display
     /// <returns>
     /// true if this object can be drawn in the pipeline's viewport based on it's object type and display attributes.
     /// </returns>
+    /// <since>5.0</since>
     public bool IsActive(DocObjects.RhinoObject rhinoObject)
     {
       IntPtr pRhinoObject = rhinoObject.ConstPointer();
@@ -1444,6 +1597,7 @@ namespace Rhino.Display
     /// <returns>
     /// true if the pipeline should stop attempting to draw more geometry and just show the frame buffer.
     /// </returns>
+    /// <since>5.0</since>
     public bool InterruptDrawing()
     {
       return UnsafeNativeMethods.CRhinoDisplayPipeline_GetBool(m_ptr, UnsafeNativeMethods.DisplayPipelineBool.InteruptDrawing);
@@ -1455,6 +1609,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="includeModelTransform"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public float[] GetOpenGLWorldToCamera(bool includeModelTransform)
     {
       float[] m = new float[16];
@@ -1468,6 +1623,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="includeModelTransform"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public float[] GetOpenGLWorldToClip(bool includeModelTransform)
     {
       float[] m = new float[16];
@@ -1480,6 +1636,7 @@ namespace Rhino.Display
     /// transformation in OpenGL's right handed coordinate system
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public float[] GetOpenGLCameraToClip()
     {
       float[] m = new float[16];
@@ -1494,6 +1651,7 @@ namespace Rhino.Display
     /// <param name="width">Width of target image.</param>
     /// <param name="height">Height of target image.</param>
     /// <returns>A bitmap containing the given view, or null on error.</returns>
+    /// <since>5.0</since>
     public static System.Drawing.Bitmap DrawToBitmap(RhinoViewport viewport, int width, int height)
     {
       if (null == viewport)
@@ -1520,7 +1678,8 @@ namespace Rhino.Display
     /// <param name="viewportRight">The viewport representing the right eye location and look direction.</param>
     /// <param name="handleLeft">Will contain the OpenGL texture handle which references the left output color buffer.</param>
     /// <param name="handleRight">Will contain the OpenGL texture handle which references the right output color buffer.</param>
-    /// <returns>true if drawing succedded, false otherwise.</returns>
+    /// <returns>true if drawing succeeded, false otherwise.</returns>
+    /// <since>6.8</since>
     [CLSCompliant(false)]
     public bool DrawStereoFrameBuffer(DocObjects.ViewportInfo viewportLeft, DocObjects.ViewportInfo viewportRight, out uint handleLeft, out uint handleRight)
     {
@@ -1543,6 +1702,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_meshdrawing.cs' lang='cs'/>
     /// <code source='examples\py\ex_meshdrawing.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawMeshWires(Mesh mesh, System.Drawing.Color color)
     {
       DrawMeshWires(mesh, color, 1);
@@ -1553,6 +1713,7 @@ namespace Rhino.Display
     /// <param name="mesh">Mesh for wire drawing.</param>
     /// <param name="color">Color of mesh wires.</param>
     /// <param name="thickness">Thickness (in pixels) of mesh wires.</param>
+    /// <since>5.0</since>
     public void DrawMeshWires(Mesh mesh, System.Drawing.Color color, int thickness)
     {
       if (thickness > 0)
@@ -1568,6 +1729,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="mesh">Mesh for vertex drawing.</param>
     /// <param name="color">Color of mesh vertices.</param>
+    /// <since>5.0</since>
     public void DrawMeshVertices(Mesh mesh, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -1659,6 +1821,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_meshdrawing.cs' lang='cs'/>
     /// <code source='examples\py\ex_meshdrawing.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawMeshShaded(Mesh mesh, DisplayMaterial material)
     {
       if (MeshCacheEnabled)
@@ -1678,6 +1841,7 @@ namespace Rhino.Display
     /// <param name="mesh">Mesh to draw.</param>
     /// <param name="material">Material to draw faces with.</param>
     /// <param name="faceIndices">Indices of specific faces to draw</param>
+    /// <since>5.0</since>
     public void DrawMeshShaded(Mesh mesh, DisplayMaterial material, int[] faceIndices)
     {
       IntPtr const_ptr_mesh = mesh.ConstPointer();
@@ -1693,6 +1857,7 @@ namespace Rhino.Display
     /// The mesh must have Vertex Colors defined for this to work.
     /// </summary>
     /// <param name="mesh">Mesh to draw.</param>
+    /// <since>5.0</since>
     public void DrawMeshFalseColors(Mesh mesh)
     {
       IntPtr const_ptr_mesh = mesh.ConstPointer();
@@ -1704,6 +1869,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="subd">SubD to draw</param>
     /// <param name="material">Material to draw faces with</param>
+    /// <since>7.0</since>
     public void DrawSubDShaded(SubD subd, DisplayMaterial material)
     {
       IntPtr const_ptr_subd = subd.ConstPointer();
@@ -1720,6 +1886,7 @@ namespace Rhino.Display
     /// <param name="subd">SubD to draw</param>
     /// <param name="color">wire color</param>
     /// <param name="thickness">wire thickness</param>
+    /// <since>7.0</since>
     public void DrawSubDWires(SubD subd, System.Drawing.Color color, float thickness)
     {
       int argb = color.ToArgb();
@@ -1734,6 +1901,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
     /// <param name="material">Material to draw faces with.</param>
+    /// <since>5.0</since>
     public void DrawBrepShaded(Brep brep, DisplayMaterial material)
     {
       IntPtr const_ptr_brep = brep.ConstPointer();
@@ -1749,6 +1917,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
     /// <param name="color">Color of Wireframe curves.</param>
+    /// <since>5.0</since>
     public void DrawBrepWires(Brep brep, System.Drawing.Color color)
     {
       DrawBrepWires(brep, color, 1);
@@ -1764,6 +1933,7 @@ namespace Rhino.Display
     /// <para> 0 = default internal wires.</para>
     /// <para>>0 = custom high density.</para>
     /// </param>
+    /// <since>5.0</since>
     public void DrawBrepWires(Brep brep, System.Drawing.Color color, int wireDensity)
     {
       int argb = color.ToArgb();
@@ -1777,6 +1947,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="extrusion">Extrusion to draw.</param>
     /// <param name="color">Color of Wireframe curves.</param>
+    /// <since>6.0</since>
     public void DrawExtrusionWires(Extrusion extrusion, System.Drawing.Color color)
     {
       DrawExtrusionWires(extrusion, color, 1);
@@ -1793,6 +1964,7 @@ namespace Rhino.Display
     /// <para> 0 = default internal wires.</para>
     /// <para>>0 = custom high density.</para>
     /// </param>
+    /// <since>6.0</since>
     public void DrawExtrusionWires(Extrusion extrusion, System.Drawing.Color color, int wireDensity)
     {
       int argb = color.ToArgb();
@@ -1805,6 +1977,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
     /// <param name="color">Object color.</param>
+    /// <since>6.16</since>
     public void DrawZebraPreview(Brep brep, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -1817,6 +1990,7 @@ namespace Rhino.Display
     /// Draws a point in style used during "GetPoint" operations
     /// </summary>
     /// <param name="point">Location of the point in world coordinates</param>
+    /// <since>6.0</since>
     public void DrawActivePoint(Point3d point)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPoint(m_ptr, point, true);
@@ -1826,6 +2000,7 @@ namespace Rhino.Display
     /// Draws a point using the current display attribute size, style and color
     /// </summary>
     /// <param name="point">Location of point in world coordinates.</param>
+    /// <since>6.0</since>
     public void DrawPoint(Point3d point)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPoint(m_ptr, point, false);
@@ -1834,6 +2009,7 @@ namespace Rhino.Display
     /// <summary>Draws a point with a given radius, style and color.</summary>
     /// <param name="point">Location of point in world coordinates.</param>
     /// <param name="color">Color of point.</param>
+    /// <since>5.0</since>
     public void DrawPoint(Point3d point, System.Drawing.Color color)
     {
       var point_style = DisplayPipelineAttributes.PointStyle;
@@ -1847,6 +2023,7 @@ namespace Rhino.Display
     /// <param name="color">
     /// Color of point. If style is ControlPoint, this will be the border color.
     /// </param>
+    /// <since>6.0</since>
     public void DrawPoint(Point3d point, PointStyle style, float radius, System.Drawing.Color color)
     {
       Point3d[] pts = { point };
@@ -1859,11 +2036,19 @@ namespace Rhino.Display
     /// <param name="color">
     /// Color of points. If style is ControlPoint, this will be the border color.
     /// </param>
+    /// <since>6.0</since>
     public void DrawPoints(System.Collections.Generic.IEnumerable<Point3d> points, PointStyle style, float radius, System.Drawing.Color color)
     {
-      DrawPoints(points, style, color, color, radius, 0, 0, 0, true, true);
+      // 20 Dec 2019 S. Baer (RH-56225)
+      // If input point style is a control point, just select a white fill as
+      // there is no secondary color parameter to this function
+      if( style == PointStyle.ControlPoint || style == PointStyle.RoundControlPoint)
+        DrawPoints(points, style, color, System.Drawing.Color.White, radius, 0, 0, 0, true, true);
+      else
+        DrawPoints(points, style, color, color, radius, 0, 0, 0, true, true);
     }
 
+    /// <since>6.0</since>
     public void DrawPoint(Point3d point, PointStyle style, System.Drawing.Color strokeColor,
       System.Drawing.Color fillColor, float radius, float strokeWidth, float secondarySize, float rotationRadians, bool diameterIsInPixels,
       bool autoScaleForDpi)
@@ -1872,6 +2057,7 @@ namespace Rhino.Display
       DrawPoints(pts, style, strokeColor, fillColor, radius, strokeWidth, secondarySize, rotationRadians, diameterIsInPixels, autoScaleForDpi);
     }
 
+    /// <since>6.0</since>
     public void DrawPoints(System.Collections.Generic.IEnumerable<Point3d> points, PointStyle style, System.Drawing.Color strokeColor,
       System.Drawing.Color fillColor, float radius, float strokeWidth, float secondarySize, float rotationRadians, bool diameterIsInPixels,
       bool autoScaleForDpi)
@@ -1894,6 +2080,7 @@ namespace Rhino.Display
     /// <param name="color">
     /// Color of point. If style is ControlPoint, this will be the border color.
     /// </param>
+    /// <since>5.0</since>
     public void DrawPoint(Point3d point, PointStyle style, int radius, System.Drawing.Color color)
     {
       DrawPoint(point, style, (float)radius, color);
@@ -1905,6 +2092,7 @@ namespace Rhino.Display
     /// <param name="color">
     /// Color of points. If style is ControlPoint, this will be the border color.
     /// </param>
+    /// <since>5.0</since>
     public void DrawPoints(System.Collections.Generic.IEnumerable<Point3d> points, PointStyle style, int radius, System.Drawing.Color color)
     {
       DrawPoints(points, style, (float)radius, color);
@@ -1915,6 +2103,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cloud">Point cloud to draw, if the cloud has a color array, it will be used, otherwise the points will be black.</param>
     /// <param name="size">Size of points.</param>
+    /// <since>6.0</since>
     public void DrawPointCloud(PointCloud cloud, float size)
     {
       DrawPointCloud(cloud, size, System.Drawing.Color.Black);
@@ -1925,6 +2114,7 @@ namespace Rhino.Display
     /// <param name="cloud">Point cloud to draw.</param>
     /// <param name="size">Size of points.</param>
     /// <param name="color">Color of points in the cloud, if the cloud has a color array this setting is ignored.</param>
+    /// <since>6.0</since>
     public void DrawPointCloud(PointCloud cloud, float size, System.Drawing.Color color)
     {
       IntPtr const_ptr_cloud = cloud.ConstPointer();
@@ -1937,6 +2127,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cloud">Point cloud to draw, if the cloud has a color array, it will be used, otherwise the points will be black.</param>
     /// <param name="size">Size of points.</param>
+    /// <since>5.0</since>
     public void DrawPointCloud(PointCloud cloud, int size)
     {
       DrawPointCloud(cloud, (float)size, System.Drawing.Color.Black);
@@ -1947,6 +2138,7 @@ namespace Rhino.Display
     /// <param name="cloud">Point cloud to draw.</param>
     /// <param name="size">Size of points.</param>
     /// <param name="color">Color of points in the cloud, if the cloud has a color array this setting is ignored.</param>
+    /// <since>5.0</since>
     public void DrawPointCloud(PointCloud cloud, int size, System.Drawing.Color color)
     {
       IntPtr const_ptr_cloud = cloud.ConstPointer();
@@ -1954,6 +2146,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPointCloud(m_ptr, const_ptr_cloud, size, color.ToArgb(), ptr_cache);
     }
 
+    /// <since>5.0</since>
     public void DrawDirectionArrow(Point3d location, Vector3d direction, System.Drawing.Color color)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDirectionArrow(m_ptr, location, direction, color.ToArgb());
@@ -1964,6 +2157,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="line">Arrow shaft.</param>
     /// <param name="color">Color of arrow.</param>
+    /// <since>5.0</since>
     public void DrawArrow(Line line, System.Drawing.Color color)
     {
       Line[] lines = { line };
@@ -1976,12 +2170,13 @@ namespace Rhino.Display
     /// <param name="line">Arrow shaft.</param>
     /// <param name="color">Color of arrow.</param>
     /// <param name="screenSize">If screenSize != 0.0 then the size (in screen pixels) of the arrow head will be equal to screenSize.</param>
-    /// <param name="relativeSize">If relativeSize != 0.0 and screensize == 0.0 the size of the arrow head will be proportional to the arrow shaft length.</param>
+    /// <param name="relativeSize">If relativeSize != 0.0 and screen size == 0.0 the size of the arrow head will be proportional to the arrow shaft length.</param>
     /// <example>
     /// <code source='examples\vbnet\ex_conduitarrowheads.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_conduitarrowheads.cs' lang='cs'/>
     /// <code source='examples\py\ex_conduitarrowheads.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawArrow(Line line, System.Drawing.Color color, double screenSize, double relativeSize)
     {
       Line[] lines = { line };
@@ -1992,6 +2187,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lines">Arrow shafts.</param>
     /// <param name="color">Color of arrows.</param>
+    /// <since>5.0</since>
     public void DrawArrows(Line[] lines, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -2002,6 +2198,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lines">Arrow shafts.</param>
     /// <param name="color">Color of arrows.</param>
+    /// <since>5.0</since>
     public void DrawArrows(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color)
     {
       if (lines == null) { return; }
@@ -2040,7 +2237,8 @@ namespace Rhino.Display
     /// <param name="direction">Direction in which arrow head is pointing.</param>
     /// <param name="color">Color of arrow head.</param>
     /// <param name="screenSize">If screenSize != 0.0, then the size (in screen pixels) of the arrow head will be equal to the screenSize.</param>
-    /// <param name="worldSize">If worldSize != 0.0 and screensize == 0.0 the size of the arrow head will be equal to the number of units in worldSize.</param>
+    /// <param name="worldSize">If worldSize != 0.0 and screen size == 0.0 the size of the arrow head will be equal to the number of units in worldSize.</param>
+    /// <since>5.0</since>
     public void DrawArrowHead(Point3d tip, Vector3d direction, System.Drawing.Color color, double screenSize, double worldSize)
     {
       if (screenSize != 0.0)
@@ -2062,6 +2260,7 @@ namespace Rhino.Display
     /// <param name="color">Color of arrow.</param>
     /// <param name="thickness">Thickness (in pixels) of the arrow line segments.</param>
     /// <param name="size">Size (in world units) of the arrow tip lines.</param>
+    /// <since>5.0</since>
     public void DrawLineArrow(Line line, System.Drawing.Color color, int thickness, double size)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineArrow(m_ptr, ref line, color.ToArgb(), thickness, size);
@@ -2072,6 +2271,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="line">Line to draw.</param>
     /// <param name="color">Color to draw line in.</param>
+    /// <since>5.0</since>
     public void DrawLine(Line line, System.Drawing.Color color)
     {
       DrawLine(line.From, line.To, color, 1);
@@ -2082,6 +2282,7 @@ namespace Rhino.Display
     /// <param name="line">Line to draw.</param>
     /// <param name="color">Color to draw line in.</param>
     /// <param name="thickness">Thickness (in pixels) of line.</param>
+    /// <since>5.0</since>
     public void DrawLine(Line line, System.Drawing.Color color, int thickness)
     {
       DrawLine(line.From, line.To, color, thickness);
@@ -2092,6 +2293,7 @@ namespace Rhino.Display
     /// <param name="from">Line from point.</param>
     /// <param name="to">Line to point.</param>
     /// <param name="color">Color to draw line in.</param>
+    /// <since>5.0</since>
     public void DrawLine(Point3d from, Point3d to, System.Drawing.Color color)
     {
       DrawLine(from, to, color, 1);
@@ -2103,6 +2305,7 @@ namespace Rhino.Display
     /// <param name="to">Line to point.</param>
     /// <param name="color">Color to draw line in.</param>
     /// <param name="thickness">Thickness (in pixels) of line.</param>
+    /// <since>5.0</since>
     public void DrawLine(Point3d from, Point3d to, System.Drawing.Color color, int thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLine(m_ptr, from, to, color.ToArgb(), thickness);
@@ -2113,6 +2316,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="line">Line to draw.</param>
     /// <param name="color">Color of line.</param>
+    /// <since>5.0</since>
     public void DrawDottedLine(Line line, System.Drawing.Color color)
     {
       DrawDottedLine(line.From, line.To, color);
@@ -2125,6 +2329,7 @@ namespace Rhino.Display
     /// <param name="color">Color of line.</param>
     /// <param name="pattern">Pattern of the line (like 0x00001111 for dotted line).</param>
     /// <param name="thickness">Thickness (in pixels) of lines.</param>
+    /// <since>6.0</since>
     public void DrawPatternedLine(Line line, System.Drawing.Color color, int pattern, int thickness)
     {
       DrawPatternedLine(line.From, line.To, color, pattern, thickness);
@@ -2136,6 +2341,7 @@ namespace Rhino.Display
     /// <param name="from">Line start point.</param>
     /// <param name="to">Line end point.</param>
     /// <param name="color">Color of line.</param>
+    /// <since>5.0</since>
     public void DrawDottedLine(Point3d from, Point3d to, System.Drawing.Color color)
     {
       //UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDottedLine(m_ptr, from, to, color.ToArgb());
@@ -2150,6 +2356,7 @@ namespace Rhino.Display
     /// <param name="color">Color of line.</param>
     /// <param name="pattern">Pattern of the line (like 0x00001111 for dotted line).</param>
     /// <param name="thickness">Thickness (in pixels) of lines.</param>
+    /// <since>6.0</since>
     public void DrawPatternedLine(Point3d from, Point3d to, System.Drawing.Color color, int pattern, int thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPatternedLine(m_ptr, from, to, color.ToArgb(), pattern, thickness);
@@ -2161,6 +2368,7 @@ namespace Rhino.Display
     /// <param name="points">End points of each line segment.</param>
     /// <param name="color">Color of polyline.</param>
     /// <param name="close">Draw a line between the first and last points.</param>
+    /// <since>5.0</since>
     public void DrawDottedPolyline(System.Collections.Generic.IEnumerable<Point3d> points, System.Drawing.Color color, bool close)
     {
       DrawPatternedPolyline(points, color, 0x00001111, 1, close);
@@ -2174,6 +2382,7 @@ namespace Rhino.Display
     /// <param name="pattern">Pattern to use for the line (like 0x00001111 for dotted).</param>
     /// <param name="thickness">Thickness (in pixels) of lines.</param>
     /// <param name="close">Draw a line between the first and last points.</param>
+    /// <since>6.0</since>
     public void DrawPatternedPolyline(System.Collections.Generic.IEnumerable<Point3d> points, System.Drawing.Color color, int pattern, int thickness, bool close)
     {
       Point3d first_point = Point3d.Unset;
@@ -2198,6 +2407,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lines">Lines to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawLines(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color)
     {
       DrawLines(lines, color, 1);
@@ -2209,6 +2419,7 @@ namespace Rhino.Display
     /// <param name="lines">Lines to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of lines.</param>
+    /// <since>5.0</since>
     public void DrawLines(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -2233,6 +2444,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="polyline">Polyline to draw.</param>
     /// <param name="color">Color to draw in.</param>
+    /// <since>5.0</since>
     public void DrawPolyline(System.Collections.Generic.IEnumerable<Point3d> polyline, System.Drawing.Color color)
     {
       DrawPolyline(polyline, color, 1);
@@ -2243,6 +2455,7 @@ namespace Rhino.Display
     /// <param name="polyline">Polyline to draw.</param>
     /// <param name="color">Color to draw in.</param>
     /// <param name="thickness">Thickness (in pixels) of the Polyline.</param>
+    /// <since>5.0</since>
     public void DrawPolyline(System.Collections.Generic.IEnumerable<Point3d> polyline, System.Drawing.Color color, int thickness)
     {
       int count;
@@ -2266,6 +2479,7 @@ namespace Rhino.Display
     /// true if the closed area should be filled with color. 
     /// false if you want to draw just the border of the closed shape.
     /// </param>
+    /// <since>5.0</since>
     public void DrawPolygon(System.Collections.Generic.IEnumerable<Point3d> points, System.Drawing.Color color, bool filled)
     {
       int count;
@@ -2289,6 +2503,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_conduitbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_conduitbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public void DrawBitmap(DisplayBitmap bitmap, int left, int top)
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
@@ -2303,6 +2518,7 @@ namespace Rhino.Display
     /// <param name="text">Text content of dot.</param>
     /// <param name="dotColor">Dot background color.</param>
     /// <param name="textColor">Dot foreground color.</param>
+    /// <since>6.0</since>
     public void DrawDot(float screenX, float screenY, string text, System.Drawing.Color dotColor, System.Drawing.Color textColor)
     {
       int argb_dot = dotColor.ToArgb();
@@ -2316,6 +2532,7 @@ namespace Rhino.Display
     /// <param name="screenX">X coordinate (in pixels) of dot center.</param>
     /// <param name="screenY">Y coordinate (in pixels) of dot center.</param>
     /// <param name="text">Text content of dot.</param>
+    /// <since>6.0</since>
     public void DrawDot(float screenX, float screenY, string text)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2328,6 +2545,7 @@ namespace Rhino.Display
     /// <param name="text">Text content of dot.</param>
     /// <param name="dotColor">Dot background color.</param>
     /// <param name="textColor">Dot foreground color.</param>
+    /// <since>5.0</since>
     public void DrawDot(Point3d worldPosition, string text, System.Drawing.Color dotColor, System.Drawing.Color textColor)
     {
       int argb_dot = dotColor.ToArgb();
@@ -2340,6 +2558,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="worldPosition">Location of dot in world coordinates.</param>
     /// <param name="text">Text content of dot.</param>
+    /// <since>5.0</since>
     public void DrawDot(Point3d worldPosition, string text)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2353,6 +2572,7 @@ namespace Rhino.Display
     /// <param name="fillColor"></param>
     /// <param name="textColor"></param>
     /// <param name="borderColor"></param>
+    /// <since>6.0</since>
     public void DrawDot(TextDot dot, System.Drawing.Color fillColor, System.Drawing.Color textColor, System.Drawing.Color borderColor)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2364,6 +2584,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDot5(ptr_this, const_ptr_dot, argb_fill, argb_text, argb_border, cache_handle);
     }
 
+    /// <since>6.0</since>
     public void DrawHatch(Hatch hatch, System.Drawing.Color hatchColor, System.Drawing.Color boundaryColor)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2385,6 +2606,7 @@ namespace Rhino.Display
     /// <param name="linearGradient"></param>
     /// <param name="boundaryThickness"></param>
     /// <param name="boundaryColor"></param>
+    /// <since>7.0</since>
     public void DrawGradientHatch(Hatch hatch, System.Drawing.Color color1, System.Drawing.Color color2, Point3d point1, Point3d point2,
       bool linearGradient, float boundaryThickness, System.Drawing.Color boundaryColor)
     {
@@ -2399,6 +2621,7 @@ namespace Rhino.Display
       GC.KeepAlive(hatch);
     }
 
+    /// <since>7.0</since>
     public void DrawGradientHatch(Hatch hatch, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
       bool linearGradient, float repeat, float boundaryThickness, System.Drawing.Color boundaryColor)
     {
@@ -2421,6 +2644,7 @@ namespace Rhino.Display
       GC.KeepAlive(hatch);
     }
 
+    /// <since>7.0</since>
     public void DrawGradientMesh(Mesh mesh, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
       bool linearGradient, float repeat)
     {
@@ -2442,6 +2666,7 @@ namespace Rhino.Display
       GC.KeepAlive(mesh);
     }
 
+    /// <since>7.0</since>
     public void DrawGradientLines(System.Collections.Generic.IEnumerable<Line> lines, float strokeWidth, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
       bool linearGradient, float repeat)
     {
@@ -2466,6 +2691,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw in.</param>
+    /// <since>5.0</since>
     public void DrawBox(BoundingBox box, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -2478,6 +2704,7 @@ namespace Rhino.Display
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw in.</param>
     /// <param name="thickness">Thickness (in pixels) of box edges.</param>
+    /// <since>5.0</since>
     public void DrawBox(BoundingBox box, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -2488,6 +2715,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw in.</param>
+    /// <since>5.0</since>
     public void DrawBox(Box box, System.Drawing.Color color)
     {
       DrawBox(box, color, 1);
@@ -2498,6 +2726,7 @@ namespace Rhino.Display
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw in.</param>
     /// <param name="thickness">Thickness (in pixels) of box edges.</param>
+    /// <since>5.0</since>
     public void DrawBox(Box box, System.Drawing.Color color, int thickness)
     {
       if (!box.IsValid) { return; }
@@ -2572,33 +2801,36 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Draws corner widgets of a world aligned boundingbox. 
+    /// Draws corner widgets of a world aligned bounding box. 
     /// Widget size will be 5% of the Box diagonal.
     /// </summary>
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawBoxCorners(BoundingBox box, System.Drawing.Color color)
     {
       double diag = box.m_min.DistanceTo(box.m_max);
       DrawBoxCorners(box, color, 0.05 * diag, 1);
     }
     /// <summary>
-    /// Draws corner widgets of a world aligned boundingbox. 
+    /// Draws corner widgets of a world aligned bounding box. 
     /// </summary>
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="size">Size (in model units) of the corner widgets.</param>
+    /// <since>5.0</since>
     public void DrawBoxCorners(BoundingBox box, System.Drawing.Color color, double size)
     {
       DrawBoxCorners(box, color, size, 1);
     }
     /// <summary>
-    /// Draws corner widgets of a world aligned boundingbox. 
+    /// Draws corner widgets of a world aligned bounding box. 
     /// </summary>
     /// <param name="box">Box to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="size">Size (in model units) of the corner widgets.</param>
     /// <param name="thickness">Thickness (in pixels) of the corner widgets.</param>
+    /// <since>5.0</since>
     public void DrawBoxCorners(BoundingBox box, System.Drawing.Color color, double size, int thickness)
     {
       if (!box.IsValid) { return; }
@@ -2705,6 +2937,7 @@ namespace Rhino.Display
     /// <param name="tip">Location of arrow tip point.</param>
     /// <param name="direction">Direction of arrow.</param>
     /// <param name="color">Color of arrow widget.</param>
+    /// <since>5.0</since>
     public void DrawMarker(Point3d tip, Vector3d direction, System.Drawing.Color color)
     {
       DrawMarker(tip, direction, color, 3, 16, 0.0);
@@ -2716,6 +2949,7 @@ namespace Rhino.Display
     /// <param name="direction">Direction of arrow.</param>
     /// <param name="color">Color of arrow widget.</param>
     /// <param name="thickness">Thickness of arrow widget lines.</param>
+    /// <since>5.0</since>
     public void DrawMarker(Point3d tip, Vector3d direction, System.Drawing.Color color, int thickness)
     {
       DrawMarker(tip, direction, color, thickness, 16.0, 0.0);
@@ -2728,6 +2962,7 @@ namespace Rhino.Display
     /// <param name="color">Color of arrow widget.</param>
     /// <param name="thickness">Thickness of arrow widget lines.</param>
     /// <param name="size">Size (in pixels) of the arrow shaft.</param>
+    /// <since>5.0</since>
     public void DrawMarker(Point3d tip, Vector3d direction, System.Drawing.Color color, int thickness, double size)
     {
       DrawMarker(tip, direction, color, thickness, size, 0.0);
@@ -2741,6 +2976,7 @@ namespace Rhino.Display
     /// <param name="thickness">Thickness of arrow widget lines.</param>
     /// <param name="size">Size (in pixels) of the arrow shaft.</param>
     /// <param name="rotation">Rotational angle adjustment (in radians, counter-clockwise of direction.</param>
+    /// <since>5.0</since>
     public void DrawMarker(Point3d tip, Vector3d direction, System.Drawing.Color color, int thickness, double size, double rotation)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2752,6 +2988,7 @@ namespace Rhino.Display
       {
       }
     */
+    /// <since>5.0</since>
     public void DrawConstructionPlane(DocObjects.ConstructionPlane constructionPlane)
     {
       int[] colors = constructionPlane.ArgbColors();
@@ -2781,6 +3018,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_drawstring.cs' lang='cs'/>
     /// <code source='examples\py\ex_drawstring.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point2d screenCoordinate, bool middleJustified)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2795,6 +3033,7 @@ namespace Rhino.Display
     /// <param name="screenCoordinate">definition point in screen coordinates (0,0 is top-left corner)</param>
     /// <param name="middleJustified">if true text is centered around the definition point, otherwise it is lower-left justified.</param>
     /// <param name="height">height in pixels (good default is 12)</param>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point2d screenCoordinate, bool middleJustified, int height)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2810,6 +3049,7 @@ namespace Rhino.Display
     /// <param name="middleJustified">if true text is centered around the definition point, otherwise it is lower-left justified.</param>
     /// <param name="height">height in pixels (good default is 12)</param>
     /// <param name="fontface">font name (good default is "Arial")</param>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point2d screenCoordinate, bool middleJustified, int height, string fontface)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2823,6 +3063,7 @@ namespace Rhino.Display
     /// <param name="color">text color.</param>
     /// <param name="worldCoordinate">definition point in world coordinates.</param>
     /// <param name="middleJustified">if true text is centered around the definition point, otherwise it is lower-left justified.</param>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point3d worldCoordinate, bool middleJustified)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2837,6 +3078,7 @@ namespace Rhino.Display
     /// <param name="worldCoordinate">definition point in world coordinates.</param>
     /// <param name="middleJustified">if true text is centered around the definition point, otherwise it is lower-left justified.</param>
     /// <param name="height">height in pixels (good default is 12)</param>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point3d worldCoordinate, bool middleJustified, int height)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2852,28 +3094,33 @@ namespace Rhino.Display
     /// <param name="middleJustified">If true text is centered around the definition point, otherwise it is lower-left justified.</param>
     /// <param name="height">Height in pixels (good default is 12).</param>
     /// <param name="fontface">Font name (good default is "Arial").</param>
+    /// <since>5.0</since>
     public void Draw2dText(string text, System.Drawing.Color color, Point3d worldCoordinate, bool middleJustified, int height, string fontface)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dText2(ptr_this, text, color.ToArgb(), worldCoordinate, middleJustified, height, fontface);
     }
 
+    /// <since>6.4</since>
     public void Draw3dText(string text, System.Drawing.Color color, Plane textPlane, double height, string fontface, bool bold, bool italic, DocObjects.TextHorizontalAlignment horizontalAlignment, DocObjects.TextVerticalAlignment verticalAlignment)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw3dText(ptr_this, text, color.ToArgb(), ref textPlane, height, fontface, bold, italic, horizontalAlignment, verticalAlignment);
     }
 
+    /// <since>6.0</since>
     public void Draw3dText(string text, System.Drawing.Color color, Plane textPlane, double height, string fontface, bool bold, bool italic)
     {
       Draw3dText(text, color, textPlane, height, fontface, bold, italic, DocObjects.TextHorizontalAlignment.Left, DocObjects.TextVerticalAlignment.Bottom);
     }
 
+    /// <since>5.0</since>
     public void Draw3dText(string text, System.Drawing.Color color, Plane textPlane, double height, string fontface)
     {
       Draw3dText(text, color, textPlane, height, fontface, false, false, DocObjects.TextHorizontalAlignment.Left, DocObjects.TextVerticalAlignment.Bottom);
     }
 
+    /// <since>5.0</since>
     public void Draw3dText(Text3d text, System.Drawing.Color color)
     {
       Draw3dText(text.Text, color, text.TextPlane, text.Height, text.FontFace, text.Bold, text.Italic, text.HorizontalAlignment, text.VerticalAlignment);
@@ -2885,6 +3132,7 @@ namespace Rhino.Display
     /// <param name="text">The string to draw.</param>
     /// <param name="color">Text color.</param>
     /// <param name="textPlane">The plane for the text object.</param>
+    /// <since>5.0</since>
     public void Draw3dText(Text3d text, System.Drawing.Color color, Plane textPlane)
     {
       Draw3dText(text.Text, color, textPlane, text.Height, text.FontFace, text.Bold, text.Italic, text.HorizontalAlignment, text.VerticalAlignment);
@@ -2896,6 +3144,7 @@ namespace Rhino.Display
     /// <param name="text">The string to draw.</param>
     /// <param name="color">Text color.</param>
     /// <param name="textPlaneOrigin">The origin of the plane to draw.</param>
+    /// <since>5.0</since>
     public void Draw3dText(Text3d text, System.Drawing.Color color, Point3d textPlaneOrigin)
     {
       Plane plane = text.TextPlane;
@@ -2903,10 +3152,12 @@ namespace Rhino.Display
       Draw3dText(text.Text, color, plane, text.Height, text.FontFace, text.Bold, text.Italic, text.HorizontalAlignment, text.VerticalAlignment);
     }
 
+    /// <since>6.0</since>
     public void DrawText(TextEntity text, System.Drawing.Color color)
     {
       DrawText(text, color, 1.0);
     }
+    /// <since>6.0</since>
     public void DrawText(TextEntity text, System.Drawing.Color color, double scale)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2914,6 +3165,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_ON_V6_TextObject(ptr_this, const_ptr_text, scale, color.ToArgb());
       GC.KeepAlive(text);
     }
+    /// <since>6.0</since>
     public void DrawText(TextEntity text, System.Drawing.Color color, Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2934,6 +3186,7 @@ namespace Rhino.Display
     /// <param name="height">height in pixels (good default is 12)</param>
     /// <param name="fontFace">font name (good default is "Arial")</param>
     /// <returns>rectangle in the viewport's screen coordinates on success.</returns>
+    /// <since>5.10</since>
     public System.Drawing.Rectangle Measure2dText( string text, Point2d definitionPoint, bool middleJustified, double rotationRadians, int height, string fontFace )
     {
       int left=0, top=0, right=0, bottom=0;
@@ -2944,6 +3197,7 @@ namespace Rhino.Display
       return System.Drawing.Rectangle.Empty;
     }
 
+    /// <since>5.0</since>
     public void DrawObject(DocObjects.RhinoObject rhinoObject)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2961,6 +3215,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_arraybydistance.cs' lang='cs'/>
     /// <code source='examples\py\ex_arraybydistance.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawObject(DocObjects.RhinoObject rhinoObject, Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2968,6 +3223,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawObject2(ptr_this, const_ptr_rhino_object, ref xform);
     }
 
+    /// <since>6.0</since>
     public void DrawAnnotation(AnnotationBase annotation, System.Drawing.Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2975,6 +3231,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawAnnotation(ptr_this, const_ptr_annotation, color.ToArgb());
     }
 
+    /// <since>6.0</since>
     public void DrawAnnotationArrowhead(Arrowhead arrowhead, Transform xform, System.Drawing.Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2990,6 +3247,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="arc">Arc to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawArc(Arc arc, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3001,6 +3259,7 @@ namespace Rhino.Display
     /// <param name="arc">Arc to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of arc.</param>
+    /// <since>5.0</since>
     public void DrawArc(Arc arc, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3016,6 +3275,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_getpointdynamicdraw.cs' lang='cs'/>
     /// <code source='examples\py\ex_getpointdynamicdraw.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void DrawCircle(Circle circle, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3027,6 +3287,7 @@ namespace Rhino.Display
     /// <param name="circle">Circle to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of circle.</param>
+    /// <since>5.0</since>
     public void DrawCircle(Circle circle, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3037,6 +3298,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="sphere">Sphere to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawSphere(Sphere sphere, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3048,6 +3310,7 @@ namespace Rhino.Display
     /// <param name="sphere">Sphere to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of Sphere wires.</param>
+    /// <since>5.0</since>
     public void DrawSphere(Sphere sphere, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3058,6 +3321,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="torus">Torus to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawTorus(Torus torus, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3069,6 +3333,7 @@ namespace Rhino.Display
     /// <param name="torus">Torus to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of torus wires.</param>
+    /// <since>5.0</since>
     public void DrawTorus(Torus torus, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3079,6 +3344,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cylinder">Cylinder to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawCylinder(Cylinder cylinder, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3090,6 +3356,7 @@ namespace Rhino.Display
     /// <param name="cylinder">Cylinder to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of cylinder wires.</param>
+    /// <since>5.0</since>
     public void DrawCylinder(Cylinder cylinder, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3100,6 +3367,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cone">Cone to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawCone(Cone cone, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3111,6 +3379,7 @@ namespace Rhino.Display
     /// <param name="cone">Cone to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of Cone wires.</param>
+    /// <since>5.0</since>
     public void DrawCone(Cone cone, System.Drawing.Color color, int thickness)
     {
       int argb = color.ToArgb();
@@ -3121,6 +3390,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="curve">Curve to draw.</param>
     /// <param name="color">Color to draw with.</param>
+    /// <since>5.0</since>
     public void DrawCurve(Curve curve, System.Drawing.Color color)
     {
       curve.Draw(this, color, 1);
@@ -3131,6 +3401,7 @@ namespace Rhino.Display
     /// <param name="curve">Curve to draw.</param>
     /// <param name="color">Color to draw with.</param>
     /// <param name="thickness">Thickness (in pixels) of curve.</param>
+    /// <since>5.0</since>
     public void DrawCurve(Curve curve, System.Drawing.Color color, int thickness)
     {
       curve.Draw(this, color, thickness);
@@ -3141,6 +3412,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="curve">Base curve for curvature graph.</param>
     /// <param name="color">Color of curvature graph.</param>
+    /// <since>5.0</since>
     public void DrawCurvatureGraph(Curve curve, System.Drawing.Color color)
     {
       int argb = color.ToArgb();
@@ -3153,6 +3425,7 @@ namespace Rhino.Display
     /// <param name="curve">Base curve for curvature graph.</param>
     /// <param name="color">Color of curvature graph.</param>
     /// <param name="hairScale">100 = true length, &gt; 100 magnified, &lt; 100 shortened.</param>
+    /// <since>5.0</since>
     public void DrawCurvatureGraph(Curve curve, System.Drawing.Color color, int hairScale)
     {
       int argb = color.ToArgb();
@@ -3167,6 +3440,7 @@ namespace Rhino.Display
     /// <param name="hairScale">100 = true length, &gt; 100 magnified, &lt; 100 shortened.</param>
     /// <param name="hairDensity">&gt;= 0 larger numbers = more hairs (good default is 1).</param>
     /// <param name="sampleDensity">Between 1 and 10. Higher numbers draw smoother outer curves. (good default is 2).</param>
+    /// <since>5.0</since>
     public void DrawCurvatureGraph(Curve curve, System.Drawing.Color color, int hairScale, int hairDensity, int sampleDensity)
     {
       int argb = color.ToArgb();
@@ -3180,6 +3454,7 @@ namespace Rhino.Display
     /// <param name="surface">Surface to draw.</param>
     /// <param name="wireColor">Color to draw with.</param>
     /// <param name="wireDensity">Thickness (in pixels) or wires to draw.</param>
+    /// <since>5.0</since>
     public void DrawSurface(Surface surface, System.Drawing.Color wireColor, int wireDensity)
     {
       surface.Draw(this, wireColor, wireDensity);
@@ -3187,32 +3462,38 @@ namespace Rhino.Display
 
     #endregion
 
+    /// <since>5.0</since>
     public void DrawSprite(DisplayBitmap bitmap, Point3d worldLocation, float size, bool sizeInWorldSpace)
     {
       DrawSprite(bitmap, worldLocation, size, System.Drawing.Color.White, sizeInWorldSpace);
     }
 
+    /// <since>5.0</since>
     public void DrawSprite(DisplayBitmap bitmap, Point3d worldLocation, float size, System.Drawing.Color blendColor, bool sizeInWorldSpace)
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap(m_ptr, ptr_bitmap, worldLocation, size, blendColor.ToArgb(), sizeInWorldSpace);
     }
 
+    /// <since>5.0</since>
     public void DrawSprite(DisplayBitmap bitmap, Point2d screenLocation, float size)
     {
       DrawSprite(bitmap, screenLocation, size, System.Drawing.Color.White);
     }
+    /// <since>5.0</since>
     public void DrawSprite(DisplayBitmap bitmap, Point2d screenLocation, float size, System.Drawing.Color blendColor)
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap2(m_ptr, ptr_bitmap, screenLocation, size, blendColor.ToArgb());
     }
 
+    /// <since>5.0</since>
     public void DrawSprites(DisplayBitmap bitmap, DisplayBitmapDrawList items, float size, bool sizeInWorldSpace)
     {
       DrawSprites(bitmap, items, size, Vector3d.Zero, sizeInWorldSpace);
     }
 
+    /// <since>5.0</since>
     public void DrawSprites(DisplayBitmap bitmap, DisplayBitmapDrawList items, float size, Vector3d translation, bool sizeInWorldSpace)
     {
       var camera_direction = new Vector3d();
@@ -3222,12 +3503,14 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmaps(m_ptr, ptr_bitmap, items.m_points.Length, items.m_points, items.m_colors_argb.Length, items.m_colors_argb, indices, size, translation, sizeInWorldSpace);
     }
 
+    /// <since>5.0</since>
     public void DrawParticles(ParticleSystem particles)
     {
       particles.UpdateDrawCache();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawParticles1(m_ptr, IntPtr.Zero, particles.m_points.Length, particles.m_points, particles.m_sizes, particles.m_colors_argb, particles.DisplaySizesInWorldUnits);
     }
 
+    /// <since>5.0</since>
     public void DrawParticles(ParticleSystem particles, DisplayBitmap bitmap)
     {
       particles.UpdateDrawCache();
@@ -3246,6 +3529,7 @@ namespace Rhino.Display
 
     }
 
+    /// <since>5.0</since>
     public void DrawParticles(ParticleSystem particles, DisplayBitmap[] bitmaps)
     {
       particles.UpdateDrawCache();
@@ -3256,11 +3540,13 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawParticles2(m_ptr, ids.Length, ids, particles.m_points.Length, particles.m_points, particles.m_sizes, particles.m_colors_argb, particles.m_display_bitmap_ids, particles.DisplaySizesInWorldUnits);
     }
 
+    /// <since>5.10</since>
     public void Draw2dRectangle(System.Drawing.Rectangle rectangle, System.Drawing.Color strokeColor, int thickness, System.Drawing.Color fillColor)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dRectangle(m_ptr, rectangle.Left, rectangle.Top, rectangle.Width, rectangle.Height, strokeColor.ToArgb(), thickness, fillColor.ToArgb());
     }
 
+    /// <since>6.0</since>
     public void DrawRoundedRectangle(System.Drawing.PointF center, float pixelWidth, float pixelHeight, float cornerRadius, System.Drawing.Color strokeColor,
       float strokeWidth, System.Drawing.Color fillColor)
     {
@@ -3269,11 +3555,13 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawRoundedRectangle(m_ptr, center.X, center.Y, pixelWidth, pixelHeight, cornerRadius, stroke_argb, strokeWidth, fill_argb);
     }
 
+    /// <since>6.0</since>
     public void Draw2dLine(System.Drawing.Point from, System.Drawing.Point to, System.Drawing.Color color, float thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dLine(m_ptr, from.X, from.Y, to.X, to.Y, color.ToArgb(), thickness);
     }
 
+    /// <since>6.0</since>
     public void Draw2dLine(System.Drawing.PointF from, System.Drawing.PointF to, System.Drawing.Color color, float thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dLine2(m_ptr, from.X, from.Y, to.X, to.Y, color.ToArgb(), thickness);
@@ -3293,6 +3581,7 @@ namespace Rhino.Display
     }
     internal DrawEventArgs() { }
 
+    /// <since>5.0</since>
     public RhinoViewport Viewport
     {
       get
@@ -3307,12 +3596,14 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>5.0</since>
     public DisplayPipeline Display
     {
       get { return m_dp ?? (m_dp=new DisplayPipeline(m_ptr_display_pipeline)); }
     }
 
     RhinoDoc m_doc;
+    /// <since>5.0</since>
     public RhinoDoc RhinoDoc
     {
       get
@@ -3347,11 +3638,13 @@ namespace Rhino.Display
       : base(pDisplayPipeline, pDisplayConduit)
     {
     }
+    /// <since>5.0</since>
     public bool WorldAxesDrawn
     {
       get { return GetChannelAttributeBool(idxWorldAxesDrawn); }
       set { SetChannelAttributeBool(idxWorldAxesDrawn, value); }
     }
+    /// <since>5.0</since>
     public bool DrawWorldAxes
     {
       get { return GetChannelAttributeBool(idxDrawWorldAxes); }
@@ -3367,6 +3660,7 @@ namespace Rhino.Display
     }
 
     Rhino.DocObjects.RhinoObject m_rhino_object;
+    /// <since>5.3</since>
     public Rhino.DocObjects.RhinoObject RhinoObject
     {
       get
@@ -3384,6 +3678,7 @@ namespace Rhino.Display
     /// Gets the rhino object runtime serial number.
     /// </summary>
     /// <value>The rhino object serial number.</value>
+    /// <since>6.14</since>
     [CLSCompliant(false)]
     public uint RhinoObjectSerialNumber
     {
@@ -3395,6 +3690,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>5.3</since>
     public bool CullObject
     {
       get { return !GetChannelAttributeBool(idxDrawObject); }
@@ -3411,6 +3707,7 @@ namespace Rhino.Display
     }
 
     internal Rhino.DocObjects.RhinoObject m_rhino_object;
+    /// <since>5.0</since>
     public Rhino.DocObjects.RhinoObject RhinoObject
     {
       get
@@ -3424,6 +3721,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>5.0</since>
     public bool DrawObject
     {
       get { return GetChannelAttributeBool(idxDrawObject); }
@@ -3444,6 +3742,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets the current bounding box.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get { return m_bbox; }
@@ -3454,6 +3753,7 @@ namespace Rhino.Display
     /// dynamic objects in "box" are drawn.
     /// </summary>
     /// <param name="box">The box to unite.</param>
+    /// <since>5.0</since>
     public void IncludeBoundingBox(BoundingBox box)
     {
       m_bbox.Union(box);
@@ -3471,16 +3771,19 @@ namespace Rhino.Display
       m_pConduit = pConduit;
     }
 
+    /// <since>6.18</since>
     public void SetFill(System.Drawing.Color color)
     {
       SetFill(color, color, color, color);
     }
 
+    /// <since>6.18</since>
     public void SetFill(System.Drawing.Color top, System.Drawing.Color bottom)
     {
       SetFill(top, bottom, top, bottom);
     }
 
+    /// <since>6.18</since>
     public void SetFill(System.Drawing.Color topLeft, System.Drawing.Color bottomLeft, System.Drawing.Color topRight, System.Drawing.Color bottomRight)
     {
       int tl = topLeft.ToArgb();
@@ -3504,6 +3807,7 @@ namespace Rhino.Display
     }
     private DisplayModeChangedEventArgs() { }
 
+    /// <since>6.18</since>
     public RhinoViewport Viewport
     {
       get
@@ -3519,6 +3823,7 @@ namespace Rhino.Display
     }
 
     RhinoDoc m_doc;
+    /// <since>6.18</since>
     public RhinoDoc RhinoDoc
     {
       get
@@ -3532,17 +3837,20 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.18</since>
     public Guid OldDisplayModeId { get; }
+    /// <since>6.18</since>
     public Guid ChangedDisplayModeId { get; }
   }
 
   /// <summary>
-  /// Provides functionality for getting the zbuffer values from a viewport
+  /// Provides functionality for getting the z-buffer values from a viewport
   /// and a given display mode
   /// </summary>
   public class ZBufferCapture : IDisposable
   {
     IntPtr m_ptr; //CRhinoZBuffer*
+    /// <since>5.3</since>
     public ZBufferCapture(RhinoViewport viewport)
     {
       IntPtr pViewport = IntPtr.Zero;
@@ -3559,6 +3867,7 @@ namespace Rhino.Display
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.3</since>
     public void Dispose()
     {
       Dispose(true);
@@ -3590,6 +3899,7 @@ namespace Rhino.Display
       return m_ptr;
     }
 
+    /// <since>5.3</since>
     public void SetDisplayMode(Guid modeId)
     {
       IntPtr pThis = NonConstPointer(true);
@@ -3610,34 +3920,46 @@ namespace Rhino.Display
     const int IDX_SHOW_ANNOTATIONS = 5;
     const int IDX_SHOW_LIGHTS = 6;
 
+    /// <since>5.3</since>
     public void ShowIsocurves(bool on) { SetBool(IDX_SHOW_ISOCURVES, on); }
+    /// <since>5.3</since>
     public void ShowMeshWires(bool on) { SetBool(IDX_SHOW_MESH_WIRES, on); }
+    /// <since>5.3</since>
     public void ShowCurves(bool on) { SetBool(IDX_SHOW_CURVES, on); }
+    /// <since>5.3</since>
     public void ShowPoints(bool on) { SetBool(IDX_SHOW_POINTS, on); }
+    /// <since>5.3</since>
     public void ShowText(bool on) { SetBool(IDX_SHOW_TEXT, on); }
+    /// <since>5.3</since>
     public void ShowAnnotations(bool on) { SetBool(IDX_SHOW_ANNOTATIONS, on); }
+    /// <since>5.3</since>
     public void ShowLights(bool on) { SetBool(IDX_SHOW_LIGHTS, on); }
 
+    /// <since>5.3</since>
     public int HitCount()
     {
       IntPtr pThis = NonConstPointer(false);
       return UnsafeNativeMethods.CRhinoZBuffer_HitCount(pThis);
     }
+    /// <since>5.3</since>
     public float MaxZ()
     {
       IntPtr pThis = NonConstPointer(false);
       return UnsafeNativeMethods.CRhinoZBuffer_MaxZ(pThis);
     }
+    /// <since>5.3</since>
     public float MinZ()
     {
       IntPtr pThis = NonConstPointer(false);
       return UnsafeNativeMethods.CRhinoZBuffer_MinZ(pThis);
     }
+    /// <since>5.3</since>
     public float ZValueAt(int x, int y)
     {
       IntPtr pThis = NonConstPointer(false);
       return UnsafeNativeMethods.CRhinoZBuffer_ZValue(pThis, x, y);
     }
+    /// <since>5.3</since>
     public Point3d WorldPointAt(int x, int y)
     {
       IntPtr pThis = NonConstPointer(false);
@@ -3647,6 +3969,7 @@ namespace Rhino.Display
     }
 
     System.Drawing.Bitmap m_bitmap;
+    /// <since>5.3</since>
     public System.Drawing.Bitmap GrayscaleDib()
     {
       if (m_bitmap == null)

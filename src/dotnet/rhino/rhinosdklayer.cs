@@ -24,6 +24,7 @@ namespace Rhino.DocObjects
     #endregion
 
     #region constructors
+    /// <since>5.0</since>
     public Layer() : base()
     {
       // Creates a new non-document control ON_Layer
@@ -79,12 +80,13 @@ namespace Rhino.DocObjects
     /// <para>color = Rhino.ApplicationSettings.AppearanceSettings.DefaultLayerColor</para>
     /// <para>line style = Rhino.ApplicationSettings.AppearanceSettings.DefaultLayerLineStyle</para>
     /// <para>material index = -1</para>
-    /// <para>iges level = -1</para>
+    /// <para>IGES level = -1</para>
     /// <para>mode = NormalLayer</para>
     /// <para>name = empty</para>
     /// <para>layer index = 0 (ignored by AddLayer)</para>
     /// </summary>
     /// <returns>A new layer instance.</returns>
+    /// <since>5.0</since>
     public static Layer GetDefaultLayerProperties()
     {
       Layer layer = new Layer();
@@ -100,6 +102,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_locklayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_locklayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("No longer needed. Layer changes in the document are now immediate")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool CommitChanges() { return false; }
@@ -183,6 +186,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_renamelayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_renamelayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public override string Name
     {
       get
@@ -204,6 +208,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_locklayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_locklayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string FullPath
     {
       get
@@ -285,6 +290,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the index of this layer.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the Index property.")]
     public int LayerIndex
     {
@@ -296,6 +302,7 @@ namespace Rhino.DocObjects
     /// Gets or sets the ID of this layer object. 
     /// You typically do not need to assign a custom ID.
     /// </summary>
+    /// <since>5.0</since>
     public override Guid Id
     {
       get
@@ -312,7 +319,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets the ID of the parent layer. Layers can be origanized in a hierarchical structure, 
+    /// Gets the ID of the parent layer. Layers can be organized in a hierarchical structure, 
     /// in which case this returns the parent layer ID. If the layer has no parent, 
     /// Guid.Empty will be returned.
     /// </summary>
@@ -321,6 +328,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_addchildlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addchildlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid ParentLayerId
     {
       get
@@ -339,6 +347,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the IGES level for this layer.
     /// </summary>
+    /// <since>5.0</since>
     public int IgesLevel
     {
       get { return GetInt(UnsafeNativeMethods.LayerInt.IgesLevel); }
@@ -366,6 +375,7 @@ namespace Rhino.DocObjects
     /// If Guid.Empty, then checks for any viewport settings.
     /// </param>
     /// <returns>True if the layer has per viewport settings, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool HasPerViewportSettings(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -379,6 +389,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the settings for that viewport are deleted.
     /// If Guid.Empty, then all per viewport settings are deleted.
     /// </param>
+    /// <since>6.0</since>
     public void DeletePerViewportSettings(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -389,6 +400,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the display color for this layer.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color Color
     {
       get
@@ -411,6 +423,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">If not Guid.Empty, then the setting applies only to the viewport with the specified id.</param>
     /// <returns>The display color.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Color PerViewportColor(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -423,6 +436,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">If not Guid.Empty, then the setting applies only to the viewport with the specified id.</param>
     /// <param name="color">The display color.</param>
+    /// <since>6.0</since>
     public void SetPerViewportColor(Guid viewportId, System.Drawing.Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -437,6 +451,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the setting for this viewport will be deleted.
     /// If Guid.Empty, the all per viewport layer color settings will be removed.
     /// </param>
+    /// <since>6.0</since>
     public void DeletePerViewportColor(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -447,6 +462,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the plot color for this layer.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color PlotColor
     {
       get
@@ -469,6 +485,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">If not Guid.Empty, then the setting applies only to the viewport with the specified id.</param>
     /// <returns>The plot color.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Color PerViewportPlotColor(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -481,6 +498,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">If not Guid.Empty, then the setting applies only to the viewport with the specified id.</param>
     /// <param name="color">The plot color.</param>
+    /// <since>6.0</since>
     public void SetPerViewportPlotColor(Guid viewportId, System.Drawing.Color color)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -495,6 +513,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the setting for this viewport will be deleted.
     /// If Guid.Empty, the all per viewport layer color settings will be removed.
     /// </param>
+    /// <since>6.0</since>
     public void DeletePerViewportPlotColor(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -507,6 +526,7 @@ namespace Rhino.DocObjects
     /// A weight of 0.0 indicates the "default" pen weight should be used.
     /// A weight of -1.0 indicates the layer should not be printed.
     /// </summary>
+    /// <since>5.0</since>
     public double PlotWeight
     {
       get
@@ -527,6 +547,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">If not Guid.Empty, then the setting applies only to the viewport with the specified id.</param>
     /// <returns>The plot color.</returns>
+    /// <since>6.0</since>
     public double PerViewportPlotWeight(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -542,6 +563,7 @@ namespace Rhino.DocObjects
     /// A weight of  0.0 indicates the "default" pen weight should be used. 
     /// A weight of -1.0 indicates the layer should not be printed.
     /// </param>
+    /// <since>6.0</since>
     public void SetPerViewportPlotWeight(Guid viewportId, double plotWeight)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -556,6 +578,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the setting for this viewport will be deleted.
     /// If Guid.Empty, the all per viewport layer color settings will be removed.
     /// </param>
+    /// <since>6.0</since>
     public void DeletePerViewportPlotWeight(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -566,6 +589,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the line-type index for this layer.
     /// </summary>
+    /// <since>5.0</since>
     public int LinetypeIndex
     {
       get { return GetInt(UnsafeNativeMethods.LayerInt.LinetypeIndex); }
@@ -579,6 +603,7 @@ namespace Rhino.DocObjects
     /// and the material created by the default Material constructor 
     /// should be used.
     /// </summary>
+    /// <since>5.0</since>
     public int RenderMaterialIndex
     {
       get { return GetInt(UnsafeNativeMethods.LayerInt.RenderMaterialIndex); }
@@ -588,6 +613,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the visibility of this layer.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsVisible
     {
       get { return GetBool(UnsafeNativeMethods.LayerBool.IsVisible); }
@@ -602,6 +628,7 @@ namespace Rhino.DocObjects
     /// If Guid.Empty, the IsVisible property is returned.
     /// </param>
     /// <returns>Returns true if objects on layer are visible.</returns>
+    /// <since>6.0</since>
     public bool PerViewportIsVisible(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -616,6 +643,7 @@ namespace Rhino.DocObjects
     /// If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.
     /// </param>
     /// <param name="visible">true to make layer visible, false to make layer invisible.</param>
+    /// <since>6.0</since>
     public void SetPerViewportVisible(Guid viewportId, bool visible)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -630,6 +658,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the setting for this viewport will be deleted.
     /// If Guid.Empty, the all per viewport visibility settings will be removed.
     /// </param>
+    /// <since>6.0</since>
     public void DeletePerViewportVisible(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -638,7 +667,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets the per layer persistent visibility. The persistent visbility setting is used for layers whose visibilty can be changed by a parent layer. 
+    /// Gets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. 
     /// In this case, when a parent layer is turned off, then child layers are also turned off.
     /// The persistent visibility setting determines what happens when the parent is turned on again.
     /// </summary>
@@ -649,6 +678,7 @@ namespace Rhino.DocObjects
     /// Returns false if this layer's visibility in the specified viewport is controlled by a parent object and the parent layer is turned on(after being off),
     /// then this layer will continue to be off in the specified viewport.
     /// </returns>
+    /// <since>6.0</since>
     public bool PerViewportPersistentVisibility(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -656,7 +686,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Sets the per layer persistent visibility. The persistent visbility setting is used for layers whose visibilty can be changed by a parent layer. 
+    /// Sets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. 
     /// In this case, when a parent layer is turned off, then child layers are also turned off.
     /// The persistent visibility setting determines what happens when the parent is turned on again.
     /// </summary>
@@ -670,6 +700,7 @@ namespace Rhino.DocObjects
     /// If false, this layer's visibility in the specified viewport is controlled by a parent object and the parent layer is turned on (after being off),
     /// then this layer will continue to be off in the specified viewport.
     /// </param>
+    /// <since>6.0</since>
     public void SetPerViewportPersistentVisibility(Guid viewportId, bool persistentVisibility)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -684,6 +715,7 @@ namespace Rhino.DocObjects
     /// If not Guid.Empty, then the setting for this viewport will be deleted.
     /// If Guid.Empty, the all per viewport visibility settings will be removed.
     /// </param>
+    /// <since>6.0</since>
     public void UnsetPerViewportPersistentVisibility(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -699,6 +731,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_locklayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_locklayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsLocked
     {
       get { return GetBool(UnsafeNativeMethods.LayerBool.IsLocked); }
@@ -708,6 +741,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.Layer"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get { return ModelComponentType.Layer; }
@@ -716,6 +750,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the status of the layer.
     /// </summary>
+    /// <since>6.0</since>
     public override ComponentStatus ComponentStatus
     {
       get
@@ -730,7 +765,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// The persistent visbility setting is used for layers whose visibilty can
+    /// The persistent viability setting is used for layers whose visibility can
     /// be changed by a "parent" object. A common case is when a layer is a
     /// child layer (ParentId is not nil). In this case, when a parent layer is
     /// turned off, then child layers are also turned off. The persistent
@@ -745,9 +780,10 @@ namespace Rhino.DocObjects
     /// object and the parent layer is turned on (after being off), then
     /// this layer will continue to be off.
     /// 
-    /// When the persistent visbility is not explicitly set, this
+    /// When the persistent viability is not explicitly set, this
     /// property returns the current value of IsVisible
     /// </remarks>
+    /// <since>5.5</since>
     public bool GetPersistentVisibility()
     {
       return GetBool(UnsafeNativeMethods.LayerBool.PersistentVisibility);
@@ -757,6 +793,7 @@ namespace Rhino.DocObjects
     /// Set the persistent visibility setting for this layer
     /// </summary>
     /// <param name="persistentVisibility"></param>
+    /// <since>5.5</since>
     public void SetPersistentVisibility(bool persistentVisibility)
     {
       SetBool(UnsafeNativeMethods.LayerBool.PersistentVisibility, persistentVisibility);
@@ -765,6 +802,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Remove any explicit persistent visibility setting from this layer
     /// </summary>
+    /// <since>5.5</since>
     public void UnsetPersistentVisibility()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -780,6 +818,7 @@ namespace Rhino.DocObjects
     /// determines what happens when the parent is unlocked again.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.5</since>
     public bool GetPersistentLocking()
     {
       return GetBool(UnsafeNativeMethods.LayerBool.PersistentLocking);
@@ -789,14 +828,16 @@ namespace Rhino.DocObjects
     /// Set the persistent locking setting for this layer
     /// </summary>
     /// <param name="persistentLocking"></param>
+    /// <since>5.5</since>
     public void SetPersistentLocking(bool persistentLocking)
     {
       SetBool(UnsafeNativeMethods.LayerBool.PersistentLocking, persistentLocking);
     }
 
     /// <summary>
-    /// Remove any explicity persistent locking settings from this layer
+    /// Remove any explicitly persistent locking settings from this layer
     /// </summary>
+    /// <since>5.5</since>
     public void UnsetPersistentLocking()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -807,6 +848,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value indicating whether this layer is expanded in the Rhino Layer dialog.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsExpanded
     {
       get { return GetBool(UnsafeNativeMethods.LayerBool.IsExpanded); }
@@ -817,6 +859,7 @@ namespace Rhino.DocObjects
     /// Gets a value indicating whether this layer has been deleted and is 
     /// currently in the Undo buffer.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeleted
     {
       get
@@ -836,6 +879,7 @@ namespace Rhino.DocObjects
     /// Gets a value indicting whether this layer is a referenced layer. 
     /// Referenced layers are part of referenced documents.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsReference
     {
       get
@@ -859,6 +903,7 @@ namespace Rhino.DocObjects
     /// been assigned  and the material created by the default Material
     /// constructor or the <see cref="RenderMaterialIndex"/> should be used.
     /// </summary>
+    /// <since>5.7</since>
     public RenderMaterial RenderMaterial
     {
       get
@@ -897,6 +942,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Runtime index used to sort layers in layer dialog.
     /// </summary>
+    /// <since>5.0</since>
     public int SortIndex
     {
       get
@@ -940,6 +986,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Sets layer to default settings.
     /// </summary>
+    /// <since>5.0</since>
     public void Default()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -953,6 +1000,7 @@ namespace Rhino.DocObjects
     /// Copy typical attributes from another layer
     /// </summary>
     /// <param name="otherLayer"></param>
+    /// <since>6.0</since>
     public void CopyAttributesFrom(Layer otherLayer)
     {
       IntPtr const_ptr_other = otherLayer.ConstPointer();
@@ -971,6 +1019,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static bool IsValidName(string name)
     {
       return UnsafeNativeMethods.RHC_IsValidName(name);
@@ -980,6 +1029,7 @@ namespace Rhino.DocObjects
     /// The string "::" (colon,colon) is used to
     /// separate parent and child layer names.
     /// </summary>
+    /// <since>6.0</since>
     public static string PathSeparator
     {
       get { return "::"; }
@@ -992,6 +1042,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// leaf name or String.Empty if fullPath does not contain a leaf
     /// </returns>
+    /// <since>6.0</since>
     public static string GetLeafName(string fullPath)
     {
       using(var s = new StringWrapper())
@@ -1011,6 +1062,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// leaf name or String.Empty if fullPath does not contain a leaf
     /// </returns>
+    /// <since>6.0</since>
     public static string GetLeafName(Layer layer)
     {
       return GetLeafName(layer.FullPath);
@@ -1023,6 +1075,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// parent name or String.Empty
     /// </returns>
+    /// <since>6.0</since>
     public static string GetParentName(string fullPath)
     {
       using (var s = new StringWrapper())
@@ -1042,37 +1095,44 @@ namespace Rhino.DocObjects
     /// <returns>
     /// parent name or String.Empty
     /// </returns>
+    /// <since>6.0</since>
     public static string GetParentName(Layer layer)
     {
       return GetParentName(layer.FullPath);
     }
 
+    /// <since>5.0</since>
     public bool IsChildOf(int layerIndex)
     {
       int index = Index;
       int rc = UnsafeNativeMethods.CRhinoLayerNode_IsChildOrParent(m_doc.RuntimeSerialNumber, index, layerIndex, true);
       return 1 == rc;
     }
+    /// <since>5.0</since>
     public bool IsChildOf(Layer otherLayer)
     {
       return IsChildOf(otherLayer.Index);
     }
+    /// <since>6.0</since>
     public bool IsChildOf(Guid otherlayerId)
     {
       var layer = m_doc.Layers.Find(otherlayerId, true, -1);
       return IsChildOf(layer);
     }
 
+    /// <since>5.0</since>
     public bool IsParentOf(int layerIndex)
     {
       int index = Index;
       int rc = UnsafeNativeMethods.CRhinoLayerNode_IsChildOrParent(m_doc.RuntimeSerialNumber, index, layerIndex, false);
       return 1 == rc;
     }
+    /// <since>5.0</since>
     public bool IsParentOf(Layer otherLayer)
     {
       return IsParentOf(otherLayer.Index);
     }
+    /// <since>6.0</since>
     public bool IsParentOf(Guid otherLayer)
     {
       var layer = m_doc.Layers.Find(otherLayer, true, -1);
@@ -1083,6 +1143,7 @@ namespace Rhino.DocObjects
     /// Gets immediate children of this layer. Note that child layers may have their own children.
     /// </summary>
     /// <returns>Array of child layers. null if this layer does not have any children.</returns>
+    /// <since>5.0</since>
     public Layer[] GetChildren()
     {
       SimpleArrayInt child_indices = new SimpleArrayInt();
@@ -1112,6 +1173,7 @@ namespace Rhino.DocObjects
     /// <param name="key">id used to retrieve this string.</param>
     /// <param name="value">string associated with key.</param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SetUserString(string key, string value)
     {
       var rc = _SetUserString(key, value);
@@ -1123,6 +1185,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="key">id used to retrieve the string.</param>
     /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>5.0</since>
     public string GetUserString(string key)
     {
       return _GetUserString(key);
@@ -1131,6 +1194,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the amount of user strings.
     /// </summary>
+    /// <since>5.0</since>
     public int UserStringCount
     {
       get
@@ -1143,11 +1207,13 @@ namespace Rhino.DocObjects
     /// Gets a copy of all (user key string, user value string) pairs attached to this geometry.
     /// </summary>
     /// <returns>A new collection.</returns>
+    /// <since>5.0</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings()
     {
       return _GetUserStrings();
     }
 
+    /// <since>6.0</since>
     public bool Equals(Layer other)
     {
       if (other == null) return false;
@@ -1162,12 +1228,14 @@ namespace Rhino.DocObjects
       return Equals(obj as Layer);
     } 
 
+    /// <since>6.0</since>
     public static bool operator ==(Layer left, Layer right)
     {
       if ((object)left == null) return (object)right == null;
       return left.Equals(right);
     }
 
+    /// <since>6.0</since>
     public static bool operator !=(Layer left, Layer right)
     {
       return !(left == right);
@@ -1213,28 +1281,33 @@ namespace Rhino.DocObjects.Tables
     }
 
     RhinoDoc m_doc;
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
     }
 
+    /// <since>5.0</since>
     public LayerTableEventType EventType
     {
       get { return m_event_type; }
     }
 
+    /// <since>5.0</since>
     public int LayerIndex
     {
       get { return m_layer_index; }
     }
 
     Layer m_new_layer;
+    /// <since>5.0</since>
     public Layer NewState
     {
       get { return m_new_layer ?? (m_new_layer = new Layer(LayerIndex, Document)); }
     }
 
     Layer m_old_layer;
+    /// <since>5.0</since>
     public Layer OldState
     {
       get
@@ -1257,6 +1330,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this table.</summary>
+    /// <since>5.0</since>
     public new RhinoDoc Document
     {
       get { return m_doc; }
@@ -1265,6 +1339,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns number of layers in the layer table, including deleted layers.
     /// </summary>
+    /// <since>5.0</since>
     public override int Count
     {
       get
@@ -1276,6 +1351,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns number of layers in the layer table, excluding deleted layers.
     /// </summary>
+    /// <since>5.0</since>
     public int ActiveCount
     {
       get
@@ -1291,7 +1367,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="index">zero based array index.</param>
     /// <returns>
-    /// Refererence to the layer.  If layer_index is out of range, the current
+    /// Reference to the layer.  If layer_index is out of range, the current
     /// layer is returned. Note that this reference may become invalid after
     /// AddLayer() is called.
     /// </returns>
@@ -1308,13 +1384,14 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// At all times, there is a "current" layer.  Unless otherwise specified, new objects
     /// are assigned to the current layer. The current layer is never locked, hidden, or deleted.
-    /// Resturns: Zero based layer table index of the current layer.
+    /// Returns: Zero based layer table index of the current layer.
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_moveobjectstocurrentlayer.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_moveobjectstocurrentlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_moveobjectstocurrentlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int CurrentLayerIndex
     {
       get
@@ -1335,6 +1412,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, then no warning message box pops up if the current layer request can't be satisfied.
     /// </param>
     /// <returns>true if current layer index successfully set.</returns>
+    /// <since>5.0</since>
     public bool SetCurrentLayerIndex(int layerIndex, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_SetCurrentLayerIndex(m_doc.RuntimeSerialNumber, layerIndex, quiet);
@@ -1353,6 +1431,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_sellayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_sellayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Layer CurrentLayer
     {
       get
@@ -1361,6 +1440,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -1385,6 +1465,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(string layerName, bool ignoreDeletedLayers)
@@ -1393,6 +1474,7 @@ namespace Rhino.DocObjects.Tables
       return found == null ? -1 : found.Index;
     }
 
+    /// <since>5.0</since>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int FindNext(int index, string layerName, bool ignoreDeletedLayers)
@@ -1407,12 +1489,14 @@ namespace Rhino.DocObjects.Tables
     /// <param name="index">Do not use.</param>
     /// <param name="layerName">Do not use.</param>
     /// <returns>Do not use.</returns>
+    /// <since>6.0</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Layer FindNext(int index, string layerName)
     {
       return FindName(layerName, index);
     }
 
+    /// <since>5.0</since>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int FindByFullPath(string layerPath, bool ignoreDeletedLayers)
@@ -1428,6 +1512,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="notFoundReturnValue">Should be -1 to get the index of the OpenNURBS default layer,
     /// or <see cref="RhinoMath.UnsetIntIndex">UnsetIntIndex</see> to get an always-out-of-bound value.</param>
     /// <returns>The index of the found layer, or notFoundReturnValue.</returns>
+    /// <since>6.0</since>
     public int FindByFullPath(string layerPath, int notFoundReturnValue)
     {
       if (string.IsNullOrEmpty(layerPath))
@@ -1443,6 +1528,7 @@ namespace Rhino.DocObjects.Tables
     /// >=0 index of the layer with the given name
     /// -1  no layer has the given name.
     /// </returns>
+    /// <since>6.0</since>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid parentId, string layerName, bool ignoreDeletedLayers)
@@ -1456,6 +1542,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="notFoundReturnValue">Should be -1 to get the index of the OpenNURBS default layer,
     /// or <see cref="RhinoMath.UnsetIntIndex">UnsetIntIndex</see> to get an always-out-of-bound value.</param>
     /// <returns>The index of the found layer, or notFoundReturnValue.</returns>
+    /// <since>6.0</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid parentId, string layerName, int notFoundReturnValue)
     {
@@ -1469,6 +1556,7 @@ namespace Rhino.DocObjects.Tables
     /// >=0 index of the layer with the given name
     /// -1  no layer has the given name.
     /// </returns>
+    /// <since>5.0</since>
     [Obsolete("notFoundReturnValue should be specified. Add a third argument, its previous value was -1 but consider RhinoMath.UnsetIntIndex.")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid layerId, bool ignoreDeletedLayers)
@@ -1482,6 +1570,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="notFoundReturnValue">Should be -1 to get the index of the OpenNURBS default layer,
     /// or <see cref="RhinoMath.UnsetIntIndex">UnsetIntIndex</see> to get an always-out-of-bound value.</param>
     /// <returns>The index of the found layer, or notFoundReturnValue.</returns>
+    /// <since>6.0</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid layerId, bool ignoreDeletedLayers, int notFoundReturnValue)
     {
@@ -1503,6 +1592,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public Layer FindName(string layerName)
     {
       return FindName(layerName, 0);
@@ -1516,6 +1606,7 @@ namespace Rhino.DocObjects.Tables
     /// This is the first index that will be tested.</param>
     /// <param name="layerName">The layer to search for.</param>
     /// <returns>A layer, or null.</returns>
+    /// <since>6.0</since>
     public Layer FindName(string layerName, int startIndex)
     {
       if (string.IsNullOrEmpty(layerName))
@@ -1532,17 +1623,19 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="nameHash">The name hash of the Layer to be searched.</param>
     /// <returns>An Layer, or null on error.</returns>
+    /// <since>6.0</since>
     public Layer FindNameHash(NameHash nameHash)
     {
       return __FindNameHashInternal(nameHash);
     }
 
     /// <summary>
-    /// Retrieves a Layer object based on Index. This seach type of search is discouraged.
+    /// Retrieves a Layer object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A Layer object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public Layer FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -1564,6 +1657,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addchildlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addchildlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(Layer layer)
     {
       if (null == layer)
@@ -1572,6 +1666,7 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, false);
     }
 
+    /// <since>5.0</since>
     void ICollection<Layer>.Add(Layer item)
     {
       if (Add(item) < 0) throw new NotSupportedException("Could not add item.");
@@ -1591,6 +1686,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(string layerName, System.Drawing.Color layerColor)
     {
       if (string.IsNullOrEmpty(layerName)) { return -1; }
@@ -1619,6 +1715,7 @@ namespace Rhino.DocObjects.Tables
     /// >=0 index of new layer
     /// -1  layer not added because a layer with that name already exists.
     /// </returns>
+    /// <since>5.0</since>
     public int AddReferenceLayer(Layer layer)
     {
       if (null == layer)
@@ -1631,6 +1728,7 @@ namespace Rhino.DocObjects.Tables
     /// Adds a new layer with default definition to the layer table.
     /// </summary>
     /// <returns>index of new layer.</returns>
+    /// <since>5.0</since>
     public int Add()
     {
       return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, IntPtr.Zero, false);
@@ -1640,6 +1738,7 @@ namespace Rhino.DocObjects.Tables
     /// Reference layers are not saved in files.
     /// </summary>
     /// <returns>index of new layer.</returns>
+    /// <since>5.0</since>
     public int AddReferenceLayer()
     {
       return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, IntPtr.Zero, true);
@@ -1655,6 +1754,7 @@ namespace Rhino.DocObjects.Tables
     /// true if successful. false if layerIndex is out of range or the settings attempt
     /// to lock or hide the current layer.
     /// </returns>
+    /// <since>5.0</since>
     public bool Modify(Layer newSettings, int layerIndex, bool quiet)
     {
       if (null == newSettings)
@@ -1672,6 +1772,7 @@ namespace Rhino.DocObjects.Tables
     /// true if successful. false if layerIndex is out of range or the settings attempt
     /// to lock or hide the current layer.
     /// </returns>
+    /// <since>6.0</since>
     public bool Modify(Layer newSettings, Guid layerId, bool quiet)
     {
       if (null == newSettings)
@@ -1686,6 +1787,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerId">The layer ID to be made visible.</param>
     /// <returns>true if the operation succeeded.</returns>
+    /// <since>5.0</since>
     public bool ForceLayerVisible(Guid layerId)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_ForceVisible(m_doc.RuntimeSerialNumber, layerId);
@@ -1696,6 +1798,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerIndex">The layer index to be made visible.</param>
     /// <returns>true if the operation succeeded.</returns>
+    /// <since>5.0</since>
     public bool ForceLayerVisible(int layerIndex)
     {
       return ForceLayerVisible(this[layerIndex].Id);
@@ -1708,6 +1811,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="layerIndex">The layer index to be used.</param>
     /// <param name="undoRecordSerialNumber">The undo record serial number. Pass 0 not to specify one.</param>
     /// <returns>true if this layer had been modified and the modifications were undone.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool UndoModify(int layerIndex, uint undoRecordSerialNumber)
     {
@@ -1720,6 +1824,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerIndex">The layer index to be used.</param>
     /// <returns>true if this layer had been modified and the modifications were undone.</returns>
+    /// <since>5.0</since>
     public bool UndoModify(int layerIndex)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_UndoModifyLayer(m_doc.RuntimeSerialNumber, layerIndex, 0);
@@ -1732,6 +1837,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="layerId">The layer Id to be used.</param>
     /// <param name="undoRecordSerialNumber">The undo record serial number. Pass 0 not to specify one.</param>
     /// <returns>true if this layer had been modified and the modifications were undone.</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public bool UndoModify(Guid layerId, uint undoRecordSerialNumber)
     {
@@ -1745,6 +1851,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerId">The layer Id to be used.</param>
     /// <returns>true if this layer had been modified and the modifications were undone.</returns>
+    /// <since>6.0</since>
     public bool UndoModify(Guid layerId)
     {
       int layerIndex = Find(layerId, true, -1);
@@ -1760,9 +1867,10 @@ namespace Rhino.DocObjects.Tables
     /// deleted because it is the current layer or it contains active geometry.
     /// </param>
     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer or because it layer contains active geometry.
     /// </returns>
+    /// <since>5.0</since>
     public bool Delete(int layerIndex, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_DeleteLayer(m_doc.RuntimeSerialNumber, layerIndex, quiet, false);
@@ -1773,9 +1881,10 @@ namespace Rhino.DocObjects.Tables
     /// Layer to be deleted.
     /// </param>
     ///     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer or because it layer contains active geometry.
     /// </returns>
+    /// <since>6.0</since>
     public override bool Delete(Layer layer)
     {
       return Delete(layer, true);
@@ -1790,9 +1899,10 @@ namespace Rhino.DocObjects.Tables
     /// deleted because it is the current layer or it contains active geometry.
     /// </param>
     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer or because it layer contains active geometry.
     /// </returns>
+    /// <since>6.0</since>
     public bool Delete(Guid layerId, bool quiet)
     {
       int index = Find(layerId, true, -1);
@@ -1808,9 +1918,10 @@ namespace Rhino.DocObjects.Tables
     /// deleted because it is the current layer or it contains active geometry.
     /// </param>
     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer or because it layer contains active geometry.
     /// </returns>
+    /// <since>6.0</since>
     public bool Delete(Layer layer, bool quiet)
     {
       if (layer == null) return false;
@@ -1828,9 +1939,10 @@ namespace Rhino.DocObjects.Tables
     /// deleted because it is the current layer.
     /// </param>
     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer.
     /// </returns>
+    /// <since>5.5</since>
     public bool Purge(int layerIndex, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_DeleteLayer(m_doc.RuntimeSerialNumber, layerIndex, quiet, true);
@@ -1847,9 +1959,10 @@ namespace Rhino.DocObjects.Tables
     /// deleted because it is the current layer.
     /// </param>
     /// <returns>
-    /// true if successful. false if layerIndex is out of range or the the layer cannot be
+    /// true if successful. false if layerIndex is out of range or the layer cannot be
     /// deleted because it is the current layer.
     /// </returns>
+    /// <since>6.0</since>
     public bool Purge(Guid layerId, bool quiet)
     {
       int index = m_doc.Layers.Find(layerId, true, -1);
@@ -1867,6 +1980,7 @@ namespace Rhino.DocObjects.Tables
     /// This must be in the range 0 &lt;= layerIndex &lt; LayerTable.Count.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Undelete(int layerIndex)
     {
       return UnsafeNativeMethods.CRhinoLayerTable_UndeleteLayer(m_doc.RuntimeSerialNumber, layerIndex);
@@ -1884,6 +1998,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("'ignoreDeleted' is now redundant. Layers are now permanently removed. Use the overload with this argument.")]
     public string GetUnusedLayerName(bool ignoreDeleted)
     {
@@ -1899,6 +2014,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public string GetUnusedLayerName()
     {
       using (var sh = new StringHolder())
@@ -1913,7 +2029,7 @@ namespace Rhino.DocObjects.Tables
     /// Returns the indices of layers that are selected on the Layer user interface.
     /// </summary>
     /// <param name="layerIndices">The indices of selected layers.</param>
-    /// <returns>true if the layer user inteface is visible, false otherwise.</returns>
+    /// <returns>true if the layer user interface is visible, false otherwise.</returns>
     public bool GetSelected(out List<int> layerIndices)
     {
       layerIndices = new List<int>();
@@ -1936,7 +2052,8 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerIndices">The indices of layers to select.</param>
     /// <param name="bDeselect">If true, then any previously selected layers will be unselected.</param>
-    /// <returns>true if the layer user inteface is visible, false otherwise.</returns>
+    /// <returns>true if the layer user interface is visible, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Select(IEnumerable<int> layerIndices, bool bDeselect)
     {
       var rc = false;
@@ -1955,8 +2072,9 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerIndex">The index of the layer to duplicate.</param>
     /// <param name="duplicateObjects">If true, then layer objects will also be duplicated and added to the document.</param>
-    /// <param name="duplicateSublayers">If true, then all sublayers of the layer will be duplicated.</param>
+    /// <param name="duplicateSublayers">If true, then all sub-layers of the layer will be duplicated.</param>
     /// <returns>The indices of the newly added layers if successful, an empty array on failure.</returns>
+    /// <since>6.18</since>
     public int[] Duplicate(int layerIndex, bool duplicateObjects, bool duplicateSublayers)
     {
       return Duplicate(new int[] { layerIndex }, duplicateObjects, duplicateSublayers);
@@ -1967,8 +2085,9 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="layerIndices">The indices of layers to duplicate.</param>
     /// <param name="duplicateObjects">If true, then layer objects will also be duplicated and added to the document.</param>
-    /// <param name="duplicateSublayers">If true, then all sublayers of the layer will be duplicated.</param>
+    /// <param name="duplicateSublayers">If true, then all sub-layers of the layer will be duplicated.</param>
     /// <returns>The indices of the newly added layers if successful, an empty array on failure.</returns>
+    /// <since>6.18</since>
     public int[] Duplicate(IEnumerable<int> layerIndices, bool duplicateObjects, bool duplicateSublayers)
     {
       using (var in_layers = new SimpleArrayInt(layerIndices))
@@ -1983,6 +2102,7 @@ namespace Rhino.DocObjects.Tables
       return new int[0];
     }
 
+    /// <since>5.0</since>
     public override IEnumerator<Layer> GetEnumerator()
     {
       return base.GetEnumerator();

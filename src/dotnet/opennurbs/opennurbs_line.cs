@@ -19,6 +19,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Start point of line segment.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d From
     {
       get { return m_from; }
@@ -27,6 +28,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X coordinate of the line From point.
     /// </summary>
+    /// <since>5.0</since>
     public double FromX
     {
       get { return m_from.X; }
@@ -35,6 +37,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y coordinate of the line From point.
     /// </summary>
+    /// <since>5.0</since>
     public double FromY
     {
       get { return m_from.Y; }
@@ -43,6 +46,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z coordinate of the line From point.
     /// </summary>
+    /// <since>5.0</since>
     public double FromZ
     {
       get { return m_from.Z; }
@@ -52,6 +56,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// End point of line segment.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d To
     {
       get { return m_to; }
@@ -60,6 +65,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X coordinate of the line To point.
     /// </summary>
+    /// <since>5.0</since>
     public double ToX
     {
       get { return m_to.X; }
@@ -68,6 +74,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y coordinate of the line To point.
     /// </summary>
+    /// <since>5.0</since>
     public double ToY
     {
       get { return m_to.Y; }
@@ -76,6 +83,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z coordinate of the line To point.
     /// </summary>
+    /// <since>5.0</since>
     public double ToZ
     {
       get { return m_to.Z; }
@@ -89,6 +97,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="from">Start point of line.</param>
     /// <param name="to">End point of line.</param>
+    /// <since>5.0</since>
     public Line(Point3d from, Point3d to)
     {
       m_from = from;
@@ -100,6 +109,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="start">Start point of line segment.</param>
     /// <param name="span">Direction and length of line segment.</param>
+    /// <since>5.0</since>
     public Line(Point3d start, Vector3d span)
     {
       m_from = start;
@@ -112,6 +122,7 @@ namespace Rhino.Geometry
     /// <param name="start">Start point of line segment.</param>
     /// <param name="direction">Direction of line segment.</param>
     /// <param name="length">Length of line segment.</param>
+    /// <since>5.0</since>
     public Line(Point3d start, Vector3d direction, double length)
     {
       Vector3d dir = direction;
@@ -131,6 +142,7 @@ namespace Rhino.Geometry
     /// <param name="x1">The X coordinate of the second point.</param>
     /// <param name="y1">The Y coordinate of the second point.</param>
     /// <param name="z1">The Z coordinate of the second point.</param>
+    /// <since>5.0</since>
     public Line(double x0, double y0, double z0, double x1, double y1, double z1)
     {
       m_from = new Point3d(x0, y0, z0);
@@ -142,6 +154,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a line segment which has <see cref="Point3d.Unset"/> end points.
     /// </summary>
+    /// <since>5.0</since>
     static public Line Unset
     {
       get { return new Line(Point3d.Unset, Point3d.Unset); }
@@ -153,6 +166,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not this line is valid. 
     /// Valid lines must have valid start and end points.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -167,6 +181,7 @@ namespace Rhino.Geometry
     /// making the actual length negative. The line From point will remain fixed 
     /// when a new Length is set.
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get { return From.DistanceTo(To); }
@@ -190,6 +205,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_intersectlines.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectlines.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Vector3d Direction
     {
       get { return To - From; }
@@ -200,6 +216,7 @@ namespace Rhino.Geometry
     /// Note that tangent vectors are always unit vectors.
     /// </summary>
     /// <value>Sets only the direction of the line, the length is maintained.</value>
+    /// <since>5.0</since>
     public Vector3d UnitTangent
     {
       get
@@ -221,6 +238,7 @@ namespace Rhino.Geometry
     /// Gets the line's 3d axis aligned bounding box.
     /// </summary>
     /// <returns>3d bounding box.</returns>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -240,6 +258,7 @@ namespace Rhino.Geometry
     /// <param name="points">The points through which to fit.</param>
     /// <param name="fitLine">The resulting line on success.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool TryFitLineToPoints(IEnumerable<Point3d> points, out Line fitLine)
     {
       fitLine = new Line();
@@ -261,10 +280,11 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second curve.</param>
     /// <param name="t0">Parameter value of point on curve0. Seed value at input and solution at output.</param>
     /// <param name="t1">Parameter value of point on curve 0.  Seed value at input and solution at output.</param>
-    /// <param name="perpendicular0">Find line Perpendicuar to (true) or tangent to (false) curve0.</param>
-    /// <param name="perpendicular1">Find line Perpendicuar to (true) or tangent to (false) curve1.</param>
+    /// <param name="perpendicular0">Find line perpendicular to (true) or tangent to (false) curve0.</param>
+    /// <param name="perpendicular1">Find line Perpendicular to (true) or tangent to (false) curve1.</param>
     /// <param name="line">The line segment if successful.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.2</since>
     public static bool TryCreateBetweenCurves(Curve curve0, Curve curve1, ref double t0, ref double t1, bool perpendicular0, bool perpendicular1, out Line line)
     {
       line = Line.Unset;
@@ -282,6 +302,7 @@ namespace Rhino.Geometry
     /// <param name="a">A line.</param>
     /// <param name="b">Another line.</param>
     /// <returns>true if a has the same coordinates as b; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Line a, Line b)
     {
       return a.From == b.From && a.To == b.To;
@@ -293,6 +314,7 @@ namespace Rhino.Geometry
     /// <param name="a">A line.</param>
     /// <param name="b">Another line.</param>
     /// <returns>true if a has any coordinate that distinguishes it from b; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Line a, Line b)
     {
       return a.From != b.From || a.To != b.To;
@@ -316,6 +338,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">A line.</param>
     /// <returns>true if other has the same coordinates as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Line other)
     {
@@ -328,6 +351,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Line other, double epsilon)
     {
@@ -356,6 +380,7 @@ namespace Rhino.Geometry
     }
 
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -367,6 +392,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Flip the endpoints of the line segment.
     /// </summary>
+    /// <since>5.0</since>
     public void Flip()
     {
       Point3d temp = From;
@@ -377,13 +403,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluates the line at the specified parameter.
     /// </summary>
-    /// <param name="t">Parameter to evaluate line segment at. Line parameters are normalised parameters.</param>
+    /// <param name="t">Parameter to evaluate line segment at. Line parameters are normalized parameters.</param>
     /// <returns>The point at the specified parameter.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_intersectlines.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_intersectlines.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectlines.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -398,6 +425,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">Point to project onto the line.</param>
     /// <returns>The parameter on the line that is closest to testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double ClosestParameter(Point3d testPoint)
     {
@@ -412,6 +440,7 @@ namespace Rhino.Geometry
     /// <param name="testPoint">Point to project onto the line.</param>
     /// <param name="limitToFiniteSegment">If true, the projection is limited to the finite line segment.</param>
     /// <returns>The point on the (in)finite line that is closest to testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint, bool limitToFiniteSegment)
     {
@@ -432,6 +461,7 @@ namespace Rhino.Geometry
     /// <param name="testPoint">Point for distance computation.</param>
     /// <param name="limitToFiniteSegment">If true, the distance is limited to the finite line segment.</param>
     /// <returns>The shortest distance between this line segment and testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double DistanceTo(Point3d testPoint, bool limitToFiniteSegment)
     {
@@ -444,6 +474,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">A point to test.</param>
     /// <returns>The minimum distance.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double MinimumDistanceTo(Point3d testPoint)
     {
@@ -455,6 +486,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testLine">A line to test.</param>
     /// <returns>The minimum distance.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double MinimumDistanceTo(Line testLine)
     {
@@ -466,6 +498,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">A point to test.</param>
     /// <returns>The maximum distance.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double MaximumDistanceTo(Point3d testPoint)
     {
@@ -477,6 +510,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testLine">A line to test.</param>
     /// <returns>The maximum distance.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double MaximumDistanceTo(Line testLine)
     {
@@ -488,6 +522,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="xform">Transform to apply to this line.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       return UnsafeNativeMethods.ON_Line_Transform(ref this, ref xform);
@@ -498,6 +533,7 @@ namespace Rhino.Geometry
     /// This amounts to the same as calling NurbsCurve.CreateFromLine().
     /// </summary>
     /// <returns>A nurbs curve representation of this line or null if no such representation could be made.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -510,6 +546,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="distance">A positive, 0, or a negative value that will be the distance from <see cref="From"/>.</param>
     /// <returns>The newly found point.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Point3d PointAtLength(double distance)
     {
@@ -530,6 +567,7 @@ namespace Rhino.Geometry
     /// Positive distance result in longer lines.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Extend(double startLength, double endLength)
     {
       if (!IsValid) { return false; }
@@ -556,6 +594,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="box">Box to extend through.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(BoundingBox box)
     {
       if (!IsValid) { return false; }
@@ -570,6 +609,7 @@ namespace Rhino.Geometry
     /// <param name="box">Box to extend through.</param>
     /// <param name="additionalLength">Additional length to append at both sides of the line.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(BoundingBox box, double additionalLength)
     {
       if (!IsValid) { return false; }
@@ -583,6 +623,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="box">Box to extend through.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(Box box)
     {
       if (!IsValid) { return false; }
@@ -597,6 +638,7 @@ namespace Rhino.Geometry
     /// <param name="box">Box to extend through.</param>
     /// <param name="additionalLength">Additional length to append at both sides of the line.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(Box box, double additionalLength)
     {
       if (!IsValid) { return false; }
@@ -639,10 +681,11 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets a plane that contains the line. The origin of the plane is at the start of the line.
-    /// If possible, a plane parallel to the world xy, yz, or zx plane is returned.
+    /// If possible, a plane parallel to the world XY, YZ, or ZX plane is returned.
     /// </summary>
     /// <param name="plane">If the return value is true, the plane out parameter is assigned during this call.</param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool TryGetPlane(out Plane plane)
     {

@@ -16,6 +16,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new empty polyline.
     /// </summary>
+    /// <since>5.0</since>
     public Polyline()
     {
     }
@@ -23,6 +24,7 @@ namespace Rhino.Geometry
     /// Initializes a new empty polyline with an initial capacity.
     /// </summary>
     /// <param name="initialCapacity">Number of vertices this polyline can contain without resizing.</param>
+    /// <since>5.0</since>
     public Polyline(int initialCapacity)
       : base(initialCapacity)
     {
@@ -31,6 +33,7 @@ namespace Rhino.Geometry
     /// Initializes a new polyline from a collection of points.
     /// </summary>
     /// <param name="collection">Points to copy into the local vertex array.</param>
+    /// <since>5.0</since>
     public Polyline(IEnumerable<Point3d> collection)
       : base(collection)
     {
@@ -59,6 +62,7 @@ namespace Rhino.Geometry
     /// <para>Valid polylines have at least one segment, no Invalid points and no zero length segments.</para>
     /// <para>Closed polylines with only two segments are also not considered valid.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -81,6 +85,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of segments for this polyline.
     /// </summary>
+    /// <since>5.0</since>
     public int SegmentCount
     {
       get
@@ -95,6 +100,7 @@ namespace Rhino.Geometry
     /// identical to its endpoint.</para>
     /// </summary>
     /// <seealso cref="IsClosedWithinTolerance"/>
+    /// <since>5.0</since>
     public bool IsClosed
     {
       get
@@ -110,6 +116,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">If the distance between the start and end point of the polyline 
     /// is less than tolerance, the polyline is considered to be closed.</param>
     /// <returns>true if the polyline is closed to within tolerance, false otherwise.</returns>
+    /// <since>5.0</since>
     public bool IsClosedWithinTolerance(double tolerance)
     {
       if (m_size <= 2) { return false; }
@@ -125,6 +132,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the total length of the polyline.
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get
@@ -149,6 +157,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">Index of segment to retrieve.</param>
     /// <returns>Line segment at index or Line.Unset on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Line SegmentAt(int index)
     {
@@ -164,6 +173,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Polyline parameter.</param>
     /// <returns>The point on the polyline at t.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -202,6 +212,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Polyline parameter.</param>
     /// <returns>The tangent along the polyline at t.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d TangentAt(double t)
     {
@@ -225,11 +236,12 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a polyline out of a parameter subdomain in this curve.
+    /// Constructs a polyline out of a parameter sub-domain in this curve.
     /// </summary>
-    /// <param name="domain">The subdomain of the polyline. 
+    /// <param name="domain">The sub-domain of the polyline. 
     /// The integer part of the domain parameters indicate the index of the segment.</param>
-    /// <returns>The polyline as defined by the subdomain, or null on failure.</returns>
+    /// <returns>The polyline as defined by the sub-domain, or null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline Trim(Interval domain)
     {
@@ -273,6 +285,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">Point to approximate.</param>
     /// <returns>The point on the polyline closest to testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -286,6 +299,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="testPoint">Point to approximate.</param>
     /// <returns>The parameter along the polyline closest to testPoint.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double ClosestParameter(Point3d testPoint)
     {
@@ -330,6 +344,7 @@ namespace Rhino.Geometry
     /// Constructs an array of line segments that make up the entire polyline.
     /// </summary>
     /// <returns>An array of line segments or null if the polyline contains fewer than 2 points.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Line[] GetSegments()
     {
@@ -349,6 +364,7 @@ namespace Rhino.Geometry
     /// Constructs a nurbs curve representation of this polyline.
     /// </summary>
     /// <returns>A Nurbs curve shaped like this polyline or null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -359,6 +375,7 @@ namespace Rhino.Geometry
     /// Constructs a polyline curve representation of this polyline.
     /// </summary>
     /// <returns>A curve shaped like this polyline or null on failure.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public PolylineCurve ToPolylineCurve()
     {
@@ -373,6 +390,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="tolerance">Vertices closer together than tolerance will be removed.</param>
     /// <returns>Number of points (and segments) removed.</returns>
+    /// <since>5.0</since>
     public int DeleteShortSegments(double tolerance)
     {
       int count = m_size;
@@ -451,6 +469,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use during collapsing.</param>
     /// <returns>The number of segments that were collapsed.</returns>
     /// <seealso cref="DeleteShortSegments"/>
+    /// <since>5.0</since>
     public int CollapseShortSegments(double tolerance)
     {
       if (m_size < 3) { return 0; }
@@ -539,6 +558,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance for reduction. Whenever a vertex of the polyline is more 
     /// significant than tolerance, it will be included in the reduction.</param>
     /// <returns>The number of vertices that disappeared due to reduction.</returns>
+    /// <since>5.0</since>
     public int ReduceSegments(double tolerance)
     {
       if (m_size < 3) return 0;
@@ -607,9 +627,10 @@ namespace Rhino.Geometry
     /// Merge co-linear consecutive segments in a polyline.
     /// This method will automatically remove any zero-length segments as well.
     /// </summary>
-    /// <param name="angleTolerance">The angle tolerance between adjacent segments for co-linearlity test.</param>
-    /// <param name="includeSeam">If true, the seam point of a closed polyline will be moved forwards if it is colinear too.</param>
+    /// <param name="angleTolerance">The angle tolerance between adjacent segments for collinearity test.</param>
+    /// <param name="includeSeam">If true, the seam point of a closed polyline will be moved forwards if it is collinear too.</param>
     /// <returns>Number of segments removed from the entire polyline.</returns>
+    /// <since>6.3</since>
     public int MergeColinearSegments(double angleTolerance, bool includeSeam)
     {
       bool AreColinear(int i0, int i1, int i2)
@@ -667,11 +688,12 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Smoothens the polyline segments by averaging adjacent vertices. 
+    /// Smoothen the polyline segments by averaging adjacent vertices. 
     /// Smoothing requires a polyline with exclusively valid vertices.
     /// </summary>
     /// <param name="amount">Amount to smooth. Zero equals no smoothing, one equals complete smoothing.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Smooth(double amount)
     {
       int count = Count;
@@ -725,6 +747,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="angle">Angle (in radians) between adjacent segments for a break to occur.</param>
     /// <returns>An array of polyline segments, or null on error.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline[] BreakAtAngles(double angle)
     {
@@ -775,6 +798,7 @@ namespace Rhino.Geometry
     /// Compute the center point of the polyline as the weighted average of all segments.
     /// </summary>
     /// <returns>The weighted average of all segments.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d CenterPoint()
     {
@@ -802,6 +826,7 @@ namespace Rhino.Geometry
     /// <param name="circle">The circle.</param>
     /// <param name="sideCount">The number of sides</param>
     /// <returns>A closed polyline if successful, null otherwise.</returns>
+    /// <since>6.10</since>
     public static Polyline CreateInscribedPolygon(Circle circle, int sideCount)
     {
       using (var output_points = new SimpleArrayPoint3d())
@@ -813,11 +838,12 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tanget to the circle.
+    /// Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tangent to the circle.
     /// </summary>
     /// <param name="circle">The circle.</param>
     /// <param name="sideCount">The number of sides</param>
     /// <returns>A closed polyline if successful, null otherwise.</returns>
+    /// <since>6.10</since>
     public static Polyline CreateCircumscribedPolygon(Circle circle, int sideCount)
     {
       using (var output_points = new SimpleArrayPoint3d())
@@ -836,6 +862,7 @@ namespace Rhino.Geometry
     /// <param name="radius">The radius of other circle.</param>
     /// <param name="cornerCount">The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.</param>
     /// <returns>A closed polyline if successful, null otherwise.</returns>
+    /// <since>6.10</since>
     public static Polyline CreateStarPolygon(Circle circle, double radius, int cornerCount)
     {
       using (var output_points = new SimpleArrayPoint3d())
@@ -852,6 +879,7 @@ namespace Rhino.Geometry
     /// triangulation of a closed polyline
     /// </summary>
     /// <returns></returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public MeshFace[] TriangulateClosedPolyline()
     {
@@ -882,6 +910,7 @@ namespace Rhino.Geometry
     /// Returns a deep copy of this polyline instance.
     /// </summary>
     /// <returns>The duplicated polyline.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public new Polyline Duplicate()
     {

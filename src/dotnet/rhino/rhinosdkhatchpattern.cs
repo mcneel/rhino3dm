@@ -33,6 +33,7 @@ namespace Rhino.DocObjects
     #endregion
 
     #region constructors
+    /// <since>5.0</since>
     public HatchPattern() : base()
     {
       // Creates a new non-document control ON_HatchPattern
@@ -79,6 +80,7 @@ namespace Rhino.DocObjects
     /// Ignored.
     /// </param>
     /// <returns>An array of hatch patterns. This can be null, but not empty.</returns>
+    /// <since>5.0</since>
     public static HatchPattern[] ReadFromFile(string filename, bool quiet)
     {
       if (string.IsNullOrEmpty(filename))
@@ -148,6 +150,7 @@ namespace Rhino.DocObjects
     /// will work with hatch patterns.  Call IsDeleted to determine to determine if
     /// a hatch pattern is deleted.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeleted
     {
       get
@@ -163,6 +166,7 @@ namespace Rhino.DocObjects
     /// Rhino allows multiple files to be viewed simultaneously. Hatch patterns in the
     /// document are "normal" or "reference". Reference hatch patterns are not saved.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsReference
     {
       get
@@ -181,6 +185,7 @@ namespace Rhino.DocObjects
     /// <param name="height">The height of the preview.</param>
     /// <param name="angle">The rotation angle of the pattern display in radians.</param>
     /// <returns>The preview line segments if successful, an empty array on failure.</returns>
+    /// <since>6.8</since>
     public Rhino.Geometry.Line[] CreatePreviewGeometry(int width, int height, double angle)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -199,6 +204,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.HatchPattern"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -210,6 +216,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Index in the hatch pattern table for this pattern. -1 if not in the table.
     /// </summary>
+    /// <since>5.0</since>
     public override int Index
     {
       get
@@ -224,6 +231,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public string Description
     {
       get
@@ -245,6 +253,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public HatchPatternFillType FillType
     {
       get
@@ -261,6 +270,7 @@ namespace Rhino.DocObjects
 
     public static class Defaults
     {
+      /// <since>6.0</since>
       public static HatchPattern Solid
       {
         get
@@ -270,6 +280,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Hatch1
       {
         get
@@ -279,6 +290,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Hatch2
       {
         get
@@ -288,6 +300,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Hatch3
       {
         get
@@ -297,6 +310,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Dash
       {
         get
@@ -306,6 +320,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Grid
       {
         get
@@ -315,6 +330,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Grid60
       {
         get
@@ -324,6 +340,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Plus
       {
         get
@@ -333,6 +350,7 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>6.0</since>
       public static HatchPattern Squares
       {
         get
@@ -390,6 +408,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int CurrentHatchPatternIndex
     {
       get
@@ -402,6 +421,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -421,7 +441,8 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
-    [Obsolete("ignoreDeleted is now ignored. Items are removed permanenently now. Use FindName.")]
+    /// <since>5.0</since>
+    [Obsolete("ignoreDeleted is now ignored. Items are removed permanently now. Use FindName.")]
     public int Find(string name, bool ignoreDeleted)
     {
       var hatch = FindName(name);
@@ -438,6 +459,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public HatchPattern FindName(string name)
     {
       return __FindNameInternal(name);
@@ -448,17 +470,19 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="nameHash">The name hash of the HatchPattern to be searched.</param>
     /// <returns>An Linetype, or null on error.</returns>
+    /// <since>6.0</since>
     public HatchPattern FindNameHash(NameHash nameHash)
     {
       return __FindNameHashInternal(nameHash);
     }
 
     /// <summary>
-    /// Retrieves a HatchPattern object based on Index. This seach type of search is discouraged.
+    /// Retrieves a HatchPattern object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A HatchPattern object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public HatchPattern FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -475,8 +499,9 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// >=0 index of new hatch pattern
     /// -1  not added because a hatch pattern with that name already exists or
-    /// some other problem occured.
+    /// some other problem occurred.
     /// </returns>
+    /// <since>5.0</since>
     public int Add(Rhino.DocObjects.HatchPattern pattern)
     {
       if (null == pattern)
@@ -485,6 +510,7 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoHatchPatternTable_AddPattern(m_doc.RuntimeSerialNumber, pPattern, false);
     }
 
+    /// <since>5.0</since>
     void ICollection<HatchPattern>.Add(HatchPattern item)
     {
       if (Add(item) < 0)
@@ -493,11 +519,13 @@ namespace Rhino.DocObjects.Tables
 
     #region enumerator
 
+    /// <since>6.0</since>
     public override bool Delete(HatchPattern item)
     {
       return Delete(item, true);
     }
 
+    /// <since>6.0</since>
     public bool Delete(HatchPattern item, bool quiet)
     {
       if (null == item) return false;
