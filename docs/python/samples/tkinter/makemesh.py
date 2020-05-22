@@ -1,5 +1,5 @@
 from rhino3dm import *
-import kinter
+import tkinter as Tkinter
 import time
 import compute_rhino3d.Mesh
 import compute_rhino3d.Util
