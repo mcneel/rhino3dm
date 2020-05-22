@@ -22,6 +22,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an invalid Cylinder.
     /// </summary>
+    /// <since>5.0</since>
     public static Cylinder Unset
     {
       get
@@ -43,6 +44,7 @@ namespace Rhino.Geometry
     /// Constructs a new cylinder with infinite height.
     /// </summary>
     /// <param name="baseCircle">Base circle for infinite cylinder.</param>
+    /// <since>5.0</since>
     public Cylinder(Circle baseCircle)
     {
       m_basecircle = baseCircle;
@@ -60,6 +62,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addcylinder.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcylinder.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Cylinder(Circle baseCircle, double height)
     {
       m_basecircle = baseCircle;
@@ -82,6 +85,7 @@ namespace Rhino.Geometry
     /// Gets a boolean value indicating whether this cylinder is valid.
     /// <para>A valid cylinder is represented by a valid circle and two valid heights.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -98,6 +102,7 @@ namespace Rhino.Geometry
     /// true if the cylinder is finite (Height0 != Height1)
     /// false if the cylinder is infinite.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsFinite
     {
       get
@@ -109,6 +114,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the center point of the defining circle.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       get
@@ -120,6 +126,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the axis direction of the cylinder.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Axis
     {
       get
@@ -132,6 +139,7 @@ namespace Rhino.Geometry
     /// Gets the height of the cylinder. 
     /// Infinite cylinders have a height of zero, not Double.PositiveInfinity.
     /// </summary>
+    /// <since>5.0</since>
     public double TotalHeight
     {
       get
@@ -144,6 +152,7 @@ namespace Rhino.Geometry
     /// Gets or sets the start height of the cylinder.
     /// The center of bottom cap is: BasePlane.Origin + Height1 * BasePlane.ZAxis.
     /// </summary>
+    /// <since>5.0</since>
     public double Height1
     {
       get { return m_height1; }
@@ -156,6 +165,7 @@ namespace Rhino.Geometry
     /// presumed to be infinite.
     /// The center of top cap is: BasePlane.Origin + Height2 * BasePlane.ZAxis.
     /// </summary>
+    /// <since>5.0</since>
     public double Height2
     {
       get { return m_height2; }
@@ -165,6 +175,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the radius of the cylinder.
     /// </summary>
+    /// <since>6.0</since>
     public double Radius
     {
         get { return m_basecircle.Radius; }
@@ -174,6 +185,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the base plane of the cylinder.
     /// </summary>
+    /// <since>6.0</since>
     public Plane BasePlane
     {
       get { return m_basecircle.Plane; }
@@ -187,6 +199,7 @@ namespace Rhino.Geometry
     /// Compute the circle at the given elevation parameter.
     /// </summary>
     /// <param name="linearParameter">Height parameter for circle section.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public Circle CircleAt(double linearParameter)
     {
@@ -197,9 +210,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Compute the line at the given angle parameter. This line will be degenerate if the cylinder is infite.
+    /// Compute the line at the given angle parameter. This line will be degenerate if the cylinder is infinite.
     /// </summary>
     /// <param name="angularParameter">Angle parameter for line section.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public Line LineAt(double angularParameter)
     {
@@ -223,6 +237,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addcylinder.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcylinder.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public Brep ToBrep(bool capBottom, bool capTop)
     {
@@ -234,6 +249,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling NurbsSurface.CreateFromCylinder().
     /// </summary>
     /// <returns>A Nurbs surface representation of the cylinder or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsSurface ToNurbsSurface()
     {
@@ -245,6 +261,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling RevSurface.CreateFromCylinder().
     /// </summary>
     /// <returns>A RevSurface representation of the cylinder or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public RevSurface ToRevSurface()
     {
@@ -258,6 +275,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Cylinder other, double epsilon)
     {

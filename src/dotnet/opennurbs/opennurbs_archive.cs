@@ -109,6 +109,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets or sets the version of this <see cref="ArchivableDictionary"/>.
     /// </summary>
+    /// <since>5.0</since>
     public int Version
     {
       get { return m_version; }
@@ -118,6 +119,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets or sets the name string of this <see cref="ArchivableDictionary"/>.
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get { return m_name; }
@@ -135,6 +137,7 @@ namespace Rhino.Collections
     }
 
     /// <summary>Initializes an instance of a dictionary for writing to a 3dm archive.</summary>
+    /// <since>5.0</since>
     public ArchivableDictionary()
     {
       m_version = 0;
@@ -145,6 +148,7 @@ namespace Rhino.Collections
     /// <param name="parentUserData">
     /// parent user data if this dictionary is associated with user data
     /// </param>
+    /// <since>5.0</since>
     public ArchivableDictionary(DocObjects.Custom.UserData parentUserData)
     {
       m_parent_userdata = parentUserData;
@@ -158,6 +162,7 @@ namespace Rhino.Collections
     /// a dictionary is being written. One good way to write version information is to
     /// use a date style integer (YYYYMMDD)
     /// </param>
+    /// <since>5.0</since>
     public ArchivableDictionary(int version)
     {
       m_version = version;
@@ -172,9 +177,10 @@ namespace Rhino.Collections
     ///</param>
     ///<param name="name">
     /// Optional name to associate with this dictionary.
-    /// NOTE: if this dictionary is set as a subdictionary, the name will be changed to
-    /// the subdictionary key entry
+    /// NOTE: if this dictionary is set as a sub-dictionary, the name will be changed to
+    /// the sub-dictionary key entry
     ///</param>
+    /// <since>5.0</since>
     public ArchivableDictionary(int version, string name)
     {
       m_version = version;
@@ -207,6 +213,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
     /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    /// <since>7.0</since>
     [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
@@ -244,10 +251,11 @@ namespace Rhino.Collections
 
 
     /// <summary>
-    /// If this dictionary is part of userdata (or is a UserDictionary), then
+    /// If this dictionary is part of user-data (or is a UserDictionary), then
     /// this is the parent user data. null if this dictionary is not part of
-    /// userdata
+    /// user-data
     /// </summary>
+    /// <since>5.0</since>
     public DocObjects.Custom.UserData ParentUserData
     {
       get { return m_parent_userdata; }
@@ -849,6 +857,7 @@ namespace Rhino.Collections
     }
 
     /// <summary>Gets all entry names or keys.</summary>
+    /// <since>5.0</since>
     public string[] Keys
     {
       get
@@ -860,6 +869,7 @@ namespace Rhino.Collections
     }
 
     /// <summary>Gets all values in this dictionary.</summary>
+    /// <since>5.0</since>
     public object[] Values
     {
       get
@@ -880,6 +890,7 @@ namespace Rhino.Collections
     /// <param name="key">The key to locate.</param>
     /// <returns>true if the dictionary contains an element with the specified key; otherwise, false.</returns>
     /// <exception cref="System.ArgumentNullException">key is null.</exception>
+    /// <since>5.0</since>
     public bool ContainsKey(string key)
     {
       return m_items.ContainsKey(key);
@@ -941,6 +952,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Removes all keys and values from the dictionary.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       m_items.Clear();
@@ -954,6 +966,7 @@ namespace Rhino.Collections
     /// <returns>true if the element is successfully found and removed; otherwise, false.
     /// This method returns false if key is not found.
     /// </returns>
+    /// <since>5.0</since>
     public bool Remove(string key)
     {
       return m_items.Remove(key);
@@ -962,6 +975,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets the number of key/value pairs contained in the dictionary.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -979,6 +993,7 @@ namespace Rhino.Collections
     /// otherwise, null. This parameter is passed uninitialized.</param>
     /// <returns>true if the dictionary contains an element with the specified key; otherwise, false.</returns>
     /// <exception cref="System.ArgumentNullException">Key is null.</exception>
+    /// <since>5.0</since>
     public bool TryGetValue(string key, out object value)
     {
       DictionaryItem di;
@@ -1028,6 +1043,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetString(string key, out string value)
     {
       return TryGetHelper(key, out value, string.Empty);
@@ -1037,6 +1053,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key">The key which points to the string</param>
     /// <returns>The string</returns>
+    /// <since>5.0</since>
     public string GetString(string key)
     {
       return GetHelper(key, string.Empty);
@@ -1047,6 +1064,7 @@ namespace Rhino.Collections
     /// <param name="key">The key which points to the string</param>
     /// <param name="defaultValue">The string</param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public string GetString(string key, string defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1058,6 +1076,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public bool TryGetDictionary(string key, out ArchivableDictionary value)
     {
       return TryGetHelper<ArchivableDictionary>(key, out value, null);
@@ -1068,6 +1087,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public ArchivableDictionary GetDictionary(string key)
     {
       return GetHelper< ArchivableDictionary>(key, null);
@@ -1079,6 +1099,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public ArchivableDictionary GetDictionary(string key, ArchivableDictionary defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1090,6 +1111,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public bool TryGetBytes(string key, out byte[] value)
     {
       return TryGetHelper(key, out value, new byte[0]);
@@ -1100,6 +1122,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public byte[] GetBytes(string key)
     {
       return GetHelper<byte[]>(key, null);
@@ -1111,35 +1134,39 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public byte[] GetBytes(string key, byte[] defaultValue)
     {
       return GetWithDefaultHelper<byte[]>(key, defaultValue);
     }
     /// <summary>
-    /// Get value as bool, will only succeed if value was created using Set(string key, bool value)
+    /// Get value as Boolean, will only succeed if value was created using Set(string key, Boolean value)
     /// </summary>
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetBool(string key, out bool value)
     {
       return TryGetHelper(key, out value, false);
     }
     /// <summary>
-    /// Get value as bool, will only succeed if value was created using Set(string key, bool value)
+    /// Get value as Boolean, will only succeed if value was created using Set(string key, Boolean value)
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool GetBool(string key)
     {
       return GetHelper(key, false);
     }
     /// <summary>
-    /// Get value as bool, will return defaultValue unless value was created using Set(string key, bool value)
+    /// Get value as Boolean, will return defaultValue unless value was created using Set(string key, Boolean value)
     /// </summary>
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool GetBool(string key, bool defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1150,6 +1177,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetFloat(string key, out float value)
     {
       return TryGetHelper(key, out value, 0f);
@@ -1159,6 +1187,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public float GetFloat(string key)
     {
       return GetHelper(key, 0f);
@@ -1169,6 +1198,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public float GetFloat(string key, float defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1179,6 +1209,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetDouble(string key, out double value)
     {
       return TryGetHelper(key, out value, 0.0);
@@ -1188,6 +1219,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public double GetDouble(string key)
     {
       return GetHelper(key, 0.0);
@@ -1198,6 +1230,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.10</since>
     public double GetDouble(string key, double defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1208,6 +1241,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public int GetInteger(string key, int defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1218,6 +1252,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetInteger(string key, out int value)
     {
       return TryGetHelper(key, out value, 0);
@@ -1227,6 +1262,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public int GetInteger(string key)
     {
       return GetHelper(key, 0);
@@ -1237,6 +1273,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public int Getint(string key, int defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1247,6 +1284,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetPoint3f(string key, out Geometry.Point3f value)
     {
       return TryGetHelper(key, out value, Geometry.Point3f.Unset);
@@ -1256,6 +1294,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Point3f GetPoint3f(string key)
     {
       return GetHelper(key, Geometry.Point3f.Unset);
@@ -1266,6 +1305,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Point3f GetPoint3f(string key, Geometry.Point3f defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1276,6 +1316,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetPoint3d(string key, out Geometry.Point3d value)
     {
       return TryGetHelper(key, out value, Geometry.Point3d.Unset);
@@ -1285,6 +1326,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Point3d GetPoint3d(string key)
     {
       return GetHelper(key, Geometry.Point3d.Unset);
@@ -1295,6 +1337,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Point3d GetPoint3d(string key, Geometry.Point3d defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1305,6 +1348,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetVector3d(string key, out Geometry.Vector3d value)
     {
       return TryGetHelper(key, out value, Geometry.Vector3d.Unset);
@@ -1314,6 +1358,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Vector3d GetVector3d(string key)
     {
       return GetHelper(key, Rhino.Geometry.Vector3d.Unset);
@@ -1324,6 +1369,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Geometry.Vector3d GetVector3d(string key, Geometry.Vector3d defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1334,6 +1380,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public bool TryGetGuid(string key, out Guid value)
     {
       return TryGetHelper(key, out value, Guid.Empty);
@@ -1343,6 +1390,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Guid GetGuid(string key)
     {
       return GetHelper(key, Guid.Empty);
@@ -1353,6 +1401,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Guid GetGuid(string key, Guid defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1364,6 +1413,7 @@ namespace Rhino.Collections
     /// <param name="key">The key.</param>
     /// <param name="value">The value.</param>
     /// <returns>The value as Plane.</returns>
+    /// <since>6.11</since>
     public bool TryGetPlane(string key, out Geometry.Plane value)
     {
       return TryGetHelper(key, out value, Geometry.Plane.Unset);
@@ -1374,6 +1424,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns>The value as Plane.</returns>
+    /// <since>6.11</since>
     public Geometry.Plane GetPlane(string key)
     {
       return GetHelper(key, Geometry.Plane.Unset);
@@ -1385,6 +1436,7 @@ namespace Rhino.Collections
     /// <param name="key">The key.</param>
     /// <param name="defaultValue">The default value.</param>
     /// <returns>The value as Plane.</returns>
+    /// <since>6.11</since>
     public Geometry.Plane GetPlane(string key, Geometry.Plane defaultValue)
     {
       return GetWithDefaultHelper(key, defaultValue);
@@ -1399,6 +1451,7 @@ namespace Rhino.Collections
     /// <para>Because <see cref="bool"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para>
     /// </param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, bool val) { return SetItem(key, ItemType.Bool, val); }
 
     /// <summary>
@@ -1408,6 +1461,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="byte"/>.
     /// <para>Because <see cref="byte"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, byte val) { return SetItem(key, ItemType.Byte, val); }
 
     /// <summary>
@@ -1417,6 +1471,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="sbyte"/>.
     /// <para>Because <see cref="sbyte"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Set(string key, sbyte val) { return SetItem(key, ItemType.SByte, val); }
 
@@ -1427,6 +1482,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="short"/>.
     /// <para>Because <see cref="short"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, short val) { return SetItem(key, ItemType.Short, val); }
 
     /// <summary>
@@ -1436,6 +1492,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="ushort"/>.
     /// <para>Because <see cref="ushort"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Set(string key, ushort val) { return SetItem(key, ItemType.UShort, val); }
 
@@ -1446,6 +1503,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="int"/>.
     /// <para>Because <see cref="int"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, int val) { return SetItem(key, ItemType.Int32, val); }
 
     /// <summary>
@@ -1455,6 +1513,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="uint"/>.
     /// <para>Because <see cref="uint"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Set(string key, uint val) { return SetItem(key, ItemType.UInt32, val); }
 
@@ -1465,6 +1524,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="long"/>.
     /// <para>Because <see cref="long"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, Int64 val) { return SetItem(key, ItemType.Int64, val); }
 
     /// <summary>
@@ -1474,6 +1534,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="float"/>.
     /// <para>Because <see cref="float"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, float val) { return SetItem(key, ItemType.Single, val); }
 
     /// <summary>
@@ -1483,6 +1544,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="double"/>.
     /// <para>Because <see cref="double"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, double val) { return SetItem(key, ItemType.Double, val); }
 
     /// <summary>
@@ -1492,6 +1554,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="Guid"/>.
     /// <para>Because <see cref="Guid"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, Guid val) { return SetItem(key, ItemType.Guid, val); }
 
     /// <summary>
@@ -1501,6 +1564,7 @@ namespace Rhino.Collections
     /// <param name="val">A <see cref="string"/>.
     /// <para>Because <see cref="string"/> is immutable, it is not possible to modify the object while it is in this dictionary.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, string val) { return SetItem(key, ItemType.String, val); }
 
     /// <summary>
@@ -1511,6 +1575,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<bool> val) { return SetItem(key, ItemType.ArrayBool, val); }
 
     /// <summary>
@@ -1521,6 +1586,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<byte> val) { return SetItem(key, ItemType.ArrayByte, val); }
 
     /// <summary>
@@ -1531,6 +1597,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Set(string key, IEnumerable<sbyte> val) { return SetItem(key, ItemType.ArraySByte, val); }
 
@@ -1542,6 +1609,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<short> val) { return SetItem(key, ItemType.ArrayShort, val); }
 
     /// <summary>
@@ -1552,6 +1620,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<int> val) { return SetItem(key, ItemType.ArrayInt32, val); }
 
     /// <summary>
@@ -1562,6 +1631,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<float> val) { return SetItem(key, ItemType.ArraySingle, val); }
 
     /// <summary>
@@ -1572,6 +1642,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<double> val) { return SetItem(key, ItemType.ArrayDouble, val); }
 
     /// <summary>
@@ -1582,6 +1653,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<Guid> val) { return SetItem(key, ItemType.ArrayGuid, val); }
 
     /// <summary>
@@ -1592,6 +1664,7 @@ namespace Rhino.Collections
     /// <para>Because this interface is a reference type, changes to the assigned object <b>will modify</b> this entry inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, IEnumerable<string> val) { return SetItem(key, ItemType.ArrayString, val); }
 
     /// <summary>
@@ -1602,6 +1675,7 @@ namespace Rhino.Collections
     /// <para>Because <see cref="System.Drawing.Color"/> has value semantics, changes to the
     /// assigning value will leave this entry unchanged.</para></param>
     /// <returns>true if set operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.Color val) { return SetItem(key, ItemType.Color, val); }
 
     /// <summary>
@@ -1610,6 +1684,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.Point"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.Point val) { return SetItem(key, ItemType.Point, val); }
 
     /// <summary>
@@ -1618,6 +1693,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.PointF"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.PointF val) { return SetItem(key, ItemType.PointF, val); }
 
     /// <summary>
@@ -1626,6 +1702,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.Rectangle"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.Rectangle val) { return SetItem(key, ItemType.Rectangle, val); }
 
     /// <summary>
@@ -1634,6 +1711,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.RectangleF"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.RectangleF val) { return SetItem(key, ItemType.RectangleF, val); }
 
     /// <summary>
@@ -1642,6 +1720,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.Size"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.Size val) { return SetItem(key, ItemType.Size, val); }
 
     /// <summary>
@@ -1650,6 +1729,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.SizeF"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.SizeF val) { return SetItem(key, ItemType.SizeF, val); }
 
 #if !MOBILE_BUILD && !DOTNETCORE
@@ -1659,6 +1739,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="System.Drawing.Font"/> is immutable, it is not possible to modify the object while it is in this dictionary.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, System.Drawing.Font val) { return SetItem(key, ItemType.Font, val); }
 #endif
     /// <summary>
@@ -1667,6 +1748,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Interval"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Interval val) { return SetItem(key, ItemType.Interval, val); }
 
     /// <summary>
@@ -1675,6 +1757,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A point for that key.
     /// <para>Because <see cref="Rhino.Geometry.Point2d"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Point2d val) { return SetItem(key, ItemType.Point2d, val); }
 
     /// <summary>
@@ -1683,6 +1766,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A point for that key.
     /// <para>Because <see cref="Rhino.Geometry.Point3d"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Point3d val) { return SetItem(key, ItemType.Point3d, val); }
 
     /// <summary>
@@ -1691,6 +1775,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Point4d"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Point4d val) { return SetItem(key, ItemType.Point4d, val); }
 
     /// <summary>
@@ -1699,6 +1784,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Vector2d"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Vector2d val) { return SetItem(key, ItemType.Vector2d, val); }
 
     /// <summary>
@@ -1707,6 +1793,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Vector3d"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Vector3d val) { return SetItem(key, ItemType.Vector3d, val); }
 
     /// <summary>
@@ -1715,6 +1802,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.BoundingBox"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.BoundingBox val) { return SetItem(key, ItemType.BoundingBox, val); }
 
     /// <summary>
@@ -1723,6 +1811,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Ray3d"/> has value semantics and is immutable, no changes to this object are possible.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Ray3d val) { return SetItem(key, ItemType.Ray3d, val); }
 
     bool SetPlaneEquation(string key, double[] eq) { return SetItem(key, ItemType.PlaneEquation, eq); }
@@ -1733,6 +1822,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A transform for that key.
     /// <para>Because <see cref="Rhino.Geometry.Transform"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Transform val) { return SetItem(key, ItemType.Xform, val); }
 
     /// <summary>
@@ -1741,6 +1831,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A plane for that key.
     /// <para>Because <see cref="Rhino.Geometry.Plane"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Plane val) { return SetItem(key, ItemType.Plane, val); }
 
     /// <summary>
@@ -1749,6 +1840,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Line"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Line val) { return SetItem(key, ItemType.Line, val); }
 
     /// <summary>
@@ -1757,6 +1849,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Point3f"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Point3f val) { return SetItem(key, ItemType.Point3f, val); }
 
     /// <summary>
@@ -1765,6 +1858,7 @@ namespace Rhino.Collections
     /// <param name="key">A text key.</param>
     /// <param name="val">A value for that key.
     /// <para>Because <see cref="Rhino.Geometry.Vector3f"/> has value semantics, changes to the assigning value will leave this entry unchanged.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.Vector3f val) { return SetItem(key, ItemType.Vector3f, val); }
 
     /// <summary>
@@ -1774,6 +1868,7 @@ namespace Rhino.Collections
     /// <param name="val">An object for that key.
     /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, ArchivableDictionary val) { return SetItem(key, ItemType.OnBinaryArchiveDictionary, val); }
 
     /// <summary>
@@ -1783,6 +1878,7 @@ namespace Rhino.Collections
     /// <param name="val">An object for that key.
     /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.MeshingParameters val) { return SetItem(key, ItemType.OnMeshParameters, val); }
 
     /// <summary>
@@ -1792,6 +1888,7 @@ namespace Rhino.Collections
     /// <param name="val">A geometry object for that key.
     /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate. You can use <see cref="Rhino.Geometry.GeometryBase.Duplicate"/> for this.</para></param>
+    /// <since>5.0</since>
     public bool Set(string key, Geometry.GeometryBase val) { return SetItem(key, ItemType.OnGeometry, val); }
 
 #if RHINO_SDK
@@ -1802,6 +1899,7 @@ namespace Rhino.Collections
     /// <param name="val">An object for that key
     /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
+    /// <since>5.8</since>
     public bool Set(string key, DocObjects.ObjRef val) { return SetItem(key, ItemType.OnObjRef, val); }
 
     /// <summary>
@@ -1811,9 +1909,11 @@ namespace Rhino.Collections
     /// <param name="val">An object for that key
     /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
     /// <para>It is up to the user to clone this entry when appropriate.</para></param>
+    /// <since>5.8</since>
     public bool Set(string key, IEnumerable<DocObjects.ObjRef> val) { return SetItem(key, ItemType.ArrayObjRef, val); }
 #endif
 
+    /// <since>7.0</since>
     public bool Set(string key, IEnumerable<Geometry.GeometryBase> val) { return SetItem(key, ItemType.ArrayGeometry, val); }
 
     bool SetItem(string key, ItemType it, object val)
@@ -1830,6 +1930,7 @@ namespace Rhino.Collections
     /// <typeparam name="T"></typeparam>
     /// <param name="enumValue"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public bool SetEnumValue<T>(T enumValue) 
         where T : struct, IConvertible
@@ -1846,6 +1947,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="enumValue"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public bool SetEnumValue<T>(string key, T enumValue) 
         where T : struct, IConvertible
@@ -1862,6 +1964,7 @@ namespace Rhino.Collections
     /// <exception cref="KeyNotFoundException">Thrown when the key is not found in the dictionary.</exception>
     /// <exception cref="FormatException">Thrown when the string retrieved from the dictionary is not convertible to the enum type.</exception>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetEnumValue<T>()
         where T : struct, IConvertible
@@ -1879,6 +1982,7 @@ namespace Rhino.Collections
     /// <exception cref="KeyNotFoundException">Thrown when the key is not found in the dictionary.</exception>
     /// <exception cref="FormatException">Thrown when the string retrieved from the dictionary is not convertible to the enum type.</exception>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public T GetEnumValue<T>(string key) 
         where T : struct, IConvertible
@@ -1904,6 +2008,7 @@ namespace Rhino.Collections
     /// <param name="key"></param>
     /// <param name="enumValue"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public bool TryGetEnumValue<T>(string key, out T enumValue)
         where T : struct, IConvertible
@@ -1932,10 +2037,11 @@ namespace Rhino.Collections
 
 
     /// <summary>
-    /// Remmove an enum value from the dictionary.
+    /// Remove an enum value from the dictionary.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>5.4</since>
     [CLSCompliant(false)]
     public bool RemoveEnumValue<T>()
         where T : struct, IConvertible
@@ -1956,6 +2062,7 @@ namespace Rhino.Collections
     /// <param name="source"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
+    /// <since>5.4</since>
     public bool AddContentsFrom(ArchivableDictionary source)
     {
       if (null == source) throw new ArgumentNullException(nameof(source));
@@ -1983,6 +2090,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="source"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public bool ReplaceContentsWith(ArchivableDictionary source)
     {
       if (null == source) throw new ArgumentNullException(nameof(source));
@@ -2017,6 +2125,7 @@ namespace Rhino.Collections
     /// Constructs a deep copy of this object.
     /// </summary>
     /// <returns>The copy of this object.</returns>
+    /// <since>5.0</since>
     public ArchivableDictionary Clone()
     {
       ArchivableDictionary clone = new ArchivableDictionary(m_version, m_name);
@@ -2027,6 +2136,7 @@ namespace Rhino.Collections
       return clone;
     }
 
+    /// <since>5.0</since>
     object ICloneable.Clone()
     {
       return Clone();
@@ -2042,11 +2152,13 @@ namespace Rhino.Collections
       throw new NotSupportedException("You must use the SetXXX() methods to set the content of this archive.");
     }
 
+    /// <since>5.0</since>
     ICollection<string> IDictionary<string, object>.Keys
     {
       get { return Array.AsReadOnly(Keys); }
     }
 
+    /// <since>5.0</since>
     ICollection<object> IDictionary<string, object>.Values
     {
       get { return Values; }
@@ -2108,6 +2220,7 @@ namespace Rhino.Collections
     /// Gets the enumerator of this dictionary.
     /// </summary>
     /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <since>5.0</since>
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
     {
       foreach (var element in m_items)
@@ -2122,6 +2235,7 @@ namespace Rhino.Collections
     /// Gets the enumerator of this dictionary.
     /// </summary>
     /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -2133,7 +2247,7 @@ namespace Rhino.FileIO
 {
   /// <summary>
   /// Thrown by BinaryArchiveReader and BinaryArchiveWriter classes when
-  /// an IO error has occured.
+  /// an IO error has occurred.
   /// </summary>
   public class BinaryArchiveException : System.IO.IOException
   {
@@ -2141,6 +2255,7 @@ namespace Rhino.FileIO
     /// Initializes a new instance of the <see cref="BinaryArchiveException"/> class.
     /// </summary>
     /// <param name="message">The inner message to show to users.</param>
+    /// <since>5.0</since>
     public BinaryArchiveException(string message)
       : base(message)
     { }
@@ -2170,6 +2285,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets whether an error occurred.
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteErrorOccured
     {
       get { return m_write_error_occured; }
@@ -2192,6 +2308,7 @@ namespace Rhino.FileIO
     /// 5     an old version 5 3dm archive is being read
     /// 50    a version 5 3dm archive is being read/written.
     /// </summary>
+    /// <since>5.0</since>
     public int Archive3dmVersion
     {
       get
@@ -2212,6 +2329,7 @@ namespace Rhino.FileIO
     /// the contents of the chunk.
     /// False if input was not valid or the write failed.
     /// </returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public bool BeginWrite3dmChunk(uint typecode, int majorVersion, int minorVersion)
     {
@@ -2232,6 +2350,7 @@ namespace Rhino.FileIO
     /// updates length in chunk header
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool EndWrite3dmChunk()
     {
       return UnsafeNativeMethods.ON_BinaryArchive_EndWrite3dmChunk(m_ptr);
@@ -2248,6 +2367,7 @@ namespace Rhino.FileIO
     /// CRC calculation setting after you are finished doing your fancy pants
     /// expert IO.
     /// </returns>
+    /// <since>6.0</since>
     public bool EnableCRCCalculation(bool enable)
     {
       return UnsafeNativeMethods.ON_BinaryArchive_EnableCRCCalculation(m_ptr, enable);
@@ -2264,6 +2384,7 @@ namespace Rhino.FileIO
     /// <param name="major">0 to 15.</param>
     /// <param name="minor">0 to 16.</param>
     /// <returns>true on successful read.</returns>
+    /// <since>5.0</since>
     public void Write3dmChunkVersion(int major, int minor)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_Write3dmChunkVersion(m_ptr, major, minor);
@@ -2275,6 +2396,7 @@ namespace Rhino.FileIO
     /// Delivers the complete content of a dictionary to the archive.
     /// </summary>
     /// <param name="dictionary">A dictionary to archive.</param>
+    /// <since>5.0</since>
     public void WriteDictionary(Collections.ArchivableDictionary dictionary)
     {
       m_write_error_occured = m_write_error_occured || !dictionary.Write(this);
@@ -2286,6 +2408,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="bool"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteBool(bool value)
     {
       if (!UnsafeNativeMethods.ON_BinaryArchive_WriteBool(m_ptr, value))
@@ -2296,6 +2419,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="byte"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteByte(byte value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteByte(m_ptr, value);
@@ -2307,6 +2431,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="sbyte"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public void WriteSByte(sbyte value)
     {
@@ -2317,6 +2442,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="short"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteShort(short value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteShort(m_ptr, value);
@@ -2328,6 +2454,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="ushort"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public void WriteUShort(ushort value)
     {
@@ -2338,6 +2465,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="int"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteInt(int value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteInt(m_ptr, value);
@@ -2349,6 +2477,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="uint"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public void WriteUInt(uint value)
     {
@@ -2359,6 +2488,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Int64"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteInt64(Int64 value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteInt64(m_ptr, value);
@@ -2370,6 +2500,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="float"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteSingle(float value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteSingle(m_ptr, value);
@@ -2381,6 +2512,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="double"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteDouble(double value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteDouble(m_ptr, value);
@@ -2392,6 +2524,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Guid"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteGuid(Guid value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteGuid(m_ptr, ref value);
@@ -2403,6 +2536,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="string"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteString(string value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteString(m_ptr, value, true);
@@ -2414,6 +2548,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="string"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>6.0</since>
     public void WriteUtf8String(string value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteString(m_ptr, value, false);
@@ -2426,6 +2561,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteBoolArray(IEnumerable<bool> value)
     {
       var l = new List<bool>(value);
@@ -2444,6 +2580,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteByteArray(IEnumerable<byte> value)
     {
       var l = new List<byte>(value);
@@ -2462,6 +2599,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.9</since>
     public void WriteCompressedBuffer(IEnumerable<byte> value)
     {
       // 10-Feb-2014 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-24156
@@ -2480,6 +2618,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public void WriteSByteArray(IEnumerable<sbyte> value)
     {
@@ -2495,6 +2634,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteShortArray(IEnumerable<short> value)
     {
       List<short> l = new List<short>(value);
@@ -2513,6 +2653,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteIntArray(IEnumerable<int> value)
     {
       List<int> l = new List<int>(value);
@@ -2531,6 +2672,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteSingleArray(IEnumerable<float> value)
     {
       List<float> l = new List<float>(value);
@@ -2549,6 +2691,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteDoubleArray(IEnumerable<double> value)
     {
       List<double> l = new List<double>(value);
@@ -2567,6 +2710,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteGuidArray(IEnumerable<Guid> value)
     {
       int count = 0;
@@ -2584,6 +2728,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteStringArray(IEnumerable<string> value)
     {
       int count = 0;
@@ -2604,6 +2749,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.Color"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteColor(System.Drawing.Color value)
     {
       int argb = value.ToArgb();
@@ -2616,6 +2762,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.Point"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePoint(System.Drawing.Point value)
     {
       int[] xy = new int[] { value.X, value.Y };
@@ -2628,6 +2775,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.PointF"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePointF(System.Drawing.PointF value)
     {
       float[] xy = new float[] { value.X, value.Y };
@@ -2640,6 +2788,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.Rectangle"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteRectangle(System.Drawing.Rectangle value)
     {
       int[] xywh = new int[] { value.X, value.Y, value.Width, value.Height };
@@ -2652,6 +2801,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.RectangleF"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteRectangleF(System.Drawing.RectangleF value)
     {
       float[] f = new float[] { value.X, value.Y, value.Width, value.Height };
@@ -2664,6 +2814,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.Size"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteSize(System.Drawing.Size value)
     {
       int[] xy = new int[] { value.Width, value.Height };
@@ -2676,6 +2827,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.SizeF"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteSizeF(System.Drawing.SizeF value)
     {
       float[] xy = new float[] { value.Width, value.Height };
@@ -2690,6 +2842,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="System.Drawing.Font"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteFont(System.Drawing.Font value)
     {
       string family_name = value.FontFamily.Name;
@@ -2711,6 +2864,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.DocObjects.ObjRef"/> to the archive
     /// </summary>
     /// <returns>the element that was read</returns>
+    /// <since>5.8</since>
     public void WriteObjRef( DocObjects.ObjRef objref )
     {
       IntPtr ptr_const_objref = objref.ConstPointer();
@@ -2724,6 +2878,7 @@ namespace Rhino.FileIO
     /// <para>The return will always be an array.</para>
     /// </summary>
     /// <param name="objrefs">A value to write.</param>
+    /// <since>5.8</since>
     public void WriteObjRefArray(IEnumerable<DocObjects.ObjRef> objrefs)
     {
       using (var array = new Runtime.InteropWrappers.ClassArrayOnObjRef(objrefs))
@@ -2737,6 +2892,7 @@ namespace Rhino.FileIO
 #endif //RHINO_SDK
 #endif
 
+    /// <since>7.0</since>
     public void WriteGeometryArray(IEnumerable<Geometry.GeometryBase> geometry)
     {
       int count = 0;
@@ -2758,6 +2914,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Interval"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteInterval(Geometry.Interval value)
     {
       double[] d = new double[] { value.T0, value.T1 };
@@ -2770,6 +2927,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Point2d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePoint2d(Geometry.Point2d value)
     {
       double[] d = new double[] { value.X, value.Y };
@@ -2782,6 +2940,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Point3d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePoint3d(Geometry.Point3d value)
     {
       double[] d = new double[] { value.X, value.Y, value.Z };
@@ -2794,6 +2953,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Point4d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePoint4d(Geometry.Point4d value)
     {
       double[] d = new double[] { value.X, value.Y, value.Z, value.W };
@@ -2806,6 +2966,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Vector2d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteVector2d(Geometry.Vector2d value)
     {
       double[] d = new double[] { value.X, value.Y };
@@ -2818,6 +2979,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Vector3d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteVector3d(Geometry.Vector3d value)
     {
       double[] d = new double[] { value.X, value.Y, value.Z };
@@ -2830,6 +2992,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.BoundingBox"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteBoundingBox(Geometry.BoundingBox value)
     {
       WritePoint3d(value.Min);
@@ -2840,6 +3003,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Ray3d"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteRay3d(Geometry.Ray3d value)
     {
       WritePoint3d(value.Position);
@@ -2859,6 +3023,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Transform"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteTransform(Geometry.Transform value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteTransform(m_ptr, ref value);
@@ -2870,6 +3035,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Plane"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePlane(Geometry.Plane value)
     {
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WritePlane(m_ptr, ref value);
@@ -2881,6 +3047,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Line"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteLine(Geometry.Line value)
     {
       WritePoint3d(value.From);
@@ -2891,6 +3058,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Point3f"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WritePoint3f(Geometry.Point3f value)
     {
       float[] f = new float[] { value.X, value.Y, value.Z };
@@ -2903,6 +3071,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.Vector3f"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteVector3f(Geometry.Vector3f value)
     {
       float[] f = new float[] { value.X, value.Y, value.Z };
@@ -2915,6 +3084,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.MeshingParameters"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteMeshingParameters(Geometry.MeshingParameters value)
     {
       IntPtr pMeshParameters = value.ConstPointer();
@@ -2927,6 +3097,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Geometry.GeometryBase"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>5.0</since>
     public void WriteGeometry(Geometry.GeometryBase value)
     {
       IntPtr pGeometry = value.ConstPointer();
@@ -2939,6 +3110,7 @@ namespace Rhino.FileIO
     /// Writes a <see cref="Rhino.Render.RenderSettings"/> value to the archive.
     /// </summary>
     /// <param name="value">A value to write.</param>
+    /// <since>6.0</since>
     public void WriteRenderSettings(RenderSettings value)
     {
       var pointer = value.ConstPointer();
@@ -2950,6 +3122,7 @@ namespace Rhino.FileIO
     /// Reads a legacy ON_CheckSum, only provided to read data chunks from old
     /// V5 files, the CheckSum read is discarded
     /// </summary>
+    /// <since>6.0</since>
     [Obsolete("This is only present to allow writing of old, empty ON_CheckSum data")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public void WriteEmptyCheckSum()
@@ -2999,6 +3172,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets whether en error occurred during reading.
     /// </summary>
+    /// <since>5.0</since>
     public bool ReadErrorOccured
     {
       get { return m_read_error_occured; }
@@ -3021,6 +3195,7 @@ namespace Rhino.FileIO
     /// 5     an old version 5 3dm archive is being read
     /// 50    a version 5 3dm archive is being read/written.
     /// </summary>
+    /// <since>5.0</since>
     public int Archive3dmVersion
     {
       get
@@ -3040,12 +3215,14 @@ namespace Rhino.FileIO
     /// CRC calculation setting after you are finished doing your fancy pants
     /// expert IO.
     /// </returns>
+    /// <since>6.0</since>
     public bool EnableCRCCalculation(bool enable)
     {
       return UnsafeNativeMethods.ON_BinaryArchive_EnableCRCCalculation(m_ptr, enable);
     }
 
     /// <summary>current offset (in bytes) into archive ( like ftell() )</summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public ulong CurrentPosition
     {
@@ -3099,6 +3276,7 @@ namespace Rhino.FileIO
     /// even if something goes wrong while you attempt to read the interior of the chunk.
     /// False if the chunk did not exist at the current location in the file.
     /// </returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public bool BeginRead3dmChunk(uint expectedTypeCode, out int majorVersion, out int minorVersion)
     {
@@ -3131,6 +3309,7 @@ namespace Rhino.FileIO
     /// for partially read chunks.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool EndRead3dmChunk(bool suppressPartiallyReadChunkWarning)
     {
       return UnsafeNativeMethods.ON_BinaryArchive_EndRead3dmChunk(m_ptr, suppressPartiallyReadChunkWarning);
@@ -3147,6 +3326,7 @@ namespace Rhino.FileIO
     /// <param name="major">0 to 15.</param>
     /// <param name="minor">0 to 16.</param>
     /// <returns>true on successful read.</returns>
+    /// <since>5.0</since>
     public void Read3dmChunkVersion(out int major, out int minor)
     {
       major = 0;
@@ -3165,6 +3345,7 @@ namespace Rhino.FileIO
     /// Reads a complete <see cref="Rhino.Collections.ArchivableDictionary"/> from the archive.
     /// </summary>
     /// <returns>The newly instantiated object.</returns>
+    /// <since>5.0</since>
     public Rhino.Collections.ArchivableDictionary ReadDictionary()
     {
       Collections.ArchivableDictionary rc = null;
@@ -3183,6 +3364,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="bool"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public bool ReadBool()
     {
       bool rc = false;
@@ -3196,6 +3378,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="byte"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public byte ReadByte()
     {
       byte rc = 0;
@@ -3209,6 +3392,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="sbyte"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public sbyte ReadSByte()
     {
@@ -3219,6 +3403,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="short"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public short ReadShort()
     {
       short rc = 0;
@@ -3232,6 +3417,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="ushort"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public ushort ReadUShort()
     {
@@ -3242,6 +3428,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="int"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public int ReadInt()
     {
       int rc = 0;
@@ -3255,6 +3442,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="uint"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint ReadUInt()
     {
@@ -3265,6 +3453,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="long"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public Int64 ReadInt64()
     {
       Int64 rc = 0; 
@@ -3278,6 +3467,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="float"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public float ReadSingle()
     {
       float rc = 0;
@@ -3291,6 +3481,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="double"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public double ReadDouble()
     {
       double rc = 0;
@@ -3304,6 +3495,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Guid"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public Guid ReadGuid()
     {
       Guid rc = Guid.Empty;
@@ -3317,6 +3509,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="string"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>5.0</since>
     public string ReadString()
     {
       using (var str = new StringHolder())
@@ -3333,6 +3526,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="string"/> from the archive.
     /// </summary>
     /// <returns>The value that was read.</returns>
+    /// <since>6.0</since>
     public string ReadUtf8String()
     {
       using (var str = new StringHolder())
@@ -3350,6 +3544,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public bool[] ReadBoolArray()
     {
       bool[] rc = null;
@@ -3372,6 +3567,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public byte[] ReadByteArray()
     {
       byte[] rc = null;
@@ -3394,6 +3590,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.9</since>
     public byte[] ReadCompressedBuffer()
     {
       // 10-Feb-2014 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-24156
@@ -3419,6 +3616,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public sbyte[] ReadSByteArray()
     {
@@ -3439,6 +3637,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public short[] ReadShortArray()
     {
       short[] rc = null;
@@ -3461,6 +3660,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public int[] ReadIntArray()
     {
       int[] rc = null;
@@ -3483,6 +3683,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public float[] ReadSingleArray()
     {
       float[] rc = null;
@@ -3505,6 +3706,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public double[] ReadDoubleArray()
     {
       double[] rc = null;
@@ -3527,6 +3729,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public Guid[] ReadGuidArray()
     {
       Guid[] rc = null;
@@ -3545,6 +3748,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.0</since>
     public string[] ReadStringArray()
     {
       string[] rc = null;
@@ -3571,6 +3775,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.Color"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Color ReadColor()
     {
       int argb = 0;
@@ -3584,6 +3789,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.Point"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Point ReadPoint()
     {
       int[] xy = new int[2];
@@ -3597,6 +3803,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.PointF"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.PointF ReadPointF()
     {
       float[] xy = new float[2];
@@ -3610,6 +3817,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.Rectangle"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle ReadRectangle()
     {
       int[] xywh = new int[4];
@@ -3623,6 +3831,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.RectangleF"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.RectangleF ReadRectangleF()
     {
       float[] f = new float[4];
@@ -3636,6 +3845,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.Size"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Size ReadSize()
     {
       int[] xy = new int[2];
@@ -3649,6 +3859,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.SizeF"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.SizeF ReadSizeF()
     {
       float[] xy = new float[2];
@@ -3663,6 +3874,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="System.Drawing.Font"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Font ReadFont()
     {
       System.Drawing.Font rc;
@@ -3694,6 +3906,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.DocObjects.ObjRef"/> from the archive
     /// </summary>
     /// <returns>the element that was read</returns>
+    /// <since>5.8</since>
     public DocObjects.ObjRef ReadObjRef()
     {
       DocObjects.ObjRef rc = new DocObjects.ObjRef();
@@ -3709,6 +3922,7 @@ namespace Rhino.FileIO
     /// <para>An array is returned even if the input was another enumerable type.</para>
     /// </summary>
     /// <returns>The array that was read.</returns>
+    /// <since>5.8</since>
     public DocObjects.ObjRef[] ReadObjRefArray()
     {
       using(var objrefs = new ClassArrayOnObjRef())
@@ -3728,6 +3942,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Interval"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Interval ReadInterval()
     {
       double[] d = new double[2];
@@ -3741,6 +3956,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Point2d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Point2d ReadPoint2d()
     {
       double[] d = new double[2];
@@ -3754,6 +3970,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Point3d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Point3d ReadPoint3d()
     {
       double[] d = new double[3];
@@ -3767,6 +3984,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Point4d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Point4d ReadPoint4d()
     {
       double[] d = new double[4];
@@ -3780,6 +3998,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Vector2d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Vector2d ReadVector2d()
     {
       double[] d = new double[2];
@@ -3793,6 +4012,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Vector3d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Vector3d ReadVector3d()
     {
       double[] d = new double[3];
@@ -3806,6 +4026,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.BoundingBox"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.BoundingBox ReadBoundingBox()
     {
       Geometry.Point3d p0 = ReadPoint3d();
@@ -3817,6 +4038,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Ray3d"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Ray3d ReadRay3d()
     {
       Geometry.Point3d p = ReadPoint3d();
@@ -3838,6 +4060,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Transform"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Transform ReadTransform()
     {
       Geometry.Transform rc = new Geometry.Transform();
@@ -3851,6 +4074,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Plane"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Plane ReadPlane()
     {
       Rhino.Geometry.Plane rc = new Rhino.Geometry.Plane();
@@ -3864,6 +4088,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Line"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Line ReadLine()
     {
       Geometry.Point3d p0 = ReadPoint3d();
@@ -3875,6 +4100,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Point3f"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Point3f ReadPoint3f()
     {
       float[] f = new float[3];
@@ -3888,6 +4114,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.Vector3f"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.Vector3f ReadVector3f()
     {
       float[] f = new float[3];
@@ -3901,6 +4128,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Geometry.MeshingParameters"/> from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.MeshingParameters ReadMeshingParameters()
     {
       IntPtr ptr_meshparameters = IntPtr.Zero;
@@ -3917,6 +4145,7 @@ namespace Rhino.FileIO
     /// <para>The <see cref="Rhino.Geometry.GeometryBase"/> class is abstract.</para>
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>5.0</since>
     public Geometry.GeometryBase ReadGeometry()
     {
       IntPtr ptr_geometry = IntPtr.Zero;
@@ -3932,6 +4161,7 @@ namespace Rhino.FileIO
       return Geometry.GeometryBase.CreateGeometryHelper(ptr_geometry, null);
     }
 
+    /// <since>7.0</since>
     public Geometry.GeometryBase[] ReadGeometryArray()
     {
       Geometry.GeometryBase[] rc = null;
@@ -3954,6 +4184,7 @@ namespace Rhino.FileIO
     /// Reads a <see cref="Rhino.Render.RenderSettings"/>-derived object from the archive.
     /// </summary>
     /// <returns>The element that was read.</returns>
+    /// <since>6.0</since>
     public RenderSettings ReadRenderSettings()
     {
       var ptr_render_settings = IntPtr.Zero;
@@ -3975,6 +4206,7 @@ namespace Rhino.FileIO
     /// Reads a legacy ON_CheckSum, only provided to read data chunks from old
     /// V5 files, the CheckSum read is discarded
     /// </summary>
+    /// <since>6.0</since>
     [Obsolete("This is only present to allow reading of old ON_CheckSum data")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public void ReadCheckSum()
@@ -4000,6 +4232,7 @@ namespace Rhino.FileIO
     /// in use when file was written.
     /// </param>
     /// <returns>true on success</returns>
+    /// <since>5.1</since>
     public bool Read3dmStartSection(out int version, out string comment)
     {
       using (var sh = new StringHolder())
@@ -4014,7 +4247,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Fnction for studying contents of a file.  The primary use is as an aid
+    /// Function for studying contents of a file.  The primary use is as an aid
     /// to help dig through files that have been damaged (bad disks, transmission
     /// errors, etc.) If an error is found, a line that begins with the word
     /// "ERROR" is printed.
@@ -4024,6 +4257,7 @@ namespace Rhino.FileIO
     /// 0 if something went wrong, otherwise the typecode of the chunk that
     /// was just studied.
     /// </returns>
+    /// <since>5.1</since>
     [CLSCompliant(false)]
     public uint Dump3dmChunk(TextLog log)
     {
@@ -4036,6 +4270,7 @@ namespace Rhino.FileIO
     /// true if at end of a file
     /// </summary>
     /// <returns></returns>
+    /// <since>5.1</since>
     public bool AtEnd()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -4106,12 +4341,14 @@ namespace Rhino.FileIO
     BinaryArchiveReader m_reader;
     BinaryArchiveWriter m_writer;
 
+    /// <since>5.1</since>
     public BinaryArchiveFile(string filename, BinaryArchiveMode mode)
     {
       m_filename = filename;
       m_mode = mode;
     }
 
+    /// <since>5.1</since>
     public bool Open()
     {
       if( m_ptr_binaryfile == IntPtr.Zero )
@@ -4119,6 +4356,7 @@ namespace Rhino.FileIO
       return m_ptr_binaryfile != IntPtr.Zero;
     }
 
+    /// <since>5.1</since>
     public void Close()
     {
       UnsafeNativeMethods.ON_BinaryFile_Close(m_ptr_binaryfile);
@@ -4138,6 +4376,7 @@ namespace Rhino.FileIO
       return m_ptr_binaryfile;
     }
 
+    /// <since>5.1</since>
     public BinaryArchiveReader Reader
     {
       get
@@ -4153,6 +4392,7 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <since>5.1</since>
     public BinaryArchiveWriter Writer
     {
       get
@@ -4176,6 +4416,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.1</since>
     public void Dispose()
     {
       Close();
@@ -4192,6 +4433,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Initializes a new instance of the <see cref="SerializationOptions"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public SerializationOptions()
     {
 #if RHINO_SDK
@@ -4205,11 +4447,13 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets a value indicating the Rhino version.
     /// </summary>
+    /// <since>5.0</since>
     public int RhinoVersion { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to write user data.
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteUserData { get; set; }
   }
 }

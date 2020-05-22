@@ -17,6 +17,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Creates empty default notes
     /// </summary>
+    /// <since>5.0</since>
     public File3dmNotes() { }
 
     internal File3dmNotes(File3dm parent)
@@ -47,6 +48,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the text content of the notes.
     /// </summary>
+    /// <since>5.0</since>
     public string Notes
     {
       get
@@ -81,6 +83,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the notes visibility. If the notes are visible, true; false otherwise.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsVisible
     {
       get
@@ -111,6 +114,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the text format. If the format is HTML, true; false otherwise.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsHtml
     {
       get
@@ -141,6 +145,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the position of the Notes when they were saved.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Rectangle WindowRectangle
     {
       get

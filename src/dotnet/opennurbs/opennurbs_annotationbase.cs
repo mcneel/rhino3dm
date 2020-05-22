@@ -41,6 +41,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Type of annotation
     /// </summary>
+    /// <since>6.0</since>
     public virtual AnnotationType AnnotationType
     {
       get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
@@ -55,6 +56,7 @@ namespace Rhino.Geometry
     /// those overrides will be represented in the DimensionStyle
     /// returned by DimensionStyle(ParentStyle)
     /// </summary>
+    /// <since>6.0</since>
     public Guid DimensionStyleId
     {
       get
@@ -73,6 +75,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>6.0</since>
     public bool HasPropertyOverrides
     {
       get
@@ -89,6 +92,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="field"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool IsPropertyOverridden(DimensionStyle.Field field)
     {
@@ -109,9 +113,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Clears all overriden properties for this annotation
+    /// Clears all overridden properties for this annotation
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool ClearPropertyOverrides() => ClearOverrideDimStyle();
 
     /// <summary>
@@ -123,6 +128,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="parentDimStyle"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public DimensionStyle GetDimensionStyle(DimensionStyle parentDimStyle)
     {
@@ -143,6 +149,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// If there are no overrides then the parent style is returned otherwise the dimension style saved with the annotation is returned.
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle DimensionStyle
     {
       get
@@ -164,6 +171,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="OverrideStyle"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool SetOverrideDimStyle(DimensionStyle OverrideStyle)
     {
       var ptr_this = NonConstPointer();
@@ -185,6 +193,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The parent dimension style associated with this annotation
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle ParentDimensionStyle
     {
       get
@@ -240,6 +249,7 @@ namespace Rhino.Geometry
     /// Gets the parent dimstyle for the annotation and 
     /// gets or sets the text height in the dimstyle
     /// </summary>
+    /// <since>5.0</since>
     public double TextHeight
     {
       get
@@ -262,6 +272,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Determines whether or not to draw a Text Mask
     /// </summary>
+    /// <since>6.0</since>
     public bool MaskEnabled
     {
       get
@@ -286,6 +297,7 @@ namespace Rhino.Geometry
     /// If true, the viewport's color is used for the mask color. If
     /// false, the color defined by MaskColor is used
     /// </summary>
+    /// <since>6.0</since>
     public bool MaskUsesViewportColor
     {
       get { return MaskColorSource == DimensionStyle.MaskType.BackgroundColor; }
@@ -295,6 +307,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets whether the mask background color is from the background or from a color
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.MaskType MaskColorSource
     {
       get
@@ -314,12 +327,54 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Gets or sets whether to draw a frame around a text mask
+    /// </summary>
+    /// <since>7.0</since>
+    public bool DrawTextFrame
+    {
+      get { return MaskFrame == DimensionStyle.MaskFrame.RectFrame; }
+      set
+      {
+        if (value != (MaskFrame == DimensionStyle.MaskFrame.RectFrame))
+        {
+          if (value)
+            MaskFrame = DimensionStyle.MaskFrame.RectFrame;
+          else
+            MaskFrame = DimensionStyle.MaskFrame.NoFrame;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to draw a frame around a text mask
+    /// </summary>
+    /// <since>7.0</since>
+    public DimensionStyle.MaskFrame MaskFrame
+    {
+      get
+      {
+        IntPtr thisptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        DimensionStyle.MaskFrame t = UnsafeNativeMethods.ON_V6_Annotation_MaskFrameType(thisptr, styleptr);
+        GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        return t;
+      }
+      set
+      {
+        IntPtr thisptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Annotation_SetMaskFrameType(thisptr, styleptr, value);
+        GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      }
+    }
 
     /// <summary>
     /// Color to use for drawing a text mask when it is enabled. If the mask is
     /// enabled and MaskColor is System.Drawing.Color.Transparent, then the
     /// viewport's color will be used for the MaskColor
     /// </summary>
+    /// <since>6.0</since>
     public Color MaskColor
     {
       get
@@ -344,6 +399,7 @@ namespace Rhino.Geometry
     /// value multiplied by TextHeight is the offset on each side of the tight rectangle 
     /// around the text characters to the mask rectangle. The default value is 0.1.
     /// </summary>
+    /// <since>6.0</since>
     public double MaskOffset
     {
       get
@@ -366,6 +422,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the dimension scale
     /// </summary>
+    /// <since>6.0</since>
     public double DimensionScale
     {
       get
@@ -393,6 +450,7 @@ namespace Rhino.Geometry
     /// <param name="dimstyle"></param>
     /// <param name="vport"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static double GetDimensionScale(RhinoDoc doc, DimensionStyle dimstyle, Rhino.Display.RhinoViewport vport)
     {
       uint docsn = doc.RuntimeSerialNumber;
@@ -408,6 +466,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets whether the text is oriented towards the reader when viewed from behind
     /// </summary>
+    /// <since>6.0</since>
     public bool DrawForward
     {
       get
@@ -430,6 +489,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The base Font for the text of the annotation.  The text string is rich text and therefore a different font that the base font can be associated with sub strings of the text
     /// </summary>
+    /// <since>6.0</since>
     public DocObjects.Font Font
     {
       get
@@ -455,6 +515,7 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary> Obsolete; use Font property instead </summary>
+    /// <since>6.1</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use Font property instead")]
     public int FontIndex
@@ -484,6 +545,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Length display units and format
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.LengthDisplay DimensionLengthDisplay
     {
       get
@@ -507,6 +569,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Alternate length display units and format
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.LengthDisplay AlternateDimensionLengthDisplay
     {
       get
@@ -530,6 +593,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Set or get the decimal separator c
     /// </summary>
+    /// <since>7.0</since>
     public char DecimalSeparator
     {
       get
@@ -566,6 +630,7 @@ namespace Rhino.Geometry
     #endregion properties originating from dim style that can be overridden
 
     /// <summary> Plane that this annotation lies on </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get
@@ -612,9 +677,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Return plain text string for this annotation with field expressions unevaluated 
-    /// intrunmap is an array of ints in groups of 3: run index, char pos start, length
+    /// Return plain text string for this annotation with field expressions unevaluated.
     /// </summary>
+    /// <param name="map">an array of int values in groups of 3: run index, character start position, and length.</param>
+    /// <returns>A plain text string.</returns>
+    /// <since>7.0</since>
     public string GetPlainTextWithRunMap(ref int[] map)
     {
       using (var sw = new StringWrapper())
@@ -632,6 +699,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// See RichText
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use RichText")]
     public string TextFormula
     {
@@ -642,6 +710,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Text including additional RTF formatting information
     /// </summary>
+    /// <since>6.0</since>
     public string RichText
     {
       get
@@ -660,6 +729,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Text including additional RTF formatting information
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use RichText or PlainText")]
     public string Text
     {
@@ -670,6 +740,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Text stripped of RTF formatting information
     /// </summary>
+    /// <since>6.0</since>
     public string PlainText
     {
       get { return GetText(false); }
@@ -683,6 +754,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Text stripped of RTF formatting information and with field expressions intact
     /// </summary>
+    /// <since>6.19</since>
     public string PlainTextWithFields
     {
       get { return GetPlainTextWithFields(); }
@@ -695,6 +767,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static string PlainTextToRtf(string str) => 
       @"{\rtf1{\ltrch " 
       + str.Replace("\n", Ph)
@@ -712,6 +785,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="rtfText"></param>
     /// <param name="dimstyle"></param>
+    /// <since>6.0</since>
     public void SetRichText(string rtfText, DimensionStyle dimstyle)
     {
       var const_ptr_dimstyle = (dimstyle!=null) ? dimstyle.ConstPointer() : IntPtr.Zero;
@@ -732,6 +806,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>6.0</since>
     public bool TextHasRtfFormatting => Regex.Match(RichText ?? "", @"^{\\\\?rtf").Success; // sometimes the string only has one backslack - only seen it in Dimensions
 
     /// <summary>
@@ -748,6 +823,7 @@ namespace Rhino.Geometry
     /// <param name="set_facename"></param>
     /// <param name="facename"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     static public string FormatRtfString(string rtf_in,
       bool clear_bold, bool set_bold,
       bool clear_italic, bool set_italic,
@@ -776,6 +852,7 @@ namespace Rhino.Geometry
     /// <param name="facename"></param>
     /// <returns></returns>
     ///     [Obsolete("Use AnnotationBase.FirstCharFont instead")]
+    /// <since>6.0</since>
     static public bool FirstCharProperties(string rtf_str, ref bool bold, ref bool italic, ref bool underline, ref string facename)
     {
       if(null == rtf_str)
@@ -803,6 +880,7 @@ namespace Rhino.Geometry
     /// Returns the font used by the first run of text in an annotation
     /// </summary>
     /// <returns></returns>
+    /// <since>6.5</since>
     public Rhino.DocObjects.Font FirstCharFont
     {
       get
@@ -814,8 +892,42 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Returns true if all of the text in the annotation is Bold, otherwise returns false
+    /// </summary>
+    /// <returns></returns>
+    /// <since>6.22</since>
+    public bool IsAllBold()
+    {
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Annotation_IsAllBold(const_ptr);
+    }
+
+    /// <summary>
+    /// Returns true if all of the text in the annotation is Italic, otherwise returns false
+    /// </summary>
+    /// <returns></returns>
+    /// <since>6.22</since>
+    public bool IsAllItalic()
+    {
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Annotation_IsAllItalic(const_ptr);
+    }
+
+    /// <summary>
+    /// Returns true if all of the text in the annotation is Underlined, otherwise returns false
+    /// </summary>
+    /// <returns></returns>
+    /// <since>6.22</since>
+    public bool IsAllUnderlined()
+    {
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Annotation_IsAllUnderlined(const_ptr);
+    }
+
+    /// <summary>
     /// Width of text in the model
     /// </summary>
+    /// <since>6.0</since>
     public double TextModelWidth
     {
       get
@@ -828,6 +940,7 @@ namespace Rhino.Geometry
 
 
     /// <summary> Text format width (Wrapping rectangle) </summary>
+    /// <since>6.0</since>
     public double FormatWidth
     {
       get
@@ -845,6 +958,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Is text wrapping on
     /// </summary>
+    /// <since>6.0</since>
     public bool TextIsWrapped
     {
       get
@@ -862,6 +976,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Wrap text
     /// </summary>
+    /// <since>6.0</since>
     public void WrapText()
     {
       var ptr_this = NonConstPointer();
@@ -871,6 +986,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Rotation of text in radians
     /// </summary>
+    /// <since>6.0</since>
     public double TextRotationRadians
     {
       get
@@ -889,6 +1005,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Rotation of text in degrees
     /// </summary>
+    /// <since>6.0</since>
     public double TextRotationDegrees
     {
       get { return RhinoMath.ToDegrees(TextRotationRadians); }
@@ -900,6 +1017,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="set_on"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual bool SetBold(bool set_on)
     {
       IntPtr ptr = NonConstPointer();
@@ -915,6 +1033,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="set_on"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual bool SetItalic(bool set_on)
     {
       IntPtr ptr = NonConstPointer();
@@ -929,6 +1048,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="set_on"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual bool SetUnderline(bool set_on)
     {
       IntPtr ptr = NonConstPointer();
@@ -944,6 +1064,7 @@ namespace Rhino.Geometry
     /// <param name="set_on"></param>
     /// <param name="facename"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual bool SetFacename(bool set_on, string facename)
     {
         IntPtr ptr = NonConstPointer();
@@ -953,12 +1074,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Aligned Boundingbox solver. Gets the world axis aligned boundingbox for the transformed geometry.
+    /// Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed geometry.
     /// </summary>
-    /// <param name="xform">Transformation to apply to bbox after calculation. 
+    /// <param name="xform">Transformation to apply to bounding box after calculation. 
     /// The geometry is not modified.</param>
-    /// <returns>The boundingbox of the transformed geometry in world coordinates 
+    /// <returns>The bounding box of the transformed geometry in world coordinates 
     /// or BoundingBox.Empty if not bounding box could be found.</returns>
+    /// <since>6.10</since>
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       BoundingBox bbox = BoundingBox.Empty;
@@ -987,6 +1109,7 @@ namespace Rhino.Geometry
     /// <param name="end_run_idx"></param>
     /// <param name="end_run_pos"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool RunReplace(
       string repl_string,
       int start_run_idx, 
@@ -1016,6 +1139,7 @@ namespace Rhino.Geometry
     /// 
     /// </summary>
     /// <param name="msg"></param>
+    /// <since>6.0</since>
     public InvalidDimensionStyleIdException(string msg) : base(msg) { }
   }
 }

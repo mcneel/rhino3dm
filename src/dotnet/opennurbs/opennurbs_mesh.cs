@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -75,6 +75,7 @@ namespace Rhino.Render
     /// <returns>
     /// Returns true if index is valid; otherwise returns false.
     /// </returns>
+    /// <since>5.10</since>
     public bool TryGetAt(int index, out double u, out double v, out double w)
     {
       u = v = w = -1.0;
@@ -85,6 +86,7 @@ namespace Rhino.Render
     /// <summary>
     /// Coordinate dimension: 2 = UV, 3 = UVW
     /// </summary>
+    /// <since>5.10</since>
     public int Dim
     {
       get { return UnsafeNativeMethods.ON_TextureCoordinates_GetDimension(ConstPointer()); }
@@ -92,6 +94,7 @@ namespace Rhino.Render
     /// <summary>
     /// The texture mapping Id.
     /// </summary>
+    /// <since>5.10</since>
     public Guid MappingId
     {
       get { return UnsafeNativeMethods.ON_TextureCoordinates_GetMappingId(ConstPointer()); }
@@ -110,6 +113,7 @@ namespace Rhino.Render
     }
 
     #region IList<Point3d> implementation
+    /// <since>5.10</since>
     void ICollection<Point3d>.Add(Point3d item)
     {
       throw new NotSupportedException("The cached texture coordinate list is read-only");
@@ -118,6 +122,7 @@ namespace Rhino.Render
     /// IList implementation, this list is always read-only so calling this
     /// will cause a NotSupportedException to be thrown.
     /// </summary>
+    /// <since>5.10</since>
     void ICollection<Point3d>.Clear()
     {
       throw new NotSupportedException("The cached texture coordinate list is read-only");
@@ -127,6 +132,7 @@ namespace Rhino.Render
     /// </summary>
     /// <param name="item"></param>
     /// <returns></returns>
+    /// <since>5.10</since>
     public bool Contains(Point3d item)
     {
       var index = IndexOf(item);
@@ -154,6 +160,7 @@ namespace Rhino.Render
     /// The number of elements in this collection is greater than the available
     /// space from arrayIndex to the end of the destination array.
     /// </exception>
+    /// <since>5.10</since>
     public void CopyTo(Point3d[] array, int arrayIndex)
     {
       if (array == null) throw new ArgumentNullException("array");
@@ -173,6 +180,7 @@ namespace Rhino.Render
     /// IList implementation, this list is always read-only so calling this
     /// will cause a NotSupportedException to be thrown.
     /// </summary>
+    /// <since>5.10</since>
     bool ICollection<Point3d>.Remove(Point3d item)
     {
       throw new NotSupportedException("The cached texture coordinate list is read-only");
@@ -180,6 +188,7 @@ namespace Rhino.Render
     /// <summary>
     /// Number of cached coordinates.
     /// </summary>
+    /// <since>5.10</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_TextureCoordinates_GetPointListCount(ConstPointer()); }
@@ -187,6 +196,7 @@ namespace Rhino.Render
     /// <summary>
     /// This collection is always read-only
     /// </summary>
+    /// <since>5.10</since>
     public bool IsReadOnly { get { return true; } }
     /// <summary>
     /// Returns an enumerator that iterates through this collection.
@@ -194,6 +204,7 @@ namespace Rhino.Render
     /// <returns>
     /// A enumerator that can be used to iterate through this collection.
     /// </returns>
+    /// <since>5.10</since>
     public IEnumerator<Point3d> GetEnumerator()
     {
       var const_pointer = ConstPointer();
@@ -205,6 +216,7 @@ namespace Rhino.Render
     /// <returns>
     /// A enumerator that can be used to iterate through this collection.
     /// </returns>
+    /// <since>5.10</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -218,6 +230,7 @@ namespace Rhino.Render
     /// <returns>
     /// The index of item if found in the list; otherwise, -1.
     /// </returns>
+    /// <since>5.10</since>
     public int IndexOf(Point3d item)
     {
       var count = Count;
@@ -231,11 +244,13 @@ namespace Rhino.Render
       return -1;
     }
 
+    /// <since>5.10</since>
     void IList<Point3d>.Insert(int index, Point3d item)
     {
       throw new NotSupportedException("The cached texture coordinate list is read-only");
     }
 
+    /// <since>5.10</since>
     void IList<Point3d>.RemoveAt(int index)
     {
       throw new NotSupportedException("The cached texture coordinate list is read-only");
@@ -339,23 +354,27 @@ namespace Rhino.Render
     /// <summary>
     ///  Gets or sets a map globally unique identifier.
     /// </summary>
+    /// <since>5.0</since>
     public Guid Id { get; set; }
 
     /// <summary>
     ///  Gets or sets a texture mapping type: linear, cylinder, etc...
     /// </summary>
+    /// <since>5.0</since>
     public TextureMappingType MappingType { get; set; }
 
     /// <summary>
     /// Gets or sets the cyclic redundancy check on the mapping.
     /// See also <see cref="RhinoMath.CRC32(uint,byte[])" />.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint MappingCRC { get; set; }
 
     /// <summary>
     /// Gets or sets a 4x4 matrix transform.
     /// </summary>
+    /// <since>5.0</since>
     public Transform MeshTransform { get; set; }
   }
 }
@@ -398,33 +417,323 @@ namespace Rhino.Geometry
     /// </summary>
     Object = 2
   }
+
+  /// <summary>
+  /// Output of a mesh checking operations.
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 128)]
+  public struct MeshCheckParameters
+  {
+    #region members
+    private byte m_bAbbreviatedVersion;
+    private byte m_bCheckForDegenerateFaces;
+    private int m_totalDegenerateFaceCt;
+    private byte m_bCheckForDegenerateNgons;
+    private int m_totalInvalidNgonCt;
+    private byte m_bCheckForNakeEdges;
+    private int m_totalNakedEdgeCt;
+    private byte m_bCheckForNonManifoldEdges;
+    private int m_totalNonManifoldEdgeCt;
+    private byte m_bCheckForExtremelyShortEdges;
+    private double m_DistanceToCheck;
+    private int m_totalExtremelyShortEdgeCt;
+    private byte m_bCheckForBogusNormals;
+    private int m_totalNotUnitVectorNormalCt;
+    private int m_totalZeroLengthNormalCt;
+    private int m_totalVertexFaceNormalDifferCt;
+    private byte m_bCheckForDuplicateFaces;
+    private int m_totalDuplicateFaceCt;
+    private byte m_bCheckForRandomFaceNormals;
+    private int m_totalRandomFaceNormalCt;
+    private byte m_bCheckForDisjointMeshes;
+    private int m_totalDisjointMeshCt;
+    private byte m_bCheckForUnusedVertices;
+    private int m_totalUnusedVertexCt;
+    private byte m_bCheckForSelfIntersection;
+    private int m_totalClashingPairsCt;
+    private byte m_bCheckForReserved1;
+    private int m_totalReserved1Ct;
+    private byte m_bCheckForReserved2;
+    private int m_totalReserved2Ct;
+    #endregion
+
+    /// <summary>
+    /// Gets the default mesh check parameters.
+    /// </summary>
+    /// <returns>The default mesh check parameters.</returns>
+    /// <since>7.0</since>
+    public static MeshCheckParameters Defaults()
+    {
+      var mcp = new MeshCheckParameters
+      {
+        m_bAbbreviatedVersion = 0,
+        m_bCheckForDegenerateFaces = 1,
+        m_totalDegenerateFaceCt = 0,
+        m_bCheckForDegenerateNgons = 1,
+        m_totalInvalidNgonCt = 0,
+        m_bCheckForNakeEdges = 1,
+        m_totalNakedEdgeCt = 0,
+        m_bCheckForNonManifoldEdges = 1,
+        m_totalNonManifoldEdgeCt = 0,
+        m_bCheckForExtremelyShortEdges = 1,
+        m_DistanceToCheck = RhinoMath.UnsetValue, // MX_DIMINISH_MAGNITUDE_COEFFICIENT_DEFAULT
+        m_totalExtremelyShortEdgeCt = 0,
+        m_bCheckForBogusNormals = 1,
+        m_totalNotUnitVectorNormalCt = 0,
+        m_totalZeroLengthNormalCt = 0,
+        m_totalVertexFaceNormalDifferCt = 0,
+        m_bCheckForDuplicateFaces = 1,
+        m_totalDuplicateFaceCt = 0,
+        m_bCheckForRandomFaceNormals = 1,
+        m_totalRandomFaceNormalCt = 0,
+        m_bCheckForDisjointMeshes = 1,
+        m_totalDisjointMeshCt = 0,
+        m_bCheckForUnusedVertices = 1,
+        m_totalUnusedVertexCt = 0,
+        m_bCheckForSelfIntersection = 1,
+        m_totalClashingPairsCt = 0,
+        m_bCheckForReserved1 = 0,
+        m_totalReserved1Ct = 0,
+        m_bCheckForReserved2 = 0,
+        m_totalReserved2Ct = 0
+      };
+      return mcp;
+    }
+
+    #region properties
+    /// <summary>
+    /// If true, then look for triangles and quads that have zero area and quads
+    /// where one sub triangle has zero area.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForDegenerateFaces
+    {
+      get { return Convert.ToBoolean(m_bCheckForDegenerateFaces); }
+      set { m_bCheckForDegenerateFaces = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total degenerate face count for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int DegenerateFaceCount => m_totalDegenerateFaceCt;
+
+    /// <summary>
+    /// If true, then look for ngons that have invalid information.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForInvalidNgons
+    {
+      get { return Convert.ToBoolean(m_bCheckForDegenerateNgons); }
+      set { m_bCheckForDegenerateNgons = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total number of invalid ngons for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int InvalidNgonCount => m_totalInvalidNgonCt;
+
+    /// <summary>
+    /// If true, then look for topological edges in the mesh topology where the
+    /// face count is 1. Note, this check is also made if CheckForDuplicateFaces
+    /// is true but the output is not shown if CheckForNakedEdges is false.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForNakedEdges
+    {
+      get { return Convert.ToBoolean(m_bCheckForNakeEdges); }
+      set { m_bCheckForNakeEdges = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total number of naked edges for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int NakedEdgeCount => m_totalNakedEdgeCt;
+
+    /// <summary>
+    /// If true, then look for topological edges in the mesh topology where the
+    /// face count is greater than 2. Note, this check is also made if
+    /// CheckForDuplicateFaces is true but the output is not shown if 
+    /// CheckForNonManifoldEdges is false.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForNonManifoldEdges
+    {
+      get { return Convert.ToBoolean(m_bCheckForNonManifoldEdges); }
+      set { m_bCheckForNonManifoldEdges = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total number of non-manifold edges for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int NonManifoldEdgeCount => m_totalNonManifoldEdgeCt;
+
+    /// <summary>
+    /// If true, then look for topological edges where the distance between the
+    /// endpoints is less than ExtremelyShortEdgeDistance.  
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForExtremelyShortEdges
+    {
+      get { return Convert.ToBoolean(m_bCheckForExtremelyShortEdges); }
+      set { m_bCheckForExtremelyShortEdges = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total number of extremely short edges for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int ExtremelyShortEdgeCount => m_totalExtremelyShortEdgeCt;
+
+    /// <summary>
+    /// If true, then look for vertex normals that are not unit vectors,
+    /// are zero length or vary greatly from the general direction of the
+    /// face normals.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForBadNormals
+    {
+      get { return Convert.ToBoolean(m_bCheckForBogusNormals); }
+      set { m_bCheckForBogusNormals = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Get the total count of normals that are not unit vectors for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int NonUnitVectorNormalCount => m_totalNotUnitVectorNormalCt;
+    /// <summary>
+    /// Gets the total count of zero length normals for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int ZeroLengthNormalCount => m_totalZeroLengthNormalCt;
+    /// <summary>
+    /// Gets the total count of vertex normals that differ greatly from face 
+    /// normals for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int VertexFaceNormalsDifferCount => m_totalVertexFaceNormalDifferCt;
+
+    /// <summary>
+    /// If true, then look for faces that have vertexes (not necessarily vertex indexes) that are identical.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForDuplicateFaces
+    {
+      get { return Convert.ToBoolean(m_bCheckForDuplicateFaces); }
+      set { m_bCheckForDuplicateFaces = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total count of duplicate faces for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int DuplicateFaceCount => m_totalDuplicateFaceCt;
+
+    /// <summary>
+    /// If true, then look for adjacent faces that have the same edge orientation.
+    /// This typically means that clockwise/counterclockwise orientation, and face normal
+    /// are not in sync.  
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForRandomFaceNormals
+    {
+      get { return Convert.ToBoolean(m_bCheckForRandomFaceNormals); }
+      set { m_bCheckForRandomFaceNormals = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total count of random face normals for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int RandomFaceNormalCount => m_totalRandomFaceNormalCt;
+
+    /// <summary>
+    /// If true, then look for faces in the mesh that are totally isolated from other faces in the mesh.  
+    /// (i.e. an island of faces, or many islands, that have a boundary of naked edges)
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForDisjointMeshes
+    {
+      get { return Convert.ToBoolean(m_bCheckForDisjointMeshes); }
+      set { m_bCheckForDisjointMeshes = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total count of disjoint pieces for all meshes.
+    /// </summary>
+    /// <since>7.0</since>
+    public int DisjointMeshCount => m_totalDisjointMeshCt;
+
+    /// <summary>
+    /// If true, then look for vertices that are not referenced by any face in the mesh.  
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForUnusedVertices
+    {
+      get { return Convert.ToBoolean(m_bCheckForUnusedVertices); }
+      set { m_bCheckForUnusedVertices = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total count of unused vertices for all meshes.  
+    /// </summary>
+    /// <since>7.0</since>
+    public int UnusedVertexCount => m_totalUnusedVertexCt;
+
+    /// <summary>
+    /// If true, then look for self intersections.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CheckForSelfIntersection
+    {
+      get { return Convert.ToBoolean(m_bCheckForSelfIntersection); }
+      set { m_bCheckForSelfIntersection = Convert.ToByte(value); }
+    }
+    /// <summary>
+    /// Gets the total count of self intersections for all meshes.  
+    /// </summary>
+    /// <since>7.0</since>
+    public int SelfIntersectingPairsCount => m_totalClashingPairsCt;
+
+    // #pragma warning disable 414
+    private bool CheckForReserved1
+    {
+      get { return Convert.ToBoolean(m_bCheckForReserved1); }
+      set { m_bCheckForReserved1 = Convert.ToByte(value); }
+    }
+    private int CheckForReserved1Count => m_totalReserved1Ct;
+
+    // #pragma warning disable 414
+    private bool CheckForReserved2
+    {
+      get { return Convert.ToBoolean(m_bCheckForReserved2); }
+      set { m_bCheckForReserved2 = Convert.ToByte(value); }
+    }
+    private int CheckForReserved2Count => m_totalReserved2Ct;
+    #endregion
+  }
+
 #endif
 
   /// <summary>
   /// Defines how to pack render/meshes textures.
   /// </summary>
-  public enum MeshingParameterTextureRange 
+  public enum MeshingParameterTextureRange
   {
     /// <summary>This value is not set.</summary>
     Unset = 0,
 
     /// <summary>
-    /// Rach face has a normalized texture range [0,1]x[0,1].
+    /// Each face has a normalized texture range [0,1]x[0,1].
     /// The normalized coordinate is calculated using the
     /// entire surface domain.  For meshes of trimmed
     /// surfaces when the active area is a small subset of
     /// the entire surface, there will be large regions of
     /// unused texture space in [0,1]x[0,1].  When the 3d region
     /// being meshed is far from being square-ish, there will be
-    /// a substantual amount of distortion mapping [0,1]x[0,1]
+    /// a substantial amount of distortion mapping [0,1]x[0,1]
     /// texture space to the 3d mesh.
     /// </summary>
     UnpackedUnscaledNormalized = 1,
 
     /// <summary>
     /// Each face is assigned a texture range that is a 
-    /// subrectangle of [0,1]x[0,1].  The subrectangles are 
-    /// mutually disjoint and packed into into [0,1]x[0,1]
+    /// sub-rectangle of [0,1]x[0,1].  The sub-rectangles are 
+    /// mutually disjoint and packed into [0,1]x[0,1]
     /// in a way that minimizes distortion and maximizes the
     /// coverage of [0,1]x[0,1].
     /// When the surface or surfaces being meshed are trimmed,
@@ -449,6 +758,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance with default values.
     /// <para>Initial values are same as <see cref="Default"/>.</para>
     /// </summary>
+    /// <since>5.0</since>
     public MeshingParameters()
     {
       m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
@@ -462,6 +772,7 @@ namespace Rhino.Geometry
     /// The density and number of mesh polygons, where 0.0 &lt;= density &lt;= 1.0,
     /// where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
     /// </param>
+    /// <since>6.0</since>
     public MeshingParameters(double density)
     {
       m_ptr = UnsafeNativeMethods.ON_MeshParameters_New2(density, RhinoMath.UnsetValue);
@@ -476,6 +787,7 @@ namespace Rhino.Geometry
     /// where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
     /// </param>
     /// <param name="minimumEdgeLength">The minimum allowed mesh edge length.</param>
+    /// <since>6.0</since>
     public MeshingParameters(double density, double minimumEdgeLength)
     {
       m_ptr = UnsafeNativeMethods.ON_MeshParameters_New2(density, minimumEdgeLength);
@@ -497,6 +809,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -530,6 +843,7 @@ namespace Rhino.Geometry
     /// <param name="doc">A Rhino document to query.</param>
     /// <returns>Meshing parameters of the document.</returns>
     /// <exception cref="ArgumentNullException">If doc is null.</exception>
+    /// <since>5.0</since>
     public static MeshingParameters DocumentCurrentSetting(RhinoDoc doc)
     {
       if (doc == null) throw new ArgumentNullException("doc");
@@ -545,6 +859,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static MeshingParameters Minimal
     {
       get
@@ -581,6 +896,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static MeshingParameters Default
     {
       get
@@ -599,6 +915,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("Use MeshingParameters.FastRenderMesh")]
     public static MeshingParameters Coarse
     {
@@ -621,8 +938,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets mesh creation parameters to create the a render mesh when 
-    /// meshing speed is prefered over mesh quality.
+    /// meshing speed is preferred over mesh quality.
     /// </summary>
+    /// <since>6.0</since>
     public static MeshingParameters FastRenderMesh
     {
       get
@@ -642,6 +960,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("Use MeshingParameters.QualityRenderMesh")]
     public static MeshingParameters Smooth
     {
@@ -664,8 +983,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets mesh creation parameters to create the a render mesh when mesh 
-    /// quality is prefered over meshing speed.
+    /// quality is preferred over meshing speed.
     /// </summary>
+    /// <since>6.0</since>
     public static MeshingParameters QualityRenderMesh
     {
       get
@@ -679,6 +999,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets mesh creation parameters to create the default analysis mesh.
     /// </summary>
+    /// <since>6.0</since>
     public static MeshingParameters DefaultAnalysisMesh
     {
       get
@@ -696,6 +1017,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets how and if textures will be packed.
     /// </summary>
+    /// <since>6.0</since>
     public MeshingParameterTextureRange TextureRange
     {
       get
@@ -711,7 +1033,7 @@ namespace Rhino.Geometry
         }
 
         IntPtr ptr = NonConstPointer();
-        if(!UnsafeNativeMethods.ON_MeshParameters_SetTextureRange(ptr, (uint)value))
+        if (!UnsafeNativeMethods.ON_MeshParameters_SetTextureRange(ptr, (uint)value))
         {
           throw new NotSupportedException("Could not set texture range.");
         }
@@ -734,6 +1056,7 @@ namespace Rhino.Geometry
     /// Gets or sets whether or not the mesh is allowed to have jagged seams. 
     /// When this flag is set to true, meshes on either side of a Brep Edge will not match up.
     /// </summary>
+    /// <since>5.0</since>
     public bool JaggedSeams
     {
       get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.JaggedSeams); }
@@ -744,6 +1067,7 @@ namespace Rhino.Geometry
     /// Gets or sets a value indicating whether or not the sampling grid can be refined 
     /// when certain tolerances are not met.
     /// </summary>
+    /// <since>5.0</since>
     public bool RefineGrid
     {
       get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.RefineGrid); }
@@ -754,6 +1078,7 @@ namespace Rhino.Geometry
     /// Gets or sets a value indicating whether or not planar areas are allowed 
     /// to be meshed in a simplified manner.
     /// </summary>
+    /// <since>5.0</since>
     public bool SimplePlanes
     {
       get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.SimplePlanes); }
@@ -764,6 +1089,7 @@ namespace Rhino.Geometry
     /// Gets or sets a value indicating whether or not surface curvature 
     /// data will be embedded in the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public bool ComputeCurvature
     {
       get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.ComputeCurvature); }
@@ -778,6 +1104,7 @@ namespace Rhino.Geometry
     /// resulting mesh is not closed because the input Brep has a geometric flaw, like
     /// loops in trimming curve.
     /// </summary>
+    /// <since>6.0</since>
     public bool ClosedObjectPostProcess
     {
       get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.ClosedObjectPostProcess); }
@@ -799,6 +1126,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the minimum number of grid quads in the initial sampling grid.
     /// </summary>
+    /// <since>5.0</since>
     public int GridMinCount
     {
       get { return GetGridCount(true); }
@@ -808,6 +1136,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the maximum number of grid quads in the initial sampling grid.
     /// </summary>
+    /// <since>5.0</since>
     public int GridMaxCount
     {
       get { return GetGridCount(false); }
@@ -830,6 +1159,7 @@ namespace Rhino.Geometry
     /// Gets or sets the maximum allowed angle difference (in radians) 
     /// for a single sampling quad. The angle pertains to the surface normals.
     /// </summary>
+    /// <since>5.0</since>
     public double GridAngle
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.GridAngle); }
@@ -839,6 +1169,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the maximum allowed aspect ratio of sampling quads.
     /// </summary>
+    /// <since>5.0</since>
     public double GridAspectRatio
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.GridAspectRatio); }
@@ -850,6 +1181,7 @@ namespace Rhino.Geometry
     /// Values lower than 1.0 will decrease the number of initial quads, 
     /// values higher than 1.0 will increase the number of initial quads.
     /// </summary>
+    /// <since>5.0</since>
     public double GridAmplification
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.GridAmplification); }
@@ -860,6 +1192,7 @@ namespace Rhino.Geometry
     /// Gets or sets the maximum allowed edge deviation. 
     /// This tolerance is measured between the center of the mesh edge and the surface.
     /// </summary>
+    /// <since>5.0</since>
     public double Tolerance
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.Tolerance); }
@@ -869,6 +1202,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the minimum tolerance.
     /// </summary>
+    /// <since>5.0</since>
     public double MinimumTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.MinimumTolerance); }
@@ -878,6 +1212,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the relative tolerance.
     /// </summary>
+    /// <since>5.0</since>
     public double RelativeTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RelativeTolerance); }
@@ -887,6 +1222,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the minimum allowed mesh edge length.
     /// </summary>
+    /// <since>5.0</since>
     public double MinimumEdgeLength
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.MinimumEdgeLength); }
@@ -896,6 +1232,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the maximum allowed mesh edge length.
     /// </summary>
+    /// <since>5.0</since>
     public double MaximumEdgeLength
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.MaximumEdgeLength); }
@@ -905,6 +1242,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the mesh parameter refine angle.
     /// </summary>
+    /// <since>5.0</since>
     public double RefineAngle
     {
       get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngle); }
@@ -938,17 +1276,23 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Start of subinterval of parent mesh vertex array</summary>
+    /// <since>5.6</since>
     public int StartVertexIndex { get { return m_vi0; } }
     /// <summary>End of subinterval of parent mesh vertex array</summary>
+    /// <since>5.6</since>
     public int EndVertexIndex { get { return m_vi1; } }
     /// <summary>Start of subinterval of parent mesh face array</summary>
+    /// <since>5.6</since>
     public int StartFaceIndex { get { return m_fi0; } }
     /// <summary>End of subinterval of parent mesh face array</summary>
+    /// <since>5.6</since>
     public int EndFaceIndex { get { return m_fi1; } }
 
     /// <summary>EndVertexIndex - StartVertexIndex</summary>
+    /// <since>5.6</since>
     public int VertexCount { get { return m_vertex_count; } }
     /// <summary></summary>
+    /// <since>5.6</since>
     public int TriangleCount { get { return m_triangle_count; } }
   }
 
@@ -975,6 +1319,7 @@ namespace Rhino.Geometry
     /// <param name="thickness">Thickness of mesh at vertex.</param>
     /// <param name="point">Vertex location.</param>
     /// <param name="oppositePoint">Opposite location.</param>
+    /// <since>6.0</since>
     public MeshThicknessMeasurement(int meshIndex, int vertexIndex, double thickness, Point3d point, Point3d oppositePoint)
     {
       _meshIndex = meshIndex;
@@ -989,6 +1334,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the index of the mesh associated with this thickness measurement.
     /// </summary>
+    /// <since>6.0</since>
     public int MeshIndex
     {
       get { return _meshIndex; }
@@ -996,6 +1342,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the index of the vertex associated with this thickness measurement.
     /// </summary>
+    /// <since>6.0</since>
     public int VertexIndex
     {
       get { return _vertexIndex; }
@@ -1003,6 +1350,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the local thickness of the mesh.
     /// </summary>
+    /// <since>6.0</since>
     public double Thickness
     {
       get { return _thickness; }
@@ -1010,6 +1358,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the location of the thickness measurement.
     /// </summary>
+    /// <since>6.0</since>
     public Point3d Point
     {
       get { return _point0; }
@@ -1017,6 +1366,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point opposite to the measurement point.
     /// </summary>
+    /// <since>6.0</since>
     public Point3d OppositePoint
     {
       get { return _point1; }
@@ -1034,6 +1384,7 @@ namespace Rhino.Geometry
     /// Users of this class should not rely on default values to stay constant
     /// across service releases.
     /// </summary>
+    /// <since>6.0</since>
     public ReduceMeshParameters()
     {
       DesiredPolygonCount = 0;
@@ -1048,33 +1399,42 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Desired or target number of faces</summary>
+    /// <since>6.0</since>
     public int DesiredPolygonCount { get; set; }
 
     /// <summary>If true mesh appearance is not changed even if the target polygon count is not reached</summary>
+    /// <since>6.0</since>
     public bool AllowDistortion { get; set; }
 
     /// <summary>Integer from 1 to 10 telling how accurate reduction algorithm
     /// to use. Greater number gives more accurate results</summary>
+    /// <since>6.0</since>
     public int Accuracy { get; set; }
 
     /// <summary>If true mesh is fitted to an axis aligned unit cube until reduction is complete</summary>
+    /// <since>6.0</since>
     public bool NormalizeMeshSize { get; set; }
 
     /// <summary></summary>
+    /// <since>6.0</since>
     public string Error { get; internal set; }
 
     /// <summary></summary>
+    /// <since>6.0</since>
     public int[] FaceTags { get; set; }
 
     /// <summary>List of topological mesh vertices and mesh vertices that will not be moved or deleted in reduction process.
     /// Each mesh vertex will lock the corresponding topological mesh vertex. In other words it is not possible to have a
     /// locked and non-locked mesh vertex at the same location.</summary>
+    /// <since>6.0</since>
     public ComponentIndex[] LockedComponents { get; set; }
 
     /// <summary></summary>
+    /// <since>6.0</since>
     public CancellationToken CancelToken { get; set; }
 
     /// <summary></summary>
+    /// <since>6.0</since>
     public IProgress<double> ProgressReporter { get; set; }
   }
 
@@ -1084,8 +1444,9 @@ namespace Rhino.Geometry
   public class QuadRemeshParameters
   {
     /// <summary>
-    /// The number of quads to try to achieve in the final remeshed object
+    /// The number of quads to try to achieve in the final re-meshed object
     /// </summary>
+    /// <since>7.0</since>
     public int TargetQuadCount { get; set; } = 2000;
 
     /// <summary>
@@ -1093,17 +1454,20 @@ namespace Rhino.Geometry
     /// Smaller values results in more uniform quad sizes at the risk of less feature preservation.
     /// Range [0 - 100]
     /// </summary>
+    /// <since>7.0</since>
     public double AdaptiveSize { get; set; } = 50;
 
     /// <summary>
     /// Respect the original Target Quad Count value as much as possible.
     /// True returns more quads than TargetQuadCount depending on amount of high-curvature areas.
     /// </summary>
+    /// <since>7.0</since>
     public bool AdaptiveQuadCount { get; set; } = true;
 
     /// <summary>
     /// When enabled the hard edges in models will be retained.
     /// </summary>
+    /// <since>7.0</since>
     public bool DetectHardEdges { get; set; } = true;
 
     /*
@@ -1119,17 +1483,20 @@ namespace Rhino.Geometry
     /// 2 = Interpolate Edge Loop
     /// This value is ignored if Guide Curves are not supplied
     /// </summary>
+    /// <since>7.0</since>
     public int GuideCurveInfluence { get; set; } = 0;
 
     /// <summary>
     /// 0=off, 1=On(Smart), 2=On(Strict) :
     /// Mesh array's created from Breps will have their brep face edge boundaries retained.
     /// Smart - Small or insignificant input faces are ignored.
-    /// Strict - All input faces are factored in remeshed result.
+    /// Strict - All input faces are factored in re-meshed result.
     /// </summary>
+    /// <since>7.0</since>
     public int PreserveMeshArrayEdgesMode { get; set; } = 0;
 
-    /// <summary> Symmetry axis to use for symmetric remeshing </summary>
+    /// <summary> Symmetry axis to use for symmetric re-meshing </summary>
+    /// <since>7.0</since>
     public QuadRemeshSymmetryAxis SymmetryAxis { get; set; } = QuadRemeshSymmetryAxis.None;
   }
 
@@ -1137,7 +1504,7 @@ namespace Rhino.Geometry
   [Flags]
   public enum QuadRemeshSymmetryAxis
   {
-    /// <summary> No symmetric remeshing</summary>
+    /// <summary> No symmetric re-meshing</summary>
     None = 0,
     /// <summary> Symmetry across X axis</summary>
     X = 1,
@@ -1156,6 +1523,24 @@ namespace Rhino.Geometry
   {
     #region static mesh creation
 #if RHINO_SDK
+
+    /// <summary>
+    /// Examines the mesh and logs a description of what it finds right or wrong.
+    /// The various properties the function checks for are described in MeshCheckParameters.
+    /// </summary>
+    /// <param name="textLog">The text log</param>
+    /// <param name="parameters">The mesh checking parameter and results.</param>
+    /// <returns>Returns true if the mesh is valid, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool Check(TextLog textLog, ref MeshCheckParameters parameters)
+    {
+      if (null == textLog)
+        throw new ArgumentNullException(nameof(textLog));
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_textlog = textLog.NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoCheckMesh(ptr_const_this, ptr_textlog, ref parameters);
+    }
+
     /// <summary>
     /// Constructs a planar mesh grid.
     /// </summary>
@@ -1169,6 +1554,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentException">Thrown when yInterval is a null reference.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when xCount is less than or equal to zero.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when yCount is less than or equal to zero.</exception>
+    /// <since>5.0</since>
     public static Mesh CreateFromPlane(Plane plane, Interval xInterval, Interval yInterval, int xCount, int yCount)
     {
       if (!plane.IsValid) { throw new ArgumentException("plane is invalid"); }
@@ -1185,6 +1571,31 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Constructs a sub-mesh, that contains a filtered list of faces.
+    /// </summary>
+    /// <param name="original">The mesh to copy. This item can be null, and in this case an empty mesh is returned.</param>
+    /// <param name="inclusion">A series of true and false values, that determine if each face is used in the new mesh.
+    /// <para>If the amount does not match the length of the face list, the pattern is repeated. If it exceeds the amount
+    /// of faces in the mesh face list, the pattern is truncated. This items can be null or empty, and the mesh will simply be duplicated.</para>
+    /// </param>
+    public static Mesh CreateFromFilteredFaceList(Mesh original, IEnumerable<bool> inclusion)
+    {
+      if (original == null) { return new Mesh(); }
+      if (inclusion == null) { return original.DuplicateMesh(); }
+
+      IntPtr original_int_ptr = original.ConstPointer();
+      bool[] array = RhinoListHelpers.GetConstArray(inclusion, out int count);
+
+      IntPtr ptr = UnsafeNativeMethods.ON_Mesh_CreateFromFilteredFaceList(original_int_ptr, array, count);
+
+      GC.KeepAlive(original);
+
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new Mesh(ptr, null);
+    }
+
+    /// <summary>
     /// Constructs new mesh that matches a bounding box.
     /// </summary>
     /// <param name="box">A box to use for creation.</param>
@@ -1192,6 +1603,7 @@ namespace Rhino.Geometry
     /// <param name="yCount">Number of faces in y-direction.</param>
     /// <param name="zCount">Number of faces in z-direction.</param>
     /// <returns>A new brep, or null on failure.</returns>
+    /// <since>5.6</since>
     public static Mesh CreateFromBox(BoundingBox box, int xCount, int yCount, int zCount)
     {
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoMeshBox2(box.Min, box.Max, xCount, yCount, zCount);
@@ -1206,6 +1618,7 @@ namespace Rhino.Geometry
     /// <param name="yCount">Number of faces in y-direction.</param>
     /// <param name="zCount">Number of faces in z-direction.</param>
     /// <returns></returns>
+    /// <since>5.3</since>
     public static Mesh CreateFromBox(Box box, int xCount, int yCount, int zCount)
     {
       return CreateFromBox(box.GetCorners(), xCount, yCount, zCount);
@@ -1236,6 +1649,7 @@ namespace Rhino.Geometry
     /// <param name="zCount">Number of faces in z-direction.</param>
     /// <returns>A new brep, or null on failure.</returns>
     /// <returns>A new box mesh, on null on error.</returns>
+    /// <since>5.3</since>
     public static Mesh CreateFromBox(IEnumerable<Point3d> corners, int xCount, int yCount, int zCount)
     {
       var box_corners = new Point3d[8];
@@ -1265,6 +1679,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentOutOfRangeException">Thrown when xCount is less than or equal to two.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when yCount is less than or equal to two.</exception>
     /// <returns></returns>
+    /// <since>5.0</since>
     public static Mesh CreateFromSphere(Sphere sphere, int xCount, int yCount)
     {
       if (!sphere.IsValid) { throw new ArgumentException("sphere is invalid"); }
@@ -1291,6 +1706,7 @@ namespace Rhino.Geometry
     /// Note, the total number of mesh faces produces is: 20 * (4 ^ subdivisions)
     /// </param>
     /// <returns>A welded mesh icosphere if successful, or null on failure.</returns>
+    /// <since>6.0</since>
     public static Mesh CreateIcoSphere(Sphere sphere, int subdivisions)
     {
       if (!sphere.IsValid) { throw new ArgumentException("sphere is invalid"); }
@@ -1313,6 +1729,7 @@ namespace Rhino.Geometry
     /// Note, the total number of mesh faces produces is: 6 * (4 ^ subdivisions)
     /// </param>
     /// <returns>A welded quad mesh sphere if successful, or null on failure.</returns>
+    /// <since>6.0</since>
     public static Mesh CreateQuadSphere(Sphere sphere, int subdivisions)
     {
       if (!sphere.IsValid) { throw new ArgumentException("sphere is invalid"); }
@@ -1328,6 +1745,7 @@ namespace Rhino.Geometry
     /// <param name="around">Number of faces around the cylinder.</param>
     /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
     /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    /// <since>5.0</since>
     public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around)
     {
       if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
@@ -1343,6 +1761,7 @@ namespace Rhino.Geometry
     /// <param name="capTop">If true end at Cylinder.Height2 should be capped.</param>
     /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
     /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop)
     {
       if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
@@ -1356,9 +1775,10 @@ namespace Rhino.Geometry
     /// <param name="around">Number of faces around the cylinder.</param>
     /// <param name="capBottom">If true end at Cylinder.Height1 should be capped.</param>
     /// <param name="capTop">If true end at Cylinder.Height2 should be capped.</param>
-    /// <param name="quadCaps">If true and it's possible to make quad caps, ie. around is even, then caps will have quad faces.</param>
+    /// <param name="quadCaps">If true and it's possible to make quad caps, i.e.. around is even, then caps will have quad faces.</param>
     /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
     /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop, bool quadCaps)
     {
       if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
@@ -1372,6 +1792,7 @@ namespace Rhino.Geometry
     /// <param name="around">Number of faces around the cone.</param>
     /// <exception cref="ArgumentException">Thrown when cone is invalid.</exception>
     /// <returns>A valid mesh if successful.</returns>
+    /// <since>5.0</since>
     public static Mesh CreateFromCone(Cone cone, int vertical, int around)
     {
       return CreateFromCone(cone, vertical, around, true);
@@ -1384,6 +1805,7 @@ namespace Rhino.Geometry
     /// <param name="solid">If false the mesh will be open with no faces on the circular planar portion.</param>
     /// <exception cref="ArgumentException">Thrown when cone is invalid.</exception>
     /// <returns>A valid mesh if successful.</returns>
+    /// <since>6.8</since>
     public static Mesh CreateFromCone(Cone cone, int vertical, int around, bool solid)
     {
       if (!cone.IsValid) { throw new ArgumentException("cone is invalid"); }
@@ -1396,9 +1818,10 @@ namespace Rhino.Geometry
     /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
     /// <param name="around">Number of faces around the cone.</param>
     /// <param name="solid">If false the mesh will be open with no faces on the circular planar portion.</param>
-    /// <param name="quadCaps">If true and it's possible to make quad caps, ie. around is even, then caps will have quad faces.</param>
+    /// <param name="quadCaps">If true and it's possible to make quad caps, i.e.. around is even, then caps will have quad faces.</param>
     /// <exception cref="ArgumentException">Thrown when cone is invalid.</exception>
     /// <returns>A valid mesh if successful.</returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromCone(Cone cone, int vertical, int around, bool solid, bool quadCaps)
     {
       if (!cone.IsValid) { throw new ArgumentException("cone is invalid"); }
@@ -1414,6 +1837,7 @@ namespace Rhino.Geometry
     /// <param name="around">Number of faces around the torus.</param>
     /// <exception cref="ArgumentException">Thrown when torus is invalid.</exception>
     /// <returns>Returns a mesh torus if successful, null otherwise.</returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromTorus(Torus torus, int vertical, int around)
     {
       if (!torus.IsValid) { throw new ArgumentException("torus is invalid"); }
@@ -1429,6 +1853,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// Do not use.
     /// </returns>
+    /// <since>5.0</since>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Mesh CreateFromPlanarBoundary(Curve boundary, MeshingParameters parameters)
     {
@@ -1446,6 +1871,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// New mesh on success or null on failure.
     /// </returns>
+    /// <since>6.0</since>
     public static Mesh CreateFromPlanarBoundary(Curve boundary, MeshingParameters parameters, double tolerance)
     {
       IntPtr ptr_const_curve = boundary.ConstPointer();
@@ -1457,12 +1883,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Attempts to create a Mesh that is a triangulation of a closed polyline.
+    /// Attempts to create a Mesh that is a triangulation of a simple closed polyline that projects onto a plane.
     /// </summary>
     /// <param name="polyline">must be closed</param>
     /// <returns>
     /// New mesh on success or null on failure.
     /// </returns>
+    /// <since>5.0</since>
     public static Mesh CreateFromClosedPolyline(Polyline polyline)
     {
       if (!polyline.IsClosed)
@@ -1523,6 +1950,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_tightboundingbox.cs' lang='cs'/>
     /// <code source='examples\py\ex_tightboundingbox.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("Use version that takes MeshingParameters as input")]
     public static Mesh[] CreateFromBrep(Brep brep)
     {
@@ -1547,6 +1975,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Mesh[] CreateFromBrep(Brep brep, MeshingParameters meshingParameters)
     {
       IntPtr ptr_const_brep = brep.ConstPointer();
@@ -1566,6 +1995,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="surface">Surface to approximate</param>
     /// <returns>New mesh representing the surface</returns>
+    /// <since>6.5</since>
     public static Mesh CreateFromSurface(Surface surface)
     {
       return CreateFromSurface(surface, MeshingParameters.Default);
@@ -1577,6 +2007,7 @@ namespace Rhino.Geometry
     /// <param name="surface">Surface to approximate</param>
     /// <param name="meshingParameters">settings used to create the mesh</param>
     /// <returns>New mesh representing the surface</returns>
+    /// <since>6.5</since>
     public static Mesh CreateFromSurface(Surface surface, MeshingParameters meshingParameters)
     {
       IntPtr ptr_const_surface = surface.ConstPointer();
@@ -1595,6 +2026,7 @@ namespace Rhino.Geometry
     /// <param name="subd"></param>
     /// <param name="displayDensity"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromSubD(SubD subd, int displayDensity)
     {
       IntPtr constPtrSubD = subd.ConstPointer();
@@ -1610,6 +2042,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="subd"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromSubDControlNet(SubD subd)
     {
       IntPtr constPtrSubD = subd.ConstPointer();
@@ -1632,7 +2065,7 @@ namespace Rhino.Geometry
     /// unpredictable and is likely to not include the entire outer boundary.
     /// </param>
     /// <param name="angleToleranceRadians">
-    /// Maximum angle between unit tangents and adjacent verticies. Used to
+    /// Maximum angle between unit tangents and adjacent vertices. Used to
     /// divide curve inputs that cannot otherwise be represented as a polyline.
     /// </param>
     /// <param name="innerBoundaryCurves">
@@ -1675,6 +2108,7 @@ namespace Rhino.Geometry
     /// perimeter will be divided into to create an outer boundary to work with.
     /// </param>
     /// <returns>mesh on success; null on failure</returns>
+    /// <since>6.0</since>
     public static Mesh CreatePatch(Polyline outerBoundary, double angleToleranceRadians, Surface pullbackSurface,
       IEnumerable<Curve> innerBoundaryCurves, IEnumerable<Curve> innerBothSideCurves, IEnumerable<Point3d> innerPoints,
       bool trimback, int divisions)
@@ -1761,6 +2195,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="meshes">Meshes to union.</param>
     /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>5.0</since>
     public static Mesh[] CreateBooleanUnion(IEnumerable<Mesh> meshes)
     {
       if (null == meshes)
@@ -1843,6 +2278,7 @@ namespace Rhino.Geometry
     /// <param name="firstSet">First set of Meshes (the set to subtract from).</param>
     /// <param name="secondSet">Second set of Meshes (the set to subtract).</param>
     /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>5.0</since>
     public static Mesh[] CreateBooleanDifference(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet)
     {
       return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference);
@@ -1853,6 +2289,7 @@ namespace Rhino.Geometry
     /// <param name="firstSet">First set of Meshes.</param>
     /// <param name="secondSet">Second set of Meshes.</param>
     /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>5.0</since>
     public static Mesh[] CreateBooleanIntersection(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet)
     {
       return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Intersect);
@@ -1864,6 +2301,7 @@ namespace Rhino.Geometry
     /// <param name="meshesToSplit">A list, an array, or any enumerable set of meshes to be split. If this is null, null will be returned.</param>
     /// <param name="meshSplitters">A list, an array, or any enumerable set of meshes that cut. If this is null, null will be returned.</param>
     /// <returns>A new mesh array, or null on error.</returns>
+    /// <since>5.0</since>
     public static Mesh[] CreateBooleanSplit(IEnumerable<Mesh> meshesToSplit, IEnumerable<Mesh> meshSplitters)
     {
       return MeshBooleanHelper(meshesToSplit, meshSplitters, UnsafeNativeMethods.MeshBooleanIntDiffConst.Split);
@@ -1880,6 +2318,7 @@ namespace Rhino.Geometry
     /// <param name="faceted">Specifies whether the pipe is faceted, or not.</param>
     /// <param name="intervals">A series of intervals to pipe. This value can be null.</param>
     /// <returns>A new mesh, or null on failure.</returns>
+    /// <since>6.0</since>
     public static Mesh CreateFromCurvePipe(Curve curve, double radius, int segments, int accuracy,
       MeshPipeCapStyle capType, bool faceted, IEnumerable<Interval> intervals = null)
     {
@@ -1924,8 +2363,9 @@ namespace Rhino.Geometry
     /// <param name="curve">A curve to extrude.</param>
     /// <param name="direction">The direction of extrusion.</param>
     /// <param name="parameters">The parameters of meshing.</param>
-    /// <param name="boundingBox">The bounding box controls the length of the estrusion.</param>
+    /// <param name="boundingBox">The bounding box controls the length of the extrusion.</param>
     /// <returns>A new mesh, or null on failure.</returns>
+    /// <since>7.0</since>
     public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters,
       BoundingBox boundingBox)
     {
@@ -1948,10 +2388,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Repairs meshes with vertices that are too near, using a tolerance value.</summary>
-    /// <param name="meshes">The meshes to be repared.</param>
+    /// <param name="meshes">The meshes to be repaired.</param>
     /// <param name="tolerance">A minimum distance for clean vertices.</param>
     /// <returns>A valid meshes array if successful. If no change was required, some meshes can be null. Otherwise, null, when no changes were done.</returns>
     /// <remarks><seealso cref="RequireIterativeCleanup"/></remarks>
+    /// <since>7.0</since>
     public static Mesh[] CreateFromIterativeCleanup(IEnumerable<Mesh> meshes, double tolerance)
     {
       if (meshes == null) throw new ArgumentNullException(nameof(meshes));
@@ -1985,6 +2426,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">A 3d distance. This is usually a value of about 10e-7 magnitude.</param>
     /// <returns>True if meshes would be changed, otherwise false.</returns>
     /// <remarks><seealso cref="Rhino.Geometry.Mesh.CreateFromIterativeCleanup"/></remarks>
+    /// <since>7.0</since>
     public static bool RequireIterativeCleanup(IEnumerable<Mesh> meshes, double tolerance)
     {
       if (meshes == null) throw new ArgumentNullException(nameof(meshes));
@@ -2011,6 +2453,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Mesh()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_Mesh_New(IntPtr.Zero);
@@ -2053,7 +2496,7 @@ namespace Rhino.Geometry
     }
 
     internal int[] m_internal_ngon_edges;
-    /// <summary> Clear local cache on non const calls </summary>
+    /// <summary> Clear local cache on non constant calls </summary>
     protected override void NonConstOperation()
     {
       if (OneShotNonConstCallback != null)
@@ -2088,6 +2531,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">The other mesh to copy from.</param>
     /// <exception cref="ArgumentNullException">If other is null.</exception>
+    /// <since>5.0</since>
     public void CopyFrom(Mesh other)
     {
       if (other == null) throw new ArgumentNullException("other");
@@ -2103,6 +2547,7 @@ namespace Rhino.Geometry
     /// This is the same as <see cref="DuplicateMesh"/>.
     /// </summary>
     /// <returns>A mesh.</returns>
+    /// <since>5.0</since>
     public override GeometryBase Duplicate()
     {
       IntPtr ptr = ConstPointer();
@@ -2113,6 +2558,7 @@ namespace Rhino.Geometry
     /// <summary>Constructs a copy of this mesh.
     /// This is the same as <see cref="Duplicate"/>.
     /// </summary>
+    /// <since>5.0</since>
     public Mesh DuplicateMesh()
     {
       return Duplicate() as Mesh;
@@ -2128,6 +2574,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of disjoint (topologically unconnected) pieces in this mesh.
     /// </summary>
+    /// <since>5.0</since>
     public int DisjointMeshCount
     {
       get
@@ -2142,6 +2589,7 @@ namespace Rhino.Geometry
     /// A mesh is considered solid when every mesh edge borders two or more faces.
     /// </summary>
     /// <returns>true if the mesh is closed, false if it is not.</returns>
+    /// <since>5.0</since>
     public bool IsClosed
     {
       get
@@ -2167,6 +2615,7 @@ namespace Rhino.Geometry
     /// and there is at least one "edge" with no more than one adjacent face.
     /// </param>
     /// <returns>true if every mesh "edge" has at most two adjacent faces.</returns>
+    /// <since>5.0</since>
     public bool IsManifold(bool topologicalTest, out bool isOriented, out bool hasBoundary)
     {
       isOriented = false;
@@ -2179,12 +2628,27 @@ namespace Rhino.Geometry
     /// Will return true if SetCachedTextureCoordinates has been called;
     /// otherwise will return false.
     /// </summary>
+    /// <since>5.10</since>
     public bool HasCachedTextureCoordinates
     {
       get
       {
         var const_pointer = ConstPointer();
         var value = UnsafeNativeMethods.ON_Mesh_HasCachedTextureCoordinates(const_pointer);
+        return value;
+      }
+    }
+
+    /// <summary>
+    /// HasPrincipalCurvatures
+    /// </summary>
+    /// <since>7.0</since>
+    public bool HasPrincipalCurvatures
+    {
+      get
+      {
+        var const_pointer = ConstPointer();
+        var value = UnsafeNativeMethods.ON_Mesh_GetBool(const_pointer, UnsafeNativeMethods.MeshBoolConst.HasPrincipalCurvatures);
         return value;
       }
     }
@@ -2199,6 +2663,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.MeshVertexList Vertices
     {
       get { return m_vertices ?? (m_vertices = new Collections.MeshVertexList(this)); }
@@ -2211,6 +2676,7 @@ namespace Rhino.Geometry
     /// <para>This object stores vertex connectivity and the indices of vertices
     /// that were unified while computing the edge topology.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Collections.MeshTopologyVertexList TopologyVertices
     {
       get
@@ -2225,6 +2691,7 @@ namespace Rhino.Geometry
     /// Gets the <see cref="Rhino.Geometry.Collections.MeshTopologyEdgeList"/> object associated with this mesh.
     /// <para>This object stores edge connectivity.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Collections.MeshTopologyEdgeList TopologyEdges
     {
       get
@@ -2242,6 +2709,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.MeshVertexNormalList Normals
     {
       get { return m_normals ?? (m_normals = new Collections.MeshVertexNormalList(this)); }
@@ -2256,6 +2724,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Collections.MeshFaceList Faces
     {
       get { return m_faces ?? (m_faces = new Collections.MeshFaceList(this)); }
@@ -2272,6 +2741,7 @@ namespace Rhino.Geometry
     /// that is, all polygons that are visible in the mesh, then use the
     /// <see cref="GetNgonAndFacesEnumerable()"/> helper method.</para>
     /// </summary>
+    /// <since>6.0</since>
     public Collections.MeshNgonList Ngons
     {
       get { return m_ngons ?? (m_ngons = new Collections.MeshNgonList(this)); }
@@ -2281,6 +2751,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets access to the face normal collection in this mesh.
     /// </summary>
+    /// <since>5.0</since>
     public Collections.MeshFaceNormalList FaceNormals
     {
       get { return m_facenormals ?? (m_facenormals = new Collections.MeshFaceNormalList(this)); }
@@ -2290,6 +2761,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets access to the (optional) vertex color collection in this mesh.
     /// </summary>
+    /// <since>5.0</since>
     public Collections.MeshVertexColorList VertexColors
     {
       get { return m_vertexcolors ?? (m_vertexcolors = new Collections.MeshVertexColorList(this)); }
@@ -2299,6 +2771,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets access to the vertex texture coordinate collection in this mesh.
     /// </summary>
+    /// <since>5.0</since>
     public Collections.MeshTextureCoordinateList TextureCoordinates
     {
       get { return m_texcoords ?? (m_texcoords = new Collections.MeshTextureCoordinateList(this)); }
@@ -2309,6 +2782,7 @@ namespace Rhino.Geometry
     /// Gets access to the vertex hidden/visibility collection in this mesh.
     /// This is a runtime property and it is not saved in the 3dm file.
     /// </summary>
+    /// <since>6.0</since>
     public Collections.MeshVertexStatusList ComponentStates
     {
       get { return m_hidden ?? (m_hidden = new Collections.MeshVertexStatusList(this)); }
@@ -2317,6 +2791,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Removes all texture coordinate information from this mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void ClearTextureData()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2326,6 +2801,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Removes surface parameters, curvature parameters and surface statistics from the mesh.
     /// </summary>
+    /// <since>6.0</since>
     public void ClearSurfaceData()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2335,6 +2811,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Removes topology data, forcing all topology information to be recomputed.
     /// </summary>
+    /// <since>6.0</since>
     public void DestroyTopology()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2344,6 +2821,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Destroys the mesh vertex access tree.
     /// </summary>
+    /// <since>6.0</since>
     public void DestroyTree()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2353,6 +2831,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Destroys mesh partition.
     /// </summary>
+    /// <since>6.0</since>
     public void DestroyPartition()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2367,7 +2846,8 @@ namespace Rhino.Geometry
     /// these parameters and the mesh geometry is updated.
     /// </summary>
     /// <param name="surface">An input surface.</param>
-    /// <returns>true if the operation succceeded; false otherwise.</returns>
+    /// <returns>true if the operation succeeded; false otherwise.</returns>
+    /// <since>5.0</since>
     public bool EvaluateMeshGeometry(Surface surface)
     {
       // don't switch to non-const if we don't have to
@@ -2389,6 +2869,7 @@ namespace Rhino.Geometry
     /// <param name="tm">Texture mapping</param>
     /// <param name="xf">Transform to apply to the texture mapping</param>
     /// <param name="lazy">Whether to generate lazily (true) or right away (false)</param>
+    /// <since>6.0</since>
     public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy)
     {
       UnsafeNativeMethods.ON_Mesh_SetTextureCoordinatesFromMappingAndTransform(NonConstPointer(), tm.ConstPointer(), ref xf, lazy);
@@ -2399,6 +2880,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="tm"></param>
     /// <param name="xf"></param>
+    /// <since>5.10</since>
     public void SetCachedTextureCoordinates(TextureMapping tm, ref Transform xf)
     {
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinates(NonConstPointer(), tm.ConstPointer(), ref xf, false);
@@ -2415,13 +2897,14 @@ namespace Rhino.Geometry
     /// <returns>
     /// Object which allows access to coordinates and other props.
     /// </returns>
+    /// <since>5.10</since>
     public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
     {
       return CachedTextureCoordinates.GetCachedTextureCoordinates(this, textureMappingId);
     }
 
     /// <summary>
-    /// Removes any unreferenced objects from arrays, reindexes as needed 
+    /// Removes any unreferenced objects from arrays, re-indexes as needed 
     /// and shrinks arrays to minimum required size.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
@@ -2430,6 +2913,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Compact()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2441,6 +2925,7 @@ namespace Rhino.Geometry
     /// Compute volume of the mesh. 
     /// </summary>
     /// <returns>Volume of the mesh.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public double Volume()
     {
@@ -2453,10 +2938,22 @@ namespace Rhino.Geometry
     /// <param name="vertexNormals">If true, vertex normals will be reversed.</param>
     /// <param name="faceNormals">If true, face normals will be reversed.</param>
     /// <param name="faceOrientation">If true, face orientations will be reversed.</param>
+    /// <since>5.0</since>
     public void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation)
     {
+      Flip(vertexNormals, faceNormals, faceOrientation, false);
+    }
+
+    /// <summary>Reverses the direction of the mesh.</summary>
+    /// <param name="vertexNormals">If true, vertex normals will be reversed.</param>
+    /// <param name="faceNormals">If true, face normals will be reversed.</param>
+    /// <param name="faceOrientation">If true, face orientations will be reversed.</param>
+    /// <param name="ngonsBoundaryDirection">If true, ngon boundaries will be reversed</param>
+    /// <since>7.0</since>
+    public void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation, bool ngonsBoundaryDirection)
+    {
       IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.ON_Mesh_Flip(ptr_this, vertexNormals, faceNormals, faceOrientation);
+      UnsafeNativeMethods.ON_Mesh_Flip(ptr_this, vertexNormals, faceNormals, faceOrientation, ngonsBoundaryDirection);
     }
 
     /// <summary>
@@ -2467,6 +2964,7 @@ namespace Rhino.Geometry
     /// <para>-1 = mesh is solid with inward facing normals.</para>
     /// <para>0 = mesh is not solid.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int SolidOrientation()
     {
@@ -2492,9 +2990,10 @@ namespace Rhino.Geometry
     /// true if point is inside the solid mesh, false if not.
     /// </returns>
     /// <remarks>
-    /// The caller is responsible for making certing the mesh is solid before
+    /// The caller is responsible for making certain the mesh is solid before
     /// calling this function. If the mesh is not solid, the behavior is unpredictable.
     /// </remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IsPointInside(Point3d point, double tolerance, bool strictlyIn)
     {
@@ -2521,6 +3020,7 @@ namespace Rhino.Geometry
     /// <param name="bFixBoundaries">When true vertices along naked edges will not be modified.</param>
     /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Smooth(double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem)
     {
       return Smooth(smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, Plane.WorldXY);
@@ -2537,6 +3037,7 @@ namespace Rhino.Geometry
     /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
     /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Smooth(double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2555,6 +3056,7 @@ namespace Rhino.Geometry
     /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
     /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.8</since>
     public bool Smooth(IEnumerable<int> vertexIndices, double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2573,8 +3075,9 @@ namespace Rhino.Geometry
     /// <param name="angleToleranceRadians">Angle at which to make unique vertices.</param>
     /// <param name="modifyNormals">
     /// Determines whether new vertex normals will have the same vertex normal as the original (false)
-    /// or vertex normals made from the corrsponding face normals (true)
+    /// or vertex normals made from the corresponding face normals (true)
     /// </param>
+    /// <since>5.0</since>
     public void Unweld(double angleToleranceRadians, bool modifyNormals)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2590,6 +3093,7 @@ namespace Rhino.Geometry
     /// If false, each of the vertex normals on either side of the edge is assigned the same value as the original normal that the pair is replacing, keeping a smooth look.
     /// </param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.3</since>
     public bool UnweldEdge(IEnumerable<int> edgeIndices, bool modifyNormals)
     {
       var edges = new RhinoList<int>(edgeIndices);
@@ -2607,6 +3111,7 @@ namespace Rhino.Geometry
     /// are averaged.
     /// </summary>
     /// <param name="angleToleranceRadians">Angle at which to weld vertices.</param>
+    /// <since>5.0</since>
     public void Weld(double angleToleranceRadians)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2617,6 +3122,7 @@ namespace Rhino.Geometry
     /// Removes mesh normals and reconstructs the face and vertex normals based
     /// on the orientation of the faces.
     /// </summary>
+    /// <since>6.0</since>
     public void RebuildNormals()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2628,6 +3134,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="selective">If true, then extract hanging faces only.</param>
     /// <returns>A mesh containing the extracted non-manifold parts if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public Mesh ExtractNonManifoldEdges(bool selective)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2644,6 +3151,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="distance">Distance to not exceed when modifying the mesh.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool HealNakedEdges(double distance)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2658,6 +3166,7 @@ namespace Rhino.Geometry
     /// <remarks>This function does not differentiate between inner and outer naked edges.  
     /// If you need that, it would be better to use Mesh.FillHole.
     /// </remarks>
+    /// <since>6.0</since>
     public bool FillHoles()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2671,6 +3180,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="topologyEdgeIndex">Starting naked edge index.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool FileHole(int topologyEdgeIndex)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2684,6 +3194,7 @@ namespace Rhino.Geometry
     /// to recompute vertex normals after calling this functions.
     /// </summary>
     /// <returns>number of faces that were modified.</returns>
+    /// <since>5.0</since>
     public int UnifyNormals()
     {
       return UnifyNormals(IsDocumentControlled);
@@ -2697,6 +3208,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="countOnly">If true, then only the number of faces that would be modified is determined.</param>
     /// <returns>If countOnly=false, the number of faces that were modified. If countOnly=true, the number of faces that would be modified.</returns>
+    /// <since>6.0</since>
     public int UnifyNormals(bool countOnly)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2708,6 +3220,7 @@ namespace Rhino.Geometry
     /// Splits up the mesh into its unconnected pieces.
     /// </summary>
     /// <returns>An array containing all the disjoint pieces that make up this Mesh.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh[] SplitDisjointPieces()
     {
@@ -2725,6 +3238,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">The splitting plane.</param>
     /// <returns>A new mesh array with the split result. This can be null if no result was found.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh[] Split(Plane plane)
     {
@@ -2741,6 +3255,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mesh">Mesh to split with.</param>
     /// <returns>An array of mesh segments representing the split result.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh[] Split(Mesh mesh)
     {
@@ -2752,8 +3267,10 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="meshes">Meshes to split with.</param>
     /// <returns>An array of mesh segments representing the split result.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
-    public Mesh[] Split(IEnumerable<Mesh> meshes) {
+    public Mesh[] Split(IEnumerable<Mesh> meshes)
+    {
       return Split(meshes, RhinoMath.SqrtEpsilon * 10, false, null, CancellationToken.None, null);
     }
     /// <summary>
@@ -2769,6 +3286,7 @@ namespace Rhino.Geometry
     /// <param name="cancel">A cancellation token.</param>
     /// <param name="progress">A progress reporter item. This can be null.</param>
     /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
+    /// <since>7.0</since>
     [ConstOperation]
     public Mesh[] Split(IEnumerable<Mesh> meshes, double tolerance, bool splitAtCoplanar, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
     {
@@ -2818,6 +3336,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">A plane to project against.</param>
     /// <returns>An array of polylines, or null on error.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline[] GetOutlines(Plane plane)
     {
@@ -2850,6 +3369,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="viewport">A viewport to determine projection direction.</param>
     /// <returns>An array of polylines, or null on error.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline[] GetOutlines(Display.RhinoViewport viewport)
     {
@@ -2884,6 +3404,7 @@ namespace Rhino.Geometry
     /// <param name="viewportInfo">The viewport info that provides the outline direction.</param>
     /// <param name="plane">Usually the view's construction plane. If a parallel projection and view plane is parallel to this, then project the results to the plane.</param>
     /// <returns>An array of polylines, or null on error.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Polyline[] GetOutlines(ViewportInfo viewportInfo, Plane plane)
     {
@@ -2922,6 +3443,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_dupmeshboundary.cs' lang='cs'/>
     /// <code source='examples\py\ex_dupmeshboundary.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline[] GetNakedEdges()
     {
@@ -2949,14 +3471,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Explode the mesh into submeshes where a submesh is a collection of faces that are contained
+    /// Explode the mesh into sub-meshes where a sub-mesh is a collection of faces that are contained
     /// within a closed loop of "unwelded" edges. Unwelded edges are edges where the faces that share
     /// the edge have unique mesh vertexes (not mesh topology vertexes) at both ends of the edge.
     /// </summary>
     /// <returns>
-    /// Array of submeshes on success; null on error. If the count in the returned array is 1, then
-    /// nothing happened and the ouput is essentially a copy of the input.
+    /// Array of sub-meshes on success; null on error. If the count in the returned array is 1, then
+    /// nothing happened and the output is essentially a copy of the input.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh[] ExplodeAtUnweldedEdges()
     {
@@ -2980,6 +3503,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_createmeshfrombrep.cs' lang='cs'/>
     /// <code source='examples\py\ex_createmeshfrombrep.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void Append(Mesh other)
     {
       if (null == other || other.ConstPointer() == ConstPointer())
@@ -2996,6 +3520,7 @@ namespace Rhino.Geometry
     /// into a single large mesh.
     /// </summary>
     /// <param name="meshes">Meshes to append to this one.</param>
+    /// <since>6.8</since>
     public void Append(IEnumerable<Mesh> meshes)
     {
       List<GeometryBase> g = new List<GeometryBase>();
@@ -3018,8 +3543,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point on the mesh that is closest to a given test point.
     /// </summary>
-    /// <param name="testPoint">Point to seach for.</param>
+    /// <param name="testPoint">Point to search for.</param>
     /// <returns>The point on the mesh closest to testPoint, or Point3d.Unset on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -3045,6 +3571,7 @@ namespace Rhino.Geometry
     /// This parameter is ignored if you pass 0.0 for a maximumDistance.
     /// </param>
     /// <returns>closest point information on success. null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public MeshPoint ClosestMeshPoint(Point3d testPoint, double maximumDistance)
     {
@@ -3058,7 +3585,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point on the mesh that is closest to a given test point.
     /// </summary>
-    /// <param name="testPoint">Point to seach for.</param>
+    /// <param name="testPoint">Point to search for.</param>
     /// <param name="pointOnMesh">Point on the mesh closest to testPoint.</param>
     /// <param name="maximumDistance">
     /// Optional upper bound on the distance from test point to the mesh. 
@@ -3071,6 +3598,7 @@ namespace Rhino.Geometry
     /// Index of face that the closest point lies on if successful. 
     /// -1 if not successful; the value of pointOnMesh is undefined.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int ClosestPoint(Point3d testPoint, out Point3d pointOnMesh, double maximumDistance)
     {
@@ -3082,7 +3610,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point on the mesh that is closest to a given test point.
     /// </summary>
-    /// <param name="testPoint">Point to seach for.</param>
+    /// <param name="testPoint">Point to search for.</param>
     /// <param name="pointOnMesh">Point on the mesh closest to testPoint.</param>
     /// <param name="normalAtPoint">The normal vector of the mesh at the closest point.</param>
     /// <param name="maximumDistance">
@@ -3096,6 +3624,7 @@ namespace Rhino.Geometry
     /// Index of face that the closest point lies on if successful. 
     /// -1 if not successful; the value of pointOnMesh is undefined.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int ClosestPoint(Point3d testPoint, out Point3d pointOnMesh, out Vector3d normalAtPoint, double maximumDistance)
     {
@@ -3108,8 +3637,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluate a mesh at a set of barycentric coordinates.
     /// </summary>
-    /// <param name="meshPoint">MeshPoint instance contiaining a valid Face Index and Barycentric coordinates.</param>
+    /// <param name="meshPoint">MeshPoint instance containing a valid Face Index and Barycentric coordinates.</param>
     /// <returns>A Point on the mesh or Point3d.Unset if the faceIndex is not valid or if the barycentric coordinates could not be evaluated.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(MeshPoint meshPoint)
     {
@@ -3127,6 +3657,7 @@ namespace Rhino.Geometry
     /// <param name="t2">Third barycentric coordinate.</param>
     /// <param name="t3">Fourth barycentric coordinate. If the face is a triangle, this coordinate will be ignored.</param>
     /// <returns>A Point on the mesh or Point3d.Unset if the faceIndex is not valid or if the barycentric coordinates could not be evaluated.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(int faceIndex, double t0, double t1, double t2, double t3)
     {
@@ -3141,8 +3672,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluate a mesh normal at a set of barycentric coordinates.
     /// </summary>
-    /// <param name="meshPoint">MeshPoint instance contiaining a valid Face Index and Barycentric coordinates.</param>
+    /// <param name="meshPoint">MeshPoint instance containing a valid Face Index and Barycentric coordinates.</param>
     /// <returns>A Normal vector to the mesh or Vector3d.Unset if the faceIndex is not valid or if the barycentric coordinates could not be evaluated.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d NormalAt(MeshPoint meshPoint)
     {
@@ -3160,6 +3692,7 @@ namespace Rhino.Geometry
     /// <param name="t2">Third barycentric coordinate.</param>
     /// <param name="t3">Fourth barycentric coordinate. If the face is a triangle, this coordinate will be ignored.</param>
     /// <returns>A Normal vector to the mesh or Vector3d.Unset if the faceIndex is not valid or if the barycentric coordinates could not be evaluated.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d NormalAt(int faceIndex, double t0, double t1, double t2, double t3)
     {
@@ -3174,9 +3707,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluate a mesh color at a set of barycentric coordinates.
     /// </summary>
-    /// <param name="meshPoint">MeshPoint instance contiaining a valid Face Index and Barycentric coordinates.</param>
+    /// <param name="meshPoint">MeshPoint instance containing a valid Face Index and Barycentric coordinates.</param>
     /// <returns>The interpolated vertex color on the mesh or Color.Transparent if the faceIndex is not valid, 
     /// if the barycentric coordinates could not be evaluated, or if there are no colors defined on the mesh.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Color ColorAt(MeshPoint meshPoint)
     {
@@ -3196,6 +3730,7 @@ namespace Rhino.Geometry
     /// <returns>The interpolated vertex color on the mesh or Color.Transparent if the faceIndex is not valid, 
     /// if the barycentric coordinates could not be evaluated, or if there are no colors defined on the mesh.</returns>
     /// <remarks>Coordinate 0,0,0,0 is not a valid set of barycentric coordinates. The sum of t0 to t3 should be 1.</remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Color ColorAt(int faceIndex, double t0, double t1, double t2, double t3)
     {
@@ -3214,6 +3749,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">An array, a list or any enumerable set of points.</param>
     /// <returns>An array of points. This can be empty.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] PullPointsToMesh(IEnumerable<Point3d> points)
     {
@@ -3234,6 +3770,7 @@ namespace Rhino.Geometry
     /// <param name="curve">A curve to pull.</param>
     /// <param name="tolerance">A tolerance value.</param>
     /// <returns>A polyline curve, or null if none could be constructed.</returns>
+    /// <since>7.0</since>
     [ConstOperation]
     public PolylineCurve PullCurve(Curve curve, double tolerance)
     {
@@ -3251,12 +3788,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Splits a mesh by adding edges in correspondance with input polylines, and divides the mesh at partitioned areas.
+    /// Splits a mesh by adding edges in correspondence with input polylines, and divides the mesh at partitioned areas.
     /// Polyline segments that are measured not to be on the mesh will be ignored.
     /// </summary>
     /// <param name="curves">An array, a list or any enumerable of polyline curves.</param>
     /// <param name="tolerance">A tolerance value.</param>
     /// <returns>An array of meshes, or null if no change would happen.</returns>
+    /// <since>7.0</since>
     [ConstOperation]
     public Mesh[] SplitWithProjectedPolylines(IEnumerable<PolylineCurve> curves, double tolerance)
     {
@@ -3264,7 +3802,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Splits a mesh by adding edges in correspondance with input polylines, and divides the mesh at partitioned areas.
+    /// Splits a mesh by adding edges in correspondence with input polylines, and divides the mesh at partitioned areas.
     /// Polyline segments that are measured not to be on the mesh will be ignored.
     /// </summary>
     /// <param name="curves">An array, a list or any enumerable of polyline curves.</param>
@@ -3273,12 +3811,13 @@ namespace Rhino.Geometry
     /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
     /// <param name="progress">A progress reporter to inform the user about progress. The reported value is indicative.</param>
     /// <returns>An array of meshes, or null if no change would happen.</returns>
+    /// <since>7.0</since>
     [ConstOperation]
     public Mesh[] SplitWithProjectedPolylines(IEnumerable<PolylineCurve> curves, double tolerance, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
     {
       if (curves == null) throw new ArgumentNullException(nameof(curves));
       RhinoList<IntPtr> polyline_curve_const_ptrs = new RhinoList<IntPtr>();
-      foreach(var curve in curves)
+      foreach (var curve in curves)
       {
         polyline_curve_const_ptrs.Add(curve.ConstPointer());
       }
@@ -3318,6 +3857,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="distance">A distance value to use for offsetting.</param>
     /// <returns>A new mesh on success, or null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh Offset(double distance)
     {
@@ -3332,6 +3872,7 @@ namespace Rhino.Geometry
     /// <param name="distance">A distance value.</param>
     /// <param name="solidify">true if the mesh should be solidified.</param>
     /// <returns>A new mesh on success, or null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Mesh Offset(double distance, bool solidify)
     {
@@ -3352,6 +3893,7 @@ namespace Rhino.Geometry
     /// <param name="solidify">true if the mesh should be solidified.</param>
     /// <param name="direction">Direction of offset for all vertices.</param>
     /// <returns>A new mesh on success, or null on failure.</returns>
+    /// <since>6.2</since>
     [ConstOperation]
     public Mesh Offset(double distance, bool solidify, Vector3d direction)
     {
@@ -3400,6 +3942,7 @@ namespace Rhino.Geometry
     /// This number may differ from the initial number of edges that meet
     /// the input criteria because the lengths of some initial edges may be altered as other edges are collapsed.
     /// </remarks>
+    /// <since>6.0</since>
     public int CollapseFacesByEdgeLength(bool bGreaterThan, double edgeLength)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -3420,6 +3963,7 @@ namespace Rhino.Geometry
     /// The face area must be both less than LessThanArea AND greater than GreaterThanArea in order to be considered.  
     /// Use large numbers for lessThanArea or zero for greaterThanArea to simulate an OR.
     /// </remarks>
+    /// <since>6.0</since>
     public int CollapseFacesByArea(double lessThanArea, double greaterThanArea)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -3436,6 +3980,7 @@ namespace Rhino.Geometry
     /// This number may differ from the initial number of faces that meet 
     /// the input criteria because the aspect ratios of some initial faces may be altered as other faces are collapsed.
     /// </remarks>
+    /// <since>6.0</since>
     public int CollapseFacesByByAspectRatio(double aspectRatio)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -3450,6 +3995,7 @@ namespace Rhino.Geometry
     /// <remarks>The lock implements the IDisposable interface, and one call of its
     /// <see cref="IDisposable.Dispose()"/> or <see cref="ReleaseUnsafeLock"/> will update the data structure as required.
     /// This can be achieved with a using statement (Using in Vb.Net).</remarks>
+    /// <since>6.0</since>
     public MeshUnsafeLock GetUnsafeLock(bool writable)
     {
       return new MeshUnsafeLock(this, writable);
@@ -3460,6 +4006,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="meshData">The data that will be unlocked.</param>
 
+    /// <since>6.0</since>
+    /// <since>6.0</since>
     public void ReleaseUnsafeLock(MeshUnsafeLock meshData)
     {
       meshData.Release();
@@ -3475,6 +4023,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentNullException">If curves is null.</exception>
     /// <exception cref="InvalidOperationException">If displacement failed
     /// because of an error. The exception message specifies the error.</exception>
+    /// <since>6.0</since>
     [ConstOperation]
     public Mesh WithShutLining(bool faceted, double tolerance, IEnumerable<ShutLiningCurveInfo> curves)
     {
@@ -3515,6 +4064,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentNullException">If displacer is null.</exception>
     /// <exception cref="InvalidOperationException">If displacement failed
     /// because of an error. The exception message specifies the error.</exception>
+    /// <since>6.0</since>
     [ConstOperation]
     public Mesh WithDisplacement(MeshDisplacementInfo displacement)
     {
@@ -3579,6 +4129,7 @@ namespace Rhino.Geometry
     /// <returns>A new mesh with soft edges.</returns>
     /// <exception cref="InvalidOperationException">If displacement failed
     /// because of an error. The exception message specifies the error.</exception>
+    /// <since>6.0</since>
     [ConstOperation]
     public Mesh WithEdgeSoftening(double softeningRadius, bool chamfer, bool faceted, bool force, double angleThreshold)
     {
@@ -3641,12 +4192,13 @@ namespace Rhino.Geometry
 
     #region topological methods
     /// <summary>
-    /// Returns an array of bool values equal in length to the number of vertices in this
+    /// Returns an array of Boolean values equal in length to the number of vertices in this
     /// mesh. Each value corresponds to a mesh vertex and is set to true if the vertex is
     /// not completely surrounded by faces.
     /// </summary>
     /// <returns>An array of true/false flags that, at each index, reveals if the corresponding
     /// vertex is completely surrounded by faces.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool[] GetNakedEdgePointStatus()
     {
@@ -3703,7 +4255,7 @@ namespace Rhino.Geometry
     #endregion
 
     /// <summary>
-    /// In ancient times (or modern smartphone times), some rendering engines
+    /// In ancient times (or modern smart phone times), some rendering engines
     /// were only able to process small batches of triangles and the
     /// CreatePartitions() function was provided to partition the mesh into
     /// subsets of vertices and faces that those rendering engines could handle.
@@ -3711,6 +4263,7 @@ namespace Rhino.Geometry
     /// <param name="maximumVertexCount"></param>
     /// <param name="maximumTriangleCount"></param>
     /// <returns>true on success</returns>
+    /// <since>5.6</since>
     public bool CreatePartitions(int maximumVertexCount, int maximumTriangleCount)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -3721,6 +4274,7 @@ namespace Rhino.Geometry
     /// Number of partition information chunks stored on this mesh based
     /// on the last call to CreatePartitions
     /// </summary>
+    /// <since>5.6</since>
     public int PartitionCount
     {
       get
@@ -3735,6 +4289,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="which">The partition index.</param>
     /// <returns></returns>
+    /// <since>5.6</since>
     [ConstOperation]
     public MeshPart GetPartition(int which)
     {
@@ -3754,6 +4309,7 @@ namespace Rhino.Geometry
     /// no matter if defined as a triangle, a quad, or a strictly over-four-sided ngon.
     /// </summary>
     /// <returns>The enumerator capable of enumerating through <see cref="Mesh.Ngons">Mesh.Ngons</see>> Mesh.Ngons and Faces</returns>
+    /// <since>6.0</since>
     public IEnumerable<MeshNgon> GetNgonAndFacesEnumerable()
     {
       // The type is hidden for now. We can decide to show it, if it makes sense to show
@@ -3766,6 +4322,7 @@ namespace Rhino.Geometry
     /// Retrieves the count of items that <see cref="GetNgonAndFacesEnumerable"/> will provide.
     /// </summary>
     /// <returns>The amount of faces that are not part of an ngon + the amount of ngons.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public int GetNgonAndFacesCount()
     {
@@ -3863,12 +4420,13 @@ namespace Rhino.Geometry
     /// <param name="brep"></param>
     /// <param name="parameters"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Mesh QuadRemeshBrep(Brep brep, QuadRemeshParameters parameters)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings,new Curve[]{}, null, CancellationToken.None);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, new Curve[] { }, null, CancellationToken.None);
     }
 
     /// <summary>
@@ -3884,6 +4442,7 @@ namespace Rhino.Geometry
     /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
     /// </param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Mesh QuadRemeshBrep(Brep brep, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves)
     {
       if (parameters == null)
@@ -3895,7 +4454,7 @@ namespace Rhino.Geometry
 
 
     /// <summary>
-    /// Quad remesh this brep async
+    /// Quad remesh this Brep asynchronously.
     /// </summary>
     /// <param name="brep">
     /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
@@ -3904,16 +4463,17 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Task<Mesh> QuadRemeshBrepAsync(Brep brep, QuadRemeshParameters parameters, IProgress<int> progress, CancellationToken cancelToken)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, new Curve[]{}, progress, cancelToken), cancelToken);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, new Curve[] { }, progress, cancelToken), cancelToken);
     }
 
     /// <summary>
-    /// Quad remesh this brep async
+    /// Quad remesh this Brep asynchronously.
     /// </summary>
     /// <param name="brep">
     /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
@@ -3927,6 +4487,7 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Task<Mesh> QuadRemeshBrepAsync(Brep brep, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
     {
       if (parameters == null)
@@ -3936,20 +4497,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Quad remesh this mesh
+    /// Quad remesh this mesh.
     /// </summary>
     /// <param name="parameters"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Mesh QuadRemesh(QuadRemeshParameters parameters)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, new Curve[]{}, null, CancellationToken.None);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, new List<int>(), settings, new Curve[] { }, null, CancellationToken.None);
     }
 
     /// <summary>
-    /// Quad remesh this mesh
+    /// Quad remesh this mesh.
     /// </summary>
     /// <param name="parameters"></param>
     /// <param name="guideCurves">
@@ -3958,32 +4520,34 @@ namespace Rhino.Geometry
     /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
     /// </param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Mesh QuadRemesh(QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, guideCurves, null, CancellationToken.None);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, new List<int>(), settings, guideCurves, null, CancellationToken.None);
     }
 
-    
+
     /// <summary>
-    /// Quad remesh this mesh async
+    /// Quad remesh this mesh asynchronously.
     /// </summary>
     /// <param name="parameters"></param>
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Task<Mesh> QuadRemeshAsync(QuadRemeshParameters parameters, IProgress<int> progress, CancellationToken cancelToken)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings,new Curve[]{}, progress, cancelToken), cancelToken);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, new List<int>(), settings, new Curve[] { }, progress, cancelToken), cancelToken);
     }
 
     /// <summary>
-    /// Quad remesh this mesh async
+    /// Quad remesh this mesh asynchronously.
     /// </summary>
     /// <param name="parameters"></param>
     /// <param name="guideCurves">
@@ -3994,16 +4558,17 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Task<Mesh> QuadRemeshAsync(QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,new List<int>(), settings, guideCurves, progress, cancelToken), cancelToken);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, new List<int>(), settings, guideCurves, progress, cancelToken), cancelToken);
     }
 
     /// <summary>
-    /// Quad remesh this mesh async
+    /// Quad remesh this mesh asynchronously.
     /// </summary>
     /// <param name="faceBlocks"></param>
     /// <param name="parameters"></param>
@@ -4015,12 +4580,13 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Task<Mesh> QuadRemeshAsync(IEnumerable<int> faceBlocks, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
     {
       if (parameters == null)
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
-      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this,faceBlocks, settings, guideCurves, progress, cancelToken), cancelToken);
+      return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, faceBlocks, settings, guideCurves, progress, cancelToken), cancelToken);
     }
 
     /// <summary>
@@ -4035,6 +4601,7 @@ namespace Rhino.Geometry
     /// </param>
     /// <param name="normalizeSize">If true mesh is fitted to an axis aligned unit cube until reduction is complete</param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>5.10</since>
     public bool Reduce(int desiredPolygonCount, bool allowDistortion, int accuracy, bool normalizeSize)
     {
       return Reduce(desiredPolygonCount, allowDistortion, accuracy, normalizeSize, false);
@@ -4055,6 +4622,7 @@ namespace Rhino.Geometry
     /// If True then will run computation inside a worker thread and ignore any provided CancellationTokens and ProgressReporters.
     /// If False then will run on main thread.</param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>6.15</since>
     public bool Reduce(int desiredPolygonCount, bool allowDistortion, int accuracy, bool normalizeSize, bool threaded)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -4075,6 +4643,7 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="problemDescription"></param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>6.0</since>
     public bool Reduce(int desiredPolygonCount, bool allowDistortion, int accuracy, bool normalizeSize,
       CancellationToken cancelToken, IProgress<double> progress, out string problemDescription)
     {
@@ -4097,6 +4666,7 @@ namespace Rhino.Geometry
     /// If True then will run computation inside a worker thread and ignore any provided CancellationTokens and ProgressReporters.
     /// If False then will run on main thread.</param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>6.15</since>
     public bool Reduce(int desiredPolygonCount, bool allowDistortion, int accuracy, bool normalizeSize,
       CancellationToken cancelToken, IProgress<double> progress, out string problemDescription, bool threaded)
     {
@@ -4121,6 +4691,7 @@ namespace Rhino.Geometry
     /// <summary>Reduce polygon count</summary>
     /// <param name="parameters">Parameters</param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>6.0</since>
     public bool Reduce(ReduceMeshParameters parameters)
     {
       return Reduce(parameters, false);
@@ -4132,6 +4703,7 @@ namespace Rhino.Geometry
     /// If True then will run computation inside a worker thread and ignore any provided CancellationTokens and ProgressReporters.
     /// If False then will run on main thread.</param>
     /// <returns>True if mesh is successfully reduced and false if mesh could not be reduced for some reason.</returns>
+    /// <since>6.15</since>
     public bool Reduce(ReduceMeshParameters parameters, bool threaded)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -4182,6 +4754,7 @@ namespace Rhino.Geometry
     /// <param name="meshes">Meshes to include in thickness analysis.</param>
     /// <param name="maximumThickness">Maximum thickness to consider. Use as small a thickness as possible to speed up the solver.</param>
     /// <returns>Array of thickness measurements.</returns>
+    /// <since>6.0</since>
     public static MeshThicknessMeasurement[] ComputeThickness(IEnumerable<Mesh> meshes, double maximumThickness)
     {
       return ComputeThickness(meshes, maximumThickness, System.Threading.CancellationToken.None);
@@ -4193,6 +4766,7 @@ namespace Rhino.Geometry
     /// <param name="maximumThickness">Maximum thickness to consider. Use as small a thickness as possible to speed up the solver.</param>
     /// <param name="cancelToken">Computation cancellation token.</param>
     /// <returns>Array of thickness measurements.</returns>
+    /// <since>6.0</since>
     public static MeshThicknessMeasurement[] ComputeThickness(IEnumerable<Mesh> meshes, double maximumThickness, System.Threading.CancellationToken cancelToken)
     {
       return ComputeThickness(meshes, maximumThickness, -1, cancelToken);
@@ -4205,6 +4779,7 @@ namespace Rhino.Geometry
     /// <param name="sharpAngle">Sharpness angle in radians.</param>
     /// <param name="cancelToken">Computation cancellation token.</param>
     /// <returns>Array of thickness measurements.</returns>
+    /// <since>6.0</since>
     public static MeshThicknessMeasurement[] ComputeThickness(IEnumerable<Mesh> meshes, double maximumThickness, double sharpAngle, System.Threading.CancellationToken cancelToken)
     {
       if (meshes == null)
@@ -4260,6 +4835,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_makerhinocontours.cs' lang='cs'/>
     /// <code source='examples\py\ex_makerhinocontours.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval)
     {
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
@@ -4279,6 +4855,7 @@ namespace Rhino.Geometry
     /// <param name="meshToContour">A mesh to contour.</param>
     /// <param name="sectionPlane">A cutting plane.</param>
     /// <returns>An array of curves. This array can be empty.</returns>
+    /// <since>5.0</since>
     public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane)
     {
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
@@ -4305,6 +4882,7 @@ namespace Rhino.Geometry
     /// <param name="cancel"></param>
     /// <param name="progress"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool GetSelfIntersections(double tolerance,
       out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
       FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
@@ -4350,6 +4928,7 @@ namespace Rhino.Geometry
     /// <exception cref="InvalidOperationException">The mesh does not use single precision vertices.</exception>
     /// <remarks>When running this method for writing, it is up to the caller to ensure that the mesh has no
     /// double precision array that needs to be synchronized. Otherwise, also the double precision array must be synchronized.</remarks>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public unsafe Point3f* VertexPoint3fArray(out int length)
     {
@@ -4378,6 +4957,7 @@ namespace Rhino.Geometry
     /// <remarks>When running this method for writing and if the mesh has also a single precision array, the array is synchronized if the pointer to the
     /// single precision array was not requested. Otherwise, it is up to the caller to ensure that the mesh vertices are kept synchronized, by setting both arrays to 
     /// the required values.</remarks>
+    /// <since>6.20</since>
     [CLSCompliant(false)]
     public unsafe Point3d* VertexPoint3dArray(out int length)
     {
@@ -4404,6 +4984,7 @@ namespace Rhino.Geometry
     /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one.</returns>
     /// <exception cref="InvalidOperationException">The mesh does not have vertex normals.</exception>
+    /// <since>6.20</since>
     [CLSCompliant(false)]
     public unsafe Vector3f* NormalVector3fArray(out int length)
     {
@@ -4429,6 +5010,7 @@ namespace Rhino.Geometry
     /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one.</returns>
     /// <exception cref="InvalidOperationException">The mesh does not have face normals.</exception>
+    /// <since>6.20</since>
     [CLSCompliant(false)]
     public unsafe MeshFace* FacesArray(out int length)
     {
@@ -4454,6 +5036,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Releases the lock and updates the underlying unmanaged data structures.
     /// </summary>
+    /// <since>6.0</since>
     public void Release()
     {
       if (!Writable || m_mesh == null) return;
@@ -4488,6 +5071,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh vertices.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -4509,6 +5093,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of vertices the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -4542,7 +5127,7 @@ namespace Rhino.Geometry.Collections
       {
         var rc = new Point3d();
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        if( !UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, index, ref rc))
+        if (!UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, index, ref rc))
         {
           // return false means an error occurred at the C wrapper level
           // the C function makes sure that index is in the correct range so we
@@ -4555,7 +5140,7 @@ namespace Rhino.Geometry.Collections
       set
       {
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
-        if( !UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, value.m_x, value.m_y, value.m_z))
+        if (!UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, value.m_x, value.m_y, value.m_z))
         {
           if (index < 0 || index >= Count)
             throw new IndexOutOfRangeException();
@@ -4566,6 +5151,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Set to true if the vertices should be stored in double precision
     /// </summary>
+    /// <since>6.4</since>
     public bool UseDoublePrecisionVertices
     {
       get
@@ -4575,7 +5161,7 @@ namespace Rhino.Geometry.Collections
       }
       set
       {
-        if( value != UseDoublePrecisionVertices )
+        if (value != UseDoublePrecisionVertices)
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_UseDoublePrecisionVertices(ptr_mesh, value);
@@ -4589,6 +5175,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Clears the Vertex list on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -4600,6 +5187,7 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store faces. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4618,6 +5206,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(float x, float y, float z)
     {
       return Add(new Point3d(x, y, z));
@@ -4634,6 +5223,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(double x, double y, double z)
     {
       return Add(new Point3d(x, y, z));
@@ -4643,6 +5233,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertex">Location of new vertex.</param>
     /// <returns>The index of the newly added vertex.</returns>
+    /// <since>5.0</since>
     public int Add(Point3f vertex)
     {
       return Add(new Point3d(vertex.m_x, vertex.m_y, vertex.m_z));
@@ -4652,6 +5243,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertex">Location of new vertex.</param>
     /// <returns>The index of the newly added vertex.</returns>
+    /// <since>5.0</since>
     public int Add(Point3d vertex)
     {
       int count = Count;
@@ -4667,6 +5259,7 @@ namespace Rhino.Geometry.Collections
     /// <para>This overload accepts double-precision points.</para>
     /// </summary>
     /// <param name="vertices">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
+    /// <since>5.0</since>
     public void AddVertices(IEnumerable<Point3d> vertices)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4688,6 +5281,7 @@ namespace Rhino.Geometry.Collections
     /// <para>This overload accepts single-precision points.</para>
     /// </summary>
     /// <param name="vertices">A list, an array or any enumerable set of <see cref="Point3f"/>.</param>
+    /// <since>5.0</since>
     public void AddVertices(IEnumerable<Point3f> vertices)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4715,6 +5309,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of vertex location.</param>
     /// <param name="z">Z component of vertex location.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetVertex(int index, float x, float y, float z)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4734,6 +5329,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="z">Z component of vertex location.</param>
     /// <param name="updateNormals">Set to true if you'd like the vertex and face normals impacted by the change updated.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.6</since>
     public bool SetVertex(int index, double x, double y, double z, bool updateNormals)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4752,6 +5348,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of vertex location.</param>
     /// <param name="z">Z component of vertex location.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetVertex(int index, double x, double y, double z)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4767,6 +5364,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of vertex to set.</param>
     /// <param name="vertex">Vertex location.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetVertex(int index, Point3f vertex)
     {
       return SetVertex(index, vertex.X, vertex.Y, vertex.Z);
@@ -4780,6 +5378,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of vertex to set.</param>
     /// <param name="vertex">Vertex location.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetVertex(int index, Point3d vertex)
     {
       return SetVertex(index, vertex.X, vertex.Y, vertex.Z);
@@ -4790,6 +5389,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndex">Index of vertex to query.</param>
     /// <returns>true if the vertex is hidden, false if it is not.</returns>
+    /// <since>5.0</since>
     public bool IsHidden(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -4800,6 +5400,7 @@ namespace Rhino.Geometry.Collections
     /// Hides the vertex at the given index.
     /// </summary>
     /// <param name="vertexIndex">Index of vertex to hide.</param>
+    /// <since>5.0</since>
     public void Hide(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -4815,6 +5416,7 @@ namespace Rhino.Geometry.Collections
     /// Shows the vertex at the given index.
     /// </summary>
     /// <param name="vertexIndex">Index of vertex to show.</param>
+    /// <since>5.0</since>
     public void Show(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -4829,6 +5431,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Hides all vertices in the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void HideAll()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4838,6 +5441,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Shows all vertices in the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void ShowAll()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4850,6 +5454,7 @@ namespace Rhino.Geometry.Collections
     /// Removes all vertices that are currently not used by the Face list.
     /// </summary>
     /// <returns>The number of unused vertices that were removed.</returns>
+    /// <since>5.0</since>
     public int CullUnused()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -4869,6 +5474,7 @@ namespace Rhino.Geometry.Collections
     /// <returns>
     /// true if the mesh is changed, in which case the mesh will have fewer vertices than before.
     /// </returns>
+    /// <since>5.0</since>
     public bool CombineIdentical(bool ignoreNormals, bool ignoreAdditional)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -4884,6 +5490,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
     /// <param name="whichVertices">If not null, defines which vertices should be considered for adjustment.</param>
     /// <returns>If the operation succeeded, the number of moved vertices, or -1 on error.</returns>
+    /// <since>6.0</since>
     public int Align(double distance, IEnumerable<bool> whichVertices = null)
     {
       bool[] which_vertices_array;
@@ -4956,6 +5563,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndex">The index of a vertex in the mesh.</param>
     /// <returns>An array of indices of faces on success, null on failure.</returns>
+    /// <since>5.0</since>
     public int[] GetVertexFaces(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -4974,9 +5582,10 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndex">A vertex index in the mesh.</param>
     /// <returns>
-    /// Array of indices of vertices that are topoligically the same as this vertex. The
+    /// Array of indices of vertices that are topologically the same as this vertex. The
     /// array includes vertexIndex. Returns null on failure.
     /// </returns>
+    /// <since>5.0</since>
     public int[] GetTopologicalIndenticalVertices(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -4995,6 +5604,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndex">The index of a vertex to query.</param>
     /// <returns>An array of vertex indices that are connected with the specified vertex.</returns>
+    /// <since>5.0</since>
     public int[] GetConnectedVertices(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5013,6 +5623,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>6.4</since>
     public Point3d Point3dAt(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5025,6 +5636,7 @@ namespace Rhino.Geometry.Collections
     /// Copies all vertices to a new array of <see cref="Point3f"/>.
     /// </summary>
     /// <returns>A new array.</returns>
+    /// <since>5.0</since>
     public Point3f[] ToPoint3fArray()
     {
       int count = Count;
@@ -5043,6 +5655,7 @@ namespace Rhino.Geometry.Collections
     /// Copies all vertices to a new array of <see cref="Point3d"/>.
     /// </summary>
     /// <returns>A new array.</returns>
+    /// <since>5.0</since>
     public Point3d[] ToPoint3dArray()
     {
       int count = Count;
@@ -5061,6 +5674,7 @@ namespace Rhino.Geometry.Collections
     /// Copies all vertices to a linear array of float in x,y,z order
     /// </summary>
     /// <returns>The float array.</returns>
+    /// <since>5.9</since>
     public float[] ToFloatArray()
     {
       int count = Count;
@@ -5087,6 +5701,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of vertex to remove.</param>
     /// <param name="shrinkFaces">If true, quads that reference the deleted vertex will be converted to triangles.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Remove(int index, bool shrinkFaces)
     {
       return Remove(new int[] { index }, shrinkFaces);
@@ -5179,6 +5794,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="indices">Vertex indices to remove.</param>
     /// <param name="shrinkFaces">If true, quads that reference the deleted vertex will be converted to triangles.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Remove(IEnumerable<int> indices, bool shrinkFaces)
     {
       if (indices == null)
@@ -5282,6 +5898,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.RemoveAt(this, index);
     }
 
+    /// <since>5.0</since>
     void ICollection<Point3f>.Add(Point3f item)
     {
       Add(item);
@@ -5384,6 +6001,7 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all mesh vertices (points) in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Point3f> GetEnumerator()
     {
       int count = Count;
@@ -5396,6 +6014,7 @@ namespace Rhino.Geometry.Collections
       }
     }
 
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -5423,6 +6042,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh topology vertices.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -5469,6 +6089,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndex">Index of a vertex in the Mesh.Vertices.</param>
     /// <returns>Index of a topology vertex in the Mesh.TopologyVertices.</returns>
+    /// <since>5.0</since>
     public int TopologyVertexIndex(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5485,6 +6106,7 @@ namespace Rhino.Geometry.Collections
     /// <returns>
     /// Indices of all vertices that in Mesh.Vertices that a topology vertex represents.
     /// </returns>
+    /// <since>5.0</since>
     public int[] MeshVertexIndices(int topologyVertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5503,6 +6125,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">The index of a face to query.</param>
     /// <returns>An array of vertex indices.</returns>
+    /// <since>5.0</since>
     public int[] IndicesFromFace(int faceIndex)
     {
       int[] rc;
@@ -5525,6 +6148,7 @@ namespace Rhino.Geometry.Collections
     /// Indices of all topological vertices that are connected to this topological vertex.
     /// null if no vertices are connected to this vertex.
     /// </returns>
+    /// <since>5.0</since>
     public int[] ConnectedTopologyVertices(int topologyVertexIndex)
     {
       IntPtr ptr = m_mesh.ConstPointer();
@@ -5542,11 +6166,12 @@ namespace Rhino.Geometry.Collections
     /// Gets all topological vertices that are connected to a given vertex.
     /// </summary>
     /// <param name="topologyVertexIndex">index of a topology vertex in Mesh.TopologyVertices.</param>
-    /// <param name="sorted">if true, thr vertices are returned in a radially sorted order.</param>
+    /// <param name="sorted">if true, the vertices are returned in a radially sorted order.</param>
     /// <returns>
     /// Indices of all topological vertices that are connected to this topological vertex.
     /// null if no vertices are connected to this vertex.
     /// </returns>
+    /// <since>5.0</since>
     public int[] ConnectedTopologyVertices(int topologyVertexIndex, bool sorted)
     {
       if (sorted)
@@ -5557,11 +6182,12 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Sorts the edge list for the mesh topology vertex list so that
     /// the edges are in radial order when you call ConnectedTopologyVertices.
-    /// A nonmanifold edge is treated as a boundary edge with respect
-    /// to sorting.  If any boundary or nonmanifold edges end at the
-    /// vertex, then the first edge will be a boundary or nonmanifold edge.
+    /// A non-manifold edge is treated as a boundary edge with respect
+    /// to sorting.  If any boundary or non-manifold edges end at the
+    /// vertex, then the first edge will be a boundary or non-manifold edge.
     /// </summary>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SortEdges()
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5571,12 +6197,13 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Sorts the edge list for as single mesh topology vertex so that
     /// the edges are in radial order when you call ConnectedTopologyVertices.
-    /// A nonmanifold edge is treated as a boundary edge with respect
-    /// to sorting.  If any boundary or nonmanifold edges end at the
-    /// vertex, then the first edge will be a boundary or nonmanifold edge.
+    /// A non-manifold edge is treated as a boundary edge with respect
+    /// to sorting.  If any boundary or non-manifold edges end at the
+    /// vertex, then the first edge will be a boundary or non-manifold edge.
     /// </summary>
     /// <param name="topologyVertexIndex">index of a topology vertex in Mesh.TopologyVertices></param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SortEdges(int topologyVertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5589,6 +6216,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyVertexIndex">index of a topology vertex in Mesh.TopologyVertices.</param>
     /// <returns>true if mesh topology vertex is hidden.</returns>
+    /// <since>5.0</since>
     public bool IsHidden(int topologyVertexIndex)
     {
       return m_mesh.TopItemIsHidden(UnsafeNativeMethods.MeshTopologyHiddenConst.TopVertexIsHidden, topologyVertexIndex);
@@ -5602,6 +6230,7 @@ namespace Rhino.Geometry.Collections
     /// Indices of all faces in Mesh.Faces that are connected to this topological vertex.
     /// null if no faces are connected to this vertex.
     /// </returns>
+    /// <since>5.0</since>
     public int[] ConnectedFaces(int topologyVertexIndex)
     {
       IntPtr ptr = m_mesh.ConstPointer();
@@ -5619,6 +6248,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyVertexIndex">Index of a topology vertex in Mesh.TopologyVertices.</param>
     /// <returns>The amount of edges at this vertex. This can be 0.</returns>
+    /// <since>6.0</since>
     public int ConnectedEdgesCount(int topologyVertexIndex)
     {
       IntPtr ptr = m_mesh.ConstPointer();
@@ -5636,6 +6266,7 @@ namespace Rhino.Geometry.Collections
     /// <returns>
     /// The index of the connected edge.
     /// </returns>
+    /// <since>6.0</since>
     public int ConnectedEdge(int topologyVertexIndex, int edgeAtVertexIndex)
     {
       IntPtr ptr = m_mesh.ConstPointer();
@@ -5659,6 +6290,7 @@ namespace Rhino.Geometry.Collections
     /// Indices of all edges around vertex that are connected to this topological vertex.
     /// null if no faces are connected to this vertex.
     /// </returns>
+    /// <since>6.0</since>
     public int[] ConnectedEdges(int topologyVertexIndex)
     {
       IntPtr ptr = m_mesh.ConstPointer();
@@ -5797,12 +6429,14 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all topology vertices in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Point3f> GetEnumerator()
     {
       var count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -5828,6 +6462,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the amount of edges in this list.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -5841,6 +6476,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>Gets the two topology vertices for a given topology edge.</summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge.</param>
     /// <returns>The pair of vertex indices the edge connects.</returns>
+    /// <since>5.0</since>
     public IndexPair GetTopologyVertices(int topologyEdgeIndex)
     {
       int i = -1, j = -1;
@@ -5854,6 +6490,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge that is queried.</param>
     /// <returns>An array of face indices the edge borders. This might be empty on error.</returns>
+    /// <since>5.0</since>
     public int[] GetConnectedFaces(int topologyEdgeIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5871,6 +6508,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="topologyEdgeIndex">An index of a topology edge that is queried.</param>
     /// <param name="faceOrientationMatchesEdgeDirection">An array of Boolean values that explains whether each face direction matches the direction of the specified edge.</param>
     /// <returns>An array of face indices the edge borders. This might be empty on error.</returns>
+    /// <since>5.0</since>
     public int[] GetConnectedFaces(int topologyEdgeIndex, out bool[] faceOrientationMatchesEdgeDirection)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5891,6 +6529,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>A new array of indices to the topological edges that are connected with the specified face.</returns>
+    /// <since>5.0</since>
     public int[] GetEdgesForFace(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5919,6 +6558,7 @@ namespace Rhino.Geometry.Collections
     /// reversed (false) compared to it.
     /// </param>
     /// <returns>A new array of indices to the topological edges that are connected with the specified face.</returns>
+    /// <since>5.0</since>
     public int[] GetEdgesForFace(int faceIndex, out bool[] sameOrientation)
     {
       sameOrientation = new bool[0];
@@ -5948,6 +6588,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="topologyVertex1">The first topology vertex index.</param>
     /// <param name="topologyVertex2">The second topology vertex index.</param>
     /// <returns>The edge index.</returns>
+    /// <since>5.0</since>
     public int GetEdgeIndex(int topologyVertex1, int topologyVertex2)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -5959,6 +6600,7 @@ namespace Rhino.Geometry.Collections
     /// <returns>
     /// Line along edge. If input is not valid, an Invalid Line is returned.
     /// </returns>
+    /// <since>5.0</since>
     public Line EdgeLine(int topologyEdgeIndex)
     {
       var rc = new Line();
@@ -5972,6 +6614,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool CollapseEdge(int topologyEdgeIndex)
     {
       return m_mesh.IndexOpBool(UnsafeNativeMethods.MeshIndexOpBoolConst.CollapseEdge, topologyEdgeIndex);
@@ -5986,6 +6629,7 @@ namespace Rhino.Geometry.Collections
     /// Parameter along edge. This is the same as getting an EdgeLine and calling PointAt(t) on that line
     /// </param>
     /// <returns>true if successful</returns>
+    /// <since>5.0</since>
     public bool SplitEdge(int topologyEdgeIndex, double t)
     {
       var line = EdgeLine(topologyEdgeIndex);
@@ -6003,6 +6647,7 @@ namespace Rhino.Geometry.Collections
     /// Location to perform the split
     /// </param>
     /// <returns>true if successful</returns>
+    /// <since>5.0</since>
     public bool SplitEdge(int topologyEdgeIndex, Point3d point)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6014,6 +6659,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if the edge is unwelded, false if the edge is welded.</returns>
+    /// <since>6.13</since>
     public bool IsEdgeUnwelded(int topologyEdgeIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -6026,6 +6672,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if edge can be swapped.</returns>
+    /// <since>5.0</since>
     public bool IsSwappableEdge(int topologyEdgeIndex)
     {
       return m_mesh.IndexOpBool(UnsafeNativeMethods.MeshIndexOpBoolConst.IsSwappableEdge, topologyEdgeIndex);
@@ -6036,6 +6683,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool SwapEdge(int topologyEdgeIndex)
     {
       return m_mesh.IndexOpBool(UnsafeNativeMethods.MeshIndexOpBoolConst.SwapEdge, topologyEdgeIndex);
@@ -6047,6 +6695,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if mesh topology edge is hidden.</returns>
+    /// <since>5.0</since>
     public bool IsHidden(int topologyEdgeIndex)
     {
       return m_mesh.TopItemIsHidden(UnsafeNativeMethods.MeshTopologyHiddenConst.TopEdgeIsHidden, topologyEdgeIndex);
@@ -6058,6 +6707,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge in <see cref="Mesh.TopologyEdges"/>.</param>
     /// <returns>true if mesh topology edge is an interior ngon edge.</returns>
+    /// <since>6.0</since>
     public bool IsNgonInterior(int topologyEdgeIndex)
     {
       int count = Count;
@@ -6090,6 +6740,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh vertex normals.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -6110,6 +6761,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the amount of vertex normals that the list can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -6143,7 +6795,7 @@ namespace Rhino.Geometry.Collections
       {
         var rc = new Vector3f();
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        if( !UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, index, ref rc, false))
+        if (!UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, index, ref rc, false))
         {
           if (index < 0 || index >= Count)
             throw new IndexOutOfRangeException();
@@ -6167,6 +6819,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Clears the vertex normal collection on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6177,6 +6830,7 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store vertex normals. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6198,6 +6852,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of new vertex normal.</param>
     /// <param name="z">Z component of new vertex normal.</param>
     /// <returns>The index of the newly added vertex normal.</returns>
+    /// <since>5.0</since>
     public int Add(float x, float y, float z)
     {
       return Add(new Vector3f(x, y, z));
@@ -6209,6 +6864,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of new vertex normal.</param>
     /// <param name="z">Z component of new vertex normal.</param>
     /// <returns>The index of the newly added vertex normal.</returns>
+    /// <since>5.0</since>
     public int Add(double x, double y, double z)
     {
       return Add(new Vector3f((float)x, (float)y, (float)z));
@@ -6218,6 +6874,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normal">new vertex normal.</param>
     /// <returns>The index of the newly added vertex normal.</returns>
+    /// <since>5.0</since>
     public int Add(Vector3f normal)
     {
       int n = Count;
@@ -6230,6 +6887,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normal">new vertex normal.</param>
     /// <returns>The index of the newly added vertex normal.</returns>
+    /// <since>5.0</since>
     public int Add(Vector3d normal)
     {
       return Add(new Vector3f((float)normal.X, (float)normal.Y, (float)normal.Z));
@@ -6239,6 +6897,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normals">Normals to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool AddRange(Vector3f[] normals)
     {
       return SetNormalsHelper(normals, true);
@@ -6255,6 +6914,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of vertex normal.</param>
     /// <param name="z">Z component of vertex normal.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetNormal(int index, float x, float y, float z)
     {
       return SetNormal(index, new Vector3f(x, y, z));
@@ -6270,6 +6930,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of vertex normal.</param>
     /// <param name="z">Z component of vertex normal.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetNormal(int index, double x, double y, double z)
     {
       return SetNormal(index, new Vector3f((float)x, (float)y, (float)z));
@@ -6283,6 +6944,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of vertex normal to set.</param>
     /// <param name="normal">The new normal at the index.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetNormal(int index, Vector3f normal)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -6297,6 +6959,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of vertex normal to set.</param>
     /// <param name="normal">The new normal at the index.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetNormal(int index, Vector3d normal)
     {
       return SetNormal(index, new Vector3f((float)normal.m_x, (float)normal.m_y, (float)normal.m_z));
@@ -6306,6 +6969,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normals">Normals for the entire mesh.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetNormals(Vector3f[] normals)
     {
       return SetNormalsHelper(normals, false);
@@ -6317,6 +6981,7 @@ namespace Rhino.Geometry.Collections
     /// Copies all vertex normals to a linear array of float in x,y,z order
     /// </summary>
     /// <returns>The float array.</returns>
+    /// <since>6.0</since>
     public float[] ToFloatArray()
     {
       var count = Count;
@@ -6342,6 +7007,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool ComputeNormals()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -6352,6 +7018,7 @@ namespace Rhino.Geometry.Collections
     /// Unitizes all vertex normals.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool UnitizeNormals()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -6362,6 +7029,7 @@ namespace Rhino.Geometry.Collections
     /// Reverses direction of all vertex normals
     /// <para>This is the same as Mesh.Flip(true, false, false)</para>
     /// </summary>
+    /// <since>5.0</since>
     public void Flip()
     {
       m_mesh.Flip(true, false, false);
@@ -6384,6 +7052,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.RemoveAt(this, index);
     }
 
+    /// <since>5.0</since>
     void ICollection<Vector3f>.Add(Vector3f item)
     {
       Add(item);
@@ -6486,6 +7155,7 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all normals (vectors) in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Vector3f> GetEnumerator()
     {
       var count = Count;
@@ -6497,6 +7167,7 @@ namespace Rhino.Geometry.Collections
         yield return rc;
       }
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -6522,6 +7193,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh faces. When getting this can includes invalid faces.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -6542,6 +7214,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of faces that are valid quads (4 corners).
     /// </summary>
+    /// <since>5.0</since>
     public int QuadCount
     {
       get
@@ -6554,6 +7227,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the number of faces that are valid triangles (3 corners).
     /// </summary>
+    /// <since>5.0</since>
     public int TriangleCount
     {
       get
@@ -6588,6 +7262,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of mesh triangles and quads the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -6614,6 +7289,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Clears the Face list on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6624,6 +7300,7 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store faces. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6635,6 +7312,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="face">Face to add.</param>
     /// <returns>The index of the newly added face.</returns>
+    /// <since>5.0</since>
     public int AddFace(MeshFace face)
     {
       return AddFace(face.m_a, face.m_b, face.m_c, face.m_d);
@@ -6646,12 +7324,13 @@ namespace Rhino.Geometry.Collections
     /// <param name="vertex2">Index of second face corner.</param>
     /// <param name="vertex3">Index of third face corner.</param>
     /// <returns>The index of the newly added triangle.</returns>
+    /// <since>5.0</since>
     public int AddFace(int vertex1, int vertex2, int vertex3)
     {
       return AddFace(vertex1, vertex2, vertex3, vertex3);
     }
     /// <summary>
-    /// Appends a new quadragular face to the end of the mesh face list.
+    /// Appends a new quadrangular face to the end of the mesh face list.
     /// </summary>
     /// <param name="vertex1">Index of first face corner.</param>
     /// <param name="vertex2">Index of second face corner.</param>
@@ -6663,6 +7342,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int AddFace(int vertex1, int vertex2, int vertex3, int vertex4)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -6674,6 +7354,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faces">Faces to add.</param>
     /// <returns>Indices of the newly created faces</returns>
+    /// <since>5.0</since>
     public int[] AddFaces(IEnumerable<MeshFace> faces)
     {
       var rc = new List<int>();
@@ -6691,6 +7372,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">An index.</param>
     /// <param name="face">A face.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is negative or &gt;= Count.</exception>
+    /// <since>5.0</since>
     public void Insert(int index, MeshFace face)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6705,6 +7387,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">A position in the list.</param>
     /// <param name="face">A face.</param>
     /// <returns>true if the operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SetFace(int index, MeshFace face)
     {
       return SetFace(index, face.m_a, face.m_b, face.m_c, face.m_d);
@@ -6717,6 +7400,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="vertex2">The second vertex index.</param>
     /// <param name="vertex3">The third vertex index.</param>
     /// <returns>true if the operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SetFace(int index, int vertex1, int vertex2, int vertex3)
     {
       return SetFace(index, vertex1, vertex2, vertex3, vertex3);
@@ -6731,6 +7415,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="vertex3">The third vertex index.</param>
     /// <param name="vertex4">The fourth vertex index.</param>
     /// <returns>true if the operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SetFace(int index, int vertex1, int vertex2, int vertex3, int vertex4)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -6743,6 +7428,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of face to get. Must be larger than or equal to zero and 
     /// smaller than the Face Count of the mesh.</param>
     /// <returns>The mesh face at the given index on success or MeshFace.Unset if the index is out of range.</returns>
+    /// <since>5.0</since>
     public MeshFace GetFace(int index)
     {
       var rc = new MeshFace();
@@ -6760,6 +7446,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of face to get. Must be larger than or equal to zero and 
     /// smaller than the Face Count of the mesh.</param>
     /// <returns>The mesh face at the given index on success or MeshFace.Unset if the index is out of range.</returns>
+    /// <since>6.0</since>
     public double GetFaceAspectRatio(int index)
     {
       MeshFace face = m_mesh.Faces.GetFace(index);
@@ -6800,6 +7487,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="c">A third point. This out argument is assigned during the call.</param>
     /// <param name="d">A fourth point. This out argument is assigned during the call.</param>
     /// <returns>true if the operation succeeded, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool GetFaceVertices(int faceIndex, out Point3f a, out Point3f b, out Point3f c, out Point3f d)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -6816,6 +7504,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>A new bounding box, or <see cref="BoundingBox.Empty"/> on error.</returns>
+    /// <since>5.0</since>
     public BoundingBox GetFaceBoundingBox(int faceIndex)
     {
       Point3f a, b, c, d;
@@ -6832,10 +7521,11 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the center point of a face.
     /// <para>For a triangular face, this is the centroid or barycenter.</para>
-    /// <para>For a quad, this is the avarage of four coner points.</para>
+    /// <para>For a quad, this is the average of four comer points.</para>
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>The center point.</returns>
+    /// <since>5.0</since>
     public Point3d GetFaceCenter(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -6850,6 +7540,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>All indices that share an edge.</returns>
+    /// <since>5.0</since>
     public int[] AdjacentFaces(int faceIndex)
     {
       int[] edges = m_mesh.TopologyEdges.GetEdgesForFace(faceIndex);
@@ -6883,16 +7574,17 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <returns>The int array. This method never returns null.</returns>
     /// <param name="asTriangles">If set to <c>true</c> as triangles.</param>
+    /// <since>5.9</since>
     public int[] ToIntArray(bool asTriangles)
     {
       int elementCount = Count * 4;
       int[] rc = new int[elementCount];
       IntPtr const_ptr_this = m_mesh.ConstPointer();
       UnsafeNativeMethods.ON_Mesh_GetFaces(const_ptr_this, elementCount, rc);
-      if( asTriangles )
+      if (asTriangles)
       {
         List<int> triangles = new List<int>(elementCount * 2);
-        for(int i=0; i<elementCount; i++)
+        for (int i = 0; i < elementCount; i++)
         {
           int a = rc[i++];
           int b = rc[i++];
@@ -6901,7 +7593,7 @@ namespace Rhino.Geometry.Collections
           triangles.Add(a);
           triangles.Add(b);
           triangles.Add(c);
-          if(c!=d)
+          if (c != d)
           {
             triangles.Add(c);
             triangles.Add(d);
@@ -6924,7 +7616,7 @@ namespace Rhino.Geometry.Collections
     public int[] ToIntArray(bool asTriangles, ref List<int> replacedIndices)
     {
       int count = asTriangles ? (QuadCount * 2 + TriangleCount) * 3 : Count * 4;
-      int invalidcount = Count - (QuadCount + TriangleCount) ;
+      int invalidcount = Count - (QuadCount + TriangleCount);
 
       int invalidQuads = (from iq in this where iq.IsQuad && !iq.IsValid() select iq).Count();
       int invalidTris = (from iq in this where iq.IsTriangle && !iq.IsValid() select iq).Count();
@@ -6948,7 +7640,8 @@ namespace Rhino.Geometry.Collections
         var C = face.C < vertex_count ? face.C : cleanup ? 0 : face.C;
         var D = face.D < vertex_count ? face.D : cleanup ? 0 : face.D;
 
-        if(cleanup) {
+        if (cleanup)
+        {
           if (A != face.A) replacements.Add(face.A);
           if (B != face.B) replacements.Add(face.B);
           if (C != face.C) replacements.Add(face.C);
@@ -6984,6 +7677,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndexes">An array containing all the face indices to be removed.</param>
     /// <returns>The number of faces deleted on success.</returns>
+    /// <since>5.0</since>
     public int DeleteFaces(IEnumerable<int> faceIndexes)
     {
       return DeleteFaces(faceIndexes, true);
@@ -6995,6 +7689,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="faceIndexes">An array containing all the face indices to be removed.</param>
     /// <param name="compact">No longer used.</param>
     /// <returns>The number of faces deleted on success.</returns>
+    /// <since>6.6</since>
     public int DeleteFaces(IEnumerable<int> faceIndexes, bool compact)
     {
       if (null == faceIndexes)
@@ -7014,6 +7709,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="index">The index of the face that will be removed.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is &lt; 0 or &gt;= Count.</exception>
+    /// <since>5.0</since>
     public void RemoveAt(int index)
     {
       RemoveAt(index, true);
@@ -7025,6 +7721,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">The index of the face that will be removed.</param>
     /// <param name="compact">No longer used.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is &lt; 0 or &gt;= Count.</exception>
+    /// <since>6.6</since>
     public void RemoveAt(int index, bool compact)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7033,9 +7730,10 @@ namespace Rhino.Geometry.Collections
       if (count != 1 && (index < 0 || index > Count))
         throw new ArgumentOutOfRangeException("index");
     }
-    
+
     /// <summary>Splits all quads along the short diagonal.</summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ConvertQuadsToTriangles()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7043,7 +7741,7 @@ namespace Rhino.Geometry.Collections
     }
 
     /// <summary>
-    /// Splits non-planar quads into two triangles based on given params.
+    /// Splits non-planar quads into two triangles based on given parameters.
     /// </summary>
     /// <param name="planarTolerance">
     /// If planarTolerance >= 0, then a quad is split if its vertices
@@ -7078,6 +7776,7 @@ namespace Rhino.Geometry.Collections
     /// If both planarTolerance = Rhino.RhinoMath.UnsetValue and angleToleranceRadians = Rhino.RhinoMath.UnsetValue,
     /// then all quads are split.
     /// </remarks>
+    /// <since>6.0</since>
     public int ConvertNonPlanarQuadsToTriangles(double planarTolerance, double angleToleranceRadians, int splitMethod)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7099,6 +7798,7 @@ namespace Rhino.Geometry.Collections
     /// has to be >= minimumDiagonalLengthRatio. When in doubt us .875.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ConvertTrianglesToQuads(double angleToleranceRadians, double minimumDiagonalLengthRatio)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7113,6 +7813,7 @@ namespace Rhino.Geometry.Collections
     /// vertex indices.</para>
     /// </summary>
     /// <returns>The number of degenerate faces that were removed.</returns>
+    /// <since>5.0</since>
     public int CullDegenerateFaces()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7125,6 +7826,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>true if hidden, false if fully visible.</returns>
+    /// <since>5.0</since>
     public bool IsHidden(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7137,6 +7839,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>true if that face makes the mesh open, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool HasNakedEdges(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7148,6 +7851,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndex">A face index.</param>
     /// <returns>An array of integers.</returns>
+    /// <since>5.0</since>
     public int[] GetTopologicalVertices(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7167,6 +7871,7 @@ namespace Rhino.Geometry.Collections
     /// If &lt;=0, then all clashing pairs will be added to the output array.
     /// </param>
     /// <returns>Array of pairs of mesh face indices.</returns>
+    /// <since>6.0</since>
     public IndexPair[] GetClashingFacePairs(int maxPairCount)
     {
       using (var face_indices = new Runtime.InteropWrappers.SimpleArray2dex())
@@ -7188,8 +7893,9 @@ namespace Rhino.Geometry.Collections
     /// <param name="angleRadians">angle to use for comparison of what is connected</param>
     /// <param name="greaterThanAngle">
     /// If true angles greater than or equal to are considered connected.
-    /// If false, angles less than or equal to are considerd connected.</param>
+    /// If false, angles less than or equal to are considered connected.</param>
     /// <returns>list of connected face indices</returns>
+    /// <since>5.6</since>
     public int[] GetConnectedFaces(int faceIndex, double angleRadians, bool greaterThanAngle)
     {
       IntPtr ptr_const_mesh = m_mesh.ConstPointer();
@@ -7212,6 +7918,7 @@ namespace Rhino.Geometry.Collections
     /// False means they aren't considered
     /// </param>
     /// <returns>Array of connected face indexes</returns>
+    /// <since>5.6</since>
     public int[] GetConnectedFacesToEdges(int startFaceIndex, bool treatNonmanifoldLikeUnwelded)
     {
       IntPtr ptr_const_mesh = m_mesh.ConstPointer();
@@ -7230,6 +7937,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="whollyDegenerateFaces">Array of indexes for faces, both triangles and quads, that have zero area.</param>
     /// <param name="partiallyDegenerateFaces">Array of indexes for quad faces, that have one triangle with zero area.</param>
     /// <returns>Returns true if the mesh has wholly or partially degenerate faces, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool GetZeroAreaFaces(out int[] whollyDegenerateFaces, out int[] partiallyDegenerateFaces)
     {
       var ptr_const_mesh = m_mesh.ConstPointer();
@@ -7250,6 +7958,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="fixedFaceCount">Number of fixed partially degenerate faces.</param>
     /// <returns>Number of removed wholly degenerate faces.</returns>
+    /// <since>6.0</since>
     public int RemoveZeroAreaFaces(ref int fixedFaceCount)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7263,6 +7972,7 @@ namespace Rhino.Geometry.Collections
     /// The indexes that are duplicates of other indexes if successful. 
     /// If there are no duplicate, then an empty array is returned.
     /// </returns>
+    /// <since>6.0</since>
     public int[] GetDuplicateFaces()
     {
       IntPtr ptr_const_mesh = m_mesh.ConstPointer();
@@ -7278,6 +7988,7 @@ namespace Rhino.Geometry.Collections
     /// Extracts, or removes, duplicate faces.
     /// </summary>
     /// <returns>A mesh containing the extracted duplicate faces if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public Mesh ExtractDuplicateFaces()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7290,6 +8001,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="faceIndices">The face indices to be extracted.</param>
     /// <returns>A mesh containing the extracted faces if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public Mesh ExtractFaces(IEnumerable<int> faceIndices)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7311,11 +8023,13 @@ namespace Rhino.Geometry.Collections
       return GenericIListImplementation.IndexOf(this, item);
     }
 
+    /// <since>5.0</since>
     void IList<MeshFace>.Insert(int index, MeshFace item)
     {
       GenericIListImplementation.Insert(this, index, item);
     }
 
+    /// <since>5.0</since>
     void IList<MeshFace>.RemoveAt(int index)
     {
       GenericIListImplementation.RemoveAt(this, index);
@@ -7389,6 +8103,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.Remove(this, item);
     }
 
+    /// <since>5.0</since>
     void IList.RemoveAt(int index)
     {
       GenericIListImplementation.RemoveAt(this, index);
@@ -7429,12 +8144,14 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all faces in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<MeshFace> GetEnumerator()
     {
       int count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -7444,7 +8161,7 @@ namespace Rhino.Geometry.Collections
 
 
   /// <summary>
-  /// Provides access to the ngons and n-gon related functionality of a Mesh.
+  /// Provides access to the ngons and ngon-related functionality of a Mesh.
   /// See also the <see cref="Rhino.Geometry.Mesh.Ngons"/> property for Ngon functionality details.
   /// </summary>
   public class MeshNgonList : IResizableList<MeshNgon>, IList, IReadOnlyList<MeshNgon>
@@ -7462,6 +8179,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh ngons.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -7479,6 +8197,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the number of mesh ngons.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint UnsignedCount
     {
@@ -7501,6 +8220,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Clears the Ngon list on the mesh.
     /// </summary>
+    /// <since>6.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7512,6 +8232,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="ngon">Ngon to add.</param>
     /// <returns>The index of the newly added ngon.</returns>
+    /// <since>6.0</since>
     public int AddNgon(MeshNgon ngon)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7547,6 +8268,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="ngons">Ngons to add.</param>
     /// <returns>Indices of the newly created ngons</returns>
+    /// <since>6.0</since>
     public int[] AddNgons(IEnumerable<MeshNgon> ngons)
     {
       IntPtr mesh_ptr = m_mesh.NonConstPointer();
@@ -7564,6 +8286,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="planarTolerance">3d distance tolerance for coplanar test.</param>
     /// <returns>Number of ngons added to the mesh.</returns>
+    /// <since>6.0</since>
     public int AddPlanarNgons(double planarTolerance)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7574,10 +8297,11 @@ namespace Rhino.Geometry.Collections
     /// Add an ngon for each group of connected coplanar faces.
     /// </summary>
     /// <param name="planarTolerance">3d distance tolerance for coplanar test.</param>
-    /// <param name="minimumNgonVertexCount">Mininimum number of vertices for an ngon.</param>
+    /// <param name="minimumNgonVertexCount">Minimum number of vertices for an ngon.</param>
     /// <param name="minimumNgonFaceCount">Minimum number of faces for an ngon.</param>
     /// <param name="allowHoles">Determines whether the ngon can have inner boundaries.</param>
     /// <returns>Number of ngons added to the mesh.</returns>
+    /// <since>6.0</since>
     public int AddPlanarNgons(double planarTolerance, int minimumNgonVertexCount, int minimumNgonFaceCount, bool allowHoles)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7590,6 +8314,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="ngon">ngon.</param>
     /// <param name="bAppendStartPoint">If true, the first point in the list is also appended to the end of the list to create a closed polyline.</param>
     /// <returns>A list of ngon boundary points.</returns>
+    /// <since>6.0</since>
     public Point3d[] NgonBoundaryVertexList(MeshNgon ngon, bool bAppendStartPoint)
     {
       Point3d[] ngon_bdry_point_list = null;
@@ -7605,11 +8330,26 @@ namespace Rhino.Geometry.Collections
     }
 
     /// <summary>
+    /// If the mesh has ngons with ON_MeshNgon.Orientation() = -1, 
+    /// then reverse the ngon's boundary orientation.
+    /// </summary>
+    /// <param name="permitHoles">ngons may contain holes</param>
+    /// <returns>
+    /// True if all non-empty ngons have ON_MeshNgon.Orientation()=1 after the call.
+    /// </returns>
+    bool OrientNgons(bool permitHoles)
+    {
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      return UnsafeNativeMethods.ON_Mesh_OrientNgons(ptr_mesh, permitHoles);
+    }
+
+    /// <summary>
     /// Inserts a mesh ngon at a defined index in this list.
     /// </summary>
     /// <param name="index">An ngon index.</param>
     /// <param name="ngon">An ngon.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is negative or &gt;= Count.</exception>
+    /// <since>6.0</since>
     public void Insert(int index, MeshNgon ngon)
     {
       bool rc = false;
@@ -7628,6 +8368,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">An ngon index.</param>
     /// <param name="ngon">An ngon.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is negative or &gt;= Count.</exception>
+    /// <since>6.0</since>
     public void SetNgon(int index, MeshNgon ngon)
     {
       bool rc = false;
@@ -7646,6 +8387,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of ngon to get. Must be larger than or equal to zero and 
     /// smaller than the Ngon Count of the mesh.</param>
     /// <returns>The mesh ngon at the given index.  This ngon can be MeshNgon.Empty.</returns>
+    /// <since>6.0</since>
     public MeshNgon GetNgon(int index)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7658,6 +8400,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="meshFaceIndex">Index of a mesh face.</param>
     /// <returns>The index of the mesh ngon the face belongs to or -1 if the face does not belong to an ngon.</returns>
+    /// <since>6.0</since>
     public int NgonIndexFromFaceIndex(int meshFaceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7689,6 +8432,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="index">A ngon index.</param>
     /// <returns>A new bounding box, or <see cref="BoundingBox.Empty"/> on error.</returns>
+    /// <since>6.0</since>
     public BoundingBox GetNgonBoundingBox(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7702,6 +8446,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="ngon">An ngon.</param>
     /// <returns>A new bounding box, or <see cref="BoundingBox.Empty"/> on error.</returns>
+    /// <since>6.0</since>
     public BoundingBox GetNgonBoundingBox(MeshNgon ngon)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7715,6 +8460,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="index">Ngon index.</param>
     /// <returns>Outer edge count or zero on error.</returns>
+    /// <since>6.0</since>
     public int GetNgonOuterEdgeCount(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7722,10 +8468,45 @@ namespace Rhino.Geometry.Collections
     }
 
     /// <summary>
+    /// Determine if the ngon's boundary orientation matches that of the set of faces it is made from.
+    /// </summary>
+    /// <param name="index">Ngon index.</param>
+    /// <param name="permitHoles">
+    /// true if the ngon is permitted to have interior holes, false otherwise.
+    /// </param>
+    /// <returns>
+    /// 1: The ngon does not have holes, the ngon's faces are compatibly oriented, 
+    /// and the ngon's outer boundary orientation matches the faces' orientation.
+    /// -1: The ngon does not have holes, the ngon's faces are compatibly oriented,
+    /// and the ngon's outer boundary orientation is opposite the faces' orientation.
+    /// 0: Otherwise.The ngon may be invalid, have holes, the ngon's faces may not be
+    /// compatibly oriented, the ngons edges may not have a consistent orientation
+    /// with respect to the faces, or some other issue.
+    /// </returns>
+    /// <since>7.0</since>
+    public int Orientation(int index, bool permitHoles)
+    {
+      IntPtr const_ptr_mesh = m_mesh.ConstPointer();
+      return UnsafeNativeMethods.ON_MeshNgon_Orientation(const_ptr_mesh, (uint)index, permitHoles);
+    }
+
+    /// <summary>
+    /// Reverse the order of the m_vi[] array for an ngon
+    /// </summary>
+    /// <param name="index"></param>
+    /// <since>7.0</since>
+    public void ReverseOuterBoundary(int index)
+    {
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      UnsafeNativeMethods.ON_MeshNgon_ReverseOuterBoundary(ptr_mesh, (uint)index);
+    }
+
+    /// <summary>
     /// Gets the complete edge count of an ngon.
     /// </summary>
     /// <param name="index">Ngon index.</param>
     /// <returns>Complete edge count or zero on error.</returns>
+    /// <since>6.0</since>
     public int GetNgonEdgeCount(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7738,7 +8519,8 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Ngon index.</param>
     /// <returns>true for holes (or malformed ngon, see remarks), false for no holes.</returns>
     /// <remarks>A slit, for example, will give an edge count that differs from outer edge count despite the
-    /// lack of true "holes" ie. interior edges that are not shared by more than one face of the ngon in question.</remarks>
+    /// lack of true "holes" i.e. interior edges that are not shared by more than one face of the ngon in question.</remarks>
+    /// <since>6.0</since>
     public bool NgonHasHoles(int index)
     {
       return GetNgonEdgeCount(index) != GetNgonOuterEdgeCount(index);
@@ -7746,10 +8528,11 @@ namespace Rhino.Geometry.Collections
 
     /// <summary>
     /// Gets the center point of an ngon.
-    /// <para>This the avarage of the corner points.</para>
+    /// <para>This the average of the corner points.</para>
     /// </summary>
     /// <param name="index">A ngon index.</param>
     /// <returns>The center point.</returns>
+    /// <since>6.0</since>
     public Point3d GetNgonCenter(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7761,10 +8544,11 @@ namespace Rhino.Geometry.Collections
 
     /// <summary>
     /// Gets the center point of an ngon.
-    /// <para>This the avarage of the corner points.</para>
+    /// <para>This the average of the corner points.</para>
     /// </summary>
     /// <param name="ngon">An ngon.</param>
     /// <returns>The center point.</returns>
+    /// <since>6.0</since>
     public Point3d GetNgonCenter(MeshNgon ngon)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
@@ -7774,13 +8558,14 @@ namespace Rhino.Geometry.Collections
       return center;
     }
 
-#endregion
+    #endregion
 
     /// <summary>
     /// Remove one or more ngons from the mesh.
     /// </summary>
     /// <param name="indices">An array of ngon indices.</param>
     /// <returns>The number of deleted ngons.</returns>
+    /// <since>6.0</since>
     public int RemoveNgons(IEnumerable<int> indices)
     {
       if (null == indices)
@@ -7797,6 +8582,7 @@ namespace Rhino.Geometry.Collections
     /// Removes an ngon from the mesh.
     /// </summary>
     /// <param name="index">The index of the ngon.</param>
+    /// <since>6.0</since>
     public void RemoveAt(int index)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -7804,10 +8590,11 @@ namespace Rhino.Geometry.Collections
     }
 
     /// <summary>
-    /// Get a list of vertices that form the boundary of a face set. This is often use to get n-gon boundaries.
+    /// Get a list of vertices that form the boundary of a face set. This is often use to get ngon boundaries.
     /// </summary>
     /// <param name="ngonFaceIndexList">List of mesh face indices.</param>
     /// <returns>List of mesh vertex indices that form the boundary of the face set.</returns>
+    /// <since>6.0</since>
     public int[] GetNgonBoundary(IEnumerable<int> ngonFaceIndexList)
     {
       int[] ngon_vertex_list = null;
@@ -7835,6 +8622,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">The index of the ngon to test.</param>
     /// <returns>0 if the ngon is not valid, otherwise the number of boundary edges.</returns>
     /// <remarks>If the return value is > MeshNgon.BoundaryVertexCount, then the ngon has either inner boundaries or duplicate vertices.</remarks>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint IsValid(int index)
     {
@@ -7845,9 +8633,10 @@ namespace Rhino.Geometry.Collections
     /// Tests an ngon to see if the vertex and face references are valid and pass partial boundary validity checks.
     /// </summary>
     /// <param name="index">The index of the ngon to test.</param>
-    /// <param name="textLog">A textlog for collecting information about problems.</param>
+    /// <param name="textLog">A text log for collecting information about problems.</param>
     /// <returns>0 if the ngon is not valid, otherwise the number of boundary edges.</returns>
     /// <remarks>If the return value is > MeshNgon.BoundaryVertexCount, then the ngon has either inner boundaries or duplicate vertices.</remarks>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint IsValid(int index, TextLog textLog)
     {
@@ -7856,20 +8645,22 @@ namespace Rhino.Geometry.Collections
       return UnsafeNativeMethods.ON_MeshNgon_IsValid(ptr_const_mesh, index, ptr_textlog);
     }
 
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
 
     int IList<MeshNgon>.IndexOf(MeshNgon item)
     {
       return GenericIListImplementation.IndexOf(this, item);
     }
 
+    /// <since>6.0</since>
     void IList<MeshNgon>.Insert(int index, MeshNgon item)
     {
       GenericIListImplementation.Insert(this, index, item);
     }
 
+    /// <since>6.0</since>
     void IList<MeshNgon>.RemoveAt(int index)
     {
       GenericIListImplementation.RemoveAt(this, index);
@@ -7943,6 +8734,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.Remove(this, item);
     }
 
+    /// <since>6.0</since>
     void IList.RemoveAt(int index)
     {
       GenericIListImplementation.RemoveAt(this, index);
@@ -7983,17 +8775,19 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all ngons in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>6.0</since>
     public IEnumerator<MeshNgon> GetEnumerator()
     {
       int count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>6.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
 
@@ -8004,17 +8798,18 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshFaceNormalList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh face normals.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -8064,6 +8859,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of face normals the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -8080,13 +8876,14 @@ namespace Rhino.Geometry.Collections
         }
       }
     }
-#endregion
+    #endregion
 
-#region methods
-#region face access
+    #region methods
+    #region face access
     /// <summary>
     /// Clears the Face Normal list on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8097,6 +8894,7 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store face normals. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8110,6 +8908,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of face normal.</param>
     /// <param name="z">Z component of face normal.</param>
     /// <returns>The index of the newly added face normal.</returns>
+    /// <since>5.0</since>
     public int AddFaceNormal(float x, float y, float z)
     {
       return AddFaceNormal(new Vector3f(x, y, z));
@@ -8121,6 +8920,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">Y component of face normal.</param>
     /// <param name="z">Z component of face normal.</param>
     /// <returns>The index of the newly added face normal.</returns>
+    /// <since>5.0</since>
     public int AddFaceNormal(double x, double y, double z)
     {
       return AddFaceNormal(new Vector3f((float)x, (float)y, (float)z));
@@ -8130,6 +8930,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normal">New face normal.</param>
     /// <returns>The index of the newly added face normal.</returns>
+    /// <since>5.0</since>
     public int AddFaceNormal(Vector3d normal)
     {
       return AddFaceNormal(new Vector3f((float)normal.m_x, (float)normal.m_y, (float)normal.m_z));
@@ -8139,6 +8940,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="normal">New face normal.</param>
     /// <returns>The index of the newly added face normal.</returns>
+    /// <since>5.0</since>
     public int AddFaceNormal(Vector3f normal)
     {
       SetFaceNormal(Count, normal);
@@ -8153,6 +8955,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">A y component.</param>
     /// <param name="z">A z component.</param>
     /// <returns>true on success; false on error.</returns>
+    /// <since>5.0</since>
     public bool SetFaceNormal(int index, float x, float y, float z)
     {
       return SetFaceNormal(index, new Vector3f(x, y, z));
@@ -8166,6 +8969,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="y">A y component.</param>
     /// <param name="z">A z component.</param>
     /// <returns>true on success; false on error.</returns>
+    /// <since>5.0</since>
     public bool SetFaceNormal(int index, double x, double y, double z)
     {
       return SetFaceNormal(index, new Vector3f((float)x, (float)y, (float)z));
@@ -8177,6 +8981,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">An index.</param>
     /// <param name="normal">A normal vector.</param>
     /// <returns>true on success; false on error.</returns>
+    /// <since>5.0</since>
     public bool SetFaceNormal(int index, Vector3d normal)
     {
       return SetFaceNormal(index, new Vector3f((float)normal.m_x, (float)normal.m_y, (float)normal.m_z));
@@ -8188,17 +8993,19 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">An index.</param>
     /// <param name="normal">A normal vector.</param>
     /// <returns>true on success; false on error.</returns>
+    /// <since>5.0</since>
     public bool SetFaceNormal(int index, Vector3f normal)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       return UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, normal, true);
     }
-#endregion
+    #endregion
 
     /// <summary>
     /// Unitizes all the existing face normals.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool UnitizeFaceNormals()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8209,14 +9016,15 @@ namespace Rhino.Geometry.Collections
     /// Computes all the face normals for this mesh based on the physical shape of the mesh.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ComputeFaceNormals()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeFaceNormals);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
     int IList<Vector3f>.IndexOf(Vector3f item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -8334,17 +9142,19 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all normals (vectors) in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Vector3f> GetEnumerator()
     {
       var count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -8354,17 +9164,18 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexColorList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh colors.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -8417,6 +9228,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets a mapping information for the mesh associated with these vertex colors.
     /// </summary>
+    /// <since>5.0</since>
     public MappingTag Tag
     {
       get
@@ -8443,12 +9255,28 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_SetMappingTag(ptr_mesh, 0, value.Id, (int)value.MappingType, value.MappingCRC, ref xf);
       }
     }
-#endregion
+    #endregion
 
-#region access
+    #region access
+    /// <summary>
+    /// Return colors as an array of integers with packed ARGB values
+    /// </summary>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public int[] ToARGBArray()
+    {
+      IntPtr const_ptr_mesh = m_mesh.ConstPointer();
+      int colorCount = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCount);
+      int[] rc = new int[colorCount];
+      UnsafeNativeMethods.ON_Mesh_GetVertexColorsAsArgb(const_ptr_mesh, colorCount, rc);
+      return rc;
+    }
+
+
     /// <summary>
     /// Clears the vertex color list on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8462,6 +9290,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="green">Green component of color, must be in the 0~255 range.</param>
     /// <param name="blue">Blue component of color, must be in the 0~255 range.</param>
     /// <returns>The index of the newly added color.</returns>
+    /// <since>5.0</since>
     public int Add(int red, int green, int blue)
     {
       SetColor(Count, red, green, blue);
@@ -8472,6 +9301,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="color">Color to append, Alpha channels will be ignored.</param>
     /// <returns>The index of the newly added color.</returns>
+    /// <since>5.0</since>
     public int Add(Color color)
     {
       SetColor(Count, color);
@@ -8490,6 +9320,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="green">Green component of vertex color. Value must be in the 0~255 range.</param>
     /// <param name="blue">Blue component of vertex color. Value must be in the 0~255 range.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetColor(int index, int red, int green, int blue)
     {
       return SetColor(index, Color.FromArgb(red, green, blue));
@@ -8504,6 +9335,7 @@ namespace Rhino.Geometry.Collections
     /// If index equals Count, then the color will be appended.</param>
     /// <param name="color">Color to set, Alpha channels will be ignored.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetColor(int index, Color color)
     {
       if (index < 0 || index > Count)
@@ -8521,6 +9353,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="face">A face to use to retrieve indices.</param>
     /// <param name="color">A color.</param>
     /// <returns>true on success; false on error.</returns>
+    /// <since>5.0</since>
     public bool SetColor(MeshFace face, Color color)
     {
       return SetColor(face.A, color) &&
@@ -8532,6 +9365,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of vertex colors the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -8551,9 +9385,9 @@ namespace Rhino.Geometry.Collections
         }
       }
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     private bool SetColorsHelper(Color[] colors, bool append)
     {
       if (colors == null) { return false; }
@@ -8574,6 +9408,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="baseColor">Color to apply to every vertex.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool CreateMonotoneMesh(Color baseColor)
     {
       int count = m_mesh.Vertices.Count;
@@ -8595,6 +9430,7 @@ namespace Rhino.Geometry.Collections
     /// <code source='examples\vbnet\ex_analysismode.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_analysismode.cs' lang='cs'/>
     /// </example>
+    /// <since>5.0</since>
     public bool SetColors(Color[] colors)
     {
       return SetColorsHelper(colors, false);
@@ -8606,6 +9442,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="colors">Colors to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool AppendColors(Color[] colors)
     {
       return SetColorsHelper(colors, true);
@@ -8615,14 +9452,15 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store vertex colors. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
     int IList<Color>.IndexOf(Color item)
     {
       return IndexOfHelper(item);
@@ -8648,6 +9486,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.RemoveAt(this, index);
     }
 
+    /// <since>5.0</since>
     void ICollection<Color>.Add(Color item)
     {
       Add(item);
@@ -8771,17 +9610,19 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all colors in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Color> GetEnumerator()
     {
       var count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -8791,17 +9632,18 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshTextureCoordinateList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of texture coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -8822,6 +9664,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of texture coordinates the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -8872,12 +9715,13 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the Texture Coordinate list on the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8890,6 +9734,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="s">S component of new texture coordinate.</param>
     /// <param name="t">T component of new texture coordinate.</param>
     /// <returns>The index of the newly added texture coordinate.</returns>
+    /// <since>5.0</since>
     public int Add(float s, float t)
     {
       int n = Count;
@@ -8903,6 +9748,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="s">S component of new texture coordinate.</param>
     /// <param name="t">T component of new texture coordinate.</param>
     /// <returns>The index of the newly added texture coordinate.</returns>
+    /// <since>5.0</since>
     public int Add(double s, double t)
     {
       return Add((float)s, (float)t);
@@ -8912,6 +9758,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="tc">Texture coordinate to add.</param>
     /// <returns>The index of the newly added texture coordinate.</returns>
+    /// <since>5.0</since>
     public int Add(Point2f tc)
     {
       return Add(tc.m_x, tc.m_y);
@@ -8921,6 +9768,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="tc">Texture coordinate to add.</param>
     /// <returns>The index of the newly added texture coordinate.</returns>
+    /// <since>5.0</since>
     public int Add(Point3d tc)
     {
       return Add((float)tc.m_x, (float)tc.m_y);
@@ -8930,6 +9778,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="textureCoordinates">Texture coordinates to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool AddRange(Point2f[] textureCoordinates)
     {
       return SetTextureCoordinatesHelper(textureCoordinates, true);
@@ -8945,6 +9794,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="s">S component of texture coordinate.</param>
     /// <param name="t">T component of texture coordinate.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinate(int index, float s, float t)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -8960,6 +9810,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="s">S component of texture coordinate.</param>
     /// <param name="t">T component of texture coordinate.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinate(int index, double s, double t)
     {
       return SetTextureCoordinate(index, (float)s, (float)t);
@@ -8973,6 +9824,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of texture coordinate to set.</param>
     /// <param name="tc">Texture coordinate point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinate(int index, Point2f tc)
     {
       return SetTextureCoordinate(index, tc.m_x, tc.m_y);
@@ -8986,6 +9838,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="index">Index of texture coordinate to set.</param>
     /// <param name="tc">Texture coordinate point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinate(int index, Point3f tc)
     {
       return SetTextureCoordinate(index, tc.m_x, tc.m_y);
@@ -8995,6 +9848,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="textureCoordinates">Texture coordinates to assign to the mesh.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinates(Point2f[] textureCoordinates)
     {
       return SetTextureCoordinatesHelper(textureCoordinates, false);
@@ -9013,6 +9867,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="mapping">The new mapping type.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool SetTextureCoordinates(TextureMapping mapping)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -9024,19 +9879,21 @@ namespace Rhino.Geometry.Collections
     /// Releases all memory allocated to store texture coordinates. The list capacity will be 0 after this call.
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Scales the texture coordinates so the texture domains are [0,1] 
     /// and eliminate any texture rotations.
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool NormalizeTextureCoordinates()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -9048,6 +9905,7 @@ namespace Rhino.Geometry.Collections
     /// All texture coordinates rows (Us) become columns (Vs), and vice versa.</para>
     /// </summary>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool TransposeTextureCoordinates()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -9063,6 +9921,7 @@ namespace Rhino.Geometry.Collections
     /// <para>1 = second texture coordinate is reversed.</para>
     /// </param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     public bool ReverseTextureCoordinates(int direction)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
@@ -9073,6 +9932,7 @@ namespace Rhino.Geometry.Collections
     /// Copies all vertices to a linear array of float in u,v order
     /// </summary>
     /// <returns>The float array.</returns>
+    /// <since>6.0</since>
     public float[] ToFloatArray()
     {
       var count = Count;
@@ -9092,9 +9952,9 @@ namespace Rhino.Geometry.Collections
       }
       return rc;
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point2f>, IList and related implementations
+    #region IResizableList<Point2f>, IList and related implementations
     int IList<Point2f>.IndexOf(Point2f item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -9110,6 +9970,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.RemoveAt(this, index);
     }
 
+    /// <since>5.0</since>
     void ICollection<Point2f>.Add(Point2f item)
     {
       Add(item);
@@ -9218,17 +10079,19 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all texture coordinates in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<Point2f> GetEnumerator()
     {
       var count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>5.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -9238,17 +10101,18 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexStatusList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of hidden vertices. For this to be a valid part of a mesh, this count should be the same as the one of mesh vertices.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -9269,6 +10133,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets a value indicating how many vertices have been set to hidden.
     /// </summary>
+    /// <since>6.0</since>
     public int HiddenCount
     {
       get
@@ -9281,6 +10146,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets or sets the total number of hidden vertex information the internal data structure can hold without resizing.
     /// </summary>
+    /// <since>6.0</since>
     public int Capacity
     {
       get
@@ -9330,12 +10196,13 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the hidden vertex list on the mesh. This results in a fully visible mesh.
     /// </summary>
+    /// <since>6.0</since>
     public void Clear()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -9347,6 +10214,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="hidden">True if vertex is hidden.</param>
     /// <returns>The index of the newly added hidden vertex.</returns>
+    /// <since>6.0</since>
     public void Add(bool hidden)
     {
       int n = Count;
@@ -9358,6 +10226,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="values">Hidden values to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public void AddRange(IEnumerable<bool> values)
     {
       foreach (var value in values)
@@ -9371,14 +10240,15 @@ namespace Rhino.Geometry.Collections
     /// <para>Vertices will be immediately considered visible.</para>
     /// <para>Subsequent calls can add new items.</para>
     /// </summary>
+    /// <since>6.0</since>
     public void Destroy()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point2f>, IList and related implementations
+    #region IResizableList<Point2f>, IList and related implementations
     int IList<bool>.IndexOf(bool item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -9394,6 +10264,7 @@ namespace Rhino.Geometry.Collections
       GenericIListImplementation.RemoveAt(this, index);
     }
 
+    /// <since>6.0</since>
     void ICollection<bool>.Add(bool item)
     {
       Add(item);
@@ -9404,6 +10275,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="hidden">The value to be checked. True means some vertex is hidden.</param>
     /// <returns>True if the array contains the specified value.</returns>
+    /// <since>6.0</since>
     public bool Contains(bool hidden)
     {
       return hidden ? HiddenCount > 0 : HiddenCount == 0;
@@ -9414,6 +10286,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="array">The array to be copied into.</param>
     /// <param name="arrayIndex">The starting index in the array.</param>
+    /// <since>6.0</since>
     public void CopyTo(bool[] array, int arrayIndex)
     {
       GenericIListImplementation.CopyTo(this, array, arrayIndex);
@@ -9520,17 +10393,19 @@ namespace Rhino.Geometry.Collections
     /// Gets an enumerator that yields all flags in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>6.0</since>
     public IEnumerator<bool> GetEnumerator()
     {
       var count = Count;
       for (int i = 0; i < count; i++)
         yield return this[i];
     }
+    /// <since>6.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 }
 
@@ -9958,20 +10833,21 @@ namespace Rhino.Geometry
   [Serializable]
   public struct MeshFace : IEquatable<MeshFace>, IComparable<MeshFace>, IComparable
   {
-#region members
+    #region members
     internal int m_a;
     internal int m_b;
     internal int m_c;
     internal int m_d;
-#endregion
+    #endregion
 
-#region constructors
+    #region constructors
     /// <summary>
     /// Constructs a new triangular Mesh face.
     /// </summary>
     /// <param name="a">Index of first corner.</param>
     /// <param name="b">Index of second corner.</param>
     /// <param name="c">Index of third corner.</param>
+    /// <since>5.0</since>
     public MeshFace(int a, int b, int c)
     {
       m_a = a;
@@ -9986,6 +10862,7 @@ namespace Rhino.Geometry
     /// <param name="b">Index of second corner.</param>
     /// <param name="c">Index of third corner.</param>
     /// <param name="d">Index of fourth corner.</param>
+    /// <since>5.0</since>
     public MeshFace(int a, int b, int c, int d)
     {
       m_a = a;
@@ -9997,13 +10874,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an Unset MeshFace. Unset faces have Int32.MinValue for all corner indices.
     /// </summary>
+    /// <since>5.0</since>
     public static MeshFace Unset
     {
       get { return new MeshFace(int.MinValue, int.MinValue, int.MinValue); }
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Internal property that figures out the debugger display for mesh Faces.
     /// </summary>
@@ -10019,6 +10897,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the first corner index of the mesh face.
     /// </summary>
+    /// <since>5.0</since>
     public int A
     {
       get { return m_a; }
@@ -10027,6 +10906,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the second corner index of the mesh face.
     /// </summary>
+    /// <since>5.0</since>
     public int B
     {
       get { return m_b; }
@@ -10035,6 +10915,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the third corner index of the mesh face.
     /// </summary>
+    /// <since>5.0</since>
     public int C
     {
       get { return m_c; }
@@ -10045,6 +10926,7 @@ namespace Rhino.Geometry
     /// If D equals C, the mesh face is considered to be a triangle 
     /// rather than a quad.
     /// </summary>
+    /// <since>5.0</since>
     public int D
     {
       get { return m_d; }
@@ -10085,6 +10967,7 @@ namespace Rhino.Geometry
     /// vertices on the mesh. If you want to perform a complete 
     /// validity check, use IsValid(int) instead.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid()
     {
       if (m_a < 0) { return false; }
@@ -10107,6 +10990,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vertexCount">Number of vertices in the mesh that this face is a part of.</param>
     /// <returns>true if the face is considered valid, false if not.</returns>
+    /// <since>5.0</since>
     public bool IsValid(int vertexCount)
     {
       if (!IsValid()) { return false; }
@@ -10126,6 +11010,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">Array of vertices with which to validate the face.</param>
     /// <returns>true if the face is considered valid, false if not.</returns>
+    /// <since>6.0</since>
     public bool IsValid(Point3d[] points)
     {
       return IsValidEx(ref points);
@@ -10140,6 +11025,7 @@ namespace Rhino.Geometry
     /// <remarks>This function assumes the face is invalid and attempts to repair unconditionally.  It is
     /// only worthwhile to call Repair on faces where IsValid returns false.
     /// </remarks>
+    /// <since>6.0</since>
     public bool Repair(Point3d[] points)
     {
       return RepairEx(ref points);
@@ -10153,6 +11039,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">Array of vertices with which to validate the face.</param>
     /// <returns>true if the face is considered valid, false if not.</returns>
+    /// <since>6.5</since>
     public bool IsValidEx(ref Point3d[] points)
     {
       int ct = points.Length;
@@ -10215,6 +11102,7 @@ namespace Rhino.Geometry
     /// This function is the analog of UnsafeNativeMethods.ON_MeshFace_Repair done completely here to avoid 
     /// copying the point array.
     /// </remarks>
+    /// <since>6.5</since>
     public bool RepairEx(ref Point3d[] points)
     {
       int ct = points.Length;
@@ -10273,22 +11161,25 @@ namespace Rhino.Geometry
     /// A mesh face is considered to be a triangle when C equals D, thus it is 
     /// possible for an Invalid mesh face to also be a triangle.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsTriangle { get { return m_c == m_d; } }
     /// <summary>
     /// Gets a value indicating whether or not this mesh face is a quad. 
     /// A mesh face is considered to be a triangle when C does not equal D, 
     /// thus it is possible for an Invalid mesh face to also be a quad.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsQuad { get { return m_c != m_d; } }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Sets all the corners for this face as a triangle.
     /// </summary>
     /// <param name="a">Index of first corner.</param>
     /// <param name="b">Index of second corner.</param>
     /// <param name="c">Index of third corner.</param>
+    /// <since>5.0</since>
     public void Set(int a, int b, int c)
     {
       m_a = a;
@@ -10303,6 +11194,7 @@ namespace Rhino.Geometry
     /// <param name="b">Index of second corner.</param>
     /// <param name="c">Index of third corner.</param>
     /// <param name="d">Index of fourth corner.</param>
+    /// <since>5.0</since>
     public void Set(int a, int b, int c, int d)
     {
       m_a = a;
@@ -10315,6 +11207,7 @@ namespace Rhino.Geometry
     /// Reverses the orientation of the face by swapping corners. 
     /// The first corner is always maintained.
     /// </summary>
+    /// <since>5.0</since>
     public MeshFace Flip()
     {
       if (m_c == m_d)
@@ -10329,6 +11222,7 @@ namespace Rhino.Geometry
     /// <param name="other">The other mesh face for comparison.</param>
     /// <returns>true if the other face is, also orderly, equal
     /// to the present one; otherwise false.</returns>
+    /// <since>6.0</since>
     public bool Equals(MeshFace other)
     {
       return (A == other.A && B == other.B && C == other.C && D == other.D);
@@ -10347,9 +11241,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns a runtime-stable hashcode for the current mesh face.
-    /// You are not allowed to rely on persistance of this hashcode in
-    /// serialization, but for each version of RhinoCommon, this hashcode
+    /// Returns a runtime-stable hash code for the current mesh face.
+    /// You are not allowed to rely on persistence of this hash code in
+    /// serialization, but for each version of RhinoCommon, this hash code
     /// will be the same for each mesh face.
     /// </summary>
     /// <returns>A non-unique integer that represents this mesh face.</returns>
@@ -10370,6 +11264,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first MeshFace.</param>
     /// <param name="b">The second MeshFace.</param>
     /// <returns>true if the indices of the two points are exactly equal; otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator ==(MeshFace a, MeshFace b)
     {
       return a.Equals(b);
@@ -10381,6 +11276,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first MeshFace.</param>
     /// <param name="b">The second MeshFace.</param>
     /// <returns>true if the indices of the two points are in any way different; otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator !=(MeshFace a, MeshFace b)
     {
       return (a.A != b.A || a.B != b.B || a.C != b.C || a.D != b.D);
@@ -10408,6 +11304,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this &lt; other. Priority is for index of corner A first, then B, then C, then D.</para>
     /// <para>+1: otherwise.</para>
     /// </returns>
+    /// <since>6.0</since>
     public int CompareTo(MeshFace other)
     {
       if (A < other.A) return -1;
@@ -10432,7 +11329,7 @@ namespace Rhino.Geometry
 
       return CompareTo((MeshFace)obj);
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -10471,6 +11368,7 @@ namespace Rhino.Geometry
     /// may be in any order.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static MeshNgon Create(IList<int> meshVertexIndexList, IList<int> meshFaceIndexList)
     {
       var rc = new MeshNgon(IntPtr.Zero);
@@ -10481,12 +11379,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an empty MeshNgon.
     /// </summary>
+    /// <since>6.0</since>
     public static MeshNgon Empty
     {
       get { return new MeshNgon(IntPtr.Zero); }
     }
 
-#region properties
+    #region properties
     /// <summary>
     /// Internal property that figures out the debugger display for mesh Faces.
     /// </summary>
@@ -10502,6 +11401,7 @@ namespace Rhino.Geometry
     /// Get the number of vertices in this ngon.
     /// <seealso cref="MeshNgon"/> about length information.
     /// </summary>
+    /// <since>6.0</since>
     public int BoundaryVertexCount
     {
       get { return m_vi.Length; }
@@ -10510,6 +11410,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Get the number of faces in this ngon.
     /// </summary>
+    /// <since>6.0</since>
     public int FaceCount
     {
       get { return m_fi.Length; }
@@ -10536,6 +11437,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns>A list of mesh vertex indexes.</returns>
     /// <seealso cref="MeshNgon"/> about length information.
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint[] BoundaryVertexIndexList()
     {
@@ -10546,15 +11448,16 @@ namespace Rhino.Geometry
     /// Get the ngon's mesh face index list.
     /// </summary>
     /// <returns>A list of mesh face indexes.</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint[] FaceIndexList()
     {
       return m_fi.ToArray();
     }
 
-#endregion
+    #endregion
 
-#region methods
+    #region methods
 
     /// <summary>
     /// Set the ngon vertex and face index lists.
@@ -10566,6 +11469,7 @@ namespace Rhino.Geometry
     /// A list of mesh face indexes that define the interior of the ngon. The mesh face indexes
     /// may be in any order.
     /// </param>
+    /// <since>6.0</since>
     public void Set(IList<int> meshVertexIndexList, IList<int> meshFaceIndexList)
     {
       // 24 March 2016 S. Baer
@@ -10597,6 +11501,7 @@ namespace Rhino.Geometry
     /// <param name="otherNgon">The other ngon for comparison.</param>
     /// <returns>true if otherNgon is identical to this ngon; otherwise false.
     /// </returns>
+    /// <since>6.0</since>
     public bool Equals(MeshNgon otherNgon)
     {
       return CompareTo(otherNgon) == 0;
@@ -10617,9 +11522,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns a runtime-stable hashcode for the current mesh ngon.
-    /// You are not allowed to rely on persistance of this hashcode in
-    /// serialization, but for each instance of the application, this hashcode
+    /// Returns a runtime-stable hash code for the current mesh ngon.
+    /// You are not allowed to rely on persistence of this hash code in
+    /// serialization, but for each instance of the application, this hash code
     /// will be the same for ngons with identical vertex and face lists.
     /// </summary>
     /// <returns>A non-unique integer that represents this mesh ngon.</returns>
@@ -10634,6 +11539,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first MeshNgon.</param>
     /// <param name="b">The second MeshNgon.</param>
     /// <returns>true if the vertex and face index lists are identical; otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator ==(MeshNgon a, MeshNgon b)
     {
       if (((object)a) == null) return ((object)b) == null;
@@ -10648,6 +11554,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first MeshNgon.</param>
     /// <param name="b">The second MeshNgon.</param>
     /// <returns>true if the vertex or face index lists are different in any way; otherwise false.</returns>
+    /// <since>6.0</since>
     public static bool operator !=(MeshNgon a, MeshNgon b)
     {
       if (((object)a) == null) return ((object)b) != null;
@@ -10680,6 +11587,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this &lt; otherNgon. </para>
     /// <para>+1: if this &gt; otherNgon.</para>
     /// </returns>
+    /// <since>6.0</since>
     public int CompareTo(MeshNgon otherNgon)
     {
       return UnsafeNativeMethods.ON_MeshNgon_Compare((uint)m_vi.LongLength, m_vi, (uint)m_fi.LongLength, m_fi,
@@ -10693,7 +11601,7 @@ namespace Rhino.Geometry
 
       return CompareTo((MeshNgon)obj);
     }
-#endregion
+    #endregion
   }
 
 #if RHINO_SDK
@@ -10722,6 +11630,7 @@ namespace Rhino.Geometry
     /// <param name="curveIntervals">The parts of the curve to use as profiles.</param>
     /// <param name="enabled">If true, this curve is active.</param>
     /// <exception cref="ArgumentNullException">If curve is null.</exception>
+    /// <since>6.0</since>
     public ShutLiningCurveInfo(Curve curve,
       double radius, int profile, bool pull, bool isBump,
       IEnumerable<Interval> curveIntervals = null, bool enabled = true)
@@ -10745,6 +11654,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The profile curve.
     /// </summary>
+    /// <since>6.0</since>
     public Curve Curve
     {
       get
@@ -10756,6 +11666,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// If true, this curve is active.
     /// </summary>
+    /// <since>6.0</since>
     public bool Enabled
     {
       get
@@ -10767,6 +11678,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The profile radius.
     /// </summary>
+    /// <since>6.0</since>
     public double Radius
     {
       get
@@ -10778,6 +11690,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// >The profile type.
     /// </summary>
+    /// <since>6.0</since>
     public int Profile
     {
       get
@@ -10789,6 +11702,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// True if the curve should be pulled.
     /// </summary>
+    /// <since>6.0</since>
     public bool Pull
     {
       get
@@ -10800,6 +11714,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// True if profile constitutes a bump. See Rhino's Help for more information.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsBump
     {
       get
@@ -10811,6 +11726,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The parts of the curve to use as profiles.
     /// </summary>
+    /// <since>6.0</since>
     public ReadOnlyCollection<Interval> CurveIntervals
     {
       get
@@ -10857,6 +11773,7 @@ namespace Rhino.Geometry
     /// across service releases.
     /// </summary>
     /// <exception cref="ArgumentNullException">If texture or mapping is null.</exception>
+    /// <since>6.0</since>
     public MeshDisplacementInfo(RenderTexture texture,
       TextureMapping mapping)
     {
@@ -10886,31 +11803,37 @@ namespace Rhino.Geometry
     /// <summary>
     /// The texture used as displacement.
     /// </summary>
+    /// <since>6.0</since>
     public RenderTexture Texture { get; private set; }
 
     /// <summary>
     /// Value considered lowest point in the displacement.
     /// </summary>
+    /// <since>6.0</since>
     public double Black { get; set; }
 
     /// <summary>
     /// Value considered highest point of the displacement texture.
     /// </summary>
+    /// <since>6.0</since>
     public double White { get; set; }
 
     /// <summary>
     /// The texture mapping of the mesh.
     /// </summary>
+    /// <since>6.0</since>
     public TextureMapping Mapping { get; private set; }
 
     /// <summary>
     /// Texture mapping transform.
     /// </summary>
+    /// <since>6.0</since>
     public Transform MappingTransform { get; set; }
 
     /// <summary>
     /// Instance transformation of the mesh.
     /// </summary>
+    /// <since>6.0</since>
     public Transform InstanceTransform { get; set; }
 
     // --- ARGS
@@ -10918,12 +11841,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// The amount of displacement for the black color in the texture.
     /// </summary>
+    /// <since>6.0</since>
     public double BlackMove { get; set; }
 
     /// <summary>
     /// Specifies the maximum angle between face normals of adjacent faces
     /// that will get welded together.
     /// </summary>
+    /// <since>6.0</since>
     public double PostWeldAngle { get; set; }
 
     /// <summary>
@@ -10935,49 +11860,57 @@ namespace Rhino.Geometry
     /// <para>Specifying 0.01 only splits edges where heavy contrast
     /// exists.</para>
     /// </summary>
+    /// <since>6.0</since>
     public double RefineSensitivity { get; set; }
 
     /// <summary>
     /// Specifies how densely the object is initially subdivided.
     /// The lower the value, the higher the resolution of the displaced mesh.
     /// </summary>
+    /// <since>6.0</since>
     public double SweepPitch { get; set; }
 
     /// <summary>
     /// The amount of displacement for the white color in the texture.
     /// </summary>
+    /// <since>6.0</since>
     public double WhiteMove { get; set; }
 
     /// <summary>
     /// Mapping channel number for the displacement mapping.
     /// </summary>
+    /// <since>6.0</since>
     public int ChannelNumber { get; set; }
 
     /// <summary>
     /// Runs a mesh reduction as a post process o simplify the result of
     /// displacement to meet the specified number of faces.
     /// </summary>
+    /// <since>6.0</since>
     public int FaceLimit { get; set; }
 
     /// <summary>
     /// Straightens rough feature edges.
     /// The value specifies the number of passes.
     /// </summary>
+    /// <since>6.0</since>
     public int FairingAmount { get; set; }
 
     /// <summary>
     /// Specifies the number of refinement passes.
     /// </summary>
+    /// <since>6.0</since>
     public int RefineStepCount { get; set; }
 
     /// <summary>
     /// Specifies how much memory can be allocated for use by the
     /// displacement mesh. Value in megabytes.
     /// </summary>
+    /// <since>6.0</since>
     public int MemoryLimit { get; set; }
   }
 
 
-  
+
 #endif
 }

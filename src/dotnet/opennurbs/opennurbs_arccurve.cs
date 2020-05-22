@@ -10,9 +10,9 @@ namespace Rhino.Geometry
   /// </summary>
   /// <remarks>
   /// <para>Details:</para>
-  /// <para>an ArcCurve is a subcurve of a circle, with a constant speed
+  /// <para>an ArcCurve is a sub-curve of a circle, with a constant speed
   /// parameterization. The parameterization is	an affine linear
-  /// reparameterzation of the underlying arc	m_arc onto the domain m_t.</para>
+  /// reparameterization of the underlying arc	m_arc onto the domain m_t.</para>
   /// <para>A valid ArcCurve has Radius()>0 and  0&lt;AngleRadians()&lt;=2*PI
   /// and a strictly increasing Domain.</para>
   /// </remarks>
@@ -29,6 +29,7 @@ namespace Rhino.Geometry
     /// Initializes a new <see cref="ArcCurve"/> instance.
     /// <para>Radius is set to 1, position to Origin and Domain to full span (circle).</para>
     /// </summary>
+    /// <since>5.0</since>
     public ArcCurve()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ArcCurve_New(IntPtr.Zero);
@@ -40,6 +41,7 @@ namespace Rhino.Geometry
     /// copying values from another <see cref="ArcCurve"/>.
     /// </summary>
     /// <param name="other">Another ArcCurve.</param>
+    /// <since>5.0</since>
     public ArcCurve(ArcCurve other)
     {
       IntPtr pOther = IntPtr.Zero;
@@ -55,6 +57,7 @@ namespace Rhino.Geometry
     /// copying values from another <see cref="Arc"/>.
     /// </summary>
     /// <param name="arc">Another Arc.</param>
+    /// <since>5.0</since>
     public ArcCurve(Arc arc)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ArcCurve_New2(ref arc);
@@ -70,6 +73,7 @@ namespace Rhino.Geometry
     /// <param name="arc">An original arc.</param>
     /// <param name="t0">A new Domain.T0 value.</param>
     /// <param name="t1">A new Domain.T1 value.</param>
+    /// <since>5.0</since>
     public ArcCurve(Arc arc, double t0, double t1)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ArcCurve_New3(ref arc, t0, t1);
@@ -82,6 +86,7 @@ namespace Rhino.Geometry
     /// <para>Parameterization will be [0;circle.Circumference]</para>
     /// </summary>
     /// <param name="circle">The original circle.</param>
+    /// <since>5.0</since>
     public ArcCurve(Circle circle)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ArcCurve_New4(ref circle);
@@ -97,6 +102,7 @@ namespace Rhino.Geometry
     /// <param name="circle">A circle.</param>
     /// <param name="t0">A new Domain.T0 value.</param>
     /// <param name="t1">A new Domain.T1 value.</param>
+    /// <since>5.0</since>
     public ArcCurve(Circle circle, double t0, double t1)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ArcCurve_New5(ref circle, t0, t1);
@@ -126,6 +132,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the arc that is contained within this ArcCurve.
     /// </summary>
+    /// <since>5.0</since>
     public Arc Arc
     {
       get
@@ -140,6 +147,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether or not this curve can be represented by a complete circle.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCompleteCircle
     {
       get
@@ -153,6 +161,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the radius of this ArcCurve.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius
     {
       get
@@ -165,6 +174,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the angles of this arc in radians.
     /// </summary>
+    /// <since>5.0</since>
     public double AngleRadians
     {
       get
@@ -177,6 +187,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the angles of this arc in degrees.
     /// </summary>
+    /// <since>5.0</since>
     public double AngleDegrees
     {
       get

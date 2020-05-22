@@ -52,6 +52,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// If the input is valid, then a new extrusion is returned. Otherwise null is returned
     /// </returns>
+    /// <since>5.1</since>
     public static Extrusion Create(Curve planarCurve, double height, bool cap)
     {
       IntPtr ptr_const_curve = planarCurve.ConstPointer();
@@ -66,6 +67,7 @@ namespace Rhino.Geometry
     /// <param name="box">IsValid must be true.</param>
     /// <param name="cap">If true, the base and the top of the box will be capped. Defaults to true.</param>
     /// <returns>Extrusion on success. null on failure.</returns>
+    /// <since>6.0</since>
     public static Extrusion CreateBoxExtrusion(Box box, bool cap=true)
     {
       if (!box.IsValid) return null;
@@ -90,6 +92,7 @@ namespace Rhino.Geometry
     /// <param name="capBottom">If true, the end at cylinder.Height1 will be capped.</param>
     /// <param name="capTop">If true, the end at cylinder.Height2 will be capped.</param>
     /// <returns>Extrusion on success. null on failure.</returns>
+    /// <since>5.0</since>
     public static Extrusion CreateCylinderExtrusion(Cylinder cylinder, bool capBottom, bool capTop)
     {
       IntPtr ptr_new_extrusion = UnsafeNativeMethods.ON_Extrusion_CreateCylinder(ref cylinder, capBottom, capTop);
@@ -107,6 +110,7 @@ namespace Rhino.Geometry
     /// <param name="capBottom">If true, the end at cylinder.Height1 will be capped.</param>
     /// <param name="capTop">If true, the end at cylinder.Height2 will be capped.</param>
     /// <returns>Extrusion on success. null on failure.</returns>
+    /// <since>5.0</since>
     public static Extrusion CreatePipeExtrusion(Cylinder cylinder, double otherRadius, bool capTop, bool capBottom)
     {
       IntPtr ptr_new_extrusion = UnsafeNativeMethods.ON_Extrusion_CreatePipe(ref cylinder, otherRadius, capBottom, capTop);
@@ -117,6 +121,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new instance of the <see cref="Extrusion"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public Extrusion()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_Extrusion_New(IntPtr.Zero);
@@ -132,7 +137,8 @@ namespace Rhino.Geometry
     /// If true and the profiles have kinks, then the faces corresponding to those profiles are split
     /// so they will be G1.
     /// </param>
-    /// <returns>A brep with a similar shape like this extrustion, or null on error.</returns>
+    /// <returns>A brep with a similar shape like this extrusion, or null on error.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Brep ToBrep(bool splitKinkyFaces)
     {
@@ -149,6 +155,7 @@ namespace Rhino.Geometry
     /// <param name="up">The up vector.</param>
     /// <returns>true if the operation succeeded; otherwise false.
     /// Setting up=a-b will make the operation fail.</returns>
+    /// <since>5.0</since>
     public bool SetPathAndUp(Point3d a, Point3d b, Vector3d up)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -158,6 +165,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the start point of the path.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PathStart
     {
       get
@@ -172,6 +180,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the end point of the path.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PathEnd
     {
       get
@@ -186,6 +195,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the up vector of the path.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d PathTangent
     {
       get
@@ -201,6 +211,7 @@ namespace Rhino.Geometry
     /// Gets or sets the normal of the miter plane at the start in profile coordinates.
     /// In profile coordinates, 0,0,1 always maps to the extrusion axis
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d MiterPlaneNormalAtStart
     {
       get
@@ -221,6 +232,7 @@ namespace Rhino.Geometry
     /// Gets or sets the normal of the miter plane at the end in profile coordinates.
     /// In profile coordinates, 0,0,1 always maps to the extrusion axis
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d MiterPlaneNormalAtEnd
     {
       get
@@ -240,6 +252,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns a value indicating whether a miter plane at start is defined.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsMiteredAtStart
     {
       get
@@ -253,6 +266,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether a miter plane at the end is defined.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsMiteredAtEnd
     {
       get
@@ -266,6 +280,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether there is no gap among all surfaces constructing this object.
     /// </summary>
+    /// <since>5.0</since>
     public override bool IsSolid
     {
       get
@@ -278,6 +293,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the surface that fills the bottom profile is existing.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCappedAtBottom
     {
       get
@@ -291,6 +307,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the surface that fills the top profile is existing.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCappedAtTop
     {
       get
@@ -304,6 +321,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the amount of capping surfaces.
     /// </summary>
+    /// <since>5.0</since>
     public int CapCount
     {
       get
@@ -314,13 +332,14 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the transformation that maps the xy profile curve to its 3d location.
+    /// Gets the transformation that maps the XY profile curve to its 3d location.
     /// </summary>
     /// <param name="s">
     /// 0.0 = starting profile
     /// 1.0 = ending profile.
     /// </param>
     /// <returns>A Transformation. The transform is Invalid on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Transform GetProfileTransformation(double s)
     {
@@ -343,6 +362,7 @@ namespace Rhino.Geometry
     /// <remarks>
     ///  When no mitering is happening, GetPathPlane() and GetProfilePlane() return the same plane.
     /// </remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Plane GetProfilePlane(double s)
     {
@@ -364,6 +384,7 @@ namespace Rhino.Geometry
     /// <remarks>
     ///  When no mitering is happening, GetPathPlane() and GetProfilePlane() return the same plane.
     /// </remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Plane GetPathPlane(double s)
     {
@@ -388,6 +409,7 @@ namespace Rhino.Geometry
     /// the extrusion may not have inner profiles. If the extrusion already
     /// has a profile, the set will fail.
     /// </returns>
+    /// <since>5.0</since>
     public bool SetOuterProfile(Curve outerProfile, bool cap)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -402,6 +424,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="innerProfile">Closed curve in the XY plane or a 2d curve.</param>
     /// <returns>true if the profile was set.</returns>
+    /// <since>5.0</since>
     public bool AddInnerProfile(Curve innerProfile)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -414,6 +437,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the amount of profile curves.
     /// </summary>
+    /// <since>5.0</since>
     public int ProfileCount
     {
       get
@@ -432,10 +456,11 @@ namespace Rhino.Geometry
     /// </param>
     /// <param name="s">
     /// 0.0 &lt;= s &lt;= 1.0
-    /// A relative parameter controling which profile is returned.
+    /// A relative parameter controlling which profile is returned.
     /// 0 = bottom profile and 1 = top profile.
     /// </param>
     /// <returns>The profile.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve Profile3d(int profileIndex, double s)
     {
@@ -449,6 +474,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="ci">The index of this profile.</param>
     /// <returns>The profile.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve Profile3d(ComponentIndex ci)
     {
@@ -462,6 +488,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="ci">The index of this profile.</param>
     /// <returns>The profile.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve WallEdge(ComponentIndex ci)
     {
@@ -475,6 +502,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="ci">The index specifying which precise item to retrieve.</param>
     /// <returns>The surface.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Surface WallSurface(ComponentIndex ci)
     {
@@ -487,6 +515,7 @@ namespace Rhino.Geometry
     /// Gets the line-like curve that is the conceptual axis of the extrusion.
     /// </summary>
     /// <returns>The path as a line curve.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public LineCurve PathLineCurve()
     {
@@ -504,6 +533,7 @@ namespace Rhino.Geometry
     /// When the profileParameter corresponds to the end of one profile and the
     /// beginning of the next profile, the index of the next profile is returned.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int ProfileIndex(double profileParameter)
     {
@@ -516,6 +546,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="meshType">The mesh type.</param>
     /// <returns>A mesh.</returns>
+    /// <since>5.6</since>
     [ConstOperation]
     public Mesh GetMesh(MeshType meshType)
     {
@@ -535,6 +566,7 @@ namespace Rhino.Geometry
     /// Constructs all the Wireframe curves for this Extrusion.
     /// </summary>
     /// <returns>An array of Wireframe curves.</returns>
+    /// <since>5.6</since>
     [ConstOperation]
     public Curve[] GetWireframe()
     {

@@ -19,6 +19,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an invalid Torus.
     /// </summary>
+    /// <since>5.0</since>
     public static Torus Unset
     {
       get
@@ -40,6 +41,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addtorus.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtorus.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Torus(Plane basePlane, double majorRadius, double minorRadius)
     {
       m_majorCirclePlane = basePlane;
@@ -52,6 +54,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether this torus is valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -67,6 +70,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the plane for the torus large circle.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_majorCirclePlane; }
@@ -76,6 +80,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the radius of the circle that lies at the heart of the torus.
     /// </summary>
+    /// <since>5.0</since>
     public double MajorRadius
     {
       get { return m_majorRadius; }
@@ -85,6 +90,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the radius of the torus section.
     /// </summary>
+    /// <since>5.0</since>
     public double MinorRadius
     {
       get { return m_minorRadius; }
@@ -94,10 +100,11 @@ namespace Rhino.Geometry
 
     #region methods
     /// <summary>
-    /// Converts this torus to its nurbs surface representation. 
+    /// Converts this torus to its NURBS surface representation. 
     /// This is synonymous with calling NurbsSurface.CreateFromTorus().
     /// </summary>
-    /// <returns>A nurbs surface representation of this torus, or null on error.</returns>
+    /// <returns>A NURBS surface representation of this torus, or null on error.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsSurface ToNurbsSurface()
     {
@@ -114,6 +121,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addtorus.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtorus.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public RevSurface ToRevSurface()
     {
@@ -127,6 +135,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Torus other, double epsilon)
     {

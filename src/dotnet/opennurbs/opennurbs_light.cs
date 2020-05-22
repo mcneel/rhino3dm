@@ -21,6 +21,7 @@ namespace Rhino.Geometry
     /// <param name="altitudeDegrees">The Altitude angle in degrees. Altitude is the angle above the ground plane.</param>
     /// <returns>A new sun light.</returns>
     /// <exception cref="Rhino.Runtime.RdkNotLoadedException">If the RDK is not loaded.</exception>
+    /// <since>5.0</since>
     public static Light CreateSunLight(double northAngleDegrees, double azimuthDegrees, double altitudeDegrees)
     {
       Runtime.HostUtils.CheckForRdk(true, true);
@@ -43,6 +44,7 @@ namespace Rhino.Geometry
     /// <param name="longitudeDegrees">The longitude, in degrees, of the location on Earth.</param>
     /// <returns>A newly constructed light object.</returns>
     /// <exception cref="Rhino.Runtime.RdkNotLoadedException">If the RDK is not loaded.</exception>
+    /// <since>5.0</since>
     public static Light CreateSunLight(double northAngleDegrees, DateTime when, double latitudeDegrees, double longitudeDegrees)
     {
       Runtime.HostUtils.CheckForRdk(true, true);
@@ -60,6 +62,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="sun">A Sun object from the Rhino.Render namespace.</param>
     /// <returns>A light.</returns>
+    /// <since>5.0</since>
     public static Light CreateSunLight(Render.Sun sun)
     {
       Runtime.HostUtils.CheckForRdk(true, true);
@@ -80,6 +83,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new light.
     /// </summary>
+    /// <since>5.0</since>
     public Light()
     {
       IntPtr pLight = UnsafeNativeMethods.ON_Light_New();
@@ -121,6 +125,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets a value that defines if the light is turned on (true) or off (false).
     /// </summary>
+    /// <since>5.0</since>
     public bool IsEnabled
     {
       get
@@ -151,6 +156,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets a light style on this camera.
     /// </summary>
+    /// <since>5.0</since>
     public LightStyle LightStyle
     {
       get { return (LightStyle)GetInt(idxLightStyle); }
@@ -161,6 +167,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether the light style
     /// is <see cref="LightStyle"/> CameraPoint or WorldPoint.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsPointLight
     {
       get
@@ -174,6 +181,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether the light style
     /// is <see cref="LightStyle"/> CameraDirectional or WorldDirectional.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDirectionalLight
     {
       get
@@ -187,6 +195,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether the light style
     /// is <see cref="LightStyle"/> CameraSpot or WorldSpot.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsSpotLight
     {
       get
@@ -200,6 +209,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether the light style
     /// is <see cref="LightStyle"/> WorldLinear.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsLinearLight
     {
       get { return LightStyle == LightStyle.WorldLinear; }
@@ -209,6 +219,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether the light style
     /// is <see cref="LightStyle"/> WorldRectangular.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRectangularLight
     {
       get { return LightStyle == LightStyle.WorldRectangular; }
@@ -218,6 +229,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether this object is a Sun light.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsSunLight
     {
       get 
@@ -233,6 +245,7 @@ namespace Rhino.Geometry
     /// Gets a value, determined by LightStyle, that explains whether
     /// the camera directions are relative to World or Camera spaces.
     /// </summary>
+    /// <since>5.0</since>
     public DocObjects.CoordinateSystem CoordinateSystem
     {
       get { return (DocObjects.CoordinateSystem)GetInt(idxCoordinateSystem);}
@@ -241,6 +254,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the light or 3D position or location.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Location
     {
       get
@@ -277,6 +291,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the vector direction of the camera.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Direction
     {
       get{ return GetVector(idxDirection); }
@@ -286,6 +301,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a perpendicular vector to the camera direction.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d PerpendicularDirection
     {
       get { return GetVector(idxPerpendicularDirection); }
@@ -313,6 +329,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the light intensity.
     /// </summary>
+    /// <since>5.0</since>
     public double Intensity
     {
       get { return GetDouble(idxIntensity); }
@@ -322,6 +339,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the light power in watts (W).
     /// </summary>
+    /// <since>5.0</since>
     public double PowerWatts
     {
       get { return GetDouble(idxPowerWatts); }
@@ -331,6 +349,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the light power in lumens (lm).
     /// </summary>
+    /// <since>5.0</since>
     public double PowerLumens
     {
       get { return GetDouble(idxPowerLumens); }
@@ -340,6 +359,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the light power in candelas (cd).
     /// </summary>
+    /// <since>5.0</since>
     public double PowerCandela
     {
       get { return GetDouble(idxPowerCandela); }
@@ -365,6 +385,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the ambient color.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color Ambient
     {
       get { return GetColor(idxAmbient); }
@@ -379,6 +400,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_modifylightcolor.cs' lang='cs'/>
     /// <code source='examples\py\ex_modifylightcolor.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public System.Drawing.Color Diffuse
     {
       get { return GetColor(idxDiffuse); }
@@ -388,6 +410,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the specular color.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color Specular
     {
       get { return GetColor(idxSpecular); }
@@ -401,6 +424,7 @@ namespace Rhino.Geometry
     /// <param name="a0">The new constant attenuation divisor term.</param>
     /// <param name="a1">The new reverse linear attenuation divisor term.</param>
     /// <param name="a2">The new reverse quadratic attenuation divisor term.</param>
+    /// <since>5.0</since>
     public void SetAttenuation(double a0, double a1, double a2)
     {
       IntPtr pThis = NonConstPointer();
@@ -410,6 +434,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or Sets the attenuation vector.
     /// </summary>
+    /// <since>5.7</since>
     public Vector3d AttenuationVector
     {
       get
@@ -432,6 +457,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="d">The distance to evaluate.</param>
     /// <returns>0 if a0 + d*a1 + d^2*a2 &lt;= 0.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double GetAttenuation(double d)
     {
@@ -444,6 +470,7 @@ namespace Rhino.Geometry
     /// <para>Ignored for non-spot lights.</para>
     /// <para>angle = 0 to pi/2  (0 to 90 degrees).</para>
     /// </summary>
+    /// <since>5.0</since>
     public double SpotAngleRadians
     {
       get{ return GetDouble(idxSpotAngleRadians); }
@@ -452,7 +479,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// The spot exponent varies from 0.0 to 128.0 and provides
-    /// an exponential interface for controling the focus or 
+    /// an exponential interface for controlling the focus or 
     /// concentration of a spotlight (like the 
     /// OpenGL GL_SPOT_EXPONENT parameter).  The spot exponent
     /// and hot spot parameters are linked; changing one will
@@ -460,6 +487,7 @@ namespace Rhino.Geometry
     /// A hot spot setting of 0.0 corresponds to a spot exponent of 128.
     /// A hot spot setting of 1.0 corresponds to a spot exponent of 0.0.
     /// </summary>
+    /// <since>5.0</since>
     public double SpotExponent
     {
       get { return GetDouble(idxSpotExponent); }
@@ -468,11 +496,12 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// The hot spot setting runs from 0.0 to 1.0 and is used to
-    /// provides a linear interface for controling the focus or 
+    /// provides a linear interface for controlling the focus or 
     /// concentration of a spotlight.
     /// A hot spot setting of 0.0 corresponds to a spot exponent of 128.
     /// A hot spot setting of 1.0 corresponds to a spot exponent of 0.0.
     /// </summary>
+    /// <since>5.0</since>
     public double HotSpot
     {
       get { return GetDouble(idxHotSpot); }
@@ -485,6 +514,7 @@ namespace Rhino.Geometry
     /// <param name="innerRadius">The inner radius. This out parameter is assigned during this call.</param>
     /// <param name="outerRadius">The outer radius. This out parameter is assigned during this call.</param>
     /// <returns>true if operation succeeded; otherwise, false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool GetSpotLightRadii(out double innerRadius, out double outerRadius)
     {
@@ -498,6 +528,7 @@ namespace Rhino.Geometry
     /// Gets or sets the height in linear and rectangular lights.
     /// <para>(ignored for non-linear/rectangular lights.)</para>
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Length
     {
       get { return GetVector(idxLength); }
@@ -508,6 +539,7 @@ namespace Rhino.Geometry
     /// Gets or sets the width in linear and rectangular lights.
     /// <para>(ignored for non-linear/rectangular lights.)</para>
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Width
     {
       get { return GetVector(idxWidth); }
@@ -518,6 +550,7 @@ namespace Rhino.Geometry
     /// Gets or sets the spot light shadow intensity.
     /// <para>(ignored for non-spot lights.)</para>
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use ShadowIntensity")]
     public double SpotLightShadowIntensity
     {
@@ -528,6 +561,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the shadow intensity for the light.
     /// </summary>
+    /// <since>6.0</since>
     public double ShadowIntensity
     {
         get { return GetDouble(idxShadowIntensity); }
@@ -537,6 +571,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the spot light name.
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get
@@ -557,6 +592,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Gets the ID of this light.</summary>
+    /// <since>6.0</since>
     public Guid Id
     {
       get
@@ -571,5 +607,75 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_Light_SetModelObjectId(pThis, value);
       }
     }
+
+    #region Attenuation helper functions and enum
+    /// <summary>
+    /// Vector denoting a constant light attenuation.
+    /// </summary>
+    public static readonly Vector3d ConstantAttenuationVector = new Vector3d(1, 0, 0);
+    /// <summary>
+    /// Vector denoting a linear light attenuation.
+    /// </summary>
+    public static readonly Vector3d LinearAttenuationVector = new Vector3d(0, 1, 0);
+    /// <summary>
+    /// Vector denoting an inverse squared light attenuation.
+    /// </summary>
+    public static readonly Vector3d InverseSquaredAttenuationVector = new Vector3d(0, 0, 1);
+
+    /// <summary>
+    /// Types of light attenuation available.
+    /// </summary>
+    public enum Attenuation {
+      /// <summary>
+      /// Constant light attenuation, meaning no light energy fall-off.
+      /// </summary>
+      Constant,
+      /// <summary>
+      /// Linear light attenuation, meaning linear light energy fall-off.
+      /// </summary>
+      Linear,
+      /// <summary>
+      /// Inverse squared light attenuation, meaning light energy falls off in spherical order.
+      /// </summary>
+      InverseSquared,
+    }
+
+    /// <summary>
+    /// Get the type of attenuation for this light.
+    /// </summary>
+    /// <since>7.0</since>
+    public Attenuation AttenuationType {
+      get {
+        var att = Attenuation.Constant;
+        var vec = AttenuationVector;
+        if (vec.Equals(ConstantAttenuationVector))
+        {
+          att = Attenuation.Constant;
+        }
+        else if (vec.Equals(LinearAttenuationVector))
+        {
+          att = Attenuation.Linear;
+        }
+        else if (vec.Equals(InverseSquaredAttenuationVector))
+        {
+          att = Attenuation.InverseSquared;
+        }
+        return att;
+      }
+      set {
+        switch(value) {
+          case Attenuation.Linear:
+            AttenuationVector = LinearAttenuationVector;
+            break;
+          case Attenuation.InverseSquared:
+            AttenuationVector = InverseSquaredAttenuationVector;
+            break;
+          default: // defaulting to constant since that is what pre-rhino7 used to support only anyway
+            AttenuationVector = ConstantAttenuationVector;
+            break;
+        }
+      }
+    }
+    #endregion
   }
 }

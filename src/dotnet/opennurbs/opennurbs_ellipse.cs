@@ -5,7 +5,7 @@ using Rhino.Runtime;
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Represents the values of a plane and the two semiaxes radii in an ellipse.
+  /// Represents the values of a plane and the two semi-axes radii in an ellipse.
   /// </summary>
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 144)]
   [Serializable]
@@ -24,6 +24,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Base plane of ellipse.</param>
     /// <param name="radius1">Ellipse radius along base plane X direction.</param>
     /// <param name="radius2">Ellipse radius along base plane Y direction.</param>
+    /// <since>5.0</since>
     public Ellipse(Plane plane, double radius1, double radius2)
     {
       m_plane = plane;
@@ -32,14 +33,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Initializes a new ellipse from a center point and the two semiaxes intersections.
+    /// Initializes a new ellipse from a center point and the two semi-axes intersections.
     /// </summary>
-    /// <param name="center">A center for the ellipse. The avarage of the foci.</param>
+    /// <param name="center">A center for the ellipse. The average of the foci.</param>
     /// <param name="second">The intersection of the ellipse X axis with the ellipse itself.</param>
-    /// <param name="third">A point that determines the radius along the Y semiaxis.
+    /// <param name="third">A point that determines the radius along the Y semi-axis.
     /// <para>If the point is at right angle with the (center - second point) vector,
     /// it will be the intersection of the ellipse Y axis with the ellipse itself.</para>
     /// </param>
+    /// <since>5.0</since>
     public Ellipse(Point3d center, Point3d second, Point3d third)
     {
       m_plane = new Plane(center, second, third);
@@ -52,6 +54,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the base plane of the ellipse.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane 
     { 
       get { return m_plane; }
@@ -59,8 +62,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the radius of the ellipse along the base plane X semiaxis.
+    /// Gets or sets the radius of the ellipse along the base plane X semi-axis.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius1 
     {
       get { return m_radius1; }
@@ -68,8 +72,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the radius of the ellipse along the base plane Y semiaxis.
+    /// Gets or sets the radius of the ellipse along the base plane Y semi-axis.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius2 
     {
       get { return m_radius2; }
@@ -79,6 +84,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns an indication of the validity of this ellipse.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsValid {
       get
       {
@@ -94,6 +100,7 @@ namespace Rhino.Geometry
     /// <para>This is equivalent to calling NurbsCurve.CreateFromEllipse().</para>
     /// </summary>
     /// <returns>A nurbs curve representation of this ellipse or null if no such representation could be made.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -106,6 +113,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Ellipse other, double epsilon)
     {

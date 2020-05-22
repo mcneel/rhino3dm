@@ -19,6 +19,7 @@ namespace Rhino
     /// </summary>
     /// <param name="i">A first index.</param>
     /// <param name="j">A second index.</param>
+    /// <since>5.0</since>
     public IndexPair(int i, int j)
     {
       m_i = i;
@@ -28,6 +29,7 @@ namespace Rhino
     /// <summary>
     /// Gets or sets the first, I index.
     /// </summary>
+    /// <since>5.0</since>
     public int I
     {
       get { return m_i; }
@@ -37,6 +39,7 @@ namespace Rhino
     /// <summary>
     /// Gets or sets the second, J index.
     /// </summary>
+    /// <since>5.0</since>
     public int J
     {
       get { return m_j; }
@@ -87,6 +90,7 @@ namespace Rhino
     /// The index, 0 for I or 1 for J of <paramref name="item"/> if found in the list; otherwise, -1.
     /// </returns>
     /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1"/>.</param>
+    /// <since>6.0</since>
     public int IndexOf(int item)
     {
       return item == m_i ? 0 : (item == m_j ? 1 : -1);
@@ -100,6 +104,7 @@ namespace Rhino
     /// true if <paramref name="item"/> is found in the <see cref="IndexPair"/>; otherwise, false.
     /// </returns>
     /// <param name="item">The number to locate in the <see cref="IndexPair"/>.</param>
+    /// <since>6.0</since>
     public bool Contains(int item)
     {
       return IndexOf(item) != -1;
@@ -115,6 +120,7 @@ namespace Rhino
     /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
     /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0 or <paramref name="arrayIndex"/> is greater than or equals the length of array minus 2.</exception>
     /// <exception cref="T:System.ArgumentException">The length of the <paramref name="array"/> is less than 2.</exception>
+    /// <since>6.0</since>
     public void CopyTo(int[] array, int arrayIndex)
     {
       if (array == null) throw new ArgumentNullException(nameof(array));
@@ -128,12 +134,14 @@ namespace Rhino
     /// <summary>
     /// Returns the amount of elements in this pair of indices, which is always 2.
     /// </summary>
+    /// <since>6.0</since>
     public int Count => 2;
 
     /// <summary>
     /// Gets an enumerator that goes over <see cref="I"/> and <see cref="J"/>, in this order.
     /// </summary>
     /// <returns>The needed enumerator.</returns>
+    /// <since>6.0</since>
     public IEnumerator<int> GetEnumerator()
     {
       yield return m_i;
@@ -172,6 +180,7 @@ namespace Rhino
       throw new InvalidOperationException("IndexPair has fixed length");
     }
 
+    /// <since>6.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -190,50 +199,83 @@ namespace Rhino
     const double PI = 3.141592653589793238462643;
 
     /// <summary>
-    /// Gets the Zero Tolerance constant (2^-32).
+    /// Gets Rhino's Zero Tolerance constant, which is 2^-32. In cases when an
+    /// absolute "zero" tolerance is required to compare model space coordinates, 
+    /// ZeroTolerance is used. The value of ZeroTolerance should be no smaller than 
+    /// <see cref="RhinoMath.Epsilon"/> and should be several orders of magnitude smaller than <see cref="RhinoMath.SqrtEpsilon"/>.
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_ZERO_TOLERANCE.
+    /// </remarks>
     public const double ZeroTolerance = 2.3283064365386962890625e-10;
 
     /// <summary>
     /// Gets the Rhino standard Unset value. Use this value rather than Double.NaN when 
     /// a bogus floating point value is required.
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_UNSET_VALUE.
+    /// </remarks>
     public const double UnsetValue = -1.23432101234321e+308;
+
+    /// <summary>
+    /// Gets the value of DBL_EPSILON, which is the smallest positive floating point number x such that 1 + x != 1.
+    /// This is different than Double.Epsilon which is the smallest positive Double value that is greater than zero.
+    /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_EPSILON.
+    /// </remarks>
+    public const double Epsilon = 2.2204460492503131e-16;
 
     /// <summary>
     /// Represents a default value that is used when comparing square roots.
     /// <para>This value is several orders of magnitude larger than <see cref="RhinoMath.ZeroTolerance"/>.</para>
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_SQRT_EPSILON.
+    /// </remarks>
     public const double SqrtEpsilon = 1.490116119385000000e-8;
 
     /// <summary>
     /// Represents the default angle tolerance, used when no other values are provided.
     /// <para>This is one degree, expressed in radians.</para>
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_DEFAULT_ANGLE_TOLERANCE.
+    /// </remarks>
     public const double DefaultAngleTolerance = PI / 180.0;
 
     /// <summary>
-    /// Default distance tolerance
+    /// Get Rhino's default distance tolerance in millimeters.
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_DEFAULT_DISTANCE_TOLERANCE_MM.
+    /// </remarks>
     public const double DefaultDistanceToleranceMillimeters = 0.01;
 
     /// <summary>
     /// Gets the single precision floating point number that is considered 'unset' in Rhino.
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_UNSET_FLOAT.
+    /// </remarks>
     public const float UnsetSingle = -1.234321e+38f;
 
-    /// <summary>When signed int values are used in a context where 
+    /// <summary>
+    /// When signed int values are used in a context where 
     /// 0 and small negative values are valid indices and there needs
-    /// to be a value that indicates the index is not set,
-    /// OpenNURBS uses this index.  This value is -2147483647,
-    /// or Int32.MinValue + 1. This value paralles ON_UNSET_INT_INDEX.
+    /// to be a value that indicates the index is not set.
     /// </summary>
+    /// <remarks>
+    /// This is equivalent to openNURBS ON_UNSET_INT_INDEX.
+    /// </remarks>
     public const int UnsetIntIndex = int.MinValue + 1;
 
     /// <summary>
     /// Convert an angle from degrees to radians.
     /// </summary>
     /// <param name="degrees">Degrees to convert (180 degrees equals pi radians).</param>
+    /// <since>5.0</since>
     public static double ToRadians(double degrees)
     {
       return degrees * (PI / 180.0);
@@ -243,6 +285,7 @@ namespace Rhino
     /// Convert an angle from radians to degrees.
     /// </summary>
     /// <param name="radians">Radians to convert (180 degrees equals pi radians).</param>
+    /// <since>5.0</since>
     public static double ToDegrees(double radians)
     {
       return radians * (180.0 / PI);
@@ -257,6 +300,7 @@ namespace Rhino
     /// </summary>
     /// <param name="x"><see cref="double"/> number to test for validity.</param>
     /// <returns>true if the number if valid, false if the number is NaN, Infinity or Unset.</returns>
+    /// <since>5.0</since>
     public static bool IsValidDouble(double x)
     {
       return (x != UnsetValue) && (!double.IsInfinity(x)) && (!double.IsNaN(x));
@@ -271,6 +315,7 @@ namespace Rhino
     /// </summary>
     /// <param name="x"><see cref="float"/> number to test for validity.</param>
     /// <returns>true if the number if valid, false if the number is NaN, Infinity or Unset.</returns>
+    /// <since>5.0</since>
     public static bool IsValidSingle(float x)
     {
       return (x != UnsetSingle) && (!float.IsInfinity(x)) && (!float.IsNaN(x));
@@ -281,6 +326,7 @@ namespace Rhino
     /// </summary>
     /// <param name="index"><see cref="int"/> number express as string.</param>
     /// <returns>The text representation of the int index.</returns>
+    /// <since>6.0</since>
     public static string IntIndexToString(int index)
     {
       string rc;
@@ -295,6 +341,7 @@ namespace Rhino
     /// <param name="from">The system to convert from.</param>
     /// <param name="to">The system to convert measurements into.</param>
     /// <returns>A scale multiplier.</returns>
+    /// <since>5.0</since>
     public static double UnitScale(UnitSystem from, UnitSystem to)
     {
       return UnsafeNativeMethods.ONC_UnitScale(from, to);
@@ -307,6 +354,7 @@ namespace Rhino
     /// <param name="bound1">A first bound.</param>
     /// <param name="bound2">A second bound. This does not necessarily need to be larger or smaller than bound1.</param>
     /// <returns>The clamped value.</returns>
+    /// <since>5.0</since>
     public static int Clamp(int value, int bound1, int bound2)
     {
       int min = bound1;
@@ -331,6 +379,7 @@ namespace Rhino
     /// <param name="bound1">A first bound.</param>
     /// <param name="bound2">A second bound. This does not necessarily need to be larger or smaller than bound1.</param>
     /// <returns>The clamped value.</returns>
+    /// <since>5.0</since>
     public static double Clamp(double value, double bound1, double bound2)
     {
       double min = bound1;
@@ -355,6 +404,7 @@ namespace Rhino
     /// <param name="currentRemainder">The remainder from which to start.</param>
     /// <param name="buffer">The value to add to the current remainder.</param>
     /// <returns>The new current remainder.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static uint CRC32(uint currentRemainder, byte[] buffer)
     {
@@ -372,6 +422,7 @@ namespace Rhino
     /// <code source='examples\vbnet\ex_analysismode.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_analysismode.cs' lang='cs'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static uint CRC32(uint currentRemainder, double value)
     {
@@ -385,6 +436,7 @@ namespace Rhino
     /// <param name="currentRemainder">The remainder from which to start.</param>
     /// <param name="value">The value to add to the current remainder.</param>
     /// <returns>The new current remainder.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static uint CRC32(uint currentRemainder, int value)
     {
@@ -399,6 +451,7 @@ namespace Rhino
     /// <returns>result</returns>
     /// <exception cref="ArgumentNullException"><paramref name="expression"/> is null.</exception>
     /// <exception cref="FormatException"><paramref name="expression"/> cannot be parsed.</exception>
+    /// <since>6.0</since>
     public static double ParseNumber(string expression)
     {
       if (expression == null)
@@ -417,7 +470,8 @@ namespace Rhino
     /// </summary>
     /// <param name="expression"></param>
     /// <param name="result"></param>
-    /// <returns>true if successfull otherwise false</returns>
+    /// <returns>true if successful otherwise false</returns>
+    /// <since>6.0</since>
     public static bool TryParseNumber(string expression, out double result)
     {
       result = RhinoMath.UnsetValue;
@@ -438,6 +492,7 @@ namespace Rhino
     /// <param name="y"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public static bool EpsilonEquals(double x, double y, double epsilon)
     {
       // IEEE standard says that any comparison between NaN should return false;
@@ -466,6 +521,7 @@ namespace Rhino
     /// <param name="y"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     public static bool EpsilonEquals(float x, float y, float epsilon)
     {
       // IEEE standard says that any comparison between NaN should return false;
@@ -487,11 +543,64 @@ namespace Rhino
       return (x >= y - epsilon && x <= y + epsilon);
     }
 
+    /// <summary>
+    /// Expert tool to evaluate surface unit normal.
+    /// </summary>
+    /// <param name="limitDirection">Determines which direction is used to compute the limit, where:
+    /// 0 = default, 1 = from quadrant I, 2 = from quadrant II, etc.</param>
+    /// <param name="ds">First partial derivative.</param>
+    /// <param name="dt">First partial derivative.</param>
+    /// <param name="dss">Second partial derivative.</param>
+    /// <param name="dst">Second partial derivative.</param>
+    /// <param name="dtt">Second partial derivative.</param>
+    /// <param name="n">Unit normal.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public static bool EvaluateNormal(
+      int limitDirection,
+      Rhino.Geometry.Vector3d ds,
+      Rhino.Geometry.Vector3d dt,
+      Rhino.Geometry.Vector3d dss,
+      Rhino.Geometry.Vector3d dst,
+      Rhino.Geometry.Vector3d dtt,
+      out Rhino.Geometry.Vector3d n
+      )
+    {
+      n = Rhino.Geometry.Vector3d.Unset;
+      return UnsafeNativeMethods.ONC_EvNormal(limitDirection, ds, dt, dss, dst, dtt, ref n);
+    }
+
+    /// <summary>
+    /// Expert tool to evaluate partial derivatives of surface unit normal.
+    /// </summary>
+    /// <param name="ds">First partial derivative.</param>
+    /// <param name="dt">First partial derivative.</param>
+    /// <param name="dss">Second partial derivative.</param>
+    /// <param name="dst">Second partial derivative.</param>
+    /// <param name="dtt">Second partial derivative.</param>
+    /// <param name="ns">First partial derivative of unit normal. If the Jacobian is degenerate, ns is set to zero.</param>
+    /// <param name="nt">First partial derivative of unit normal. If the Jacobian is degenerate, nt is set to zero.</param>
+    /// <returns>true if Jacobian is non-degenerate, false if Jacobian is degenerate.</returns>
+    /// <since>7.0</since>
+    public static bool EvaluateNormalPartials(
+      Rhino.Geometry.Vector3d ds,
+      Rhino.Geometry.Vector3d dt,
+      Rhino.Geometry.Vector3d dss,
+      Rhino.Geometry.Vector3d dst,
+      Rhino.Geometry.Vector3d dtt,
+      out Rhino.Geometry.Vector3d ns,
+      out Rhino.Geometry.Vector3d nt
+      )
+    {
+      ns = Rhino.Geometry.Vector3d.Unset;
+      nt = Rhino.Geometry.Vector3d.Unset;
+      return UnsafeNativeMethods.ONC_EvNormalPartials(ds, dt, dss, dst, dtt, ref ns, ref nt);
+    }
   }
 
 
   /// <summary>
-  /// Provides the antialias levels used for render quality
+  /// Provides the anti-alias levels used for render quality
   /// </summary>
   public enum AntialiasLevel
   {
@@ -632,7 +741,7 @@ namespace Rhino
       G2_locus_continuous = 10,
 
       /// <summary>
-      /// Analytic discontinuity. Cinfinity_continuous is a euphanisim for "at a knot".
+      /// Analytic discontinuity. Cinfinity_continuous is a euphemism for "at a knot".
       /// </summary>
       Cinfinity_continuous = 11,
 
@@ -736,7 +845,7 @@ namespace Rhino
       Locked = 2,
       ///<summary>
       ///Object is part of an InstanceDefinition. The InstanceDefinition
-      ///m_object_uuid[] array will contain this object attribute's uuid.
+      ///m_object_uuid[] array will contain this object attribute's id.
       ///</summary>
       InstanceDefinitionObject = 3
       //ObjectModeCount = 4
@@ -848,7 +957,7 @@ namespace Rhino
       /// <summary>
       /// The shaded display mode.
       /// <para>Objects are generally displayed with their corresponding isocurves and edges,
-      /// and are filled with their diplay colors.</para>
+      /// and are filled with their display colors.</para>
       /// </summary>
       Shaded = 2,
 
@@ -1024,6 +1133,12 @@ namespace Rhino
       /// A brep loop.
       /// </summary>
       BrepLoop = 0x80000,
+
+      /// <summary>
+      /// a brep vertex.
+      /// </summary>
+      BrepVertex = 0x100000,
+
       /// <summary>Selection filter value - not a real object type.</summary>
       PolysrfFilter = 0x200000,
       /// <summary>Selection filter value - not a real object type.</summary>
@@ -1101,12 +1216,16 @@ namespace Rhino
     static readonly char g_plusminus_symbol = (char)UnsafeNativeMethods.ON_wString_PlusMinusSymbol();
 
     /// <summary> Degree symbol used for angles </summary>
+    /// <since>6.0</since>
     public static char DegreeSymbol { get { return g_degree_symbol; } }
     /// <summary> Radius symbol </summary>
+    /// <since>6.0</since>
     public static char RadiusSymbol { get { return g_radius_symbol; } }
     /// <summary> Diameter symbol </summary>
+    /// <since>6.0</since>
     public static char DiameterSymbol { get { return g_diameter_symbol; } }
     /// <summary> Plus-Minus tolerance symbol </summary>
+    /// <since>6.0</since>
     public static char PlusMinusSymbol { get { return g_plusminus_symbol; } }
   }
 }
@@ -1207,7 +1326,7 @@ namespace Rhino.Geometry
     MeshFace = 14,
 
     /// <summary>
-    /// Targets a mesh ngon index.
+    /// Targets a mesh n-gon index.
     /// </summary>
     MeshNgon = 15,
 
@@ -1222,7 +1341,7 @@ namespace Rhino.Geometry
     PolycurveSegment = 31,
 
     /// <summary>
-    /// Targets a pointcloud point index.
+    /// Targets a point cloud point index.
     /// </summary>
     PointCloudPoint = 41,
 
@@ -1319,6 +1438,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="type"></param>
     /// <param name="index"></param>
+    /// <since>5.0</since>
     public ComponentIndex(ComponentIndexType type, int index)
     {
       m_type = (uint)type;
@@ -1346,6 +1466,7 @@ namespace Rhino.Geometry
     /// dim_ordinate_point OrdinateDimension2::POINT_INDEX
     /// dim_text_point     TextEntity2 origin point.
     /// </summary>
+    /// <since>5.0</since>
     public ComponentIndexType ComponentIndexType
     {
       get
@@ -1377,6 +1498,7 @@ namespace Rhino.Geometry
     /// dim_ordinate_point OrdinateDimension2::POINT_INDEX
     /// dim_text_point     TextEntity2 origin point.
     /// </summary>
+    /// <since>5.0</since>
     public int Index
     {
       get { return m_index; }
@@ -1386,6 +1508,7 @@ namespace Rhino.Geometry
     /// Return true is this component index is the same as the Unset component index
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool IsUnset()
     {
       var unset = Unset;
@@ -1395,6 +1518,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The unset value of component index.
     /// </summary>
+    /// <since>5.0</since>
     public static ComponentIndex Unset
     {
       get { return new ComponentIndex(ComponentIndexType.InvalidType, -1); }

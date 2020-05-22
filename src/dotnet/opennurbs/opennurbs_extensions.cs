@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using Rhino.Geometry;
@@ -131,6 +131,7 @@ namespace Rhino.FileIO
     /// <param name="path">The file to read.</param>
     /// <returns>new File3dm on success, null on error.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist.</exception>
+    /// <since>5.0</since>
     public static File3dm Read(string path)
     {
       if (!File.Exists(path))
@@ -148,12 +149,13 @@ namespace Rhino.FileIO
     /// Otherwise tableTypeFilterFilter identifies what tables should be read.
     /// </param>
     /// <param name="objectTypeFilter">
-    /// If objectTypeFilter is not None, then is a filter made by bitwise oring
+    /// If objectTypeFilter is not None, then is a filter made by bitwise or-ing
     /// values to select which types of objects will be read from the model object
     /// table.
     /// </param>
     /// <returns>new File3dm on success, null on error.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist.</exception>
+    /// <since>5.9</since>
     [CLSCompliant(false)]
     public static File3dm Read(string path, TableTypeFilter tableTypeFilterFilter, ObjectTypeFilter objectTypeFilter)
     {
@@ -173,13 +175,14 @@ namespace Rhino.FileIO
     /// Otherwise tableTypeFilterFilter identifies what tables should be read.
     /// </param>
     /// <param name="objectTypeFilter">
-    /// If objectTypeFilter is not None, then is a filter made by bitwise oring
+    /// If objectTypeFilter is not None, then is a filter made by bitwise or-ing
     /// values to select which types of objects will be read from the model object
     /// table.
     /// </param>
     /// <param name="errorLog">Any archive reading errors are logged here.</param>
     /// <returns>new File3dm on success, null on error.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist.</exception>
+    /// <since>5.9</since>
     [CLSCompliant(false)]
     public static File3dm ReadWithLog(string path, TableTypeFilter tableTypeFilterFilter, ObjectTypeFilter objectTypeFilter, out string errorLog)
     {
@@ -203,6 +206,7 @@ namespace Rhino.FileIO
     /// <param name="errorLog">Any archive reading errors are logged here.</param>
     /// <returns>New File3dm on success, null on error.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist.</exception>
+    /// <since>5.0</since>
     public static File3dm ReadWithLog(string path, out string errorLog)
     {
       errorLog = string.Empty;
@@ -222,6 +226,7 @@ namespace Rhino.FileIO
     /// <param name="path">The file from which to read the notes.</param>
     /// <returns>The 3dm file notes.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist, is null or cannot be accessed because of permissions.</exception>
+    /// <since>5.0</since>
     public static string ReadNotes(string path)
     {
       if (!File.Exists(path))
@@ -239,6 +244,7 @@ namespace Rhino.FileIO
     /// <param name="path">The file from which to read the archive version.</param>
     /// <returns>The 3dm file archive version.</returns>
     /// <exception cref="FileNotFoundException">If path does not exist, is null or cannot be accessed because of permissions.</exception>
+    /// <since>5.10</since>
     public static int ReadArchiveVersion(string path)
     {
       if (!File.Exists (path))
@@ -258,6 +264,7 @@ namespace Rhino.FileIO
     /// <param name="createdOn">date file was created (DateTime.MinValue if not set in file)</param>
     /// <param name="lastEditedOn">date file was last edited (DateTime.MinValue if not set in file)</param>
     /// <returns>true on success</returns>
+    /// <since>5.6</since>
     public static bool ReadRevisionHistory(string path, out string createdBy, out string lastEditedBy, out int revision, out DateTime createdOn, out DateTime lastEditedOn)
     {
       createdBy = "";
@@ -294,6 +301,7 @@ namespace Rhino.FileIO
     /// <param name="applicationName">The application name. This out parameter is assigned during this call.</param>
     /// <param name="applicationUrl">The application URL. This out parameter is assigned during this call.</param>
     /// <param name="applicationDetails">The application details. This out parameter is assigned during this call.</param>
+    /// <since>5.0</since>
     public static void ReadApplicationData(string path, out string applicationName, out string applicationUrl, out string applicationDetails)
     {
       if (!File.Exists(path))
@@ -325,6 +333,7 @@ namespace Rhino.FileIO
     /// <code source='examples\cs\ex_extractthumbnail.cs' lang='cs'/>
     /// <code source='examples\py\ex_extractthumbnail.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static System.Drawing.Bitmap ReadPreviewImage(string path)
     {
       if (!File.Exists(path))
@@ -360,6 +369,7 @@ namespace Rhino.FileIO
     /// Array of dimension styles on success (empty array if file does not contain dimension styles)
     /// null on error
     /// </returns>
+    /// <since>6.0</since>
     public static DimensionStyle[] ReadDimensionStyles(string path)
     {
       if (!File.Exists(path))
@@ -400,6 +410,7 @@ namespace Rhino.FileIO
     /// true if archive is written with no error.
     /// false if errors occur.
     /// </returns>
+    /// <since>5.0</since>
     public bool Write(string path, int version)
     {
       return Write(path, new File3dmWriteOptions { Version = version });
@@ -415,6 +426,7 @@ namespace Rhino.FileIO
     /// true if archive is written with no error.
     /// false if errors occur.
     /// </returns>
+    /// <since>5.9</since>
     public bool Write(string path, File3dmWriteOptions options)
     {
       options = options ?? new File3dmWriteOptions();
@@ -442,6 +454,7 @@ namespace Rhino.FileIO
     /// true if archive is written with no error.
     /// false if errors occur.
     /// </returns>
+    /// <since>5.0</since>
     public bool WriteWithLog(string path, int version, out string errorLog)
     {
       return WriteWithLog(path, new File3dmWriteOptions { Version = version }, out errorLog);
@@ -458,6 +471,7 @@ namespace Rhino.FileIO
     /// true if archive is written with no error.
     /// false if errors occur.
     /// </returns>
+    /// <since>6.0</since>
     public bool WriteWithLog(string path, File3dmWriteOptions options, out string errorLog)
     {
       options = options ?? new File3dmWriteOptions();
@@ -487,6 +501,7 @@ namespace Rhino.FileIO
     /// No errors are found.
     /// </param>
     /// <returns>true in any case.</returns>
+    /// <since>5.0</since>
     [Obsolete("IsValid now returns always true.")]
     public bool IsValid(out string errors)
     {
@@ -502,6 +517,7 @@ namespace Rhino.FileIO
     /// No errors are found.
     /// </param>
     /// <returns>>true in any case.</returns>
+    /// <since>5.1</since>
     [Obsolete("IsValid now returns always true.")]
     public bool IsValid(TextLog errors)
     {
@@ -512,6 +528,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// This function is only kept for forward assembly compatibility.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Polish and Audit functionality no longer exist.")]
     public void Polish()
     {
@@ -525,13 +542,14 @@ namespace Rhino.FileIO
     /// </param>
     /// <param name="repairCount">Is set to 0.</param>
     /// <param name="errors">
-    /// Contains no meaninful error.
+    /// Contains no meaningful error.
     /// </param>
     /// <param name="warnings">Is set to null.
     /// </param>
     /// <returns>
     /// Returns 0.
     /// </returns>
+    /// <since>5.0</since>
     [Obsolete("Polish and Audit functionality no longer exist.")]
     public int Audit(bool attemptRepair, out int repairCount, out string errors, out int[] warnings)
     {
@@ -550,6 +568,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the start section comments, which are the comments with which the 3dm file begins.
     /// </summary>
+    /// <since>5.0</since>
     public string StartSectionComments
     {
       get
@@ -573,6 +592,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the model notes.
     /// </summary>
+    /// <since>5.0</since>
     public File3dmNotes Notes
     {
       get
@@ -611,6 +631,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the name of the application that wrote this file.
     /// </summary>
+    /// <since>5.0</since>
     public string ApplicationName
     {
       get { return GetString(idxApplicationName); }
@@ -620,6 +641,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets a URL for the application that wrote this file.
     /// </summary>
+    /// <since>5.0</since>
     public string ApplicationUrl
     {
       get { return GetString(idxApplicationUrl); }
@@ -629,6 +651,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets details for the application that wrote this file.
     /// </summary>
+    /// <since>5.0</since>
     public string ApplicationDetails
     {
       get { return GetString(idxApplicationDetails); }
@@ -638,6 +661,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets a string that names the user who created the file.
     /// </summary>
+    /// <since>5.0</since>
     public string CreatedBy
     {
       get { return GetString(idxCreatedBy); }
@@ -646,6 +670,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets a string that names the user who last edited the file.
     /// </summary>
+    /// <since>5.0</since>
     public string LastEditedBy
     {
       get { return GetString(idxLastCreatedBy); }
@@ -655,6 +680,7 @@ namespace Rhino.FileIO
     /// Get the DateTime that this file was originally created. If the
     /// value is not set in the 3dm file, then DateTime.MinValue is returned
     /// </summary>
+    /// <since>5.6</since>
     public DateTime Created
     {
       get
@@ -672,6 +698,7 @@ namespace Rhino.FileIO
     /// Get the DateTime that this file was last edited. If the
     /// value is not set in the 3dm file, then DateTime.MinValue is returned
     /// </summary>
+    /// <since>5.6</since>
     public DateTime LastEdited
     {
       get
@@ -688,6 +715,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the revision number.
     /// </summary>
+    /// <since>5.0</since>
     public int Revision
     {
       get
@@ -704,6 +732,7 @@ namespace Rhino.FileIO
 
 #if RHINO_SDK
     /// <summary> Preview image used for file explorer </summary>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap GetPreviewImage()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -717,6 +746,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary> Preview image used for file explorer </summary>
+    /// <since>6.0</since>
     public void SetPreviewImage(System.Drawing.Bitmap image)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -733,6 +763,7 @@ namespace Rhino.FileIO
     /// Settings include tolerance, and unit system, and defaults used
     /// for creating views and objects.
     /// </summary>
+    /// <since>5.0</since>
     public File3dmSettings Settings
     {
       get
@@ -744,6 +775,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Retrieves the manifest with all object descriptions in this file.
     /// </summary>
+    /// <since>6.0</since>
     public ManifestTable Manifest
     {
       get { return m_manifest_table ?? (m_manifest_table = new File3dmManifestTable(this)); }
@@ -753,6 +785,7 @@ namespace Rhino.FileIO
     /// Gets access to the <see cref="File3dmObjectTable"/> class associated with this file,
     /// which contains all objects.
     /// </summary>
+    /// <since>5.0</since>
     public File3dmObjectTable Objects
     {
       get { return m_object_table ?? (m_object_table = new File3dmObjectTable(this)); }
@@ -761,6 +794,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Materials in this file.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the new AllMaterials property")]
     public IList<Material> Materials
     {
@@ -770,6 +804,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Materials in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmMaterialTable AllMaterials
     {
       get { return m_material_table ?? (m_material_table = new File3dmMaterialTable(this)); }
@@ -778,6 +813,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Linetypes in this file.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the new AllLinetypes property")]
     public IList<Linetype> Linetypes
     {
@@ -787,6 +823,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Linetypes in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmLinetypeTable AllLinetypes
     {
       get { return m_linetype_table ?? (m_linetype_table = new File3dmLinetypeTable(this)); }
@@ -795,6 +832,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Layers in this file.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the new AllLayers property")]
     public IList<Layer> Layers
     {
@@ -804,14 +842,16 @@ namespace Rhino.FileIO
     /// <summary>
     /// Layers in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmLayerTable AllLayers
     {
       get { return m_layer_table ?? (m_layer_table = new File3dmLayerTable(this)); }
     }
 
     /// <summary>
-    /// Grpups in this file.
+    /// Groups in this file.
     /// </summary>
+    /// <since>6.5</since>
     public File3dmGroupTable AllGroups
     {
       get { return m_group_table ?? (m_group_table = new File3dmGroupTable(this)); }
@@ -820,6 +860,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Dimension Styles in this file.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the new AllDimStyles property")]
     public IList<DimensionStyle> DimStyles
     {
@@ -829,6 +870,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Dimension Styles in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmDimStyleTable AllDimStyles
     {
       get { return m_dimstyle_table ?? (m_dimstyle_table = new File3dmDimStyleTable(this)); }
@@ -837,6 +879,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Hatch patterns in this file
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the new AllHatchPatterns property")]
     public IList<HatchPattern> HatchPatterns
     {
@@ -846,6 +889,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Hatch patterns in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmHatchPatternTable AllHatchPatterns
     {
       get { return m_hatchpattern_table ?? (m_hatchpattern_table = new File3dmHatchPatternTable(this)); }
@@ -854,6 +898,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Instance definitions in this file.
     /// </summary>
+    /// <since>5.6</since>
     [Obsolete("Use the new AllInstanceDefinitions property")]
     public IList<InstanceDefinitionGeometry> InstanceDefinitions
     {
@@ -866,6 +911,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Instance definitions in this file
     /// </summary>
+    /// <since>6.0</since>
     public File3dmInstanceDefinitionTable AllInstanceDefinitions
     {
       get
@@ -877,6 +923,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Views that represent the RhinoViews which are displayed when Rhino loads this file.
     /// </summary>
+    /// <since>5.0</since>
     public IList<ViewInfo> Views
     {
       get { return m_view_table ?? (m_view_table = new File3dmViewTable(this, false)); }
@@ -885,6 +932,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Views that represent the RhinoViews which are displayed when Rhino loads this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmViewTable AllViews
     {
       get { return m_named_view_table ?? (m_named_view_table = new File3dmViewTable(this, false)); }
@@ -893,6 +941,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Named views in this file.
     /// </summary>
+    /// <since>5.0</since>
     public IList<ViewInfo> NamedViews
     {
       get { return m_named_view_table ?? (m_named_view_table = new File3dmViewTable(this, true)); }
@@ -901,6 +950,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Named views in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmViewTable AllNamedViews
     {
       get { return m_named_view_table ?? (m_named_view_table = new File3dmViewTable(this, true)); }
@@ -909,6 +959,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Named construction planes in this file.
     /// </summary>
+    /// <since>6.0</since>
     public IList<ConstructionPlane> NamedConstructionPlanes
     {
       get
@@ -922,6 +973,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Named construction planes in this file.
     /// </summary>
+    /// <since>6.0</since>
     public File3dmNamedConstructionPlanes AllNamedConstructionPlanes
     {
       get
@@ -934,6 +986,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Custom plug-in data in this file.  This data is not attached to any geometry or attributes
     /// </summary>
+    /// <since>5.0</since>
     public File3dmPlugInDataTable PlugInData
     {
       get { return m_userdata_table ?? (m_userdata_table = new File3dmPlugInDataTable(this)); }
@@ -942,6 +995,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Document user strings in this file
     /// </summary>
+    /// <since>6.0</since>
     public File3dmStringTable Strings
     {
       get { return m_string_table ?? (m_string_table = new File3dmStringTable(this)); }
@@ -979,6 +1033,7 @@ namespace Rhino.FileIO
 
     /// <summary>Prepares a text dump of the entire model.</summary>
     /// <returns>The text dump.</returns>
+    /// <since>5.0</since>
     public string Dump()
     {
       return Dump(idxDumpAll);
@@ -986,6 +1041,7 @@ namespace Rhino.FileIO
 
     /// <summary>Prepares a text dump of model properties and settings.</summary>
     /// <returns>The text dump.</returns>
+    /// <since>5.0</since>
     public string DumpSummary()
     {
       return Dump(idxDumpSummary);
@@ -993,6 +1049,7 @@ namespace Rhino.FileIO
 
     /// <summary>Prepares a text dump of the entire model.</summary>
     /// <param name="log"></param>
+    /// <since>5.1</since>
     public void DumpToTextLog(TextLog log)
     {
       IntPtr pConstThis = ConstPointer();
@@ -1097,6 +1154,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Initializes a new instance of a 3dm file.
     /// </summary>
+    /// <since>5.0</since>
     public File3dm()
     {
       m_ptr = UnsafeNativeMethods.ONX_Model_New();
@@ -1114,6 +1172,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1145,6 +1204,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Initializes properties to defaults.
     /// </summary>
+    /// <since>5.9</since>
     public File3dmWriteOptions()
     {
 #if RHINO_SDK
@@ -1171,11 +1231,13 @@ namespace Rhino.FileIO
     /// <para>Rhino can read its current version, plus earlier file versions except 1.</para>
     /// <para>Use latest version when possible.</para>
     /// </summary>
+    /// <since>5.9</since>
     public int Version { get; set; }
 
     /// <summary>
     /// Include Render meshes in the file. Default is true
     /// </summary>
+    /// <since>5.9</since>
     [Obsolete("Specify analysis meshes for object types individually. Use EnableAnalysisMeshes()")]
     public bool SaveRenderMeshes
     {
@@ -1195,8 +1257,9 @@ namespace Rhino.FileIO
     /// Specifically, currently SubD mesh saving is disabled by default, while Brep and Extrusion is on.
     /// </summary>
     /// <param name="objectType">The object type. Mostly brep, extrusion and SubD (or their flag combinations) make sense here.
-    /// <para>DO NOT specify a 'filter' or subobject type.</para></param>
+    /// <para>DO NOT specify a 'filter' or sub-object type.</para></param>
     /// <param name="enable">If false, disables saving for this object type.</param>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public void EnableRenderMeshes(ObjectType objectType, bool enable)
     {
@@ -1213,6 +1276,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Include analysis meshes in the file. Default is true
     /// </summary>
+    /// <since>5.9</since>
     [Obsolete("Specify analysis meshes for object types individually. Use EnableAnalysisMeshes()")]
     public bool SaveAnalysisMeshes
     {
@@ -1232,8 +1296,9 @@ namespace Rhino.FileIO
     /// Currently SubD mesh saving is disabled by default, while Brep and Extrusion is enabled.
     /// </summary>
     /// <param name="objectType">The object type. Mostly mesh, brep, extrusion and SubD (or their flag combinations) make sense here.
-    /// <para>DO NOT specify a 'filter' or subobject type.</para></param>
+    /// <para>DO NOT specify a 'filter' or sub-object type.</para></param>
     /// <param name="enable">If false, disables saving for this object type.</param>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public void EnableAnalysisMeshes(ObjectType objectType, bool enable)
     {
@@ -1250,6 +1315,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Include custom user data in the file. Default is true
     /// </summary>
+    /// <since>5.9</since>
     public bool SaveUserData { get; set; }
   }
 
@@ -1290,6 +1356,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the geometry that is linked with this document object.
     /// </summary>
+    /// <since>5.0</since>
     public GeometryBase Geometry
     {
       get
@@ -1304,6 +1371,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the attributes that are linked with this document object.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectAttributes Attributes
     {
       get
@@ -1318,6 +1386,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the Name of the object. Equivalent to this.Attributes.Name.
     /// </summary>
+    /// <since>5.0</since>
     public override string Name
     {
       get { return Attributes.Name; }
@@ -1327,6 +1396,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.ModelGeometry"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType => ModelComponentType.ModelGeometry;
 
     /// <summary>
@@ -1344,6 +1414,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="other">The other item to test.</param>
     /// <returns>true is the two objects coincide.</returns>
+    /// <since>6.0</since>
     public bool Equals(File3dmObject other)
     {
       return other != null && m_id == other.m_id && m_parent == other.m_parent;
@@ -1465,7 +1536,7 @@ namespace Rhino.FileIO
     /// replaced with a new object, then the guid  persists. For example, if the _Move command
     /// moves an object, then the moved object inherits its guid from the starting object.
     /// If the Copy command copies an object, then the copy gets a new guid. This guid persists
-    /// through file saving/openning operations. This function will not find grip objects.
+    /// through file saving/opening operations. This function will not find grip objects.
     /// </summary>
     /// <param name="id">ID of model component to search for.</param>
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
@@ -1646,6 +1717,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the parent object. This is the RhinoDoc, or the File3md file. 
     /// </summary>
+    /// <since>6.0</since>
     public abstract object Parent { get; }
 
     /// <summary>
@@ -1655,10 +1727,11 @@ namespace Rhino.FileIO
     /// replaced with a new object, then the guid  persists. For example, if the _Move command
     /// moves an object, then the moved object inherits its guid from the starting object.
     /// If the Copy command copies an object, then the copy gets a new guid. This guid persists
-    /// through file saving/openning operations. This function will not find grip objects.
+    /// through file saving/opening operations. This function will not find grip objects.
     /// </summary>
     /// <param name="id">ID of model component to search for.</param>
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public abstract ModelComponent FindId(Guid id);
 
     /// <summary>
@@ -1668,12 +1741,13 @@ namespace Rhino.FileIO
     /// replaced with a new object, then the guid  persists. For example, if the _Move command
     /// moves an object, then the moved object inherits its guid from the starting object.
     /// If the Copy command copies an object, then the copy gets a new guid. This guid persists
-    /// through file saving/openning operations. This function will not find grip objects.
+    /// through file saving/opening operations. This function will not find grip objects.
     /// </summary>
     /// <param name="id">ID of model component to search for.</param>
     /// <param name="type">The type to be searched. If this is <see cref="ModelComponentType.Unset"/>
     /// then all types are searched.</param>
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public abstract ModelComponent FindId(Guid id, ModelComponentType type);
 
     /// <summary>
@@ -1683,11 +1757,12 @@ namespace Rhino.FileIO
     /// replaced with a new object, then the guid  persists. For example, if the _Move command
     /// moves an object, then the moved object inherits its guid from the starting object.
     /// If the Copy command copies an object, then the copy gets a new guid. This guid persists
-    /// through file saving/openning operations. This function will not find grip objects.
+    /// through file saving/opening operations. This function will not find grip objects.
     /// </summary>
     /// <param name="id">Index of model component to search for.</param>
     /// <typeparam name="T">The type, derived from ModelComponent or ModelComponent itself.</typeparam>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public T FindId<T>(Guid id)
       where T : ModelComponent
     {
@@ -1702,6 +1777,7 @@ namespace Rhino.FileIO
     /// <param name="index">Index of model component to search for.</param>
     /// <param name="type">The type to be searched. Cannot be <see cref="ModelComponentType.Unset"/>.</param>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public abstract ModelComponent FindIndex(int index, ModelComponentType type);
 
     /// <summary>
@@ -1711,6 +1787,7 @@ namespace Rhino.FileIO
     /// <param name="index">Index of model component to search for.</param>
     /// <typeparam name="T">The type, derived from ModelComponent. Cannot be ModelComponent itself.</typeparam>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public T FindIndex<T>(int index)
       where T : ModelComponent
     {
@@ -1727,6 +1804,7 @@ namespace Rhino.FileIO
     /// <param name="type">The type to be searched. Cannot be <see cref="ModelComponentType.Unset"/>.</param>
     /// <param name="parent">Parent object id. This is only required for layers.</param>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public abstract ModelComponent FindName(string name, ModelComponentType type, Guid parent);
 
     /// <summary>
@@ -1738,6 +1816,7 @@ namespace Rhino.FileIO
     /// <param name="name">Name of model component to search for.</param>
     /// <param name="parent">Parent object id. This is only required for layers.</param>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public T FindName<T>(string name, Guid parent)
       where T : ModelComponent
     {
@@ -1752,6 +1831,7 @@ namespace Rhino.FileIO
     /// <param name="nameHash">NameHash of model component to search for.</param>
     /// <param name="type">The type to be searched. Cannot be <see cref="ModelComponentType.Unset"/>.</param>
     /// <returns>Reference to the rhino object or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public abstract ModelComponent FindNameHash(NameHash nameHash, ModelComponentType type);
 
     /// <summary>
@@ -1760,6 +1840,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <typeparam name="T">The type, derived from ModelComponent.</typeparam>
     /// <param name="nameHash">Name hash of model component to search for.</param>
+    /// <since>6.0</since>
     public T FindNameHash<T>(NameHash nameHash)
       where T : ModelComponent
     {
@@ -1772,6 +1853,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Total number of items in the manifest, including deleted items.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -1784,6 +1866,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Total number of items in the manifest, including deleted items.
     /// </summary>
+    /// <since>6.0</since>
     public long LongCount
     {
       get
@@ -1796,6 +1879,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.Mixed"/>.
     /// </summary>
+    /// <since>6.0</since>
     public ModelComponentType ComponentType
     {
       get
@@ -1807,6 +1891,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Total number of items in the manifest, including deleted items.
     /// </summary>
+    /// <since>6.0</since>
     public int ActiveObjectCount(ModelComponentType type)
     {
       if (!Enum.IsDefined(typeof(ModelComponentType), type))
@@ -1816,11 +1901,13 @@ namespace Rhino.FileIO
       return (int)UnsafeNativeMethods.ONX_ON_ComponentManifest_ActiveComponentCount_ItemCount(manifest_const_ptr, type);
     }
 
+    /// <since>6.0</since>
     ModelComponent ICommonComponentTable<ModelComponent>.FindNameHash(NameHash nameHash)
     {
       throw new NotSupportedException("You can search by NameHash and without type only in a typed manifest table.");
     }
 
+    /// <since>6.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -1830,6 +1917,7 @@ namespace Rhino.FileIO
     /// Visits all model components in the document, including default ones.
     /// </summary>
     /// <returns>An enumerator.</returns>
+    /// <since>6.0</since>
     public virtual IEnumerator<T> GetEnumerator<T>()
       where T : ModelComponent
     {
@@ -1847,6 +1935,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <typeparam name="T">A model component type.</typeparam>
     /// <returns>A <see cref="ModelComponentType"/>.</returns>
+    /// <since>6.0</since>
     public static ModelComponentType GetModelComponentTypeFromGenericType<T>()
       where T : ModelComponent
     {
@@ -1911,6 +2000,7 @@ namespace Rhino.FileIO
     /// Visits all model components in the document, including default ones.
     /// </summary>
     /// <returns>An enumerator.</returns>
+    /// <since>6.0</since>
     public virtual IEnumerator<ModelComponent> GetEnumerator()
     {
       foreach (ModelComponentType type in Enum.GetValues(typeof(ModelComponentType)))
@@ -1930,11 +2020,13 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="type">The model component type.</param>
     /// <returns>An enumerator.</returns>
+    /// <since>6.0</since>
     public abstract IEnumerator<ModelComponent> GetEnumerator(ModelComponentType type);
 
     /// <summary>
     /// Marks all items as deleted.
     /// </summary>
+    /// <since>6.0</since>
     public virtual void Clear()
     {
       GenericIListImplementation.ClearByItems<ModelComponent>(this);
@@ -1945,6 +2037,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="item">An item, or null. Null is never contained.</param>
     /// <returns>True if the item is contained; otherwise, false.</returns>
+    /// <since>6.0</since>
     public bool Contains(ModelComponent item)
     {
       if (item == null) return false;
@@ -1957,6 +2050,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="array">The array to copy to.</param>
     /// <param name="arrayIndex">The position in the array from which to start copying.</param>
+    /// <since>6.0</since>
     public void CopyTo(ModelComponent[] array, int arrayIndex)
     {
       GenericIListImplementation.CopyToFromReadOnlyCollection<ModelComponent>(this, array, arrayIndex);
@@ -2175,7 +2269,7 @@ namespace Rhino.FileIO
 
   /// <summary>
   /// Represents a simple object table for a file that is open externally.
-  /// <para>This class mimics Rhino.DocObjects.Tables.ObjectTable while providing external eccess to the file.</para>
+  /// <para>This class mimics Rhino.DocObjects.Tables.ObjectTable while providing external access to the file.</para>
   /// </summary>
   public class File3dmObjectTable :
     File3dmCommonComponentTable<File3dmObject>,
@@ -2191,6 +2285,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.ModelGeometry"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -2210,6 +2305,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// Array of objects that belong to the specified layer or empty array if no objects could be found.
     /// </returns>
+    /// <since>5.0</since>
     public File3dmObject[] FindByLayer(string layer)
     {
       var layer_item = m_parent.AllLayers.FindName(layer, Guid.Empty);
@@ -2224,6 +2320,7 @@ namespace Rhino.FileIO
     /// <param name="layer">A layer instance.</param>
     /// <returns>Array of objects that belong to the specified layer or empty array if no objects could be found.</returns>
     /// <exception cref="ArgumentNullException">If layer is null.</exception>
+    /// <since>6.0</since>
     public File3dmObject[] FindByLayer(Layer layer)
     {
       if (layer == null) throw new ArgumentNullException("layer");
@@ -2246,6 +2343,7 @@ namespace Rhino.FileIO
     /// <param name="group">A group instance.</param>
     /// <returns>Array of objects that belong to the specified group or empty array if no objects could be found.</returns>
     /// <exception cref="ArgumentNullException">If group is null.</exception>
+    /// <since>6.20</since>
     public File3dmObject[] FindByGroup(Group group)
     {
       if (group == null)
@@ -2263,6 +2361,7 @@ namespace Rhino.FileIO
 
     /// <summary>Gets the bounding box containing every object in this table.</summary>
     /// <returns>The computed bounding box.</returns>
+    /// <since>5.0</since>
     public Rhino.Geometry.BoundingBox GetBoundingBox()
     {
       Rhino.Geometry.BoundingBox bbox = new Geometry.BoundingBox();
@@ -2278,6 +2377,7 @@ namespace Rhino.FileIO
     /// Duplicates the object, then adds a copy of the object to the document.
     /// </summary>
     /// <param name="item">The item to duplicate and add.</param>
+    /// <since>6.0</since>
     public override void Add(File3dmObject item)
     {
       bool mem;
@@ -2294,6 +2394,7 @@ namespace Rhino.FileIO
     /// <param name="y">Y component of point coordinate.</param>
     /// <param name="z">Z component of point coordinate.</param>
     /// <returns>id of new object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(double x, double y, double z)
     {
       return AddPoint(new Point3d(x, y, z));
@@ -2301,6 +2402,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a point object to the table.</summary>
     /// <param name="point">A location for point.</param>
     /// <returns>Id of new object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3d point)
     {
       return AddPoint(point, null);
@@ -2310,6 +2412,7 @@ namespace Rhino.FileIO
     /// <param name="point">A location for point.</param>
     /// <param name="attributes">attributes to apply to point.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3d point, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes==null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2320,6 +2423,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a point object to the document.</summary>
     /// <param name="point">location of point.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3f point)
     {
       Point3d p3d = new Point3d(point);
@@ -2329,6 +2433,7 @@ namespace Rhino.FileIO
     /// <param name="point">location of point.</param>
     /// <param name="attributes">attributes to apply to point.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3f point, DocObjects.ObjectAttributes attributes)
     {
       Point3d p3d = new Point3d(point);
@@ -2340,6 +2445,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="points">Points to add.</param>
     /// <returns>List of object ids.</returns>
+    /// <since>5.0</since>
     public Guid[] AddPoints(IEnumerable<Point3d> points)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -2358,6 +2464,7 @@ namespace Rhino.FileIO
     /// <param name="points">Points to add.</param>
     /// <param name="attributes">Attributes to apply to point objects.</param>
     /// <returns>An array of object unique identifiers.</returns>
+    /// <since>5.0</since>
     public Guid[] AddPoints(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -2376,6 +2483,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="points">Points to add.</param>
     /// <returns>An array of object unique identifiers.</returns>
+    /// <since>5.0</since>
     public Guid[] AddPoints(IEnumerable<Point3f> points)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -2394,6 +2502,7 @@ namespace Rhino.FileIO
     /// <param name="points">Points to add.</param>
     /// <param name="attributes">Attributes to apply to point objects.</param>
     /// <returns>An array of object unique identifiers.</returns>
+    /// <since>5.0</since>
     public Guid[] AddPoints(IEnumerable<Point3f> points, DocObjects.ObjectAttributes attributes)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -2410,6 +2519,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="cloud">PointCloud to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(PointCloud cloud)
     {
       return AddPointCloud(cloud, null);
@@ -2418,6 +2528,7 @@ namespace Rhino.FileIO
     /// <param name="cloud">PointCloud to add.</param>
     /// <param name="attributes">attributes to apply to point cloud.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(PointCloud cloud, DocObjects.ObjectAttributes attributes)
     {
       if (cloud == null) { throw new ArgumentNullException("cloud"); }
@@ -2434,6 +2545,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(IEnumerable<Point3d> points)
     {
       return AddPointCloud(points, null);
@@ -2442,6 +2554,7 @@ namespace Rhino.FileIO
     /// <param name="points">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
     /// <param name="attributes">Attributes to apply to point cloud.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
     {
       int count;
@@ -2470,6 +2583,7 @@ namespace Rhino.FileIO
     /// <code source='examples\cs\ex_addclippingplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_addclippingplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, Guid clippedViewportId)
     {
       return AddClippingPlane(plane, uMagnitude, vMagnitude, new Guid[] { clippedViewportId });
@@ -2482,6 +2596,7 @@ namespace Rhino.FileIO
     /// <param name="vMagnitude">The size in V direction.</param>
     /// <param name="clippedViewportIds">A list, an array or any enumerable of viewport ids that the new clipping plane will clip.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds)
     {
       return AddClippingPlane(plane, uMagnitude, vMagnitude, clippedViewportIds, null);
@@ -2495,6 +2610,7 @@ namespace Rhino.FileIO
     /// <param name="clippedViewportIds">list of viewport ids that the new clipping plane will clip.</param>
     /// <param name="attributes">Attributes to apply to point cloud.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttrs = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2515,6 +2631,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="dimension">A dimension.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLinearDimension(LinearDimension dimension)
     {
       return AddLinearDimension(dimension, null);
@@ -2526,6 +2643,7 @@ namespace Rhino.FileIO
     /// <param name="dimension">A dimension.</param>
     /// <param name="attributes">Attributes to apply to dimension.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLinearDimension(LinearDimension dimension, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstDimension = dimension.ConstPointer();
@@ -2539,6 +2657,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="dimension">Dimension object to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddAngularDimension(AngularDimension dimension)
     {
       return AddAngularDimension(dimension, null);
@@ -2550,6 +2669,7 @@ namespace Rhino.FileIO
     /// <param name="dimension">Dimension object to add.</param>
     /// <param name="attributes">Attributes to apply to dimension.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddAngularDimension(AngularDimension dimension, ObjectAttributes attributes)
     {
       IntPtr ptr_const_dim = dimension.ConstPointer();
@@ -2562,6 +2682,7 @@ namespace Rhino.FileIO
     /// <param name="from">A line start point.</param>
     /// <param name="to">A line end point.</param>
     /// <returns>A unique identifier of new rhino object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Point3d from, Point3d to)
     {
       return AddLine(from, to, null);
@@ -2571,6 +2692,7 @@ namespace Rhino.FileIO
     /// <param name="to">The end point of the line.</param>
     /// <param name="attributes">Attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Point3d from, Point3d to, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2579,6 +2701,7 @@ namespace Rhino.FileIO
     }
     /// <summary>Adds a line object to Rhino.</summary>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Line line)
     {
       return AddLine(line.From, line.To);
@@ -2587,6 +2710,7 @@ namespace Rhino.FileIO
     /// <param name="line">A line.</param>
     /// <param name="attributes">Attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Line line, DocObjects.ObjectAttributes attributes)
     {
       return AddLine(line.From, line.To, attributes);
@@ -2595,6 +2719,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a polyline object to Rhino.</summary>
     /// <param name="points">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPolyline(IEnumerable<Point3d> points)
     {
       return AddPolyline(points, null);
@@ -2603,6 +2728,7 @@ namespace Rhino.FileIO
     /// <param name="points">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
     /// <param name="attributes">Attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPolyline(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
     {
       int count;
@@ -2618,6 +2744,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a curve object to the document representing an arc.</summary>
     /// <param name="arc">An arc.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddArc(Arc arc)
     {
       return AddArc(arc, null);
@@ -2626,6 +2753,7 @@ namespace Rhino.FileIO
     /// <param name="arc">An arc to add.</param>
     /// <param name="attributes">attributes to apply to arc.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddArc(Arc arc, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2636,6 +2764,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a curve object to the document representing a circle.</summary>
     /// <param name="circle">A circle to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCircle(Circle circle)
     {
       return AddCircle(circle, null);
@@ -2644,6 +2773,7 @@ namespace Rhino.FileIO
     /// <param name="circle">A circle to add.</param>
     /// <param name="attributes">attributes to apply to circle.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCircle(Circle circle, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2654,6 +2784,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a curve object to the document representing an ellipse.</summary>
     /// <param name="ellipse">An ellipse to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddEllipse(Ellipse ellipse)
     {
       return AddEllipse(ellipse, null);
@@ -2662,6 +2793,7 @@ namespace Rhino.FileIO
     /// <param name="ellipse">An ellipse to add.</param>
     /// <param name="attributes">attributes to apply to ellipse.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddEllipse(Ellipse ellipse, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2673,6 +2805,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="sphere">A sphere to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddSphere(Sphere sphere)
     {
       return AddSphere(sphere, null);
@@ -2683,6 +2816,7 @@ namespace Rhino.FileIO
     /// <param name="sphere">A sphere to add.</param>
     /// <param name="attributes">Attributes to link with the sphere.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddSphere(Sphere sphere, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2693,6 +2827,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a curve object to the table.</summary>
     /// <param name="curve">A curve to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCurve(Geometry.Curve curve)
     {
       return AddCurve(curve, null);
@@ -2701,6 +2836,7 @@ namespace Rhino.FileIO
     /// <param name="curve">A duplicate of this curve is added to Rhino.</param>
     /// <param name="attributes">Attributes to apply to curve.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCurve(Geometry.Curve curve, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2713,6 +2849,7 @@ namespace Rhino.FileIO
     /// <param name="text">The text.</param>
     /// <param name="location">The location.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(string text, Point3d location)
     {
       Geometry.TextDot dot = new Rhino.Geometry.TextDot(text, location);
@@ -2725,6 +2862,7 @@ namespace Rhino.FileIO
     /// <param name="location">The location.</param>
     /// <param name="attributes">Attributes to link with curve.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(string text, Point3d location, DocObjects.ObjectAttributes attributes)
     {
       Geometry.TextDot dot = new Rhino.Geometry.TextDot(text, location);
@@ -2735,6 +2873,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a text dot object to the table.</summary>
     /// <param name="dot">The text dot.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(Geometry.TextDot dot)
     {
       return AddTextDot(dot, null);
@@ -2743,6 +2882,7 @@ namespace Rhino.FileIO
     /// <param name="dot">The text dot.</param>
     /// <param name="attributes">Attributes to link with text dot.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(Geometry.TextDot dot, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2756,6 +2896,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="instanceReference">The instance reference geometry object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddInstanceObject(InstanceReferenceGeometry instanceReference)
     {
       return AddInstanceObject(instanceReference, null);
@@ -2767,6 +2908,7 @@ namespace Rhino.FileIO
     /// <param name="instanceReference">The instance reference geometry object.</param>
     /// <param name="attributes">The attributes to link with the object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddInstanceObject(InstanceReferenceGeometry instanceReference, ObjectAttributes attributes)
     {
       if (null == instanceReference) throw new ArgumentNullException(nameof(instanceReference));
@@ -2782,6 +2924,7 @@ namespace Rhino.FileIO
     /// <param name="instanceDefinitionIndex">The index of the instance definition geometry object.</param>
     /// <param name="instanceXform">The transformation.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform)
     {
       return AddInstanceObject(instanceDefinitionIndex, instanceXform, null);
@@ -2794,6 +2937,7 @@ namespace Rhino.FileIO
     /// <param name="instanceXform">The transformation.</param>
     /// <param name="attributes">The object attributes.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>6.5</since>
     public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
     {
       IntPtr ptr_const_attributes = attributes?.ConstPointer() ?? IntPtr.Zero;
@@ -2807,6 +2951,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="text3d">The text object to add.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(Rhino.Display.Text3d text3d)
     {
       return AddText(text3d, null);
@@ -2817,6 +2962,7 @@ namespace Rhino.FileIO
     /// <param name="text3d">The text object to add.</param>
     /// <param name="attributes">Attributes to link to the object.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(Rhino.Display.Text3d text3d, DocObjects.ObjectAttributes attributes)
     {
       TextJustification justification = TextJustification.None;
@@ -2860,6 +3006,7 @@ namespace Rhino.FileIO
     /// <param name="bold">Bold flag.</param>
     /// <param name="italic">Italic flag.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic)
     {
       return AddText(text, plane, height, fontName, bold, italic, null);
@@ -2876,6 +3023,7 @@ namespace Rhino.FileIO
     /// <param name="italic">Italic flag.</param>
     /// <param name="justification">The justification of the text.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification)
     {
       return AddText(text, plane, height, fontName, bold, italic, justification, null);
@@ -2893,6 +3041,7 @@ namespace Rhino.FileIO
     /// <param name="justification">The justification of the text.</param>
     /// <param name="attributes">Attributes to link to the object.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, DocObjects.ObjectAttributes attributes)
     {
       if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(fontName))
@@ -2919,6 +3068,7 @@ namespace Rhino.FileIO
     /// <param name="italic">Italic flag.</param>
     /// <param name="attributes">Object Attributes.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, DocObjects.ObjectAttributes attributes)
     {
       return AddText(text, plane, height, fontName, bold, italic, TextJustification.None, attributes);
@@ -2927,6 +3077,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a surface object to Rhino.</summary>
     /// <param name="surface">A duplicate of this surface is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddSurface(Geometry.Surface surface)
     {
       return AddSurface(surface, null);
@@ -2935,6 +3086,7 @@ namespace Rhino.FileIO
     /// <param name="surface">A duplicate of this surface is added to Rhino.</param>
     /// <param name="attributes">Attributes to link to the object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddSurface(Geometry.Surface surface, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2946,6 +3098,7 @@ namespace Rhino.FileIO
     /// <summary>Adds an extrusion object to Rhino.</summary>
     /// <param name="extrusion">A duplicate of this extrusion is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddExtrusion(Geometry.Extrusion extrusion)
     {
       return AddExtrusion(extrusion, null);
@@ -2954,6 +3107,7 @@ namespace Rhino.FileIO
     /// <param name="extrusion">A duplicate of this extrusion is added to Rhino.</param>
     /// <param name="attributes">Attributes to link to the object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddExtrusion(Geometry.Extrusion extrusion, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2965,6 +3119,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a mesh object to Rhino.</summary>
     /// <param name="mesh">A duplicate of this mesh is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddMesh(Geometry.Mesh mesh)
     {
       return AddMesh(mesh, null);
@@ -2973,6 +3128,7 @@ namespace Rhino.FileIO
     /// <param name="mesh">A duplicate of this mesh is added to Rhino.</param>
     /// <param name="attributes">Attributes to link to the object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddMesh(Geometry.Mesh mesh, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -2984,6 +3140,7 @@ namespace Rhino.FileIO
     /// <summary>Adds a brep object to Rhino.</summary>
     /// <param name="brep">A duplicate of this brep is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddBrep(Geometry.Brep brep)
     {
       return AddBrep(brep, null);
@@ -2992,6 +3149,7 @@ namespace Rhino.FileIO
     /// <param name="brep">A duplicate of this brep is added to Rhino.</param>
     /// <param name="attributes">Attributes to apply to brep.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddBrep(Geometry.Brep brep, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -3006,6 +3164,7 @@ namespace Rhino.FileIO
     /// <param name="plane">A plane.</param>
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(Plane plane, IEnumerable<Point2d> points)
     {
       return AddLeader(null, plane, points);
@@ -3018,6 +3177,7 @@ namespace Rhino.FileIO
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <param name="attributes">Attributes to apply to brep.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(Plane plane, IEnumerable<Point2d> points, DocObjects.ObjectAttributes attributes)
     {
       return AddLeader(null, plane, points, attributes);
@@ -3031,6 +3191,7 @@ namespace Rhino.FileIO
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <param name="attributes">Attributes to apply to brep.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(string text, Plane plane, IEnumerable<Point2d> points, DocObjects.ObjectAttributes attributes)
     {
       string s = null;
@@ -3056,6 +3217,7 @@ namespace Rhino.FileIO
     /// <param name="plane">A plane.</param>
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(string text, Plane plane, IEnumerable<Point2d> points)
     {
       return AddLeader(text, plane, points, null);
@@ -3069,6 +3231,7 @@ namespace Rhino.FileIO
     /// <param name="text">The text.</param>
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(string text, IEnumerable<Point3d> points)
     {
       Plane plane;
@@ -3097,6 +3260,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="points">A list, an array or any enumerable set of 2d points.</param>
     /// <returns>A unique identifier for the object; or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLeader(IEnumerable<Point3d> points)
     {
       return AddLeader(null, points);
@@ -3108,6 +3272,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="hatch">A hatch.</param>
     /// <returns>A unique identifier for the hatch, or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch)
     {
       return AddHatch(hatch, null);
@@ -3119,6 +3284,7 @@ namespace Rhino.FileIO
     /// <param name="hatch">A hatch.</param>
     /// <param name="attributes">Attributes to apply to brep.</param>
     /// <returns>A unique identifier for the hatch, or <see cref="Guid.Empty"/> on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstHatch = hatch.ConstPointer();
@@ -3134,6 +3300,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="objectId">Id of the object to delete.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.2</since>
     public bool Delete(Guid objectId)
     {
       IntPtr pThis = m_parent.NonConstPointer();
@@ -3144,6 +3311,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="objectIds">Ids of all objects to delete.</param>
     /// <returns>The number of successfully deleted objects.</returns>
+    /// <since>5.2</since>
     public int Delete(IEnumerable<Guid> objectIds)
     {
       if (objectIds == null) { throw new ArgumentNullException("objectIds"); }
@@ -3161,6 +3329,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the total amount of items in the object table, including lights.
     /// </summary>
+    /// <since>5.0</since>
     public override int Count => base.Count + m_manifest.ActiveObjectCount(ModelComponentType.RenderLight);
 
     /// <summary>
@@ -3168,6 +3337,7 @@ namespace Rhino.FileIO
     /// Like in Rhino, this includes lights. Unlike in Rhino, however, all lights are returned in the end of the list.
     /// </summary>
     /// <returns>An enumerator that yields all objects in a document.</returns>
+    /// <since>5.0</since>
     public override IEnumerator<File3dmObject> GetEnumerator()
     {
       var base_enum = base.GetEnumerator();
@@ -3199,6 +3369,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Plug-in this data is associated with
     /// </summary>
+    /// <since>5.0</since>
     public Guid PlugInId
     {
       get { return m_id; }
@@ -3220,6 +3391,7 @@ namespace Rhino.FileIO
 
     /// <summary>Prepares a text dump of table.</summary>
     /// <returns>A string containing the dump.</returns>
+    /// <since>5.0</since>
     public string Dump()
     {
       return m_parent.Dump(File3dm.idxUserDataTable);
@@ -3229,6 +3401,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the number of File3dmPlugInData in this table.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -3265,6 +3438,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Remove all entries from this table
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       IntPtr pParent = m_parent.NonConstPointer();
@@ -3277,10 +3451,12 @@ namespace Rhino.FileIO
     /// Gets the enumerator that visits any <see cref="File3dmPlugInData"/> in this table.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<File3dmPlugInData> GetEnumerator()
     {
       return new Rhino.Collections.TableEnumerator<File3dmPlugInDataTable, File3dmPlugInData>(this);
     }
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return new Rhino.Collections.TableEnumerator<File3dmPlugInDataTable, File3dmPlugInData>(this);
@@ -3301,6 +3477,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.RenderMaterial"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3315,6 +3492,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A material, or null if none was found.</returns>
+    /// <since>6.0</since>
     public DocObjects.Material FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -3333,6 +3511,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.LinePattern"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3346,6 +3525,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the Linetype to be searched.</param>
     /// <returns>A Linetype, or null on error.</returns>
+    /// <since>6.0</since>
     public Linetype FindName(string name)
     {
       return m_manifest.FindName<Linetype>(name, Guid.Empty);
@@ -3356,6 +3536,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the Linetype to be searched.</param>
     /// <returns>An Linetype, or null on error.</returns>
+    /// <since>6.0</since>
     public Linetype FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<Linetype>(nameHash);
@@ -3367,6 +3548,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A Linetype, or null if none was found.</returns>
+    /// <since>6.0</since>
     public Linetype FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -3387,6 +3569,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.Layer"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3401,6 +3584,7 @@ namespace Rhino.FileIO
     /// <param name="name">The name of the Layer to be searched.</param>
     /// <param name="parentId">The id of the parent Layer to be searched.</param>
     /// <returns>A Layer, or null on error.</returns>
+    /// <since>6.0</since>
     public Layer FindName(string name, Guid parentId)
     {
       return m_manifest.FindName<Layer>(name, parentId);
@@ -3411,6 +3595,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the Layer to be searched.</param>
     /// <returns>An Layer, or null on error.</returns>
+    /// <since>6.0</since>
     public Layer FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<Layer>(nameHash);
@@ -3422,6 +3607,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A Layer object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public Layer FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -3441,6 +3627,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.Group"/>.
     /// </summary>
+    /// <since>6.5</since>
     public override ModelComponentType ComponentType
     {
       get { return ModelComponentType.Group; }
@@ -3451,6 +3638,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the Group to be searched.</param>
     /// <returns>A Group, or null on error.</returns>
+    /// <since>6.5</since>
     public Group FindName(string name)
     {
       return m_manifest.FindName<Group>(name, Guid.Empty);
@@ -3461,6 +3649,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the Group to be searched.</param>
     /// <returns>A Group, or null on error.</returns>
+    /// <since>6.5</since>
     public Group FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<Group>(nameHash);
@@ -3472,6 +3661,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="groupIndex">The index to search for.</param>
     /// <returns>A Group object, or null if none was found.</returns>
+    /// <since>6.5</since>
     public Group FindIndex(int groupIndex)
     {
       return __FindIndexInternal(groupIndex);
@@ -3482,6 +3672,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="groupIndex">The index of the group in this table.</param>
     /// <returns>Array of objects that belong to the specified group or empty array if no objects could be found.</returns>
+    /// <since>6.20</since>
     public File3dmObject[] GroupMembers(int groupIndex)
     {
       var list = new List<File3dmObject>();
@@ -3509,6 +3700,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.DimStyle"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3522,6 +3714,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the DimensionStyle to be searched.</param>
     /// <returns>An DimensionStyle, or null on error.</returns>
+    /// <since>6.0</since>
     public DimensionStyle FindName(string name)
     {
       return m_manifest.FindName<DimensionStyle>(name, Guid.Empty);
@@ -3532,6 +3725,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the DimensionStyle to be searched.</param>
     /// <returns>An DimensionStyle, or null on error.</returns>
+    /// <since>6.0</since>
     public DimensionStyle FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<DimensionStyle>(nameHash);
@@ -3543,6 +3737,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A DimensionStyle object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public DimensionStyle FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -3561,6 +3756,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.HatchPattern"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3574,6 +3770,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the HatchPattern to be searched.</param>
     /// <returns>An HatchPattern, or null on error.</returns>
+    /// <since>6.0</since>
     public HatchPattern FindName(string name)
     {
       return m_manifest.FindName<HatchPattern>(name, Guid.Empty);
@@ -3584,6 +3781,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the HatchPattern to be searched.</param>
     /// <returns>An HatchPattern, or null on error.</returns>
+    /// <since>6.0</since>
     public HatchPattern FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<HatchPattern>(nameHash);
@@ -3595,6 +3793,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A HatchPattern object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public HatchPattern FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -3613,6 +3812,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -3626,6 +3826,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the InstanceDefinitionGeometry to be searched.</param>
     /// <returns>An InstanceDefinitionGeometry, or null on error.</returns>
+    /// <since>6.0</since>
     public InstanceDefinitionGeometry FindName(string name)
     {
       return m_manifest.FindName<InstanceDefinitionGeometry>(name, Guid.Empty);
@@ -3636,6 +3837,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="nameHash">The name hash of the InstanceDefinitionGeometry to be searched.</param>
     /// <returns>An InstanceDefinitionGeometry, or null on error.</returns>
+    /// <since>6.0</since>
     public InstanceDefinitionGeometry FindNameHash(NameHash nameHash)
     {
       return m_manifest.FindNameHash<InstanceDefinitionGeometry>(nameHash);
@@ -3652,6 +3854,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
     /// </returns>
+    /// <since>6.5</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
       using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
@@ -3684,6 +3887,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
     /// </returns>
+    /// <since>6.5</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry)
     {
       return Add(name, description, basePoint, geometry, null);
@@ -3700,6 +3904,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
     /// </returns>
+    /// <since>6.5</since>
     public int Add(string name, string description, Point3d basePoint, GeometryBase geometry, ObjectAttributes attributes)
     {
       return Add(name, description, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
@@ -3712,6 +3917,7 @@ namespace Rhino.FileIO
     /// <param name="name">The definition name.</param>
     /// <param name="description">The definition description.</param>
     /// <returns></returns>
+    /// <since>6.13</since>
     public int AddLinked(string filename, string name, string description)
     {
       IntPtr ptr_this = m_parent.NonConstPointer();
@@ -3750,6 +3956,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the ViewInfo to be searched.</param>
     /// <returns>An ViewInfo, or null on error.</returns>
+    /// <since>6.0</since>
     public ViewInfo FindName(string name)
     {
       var view_index = Find(name);
@@ -3761,6 +3968,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="item">The item to be searched.</param>
     /// <returns>The index of the ViewInfo.</returns>
+    /// <since>6.0</since>
     public int IndexOf(DocObjects.ViewInfo item)
     {
       File3dm file = item.m_parent as File3dm;
@@ -3788,6 +3996,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">The index of the item to remove.</param>
     /// <returns>True if the item was removed.</returns>
+    /// <since>6.0</since>
     public bool Delete(int index)
     {
       if (index < 0 || index >= Count)
@@ -3825,6 +4034,7 @@ namespace Rhino.FileIO
     /// Adds a 
     /// </summary>
     /// <param name="item"></param>
+    /// <since>6.0</since>
     public void Add(DocObjects.ViewInfo item)
     {
       if (item == null)
@@ -3838,6 +4048,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Removes all items from the table.
     /// </summary>
+    /// <since>6.0</since>
     public void Clear()
     {
       IntPtr pParent = m_parent.NonConstPointer();
@@ -3849,16 +4060,18 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="item">The view to check.</param>
     /// <returns>true if the item is in the table; false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Contains(DocObjects.ViewInfo item)
     {
       return IndexOf(item) != -1;
     }
 
     /// <summary>
-    /// Copies the content of teh table to an array.
+    /// Copies the content of the table to an array.
     /// </summary>
     /// <param name="array"></param>
     /// <param name="arrayIndex"></param>
+    /// <since>6.0</since>
     public void CopyTo(DocObjects.ViewInfo[] array, int arrayIndex)
     {
       int available = array.Length - arrayIndex;
@@ -3874,6 +4087,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the amount of items in the table.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -3894,6 +4108,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="item"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool Delete(DocObjects.ViewInfo item)
     {
       int index = (this as IList<ViewInfo>).IndexOf(item);
@@ -3911,11 +4126,13 @@ namespace Rhino.FileIO
     /// Returns an enumerator that yields all views in the table.
     /// </summary>
     /// <returns>An enumerator.</returns>
+    /// <since>6.0</since>
     public IEnumerator<DocObjects.ViewInfo> GetEnumerator()
     {
       return new Rhino.Collections.TableEnumerator<File3dmViewTable, Rhino.DocObjects.ViewInfo>(this);
     }
 
+    /// <since>6.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -3928,7 +4145,7 @@ namespace Rhino.FileIO
   }
 
   /// <summary>
-  /// Provides access to namned construction planes in the 3dm file.
+  /// Provides access to named construction planes in the 3dm file.
   /// </summary>
   public class File3dmNamedConstructionPlanes :
     IList<ConstructionPlane>, Collections.IRhinoTable<ConstructionPlane>
@@ -3956,6 +4173,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The name of the construction plane to be searched.</param>
     /// <returns>A ConstructionPlane, or null if not found.</returns>
+    /// <since>6.0</since>
     public ConstructionPlane FindName(string name)
     {
       var view_index = Find(name);
@@ -3967,6 +4185,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="cplane">The construction plane to be searched.</param>
     /// <returns>The index of the named construction plane, -1 if not found.</returns>
+    /// <since>6.0</since>
     public int IndexOf(ConstructionPlane cplane)
     {
       // 27-Sep-2017 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-41623
@@ -4000,6 +4219,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="index">Zero based array index.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Delete(int index)
     {
       if (index < 0 || index > Count)
@@ -4014,6 +4234,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="cplane">The construction plane to delete.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool Delete(DocObjects.ConstructionPlane cplane)
     {
       int index = (this as IList<ConstructionPlane>).IndexOf(cplane);
@@ -4059,6 +4280,7 @@ namespace Rhino.FileIO
     /// 0 based index of the named construction plane.
     /// -1 on failure.
     /// </returns>
+    /// <since>6.0</since>
     public int Add(string name, Geometry.Plane plane)
     {
       if (string.IsNullOrEmpty(name))
@@ -4072,6 +4294,7 @@ namespace Rhino.FileIO
     /// Adds a named construction plane to the table.
     /// </summary>
     /// <param name="cplane">The construction plane to add.</param>
+    /// <since>6.0</since>
     public void Add(ConstructionPlane cplane)
     {
       if (null == cplane)
@@ -4089,6 +4312,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Removes all named construction planes from the table.
     /// </summary>
+    /// <since>6.0</since>
     public void Clear()
     {
       IntPtr ptr_parent = m_parent.NonConstPointer();
@@ -4100,6 +4324,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="cplane">The construction plane to check.</param>
     /// <returns>true if the named construction plane is in the table; false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Contains(ConstructionPlane cplane)
     {
       return IndexOf(cplane) != -1;
@@ -4110,6 +4335,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="array"></param>
     /// <param name="arrayIndex"></param>
+    /// <since>6.0</since>
     public void CopyTo(ConstructionPlane[] array, int arrayIndex)
     {
       int available = array.Length - arrayIndex;
@@ -4125,6 +4351,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Number of named construction planes in the table.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -4154,10 +4381,12 @@ namespace Rhino.FileIO
     /// Gets an enumerator that yields all construction planes in this collection.
     /// </summary>
     /// <returns>The enumerator.</returns>
+    /// <since>6.0</since>
     public IEnumerator<ConstructionPlane> GetEnumerator()
     {
       return new Collections.TableEnumerator<File3dmNamedConstructionPlanes, ConstructionPlane>(this);
     }
+    /// <since>6.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return new Collections.TableEnumerator<File3dmNamedConstructionPlanes, ConstructionPlane>(this);
@@ -4179,6 +4408,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the number of document strings in the 3dm file.
     /// </summary>
+    /// <since>6.0</since>
     public int Count
     {
       get
@@ -4191,6 +4421,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the number of Section/Entry-style key values.
     /// </summary>
+    /// <since>6.0</since>
     public int DocumentUserTextCount
     {
       get
@@ -4207,6 +4438,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="i">The index.</param>
     /// <returns>The key if successful.</returns>
+    /// <since>6.0</since>
     public string GetKey(int i)
     {
       using (var sh = new StringHolder())
@@ -4223,6 +4455,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="i">The index at which to get the value.</param>
     /// <returns>The string value if successful.</returns>
+    /// <since>6.0</since>
     public string GetValue(int i)
     {
       using (var sh = new StringHolder())
@@ -4239,6 +4472,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="key">The key at which to get the value.</param>
     /// <returns>The string value if successful.</returns>
+    /// <since>6.0</since>
     public string GetValue(string key)
     {
       using (var sh = new StringHolder())
@@ -4256,6 +4490,7 @@ namespace Rhino.FileIO
     /// <param name="section">The section at which to get the value.</param>
     /// <param name="entry">The entry to search for.</param>
     /// <returns>The string value if successful.</returns>
+    /// <since>6.0</since>
     public string GetValue(string section, string entry)
     {
       if (string.IsNullOrEmpty(section) || string.IsNullOrEmpty(entry))
@@ -4269,6 +4504,7 @@ namespace Rhino.FileIO
     /// <para>By default a section name is a key that is prefixed with a string separated by a backslash.</para>
     /// </summary>
     /// <returns>An array of section names. This can be empty, but not null.</returns>
+    /// <since>6.0</since>
     public string[] GetSectionNames()
     {
       int count = Count;
@@ -4294,6 +4530,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="section">The section from which to retrieve section names.</param>
     /// <returns>An array of section names. This can be empty, but not null.</returns>
+    /// <since>6.0</since>
     public string[] GetEntryNames(string section)
     {
       section += "\\";
@@ -4319,6 +4556,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// The previous value if successful.
     /// </returns>
+    /// <since>6.0</since>
     public string SetString(string section, string entry, string value)
     {
       string key = section;
@@ -4337,6 +4575,7 @@ namespace Rhino.FileIO
     /// <returns>
     /// The previous value if successful.
     /// </returns>
+    /// <since>6.0</since>
     public string SetString(string key, string value)
     {
       string rc = GetValue(key);
@@ -4350,6 +4589,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="section">name of section to delete. If null, all sections will be deleted.</param>
     /// <param name="entry">name of entry to delete. If null, all entries will be deleted for a given section.</param>
+    /// <since>6.0</since>
     public void Delete(string section, string entry)
     {
       if (null == section && null != entry)
@@ -4378,6 +4618,7 @@ namespace Rhino.FileIO
     /// Removes a document string from the 3dm file.
     /// </summary>
     /// <param name="key">The key to remove.</param>
+    /// <since>6.0</since>
     public void Delete(string key)
     {
       IntPtr ptr_parent = m_parent.NonConstPointer();

@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -27,6 +27,7 @@ namespace Rhino.Geometry
     /// <param name="style">Dimension's DimensionStyle</param>
     /// <param name="textScale">Scale to apply to text</param>
     /// <param name="drawForward">Draw text front-facing</param>
+    /// <since>6.0</since>
     [ConstOperation]
     public Transform GetTextTransform(ViewportInfo viewport, DimensionStyle style, double textScale, bool drawForward)
     {
@@ -39,6 +40,7 @@ namespace Rhino.Geometry
       return xform;
     }
 
+    /// <since>6.0</since>
     public bool UseDefaultTextPoint
     {
       get
@@ -56,6 +58,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets and sets the position of text on the plane.
     /// </summary>
+    /// <since>6.0</since>
     public Point2d TextPosition
     {
       get
@@ -72,6 +75,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public string PlainUserText
     {
       get
@@ -88,6 +92,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public new string TextFormula
     {
       get
@@ -111,6 +116,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double TextRotation
     {
       get
@@ -128,9 +134,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the numeric value (or measurement), depending on geometry type.
     /// <para>LinearDimension: distance between arrow tips</para>
-    /// <para>RadialDimension: radius or diamater depending on type</para>
+    /// <para>RadialDimension: radius or diameter depending on type</para>
     /// <para>AngularDimension: angle in degrees</para>
     /// </summary>
+    /// <since>6.0</since>
     public double NumericValue
     {
       get
@@ -140,18 +147,21 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Guid DetailMeasured
     {
       get { return UnsafeNativeMethods.ON_V6_Dimension_GetDetailMeasured(ConstPointer()); }
       set { UnsafeNativeMethods.ON_V6_Dimension_SetDetailMeasured(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public double DistanceScale
     {
       get { return UnsafeNativeMethods.ON_V6_Dimension_GetDistanceScale(ConstPointer()); }
       set { UnsafeNativeMethods.ON_V6_Dimension_SetDistanceScale(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     [Obsolete]
     public ForceArrow ForceArrowPosition
     {
@@ -159,6 +169,7 @@ namespace Rhino.Geometry
       set {}
     }
 
+    /// <since>6.0</since>
     [Obsolete]
     public ForceText ForceTextPosition
     {
@@ -168,6 +179,7 @@ namespace Rhino.Geometry
 
     #region properties originating from dim style that can be overridden
 
+    /// <since>6.20</since>
     public bool ForceDimLine
     {
       get
@@ -184,6 +196,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.20</since>
     public DimensionStyle.ArrowFit ArrowFit // Only works on Linear and Angular dimensions
     {
       get
@@ -200,6 +213,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.20</since>
     public bool ForceDimensionLineBetweenExtensionLines
     {
       get
@@ -216,6 +230,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.20</since>
     public DimensionStyle.TextFit TextFit // Only works on Linear /*and Angular*/ dimensions
     {
       get
@@ -232,6 +247,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public virtual TextOrientation TextOrientation
     {
       get
@@ -251,6 +267,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public virtual DimensionStyle.TextLocation TextLocation
     {
       get
@@ -272,6 +289,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public virtual DimensionStyle.LeaderContentAngleStyle TextAngleType
     {
       get
@@ -293,6 +311,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double DimensionLineExtension
     {
       get
@@ -312,6 +331,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ExtensionLineExtension
     {
       get
@@ -331,6 +351,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ExtensionLineOffset
     {
       get
@@ -350,6 +371,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public bool FixedLengthExtensionOn
     {
       get
@@ -369,6 +391,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double FixedExtensionLength
     {
       get
@@ -388,6 +411,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double BaselineSpacing
     {
       get
@@ -407,6 +431,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double CentermarkSize
     {
       get
@@ -426,6 +451,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.CenterMarkStyle CentermarkStyle
     {
       get
@@ -445,6 +471,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public bool SuppressExtension1
     {
       get
@@ -464,6 +491,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public bool SuppressExtension2
     {
       get
@@ -483,6 +511,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ArrowType ArrowheadType1
     {
       get
@@ -502,6 +531,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ArrowType ArrowheadType2
     {
       get
@@ -521,6 +551,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ArrowSize
     {
       get
@@ -540,6 +571,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Guid ArrowBlockId1
     {
       get
@@ -559,6 +591,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Guid ArrowBlockId2
     {
       get
@@ -578,6 +611,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double LengthFactor
     {
       get
@@ -597,6 +631,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public int LengthResolution
     {
       get
@@ -616,6 +651,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double LengthRoundoff
     {
       get
@@ -635,6 +671,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public string Prefix
     {
       get
@@ -658,6 +695,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public string Suffix
     {
       get
@@ -681,6 +719,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ZeroSuppression ZeroSuppression
     {
       get
@@ -700,6 +739,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public bool AltUnitsDisplay
     {
       get
@@ -719,6 +759,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double AltLengthFactor
     {
       get
@@ -738,6 +779,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public int AltLengthResolution
     {
       get
@@ -757,6 +799,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double AltLengthRoundoff
     {
       get
@@ -776,6 +819,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public string AltPrefix
     {
       get
@@ -799,6 +843,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public string AltSuffix
     {
       get
@@ -822,6 +867,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ZeroSuppression AltZeroSuppression
     {
       get
@@ -841,6 +887,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public bool AlternateBelowLine
     {
       get
@@ -860,6 +907,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ToleranceDisplayFormat ToleranceFormat
     {
       get
@@ -879,6 +927,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public int ToleranceResolution
     {
       get
@@ -898,6 +947,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public int AltToleranceResolution
     {
       get
@@ -917,6 +967,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ToleranceUpperValue
     {
       get
@@ -936,6 +987,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ToleranceLowerValue
     {
       get
@@ -955,6 +1007,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double ToleranceHeightScale
     {
       get
@@ -980,6 +1033,7 @@ namespace Rhino.Geometry
                                          b != DimensionStyle.LengthDisplay.InchesFractional &&
                                          b != DimensionStyle.LengthDisplay.FeetAndInches;
 
+    /// <since>6.0</since>
     public void SetDimensionLengthDisplayWithZeroSuppressionReset(DimensionStyle.LengthDisplay ld)
     {
       var areBothDecimalFormats = AreBothDecimalFormats(DimensionLengthDisplay, ld);
@@ -991,6 +1045,7 @@ namespace Rhino.Geometry
       GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
     }
 
+    /// <since>6.0</since>
     public void SetAltDimensionLengthDisplayWithZeroSuppressionReset(DimensionStyle.LengthDisplay ld)
     {
       var areBothDecimalFormats = AreBothDecimalFormats(AlternateDimensionLengthDisplay, ld);
@@ -1016,6 +1071,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>5.0</since>
     public LinearDimension()
     {
       var ptr = UnsafeNativeMethods.ON_DimLinear_New();
@@ -1027,6 +1083,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addlineardimension2.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlineardimension2.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public LinearDimension(Plane dimensionPlane, Point2d extensionLine1End, Point2d extensionLine2End, Point2d pointOnDimensionLine)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_DimLinear_New();
@@ -1039,6 +1096,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new instance of the <see cref="LinearDimension"/> class, based on three points.
     /// </summary>
+    /// <since>5.0</since>
     public static LinearDimension FromPoints(Point3d extensionLine1End, Point3d extensionLine2End, Point3d pointOnDimensionLine)
     {
       Point3d[] points = { extensionLine1End, extensionLine2End, pointOnDimensionLine };
@@ -1074,12 +1132,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the distance between arrow tips.
     /// </summary>
+    /// <since>5.0</since>
     public double DistanceBetweenArrowTips => NumericValue;
 
     /// <summary>
     /// Sets the three locations of the point, using two-dimensional points
     /// that refer to the plane of the annotation.
     /// </summary>
+    /// <since>5.0</since>
     public void SetLocations(Point2d extensionLine1End, Point2d extensionLine2End, Point2d pointOnDimensionLine)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1093,6 +1153,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets a value indicating whether this annotation is aligned.
     /// </summary>
+    /// <since>5.0</since>
     public bool Aligned
     {
       get
@@ -1105,6 +1166,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public new AnnotationType AnnotationType
     {
       get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
@@ -1123,6 +1185,7 @@ namespace Rhino.Geometry
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <param name="rotationInPlane">For Rotated style</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static LinearDimension Create(AnnotationType dimtype, DimensionStyle dimStyle,
       Plane plane, Vector3d horizontal, Point3d defpoint1, Point3d defpoint2,
       Point3d dimlinepoint, double rotationInPlane)
@@ -1145,6 +1208,7 @@ namespace Rhino.Geometry
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <param name="textpoint">Text location</param>
     /// <returns>true = success</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Get3dPoints( out Point3d extensionLine1End, out Point3d extensionLine2End,
       out Point3d arrowhead1End, out Point3d arrowhead2End,
@@ -1164,6 +1228,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// End of the first extension line.
     /// </summary>
+    /// <since>5.0</since>
     public Point2d ExtensionLine1End
     {
       get
@@ -1183,6 +1248,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// End of the second extension line.
     /// </summary>
+    /// <since>5.0</since>
     public Point2d ExtensionLine2End
     {
       get
@@ -1202,6 +1268,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the arrow head end of the first extension line.
     /// </summary>
+    /// <since>5.0</since>
     public Point2d Arrowhead1End
     {
       get
@@ -1216,6 +1283,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the arrow head end of the second extension line.
     /// </summary>
+    /// <since>5.0</since>
     public Point2d Arrowhead2End
     {
       get
@@ -1230,6 +1298,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Point on annotation plane where dimension line starts
     /// </summary>
+    /// <since>6.0</since>
     public Point2d DimensionLinePoint
     {
       get
@@ -1247,6 +1316,7 @@ namespace Rhino.Geometry
     }
 
 
+    /// <since>6.0</since>
     [ConstOperation]
     public bool GetTextRectangle(out Point3d[] corners)
     {
@@ -1280,6 +1350,7 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
@@ -1309,6 +1380,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>6.0</since>
     public AngularDimension()
     {
       var ptr_this = UnsafeNativeMethods.ON_DimAngular_New();
@@ -1320,6 +1392,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="arc">The start and end points of the arc are the start and endpoints of the dimension</param>
     /// <param name="offset">How far to offset the dimension location from the arc</param>
+    /// <since>5.0</since>
     public AngularDimension(Arc arc, double offset)
     {
       IntPtr ptr_this = UnsafeNativeMethods.ON_DimAngular_New2(ref arc, offset);
@@ -1338,11 +1411,12 @@ namespace Rhino.Geometry
     /// <param name="dimStyle">Dimension's DimensionStyle</param>
     /// <param name="plane">Dimension's Plane</param>
     /// <param name="horizontal">Horizontal reference direction</param>
-    /// <param name="centerpoint">Dimension centerpoint</param>
+    /// <param name="centerpoint">Dimension center point</param>
     /// <param name="defpoint1">First definition point</param>
     /// <param name="defpoint2">Second definition point</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static AngularDimension Create( DimensionStyle dimStyle, Plane plane,
       Vector3d horizontal, Point3d centerpoint, Point3d defpoint1, 
       Point3d defpoint2, Point3d dimlinepoint )
@@ -1360,11 +1434,12 @@ namespace Rhino.Geometry
     /// Update Dimension geometry from point locations
     /// </summary>
     /// <param name="plane">Dimension's plane</param>
-    /// <param name="centerpoint">Dimension's centerpoint</param>
+    /// <param name="centerpoint">Dimension's center point</param>
     /// <param name="defpoint1">First definition point</param>
     /// <param name="defpoint2">Second definition point</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
       Point3d centerpoint,
@@ -1394,6 +1469,7 @@ namespace Rhino.Geometry
     /// <param name="dirpoint2">Second direction point</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static AngularDimension Create(
       Guid styleId,
       Plane plane,
@@ -1421,6 +1497,7 @@ namespace Rhino.Geometry
     /// <param name="dirpoint2">Second direction point</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
       Point3d extpoint1,
@@ -1452,6 +1529,7 @@ namespace Rhino.Geometry
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <param name="textpoint">Text location point</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Get3dPoints(
       out Point3d centerpoint,
@@ -1475,6 +1553,7 @@ namespace Rhino.Geometry
         ref centerpoint, ref defpoint1, ref defpoint2, ref arrowpoint1, ref arrowpoint2, ref dimlinepoint, ref textpoint);
     }
 
+    /// <since>6.0</since>
     public Point2d CenterPoint
     {
       get
@@ -1486,6 +1565,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimAngular_SetCenterPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d DefPoint1
     {
       get
@@ -1497,6 +1577,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint1(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d DefPoint2
     {
       get
@@ -1508,6 +1589,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint2(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d DimlinePoint
     {
       get
@@ -1519,6 +1601,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimAngular_SetDimlinePoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d ArrowPoint1
     {
       get
@@ -1529,6 +1612,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Point2d ArrowPoint2
     {
       get
@@ -1539,6 +1623,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public bool GetTextRectangle(out Point3d[] corners)
     {
@@ -1546,6 +1631,7 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public bool GetDisplayLines(DimensionStyle style, double scale, out Line[] lines, out Arc[] arcs)
     {
@@ -1565,6 +1651,7 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public string GetAngleDisplayText(DimensionStyle style)
     {
@@ -1580,6 +1667,7 @@ namespace Rhino.Geometry
     }
 
 #region properties originating from dim style that can be overridden
+    /// <since>6.0</since>
     public DimensionStyle.AngleDisplayFormat AngleFormat
     {
       get
@@ -1599,6 +1687,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public int AngleResolution
     {
       get
@@ -1618,6 +1707,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double AngleRoundoff
     {
       get
@@ -1637,6 +1727,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ZeroSuppression AngleZeroSuppression
     {
       get
@@ -1669,6 +1760,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>6.0</since>
     public RadialDimension()
     {
       var ptr = UnsafeNativeMethods.ON_DimRadial_New();
@@ -1681,6 +1773,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>6.0</since>
     public new AnnotationType AnnotationType
     {
       get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
@@ -1690,6 +1783,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the value refers to the diameter, rather than the radius.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDiameterDimension => AnnotationType == AnnotationType.Diameter;
 
     /// <summary>
@@ -1702,6 +1796,7 @@ namespace Rhino.Geometry
     /// <param name="radiuspoint">Point on dimension radius</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static RadialDimension Create( DimensionStyle dimStyle, AnnotationType dimtype,
       Plane plane, Point3d centerpoint, Point3d radiuspoint, Point3d dimlinepoint )
     {
@@ -1723,6 +1818,7 @@ namespace Rhino.Geometry
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <param name="rotationInPlane">Rotation around plane origin</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
       Point3d centerpoint,
@@ -1748,6 +1844,7 @@ namespace Rhino.Geometry
     /// <param name="kneepoint">Point where dimension line jogs</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Get3dPoints(
       out Point3d centerpoint,
@@ -1765,6 +1862,7 @@ namespace Rhino.Geometry
         ref centerpoint, ref radiuspoint, ref dimlinepoint, ref kneepoint);
     }
 
+    /// <since>6.0</since>
     public Point2d CenterPoint
     {
       get
@@ -1776,6 +1874,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimRadial_SetCenterPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d RadiusPoint
     {
       get
@@ -1787,6 +1886,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimRadial_SetRadiusPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d DimlinePoint
     {
       get
@@ -1798,6 +1898,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimRadial_SetDimlinePoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d KneePoint
     {
       get
@@ -1808,6 +1909,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public bool GetTextRectangle(out Point3d[] corners)
     {
@@ -1839,6 +1941,7 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
@@ -1858,6 +1961,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the horizontal alignment of the radial dimension's text
     /// </summary>
+    /// <since>6.9</since>
     public TextHorizontalAlignment LeaderTextHorizontalAlignment
     {
       get
@@ -1877,6 +1981,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.ArrowType LeaderArrowType
     {
       get
@@ -1896,6 +2001,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double LeaderArrowSize
     {
       get
@@ -1915,6 +2021,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Guid LeaderArrowBlockId
     {
       get
@@ -1934,6 +2041,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public DimensionStyle.LeaderCurveStyle LeaderCurveStyle
     {
       get
@@ -1955,6 +2063,7 @@ namespace Rhino.Geometry
 
 #endregion properties originating from dim style that can be overridden
 
+    /// <since>6.0</since>
     public override TextOrientation TextOrientation
     {
       get
@@ -1974,6 +2083,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public override DimensionStyle.TextLocation TextLocation
     {
       get
@@ -1993,6 +2103,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public override DimensionStyle.LeaderContentAngleStyle TextAngleType
     {
       get
@@ -2022,6 +2133,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>6.0</since>
     public OrdinateDimension()
     {
       var ptr = UnsafeNativeMethods.ON_DimOrdinate_New();
@@ -2040,12 +2152,13 @@ namespace Rhino.Geometry
     /// <param name="dimStyle">Dimension's AnnotationStyle</param>
     /// <param name="plane">Dimension;s plane</param>
     /// <param name="direction">MeasuredDirection.XAxis or MeasuredDirection.YAxis</param>
-    /// <param name="basepoint">Dimension';s basepoint</param>
+    /// <param name="basepoint">Dimension's base point</param>
     /// <param name="defpoint">Dimension's definition point</param>
     /// <param name="leaderpoint">Point at tail of leader</param>
     /// <param name="kinkoffset1">Distance to first jog</param>
     /// <param name="kinkoffset2">Distance to second jog</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static OrdinateDimension Create( DimensionStyle dimStyle, Plane plane,
       MeasuredDirection direction, Point3d basepoint, Point3d defpoint,
       Point3d leaderpoint, double kinkoffset1, double kinkoffset2)
@@ -2064,12 +2177,13 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">Dimension's plane</param>
     /// <param name="direction">MeasuredDirection.XAxis or MeasuredDirection.YAxisw</param>
-    /// <param name="basepoint">Dimension';s basepoint</param>
+    /// <param name="basepoint">Dimension's base point</param>
     /// <param name="defpoint">Dimension's definition point</param>
     /// <param name="leaderpoint">Point at tail of leader</param>
     /// <param name="kinkoffset1">Distance to first jog</param>
     /// <param name="kinkoffset2">Distance to second jog</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
       MeasuredDirection direction,
@@ -2088,12 +2202,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Get locations of dimension's 3d points
     /// </summary>
-    /// <param name="basepoint">Dimension',s basepoint</param>
+    /// <param name="basepoint">Dimension's base point</param>
     /// <param name="defpoint">Dimension's definition point</param>
     /// <param name="leaderpoint">Point at tail of leader</param>
     /// <param name="kinkpoint1">Point at first jog</param>
     /// <param name="kinkpoint2">Point at second jog</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Get3dPoints(
       out Point3d basepoint,
@@ -2113,6 +2228,7 @@ namespace Rhino.Geometry
         ref basepoint, ref defpoint, ref leaderpoint, ref kinkpoint1, ref kinkpoint2);
     }
 
+    /// <since>6.0</since>
     public Point2d DefPoint
     {
       get
@@ -2124,6 +2240,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetDefPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d LeaderPoint
     {
       get
@@ -2135,6 +2252,7 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetDefPoint(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public Point2d KinkPoint1
     {
       get
@@ -2145,6 +2263,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public Point2d KinkPoint2
     {
       get
@@ -2155,18 +2274,21 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public double KinkOffset1
     {
       get { return UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset1(ConstPointer()); }
       set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset1(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     public double KinkOffset2
     {
       get { return UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset2(ConstPointer()); }
       set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset2(NonConstPointer(), value); }
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public bool GetTextRectangle(out Point3d[] corners)
     {
@@ -2198,6 +2320,7 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <since>6.0</since>
     [ConstOperation]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
@@ -2212,7 +2335,7 @@ namespace Rhino.Geometry
     }
   }
 
-  /// <summary> Represents a centermark </summary>
+  /// <summary> Represents a center mark </summary>
   [Serializable]
   public class Centermark : Dimension
   {
@@ -2220,6 +2343,7 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <since>6.0</since>
     public Centermark()
     {
       var ptr = UnsafeNativeMethods.ON_Centermark_New();
@@ -2232,12 +2356,13 @@ namespace Rhino.Geometry
     {
     }
 
-    /// <summary> Create a new centermark </summary>
+    /// <summary> Create a new center mark </summary>
     /// <param name="dimStyle">Dimension's AnnotationStyle</param>
     /// <param name="plane">Dimension's plane</param>
     /// <param name="centerpoint">Dimension's center point</param>
-    /// <param name="radius">Centermark;s radius</param>
+    /// <param name="radius">Center mark's radius</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static Centermark Create(DimensionStyle dimStyle, Plane plane, Point3d centerpoint, double radius )
     {
       Guid style_id = dimStyle.Id;

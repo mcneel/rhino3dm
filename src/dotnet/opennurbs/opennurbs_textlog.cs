@@ -17,6 +17,7 @@ namespace Rhino.FileIO
     /// Creates a text log that stores all text in memory.  Use ToString on this
     /// version of the TextLog to get the text that we written
     /// </summary>
+    /// <since>5.1</since>
     public TextLog()
     {
       m_pString = UnsafeNativeMethods.ON_wString_New(null);
@@ -38,6 +39,7 @@ namespace Rhino.FileIO
     /// Name of file to create and write to. If null, then text output
     /// is sent to StdOut
     /// </param>
+    /// <since>5.1</since>
     public TextLog(string filename)
     {
       m_pTextLog = UnsafeNativeMethods.ON_TextLog_New2(filename);
@@ -45,6 +47,7 @@ namespace Rhino.FileIO
 
     /// Create a TextLog from a pointer owned elsewhere. Need
     /// to ensure that pointer isn't deleted on Disposal of this array
+    /// <since>6.0</since>
     public TextLog(IntPtr ptr)
     {
       m_pTextLog = ptr;
@@ -70,6 +73,7 @@ namespace Rhino.FileIO
     /// <code source='examples\cs\ex_printinstancedefinitiontree.cs' lang='cs'/>
     /// <code source='examples\py\ex_printinstancedefinitiontree.py' lang='py'/>
     /// </example>
+    /// <since>5.1</since>
     public void PushIndent()
     {
       IntPtr pThis = NonConstPointer();
@@ -84,6 +88,7 @@ namespace Rhino.FileIO
     /// <code source='examples\cs\ex_printinstancedefinitiontree.cs' lang='cs'/>
     /// <code source='examples\py\ex_printinstancedefinitiontree.py' lang='py'/>
     /// </example>
+    /// <since>5.1</since>
     public void PopIndent()
     {
       IntPtr pThis = NonConstPointer();
@@ -93,6 +98,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// 0: one tab per indent. &gt;0: number of spaces per indent
     /// </summary>
+    /// <since>5.1</since>
     public int IndentSize
     {
       get
@@ -112,6 +118,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="text"></param>
     /// <param name="lineLength"></param>
+    /// <since>5.1</since>
     public void PrintWrappedText(string text, int lineLength)
     {
       IntPtr pThis = NonConstPointer();
@@ -119,7 +126,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Send text to the textlog
+    /// Send text to the text log
     /// </summary>
     /// <param name="text"></param>
     /// <example>
@@ -127,6 +134,7 @@ namespace Rhino.FileIO
     /// <code source='examples\cs\ex_printinstancedefinitiontree.cs' lang='cs'/>
     /// <code source='examples\py\ex_printinstancedefinitiontree.py' lang='py'/>
     /// </example>
+    /// <since>5.1</since>
     public void Print(string text)
     {
       IntPtr pThis = NonConstPointer();
@@ -134,20 +142,22 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Send formatted text to the textlog
+    /// Send formatted text to the text log
     /// </summary>
     /// <param name="format"></param>
     /// <param name="arg0"></param>
+    /// <since>5.1</since>
     public void Print(string format, object arg0)
     {
       Print(string.Format(format, arg0));
     }
     /// <summary>
-    /// Send formatted text to the textlog
+    /// Send formatted text to the text log
     /// </summary>
     /// <param name="format"></param>
     /// <param name="arg0"></param>
     /// <param name="arg1"></param>
+    /// <since>5.1</since>
     public void Print(string format, object arg0, object arg1)
     {
       Print(string.Format(format, arg0, arg1));
@@ -172,6 +182,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.1</since>
     public void Dispose()
     {
       Dispose(true);
@@ -205,8 +216,9 @@ namespace Rhino.FileIO
     /// Returns a reference to a TextLog that prints to the Rhino command line.
     /// Each new command line reference holds its own indents.
     /// </summary>
-    /// <remarks>All Print methods of this instance are guaranteeed to be thread safe.
+    /// <remarks>All Print methods of this instance are guaranteed to be thread safe.
     /// Other methods are not guaranteed to be thread safe.</remarks>
+    /// <since>7.0</since>
     public static TextLog NewCommandLine() => new CommandLineTextLog();
 
     private class CommandLineTextLog : TextLog

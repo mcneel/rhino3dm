@@ -32,6 +32,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// All curve intersection events are either a single point or an overlap.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsPoint
     {
       get { return (1 == m_type || 3 == m_type); }
@@ -45,16 +46,18 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_curvesurfaceintersect.cs' lang='cs'/>
     /// <code source='examples\py\ex_curvesurfaceintersect.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsOverlap
     {
       get { return !IsPoint; }
     }
 
     /// <summary>
-    /// Gets the point on Curve A where the intersection occured. 
+    /// Gets the point on Curve A where the intersection occurred. 
     /// If the intersection type is overlap, then this will return the 
     /// start of the overlap region.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PointA
     {
       get { return m_A0; }
@@ -63,16 +66,18 @@ namespace Rhino.Geometry.Intersect
     /// Gets the end point of the overlap on Curve A. 
     /// If the intersection type is not overlap, this value is meaningless.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PointA2
     {
       get { return m_A1; }
     }
 
     /// <summary>
-    /// Gets the point on Curve B (or Surface B) where the intersection occured. 
+    /// Gets the point on Curve B (or Surface B) where the intersection occurred. 
     /// If the intersection type is overlap, then this will return the 
     /// start of the overlap region.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PointB
     {
       get { return m_B0; }
@@ -81,25 +86,28 @@ namespace Rhino.Geometry.Intersect
     /// Gets the end point of the overlap on Curve B (or Surface B). 
     /// If the intersection type is not overlap, this value is meaningless.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d PointB2
     {
       get { return m_B1; }
     }
 
     /// <summary>
-    /// Gets the parameter on Curve A where the intersection occured. 
+    /// Gets the parameter on Curve A where the intersection occurred. 
     /// If the intersection type is overlap, then this will return the 
     /// start of the overlap region.
     /// </summary>
+    /// <since>5.0</since>
     public double ParameterA
     {
       get { return m_a0; }
     }
     /// <summary>
-    /// Gets the parameter on Curve B where the intersection occured. 
+    /// Gets the parameter on Curve B where the intersection occurred. 
     /// If the intersection type is overlap, then this will return the 
     /// start of the overlap region.
     /// </summary>
+    /// <since>5.0</since>
     public double ParameterB
     {
       get { return m_b0; }
@@ -109,6 +117,7 @@ namespace Rhino.Geometry.Intersect
     /// Gets the interval on curve A where the overlap occurs. 
     /// If the intersection type is not overlap, this value is meaningless.
     /// </summary>
+    /// <since>5.0</since>
     public Interval OverlapA
     {
       get { return new Interval(m_a0, m_a1); }
@@ -117,6 +126,7 @@ namespace Rhino.Geometry.Intersect
     /// Gets the interval on curve B where the overlap occurs. 
     /// If the intersection type is not overlap, this value is meaningless.
     /// </summary>
+    /// <since>5.0</since>
     public Interval OverlapB
     {
       get { return new Interval(m_b0, m_b1); }
@@ -129,6 +139,7 @@ namespace Rhino.Geometry.Intersect
     /// </summary>
     /// <param name="u">Parameter on surface u direction where the intersection occurs.</param>
     /// <param name="v">Parameter on surface v direction where the intersection occurs.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public void SurfacePointParameter(out double u, out double v)
     {
@@ -150,6 +161,7 @@ namespace Rhino.Geometry.Intersect
     /// </summary>
     /// <param name="uDomain">Domain along surface U direction for overlap event.</param>
     /// <param name="vDomain">Domain along surface V direction for overlap event.</param>
+    /// <since>5.0</since>
     [ConstOperation]
     public void SurfaceOverlapParameter(out Interval uDomain, out Interval vDomain)
     {
@@ -172,6 +184,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="eventB">The second intersection event to compare.</param>
     /// <param name="relativePointTolerance">The comparison tolerance. If RhinoMath.UnsetValue, then RhinoMath.SqrtEpsilon is used.</param>
     /// <returns>true if the two inputs represent the same intersection, false otherwise.</returns>
+    /// <since>7.0</since>
     public static bool CompareEquivalent(IntersectionEvent eventA, IntersectionEvent eventB, double relativePointTolerance)
     {
       return CompareEquivalent(eventA, eventB, relativePointTolerance, null);
@@ -185,6 +198,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="relativePointTolerance">The comparison tolerance. If RhinoMath.UnsetValue, then RhinoMath.SqrtEpsilon is used.</param>
     /// <param name="log">If not null and false is returned, then a description of the error is appended to log.</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static bool CompareEquivalent(IntersectionEvent eventA, IntersectionEvent eventB, double relativePointTolerance, Rhino.FileIO.TextLog log)
     {
       // compare to match
@@ -234,6 +248,55 @@ namespace Rhino.Geometry.Intersect
   }
 
 #if RHINO_SDK
+
+  /// <summary>
+  /// Represents an element which is part of a ray shoot.
+  /// </summary>
+  /// <since>7.0</since>
+  public struct RayShootEvent
+  {
+    #region Members
+    private int m_geometry_index;
+    private int m_brep_face_index;
+    private Point3d m_point;
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The index of the surface or Brep that was hit.
+    /// </summary>
+    /// <since>7.0</since>
+    public int GeometryIndex
+    {
+      get { return m_geometry_index; }
+      set { m_geometry_index = value; }
+    }
+
+    /// <summary>
+    /// If GeometryIndex references a Brep, then the index of the Brep face that was hit.
+    /// If GeometryIndex references a surface, than RhinoMath.UnsetIntIndex.
+    /// </summary>
+    /// <since>7.0</since>
+    public int BrepFaceIndex
+    {
+      get { return m_brep_face_index; }
+      set { m_brep_face_index = value; }
+    }
+
+    /// <summary>
+    /// The 3d hit point.
+    /// </summary>
+    /// <since>7.0</since>
+    public Point3d Point
+    {
+      get { return m_point; }
+      set { m_point = value; }
+    }
+
+    #endregion
+  }
+
   /// <summary>
   /// Maintains an ordered list of Curve Intersection results.
   /// </summary>
@@ -275,6 +338,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -305,6 +369,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Gets the number of recorded intersection events.
     /// </summary>
+    /// <since>5.0</since>
     public int Count
     {
       get { return m_count; }
@@ -355,6 +420,7 @@ namespace Rhino.Geometry.Intersect
     /// larger than or equal to the length of this collection; or this collection contains more 
     /// IntersectionEvents than the ones that can be stored in array after and including arrayIndex.
     /// </exception>
+    /// <since>5.0</since>
     public void CopyTo(IntersectionEvent[] array, int arrayIndex)
     {
       if (array == null)
@@ -382,6 +448,7 @@ namespace Rhino.Geometry.Intersect
     /// Returns an enumerator that is capable of yielding all IntersectionEvents in the collection.
     /// </summary>
     /// <returns>The constructed enumerator.</returns>
+    /// <since>5.0</since>
     public IEnumerator<IntersectionEvent> GetEnumerator()
     {
       for (int i = 0; i < Count; i++)
@@ -485,7 +552,7 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// This collection is readonly, so this property returns always true.
+    /// This collection is read-only, so this property returns always true.
     /// </summary>
     bool ICollection<IntersectionEvent>.IsReadOnly
     {
@@ -509,6 +576,7 @@ namespace Rhino.Geometry.Intersect
     /// This returns the same enumerator as the generic counterpart.
     /// </summary>
     /// <returns>The constructed enumerator.</returns>
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return GetEnumerator();

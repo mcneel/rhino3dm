@@ -29,6 +29,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_planesurface.cs' lang='cs'/>
     /// <code source='examples\py\ex_planesurface.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public PlaneSurface(Plane plane, Interval xExtents, Interval yExtents)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_New(ref plane, xExtents, yExtents);
@@ -58,6 +59,7 @@ namespace Rhino.Geometry
     /// <param name="vectorInPlane">A vector the direction of which will be in plane.</param>
     /// <param name="box">A box to cut through.</param>
     /// <returns>A new plane surface on success, or null on error.</returns>
+    /// <since>5.0</since>
     public static PlaneSurface CreateThroughBox(Line lineInPlane, Vector3d vectorInPlane, BoundingBox box)
     {
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPlaneThroughBox(ref lineInPlane, vectorInPlane, ref box);
@@ -77,6 +79,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_splitbrepwithplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_splitbrepwithplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static PlaneSurface CreateThroughBox(Plane plane, BoundingBox box)
     {
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPlaneThroughBox2(ref plane, ref box);
@@ -116,6 +119,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the clipping plane.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get
@@ -136,6 +140,7 @@ namespace Rhino.Geometry
     /// Returns the ids of RhinoViewport objects that are clipped by this clipping plane.
     /// </summary>
     /// <returns>The ids of RhinoViewport objects.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Guid[] ViewportIds()
     {
@@ -152,6 +157,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="viewportId">The id of the RhinoViewport to add.</param>
     /// <returns>true if the viewport was added, false if the viewport is already in the list.</returns>
+    /// <since>6.1</since>
     public bool AddClipViewportId(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -163,6 +169,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="viewportId">The id of the RhinoViewport to remove.</param>
     /// <returns>true if the viewport was removed, false if the viewport was not in the list.</returns>
+    /// <since>6.1</since>
     public bool RemoveClipViewportId(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();

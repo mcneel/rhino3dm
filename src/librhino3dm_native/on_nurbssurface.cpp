@@ -446,3 +446,109 @@ RH_C_FUNCTION bool ON_MorphControl_MorphGeometry(const ON_MorphControl* pConstMo
 }
 
 #endif
+
+
+RH_C_FUNCTION ON_HermiteSurface* ON_HermiteSurface_New()
+{
+  return new ON_HermiteSurface();
+}
+
+RH_C_FUNCTION ON_HermiteSurface* ON_HermiteSurface_New2(int u_count, int v_count)
+{
+  return new ON_HermiteSurface(u_count, v_count);
+}
+
+RH_C_FUNCTION void ON_HermiteSurface_Delete(ON_HermiteSurface* pHermiteSurface)
+{
+  if (pHermiteSurface)
+    delete pHermiteSurface;
+}
+
+RH_C_FUNCTION bool ON_HermiteSurface_Create(ON_HermiteSurface* pHermiteSurface, int u_count, int v_count)
+{
+  bool rc = false;
+  if (pHermiteSurface)
+    rc = pHermiteSurface->Create(u_count, v_count);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_HermiteSurface_IsValid(const ON_HermiteSurface* pConstHermiteSurface)
+{
+  bool rc = false;
+  if (pConstHermiteSurface)
+    rc = pConstHermiteSurface->IsValid();
+  return rc;
+}
+
+RH_C_FUNCTION int ON_HermiteSurface_Count(const ON_HermiteSurface* pConstHermiteSurface, bool u_dir)
+{
+  int rc = 0;
+  if (pConstHermiteSurface)
+    rc = u_dir ? pConstHermiteSurface->UCount() : pConstHermiteSurface->VCount();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_HermiteSurface_ParameterAt(ON_HermiteSurface* pHermiteSurface, bool u_dir, bool set, int index, double* pParameter)
+{
+  if (pHermiteSurface && pParameter)
+  {
+    if (set)
+    {
+      if (u_dir)
+        pHermiteSurface->SetUParameterAt(index, *pParameter);
+      else
+        pHermiteSurface->SetVParameterAt(index, *pParameter);
+    }
+    else
+    {
+      if (u_dir)
+        *pParameter = pHermiteSurface->UParameterAt(index);
+      else
+        *pParameter = pHermiteSurface->VParameterAt(index);
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_HermiteSurface_PointAt(ON_HermiteSurface* pHermiteSurface, int u, int v, bool set, ON_3dPoint* pPoint)
+{
+  if (pHermiteSurface && pPoint)
+  {
+    if (set)
+      pHermiteSurface->SetPointAt(u, v, *pPoint);
+    else
+      *pPoint = pHermiteSurface->PointAt(u, v);
+  }
+}
+
+RH_C_FUNCTION void ON_HermiteSurface_VectorAt(ON_HermiteSurface* pHermiteSurface, int which, int u, int v, bool set, ON_3dVector* pVector)
+{
+  if (pHermiteSurface && pVector)
+  {
+    if (set)
+    {
+      if (0 == which)
+        pHermiteSurface->SetUTangentAt(u, v, *pVector);
+      else if (1 == which)
+        pHermiteSurface->SetVTangentAt(u, v, *pVector);
+      else if (2 == which)
+        pHermiteSurface->SetTwistAt(u, v, *pVector);
+    }
+    else
+    {
+      if (0 == which)
+        *pVector = pHermiteSurface->UTangentAt(u, v);
+      else if (1 == which)
+        *pVector = pHermiteSurface->VTangentAt(u, v);
+      else if (2 == which)
+        *pVector = pHermiteSurface->TwistAt(u, v);
+    }
+  }
+}
+
+RH_C_FUNCTION ON_NurbsSurface* ON_HermiteSurface_NurbsSurface(ON_HermiteSurface* pHermiteSurface)
+{
+  ON_NurbsSurface* rc = nullptr;
+  if (pHermiteSurface)
+    rc = pHermiteSurface->NurbsSurface();
+  return rc;
+}

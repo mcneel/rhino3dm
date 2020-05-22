@@ -28,6 +28,7 @@ namespace Rhino.Geometry
     /// World XY plane.</para>
     /// </summary>
     /// <param name="bbox">BoundingBox to mimic.</param>
+    /// <since>5.0</since>
     public Box(BoundingBox bbox)
     {
       m_plane = Plane.WorldXY;
@@ -43,6 +44,7 @@ namespace Rhino.Geometry
     /// <param name="xSize">Dimensions along the base plane X-Axis.</param>
     /// <param name="ySize">Dimensions along the base plane Y-Axis.</param>
     /// <param name="zSize">Dimensions along the base plane Z-Axis.</param>
+    /// <since>5.0</since>
     public Box(Plane basePlane, Interval xSize, Interval ySize, Interval zSize)
     {
       m_plane = basePlane;
@@ -56,6 +58,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="basePlane">Orientation of the box.</param>
     /// <param name="points">Points to include, Invalid points will be ignored.</param>
+    /// <since>5.0</since>
     public Box(Plane basePlane, IEnumerable<Point3d> points)
     {
       // David: this code is untested.
@@ -111,6 +114,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="basePlane">Base plane for aligned bounding box.</param>
     /// <param name="geometry">Geometry to box.</param>
+    /// <since>5.0</since>
     public Box(Plane basePlane, GeometryBase geometry)
     {
       // David: this code is untested.
@@ -132,10 +136,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Initializes a world aligned box from a base plane and a boundingbox.
+    /// Initializes a world aligned box from a base plane and a bounding box.
     /// </summary>
-    /// <param name="basePlane">Base plane of bounging box.</param>
+    /// <param name="basePlane">Base plane of bounding box.</param>
     /// <param name="boundingbox">Bounding Box in plane coordinates.</param>
+    /// <since>5.0</since>
     public Box(Plane basePlane, BoundingBox boundingbox)
     {
       m_plane = basePlane;
@@ -149,6 +154,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Empty Box. Empty boxes are considered to be invalid.
     /// </summary>
+    /// <since>5.0</since>
     public static Box Empty
     {
       get
@@ -160,6 +166,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a Box whose base plane and axis dimensions are all Unset.
     /// </summary>
+    /// <since>5.0</since>
     public static Box Unset
     {
       get
@@ -174,6 +181,7 @@ namespace Rhino.Geometry
     /// Gets the validity of this Box. Boxes are invalid when the base plane or any of 
     /// the dimension intervals are invalid or decreasing.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -194,6 +202,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the orientation plane for this Box.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_plane; }
@@ -204,6 +213,7 @@ namespace Rhino.Geometry
     /// Gets or sets the Interval that describes the dimension of the 
     /// Box along the orientation plane X-Axis. Otherwise known as the Width of the Box.
     /// </summary>
+    /// <since>5.0</since>
     public Interval X
     {
       get { return m_dx; }
@@ -214,6 +224,7 @@ namespace Rhino.Geometry
     /// Gets or sets the Interval that describes the dimension of the 
     /// Box along the orientation plane Y-Axis. Otherwise known as the Depth of the Box.
     /// </summary>
+    /// <since>5.0</since>
     public Interval Y
     {
       get { return m_dy; }
@@ -224,6 +235,7 @@ namespace Rhino.Geometry
     /// Gets or sets the Interval that describes the dimension of the 
     /// Box along the orientation plane Z-Axis. Otherwise known as the Height of the Box.
     /// </summary>
+    /// <since>5.0</since>
     public Interval Z
     {
       get { return m_dz; }
@@ -233,6 +245,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point that is in the center of the box.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       get
@@ -244,6 +257,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the world axis aligned Bounding box for this oriented box.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -256,6 +270,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the total surface area of this box.
     /// </summary>
+    /// <since>5.0</since>
     public double Area
     {
       get
@@ -276,6 +291,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the total volume of this box.
     /// </summary>
+    /// <since>5.0</since>
     public double Volume
     {
       get
@@ -299,6 +315,7 @@ namespace Rhino.Geometry
     /// <param name="y">Unitized parameter (between 0 and 1 is inside the box) along box Y direction.</param>
     /// <param name="z">Unitized parameter (between 0 and 1 is inside the box) along box Z direction.</param>
     /// <returns>The point at (x,y,z).</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double x, double y, double z)
     {
@@ -316,6 +333,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Sample point.</param>
     /// <returns>The point on or in the box that is closest to the sample point.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d point)
     {
@@ -346,6 +364,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Sample point.</param>
     /// <returns>The point on the box that is furthest from the sample point.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d FurthestPoint(Point3d point)
     {
@@ -373,6 +392,7 @@ namespace Rhino.Geometry
     /// InValid boxes cannot be inflated.
     /// </summary>
     /// <param name="amount">Amount (in model units) to inflate this box in all directions.</param>
+    /// <since>5.0</since>
     public void Inflate(double amount)
     {
       Inflate(amount, amount, amount);
@@ -386,6 +406,7 @@ namespace Rhino.Geometry
     /// <param name="xAmount">Amount (in model units) to inflate this box in the x direction.</param>
     /// <param name="yAmount">Amount (in model units) to inflate this box in the y direction.</param>
     /// <param name="zAmount">Amount (in model units) to inflate this box in the z direction.</param>
+    /// <since>5.0</since>
     public void Inflate(double xAmount, double yAmount, double zAmount)
     {
       // David: This code is untested.
@@ -407,6 +428,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Point to test.</param>
     /// <returns>true if the point is on the inside of or coincident with this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(Point3d point)
     {
@@ -420,6 +442,7 @@ namespace Rhino.Geometry
     /// <param name="strict">If true, the point needs to be fully on the inside of the Box. 
     /// I.e. coincident points will be considered 'outside'.</param>
     /// <returns>true if the point is (strictly) on the inside of this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(Point3d point, bool strict)
     {
@@ -435,22 +458,24 @@ namespace Rhino.Geometry
       return true;
     }
     /// <summary>
-    /// Test a boundingbox for Box inclusion. This is the same as calling Contains(box,false)
+    /// Test a bounding box for Box inclusion. This is the same as calling Contains(box,false)
     /// </summary>
     /// <param name="box">Box to test.</param>
     /// <returns>true if the box is on the inside of or coincident with this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(BoundingBox box)
     {
       return Contains(box, false);
     }
     /// <summary>
-    /// Test a boundingbox for Box inclusion.
+    /// Test a bounding box for Box inclusion.
     /// </summary>
     /// <param name="box">Box to test.</param>
-    /// <param name="strict">If true, the boundingbox needs to be fully on the inside of this Box. 
+    /// <param name="strict">If true, the bounding box needs to be fully on the inside of this Box. 
     /// I.e. coincident boxes will be considered 'outside'.</param>
     /// <returns>true if the box is (strictly) on the inside of this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(BoundingBox box, bool strict)
     {
@@ -468,6 +493,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="box">Box to test.</param>
     /// <returns>true if the box is on the inside of or coincident with this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(Box box)
     {
@@ -481,6 +507,7 @@ namespace Rhino.Geometry
     /// <param name="strict">If true, the box needs to be fully on the inside of this Box. 
     /// I.e. coincident boxes will be considered 'outside'.</param>
     /// <returns>true if the box is (strictly) on the inside of this Box.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Contains(Box box, bool strict)
     {
@@ -499,6 +526,7 @@ namespace Rhino.Geometry
     /// This grows the box in directions so it contains the point.
     /// </summary>
     /// <param name="point">Point to include.</param>
+    /// <since>5.0</since>
     public void Union(Point3d point)
     {
       //David: this is untested.
@@ -516,7 +544,8 @@ namespace Rhino.Geometry
     /// Attempts to make the Box valid. This is not always possible.
     /// </summary>
     /// <returns>true if the box was made valid, or if it was valid to begin with. 
-    /// false if the box remains in a differently abled state.</returns>
+    /// false if the box remains unchanged.</returns>
+    /// <since>5.0</since>
     public bool MakeValid()
     {
       // David: This code is untested.
@@ -537,6 +566,7 @@ namespace Rhino.Geometry
     /// Gets an array of the 8 corner points of this box.
     /// </summary>
     /// <returns>An array of 8 corners.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] GetCorners()
     {
@@ -566,6 +596,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="xform">Transformation matrix to apply to this Box.</param>
     /// <returns>true if the Box was successfully transformed, false if otherwise.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       // David: This code is untested.
@@ -613,6 +644,7 @@ namespace Rhino.Geometry
     /// the physical dimensions.
     /// </summary>
     /// <param name="origin">The new base plane origin.</param>
+    /// <since>5.0</since>
     public void RepositionBasePlane(Point3d origin)
     {
       if (!m_plane.IsValid) { return; }
@@ -635,6 +667,7 @@ namespace Rhino.Geometry
     /// Constructs a brep representation of this box.
     /// </summary>
     /// <returns>A Brep representation of this box or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Brep ToBrep()
     {
@@ -645,6 +678,7 @@ namespace Rhino.Geometry
     /// Constructs an extrusion representation of this box.
     /// </summary>
     /// <returns>An Extrusion representation of this box or null.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Extrusion ToExtrusion()
     {
@@ -710,6 +744,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Box other, double epsilon)
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Rhino.DocObjects;
 using Rhino.Geometry.Collections;
@@ -14,6 +14,7 @@ namespace Rhino.Geometry
   public class HiddenLineDrawingParameters
   {
     /// <summary>default constructor</summary>
+    /// <since>6.0</since>
     public HiddenLineDrawingParameters()
     {
       IncludeTangentEdges = true;
@@ -27,6 +28,7 @@ namespace Rhino.Geometry
     /// Absolute tolerance is used to decide if curves overlap or intersect.
     /// A suggested value is to use RhinoDoc.AbsoluteTolerance
     /// </summary>
+    /// <since>6.0</since>
     public double AbsoluteTolerance { get; set; }
 
     /// <summary>
@@ -39,6 +41,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="viewport">A copy of viewportInfo is made inside of HiddenLineDrawing.</param>
     /// <returns>True if the viewport has been set.</returns>
+    /// <since>6.0</since>
     public void SetViewport(ViewportInfo viewport)
     {
       if (viewport == null) throw new ArgumentNullException(nameof(viewport));
@@ -47,7 +50,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Set the viewport for the hidden line drawing (HLD). The viewport supplies
-    /// the projection that determinest he visibility of curves, and the HLD 
+    /// the projection that determines the visibility of curves, and the HLD 
     /// coordinate system in which the resulting curves are represented. The
     /// HLD-coordinate system is a right handed system for 3-D model space, in 
     /// which the 3rd coordinate direction is the projection direction. In particular
@@ -55,6 +58,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="viewport">A copy of rhinoViewport is made inside of HiddenLineDrawing.</param>
     /// <returns>True if the viewport has been set.</returns>
+    /// <since>6.0</since>
     public void SetViewport(Display.RhinoViewport viewport)
     {
       if (viewport == null) throw new ArgumentNullException(nameof(viewport));
@@ -62,20 +66,25 @@ namespace Rhino.Geometry
     }
 
     /// <summary> Flatten the computed geometry </summary>
+    /// <since>6.0</since>
     public bool Flatten { get; set; }
 
     /// <summary> Specify clipping planes that are active for this view. </summary>
     /// <param name="plane"></param>
+    /// <since>6.0</since>
     public void AddClippingPlane(Plane plane)
     {
       m_clipping_planes.Add(plane);
     }
 
     /// <summary> Include tangent edges in hidden line drawing (default is true) </summary>
+    /// <since>6.0</since>
     public bool IncludeTangentEdges { get; set; }
     /// <summary> Include tangent seams in hidden line drawing (default is true) </summary>
+    /// <since>6.0</since>
     public bool IncludeTangentSeams { get; set; }
     /// <summary> Include hidden curves in hidden line drawing (default is true) </summary>
+    /// <since>6.0</since>
     public bool IncludeHiddenCurves { get; set; }
 
     /// <summary>
@@ -89,6 +98,7 @@ namespace Rhino.Geometry
     /// true if the type of geometry can be added for calculations.
     /// Currently only curves, meshes, breps, surfaces and extrusions are supported
     /// </returns>
+    /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, object tag)
     {
       return AddGeometry(geometry, Transform.Identity, tag);
@@ -106,6 +116,7 @@ namespace Rhino.Geometry
     /// true if the type of geometry can be added for calculations.
     /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
     /// </returns>
+    /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, Transform xform, object tag)
     {
       if( geometry is Brep || 
@@ -171,6 +182,7 @@ namespace Rhino.Geometry
     /// <param name="parameters"></param>
     /// <param name="multipleThreads"></param>
     /// <returns>Results of calculation on success, null on failure</returns>
+    /// <since>6.0</since>
     public static HiddenLineDrawing Compute(HiddenLineDrawingParameters parameters, bool multipleThreads)
     {
       return Compute(parameters, multipleThreads, null, System.Threading.CancellationToken.None);
@@ -184,6 +196,7 @@ namespace Rhino.Geometry
     /// <param name="progress"></param>
     /// <param name="cancelToken"></param>
     /// <returns>Results of calculation on success, null on failure or cancellation</returns>
+    /// <since>6.0</since>
     public static HiddenLineDrawing Compute(HiddenLineDrawingParameters parameters, bool multipleThreads, IProgress<double> progress, System.Threading.CancellationToken cancelToken)
     {
       if (parameters.Viewport == null)
@@ -244,6 +257,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       if (IntPtr.Zero != m_ptr)
@@ -282,8 +296,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Subcurve objects calculated by the hidden line drawing.
+    /// Sub-curve objects calculated by the hidden line drawing.
     /// </summary>
+    /// <since>6.0</since>
     public IEnumerable<HiddenLineDrawingSegment> Segments
     {
       get { return GetSegmentList(); }
@@ -297,6 +312,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Point objects calculated by the hidden line drawing.
     /// </summary>
+    /// <since>6.8</since>
     public IEnumerable<HiddenLineDrawingPoint> Points
     {
       get { return GetPointList(); }
@@ -313,7 +329,7 @@ namespace Rhino.Geometry
     /// Add Brep, Curve, Extrusion, or Mesh that is to be drawn.
     /// </summary>
     /// <param name="geometry">The geometry to be drawn.</param>
-    /// <param name="xform">A transformation to apply to geoemtry to place it in the world coordinte system.</param>
+    /// <param name="xform">A transformation to apply to geometry to place it in the world coordinate system.</param>
     /// <param name="tagIndex">A value used to cross-reference the geometry, such as a layer index.</param>
     /// <returns>Index of the object, or -1 if the geometry type is not supported.</returns>
     private void AddObject(GeometryBase geometry, Transform xform, int tagIndex)
@@ -383,6 +399,7 @@ namespace Rhino.Geometry
 
     /// <summary> Returns the ViewportInfo used by the hidden line drawing.</summary>
     /// <returns>The ViewportInfo</returns>
+    /// <since>6.0</since>
     public ViewportInfo Viewport
     {
       get
@@ -398,6 +415,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="includeHidden">Include hidden objects.</param>
     /// <returns>The tight bounding box.</returns>
+    /// <since>6.0</since>
     public BoundingBox BoundingBox(bool includeHidden)
     {
       var ptr_this = NonConstPointer();
@@ -409,6 +427,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the world-coordinate system to HLD-coordinate system transformation. 
     /// </summary>
+    /// <since>6.0</since>
     public Transform WorldToHiddenLine
     {
       get
@@ -443,6 +462,7 @@ namespace Rhino.Geometry
     /// Returns the geometry in world coordinates if UseXform is false. 
     /// Otherwise, the geometry in object space coordinates is returned.
     /// </summary>
+    /// <since>6.0</since>
     public GeometryBase Geometry
     {
       get
@@ -459,6 +479,7 @@ namespace Rhino.Geometry
     /// Returns the transformation passed into the Add... function
     /// when setting up the hidden line drawing parameters.
     /// </summary>
+    /// <since>6.0</since>
     public Transform Transform
     {
       get
@@ -474,6 +495,7 @@ namespace Rhino.Geometry
     /// Returns the extra data used to cross-reference the object specified in
     /// HiddenLineDrawing.AddObject.
     /// </summary>
+    /// <since>6.0</since>
     public object Tag
     {
       get
@@ -488,7 +510,7 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
-  /// Points generated from source objects which coorespond to point and point cloud source objects.
+  /// Points generated from source objects which correspond to point and point cloud source objects.
   /// </summary>
   public sealed class HiddenLineDrawingPoint
   {
@@ -508,6 +530,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Return the source object that this point came from.
     /// </summary>
+    /// <since>6.8</since>
     public HiddenLineDrawingObject SourceObject
     {
       get
@@ -523,6 +546,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Component of source object part that generated this curve.
     /// </summary>
+    /// <since>6.8</since>
     public ComponentIndex SourceObjectComponentIndex
     {
       get
@@ -537,6 +561,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Index into HiddenLineDrawing.ClippingPlanes when SilhouetteType == SilhouetteType.SectionCut.
     /// </summary>
+    /// <since>6.8</since>
     public int ClippingPlaneIndex
     {
       get
@@ -549,6 +574,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the location of this object in HiddenLineDrawing coordinates.
     /// </summary>
+    /// <since>6.8</since>
     public Point3d Location
     {
       get
@@ -563,6 +589,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Index of this object in HiddenLineDrawing.Points.
     /// </summary>
+    /// <since>6.8</since>
     public int Index
     {
       get
@@ -573,7 +600,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// The different types of HiddenLineObjectPoint visiblity
+    /// The different types of HiddenLineObjectPoint visibility
     /// </summary>
     public enum Visibility
     {
@@ -598,6 +625,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the point's visibility
     /// </summary>
+    /// <since>6.8</since>
     public Visibility PointVisibility
     {
       get
@@ -636,6 +664,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Verifies the object is valid.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsValid
     {
       get
@@ -648,6 +677,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Return the source object that this curve came from
     /// </summary>
+    /// <since>6.0</since>
     public HiddenLineDrawingObject SourceObject
     {
       get
@@ -663,6 +693,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Component of source object part that generated this curve.
     /// </summary>
+    /// <since>6.0</since>
     public ComponentIndex SourceObjectComponentIndex
     {
       get
@@ -677,6 +708,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Index into HiddenLineDrawing.ClippingPlanes when SilhouetteType == SilhouetteType.SectionCut.
     /// </summary>
+    /// <since>6.0</since>
     public int ClippingPlaneIndex
     {
       get
@@ -689,6 +721,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Index of this object in HiddenLineDrawing.FullCurves.
     /// </summary>
+    /// <since>6.0</since>
     public int Index
     {
       get
@@ -701,6 +734,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The silhouette event type
     /// </summary>
+    /// <since>6.0</since>
     public SilhouetteType SilhouetteType
     {
       get
@@ -713,9 +747,10 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Initialized to RhinoMath.UnsetValue. Valid if the full curve is closed.
-    /// Rejoin can reparmeterize the curve by moving the seam.  When this has been
+    /// Rejoin can reparameterize the curve by moving the seam.  When this has been
     ///  done the original domain start is stored here.
     /// </summary>
+    /// <since>6.0</since>
     public double OriginalDomainStart
     {
       get
@@ -728,6 +763,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Increasing, partition of curve.Domain.
     /// </summary>
+    /// <since>6.0</since>
     public double[] Parameters
     {
       get
@@ -745,6 +781,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The HiddenLineDrawingCurve objects that make up this full curve.
     /// </summary>
+    /// <since>6.0</since>
     public HiddenLineDrawingSegment[] Segments
     {
       get
@@ -773,6 +810,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if all the non clipped portions of this curve are projecting.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsProjecting
     {
       get
@@ -791,6 +829,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">The parameter.</param>
     /// <returns>The HiddenLineDrawingCurve object if successful.</returns>
+    /// <since>6.0</since>
     public HiddenLineDrawingSegment Curve(double t)
     {
       return Curve(t, 0); // 0 == default
@@ -807,6 +846,7 @@ namespace Rhino.Geometry
     /// &gt;0 - curve that contains an interval [t, t+], for some t+ &gt; t.
     /// </param>
     /// <returns>The HiddenLineDrawingCurve object if successful.</returns>
+    /// <since>6.0</since>
     public HiddenLineDrawingSegment Curve(double t, int side)
     {
       var ptr = m_owner.NonConstPointer();
@@ -822,7 +862,7 @@ namespace Rhino.Geometry
 
   /// <summary>
   /// The results of HiddenLineDrawing calculation are a collection of segments.
-  /// A segment is a subcurve of a HiddenLineDrawingObjectCurve.
+  /// A segment is a sub-curve of a HiddenLineDrawingObjectCurve.
   /// </summary>
   public sealed class HiddenLineDrawingSegment
   {
@@ -866,6 +906,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Index of this curve in HiddenLineDrawing.Curves.
     /// </summary>
+    /// <since>6.0</since>
     public int Index
     {
       get
@@ -876,11 +917,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary> The actual curve geometry </summary>
+    /// <since>6.0</since>
     public Curve CurveGeometry => m_curve;
 
     /// <summary>
-    /// This curve is a subcurve of the returned HiddenLineDrawingFullCurve object.
+    /// This curve is a sub-curve of the returned HiddenLineDrawingFullCurve object.
     /// </summary>
+    /// <since>6.0</since>
     public HiddenLineDrawingObjectCurve ParentCurve
     {
       get
@@ -894,7 +937,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// The different types of HiddenLineDrawingSegment visiblity
+    /// The different types of HiddenLineDrawingSegment visibility
     /// </summary>
     public enum Visibility
     {
@@ -927,6 +970,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the segment's visibility
     /// </summary>
+    /// <since>6.0</since>
     public Visibility SegmentVisibility
     {
       get
@@ -938,8 +982,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns true if this curve is a scene silhoutte.
+    /// Returns true if this curve is a scene silhouette.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsSceneSilhouette
     {
       get
@@ -976,12 +1021,13 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// The SideFill fields are only valid for visible curves.
-    /// With respect to the HiddenLineDrawing, the region to the left (or right respecively) of this curve is
+    /// With respect to the HiddenLineDrawing, the region to the left (or right respectively) of this curve is
     /// described by CurveSideFills[0] or CurveSideFills[1], respectively.  If exactly one of these regions is empty 
-    /// this is a scene silhouette. If this region conains a surface it is either a surface which in 3-D is adjacent 
+    /// this is a scene silhouette. If this region contains a surface it is either a surface which in 3-D is adjacent 
     /// to this edge or it an surface that is further away from the camera, we call this a shadow surface.  
     /// unknown is used for unset values and for projecting curves
     /// </summary>
+    /// <since>6.0</since>
     public SideFill[] CurveSideFills
     {
       get

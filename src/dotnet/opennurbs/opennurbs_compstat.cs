@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using Rhino.Runtime;
 
@@ -29,41 +29,49 @@ namespace Rhino.Geometry
     /// <summary>
     /// This is the default value and equal to undefined.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Clear { get { return new ComponentStatus(ComponentState.Unset);} }
 
     /// <summary>
     /// The selection flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Selected { get { return new ComponentStatus(ComponentState.Selected); } }
 
     /// <summary>
     /// The persistent selection flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus SelectedPersistent { get { return new ComponentStatus(ComponentState.SelectedPersistent); } }
 
     /// <summary>
     /// The highlight selection flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Highlighted { get { return new ComponentStatus(ComponentState.Highlighted); } }
 
     /// <summary>
     /// The hidden flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Hidden { get { return new ComponentStatus(ComponentState.Hidden); } }
 
     /// <summary>
     /// The locked flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Locked { get { return new ComponentStatus(ComponentState.Locked); } }
 
     /// <summary>
     /// The damaged flag is checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus Damaged { get { return new ComponentStatus(ComponentState.Damaged); } }
 
     /// <summary>
     /// All flags are checked.
     /// </summary>
+    /// <since>6.0</since>
     public static ComponentStatus AllSet { get
       {
         var all_set = (byte)UnsafeNativeMethods.ON_ComponentStatus_AllSet();
@@ -76,6 +84,7 @@ namespace Rhino.Geometry
     /// True if every setting is 0 or false.
     /// </summary>
     /// <returns>True if the component status is undefined or clear.</returns>
+    /// <since>6.0</since>
     public bool IsClear
     {
       get
@@ -88,6 +97,7 @@ namespace Rhino.Geometry
     /// Returns false if component is not damaged. True otherwise.
     /// </summary>
     /// <returns>The component status for damaged.</returns>
+    /// <since>6.0</since>
     public bool IsDamaged
     {
       get
@@ -100,6 +110,7 @@ namespace Rhino.Geometry
     /// Returns true if highlighted. False otherwise.
     /// </summary>
     /// <returns>The component status for highlighted.</returns>
+    /// <since>6.0</since>
     public bool IsHighlighted
     {
       get
@@ -112,6 +123,7 @@ namespace Rhino.Geometry
     /// Returns true if hidden. False otherwise.
     /// </summary>
     /// <returns>The component status for hidden.</returns>
+    /// <since>6.0</since>
     public bool IsHidden
     {
       get
@@ -124,6 +136,7 @@ namespace Rhino.Geometry
     /// Returns true if locked. False otherwise.
     /// </summary>
     /// <returns>The component status for locked.</returns>
+    /// <since>6.0</since>
     public bool IsLocked
     {
       get
@@ -136,6 +149,7 @@ namespace Rhino.Geometry
     /// Returns true if selected or selected persistent. False otherwise.
     /// </summary>
     /// <returns>The component status for selected.</returns>
+    /// <since>6.0</since>
     public bool IsSelected
     {
       get
@@ -148,6 +162,7 @@ namespace Rhino.Geometry
     /// Returns true if selected persistent. False otherwise.
     /// </summary>
     /// <returns>The component status for selected.</returns>
+    /// <since>6.0</since>
     public bool IsSelectedPersistent
     {
       get
@@ -161,6 +176,7 @@ namespace Rhino.Geometry
     /// and returns a new ComponentStatus with those flags checked.
     /// </summary>
     /// <param name="additionalStatus">To be used for adding status values.</param>
+    /// <since>6.0</since>
     [ConstOperation]
     public ComponentStatus WithStates(ComponentStatus additionalStatus)
     {
@@ -176,6 +192,7 @@ namespace Rhino.Geometry
     /// <param name="comparand">If a state is set in states_filter, the corresponding state
     /// in "this" and comparand will be tested.</param>
     /// <returns>True if at least one tested state in "this" and comparand are identical.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool HasSomeEqualStates(ComponentStatus statesFilter, ComponentStatus comparand)
     {
@@ -189,6 +206,7 @@ namespace Rhino.Geometry
     /// <param name="comparand">If a state is set in states_filter, the corresponding state
     /// in "this" and comparand will be tested.</param>
     /// <returns>True if at all tested states in "this" and comparand are identical.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool HasAllEqualStates(ComponentStatus statesFilter, ComponentStatus comparand)
     {
@@ -202,6 +220,7 @@ namespace Rhino.Geometry
     /// <param name="comparand">If a state is set in states_filter, the corresponding state
     /// in "this" and comparand will be tested.</param>
     /// <returns>True if at all tested states in "this" and comparand are identical.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool HasNoEqualStates(ComponentStatus statesFilter, ComponentStatus comparand)
     {
@@ -226,6 +245,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first ComponentStatus.</param>
     /// <param name="b">The second ComponentStatus.</param>
     /// <returns>true if they are exactly equal. False otherwise.</returns>
+    /// <since>6.0</since>
     public static bool operator ==(ComponentStatus a, ComponentStatus b)
     {
       return a.Equals(b);
@@ -237,6 +257,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first ComponentStatus.</param>
     /// <param name="b">The second ComponentStatus.</param>
     /// <returns>true if they are in any way different. False otherwise.</returns>
+    /// <since>6.0</since>
     public static bool operator !=(ComponentStatus a, ComponentStatus b)
     {
       return a.m_status != b.m_status;
@@ -269,6 +290,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">A ComponentStatus.</param>
     /// <returns>true if equal in value. false otherwise</returns>
+    /// <since>6.0</since>
     public bool Equals(ComponentStatus other)
     {
       return m_status == other.m_status;

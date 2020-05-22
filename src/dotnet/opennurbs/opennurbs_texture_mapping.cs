@@ -34,7 +34,12 @@ namespace Rhino.Render
     SurfaceMappingPrimitive = UnsafeNativeMethods.TextureMappingType.SrfMappingPrimitive,
 
     /// <summary>Mapping primitive is a brep.</summary>
-    BrepMappingPrimitive = UnsafeNativeMethods.TextureMappingType.BrepMappingPrimitive
+    BrepMappingPrimitive = UnsafeNativeMethods.TextureMappingType.BrepMappingPrimitive,
+
+    /// <summary>
+    /// OCS mapping type (WCS/WCS Box with object frame).
+    /// </summary>
+    OcsMapping = UnsafeNativeMethods.TextureMappingType.OcsMapping
   }
 
   /// <summary>
@@ -56,6 +61,7 @@ namespace Rhino.Render
     /// <summary>
     /// Texture mapping type associated with this Mapping object.
     /// </summary>
+    /// <since>5.10</since>
     public TextureMappingType MappingType
     {
       get
@@ -82,6 +88,8 @@ namespace Rhino.Render
             return TextureMappingType.SurfaceMappingPrimitive;
           case UnsafeNativeMethods.TextureMappingType.BrepMappingPrimitive:
             return TextureMappingType.BrepMappingPrimitive;
+          case UnsafeNativeMethods.TextureMappingType.OcsMapping:
+            return TextureMappingType.OcsMapping;
         }
         throw new Exception("Unknown TextureMappingType");
       }
@@ -91,6 +99,7 @@ namespace Rhino.Render
     /// <summary>
     /// The unique Id for this texture mapping object.
     /// </summary>
+    /// <since>5.10</since>
     public override Guid Id
     {
       get
@@ -104,6 +113,7 @@ namespace Rhino.Render
     /// Transform applied to mapping coordinate (u,v,w) to convert it into a
     /// texture coordinate.
     /// </summary>
+    /// <since>5.10</since>
     public Transform UvwTransform
     {
       get
@@ -128,6 +138,7 @@ namespace Rhino.Render
     /// runtime setting that is not saved in 3dm files. If m_type is
     /// srfp_mapping, then m_Pxyz and m_Nxyz are ignored.
     /// </summary>
+    /// <since>5.10</since>
     public Transform PrimativeTransform
     {
       get
@@ -152,6 +163,7 @@ namespace Rhino.Render
     /// runtime setting that is not saved in 3dm files. If m_type is
     /// srfp_mapping, then m_Pxyz and m_Nxyz are ignored.
     /// </summary>
+    /// <since>5.10</since>
     public Transform NormalTransform
     {
       get
@@ -171,6 +183,7 @@ namespace Rhino.Render
     /// <summary>
     /// Returns <see cref="ModelComponentType.TextureMapping"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -192,6 +205,7 @@ namespace Rhino.Render
     /// Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap
     /// Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
     /// </returns>
+    /// <since>6.17</since>
     public int Evaluate(Point3d p, Vector3d n, out Point3d t)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -220,6 +234,7 @@ namespace Rhino.Render
     /// Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap
     /// Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
     /// </returns>
+    /// <since>6.17</since>
     public int Evaluate(Point3d p, Vector3d n, out Point3d t, Transform pXform, Transform nXform)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -259,6 +274,7 @@ namespace Rhino.Render
     /// Generally, GetMappingBox will not return the same parameters passed to
     /// SetBoxMapping.  However, the location of the box will be the same.
     /// </remarks>
+    /// <since>5.10</since>
     public bool TryGetMappingBox(out Plane plane, out Interval dx, out Interval dy, out Interval dz)
     {
       var ptr = ConstPointer();
@@ -305,6 +321,7 @@ namespace Rhino.Render
     /// Generally, GetMappingBox will not return the same parameters passed to
     /// SetBoxMapping.  However, the location of the box will be the same.
     /// </remarks>
+    /// <since>6.7</since>
     public bool TryGetMappingBox(out Plane plane, out Interval dx, out Interval dy, out Interval dz, out bool capped)
     {
       var ptr = ConstPointer();
@@ -330,6 +347,7 @@ namespace Rhino.Render
     /// same.  If this mapping is not cylindrical, the cylinder will
     /// approximate the actual mapping primitive.
     /// </remarks>
+    /// <since>5.10</since>
     public bool TryGetMappingSphere(out Sphere sphere)
     {
       var ptr = ConstPointer();
@@ -351,6 +369,7 @@ namespace Rhino.Render
     /// the same.  If this mapping is not cylindrical, the cylinder will
     /// approximate the actual mapping primitive.
     /// </remarks>
+    /// <since>5.10</since>
     public bool TryGetMappingCylinder(out Cylinder cylinder)
     {
       var ptr = ConstPointer();
@@ -375,6 +394,7 @@ namespace Rhino.Render
     /// the same.  If this mapping is not cylindrical, the cylinder will
     /// approximate the actual mapping primitive.
     /// </remarks>
+    /// <since>6.7</since>
     public bool TryGetMappingCylinder(out Cylinder cylinder, out bool capped)
     {
       var ptr = ConstPointer();
@@ -406,6 +426,7 @@ namespace Rhino.Render
     ///  to SetPlaneMapping.  However, the location of the plane will be the
     ///  same.
     /// </remarks>
+    /// <since>5.10</since>
     public bool TryGetMappingPlane(out Plane plane, out Interval dx, out Interval dy, out Interval dz)
     {
       var ptr = ConstPointer();
@@ -443,6 +464,7 @@ namespace Rhino.Render
     ///  to SetPlaneMapping.  However, the location of the plane will be the
     ///  same.
     /// </remarks>
+    /// <since>6.7</since>
     public bool TryGetMappingPlane(out Plane plane, out Interval dx, out Interval dy, out Interval dz, out bool capped)
     {
       var ptr = ConstPointer();
@@ -460,6 +482,7 @@ namespace Rhino.Render
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns>True if custom mapping mesh was returned.</returns>
+    /// <since>6.18</since>
     public bool TryGetMappingMesh(out Mesh mesh)
     {
       var ptr = ConstPointer();
@@ -476,6 +499,7 @@ namespace Rhino.Render
     /// <param name="dy">portion of the plane's y axis that is mapped to [0,1] (can be a decreasing interval)</param>
     /// <param name="dz">portion of the plane's z axis that is mapped to [0,1] (can be a decreasing interval)</param>
     /// <returns>TextureMapping instance if input is valid</returns>
+    /// <since>5.0</since>
     public static TextureMapping CreatePlaneMapping(Plane plane, Interval dx, Interval dy, Interval dz)
     {
       return CreatePlaneMapping(plane, dx, dy, dz, false);
@@ -488,6 +512,7 @@ namespace Rhino.Render
     /// <param name="dz">portion of the plane's z axis that is mapped to [0,1] (can be a decreasing interval)</param>
     /// <param name="capped">set to true if planar UVW is meant, false for planar UV</param>
     /// <returns>TextureMapping instance if input is valid</returns>
+    /// <since>6.7</since>
     public static TextureMapping CreatePlaneMapping(Plane plane, Interval dx, Interval dy, Interval dz, bool capped)
     {
       TextureMapping rc = new TextureMapping();
@@ -519,6 +544,7 @@ namespace Rhino.Render
     /// This is the same convention box mapping uses.
     /// </remarks>
     /// <returns>TextureMapping instance if input is valid</returns>
+    /// <since>5.0</since>
     public static TextureMapping CreateCylinderMapping(Cylinder cylinder, bool capped)
     {
       TextureMapping rc = new TextureMapping();
@@ -537,10 +563,11 @@ namespace Rhino.Render
     /// <param name="sphere">
     /// sphere in world space used to define a spherical coordinate system.
     /// The longitude parameter maps (0,2pi) to texture "u" (0,1).
-    /// The latitude paramter maps (-pi/2,+pi/2) to texture "v" (0,1).
+    /// The latitude parameter maps (-pi/2,+pi/2) to texture "v" (0,1).
     /// The radial parameter maps (0,r) to texture "w" (0,1).
     /// </param>
     /// <returns>TextureMapping instance if input is valid</returns>
+    /// <since>5.0</since>
     public static TextureMapping CreateSphereMapping(Sphere sphere)
     {
       TextureMapping rc = new TextureMapping();
@@ -561,17 +588,17 @@ namespace Rhino.Render
     /// <param name="dx">
     /// Determines the location of the front and back planes. The vector
     /// plane.xaxis is perpendicular to these planes and they pass through
-    /// plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectivly.
+    /// plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectively.
     /// </param>
     /// <param name="dy">
     /// Determines the location of the left and right planes. The vector
     /// plane.yaxis is perpendicular to these planes and they pass through
-    /// plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectivly.
+    /// plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectively.
     /// </param>
     /// <param name="dz">
     /// Determines the location of the top and bottom planes. The vector
     /// plane.zaxis is perpendicular to these planes and they pass through
-    /// plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectivly.
+    /// plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectively.
     /// </param>
     /// <param name="capped">
     /// If true, the box is treated as a finite capped box.
@@ -594,6 +621,7 @@ namespace Rhino.Render
     /// 0/6 &lt;=u&lt;= 1/6 &lt;=u&lt;= 2/6 &lt;=u&lt;= 3/6 &lt;=u&lt;= 4/6 &lt;=u&lt;= 5/6 &lt;=u&lt;= 6/6 
     /// </remarks>
     /// <returns>TextureMapping instance if input is valid</returns>
+    /// <since>5.0</since>
     public static TextureMapping CreateBoxMapping(Plane plane, Interval dx, Interval dy, Interval dz, bool capped)
     {
       TextureMapping rc = new TextureMapping();
@@ -611,6 +639,7 @@ namespace Rhino.Render
     /// </summary>
     /// <param name="mesh">Mesh with texture coordinates</param>
     /// <returns>TextureMapping instance</returns>
+    /// <since>6.15</since>
     public static TextureMapping CreateCustomMeshMapping(Mesh mesh)
     {
       TextureMapping rc = new TextureMapping();

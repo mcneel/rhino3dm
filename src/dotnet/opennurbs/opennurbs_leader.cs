@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 
@@ -10,6 +10,7 @@ namespace Rhino.Geometry
   public class Arrowhead
   {
     /// <summary> Constructor </summary>
+    /// <since>6.0</since>
     public Arrowhead() : this(DimensionStyle.ArrowType.SolidTriangle, Guid.Empty)
     {
     }
@@ -17,6 +18,7 @@ namespace Rhino.Geometry
     /// <summary> Constructor </summary>  
     /// <param name="arrowType"> type of this arrowhead </param>
     /// <param name="blockId"> Guid of the block used for user defined display </param>
+    /// <since>6.0</since>
     public Arrowhead(DimensionStyle.ArrowType arrowType, Guid blockId)
     {
       BlockId = blockId;
@@ -24,9 +26,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary> Id of block used for user-defined arrowhead </summary>
+    /// <since>6.0</since>
     public Guid BlockId { get; }
 
     /// <summary> Type of arrowhead used by annotation </summary>
+    /// <since>6.0</since>
     public DimensionStyle.ArrowType ArrowType { get; }
   }
 
@@ -46,6 +50,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary> Constructor </summary>
+    /// <since>6.0</since>
     public Leader()
     {
       var ptr = UnsafeNativeMethods.ON_V6_Leader_New();
@@ -60,6 +65,7 @@ namespace Rhino.Geometry
     /// <param name="dimstyle"></param>
     /// <param name="points"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static Leader Create(string text, Plane plane, DimensionStyle dimstyle, Point3d[] points)
     {
       return CreateWithRichText(AnnotationBase.PlainTextToRtf(text), plane, dimstyle, points);
@@ -73,6 +79,7 @@ namespace Rhino.Geometry
     /// <param name="dimstyle"></param>
     /// <param name="points"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static Leader CreateWithRichText(string richText, Plane plane, DimensionStyle dimstyle, Point3d[] points)
     {
       IntPtr const_ptr_dimstyle = dimstyle.ConstPointer();
@@ -86,6 +93,7 @@ namespace Rhino.Geometry
 
     private NurbsCurve m_curve;
     /// <summary> Gets the curve used by this leader </summary>
+    /// <since>6.0</since>
     public NurbsCurve Curve
     {
       get
@@ -103,6 +111,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Get or set the 2d points defining the curve used by this leader
     /// </summary>
+    /// <since>6.0</since>
     public Point2d[] Points2D
     {
       get
@@ -125,6 +134,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Get or set the 3d points defining the curve used by this leader
     /// </summary>
+    /// <since>6.0</since>
     public Point3d[] Points3D
     {
       get
@@ -149,6 +159,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the horizontal alignment of the leader's text
     /// </summary>
+    /// <since>6.0</since>
     public TextHorizontalAlignment LeaderTextHorizontalAlignment
     {
       get
@@ -168,6 +179,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the vertical alignment of the leader's text
     /// </summary>
+    /// <since>6.0</since>
     public TextVerticalAlignment LeaderTextVerticalAlignment
     {
       get
@@ -187,6 +199,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The arrowhead type for the leader
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.ArrowType LeaderArrowType
     {
       get
@@ -206,6 +219,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Id of the block used as the arrow for the leader when the arrow type is 'User arrow'
     /// </summary>
+    /// <since>6.0</since>
     public Guid LeaderArrowBlockId
     {
       get
@@ -225,6 +239,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The size of the leader arrow
     /// </summary>
+    /// <since>6.0</since>
     public double LeaderArrowSize
     {
       get
@@ -244,6 +259,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The style of the leader curve: polyline or spline
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.LeaderCurveStyle LeaderCurveStyle
     {
       get
@@ -263,6 +279,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Angle for text of leader text
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle.LeaderContentAngleStyle LeaderContentAngleStyle
     {
       get
@@ -282,6 +299,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if the leader has a landing line
     /// </summary>
+    /// <since>6.0</since>
     public bool LeaderHasLanding
     {
       get
@@ -301,6 +319,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the length of the landing line
     /// </summary>
+    /// <since>6.0</since>
     public double LeaderLandingLength
     {
       get

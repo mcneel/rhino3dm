@@ -12,6 +12,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a rectangular grid of points, with no points in it.
     /// </summary>
+    /// <since>5.0</since>
     public Point3dGrid()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PointGrid_New(0,0);
@@ -23,6 +24,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="rows">An amount of rows.</param>
     /// <param name="columns">An amount of columns.</param>
+    /// <since>5.0</since>
     public Point3dGrid(int rows, int columns)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PointGrid_New(rows, columns);

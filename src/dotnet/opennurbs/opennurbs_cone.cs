@@ -19,6 +19,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an invalid Cone.
     /// </summary>
+    /// <since>5.0</since>
     public static Cone Unset
     {
       get
@@ -35,6 +36,7 @@ namespace Rhino.Geometry
         /// <param name="plane">Base plane of cone.  The apex of the cone is at the plane's origin.</param>
         /// <param name="height">Height of cone.</param>
         /// <param name="radius">Radius of cone.</param>
+        /// <since>5.0</since>
         public Cone(Plane plane, double height, double radius)
     {
       m_baseplane = plane;
@@ -47,6 +49,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the base plane of the cone.  The apex of the cone is at the plane's origin.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_baseplane; }
@@ -56,6 +59,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the height of the circular right cone.
     /// </summary>
+    /// <since>5.0</since>
     public double Height
     {
       get { return m_height; }
@@ -65,6 +69,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the radius of the cone.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius
     {
       get { return m_radius; }
@@ -74,6 +79,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// true if plane is valid, height is not zero and radius is not zero.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -85,6 +91,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Center of base circle.</summary>
+    /// <since>5.0</since>
     public Point3d BasePoint
     {
       get
@@ -94,6 +101,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Point at tip of the cone.</summary>
+    /// <since>5.0</since>
     public Point3d ApexPoint
     {
       get
@@ -103,6 +111,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Unit vector axis of cone.</summary>
+    /// <since>5.0</since>
     public Vector3d Axis
     {
       get
@@ -120,6 +129,7 @@ namespace Rhino.Geometry
     /// The angle and the height have the same sign.
     /// </summary>
     /// <returns>Math.Atan(Radius / Height) if the height is not 0; 0 if the radius is 0; Math.PI otherwise.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double AngleInRadians()
     {
@@ -132,6 +142,7 @@ namespace Rhino.Geometry
     /// The angle and the height have the same sign.
     /// </summary>
     /// <returns>An angle in degrees.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double AngleInDegrees()
     {
@@ -143,6 +154,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling NurbsSurface.CreateFromCone().
     /// </summary>
     /// <returns>A Nurbs surface representation of the cone or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsSurface ToNurbsSurface()
     {
@@ -154,6 +166,7 @@ namespace Rhino.Geometry
     /// This is synonymous with calling RevSurface.CreateFromCone().
     /// </summary>
     /// <returns>A RevSurface representation of the cone or null.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public RevSurface ToRevSurface()
     {
@@ -169,6 +182,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="capBottom">true if the bottom should be filled with a surface. false otherwise.</param>
     /// <returns>A brep (polysurface) representation of this cone values.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Brep ToBrep(bool capBottom)
     {
@@ -182,6 +196,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Cone other, double epsilon)
     {

@@ -70,6 +70,7 @@ RH_C_FUNCTION bool ON_MassProperties_GetMoments(const ON_MassProperties* pConstM
   const int idx_cc_secondmoments = 5;
   const int idx_cc_momentsofinertia = 6;
   const int idx_cc_radiiofgyration = 7;
+  const int idx_cc_productmoments = 8;
 
   bool rc = false;
   if( pConstMassProps && moment && error )
@@ -146,6 +147,15 @@ RH_C_FUNCTION bool ON_MassProperties_GetMoments(const ON_MassProperties* pConstM
         rc = true;
       }
       break;
+    case idx_cc_productmoments:
+      if (pConstMassProps->m_bValidSecondMoments)
+      {
+        moment->Set(pConstMassProps->m_ccs_xy, pConstMassProps->m_ccs_yz, pConstMassProps->m_ccs_zx);
+        error->Set(pConstMassProps->m_ccs_xy_err, pConstMassProps->m_ccs_yz_err, pConstMassProps->m_ccs_zx_err);
+        rc = true;
+      }
+      break;
+
     default:
       break;
     }

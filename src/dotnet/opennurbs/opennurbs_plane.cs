@@ -49,6 +49,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the origin point of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Origin
     {
       get { return m_origin; }
@@ -57,6 +58,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X coordinate of the origin of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public double OriginX
     {
       get { return m_origin.X; }
@@ -65,6 +67,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y coordinate of the origin of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public double OriginY
     {
       get { return m_origin.Y; }
@@ -73,6 +76,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z coordinate of the origin of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public double OriginZ
     {
       get { return m_origin.Z; }
@@ -81,6 +85,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X axis vector of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d XAxis
     {
       get { return m_xaxis; }
@@ -89,6 +94,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Y axis vector of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d YAxis
     {
       get { return m_yaxis; }
@@ -97,6 +103,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Z axis vector of this plane.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d ZAxis
     {
       get { return m_zaxis; }
@@ -108,6 +115,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// plane coincident with the World XY plane.
     /// </summary>
+    /// <since>5.0</since>
     public static Plane WorldXY
     {
       get
@@ -119,6 +127,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// plane coincident with the World YZ plane.
     /// </summary>
+    /// <since>5.0</since>
     public static Plane WorldYZ
     {
       get
@@ -130,6 +139,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// plane coincident with the World ZX plane.
     /// </summary>
+    /// <since>5.0</since>
     public static Plane WorldZX
     {
       get
@@ -141,6 +151,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a plane that contains Unset origin and axis vectors.
     /// </summary>
+    /// <since>5.0</since>
     public static Plane Unset
     {
       get
@@ -155,6 +166,7 @@ namespace Rhino.Geometry
     /// <para>This is nothing special and performs the same as assigning to another variable.</para>
     /// </summary>
     /// <param name="other">The source plane value.</param>
+    /// <since>5.0</since>
     public Plane(Plane other)
     {
       this = other;
@@ -171,6 +183,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addcylinder.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcylinder.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Plane(Point3d origin, Vector3d normal)
       : this()
     {
@@ -186,8 +199,9 @@ namespace Rhino.Geometry
     /// </param>
     /// <param name='yDirection'>
     /// Non-zero vector not parallel to x_dir that is used to determine the
-    /// yaxis direction. y_dir does not need to be perpendicular to x_dir.
+    /// y-axis direction. y_dir does not need to be perpendicular to x_dir.
     /// </param>
+    /// <since>5.0</since>
     public Plane(Point3d origin, Vector3d xDirection, Vector3d yDirection)
       : this()
     {
@@ -195,21 +209,22 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Initializes a plane from three non-colinear points.
+    /// Initializes a plane from three non-collinear points.
     /// </summary>
     /// <param name='origin'>Origin point of the plane.</param>
     /// <param name='xPoint'>
     /// Second point in the plane. The x-axis will be parallel to x_point-origin.
     /// </param>
     /// <param name='yPoint'>
-    /// Third point on the plane that is not colinear with the first two points.
-    /// yaxis*(y_point-origin) will be &gt; 0.
+    /// Third point on the plane that is not collinear with the first two points.
+    /// taxis*(y_point-origin) will be &gt; 0.
     /// </param>
     /// <example>
     /// <code source='examples\vbnet\ex_addclippingplane.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addclippingplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_addclippingplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Plane(Point3d origin, Point3d xPoint, Point3d yPoint)
       : this()
     {
@@ -220,6 +235,7 @@ namespace Rhino.Geometry
     /// Constructs a plane from an equation
     /// Ax+By+Cz+D=0.
     /// </summary>
+    /// <since>5.0</since>
     public Plane(double a, double b, double c, double d)
       : this()
     {
@@ -236,6 +252,7 @@ namespace Rhino.Geometry
     /// <param name="points">Points to fit to.</param>
     /// <param name="plane">Resulting plane.</param>
     /// <returns>A value indicating the result of the operation.</returns>
+    /// <since>5.0</since>
     public static PlaneFitResult FitPlaneToPoints(System.Collections.Generic.IEnumerable<Point3d> points, out Plane plane)
     {
       double max_dev;
@@ -247,6 +264,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Resulting plane.</param>
     /// <param name="maximumDeviation">The distance from the furthest point to the plane.</param>
     /// <returns>A value indicating the result of the operation.</returns>
+    /// <since>5.0</since>
     public static PlaneFitResult FitPlaneToPoints(System.Collections.Generic.IEnumerable<Point3d> points, out Plane plane, out double maximumDeviation)
     {
       plane = new Plane();
@@ -273,6 +291,7 @@ namespace Rhino.Geometry
     /// <param name="a">A first plane.</param>
     /// <param name="b">A second plane.</param>
     /// <returns>true if the two planes have all equal components; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Plane a, Plane b)
     {
       return a.Equals(b);
@@ -283,7 +302,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="a">A first plane.</param>
     /// <param name="b">A second plane.</param>
-    /// <returns>true if the two planes have any different componet components; false otherwise.</returns>
+    /// <returns>true if the two planes have any different component components; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Plane a, Plane b)
     {
       return (a.m_origin != b.m_origin) ||
@@ -307,6 +327,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="plane">A plane.</param>
     /// <returns>true if plane has the same components as this plane; false otherwise.</returns>
+    /// <since>5.0</since>
     public bool Equals(Plane plane)
     {
       return (m_origin == plane.m_origin) &&
@@ -337,6 +358,7 @@ namespace Rhino.Geometry
       return rc;
     }
     /// <inheritdoc />
+    /// <since>7.0</since>
     public string ToString(string format, IFormatProvider formatProvider)
     {
       var fo = Origin.ToString(format, formatProvider);
@@ -351,6 +373,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the normal of this plane. This is essentially the ZAxis of the plane.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Normal
     {
       get { return ZAxis; }
@@ -359,8 +382,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether or not this is a valid plane. 
     /// A plane is considered to be valid when all fields contain reasonable 
-    /// information and the equation jibes with point and zaxis.
+    /// information and the equation jibes with point and z-axis.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get { return UnsafeNativeMethods.ON_Plane_IsValid(ref this); }
@@ -374,6 +398,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// Array of four values.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double[] GetPlaneEquation()
     {
@@ -388,6 +413,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// bool
     /// </returns>
+    /// <since>6.0</since>
     public bool UpdateEquation()
     {
       return UnsafeNativeMethods.ON_Plane_UpdateEquation(ref this);
@@ -396,11 +422,12 @@ namespace Rhino.Geometry
     /// <summary>
     /// Get the value of the plane equation at the point.
     /// </summary>
-    /// <param name="p">evaulation point.</param>
+    /// <param name="p">evaluation point.</param>
     /// <returns>returns pe[0]*p.X + pe[1]*p.Y + pe[2]*p.Z + pe[3] where
-    /// pe[0], pe[1], pe[2] and pe[3] are the coeeficients of the plane equation.
+    /// pe[0], pe[1], pe[2] and pe[3] are the coefficients of the plane equation.
     /// 
     /// </returns>
+    /// <since>5.7</since>
     [ConstOperation]
     public double ValueAt(Point3d p)
     {
@@ -411,9 +438,10 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluate a point on the plane.
     /// </summary>
-    /// <param name="u">evaulation parameter.</param>
-    /// <param name="v">evaulation parameter.</param>
+    /// <param name="u">evaluation parameter.</param>
+    /// <param name="v">evaluation parameter.</param>
     /// <returns>plane.origin + u*plane.xaxis + v*plane.yaxis.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double u, double v)
     {
@@ -423,10 +451,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// Evaluate a point on the plane.
     /// </summary>
-    /// <param name="u">evaulation parameter.</param>
-    /// <param name="v">evaulation parameter.</param>
-    /// <param name="w">evaulation parameter.</param>
+    /// <param name="u">evaluation parameter.</param>
+    /// <param name="v">evaluation parameter.</param>
+    /// <param name="w">evaluation parameter.</param>
     /// <returns>plane.origin + u*plane.xaxis + v*plane.yaxis + z*plane.zaxis.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double u, double v, double w)
     {
@@ -450,6 +479,7 @@ namespace Rhino.Geometry
     /// encompass the Box.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(BoundingBox box, out Interval s, out Interval t)
     {
       s = Interval.Unset;
@@ -475,6 +505,7 @@ namespace Rhino.Geometry
     /// encompass the Box.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool ExtendThroughBox(Box box, out Interval s, out Interval t)
     {
       s = Interval.Unset;
@@ -531,6 +562,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addlineardimension2.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlineardimension2.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool ClosestParameter(Point3d testPoint, out double s, out double t)
     {
@@ -549,6 +581,7 @@ namespace Rhino.Geometry
     /// The point on the plane that is closest to testPoint, 
     /// or Point3d.Unset on failure.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -573,6 +606,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_issurfaceinplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_issurfaceinplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public double DistanceTo(Point3d testPoint)
     {
@@ -580,12 +614,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns the signed minimum and maximum distances from bbox to this plane.
+    /// Returns the signed minimum and maximum distances from bounding box to this plane.
     /// </summary>
     /// <param name="bbox">bounding box to get distances from</param>
     /// <param name="min">minimum signed distance from plane to box</param>
     /// <param name="max">maximum signed distance from plane to box</param>
     /// <returns>false if plane has zero length normal</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool DistanceTo(BoundingBox bbox, out double min, out double max)
     {
@@ -600,6 +635,7 @@ namespace Rhino.Geometry
     /// <param name="ptPlane">Point in plane (s,t,d) coordinates.</param>
     /// <returns>true on success, false on failure.</returns>
     /// <remarks>D stands for distance, not disease.</remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool RemapToPlaneSpace(Point3d ptSample, out Point3d ptPlane)
     {
@@ -621,6 +657,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Flip this plane by swapping out the X and Y axes and inverting the Z axis.
     /// </summary>
+    /// <since>5.0</since>
     public void Flip()
     {
       Vector3d v = m_xaxis;
@@ -634,6 +671,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="xform">Transformation to apply to plane.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       return UnsafeNativeMethods.ON_Plane_Transform(ref this, ref xform);
@@ -644,6 +682,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="delta">Translation (motion) vector.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Translate(Vector3d delta)
     {
       if (!delta.IsValid)
@@ -660,6 +699,7 @@ namespace Rhino.Geometry
     /// <param name="cosAngle">Cos(angle).</param>
     /// <param name="axis">Axis of rotation.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axis)
     {
       bool rc = true;
@@ -685,6 +725,7 @@ namespace Rhino.Geometry
     /// <param name="angle">Angle in radians.</param>
     /// <param name="axis">Axis of rotation.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angle, Vector3d axis)
     {
       return Rotate(Math.Sin(angle), Math.Cos(angle), axis);
@@ -697,6 +738,7 @@ namespace Rhino.Geometry
     /// <param name="axis">Axis of rotation.</param>
     /// <param name="centerOfRotation">Center of rotation.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angle, Vector3d axis, Point3d centerOfRotation)
     {
       return Rotate(Math.Sin(angle), Math.Cos(angle), axis, centerOfRotation);
@@ -708,6 +750,7 @@ namespace Rhino.Geometry
     /// <param name="axis">Axis of rotation.</param>
     /// <param name="centerOfRotation">Center of rotation.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axis, Point3d centerOfRotation)
     {
       if (centerOfRotation == Origin)
@@ -730,6 +773,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Plane other, double epsilon)
     {
@@ -739,6 +783,7 @@ namespace Rhino.Geometry
              m_zaxis.EpsilonEquals(other.m_zaxis, epsilon);
     }
 
+    /// <since>6.0</since>
     object ICloneable.Clone()
     {
       return Clone();
@@ -748,6 +793,7 @@ namespace Rhino.Geometry
     /// Returns a deep of this instance.
     /// </summary>
     /// <returns>A plane with the same values as this item.</returns>
+    /// <since>6.0</since>
     public Plane Clone()
     {
       return new Plane(this);

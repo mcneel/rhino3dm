@@ -44,6 +44,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new, empty polycurve.
     /// </summary>
+    /// <since>5.0</since>
     public PolyCurve()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PolyCurve_New(IntPtr.Zero);
@@ -55,6 +56,7 @@ namespace Rhino.Geometry
     /// <para>When not overridden in a derived class, this calls <see cref="DuplicatePolyCurve"/>.</para>
     /// </summary>
     /// <returns>An exact duplicate of this curve.</returns>
+    /// <since>5.0</since>
     public override GeometryBase Duplicate()
     {
       return DuplicatePolyCurve();
@@ -64,6 +66,7 @@ namespace Rhino.Geometry
     /// <para>This is the same as <see cref="Duplicate"/>.</para>
     /// </summary>
     /// <returns>An exact duplicate of this curve.</returns>
+    /// <since>5.0</since>
     public PolyCurve DuplicatePolyCurve()
     {
       return new PolyCurve(this);
@@ -77,6 +80,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the number of segments that make up this Polycurve.
     /// </summary>
+    /// <since>5.0</since>
     public int SegmentCount
     {
       get
@@ -91,6 +95,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index">Index of segment to retrieve.</param>
     /// <returns>The segment at the given index or null on failure.</returns>
+    /// <since>5.0</since>
     public Curve SegmentCurve(int index)
     {
       IntPtr ptr = ConstPointer();
@@ -131,6 +136,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not a PolyCurve contains nested PolyCurves.
     /// </summary>
     /// <seealso cref="RemoveNesting"/>
+    /// <since>5.0</since>
     public bool IsNested
     {
       get
@@ -143,6 +149,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// This is a quick way to see if the curve has gaps between the sub curve segments. 
     /// </summary>
+    /// <since>5.0</since>
     public bool HasGap
     {
       get
@@ -167,6 +174,7 @@ namespace Rhino.Geometry
     /// true if any nested PolyCurve was found and absorbed, false if no PolyCurve segments could be found.
     /// </returns>
     /// <seealso cref="IsNested"/>
+    /// <since>5.0</since>
     public bool RemoveNesting()
     {
       // check to see if this curve is nested before forcing it to be non-const
@@ -181,6 +189,7 @@ namespace Rhino.Geometry
     /// Call <see cref="RemoveNesting"/> first if you need all individual segments.
     /// </summary>
     /// <returns>An array of polycurve segments.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve[] Explode()
     {
@@ -225,6 +234,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="line">Line segment to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Append(Line line)
     {
       if (!line.IsValid) { return false; }
@@ -236,6 +246,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="arc">Arc segment to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Append(Arc arc)
     {
       IntPtr ptr = NonConstPointer();
@@ -248,6 +259,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curve">Segment to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Append(Curve curve)
     {
       if (null == curve)
@@ -265,6 +277,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curve">Segment to append.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool AppendSegment(Curve curve)
     {
       if(null == curve)
@@ -284,6 +297,7 @@ namespace Rhino.Geometry
     /// Segment curve evaluation parameter or UnsetValue if the 
     /// segment curve parameter could not be computed.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double SegmentCurveParameter(double polycurveParameter)
     {
@@ -299,6 +313,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// Polycurve evaluation parameter or UnsetValue if the polycurve curve parameter could not be computed.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double PolyCurveParameter(int segmentIndex, double segmentCurveParameter)
     {
@@ -307,13 +322,14 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns the polycurve subdomain assigned to a segment curve.
+    /// Returns the polycurve sub-domain assigned to a segment curve.
     /// </summary>
     /// <param name="segmentIndex">Index of segment.</param>
     /// <returns>
-    /// The polycurve subdomain assigned to a segment curve. 
+    /// The polycurve sub-domain assigned to a segment curve. 
     /// Returns Interval.Unset if segment_index &lt; 0 or segment_index >= Count().
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Interval SegmentDomain(int segmentIndex)
     {
@@ -332,6 +348,7 @@ namespace Rhino.Geometry
     /// If polycurve_parameter &lt; Domain.Min(), then 0 is returned. 
     /// If polycurve_parameter > Domain.Max(), then Count()-1 is returned.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int SegmentIndex(double polycurveParameter)
     {
@@ -342,12 +359,13 @@ namespace Rhino.Geometry
     /// <summary>Finds the segments that overlap the Polycurve sub domain.</summary>
     /// <param name="subdomain">Domain on this PolyCurve.</param>
     /// <param name="segmentIndex0">
-    /// Index of first segment that overlaps the subdomain.
+    /// Index of first segment that overlaps the sub-domain.
     /// </param>
     /// <param name="segmentIndex1">
-    /// Index of last segment that overlaps the subdomain. Note that segmentIndex0 &lt;= i &lt; segmentIndex1.
+    /// Index of last segment that overlaps the sub-domain. Note that segmentIndex0 &lt;= i &lt; segmentIndex1.
     /// </param>
-    /// <returns>Number of segments that overlap the subdomain.</returns>
+    /// <returns>Number of segments that overlap the sub-domain.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int SegmentIndexes(Interval subdomain, out int segmentIndex0, out int segmentIndex1)
     {
@@ -359,6 +377,22 @@ namespace Rhino.Geometry
     #endregion
 
 #if RHINO_SDK
+    /// <summary>
+    /// Removes any nesting of polycurves. If this polycurve has just a single segment, the segment is returned.
+    /// If, after nest removal, there are adjacent segments which are polylines, they are combined into a single polyline.
+    /// The new curve may have a different domain from this polycurve. If the start and end segments of a closed input are polylines,
+    /// the result may have a different seam location since the start and end segments will be combined.
+    /// </summary>
+    /// <returns>A new curve that is not necessarily a polycurve if successful, null otherwise. </returns>
+    /// <seealso cref="RemoveNesting"/>
+    /// <since>7.0</since>
+    public Curve CleanUp()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoCleanUpPolyCurve(ptr_const_this);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
     private IntPtr CurveDisplay()
     {
       if (IntPtr.Zero == m_pCurveDisplay)

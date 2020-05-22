@@ -15,6 +15,7 @@ namespace Rhino.Geometry
     /// <param name="curveA">The curve used as extrusion profile.</param>
     /// <param name="curveB">The curve used as path.</param>
     /// <returns>A new sum surface on success; null on failure.</returns>
+    /// <since>5.0</since>
     public static SumSurface Create(Curve curveA, Curve curveB)
     {
       IntPtr pConstCurveA = curveA.ConstPointer();
