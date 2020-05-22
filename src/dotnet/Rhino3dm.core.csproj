@@ -12,20 +12,10 @@
     <!-- <Version>1.0.3</Version> -->
   </PropertyGroup>
 
-  <ItemGroup Condition="exists('..\build\windows\win32\Release\librhino3dm_native.dll')">
-    <None Include="..\build\windows\win32\Release\librhino3dm_native.dll">
-      <PackagePath>runtimes\win-x86\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Win32\%(Filename)%(Extension)</Link>
-      <Pack>true</Pack>
-    </None>
-  </ItemGroup>
-
   <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
     <None Include="..\build\windows\win64\Release\librhino3dm_native.dll">
       <PackagePath>runtimes\win-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Win64\%(Filename)%(Extension)</Link>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
