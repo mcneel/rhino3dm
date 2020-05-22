@@ -25,6 +25,7 @@ namespace Rhino.Input.Custom
   public class GetLine : IDisposable
   {
     IntPtr m_ptr_argsrhinogetline;
+    /// <since>5.1</since>
     public GetLine()
     {
       m_ptr_argsrhinogetline = UnsafeNativeMethods.CArgsRhinoGetLine_New();
@@ -44,6 +45,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.1</since>
     public void Dispose()
     {
       Dispose(true);
@@ -72,6 +74,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="line"></param>
     /// <returns></returns>
+    /// <since>5.1</since>
     public Commands.Result Get(out Geometry.Line line)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -97,6 +100,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting first point</summary>
+    /// <since>5.1</since>
     public string FirstPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetLineStringConsts.FirstPointPrompt); }
@@ -104,6 +108,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting midpoint</summary>
+    /// <since>5.1</since>
     public string MidPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetLineStringConsts.MidPointPrompt); }
@@ -111,6 +116,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>Prompt when getting second point</summary>
+    /// <since>5.1</since>
     public string SecondPointPrompt
     {
       get { return GetStringHelper(UnsafeNativeMethods.ArgsGetLineStringConsts.SecondPointPrompt); }
@@ -135,6 +141,7 @@ namespace Rhino.Input.Custom
     /// The default is to require the user to keep picking the end
     /// point until we get a point different than the start point.
     /// </summary>
+    /// <since>5.1</since>
     public bool AcceptZeroLengthLine
     {
       get { return GetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts.AcceptZeroLengthLine); }
@@ -146,6 +153,7 @@ namespace Rhino.Input.Custom
     /// line when the second point is begin picked.  If false,
     /// the active layer color is used.
     /// </summary>
+    /// <since>5.1</since>
     public bool HaveFeedbackColor
     {
       get { return GetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts.HaveFeedbackColor); }
@@ -156,6 +164,7 @@ namespace Rhino.Input.Custom
     /// line when the second point is begin picked.  If not set,
     /// the active layer color is used.
     /// </summary>
+    /// <since>5.1</since>
     public System.Drawing.Color FeedbackColor
     {
       get
@@ -175,6 +184,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// If FixedLength > 0, the line must have the specified length
     /// </summary>
+    /// <since>5.1</since>
     public double FixedLength
     {
       get
@@ -191,18 +201,20 @@ namespace Rhino.Input.Custom
 
     /// <summary>
     /// If true, then the "BothSides" option shows up when the
-    /// start point is inteactively picked.
+    /// start point is interactively picked.
     /// </summary>
     /// <param name="on"></param>
+    /// <since>5.1</since>
     public void EnableFromBothSidesOption(bool on)
     {
       SetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts.EnableFromBothSidesOption, on);
     }
 
     /// <summary>
-    /// If true, the the "MidPoint" options shows up
+    /// If true, the "MidPoint" options shows up
     /// </summary>
     /// <param name="on"></param>
+    /// <since>5.1</since>
     public void EnableFromMidPointOption(bool on)
     {
       SetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts.EnableFromMidPointOption, on);
@@ -212,6 +224,7 @@ namespace Rhino.Input.Custom
     /// If true, then all line variations are shown if the default line mode is used
     /// </summary>
     /// <param name="on"></param>
+    /// <since>5.1</since>
     public void EnableAllVariations(bool on)
     {
       SetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts.EnableAllVariations, on);
@@ -222,6 +235,7 @@ namespace Rhino.Input.Custom
     /// the start point interactive picking
     /// </summary>
     /// <param name="point"></param>
+    /// <since>5.1</since>
     public void SetFirstPoint(Geometry.Point3d point)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -231,6 +245,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Mode used
     /// </summary>
+    /// <since>5.1</since>
     public GetLineMode GetLineMode
     {
       get

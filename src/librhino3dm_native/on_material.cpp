@@ -397,6 +397,93 @@ RH_C_FUNCTION int ON_Material_NextTransparencyTexture(const ON_Material* pConstM
   return -1;
 }
 
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION ON_UUID ON_Material_MaterialChannelIdFromIndex(const CRhinoMaterial* pMaterial, int material_channel_index)
+{
+  if (pMaterial == nullptr)
+    return ON_nil_uuid;
+
+  // This code is copied from ON_Material::MaterialChannelIdFromIndex @ 7.x
+  // 7.x should call the above function directly
+  for (;;)
+  {
+    if (material_channel_index <= 0)
+      break;
+    const int count = pMaterial->m_material_channel.Count();
+    if (count <= 0)
+      break;
+    const ON_UuidIndex* a = pMaterial->m_material_channel.Array();
+    for (const ON_UuidIndex* a1 = a + count; a < a1; ++a)
+    {
+      if (material_channel_index == a->m_i)
+        return a->m_id;
+    }
+    break;
+  }
+
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION int ON_Material_MaterialChannelIndexFromId(CRhinoMaterial* pMaterial, ON_UUID material_channel_id, bool bAddIdIfNotPresent)
+{
+  if (pMaterial == nullptr)
+    return -1;
+
+  // This code is copied from ON_Material::MaterialChannelIndexFromId @ 7.x
+  // 7.x should call the above function directly
+  for (;;)
+  {
+    if (ON_nil_uuid == material_channel_id)
+      break;
+    int unused_index = 0;
+
+    const int count = pMaterial->m_material_channel.Count();
+    if (count > 0)
+    {
+      const ON_UuidIndex* a = pMaterial->m_material_channel.Array();
+      for (const ON_UuidIndex* a1 = a + count; a < a1; ++a)
+      {
+        if (material_channel_id == a->m_id)
+          return a->m_i;
+        if (a->m_i > unused_index)
+          unused_index = a->m_i;
+      }
+    }
+
+    if (false == bAddIdIfNotPresent)
+      break;
+    if (count >= 65536)
+      break; // some rogue actor filled the m_material_channel[] array.
+
+    ++unused_index;
+    if (unused_index <= 0 || unused_index > 65536)
+    {
+      // int overflow or too big for a material channel index
+      for (unused_index = 1; unused_index <= count + 1; ++unused_index)
+      {
+        if (ON_nil_uuid == ON_Material_MaterialChannelIdFromIndex(pMaterial, unused_index))
+          break;
+      }
+    }
+    ON_UuidIndex ui;
+    ui.m_id = material_channel_id;
+    ui.m_i = unused_index;
+    pMaterial->m_material_channel.Append(ui);
+    return ui.m_i;
+  }
+
+  return 0;
+}
+
+RH_C_FUNCTION void ON_Material_ClearMaterialChannels(CRhinoMaterial* pMaterial)
+{
+  if (pMaterial != nullptr)
+  {
+    pMaterial->m_material_channel.Empty();
+  }
+}
+#endif
+
 RH_C_FUNCTION void ON_Texture_GetFileName(const ON_Texture* pConstTexture, CRhCmnStringHolder* pString)
 {
   if( pConstTexture && pString )

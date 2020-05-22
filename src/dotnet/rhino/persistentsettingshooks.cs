@@ -213,13 +213,22 @@ namespace Rhino
     /// </summary>
     /// <param name="plugInId"></param>
     /// <param name="thisRhinoIsSaving"></param>
-    internal static void InvokeSetingsSaved(Guid plugInId, bool thisRhinoIsSaving)
+    /// <param name="dirty">
+    /// Will be true if the settings are in the to be written queu indicating that there is
+    /// an additional change that needs to be written.
+    /// </param>
+    internal static void InvokeSetingsSaved(Guid plugInId, bool thisRhinoIsSaving, bool dirty)
     {
       var runtime_plug_in_settings = PlugInSettings(plugInId);
       if (runtime_plug_in_settings == null) return;
       // Make a copy of the old settings
       var old_settings = runtime_plug_in_settings.Duplicate(false);
-      if (!Runtime.HostUtils.RunningOnOSX)
+      // 11 December 2019 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-55242
+      // If dirty == true then there was a change to this settings dictionary after the file was
+      // previously written and the file change notification recieved so do NOT read the file now
+      // since the current dictionary is about to be written again
+      if (!Runtime.HostUtils.RunningOnOSX && !dirty)
       {
         // Get the main Rhino window, will be null if this is called while Rhino
         // is shutting down

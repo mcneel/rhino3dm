@@ -15,6 +15,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the revolute curve.
     /// </summary>
+    /// <since>6.0</since>
     public Curve Curve
     {
       get
@@ -29,6 +30,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the axis of revolution.
     /// </summary>
+    /// <since>6.0</since>
     public Line Axis
     {
       get
@@ -45,6 +47,7 @@ namespace Rhino.Geometry
     /// The interval angle must be increasing and satisfy 
     /// RhinoMath.ZeroTolerance &lt; Angle.Length&lt;= 2.0 * System.Math.PI.
     /// </summary>
+    /// <since>6.0</since>
     public Interval Angle
     {
       get
@@ -66,9 +69,10 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="revoluteCurve">A generatrix.</param>
     /// <param name="axisOfRevolution">An axis.</param>
-    /// <param name="startAngleRadians">An angle in radias for the start.</param>
-    /// <param name="endAngleRadians">An angle in radias for the end.</param>
+    /// <param name="startAngleRadians">An angle in radians for the start.</param>
+    /// <param name="endAngleRadians">An angle in radians for the end.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface Create(Curve revoluteCurve, Line axisOfRevolution, double startAngleRadians, double endAngleRadians)
     {
       IntPtr pConstCurve = revoluteCurve.ConstPointer();
@@ -90,6 +94,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addtruncatedcone.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtruncatedcone.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static RevSurface Create(Curve revoluteCurve, Line axisOfRevolution)
     {
       return Create(revoluteCurve, axisOfRevolution, 0, 2.0 * Math.PI);
@@ -102,9 +107,10 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="revoluteLine">A generatrix.</param>
     /// <param name="axisOfRevolution">An axis.</param>
-    /// <param name="startAngleRadians">An angle in radias for the start.</param>
-    /// <param name="endAngleRadians">An angle in radias for the end.</param>
+    /// <param name="startAngleRadians">An angle in radians for the start.</param>
+    /// <param name="endAngleRadians">An angle in radians for the end.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface Create(Line revoluteLine, Line axisOfRevolution, double startAngleRadians, double endAngleRadians)
     {
       using (LineCurve lc = new LineCurve(revoluteLine))
@@ -120,6 +126,7 @@ namespace Rhino.Geometry
     /// <param name="revoluteLine">A generatrix.</param>
     /// <param name="axisOfRevolution">An axis.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface Create(Line revoluteLine, Line axisOfRevolution)
     {
       return Create(revoluteLine, axisOfRevolution, 0, 2.0 * Math.PI);
@@ -131,9 +138,10 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="revolutePolyline">A generatrix.</param>
     /// <param name="axisOfRevolution">An axis.</param>
-    /// <param name="startAngleRadians">An angle in radias for the start.</param>
-    /// <param name="endAngleRadians">An angle in radias for the end.</param>
+    /// <param name="startAngleRadians">An angle in radians for the start.</param>
+    /// <param name="endAngleRadians">An angle in radians for the end.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface Create(Polyline revolutePolyline, Line axisOfRevolution, double startAngleRadians, double endAngleRadians)
     {
       using (PolylineCurve plc = new PolylineCurve(revolutePolyline))
@@ -148,6 +156,7 @@ namespace Rhino.Geometry
     /// <param name="revolutePolyline">A generatrix.</param>
     /// <param name="axisOfRevolution">An axis.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface Create(Polyline revolutePolyline, Line axisOfRevolution)
     {
       return Create(revolutePolyline, axisOfRevolution, 0, 2.0 * Math.PI);
@@ -158,6 +167,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="cone">A cone.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface CreateFromCone(Cone cone)
     {
       IntPtr pRevSurface = UnsafeNativeMethods.ON_Cone_RevSurfaceForm(ref cone);
@@ -171,6 +181,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="cylinder">A cylinder.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface CreateFromCylinder(Cylinder cylinder)
     {
       IntPtr pRevSurface = UnsafeNativeMethods.ON_Cylinder_RevSurfaceForm(ref cylinder);
@@ -184,6 +195,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="sphere">A sphere.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface CreateFromSphere(Sphere sphere)
     {
       IntPtr pRevSurface = UnsafeNativeMethods.ON_Sphere_RevSurfaceForm(ref sphere);
@@ -197,6 +209,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="torus">A torus.</param>
     /// <returns>A new surface of revolution, or null if any of the inputs is invalid or on error.</returns>
+    /// <since>5.0</since>
     public static RevSurface CreateFromTorus(Torus torus)
     {
       IntPtr pRevSurface = UnsafeNativeMethods.ON_Torus_RevSurfaceForm(ref torus);

@@ -15,6 +15,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Initializes a new instance of the document controlled exception class.
     /// </summary>
+    /// <since>5.0</since>
     public DocumentCollectedException() :
       base("This object cannot be modified because it is controlled by a document.") { }
 
@@ -22,6 +23,7 @@ namespace Rhino.Runtime
     /// Initializes a new instance of the document collected exception class.
     /// </summary>
     /// <param name="message">A more specific message.</param>
+    /// <since>6.0</since>
     public DocumentCollectedException(string message) :
       base(message)
     { }
@@ -49,11 +51,13 @@ namespace Rhino.Runtime
     /// <summary>
     /// pointer to base geometry (ON_Object*)
     /// </summary>
+    /// <since>6.10</since>
     public IntPtr Pointer { get; private set; }
 
     /// <summary>
     /// Corrupt geometry .NET class
     /// </summary>
+    /// <since>6.10</since>
     public CommonObject CommonObject { get; private set; }
   }
 
@@ -68,6 +72,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Used to test ON_Object* pointers to see if they are a brep or mesh that is corrupt enough to crash Rhino.
     /// </summary>
+    /// <since>6.10</since>
     public static bool PerformCorruptionTesting
     {
       get; set;
@@ -234,7 +239,7 @@ namespace Rhino.Runtime
     object m_nonconst_lock = new object();
     /// <summary>
     /// For derived classes implementers.
-    /// <para>Defines the necessary implementation to free the instance from being const.</para>
+    /// <para>Defines the necessary implementation to free the instance from being constant.</para>
     /// </summary>
     protected virtual void NonConstOperation()
     {
@@ -275,7 +280,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Is called when a non-const operation first occurs.
+    /// Is called when a non-constant operation first occurs.
     /// </summary>
     protected virtual void OnSwitchToNonConst(){}
 
@@ -284,6 +289,7 @@ namespace Rhino.Runtime
     /// completes, call EnsurePrivateCopy to make sure that this class is not tied to the document. You can
     /// call this function as many times as you want.
     /// </summary>
+    /// <since>5.0</since>
     public void EnsurePrivateCopy()
     {
       NonConstOperation();
@@ -293,6 +299,7 @@ namespace Rhino.Runtime
     /// If true this object may not be modified. Any properties or functions that attempt
     /// to modify this object when it is set to "IsReadOnly" will throw a NotSupportedException.
     /// </summary>
+    /// <since>5.0</since>
     public virtual bool IsDocumentControlled
     {
       get { return (IntPtr.Zero==m_ptr); }
@@ -318,10 +325,10 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Assigns a parent object and a subobject index to this.
+    /// Assigns a parent object and a sub-object index to this.
     /// </summary>
     /// <param name="parentObject">The parent object.</param>
-    /// <param name="subobjectIndex">The subobject index.</param>
+    /// <param name="subobjectIndex">The sub-object index.</param>
     protected void ConstructConstObject(object parentObject, int subobjectIndex)
     {
       m__parent = parentObject;
@@ -332,6 +339,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>Tests an object to see if it is valid.</summary>
+    /// <since>5.0</since>
     public virtual bool IsValid
     {
       get
@@ -347,6 +355,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="log">A textual log. This out parameter is assigned during this call.</param>
     /// <returns>true if this object is valid; false otherwise.</returns>
+    /// <since>5.0</since>
     public bool IsValidWithLog(out string log)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -389,6 +398,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -453,6 +463,7 @@ namespace Rhino.Runtime
     /// Indicates if this object has been disposed or the
     /// document it originally belonged to has been disposed.
     /// </summary>
+    /// <since>6.0</since>
     public bool Disposed
     {
       get
@@ -504,6 +515,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Gets true if this class has any custom information attached to it through UserData.
     /// </summary>
+    /// <since>5.0</since>
     public bool HasUserData
     {
       get
@@ -517,6 +529,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// List of custom information that is attached to this class.
     /// </summary>
+    /// <since>5.0</since>
     public DocObjects.Custom.UserDataList UserData
     {
       get
@@ -529,6 +542,7 @@ namespace Rhino.Runtime
     /// Dictionary of custom information attached to this class. The dictionary is actually user
     /// data provided as an easy to use sharable set of information.
     /// </summary>
+    /// <since>5.0</since>
     public Collections.ArchivableDictionary UserDictionary
     {
       get
@@ -701,6 +715,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
     /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    /// <since>5.0</since>
     [SecurityPermission(SecurityAction.LinkDemand, Flags=SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
@@ -716,6 +731,7 @@ namespace Rhino.Runtime
     /// <param name="opennurbs"></param>
     /// <param name="base64Data"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static CommonObject FromBase64String(int archive3dm, int opennurbs, string base64Data)
     {
       uint opennurbsVersion = (uint)opennurbs;
@@ -732,6 +748,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="jsonDictionary"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static CommonObject FromJSON(System.Collections.Generic.Dictionary<string,string> jsonDictionary)
     {
       int archive3dm = 0;
@@ -755,7 +772,7 @@ namespace Rhino.Runtime
       }
 
       if (0 == archive3dm || 0 == opennurbs || data == null)
-        throw new SerializationException("Could not extract keys from disctionary");
+        throw new SerializationException("Could not extract keys from dictionary");
       return FromBase64String(archive3dm, opennurbs, data);
     }
 
@@ -764,6 +781,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public string ToJSON(Rhino.FileIO.SerializationOptions options)
     {
       string json = null;

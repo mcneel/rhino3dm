@@ -28,6 +28,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t0">The first value.</param>
     /// <param name="t1">The second value.</param>
+    /// <since>5.0</since>
     public Interval(double t0, double t1)
     {
       m_t0 = t0;
@@ -38,6 +39,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance copying the other instance values.
     /// </summary>
     /// <param name="other">The Rhino.Geometry.Interval to use as a base.</param>
+    /// <since>5.0</since>
     public Interval(Interval other)
     {
       m_t0 = other.m_t0;
@@ -66,6 +68,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first interval.</param>
     /// <param name="b">The second interval.</param>
     /// <returns>true if the components of the two intervals are exactly equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Interval a, Interval b)
     {
       return a.CompareTo(b) == 0;
@@ -77,6 +80,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first interval.</param>
     /// <param name="b">The second interval.</param>
     /// <returns>true if the two intervals are different in any value; false if they are equal.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Interval a, Interval b)
     {
       return a.CompareTo(b) != 0;
@@ -110,6 +114,7 @@ namespace Rhino.Geometry
     /// <param name="interval">The base interval (minuend).</param>
     /// <param name="number">The shifting value to be subtracted (subtrahend).</param>
     /// <returns>A new interval with [T0-number, T1-number].</returns>
+    /// <since>5.0</since>
     public static Interval operator -(Interval interval, double number)
     {
       return new Interval(interval.m_t0 - number, interval.m_t1 - number);
@@ -121,6 +126,7 @@ namespace Rhino.Geometry
     /// <param name="number">The shifting value to subtract from (minuend).</param>
     /// <param name="interval">The interval to be subtracted from (subtrahend).</param>
     /// <returns>A new interval with [number-T0, number-T1].</returns>
+    /// <since>5.0</since>
     public static Interval operator -(double number, Interval interval)
     {
       return new Interval(number - interval.m_t0, number - interval.m_t1);
@@ -134,6 +140,7 @@ namespace Rhino.Geometry
     /// <param name="a">First interval.</param>
     /// <param name="b">Second interval.</param>
     /// <returns>true if a[0] is smaller than b[0], or a[0] == b[0] and a[1] is smaller than b[1]; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <(Interval a, Interval b)
     {
       return a.CompareTo(b) < 0;
@@ -147,6 +154,7 @@ namespace Rhino.Geometry
     /// <param name="a">First interval.</param>
     /// <param name="b">Second interval.</param>
     /// <returns>true if a[0] is smaller than b[0], or a[0] == b[0] and a[1] is smaller than or equal to b[1]; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <=(Interval a, Interval b)
     {
       return a.CompareTo(b) <= 0;
@@ -160,6 +168,7 @@ namespace Rhino.Geometry
     /// <param name="a">First interval.</param>
     /// <param name="b">Second interval.</param>
     /// <returns>true if a[0] is larger than b[0], or a[0] == b[0] and a[1] is larger than b[1]; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >(Interval a, Interval b)
     {
       return a.CompareTo(b) > 0;
@@ -173,6 +182,7 @@ namespace Rhino.Geometry
     /// <param name="a">First interval.</param>
     /// <param name="b">Second interval.</param>
     /// <returns>true if a[0] is larger than b[0], or a[0] == b[0] and a[1] is larger than or equal to b[1]; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >=(Interval a, Interval b)
     {
       return a.CompareTo(b) >= 0;
@@ -190,6 +200,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an Interval whose limits are RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Interval Unset
     {
       get
@@ -203,11 +214,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the lower bound of the Interval.
     /// </summary>
+    /// <since>5.0</since>
     public double T0 { get { return m_t0; } set { m_t0 = value; } }
 
     /// <summary>
     /// Gets or sets the upper bound of the Interval.
     /// </summary>
+    /// <since>5.0</since>
     public double T1 { get { return m_t1; } set { m_t1 = value; } }
 
     /// <summary>
@@ -235,6 +248,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the smaller of T0 and T1.
     /// </summary>
+    /// <since>5.0</since>
     public double Min
     {
       get { return ((RhinoMath.IsValidDouble(m_t0) && RhinoMath.IsValidDouble(m_t1)) ? (m_t0 <= m_t1 ? m_t0 : m_t1) : RhinoMath.UnsetValue); }
@@ -243,6 +257,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the larger of T0 and T1.
     /// </summary>
+    /// <since>5.0</since>
     public double Max
     {
       get { return ((RhinoMath.IsValidDouble(m_t0) && RhinoMath.IsValidDouble(m_t1)) ? (m_t0 <= m_t1 ? m_t1 : m_t0) : RhinoMath.UnsetValue); }
@@ -256,6 +271,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_extendcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_extendcurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public double Mid
     {
       get { return ((RhinoMath.IsValidDouble(m_t0) && RhinoMath.IsValidDouble(m_t1)) ? ((m_t0 == m_t1) ? m_t0 : (0.5 * (m_t0 + m_t1))) : RhinoMath.UnsetValue); }
@@ -265,6 +281,7 @@ namespace Rhino.Geometry
     /// Gets the signed length of the numeric range. 
     /// If the interval is decreasing, a negative length will be returned.
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get { return ((RhinoMath.IsValidDouble(m_t0) && RhinoMath.IsValidDouble(m_t1)) ? m_t1 - m_t0 : 0.0); }
@@ -274,6 +291,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not this Interval is valid. 
     /// Valid intervals must contain valid numbers.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get { return RhinoMath.IsValidDouble(m_t0) && RhinoMath.IsValidDouble(m_t1); }
@@ -289,6 +307,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if T0 == T1 != ON.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsSingleton
     {
       get { return (RhinoMath.IsValidDouble(m_t0) && m_t0 == m_t1); }
@@ -297,6 +316,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if T0 &lt; T1.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsIncreasing
     {
       get { return (RhinoMath.IsValidDouble(m_t0) && m_t0 < m_t1); }
@@ -305,6 +325,7 @@ namespace Rhino.Geometry
     /// <summary> 
     /// Returns true if T[0] &gt; T[1].
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDecreasing
     {
       get { return (RhinoMath.IsValidDouble(m_t1) && m_t1 < m_t0); }
@@ -341,6 +362,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">The other interval to compare with.</param>
     /// <returns>true if obj is an <see cref="Interval" /> and has the same bounds; false otherwise.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Interval other)
     {
@@ -358,6 +380,7 @@ namespace Rhino.Geometry
     ///<para>+1: if this[0] &gt; other[0]</para>
     ///<para>-1: if this[0] == other[0] and this[1] &lt; other[1]</para>
     ///<para>+1: if this[0] == other[0] and this[1] &gt; other[1]</para>.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Interval other)
     {
@@ -396,6 +419,7 @@ namespace Rhino.Geometry
     /// Grows the <see cref="Interval" /> to include the given number.
     /// </summary>
     /// <param name="value">Number to include in this interval.</param>
+    /// <since>5.0</since>
     public void Grow(double value)
     {
       if (!RhinoMath.IsValidDouble(value)) { return; }
@@ -408,6 +432,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Ensures this <see cref="Interval" /> is either singleton or increasing.
     /// </summary>
+    /// <since>5.0</since>
     public void MakeIncreasing()
     {
       if (IsDecreasing) { Swap(); }
@@ -416,6 +441,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Changes interval to [-T1, -T0].
     /// </summary>
+    /// <since>5.0</since>
     public void Reverse()
     {
       if (IsValid)
@@ -429,6 +455,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Exchanges T0 and T1.
     /// </summary>
+    /// <since>5.0</since>
     public void Swap()
     {
       double temp = m_t0;
@@ -440,6 +467,7 @@ namespace Rhino.Geometry
     ///<summary>Converts normalized parameter to interval value, or pair of values.</summary>
     ///<returns>Interval parameter min*(1.0-normalizedParameter) + max*normalizedParameter.</returns>
     ///<seealso>NormalizedParameterAt</seealso>
+    /// <since>5.0</since>
     [ConstOperation]
     public double ParameterAt(double normalizedParameter)
     {
@@ -449,6 +477,7 @@ namespace Rhino.Geometry
     ///<summary>Converts normalized parameter to interval value, or pair of values.</summary>
     ///<returns>Interval parameter min*(1.0-normalizedParameter) + max*normalized_paramete.</returns>
     ///<seealso>NormalizedParameterAt</seealso>
+    /// <since>5.0</since>
     [ConstOperation]
     public Interval ParameterIntervalAt(Interval normalizedInterval)
     {
@@ -460,6 +489,7 @@ namespace Rhino.Geometry
     ///<summary>Converts interval value, or pair of values, to normalized parameter.</summary>
     ///<returns>Normalized parameter x so that min*(1.0-x) + max*x = intervalParameter.</returns>
     ///<seealso>ParameterAt</seealso>
+    /// <since>5.0</since>
     [ConstOperation]
     public double NormalizedParameterAt(double intervalParameter)
     {
@@ -483,6 +513,7 @@ namespace Rhino.Geometry
     ///<summary>Converts interval value, or pair of values, to normalized parameter.</summary>
     ///<returns>Normalized parameter x so that min*(1.0-x) + max*x = intervalParameter.</returns>
     ///<seealso>ParameterAt</seealso>
+    /// <since>5.0</since>
     [ConstOperation]
     public Interval NormalizedIntervalAt(Interval intervalParameter)
     {
@@ -496,6 +527,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Parameter to test.</param>
     /// <returns>true if t is contained within or is coincident with the limits of this Interval.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IncludesParameter(double t)
     {
@@ -507,6 +539,7 @@ namespace Rhino.Geometry
     /// <param name="t">Parameter to test.</param>
     /// <param name="strict">If true, the parameter must be fully on the inside of the Interval.</param>
     /// <returns>true if t is contained within the limits of this Interval.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IncludesParameter(double t, bool strict)
     {
@@ -530,6 +563,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="interval">Interval to test.</param>
     /// <returns>true if the other interval is contained within or is coincident with the limits of this Interval; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IncludesInterval(Interval interval)
     {
@@ -541,6 +575,7 @@ namespace Rhino.Geometry
     /// <param name="interval">Interval to test.</param>
     /// <param name="strict">If true, the other interval must be fully on the inside of the Interval.</param>
     /// <returns>true if the other interval is contained within the limits of this Interval; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IncludesInterval(Interval interval, bool strict)
     {
@@ -562,6 +597,7 @@ namespace Rhino.Geometry
     /// The interval [ON.UnsetValue,ON.UnsetValue] is considered to be
     /// the empty set interval.  The result of any intersection involving an
     /// empty set interval or disjoint intervals is the empty set interval.</returns>
+    /// <since>5.0</since>
     public static Interval FromIntersection(Interval a, Interval b)
     {
       Interval rc = new Interval();
@@ -580,6 +616,7 @@ namespace Rhino.Geometry
     /// <para>The union of an empty set an a non-empty interval is the non-empty interval.</para>
     /// <para>The union of two non-empty intervals is [min(a.Min(),b.Min()), max(a.Max(),b.Max())]</para>
     /// </returns>
+    /// <since>5.0</since>
     public static Interval FromUnion(Interval a, Interval b)
     {
       Interval rc = new Interval();
@@ -594,6 +631,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Interval other, double epsilon)
     {
@@ -617,11 +655,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X (first) coordinate of the point.
     /// </summary>
+    /// <since>5.0</since>
     public double X { get { return m_x; } set { m_x = value; } }
 
     /// <summary>
     /// Gets or sets the Y (second) coordinate of the point.
     /// </summary>
+    /// <since>5.0</since>
     public double Y { get { return m_y; } set { m_y = value; } }
 
     #region constructors
@@ -631,6 +671,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="x">The X (first) coordinate.</param>
     /// <param name="y">The Y (second) coordinate.</param>
+    /// <since>5.0</since>
     public Point2d(double x, double y)
     {
       m_x = x;
@@ -641,6 +682,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of <see cref="Point2d"/> by converting a vector.
     /// </summary>
     /// <param name="vector">The vector that will be copied.</param>
+    /// <since>5.0</since>
     public Point2d(Vector2d vector)
     {
       m_x = vector.X;
@@ -651,6 +693,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of <see cref="Point2d"/> by copying another <see cref="Point2d"/>.
     /// </summary>
     /// <param name="point">The point that will be copied.</param>
+    /// <since>5.0</since>
     public Point2d(Point2d point)
     {
       m_x = point.m_x;
@@ -658,9 +701,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Point3d"/> by copying the first two coordiantes of a <see cref="Point3d"/>.
+    /// Initializes a new instance of <see cref="Point3d"/> by copying the first two coordinates of a <see cref="Point3d"/>.
     /// </summary>
     /// <param name="point">The point that will be used: the Z (third) coordinate is discarded.</param>
+    /// <since>5.0</since>
     public Point2d(Point3d point)
     {
       m_x = point.m_x;
@@ -694,7 +738,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point2d operator *(Point2d point, double t)
     {
       return new Point2d(point.X * t, point.Y * t);
@@ -706,7 +751,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point2d Multiply(Point2d point, double t)
     {
       return new Point2d(point.X * t, point.Y * t);
@@ -717,7 +763,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">A number.</param>
     /// <param name="point">A point.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point2d operator *(double t, Point2d point)
     {
       return new Point2d(point.X * t, point.Y * t);
@@ -729,7 +776,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">A number.</param>
     /// <param name="point">A point.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point2d Multiply(double t, Point2d point)
     {
       return new Point2d(point.X * t, point.Y * t);
@@ -740,7 +788,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">A number.</param>
     /// <param name="point">A point.</param>
-    /// <returns>A new point that is coordinatewise divided by t.</returns>
+    /// <returns>A new point that is coordinate-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Point2d operator /(Point2d point, double t)
     {
       return new Point2d(point.X / t, point.Y / t);
@@ -752,7 +801,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise divided by t.</returns>
+    /// <returns>A new point that is coordinate-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Point2d Divide(Point2d point, double t)
     {
       return new Point2d(point.X / t, point.Y / t);
@@ -763,7 +813,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new point that is coordinatewise summed with the vector.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the vector.</returns>
     public static Point2d operator +(Point2d point, Vector2d vector)
     {
       return new Point2d(point.X + vector.X, point.Y + vector.Y);
@@ -775,7 +825,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new point that is coordinatewise summed with the vector.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the vector.</returns>
+    /// <since>5.0</since>
     public static Point2d Add(Point2d point, Vector2d vector)
     {
       return new Point2d(point.X + vector.X, point.Y + vector.Y);
@@ -786,7 +837,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="point">A point.</param>
-    /// <returns>A new point that is coordinatewise summed with the vector.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the vector.</returns>
     public static Point2d operator +(Vector2d vector, Point2d point)
     {
       return new Point2d(point.X + vector.X, point.Y + vector.Y);
@@ -798,7 +849,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="point">A point.</param>
-    /// <returns>A new point that is coordinatewise summed with the vector.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the vector.</returns>
+    /// <since>5.0</since>
     public static Point2d Add(Vector2d vector, Point2d point)
     {
       return new Point2d(point.X + vector.X, point.Y + vector.Y);
@@ -809,7 +861,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point1">A point.</param>
     /// <param name="point2">A point.</param>
-    /// <returns>A new point that is coordinatewise summed with the other point.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the other point.</returns>
     public static Point2d operator +(Point2d point1, Point2d point2)
     {
       return new Point2d(point1.X + point2.X, point1.Y + point2.Y);
@@ -821,7 +873,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point1">A point.</param>
     /// <param name="point2">A point.</param>
-    /// <returns>A new point that is coordinatewise summed with the other point.</returns>
+    /// <returns>A new point that is coordinate-wise summed with the other point.</returns>
+    /// <since>5.0</since>
     public static Point2d Add(Point2d point1, Point2d point2)
     {
       return new Point2d(point1.X + point2.X, point1.Y + point2.Y);
@@ -832,7 +885,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new point that is coordinatewise subtracted by vector.</returns>
+    /// <returns>A new point that is coordinate-wise subtracted by vector.</returns>
+    /// <since>5.0</since>
     public static Point2d operator -(Point2d point, Vector2d vector)
     {
       return new Point2d(point.X - vector.X, point.Y - vector.Y);
@@ -844,7 +898,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new point that is coordinatewise subtracted by vector.</returns>
+    /// <returns>A new point that is coordinate-wise subtracted by vector.</returns>
+    /// <since>5.0</since>
     public static Point2d Subtract(Point2d point, Vector2d vector)
     {
       return new Point2d(point.X - vector.X, point.Y - vector.Y);
@@ -855,7 +910,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point1">A point (minuend).</param>
     /// <param name="point2">A point (subtrahend).</param>
-    /// <returns>A new vector that is point1 coordinatewise subtracted by point2.</returns>
+    /// <returns>A new vector that is point1 coordinate-wise subtracted by point2.</returns>
+    /// <since>5.0</since>
     public static Vector2d operator -(Point2d point1, Point2d point2)
     {
       return new Vector2d(point1.X - point2.X, point1.Y - point2.Y);
@@ -867,7 +923,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point1">A point (minuend).</param>
     /// <param name="point2">A point (subtrahend).</param>
-    /// <returns>A new vector that is point1 coordinatewise subtracted by point2.</returns>
+    /// <returns>A new vector that is point1 coordinate-wise subtracted by point2.</returns>
+    /// <since>5.0</since>
     public static Vector2d Subtract(Point2d point1, Point2d point2)
     {
       return new Vector2d(point1.X - point2.X, point1.Y - point2.Y);
@@ -879,6 +936,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the coordinates of the two points are exactly equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Point2d a, Point2d b)
     {
       return a.m_x == b.m_x && a.m_y == b.m_y;
@@ -890,6 +948,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the two points differ in any coordinate; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Point2d a, Point2d b)
     {
       return a.m_x != b.m_x || a.m_y != b.m_y;
@@ -902,6 +961,7 @@ namespace Rhino.Geometry
     /// <param name="a">First point.</param>
     /// <param name="b">Second point.</param>
     /// <returns>true if a.X is smaller than b.X, or a.X == b.X and a.Y is smaller than b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <(Point2d a, Point2d b)
     {
       return (a.X < b.X) || (a.X == b.X && a.Y < b.Y);
@@ -915,6 +975,7 @@ namespace Rhino.Geometry
     /// <param name="a">First point.</param>
     /// <param name="b">Second point.</param>
     /// <returns>true if a.X is smaller than b.X, or a.X == b.X and a.Y &lt;= b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <=(Point2d a, Point2d b)
     {
       return (a.X < b.X) || (a.X == b.X && a.Y <= b.Y);
@@ -928,6 +989,7 @@ namespace Rhino.Geometry
     /// <param name="a">First point.</param>
     /// <param name="b">Second point.</param>
     /// <returns>true if a.X is larger than b.X, or a.X == b.X and a.Y is larger than b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >(Point2d a, Point2d b)
     {
       return (a.X > b.X) || (a.X == b.X && a.Y > b.Y);
@@ -941,6 +1003,7 @@ namespace Rhino.Geometry
     /// <param name="a">First point.</param>
     /// <param name="b">Second point.</param>
     /// <returns>true if a.X is larger than b.X, or a.X == b.X and a.Y &gt;= b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >=(Point2d a, Point2d b)
     {
       return (a.X > b.X) || (a.X == b.X && a.Y >= b.Y);
@@ -964,6 +1027,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">The specified point.</param>
     /// <returns>true if point has the same coordinates as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Point2d point)
     {
@@ -992,6 +1056,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this.X == other.X and this.Y &lt; other.Y</para>
     /// <para>+1: otherwise.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Point2d other)
     {
@@ -1023,6 +1088,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Point2d other, double epsilon)
     {
@@ -1041,6 +1107,7 @@ namespace Rhino.Geometry
       return String.Format("{0},{1}", X.ToString(culture), Y.ToString(culture));
     }
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -1077,6 +1144,7 @@ namespace Rhino.Geometry
     ///<summary>
     ///If any coordinate of a point is UnsetValue, then the point is not valid.
     ///</summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get { return RhinoMath.IsValidDouble(X) && RhinoMath.IsValidDouble(Y); }
@@ -1085,6 +1153,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the smallest (both positive and negative) valid coordinate, or RhinoMath.UnsetValue if no coordinate is valid.
     /// </summary>
+    /// <since>5.0</since>
     public double MinimumCoordinate
     {
       get
@@ -1109,6 +1178,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the largest valid coordinate, or RhinoMath.UnsetValue if no coordinate is valid.
     /// </summary>
+    /// <since>5.0</since>
     public double MaximumCoordinate
     {
       get
@@ -1133,6 +1203,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a point at 0,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Point2d Origin
     {
       get { return new Point2d(0, 0); }
@@ -1141,6 +1212,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a point at RhinoMath.UnsetValue,RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Point2d Unset
     {
       get { return new Point2d(RhinoMath.UnsetValue, RhinoMath.UnsetValue); }
@@ -1156,6 +1228,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_leader.cs' lang='cs'/>
     /// <code source='examples\py\ex_leader.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public double DistanceTo(Point2d other)
     {
@@ -1177,6 +1250,7 @@ namespace Rhino.Geometry
     /// <para>result = transformation*point</para>
     /// </summary>
     /// <param name="xform">Transformation to apply.</param>
+    /// <since>5.1</since>
     public void Transform(Transform xform)
     {
       double ww = xform.m_30 * m_x + xform.m_31 * m_y + xform.m_33;
@@ -1218,6 +1292,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addcircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Point3d(double x, double y, double z)
     {
       m_x = x;
@@ -1229,6 +1304,7 @@ namespace Rhino.Geometry
     /// Initializes a new point by copying coordinates from the components of a vector.
     /// </summary>
     /// <param name="vector">A vector.</param>
+    /// <since>5.0</since>
     public Point3d(Vector3d vector)
     {
       m_x = vector.m_x;
@@ -1240,6 +1316,7 @@ namespace Rhino.Geometry
     /// Initializes a new point by copying coordinates from a single-precision point.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>5.0</since>
     public Point3d(Point3f point)
     {
       m_x = point.X;
@@ -1251,6 +1328,7 @@ namespace Rhino.Geometry
     /// Initializes a new point by copying coordinates from another point.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>5.0</since>
     public Point3d(Point3d point)
     {
       m_x = point.X;
@@ -1264,6 +1342,7 @@ namespace Rhino.Geometry
     /// If the W (fourth) dimension of the input point is zero, then it will be just discarded.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>5.0</since>
     public Point3d(Point4d point)
     {
       double w = (point.m_w != 1.0 && point.m_w != 0.0) ? 1.0 / point.m_w : 1.0;
@@ -1275,6 +1354,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of a point at location 0,0,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Point3d Origin
     {
       get { return new Point3d(0, 0, 0); }
@@ -1283,6 +1363,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of a point at location RhinoMath.UnsetValue,RhinoMath.UnsetValue,RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Point3d Unset
     {
       get { return new Point3d(RhinoMath.UnsetValue, RhinoMath.UnsetValue, RhinoMath.UnsetValue); }
@@ -1312,7 +1393,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point3d operator *(Point3d point, double t)
     {
       return new Point3d(point.m_x * t, point.m_y * t, point.m_z * t);
@@ -1324,7 +1406,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point3d Multiply(Point3d point, double t)
     {
       return new Point3d(point.m_x * t, point.m_y * t, point.m_z * t);
@@ -1335,7 +1418,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point3d operator *(double t, Point3d point)
     {
       return new Point3d(point.m_x * t, point.m_y * t, point.m_z * t);
@@ -1347,7 +1431,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise multiplied by t.</returns>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Point3d Multiply(double t, Point3d point)
     {
       return new Point3d(point.m_x * t, point.m_y * t, point.m_z * t);
@@ -1358,7 +1443,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise divided by t.</returns>
+    /// <returns>A new point that is coordinate-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Point3d operator /(Point3d point, double t)
     {
       return new Point3d(point.m_x / t, point.m_y / t, point.m_z / t);
@@ -1370,7 +1456,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new point that is coordinatewise divided by t.</returns>
+    /// <returns>A new point that is coordinate-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Point3d Divide(Point3d point, double t)
     {
       return new Point3d(point.m_x / t, point.m_y / t, point.m_z / t);
@@ -1394,6 +1481,7 @@ namespace Rhino.Geometry
     /// <param name="point1">A point.</param>
     /// <param name="point2">A point.</param>
     /// <returns>A new point that results from the addition of point1 and point2.</returns>
+    /// <since>5.0</since>
     public static Point3d Add(Point3d point1, Point3d point2)
     {
       return new Point3d(point1.m_x + point2.m_x, point1.m_y + point2.m_y, point1.m_z + point2.m_z);
@@ -1417,6 +1505,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
     /// <returns>A new point that results from the addition of point and vector.</returns>
+    /// <since>5.0</since>
     public static Point3d Add(Point3d point, Vector3d vector)
     {
       return new Point3d(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
@@ -1440,6 +1529,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
     /// <returns>A new point that results from the addition of point and vector.</returns>
+    /// <since>5.0</since>
     public static Point3d Add(Point3d point, Vector3f vector)
     {
       return new Point3d(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
@@ -1463,6 +1553,7 @@ namespace Rhino.Geometry
     /// <param name="vector">A vector.</param>
     /// <param name="point">A point.</param>
     /// <returns>A new point that results from the addition of point and vector.</returns>
+    /// <since>5.0</since>
     public static Point3d Add(Vector3d vector, Point3d point)
     {
       return new Point3d(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
@@ -1474,6 +1565,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
     /// <returns>A new point that is the difference of point minus vector.</returns>
+    /// <since>5.0</since>
     public static Point3d operator -(Point3d point, Vector3d vector)
     {
       return new Point3d(point.m_x - vector.m_x, point.m_y - vector.m_y, point.m_z - vector.m_z);
@@ -1486,6 +1578,7 @@ namespace Rhino.Geometry
     /// <param name="vector">A vector.</param>
     /// <param name="point">A point.</param>
     /// <returns>A new point that is the difference of point minus vector.</returns>
+    /// <since>5.0</since>
     public static Point3d Subtract(Point3d point, Vector3d vector)
     {
       return new Point3d(point.m_x - vector.m_x, point.m_y - vector.m_y, point.m_z - vector.m_z);
@@ -1497,6 +1590,7 @@ namespace Rhino.Geometry
     /// <param name="point1">A point.</param>
     /// <param name="point2">Another point.</param>
     /// <returns>A new vector that is the difference of point minus vector.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator -(Point3d point1, Point3d point2)
     {
       return new Vector3d(point1.m_x - point2.m_x, point1.m_y - point2.m_y, point1.m_z - point2.m_z);
@@ -1509,6 +1603,7 @@ namespace Rhino.Geometry
     /// <param name="point1">A point.</param>
     /// <param name="point2">Another point.</param>
     /// <returns>A new vector that is the difference of point minus vector.</returns>
+    /// <since>5.0</since>
     public static Vector3d Subtract(Point3d point1, Point3d point2)
     {
       return new Vector3d(point1.m_x - point2.m_x, point1.m_y - point2.m_y, point1.m_z - point2.m_z);
@@ -1519,6 +1614,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    /// <since>5.0</since>
     public static Point3d operator -(Point3d point)
     {
       return new Point3d(-point.m_x, -point.m_y, -point.m_z);
@@ -1530,6 +1626,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the coordinates of the two points are exactly equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Point3d a, Point3d b)
     {
       return (a.m_x == b.m_x && a.m_y == b.m_y && a.m_z == b.m_z);
@@ -1541,6 +1638,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the two points differ in any coordinate; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Point3d a, Point3d b)
     {
       return (a.m_x != b.m_x || a.m_y != b.m_y || a.m_z != b.m_z);
@@ -1593,6 +1691,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <returns>The resulting point.</returns>
+    /// <since>6.0</since>
     public static Point3d FromPoint3f(Point3f point)
     {
       return new Point3d(point);
@@ -1608,6 +1707,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is smaller than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z is smaller than b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <(Point3d a, Point3d b)
     {
       if (a.X < b.X)
@@ -1633,6 +1733,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is smaller than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z &lt;= b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <=(Point3d a, Point3d b)
     {
       return a.CompareTo(b) <= 0;
@@ -1648,6 +1749,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is larger than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z is larger than b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >(Point3d a, Point3d b)
     {
       if (a.X > b.X)
@@ -1673,6 +1775,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is larger than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z &gt;= b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >=(Point3d a, Point3d b)
     {
       return a.CompareTo(b) >= 0;
@@ -1684,16 +1787,19 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X (first) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double X { get { return m_x; } set { m_x = value; } }
 
     /// <summary>
     /// Gets or sets the Y (second) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double Y { get { return m_y; } set { m_y = value; } }
 
     /// <summary>
     /// Gets or sets the Z (third) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double Z { get { return m_z; } set { m_z = value; } }
 
     /// <summary>
@@ -1734,6 +1840,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Each coordinate of the point must pass the <see cref="RhinoMath.IsValidDouble"/> test.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get { return RhinoMath.IsValidDouble(m_x) && RhinoMath.IsValidDouble(m_y) && RhinoMath.IsValidDouble(m_z); }
@@ -1742,6 +1849,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the smallest (both positive and negative) coordinate value in this point.
     /// </summary>
+    /// <since>5.0</since>
     public double MinimumCoordinate
     {
       get
@@ -1775,6 +1883,7 @@ namespace Rhino.Geometry
     /// Gets the largest (both positive and negative) valid coordinate in this point,
     /// or RhinoMath.UnsetValue if no coordinate is valid.
     /// </summary>
+    /// <since>5.0</since>
     public double MaximumCoordinate
     {
       get
@@ -1825,6 +1934,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Point3d other, double epsilon)
     {
@@ -1845,6 +1955,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this.X == other.X and this.Y == other.Y and this.Z &lt; other.Z</para>
     /// <para>+1: otherwise.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Point3d other)
     {
@@ -1880,6 +1991,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">The specified point.</param>
     /// <returns>true if point has the same coordinates as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Point3d point)
     {
@@ -1906,6 +2018,7 @@ namespace Rhino.Geometry
     /// If t=0 then this point is set to pA. 
     /// If t=1 then this point is set to pB. 
     /// Values of t in between 0.0 and 1.0 result in points between pA and pB.</param>
+    /// <since>5.0</since>
     public void Interpolate(Point3d pA, Point3d pB, double t)
     {
       m_x = pA.m_x + t * (pB.m_x - pA.m_x);
@@ -1925,6 +2038,7 @@ namespace Rhino.Geometry
     }
 
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -1999,7 +2113,7 @@ namespace Rhino.Geometry
       // Small comma.
       if (character == 0xFE50) return true;
 
-      // Fullwidth comma.
+      // Full width comma.
       if (character == 0xFF0C) return true;
 
       return false;
@@ -2015,6 +2129,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_intersectcurves.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectcurves.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public double DistanceTo(Point3d other)
     {
@@ -2039,6 +2154,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Other point for squared distance measurement.</param>
     /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public double DistanceToSquared(Point3d other)
     {
@@ -2063,6 +2179,7 @@ namespace Rhino.Geometry
     /// <code source='examples\vbnet\ex_pointatcursor.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_pointatcursor.cs' lang='cs'/>
     /// </example>
+    /// <since>5.0</since>
     public void Transform(Transform xform)
     {
       //David: this method doesn't test for validity. Should it?
@@ -2085,6 +2202,7 @@ namespace Rhino.Geometry
     /// <para>Points that fall within this tolerance will be discarded.</para>
     /// .</param>
     /// <returns>An array of points without duplicates; or null on error.</returns>
+    /// <since>5.0</since>
     public static Point3d[] CullDuplicates(System.Collections.Generic.IEnumerable<Point3d> points, double tolerance)
     {
       if (null == points)
@@ -2132,6 +2250,7 @@ namespace Rhino.Geometry
     /// <param name="points">A list, an array or any enumerable of <see cref="Point3d"/>.</param>
     /// <param name="tolerance">A tolerance value. A default might be RhinoMath.ZeroTolerance.</param>
     /// <returns>true if points are on the same plane; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool ArePointsCoplanar(System.Collections.Generic.IEnumerable<Point3d> points, double tolerance)
     {
       int count;
@@ -2147,6 +2266,7 @@ namespace Rhino.Geometry
     /// <param name="input">The point to convert.</param>
     /// <param name="result">The structure that will contain the parsed value.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.12</since>
     public static bool TryParse(string input, out Point3d result)
     {
       result = Point3d.Unset;
@@ -2160,6 +2280,7 @@ namespace Rhino.Geometry
     /// <param name="points">A list, an array or any enumerable of <see cref="Point3d"/>.</param>
     /// <param name="minimumDistance">Minimum allowed distance among a pair of points. If points are closer than this, only one of them will be kept.</param>
     /// <returns>The new array of sorted and culled points.</returns>
+    /// <since>5.0</since>
     public static Point3d[] SortAndCullPointList(System.Collections.Generic.IEnumerable<Point3d> points, double minimumDistance)
     {
       int count;
@@ -2202,6 +2323,7 @@ namespace Rhino.Geometry
     /// <param name="y">The Y (second) dimension.</param>
     /// <param name="z">The Z (third) dimension.</param>
     /// <param name="w">The W (fourth) dimension, or weight.</param>
+    /// <since>5.0</since>
     public Point4d(double x, double y, double z, double w)
     {
       m_x = x;
@@ -2214,6 +2336,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the <see cref="Point4d"/> class from the coordinates of a point.
     /// </summary>
     /// <param name="point">.</param>
+    /// <since>5.0</since>
     public Point4d(Point3d point)
     {
       m_x = point.m_x;
@@ -2226,6 +2349,7 @@ namespace Rhino.Geometry
     /// Initializes a new point by copying coordinates from another point.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>6.0</since>
     public Point4d(Point4d point)
     {
       m_x = point.X;
@@ -2254,21 +2378,25 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X (first) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double X { get { return m_x; } set { m_x = value; } }
 
     /// <summary>
     /// Gets or sets the Y (second) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double Y { get { return m_y; } set { m_y = value; } }
 
     /// <summary>
     /// Gets or sets the Z (third) coordinate of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double Z { get { return m_z; } set { m_z = value; } }
 
     /// <summary>
     /// Gets or sets the W (fourth) coordinate -or weight- of this point.
     /// </summary>
+    /// <since>5.0</since>
     public double W { get { return m_w; } set { m_w = value; } }
 
 
@@ -2322,6 +2450,7 @@ namespace Rhino.Geometry
     /// <param name="point1">First point.</param>
     /// <param name="point2">Second point.</param>
     /// <returns>A new point that results from the weighted addition of point1 and point2.</returns>
+    /// <since>5.0</since>
     public static Point4d Add(Point4d point1, Point4d point2)
     {
       return point1 + point2;
@@ -2333,6 +2462,7 @@ namespace Rhino.Geometry
     /// <param name="point1">First point.</param>
     /// <param name="point2">Second point.</param>
     /// <returns>A new point that results from the weighted subtraction of point2 from point1.</returns>
+    /// <since>5.0</since>
     public static Point4d operator -(Point4d point1, Point4d point2)
     {
       Point4d rc = point1; //copy of the value
@@ -2376,6 +2506,7 @@ namespace Rhino.Geometry
     /// <param name="point1">First point.</param>
     /// <param name="point2">Second point.</param>
     /// <returns>A new point that results from the weighted subtraction of point2 from point1.</returns>
+    /// <since>5.0</since>
     public static Point4d Subtract(Point4d point1, Point4d point2)
     {
       return point1 - point2;
@@ -2386,7 +2517,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="d">A number.</param>
-    /// <returns>A new point that results from the coordinatewise multiplication of point with d.</returns>
+    /// <returns>A new point that results from the coordinate-wise multiplication of point with d.</returns>
+    /// <since>5.0</since>
     public static Point4d operator *(Point4d point, double d)
     {
       return new Point4d(point.m_x * d, point.m_y * d, point.m_z * d, point.m_w * d);
@@ -2398,7 +2530,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">A point.</param>
     /// <param name="d">A number.</param>
-    /// <returns>A new point that results from the coordinatewise multiplication of point with d.</returns>
+    /// <returns>A new point that results from the coordinate-wise multiplication of point with d.</returns>
+    /// <since>5.0</since>
     public static Point4d Multiply(Point4d point, double d)
     {
       return point * d;
@@ -2410,7 +2543,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point1">The first point.</param>
     /// <param name="point2">The second point.</param>
-    /// <returns>A value that results from the coordinatewise multiplication of point1 and point2.</returns>
+    /// <returns>A value that results from the coordinate-wise multiplication of point1 and point2.</returns>
+    /// <since>5.0</since>
     public static double operator *(Point4d point1, Point4d point2)
     {
       return (point1.m_x * point2.m_x) +
@@ -2425,6 +2559,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the coordinates of the two points are equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Point4d a, Point4d b)
     {
       return UnsafeNativeMethods.ON_4dPoint_Equality(a, b);
@@ -2436,6 +2571,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>
     /// <returns>true if the two points differ in any coordinate; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Point4d a, Point4d b)
     {
       return !(a == b);
@@ -2458,6 +2594,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">The specified point.</param>
     /// <returns>true if point has the same value as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Point4d point)
     {
@@ -2470,6 +2607,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Point4d other, double epsilon)
     {
@@ -2482,7 +2620,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Computes the hash code for the present point.
     /// </summary>
-    /// <returns>A non-unique hash code, which uses all coordiantes of this object.</returns>
+    /// <returns>A non-unique hash code, which uses all coordinates of this object.</returns>
     [ConstOperation]
     public override int GetHashCode()
     {
@@ -2497,6 +2635,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of a point with all coordinates set as RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Point4d Unset
     {
       get { return new Point4d(RhinoMath.UnsetValue, RhinoMath.UnsetValue, RhinoMath.UnsetValue, RhinoMath.UnsetValue); }
@@ -2507,6 +2646,7 @@ namespace Rhino.Geometry
     /// <para>result = transformation*point</para>
     /// </summary>
     /// <param name="xform">Transformation to apply.</param>
+    /// <since>6.0</since>
     public void Transform(Transform xform)
     {
       double xx = xform.m_00 * m_x + xform.m_01 * m_y + xform.m_02 * m_z + xform.m_03 * m_w;
@@ -2522,6 +2662,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns an indication regarding the validity of this point.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsValid
     {
       get
@@ -2537,6 +2678,7 @@ namespace Rhino.Geometry
       return String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", m_x, m_y, m_z, m_w);
     }
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -2561,6 +2703,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="x">The X (first) component.</param>
     /// <param name="y">The Y (second) component.</param>
+    /// <since>5.0</since>
     public Vector2d(double x, double y)
     {
       m_x = x;
@@ -2583,17 +2726,20 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X (first) component of this vector.
     /// </summary>
+    /// <since>5.0</since>
     public double X { get { return m_x; } set { m_x = value; } }
 
     /// <summary>
     /// Gets or sets the Y (second) component of this vector.
     /// </summary>
+    /// <since>5.0</since>
     public double Y { get { return m_y; } set { m_y = value; } }
 
     /// <summary>
     /// Computes the length (or magnitude, or size) of this vector.
     /// This is an application of Pythagoras' theorem.
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get { return UnsafeNativeMethods.ON_2dVector_Length(this); }
@@ -2605,7 +2751,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d operator *(Vector2d vector, double t)
     {
       return new Vector2d(vector.m_x * t, vector.m_y * t);
@@ -2615,7 +2762,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d operator *(double t, Vector2d vector)
     {
       return new Vector2d(vector.m_x * t, vector.m_y * t);
@@ -2627,7 +2775,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d Multiply(Vector2d vector, double t)
     {
       return new Vector2d(vector.m_x * t, vector.m_y * t);
@@ -2638,7 +2787,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d Multiply(double t, Vector2d vector)
     {
       return new Vector2d(vector.m_x * t, vector.m_y * t);
@@ -2649,7 +2799,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is componentwise divided by t.</returns>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d operator /(Vector2d vector, double t)
     {
       return new Vector2d(vector.m_x / t, vector.m_y / t);
@@ -2661,7 +2812,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is componentwise divided by t.</returns>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    /// <since>6.0</since>
     public static Vector2d Divide(Vector2d vector, double t)
     {
       return new Vector2d(vector.m_x / t, vector.m_y / t);
@@ -2672,7 +2824,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise addition of the two vectors.</returns>
+    /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
     public static Vector2d operator +(Vector2d vector1, Vector2d vector2)
     {
       return new Vector2d(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y);
@@ -2684,7 +2836,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise addition of the two vectors.</returns>
+    /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
+    /// <since>6.0</since>
     public static Vector2d Add(Vector2d vector1, Vector2d vector2)
     {
       return new Vector2d(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y);
@@ -2695,7 +2848,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise difference of vector1 - vector2.</returns>
+    /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    /// <since>6.0</since>
     public static Vector2d operator -(Vector2d vector1, Vector2d vector2)
     {
       return new Vector2d(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y);
@@ -2707,7 +2861,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise difference of vector1 - vector2.</returns>
+    /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    /// <since>6.0</since>
     public static Vector2d Subtract(Vector2d vector1, Vector2d vector2)
     {
       return new Vector2d(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y);
@@ -2722,6 +2877,7 @@ namespace Rhino.Geometry
     /// A value that results from the evaluation of v1.X*v2.X + v1.Y*v2.Y.
     /// <para>This value equals v1.Length * v2.Length * cos(alpha), where alpha is the angle between vectors.</para>
     /// </returns>
+    /// <since>6.0</since>
     public static double operator *(Vector2d vector1, Vector2d vector2)
     {
       return (vector1.m_x * vector2.m_x + vector1.m_y * vector2.m_y);
@@ -2737,6 +2893,7 @@ namespace Rhino.Geometry
     /// A value that results from the evaluation of v1.X*v2.X + v1.Y*v2.Y.
     /// <para>This value equals v1.Length * v2.Length * cos(alpha), where alpha is the angle between vectors.</para>
     /// </returns>
+    /// <since>6.0</since>
     public static double Multiply(Vector2d vector1, Vector2d vector2)
     {
       return (vector1.m_x * vector2.m_x + vector1.m_y * vector2.m_y);
@@ -2747,6 +2904,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector to negate.</param>
     /// <returns>A new vector where all components were multiplied by -1.</returns>
+    /// <since>6.0</since>
     public static Vector2d operator -(Vector2d vector)
     {
       return new Vector2d(-vector.m_x, -vector.m_y);
@@ -2758,6 +2916,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector to negate.</param>
     /// <returns>A new vector where all components were multiplied by -1.</returns>
+    /// <since>6.0</since>
     public static Vector2d Negate(Vector2d vector)
     {
       return new Vector2d(-vector.m_x, -vector.m_y);
@@ -2769,6 +2928,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first vector.</param>
     /// <param name="b">The second vector.</param>
     /// <returns>true if components of the two vectors are pairwise equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Vector2d a, Vector2d b)
     {
       return a.m_x == b.m_x && a.m_y == b.m_y;
@@ -2780,6 +2940,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first vector.</param>
     /// <param name="b">The second vector.</param>
     /// <returns>true if any component of the two vectors is pairwise different; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Vector2d a, Vector2d b)
     {
       return a.m_x != b.m_x || a.m_y != b.m_y;
@@ -2793,6 +2954,7 @@ namespace Rhino.Geometry
     /// <param name="a">First vector.</param>
     /// <param name="b">Second vector.</param>
     /// <returns>true if a.X is smaller than b.X, or a.X == b.X and a.Y is smaller than b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <(Vector2d a, Vector2d b)
     {
       return (a.X < b.X) || (a.X == b.X && a.Y < b.Y);
@@ -2806,6 +2968,7 @@ namespace Rhino.Geometry
     /// <param name="a">First vector.</param>
     /// <param name="b">Second vector.</param>
     /// <returns>true if a.X is smaller than b.X, or a.X == b.X and a.Y &lt;= b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <=(Vector2d a, Vector2d b)
     {
       return (a.X < b.X) || (a.X == b.X && a.Y <= b.Y);
@@ -2819,6 +2982,7 @@ namespace Rhino.Geometry
     /// <param name="a">First vector.</param>
     /// <param name="b">Second vector.</param>
     /// <returns>true if a.X is larger than b.X, or a.X == b.X and a.Y is larger than b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >(Vector2d a, Vector2d b)
     {
       return (a.X > b.X) || (a.X == b.X && a.Y > b.Y);
@@ -2832,6 +2996,7 @@ namespace Rhino.Geometry
     /// <param name="a">First vector.</param>
     /// <param name="b">Second vector.</param>
     /// <returns>true if a.X is larger than b.X, or a.X == b.X and a.Y &gt;= b.Y; otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >=(Vector2d a, Vector2d b)
     {
       return (a.X > b.X) || (a.X == b.X && a.Y >= b.Y);
@@ -2854,6 +3019,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">The specified vector.</param>
     /// <returns>true if vector has the same components as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Vector2d vector)
     {
@@ -2866,6 +3032,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Vector2d other, double epsilon)
     {
@@ -2884,6 +3051,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this.X == other.X and this.Y &lt; other.Y</para>
     /// <para>+1: otherwise.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Vector2d other)
     {
@@ -2930,6 +3098,7 @@ namespace Rhino.Geometry
       return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1}", X, Y);
     }
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -2939,6 +3108,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 0,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector2d Zero
     {
       get { return new Vector2d(); }
@@ -2947,6 +3117,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components set as RhinoMath.UnsetValue,RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector2d Unset
     {
       get { return new Vector2d(RhinoMath.UnsetValue, RhinoMath.UnsetValue); }
@@ -2956,6 +3127,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether this vector is valid. 
     /// A valid vector must be formed of valid component values for x, y and z.
     /// </summary>
+    /// <since>5.7</since>
     public bool IsValid
     {
       get
@@ -2968,6 +3140,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the square of the length of the vector.
     /// </summary>
+    /// <since>6.0</since>
     public double SquareLength
     {
       get
@@ -2988,6 +3161,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool IsTiny(double tolerance)
     {
@@ -2998,6 +3172,7 @@ namespace Rhino.Geometry
     /// Uses RhinoMath.ZeroTolerance for IsTiny calculation.
     /// </summary>
     /// <returns>true if vector is very small, otherwise false.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool IsTiny()
     {
@@ -3009,6 +3184,7 @@ namespace Rhino.Geometry
     /// <para>An invalid or zero length vector cannot be unitized.</para>
     /// </summary>
     /// <returns>true on success or false on failure.</returns>
+    /// <since>5.7</since>
     public bool Unitize()
     {
       bool rc = IsValid && UnsafeNativeMethods.ON_2dVector_Unitize(ref this);
@@ -3020,6 +3196,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="angleRadians">Angle of rotation (in radians).</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool Rotate(double angleRadians)
     {
       if (RhinoMath.IsValidDouble(angleRadians))
@@ -3056,6 +3233,7 @@ namespace Rhino.Geometry
     /// <param name="x">The X (first) component.</param>
     /// <param name="y">The Y (second) component.</param>
     /// <param name="z">The Z (third) component.</param>
+    /// <since>5.0</since>
     public Vector3d(double x, double y, double z)
     {
       m_x = x;
@@ -3067,6 +3245,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of a vector, copying the three components from the three coordinates of a point.
     /// </summary>
     /// <param name="point">The point to copy from.</param>
+    /// <since>5.0</since>
     public Vector3d(Point3d point)
     {
       m_x = point.m_x;
@@ -3078,6 +3257,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of a vector, copying the three components from a single-precision vector.
     /// </summary>
     /// <param name="vector">A single-precision vector.</param>
+    /// <since>5.0</since>
     public Vector3d(Vector3f vector)
     {
       m_x = vector.m_x;
@@ -3089,6 +3269,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of a vector, copying the three components from a vector.
     /// </summary>
     /// <param name="vector">A double-precision vector.</param>
+    /// <since>5.0</since>
     public Vector3d(Vector3d vector)
     {
       m_x = vector.m_x;
@@ -3099,6 +3280,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 0,0,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector3d Zero
     {
       get { return new Vector3d(); }
@@ -3107,6 +3289,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 1,0,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector3d XAxis
     {
       get { return new Vector3d(1.0, 0.0, 0.0); }
@@ -3115,6 +3298,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 0,1,0.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector3d YAxis
     {
       get { return new Vector3d(0.0, 1.0, 0.0); }
@@ -3123,6 +3307,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 0,0,1.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector3d ZAxis
     {
       get { return new Vector3d(0.0, 0.0, 1.0); }
@@ -3131,6 +3316,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with each component set to RhinoMath.UnsetValue.
     /// </summary>
+    /// <since>5.0</since>
     public static Vector3d Unset
     {
       get { return new Vector3d(RhinoMath.UnsetValue, RhinoMath.UnsetValue, RhinoMath.UnsetValue); }
@@ -3160,7 +3346,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator *(Vector3d vector, double t)
     {
       return new Vector3d(vector.m_x * t, vector.m_y * t, vector.m_z * t);
@@ -3172,7 +3359,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d Multiply(Vector3d vector, double t)
     {
       return new Vector3d(vector.m_x * t, vector.m_y * t, vector.m_z * t);
@@ -3183,7 +3371,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">A number.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator *(double t, Vector3d vector)
     {
       return new Vector3d(vector.m_x * t, vector.m_y * t, vector.m_z * t);
@@ -3195,7 +3384,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">A number.</param>
     /// <param name="vector">A vector.</param>
-    /// <returns>A new vector that is the original vector coordinatewise multiplied by t.</returns>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d Multiply(double t, Vector3d vector)
     {
       return new Vector3d(vector.m_x * t, vector.m_y * t, vector.m_z * t);
@@ -3206,7 +3396,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is componentwise divided by t.</returns>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator /(Vector3d vector, double t)
     {
       return new Vector3d(vector.m_x / t, vector.m_y / t, vector.m_z / t);
@@ -3218,7 +3409,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector.</param>
     /// <param name="t">A number.</param>
-    /// <returns>A new vector that is componentwise divided by t.</returns>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    /// <since>5.0</since>
     public static Vector3d Divide(Vector3d vector, double t)
     {
       return new Vector3d(vector.m_x / t, vector.m_y / t, vector.m_z / t);
@@ -3229,7 +3421,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise addition of the two vectors.</returns>
+    /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
     public static Vector3d operator +(Vector3d vector1, Vector3d vector2)
     {
       return new Vector3d(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y, vector1.m_z + vector2.m_z);
@@ -3241,7 +3433,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise addition of the two vectors.</returns>
+    /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
+    /// <since>5.0</since>
     public static Vector3d Add(Vector3d vector1, Vector3d vector2)
     {
       return new Vector3d(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y, vector1.m_z + vector2.m_z);
@@ -3252,7 +3445,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise difference of vector1 - vector2.</returns>
+    /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator -(Vector3d vector1, Vector3d vector2)
     {
       return new Vector3d(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y, vector1.m_z - vector2.m_z);
@@ -3264,7 +3458,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
-    /// <returns>A new vector that results from the componentwise difference of vector1 - vector2.</returns>
+    /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    /// <since>5.0</since>
     public static Vector3d Subtract(Vector3d vector1, Vector3d vector2)
     {
       return new Vector3d(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y, vector1.m_z - vector2.m_z);
@@ -3280,6 +3475,7 @@ namespace Rhino.Geometry
     /// A value that results from the evaluation of v1.X*v2.X + v1.Y*v2.Y + v1.Z*v2.Z.
     /// <para>This value equals v1.Length * v2.Length * cos(alpha), where alpha is the angle between vectors.</para>
     /// </returns>
+    /// <since>5.0</since>
     public static double operator *(Vector3d vector1, Vector3d vector2)
     {
       return (vector1.m_x * vector2.m_x + vector1.m_y * vector2.m_y + vector1.m_z * vector2.m_z);
@@ -3296,6 +3492,7 @@ namespace Rhino.Geometry
     /// A value that results from the evaluation of v1.X*v2.X + v1.Y*v2.Y + v1.Z*v2.Z.
     /// <para>This value equals v1.Length * v2.Length * cos(alpha), where alpha is the angle between vectors.</para>
     /// </returns>
+    /// <since>5.0</since>
     public static double Multiply(Vector3d vector1, Vector3d vector2)
     {
       return (vector1.m_x * vector2.m_x + vector1.m_y * vector2.m_y + vector1.m_z * vector2.m_z);
@@ -3306,6 +3503,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">A vector to negate.</param>
     /// <returns>A new vector where all components were multiplied by -1.</returns>
+    /// <since>5.0</since>
     public static Vector3d operator -(Vector3d vector)
     {
       return new Vector3d(-vector.m_x, -vector.m_y, -vector.m_z);
@@ -3318,6 +3516,7 @@ namespace Rhino.Geometry
     /// <remarks>Similar to <see cref="Reverse">Reverse()</see>, but static for CLR compliance.</remarks>
     /// <param name="vector">A vector to negate.</param>
     /// <returns>A new vector where all components were multiplied by -1.</returns>
+    /// <since>5.0</since>
     public static Vector3d Negate(Vector3d vector)
     {
       return new Vector3d(-vector.m_x, -vector.m_y, -vector.m_z);
@@ -3329,6 +3528,7 @@ namespace Rhino.Geometry
     /// <param name="a">A vector.</param>
     /// <param name="b">Another vector.</param>
     /// <returns>true if all coordinates are pairwise equal; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Vector3d a, Vector3d b)
     {
       return a.m_x == b.m_x && a.m_y == b.m_y && a.m_z == b.m_z;
@@ -3340,6 +3540,7 @@ namespace Rhino.Geometry
     /// <param name="a">A vector.</param>
     /// <param name="b">Another vector.</param>
     /// <returns>true if any coordinate pair is different; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Vector3d a, Vector3d b)
     {
       return a.m_x != b.m_x || a.m_y != b.m_y || a.m_z != b.m_z;
@@ -3355,6 +3556,7 @@ namespace Rhino.Geometry
     /// <para>has Length == a.Length * b.Length * sin(theta) where theta is the angle between a and b.</para>
     /// <para>The resulting vector is oriented according to the right hand rule.</para>
     /// </returns>
+    /// <since>5.0</since>
     public static Vector3d CrossProduct(Vector3d a, Vector3d b)
     {
       return new Vector3d(a.m_y * b.m_z - b.m_y * a.m_z, a.m_z * b.m_x - b.m_z * a.m_x, a.m_x * b.m_y - b.m_x * a.m_y);
@@ -3367,6 +3569,7 @@ namespace Rhino.Geometry
     /// <param name="a">First vector for angle.</param>
     /// <param name="b">Second vector for angle.</param>
     /// <returns>If the input is valid, the angle (in radians) between a and b; RhinoMath.UnsetValue otherwise.</returns>
+    /// <since>5.0</since>
     public static double VectorAngle(Vector3d a, Vector3d b)
     {
       if (!a.Unitize() || !b.Unitize())
@@ -3388,6 +3591,7 @@ namespace Rhino.Geometry
     /// <param name="b">Second vector.</param>
     /// <param name="plane">Two-dimensional plane on which to perform the angle measurement.</param>
     /// <returns>On success, the angle (in radians) between a and b as projected onto the plane; RhinoMath.UnsetValue on failure.</returns>
+    /// <since>5.0</since>
     public static double VectorAngle(Vector3d a, Vector3d b, Plane plane)
     {
       { // Project vectors onto plane.
@@ -3432,6 +3636,7 @@ namespace Rhino.Geometry
     /// <param name="v2">Second vector.</param>
     /// <param name="vNormal">Normal vector.</param>
     /// <returns>On success, the angle (in radians) between a and b with respect of normal vector; RhinoMath.UnsetValue on failure.</returns>
+    /// <since>6.0</since>
     public static double VectorAngle(Vector3d v1, Vector3d v2, Vector3d vNormal)
     {
       if ((Math.Abs(v1.X - v2.X) < 1e-64) && (Math.Abs(v1.Y - v2.Y) < 1e-64) && (Math.Abs(v1.Z - v2.Z) < 1e-64))
@@ -3498,6 +3703,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is smaller than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z is smaller than b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <(Vector3d a, Vector3d b)
     {
       if (a.X < b.X)
@@ -3523,6 +3729,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is smaller than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z &lt;= b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator <=(Vector3d a, Vector3d b)
     {
       return a.CompareTo(b) <= 0;
@@ -3539,6 +3746,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is larger than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z is larger than b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >(Vector3d a, Vector3d b)
     {
       if (a.X > b.X)
@@ -3564,6 +3772,7 @@ namespace Rhino.Geometry
     /// or a.X == b.X and a.Y is larger than b.Y,
     /// or a.X == b.X and a.Y == b.Y and a.Z &gt;= b.Z;
     /// otherwise, false.</returns>
+    /// <since>5.0</since>
     public static bool operator >=(Vector3d a, Vector3d b)
     {
       return a.CompareTo(b) >= 0;
@@ -3580,6 +3789,7 @@ namespace Rhino.Geometry
     /// <param name="y">Y axis vector.</param>
     /// <param name="z">Z axis vector.</param>
     /// <returns>True if all vectors are non-zero and mutually perpendicular.</returns>
+    /// <since>6.7</since>
     public static bool AreOrthogonal(Vector3d x, Vector3d y, Vector3d z)
     {
       return UnsafeNativeMethods.ON_Plane_IsOrthogonalFrame(x, y, z);
@@ -3592,6 +3802,7 @@ namespace Rhino.Geometry
     /// <param name="y">Y axis vector.</param>
     /// <param name="z">Z axis vector.</param>
     /// <returns>True if all vectors are non-zero and mutually perpendicular.</returns>
+    /// <since>6.7</since>
     public static bool AreOrthonormal(Vector3d x, Vector3d y, Vector3d z)
     {
       return UnsafeNativeMethods.ON_Plane_IsOrthonormalFrame(x, y, z);
@@ -3605,6 +3816,7 @@ namespace Rhino.Geometry
     /// <param name="y">Y axis vector.</param>
     /// <param name="z">Z axis vector.</param>
     /// <returns>True if all vectors are non-zero and mutually perpendicular.</returns>
+    /// <since>6.7</since>
     public static bool AreRighthanded(Vector3d x, Vector3d y, Vector3d z)
     {
       return UnsafeNativeMethods.ON_Plane_IsRightHandFrame(x, y, z);
@@ -3615,14 +3827,17 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the X (first) component of the vector.
     /// </summary>
+    /// <since>5.0</since>
     public double X { get { return m_x; } set { m_x = value; } }
     /// <summary>
     /// Gets or sets the Y (second) component of the vector.
     /// </summary>
+    /// <since>5.0</since>
     public double Y { get { return m_y; } set { m_y = value; } }
     /// <summary>
     /// Gets or sets the Z (third) component of the vector.
     /// </summary>
+    /// <since>5.0</since>
     public double Z { get { return m_z; } set { m_z = value; } }
 
     /// <summary>
@@ -3663,6 +3878,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether this vector is valid. 
     /// A valid vector must be formed of valid component values for x, y and z.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -3676,6 +3892,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the smallest (both positive and negative) component value in this vector.
     /// </summary>
+    /// <since>5.0</since>
     public double MinimumCoordinate
     {
       get
@@ -3688,6 +3905,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the largest (both positive and negative) component value in this vector.
     /// </summary>
+    /// <since>5.0</since>
     public double MaximumCoordinate
     {
       get
@@ -3702,6 +3920,7 @@ namespace Rhino.Geometry
     /// This is an application of Pythagoras' theorem.
     /// If this vector is invalid, its length is considered 0.
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get { return GetLengthHelper(m_x, m_y, m_z); }
@@ -3714,6 +3933,7 @@ namespace Rhino.Geometry
     /// this property does not. You should check validity in advance,
     /// if this vector can be invalid.
     /// </summary>
+    /// <since>5.0</since>
     public double SquareLength
     {
       get { return (m_x * m_x) + (m_y * m_y) + (m_z * m_z); }
@@ -3722,6 +3942,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not this is a unit vector. 
     /// A unit vector has length 1.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsUnitVector
     {
       get
@@ -3744,6 +3965,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsTiny(double tolerance)
     {
       return UnsafeNativeMethods.ON_3dVector_IsTiny(this, tolerance);
@@ -3753,6 +3975,7 @@ namespace Rhino.Geometry
     /// Uses RhinoMath.ZeroTolerance for IsTiny calculation.
     /// </summary>
     /// <returns>true if vector is very small, otherwise false.</returns>
+    /// <since>5.0</since>
     public bool IsTiny()
     {
       return IsTiny(RhinoMath.ZeroTolerance);
@@ -3762,6 +3985,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the X, Y, and Z values are all equal to 0.0.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsZero
     {
       get
@@ -3788,6 +4012,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="vector">The specified vector.</param>
     /// <returns>true if vector has the same coordinates as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Vector3d vector)
     {
@@ -3800,6 +4025,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Vector3d other, double epsilon)
     {
@@ -3820,6 +4046,7 @@ namespace Rhino.Geometry
     /// <para>-1: if this.X == other.X and this.Y == other.Y and this.Z &lt; other.Z</para>
     /// <para>+1: otherwise.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int CompareTo(Vector3d other)
     {
@@ -3874,6 +4101,7 @@ namespace Rhino.Geometry
     }
 
     /// <inheritdoc />
+    /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
@@ -3885,6 +4113,7 @@ namespace Rhino.Geometry
     /// <para>An invalid or zero length vector cannot be unitized.</para>
     /// </summary>
     /// <returns>true on success or false on failure.</returns>
+    /// <since>5.0</since>
     public bool Unitize()
     {
       bool rc = IsValid && UnsafeNativeMethods.ON_3dVector_Unitize(ref this);
@@ -3897,6 +4126,7 @@ namespace Rhino.Geometry
     /// <para>result = transformation*vector</para>
     /// </summary>
     /// <param name="transformation">Transformation matrix to apply.</param>
+    /// <since>5.0</since>
     public void Transform(Transform transformation)
     {
       double xx = transformation.m_00 * m_x + transformation.m_01 * m_y + transformation.m_02 * m_z;
@@ -3914,6 +4144,7 @@ namespace Rhino.Geometry
     /// <param name="angleRadians">Angle of rotation (in radians).</param>
     /// <param name="rotationAxis">Axis of rotation.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angleRadians, Vector3d rotationAxis)
     {
       if (RhinoMath.IsValidDouble(angleRadians) && rotationAxis.IsValid)
@@ -3930,6 +4161,7 @@ namespace Rhino.Geometry
     ///</summary>
     ///<remarks>Similar to <see cref="Negate">Negate</see>, that is only provided for CLR language compliance.</remarks>
     ///<returns>true on success or false if the vector is invalid.</returns>
+    /// <since>5.0</since>
     public bool Reverse()
     {
       if (!IsValid)
@@ -3955,6 +4187,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_intersectlines.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectlines.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public int IsParallelTo(Vector3d other)
     {
@@ -3972,6 +4205,7 @@ namespace Rhino.Geometry
     /// <para>0 = vectors are not parallel or at least one of the vectors is zero.</para>
     /// <para>-1 = vectors are anti-parallel.</para>
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public int IsParallelTo(Vector3d other, double angleTolerance)
     {
@@ -3984,6 +4218,7 @@ namespace Rhino.Geometry
     ///</summary>
     /// <param name="other">Vector to compare to.</param>
     ///<returns>true if both vectors are perpendicular, false if otherwise.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IsPerpendicularTo(Vector3d other)
     {
@@ -3996,6 +4231,7 @@ namespace Rhino.Geometry
     /// <param name="other">Vector to use for comparison.</param>
     /// <param name="angleTolerance">Angle tolerance (in radians).</param>
     ///<returns>true if vectors form Pi-radians (90-degree) angles with each other; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IsPerpendicularTo(Vector3d other, double angleTolerance)
     {
@@ -4015,6 +4251,7 @@ namespace Rhino.Geometry
     ///</summary>
     /// <param name="other">Vector to use as guide.</param>
     ///<returns>true on success, false if input vector is zero or invalid.</returns>
+    /// <since>5.0</since>
     public bool PerpendicularTo(Vector3d other)
     {
       return UnsafeNativeMethods.ON_3dVector_PerpendicularTo(ref this, other);
@@ -4086,6 +4323,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="position">The position.</param>
     /// <param name="direction">The direction.</param>
+    /// <since>5.0</since>
     public Ray3d(Point3d position, Vector3d direction)
     {
       m_P = position;
@@ -4108,6 +4346,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the starting position of this ray.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Position
     {
       get { return m_P; }
@@ -4116,6 +4355,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the direction vector of this ray.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Direction
     {
       get { return m_V; }
@@ -4126,6 +4366,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">The t parameter.</param>
     /// <returns>A point at (Direction*t + Position).</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -4145,6 +4386,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first <see cref="Ray3d"/>.</param>
     /// <param name="b">The second <see cref="Ray3d"/>.</param>
     /// <returns>true if position and direction of the two rays are equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Ray3d a, Ray3d b)
     {
       return (a.m_P == b.m_P && a.m_V == b.m_V);
@@ -4156,6 +4398,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first <see cref="Ray3d"/>.</param>
     /// <param name="b">The second <see cref="Ray3d"/>.</param>
     /// <returns>true if position or direction (or both) in the two rays are different; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Ray3d a, Ray3d b)
     {
       return (a.m_P != b.m_P || a.m_V != b.m_V);
@@ -4178,6 +4421,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="ray">The specified ray.</param>
     /// <returns>true if ray has the same position and direction as this; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Ray3d ray)
     {
@@ -4190,6 +4434,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Ray3d other, double epsilon)
     {
@@ -4200,7 +4445,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Computes a hashing number that represents the current ray.
     /// </summary>
-    /// <returns>A signed integer that represents both postion and direction, but is not unique.</returns>
+    /// <returns>A signed integer that represents both position and direction, but is not unique.</returns>
     [ConstOperation]
     public override int GetHashCode()
     {

@@ -10,6 +10,7 @@ namespace Rhino.FileIO
     bool m_delete_pointer; // = false; initialized to false by runtime
     IntPtr m_ptr;
 
+    /// <since>5.0</since>
     public FileWriteOptions()
     {
       m_ptr = UnsafeNativeMethods.CRhinoFileWriteOptions_New();
@@ -44,6 +45,7 @@ namespace Rhino.FileIO
     /// the name of the file will be used to update the document's default file
     /// path and title and document will be marked as not modified.
     /// </summary>
+    /// <since>6.7</since>
     public bool UpdateDocumentPath
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.UpdateDocumentPath); }
@@ -53,6 +55,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// If true, this command should export only the objects currently selected in the Rhino model.
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteSelectedObjectsOnly
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.SelectedMode); }
@@ -62,6 +65,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// The file written should include the render meshes if your File Writing Plug-in supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool IncludeRenderMeshes
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.RenderMeshesMode); }
@@ -71,6 +75,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// The file written should include a preview image if your File Writing Plug-in supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool IncludePreviewImage
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.PreviewMode); }
@@ -80,6 +85,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// The file written should include the bitmap table if your File Writing Plug-in supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool IncludeBitmapTable
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.BitmapsMode); }
@@ -89,6 +95,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// The file written should include history information if your File Writing Plug-In supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool IncludeHistory
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.HistoryMode); }
@@ -98,6 +105,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Write as template
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteAsTemplate
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.AsTemplate); }
@@ -106,12 +114,14 @@ namespace Rhino.FileIO
     /// <summary>
     /// If true, it means the command has been run with a '-', meaning you should not ask questions during writing. (no dialogs, no "getters", etc.)
     /// </summary>
+    /// <since>5.0</since>
     public bool SuppressDialogBoxes
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.BatchMode); }
       set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.BatchMode, value); }
     }
 
+    /// <since>7.0</since>
     public bool SuppressAllInput
     {
       get;
@@ -121,6 +131,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// If true, the file written should include only geometry File Writing Plug-in supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteGeometryOnly
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.GeometryOnly); }
@@ -130,12 +141,14 @@ namespace Rhino.FileIO
     /// <summary>
     /// If true, the file written should include User Data if your File Writing Plug-in supports it.
     /// </summary>
+    /// <since>5.0</since>
     public bool WriteUserData
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.SaveUserData); }
       set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.SaveUserData, value); }
     }
 
+    /// <since>5.0</since>
     public int FileVersion
     {
       get
@@ -149,6 +162,7 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <since>5.0</since>
     public Geometry.Transform Xform
     {
       get
@@ -168,6 +182,7 @@ namespace Rhino.FileIO
     /// For use on Apple frameworks only.
     /// Retrns the final destination file name.
     /// </summary>
+    /// <since>6.3</since>
     public string DestinationFileName
     {
       get
@@ -189,6 +204,7 @@ namespace Rhino.FileIO
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -212,6 +228,7 @@ namespace Rhino.FileIO
     bool m_delete_pointer; // = false; initialized to false by runtime
     IntPtr m_ptr;
 
+    /// <since>5.0</since>
     public FileReadOptions()
     {
       m_ptr = UnsafeNativeMethods.CRhinoFileReadOptions_New();
@@ -252,6 +269,7 @@ namespace Rhino.FileIO
     /// patterns, and so on with the same name as items being read from the file.
     /// </para>
     /// </summary>
+    /// <since>5.0</since>
     public bool ImportMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.ImportMode); }
@@ -267,6 +285,7 @@ namespace Rhino.FileIO
     /// <item><description>Setting up appropriate views when you're finished reading.</description></item>
     /// </list>
     /// </summary>
+    /// <since>5.0</since>
     public bool OpenMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.OpenMode); }
@@ -277,6 +296,7 @@ namespace Rhino.FileIO
     /// true means we are reading template information in something like
     /// a OnFileNew event.
     /// </summary>
+    /// <since>5.0</since>
     public bool NewMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.NewMode); }
@@ -288,6 +308,7 @@ namespace Rhino.FileIO
     /// instance definition or some other type of "inserting" that is supported
     /// by Rhino's "Insert" command.
     /// </summary>
+    /// <since>5.0</since>
     public bool InsertMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.InsertMode); }
@@ -298,6 +319,7 @@ namespace Rhino.FileIO
     /// true means we are reading information for a work session reference model
     /// or a linked instance definition.
     /// </summary>
+    /// <since>5.0</since>
     public bool ImportReferenceMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.ImportReferenceMode); }
@@ -307,6 +329,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// true means you cannot ask questions during reading. (no dialogs, no "getters", etc.)
     /// </summary>
+    /// <since>5.0</since>
     public bool BatchMode
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.BatchMode); }
@@ -317,6 +340,7 @@ namespace Rhino.FileIO
     /// If this parameter is true, then no questions are asked when unit conversion
     /// scaling is optional and the setting specified by ScaleGeometry is used.
     /// </summary>
+    /// <since>5.0</since>
     public bool UseScaleGeometry
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.UseScaleGeometry); }
@@ -337,6 +361,7 @@ namespace Rhino.FileIO
     /// object is scaled by the square of the scale factor.
     /// </para>
     /// </summary>
+    /// <since>5.0</since>
     public bool ScaleGeometry
     {
       get { return GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.ScaleGeometry); }
@@ -351,6 +376,7 @@ namespace Rhino.FileIO
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);

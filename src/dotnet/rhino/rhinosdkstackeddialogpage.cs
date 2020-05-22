@@ -20,6 +20,7 @@ namespace Rhino.UI
     /// <param name="image"></param>
     /// <param name="canBeNull"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     IntPtr GetImageHandle(System.Drawing.Image image, bool canBeNull);
     /// <summary>
     /// Convert image to platform specific unmanaged pointer
@@ -27,28 +28,34 @@ namespace Rhino.UI
     /// <param name="icon"></param>
     /// <param name="canBeNull"></param>
     /// <returns></returns>
+    /// <since>6.1</since>
     IntPtr GetImageHandle(System.Drawing.Icon icon, bool canBeNull);
     /// <summary>
     /// Get the unmanaged pointer associated with the pages content control
     /// </summary>
     /// <param name="nativeWindowObject"></param>
+    /// <param name="isRhinoPanel"></param>
     /// <param name="host"></param>
     /// <returns></returns>
-    IntPtr GetNativePageWindow(object nativeWindowObject, out object host);
+    /// <since>6.0</since>
+    IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, out object host);
     /// <summary>
     /// Get the unmanaged pointer associated with the pages content control
     /// </summary>
     /// <param name="pageObject"></param>
     /// <param name="nativeWindowObject"></param>
+    /// <param name="isRhinoPanel"></param>
     /// <param name="host"></param>
     /// <returns></returns>
-    IntPtr GetNativePageWindow(object pageObject, out object nativeWindowObject, out object host);
+    /// <since>6.1</since>
+    IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, out object nativeWindowObject, out object host);
     /// <summary>
     /// Redraw the specified control.
     /// </summary>
     /// <param name="pageControl">
     /// Control to redraw
     /// </param>
+    /// <since>6.0</since>
     void RedrawPageControl(object pageControl);
     /// <summary>
     /// Get the minimum size associated with a control object
@@ -62,6 +69,7 @@ namespace Rhino.UI
     /// <param name="size">
     /// The minimum size of the control if provided.
     /// </param>
+    /// <since>6.5</since>
     bool TryGetControlMinimumSize (object controlObject, out System.Drawing.SizeF size);
   }
 
@@ -75,11 +83,11 @@ namespace Rhino.UI
     {
       throw new NotImplementedException ();
     }
-    public IntPtr GetNativePageWindow(object nativeWindowObject, out object host)
+    public IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, out object host)
     {
       throw new NotImplementedException();
     }
-    public IntPtr GetNativePageWindow(object pageObject, out object nativeWindowObject, out object host)
+    public IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, out object nativeWindowObject, out object host)
     {
       throw new NotImplementedException();
     }
@@ -122,11 +130,13 @@ namespace Rhino.UI
     /// <summary>
     /// List of child (sub) pages of this page
     /// </summary>
+    /// <since>5.0</since>
     public List<StackedDialogPage> Children => m_children ?? (m_children = new List<StackedDialogPage>());
 
     /// <summary>
     /// Will be true if this page contains sub pages.
     /// </summary>
+    /// <since>5.0</since>
     public bool HasChildren => (m_children!=null && m_children.Count>0);
 
     /// <summary>
@@ -134,6 +144,7 @@ namespace Rhino.UI
     /// page to a page after the parent dialog has been created.
     /// </summary>
     /// <param name="pageToAdd"></param>
+    /// <since>6.0</since>
     public void AddChildPage(StackedDialogPage pageToAdd)
     {
       if (!Runtime.HostUtils.RunningOnWindows)
@@ -172,6 +183,7 @@ namespace Rhino.UI
     /// the page as modified will cause the Apply button to get enabled if this
     /// is currently the visible page and the page includes the Apply button.
     /// </summary>
+    /// <since>6.0</since>
     public bool Modified
     {
       get => RhinoPageHooks.GetSetIsPageModified(this, false, false);
@@ -182,11 +194,13 @@ namespace Rhino.UI
     /// When running on Windows return the window handle for the parent of this
     /// page otherwise; return IntPtr.Zero.
     /// </summary>
+    /// <since>6.0</since>
     public IntPtr Handle => RhinoPageHooks.PageCollectionWindowHandle(this);
 
     /// <summary>
     /// Remove this page from the dialog box
     /// </summary>
+    /// <since>6.0</since>
     public void RemovePage()
     {
       RhinoPageHooks.RemovePage(this);
@@ -195,6 +209,7 @@ namespace Rhino.UI
     /// <summary>
     /// Make this page the active, visible page
     /// </summary>
+    /// <since>6.0</since>
     public void MakeActivePage()
     {
       RhinoPageHooks.MakeActivePage(this);
@@ -206,6 +221,7 @@ namespace Rhino.UI
     /// Rhino supports controls that are derived from NSview or
     /// Eto.Forms.Control.
     /// </summary>
+    /// <since>5.0</since>
     public virtual object PageControl
     {
       get
@@ -230,18 +246,21 @@ namespace Rhino.UI
     /// only.
     /// </summary>
     /// <param name="hwndParent"></param>
+    /// <since>5.0</since>
     public virtual void OnCreateParent(IntPtr hwndParent) { }
     /// <summary>
     /// Called when the parent window has been resized
     /// </summary>
     /// <param name="width"></param>
     /// <param name="height"></param>
+    /// <since>5.0</since>
     public virtual void OnSizeParent(int width, int height) { }
     /// <summary>
     /// Change the title passed to the constructor and, this will cause
     /// LocalPageTitle to get called also.
     /// </summary>
     /// <param name="newPageTile"></param>
+    /// <since>6.0</since>
     public void SetEnglishPageTitle(string newPageTile)
     {
       if (string.IsNullOrWhiteSpace(newPageTile))
@@ -253,6 +272,7 @@ namespace Rhino.UI
     /// English string used when scripting this page and a user prefixes a
     /// command option with "_"
     /// </summary>
+    /// <since>5.0</since>
     public string EnglishPageTitle { get; private set; }
 
     /// <summary>
@@ -260,6 +280,7 @@ namespace Rhino.UI
     /// control.  This is also uses as a command line option when scripting
     /// this page.
     /// </summary>
+    /// <since>5.0</since>
     public virtual string LocalPageTitle => EnglishPageTitle;
 
     /// <summary>
@@ -267,6 +288,7 @@ namespace Rhino.UI
     /// the Mac Rhino UI
     /// </summary>
     /// <value>The page image.</value>
+    /// <since>6.0</since>
     public virtual System.Drawing.Image PageImage => null;
 
     /// <summary>Called when stacked dialog OK button is pressed.</summary>
@@ -274,9 +296,11 @@ namespace Rhino.UI
     /// If return value is true then the dialog will be closed. A return of false means
     /// there was an error and dialog remains open so page can be properly updated.
     /// </returns>
+    /// <since>5.0</since>
     public virtual bool OnApply() { return true; }
 
     ///<summary>Called when stacked dialog Cancel button is pressed.</summary>
+    /// <since>5.0</since>
     public virtual void OnCancel(){}
 
     ///<summary>Called when this page is activated/deactivated.</summary>
@@ -286,6 +310,7 @@ namespace Rhino.UI
     ///activated otherwise will not allow you to change the current page.
     ///Default returns true
     ///</returns>
+    /// <since>5.0</since>
     public virtual bool OnActivate( bool active) { return true; }
 
     ///<summary>Called when this page is activated.</summary>
@@ -296,6 +321,7 @@ namespace Rhino.UI
     ///Default returns false
     ///Note: returning false implies that OnDefaults() method will never get called.
     ///</returns>
+    /// <since>5.0</since>
     public virtual bool ShowDefaultsButton => false;
 
     ///<summary>Called when this page is activated</summary>
@@ -307,14 +333,17 @@ namespace Rhino.UI
     ///Note: If true is returned OnApply will get called when the button is
     ///      clicked.
     ///</returns>
+    /// <since>6.0</since>
     public virtual bool ShowApplyButton => false;
 
     ///<summary>Called when stacked dialog Defaults button is pressed (see ShowDefaultsButton).</summary>
+    /// <since>5.0</since>
     public virtual void OnDefaults() { }
 
     /// <summary>
     /// Called when the parent dialog requests help for this page.
     /// </summary>
+    /// <since>5.0</since>
     public virtual void OnHelp() { }
 
     /// <summary>
@@ -339,6 +368,7 @@ namespace Rhino.UI
     /// Currently only used by Windows Rhino.  If this is set to true then the
     /// tree control item text will be bold.
     /// </summary>
+    /// <since>6.0</since>
     public bool NavigationTextIsBold
     {
       get
@@ -364,6 +394,7 @@ namespace Rhino.UI
     /// tree control item text be drawn using this color.  Set the color to
     /// System.Drawing.Color.Empty to use the default color.
     /// </summary>
+    /// <since>6.0</since>
     public System.Drawing.Color NavigationTextColor
     {
       get

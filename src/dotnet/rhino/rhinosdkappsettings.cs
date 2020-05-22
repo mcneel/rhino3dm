@@ -15,17 +15,20 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the name of the default font face.
     /// </summary>
+    /// <since>5.0</since>
     public string DefaultFontFaceName { get; set; }
 
     /// <summary>
     /// Gets or sets the default layer color.
     /// </summary>
+    /// <since>5.0</since>
     public Color DefaultLayerColor { get; set; }
 
     ///<summary>
     ///The color used to draw selected objects.
     ///The default is yellow, but this can be customized by the user.
     ///</summary>
+    /// <since>5.0</since>
     public Color SelectedObjectColor { get; set; }
 
     //public static Color SelectedReferenceObjectColor
@@ -35,6 +38,7 @@ namespace Rhino.ApplicationSettings
     //}
 
     ///<summary>Gets or sets the color used to draw locked objects.</summary>
+    /// <since>5.0</since>
     public Color LockedObjectColor{ get; set; }
 
     //public static Color LockedRefereceObjectColor
@@ -45,31 +49,43 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>Gets or sets the color of the world X axis of the world coordinates icon,
     /// appearing usually bottom left in viewports.</summary>
+    /// <since>5.0</since>
     public Color WorldCoordIconXAxisColor{ get; set; }
     /// <summary>Gets or sets the color of the world Y axis of the world coordinate icon,
     /// appearing usually bottom left in viewports.</summary>
+    /// <since>5.0</since>
     public Color WorldCoordIconYAxisColor{ get; set; }
     /// <summary>Gets or sets the color of the world Z axis of the world coordinate icon,
     /// appearing usually bottom left in viewports.</summary>
+    /// <since>5.0</since>
     public Color WorldCoordIconZAxisColor{ get; set; }
 
     /// <summary>Gets or sets the tracking color.</summary>
+    /// <since>5.0</since>
     public Color TrackingColor{ get; set; }
     /// <summary>Gets or sets the feedback color.</summary>
+    /// <since>5.0</since>
     public Color FeedbackColor{ get; set; }
     /// <summary>Gets or sets the default object color.</summary>
+    /// <since>5.0</since>
     public Color DefaultObjectColor{ get; set; }
     /// <summary>Gets or sets the viewport background color.</summary>
+    /// <since>5.0</since>
     public Color ViewportBackgroundColor{ get; set; }
     /// <summary>Gets or sets the frame background color.</summary>
+    /// <since>5.0</since>
     public Color FrameBackgroundColor{ get; set; }
     /// <summary>Gets or sets the command prompt text color.</summary>
+    /// <since>5.0</since>
     public Color CommandPromptTextColor{ get; set; }
-    /// <summary>Gets or sets the comand prompt hypertext color.</summary>
+    /// <summary>Gets or sets the command prompt hypertext color.</summary>
+    /// <since>5.0</since>
     public Color CommandPromptHypertextColor{ get; set; }
-    /// <summary>Gets or sets the comand prompt background color.</summary>
+    /// <summary>Gets or sets the command prompt background color.</summary>
+    /// <since>5.0</since>
     public Color CommandPromptBackgroundColor{ get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
+    /// <since>5.0</since>
     public Color CrosshairColor{ get; set; }
 
     ///<summary>
@@ -77,32 +93,43 @@ namespace Rhino.ApplicationSettings
     ///of page views to represent the printed area. The alpha portion of the color
     ///is used to draw the paper blended into the background
     ///</summary>
+    /// <since>5.0</since>
     public Color PageviewPaperColor{ get; set; }
 
     ///<summary>
     ///Gets or sets the color used by the layer manager dialog as the background color for the current layer.
     ///</summary>
+    /// <since>5.0</since>
     public Color CurrentLayerBackgroundColor{ get; set; }
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
+    /// <since>5.0</since>
     public bool EchoPromptsToHistoryWindow{ get; set; }
     ///<summary>Gets or sets a value that determines if command names are written to the history window.</summary>
+    /// <since>5.0</since>
     public bool EchoCommandsToHistoryWindow{ get; set; }
     ///<summary>Gets or sets a value that determines if the full path of the document is shown in the Rhino title bar.</summary>
+    /// <since>5.0</since>
     public bool ShowFullPathInTitleBar{ get; set; }
     ///<summary>Gets or sets a value that determines if cross hairs are visible.</summary>
+    /// <since>5.0</since>
     public bool ShowCrosshairs{ get; set; }
 
     ///<summary>Gets or sets the color of the thin line in the grid.</summary>
+    /// <since>5.0</since>
     public Color GridThinLineColor { get; set; }
     ///<summary>Gets or sets the color of the thick line in the grid.</summary>
+    /// <since>5.0</since>
     public Color GridThickLineColor { get; set; }
 
     ///<summary>Gets or sets the color of X axis line in the grid.</summary>
+    /// <since>5.0</since>
     public Color GridXAxisLineColor { get; set; }
     ///<summary>Gets or sets the color of Y axis line in the grid.</summary>
+    /// <since>5.0</since>
     public Color GridYAxisLineColor { get; set; }
     ///<summary>Gets or sets the color of Z axis line in the grid.</summary>
+    /// <since>5.0</since>
     public Color GridZAxisLineColor { get; set; }
   }
 
@@ -176,6 +203,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the factory settings of the application.
     /// </summary>
     /// <returns>An instance of a class that represents all the default settings joined together.</returns>
+    /// <since>5.0</since>
     public static AppearanceSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -186,6 +214,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <returns>An instance of a class that represents all the settings as they appear in the Rhino _Options dialog,
     /// joined in a single class.</returns>
+    /// <since>5.0</since>
     public static AppearanceSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -194,6 +223,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>5.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -203,6 +233,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">A joined settings object.</param>
+    /// <since>5.0</since>
     public static void UpdateFromState(AppearanceSettingsState state)
     {
       DefaultLayerColor = state.DefaultLayerColor;
@@ -237,6 +268,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the default font face name used in Rhino.
     /// </summary>
+    /// <since>5.0</since>
     public static string DefaultFontFaceName
     {
       get
@@ -293,6 +325,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="whichColor">A color association.</param>
     /// <returns>A .Net library color.</returns>
+    /// <since>5.0</since>
     public static Color GetPaintColor(PaintColor whichColor)
     {
       int abgr = UnsafeNativeMethods.RhColors_GetColor(whichColor);
@@ -304,6 +337,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
+    /// <since>5.0</since>
     public static void SetPaintColor(PaintColor whichColor, Color c)
     {
       SetPaintColor(whichColor, c, false);
@@ -315,6 +349,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
     /// <param name="forceUiUpdate">true if the UI should be forced to update.</param>
+    /// <since>5.0</since>
     public static void SetPaintColor(PaintColor whichColor, Color c, bool forceUiUpdate)
     {
       int argb = c.ToArgb();
@@ -324,6 +359,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets a value indicating if logical paint colors should be used.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("custom colors are always used")]
     public static bool UsePaintColors
     {
@@ -335,6 +371,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="whichColor">A color association.</param>
     /// <returns>A .Net library color.</returns>
+    /// <since>6.0</since>
     public static Color GetWidgetColor(WidgetColor whichColor)
     {
       int abgr = UnsafeNativeMethods.RhColors_GetWidgetColor(whichColor);
@@ -346,6 +383,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
+    /// <since>6.0</since>
     public static void SetWidgetColor(WidgetColor whichColor, Color c)
     {
       SetWidgetColor(whichColor, c, false);
@@ -357,6 +395,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
     /// <param name="forceUiUpdate">true if the UI should be forced to update.</param>
+    /// <since>6.0</since>
     public static void SetWidgetColor(WidgetColor whichColor, Color c, bool forceUiUpdate)
     {
       int argb = c.ToArgb();
@@ -366,6 +405,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the default layer color.
     /// </summary>
+    /// <since>5.0</since>
     public static Color DefaultLayerColor
     {
       get { return GetColor(idxDefaultLayerColor); }
@@ -376,6 +416,7 @@ namespace Rhino.ApplicationSettings
     ///The color used to draw selected objects.
     ///The default is yellow, but this can be customized by the user.
     ///</summary>
+    /// <since>5.0</since>
     public static Color SelectedObjectColor
     {
       get { return GetColor(idxSelectedObjectColor); }
@@ -389,6 +430,7 @@ namespace Rhino.ApplicationSettings
     //}
 
     ///<summary>color used to draw locked objects.</summary>
+    /// <since>5.0</since>
     public static Color LockedObjectColor
     {
       get { return GetColor(idxLockedObjectColor); }
@@ -404,6 +446,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the world coordinate X axis.
     /// </summary>
+    /// <since>5.0</since>
     public static Color WorldCoordIconXAxisColor
     {
       get { return GetColor(idxWorldIconXColor); }
@@ -413,6 +456,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the world coordinate Y axis.
     /// </summary>
+    /// <since>5.0</since>
     public static Color WorldCoordIconYAxisColor
     {
       get { return GetColor(idxWorldIconYColor); }
@@ -422,6 +466,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the world coordinate Z axis.
     /// </summary>
+    /// <since>5.0</since>
     public static Color WorldCoordIconZAxisColor
     {
       get { return GetColor(idxWorldIconZColor); }
@@ -431,6 +476,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the tracking color.
     /// </summary>
+    /// <since>5.0</since>
     public static Color TrackingColor
     {
       get { return GetColor(idxTrackingColor); }
@@ -440,6 +486,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the feedback color.
     /// </summary>
+    /// <since>5.0</since>
     public static Color FeedbackColor
     {
       get { return GetColor(idxFeedbackColor); }
@@ -449,6 +496,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the default color for new objects.
     /// </summary>
+    /// <since>5.0</since>
     public static Color DefaultObjectColor
     {
       get { return GetColor(idxDefaultObjectColor); }
@@ -458,6 +506,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the viewport background color.
     /// </summary>
+    /// <since>5.0</since>
     public static Color ViewportBackgroundColor
     {
       get { return GetColor(idxViewportBackgroundColor); }
@@ -467,6 +516,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the background color of the frame.
     /// </summary>
+    /// <since>5.0</since>
     public static Color FrameBackgroundColor
     {
       get { return GetColor(idxFrameBackgroundColor); }
@@ -476,6 +526,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the command prompt text.
     /// </summary>
+    /// <since>5.0</since>
     public static Color CommandPromptTextColor
     {
       get { return GetColor(idxCommandPromptTextColor); }
@@ -485,6 +536,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the command prompt hypertext.
     /// </summary>
+    /// <since>5.0</since>
     public static Color CommandPromptHypertextColor
     {
       get { return GetColor(idxCommandPromptHypertextColor); }
@@ -494,6 +546,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the command prompt background.
     /// </summary>
+    /// <since>5.0</since>
     public static Color CommandPromptBackgroundColor
     {
       get { return GetColor(idxCommandPromptBackgroundColor); }
@@ -503,6 +556,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the crosshair icon.
     /// </summary>
+    /// <since>5.0</since>
     public static Color CrosshairColor
     {
       get { return GetColor(idxCrosshairColor); }
@@ -514,6 +568,7 @@ namespace Rhino.ApplicationSettings
     /// of page views to represent the printed area. The alpha portion of the color
     /// is used to draw the paper blended into the background
     ///</summary>
+    /// <since>5.0</since>
     public static Color PageviewPaperColor
     {
       get { return GetColor(idxPageviewPaperColor); }
@@ -523,6 +578,7 @@ namespace Rhino.ApplicationSettings
     ///<summary>
     /// Gets or sets the color used by the layer manager dialog as the background color for the current layer.
     ///</summary>
+    /// <since>5.0</since>
     public static Color CurrentLayerBackgroundColor
     {
       get { return GetColor(idxCurrentLayerBackgroundColor); }
@@ -532,6 +588,7 @@ namespace Rhino.ApplicationSettings
     ///<summary>
     /// Gets or sets the color of objects that are eligible to be edited.
     ///</summary>
+    /// <since>6.0</since>
     public static Color EditCandidateColor
     {
       get { return GetColor(idxEditCandidateColor); }
@@ -559,6 +616,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the thin line of the grid.
     /// </summary>
+    /// <since>5.0</since>
     public static Color GridThinLineColor
     {
       get { return GetGridColor(idxThinLineColor, IntPtr.Zero); }
@@ -568,6 +626,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the thick line of the grid.
     /// </summary>
+    /// <since>5.0</since>
     public static Color GridThickLineColor
     {
       get { return GetGridColor(idxThickLineColor, IntPtr.Zero); }
@@ -577,6 +636,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the X axis of the grid.
     /// </summary>
+    /// <since>5.0</since>
     public static Color GridXAxisLineColor
     {
       get { return GetGridColor(idxXAxisColor, IntPtr.Zero); }
@@ -586,6 +646,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the Y axis of the grid.
     /// </summary>
+    /// <since>5.0</since>
     public static Color GridYAxisLineColor
     {
       get { return GetGridColor(idxYAxisColor, IntPtr.Zero); }
@@ -595,6 +656,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the color of the Z axis of the grid.
     /// </summary>
+    /// <since>5.0</since>
     public static Color GridZAxisLineColor
     {
       get { return GetGridColor(idxZAxisColor, IntPtr.Zero); }
@@ -634,6 +696,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the command prompt position.
     /// </summary>
+    /// <since>5.0</since>
     public static CommandPromptPosition CommandPromptPosition
     {
       get
@@ -654,24 +717,28 @@ namespace Rhino.ApplicationSettings
     const int idxShowSideBar = 5;
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
+    /// <since>5.0</since>
     public static bool EchoPromptsToHistoryWindow
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoPromptsToHistoryWindow, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxEchoPromptsToHistoryWindow, value); }
     }
     ///<summary>Gets or sets a value that determines if command names are written to the history window.</summary>
+    /// <since>5.0</since>
     public static bool EchoCommandsToHistoryWindow
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoCommandsToHistoryWindow, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxEchoCommandsToHistoryWindow, value); }
     }
     ///<summary>Gets or sets a value that determines if the full path of the document is shown in the Rhino title bar.</summary>
+    /// <since>5.0</since>
     public static bool ShowFullPathInTitleBar
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxFullPathInTitleBar, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxFullPathInTitleBar, value); }
     }
     ///<summary>Gets or sets a value that determines if cross hairs are visible.</summary>
+    /// <since>5.0</since>
     public static bool ShowCrosshairs
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsVisible, IntPtr.Zero); }
@@ -680,6 +747,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Should the side bar be displayed
     /// </summary>
+    /// <since>6.0</since>
     public static bool ShowSideBar
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowSideBar, IntPtr.Zero); }
@@ -690,6 +758,7 @@ namespace Rhino.ApplicationSettings
     public static property bool MainWindowTitleVisible{ bool get(); void set(bool); }
     */
     ///<summary>Gets or sets a value that determines if the File menu is visible.</summary>
+    /// <since>5.0</since>
     public static bool MenuVisible
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxMenuVisible, IntPtr.Zero); }
@@ -697,6 +766,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the language identifier.</summary>
+    /// <since>5.0</since>
     public static int LanguageIdentifier
     {
       get
@@ -718,6 +788,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the previous language identifier.
     /// </summary>
+    /// <since>5.0</since>
     public static int PreviousLanguageIdentifier
     {
       get
@@ -737,6 +808,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="bounds">The rectangle in which the main window attempts to shows is assigned to this out parameter during the call.</param>
     /// <returns>false if the information could not be retrieved.</returns>
+    /// <since>6.0</since>
     public static bool InitialMainWindowPosition(out Rectangle bounds)
     {
       int left=0, top=0, right=0, bottom=0, flags=0;
@@ -752,6 +824,7 @@ namespace Rhino.ApplicationSettings
   public static class CommandAliasList
   {
     ///<summary>Returns the number of command alias in Rhino.</summary>
+    /// <since>5.0</since>
     public static int Count
     {
       get
@@ -762,6 +835,7 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Returns a list of command alias names.</summary>
     ///<returns>An array of strings. This can be empty.</returns>
+    /// <since>5.0</since>
     public static string[] GetNames()
     {
       int count = UnsafeNativeMethods.CRhinoAppAliasList_Count(IntPtr.Zero);
@@ -779,6 +853,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Removes all aliases from the list.</summary>
+    /// <since>5.0</since>
     public static void Clear()
     {
       UnsafeNativeMethods.RhCommandAliasList_DestroyList();
@@ -786,6 +861,7 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Returns the macro of a command alias.</summary>
     ///<param name='alias'>[in] The name of the command alias.</param>
+    /// <since>5.0</since>
     public static string GetMacro(string alias)
     {
       using (var sh = new StringHolder())
@@ -800,6 +876,7 @@ namespace Rhino.ApplicationSettings
     ///<param name='alias'>[in] The name of the command alias.</param>
     ///<param name='macro'>[in] The new command macro to run when the alias is executed.</param>
     ///<returns>true if successful.</returns>
+    /// <since>5.0</since>
     public static bool SetMacro(string alias, string macro)
     {
       return UnsafeNativeMethods.RhCommandAliasList_SetMacro(alias, macro);
@@ -809,6 +886,7 @@ namespace Rhino.ApplicationSettings
     ///<param name='alias'>[in] The name of the command alias.</param>
     ///<param name='macro'>[in] The command macro to run when the alias is executed.</param>
     ///<returns>true if successful.</returns>
+    /// <since>5.0</since>
     public static bool Add(string alias, string macro)
     {
       return UnsafeNativeMethods.RhCommandAliasList_Add(alias, macro);
@@ -817,6 +895,7 @@ namespace Rhino.ApplicationSettings
     ///<summary>Deletes an existing command alias from Rhino.</summary>
     ///<param name='alias'>[in] The name of the command alias.</param>
     ///<returns>true if successful.</returns>
+    /// <since>5.0</since>
     public static bool Delete(string alias)
     {
       return UnsafeNativeMethods.RhCommandAliasList_Delete(alias);
@@ -825,6 +904,7 @@ namespace Rhino.ApplicationSettings
     ///<summary>Verifies that a command alias exists in Rhino.</summary>
     ///<param name='alias'>[in] The name of the command alias.</param>
     ///<returns>true if the alias exists.</returns>
+    /// <since>5.0</since>
     public static bool IsAlias(string alias)
     {
       return UnsafeNativeMethods.RhCommandAliasList_IsAlias(alias);
@@ -835,6 +915,7 @@ namespace Rhino.ApplicationSettings
     /// <para>Modifications to this dictionary do not affect any Rhino command alias.</para>
     /// </summary>
     /// <returns>The new dictionary.</returns>
+    /// <since>5.0</since>
     public static System.Collections.Generic.Dictionary<string,string> ToDictionary()
     {
       var rc = new System.Collections.Generic.Dictionary<string,string>();
@@ -852,6 +933,7 @@ namespace Rhino.ApplicationSettings
     /// Computes a value indicating if the current alias list is the same as the default alias list.
     /// </summary>
     /// <returns>true if the current alias list is exactly equal to the default alias list; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool IsDefault()
     {
       var current = ToDictionary();
@@ -873,9 +955,10 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>
     /// Constructs a dictionary containing as keys the default names and as value the default macro.
-    /// <para>The returned dicionary contains a copy of the settings.</para>
+    /// <para>The returned dictionary contains a copy of the settings.</para>
     /// </summary>
-    /// <returns>A new dictionary with the default name/macro combinantions.</returns>
+    /// <returns>A new dictionary with the default name/macro combinations.</returns>
+    /// <since>5.0</since>
     public static System.Collections.Generic.Dictionary<string, string> GetDefaults()
     {
       var rc = new System.Collections.Generic.Dictionary<string,string>();
@@ -914,16 +997,19 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// The angle range.
     /// </summary>
+    /// <since>7.0</since>
     public Interval AngleRange { get; set; }
 
     /// <summary>
     /// Show isoparametric curves.
     /// </summary>
+    /// <since>7.0</since>
     public bool ShowIsoCurves { get; set; }
 
     /// <summary>
     /// The up direction.
     /// </summary>
+    /// <since>7.0</since>
     public Vector3d UpDirection { get; set; }
   }
 
@@ -954,6 +1040,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the factory settings of the application.
     /// </summary>
+    /// <since>7.0</since>
     public static DraftAngleAnalysisSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -962,6 +1049,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the current settings of the application.
     /// </summary>
+    /// <since>7.0</since>
     public static DraftAngleAnalysisSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -970,6 +1058,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>7.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -979,6 +1068,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">The particular state.</param>
+    /// <since>7.0</since>
     public static void UpdateFromState(DraftAngleAnalysisSettingsState state)
     {
       AngleRange = state.AngleRange;
@@ -989,11 +1079,12 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// The angle range.
     /// </summary>
+    /// <since>7.0</since>
     public static Interval AngleRange
     {
       get
       {
-        Interval rc = new Interval(0.0, 5.0);
+        Interval rc = new Interval(-5.0, 5.0);
         UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_AngleRange(IntPtr.Zero, ref rc, false);
         return rc;
       }
@@ -1006,6 +1097,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Show isoparametric curves.
     /// </summary>
+    /// <since>7.0</since>
     public static bool ShowIsoCurves
     {
       get
@@ -1021,6 +1113,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// The up direction.
     /// </summary>
+    /// <since>7.0</since>
     public static Vector3d UpDirection
     {
       get
@@ -1044,6 +1137,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets a color used to enhance display edges in commands like _ShowEdges and _ShowNakedEdges.
     /// </summary>
+    /// <since>5.0</since>
     public Color ShowEdgeColor { get; set; }
 
     /// <summary>
@@ -1052,6 +1146,7 @@ namespace Rhino.ApplicationSettings
     /// <para>1 = naked.</para>
     /// <para>2 = non-manifold.</para>
     /// </summary>
+    /// <since>5.0</since>
     public int ShowEdges { get; set; }
   }
   
@@ -1075,6 +1170,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the factory settings of the application.
     /// </summary>
+    /// <since>5.0</since>
     public static EdgeAnalysisSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -1083,6 +1179,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the current settings of the application.
     /// </summary>
+    /// <since>5.0</since>
     public static EdgeAnalysisSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -1091,6 +1188,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>5.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -1100,6 +1198,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">The particular state.</param>
+    /// <since>5.0</since>
     public static void UpdateFromState(EdgeAnalysisSettingsState state)
     {
       ShowEdgeColor = state.ShowEdgeColor;
@@ -1109,6 +1208,7 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Gets or sets a color used to enhance display
     ///edges in commands like _ShowEdges and _ShowNakedEdges.</summary>
+    /// <since>5.0</since>
     public static Color ShowEdgeColor
     {
       get
@@ -1129,6 +1229,7 @@ namespace Rhino.ApplicationSettings
     /// <para>1 = naked.</para>
     /// <para>2 = non-manifold.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static int ShowEdges
     {
       get
@@ -1150,21 +1251,27 @@ namespace Rhino.ApplicationSettings
     internal FileSettingsState() { }
 
     ///<summary>How often the document will be saved when Rhino&apos;s automatic file saving mechanism is enabled.</summary>
+    /// <since>5.0</since>
     public System.TimeSpan AutoSaveInterval { get; set; }
 
     ///<summary>Enables or disables Rhino&apos;s automatic file saving mechanism.</summary>
+    /// <since>5.0</since>
     public bool AutoSaveEnabled { get; set; }
 
     ///<summary>Saves render and display meshes in autosave file.</summary>
+    /// <since>5.0</since>
     public bool AutoSaveMeshes { get; set; }
     
     ///<summary>true for users who consider view changes a document change.</summary>
+    /// <since>5.0</since>
     public bool SaveViewChanges { get; set; }
 
     ///<summary>Ensures that only one person at a time can have a file open for saving.</summary>
+    /// <since>5.0</since>
     public bool FileLockingEnabled { get; set; }
 
     ///<summary>Displays an information dialog which identifies computer file is open on.</summary>
+    /// <since>5.0</since>
     public bool FileLockingOpenWarning { get; set; }
 
     /// <summary>
@@ -1173,16 +1280,19 @@ namespace Rhino.ApplicationSettings
     /// the clipboard but will be able to copy from the current to the previous version using the
     /// clipboard.
     /// </summary>
+    /// <since>5.0</since>
     public bool ClipboardCopyToPreviousRhinoVersion { get; set; }
 
     /// <summary>
-    /// Gets or sets a value that determines what to do with clipboad data on exit.
+    /// Gets or sets a value that determines what to do with clipboard data on exit.
     /// </summary>
+    /// <since>5.0</since>
     public ClipboardState ClipboardOnExit { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to create backup files.
     /// </summary>
+    /// <since>5.0</since>
     public bool CreateBackupFiles { get; set; }
   }
 
@@ -1214,6 +1324,7 @@ namespace Rhino.ApplicationSettings
     /// Returns the default state.
     /// </summary>
     /// <returns>A new instance containing the default state.</returns>
+    /// <since>5.0</since>
     public static FileSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -1223,6 +1334,7 @@ namespace Rhino.ApplicationSettings
     /// Returns the current state.
     /// </summary>
     /// <returns>A new instance containing the current state.</returns>
+    /// <since>5.0</since>
     public static FileSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -1237,6 +1349,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="currentUser">true if the query relates to the current user.</param>
     /// <returns>A directory to user or machine data.</returns>
+    /// <since>5.0</since>
     public static string GetDataFolder(bool currentUser)
     {
       using (var sh = new StringHolder())
@@ -1253,6 +1366,7 @@ namespace Rhino.ApplicationSettings
     /// check to make sure that these files still exist.
     /// </summary>
     /// <returns>An array of strings with the paths to the recently opened files.</returns>
+    /// <since>5.0</since>
     public static string[] RecentlyOpenedFiles()
     {
       using (var strings = new ClassArrayString())
@@ -1276,6 +1390,7 @@ namespace Rhino.ApplicationSettings
     /// The index where the item was inserted if success.
     /// <para>-1 on failure.</para>
     ///</returns>
+    /// <since>5.0</since>
     public static int AddSearchPath(string folder, int index)
     {
       return UnsafeNativeMethods.RhDirectoryManager_AddSearchPath(folder, index);
@@ -1287,6 +1402,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name='folder'>[in] The valid folder, or imagePath, to remove.</param>
     /// <returns>true or false indicating success or failure.</returns>
+    /// <since>5.0</since>
     public static bool DeleteSearchPath(string folder)
     {
       return UnsafeNativeMethods.RhDirectoryManager_DeleteSearchPath(folder);
@@ -1300,6 +1416,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="fileName">short file name to search for.</param>
     /// <returns> full imagePath on success; null on error.</returns>
+    /// <since>5.0</since>
     public static string FindFile(string fileName)
     {
       using (var sh = new StringHolder())
@@ -1313,6 +1430,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the amount of search paths that are currently defined.
     /// </summary>
+    /// <since>5.0</since>
     public static int SearchPathCount
     {
       get
@@ -1324,6 +1442,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Returns all of the imagePath items in Rhino's search imagePath list. See "Options Files settings" in the Rhino help file for more details.
     /// </summary>
+    /// <since>5.0</since>
     public static string[] GetSearchPaths()
     {
       using (var sh = new StringHolder())
@@ -1344,6 +1463,7 @@ namespace Rhino.ApplicationSettings
     /// Returns or sets Rhino's working directory, or folder.
     /// The working folder is the default folder for all file operations.
     /// </summary>
+    /// <since>5.0</since>
     public static string WorkingFolder
     {
       get
@@ -1379,6 +1499,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Returns or sets the location of Rhino's template files.</summary>
+    /// <since>5.0</since>
     public static string TemplateFolder
     {
       get
@@ -1394,6 +1515,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Returns or sets the location of Rhino&apos;s template file.</summary>
+    /// <since>5.0</since>
     public static string TemplateFile
     {
       get
@@ -1417,6 +1539,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>the file name used by Rhino&apos;s automatic file saving mechanism.</summary>
+    /// <since>5.0</since>
     public static string AutoSaveFile
     {
       get
@@ -1451,6 +1574,7 @@ namespace Rhino.ApplicationSettings
 
 
     ///<summary>how often the document will be saved when Rhino&apos;s automatic file saving mechanism is enabled.</summary>
+    /// <since>5.0</since>
     public static System.TimeSpan AutoSaveInterval
     {
       get
@@ -1475,6 +1599,7 @@ namespace Rhino.ApplicationSettings
     const int idxCreateBackupFiles = 6;
 
     ///<summary>Enables or disables Rhino&apos;s automatic file saving mechanism.</summary>
+    /// <since>5.0</since>
     public static bool AutoSaveEnabled
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxAutoSaveEnabled); }
@@ -1482,6 +1607,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>save render and display meshes in autosave file.</summary>
+    /// <since>5.0</since>
     public static bool AutoSaveMeshes
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxAutoSaveMeshes); }
@@ -1489,6 +1615,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Input list of commands that force AutoSave prior to running.</summary>
+    /// <since>5.0</since>
     public static string[] AutoSaveBeforeCommands()
     {
       using (var sh = new StringHolder())
@@ -1503,6 +1630,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Set list of commands that force AutoSave prior to running.</summary>
+    /// <since>5.0</since>
     public static void SetAutoSaveBeforeCommands(string[] commands)
     {
       System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -1519,6 +1647,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>true for users who consider view changes a document change.</summary>
+    /// <since>5.0</since>
     public static bool SaveViewChanges
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxSaveViewChanges); }
@@ -1526,6 +1655,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Ensure that only one person at a time can have a file open for saving.</summary>
+    /// <since>5.0</since>
     public static bool FileLockingEnabled
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxFileLockingEnabled); }
@@ -1533,6 +1663,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets whether to display the information dialog which identifies computer files.</summary>
+    /// <since>5.0</since>
     public static bool FileLockingOpenWarning
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxFileLockingOpenWarning); }
@@ -1540,6 +1671,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets a value that controls the creation of backup files.</summary>
+    /// <since>5.0</since>
     public static bool CreateBackupFiles
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxCreateBackupFiles); }
@@ -1551,6 +1683,7 @@ namespace Rhino.ApplicationSettings
     /// the clipboard but will be able to copy from the current to the previous version using the
     /// clipboard.
     /// </summary>
+    /// <since>5.0</since>
     public static bool ClipboardCopyToPreviousRhinoVersion
     {
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxClipboardCopyToPreviousRhinoVersion); }
@@ -1558,8 +1691,9 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or sets a value that determines what to do with clipboad data on exit.
+    /// Gets or sets a value that determines what to do with clipboard data on exit.
     /// </summary>
+    /// <since>5.0</since>
     public static ClipboardState ClipboardOnExit
     {
       get
@@ -1574,6 +1708,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Returns the directory where the main Rhino executable is located.</summary>
+    /// <since>5.0</since>
     public static string ExecutableFolder
     {
       get
@@ -1588,6 +1723,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Returns Rhino's installation folder.</summary>
+    /// <since>5.0</since>
     public static System.IO.DirectoryInfo InstallFolder
     {
       get
@@ -1607,6 +1743,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the Rhino help file path.
     /// </summary>
+    /// <since>5.0</since>
     public static string HelpFilePath
     {
       get
@@ -1628,6 +1765,7 @@ namespace Rhino.ApplicationSettings
     /// On Windows 7, 8, usually someplace like:
     ///   "C:\Users\[USERNAME]\AppData\Local\McNeel\Rhinoceros\[VERSION_NUMBER]\"
     /// </summary>
+    /// <since>5.8</since>
     public static string LocalProfileDataFolder
     {
       get
@@ -1645,6 +1783,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the path to the default RUI file.
     /// </summary>
+    /// <since>5.0</since>
     public static string DefaultRuiFile
     {
       get
@@ -1669,6 +1808,7 @@ namespace Rhino.ApplicationSettings
     /// Return value of true means CRhinoCommand don&apos;t repeat flags will be ignored and the m_dont_repeat_list
     /// will be used instead.  false means the individual CRhinoCommands will determine if they are repeatable.
     ///</summary>
+    /// <since>5.0</since>
     public static bool UseNeverRepeatList
     {
       get
@@ -1679,6 +1819,7 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Puts the command name tokens in m_dont_repeat_list.</summary>
     ///<returns>Number of items added to m_dont_repeat_list.</returns>
+    /// <since>5.0</since>
     public static int SetList(string[] commandNames)
     {
       if (commandNames == null || commandNames.Length < 1)
@@ -1695,6 +1836,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>The list of commands to not repeat.</summary>
+    /// <since>5.0</since>
     public static string[] CommandNames()
     {
       using(var sh = new StringHolder())
@@ -1758,11 +1900,13 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the current selection mode.
     /// </summary>
+    /// <since>5.0</since>
     public MouseSelectMode MouseSelectMode { get; set; }
 
     /// <summary>
     /// Gets or sets the maximum number of popup menu lines.
     /// </summary>
+    /// <since>5.0</since>
     public int MaximumPopupMenuLines { get; set; }
 
     /// <summary>
@@ -1770,6 +1914,7 @@ namespace Rhino.ApplicationSettings
     /// <para>Undo records will be purged if there are more than MinimumUndoSteps and
     /// they use more than MaximumUndoMemoryMb.</para>
     /// </summary>
+    /// <since>5.0</since>
     public int MinimumUndoSteps { get; set; }
 
     /// <summary>
@@ -1777,16 +1922,19 @@ namespace Rhino.ApplicationSettings
     /// <para>Undo records will be purged if there are more than MinimumUndoSteps and
     /// they use more than MaximumUndoMemoryMb.</para>
     /// </summary>
+    /// <since>5.0</since>
     public int MaximumUndoMemoryMb { get; set; }
 
     /// <summary>
     /// Gets or sets the number of isoparm curves to show on new objects.
     /// </summary>
+    /// <since>5.0</since>
     public int NewObjectIsoparmCount { get; set; }
 
     /// <summary>
     /// Gets or sets what happens when the user clicks the middle mouse.
     /// </summary>
+    /// <since>5.0</since>
     public MiddleMouseMode MiddleMouseMode { get; set; }
 
     /// <summary>
@@ -1794,6 +1942,7 @@ namespace Rhino.ApplicationSettings
     /// a view, this value is only used when MiddleMouseMode is set to
     /// PopupToolbar.
     /// </summary>
+    /// <since>5.0</since>
     public string MiddleMousePopupToolbar { get; set; }
 
     /// <summary>
@@ -1801,21 +1950,25 @@ namespace Rhino.ApplicationSettings
     /// a view, this value is only used when MiddleMouseMode is set to
     /// PopupToolbar.
     /// </summary>
+    /// <since>5.0</since>
     public string MiddleMouseMacro { get; set; }
 
     /// <summary>
     /// true if right mouse down + delay will pop up context menu on a mouse up if no move happens.
     /// </summary>
+    /// <since>5.0</since>
     public bool EnableContextMenu { get; set; }
 
     /// <summary>
     /// Gets or sets the time to wait before permitting context menu display.
     /// </summary>
+    /// <since>5.0</since>
     public System.TimeSpan ContextMenuDelay { get; set; }
 
     /// <summary>
     /// Gets or sets the command help dialog auto-update feature.
     /// </summary>
+    /// <since>5.0</since>
     public bool AutoUpdateCommandHelp { get; set; }
   }
 
@@ -1857,6 +2010,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the factory settings.
     /// </summary>
     /// <returns>A new general state with factory settings.</returns>
+    /// <since>5.0</since>
     public static GeneralSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -1866,6 +2020,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new general state with current settings.</returns>
+    /// <since>5.0</since>
     public static GeneralSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -1874,6 +2029,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Should extrusion objects be created for things like cylinders
     /// </summary>
+    /// <since>6.0</since>
     public static bool UseExtrusions
     {
       get { return UnsafeNativeMethods.RHC_RhinoExtrusionObjectsEnabled(); }
@@ -1890,6 +2046,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the current selection mode.
     /// </summary>
+    /// <since>5.0</since>
     public static MouseSelectMode MouseSelectMode
     {
       get { return (MouseSelectMode)UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxMouseSelectMode); }
@@ -1899,6 +2056,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the maximum number of popup menu lines.
     /// </summary>
+    /// <since>5.0</since>
     public static int MaximumPopupMenuLines
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxMaxPopupMenuLines); }
@@ -1915,6 +2073,7 @@ namespace Rhino.ApplicationSettings
     /// <para>Undo records will be purged if there are more than MinimumUndoSteps and
     /// they use more than MaximumUndoMemoryMb.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static int MinimumUndoSteps
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxMinUndoSteps); }
@@ -1926,6 +2085,7 @@ namespace Rhino.ApplicationSettings
     /// <para>Undo records will be purged if there are more than MinimumUndoSteps and
     /// they use more than MaximumUndoMemoryMb.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static int MaximumUndoMemoryMb
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxMaxUndoMemoryMb); }
@@ -1935,6 +2095,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the number of isoparm curves to show on new objects.
     /// </summary>
+    /// <since>5.0</since>
     public static int NewObjectIsoparmCount
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxNewObjectIsoparmCount); }
@@ -1947,6 +2108,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets what happens when the user clicks the middle mouse.
     /// </summary>
+    /// <since>5.0</since>
     public static MiddleMouseMode MiddleMouseMode
     {
       get { return (MiddleMouseMode)UnsafeNativeMethods.CRhinoAppGeneralSettings_GetInt(IntPtr.Zero, idxMiddleMouseMode); }
@@ -1961,6 +2123,7 @@ namespace Rhino.ApplicationSettings
     /// a view, this value is only used when MiddleMouseMode is set to
     /// PopupToolbar.
     /// </summary>
+    /// <since>5.0</since>
     public static string MiddleMousePopupToolbar
     {
       get
@@ -1980,6 +2143,7 @@ namespace Rhino.ApplicationSettings
     /// a view, this value is only used when MiddleMouseMode is set to
     /// PopupToolbar.
     /// </summary>
+    /// <since>5.0</since>
     public static string MiddleMouseMacro
     {
       get
@@ -2009,6 +2173,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// true if right mouse down + delay will pop up context menu on a mouse up if no move happens.
     /// </summary>
+    /// <since>5.0</since>
     public static bool EnableContextMenu
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetBool(IntPtr.Zero, idxEnableContextMenu); }
@@ -2018,6 +2183,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Time to wait before permitting context menu display.
     /// </summary>
+    /// <since>5.0</since>
     public static System.TimeSpan ContextMenuDelay
     {
       get
@@ -2035,6 +2201,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Command help dialog auto-update feature.
     /// </summary>
+    /// <since>5.0</since>
     public static bool AutoUpdateCommandHelp
     {
       get { return UnsafeNativeMethods.CRhinoAppGeneralSettings_GetBool(IntPtr.Zero, idxAutoUpdateCommandContext); }
@@ -2047,12 +2214,6 @@ namespace Rhino.ApplicationSettings
     // including the ones that are not used by any object
     // or layer.
     bool m_bSaveUnreferencedMaterials;
-
-    // If true, objects that are copied from other objects
-    // will get the same material index.  Otherwise the new
-    // object gets an identical material with a unique 
-    // material index.
-    bool m_bShareMaterials;
 
     // If m_bSplitCreasedSurfaces is true, then 
     // surfaces are automatically split into
@@ -2086,7 +2247,7 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>
-  /// Defines enumerated constant values for diferent behaviour that is related to clipboard data.
+  /// Defines enumerated constant values for different behavior that is related to clipboard data.
   /// </summary>
   public enum ClipboardState : int
   {
@@ -2174,78 +2335,102 @@ namespace Rhino.ApplicationSettings
     internal ModelAidSettingsState() { }
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
+    /// <since>5.0</since>
     public bool GridSnap{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s ortho modeling aid.</summary>
+    /// <since>5.0</since>
     public bool Ortho{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Planar modeling aid.</summary>
+    /// <since>5.0</since>
     public bool Planar{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Project modeling aid.</summary>
+    /// <since>5.0</since>
     public bool ProjectSnapToCPlane{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s use horizontal dialog modeling aid.</summary>
+    /// <since>5.0</since>
     public bool UseHorizontalDialog{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend trim lines.</summary>
+    /// <since>5.0</since>
     public bool ExtendTrimLines{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend to apparent intersections.</summary>
+    /// <since>5.0</since>
     public bool ExtendToApparentIntersection{ get; set; }
 
     ///<summary>true mean Alt+arrow is used for nudging.</summary>
+    /// <since>5.0</since>
     public bool AltPlusArrow{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s display control polygon.</summary>
+    /// <since>5.0</since>
     public bool DisplayControlPolygon{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s highlight dialog modeling aid.</summary>
+    /// <since>5.0</since>
     public bool HighlightControlPolygon{ get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s object snap modeling aid.</summary>
+    /// <since>5.0</since>
     public bool Osnap{ get; set; }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
+    /// <since>5.0</since>
     public bool SnapToLocked{ get; set; }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
+    /// <since>5.0</since>
     public bool UniversalConstructionPlaneMode{ get; set; }
 
     /// <summary>Gets or sets the base orthogonal angle.</summary>
+    /// <since>5.0</since>
     public double OrthoAngle{ get; set; }
 
     ///<summary>Gets or sets the nudge step amount.</summary>
+    /// <since>5.0</since>
     public double NudgeKeyStep{ get; set; }
 
     /// <summary>Gets or sets the Ctrl-key based nudge step amount.</summary>
+    /// <since>5.0</since>
     public double CtrlNudgeKeyStep{ get; set; }
 
     /// <summary>Gets or sets the Shift-key based nudge step amount.</summary>
+    /// <since>5.0</since>
     public double ShiftNudgeKeyStep{ get; set; }
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
+    /// <since>5.0</since>
     public int OsnapPickboxRadius{ get; set; }
 
-    ///<summary>0 = world, 1 = cplane, 2 = view, 3 = uvn, -1 = not set.</summary>
+    ///<summary>0 = world, 1 = cplane, 2 = view, 3 = UVN, -1 = not set.</summary>
+    /// <since>5.0</since>
     public int NudgeMode{ get; set; }
 
     /// <summary>Gets or sets the control polygon display density.</summary>
+    /// <since>5.0</since>
     public int ControlPolygonDisplayDensity{ get; set; }
 
     /// <summary>Gets or sets the OSnap cursor mode.</summary>
+    /// <since>5.0</since>
     public CursorMode OsnapCursorMode{ get; set; }
 
     /// <summary>
     /// Returns or sets Rhino's current object snap mode.
     /// <para>The mode is a bitwise value based on the OsnapModes enumeration.</para>
     /// </summary>
+    /// <since>5.0</since>
     public OsnapModes OsnapModes{ get; set; }
 
     ///<summary>Gets or sets the radius of the mouse pick box in pixels.</summary>
+    /// <since>5.0</since>
     public int MousePickboxRadius{ get; set; }
 
     /// <summary>Gets or sets the point display mode.</summary>
+    /// <since>5.0</since>
     public PointDisplayMode PointDisplay{ get; set; }
   }
 
@@ -2291,6 +2476,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new model aid state with current settings.</returns>
+    /// <since>5.0</since>
     public static ModelAidSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -2300,6 +2486,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the factory settings.
     /// </summary>
     /// <returns>A new model aid state with factory settings.</returns>
+    /// <since>5.0</since>
     public static ModelAidSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -2309,6 +2496,7 @@ namespace Rhino.ApplicationSettings
     /// Updates from a particular setting state.
     /// </summary>
     /// <param name="state">The new states that will be set.</param>
+    /// <since>5.0</since>
     public static void UpdateFromState(ModelAidSettingsState state)
     {
       GridSnap = state.GridSnap;
@@ -2360,6 +2548,7 @@ namespace Rhino.ApplicationSettings
     const int idxSnappyGumball = 14;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool GridSnap
     {
       get { return GetBool(idxGridSnap); }
@@ -2372,6 +2561,7 @@ namespace Rhino.ApplicationSettings
     /// <code source='examples\cs\ex_ortho.cs' lang='cs'/>
     /// <code source='examples\py\ex_ortho.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static bool Ortho
     {
       get { return GetBool(idxOrtho); }
@@ -2379,6 +2569,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Planar modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool Planar
     {
       get { return GetBool(idxPlanar); }
@@ -2386,6 +2577,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Project modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool ProjectSnapToCPlane
     {
       get { return GetBool(idxProjectSnapToCPlane); }
@@ -2393,6 +2585,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s use horizontal dialog modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool UseHorizontalDialog
     {
       get { return GetBool(idxUseHorizontalDialog); }
@@ -2400,6 +2593,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend trim lines.</summary>
+    /// <since>5.0</since>
     public static bool ExtendTrimLines
     {
       get { return GetBool(idxExtendTrimLines); }
@@ -2407,6 +2601,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend to apparent intersections.</summary>
+    /// <since>5.0</since>
     public static bool ExtendToApparentIntersection
     {
       get { return GetBool(idxExtendToApparentIntersection); }
@@ -2414,6 +2609,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>true means Alt+arrow is used for nudging.</summary>
+    /// <since>5.0</since>
     public static bool AltPlusArrow
     {
       get { return GetBool(idxAltPlusArrow); }
@@ -2421,6 +2617,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s display control polygon.</summary>
+    /// <since>5.0</since>
     public static bool DisplayControlPolygon
     {
       get { return GetBool(idxDisplayControlPolygon); }
@@ -2428,12 +2625,14 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s highlight dialog modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool HighlightControlPolygon
     {
       get { return GetBool(idxHighlightControlPolygon); }
       set { SetBool(idxHighlightControlPolygon, value); }
     }
     ///<summary>Enables or disables Rhino&apos;s object snap modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool Osnap
     {
       get
@@ -2451,6 +2650,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool SnapToLocked
     {
       get { return GetBool(idxSnapToLocked); }
@@ -2458,6 +2658,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
+    /// <since>5.0</since>
     public static bool UniversalConstructionPlaneMode
     {
       get { return GetBool(idxUniversalConstructionPlaneMode); }
@@ -2473,6 +2674,7 @@ namespace Rhino.ApplicationSettings
     const int idxShiftNudgeKeyStep = 3;
 
     /// <summary>Gets or sets the base orthogonal angle.</summary>
+    /// <since>5.0</since>
     public static double OrthoAngle
     {
       get { return GetDouble(idxOrthoAngle); }
@@ -2480,6 +2682,7 @@ namespace Rhino.ApplicationSettings
     }
 
     ///<summary>Gets or sets the nudge step amount.</summary>
+    /// <since>5.0</since>
     public static double NudgeKeyStep
     {
       get { return GetDouble(idxNudgeKeyStep); }
@@ -2487,6 +2690,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the Ctrl-key based nudge step amount.</summary>
+    /// <since>5.0</since>
     public static double CtrlNudgeKeyStep
     {
       get { return GetDouble(idxCtrlNudgeKeyStep); }
@@ -2494,6 +2698,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the Shift-key based nudge step amount.</summary>
+    /// <since>5.0</since>
     public static double ShiftNudgeKeyStep
     {
       get { return GetDouble(idxShiftNudgeKeyStep); }
@@ -2512,12 +2717,14 @@ namespace Rhino.ApplicationSettings
     const int idxPointDisplay = 6;
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
+    /// <since>5.0</since>
     public static int OsnapPickboxRadius
     {
       get { return GetInt(idxOsnapPickboxRadius); }
       set { SetInt(idxOsnapPickboxRadius, value); }
     }
-    ///<summary>0 = world, 1 = cplane, 2 = view, 3 = uvn, -1 = not set.</summary>
+    ///<summary>0 = world, 1 = cplane, 2 = view, 3 = UVN, -1 = not set.</summary>
+    /// <since>5.0</since>
     public static int NudgeMode
     {
       get { return GetInt(idxNudgeMode); }
@@ -2525,6 +2732,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the control polygon display density.</summary>
+    /// <since>5.0</since>
     public static int ControlPolygonDisplayDensity
     {
       get { return GetInt(idxControlPolygonDisplayDensity); }
@@ -2532,6 +2740,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the OSnap cursor mode.</summary>
+    /// <since>5.0</since>
     public static CursorMode OsnapCursorMode
     {
       get
@@ -2549,6 +2758,7 @@ namespace Rhino.ApplicationSettings
     ///Returns or sets Rhino's current object snap mode.
     ///The mode is a bitwise value based on the OsnapModes enumeration.
     ///</summary>
+    /// <since>5.0</since>
     public static OsnapModes OsnapModes
     {
       get
@@ -2562,6 +2772,7 @@ namespace Rhino.ApplicationSettings
       }
     }
     ///<summary>radius of mouse pick box in pixels.</summary>
+    /// <since>5.0</since>
     public static int MousePickboxRadius
     {
       get { return GetInt(idxMousePickboxRadius); }
@@ -2569,6 +2780,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the point display mode.</summary>
+    /// <since>5.0</since>
     public static PointDisplayMode PointDisplay
     {
       get
@@ -2585,8 +2797,9 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>
     /// When AutoGumball is on, a gumball automatically appears
-    /// when objects are prepicked.
+    /// when objects are pre-picked.
     /// </summary>
+    /// <since>5.0</since>
     public static bool AutoGumballEnabled
     {
       get
@@ -2603,6 +2816,7 @@ namespace Rhino.ApplicationSettings
     /// When SnappyGumball is on, a dragging a gumball moves the center point.
     /// When snappy gumball is off, dragging a gumball moves the mouse down point.
     /// </summary>
+    /// <since>5.0</since>
     public static bool SnappyGumballEnabled
     {
       get
@@ -2624,31 +2838,37 @@ namespace Rhino.ApplicationSettings
     internal ViewSettingsState() { }
 
     /// <summary>Gets or sets the faction used as multiplier to pan the screen.</summary>
+    /// <since>5.0</since>
     public double PanScreenFraction { get; set; }
 
     /// <summary>Gets or sets if panning with the keyboard is reversed.
     /// <para>false, then Rhino pans the camera in the direction of the arrow key you press.
     /// true, then Rhino pans the scene instead.</para></summary>
+    /// <since>5.0</since>
     public bool PanReverseKeyboardAction { get; set; }
 
     /// <summary>Gets or sets the 'always pan parallel views' value.
     /// <para>If the view is not looking straight at the construction plane, then
     /// sets parallel viewports so they will not rotate.</para></summary>
+    /// <since>5.0</since>
     public bool AlwaysPanParallelViews { get; set; }
 
     /// <summary>
     /// Gets or sets the step size for zooming with a wheeled mouse or the Page Up and Page Down keys.
     /// </summary>
+    /// <since>5.0</since>
     public double ZoomScale { get; set; }
 
     /// <summary>
     /// Border amount to apply to parallel viewport during zoom extents
     /// </summary>
+    /// <since>6.3</since>
     public double ZoomExtentsParallelViewBorder { get; set; }
 
     /// <summary>
     /// Border amount to apply to perspective viewport during zoom extents
     /// </summary>
+    /// <since>6.3</since>
     public double ZoomExtentsPerspectiveViewBorder { get; set; }
 
     /// <summary>
@@ -2656,36 +2876,42 @@ namespace Rhino.ApplicationSettings
     /// <para>When the user rotates a view with the keyboard, Rhino rotates the view in steps.
     /// The usual step is 1/60th of a circle, which equals six degrees.</para>
     /// </summary>
+    /// <since>5.0</since>
     public int RotateCircleIncrement { get; set; }
 
     /// <summary>
     /// Gets or sets the rotation direction.
     /// <para>If true, then Rhino rotates the camera around the scene, otherwise, rotates the scene itself.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool RotateReverseKeyboard { get; set; }
 
     /// <summary>
     /// Gets or sets the rotation reference.
     /// <para>If true, then the views rotates relative to the view axes; false, than relative to the world x, y, and z axes.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool RotateToView { get; set; }
 
     /// <summary>
     /// Gets or sets the 'named views set CPlane' value.
     /// <para>When true, restoring a named view causes the construction plane saved with that view to also restore.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool DefinedViewSetCPlane { get; set; }
 
     /// <summary>
     /// Gets or sets the 'named views set projection' value.
     /// <para>When true, restoring a named view causes the viewport projection saved with the view to also restore.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool DefinedViewSetProjection { get; set; }
 
     /// <summary>
     /// Gets or sets the 'single-click maximize' value.
     /// <para>When true, maximizing a viewport needs a single click on the viewport title rather than a double-click.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool SingleClickMaximize{ get; set; }
 
     /// <summary>
@@ -2694,6 +2920,7 @@ namespace Rhino.ApplicationSettings
     /// When a standard view is manipulated, the camera lens length of all parallel projection
     /// viewports are set to match the current viewport.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool LinkedViewports { get; set; }
   }
 
@@ -2727,6 +2954,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the view factory settings.
     /// </summary>
     /// <returns>A new view state with factory settings.</returns>
+    /// <since>5.0</since>
     public static ViewSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -2736,6 +2964,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new view state with current settings.</returns>
+    /// <since>5.0</since>
     public static ViewSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -2744,6 +2973,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Updates from the default setting state.
     /// </summary>
+    /// <since>5.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -2753,6 +2983,7 @@ namespace Rhino.ApplicationSettings
     /// Updates from a particular setting state.
     /// </summary>
     /// <param name="state">The new state that will be set.</param>
+    /// <since>5.0</since>
     public static void UpdateFromState(ViewSettingsState state)
     {
       AlwaysPanParallelViews = state.AlwaysPanParallelViews;
@@ -2805,6 +3036,7 @@ namespace Rhino.ApplicationSettings
     static void SetDouble(UnsafeNativeMethods.AppViewSettings which, double d) { SetDouble(which, d, IntPtr.Zero); }
 
     /// <summary>Gets or sets the faction used as multiplier to pan the screen.</summary>
+    /// <since>5.0</since>
     public static double PanScreenFraction
     {
       get { return GetDouble(UnsafeNativeMethods.AppViewSettings.PanScreenFraction); }
@@ -2814,6 +3046,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets if panning with the keyboard is reversed.
     /// <para>false, then Rhino pans the camera in the direction of the arrow key you press.
     /// true, then Rhino pans the scene instead.</para></summary>
+    /// <since>5.0</since>
     public static bool PanReverseKeyboardAction
     {
       get { return GetBool(idxPanReverseKeyboardAction); }
@@ -2823,6 +3056,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the 'always pan parallel views' value.
     /// <para>If the view is not looking straight at the construction plane, then
     /// sets parallel viewports so they will not rotate.</para></summary>
+    /// <since>5.0</since>
     public static bool AlwaysPanParallelViews
     {
       get { return GetBool(idxAlwaysPanParallelViews); }
@@ -2832,6 +3066,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the step size for zooming with a wheeled mouse or the Page Up and Page Down keys.
     /// </summary>
+    /// <since>5.0</since>
     public static double ZoomScale
     {
       get { return GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale); }
@@ -2841,6 +3076,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Border amount to apply to parallel viewport during zoom extents
     /// </summary>
+    /// <since>6.3</since>
     public static double ZoomExtentsParallelViewBorder
     {
       get { return GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder); }
@@ -2850,6 +3086,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Border amount to apply to perspective viewport during zoom extents
     /// </summary>
+    /// <since>6.3</since>
     public static double ZoomExtentsPerspectiveViewBorder
     {
       get { return GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder); }
@@ -2861,6 +3098,7 @@ namespace Rhino.ApplicationSettings
     /// <para>When the user rotates a view with the keyboard, Rhino rotates the view in steps.
     /// The usual step is 1/60th of a circle, which equals six degrees.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static int RotateCircleIncrement
     {
       get
@@ -2877,6 +3115,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the rotation direction.
     /// <para>If true, then Rhino rotates the camera around the scene, otherwise, rotates the scene itself.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool RotateReverseKeyboard
     {
       get { return GetBool(idxRotateReverseKeyboard); }
@@ -2887,6 +3126,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the rotation reference.
     /// <para>If true, then the views rotates relative to the view axes; false, than relative to the world x, y, and z axes.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool RotateToView
     {
       get { return GetBool(idxRotateToView); }
@@ -2897,6 +3137,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the 'named views set CPlane' value.
     /// <para>When true, restoring a named view causes the construction plane saved with that view to also restore.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool DefinedViewSetCPlane
     {
       get { return GetBool(idxDefinedViewSetCPlane); }
@@ -2907,6 +3148,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the 'named views set projection' value.
     /// <para>When true, restoring a named view causes the viewport projection saved with the view to also restore.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool DefinedViewSetProjection
     {
       get { return GetBool(idxDefinedViewSetProjection); }
@@ -2917,6 +3159,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the 'single-click maximize' value.
     /// <para>When true, maximizing a viewport needs a single click on the viewport title rather than a double-click.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool SingleClickMaximize
     {
       get { return GetBool(idxSingleClickMaximize); }
@@ -2929,6 +3172,7 @@ namespace Rhino.ApplicationSettings
     /// When a standard view is manipulated, the camera lens length of all parallel projection
     /// viewports are set to match the current viewport.</para>
     /// </summary>
+    /// <since>5.0</since>
     public static bool LinkedViewports
     {
       get { return GetBool(idxLinkedViewports); }
@@ -2937,7 +3181,7 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>
-  /// Represents a sapshot of <see cref="OpenGLSettings"/>
+  /// Represents a snapshot of <see cref="OpenGLSettings"/>
   /// </summary>
   public class OpenGLSettingsState
   {
@@ -2946,6 +3190,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// AA level used in OpenGL viewports
     /// </summary>
+    /// <since>6.1</since>
     public AntialiasLevel AntialiasLevel { get; set; }
   }
 
@@ -2967,6 +3212,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the OpenGL factory settings.
     /// </summary>
     /// <returns>A new OpenGL state with factory settings.</returns>
+    /// <since>6.1</since>
     public static OpenGLSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -2976,6 +3222,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new OpenGL state with current settings.</returns>
+    /// <since>6.1</since>
     public static OpenGLSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -2984,6 +3231,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Updates from the default setting state.
     /// </summary>
+    /// <since>6.1</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -2993,6 +3241,7 @@ namespace Rhino.ApplicationSettings
     /// Updates from a particular setting state.
     /// </summary>
     /// <param name="state">The new state that will be set.</param>
+    /// <since>6.1</since>
     public static void UpdateFromState(OpenGLSettingsState state)
     {
       AntialiasLevel = state.AntialiasLevel;
@@ -3008,7 +3257,8 @@ namespace Rhino.ApplicationSettings
       UnsafeNativeMethods.CRhinoOpenGLSettings_GetSetInt(which, true, d, pOpenGLSettings);
     }
 
-    /// <summary>Gets or sets the antialias level used by OpenGL viewports</summary>
+    /// <summary>Gets or sets the anti-alias level used by OpenGL viewports</summary>
+    /// <since>6.1</since>
     public static AntialiasLevel AntialiasLevel
     {
       get { return (AntialiasLevel)GetInt(UnsafeNativeMethods.OpenGLInt.AntialiasLevel, IntPtr.Zero); }
@@ -3386,6 +3636,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public static string GetMacro(ShortcutKey key)
     {
       using (var sh = new StringHolder())
@@ -3401,6 +3652,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="key"></param>
     /// <param name="macro"></param>
+    /// <since>5.0</since>
     public static void SetMacro(ShortcutKey key, string macro)
     {
       UnsafeNativeMethods.CRhinoAppShortcutKeys_SetMacro((int)key, macro);
@@ -3415,33 +3667,43 @@ namespace Rhino.ApplicationSettings
     internal SmartTrackSettingsState() { }
 
     /// <summary>Gets or sets if the 'smart track' feature is active.</summary>
+    /// <since>5.0</since>
     public bool UseSmartTrack { get; set; }
 
     /// <summary>Gets or sets a value indicating if lines are drawn dotted.</summary>
+    /// <since>5.0</since>
     public bool UseDottedLines { get; set; }
 
     /// <summary>Gets or sets a value indicating if the 'Smart Ortho' feature is active.</summary>
+    /// <since>5.0</since>
     public bool SmartOrtho { get; set; }
 
     /// <summary>Gets or sets a value indicating if the 'Smart Tangents' feature is active.</summary>
+    /// <since>5.0</since>
     public bool SmartTangents { get; set; }
 
     /// <summary>Gets or sets the activation delay in milliseconds.</summary>
+    /// <since>5.0</since>
     public int ActivationDelayMilliseconds { get; set; }
 
     /// <summary>Gets or sets the maximum number of smart points.</summary>
+    /// <since>5.0</since>
     public static int MaxSmartPoints { get; set; }
 
     /// <summary>Gets or sets the smart track line color.</summary>
+    /// <since>5.0</since>
     public Color LineColor { get; set; }
 
     /// <summary>Gets or sets the tangent and perpendicular line color.</summary>
+    /// <since>5.0</since>
     public Color TanPerpLineColor { get; set; }
 
     /// <summary>Gets or sets the point color.</summary>
+    /// <since>5.0</since>
     public Color PointColor { get; set; }
 
     /// <summary>Gets or sets the active point color.</summary>
+    /// <since>5.0</since>
     public Color ActivePointColor { get; set; }
   }
 
@@ -3472,6 +3734,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new Smart Track state with current settings.</returns>
+    /// <since>5.0</since>
     public static SmartTrackSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -3481,6 +3744,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the Smart Track factory settings.
     /// </summary>
     /// <returns>A new Smart Track state with factory settings.</returns>
+    /// <since>5.0</since>
     public static SmartTrackSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -3490,6 +3754,7 @@ namespace Rhino.ApplicationSettings
     /// Updates from a particular setting state.
     /// </summary>
     /// <param name="state">The new state that will be set.</param>
+    /// <since>5.0</since>
     public static void UpdateFromState(SmartTrackSettingsState state)
     {
       ActivationDelayMilliseconds = state.ActivationDelayMilliseconds;
@@ -3529,6 +3794,7 @@ namespace Rhino.ApplicationSettings
     static void SetBool(int which, bool b) { SetBool(which, b, IntPtr.Zero); }
 
     /// <summary>Gets or sets if the Smart Track feature is active.</summary>
+    /// <since>5.0</since>
     public static bool UseSmartTrack
     {
       get { return GetBool(idxUseSmartTrack); }
@@ -3536,6 +3802,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets a value indicating if lines are drawn dotted.</summary>
+    /// <since>5.0</since>
     public static bool UseDottedLines
     {
       get { return GetBool(idxDottedLines); }
@@ -3544,6 +3811,7 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>Gets or sets a value indicating if the 'Smart Ortho' feature is active.
     /// <para>Orthogonal lines are then drawn automatically.</para></summary>
+    /// <since>5.0</since>
     public static bool SmartOrtho
     {
       get { return GetBool(idxSmartOrtho); }
@@ -3551,6 +3819,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets a value indicating if the 'Smart Tangents' feature is active.</summary>
+    /// <since>5.0</since>
     public static bool SmartTangents
     {
       get { return GetBool(idxSmartTangents); }
@@ -3558,6 +3827,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the activation delay in milliseconds.</summary>
+    /// <since>5.0</since>
     public static int ActivationDelayMilliseconds
     {
       get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetInt(true, IntPtr.Zero); }
@@ -3565,6 +3835,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the maximum number of smart points.</summary>
+    /// <since>5.0</since>
     public static int MaxSmartPoints
     {
       get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetInt(false, IntPtr.Zero); }
@@ -3591,6 +3862,7 @@ namespace Rhino.ApplicationSettings
     static void SetColor(int which, Color c) { SetColor(which, c, IntPtr.Zero); }
 
     /// <summary>Gets or sets the smart track line color.</summary>
+    /// <since>5.0</since>
     public static Color LineColor
     {
       get { return GetColor(idxLineColor); }
@@ -3598,6 +3870,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the tangent and perpendicular line color.</summary>
+    /// <since>5.0</since>
     public static Color TanPerpLineColor
     {
       get { return GetColor(idxTanPerpLineColor); }
@@ -3605,6 +3878,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the point color.</summary>
+    /// <since>5.0</since>
     public static Color PointColor
     {
       get { return GetColor(idxPointColor); }
@@ -3612,6 +3886,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Gets or sets the active point color.</summary>
+    /// <since>5.0</since>
     public static Color ActivePointColor
     {
       get { return GetColor(idxActivePointColor); }
@@ -3625,47 +3900,57 @@ namespace Rhino.ApplicationSettings
   public class CursorTooltipSettingsState
   {
     /// <summary>Turns on/off cursor tooltips.</summary>
+    /// <since>5.0</since>
     public bool TooltipsEnabled { get; set; }
 
     /// <summary>
     /// The x and y distances in pixels from the cursor location to the tooltip.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Point Offset { get; set; }
 
     /// <summary>Tooltip background color.</summary>
+    /// <since>5.0</since>
     public System.Drawing.Color BackgroundColor { get; set; }
 
     /// <summary>Tooltip text color.</summary>
+    /// <since>5.0</since>
     public System.Drawing.Color TextColor { get; set; }
 
     /// <summary>
     /// Displays the current object snap selection.
     /// </summary>
+    /// <since>5.0</since>
     public bool OsnapPane { get; set; }
 
     /// <summary>
     /// Displays the distance from the last picked point.
     /// </summary>
+    /// <since>5.0</since>
     public bool DistancePane { get; set; }
 
     /// <summary>
     /// Displays the current construction plane coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public bool PointPane { get; set; }
 
     /// <summary>
     /// Displays the relative construction plane coordinates and angle from the last picked point.
     /// </summary>
+    /// <since>5.0</since>
     public bool RelativePointPane { get; set; }
 
     /// <summary>
     /// Displays the current command prompt.
     /// </summary>
+    /// <since>5.0</since>
     public bool CommandPromptPane { get; set; }
 
     /// <summary>
     /// Attempts to display only the most useful tooltip.
     /// </summary>
+    /// <since>5.0</since>
     public bool AutoSuppress { get; set; }
   }
 
@@ -3701,6 +3986,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings.
     /// </summary>
     /// <returns>A new cursor tooltip state with current settings.</returns>
+    /// <since>5.0</since>
     public static CursorTooltipSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -3710,6 +3996,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the cursor tooltip factory settings.
     /// </summary>
     /// <returns>A new cursor tooltip state with factory settings.</returns>
+    /// <since>5.0</since>
     public static CursorTooltipSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -3718,6 +4005,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Turns on/off cursor tooltips.
     /// </summary>
+    /// <since>5.0</since>
     public static bool TooltipsEnabled
     {
       get { return GetInt(idx_EnableCursorToolTips, IntPtr.Zero) != 0; }
@@ -3727,6 +4015,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// The x and y distances in pixels from the cursor location to the tooltip.
     /// </summary>
+    /// <since>5.0</since>
     public static System.Drawing.Point Offset
     {
       get
@@ -3743,6 +4032,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Tooltip background color.</summary>
+    /// <since>5.0</since>
     public static System.Drawing.Color BackgroundColor
     {
       get
@@ -3758,6 +4048,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>Tooltip text color.</summary>
+    /// <since>5.0</since>
     public static System.Drawing.Color TextColor
     {
       get
@@ -3775,6 +4066,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays the current object snap selection.
     /// </summary>
+    /// <since>5.0</since>
     public static bool OsnapPane
     {
       get { return GetInt(idx_bOsnapPane, IntPtr.Zero) != 0; }
@@ -3784,6 +4076,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays the distance from the last picked point.
     /// </summary>
+    /// <since>5.0</since>
     public static bool DistancePane
     {
       get { return GetInt(idx_bDistancePane, IntPtr.Zero) != 0; }
@@ -3793,6 +4086,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays the current construction plane coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public static bool PointPane
     {
       get { return GetInt(idx_bPointPane, IntPtr.Zero) != 0; }
@@ -3802,6 +4096,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays the relative construction plane coordinates and angle from the last picked point.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RelativePointPane
     {
       get { return GetInt(idx_bRelativePointPane, IntPtr.Zero) != 0; }
@@ -3811,6 +4106,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Displays the current command prompt.
     /// </summary>
+    /// <since>5.0</since>
     public static bool CommandPromptPane
     {
       get { return GetInt(idx_bCommandPromptPane, IntPtr.Zero) != 0; }
@@ -3820,6 +4116,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Attempts to display only the most useful tooltip.
     /// </summary>
+    /// <since>5.0</since>
     public static bool AutoSuppress
     {
       get { return GetInt(idx_bAutoSuppress, IntPtr.Zero) != 0; }
@@ -3858,26 +4155,31 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the Gaussian curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public Rhino.Geometry.Interval GaussRange { get; set; }
 
     /// <summary>
     /// Gets or sets the Mean curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public Rhino.Geometry.Interval MeanRange { get; set; }
 
     /// <summary>
     /// Gets or sets the Minimum Radius curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public Rhino.Geometry.Interval MinRadiusRange { get; set; }
 
     /// <summary>
     /// Gets or sets the Maximum Radius curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public Rhino.Geometry.Interval MaxRadiusRange { get; set; }
 
     /// <summary>
     /// Gets or sets the curvature analysis style.
     /// </summary>
+    /// <since>6.0</since>
     public CurvatureAnalysisSettings.CurvatureStyle Style { get; set; }
   }
 
@@ -3945,6 +4247,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the factory settings of the application.
     /// </summary>
+    /// <since>6.0</since>
     public static CurvatureAnalysisSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -3953,6 +4256,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the current settings of the application.
     /// </summary>
+    /// <since>6.0</since>
     public static CurvatureAnalysisSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -3961,6 +4265,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>6.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -3970,6 +4275,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">The particular state.</param>
+    /// <since>6.0</since>
     public static void UpdateFromState(CurvatureAnalysisSettingsState state)
     {
       GaussRange = state.GaussRange;
@@ -3994,6 +4300,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the Gaussian curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public static Rhino.Geometry.Interval GaussRange
     {
       get => GetRange(CurvatureStyle.Gaussian);
@@ -4003,6 +4310,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the Mean curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public static Rhino.Geometry.Interval MeanRange
     {
       get => GetRange(CurvatureStyle.Mean);
@@ -4012,6 +4320,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the Minimum Radius curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public static Rhino.Geometry.Interval MinRadiusRange
     {
       get => GetRange(CurvatureStyle.MinRadius);
@@ -4021,6 +4330,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the Maximum Radius curvature range.
     /// </summary>
+    /// <since>6.0</since>
     public static Rhino.Geometry.Interval MaxRadiusRange
     {
       get => GetRange(CurvatureStyle.MaxRadius);
@@ -4030,6 +4340,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets or sets the curvature analysis style.
     /// </summary>
+    /// <since>6.0</since>
     public static CurvatureStyle Style
     {
       get
@@ -4051,6 +4362,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="meshes"></param>
     /// <param name="settings"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool CalculateCurvatureAutoRange(IEnumerable<Mesh> meshes, ref CurvatureAnalysisSettingsState settings)
     {
       bool rc = false;
@@ -4099,27 +4411,31 @@ namespace Rhino.ApplicationSettings
     internal SelectionFilterSettingsState() { }
 
     /// <summary>
-    /// The global geometry type filter controls which types of geometry will be be filtered.
+    /// The global geometry type filter controls which types of geometry will be filtered.
     /// Note, the filter can be a bitwise combination of multiple object types.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public Rhino.DocObjects.ObjectType GlobalGeometryFilter { get; set; }
 
     /// <summary>
-    /// The one-shot geometry type filter controls which types of geometry will be be filtered for one selection.
+    /// The one-shot geometry type filter controls which types of geometry will be filtered for one selection.
     /// Note, the filter can be a bitwise combination of multiple object types.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public Rhino.DocObjects.ObjectType OneShotGeometryFilter { get; set; }
 
     /// <summary>
     /// Enables or disables the global object selection filter.
     /// </summary>
+    /// <since>7.0</since>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Enables or disabled sub-object selection.
     /// </summary>
+    /// <since>7.0</since>
     public bool SubObjectSelect { get; set; }
   }
 
@@ -4169,6 +4485,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the factory settings of the application.
     /// </summary>
+    /// <since>7.0</since>
     public static SelectionFilterSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -4177,6 +4494,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Gets the current settings of the application.
     /// </summary>
+    /// <since>7.0</since>
     public static SelectionFilterSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -4185,6 +4503,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>7.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -4194,6 +4513,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">The particular state.</param>
+    /// <since>7.0</since>
     public static void UpdateFromState(SelectionFilterSettingsState state)
     {
       // Test before setting to reduce excessive application settings events
@@ -4208,9 +4528,10 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// The global geometry type filter controls which types of geometry will be be filtered.
+    /// The global geometry type filter controls which types of geometry will be filtered.
     /// Note, the filter can be a bitwise combination of multiple object types.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public static Rhino.DocObjects.ObjectType GlobalGeometryFilter
     {
@@ -4228,9 +4549,10 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// The one-shot geometry type filter controls which types of geometry will be be filtered for one selection.
+    /// The one-shot geometry type filter controls which types of geometry will be filtered for one selection.
     /// Note, the filter can be a bitwise combination of multiple object types.
     /// </summary>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public static Rhino.DocObjects.ObjectType OneShotGeometryFilter
     {
@@ -4250,6 +4572,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Enables or disables the global object selection filter.
     /// </summary>
+    /// <since>7.0</since>
     public static bool Enabled
     {
       get
@@ -4268,6 +4591,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Enables or disabled sub-object selection.
     /// </summary>
+    /// <since>7.0</since>
     public static bool SubObjectSelect
     {
       get

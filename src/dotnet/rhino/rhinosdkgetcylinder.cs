@@ -17,6 +17,7 @@ namespace Rhino.Input.Custom
   public class GetCylinder : IDisposable
   { 
     IntPtr m_ptr_argsrhinogetcylinder;
+    /// <since>6.0</since>
     public GetCylinder()
     {
       m_ptr_argsrhinogetcylinder = UnsafeNativeMethods.CArgsRhinoGetCylinder_New();
@@ -36,6 +37,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -60,11 +62,12 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// State of the cone/cyl constraint option. When the cone/cyl option is
-    /// selected, the circle is being made as a base for a cone/cyl.
-    /// By default the vertical cone/cyl option not available but is not
+    /// State of the cone/cylinder constraint option. When the cone/cylinder option is
+    /// selected, the circle is being made as a base for a cone/cylinder.
+    /// By default the vertical cone/cylinder option not available but is not
     /// selected.  By default the "Vertical" option applies to VerticalCircle.
     /// </summary>
+    /// <since>6.0</since>
     public CylinderConstraint CylinderConstraint
     {
       get
@@ -87,6 +90,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Default radius or diameter (based on InDiameterMode)
     /// </summary>
+    /// <since>6.0</since>
     public double DefaultSize
     {
       get
@@ -102,8 +106,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Determines if the "size" value is reperesenting a radius or diameter
+    /// Determines if the "size" value is representing a radius or diameter
     /// </summary>
+    /// <since>6.0</since>
     public bool InDiameterMode
     {
       get { return GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode); }
@@ -113,6 +118,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Determine if the "both sides" option is enabled
     /// </summary>
+    /// <since>6.0</since>
     public bool BothSidesOption
     {
       get
@@ -128,6 +134,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary> Height of cylinder </summary>
+    /// <since>6.0</since>
     public double Height
     {
       get
@@ -156,6 +163,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Gets or sets whether or not the output should be capped.
     /// </summary>
+    /// <since>6.0</since>
     public bool Cap
     {
       get { return GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap); }
@@ -167,6 +175,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="cylinder">The cylinder geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>6.0</since>
     public Commands.Result Get(out Geometry.Cylinder cylinder)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -182,6 +191,7 @@ namespace Rhino.Input.Custom
     /// <param name="aroundFaces">The number of faces in the around direction</param>
     /// <param name="cylinder">The cylinder geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Cylinder cylinder)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -196,11 +206,12 @@ namespace Rhino.Input.Custom
     /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
     /// <param name="aroundFaces">The number of faces in the around direction</param>
     /// <param name="cylinder">The cylinder geometry defined by the user.</param>
-    /// <param name="capStyle">Set to 0 if you don't want the prompt, 3 is tris, 4 is quads.</param>
+    /// <param name="capStyle">Set to 0 if you don't want the prompt, 3 is triangles, 4 is quads.</param>
     /// <returns>The result of the getting operation.</returns>
     /// <remarks>The prompt for capStyle will only be seen if it's not zero, aroundFaces is even
     ///          and the solid option is on.
     /// </remarks>
+    /// <since>7.0</since>
     public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref int capStyle, out Geometry.Cylinder cylinder)
     {
       IntPtr ptr_this = NonConstPointer();

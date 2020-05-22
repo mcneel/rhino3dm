@@ -13,6 +13,7 @@ namespace Rhino.DocObjects
 
     internal PointObject(bool custom) { }
 
+    /// <since>5.0</since>
     public Point PointGeometry
     {
       get
@@ -21,6 +22,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public Point DuplicatePointGeometry()
     {
       return DuplicateGeometry() as Point;
@@ -38,6 +40,7 @@ namespace Rhino.DocObjects
       : base(serialNumber)
     { }
 
+    /// <since>5.0</since>
     public PointCloud PointCloudGeometry
     {
       get
@@ -46,6 +49,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public PointCloud DuplicatePointCloudGeometry()
     {
       return DuplicateGeometry() as PointCloud;
@@ -70,6 +74,7 @@ namespace Rhino.DocObjects
     }
 
 
+    /// <since>5.0</since>
     public Point3d CurrentLocation
     {
       get
@@ -85,6 +90,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public Point3d OriginalLocation
     {
       get
@@ -99,6 +105,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// true if the grip has moved from OriginalLocation.
     /// </summary>
+    /// <since>5.0</since>
     public bool Moved
     {
       get 
@@ -112,8 +119,9 @@ namespace Rhino.DocObjects
     /// Moves the grip to a new location.
     /// </summary>
     /// <param name="xform">
-    /// Transformation appliead to the OriginalLocation point.
+    /// Transformation applied to the OriginalLocation point.
     /// </param>
+    /// <since>5.0</since>
     public void Move(Transform xform)
     {
       IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
@@ -125,6 +133,7 @@ namespace Rhino.DocObjects
     /// <param name="delta">
     /// Translation applied to the OriginalLocation point.
     /// </param>
+    /// <since>5.0</since>
     public void Move(Vector3d delta)
     {
       IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
@@ -137,6 +146,7 @@ namespace Rhino.DocObjects
     /// <param name="newLocation">
     /// New location for grip.
     /// </param>
+    /// <since>5.0</since>
     public void Move(Point3d newLocation)
     {
       IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
@@ -146,6 +156,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Undoes any grip moves made by calling Move.
     /// </summary>
+    /// <since>5.0</since>
     public void UndoMove()
     {
       IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
@@ -156,6 +167,7 @@ namespace Rhino.DocObjects
     /// The weight of a NURBS control point grip or RhinoMath.UnsetValue
     /// if the grip is not a NURBS control point grip.
     /// </summary>
+    /// <since>5.0</since>
     public virtual double Weight
     {
       get
@@ -170,6 +182,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public Guid OwnerId
     {
       get
@@ -180,7 +193,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Used to get a grip's logical neighbors, like NURBS curve, suface,
+    /// Used to get a grip's logical neighbors, like NURBS curve, surface,
     /// and cage control point grips.
     /// </summary>
     /// <param name="directionR">
@@ -196,6 +209,7 @@ namespace Rhino.DocObjects
     /// </param>
     /// <param name="wrap"></param>
     /// <returns>logical neighbor or null if the is no logical neighbor</returns>
+    /// <since>5.0</since>
     public GripObject NeighborGrip(int directionR, int directionS, int directionT, bool wrap)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -207,12 +221,13 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// Sometimes grips have directions.  These directions
-    /// can have any length and do not have to be orthoganal.
+    /// can have any length and do not have to be orthogonal.
     /// </summary>
     /// <param name="u"> u direction</param>
     /// <param name="v"> v direction</param>
     /// <param name="normal"> normal direction</param>
     /// <returns>True if the grip has directions.</returns>
+    /// <since>6.0</since>
     public bool GetGripDirections(out Vector3d u, out Vector3d v, out Vector3d normal)
     {
       u = v = normal = Vector3d.Unset;
@@ -226,6 +241,7 @@ namespace Rhino.DocObjects
     /// <param name="u"></param>
     /// <param name="v"></param>
     /// <returns>True on success. Output is unreliable if return is false.</returns>
+    /// <since>6.0</since>
     public bool GetSurfaceParameters(out double u, out double v)
     {
       u = v = Double.NaN;
@@ -240,6 +256,7 @@ namespace Rhino.DocObjects
     /// <param name="v"></param>
     /// <param name="w"></param>
     /// <returns>True on success. Output is unreliable if return is false.</returns>
+    /// <since>6.0</since>
     public bool GetCageParameters(out double u, out double v, out double w)
     {
       u = v = w = Double.NaN;
@@ -252,6 +269,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="t"></param>
     /// <returns>True on success. Output is unreliable if return is false.</returns>
+    /// <since>6.0</since>
     public bool GetCurveParameters(out double t)
     {
       t = Double.NaN;
@@ -259,6 +277,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoGripObject_GetCurveParameters(const_ptr_this, ref t);
     }
 
+    /// <since>5.0</since>
     public override int Index
     {
       get
@@ -295,6 +314,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     ~CustomPointObject() { Dispose(false); }
+    /// <since>5.6</since>
     public new void Dispose()
     {
       base.Dispose();
@@ -336,6 +356,7 @@ namespace Rhino.DocObjects.Custom
     }
     #endregion
 
+    /// <since>5.0</since>
     public CustomGripObject()
     {
       m_pRhinoObject = UnsafeNativeMethods.CRhCmnGripObject_New();
@@ -346,6 +367,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     ~CustomGripObject(){ Dispose(false); }
+    /// <since>5.0</since>
     public new void Dispose()
     {
       base.Dispose();
@@ -363,6 +385,7 @@ namespace Rhino.DocObjects.Custom
       m_pRhinoObject = IntPtr.Zero;
     }
 
+    /// <since>5.0</since>
     public new int Index
     {
       get{ return base.Index; }
@@ -373,6 +396,7 @@ namespace Rhino.DocObjects.Custom
       }
     }
 
+    /// <since>5.0</since>
     public new Point3d OriginalLocation
     {
       get{ return base.OriginalLocation; }
@@ -384,6 +408,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     // define a weight override so we don't end up in a circular call
+    /// <since>5.0</since>
     public override double Weight
     {
       get { return RhinoMath.UnsetValue; }
@@ -391,6 +416,7 @@ namespace Rhino.DocObjects.Custom
       }
     }
 
+    /// <since>5.0</since>
     public virtual void NewLocation()
     {
       IntPtr ptr_this = NonConstPointer();

@@ -56,6 +56,7 @@ namespace Rhino.DocObjects
     /// Determines if the simple material should come from the object or from
     /// it's layer.
     /// </summary>
+    /// <since>5.10</since>
     public ObjectMaterialSource MaterialSource
     {
       get
@@ -79,26 +80,32 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Identifies a rendering plug-in
     /// </summary>
+    /// <since>5.10</since>
     public Guid PlugInId { get; private set; }
     /// <summary>
     /// The Id of the Material used to render the front of an object.
     /// </summary>
+    /// <since>5.10</since>
     public Guid FrontFaceMaterialId { get { return GetMaterialId(false); } }
     /// <summary>
     /// The Id of the Material used to render the back of an object.
     /// </summary>
+    /// <since>5.10</since>
     public Guid BackFaceMaterialId { get { return GetMaterialId(true); } }
     /// <summary>
     /// The index of the material used to render the front of an object
     /// </summary>
+    /// <since>5.10</since>
     public int FrontFaceMaterialIndex { get { return GetMaterialIndex(false); } }
     /// <summary>
     /// The index of the material used to render the back of an object
     /// </summary>
+    /// <since>5.10</since>
     public int BackFaceMaterialIndex { get { return GetMaterialIndex(true); } }
     #endregion Public properties
 
     #region IDisposable implementation
+    /// <since>5.10</since>
     public void Dispose() { Dispose(true); }
     ~MaterialRef() { Dispose(false); }
     void Dispose(bool disposing)
@@ -118,27 +125,33 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Identifies a rendering plug-in
     /// </summary>
+    /// <since>5.10</since>
     public Guid PlugInId { get; set; }
     /// <summary>
     /// Determines if the simple material should come from the object or from
     /// it's layer.
     /// </summary>
+    /// <since>5.10</since>
     public ObjectMaterialSource MaterialSource { get; set; }
     /// <summary>
     /// The Id of the Material used to render the front of an object.
     /// </summary>
+    /// <since>5.10</since>
     public Guid FrontFaceMaterialId { get; set; }
     /// <summary>
     /// The index of the material used to render the front of an object
     /// </summary>
+    /// <since>5.10</since>
     public int FrontFaceMaterialIndex { get; set; }
     /// <summary>
     /// The Id of the Material used to render the back of an object.
     /// </summary>
+    /// <since>5.10</since>
     public Guid BackFaceMaterialId { get; set; }
     /// <summary>
     /// The index of the material used to render the back of an object
     /// </summary>
+    /// <since>5.10</since>
     public int BackFaceMaterialIndex { get; set; }
   }
 
@@ -186,6 +199,7 @@ namespace Rhino.DocObjects
     /// A temporary MaterialRef object, the caller is responsible for disposing
     /// of this object.
     /// </returns>
+    /// <since>5.10</since>
     public MaterialRef Create(MaterialRefCreateParams createParams)
     {
       if (createParams == null) throw new ArgumentNullException("createParams");
@@ -217,6 +231,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// A IEnumerator that can be used to iterate this dictionary.
     /// </returns>
+    /// <since>5.10</since>
     public IEnumerator<KeyValuePair<Guid, MaterialRef>> GetEnumerator()
     {
       var result = new MaterialRefDictionaryEnumerator(this);
@@ -229,6 +244,7 @@ namespace Rhino.DocObjects
     /// An System.Collections.IEnumerator object that can be used to iterate
     /// through this dictionary.
     /// </returns>
+    /// <since>5.10</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -264,6 +280,7 @@ namespace Rhino.DocObjects
     /// <exception cref="System.ArgumentException">
     /// key is empty.
     /// </exception>
+    /// <since>5.10</since>
     public void Add(Guid key, MaterialRef value)
     {
       if (key == Guid.Empty) throw new ArgumentException("key");
@@ -276,6 +293,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Removes all items from this dictionary.
     /// </summary>
+    /// <since>5.10</since>
     public void Clear()
     {
       var non_const_pointer = NonConstPointer;
@@ -375,6 +393,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the number of elements contained in this dictionary
     /// </summary>
+    /// <since>5.10</since>
     public int Count
     {
       get
@@ -387,6 +406,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// IDictionary required property, always returns false for this dictionary.
     /// </summary>
+    /// <since>5.10</since>
     public bool IsReadOnly { get { return false; } }
     /// <summary>
     /// Determines whether this dictionary contains an MaterialRef with the
@@ -399,6 +419,7 @@ namespace Rhino.DocObjects
     /// true if this dictionary contains an element with the specified plug-in
     /// Id; otherwise, false.
     /// </returns>
+    /// <since>5.10</since>
     public bool ContainsKey(Guid key)
     {
       var const_pointer = ConstPointer;
@@ -416,6 +437,7 @@ namespace Rhino.DocObjects
     /// true if the MaterialRef is successfully removed; otherwise, false. This
     /// method also returns false if key was not found in the original dictionary.
     /// </returns>
+    /// <since>5.10</since>
     public bool Remove(Guid key)
     {
       var const_pointer = ConstPointer;
@@ -440,6 +462,7 @@ namespace Rhino.DocObjects
     /// true if this dictionary contains a MaterialRef with the specified key;
     /// otherwise, false.
     /// </returns>
+    /// <since>5.10</since>
     public bool TryGetValue(Guid key, out MaterialRef value)
     {
       var contains_key = ContainsKey(key);
@@ -477,6 +500,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets an ICollection containing the plug-in Id's in this dictionary.
     /// </summary>
+    /// <since>5.10</since>
     public ICollection<Guid> Keys
     {
       get
@@ -498,6 +522,7 @@ namespace Rhino.DocObjects
     /// Gets an ICollection containing the MaterialRef objects in this
     /// dictionary.
     /// </summary>
+    /// <since>5.10</since>
     public ICollection<MaterialRef> Values
     {
       get
@@ -607,6 +632,7 @@ namespace Rhino.DocObjects
     #endregion
 
     #region constructors
+    /// <since>5.0</since>
     public Material() : base()
     {
       // Creates a new non-document controlled ON_Material
@@ -614,12 +640,14 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(ptr_material);
     }
 
+    /// <since>6.0</since>
     public Material(Material other) : base()
     {
       IntPtr ptr_material = UnsafeNativeMethods.ON_Material_New(other.ConstPointer());
       ConstructNonConstObject(ptr_material);
     }
 
+    /// <since>6.0</since>
     public void CopyFrom(Material other)
     {
       UnsafeNativeMethods.ON_Material_CopyFrom(NonConstPointer(), other.ConstPointer());
@@ -634,6 +662,7 @@ namespace Rhino.DocObjects
       m__parent = m_doc;
     }
 
+    /// <since>5.0</since>
     public static Material DefaultMaterial
     {
       get
@@ -644,6 +673,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public Guid RenderMaterialInstanceId
     {
       get
@@ -662,6 +692,7 @@ namespace Rhino.DocObjects
     /// Will create a new RenderMaterial if none exists. This can happen for older
     /// documents.
     /// </summary>
+    /// <since>6.0</since>
     public RenderMaterial RenderMaterial
     {
       get
@@ -777,6 +808,7 @@ namespace Rhino.DocObjects
     /// will work with materials.  Call IsDeleted to determine to determine if
     /// a material is deleted.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeleted
     {
       get
@@ -792,6 +824,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// The Id of the RenderPlugIn that is associated with this material.
     /// </summary>
+    /// <since>5.0</since>
     public Guid RenderPlugInId
     {
       get
@@ -811,6 +844,7 @@ namespace Rhino.DocObjects
     /// Rhino allows multiple files to be viewed simultaneously. Materials in the
     /// document are "normal" or "reference". Reference materials are not saved.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsReference
     {
       get
@@ -832,6 +866,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// By default Rhino layers and objects are assigned the default rendering material.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDefaultMaterial
     {
       get
@@ -850,6 +885,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// 
     /// </summary>
+    /// <since>5.6</since>
     public int MaterialIndex
     {
       get
@@ -863,6 +899,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Number of objects and layers that use this material.
     /// </summary>
+    /// <since>5.0</since>
     public int UseCount
     {
       get
@@ -878,6 +915,7 @@ namespace Rhino.DocObjects
     /// If true this object may not be modified. Any properties or functions that attempt
     /// to modify this object when it is set to "IsReadOnly" will throw a NotSupportedException.
     /// </summary>
+    /// <since>5.6</since>
     public override bool IsDocumentControlled
     {
       get
@@ -891,6 +929,7 @@ namespace Rhino.DocObjects
 
 #endif
 
+    /// <since>5.0</since>
     public override string Name
     {
       get
@@ -915,6 +954,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.RenderMaterial"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get { return ModelComponentType.RenderMaterial; }
@@ -950,6 +990,7 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Material_SetBool(ptr_this, which, val);
     }
 
+    /// <since>5.0</since>
     public static double MaxShine
     {
       get { return 255.0; }
@@ -958,6 +999,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the shine factor of the material.
     /// </summary>
+    /// <since>5.0</since>
     public double Shine
     {
       get { return GetDouble(IDX_SHINE); }
@@ -967,6 +1009,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the transparency of the material (0.0 = opaque to 1.0 = transparent)
     /// </summary>
+    /// <since>5.0</since>
     public double Transparency
     {
       get { return GetDouble(IDX_TRANSPARENCY); }
@@ -977,6 +1020,7 @@ namespace Rhino.DocObjects
     /// Gets or sets the index of refraction of the material, generally
     /// >= 1.0 (speed of light in vacuum)/(speed of light in material)
     /// </summary>
+    /// <since>5.1</since>
     public double IndexOfRefraction
     {
       get { return GetDouble(IDX_IOR); }
@@ -987,6 +1031,7 @@ namespace Rhino.DocObjects
     /// Gets or sets the Fresnel index of refraction of the material,
     /// default is 1.56
     /// </summary>
+    /// <since>6.0</since>
     public double FresnelIndexOfRefraction
     {
       get { return GetDouble(IDX_FRESNEL_IOR); }
@@ -996,6 +1041,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the refraction glossiness.
     /// </summary>
+    /// <since>6.0</since>
     public double RefractionGlossiness
     {
       get { return GetDouble(IDX_REFRACTION_GLOSSINESS); }
@@ -1005,6 +1051,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the reflection glossiness.
     /// </summary>
+    /// <since>6.0</since>
     public double ReflectionGlossiness
     {
       get { return GetDouble(IDX_REFLECTION_GLOSSINESS); }
@@ -1012,8 +1059,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets if fresnel reflections are used.
+    /// Gets or sets if Fresnel reflections are used.
     /// </summary>
+    /// <since>6.0</since>
     public bool FresnelReflections
     {
       get
@@ -1026,6 +1074,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public bool DisableLighting
     {
       get
@@ -1038,6 +1087,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public bool AlphaTransparency
     {
       get
@@ -1051,6 +1101,7 @@ namespace Rhino.DocObjects
     }
 
 #if RHINO_SDK
+    /// <since>7.0</since>
     public Rhino.Render.PhysicallyBasedMaterial PhysicallyBased
     {
       get
@@ -1058,12 +1109,22 @@ namespace Rhino.DocObjects
         return new Render.PhysicallyBasedMaterial(this);
       }
     }
+
+    public Rhino.Render.PhysicallyBasedMaterial ConvertToPhysicallyBased()
+    {
+      var material = new Material(this);
+
+      UnsafeNativeMethods.ON_Material_ConvertToPBR(material.NonConstPointer());
+
+      return material.PhysicallyBased;
+    }
 #endif
 
     /// <summary>
     /// Gets or sets how reflective a material is, 0f is no reflection
     /// 1f is 100% reflective.
     /// </summary>
+    /// <since>5.7</since>
     public double Reflectivity
     {
       get { return GetDouble(IDX_REFLECTIVITY); }
@@ -1073,6 +1134,7 @@ namespace Rhino.DocObjects
     /// <summary>
     ///  Very simple preview color function for GUIs.
     /// </summary>
+    /// <since>6.6</since>
     public System.Drawing.Color PreviewColor
     {
       get
@@ -1102,31 +1164,37 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Material_SetColor(ptr_this, which, argb);
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Color DiffuseColor
     {
       get{ return GetColor(IDX_DIFFUSE); }
       set{ SetColor(IDX_DIFFUSE, value); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color AmbientColor
     {
       get { return GetColor(IDX_AMBIENT); }
       set { SetColor(IDX_AMBIENT, value); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color EmissionColor
     {
       get { return GetColor(IDX_EMISSION); }
       set { SetColor(IDX_EMISSION, value); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color SpecularColor
     {
       get { return GetColor(IDX_SPECULAR); }
       set { SetColor(IDX_SPECULAR, value); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color ReflectionColor
     {
       get { return GetColor(IDX_REFLECTION); }
       set { SetColor(IDX_REFLECTION, value); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color TransparentColor
     {
       get { return GetColor(IDX_TRANSPARENT); }
@@ -1137,6 +1205,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Set material to default settings.
     /// </summary>
+    /// <since>5.0</since>
     public void Default()
     {
       var ptr_const_this = NonConstPointer();
@@ -1155,6 +1224,7 @@ namespace Rhino.DocObjects
     /// <param name="texture">An instance of Rhino.DocObjects.Texture</param>
     /// <param name="which">Use Rhino.DocObjects.TextureType</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool SetTexture(Texture texture, TextureType which)
     {
       var ptr_this = NonConstPointer();
@@ -1167,6 +1237,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="which"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public Texture GetTexture(TextureType which)
     {
       var ptr_const_this = ConstPointer();
@@ -1180,6 +1251,7 @@ namespace Rhino.DocObjects
     /// Get array of textures that this material uses
     /// </summary>
     /// <returns></returns>
+    /// <since>5.7</since>
     public Texture[] GetTextures()
     {
       var ptr_const_this = ConstPointer();
@@ -1191,16 +1263,19 @@ namespace Rhino.DocObjects
     }
 
     #region Bitmap
+    /// <since>5.0</since>
     [Obsolete("Use GetTexture instead")]
     public Texture GetBitmapTexture()
     {
       return GetTexture(TextureType.Bitmap);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bitmap);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(Texture texture)
     {
@@ -1213,16 +1288,19 @@ namespace Rhino.DocObjects
     /// Gets the bump texture of this material.
     /// </summary>
     /// <returns>A texture; or null if no bump texture has been added to this material.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use GetTexture instead")]
     public Texture GetBumpTexture()
     {
       return GetTexture(TextureType.Bump);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bump);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(Texture texture)
     {
@@ -1231,16 +1309,19 @@ namespace Rhino.DocObjects
     #endregion
 
     #region Environment
+    /// <since>5.0</since>
     [Obsolete("Use GetTexture instead")]
     public Texture GetEnvironmentTexture()
     {
       return GetTexture(TextureType.Emap);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(string filename)
     {
       return AddTexture(filename, TextureType.Emap);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(Texture texture)
     {
@@ -1249,16 +1330,19 @@ namespace Rhino.DocObjects
     #endregion
 
     #region Transparency
+    /// <since>5.0</since>
     [Obsolete("Use GetTexture instead")]
     public Texture GetTransparencyTexture()
     {
       return GetTexture(TextureType.Transparency);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(string filename)
     {
       return AddTexture(filename, TextureType.Transparency);
     }
+    /// <since>5.0</since>
     [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(Texture texture)
     {
@@ -1266,6 +1350,42 @@ namespace Rhino.DocObjects
     }
     #endregion
 
+#if RHINO_SDK
+    /// <summary>
+    /// Finds id of the material channel at given index.
+    /// </summary>
+    /// <param name="material_channel_index">Index</param>
+    /// <returns>Id of the material channel</returns>
+    public Guid MaterialChannelIdFromIndex(int material_channel_index)
+    {
+      var ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.ON_Material_MaterialChannelIdFromIndex(ptr_const_this, material_channel_index);
+    }
+
+    /// <summary>
+    /// Finds index of the material channel that refers to a material channel with the given id.
+    /// Optionally adds channel if one is not found.
+    /// </summary>
+    /// <param name="material_channel_id">Id</param>
+    /// <param name="bAddIdIfNotPresent">Controls whether to add channel if none exist</param>
+    /// <returns>Index of the material channel</returns>
+    public int MaterialChannelIndexFromId(Guid material_channel_id, bool bAddIdIfNotPresent)
+    {
+      var ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Material_MaterialChannelIndexFromId(ptr_this, material_channel_id, bAddIdIfNotPresent);
+    }
+
+    /// <summary>
+    /// Removes all material channels
+    /// </summary>
+    public void ClearMaterialChannels()
+    {
+      var ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Material_ClearMaterialChannels(ptr_this);
+    }
+#endif
+
+    /// <since>5.0</since>
     public bool CommitChanges()
     {
 #if RHINO_SDK
@@ -1285,6 +1405,7 @@ namespace Rhino.DocObjects
     /// <param name="key">id used to retrieve this string.</param>
     /// <param name="value">string associated with key.</param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SetUserString(string key, string value)
     {
       return _SetUserString(key, value);
@@ -1294,11 +1415,13 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="key">id used to retrieve the string.</param>
     /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>5.0</since>
     public string GetUserString(string key)
     {
       return _GetUserString(key);
     }
 
+    /// <since>5.0</since>
     public int UserStringCount
     {
       get
@@ -1311,6 +1434,7 @@ namespace Rhino.DocObjects
     /// Gets an independent copy of the collection of (user text key, user text value) pairs attached to this object.
     /// </summary>
     /// <returns>A collection of key strings and values strings. This </returns>
+    /// <since>5.0</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings()
     {
       return _GetUserStrings();
@@ -1356,21 +1480,25 @@ namespace Rhino.DocObjects.Tables
     }
 
     RhinoDoc m_doc;
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_document_sn)); }
     }
 
+    /// <since>5.0</since>
     public MaterialTableEventType EventType
     {
       get { return m_event_type; }
     }
 
+    /// <since>5.0</since>
     public int Index
     {
       get { return m_material_index; }
     }
 
+    /// <since>5.0</since>
     public Material OldSettings
     {
       get
@@ -1411,11 +1539,12 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Retrieves a Material object based on Index. This seach type of search is discouraged.
+    /// Retrieves a Material object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A Material object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public Material FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -1427,6 +1556,7 @@ namespace Rhino.DocObjects.Tables
     /// specified, new objects are assigned to the current material.
     /// The current material is never locked, hidden, or deleted.
     /// </summary>
+    /// <since>5.0</since>
     public int CurrentMaterialIndex
     {
       get
@@ -1442,6 +1572,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Gets or sets the current material source.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectMaterialSource CurrentMaterialSource
     {
       get
@@ -1455,6 +1586,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -1467,11 +1599,13 @@ namespace Rhino.DocObjects.Tables
     /// Adds a new material to the table based on the default material.
     /// </summary>
     /// <returns>The position of the new material in the table.</returns>
+    /// <since>5.0</since>
     public int Add()
     {
       return UnsafeNativeMethods.CRhinoMaterialTable_GetInt(m_doc.RuntimeSerialNumber, IDX_ADD_DEFAULT_MATERIAL);
     }
 
+    /// <since>5.0</since>
     void ICollection<Material>.Add(Material item)
     {
       Add(item);
@@ -1482,6 +1616,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="material">A model of the material to be added.</param>
     /// <returns>The position of the new material in the table.</returns>
+    /// <since>5.0</since>
     public int Add(Material material)
     {
       return Add(material, false);
@@ -1496,6 +1631,7 @@ namespace Rhino.DocObjects.Tables
     /// Reference materials are not saved in the file.
     /// </param>
     /// <returns>The position of the new material in the table.</returns>
+    /// <since>5.0</since>
     public int Add(Material material, bool reference)
     {
       IntPtr ptr_const_material = material.ConstPointer();
@@ -1503,7 +1639,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Finds a meterial with a given name.
+    /// Finds a material with a given name.
     /// </summary>
     /// <param name="materialName">Name of the material to search for. The search ignores case.</param>
     /// <param name="ignoreDeletedMaterials">true means don't search deleted materials.</param>
@@ -1511,6 +1647,7 @@ namespace Rhino.DocObjects.Tables
     /// >=0 index of the material with the given name
     /// -1  no material has the given name.
     /// </returns>
+    /// <since>5.0</since>
     public int Find(string materialName, bool ignoreDeletedMaterials)
     {
       return UnsafeNativeMethods.CRhinoMaterialTable_FindByName(m_doc.RuntimeSerialNumber, materialName, ignoreDeletedMaterials);
@@ -1523,6 +1660,7 @@ namespace Rhino.DocObjects.Tables
     /// >=0 index of the material with the given name
     /// -1  no material has the given name.
     /// </returns>
+    /// <since>5.0</since>
     public int Find(Guid materialId, bool ignoreDeletedMaterials)
     {
       return UnsafeNativeMethods.CRhinoMaterialTable_FindById(m_doc.RuntimeSerialNumber, materialId, ignoreDeletedMaterials);
@@ -1538,12 +1676,14 @@ namespace Rhino.DocObjects.Tables
     /// true if successful. false if materialIndex is out of range or the settings attempt
     /// to lock or hide the current material.
     /// </returns>
+    /// <since>5.0</since>
     public bool Modify(Material newSettings, int materialIndex, bool quiet)
     {
       IntPtr ptr_const_material = newSettings.ConstPointer();
       return UnsafeNativeMethods.CRhinoMaterialTable_ModifyMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, materialIndex, quiet);
     }
 
+    /// <since>5.0</since>
     public bool ResetMaterial(int materialIndex)
     {
       return UnsafeNativeMethods.CRhinoMaterialTable_ResetMaterial(m_doc.RuntimeSerialNumber, materialIndex);
@@ -1558,11 +1698,13 @@ namespace Rhino.DocObjects.Tables
     /// material cannot be deleted because it is the current material or because
     /// it material contains active geometry.
     /// </returns>
+    /// <since>5.0</since>
     public bool DeleteAt(int materialIndex)
     {
       return UnsafeNativeMethods.CRhinoMaterialTable_DeleteMaterial(m_doc.RuntimeSerialNumber, materialIndex);
     }
 
+    /// <since>6.0</since>
     public override bool Delete(Material item)
     {
       if (item == null) return false;

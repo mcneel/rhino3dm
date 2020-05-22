@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Rhino.FileIO;
 using Rhino.Geometry;
 using Rhino.Render;
@@ -505,6 +505,9 @@ namespace Rhino.DocObjects
         case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoSubDObject: // 25
           rc = new SubDObject(sn);
           break;
+        case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoProxyObject: // 26
+          rc = new ProxyObject(sn);
+          break;
         default:
           rc = new RhinoObject(sn);
           break;
@@ -523,6 +526,7 @@ namespace Rhino.DocObjects
     /// Gets the runtime serial number that will be assigned to
     /// the next Rhino Object that is created.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public static uint NextRuntimeSerialNumber
     {
@@ -535,6 +539,7 @@ namespace Rhino.DocObjects
     /// <summary> Get a Rhino object for a unique runtime serial number </summary>
     /// <param name="serialNumber"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public static RhinoObject FromRuntimeSerialNumber(uint serialNumber)
     {
@@ -548,6 +553,7 @@ namespace Rhino.DocObjects
     /// <param name="meshes">The created meshes are appended to this array.</param>
     /// <param name="attributes">The object attributes that coincide with each created mesh are appended to this array.</param>
     /// <returns>The results of the calculation.</returns>
+    /// <since>5.9</since>
     public static Commands.Result MeshObjects(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, MeshingParameters parameters, out Mesh[] meshes, out ObjectAttributes[] attributes)
     {
       using (var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
@@ -579,6 +585,7 @@ namespace Rhino.DocObjects
     /// <param name="meshes">The created meshes are appended to this array.</param>
     /// <param name="attributes">The object attributes that coincide with each created mesh are appended to this array.</param>
     /// <returns>The results of the calculation.</returns>
+    /// <since>5.9</since>
     public static Commands.Result MeshObjects(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, ref MeshingParameters parameters, ref bool simpleDialog, out Mesh[] meshes, out ObjectAttributes[] attributes)
     {
       using (var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
@@ -612,6 +619,7 @@ namespace Rhino.DocObjects
     /// <param name="meshes">The created meshes are appended to this array.</param>
     /// <param name="attributes">The object attributes that coincide with each created mesh are appended to this array.</param>
     /// <returns>The results of the calculation.</returns>
+    /// <since>6.0</since>
     public static Commands.Result MeshObjects(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, ref MeshingParameters parameters, ref int uiStyle, Transform xform, out Mesh[] meshes, out ObjectAttributes[] attributes)
     {
       using (var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
@@ -642,6 +650,7 @@ namespace Rhino.DocObjects
     /// <param name="okToCreate">true if the method is allowed to instantiate new meshes if they do not exist.</param>
     /// <param name="returnAllObjects">true if all objects should be returned.</param>
     /// <returns>An array of object references.</returns>
+    /// <since>5.0</since>
     public static ObjRef[] GetRenderMeshes(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, bool okToCreate, bool returnAllObjects)
     {
       var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects);
@@ -672,6 +681,7 @@ namespace Rhino.DocObjects
     /// <param name="rhinoObject">Object to clip</param>
     /// <param name="clippingPlaneObject">Clipping plane to use</param>
     /// <returns></returns>
+    /// <since>6.7</since>
     public static Brep[] GetFillSurfaces(RhinoObject rhinoObject, ClippingPlaneObject clippingPlaneObject)
     {
       using (var fillBreps = new SimpleArrayBrepPointer())
@@ -695,6 +705,7 @@ namespace Rhino.DocObjects
     /// <param name="rhinoObject">Object to clip</param>
     /// <param name="clippingPlaneObjects">Enumeration of clipping plane objects</param>
     /// <returns>Array of Brep containing fully trimmed fills if there were any generated.</returns>
+    /// <since>6.7</since>
     public static Brep[] GetFillSurfaces(RhinoObject rhinoObject, IEnumerable<ClippingPlaneObject> clippingPlaneObjects)
     {
       return GetFillSurfaces(rhinoObject, clippingPlaneObjects, false);
@@ -707,6 +718,7 @@ namespace Rhino.DocObjects
     /// <param name="clippingPlaneObjects">Enumeration of clipping plane objects</param>
 		/// <param name="unclippedFills">Use true to get fills that are not trimmed by all clipping planes</param>
     /// <returns>Array of Brep containing fills if there were any generated, trimmed if unclippedFills was false</returns>
+    /// <since>6.7</since>
     public static Brep[] GetFillSurfaces(RhinoObject rhinoObject, IEnumerable<ClippingPlaneObject> clippingPlaneObjects, bool unclippedFills)
     {
       using (var fillBreps = new SimpleArrayBrepPointer())
@@ -725,12 +737,47 @@ namespace Rhino.DocObjects
       }
       return null;
     }
+
+    /// <summary>
+    /// Gets a world XY-plane aligned tight bounding box from a collection of Rhino objects.
+    /// </summary>
+    /// <param name="rhinoObjects">A collection of Rhino objects.</param>
+    /// <param name="boundingBox">A tight bounding box.</param>
+    /// <returns></returns>
+    public static bool GetTightBoundingBox(IEnumerable<RhinoObject> rhinoObjects, out BoundingBox boundingBox)
+    {
+      boundingBox = BoundingBox.Unset;
+      using (var obj_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
+      {
+        var ptr_obj_array = obj_array.NonConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoGetTightBoundingBox(ptr_obj_array, ref boundingBox);
+      }
+    }
+
+    /// <summary>
+    /// Gets a plane aligned tight bounding box from a collection of Rhino objects.
+    /// </summary>
+    /// <param name="rhinoObjects">A collection of Rhino objects.</param>
+    /// <param name="plane">A valid alignment plane.</param>
+    /// <param name="boundingBox">A tight bounding box.</param>
+    /// <returns></returns>
+    public static bool GetTightBoundingBox(IEnumerable<RhinoObject> rhinoObjects, Plane plane, out BoundingBox boundingBox)
+    {
+      boundingBox = BoundingBox.Unset;
+      using (var obj_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
+      {
+        var ptr_obj_array = obj_array.NonConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoGetTightBoundingBox2(ptr_obj_array, ref plane, ref boundingBox);
+      }
+    }
+
     #endregion
 
-  #region properties
+    #region properties
     /// <summary>
     /// Gets the Rhino-based object type.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public ObjectType ObjectType
     {
@@ -745,6 +792,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the document that owns this object.
     /// </summary>
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get
@@ -760,6 +808,7 @@ namespace Rhino.DocObjects
     /// Gets the underlying geometry for this object.
     /// <para>All rhino objects are composed of geometry and attributes.</para>
     /// </summary>
+    /// <since>5.0</since>
     public virtual GeometryBase Geometry
     {
       get
@@ -790,6 +839,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the object attributes.
     /// </summary>
+    /// <since>5.0</since>
     public virtual ObjectAttributes Attributes
     {
       get
@@ -817,6 +867,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the objects runtime serial number.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber
     {
@@ -838,6 +889,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Some objects cannot be deleted, like grips on lights and annotation objects. 
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeletable
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsDeletable); }
@@ -853,6 +905,7 @@ namespace Rhino.DocObjects
     /// true if the object is deleted. Deleted objects are kept by the document
     /// for undo purposes. Call RhinoDoc.UndeleteObject to undelete an object.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeleted
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsDeleted); }
@@ -861,6 +914,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// true if the object is used as part of an instance definition.   
     /// </summary>
+    /// <since>5.0</since>
     public bool IsInstanceDefinitionGeometry
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsInstanceDefinitionGeometry); }
@@ -873,6 +927,7 @@ namespace Rhino.DocObjects
     /// visibility by the object cannot be selected. If the object is hidden, it is
     /// not visible and it cannot be selected.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsNormal
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsNormal); }
@@ -885,6 +940,7 @@ namespace Rhino.DocObjects
     /// visibility by the object cannot be selected. If the object is hidden, it is
     /// not visible and it cannot be selected.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsLocked
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsLocked); }
@@ -897,6 +953,7 @@ namespace Rhino.DocObjects
     /// visibility by the object cannot be selected. If the object is hidden, it is
     /// not visible and it cannot be selected.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsHidden
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsHidden); }
@@ -907,6 +964,7 @@ namespace Rhino.DocObjects
     /// reference model is a reference object and cannot be modified. An object is
     /// a reference object if, and only if, it is on a reference layer.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsReference
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsReference); }
@@ -915,6 +973,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Obsolete - use ReferenceModelSerialNumber
     /// </summary>
+    /// <since>6.3</since>
     [CLSCompliant(false)]
     public uint WorksessionReferenceSerialNumber
     {
@@ -929,6 +988,7 @@ namespace Rhino.DocObjects
     /// Typically this value is set and locked by the code that adds a component to a model.
     /// This value is not saved in .3dm archives.
     /// </remarks>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public override uint ReferenceModelSerialNumber
     {
@@ -937,13 +997,14 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// When a component is in a model as part of the information required for a linked instance definition,
-    /// this value identifies the the linked instance definition reference model.
+    /// this value identifies the linked instance definition reference model.
     /// </summary>
     /// <remarks>
     /// Reference components are not saved in .3dm archives. 
     /// Typically this value is set and locked by the code that adds a component to a model.
     /// This value is not saved in .3dm archives.
     /// </remarks>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public override uint InstanceDefinitionModelSerialNumber
     {
@@ -951,6 +1012,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Gets the object visibility.</summary>
+    /// <since>5.0</since>
     public bool Visible
     {
       get
@@ -981,6 +1043,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_duplicateobject.cs' lang='cs'/>
     /// <code source='examples\py\ex_duplicateobject.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GeometryBase DuplicateGeometry()
     {
       if (null != m_edited_geometry)
@@ -1004,6 +1067,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool CommitChanges()
     {
       var rc = false;
@@ -1071,6 +1135,7 @@ namespace Rhino.DocObjects
     /// amount of space take up by the object when saved to a file.
     /// </summary>
     /// <returns>The estimated number of bytes this object occupies in memory.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint MemoryEstimate()
     {
@@ -1097,6 +1162,7 @@ namespace Rhino.DocObjects
     /// </para>
     /// <para>This value is the same as the one returned by this.Attributes.ObjectId.</para>
     /// </summary>
+    /// <since>5.0</since>
     public override Guid Id
     {
       get
@@ -1113,6 +1179,7 @@ namespace Rhino.DocObjects
     /// Rhino objects have optional text names.  More than one object in
     /// a model can have the same name and some objects may have no name.
     /// </summary>
+    /// <since>5.0</since>
     public override string Name
     {
       get
@@ -1126,6 +1193,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Number of groups object belongs to.</summary>
+    /// <since>5.0</since>
     public int GroupCount
     {
       get
@@ -1139,6 +1207,7 @@ namespace Rhino.DocObjects
     /// If <see cref="GroupCount"/> is 0, then this method returns null.
     /// </summary>
     /// <returns>An array of group indices, or null if <see cref="GroupCount"/> is 0.</returns>
+    /// <since>5.0</since>
     public int[] GetGroupList()
     {
       var count = GroupCount;
@@ -1166,6 +1235,7 @@ namespace Rhino.DocObjects
     /// 2 = entire object is selected persistently.
     /// 3 = one or more proper sub-objects are selected.
     /// </returns>
+    /// <since>5.0</since>
     public int IsSelected(bool checkSubObjects)
     {
       var ptr = ConstPointer();
@@ -1173,9 +1243,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Check sub-object selection state.</summary>
-    /// <param name="componentIndex">Index of subobject to check.</param>
-    /// <returns>true if the subobject is selected.</returns>
-    /// <remarks>A subobject cannot be persistently selected.</remarks>
+    /// <param name="componentIndex">Index of sub-object to check.</param>
+    /// <returns>true if the sub-object is selected.</returns>
+    /// <remarks>A sub-object cannot be persistently selected.</remarks>
+    /// <since>5.0</since>
     public bool IsSubObjectSelected(ComponentIndex componentIndex)
     {
       var ptr = ConstPointer();
@@ -1183,7 +1254,8 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Get a list of all selected sub-objects.</summary>
-    /// <returns>An array of subobject indices, or null if there are none.</returns>
+    /// <returns>An array of sub-object indices, or null if there are none.</returns>
+    /// <since>5.0</since>
     public ComponentIndex[] GetSelectedSubObjects()
     {
       var ptr = ConstPointer();
@@ -1222,6 +1294,7 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public bool IsSelectable(bool ignoreSelectionState, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
       var ptr = ConstPointer();
@@ -1234,23 +1307,25 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public bool IsSelectable()
     {
       return IsSelectable(false, false, false, false);
     }
 
-    /// <summary>Reports if a subobject can be selected.</summary>
-    /// <param name="componentIndex">index of subobject to check.</param>
+    /// <summary>Reports if a sub-object can be selected.</summary>
+    /// <param name="componentIndex">index of sub-object to check.</param>
     /// <param name="ignoreSelectionState">
     /// If true, then selected objects are selectable.
     /// If false, then selected objects are not selectable.
     /// </param>
-    /// <returns>true if the specified subobject can be selected.</returns>
+    /// <returns>true if the specified sub-object can be selected.</returns>
     /// <remarks>
     /// Objects that are locked, hidden, or on locked or hidden layers
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public bool IsSubObjectSelectable(ComponentIndex componentIndex, bool ignoreSelectionState)
     {
       var ptr = ConstPointer();
@@ -1261,7 +1336,7 @@ namespace Rhino.DocObjects
     /// <param name="on">The new selection state; true activates selection.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// <para>Highlighting can be and stay out of sync, as its specification is independent.</para>
     /// </param>
     /// <param name="persistentSelect">
@@ -1290,6 +1365,7 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public int Select(bool on, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
       var ptr = ConstPointer();
@@ -1313,6 +1389,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Select(bool on)
     {
       return Select(on, true);
@@ -1321,8 +1398,8 @@ namespace Rhino.DocObjects
     /// <summary>Selects an object.</summary>
     /// <param name="on">The new selection state; true activates selection.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is hightlighted if it is selected
-    /// and not hightlighted if is is not selected.
+    /// If true, then the object is highlighted if it is selected
+    /// and not highlighted if is not selected.
     /// <para>Highlighting can be and stay out of sync, as its specification is independent.</para>
     /// </param>
     /// <returns>
@@ -1335,18 +1412,19 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public int Select(bool on, bool syncHighlight)
     {
       return Select(on, syncHighlight, true, false, false, false);
     }
 
     /// <summary>Reports if an object can be selected.</summary>
-    /// <param name="componentIndex">Index of subobject to check.</param>
+    /// <param name="componentIndex">Index of sub-object to check.</param>
     /// <param name="select">The new selection state; true activates selection.</param>
     /// <param name="syncHighlight">
     /// (default=true)
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <returns>
     /// 0: object is not selected
@@ -1358,18 +1436,19 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>5.0</since>
     public int SelectSubObject(ComponentIndex componentIndex, bool select, bool syncHighlight)
     {
       return SelectSubObject(componentIndex, select, syncHighlight, false);
     }
 
     /// <summary>Reports if an object can be selected.</summary>
-    /// <param name="componentIndex">Index of subobject to check.</param>
+    /// <param name="componentIndex">Index of sub-object to check.</param>
     /// <param name="select">The new selection state; true activates selection.</param>
     /// <param name="syncHighlight">
     /// (default=true)
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">When true, selection persists even after the current command
     /// terminates.</param>
@@ -1383,6 +1462,7 @@ namespace Rhino.DocObjects
     /// cannot be selected. If IsSelectableWithGripsOn() returns false,
     /// then an that object is not selectable if it has grips turned on.
     /// </remarks>
+    /// <since>6.0</since>
     public int SelectSubObject(ComponentIndex componentIndex, bool select, bool syncHighlight, bool persistentSelect)
     {
       var ptr = ConstPointer();
@@ -1390,9 +1470,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Removes selection from all subobjects.
+    /// Removes selection from all sub-objects.
     /// </summary>
-    /// <returns>The number of unselected subobjects.</returns>
+    /// <returns>The number of unselected sub-objects.</returns>
+    /// <since>5.0</since>
     public int UnselectAllSubObjects()
     {
       // 20 Jan 2010 - S. Baer
@@ -1416,6 +1497,7 @@ namespace Rhino.DocObjects
     /// <para>1: entire object is highlighted.</para>
     /// <para>3: one or more proper sub-objects are highlighted.</para>
     /// </returns>
+    /// <since>5.0</since>
     public int IsHighlighted(bool checkSubObjects)
     {
       var ptr = ConstPointer();
@@ -1427,6 +1509,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="enable">true if highlighting should be enabled.</param>
     /// <returns>true if the object is now highlighted.</returns>
+    /// <since>5.0</since>
     public bool Highlight(bool enable)
     {
       var ptr = ConstPointer();
@@ -1434,10 +1517,11 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Determines if a subobject is highlighted.
+    /// Determines if a sub-object is highlighted.
     /// </summary>
-    /// <param name="componentIndex">A subobject component index.</param>
-    /// <returns>true if the subobject is highlighted.</returns>
+    /// <param name="componentIndex">A sub-object component index.</param>
+    /// <returns>true if the sub-object is highlighted.</returns>
+    /// <since>5.0</since>
     public bool IsSubObjectHighlighted(ComponentIndex componentIndex)
     {
       var ptr = ConstPointer();
@@ -1445,9 +1529,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets a list of all highlighted subobjects.
+    /// Gets a list of all highlighted sub-objects.
     /// </summary>
-    /// <returns>An array of all highlighted subobjects; or null is there are none.</returns>
+    /// <returns>An array of all highlighted sub-objects; or null is there are none.</returns>
+    /// <since>5.0</since>
     public ComponentIndex[] GetHighlightedSubObjects()
     {
       var ptr = ConstPointer();
@@ -1464,11 +1549,12 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Highlights a subobject.
+    /// Highlights a sub-object.
     /// </summary>
-    /// <param name="componentIndex">A subobject component index.</param>
-    /// <param name="highlight">true if the subobject should be highlighted.</param>
-    /// <returns>true if the subobject is now highlighted.</returns>
+    /// <param name="componentIndex">A sub-object component index.</param>
+    /// <param name="highlight">true if the sub-object should be highlighted.</param>
+    /// <returns>true if the sub-object is now highlighted.</returns>
+    /// <since>5.0</since>
     public bool HighlightSubObject(ComponentIndex componentIndex, bool highlight)
     {
       var ptr = ConstPointer();
@@ -1476,9 +1562,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Removes highlighting from all subobjects.
+    /// Removes highlighting from all sub-objects.
     /// </summary>
-    /// <returns>The number of changed subobjects.</returns>
+    /// <returns>The number of changed sub-objects.</returns>
+    /// <since>5.0</since>
     public int UnhighlightAllSubObjects()
     {
       // 20 Jan 2010 - S. Baer
@@ -1487,6 +1574,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Gets or sets the activation state of object default editing grips.</summary>
+    /// <since>5.0</since>
     public bool GripsOn
     {
       get
@@ -1508,6 +1596,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// true if grips are turned on and at least one is selected.
     /// </summary>
+    /// <since>5.0</since>
     public bool GripsSelected
     {
       get
@@ -1522,6 +1611,7 @@ namespace Rhino.DocObjects
     /// true if the call succeeded.  If you attempt to add custom grips to an
     /// object that does not support custom grips, then false is returned.
     /// </returns>
+    /// <since>5.0</since>
     public bool EnableCustomGrips(Custom.CustomObjectGrips customGrips)
     {
       var p_const_this = ConstPointer();
@@ -1539,6 +1629,7 @@ namespace Rhino.DocObjects
     /// enabled, returns null.
     /// </summary>
     /// <returns>An array of grip objects; or null if there are no grips.</returns>
+    /// <since>5.0</since>
     public GripObject[] GetGrips()
     {
       var p_this = ConstPointer();
@@ -1571,6 +1662,7 @@ namespace Rhino.DocObjects
     /// <param name="mode">A visual analysis mode.</param>
     /// <param name="enable">true if the mode should be activated; false otherwise.</param>
     /// <returns>true if this object supports the analysis mode.</returns>
+    /// <since>5.0</since>
     public bool EnableVisualAnalysisMode(Display.VisualAnalysisMode mode, bool enable)
     {
       var p_const_this = ConstPointer();
@@ -1582,6 +1674,7 @@ namespace Rhino.DocObjects
     /// Reports if any visual analysis mode is currently active for an object.
     /// </summary>
     /// <returns>true if an analysis mode is active; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool InVisualAnalysisMode()
     {
       return InVisualAnalysisMode(null);
@@ -1595,6 +1688,7 @@ namespace Rhino.DocObjects
     /// <para>Use null if you want to see if any mode is active.</para>
     /// </param>
     /// <returns>true if the specified analysis mode is active; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool InVisualAnalysisMode(Display.VisualAnalysisMode mode)
     {
       var p_const_this = ConstPointer();
@@ -1608,6 +1702,7 @@ namespace Rhino.DocObjects
     /// Gets a list of currently enabled analysis modes for this object.
     /// </summary>
     /// <returns>An array of visual analysis modes. The array can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public Display.VisualAnalysisMode[] GetActiveVisualAnalysisModes()
     {
       var p_const_this = ConstPointer();
@@ -1626,6 +1721,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="plural">true if the descriptive name should in plural.</param>
     /// <returns>A string with the short localized descriptive name.</returns>
+    /// <since>5.0</since>
     public virtual string ShortDescription(bool plural)
     {
       using (var sh = new StringHolder())
@@ -1640,7 +1736,8 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get a brief description of a object, including it's attributes and geometry.
     /// </summary>
-    /// <param name="textLog">A textlog for collecting the description.</param>
+    /// <param name="textLog">A text log for collecting the description.</param>
+    /// <since>6.0</since>
     public void Description(TextLog textLog)
     {
       if (null == textLog)
@@ -1655,6 +1752,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="meshType"></param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public virtual bool IsMeshable(MeshType meshType)
     {
       var p_const_this = ConstPointer();
@@ -1667,6 +1765,7 @@ namespace Rhino.DocObjects
     /// meshing parameters are used.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.0</since>
     public MeshingParameters GetRenderMeshParameters()
     {
       var rc = new MeshingParameters();
@@ -1689,6 +1788,7 @@ namespace Rhino.DocObjects
     /// then only meshes that were created with these mesh parameters are counted.
     /// </param>
     /// <returns>number of meshes</returns>
+    /// <since>5.0</since>
     public virtual int MeshCount(MeshType meshType, MeshingParameters parameters)
     {
       var p_const_this = ConstPointer();
@@ -1699,7 +1799,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Create meshes used to render and analyze surface and polysrf objects.
+    /// Create meshes used to render and analyze surface and polysurface objects.
     /// </summary>
     /// <param name="meshType">type of meshes to create</param>
     /// <param name="parameters">
@@ -1710,6 +1810,7 @@ namespace Rhino.DocObjects
     /// parameters on the object's attributes
     /// </param>
     /// <returns>number of meshes created</returns>
+    /// <since>5.0</since>
     public virtual int CreateMeshes(MeshType meshType, MeshingParameters parameters, bool ignoreCustomParameters)
     {
       var p_this = NonConstPointer_I_KnowWhatImDoing();
@@ -1718,10 +1819,11 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Get existing meshes used to render and analyze surface and polysrf objects.
+    /// Get existing meshes used to render and analyze surface and polysurface objects.
     /// </summary>
     /// <param name="meshType"></param>
     /// <returns>An array of meshes.</returns>
+    /// <since>5.0</since>
     public virtual Mesh[] GetMeshes(MeshType meshType)
     {
       using (var mesh_array = new SimpleArrayMeshPointer())
@@ -1738,12 +1840,13 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
     /// <param name="preview">
-    /// Type of mesh to build. If attrs is non-null then a smaller mesh may be
+    /// Type of mesh to build. If attributes is non-null then a smaller mesh may be
     /// generated in less time, false is meant when actually rendering.
     /// </param>
     /// <returns>
     /// Returns true if custom render mesh(es) will get built for this object.
     /// </returns>
+    /// <since>5.7</since>
     [Obsolete]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
@@ -1763,12 +1866,13 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
     /// <param name="attrs">
-    /// Type of mesh to build. If attrs is non-null then a smaller mesh may be
+    /// Type of mesh to build. If attributes is non-null then a smaller mesh may be
     /// generated in less time, false is meant when actually rendering.
     /// </param>
     /// <returns>
     /// Returns true if custom render mesh(es) will get built for this object.
     /// </returns>
+    /// <since>6.0</since>
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -1791,6 +1895,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
+    /// <since>5.7</since>
     [Obsolete]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
@@ -1821,6 +1926,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
+    /// <since>6.0</since>
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -1855,6 +1961,7 @@ namespace Rhino.DocObjects
     /// Returns true if the bounding box was successfully calculated otherwise
     /// returns false on error.
     /// </returns>
+    /// <since>5.7</since>
     [Obsolete]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, bool preview, out BoundingBox boundingBox)
     {
@@ -1898,6 +2005,7 @@ namespace Rhino.DocObjects
     /// Returns true if the bounding box was successfully calculated otherwise
     /// returns false on error.
     /// </returns>
+    /// <since>6.0</since>
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -1923,7 +2031,8 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets an array of sub-objects.
     /// </summary>
-    /// <returns>An array of subobjects, or null if there are none.</returns>
+    /// <returns>An array of sub-objects, or null if there are none.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] GetSubObjects()
     {
       using (var arr = new Runtime.InternalRhinoObjectArray())
@@ -1939,13 +2048,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// True if the object has a dynamic transformation
     /// </summary>
+    /// <since>5.0</since>
     public bool HasDynamicTransform
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.HasDynamicTransform); }
     }
 
     /// <summary>
-    /// While an object is being dynamically tranformed (dragged, rotated, ...),
+    /// While an object is being dynamically transformed (dragged, rotated, ...),
     /// the current transformation can be retrieved and used for creating
     /// dynamic display.
     /// </summary>
@@ -1953,8 +2063,9 @@ namespace Rhino.DocObjects
     /// <returns>
     /// True if the object is being edited and its transformation
     /// is available.  False if the object is not being edited,
-    /// in which case the identity xform is returned.
+    /// in which case the identity transform is returned.
     /// </returns>
+    /// <since>5.0</since>
     public bool GetDynamicTransform(out Transform transform)
     {
       transform = Transform.Identity;
@@ -1967,6 +2078,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="channel"></param>
     /// <returns></returns>
+    /// <since>5.7</since>
     public TextureMapping GetTextureMapping(int channel)
     {
       Transform transform;
@@ -1978,6 +2090,7 @@ namespace Rhino.DocObjects
     /// <param name="channel"></param>
     /// <param name="objectTransform"></param>
     /// <returns></returns>
+    /// <since>5.7</since>
     public TextureMapping GetTextureMapping(int channel, out Transform objectTransform)
     {
       var pointer = ConstPointer();
@@ -1992,6 +2105,7 @@ namespace Rhino.DocObjects
     /// <param name="channel"></param>
     /// <param name="tm"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public int SetTextureMapping(int channel, TextureMapping tm)
     {
       return UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(ConstPointer(), channel, tm.ConstPointer());
@@ -1999,9 +2113,22 @@ namespace Rhino.DocObjects
     
     
     /// <summary>
+    /// Sets texture mapping and mapping object transform for a channel
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <param name="tm"></param>
+    /// <param name="objectTransform">Mapping channel object transform</param>
+    /// <returns></returns>
+    public int SetTextureMapping(int channel, TextureMapping tm, Transform objectTransform)
+    {
+      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm.ConstPointer(), ref objectTransform);
+    }
+
+    /// <summary>
     /// Returns true if this object has a texture mapping form any source (pluginId)
     /// </summary>
     /// <returns></returns>
+   /// <since>6.0</since>
    public bool HasTextureMapping()
     {
       return UnsafeNativeMethods.ON_TextureMapping_ObjectHasMapping(ConstPointer());
@@ -2015,6 +2142,7 @@ namespace Rhino.DocObjects
     /// <returns>
     /// Returns an array of channel Id's or an empty list if there are not mappings.
     /// </returns>
+    /// <since>5.7</since>
     public int[] GetTextureChannels()
     {
       var pointer = ConstPointer();
@@ -2056,6 +2184,7 @@ namespace Rhino.DocObjects
     /// is none.  This does not pay attention to the material source and will
     /// not check parent objects or layers for a RenderMaterial.
     /// </summary>
+    /// <since>5.7</since>
     public RenderMaterial RenderMaterial
     {
       get
@@ -2092,7 +2221,7 @@ namespace Rhino.DocObjects
         }
 
         m_edited_material_index = Attributes.MaterialIndex;
-        m_edited_material = value.SimulatedMaterial(false);
+        m_edited_material = value.SimulatedMaterial(RenderTexture.TextureGeneration.Allow);
 
         m_edited_material.RenderMaterialInstanceId = value.Id;
 
@@ -2119,6 +2248,7 @@ namespace Rhino.DocObjects
     /// If there is a RenderMaterial associated with this objects' associated
     /// Material then it is returned otherwise; null is returned.
     /// </returns>
+    /// <since>5.10</since>
     public RenderMaterial GetRenderMaterial(bool frontMaterial)
     {
       var const_pointer = ConstPointer();
@@ -2153,6 +2283,7 @@ namespace Rhino.DocObjects
     /// is no RenderMaterial associated with the object or  sub object so you
     /// should may GetMaterial get the objects generic material.
     /// </returns>
+    /// <since>6.0</since>
     public RenderMaterial GetRenderMaterial(ComponentIndex componentIndex, Guid plugInId, ObjectAttributes attributes)
     {
       var pointer = ConstPointer();
@@ -2183,6 +2314,7 @@ namespace Rhino.DocObjects
     /// is no RenderMaterial associated with the object or sub object so you
     /// should may GetMaterial get the objects generic material.
     /// </returns>
+    /// <since>6.0</since>
     public RenderMaterial GetRenderMaterial(ComponentIndex componentIndex, Guid plugInId)
     {
       var value = GetRenderMaterial(componentIndex, plugInId, null);
@@ -2207,6 +2339,7 @@ namespace Rhino.DocObjects
     /// is no RenderMaterial associated with the object or  sub object so you
     /// should may GetMaterial get the objects generic material.
     /// </returns>
+    /// <since>6.0</since>
     public RenderMaterial GetRenderMaterial(ComponentIndex componentIndex)
     {
       var value = GetRenderMaterial(componentIndex, Utilities.DefaultRenderPlugInId, null);
@@ -2217,6 +2350,7 @@ namespace Rhino.DocObjects
     /// Will be true if the object contains sub object meshes with materials
     /// that are different than the top level object.
     /// </summary>
+    /// <since>6.0</since>
     public bool HasSubobjectMaterials
     {
       get
@@ -2229,6 +2363,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// 
     /// </summary>
+    /// <since>6.0</since>
     public ComponentIndex[] SubobjectMaterialComponents
     {
       get
@@ -2250,6 +2385,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.ModelGeometry"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -2267,6 +2403,7 @@ namespace Rhino.DocObjects
     /// If true, gets the material used to render the object's front side
     /// </param>
     /// <returns></returns>
+    /// <since>5.0</since>
     public Material GetMaterial(bool frontMaterial)
     {
       var const_pointer = ConstPointer();
@@ -2304,6 +2441,7 @@ namespace Rhino.DocObjects
     /// identified by componentIndex if the component index is set to
     /// ComponentIndex.Unset then the top level material is returned.
     /// </returns>
+    /// <since>6.0</since>
     public Material GetMaterial(ComponentIndex componentIndex, Guid plugInId, ObjectAttributes attributes)
     {
       var doc = Document;
@@ -2334,6 +2472,7 @@ namespace Rhino.DocObjects
     /// ComponentIndex.Unset
     /// then the top level material is returned.
     /// </returns>
+    /// <since>6.0</since>
     public Material GetMaterial(ComponentIndex componentIndex, Guid plugInId)
     {
       var value = GetMaterial(componentIndex, plugInId, null);
@@ -2356,6 +2495,7 @@ namespace Rhino.DocObjects
     /// set to ComponentIndex.Unset then the top level material
     /// is returned.
     /// </returns>
+    /// <since>6.0</since>
     public Material GetMaterial(ComponentIndex componentIndex)
     {
       var value = GetMaterial(componentIndex, Guid.Empty, null);
@@ -2368,6 +2508,7 @@ namespace Rhino.DocObjects
     /// <param name="providerId">Id of the custom render mesh provider</param>
     /// <param name="parameterName">Name of the parameter</param>
     /// <returns>IConvertible. Note that you can't directly cast from object, instead you have to use the Convert mechanism.</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public virtual IConvertible GetCustomRenderMeshParameter(Guid providerId, String parameterName)
     {
@@ -2385,6 +2526,7 @@ namespace Rhino.DocObjects
     /// <param name="parameterName"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public virtual void SetCustomRenderMeshParameter(Guid providerId, String parameterName, object value)
     {
       var v = new Variant(value);
@@ -2435,6 +2577,7 @@ namespace Rhino.DocObjects
     /// modeling view.
     /// </remarks>
     /// <returns>True if the object is active in viewport</returns>
+    /// <since>5.0</since>
     public virtual bool IsActiveInViewport(Display.RhinoViewport viewport)
     {
       var p_const_this = ConstPointer();
@@ -2490,6 +2633,54 @@ namespace Rhino.DocObjects
     /// <param name="morph"></param>
     protected virtual void OnSpaceMorph(SpaceMorph morph)
     {
+    }
+  }
+
+  /// <summary>
+  /// A proxy object (not saved in files)
+  /// </summary>
+  public class ProxyObject : RhinoObject
+  {
+    Mesh[] _meshes = new Mesh[0];
+
+    internal ProxyObject(uint serialNumber) : base(serialNumber)
+    { }
+
+    /// <inheritdoc/>
+    /// <since>7.0</since>
+    public override int CreateMeshes(MeshType meshType, MeshingParameters parameters, bool ignoreCustomParameters)
+    {
+      int rc = base.CreateMeshes(meshType, parameters, ignoreCustomParameters);
+      if( 0==rc )
+      {
+        // 7 Mar 2020 S. Baer (RH-54886)
+        // For now I'm just doing the bare minimum required to get the
+        // above YT issue fixed. I haven't settled completely on how this
+        // should be implemented. Another approach that I may take is to
+        // hang the meshes off of the ON_Geometry when appropriate. The
+        // downside to that approach is that the Meshes will soon be deleted
+        // when the proxy geometry is destroyed.
+        Brep brep = Geometry as Brep;
+        if( brep!=null )
+        {
+          _meshes = Mesh.CreateFromBrep(brep, parameters);
+          if (_meshes != null)
+            rc = _meshes.Length;
+        }
+      }
+      return rc;
+    }
+
+    /// <inheritdoc/>
+    /// <since>7.0</since>
+    public override Mesh[] GetMeshes(MeshType meshType)
+    {
+      Mesh[] rc = base.GetMeshes(meshType);
+      if( rc==null || rc.Length == 0)
+      {
+        rc = _meshes;
+      }
+      return rc;
     }
   }
 #endif
@@ -2562,6 +2753,7 @@ namespace Rhino.DocObjects
     /// Initializes a new object reference from a globally unique identifier (<see cref="Guid"/>).
     /// </summary>
     /// <param name="id">The ID.</param>
+    /// <since>5.0</since>
     public ObjRef(Guid id)
     {
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_New1(id);
@@ -2573,6 +2765,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="id">The object's Id</param>
     /// <param name="ci">a portion of the object</param>
+    /// <since>7.0</since>
     public ObjRef(Guid id, Geometry.ComponentIndex ci)
     {
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_New5(id, ref ci);
@@ -2582,6 +2775,7 @@ namespace Rhino.DocObjects
     /// Initializes a new object reference from a Rhino object.
     /// </summary>
     /// <param name="rhinoObject">The Rhino object.</param>
+    /// <since>5.0</since>
     public ObjRef(RhinoObject rhinoObject)
     {
       var p_object = rhinoObject.ConstPointer();
@@ -2593,6 +2787,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="rhinoObject"></param>
     /// <param name="pickContext"></param>
+    /// <since>5.0</since>
     public ObjRef(RhinoObject rhinoObject, Input.Custom.PickContext pickContext)
     {
       var p_object = rhinoObject.ConstPointer();
@@ -2601,6 +2796,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Returns the id of the referenced Rhino object.</summary>
+    /// <since>5.0</since>
     public Guid ObjectId
     {
       get { return UnsafeNativeMethods.CRhinoObjRef_ObjectUuid(m_ptr); }
@@ -2613,6 +2809,7 @@ namespace Rhino.DocObjects
     /// the Rhino object. The value of RuntimeSerialNumber is not saved in archives
     /// because it generally changes if you save and reload an archive.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber
     {
@@ -2621,11 +2818,12 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// Gets the component index of the referenced (sub) geometry.
-    /// Some objects have subobjects that are valid pieces of geometry. For
+    /// Some objects have sub-objects that are valid pieces of geometry. For
     /// example, breps have edges and faces that are valid curves and surfaces.
-    /// Each subobject has a component index that is &gt; 0. The parent
+    /// Each sub-object has a component index that is &gt; 0. The parent
     /// geometry has a component index = -1.
     /// </summary>
+    /// <since>5.0</since>
     public ComponentIndex GeometryComponentIndex
     {
       get
@@ -2646,6 +2844,8 @@ namespace Rhino.DocObjects
         return UnsafeNativeMethods.CRhinoObjRef_Point(m_ptr);
       if (geometry is Brep)
         return UnsafeNativeMethods.CRhinoObjRef_Brep(m_ptr);
+      if (geometry is SubD)
+        return UnsafeNativeMethods.CRhinoObjRef_SubD(m_ptr);
 
       return UnsafeNativeMethods.CRhinoObjRef_Geometry(m_ptr);
     }
@@ -2666,6 +2866,7 @@ namespace Rhino.DocObjects
     /// Gets the geometry linked to the object targeted by this reference.
     /// </summary>
     /// <returns>The geometry.</returns>
+    /// <since>5.0</since>
     public GeometryBase Geometry()
     {
       var p_geometry = UnsafeNativeMethods.CRhinoObjRef_Geometry(m_ptr);
@@ -2676,6 +2877,7 @@ namespace Rhino.DocObjects
     /// Gets the clipping plane surface if this reference targeted one.
     /// </summary>
     /// <returns>A clipping plane surface, or null if this reference targeted something else.</returns>
+    /// <since>5.0</since>
     public ClippingPlaneSurface ClippingPlaneSurface()
     {
       var p_clipping_plane_surface = UnsafeNativeMethods.CRhinoObjRef_ClippingPlaneSurface(m_ptr);
@@ -2691,6 +2893,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_intersectcurves.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectcurves.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Curve Curve()
     {
       var ptr_curve = UnsafeNativeMethods.CRhinoObjRef_Curve(m_ptr);
@@ -2701,6 +2904,7 @@ namespace Rhino.DocObjects
     /// Gets the edge if this reference geometry is one.
     /// </summary>
     /// <returns>A boundary representation edge; or null on error.</returns>
+    /// <since>5.0</since>
     public BrepEdge Edge()
     {
       var pre_brep_edge = UnsafeNativeMethods.CRhinoObjRef_Edge(m_ptr);
@@ -2712,6 +2916,7 @@ namespace Rhino.DocObjects
     /// a surface, this returns the brep face.
     /// </summary>
     /// <returns>A boundary representation face; or null on error.</returns>
+    /// <since>5.0</since>
     public BrepFace Face()
     {
       var ptr_brep_face = UnsafeNativeMethods.CRhinoObjRef_Face(m_ptr);
@@ -2723,6 +2928,7 @@ namespace Rhino.DocObjects
     /// this returns the associated brep trim.
     /// </summary>
     /// <returns>A boundary representation trim; or null on error</returns>
+    /// <since>5.8</since>
     public BrepTrim Trim()
     {
       var ptr_brep_trim = UnsafeNativeMethods.CRhinoObjRef_Trim(m_ptr);
@@ -2738,6 +2944,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_booleandifference.cs' lang='cs'/>
     /// <code source='examples\py\ex_booleandifference.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Brep Brep()
     {
       var p_brep = UnsafeNativeMethods.CRhinoObjRef_Brep(m_ptr);
@@ -2753,6 +2960,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Surface Surface()
     {
       var p_surface = UnsafeNativeMethods.CRhinoObjRef_Surface(m_ptr);
@@ -2763,6 +2971,7 @@ namespace Rhino.DocObjects
     /// Gets the text dot if the referenced geometry is one.
     /// </summary>
     /// <returns>A text dot; or null if the referenced object is not a text dot, or on error.</returns>
+    /// <since>5.0</since>
     public TextDot TextDot()
     {
       var p_text_dot = UnsafeNativeMethods.CRhinoObjRef_TextDot(m_ptr);
@@ -2773,6 +2982,7 @@ namespace Rhino.DocObjects
     /// Gets the mesh if the referenced geometry is one.
     /// </summary>
     /// <returns>A mesh; or null if the referenced object is not a mesh, or on error.</returns>
+    /// <since>5.0</since>
     public Mesh Mesh()
     {
       var p_mesh = UnsafeNativeMethods.CRhinoObjRef_Mesh(m_ptr);
@@ -2783,6 +2993,7 @@ namespace Rhino.DocObjects
     /// Gets the SubD if the referenced geometry is one.
     /// </summary>
     /// <returns>A SubD; or null if the referenced object is not a SubD, or on error.</returns>
+    /// <since>7.0</since>
     public SubD SubD()
     {
       var p_subd = UnsafeNativeMethods.CRhinoObjRef_SubD(m_ptr);
@@ -2790,9 +3001,25 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the SubDFace if the referenced geometry is one.
+    /// </summary>
+    /// <returns>A SubDFace; or null if the referenced object is not a SubDFace, or on error.</returns>
+    /// <since>7.0</since>
+    public SubDFace SubDFace()
+    {
+      uint id = 0;
+      IntPtr ptrSubD = UnsafeNativeMethods.CRhinoObjRef_SubDFace(m_ptr, ref id);
+      SubD parentSubD = ObjRefToGeometryHelper(ptrSubD) as SubD;
+      if (parentSubD != null)
+        return parentSubD.Faces.Find(id);
+      return null;
+    }
+
+    /// <summary>
     /// Gets the point if the referenced geometry is one.
     /// </summary>
     /// <returns>A point; or null if the referenced object is not a point, or on error.</returns>
+    /// <since>5.0</since>
     public Point Point()
     {
       var p_point = UnsafeNativeMethods.CRhinoObjRef_Point(m_ptr);
@@ -2803,6 +3030,7 @@ namespace Rhino.DocObjects
     /// Gets the point cloud if the referenced geometry is one.
     /// </summary>
     /// <returns>A point cloud; or null if the referenced object is not a point cloud, or on error.</returns>
+    /// <since>5.0</since>
     public PointCloud PointCloud()
     {
       var p_point_cloud = UnsafeNativeMethods.CRhinoObjRef_PointCloud(m_ptr);
@@ -2813,6 +3041,7 @@ namespace Rhino.DocObjects
     /// Gets the text entity if the referenced geometry is one.
     /// </summary>
     /// <returns>A text entity; or null if the referenced object is not a text entity, or on error.</returns>
+    /// <since>5.0</since>
     public TextEntity TextEntity()
     {
       var p_text_entity = UnsafeNativeMethods.CRhinoObjRef_Annotation(m_ptr);
@@ -2823,6 +3052,7 @@ namespace Rhino.DocObjects
     /// Gets the light if the referenced geometry is one.
     /// </summary>
     /// <returns>A light; or null if the referenced object is not a light, or on error.</returns>
+    /// <since>5.0</since>
     public Light Light()
     {
       var p_light = UnsafeNativeMethods.CRhinoObjRef_Light(m_ptr);
@@ -2833,6 +3063,7 @@ namespace Rhino.DocObjects
     /// Gets the hatch if the referenced geometry is one.
     /// </summary>
     /// <returns>A hatch; or null if the referenced object is not a hatch</returns>
+    /// <since>5.0</since>
     public Hatch Hatch()
     {
       return Geometry() as Hatch;
@@ -2848,12 +3079,20 @@ namespace Rhino.DocObjects
     /// </summary>
     ~ObjRef()
     {
-      Dispose(false);
+      // 9 Jan 2020 S. Baer (RH-50670)
+      // Attempt to work around crash in garbage collection thread.
+      // Experimenting with placing this on a list of objects to be deleted on
+      // the main thread after the next command completes
+      if( Rhino.RhinoApp.IsRunningHeadless )
+        Dispose(false); // just dispose when headless since we aren't running commands
+      else
+        Rhino.Runtime.HostUtils.AddObjectsToDeleteOnMainThread(this);
     }
 
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2883,6 +3122,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoObject Object()
     {
       var constPtrRhinoObject = UnsafeNativeMethods.CRhinoObjRef_Object(m_ptr);
@@ -2893,10 +3133,11 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// If subobject selection is enabled and a piece of an instance reference
+    /// If sub-object selection is enabled and a piece of an instance reference
     /// is selected, this will return the selected piece.
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public RhinoObject InstanceDefinitionPart()
     {
       var rc = UnsafeNativeMethods.CRhinoObjRef_InstancePiece(m_ptr);
@@ -2907,6 +3148,7 @@ namespace Rhino.DocObjects
     /// Gets the method used to select this object.
     /// </summary>
     /// <returns>The method used to select this object.</returns>
+    /// <since>5.0</since>
     public SelectionMethod SelectionMethod()
     {
       var rc = UnsafeNativeMethods.CRhinoObjRef_SelectionMethod(m_ptr);
@@ -2929,16 +3171,17 @@ namespace Rhino.DocObjects
     /// <summary>
     /// If the object was selected by picking a point on it, then
     /// SelectionPoint() returns the point where the selection
-    /// occured, otherwise it returns Point3d.Unset.
+    /// occurred, otherwise it returns Point3d.Unset.
     /// </summary>
     /// <returns>
-    /// The point where the selection occured or Point3d.Unset on failure.
+    /// The point where the selection occurred or Point3d.Unset on failure.
     /// </returns>
     /// <example>
     /// <code source='examples\vbnet\ex_constrainedcopy.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_constrainedcopy.cs' lang='cs'/>
     /// <code source='examples\py\ex_constrainedcopy.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Point3d SelectionPoint()
     {
       var pt = Point3d.Unset;
@@ -2958,6 +3201,7 @@ namespace Rhino.DocObjects
     /// did not happen in a detail view.
     /// </summary>
     /// <returns></returns>
+    /// <since>6.5</since>
     [CLSCompliant(false)]
     public uint SelectionViewDetailSerialNumber()
     {
@@ -2970,6 +3214,7 @@ namespace Rhino.DocObjects
     /// SelectionView() returns the view where the object was selected.
     /// </summary>
     /// <returns></returns>
+    /// <since>6.5</since>
     public RhinoView SelectionView()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoObjRef_SelectionView(m_ptr);
@@ -2998,6 +3243,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_addradialdimension.cs' lang='cs'/>
     /// <code source='examples\py\ex_addradialdimension.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Curve CurveParameter(out double parameter)
     {
       parameter = 0.0;
@@ -3009,13 +3255,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// If the reference geometry is a surface, brep with one face,
     /// or surface edge with a selection point, then this gets the 
-    /// surface paramters of the selection point.
+    /// surface parameters of the selection point.
     /// </summary>
     /// <param name="u">The U value is assigned to this out parameter during the call.</param>
     /// <param name="v">The V value is assigned to this out parameter during the call.</param>
     /// <returns>
     /// If the selection point was on a surface, then the surface is returned.
     /// </returns>
+    /// <since>5.0</since>
     public Surface SurfaceParameter(out double u, out double v)
     {
       u = 0.0;
@@ -3030,6 +3277,7 @@ namespace Rhino.DocObjects
     /// may be used to identify the sub-object.
     /// </summary>
     /// <param name="componentIndex"></param>
+    /// <since>5.0</since>
     public void SetSelectionComponent(ComponentIndex componentIndex)
     {
       var p_this = NonConstPointer();

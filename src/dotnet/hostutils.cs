@@ -15,6 +15,62 @@ using System.Management;
 namespace Rhino.Runtime
 {
   /// <summary>
+  /// Exception thrown when calling functions in RhinoCommon and the
+  /// application is executing without a license
+  /// </summary>
+  public class NotLicensedException : Exception
+  {
+    /// <summary> Default constructor </summary>
+    /// <since>7.0</since>
+    public NotLicensedException() { }
+    /// <summary>
+    /// Create a new instance with a custom message
+    /// </summary>
+    /// <param name="message"></param>
+    /// <since>7.0</since>
+    public NotLicensedException(string message) : base(message) { }
+    /// <summary>
+    /// Create a new instance with a custom message and an inner exception
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="inner"></param>
+    /// <since>7.0</since>
+    public NotLicensedException(string message, Exception inner) : base(message, inner) { }
+
+#if RHINO_SDK
+    internal static void ThrowNotLicensedException(object sender, NamedParametersEventArgs args)
+    {
+      throw new NotLicensedException();
+    }
+#endif
+  }
+
+#if RHINO_SDK
+  /// <summary>
+  /// Passed to LicenseStateChanged event on RhinoApp
+  /// </summary>
+  public class LicenseStateChangedEventArgs : EventArgs
+  {
+    /// <summary>
+    /// true if RhinoCommon calls will never raise Rhino.Runtime.NotLicensedException.
+    /// false otherwise
+    /// </summary>
+    /// <since>7.0</since>
+    public bool CallingRhinoCommonAllowed { get; private set; } = false;
+
+    /// <summary>
+    /// LicenseStateChangedEventArgs constructor
+    /// </summary>
+    /// <param name="callingRhinoCommonAllowed">True when calling RhinoCommon will never raise Rhino.Runtime.NotLicesnedException; false otherwise.</param>
+    /// <since>7.0</since>
+    public LicenseStateChangedEventArgs(bool callingRhinoCommonAllowed)
+    {
+      CallingRhinoCommonAllowed = callingRhinoCommonAllowed;
+    }
+  }
+#endif
+
+  /// <summary>
   /// Marks a method as const. This attribute is purely informative to help the
   /// developer know that a method on a class does not alter the class itself.
   /// </summary>
@@ -44,6 +100,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Construct a new named parameter even args. You should dispose this class when you are done with it
     /// </summary>
+    /// <since>7.0</since>
     public NamedParametersEventArgs()
     {
       m_pNamedParams = UnsafeNativeMethods.CRhParameterDictionary_New();
@@ -61,6 +118,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Dispose native resources
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       Dispose(false);
@@ -85,6 +143,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>6.15</since>
     public bool TryGetString(string name, out string value)
     {
       using (var str = new StringWrapper())
@@ -99,9 +158,43 @@ namespace Rhino.Runtime
     /// <summary> Set a string value for a given key name </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, string value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetString(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Try to get a string value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetStrings(string name, out string[] value)
+    {
+      using (var list = new ClassArrayString())
+      {
+        var pointer = list.NonConstPointer();
+        bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetStringList(m_pNamedParams, name, pointer);
+        value = list.ToArray();
+        return rc;
+      }
+    }
+
+    /// <summary> Set a list of strings as a value for a given key name </summary>
+    /// <param name="name"></param>
+    /// <param name="strings"></param>
+    /// <since>7.0</since>
+    public void Set(string name, IEnumerable<string> strings)
+    {
+      using (var list = new ClassArrayString())
+      {
+        foreach (var s in strings)
+          list.Add(s);
+        var pointer = list.NonConstPointer();
+        UnsafeNativeMethods.CRhParameterDictionary_SetStringList(m_pNamedParams, name, pointer);
+      }
     }
 
     /// <summary>
@@ -110,6 +203,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>6.15</since>
     public bool TryGetBool(string name, out bool value)
     {
       value = false;
@@ -121,6 +215,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, bool value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetBool(m_pNamedParams, name, value);
@@ -132,6 +227,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>6.15</since>
     public bool TryGetInt(string name, out int value)
     {
       value = 0;
@@ -143,6 +239,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, int value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetInt(m_pNamedParams, name, value);
@@ -154,6 +251,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public bool TryGetUnsignedInt(string name, out uint value)
     {
@@ -166,6 +264,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     [CLSCompliant(false)]
     public void Set(string name, uint value)
     {
@@ -178,6 +277,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>6.15</since>
     public bool TryGetDouble(string name, out double value)
     {
       value = 0;
@@ -189,6 +289,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, double value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetDouble(m_pNamedParams, name, value);
@@ -200,6 +301,7 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool TryGetPoint(string name, out Geometry.Point3d value)
     {
       value = Rhino.Geometry.Point3d.Unset;
@@ -211,9 +313,38 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, Geometry.Point3d value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetPoint3d(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Try to get a Point3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetColor(string name, out Color value)
+    {
+      value = Color.Empty;
+      var v = value.ToArgb();
+      if (!UnsafeNativeMethods.CRhParameterDictionary_GetColor(m_pNamedParams, name, ref v))
+        return false;
+      value = Color.FromArgb(v);
+      return true;
+    }
+
+    /// <summary>
+    /// Set a Point3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>7.0</since>
+    public void Set(string name, Color value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetColor(m_pNamedParams, name, value.ToArgb());
     }
 
     /// <summary>
@@ -221,6 +352,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
+    /// <since>7.0</since>
     public void Set(string name, Geometry.GeometryBase value)
     {
       Set(name, new Geometry.GeometryBase[] { value });
@@ -231,6 +363,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="values"></param>
+    /// <since>7.0</since>
     public void Set(string name, IEnumerable<Geometry.GeometryBase> values)
     {
       IntPtr pObjectArray = UnsafeNativeMethods.ON_ObjectArray_New();
@@ -243,12 +376,38 @@ namespace Rhino.Runtime
       UnsafeNativeMethods.ON_ObjectArray_Delete(pObjectArray);
     }
 
+
+    /// <summary>
+    /// Set a HWND on Windows or NSView* on Mac
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>7.0</since>
+    public void SetWindowHandle(string name, IntPtr value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetWindowHandle(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Gets a HWND on Windows or NSVIew* on Mac
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetWindowHandle(string name, out IntPtr value)
+    {
+      value = UnsafeNativeMethods.CRhParameterDictionary_GetWindowHandle(m_pNamedParams, name);
+      return value != IntPtr.Zero;
+    }
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="name"></param>
     /// <param name="values"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool TryGetGeometry(string name, out Geometry.GeometryBase[] values)
     {
       if( !_retrievedObjects.ContainsKey(name) )
@@ -272,6 +431,32 @@ namespace Rhino.Runtime
     }
 
     Dictionary<string, Geometry.GeometryBase[]> _retrievedObjects = new Dictionary<string, Geometry.GeometryBase[]>();
+
+    /// <summary>
+    /// Get array of RhinoObject for the specified key
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="values"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetRhinoObjects(string key, out DocObjects.RhinoObject[] values)
+    {
+      if (!_retrievedRhinoObjects.ContainsKey(key))
+      {
+        using (var rhobjs = new InternalRhinoObjectArray())
+        {
+          IntPtr ptr_object_array = rhobjs.NonConstPointer();
+          if (UnsafeNativeMethods.CRhParameterDictionary_GetRhinoObjects(m_pNamedParams, key, ptr_object_array))
+          {
+            var a = rhobjs.ToArray();
+            if (a != null)
+              _retrievedRhinoObjects[key] = a;
+          }
+        }
+      }
+      return _retrievedRhinoObjects.TryGetValue(key, out values);
+    }
+    Dictionary<string, DocObjects.RhinoObject[]> _retrievedRhinoObjects = new Dictionary<string, DocObjects.RhinoObject[]>();
 
     /// <summary>
     /// Keep internal for now. This is used by the hatch command.
@@ -331,6 +516,7 @@ namespace Rhino.Runtime
     /// ActiveSkin to get at the instance of this Skin class. May return null
     /// if no Skin is being used or if the skin is not a RhinoCommon based skin.
     /// </summary>
+    /// <since>5.0</since>
     public static Skin ActiveSkin
     {
       get { return m_theSingleSkin; }
@@ -481,6 +667,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Gets access to the skin persistent settings.
     /// </summary>
+    /// <since>5.0</since>
     public PersistentSettings Settings
     {
       get
@@ -515,6 +702,7 @@ namespace Rhino.Runtime
     /// Executes the script in a specific scope.
     /// </summary>
     /// <param name="scope">The scope where the script should be executed.</param>
+    /// <since>5.0</since>
     public abstract void Execute(PythonScript scope);
   }
 
@@ -527,6 +715,7 @@ namespace Rhino.Runtime
     /// Constructs a new Python script context.
     /// </summary>
     /// <returns>A new Python script, or null if none could be created. Rhino 4 always returns null.</returns>
+    /// <since>5.0</since>
     public static PythonScript Create()
     {
       Guid ip_id = new Guid("814d908a-e25c-493d-97e9-ee3861957f49");
@@ -535,6 +724,33 @@ namespace Rhino.Runtime
         return null;
       PythonScript pyscript = obj as PythonScript;
       return pyscript;
+    }
+
+    static List<System.Reflection.Assembly> _runtimeAssemblies;
+
+    /// <summary>
+    /// Get list of assemblies used by python for library browser and
+    /// inclusion into the runtime
+    /// </summary>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public static System.Reflection.Assembly[] RuntimeAssemblies()
+    {
+      if (null == _runtimeAssemblies)
+        return new System.Reflection.Assembly[0];
+      return _runtimeAssemblies.ToArray();
+    }
+
+    /// <summary>
+    /// Add assembly to list of assemblies used by python
+    /// </summary>
+    /// <param name="assembly"></param>
+    /// <since>7.0</since>
+    public static void AddRuntimeAssembly(System.Reflection.Assembly assembly)
+    {
+      if (null == _runtimeAssemblies)
+        _runtimeAssemblies = new List<System.Reflection.Assembly>();
+      _runtimeAssemblies.Add(assembly);
     }
 
     /// <summary>
@@ -551,6 +767,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="script">A string text.</param>
     /// <returns>A Python compiled code instance.</returns>
+    /// <since>5.0</since>
     public abstract PythonCompiledCode Compile(string script);
 
     /// <summary>
@@ -558,12 +775,14 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name">The variable name.</param>
     /// <returns>true if the variable is present.</returns>
+    /// <since>5.0</since>
     public abstract bool ContainsVariable(string name);
 
     /// <summary>
     /// Retrieves all variable names in the script.
     /// </summary>
     /// <returns>An enumerable set with all names of the variables.</returns>
+    /// <since>5.0</since>
     public abstract System.Collections.Generic.IEnumerable<string> GetVariableNames();
 
     /// <summary>
@@ -571,6 +790,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name">A variable name.</param>
     /// <returns>The variable object.</returns>
+    /// <since>5.0</since>
     public abstract object GetVariable(string name);
 
     /// <summary>
@@ -578,6 +798,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name">A valid variable name in Python.</param>
     /// <param name="value">A valid value for that variable name.</param>
+    /// <since>5.0</since>
     public abstract void SetVariable(string name, object value);
 
     /// <summary>
@@ -585,12 +806,14 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name">A variable name.</param>
     /// <param name="value">A variable value.</param>
+    /// <since>5.0</since>
     public virtual void SetIntellisenseVariable(string name, object value) { }
 
     /// <summary>
     /// Removes a defined variable from the main scripting context.
     /// </summary>
     /// <param name="name">The variable name.</param>
+    /// <since>5.0</since>
     public abstract void RemoveVariable(string name);
 
     /// <summary>
@@ -599,6 +822,7 @@ namespace Rhino.Runtime
     /// <param name="statements">One or several statements.</param>
     /// <param name="expression">An expression.</param>
     /// <returns>The expression result.</returns>
+    /// <since>5.0</since>
     public abstract object EvaluateExpression(string statements, string expression);
 
     /// <summary>
@@ -606,6 +830,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="path">The path to the file.</param>
     /// <returns>true if the file executed. This method can throw scripting-runtime based exceptions.</returns>
+    /// <since>5.0</since>
     public abstract bool ExecuteFile(string path);
 
     /// <summary>
@@ -613,6 +838,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="path">The path to the file.</param>
     /// <returns>true if the file executed. This method can throw scripting-runtime based exceptions.</returns>
+    /// <since>7.0</since>
     public abstract bool ExecuteFileInScope(string path);
 
     /// <summary>
@@ -620,6 +846,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="script">A Python text.</param>
     /// <returns>true if the file executed. This method can throw scripting-runtime based exceptions.</returns>
+    /// <since>5.0</since>
     public abstract bool ExecuteScript(string script);
 
     /// <summary>
@@ -627,6 +854,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="ex">An exception that was thrown by some of the methods in this class.</param>
     /// <returns>A string that represents the Python exception.</returns>
+    /// <since>5.0</since>
     public abstract string GetStackTraceFromException(Exception ex);
 
     /// <summary>
@@ -635,21 +863,25 @@ namespace Rhino.Runtime
     /// Set Output if you want to redirect the output from python to a different function
     /// while this script executes.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Action<string> Output { get; set; }
 
     /// <summary>
     /// object set to variable held in scriptcontext.doc.
     /// </summary>
+    /// <since>5.0</since>
     public object ScriptContextDoc { get; set; }
 
     /// <summary>
     /// Command associated with this script. Used for localiation
     /// </summary>
+    /// <since>6.0</since>
     public Commands.Command ScriptContextCommand { get; set; }
 
     /// <summary>
     /// Gets or sets a context unique identified.
     /// </summary>
+    /// <since>5.0</since>
     public int ContextId
     {
       get { return m_context_id; }
@@ -663,12 +895,14 @@ namespace Rhino.Runtime
     /// <param name="script">A starting script.</param>
     /// <param name="helpcallback">A method that is called when help is shown for a function, a class or a method.</param>
     /// <returns>A Windows Forms control.</returns>
+    /// <since>5.0</since>
     public abstract object CreateTextEditorControl(string script, Action<string> helpcallback);
 
     /// <summary>
     /// Setups the script context. Use a RhinoDoc instance unless unsure.
     /// </summary>
     /// <param name="doc">Document.</param>
+    /// <since>6.0</since>
     public virtual void SetupScriptContext(object doc)
     {
     }
@@ -685,6 +919,7 @@ namespace Rhino.Runtime
     /// <param name="file"></param>
     /// <param name="member"></param>
     /// <param name="line"></param>
+    /// <since>6.0</since>
     public RiskyAction(string description, [CallerFilePath] string file="", [CallerMemberName] string member="", [CallerLineNumber] int line=0)
     {
       m_ptr_risky_action = UnsafeNativeMethods.CRhRiskyActionSpy_New(description, member, file, line);
@@ -693,6 +928,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// IDisposable implementation
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       UnsafeNativeMethods.CRhRiskyActionSpy_Delete(m_ptr_risky_action);
@@ -712,6 +948,7 @@ namespace Rhino.Runtime
     /// <summary>Used to get service of a specific type</summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <since>6.0</since>
     T GetService<T>() where T : class;
   }
 
@@ -770,6 +1007,21 @@ namespace Rhino.Runtime
   public static class HostUtils
   {
 #if RHINO_SDK
+    static System.Collections.Concurrent.ConcurrentBag<IDisposable> g_objectsToDisposeOnMainThread = new System.Collections.Concurrent.ConcurrentBag<IDisposable>();
+    internal static void DeleteObjectsOnMainThread(object sender, Rhino.Commands.CommandEventArgs e)
+    {
+      IDisposable item;
+      while(g_objectsToDisposeOnMainThread.TryTake(out item))
+      {
+        if (item != null)
+          item.Dispose();
+      }
+    }
+    internal static void AddObjectsToDeleteOnMainThread(IDisposable item)
+    {
+      g_objectsToDisposeOnMainThread.Add(item);
+    }
+
     /// <summary>
     /// Returns information about the current process. If Rhino is the top level process,
     /// processName is "Rhino". Otherwise, processName is the name, without extension, of the main
@@ -778,6 +1030,7 @@ namespace Rhino.Runtime
     /// processVersion is the System.Version of the running process. It is the FileVersion
     /// of the executable.
     /// </summary>
+    /// <since>6.15</since>
     public static void GetCurrentProcessInfo(out string processName, out Version processVersion)
     {
       if (RunningOnOSX)
@@ -795,7 +1048,7 @@ namespace Rhino.Runtime
         processVersion = new Version(fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart);
 
         var moduleName = System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName;
-        if (moduleName == "Rhinoceros")  // Mac Rhino returns Rhinoceros
+        if (moduleName == "Rhinoceros" || moduleName == "rhino")  // Mac Rhino returns Rhinoceros //RH-57096
           moduleName = "Rhino";
         processName = System.IO.Path.GetFileNameWithoutExtension(moduleName);
       }
@@ -805,6 +1058,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Returns Operating System Edition: "Professional" | "ServerDatacenter" | ... | "Unknown"
     /// </summary>
+    /// <since>6.15</since>
     public static string OperatingSystemEdition
     {
       get
@@ -817,17 +1071,33 @@ namespace Rhino.Runtime
     /// <summary>
     /// Returns Operating System Installation Type: "Client" | "Server" | "Unknown"
     /// </summary>
+    /// <since>6.15</since>
     public static string OperatingSystemInstallationType
     {
       get
       {
         var psl = GetPlatformService<IOperatingSystemInformation>();
+
+#if RHINO_SDK
+        //RH-55659 Docker environment should always report "Server".
+        if (string.Equals(Environment.UserName, "ContainerAdministrator", StringComparison.InvariantCultureIgnoreCase))
+          return "Server";
+
+        //RH-55179 Plain Cloud Zoo files: always report "Server"
+        var settings = Rhino.PlugIns.PlugIn.GetPluginSettings(Rhino.RhinoApp.CurrentRhinoId, false);
+        var licensingSettings = settings.AddChild("LicensingSettings");
+
+        if (licensingSettings.GetBool("CloudZooPlainText", false))
+          return "Server";
+#endif
+
         return psl.InstallationType;
       }
     }
     /// <summary>
     /// Returns Operating System Edition: "Professional" | "ServerDatacenter" | ... | "Unknown"
     /// </summary>
+    /// <since>6.15</since>
     public static string OperatingSystemProductName
     {
       get
@@ -839,17 +1109,28 @@ namespace Rhino.Runtime
     /// <summary>
     /// Returns Operating System Version "6.1" | "6.3" | ... | "Unknown"
     /// </summary>
+    /// <since>6.15</since>
     public static string OperatingSystemVersion
     {
       get
       {
-        var psl = GetPlatformService<IOperatingSystemInformation>();
-        return psl.Version;
+        //RH-56630
+        if (RunningOnWindows)
+        {
+          return Environment.OSVersion.Version.Major.ToString();
+
+        }
+        else
+        {
+          var psl = GetPlatformService<IOperatingSystemInformation>();
+          return psl.Version;
+        }
       }
     }
     /// <summary>
     /// Returns Operating System Build Number "11763" | "7601" | ... | "Unknown"
     /// </summary>
+    /// <since>6.15</since>
     public static string OperatingSystemBuildNumber
     {
       get
@@ -868,6 +1149,7 @@ namespace Rhino.Runtime
     /// <param name="typeFullName">The full name of the type that is IPlatformServiceLocator. This is optional.</param>
     /// <typeparam name="T">The type of the service to be instantiated.</typeparam>
     /// <returns>An instance, or null.</returns>
+    /// <since>6.0</since>
     public static T GetPlatformService<T>(string assemblyPath=null, string typeFullName=null) where T : class
     {
       if (string.IsNullOrEmpty(assemblyPath))
@@ -914,6 +1196,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool IsManagedDll(string path)
     {
       return UnsafeNativeMethods.RHC_IsManagedDll(path);
@@ -922,6 +1205,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Clear FPU exception and busy flags (Intel assembly fnclex)
     /// </summary>
+    /// <since>6.0</since>
     public static void ClearFpuExceptionStatus()
     {
       UnsafeNativeMethods.RHC_ON_FPU_ClearExceptionStatus();
@@ -936,6 +1220,7 @@ namespace Rhino.Runtime
     /// <summary>Register a named callback</summary>
     /// <param name="name"></param>
     /// <param name="callback"></param>
+    /// <since>6.15</since>
     public static void RegisterNamedCallback(string name, EventHandler<NamedParametersEventArgs> callback)
     {
       _namedCallbacks[name] = callback;
@@ -952,6 +1237,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="name"></param>
     /// <param name="args"></param>
+    /// <since>7.0</since>
     public static void ExecuteNamedCallback(string name, NamedParametersEventArgs args)
     {
       // Don't directly call the function on our dictionary and instead indirectly call
@@ -973,6 +1259,10 @@ namespace Rhino.Runtime
           return 1;
         }
       }
+      catch(NotLicensedException nle)
+      {
+        throw nle;
+      }
       catch(Exception ex)
       {
         ExceptionReport(ex);
@@ -986,6 +1276,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="endpointPath"></param>
     /// <param name="t"></param>
+    /// <since>7.0</since>
     public static void RegisterComputeEndpoint(string endpointPath, Type t)
     {
       if (_customComputeEndPoints == null)
@@ -1003,6 +1294,7 @@ namespace Rhino.Runtime
     /// Used by compute to define custom endpoints
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static Tuple<string, Type>[] GetCustomComputeEndpoints()
     {
       if (_customComputeEndPoints != null)
@@ -1018,6 +1310,7 @@ namespace Rhino.Runtime
     /// may be located
     /// </summary>
     /// <returns></returns>
+    /// <since>5.0</since>
     public static string[] GetAssemblySearchPaths()
     {
 #if RHINO_SDK
@@ -1076,6 +1369,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="geometry">Some geometry.</param>
     /// <param name="makeNonConst">A boolean value.</param>
+    /// <since>5.0</since>
     public static void InPlaceConstCast(Rhino.Geometry.GeometryBase geometry, bool makeNonConst)
     {
       if (makeNonConst)
@@ -1091,6 +1385,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Tests if this process is currently executing on the Windows platform.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RunningOnWindows
     {
       get { return !RunningOnOSX; }
@@ -1099,6 +1394,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Tests if this process is currently executing on the Mac OSX platform.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RunningOnOSX
     {
       get
@@ -1114,6 +1410,7 @@ namespace Rhino.Runtime
     /// Returns true if the host operating system is in dark mode and Rhino
     /// supports dark mode.
     /// </summary>
+    /// <since>6.19</since>
     public static bool RunningInDarkMode => UnsafeNativeMethods.RHC_RhRunningInDarkMode();
 
     private static string m_device_name;
@@ -1121,6 +1418,7 @@ namespace Rhino.Runtime
     /// Name of the computer running Rhino. If the computer is part of a
     /// Windows Domain, the computer name has "@[DOMAIN]" appended.
     /// </summary>
+    /// <since>6.0</since>
     public static string DeviceName
     {
       get
@@ -1146,6 +1444,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Gets the serial number of the computer running Rhino.
     /// </summary>
+    /// <since>6.0</since>
     public static string ComputerSerialNumber
     {
       get
@@ -1166,6 +1465,7 @@ namespace Rhino.Runtime
     /// <returns>A Windows LCID (on Windows and macOS).  On Windows, this will be 
     /// LCID value regardless of those languages that Rhino supports.  On macOS, this only
     /// returns LCID values for languages that Rhino does support.</returns>
+    /// <since>6.8</since>
     [CLSCompliant(false)]
     public static uint CurrentOSLanguage => UnsafeNativeMethods.RHC_RhCurrentOSLanguage();
 #endif
@@ -1178,6 +1478,7 @@ namespace Rhino.Runtime
     /// are added or removed from the computer. The machine-specific information is
     /// hashed using a cryptographic hash to make it anonymous.
     /// </summary>
+    /// <since>6.0</since>
     public static Guid DeviceId
     {
       get
@@ -1325,6 +1626,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Tests if this process is currently executing under the Mono runtime.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RunningInMono
     {
       get { return Type.GetType("Mono.Runtime") != null; }
@@ -1338,6 +1640,7 @@ namespace Rhino.Runtime
     /// resource editor or running stand-alone when compiled to be used as a version
     /// of OpenNURBS.
     /// </summary>
+    /// <since>5.0</since>
     public static bool RunningInRhino
     {
       get
@@ -1377,6 +1680,7 @@ namespace Rhino.Runtime
     /// performing a full check.</param>
     /// <returns>true if the RDK is loaded; false if the RDK is not loaded. Note that the
     /// <see cref="RdkNotLoadedException"/> will hinder the retrieval of any return value.</returns>
+    /// <since>5.0</since>
     public static bool CheckForRdk(bool throwOnFalse, bool usePreviousResult)
     {
       const int UNKNOWN = 0;
@@ -1429,6 +1733,7 @@ namespace Rhino.Runtime
     /// Returns true if parameters are valid and lpsRelativePath is indeed
     /// relative to lpsRelativeTo otherwise returns false
     /// </returns>
+    /// <since>6.0</since>
     public static bool GetAbsolutePath(string relativePath, bool bRelativePathisFileName, string relativeTo,bool bRelativeToIsFileName, out string pathOut)
     {
       using (var string_holder = new StringHolder())
@@ -1447,6 +1752,7 @@ namespace Rhino.Runtime
     /// Returns true if fileExtension is ".3dm", "3dm", ".3dx" or "3dx",
     /// ignoring case.
     /// </returns>
+    /// <since>6.0</since>
     public static bool IsRhinoFileExtension(string fileExtension)
     {
       return UnsafeNativeMethods.CRhinoFileUtilities_Is3dmFileExtension(System.IO.Path.GetExtension(fileExtension));
@@ -1461,6 +1767,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Returns true if the file name has an extension like 3dm.
     /// </returns>
+    /// <since>6.0</since>
     public static bool FileNameEndsWithRhinoExtension(string fileName)
     {
       return !string.IsNullOrEmpty(fileName) && IsRhinoFileExtension(System.IO.Path.GetExtension(fileName));
@@ -1473,6 +1780,7 @@ namespace Rhino.Runtime
     /// Return true if fileExtension is ".3dmbak", "3dmbak", ".3dm.bak", "3dm.bak",
     /// ".3dx.bak" or "3dx.bak", ignoring case.
     /// </returns>
+    /// <since>6.0</since>
     public static bool IsRhinoBackupFileExtension(string fileExtension)
     {
       return UnsafeNativeMethods.CRhinoFileUtilities_Is3dmBackupFileExtension(System.IO.Path.GetExtension(fileExtension));
@@ -1487,6 +1795,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Returns true if the file name has an extension like 3dmbak.
     /// </returns>
+    /// <since>6.0</since>
     public static bool FileNameEndsWithRhinoBackupExtension(string fileName)
     {
       return !string.IsNullOrEmpty(fileName) && IsRhinoBackupFileExtension(System.IO.Path.GetExtension(fileName));
@@ -1499,6 +1808,7 @@ namespace Rhino.Runtime
     /// The message will only appear if the SendDebugToCommandLine property is set to true.
     /// </summary>
     /// <param name="msg">Message to print.</param>
+    /// <since>5.0</since>
     public static void DebugString(string msg)
     {
 #if RHINO_SDK
@@ -1515,6 +1825,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="format">Message to format and print.</param>
     /// <param name="args">An Object array containing zero or more objects to format.</param>
+    /// <since>5.0</since>
     public static void DebugString(string format, params object[] args)
     {
       string msg = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, args);
@@ -1523,6 +1834,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Gets or sets whether debug messages are printed to the command line.
     /// </summary>
+    /// <since>5.0</since>
     public static bool SendDebugToCommandLine
     {
       get { return m_bSendDebugToRhino; }
@@ -1533,6 +1845,7 @@ namespace Rhino.Runtime
     /// Informs RhinoCommon of an exception that has been handled but that the developer wants to screen.
     /// </summary>
     /// <param name="ex">An exception.</param>
+    /// <since>5.0</since>
     public static void ExceptionReport(Exception ex)
     {
       ExceptionReport(null, ex);
@@ -1543,6 +1856,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="source">An exception source text.</param>
     /// <param name="ex">An exception.</param>
+    /// <since>5.0</since>
     public static void ExceptionReport(string source, Exception ex)
     {
       if (null == ex)
@@ -1583,6 +1897,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Is raised when an exception is reported with one of the <see cref="ExceptionReport(Exception)"/> method.
     /// </summary>
+    /// <since>5.0</since>
     public static event ExceptionReportDelegate OnExceptionReport;
 
     /// <summary>
@@ -1620,6 +1935,7 @@ namespace Rhino.Runtime
     /// <param name="pwStringDesc">Finer grained description of the message.</param>
     /// <param name="pwStringMessage">The message.</param>
     /// <param name="msg_type">The messag type</param>
+    /// <since>6.4</since>
     public static void SendLogMessageToCloudCallbackProc(LogMessageType msg_type, IntPtr pwStringClass, IntPtr pwStringDesc, IntPtr pwStringMessage)
     {
       if (IntPtr.Zero == pwStringClass)
@@ -1664,6 +1980,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Is raised when an exception is reported with one of the  method.
     /// </summary>
+    /// <since>6.4</since>
     public static event SendLogMessageToCloudDelegate OnSendLogMessageToCloud;
 
 
@@ -1675,6 +1992,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="geometry">Some geometry.</param>
     /// <returns>A debug dump text.</returns>
+    /// <since>5.0</since>
     public static string DebugDumpToString(Rhino.Geometry.GeometryBase geometry)
     {
       IntPtr pConstThis = geometry.ConstPointer();
@@ -1693,6 +2011,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="bezierCurve">curve to evaluate</param>
     /// <returns>A debug dump text.</returns>
+    /// <since>5.0</since>
     public static string DebugDumpToString(Rhino.Geometry.BezierCurve bezierCurve)
     {
       IntPtr pConstThis = bezierCurve.ConstPointer();
@@ -1711,6 +2030,7 @@ namespace Rhino.Runtime
     /// determine bottlenecks in start up speed
     /// </summary>
     /// <param name="description"></param>
+    /// <since>6.0</since>
     public static void RecordInitInstanceTime(string description)
     {
       UnsafeNativeMethods.CRhinoApp_RecordInitInstanceTime(description);
@@ -1720,6 +2040,7 @@ namespace Rhino.Runtime
     /// Parses a plugin and create all the commands defined therein.
     /// </summary>
     /// <param name="plugin">Plugin to harvest for commands.</param>
+    /// <since>5.0</since>
     public static void CreateCommands(PlugIn plugin)
     {
       if (plugin!=null)
@@ -1732,6 +2053,7 @@ namespace Rhino.Runtime
     /// <param name="pPlugIn">Plugin to harvest for commands.</param>
     /// <param name="pluginAssembly">Assembly associated with the plugin.</param>
     /// <returns>The number of newly created commands.</returns>
+    /// <since>5.0</since>
     public static int CreateCommands(IntPtr pPlugIn, System.Reflection.Assembly pluginAssembly)
     {
       int rc = 0;
@@ -1764,6 +2086,7 @@ namespace Rhino.Runtime
     /// <param name="plugin">Plugin that owns the command.</param>
     /// <param name="cmd">Command to add.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool RegisterDynamicCommand(PlugIn plugin, Commands.Command cmd)
     {
       // every command must have a RhinoId and Name attribute
@@ -1978,6 +2301,51 @@ namespace Rhino.Runtime
         }
       }
 
+
+      //This should reflect a string list of the enum TextFieldType in TextFieldViewModel.cs
+      //v7 functions are case sensitive and probably should not have to be for the user.
+      //Let's try to automatically repair function casing on what ever has been typed by the user.
+      //Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-57756
+      #region Repair Function Casing
+      var function_name_list = new List<string>()
+      {
+        "Area",
+        "BlockAttributeText",
+        "BlockInstanceCount",
+        "BlockInstanceName",
+        "CurveLength",
+        "Date",
+        "DateModified",
+        "DetailScale",
+        "DocumentText",
+        "FileName",
+        "LayerName",
+        "LayoutUserText",
+        "ModelUnits",
+        "Notes",
+        "NumPages",
+        "ObjectLayer",
+        "ObjectName",
+        "PageName",
+        "PageNumber",
+        "PageHeight",
+        "PageWidth",
+        "PaperName",
+        "PointCoordinate",
+        "UserText",
+        "Volume"
+      }; 
+      foreach (var fx_name in function_name_list)
+      {
+        var str_index_of_function = formula.IndexOf(fx_name, 0, StringComparison.OrdinalIgnoreCase);
+        if (str_index_of_function == -1) 
+          continue;
+       
+        var og_fx = formula.Substring(str_index_of_function, fx_name.Length); 
+        formula = formula.Replace(og_fx, fx_name);
+      }
+      #endregion 
+
       // I don't think is is possible to write bad things in a single line expression,
       // but check for import, exec, and clr just to be safe.
       string[] badwords = { "import", "exec", "clr" };
@@ -2037,6 +2405,14 @@ namespace Rhino.Runtime
               if (annotation != null && expression.StartsWith("Area", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
               {
                 string stringResult = Rhino.UI.Localization.FormatArea(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+
+                if (!string.IsNullOrWhiteSpace(stringResult))
+                  return stringResult;
+              }
+
+              if (annotation != null && expression.StartsWith("Volume", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              {
+                string stringResult = Rhino.UI.Localization.FormatVolume(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
 
                 if (!string.IsNullOrWhiteSpace(stringResult))
                   return stringResult;
@@ -2138,6 +2514,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="currentUser">true if the query relates to the current user.</param>
     /// <returns>The full path to the revelant auto install plug-in directory.</returns>
+    /// <since>6.0</since>
     public static string AutoInstallPlugInFolder(bool currentUser)
     {
       // TODO: refactor to something more generic like GetPackageFolder
@@ -2185,6 +2562,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="currentUser">Current user (true) or machine (false).</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static IEnumerable<System.IO.DirectoryInfo> GetActivePlugInVersionFolders(bool currentUser)
     {
       // TODO: this gets called a lot so we should probably cache the results
@@ -2310,6 +2688,7 @@ namespace Rhino.Runtime
     /// have to call this method.
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
+    /// <since>5.0</since>
     public static void InitializeRhinoCommon()
     {
       if (m_rhinocommoninitialized)
@@ -2334,6 +2713,9 @@ namespace Rhino.Runtime
       }
 
 #if RHINO_SDK
+      RegisterNamedCallback("ThrowNotLicensedException", NotLicensedException.ThrowNotLicensedException);
+      RegisterNamedCallback("FireLicenseStateChangedEvent", RhinoApp.FireLicenseStateChangedEvent);
+
       DebugString("Initializing RhinoCommon");
       UnsafeNativeMethods.RHC_SetGetNowProc(m_getnow_callback, m_getformattedtime_callback);
       UnsafeNativeMethods.RHC_SetPythonEvaluateCallback(m_evaluate_callback);
@@ -2343,7 +2725,10 @@ namespace Rhino.Runtime
 
       UnsafeNativeMethods.RHC_SetRdkInitializationCallbacks(m_rdk_initialize_callback, m_rdk_shutdown_callback);
 
-      UnsafeNativeMethods.RHC_SetSendLogMessageToCloudProc(m_send_log_message_to_cloud_callback);
+      // 21 Feb 2020 S. Baer (RH-57124)
+      // Turn off raygun non-fatal messages for now. We can turn them back on
+      // in the future by uncommmenting the next line
+      //UnsafeNativeMethods.RHC_SetSendLogMessageToCloudProc(m_send_log_message_to_cloud_callback);
 
       PersistentSettingsHooks.SetHooks();
       FileIO.FilePdf.SetHooks();
@@ -2360,6 +2745,7 @@ namespace Rhino.Runtime
     /// have to call this method.
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
+    /// <since>6.0</since>
     public static void InitializeRhinoCommon_RDK()
     {
       if (m_rhinocommonrdkinitialized)
@@ -2369,6 +2755,11 @@ namespace Rhino.Runtime
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(true);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(true);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(true);
+      Rhino.Render.PostEffects.EarlyPostEffectPlugIn.SetCppHooks(true);
+      Rhino.Render.PostEffects.ToneMappingPostEffectPlugIn.SetCppHooks(true);
+      Rhino.Render.PostEffects.LatePostEffectPlugIn.SetCppHooks(true);
+      Rhino.Render.PostEffects.PostEffectFactory.SetCppHooks(true);
+      Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
       Rhino.UI.Controls.FactoryBase.Register();
 
@@ -2379,14 +2770,20 @@ namespace Rhino.Runtime
     /// Makes sure all static RhinoCommon RDK components are de-initialized so they aren't calling into space when the RDK is unloaded.
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
+    /// <since>6.0</since>
     public static void ShutDownRhinoCommon_RDK()
     {
-        UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null);
+      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null);
 
-        Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
-        Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
-        Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(false);
-        Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
+      Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
+      Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
+      Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(false);
+      Rhino.Render.PostEffects.EarlyPostEffectPlugIn.SetCppHooks(false);
+      Rhino.Render.PostEffects.ToneMappingPostEffectPlugIn.SetCppHooks(false);
+      Rhino.Render.PostEffects.LatePostEffectPlugIn.SetCppHooks(false);
+      Rhino.Render.PostEffects.PostEffectFactory.SetCppHooks(false);
+      Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
+      Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
     }
 #endif
 
@@ -2400,6 +2797,7 @@ namespace Rhino.Runtime
     /// </param>
     /// <param name="sender"></param>
     /// <param name="ex"></param>
+    /// <since>6.0</since>
     public static void RhinoCommonExceptionHandler(string title, object sender, Exception ex)
     {
       if (!g_ReportExceptions)
@@ -2435,6 +2833,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
+    /// <since>6.0</since>
     public static void UnhandledThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
     {
       RhinoCommonExceptionHandler("System::Windows::Forms::Application::ThreadException event occurred", sender, e.Exception);
@@ -2485,6 +2884,7 @@ namespace Rhino.Runtime
     /// called automatically when RhinoCommon is loaded so you probably won't
     /// have to call this method.
     /// </summary>
+    /// <since>5.6</since>
     public static void InitializeZooClient()
     {
 #if RHINO_SDK
@@ -2500,6 +2900,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="task"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static int CallFromCoreRhino(string task)
     {
       if( string.Equals(task, "initialize", StringComparison.InvariantCultureIgnoreCase) )
@@ -2517,6 +2918,7 @@ namespace Rhino.Runtime
     /// <param name="pluginType">A plug-in type. This type must derive from <see cref="PlugIn"/>.</param>
     /// <param name="printDebugMessages">true if debug messages should be printed.</param>
     /// <returns>A new plug-in instance.</returns>
+    /// <since>5.0</since>
     public static PlugIn CreatePlugIn(Type pluginType, bool printDebugMessages)
     {
       return CreatePlugIn(pluginType, pluginType.Assembly, printDebugMessages, false);
@@ -2626,6 +3028,7 @@ namespace Rhino.Runtime
     /// <para>This function makes no sense on Mono.</para>
     /// </summary>
     /// <param name="display">Whether alerts should be visible.</param>
+    /// <since>5.0</since>
     public static void DisplayOleAlerts(bool display)
     {
       UnsafeNativeMethods.RHC_DisplayOleAlerts(display);
@@ -2653,6 +3056,7 @@ namespace Rhino.Runtime
     /// Only works on Windows. Returns null on Mac.
     /// </summary>
     /// <returns>An assembly.</returns>
+    /// <since>5.0</since>
     public static System.Reflection.Assembly GetRhinoDotNetAssembly()
     {
       if (m_rhdn_assembly == null && RunningOnWindows)
@@ -2674,6 +3078,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Informs the runtime that the application is shutting down.
     /// </summary>
+    /// <since>5.0</since>
     public static void SetInShutDown()
     {
       // 26 June 2018 S. Baer (RH-46531)
@@ -2952,6 +3357,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Initializes a new instance of the RDK not loaded exception with a standard message.
     /// </summary>
+    /// <since>5.0</since>
     public RdkNotLoadedException() : base("The Rhino Rdk is not loaded.") { }
   }
 }

@@ -449,7 +449,7 @@ namespace Rhino.Collections
 
     internal static Exception MakeNoSyncException(object obj)
     {
-      return new NotSupportedException(string.Format("Implicit syncronization is not supported in '{0}' objects.", obj.GetType().Name));
+      return new NotSupportedException(string.Format("Implicit synchronization is not supported in '{0}' objects.", obj.GetType().Name));
     }
   }
 
@@ -2001,14 +2001,15 @@ namespace Rhino.Collections
   public static class RhinoList
   {
     /// <summary>
-    /// Finds a certain amout of points in a list of 3D points that are the k-closest to a test point.
-    /// This method searches needlePoints by computing all distances from each pointcloud point and keeping a short list.
+    /// Finds a certain amount of points in a list of 3D points that are the k-closest to a test point.
+    /// This method searches needlePoints by computing all distances from each point cloud point and keeping a short list.
     /// </summary>
     /// <param name="pointcloud">A point cloud to be searched.</param>
     /// <param name="needlePoints">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="Rhino.Geometry.RTree.PointCloudKNeighbors(PointCloud, IEnumerable{Point3d}, int)" />
+    /// <since>6.0</since>
     public static IEnumerable<int[]> PointCloudKNeighbors(PointCloud pointcloud, IEnumerable<Point3d> needlePoints, int amount)
     {
       if (pointcloud == null) throw new ArgumentNullException(nameof(pointcloud));
@@ -2018,8 +2019,8 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// Finds a certain amout of points in a list of 3D points that are the k-closest to a test point.
-    /// This method searches needlePoints by computing all distances from each pointcloud point and keeping a "short list".
+    /// Finds a certain amour of points in a list of 3D points that are the k-closest to a test point.
+    /// This method searches needlePoints by computing all distances from each point cloud point and keeping a "short list".
     /// See RTree KNeighbors for alternatives.
     /// </summary>
     /// <param name="hayPoints">A point cloud to be searched.</param>
@@ -2027,48 +2028,52 @@ namespace Rhino.Collections
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="Rhino.Geometry.RTree.Point3dKNeighbors(IEnumerable{Point3d}, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point3dKNeighbors(IEnumerable<Point3d> hayPoints, IEnumerable<Point3d> needlePoints, int amount)
     {
       return KNeighbors(hayPoints, needlePoints, amount);
     }
 
     /// <summary>
-    /// Finds a certain amout of points in a list of single-precision 3D points that are the k-closest to a test point.
-    /// This method searches needlePoints by computing all distances from each pointcloud point and keeping a "short list".
+    /// Finds a certain amour of points in a list of single-precision 3D points that are the k-closest to a test point.
+    /// This method searches needlePoints by computing all distances from each point cloud point and keeping a "short list".
     /// </summary>
     /// <param name="hayPoints">A point cloud to be searched.</param>
     /// <param name="needlePoints">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="Rhino.Geometry.RTree.Point3dKNeighbors(IEnumerable{Point3d}, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point3fKNeighbors(IEnumerable<Point3f> hayPoints, IEnumerable<Point3f> needlePoints, int amount)
     {
       return KNeighbors(hayPoints, needlePoints, amount);
     }
 
     /// <summary>
-    /// Finds a certain amout of points in a list of single-precision 2D points that are the k-closest to a test point.
-    /// This method searches needlePoints by computing all distances from each pointcloud point and keeping a "short list".
+    /// Finds a certain amour of points in a list of single-precision 2D points that are the k-closest to a test point.
+    /// This method searches needlePoints by computing all distances from each point cloud point and keeping a "short list".
     /// </summary>
     /// <param name="hayPoints">A point cloud to be searched.</param>
     /// <param name="needlePoints">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="Rhino.Geometry.RTree.Point3dKNeighbors(IEnumerable{Point3d}, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point2dKNeighbors(IEnumerable<Point2d> hayPoints, IEnumerable<Point2d> needlePoints, int amount)
     {
       return KNeighbors(hayPoints, needlePoints, amount);
     }
 
     /// <summary>
-    /// Finds a certain amout of points in a list of single-precision 2D points that are the k-closest to a test point.
-    /// This method searches needlePoints by computing all distances from each pointcloud point and keeping a "short list".
+    /// Finds a certain amour of points in a list of single-precision 2D points that are the k-closest to a test point.
+    /// This method searches needlePoints by computing all distances from each point cloud point and keeping a "short list".
     /// </summary>
     /// <param name="hayPoints">A point cloud to be searched.</param>
     /// <param name="needlePoints">Points to search for.</param>
     /// <param name="amount">The required amount of closest neighbors to find.</param>
     /// <returns>An enumerable of arrays of indices; each array contains the indices for each of the needlePts.</returns>
     /// <seealso cref="Rhino.Geometry.RTree.Point3dKNeighbors(IEnumerable{Point3d}, IEnumerable{Point3d}, int)"/>
+    /// <since>6.0</since>
     public static IEnumerable<int[]> Point2fKNeighbors(IEnumerable<Point2f> hayPoints, IEnumerable<Point2f> needlePoints, int amount)
     {
       return KNeighbors(hayPoints, needlePoints, amount);
@@ -2229,6 +2234,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Initializes a new empty list with default capacity.
     /// </summary>
+    /// <since>5.0</since>
     public Point3dList()
     {
     }
@@ -2242,6 +2248,7 @@ namespace Rhino.Collections
     /// <code source='examples\py\ex_addnurbscurve.py' lang='py'/>
     /// </example>
     /// <param name="initialCapacity">The number of added items before which the underlying array will be resized.</param>
+    /// <since>5.0</since>
     public Point3dList(int initialCapacity)
       : base(initialCapacity)
     {
@@ -2251,6 +2258,7 @@ namespace Rhino.Collections
     /// Initializes a new point list by copying the values from another set.
     /// </summary>
     /// <param name="collection">The collection to copy from.</param>
+    /// <since>5.0</since>
     public Point3dList(IEnumerable<Point3d> collection)
       : base(collection)
     {
@@ -2260,6 +2268,7 @@ namespace Rhino.Collections
     /// Constructs a new point list from values in a point array.
     /// </summary>
     /// <param name="initialPoints">Points to add to the list.</param>
+    /// <since>5.0</since>
     public Point3dList(params Point3d[] initialPoints)
     {
       if (initialPoints != null)
@@ -2288,6 +2297,7 @@ namespace Rhino.Collections
     /// Even though this is a property, it is not a "fast" calculation. Every point is
     /// evaluated in order to get the bounding box of the list.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -2320,6 +2330,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="testPoint">point to compare against.</param>
     /// <returns>index of closest point in the list on success. -1 on error.</returns>
+    /// <since>5.0</since>
     public int ClosestIndex(Point3d testPoint)
     {
       return ClosestIndexInList(this, testPoint);
@@ -2333,6 +2344,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Returns an indexer with all X coordinates in this list.
     /// </summary>
+    /// <since>5.0</since>
     public XAccess X
     {
       get { return m_x_access ?? (m_x_access = new XAccess(this)); }
@@ -2341,6 +2353,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Returns an indexer with all Y coordinates in this list.
     /// </summary>
+    /// <since>5.0</since>
     public YAccess Y
     {
       get { return m_y_access ?? (m_y_access = new YAccess(this)); }
@@ -2349,6 +2362,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Returns an indexer with all Z coordinates in this list.
     /// </summary>
+    /// <since>5.0</since>
     public ZAccess Z
     {
       get { return m_z_access ?? (m_z_access = new ZAccess(this)); }
@@ -2449,6 +2463,7 @@ namespace Rhino.Collections
     /// <code source='examples\cs\ex_addnurbscurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnurbscurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void Add(double x, double y, double z)
     {
       Add(new Point3d(x, y, z));
@@ -2458,6 +2473,7 @@ namespace Rhino.Collections
     /// Applies a transform to all the points in the list.
     /// </summary>
     /// <param name="xform">Transform to apply.</param>
+    /// <since>5.0</since>
     public void Transform(Transform xform)
     {
       for (int i = 0; i < Count; i++)
@@ -2471,6 +2487,7 @@ namespace Rhino.Collections
     /// Set all the X values for the points to a single value
     /// </summary>
     /// <param name="xValue"></param>
+    /// <since>5.6</since>
     public void SetAllX(double xValue)
     {
       for (int i = 0; i < Count; i++)
@@ -2481,6 +2498,7 @@ namespace Rhino.Collections
     /// Set all the Y values for the points to a single value
     /// </summary>
     /// <param name="yValue"></param>
+    /// <since>5.6</since>
     public void SetAllY(double yValue)
     {
       for (int i = 0; i < Count; i++)
@@ -2491,6 +2509,7 @@ namespace Rhino.Collections
     /// Set all the Z values for the points to a single value
     /// </summary>
     /// <param name="zValue"></param>
+    /// <since>5.6</since>
     public void SetAllZ(double zValue)
     {
       for (int i = 0; i < Count; i++)
@@ -2503,6 +2522,7 @@ namespace Rhino.Collections
     /// <param name="list">A list of points.</param>
     /// <param name="testPoint">Point to compare against.</param>
     /// <returns>Index of closest point in the list on success or -1 on error.</returns>
+    /// <since>5.0</since>
     public static int ClosestIndexInList(IList<Point3d> list, Point3d testPoint)
     {
       if (null == list || !testPoint.IsValid)
@@ -2540,6 +2560,7 @@ namespace Rhino.Collections
     /// <exception cref="ArgumentException">
     /// List must contain at least one point and testPoint must be valid.
     /// </exception>
+    /// <since>5.0</since>
     public static Point3d ClosestPointInList(IList<Point3d> list, Point3d testPoint)
     {
       if (list.Count < 1 || !testPoint.IsValid)
@@ -2557,6 +2578,7 @@ namespace Rhino.Collections
     /// Returns a deep copy of this point list instance.
     /// </summary>
     /// <returns>The duplicated list.</returns>
+    /// <since>6.0</since>
     public new Point3dList Duplicate()
     {
       return (Point3dList)(this as ICloneable).Clone();
@@ -2572,6 +2594,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Initializes a new empty list of curves.
     /// </summary>
+    /// <since>5.0</since>
     public CurveList()
     {
     }
@@ -2580,6 +2603,7 @@ namespace Rhino.Collections
     /// Initializes a new empty list of curves with a predefined capacity.
     /// <para>This is the amount of items the list will accept before resizing.</para>
     /// </summary>
+    /// <since>5.0</since>
     public CurveList(int initialCapacity)
       : base(initialCapacity)
     {
@@ -2590,6 +2614,7 @@ namespace Rhino.Collections
     /// <para>Input items are not explicitly duplicated (this is a shallow copy).</para>
     /// </summary>
     /// <param name="collection">A list, an array or any enumerable set of <see cref="Curve"/>.</param>
+    /// <since>5.0</since>
     public CurveList(IEnumerable<Curve> collection)
       : base(collection)
     {
@@ -2600,6 +2625,7 @@ namespace Rhino.Collections
     /// Adds a line to this list.
     /// </summary>
     /// <param name="line">A line value that will be the model of the new internal curve.</param>
+    /// <since>5.0</since>
     public void Add(Line line)
     {
       base.Add(new LineCurve(line));
@@ -2609,6 +2635,7 @@ namespace Rhino.Collections
     /// Adds a circle to this list.
     /// </summary>
     /// <param name="circle">A circle value that will be the model of the new internal curve.</param>
+    /// <since>5.0</since>
     public void Add(Circle circle)
     {
       base.Add(new ArcCurve(circle));
@@ -2618,6 +2645,7 @@ namespace Rhino.Collections
     /// Adds an arc to this list.
     /// </summary>
     /// <param name="arc">An arc value that will be the model of the new internal curve.</param>
+    /// <since>5.0</since>
     public void Add(Arc arc)
     {
       base.Add(new ArcCurve(arc));
@@ -2628,6 +2656,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="polyline">A polyline value that will be copied in a new polyline.
     /// <para>This argument can be null, an array, a list or any enumerable set of <see cref="Point3d"/>.</para></param>
+    /// <since>5.0</since>
     public void Add(IEnumerable<Point3d> polyline)
     {
       if (polyline == null) base.Add(null);
@@ -2638,6 +2667,7 @@ namespace Rhino.Collections
     /// Adds an ellipse to this list.
     /// </summary>
     /// <param name="ellipse">An ellipse that will be the model of the new internal curve.</param>
+    /// <since>5.0</since>
     public void Add(Ellipse ellipse)
     {
       base.Add(NurbsCurve.CreateFromEllipse(ellipse));
@@ -2651,6 +2681,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="index">A 0-based position in the list.</param>
     /// <param name="line">The line value from which to construct the new curve.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Line line)
     {
       base.Insert(index, new LineCurve(line));
@@ -2661,6 +2692,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="index">A 0-based position in the list.</param>
     /// <param name="circle">The circle value from which to construct the new curve.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Circle circle)
     {
       base.Insert(index, new ArcCurve(circle));
@@ -2671,6 +2703,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="index">A 0-based position in the list.</param>
     /// <param name="arc">The arc value from which to construct the new curve.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Arc arc)
     {
       base.Insert(index, new ArcCurve(arc));
@@ -2683,6 +2716,7 @@ namespace Rhino.Collections
     /// <param name="polyline">The polyline enumerable from which to construct a copy curve.
     /// <para>This argument can be null, an array, a list or any enumerable set of
     /// <see cref="Point3d"/>.</para></param>
+    /// <since>5.0</since>
     public void Insert(int index, IEnumerable<Point3d> polyline)
     {
       if (polyline == null) base.Add(null);
@@ -2694,6 +2728,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="index">A 0-based position in the list.</param>
     /// <param name="ellipse">The ellipse value from which to construct the new curve.</param>
+    /// <since>5.0</since>
     public void Insert(int index, Ellipse ellipse)
     {
       base.Add(NurbsCurve.CreateFromEllipse(ellipse));
@@ -2706,6 +2741,7 @@ namespace Rhino.Collections
     /// this function returns false.
     /// </summary>
     /// <param name="xform">Transformation to apply to all curves.</param>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       bool rc = true;

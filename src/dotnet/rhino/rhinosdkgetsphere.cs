@@ -11,6 +11,7 @@ namespace Rhino.Input.Custom
   {
     IntPtr m_ptr_argsrhinogetsphere;
 
+    /// <since>7.0</since>
     public GetSphere()
     {
       m_ptr_argsrhinogetsphere = UnsafeNativeMethods.CRhinoGetMeshSphereArgs_New();
@@ -30,6 +31,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -67,6 +69,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Default radius or diameter (based on InDiameterMode)
     /// </summary>
+    /// <since>7.0</since>
     public double DefaultSize
     {
       get
@@ -82,8 +85,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Determines if the "size" value is reperesenting a radius or diameter
+    /// Determines if the "size" value is representing a radius or diameter
     /// </summary>
+    /// <since>7.0</since>
     public bool InDiameterMode
     {
       get { return GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode); }
@@ -95,6 +99,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="sphere">The sphere geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result Get(out Geometry.Sphere sphere)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -113,6 +118,7 @@ namespace Rhino.Input.Custom
     /// <param name="quadSubdivisions">The number of quad mesh subdivisions.</param>
     /// <param name="sphere">The sphere geometry defined by the user.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result GetMesh(ref MeshSphereStyle style, ref int verticalFaces, ref int aroundFaces, ref int triangleSubdivisions, ref int quadSubdivisions, out Geometry.Sphere sphere)
     {
       IntPtr ptr_this = NonConstPointer();

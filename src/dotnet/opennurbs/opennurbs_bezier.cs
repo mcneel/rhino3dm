@@ -48,6 +48,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
     /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    /// <since>6.3</since>
     [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
@@ -65,6 +66,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -93,6 +95,7 @@ namespace Rhino.Geometry
     /// Create bezier curve with controls defined by a list of 2d points
     /// </summary>
     /// <param name="controlPoints"></param>
+    /// <since>5.0</since>
     public BezierCurve(IEnumerable<Point2d> controlPoints)
     {
       var pts = new List<Point2d>(controlPoints);
@@ -104,6 +107,7 @@ namespace Rhino.Geometry
     /// Create bezier curve with controls defined by a list of 3d points
     /// </summary>
     /// <param name="controlPoints"></param>
+    /// <since>5.0</since>
     public BezierCurve(IEnumerable<Point3d> controlPoints)
     {
       var pts = new List<Point3d>(controlPoints);
@@ -115,6 +119,7 @@ namespace Rhino.Geometry
     /// Create bezier curve with controls defined by a list of 4d points
     /// </summary>
     /// <param name="controlPoints"></param>
+    /// <since>5.0</since>
     public BezierCurve(IEnumerable<Point4d> controlPoints)
     {
       var pts = new List<Point4d>(controlPoints);
@@ -125,6 +130,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Dimension of Bezier
     /// </summary>
+    /// <since>6.3</since>
     public int Dimension
     {
       get
@@ -135,6 +141,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Tests an object to see if it is valid.</summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -149,6 +156,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">2 or more points to interpolate</param>
     /// <returns>new bezier curve if successful</returns>
+    /// <since>5.0</since>
     public static BezierCurve CreateLoftedBezier(IEnumerable<Point3d> points)
     {
       var pts = new List<Point3d>(points);
@@ -162,6 +170,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="points">2 or more points to interpolate</param>
     /// <returns>new bezier curve if successful</returns>
+    /// <since>5.0</since>
     public static BezierCurve CreateLoftedBezier(IEnumerable<Point2d> points)
     {
       var pts = new List<Point2d>(points);
@@ -171,17 +180,18 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Boundingbox solver. Gets the world axis aligned boundingbox for the curve.
+    /// Bounding box solver. Gets the world axis aligned bounding box for the curve.
     /// </summary>
-    /// <param name="accurate">If true, a physically accurate boundingbox will be computed. 
-    /// If not, a boundingbox estimate will be computed. For some geometry types there is no 
-    /// difference between the estimate and the accurate boundingbox. Estimated boundingboxes 
+    /// <param name="accurate">If true, a physically accurate bounding box will be computed. 
+    /// If not, a bounding box estimate will be computed. For some geometry types there is no 
+    /// difference between the estimate and the accurate bounding box. Estimated bounding boxes 
     /// can be computed much (much) faster than accurate (or "tight") bounding boxes. 
     /// Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</param>
     /// <returns>
-    /// The boundingbox of the geometry in world coordinates or BoundingBox.Empty 
+    /// The bounding box of the geometry in world coordinates or BoundingBox.Empty 
     /// if not bounding box could be found.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox GetBoundingBox(bool accurate)
     {
@@ -195,6 +205,7 @@ namespace Rhino.Geometry
     /// <param name="t">Evaluation parameter.</param>
     /// <returns>Point (location of curve at the parameter t).</returns>
     /// <remarks>No error handling.</remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -208,6 +219,7 @@ namespace Rhino.Geometry
     /// <param name="t">Evaluation parameter.</param>
     /// <returns>Unit tangent vector of the curve at the parameter t.</returns>
     /// <remarks>No error handling.</remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d TangentAt(double t)
     {
@@ -221,6 +233,7 @@ namespace Rhino.Geometry
     /// <param name="t">Evaluation parameter.</param>
     /// <returns>Curvature vector of the curve at the parameter t.</returns>
     /// <remarks>No error handling.</remarks>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d CurvatureAt(double t)
     {
@@ -234,6 +247,7 @@ namespace Rhino.Geometry
     /// Constructs a NURBS curve representation of this curve.
     /// </summary>
     /// <returns>NURBS representation of the curve on success, null on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -246,6 +260,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not the curve is rational. 
     /// Rational curves have control-points with custom weights.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRational
     {
       get
@@ -258,6 +273,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Number of control vertices in this curve
     /// </summary>
+    /// <since>5.0</since>
     public int ControlVertexCount
     {
       get
@@ -275,6 +291,7 @@ namespace Rhino.Geometry
     /// If the bezier is rational, the euclidean location is returned.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point2d GetControlVertex2d(int index)
     {
@@ -290,6 +307,7 @@ namespace Rhino.Geometry
     /// If the bezier is rational, the euclidean location is returned.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d GetControlVertex3d(int index)
     {
@@ -307,10 +325,11 @@ namespace Rhino.Geometry
     /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
     /// </param>
     /// <returns>
-    /// Homogenous value of control vertex. If the bezier is not
+    /// Homogeneous value of control vertex. If the bezier is not
     /// rational, the weight is 1.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point4d GetControlVertex4d(int index)
     {
@@ -325,13 +344,15 @@ namespace Rhino.Geometry
 
     /// <summary>Make bezier rational</summary>
     /// <returns>true if successful</returns>
+    /// <since>5.0</since>
     public bool MakeRational()
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.ON_BezierCurve_MakeRational(ptr_this, true);
     }
     /// <summary>Make bezier non-rational</summary>
-    /// <returns>treu if successful</returns>
+    /// <returns>true if successful</returns>
+    /// <since>5.0</since>
     public bool MakeNonRational()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -341,6 +362,7 @@ namespace Rhino.Geometry
     /// <summary>Increase degree of bezier</summary>
     /// <param name="desiredDegree"></param>
     /// <returns>true if successful.  false if desiredDegree &lt; current degree.</returns>
+    /// <since>5.0</since>
     public bool IncreaseDegree(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -350,6 +372,7 @@ namespace Rhino.Geometry
     /// <summary>Change dimension of bezier.</summary>
     /// <param name="desiredDimension"></param>
     /// <returns>true if successful.  false if desired_dimension &lt; 1</returns>
+    /// <since>5.0</since>
     public bool ChangeDimension(int desiredDimension)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -363,6 +386,7 @@ namespace Rhino.Geometry
     /// <param name="left"></param>
     /// <param name="right"></param>
     /// <returns>true on success</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public bool Split(double t, out BezierCurve left, out BezierCurve right)
     {
@@ -388,7 +412,7 @@ namespace Rhino.Geometry
 #region Rhino SDK functions
 #if RHINO_SDK
     /// <summary>
-    /// Constructs an array of cubic, non-rational beziers that fit a curve to a tolerance.
+    /// Constructs an array of cubic, non-rational Beziers that fit a curve to a tolerance.
     /// </summary>
     /// <param name="sourceCurve">A curve to approximate.</param>
     /// <param name="distanceTolerance">
@@ -400,6 +424,7 @@ namespace Rhino.Geometry
     /// also have a kink at P.
     /// </param>
     /// <returns>A new array of bezier curves. The array can be empty and might contain null items.</returns>
+    /// <since>5.0</since>
     public static BezierCurve[] CreateCubicBeziers(Curve sourceCurve, double distanceTolerance, double kinkTolerance)
     {
       IntPtr const_ptr_source = sourceCurve.ConstPointer();
@@ -423,6 +448,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="sourceCurve">The curve to fit Beziers to</param>
     /// <returns>A new array of Bezier curves</returns>
+    /// <since>6.0</since>
     public static BezierCurve[] CreateBeziers(Curve sourceCurve)
     {
       IntPtr const_ptr_source = sourceCurve.ConstPointer();

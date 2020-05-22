@@ -580,8 +580,8 @@ RH_C_FUNCTION int ON_DimStyle_GetInt(const ON_DimStyle* constDimStyle, ON_DimSty
       return constDimStyle->AlternateToleranceResolution();
     case ON_DimStyle::field::MaskColorSource:
       return (int)constDimStyle->MaskFillType();
-//    case ON_DimStyle::field::MaskFrameType:
-//      return (int)constDimStyle->MaskFrameType();
+    case ON_DimStyle::field::MaskFrameType:
+      return (int)constDimStyle->MaskFrameType();
     case ON_DimStyle::field::DimscaleSource:
       return constDimStyle->DimScaleSource();
     case ON_DimStyle::field::TextmoveLeader:
@@ -735,13 +735,13 @@ RH_C_FUNCTION void ON_DimStyle_SetInt(ON_DimStyle* dimstyle, ON_DimStyle::field 
         dimstyle->SetMaskFillType(mask_type);
     }
     break;
-    //case ON_DimStyle::field::MaskFrameType:
-    //{
-    //  const ON_TextMask::MaskFrame mask_frame = ON_TextMask::MaskFrameFromUnsigned((unsigned int)i);
-    //  if (static_cast<const unsigned int>(mask_frame) == (unsigned int)i)
-    //    dimstyle->SetMaskFrameType(mask_frame);
-    //}
-    //break;
+    case ON_DimStyle::field::MaskFrameType:
+    {
+      const ON_TextMask::MaskFrame mask_frame = ON_TextMask::MaskFrameFromUnsigned((unsigned int)i);
+      if (static_cast<const unsigned int>(mask_frame) == (unsigned int)i)
+        dimstyle->SetMaskFrameType(mask_frame);
+    }
+    break;
     case ON_DimStyle::field::DimscaleSource:
       dimstyle->SetDimScaleSource(i);
       break;

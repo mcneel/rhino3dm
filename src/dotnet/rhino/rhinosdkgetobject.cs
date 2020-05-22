@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 using System;
 using Rhino.Geometry;
 using Rhino.DocObjects;
@@ -31,6 +31,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="doc"></param>
     /// <returns></returns>
+    /// <since>6.3</since>
     public static GetObject ActiveGetObject(RhinoDoc doc)
     {
       IntPtr ptrGetObject = UnsafeNativeMethods.CRhinoGetObject_ActiveGetObject(doc.RuntimeSerialNumber);
@@ -46,6 +47,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addobjectstogroup.cs' lang='cs'/>
     /// <code source='examples\py\ex_addobjectstogroup.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GetObject()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetObject_New();
@@ -74,6 +76,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public ObjectType GeometryFilter
     {
@@ -104,6 +107,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_circlecenter.cs' lang='cs'/>
     /// <code source='examples\py\ex_circlecenter.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GeometryAttributeFilter GeometryAttributeFilter
     {
@@ -135,6 +139,7 @@ namespace Rhino.Input.Custom
     /// </returns>
     /// <remarks>The delegate should not throw exceptions. If an exception is thrown, a message box will show and
     /// the filter will be disabled.</remarks>
+    /// <since>5.0</since>
     public virtual bool CustomGeometryFilter(RhinoObject rhObject, GeometryBase geometry, ComponentIndex componentIndex)
     {
       if (m_filter != null)
@@ -172,6 +177,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_customgeometryfilter.cs' lang='cs'/>
     /// <code source='examples\py\ex_customgeometryfilter.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetCustomGeometryFilter(GetObjectGeometryFilter filter)
     {
       m_filter = filter;
@@ -186,6 +192,7 @@ namespace Rhino.Input.Custom
     /// <returns>
     /// true if the geometry passes the filter returned by GeometryAttributeFilter().
     /// </returns>
+    /// <since>5.0</since>
     public bool PassesGeometryAttributeFilter(RhinoObject rhObject, GeometryBase geometry, ComponentIndex componentIndex)
     {
       IntPtr const_ptr_rhino_object = IntPtr.Zero;
@@ -199,7 +206,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Control the pre selection behavior GetObjects.
+    /// Control the pre-selection behavior GetObjects.
     /// </summary>
     /// <param name="enable">if true, pre-selection is enabled.</param>
     /// <param name="ignoreUnacceptablePreselectedObjects">
@@ -212,11 +219,13 @@ namespace Rhino.Input.Custom
     /// is returned and the user is not given the opportunity to post-select. If you want
     /// to force the user to post-select, then call EnablePreSelect(false).
     /// </remarks>
+    /// <since>5.0</since>
     public void EnablePreSelect(bool enable, bool ignoreUnacceptablePreselectedObjects)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_EnablePreSelect(ptr, enable, ignoreUnacceptablePreselectedObjects);
     }
+    /// <since>5.0</since>
     public void DisablePreSelect()
     {
       EnablePreSelect(false, true);
@@ -241,6 +250,7 @@ namespace Rhino.Input.Custom
     /// the user is given the chance to post select. If you want to force the user to pre-select,
     /// then call EnablePostSelect(false).
     /// </remarks>
+    /// <since>5.0</since>
     public void EnablePostSelect(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.EnablePostSelect, enable);
@@ -255,6 +265,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool DeselectAllBeforePostSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.DeselectAllBeforePostSelect); }
@@ -270,6 +281,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool OneByOnePostSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.OneByOnePostSelect); }
@@ -287,6 +299,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool SubObjectSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.SubObjectSelect); }
@@ -300,6 +313,7 @@ namespace Rhino.Input.Custom
     /// choose-one-object mechanism to include pop up in these cases, then call
     /// EnableChooseOneQuestion = true before calling GetObjects().
     /// </summary>
+    /// <since>5.0</since>
     public bool ChooseOneQuestion
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ChooseOneQuestion); }
@@ -309,10 +323,11 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// By default, if a call to Input is permitted to select different parts of
     /// the same object, like a polysurface, a surface and an edge, then the
-    /// top-most object is prefered. (polysurface beats face beats edge). If
-    /// you want the bottom most object to be prefered, then call 
+    /// top-most object is preferred. (polysurface beats face beats edge). If
+    /// you want the bottom most object to be preferred, then call 
     /// EnableBottomObjectPreference = true before calling GetObjects().
     /// </summary>
+    /// <since>5.0</since>
     public bool BottomObjectPreference
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.BottomObjectPreference); }
@@ -329,6 +344,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool GroupSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.GroupSelect); }
@@ -336,9 +352,20 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// If a subd (or a subd component) cannot be selected, but a brep (or brep
+    /// component) can be selected, then automatically create and use a proxy brep.
+    /// </summary>
+    public bool ProxyBrepFromSubD
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ProxyBrepFromSubD); }
+      set { SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ProxyBrepFromSubD, value); }
+    }
+
+    /// <summary>
     /// By default, objects in inactive details are not permitted to be picked.
     /// In a few rare cases this is used (ex. picking circles during DimRadius)
     /// </summary>
+    /// <since>5.8</since>
     public bool InactiveDetailPickEnabled
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.InactiveDetailPick); }
@@ -349,8 +376,9 @@ namespace Rhino.Input.Custom
     /// By default, any object selected during a command becomes part of the
     /// "previous selection set" and can be reselected by the SelPrev command.
     /// If you need to select objects but do not want them to be selected by
-    /// a subsquent call to SelPrev, then call EnableSelPrev = false.
+    /// a subsequent call to SelPrev, then call EnableSelPrev = false.
     /// </summary>
+    /// <since>5.0</since>
     public void EnableSelPrevious(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.SelPrev, enable);
@@ -361,6 +389,7 @@ namespace Rhino.Input.Custom
     /// If you want to post-pick objects and not have them automatically highlight,
     /// then call EnableHighlight = false.
     /// </summary>
+    /// <since>5.0</since>
     public void EnableHighlight(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.Highlight, enable);
@@ -375,6 +404,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_createblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_createblock.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool ReferenceObjectSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ReferenceObjectSelect); }
@@ -388,6 +418,7 @@ namespace Rhino.Input.Custom
     /// on is determined by the value returned by the virtual
     /// RhinoObject.IsSelectableWithGripsOn.
     /// </summary>
+    /// <since>5.0</since>
     public void EnableIgnoreGrips(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.IgnoreGrips, enable);
@@ -400,6 +431,7 @@ namespace Rhino.Input.Custom
     /// you want to prohibit the addition of the "Press Enter when done", then call
     /// EnablePressEnterWhenDonePrompt = false;
     /// </summary>
+    /// <since>5.0</since>
     public void EnablePressEnterWhenDonePrompt(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.PressEnterWhenDonePrompt, enable);
@@ -411,6 +443,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="prompt">The text that will be displayed just after the prompt,
     /// after the selection has been made.</param>
+    /// <since>5.0</since>
     public void SetPressEnterWhenDonePrompt(string prompt)
     {
       IntPtr ptr = NonConstPointer();
@@ -427,6 +460,7 @@ namespace Rhino.Input.Custom
     /// when the selected objects are being managed outside GetObjects() as in the case of
     /// CRhinoPolyEdge::GetEdge().
     /// </summary>
+    /// <since>5.0</since>
     public bool AlreadySelectedObjectSelect
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.AlreadySelectedObjectSelect); }
@@ -467,6 +501,7 @@ namespace Rhino.Input.Custom
     /// See GetResults for other possible values that may be returned when options, numbers,
     /// etc., are acceptable responses.
     /// </returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult Get()
     {
@@ -493,6 +528,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_addobjectstogroup.cs' lang='cs'/>
     /// <code source='examples\py\ex_addobjectstogroup.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult GetMultiple(int minimumNumber, int maximumNumber)
     {
@@ -515,6 +551,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Gets the number of objects that were selected.
     /// </summary>
+    /// <since>5.0</since>
     public int ObjectCount
     {
       get
@@ -529,6 +566,7 @@ namespace Rhino.Input.Custom
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public ObjRef Object(int index)
     {
       ObjRef rc = new ObjRef();
@@ -537,6 +575,7 @@ namespace Rhino.Input.Custom
       return rc;
     }
 
+    /// <since>5.0</since>
     public ObjRef[] Objects()
     {
       int count = ObjectCount;
@@ -549,6 +588,7 @@ namespace Rhino.Input.Custom
       return objrefs.ToArray();
     }
 
+    /// <since>5.0</since>
     public bool ObjectsWerePreselected
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ObjectsWerePreselected); }
@@ -558,6 +598,7 @@ namespace Rhino.Input.Custom
     /// Each instance of GetObject has a unique runtime serial number that
     /// is used to identify object selection events associated with that instance.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint SerialNumber
     {
@@ -575,6 +616,7 @@ namespace Rhino.Input.Custom
     /// calling GetObjects().
     /// </summary>
     /// <param name="enable">The state to set.</param>
+    /// <since>5.0</since>
     public void EnableClearObjectsOnEntry(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ClearObjectsOnEntry, enable);
@@ -587,6 +629,7 @@ namespace Rhino.Input.Custom
     /// before calling GetObjects().
     /// </summary>
     /// <param name="enable">The state to set.</param>
+    /// <since>5.0</since>
     public void EnableUnselectObjectsOnExit(bool enable)
     {
       SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.UnselectObjectsOnExit, enable);
@@ -595,6 +638,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// </summary>
     /// <param name="objref"></param>
+    /// <since>6.3</since>
     public void AppendToPickList(ObjRef objref)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -605,6 +649,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Clear possible special object drawing
     /// </summary>
+    /// <since>6.12</since>
     public void ClearObjects()
     {
       IntPtr ptrThis = NonConstPointer();
@@ -731,54 +776,54 @@ namespace Rhino.Input.Custom
     UntrimmedSurface = 1 << 12,
     ///<summary>
     /// If you want to accept only sub-surfaces of (multi-surface)
-    /// polysrf, then specify sub_surface.  If you do not want to
+    /// polysurface, then specify sub_surface.  If you do not want to
     /// accept sub-surfaces, then specify top_surface.  Otherwise
     /// sub-surfaces and top surfaces will pass the attribute filter.
     ///</summary>
     SubSurface = 1 << 13,
     ///<summary>
     /// If you want to accept only sub-surfaces of (multi-surface)
-    /// polysrf, then specify sub_surface.  If you do not want to
+    /// polysurface, then specify sub_surface.  If you do not want to
     /// accept sub-surfaces, then specify top_surface.  Otherwise
     /// sub-surfaces and top surfaces will pass the attribute filter.
     ///</summary>
     TopSurface = 1 << 14,
     ///<summary>
-    /// If you want to accept only manifold or nonmanifold polysrfs,
+    /// If you want to accept only manifold or non-manifold polysurfaces,
     /// then specify manifold_polysrf or nonmanifold_polysrf. Otherwise
-    /// both manifold and nonmanifold polysrfs will pass the attribute
+    /// both manifold and non-manifold polysurfaces will pass the attribute
     /// filter.
     ///</summary>
     ManifoldPolysrf = 1 << 15,
     ///<summary>
-    /// If you want to accept only manifold or nonmanifold polysrfs,
+    /// If you want to accept only manifold or non-manifold polysurfaces,
     /// then specify manifold_polysrf or nonmanifold_polysrf. Otherwise
-    /// both manifold and nonmanifold polysrfs will pass the attribute
+    /// both manifold and non-manifold polysurfaces will pass the attribute
     /// filter.
     ///</summary>
     NonmanifoldPolysrf = 1 << 16,
     ///<summary>
-    /// If you want to accept only closed or open polysrfs, then
+    /// If you want to accept only closed or open polysurfaces, then
     /// specify either closed_polysrf or open_polysrf.  Otherwise both
-    /// closed and open polysrfs will pass the attribute filter.
+    /// closed and open polysurfaces will pass the attribute filter.
     ///</summary>
     ClosedPolysrf = 1 << 17,
     ///<summary>
-    /// If you want to accept only closed or open polysrfs, then
+    /// If you want to accept only closed or open polysurfaces, then
     /// specify either closed_polysrf or open_polysrf.  Otherwise both
-    /// closed and open polysrfs will pass the attribute filter.
+    /// closed and open polysurfaces will pass the attribute filter.
     ///</summary>
     OpenPolysrf = 1 << 18,
     ///<summary>
-    /// If you want to accept only closed or open meshs, then
+    /// If you want to accept only closed or open meshes, then
     /// specify either closed_mesh or open_mesh.  Otherwise both
-    /// closed and open meshs will pass the attribute filter.
+    /// closed and open meshes will pass the attribute filter.
     ///</summary>
     ClosedMesh = 1 << 19,
     ///<summary>
-    /// If you want to accept only closed or open meshs, then
+    /// If you want to accept only closed or open meshes, then
     /// specify either closed_mesh or open_mesh.  Otherwise both
-    /// closed and open meshs will pass the attribute filter.
+    /// closed and open meshes will pass the attribute filter.
     ///</summary>
     OpenMesh = 1 << 20,
     ///<summary>all trimming edges are boundary edges.</summary>
@@ -793,7 +838,7 @@ namespace Rhino.Input.Custom
     MatedOuterLoop = 1 << 24,
     ///<summary>any outer loop is acceptable.</summary>
     OuterLoop = (1 << 23) | (1 << 24),
-    ///<summary>slit, crvonsrf, ptonsrf, etc.</summary>
+    ///<summary>slit, curve-on-surface, point-on-surface, etc.</summary>
     SpecialLoop = (1 << 25),
     AcceptAllAttributes = 0xffffffff
   }

@@ -21,6 +21,7 @@ namespace Rhino.Geometry
     /// <param name="columnCount">A positive integer, or 0, for the number of columns.</param>
     /// <exception cref="ArgumentOutOfRangeException">If either rowCount, or columnCount
     /// or both are negative.</exception>
+    /// <since>5.0</since>
     public Matrix(int rowCount, int columnCount)
     {
       if (rowCount < 0 )
@@ -36,6 +37,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the matrix based on a 4x4 matrix <see cref="Transform"/>.
     /// </summary>
     /// <param name="xform">A 4x4 matrix to copy from.</param>
+    /// <since>5.0</since>
     public Matrix(Transform xform)
     {
       m_rows = 4;
@@ -47,6 +49,7 @@ namespace Rhino.Geometry
     /// Create a duplicate of this matrix.
     /// </summary>
     /// <returns>An exact duplicate of this matrix.</returns>
+    /// <since>5.1</since>
     [ConstOperation]
     public Matrix Duplicate()
     {
@@ -77,6 +80,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -102,7 +106,7 @@ namespace Rhino.Geometry
     #endregion
 
     /// <summary>
-    /// Gets or sets the matrix value at the given row and column indixes.
+    /// Gets or sets the matrix value at the given row and column indices.
     /// </summary>
     /// <param name="row">Index of row to access.</param>
     /// <param name="column">Index of column to access.</param>
@@ -132,6 +136,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether this matrix is valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get { return (m_ptr != IntPtr.Zero && m_columns > 0 && m_rows > 0); }
@@ -141,6 +146,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether this matrix has the same number of rows
     /// and columns. 0x0 matrices are not considered square.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsSquare
     {
       get { return (m_rows > 0 && m_columns == m_rows); }
@@ -149,16 +155,19 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the amount of rows.
     /// </summary>
+    /// <since>5.0</since>
     public int RowCount { get { return m_rows; } }
 
     /// <summary>
     /// Gets the amount of columns.
     /// </summary>
+    /// <since>5.0</since>
     public int ColumnCount { get { return m_columns; } }
 
     /// <summary>
     /// Sets all values inside the matrix to zero.
     /// </summary>
+    /// <since>5.0</since>
     public void Zero()
     {
       UnsafeNativeMethods.ON_Matrix_Zero(m_ptr);
@@ -168,6 +177,7 @@ namespace Rhino.Geometry
     /// Sets diagonal value and zeros off all non-diagonal values.
     /// </summary>
     /// <param name="d">The new diagonal value.</param>
+    /// <since>5.0</since>
     public void SetDiagonal(double d)
     {
       UnsafeNativeMethods.ON_Matrix_SetDiagonal(m_ptr, d);
@@ -179,6 +189,7 @@ namespace Rhino.Geometry
     /// <para>http://en.wikipedia.org/wiki/Transpose</para>
     /// </summary>
     /// <returns>true if operation succeeded; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Transpose()
     {
       bool rc = UnsafeNativeMethods.ON_Matrix_Transpose(m_ptr);
@@ -197,6 +208,7 @@ namespace Rhino.Geometry
     /// <param name="rowA">A first row.</param>
     /// <param name="rowB">Another row.</param>
     /// <returns>true if operation succeeded; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SwapRows(int rowA, int rowB)
     {
       return UnsafeNativeMethods.ON_Matrix_Swap(m_ptr, true, rowA, rowB);
@@ -208,6 +220,7 @@ namespace Rhino.Geometry
     /// <param name="columnA">A first column.</param>
     /// <param name="columnB">Another column.</param>
     /// <returns>true if operation succeeded; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool SwapColumns(int columnA, int columnB)
     {
       return UnsafeNativeMethods.ON_Matrix_Swap(m_ptr, false, columnA, columnB);
@@ -219,6 +232,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="zeroTolerance">The admitted tolerance for 0.</param>
     /// <returns>true if operation succeeded; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Invert(double zeroTolerance)
     {
       bool rc = UnsafeNativeMethods.ON_Matrix_Invert(m_ptr, zeroTolerance);
@@ -240,6 +254,7 @@ namespace Rhino.Geometry
     /// <exception cref="ArgumentException">
     /// When a.ColumnCount != b.RowCount.
     /// </exception>
+    /// <since>5.0</since>
     public static Matrix operator *(Matrix a, Matrix b)
     {
       if (a.ColumnCount != b.RowCount)
@@ -277,6 +292,7 @@ namespace Rhino.Geometry
     /// Modifies the current matrix by multiplying its values by a number.
     /// </summary>
     /// <param name="s">A scale factor.</param>
+    /// <since>5.0</since>
     public void Scale(double s)
     {
       UnsafeNativeMethods.ON_Matrix_Scale(m_ptr, s);
@@ -294,6 +310,7 @@ namespace Rhino.Geometry
     /// The matrix itself is row reduced so that the result is an upper
     /// triangular matrix with 1's on the diagonal.
     /// </remarks>
+    /// <since>5.0</since>
     public int RowReduce( double zeroTolerance, out double determinant, out double pivot)
     {
       determinant = 0;
@@ -317,6 +334,7 @@ namespace Rhino.Geometry
     /// The matrix itself is row reduced so that the result is an upper
     /// triangular matrix with 1's on the diagonal.
     /// </remarks>
+    /// <since>5.0</since>
     public int RowReduce(double zeroTolerance, double[] b, out double pivot)
     {
       if (b.Length != RowCount)
@@ -341,6 +359,7 @@ namespace Rhino.Geometry
     /// The matrix itself is row reduced so that the result is an upper
     /// triangular matrix with 1's on the diagonal.
     /// </remarks>
+    /// <since>5.0</since>
     public int RowReduce(double zeroTolerance, Point3d[] b, out double pivot)
     {
       if (b.Length != RowCount)
@@ -354,12 +373,13 @@ namespace Rhino.Geometry
     /// b is a column of values.
     /// </summary>
     /// <param name="zeroTolerance">(&gt;=0.0) used to test for "zero" values in b
-    /// in underdetermined systems of equations.</param>
+    /// in under determined systems of equations.</param>
     /// <param name="b">The values in B[RowCount],...,B[B.Length-1] are tested to
     /// make sure they are within "zeroTolerance".</param>
     /// <returns>
     /// Array of length ColumnCount on success. null on error.
     /// </returns>
+    /// <since>5.0</since>
     public double[] BackSolve(double zeroTolerance, double[] b)
     {
       double[] x = new double[ColumnCount];
@@ -373,12 +393,13 @@ namespace Rhino.Geometry
     /// b is a column of 3d points.
     /// </summary>
     /// <param name="zeroTolerance">(&gt;=0.0) used to test for "zero" values in b
-    /// in underdetermined systems of equations.</param>
+    /// in under determined systems of equations.</param>
     /// <param name="b">The values in B[RowCount],...,B[B.Length-1] are tested to
     /// make sure they are "zero".</param>
     /// <returns>
     /// Array of length ColumnCount on success. null on error.
     /// </returns>
+    /// <since>5.0</since>
     public Point3d[] BackSolvePoints(double zeroTolerance, Point3d[] b)
     {
       Point3d[] x = new Point3d[ColumnCount];
@@ -399,6 +420,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the matrix is row orthogonal.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRowOrthogonal
     {
       get { return GetBool(idxIsRowOrthogonal); }
@@ -407,6 +429,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the matrix is column orthogonal.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsColumnOrthogonal
     {
       get { return GetBool(idxIsColumnOrthogonal); }
@@ -415,6 +438,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the matrix is row orthonormal.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsRowOrthoNormal
     {
       get { return GetBool(idxIsRowOrthoNormal); }
@@ -423,6 +447,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether the matrix is column orthonormal.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsColumnOrthoNormal
     {
       get { return GetBool(idxIsColumnOrthoNormal); }

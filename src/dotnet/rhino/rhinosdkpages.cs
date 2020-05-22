@@ -19,6 +19,7 @@ namespace Rhino.UI
 		/// <param name="page"></param>
 		/// <param name="rhinoDocRuntimeSn"></param>
 		/// <returns></returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
 		public static IntPtr NewPropertiesPanelPagePointer(ObjectPropertiesPage page, uint rhinoDocRuntimeSn) => RhinoPageHooks.NewIRhinoPropertiesPanelPagePointer(page, rhinoDocRuntimeSn);
 
@@ -27,6 +28,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="pointer"></param>
     /// <returns></returns>
+    /// <since>6.4</since>
     public static StackedDialogPage StackedDialogPageFromUnmanagedPointer(IntPtr pointer) => RhinoPageHooks.StackedDialogPageFromPointer(pointer);
   }
 
@@ -257,7 +259,7 @@ namespace Rhino.UI
         // Use the IStackedDialogPageService to create the native control to embed in the page host
         object control_object = null;
         object control_host = null;
-        page_instance.PageControlPointer = StackedDialogPage.Service?.GetNativePageWindow(page_instance.PageObject, out control_object, out control_host) ?? IntPtr.Zero;
+        page_instance.PageControlPointer = StackedDialogPage.Service?.GetNativePageWindow(page_instance.PageObject, true, out control_object, out control_host) ?? IntPtr.Zero;
         page_instance.PageControlObject = control_object;
         page_instance.PageHost = control_host;
         return page_instance.PageControlPointer;
@@ -554,9 +556,8 @@ namespace Rhino.UI
     private static RhinoPropertiesPanelDelegate g_properties_panel_index;
     private static int PropertiesPanelIndexHook(IntPtr pagePointer, Guid runtimeId)
     {
-      //var page = ObjectPropertiesPageFromRuntimeId(runtimeId);
-      //return page == null ? -1 : page.i
-      return -1;
+      var page = ObjectPropertiesPageFromRuntimeId(runtimeId);
+      return page == null ? -1 : page.Index;
     }
 
     private static RhinoPropertiesPanelDelegate g_properties_panel_page_event;

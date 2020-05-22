@@ -28,6 +28,7 @@ namespace Rhino.Geometry
     /// <param name="polyline">Polyline to parse.</param>
     /// <returns>A rectangle that is shaped similarly to the polyline or Rectangle3d.Unset 
     /// if the polyline does not represent a rectangle.</returns>
+    /// <since>5.0</since>
     public static Rectangle3d CreateFromPolyline(IEnumerable<Point3d> polyline)
     {
       double dev, angdev;
@@ -45,6 +46,7 @@ namespace Rhino.Geometry
     /// <param name="angleDeviation">On success, the angleDeviation will contain the largest deviation (in radians) between the polyline edges and the rectangle edges.</param>
     /// <returns>A rectangle that is shaped similarly to the polyline or Rectangle3d.Unset 
     /// if the polyline does not represent a rectangle.</returns>
+    /// <since>5.0</since>
     public static Rectangle3d CreateFromPolyline(IEnumerable<Point3d> polyline, out double deviation, out double angleDeviation)
     {
       if (polyline == null)
@@ -221,6 +223,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Base plane for Rectangle.</param>
     /// <param name="width">Width (as measured along the base plane x-axis) of rectangle.</param>
     /// <param name="height">Height (as measured along the base plane y-axis) of rectangle.</param>
+    /// <since>5.0</since>
     public Rectangle3d(Plane plane, double width, double height)
     {
       m_plane = plane;
@@ -234,6 +237,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Base plane for Rectangle.</param>
     /// <param name="width">Dimension of rectangle along the base plane x-axis.</param>
     /// <param name="height">Dimension of rectangle along the base plane y-axis.</param>
+    /// <since>5.0</since>
     public Rectangle3d(Plane plane, Interval width, Interval height)
     {
       m_plane = plane;
@@ -246,6 +250,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Base plane for Rectangle.</param>
     /// <param name="cornerA">First corner of Rectangle (will be projected onto plane).</param>
     /// <param name="cornerB">Second corner of Rectangle (will be projected onto plane).</param>
+    /// <since>5.0</since>
     public Rectangle3d(Plane plane, Point3d cornerA, Point3d cornerB)
     {
       m_plane = plane;
@@ -273,6 +278,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a rectangle with Unset components.
     /// </summary>
+    /// <since>5.0</since>
     static public Rectangle3d Unset
     {
       get { return new Rectangle3d(Plane.Unset, Interval.Unset, Interval.Unset); }
@@ -284,6 +290,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not this is a valid rectangle. 
     /// A rectangle is considered to be valid when the base plane and both dimensions are valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -298,6 +305,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the base plane of the rectangle.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_plane; }
@@ -306,6 +314,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the dimensions of the rectangle along the base plane X-Axis (i.e. the width).
     /// </summary>
+    /// <since>5.0</since>
     public Interval X
     {
       get { return m_x; }
@@ -314,6 +323,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the dimensions of the rectangle along the base plane Y-Axis (i.e. the height).
     /// </summary>
+    /// <since>5.0</since>
     public Interval Y
     {
       get { return m_y; }
@@ -322,6 +332,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the signed width of the rectangle. If the X dimension is decreasing, the width will be negative.
     /// </summary>
+    /// <since>5.0</since>
     public double Width
     {
       get { return m_x.Length; }
@@ -329,6 +340,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the signed height of the rectangle. If the Y dimension is decreasing, the height will be negative.
     /// </summary>
+    /// <since>5.0</since>
     public double Height
     {
       get { return m_y.Length; }
@@ -336,6 +348,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the unsigned Area of the rectangle.
     /// </summary>
+    /// <since>5.0</since>
     public double Area
     {
       get
@@ -346,6 +359,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the circumference of the rectangle.
     /// </summary>
+    /// <since>5.0</since>
     public double Circumference
     {
       get
@@ -354,8 +368,9 @@ namespace Rhino.Geometry
       }
     }
     /// <summary>
-    /// Gets the world aligned boundingbox for this rectangle.
+    /// Gets the world aligned bounding box for this rectangle.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -370,6 +385,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point in the center of the rectangle.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       get { return m_plane.PointAt(m_x.Mid, m_y.Mid, 0.0); }
@@ -380,6 +396,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Ensures the X and Y dimensions are increasing or singleton intervals.
     /// </summary>
+    /// <since>5.0</since>
     public void MakeIncreasing()
     {
       m_x.MakeIncreasing();
@@ -396,6 +413,7 @@ namespace Rhino.Geometry
     /// <para>3 = upper left (min-x, max-y)</para>
     /// </param>
     /// <returns>The point at the given corner index.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d Corner(int index)
     {
@@ -410,7 +428,7 @@ namespace Rhino.Geometry
       }
     }
     /// <summary>
-    /// Recenters the base plane on one of the corners.
+    /// Re-centers the base plane on one of the corners.
     /// </summary>
     /// <param name="index">
     /// Index of corner, valid values are:
@@ -419,14 +437,16 @@ namespace Rhino.Geometry
     /// <para>2 = upper right (max-x, max-y)</para>
     /// <para>3 = upper left (min-x, max-y)</para>
     /// </param>
+    /// <since>5.0</since>
     public void RecenterPlane(int index)
     {
       RecenterPlane(Corner(index));
     }
     /// <summary>
-    /// Recenters the base plane on a new origin.
+    /// Re-centers the base plane on a new origin.
     /// </summary>
     /// <param name="origin">New origin for plane.</param>
+    /// <since>5.0</since>
     public void RecenterPlane(Point3d origin)
     {
       double s, t;
@@ -443,6 +463,7 @@ namespace Rhino.Geometry
     /// <param name="x">Normalized parameter along Rectangle width.</param>
     /// <param name="y">Normalized parameter along Rectangle height.</param>
     /// <returns>The point at the given x,y parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double x, double y)
     {
@@ -454,6 +475,7 @@ namespace Rhino.Geometry
     /// <param name="t">Parameter along rectangle boundary. Valid values range from 0.0 to 4.0, 
     /// where each integer domain represents a single boundary edge.</param>
     /// <returns>The point at the given boundary parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -487,6 +509,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="point">Point to project.</param>
     /// <returns>The point on or in the rectangle closest to the test point or Point3d.Unset on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d point)
     {
@@ -499,6 +522,7 @@ namespace Rhino.Geometry
     /// <param name="includeInterior">If false, the point is projected onto the boundary edge only, 
     /// otherwise the interior of the rectangle is also taken into consideration.</param>
     /// <returns>The point on the rectangle closest to the test point or Point3d.Unset on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d point, bool includeInterior)
     {
@@ -544,6 +568,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="pt">Point to test. The point will be projected onto the Rectangle plane before inclusion is determined.</param>
     /// <returns>Point Rectangle relationship.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public PointContainment Contains(Point3d pt)
     {
@@ -557,6 +582,7 @@ namespace Rhino.Geometry
     /// <param name="x">Parameter along base plane X direction.</param>
     /// <param name="y">Parameter along base plane Y direction.</param>
     /// <returns>Parameter Rectangle relationship.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public PointContainment Contains(double x, double y)
     {
@@ -573,6 +599,7 @@ namespace Rhino.Geometry
     /// Transforms this rectangle. Note that rectangles cannot be skewed or tapered.
     /// </summary>
     /// <param name="xform">Transformation to apply.</param>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       Point3d p0 = Corner(0);
@@ -601,6 +628,7 @@ namespace Rhino.Geometry
     /// Constructs a polyline from this rectangle.
     /// </summary>
     /// <returns>A polyline with the same shape as this rectangle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Polyline ToPolyline()
     {
@@ -616,6 +644,7 @@ namespace Rhino.Geometry
     /// Constructs a nurbs curve representation of this rectangle.
     /// </summary>
     /// <returns>A nurbs curve with the same shape as this rectangle.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -628,6 +657,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Rectangle3d other, double epsilon)
     {

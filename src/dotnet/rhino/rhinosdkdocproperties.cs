@@ -19,12 +19,14 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Gets the document that owns this table.</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get { return m_doc; }
     }
 
     /// <summary>Number of construction planes in the table.</summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -58,6 +60,7 @@ namespace Rhino.DocObjects.Tables
     /// &gt;=0 index of the construction plane with the given name.
     /// -1 no construction plane found with the given name.
     /// </returns>
+    /// <since>5.0</since>
     public int Find(string name)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_FindCPlane(m_doc.RuntimeSerialNumber, name);
@@ -68,7 +71,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="name">
     /// If name is empty, a unique name is automatically created.
-    /// If there is already a named onstruction plane with the same name, that 
+    /// If there is already a named construction plane with the same name, that 
     /// construction plane is replaced.
     /// </param>
     /// <param name="plane">The plane value.</param>
@@ -76,6 +79,7 @@ namespace Rhino.DocObjects.Tables
     /// 0 based index of named construction plane.
     /// -1 on failure.
     /// </returns>
+    /// <since>5.0</since>
     public int Add(string name, Geometry.Plane plane)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_AddCPlane(m_doc.RuntimeSerialNumber, name, ref plane);
@@ -86,6 +90,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="index">zero based array index.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Delete(int index)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_RemoveCPlane(m_doc.RuntimeSerialNumber, index);
@@ -96,6 +101,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="name">name of the construction plane.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Delete(string name)
     {
       int index = Find(name);
@@ -103,10 +109,12 @@ namespace Rhino.DocObjects.Tables
     }
 
     #region enumerator
+    /// <since>5.0</since>
     public IEnumerator<ConstructionPlane> GetEnumerator()
     {
       return new Collections.TableEnumerator<NamedConstructionPlaneTable, ConstructionPlane>(this);
     }
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return new Collections.TableEnumerator<NamedConstructionPlaneTable, ConstructionPlane>(this);
@@ -126,12 +134,14 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this table.</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get { return m_doc; }
     }
 
     /// <summary>Number of named views in the table.</summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -163,6 +173,7 @@ namespace Rhino.DocObjects.Tables
     /// &gt;=0 index of the found named view
     /// -1 no named view found.
     /// </returns>
+    /// <since>5.0</since>
     public int FindByName(string name)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_FindNamedView(m_doc.RuntimeSerialNumber, name);
@@ -186,11 +197,13 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addnamedview.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnamedview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(string name, Guid viewportId)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_AddNamedView(m_doc.RuntimeSerialNumber, name, viewportId);
     }
 
+    /// <since>5.0</since>
     public int Add(ViewInfo view)
     {
       IntPtr ptr_const_view = view.ConstPointer();
@@ -200,6 +213,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Remove named view from the document.</summary>
     /// <param name="index">index of the named view in the named view table.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Delete(int index)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_RemoveNamedView(m_doc.RuntimeSerialNumber, index);
@@ -208,6 +222,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Remove named view from the document.</summary>
     /// <param name="name">name of the view.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Delete(string name)
     {
       int index = FindByName(name);
@@ -220,6 +235,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="index">Index of the named view in the named view table.</param>
     /// <param name="newName">The new name.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool Rename(int index, string newName)
     {
       return UnsafeNativeMethods.CRhinoDocProperties_RenameNamedView(m_doc.RuntimeSerialNumber, index, newName);
@@ -231,6 +247,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="oldName">The name of a named view in the named view table.</param>
     /// <param name="newName">The new name.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool Rename(string oldName, string newName)
     {
       int index = FindByName(oldName);
@@ -244,30 +261,35 @@ namespace Rhino.DocObjects.Tables
     /// <param name="viewport"></param>
     /// <returns></returns>
     /// 
+    /// <since>6.0</since>
     public bool Restore(int index, Display.RhinoViewport viewport)
     {
         IntPtr ptr_const_viewport = viewport.NonConstPointer();
         return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
     }
 
+    /// <since>6.0</since>
     public bool RestoreWithAspectRatio(int index, Display.RhinoViewport viewport)
     {
         IntPtr ptr_const_viewport = viewport.NonConstPointer();
         return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, true, false, false, 0, 0.0, 0);
     }
 
+    /// <since>6.0</since>
     public bool RestoreAnimatedConstantSpeed(int index, Display.RhinoViewport viewport, double units_per_frame, int ms_delay)
     {
         IntPtr ptr_const_viewport = viewport.NonConstPointer();
         return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, true, 10, units_per_frame, ms_delay);
     }
 
+    /// <since>6.0</since>
     public bool RestoreAnimatedConstantTime(int index, Display.RhinoViewport viewport, int frames, int ms_delay)
     {
         IntPtr ptr_const_viewport = viewport.NonConstPointer();
         return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, ms_delay);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool Restore(int index, Display.RhinoView view, bool backgroundBitmap)
     {
@@ -276,6 +298,7 @@ namespace Rhino.DocObjects.Tables
       return Restore(index, view.MainViewport, backgroundBitmap);
     }
 
+    /// <since>5.9</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool Restore(int index, Display.RhinoViewport viewport, bool backgroundBitmap)
     {
@@ -283,12 +306,14 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoView view, bool backgroundBitmap)
     {
       return RestoreAnimated(index, view, backgroundBitmap, 100, 10);
     }
 
+    /// <since>5.0</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoView view, bool backgroundBitmap, int frames, int frameRate)
     {
@@ -297,12 +322,14 @@ namespace Rhino.DocObjects.Tables
       return RestoreAnimated(index, view.MainViewport, backgroundBitmap, frames, frameRate);
     }
 
+    /// <since>5.9</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoViewport viewport, bool backgroundBitmap)
     {
       return RestoreAnimated(index, viewport, backgroundBitmap, 100, 10);
     }
 
+    /// <since>5.9</since>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoViewport viewport, bool backgroundBitmap, int frames, int frameRate)
     {
@@ -312,10 +339,12 @@ namespace Rhino.DocObjects.Tables
 
 
     #region enumerator
+    /// <since>5.0</since>
     public IEnumerator<ViewInfo> GetEnumerator()
     {
       return new Collections.TableEnumerator<NamedViewTable, ViewInfo>(this);
     }
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return new Collections.TableEnumerator<NamedViewTable, ViewInfo>(this);
@@ -337,12 +366,14 @@ namespace Rhino.DocObjects.Tables
         }
 
         /// <summary>Document that owns this table.</summary>
+        /// <since>6.0</since>
         public RhinoDoc Document
         {
             get { return m_doc; }
         }
 
         /// <summary>Number of Named Positions in the table.</summary>
+        /// <since>6.0</since>
         public int Count
         {
             get
@@ -351,10 +382,11 @@ namespace Rhino.DocObjects.Tables
             }
         }
 
-        /// <summary>Array of Named Position guids.</summary>
+        /// <summary>Array of Named Position Guids.</summary>
         /// <returns>
         /// Guid array of each Named Position in the document.
         /// </returns>
+        /// <since>6.0</since>
         public Guid[] Ids
         {
             get
@@ -369,6 +401,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// A string array with the names all Named Positions in the document.
         /// </returns>
+        /// <since>6.0</since>
         public string[] Names
         {
             get
@@ -387,6 +420,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Array of Rhino Objects which are tracked by the Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public RhinoObject[] Objects(Guid id)
         {
             var objects = new Runtime.InternalRhinoObjectArray();
@@ -403,6 +437,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Array of Rhino Objects which are tracked by the Named Position if successful, null if no such Named Position exists.
         /// </returns>
+        /// <since>6.0</since>
         public RhinoObject[] Objects(string name)
         {
 
@@ -421,6 +456,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Array of Guid which pertain to the objects tracked by the Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public Guid[] ObjectIds(Guid id)
         {
 
@@ -440,6 +476,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Array of Guid which pertain to the objects tracked by the Named Position, or null in case no such Named Position is found.
         /// </returns>
+        /// <since>6.0</since>
         public Guid[] ObjectIds(string name)
         {
             var id = Id(name);
@@ -451,7 +488,7 @@ namespace Rhino.DocObjects.Tables
 
         }
 
-        /// <summary>Retrieve the Transform of a Rhino Object relate dto a Named Position.</summary>
+        /// <summary>Retrieve the Transform of a Rhino Object relate to a Named Position.</summary>
         /// <param name="id">
         /// The Guid of the Named Position
         /// </param>
@@ -464,13 +501,14 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Transform of the RhinoObject related to the Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public bool ObjectXform(Guid id, RhinoObject obj, ref Geometry.Transform xform)
         {
             var objPtr = Runtime.Interop.RhinoObjectConstPointer(obj);
             return UnsafeNativeMethods.RhNamedPosition_ObjectXform(m_doc.RuntimeSerialNumber, id, objPtr, ref xform);
         }
 
-        /// <summary>Retrieve the Transform of a Rhino Object relate dto a Named Position.</summary>
+        /// <summary>Retrieve the Transform of a Rhino Object relate to a Named Position.</summary>
         /// <param name="id">
         /// The Guid of the Named Position
         /// </param>
@@ -483,6 +521,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Transform of the RhinoObject related to the Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public bool ObjectXform(Guid id, Guid objId, ref Geometry.Transform xform)
         {
             var obj = m_doc.Objects.Find(objId);
@@ -500,6 +539,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// The name of the Named Position as a string.
         /// </returns>
+        /// <since>6.0</since>
         public string Name(Guid id)
         {
             using (var name = new Runtime.InteropWrappers.StringHolder())
@@ -516,6 +556,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// The Guid of the Named Position.  If not found, an empty Guid is returned.
         /// </returns>
+        /// <since>6.0</since>
         public Guid Id(string name)
         {
             foreach (var id in Ids)
@@ -533,6 +574,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False based on whether the Named Position was able to be restored.
         /// </returns>
+        /// <since>6.0</since>
         public bool Restore(Guid id)
         {
             return UnsafeNativeMethods.RhNamedPosition_Restore(m_doc.RuntimeSerialNumber, id);
@@ -545,6 +587,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False based on whether the Named Position was able to be restored.
         /// </returns>
+        /// <since>6.0</since>
         public bool Restore(string name)
         {
             var id = Id(name);
@@ -565,6 +608,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Guid of the newly saved Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public Guid Save(string name, IEnumerable<RhinoObject> objects)
         {
 
@@ -584,6 +628,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// Guid of the newly saved Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public Guid Save(string name, IEnumerable<Guid> objectIds)
         {
             var objects = new List<RhinoObject>();
@@ -602,6 +647,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Delete was successful, Null in case the id does not exist as a Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public bool Delete(Guid id)
         {
             return UnsafeNativeMethods.RhNamedPosition_Delete(m_doc.RuntimeSerialNumber, id);
@@ -614,6 +660,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Delete was successful, Null in case the id does not exist as a Named Position.
         /// </returns>
+        /// <since>6.0</since>
         public bool Delete(string name)
         {
             var id = Id(name);
@@ -633,6 +680,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Update was successful.
         /// </returns>
+        /// <since>6.0</since>
         public bool Update(Guid id)
         {
             return UnsafeNativeMethods.RhNamedPosition_Update(m_doc.RuntimeSerialNumber, id);
@@ -647,6 +695,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Update was successful.
         /// </returns>
+        /// <since>6.0</since>
         public bool Update(string name)
         {
             var id = Id(name);
@@ -665,8 +714,9 @@ namespace Rhino.DocObjects.Tables
         /// New name for the Named Position.
         /// </param>
         /// <returns>
-        /// True or False depending on whether the Rename was successful.  For example, this method might return False if you attempt to remane the Named Position with the currently assigned name.
+        /// True or False depending on whether the Rename was successful.  For example, this method might return False if you attempt to rename the Named Position with the currently assigned name.
         /// </returns> 
+        /// <since>6.0</since>
         public bool Rename(Guid id, string name)
         {
             return UnsafeNativeMethods.RhNamedPosition_Rename(m_doc.RuntimeSerialNumber, id, name);
@@ -680,8 +730,9 @@ namespace Rhino.DocObjects.Tables
         /// New name for the Named Position.
         /// </param>
         /// <returns>
-        /// True or False depending on whether the Rename was successful.  For example, this method might return False if you attempt to remane the Named Position with the currently assigned name.
+        /// True or False depending on whether the Rename was successful.  For example, this method might return False if you attempt to rename the Named Position with the currently assigned name.
         /// </returns>
+        /// <since>6.0</since>
         public bool Rename(string oldName, string name)
         {
 
@@ -703,6 +754,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Append was successful.
         /// </returns> 
+        /// <since>6.0</since>
         public bool Append(Guid id, IEnumerable<RhinoObject> objects)
         {
 
@@ -722,6 +774,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Append was successful.
         /// </returns> 
+        /// <since>6.0</since>
         public bool Append(Guid id, IEnumerable<Guid> objectIds)
         {
 
@@ -744,6 +797,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Append was successful.
         /// </returns>
+        /// <since>6.0</since>
         public bool Append(string name, IEnumerable<RhinoObject> objects)
         {
 
@@ -766,6 +820,7 @@ namespace Rhino.DocObjects.Tables
         /// <returns>
         /// True or False depending on whether the Append was successful.
         /// </returns>
+        /// <since>6.0</since>
         public bool Append(string name, IEnumerable<Guid> objectIds)
         {
 
@@ -798,6 +853,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this table.</summary>
+    /// <since>6.7</since>
     public RhinoDoc Document
     {
       get { return m_doc; }
@@ -807,6 +863,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// A string array with the names of all Snapshots in the document.
     /// </returns>
+    /// <since>6.7</since>
     public string[] Names
     {
       get
@@ -898,16 +955,19 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Document that owns this table.
     /// </summary>
+    /// <since>6.14</since>
     public RhinoDoc Document => m_doc;
 
     /// <summary>
     /// Returns the number of named layers states in the document.
     /// </summary>
+    /// <since>6.14</since>
     public int Count => UnsafeNativeMethods.RHC_RhLayerStateCount(m_doc.RuntimeSerialNumber);
 
     /// <summary>
     /// Returns the names of named layer states in the document.
     /// </summary>
+    /// <since>6.14</since>
     public string[] Names
     {
       get
@@ -928,6 +988,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// &gt;0 if successful, -1 if not found.
     /// </returns>
+    /// <since>6.14</since>
     public int FindName(string name)
     {
       return UnsafeNativeMethods.RHC_RhLayerStateFind(m_doc.RuntimeSerialNumber, name);
@@ -938,6 +999,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="name">The name of the layer state. If the named layer state already exists, it will be updated.</param>
     /// <returns>The index of the newly added, or updated, layer state.</returns>
+    /// <since>6.14</since>
     public int Save(string name)
     {
       return Save(name, Guid.Empty);
@@ -949,6 +1011,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="name">The name of the layer state. If the named layer state already exists, it will be updated.</param>
     /// <param name="viewportId">The id of the layout or detail viewport, required to save per viewport layer state properties.</param>
     /// <returns>The index of the newly added, or updated, layer state.</returns>
+    /// <since>6.14</since>
     public int Save(string name, Guid viewportId)
     {
       return UnsafeNativeMethods.RHC_RhLayerStateSave(m_doc.RuntimeSerialNumber, name, viewportId);
@@ -960,6 +1023,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="name">The name of the layer state.</param>
     /// <param name="properties">The layer properties to restore.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.14</since>
     [CLSCompliant(false)]
     public bool Restore(string name, RestoreLayerProperties properties)
     {
@@ -971,8 +1035,9 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="name">The name of the layer state.</param>
     /// <param name="properties">The layer properties to restore.</param>
-    /// <param name="viewportId">The id of the layout or detail viewport to restore the per-viewprot layer properties.</param>
+    /// <param name="viewportId">The id of the layout or detail viewport to restore the per-viewport layer properties.</param>
     /// <returns></returns>
+    /// <since>6.14</since>
     [CLSCompliant(false)]
     public bool Restore(string name, RestoreLayerProperties properties, Guid viewportId)
     {
@@ -985,6 +1050,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="oldName">The name of the layer state.</param>
     /// <param name="newName">The new name</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.14</since>
     public bool Rename(string oldName, string newName)
     {
       if (string.IsNullOrEmpty(newName))
@@ -993,10 +1059,11 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Deletes an exising named layer state.
+    /// Deletes an existing named layer state.
     /// </summary>
     /// <param name="name">The name of the layer state.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.14</since>
     public bool Delete(string name)
     {
       return UnsafeNativeMethods.RHC_RhLayerStateDelete(m_doc.RuntimeSerialNumber, name);
@@ -1007,6 +1074,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="filename">The name of the file to import.</param>
     /// <returns>The number of named layers states imported.</returns>
+    /// <since>6.15</since>
     public int Import(string filename)
     {
       return UnsafeNativeMethods.RHC_RhLayerStateImport(m_doc.RuntimeSerialNumber, filename);

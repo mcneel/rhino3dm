@@ -295,6 +295,69 @@ RH_C_FUNCTION int ON_BrepFace_SurfaceIndex(const ON_BrepFace* pConstBrepFace)
   return rc;
 }
 
+RH_C_FUNCTION bool ON_BrepFace_GetPerFaceColor(const ON_Brep* pConstBrep, int faceIndex, int* argb)
+{
+  if (pConstBrep && faceIndex >= 0 && faceIndex < pConstBrep->m_F.Count() && argb)
+  {
+    const ON_BrepFace& face = pConstBrep->m_F[faceIndex];
+    ON_Color color = face.PerFaceColor();
+    if (color == ON_Color::UnsetColor)
+      return false;
+    unsigned int _c = (unsigned int)color;
+    *argb = (int)ABGR_to_ARGB(_c);
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_BrepFace_SetPerFaceColor(ON_Brep* brep, int faceIndex, int argb)
+{
+  if (brep && faceIndex >= 0 && faceIndex < brep->m_F.Count())
+  {
+    ON_BrepFace& face = brep->m_F[faceIndex];
+    if (0 == argb)
+      face.ClearPerFaceColor();
+    else
+    {
+      ON_Color color = ARGB_to_ABGR(argb);
+      face.SetPerFaceColor(color);
+    }
+  }
+}
+
+RH_C_FUNCTION int ON_BrepFace_MaterialChannelIndex(const ON_BrepFace* pConstBrepFace)
+{
+  int rc = -1;
+  if (pConstBrepFace)
+  {
+    rc = pConstBrepFace->m_face_material_channel;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_BrepFace_SetMaterialChannelIndex(ON_BrepFace* pBrepFace, int material_channel_index)
+{
+  if (pBrepFace)
+  {
+    if (material_channel_index > 0 && material_channel_index <= 65535)
+    {
+      pBrepFace->m_face_material_channel = material_channel_index;
+    }
+    else
+    {
+      pBrepFace->m_face_material_channel = 0;
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_BrepFace_ClearMaterialChannelIndex(ON_BrepFace* pBrepFace)
+{
+  if (pBrepFace)
+  {
+    pBrepFace->m_face_material_channel = 0;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////
 // ON_Brep
 
@@ -1945,9 +2008,37 @@ RH_C_FUNCTION double ON_Brep_Volume(const ON_Brep* pBrep, double relativeToleran
   return volume;
 }
 
+static bool Slow_SubDFaceAreaMassProperties(ON_MassProperties& mp_out, const ON_SubD& subd, unsigned int subd_face_id)
+{
+  bool rc = false;
+  for (;;)
+  {
+    const ON_SubDFace* f = subd.FaceFromId(subd_face_id);
+    if (nullptr == f)
+      break;
+    ON_Brep proxy_brep;
+    if (nullptr == subd.ProxyBrep(&proxy_brep))
+      break;
+    for (const class ON_BrepFace* brepface = subd.ProxyBrepFace(&proxy_brep, subd_face_id, nullptr);
+      nullptr != brepface;
+      brepface = subd.ProxyBrepFace(&proxy_brep, subd_face_id, brepface)
+      )
+    {
+      ON_MassProperties mp;
+      if (brepface->AreaMassProperties(mp, true, false, false, false))
+      {
+        rc = true;
+        mp_out.Sum(1, &mp, true);
+      }
+    }
+    break;
+  }
+  return rc;
+}
+
 RH_C_FUNCTION ON_MassProperties* ON_Geometry_AreaMassProperties(const ON_SimpleArray<const ON_Geometry*>* pConstGeometryArray, bool bArea, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double relativeTolerance, double absoluteTolerance)
 {
-  ON_MassProperties* rc = nullptr;
+  ON_MassProperties* mp_out = nullptr;
   if (pConstGeometryArray && pConstGeometryArray->Count() > 0)
   {
     ON_BoundingBox bbox;
@@ -1972,37 +2063,72 @@ RH_C_FUNCTION ON_MassProperties* ON_Geometry_AreaMassProperties(const ON_SimpleA
       ON_MassProperties mp;
 
       const ON_Brep* pBrep = ON_Brep::Cast(geo);
-      if (pBrep)
+      if (nullptr != pBrep)
+      {
         success = pBrep->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
+      }
+      else
+      {
+        const ON_Surface* pSurface = ON_Surface::Cast(geo);
+        if (nullptr != pSurface)
+        {
+          success = pSurface->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
+        }
+        else
+        {
+          const ON_Mesh* pMesh = ON_Mesh::Cast(geo);
+          if (nullptr != pMesh)
+            success = pMesh->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments);
 
-      const ON_Surface* pSurface = success ? 0 : ON_Surface::Cast(geo);
-      if (pSurface)
-        success = pSurface->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
-
-      const ON_Mesh* pMesh = success ? 0 : ON_Mesh::Cast(geo);
-      if (pMesh)
-        success = pMesh->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments);
-
-      const ON_Curve* pCurve = success ? 0 : ON_Curve::Cast(geo);
-      ON_Plane plane;
-      if (pCurve && pCurve->IsPlanar(&plane, absoluteTolerance) && pCurve->IsClosed())
-        success = pCurve->AreaMassProperties(basepoint, plane.Normal(), mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
+          const ON_Curve* pCurve = success ? 0 : ON_Curve::Cast(geo);
+          if (nullptr != pCurve)
+          {
+            ON_Plane plane;
+            if (pCurve->IsPlanar(&plane, absoluteTolerance) && pCurve->IsClosed())
+              success = pCurve->AreaMassProperties(basepoint, plane.Normal(), mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
+          }
+          else if (geo->HasBrepForm())
+          {
+            const ON_Brep* pBrepform = geo->BrepForm();
+            if (nullptr != pBrepform)
+            {
+              success = pBrepform->AreaMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, relativeTolerance, absoluteTolerance);
+              delete pBrepform;
+            }
+          }
+          else
+          {
+            const ON_SubDComponentRef* pCref = ON_SubDComponentRef::Cast(geo);
+            if (nullptr != pCref)
+            {
+              const ON_SubD& subd = pCref->SubD();
+              unsigned int id = pCref->ComponentPtr().ComponentId();
+              const ON_SubDFace* face = pCref->Face();
+              if (nullptr != face)
+              {
+                id = face->m_id;
+                success = Slow_SubDFaceAreaMassProperties(mp, subd, id);
+              }
+            }
+          }
+        }
+      }
 
       if (success)
       {
-        if (NULL == rc)
-          rc = new ON_MassProperties(mp);
+        if (nullptr == mp_out)
+          mp_out = new ON_MassProperties(mp);
         else
-          rc->Sum(1, &mp, true);
+          mp_out->Sum(1, &mp, true);
       }
     }
   }
-  return rc;
+  return mp_out;
 }
 
-RH_C_FUNCTION ON_MassProperties* ON_Geometry_VolumeMassProperties(const ON_SimpleArray<const ON_Geometry*>* pConstGeometryArray, bool bArea, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double relativeTolerance, double absoluteTolerance)
+RH_C_FUNCTION ON_MassProperties* ON_Geometry_VolumeMassProperties(const ON_SimpleArray<const ON_Geometry*>* pConstGeometryArray, bool bVolume, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double relativeTolerance, double absoluteTolerance)
 {
-  ON_MassProperties* rc = nullptr;
+  ON_MassProperties* mp_out = nullptr;
   if (pConstGeometryArray && pConstGeometryArray->Count() > 0)
   {
     ON_BoundingBox bbox;
@@ -2025,44 +2151,51 @@ RH_C_FUNCTION ON_MassProperties* ON_Geometry_VolumeMassProperties(const ON_Simpl
       bool success = false;
       ON_MassProperties mp;
 
-      if (!success)
+      const ON_Brep* pBrep = ON_Brep::Cast(geo);
+      if (nullptr != pBrep)
       {
-        const ON_Brep* pBrep = ON_Brep::Cast(geo);
-        if (pBrep)
-        {
-          ON_3dPoint point = pBrep->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
-          success = pBrep->VolumeMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, point, relativeTolerance, absoluteTolerance);
-        }
+        ON_3dPoint point = pBrep->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
+        success = pBrep->VolumeMassProperties(mp, bVolume, bFirstMoments, bSecondMoments, bProductMoments, point, relativeTolerance, absoluteTolerance);
       }
-      if (!success)
+      else
       {
         const ON_Surface* pSurface = ON_Surface::Cast(geo);
-        if (pSurface)
+        if (nullptr != pSurface)
         {
           ON_3dPoint point = pSurface->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
-          success = pSurface->VolumeMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, basepoint, relativeTolerance, absoluteTolerance);
+          success = pSurface->VolumeMassProperties(mp, bVolume, bFirstMoments, bSecondMoments, bProductMoments, basepoint, relativeTolerance, absoluteTolerance);
         }
-      }
-      if (!success)
-      {
-        const ON_Mesh* pMesh = ON_Mesh::Cast(geo);
-        if (pMesh)
+        else
         {
-          ON_3dPoint point = pMesh->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
-          success = pMesh->VolumeMassProperties(mp, bArea, bFirstMoments, bSecondMoments, bProductMoments, basepoint);
+          const ON_Mesh* pMesh = ON_Mesh::Cast(geo);
+          if (nullptr != pMesh)
+          {
+            ON_3dPoint point = pMesh->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
+            success = pMesh->VolumeMassProperties(mp, bVolume, bFirstMoments, bSecondMoments, bProductMoments, basepoint);
+          }
+          else if (geo->HasBrepForm())
+          {
+            const ON_Brep* pBrepform = geo->BrepForm();
+            if (nullptr != pBrepform)
+            {
+              ON_3dPoint point = pBrepform->IsSolid() ? ON_3dPoint::UnsetPoint : basepoint;
+              success = pBrepform->VolumeMassProperties(mp, bVolume, bFirstMoments, bSecondMoments, bProductMoments, point, relativeTolerance, absoluteTolerance);
+              delete pBrepform;
+            }
+          }
         }
       }
 
       if (success)
       {
-        if (nullptr == rc)
-          rc = new ON_MassProperties(mp);
+        if (nullptr == mp_out)
+          mp_out = new ON_MassProperties(mp);
         else
-          rc->Sum(1, &mp, true);
+          mp_out->Sum(1, &mp, true);
       }
     }
   }
-  return rc;
+  return mp_out;
 }
 
 RH_C_FUNCTION int ON_Brep_CreateMesh( const ON_Brep* pConstBrep, ON_SimpleArray<ON_Mesh*>* meshes )

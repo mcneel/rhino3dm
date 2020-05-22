@@ -11,7 +11,7 @@ namespace Rhino.DocObjects
 {
   /// <summary>
   /// The possible relationships between the instance definition geometry
-  /// and the archive containing the original defition.
+  /// and the archive containing the original definition.
   /// </summary>
   public enum InstanceDefinitionUpdateType : int
   {
@@ -52,7 +52,7 @@ namespace Rhino.DocObjects
   }
 
   /// <summary>
-  /// A InstanceDefinitionUpdateType.Static or InstanceDefinitionUpdateType.LinkedAndEmbedded idef
+  /// A InstanceDefinitionUpdateType.Static or InstanceDefinitionUpdateType.LinkedAndEmbedded instance definition
   /// must have LayerStyle = Unset, a InstanceDefinitionUpdateType.Linked InstanceDefnition must
   /// have LayerStyle = Active or Reference
   /// </summary>
@@ -109,6 +109,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// transformation applied to an instance definition for this object.
     /// </summary>
+    /// <since>5.0</since>
     public Transform InstanceXform
     {
       get
@@ -120,12 +121,13 @@ namespace Rhino.DocObjects
       }
     }
 
-    /// <summary>Basepoint coordinates of a block.</summary>
+    /// <summary>Base point coordinates of a block.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_blockinsertionpoint.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_blockinsertionpoint.cs' lang='cs'/>
     /// <code source='examples\py\ex_blockinsertionpoint.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Point3d InsertionPoint
     {
       get
@@ -142,6 +144,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_instancedefinitionobjects.cs' lang='cs'/>
     /// <code source='examples\py\ex_instancedefinitionobjects.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public InstanceDefinition InstanceDefinition
     {
       get
@@ -161,7 +164,8 @@ namespace Rhino.DocObjects
     /// <param name="nestingLevel">
     /// If the instance definition is used, this is the definition's nesting depth
     /// </param>
-    /// <returns>true or false depending on if the deifinition is used</returns>
+    /// <returns>true or false depending on if the definition is used</returns>
+    /// <since>5.2</since>
     public bool UsesDefinition(int definitionIndex, out int nestingLevel)
     {
       nestingLevel = 0;
@@ -183,6 +187,7 @@ namespace Rhino.DocObjects
     /// <param name="pieces">An array of Rhino objects will be assigned to this out parameter during this call.</param>
     /// <param name="pieceAttributes">An array of object attributes will be assigned to this out parameter during this call.</param>
     /// <param name="pieceTransforms">An array of the previously applied transform matrices will be assigned to this out parameter during this call.</param>
+    /// <since>5.0</since>
     public void Explode(bool explodeNestedInstances, out RhinoObject[] pieces, out ObjectAttributes[] pieceAttributes, out Transform[] pieceTransforms)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -230,6 +235,7 @@ namespace Rhino.DocObjects
     /// Number of objects this definition uses. This counts the objects that are used to define the geometry.
     /// This does NOT count the number of references to this instance definition.
     /// </summary>
+    /// <since>5.0</since>
     public int ObjectCount
     {
       get
@@ -239,6 +245,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public InstanceDefinitionUpdateType UpdateType
     {
       get
@@ -257,6 +264,7 @@ namespace Rhino.DocObjects
     /// Returns an object that is used to define the geometry.
     /// Does NOT return an object that references this definition.count the number of references to this instance.
     /// </returns>
+    /// <since>5.0</since>
     public RhinoObject Object(int index)
     {
       IntPtr const_ptr = ConstPointer();
@@ -273,6 +281,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_instancedefinitionobjects.cs' lang='cs'/>
     /// <code source='examples\py\ex_instancedefinitionobjects.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoObject[] GetObjects()
     {
       int count = ObjectCount;
@@ -299,6 +308,7 @@ namespace Rhino.DocObjects
     /// <para>2 = check for references from other instance definitions.</para>
     /// </param>
     /// <returns>An array of instance objects. The returned array can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public InstanceObject[] GetReferences(int wheretoLook)
     {
       IntPtr const_ptr = ConstPointer();
@@ -330,6 +340,7 @@ namespace Rhino.DocObjects
     /// Gets a list of all the InstanceDefinitions that contain a reference this InstanceDefinition.
     /// </summary>
     /// <returns>An array of instance definitions. The returned array can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public InstanceDefinition[] GetContainers()
     {
       using (SimpleArrayInt arr = new SimpleArrayInt())
@@ -367,6 +378,7 @@ namespace Rhino.DocObjects
     ///  >1      This InstanceDefinition uses the instance definition
     ///          and the returned value is the nesting depth.
     /// </returns>
+    /// <since>5.0</since>
     public int UsesDefinition(int otherIdefIndex)
     {
       IntPtr const_ptr = ConstPointer();
@@ -382,6 +394,7 @@ namespace Rhino.DocObjects
     /// <para>2 = check for references in other instance definitions.</para>
     /// </param>
     /// <returns>true if the instance definition is used; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool InUse(int wheretoLook)
     {
       IntPtr const_ptr = ConstPointer();
@@ -391,6 +404,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Index of this instance definition in the index definition table.
     /// </summary>
+    /// <since>5.0</since>
     public override int Index
     {
       get { return m_index; }
@@ -406,6 +420,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_renameblock.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsReference
     {
       get
@@ -415,6 +430,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public bool IsTenuous
     {
       get
@@ -427,6 +443,7 @@ namespace Rhino.DocObjects
     /// Controls how much geometry is read when a linked InstanceDefinition is updated.
     /// </summary>
     /// <returns>If this returns true then nested linked InstanceDefinition objects will be skipped otherwise; read everything, included nested linked InstanceDefinition objects</returns>
+    /// <since>5.0</since>
     public bool SkipNestedLinkedDefinitions
     {
       get
@@ -436,6 +453,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public InstanceDefinitionLayerStyle LayerStyle
     {
       get
@@ -455,6 +473,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_renameblock.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsDeleted
     {
       get
@@ -486,21 +505,25 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public override string Name
     {
       get{ return base.Name; }
     }
 
+    /// <since>5.0</since>
     public new string Description
     {
       get{ return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.Description); }
     }
 
+    /// <since>5.0</since>
     public override Guid Id
     {
       get { return base.Id; }
     }
 
+    /// <since>5.0</since>
     public string SourceArchive
     {
       get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.SourceArchive); }
@@ -508,6 +531,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// The URL description displayed as a hyperlink in the Insert and Block UI
     /// </summary>
+    /// <since>5.0</since>
     public string UrlDescription
     {
       get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.UrlTag); }
@@ -515,6 +539,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// The hyperlink URL that is executed when the UrlDescription hyperlink is clicked on in the Insert and Block UI
     /// </summary>
+    /// <since>5.0</since>
     public string Url
     {
       get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.Url); }
@@ -523,6 +548,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType { get { return ModelComponentType.InstanceDefinition; }
     }
 
@@ -533,6 +559,7 @@ namespace Rhino.DocObjects
     /// <param name="displayMode">The display mode.</param>
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize)
     {
       return CreatePreviewBitmap(definedViewportProjection, displayMode, bitmapSize, false);
@@ -546,6 +573,7 @@ namespace Rhino.DocObjects
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
       return CreatePreviewBitmap(Guid.Empty, definedViewportProjection, displayMode, bitmapSize, applyDpiScaling);
@@ -557,6 +585,7 @@ namespace Rhino.DocObjects
     /// <param name="definedViewportProjection">The view projection.</param>
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>5.0</since>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, System.Drawing.Size bitmapSize)
     {
       return CreatePreviewBitmap(definedViewportProjection, bitmapSize, false);
@@ -569,6 +598,7 @@ namespace Rhino.DocObjects
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap CreatePreviewBitmap(Display.DefinedViewportProjection definedViewportProjection, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
       return CreatePreviewBitmap(definedViewportProjection, DisplayMode.Wireframe, bitmapSize, applyDpiScaling);
@@ -583,6 +613,7 @@ namespace Rhino.DocObjects
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>6.21</since>
     public System.Drawing.Bitmap CreatePreviewBitmap(Guid definitionObjectId, Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
       IntPtr const_ptr = ConstPointer();
@@ -603,6 +634,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns the archive file status of a linked instance definition.
     /// </summary>
+    /// <since>5.2</since>
     public InstanceDefinitionArchiveFileStatus ArchiveFileStatus
     {
       get 
@@ -692,28 +724,33 @@ namespace Rhino.DocObjects.Tables
     }
 
     RhinoDoc m_doc;
+    /// <since>5.3</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
     }
 
+    /// <since>5.3</since>
     public InstanceDefinitionTableEventType EventType
     {
       get { return m_event_type; }
     }
 
+    /// <since>5.3</since>
     public int InstanceDefinitionIndex
     {
       get { return m_idef_index; }
     }
 
     InstanceDefinition m_new_idef;
+    /// <since>5.3</since>
     public InstanceDefinition NewState
     {
       get { return m_new_idef ?? (m_new_idef = Document.InstanceDefinitions[m_idef_index]); }
     }
 
     InstanceDefinitionGeometry m_old_idef;
+    /// <since>5.3</since>
     public InstanceDefinitionGeometry OldState
     {
       get
@@ -736,12 +773,14 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this table.</summary>
+    /// <since>5.0</since>
     public new RhinoDoc Document
     {
       get { return m_doc; }
     }
 
     /// <summary>Number of items in the instance definitions table.</summary>
+    /// <since>5.0</since>
     public override int Count
     {
       get
@@ -753,6 +792,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Number of items in the instance definitions table, excluding deleted definitions.
     /// </summary>
+    /// <since>5.0</since>
     public int ActiveCount
     {
       get
@@ -761,6 +801,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -802,6 +843,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_createblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_createblock.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [Obsolete("ignoreDeletedInstanceDefinitions is now redundant. Remove the second argument. Definitions are now always deleted permanently.")]
     public InstanceDefinition Find(string instanceDefinitionName, bool ignoreDeletedInstanceDefinitions)
     {
@@ -815,6 +857,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_createblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_createblock.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public InstanceDefinition Find(string instanceDefinitionName)
     {
       int index = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_FindInstanceDefinition(m_doc.RuntimeSerialNumber,
@@ -828,6 +871,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="instanceId">Unique id of the instance definition to search for.</param>
     /// <param name="ignoreDeletedInstanceDefinitions">true means don't search deleted instance definitions.</param>
     /// <returns>The specified instance definition, or null if nothing matching was found.</returns>
+    /// <since>5.0</since>
     public InstanceDefinition Find(Guid instanceId, bool ignoreDeletedInstanceDefinitions)
     {
       int index = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_FindInstanceDefinition2(m_doc.RuntimeSerialNumber,
@@ -844,6 +888,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="instanceId">Unique id of the instance definition to search for</param>
     /// <param name="ignoreDeletedInstanceDefinitions">true means don't search deleted instance definitions.</param>
     /// <returns>index > -1 if instance definition was found.</returns>
+    /// <since>6.0</since>
     public int InstanceDefinitionIndex(Guid instanceId, bool ignoreDeletedInstanceDefinitions)
     {
       int index = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_FindInstanceDefinition2(m_doc.RuntimeSerialNumber,
@@ -868,6 +913,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_createblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_createblock.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
       using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
@@ -902,6 +948,7 @@ namespace Rhino.DocObjects.Tables
     /// <example>
     /// <code source='examples\cs\ex_nestedblock.cs' lang='cs'/>
     /// </example>
+    /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry)
     {
       return Add(name, description, basePoint, geometry, null);
@@ -918,6 +965,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
     /// </returns>
+    /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, GeometryBase geometry, ObjectAttributes attributes)
     {
       return Add(name, description, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
@@ -936,6 +984,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if successful.
     /// </returns>
+    /// <since>5.0</since>
     public bool Modify(InstanceDefinition idef, string newName, string newDescription, bool quiet)
     {
       return Modify(idef.Index, newName, newDescription, quiet);
@@ -959,6 +1008,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
     /// <code source='examples\py\ex_renameblock.py' lang='py'/>
     /// </example>    
+    /// <since>5.0</since>
     public bool Modify(int idefIndex, string newName, string newDescription, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex, newName, newDescription, quiet);
@@ -970,6 +1020,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="idefIndex">The index of the instance definition to be restored.</param>
     /// <returns>true if operation succeeded.</returns>
+    /// <since>5.0</since>
     public bool UndoModify(int idefIndex)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_UndoModify(m_doc.RuntimeSerialNumber, idefIndex);
@@ -983,6 +1034,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newGeometry">The new geometry.</param>
     /// <param name="newAttributes">The new attributes.</param>
     /// <returns>true if operation succeeded.</returns>
+    /// <since>5.0</since>
     public bool ModifyGeometry(int idefIndex, IEnumerable<GeometryBase> newGeometry, IEnumerable<ObjectAttributes> newAttributes)
     {
       using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(newGeometry))
@@ -1004,11 +1056,13 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>5.0</since>
     public bool ModifyGeometry(int idefIndex, IEnumerable<GeometryBase> newGeometry)
     {
       return ModifyGeometry(idefIndex, newGeometry, null);
     }
 
+    /// <since>5.0</since>
     public bool ModifyGeometry(int idefIndex, GeometryBase newGeometry, ObjectAttributes newAttributes)
     {
       return ModifyGeometry(idefIndex, new GeometryBase[] { newGeometry }, new ObjectAttributes[] { newAttributes });
@@ -1028,6 +1082,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true if the definition was successfully modified otherwise returns false.
     /// </returns>
+    /// <since>6.0</since>
     public bool DestroySourceArchive(InstanceDefinition definition, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_DestroySourceArchive(m_doc.RuntimeSerialNumber, definition.Index, quiet);
@@ -1044,6 +1099,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true if the definition was successfully modified otherwise returns false.
     /// </returns>
+    /// <since>6.0</since>
     [Obsolete("Use the overload taking a FileReference.")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool ModifySourceArchive(int idefIndex, string sourceArchive, InstanceDefinitionUpdateType updateType, bool quiet)
@@ -1064,6 +1120,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true if the definition was successfully modified otherwise returns false.
     /// </returns>
+    /// <since>6.0</since>
     public bool ModifySourceArchive(int idefIndex, FileReference sourceArchive, InstanceDefinitionUpdateType updateType, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_SetSourceArchive(
@@ -1083,6 +1140,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true if the linked file was successfully read and updated.
     /// </returns>
+    /// <since>6.0</since>
     public bool RefreshLinkedBlock(InstanceDefinition definition)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_RefreshLinkedBlock(m_doc.RuntimeSerialNumber, definition.Index);
@@ -1101,6 +1159,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if the instance definition could be modified.
     /// </returns>
+    /// <since>5.0</since>
     [Obsolete("Source paths are always absolute at runtime. They cannot be changed.")]
     public bool MakeSourcePathRelative(InstanceDefinition idef, bool relative, bool quiet)
     {
@@ -1131,6 +1190,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if successful. false if the instance definition has active references and bDeleteReferences is false.
     /// </returns>
+    /// <since>5.0</since>
     public bool Delete(int idefIndex, bool deleteReferences, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_DeleteInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex, deleteReferences, quiet);
@@ -1141,6 +1201,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="item">The item to delete.</param>
     /// <returns>True on success.</returns>
+    /// <since>6.0</since>
     public override bool Delete(InstanceDefinition item)
     {
       if (item == null) return false;
@@ -1158,6 +1219,7 @@ namespace Rhino.DocObjects.Tables
     /// True if successful. False if the instance definition cannot be purged
     /// because it is in use by reference objects or undo information.
     /// </returns>
+    /// <since>5.9</since>
     public bool Purge(int idefIndex)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_PurgeInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex);
@@ -1172,6 +1234,7 @@ namespace Rhino.DocObjects.Tables
     /// be undeleted by the Undo command will not be deleted. If true, then all
     /// deleted instance definition information is deleted.
     /// </param>
+    /// <since>5.9</since>
     public void Compact(bool ignoreUndoReferences)
     {
       UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Compact(m_doc.RuntimeSerialNumber, ignoreUndoReferences);
@@ -1185,6 +1248,7 @@ namespace Rhino.DocObjects.Tables
     /// This must be in the range 0 &lt;= idefIndex &lt; InstanceDefinitionTable.Count.
     /// </param>
     /// <returns>true if successful</returns>
+    /// <since>5.9</since>
     public bool Undelete(int idefIndex)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_UndeleteInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex);
@@ -1201,12 +1265,13 @@ namespace Rhino.DocObjects.Tables
     /// name of file (can be any type of file that Rhino or a plug-in can read)
     /// </param>
     /// <param name="updateNestedLinks">
-    /// If true and the instance definition referes to a linked instance definition,
-    /// that needs to be updated, then the nested defition is also updated. If
+    /// If true and the instance definition references to a linked instance definition,
+    /// that needs to be updated, then the nested definition is also updated. If
     /// false, nested updates are skipped.
     /// </param>
     /// <param name="quiet"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public bool UpdateLinkedInstanceDefinition(int idefIndex, string filename, bool updateNestedLinks, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_UpdateLinkedInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex, filename, updateNestedLinks, quiet);
@@ -1215,8 +1280,9 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Gets an array of instance definitions.
     /// </summary>
-    /// <param name="ignoreDeleted">If true then deleted idefs are filtered out.</param>
+    /// <param name="ignoreDeleted">If true then deleted instance definitions are filtered out.</param>
     /// <returns>An array of instance definitions. This can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public InstanceDefinition[] GetList(bool ignoreDeleted)
     {
       SimpleArrayInt arr = new SimpleArrayInt();
@@ -1246,10 +1312,11 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Gets unsed instance definition name used as default when creating
+    /// Gets unused instance definition name used as default when creating
     /// new instance definitions.
     /// </summary>
     /// <returns>An unused instance definition name string.</returns>
+    /// <since>5.0</since>
     public string GetUnusedInstanceDefinitionName()
     {
       using (var sh = new StringHolder())
@@ -1261,13 +1328,14 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Gets unsed instance definition name used as default when creating
+    /// Gets unused instance definition name used as default when creating
     /// new instance definitions.
     /// </summary>
     /// <param name="root">
     /// The returned name is 'root nn'  If root is empty, then 'Block' (localized) is used.
     /// </param>
     /// <returns>An unused instance definition name string.</returns>
+    /// <since>5.0</since>
     public string GetUnusedInstanceDefinitionName(string root)
     {
       using (var sh = new StringHolder())
@@ -1279,7 +1347,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Gets unsed instance definition name used as default when creating
+    /// Gets unused instance definition name used as default when creating
     /// new instance definitions.
     /// </summary>
     /// <param name="root">
@@ -1292,6 +1360,7 @@ namespace Rhino.DocObjects.Tables
     /// name begins at "Block suffix".
     /// </param>
     /// <returns>An unused instance definition name string.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     [Obsolete("The defaultSuffix parameter is now ignored. Remove the second argument.")]
     public string GetUnusedInstanceDefinitionName(string root, uint defaultSuffix)
@@ -1299,6 +1368,7 @@ namespace Rhino.DocObjects.Tables
       return GetUnusedInstanceDefinitionName(root);
     }
 
+    /// <since>5.0</since>
     public override IEnumerator<InstanceDefinition> GetEnumerator()
     {
       return base.GetEnumerator();

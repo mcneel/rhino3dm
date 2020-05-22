@@ -20,6 +20,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_gettext.cs' lang='cs'/>
     /// <code source='examples\py\ex_gettext.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string DisplayText
     {
       get
@@ -37,12 +38,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get the annotation base geometry for this object
     /// </summary>
+    /// <since>6.0</since>
     public AnnotationBase AnnotationGeometry => Geometry as AnnotationBase;
 
     /// <summary>
     /// Test if the text in the annotation object contains fields
     /// that involve length, area, or volume measurements
     /// </summary>
+    /// <since>7.0</since>
     public bool HasMeasurableTextFields
     {
       get
@@ -66,6 +69,7 @@ namespace Rhino.DocObjects
     /// Gets the <see cref="DimensionStyle"/>
     /// associated with this OrdinateDimensionObject.
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle DimensionStyle
     {
       get
@@ -120,6 +124,7 @@ namespace Rhino.Display
     /// Constructs a new instance of Text3d.
     /// </summary>
     /// <param name="text">Text string.</param>
+    /// <since>5.0</since>
     public Text3d(string text)
     {
       m_text = text;
@@ -131,6 +136,7 @@ namespace Rhino.Display
     /// <param name="text">Text string.</param>
     /// <param name="plane">3D Plane for text.</param>
     /// <param name="height">Height (in units) for text.</param>
+    /// <since>5.0</since>
     public Text3d(string text, Plane plane, double height)
     {
       m_text = text;
@@ -141,6 +147,7 @@ namespace Rhino.Display
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       // not really needed anymore, keeping in place to not break SDK
@@ -152,6 +159,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the text string for this Text3d object.
     /// </summary>
+    /// <since>5.0</since>
     public string Text
     {
       get { return m_text; }
@@ -168,6 +176,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the 3D aligned plane for this Text3d object. 
     /// </summary>
+    /// <since>5.0</since>
     public Plane TextPlane
     {
       get
@@ -188,6 +197,7 @@ namespace Rhino.Display
     /// Gets or sets the height (in units) of this Text3d object. 
     /// The height should be a positive number larger than zero.
     /// </summary>
+    /// <since>5.0</since>
     public double Height
     {
       get { return m_height; }
@@ -205,6 +215,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the FontFace name.
     /// </summary>
+    /// <since>5.0</since>
     public string FontFace
     {
       get
@@ -228,16 +239,19 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets whether this Text3d object will be drawn in Bold.
     /// </summary>
+    /// <since>5.0</since>
     public bool Bold { get; set; }
 
     /// <summary>
     /// Gets or sets whether this Text3d object will be drawn in Italics.
     /// </summary>
+    /// <since>5.0</since>
     public bool Italic { get; set; }
 
     /// <summary>
-    /// Gets the boundingbox for this Text3d object.
+    /// Gets the bounding box for this Text3d object.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -265,6 +279,7 @@ namespace Rhino.Display
     /// <summary>
     /// Horizontal alignment that this Text3d is drawn with
     /// </summary>
+    /// <since>6.4</since>
     public DocObjects.TextHorizontalAlignment HorizontalAlignment
     {
       get { return m_horizontal_alignment; }
@@ -281,6 +296,7 @@ namespace Rhino.Display
     /// <summary>
     /// Vertical alignment that this Text3d is drawn with
     /// </summary>
+    /// <since>6.4</since>
     public DocObjects.TextVerticalAlignment VerticalAlignment
     {
       get { return m_vertical_alignment; }

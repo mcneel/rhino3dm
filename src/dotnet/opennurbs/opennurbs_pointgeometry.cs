@@ -19,6 +19,7 @@ namespace Rhino.Geometry
     /// Initializes a new point instance with a location.
     /// </summary>
     /// <param name="location">A position in 3D space.</param>
+    /// <since>5.0</since>
     public Point(Point3d location)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_Point_New(location);
@@ -38,6 +39,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the location (position) of this point.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Location
     {
       get

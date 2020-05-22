@@ -16,8 +16,11 @@ namespace Rhino
     [CLSCompliant(false)]
     public interface IPanelsService
     {
+      /// <since>6.1</since>
       bool SupportedType(Type type, out string exceptionMessage);
+      /// <since>6.1</since>
       void DestroyNativeWindow(object host, object nativeObject, bool disposeOfNativeObject);
+      /// <since>6.1</since>
       void SetF1Hook(object nativeObject, EventHandler hook);
     }
 
@@ -52,60 +55,76 @@ namespace Rhino
       /// <summary>
       /// Rhino material browser
       /// </summary>
+      /// <since>5.0</since>
       public static Guid Materials { get { return new Guid("{ 0x6df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
       /// Rhino environment panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid Environment { get { return new Guid("{ 0x7df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
       /// Rhino texture panel
       /// </summary>
+      /// <since>5.3</since>
       public static Guid Texture { get { return new Guid("{0x8df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
       /// Rhino light manager panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid LightManager { get { return new Guid("{ 0x86777b3d, 0x3d68, 0x4965, { 0x84, 0xf8, 0x9e, 0x1, 0x9c, 0x40, 0x24, 0x33 } }"); } }
       /// <summary>
       /// Rhino sun panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid Sun { get { return new Guid("{ 0x1012681e, 0xd276, 0x49d3, { 0x9c, 0xd9, 0x7d, 0xe9, 0x2d, 0xc2, 0x40, 0x4a } }"); } }
       /// <summary>
       /// Rhino ground plane panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid GroundPlane { get { return new Guid("{ 0x987b1930, 0xecde, 0x4e62, { 0x82, 0x82, 0x97, 0xab, 0x4a, 0xd3, 0x25, 0xfe } }"); } }
       /// <summary>
       /// Rhino Layer panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid Layers { get { return new Guid("{ 0x3610bf83, 0x47d, 0x4f7f, { 0x93, 0xfd, 0x16, 0x3e, 0xa3, 0x5, 0xb4, 0x93 } }"); } }
       /// <summary>
       /// Rhino object properties panel
       /// </summary>
+      /// <since>5.0</since>
       public static Guid ObjectProperties { get { return new Guid("{ 0x34ffb674, 0xc504, 0x49d9, { 0x9f, 0xcd, 0x99, 0xcc, 0x81, 0x1d, 0xcd, 0xa2 } }"); } }
       // Rhino Display properties panel
+      /// <since>5.0</since>
       public static Guid Display { get { return new Guid("{ 0xb68e9e9f, 0xc79c, 0x473c, { 0xa7, 0xef, 0x84, 0x6a, 0x11, 0xdc, 0x4e, 0x7b } }"); } }
       /// <summary>
       /// Rhino context sensitive help panel.
       /// </summary>
+      /// <since>5.0</since>
       public static Guid ContextHelp { get { return new Guid("{ 0xf8fb4f9, 0xc213, 0x4a6e, { 0x8e, 0x79, 0xb, 0xec, 0xe0, 0x2d, 0xf8, 0x2a } }"); } }
       /// <summary>
       /// Rhino notes panel
       /// </summary>
+      /// <since>5.9</since>
       public static Guid Notes { get { return new Guid("{ 0x1d55d702, 0x28c, 0x4aab, { 0x99, 0xcc, 0xac, 0xfd, 0xd4, 0x41, 0xfe, 0x5f } }"); } }
       /// <summary>
       /// Rhino rendering properties panel
       /// </summary>
+      /// <since>6.0</since>
       public static Guid Rendering { get { return new Guid("{ 0xd9ac0269, 0x811b, 0x47d1, { 0xaa, 0x33, 0x77, 0x79, 0x86, 0xb1, 0x37, 0x15 } }"); } }
       /// <summary>
       /// Rhino render properties panel
       /// </summary>
+      /// <since>5.9</since>
       public static Guid Libraries { get { return new Guid("{ 0xb70a4973, 0x99ca, 0x40c0, { 0xb2, 0xb2, 0xf0, 0x34, 0x17, 0xa5, 0xff, 0x1d } }"); } }
     }
 
     [CLSCompliant(false)]
     public interface IPanel
     {
+      /// <since>6.0</since>
       void PanelShown(uint documentSerialNumber, ShowPanelReason reason);
+      /// <since>6.0</since>
       void PanelHidden(uint documentSerialNumber, ShowPanelReason reason);
+      /// <since>6.0</since>
       void PanelClosing(uint documentSerialNumber, bool onCloseDocument);
     }
 
@@ -118,7 +137,8 @@ namespace Rhino
       /// Style applied to Eto controls hosted by the Rhino.UI.Panels and
       /// Rhino.UI.ObjectProperties systems.
       /// </summary>
-      /// <value>The name of the eto panel style.</value>
+      /// <value>The name of the Eto panel style.</value>
+      /// <since>6.15</since>
       public static string EtoPanelStyleName => "rhino-panel-style";
 
       static IPanelsService g_service_implementation;
@@ -143,6 +163,7 @@ namespace Rhino
       /// </summary>
       /// <param name="reason"></param>
       /// <returns></returns>
+      /// <since>6.0</since>
       public static bool IsShowing(ShowPanelReason reason)
       {
         return reason == ShowPanelReason.Show || reason == ShowPanelReason.ShowOnDeactivate;
@@ -153,6 +174,7 @@ namespace Rhino
       /// </summary>
       /// <param name="reason"></param>
       /// <returns></returns>
+      /// <since>6.0</since>
       public static bool IsHiding(ShowPanelReason reason)
       {
         return !IsShowing(reason);
@@ -181,6 +203,7 @@ namespace Rhino
       /// <param name="panelType">
       /// See <see cref="PanelType"/>
       /// </param>
+      /// <since>6.1</since>
       public static void RegisterPanel(PlugIns.PlugIn plugIn, Type type, string caption, System.Drawing.Icon icon, PanelType panelType)
       {
         PanelSystem.Register(plugIn, type, caption, icon, panelType);
@@ -202,7 +225,7 @@ namespace Rhino
       /// support classes that are derived from NsView.  In addition to the
       /// type requirements the class must have a public constructor with no
       /// parameters or a constructor with a single uint that represents the 
-      /// document serial number and and have a GuidAttribute applied with a
+      /// document serial number and have a GuidAttribute applied with a
       /// unique Id.  n Windows there is only one panel created which gets
       /// recycled for each new document.  On the Mac a panel will be created
       /// for each open document and destroyed when the document closes.  In
@@ -218,6 +241,7 @@ namespace Rhino
       /// Currently only used in Windows, use a 32bit depth icon in order to
       /// get proper transparency.
       /// </param>
+      /// <since>5.0</since>
       public static void RegisterPanel(PlugIns.PlugIn plugin, Type panelType, string caption, System.Drawing.Icon icon)
       {
         RegisterPanel(plugin, panelType, caption, icon, PanelType.PerDoc);
@@ -227,6 +251,7 @@ namespace Rhino
       /// Gets the panel icon size in logical units.
       /// </summary>
       /// <value>The size of the panel icon in logical units.</value>
+      /// <since>6.12</since>
       public static System.Drawing.Size IconSize
       {
         get
@@ -242,6 +267,7 @@ namespace Rhino
       /// Gets the panel icon size in pixels with DPI scaling applied.
       /// </summary>
       /// <value>IconSize times DPI scale</value>
+      /// <since>6.12</since>
       public static System.Drawing.Size ScaledIconSize
       {
         get
@@ -257,6 +283,7 @@ namespace Rhino
       /// </summary>
       /// <param name="panelType"></param>
       /// <param name="icon">New icon to use</param>
+      /// <since>6.0</since>
       public static void ChangePanelIcon(Type panelType, System.Drawing.Icon icon)
       {
         PanelSystem.ChangePanelIcon(panelType, icon);
@@ -276,6 +303,7 @@ namespace Rhino
       /// displayed then null will be returned even if the panel is properly
       /// registered.
       /// </returns>
+      /// <since>5.0</since>
       [Obsolete("Obsolete method, use GetPanel<MyClass>(RhinoDoc)")]
       public static object GetPanel(Guid panelId)
       {
@@ -288,6 +316,7 @@ namespace Rhino
       /// </summary>
       /// <typeparam name="T"></typeparam>
       /// <returns></returns>
+      /// <since>6.0</since>
       [Obsolete("Obsolete method, use GetPanel<MyClass>(RhinoDoc)")]
       public static T GetPanel<T>() where T : class
       {
@@ -313,6 +342,7 @@ namespace Rhino
       /// displayed then null will be returned even if the panel is properly
       /// registered.
       /// </returns>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static object GetPanel(Guid panelId, uint documentSerialNumber)
       {
@@ -330,6 +360,7 @@ namespace Rhino
       /// Runtime document Id associated with the requested panel.
       /// </param>
       /// <returns></returns>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static T GetPanel<T>(uint documentSerialNumber) where T : class
       {
@@ -354,6 +385,7 @@ namespace Rhino
       /// displayed then null will be returned even if the panel is properly
       /// registered.
       /// </returns>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static object GetPanel(Guid panelId, RhinoDoc rhinoDoc)
       {
@@ -370,6 +402,7 @@ namespace Rhino
       /// Runtime document Id associated with the requested panel.
       /// </param>
       /// <returns></returns>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static T GetPanel<T>(RhinoDoc rhinoDoc) where T : class
       {
@@ -385,6 +418,7 @@ namespace Rhino
       /// <returns>The panels.</returns>
       /// <param name="panelId">Panel identifier.</param>
       /// <param name="doc">Document.</param>
+      /// <since>6.3</since>
       public static object [] GetPanels (Guid panelId, RhinoDoc doc)
       {
         if (doc == null)
@@ -405,6 +439,7 @@ namespace Rhino
       /// <returns>The panels.</returns>
       /// <param name="panelId">Panel identifier.</param>
       /// <param name="documentRuntimeSerialNumber">Document runtime serial number.</param>
+      /// <since>6.3</since>
       [CLSCompliant (false)]
       public static object[] GetPanels(Guid panelId, uint documentRuntimeSerialNumber) => GetPanels (panelId, RhinoDoc.FromRuntimeSerialNumber (documentRuntimeSerialNumber));
 
@@ -414,6 +449,7 @@ namespace Rhino
       /// <returns>The panels.</returns>
       /// <param name="documentRuntimeSerialNumber">Document runtime serial number.</param>
       /// <typeparam name="T">The 1st type parameter.</typeparam>
+      /// <since>6.3</since>
       [CLSCompliant (false)]
       public static T [] GetPanels<T> (uint documentRuntimeSerialNumber) where T : class => GetPanels<T> (RhinoDoc.FromRuntimeSerialNumber (documentRuntimeSerialNumber));
 
@@ -423,6 +459,7 @@ namespace Rhino
       /// <returns></returns>
       /// <param name="doc"></param>
       /// <typeparam name="T"></typeparam>
+      /// <since>6.3</since>
       public static T[] GetPanels<T> (RhinoDoc doc) where T : class
       {
         var panels = GetPanels (typeof(T).GUID, doc);
@@ -441,14 +478,14 @@ namespace Rhino
       /// Class Id for the panel to check.
       /// </param>
       /// <param name="isSelectedTab">
-      /// This paramater is ignored on Mac.
+      /// This parameter is ignored on Mac.
       /// 
       /// If Windows and true the panel must be visible in a container and
       /// if it is a tabbed container it must be the active tab to be true.
       /// </param>
       /// <returns>
       /// On Windows:
-      ///   The return value is demendant on the isSelectedTab value.  If
+      ///   The return value is dependent on the isSelectedTab value.  If
       ///   isSelectedTab is true then the panel must be included in a
       ///   visible tabbed container and must also be the active tab to be
       ///   true.  If isSelectedTab is false then the panel only has to be 
@@ -457,6 +494,7 @@ namespace Rhino
       ///   isSelected is ignored and true is returned if the panel appears
       ///   in any inspector panel.
       /// </returns>
+      /// <since>6.0</since>
       public static bool IsPanelVisible(Guid panelId, bool isSelectedTab)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -472,14 +510,14 @@ namespace Rhino
       /// Type of panel to check for, this type must include a GUID attribute.
       /// </param>
       /// <param name="isSelectedTab">
-      /// This paramater is ignored on Mac.
+      /// This parameter is ignored on Mac.
       /// 
       /// If Windows and true the panel must be visible in a container and
       /// if it is a tabbed container it must be the active tab to be true.
       /// </param>
       /// <returns>
       /// On Windows:
-      ///   The return value is demendant on the isSelectedTab value.  If
+      ///   The return value is dependent on the isSelectedTab value.  If
       ///   isSelectedTab is true then the panel must be included in a
       ///   visible tabbed container and must also be the active tab to be
       ///   true.  If isSelectedTab is false then the panel only has to be 
@@ -488,6 +526,7 @@ namespace Rhino
       ///   isSelected is ignored and true is returned if the panel appears
       ///   in any inspector panel.
       /// </returns>
+      /// <since>6.0</since>
       public static bool IsPanelVisible(Type panelType, bool isSelectedTab)
       {
         return panelType != null && IsPanelVisible(panelType.GUID, isSelectedTab);
@@ -504,6 +543,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the tab is visible otherwise it returns false.
       /// </returns>
+      /// <since>5.0</since>
       public static bool IsPanelVisible(Guid panelId)
       {
         return IsPanelVisible(panelId, false);
@@ -520,6 +560,7 @@ namespace Rhino
       /// Returns true if panelType is non null and the tab is visible otherwise
       /// it returns false.
       /// </returns>
+      /// <since>5.0</since>
       public static bool IsPanelVisible(Type panelType)
       {
         return IsPanelVisible(panelType.GUID, false);
@@ -539,6 +580,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the panel was successfully opened.
       /// </returns>
+      /// <since>5.0</since>
       public static bool OpenPanelAsSibling(Guid panelId, Guid siblingPanelId)
       {
         return OpenPanelAsSibling(panelId, siblingPanelId, false);
@@ -562,6 +604,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the panel was successfully opened.
       /// </returns>
+      /// <since>6.0</since>
       public static bool OpenPanelAsSibling(Guid panelId, Guid siblingPanelId, bool makeSelectedPanel)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -575,6 +618,7 @@ namespace Rhino
       /// <param name="panelId">
       /// Class type Id for the panel to open.
       /// </param>
+      /// <since>5.0</since>
       public static void OpenPanel(Guid panelId)
       {
         OpenPanel(panelId, true);
@@ -591,6 +635,7 @@ namespace Rhino
       /// If true then the panel is set as the active tab after opening it
       /// otherwise; the panel is opened but not set as the active tab.
       /// </param>
+      /// <since>6.0</since>
       public static void OpenPanel(Guid panelId, bool makeSelectedPanel)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -604,6 +649,7 @@ namespace Rhino
       /// <param name="panelType">
       /// Class type of the panel to open.
       /// </param>
+      /// <since>5.0</since>
       public static void OpenPanel(Type panelType)
       {
         if (panelType != null)
@@ -620,6 +666,7 @@ namespace Rhino
       /// If true then the panel is set as the active tab after opening it
       /// otherwise; the panel is opened but not set as the active tab.
       /// </param>
+      /// <since>6.0</since>
       public static void OpenPanel(Type panelType, bool makeSelectedPanel)
       {
         if (panelType != null)
@@ -640,6 +687,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the 
       /// </returns>
+      /// <since>5.12</since>
       public static Guid OpenPanel(Guid dockBarId, Guid panelId)
       {
         return OpenPanel(dockBarId, panelId, true);
@@ -663,6 +711,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the 
       /// </returns>
+      /// <since>6.0</since>
       public static Guid OpenPanel(Guid dockBarId, Guid panelId, bool makeSelectedPanel)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -684,6 +733,7 @@ namespace Rhino
       /// <returns>
       /// Returns true if the 
       /// </returns>
+      /// <since>5.12</since>
       public static Guid OpenPanel(Guid dockBarId, Type panelType)
       {
         return OpenPanel(dockBarId, panelType, true);
@@ -707,12 +757,13 @@ namespace Rhino
       /// <returns>
       /// Returns true if the 
       /// </returns>
+      /// <since>6.0</since>
       public static Guid OpenPanel(Guid dockBarId, Type panelType, bool makeSelectedPanel)
       {
         return (panelType == null ? Guid.Empty : OpenPanel(dockBarId, panelType.GUID, makeSelectedPanel));
       }
       /// <summary>
-      /// Used by the FloatPanel method to detemine if the floating panel
+      /// Used by the FloatPanel method to determine if the floating panel
       /// should be shown or hidden.
       /// </summary>
       public enum FloatPanelMode
@@ -736,7 +787,7 @@ namespace Rhino
       ///   window will only contain the specified panel.
       /// 
       /// Windows support:
-      ///   On Windows this will show or hide the floating continer containing the
+      ///   On Windows this will show or hide the floating container containing the
       ///   specified panel.  If the tab is docked with other tabs it will be
       ///   floated in a new container.
       /// </summary>
@@ -749,6 +800,7 @@ namespace Rhino
       /// <returns>
       /// Return <c>true</c> if the panel visibility state was changed, <c>false</c> otherwise.
       /// </returns>
+      /// <since>6.2</since>
       public static bool FloatPanel (Type panelType, FloatPanelMode mode) => panelType != null && FloatPanel (panelType.GUID, mode);
       /// <summary>
       /// Mac support:
@@ -756,7 +808,7 @@ namespace Rhino
       ///   window will only contain the specified panel.
       /// 
       /// Windows support:
-      ///   On Windows this will show or hide the floating continer containing the
+      ///   On Windows this will show or hide the floating container containing the
       ///   specified panel.  If the tab is docked with other tabs it will be
       ///   floated in a new container.
       /// </summary>
@@ -769,6 +821,7 @@ namespace Rhino
       /// <returns>
       /// Return <c>true</c> if the panel visibility state was changed, <c>false</c> otherwise.
       /// </returns>
+      /// <since>6.2</since>
       public static bool FloatPanel(Guid panelTypeId, FloatPanelMode mode)
       {
         switch (mode)
@@ -795,6 +848,7 @@ namespace Rhino
       /// return the Id for the dock bar which host the specified panel or 
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
+      /// <since>6.1</since>
       public static Guid[] PanelDockBars(Guid panelId)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -819,6 +873,7 @@ namespace Rhino
       /// return the Id for the dock bar which host the specified panel or 
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
+      /// <since>5.12</since>
       public static Guid PanelDockBar(Guid panelId)
       {
         var ids = PanelDockBars(panelId);
@@ -837,6 +892,7 @@ namespace Rhino
       /// return the Id for the dock bar which host the specified panel or 
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
+      /// <since>5.12</since>
       public static Guid PanelDockBar(Type panelType)
       {
         return (panelType == null ? Guid.Empty : PanelDockBar(panelType.GUID));
@@ -849,6 +905,7 @@ namespace Rhino
       /// <param name="panelId">
       /// Class type Id of the panel to close.
       /// </param>
+      /// <since>5.0</since>
       public static void ClosePanel(Guid panelId)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -863,6 +920,7 @@ namespace Rhino
       /// <param name="panelType">
       /// Class type of the panel to close.
       /// </param>
+      /// <since>5.0</since>
       public static void ClosePanel(Type panelType)
       {
         if (panelType != null)
@@ -877,6 +935,7 @@ namespace Rhino
       /// Returns an array of panel class Id's for the currently open panels,
       /// if there are no open panels it will be an empty array.
       /// </returns>
+      /// <since>5.0</since>
       public static Guid[] GetOpenPanelIds()
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
@@ -894,6 +953,7 @@ namespace Rhino
       /// <param name="panelId"></param>
       /// <param name="documentSerialNumber">The document associated with the shown/hidden panel.</param>
       /// <param name="show"></param>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static void OnShowPanel(Guid panelId, uint documentSerialNumber, bool show)
       {
@@ -905,18 +965,20 @@ namespace Rhino
       /// <summary>
       /// This event is called when a panel is shown or hidden.  This event will get raised 
       /// multipThis times when the active document changes in Mac Rhino.  It will called
-      /// with show equal to false for the prevous active document and with show equal to 
+      /// with show equal to false for the previous active document and with show equal to 
       /// true for the current document.  When the event is raised with show equal to false
-      /// it only means the document instace of the panel is not visible it does not mean 
+      /// it only means the document instance of the panel is not visible it does not mean 
       /// the panel host has been closed.  If you need to know when the panel host closes
-      /// then subsribe to the Closed event.
+      /// then subscribe to the Closed event.
       /// </summary>
+      /// <since>6.0</since>
       public static event EventHandler<ShowPanelEventArgs> Show;
       /// <summary>
       /// Call this method to raise the Closed event
       /// </summary>
       /// <param name="panelId">Panel identifier.</param>
       /// <param name="documentSerialNumber">The document associated with the closed panel.</param>
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public static void OnClosePanel(Guid panelId, uint documentSerialNumber)
       {
@@ -928,6 +990,7 @@ namespace Rhino
       /// <summary>
       /// This event is raised when a panel host is closed
       /// </summary>
+      /// <since>6.0</since>
       public static event EventHandler<PanelEventArgs> Closed;
     }
     /// <summary>
@@ -935,6 +998,7 @@ namespace Rhino
     /// </summary>
     public class PanelEventArgs : EventArgs
     {
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public PanelEventArgs(Guid panelId, uint documentSerialNumber)
       {
@@ -954,9 +1018,12 @@ namespace Rhino
       /// <summary>
       /// Class Id for panel being shown or hidden
       /// </summary>
+      /// <since>6.0</since>
       public Guid PanelId { get; private set; }
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public uint DocumentSerialNumber { get; private set; }
+      /// <since>6.0</since>
       public RhinoDoc Document { get { return RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber); } }
     }
     /// <summary>
@@ -964,6 +1031,7 @@ namespace Rhino
     /// </summary>
     public class ShowPanelEventArgs : PanelEventArgs
     {
+      /// <since>6.0</since>
       [CLSCompliant(false)]
       public ShowPanelEventArgs(Guid panelId, uint documentSerialNumber, bool show) : base(panelId, documentSerialNumber)
       {
@@ -972,6 +1040,7 @@ namespace Rhino
       /// <summary>
       /// Will be true if showing or false if hiding
       /// </summary>
+      /// <since>6.0</since>
       public bool Show { get; private set; }
     }
   }

@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 using Rhino.Geometry;
 using System;
+using System.Collections.Generic;
 
 #if RHINO_SDK
 namespace Rhino.DocObjects
@@ -15,8 +16,10 @@ namespace Rhino.DocObjects
       IsCustomObject = custom; 
     }
 
+    /// <since>6.0</since>
     public bool IsCustomObject { get; private set; }
 
+    /// <since>5.0</since>
     public Mesh MeshGeometry
     {
       get
@@ -56,10 +59,30 @@ namespace Rhino.DocObjects
       return mesh;
     }
 
+    /// <since>5.0</since>
     public Mesh DuplicateMeshGeometry()
     {
       var rc = DuplicateGeometry() as Mesh;
       return rc;
+    }
+
+    /// <summary>
+    /// Examines mesh objects and logs a description of what it finds right or wrong.
+    /// The various properties the function checks for are described in MeshCheckParameters.
+    /// </summary>
+    /// <param name="meshObjects">A collection of mesh objects.</param>
+    /// <param name="textLog">The text log.</param>
+    /// <param name="parameters">The mesh checking parameter and results.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public static bool CheckMeshes(IEnumerable<MeshObject> meshObjects, Rhino.FileIO.TextLog textLog, ref MeshCheckParameters parameters)
+    {
+      if (null == textLog)
+        throw new ArgumentNullException(nameof(textLog));
+      var rharray = new Runtime.InternalRhinoObjectArray(meshObjects);
+      IntPtr ptr_const_array = rharray.NonConstPointer();
+      IntPtr ptr_textlog = textLog.NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoCheckMesh2(ptr_const_array, ptr_textlog, ref parameters);
     }
 
     internal override CommitGeometryChangesFunc GetCommitFunc()
@@ -91,6 +114,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     ~CustomMeshObject() { Dispose(false); }
+    /// <since>5.0</since>
     public new void Dispose()
     {
       base.Dispose();

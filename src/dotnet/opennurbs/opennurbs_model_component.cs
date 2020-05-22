@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
 using Rhino.Geometry;
@@ -13,7 +13,7 @@ namespace Rhino.DocObjects
   public abstract class ModelComponent : CommonObject
   {
     /// <summary>
-    /// Allows constuction from inheriting classes.
+    /// Allows construction from inheriting classes.
     /// </summary>
     internal ModelComponent()
     { }
@@ -32,6 +32,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="currentRemainder">The current remainder value.</param>
     /// <returns>The updated remainder value.</returns>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint DataCRC(uint currentRemainder)
     {
@@ -71,6 +72,7 @@ namespace Rhino.DocObjects
     /// <item>ON_DimStyle::DefaultMillimeterArchitecture</item>
     /// </list>
     /// </summary>
+    /// <since>6.0</since>
     public bool IsSystemComponent
     {
       get
@@ -88,6 +90,7 @@ namespace Rhino.DocObjects
     /// When setting the ID failed.
     /// This usually happened because the instance ID is already locked.
     /// </exception>
+    /// <since>6.0</since>
     public virtual Guid Id
     {
       get
@@ -110,6 +113,7 @@ namespace Rhino.DocObjects
     /// Resets the HasId property of the model component to false, if possible.
     /// </summary>
     /// <exception cref="InvalidOperationException">If the ID is locked.</exception>
+    /// <since>6.0</since>
     public void ClearId()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -123,6 +127,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component has an ID.
     /// </summary>
+    /// <since>6.0</since>
     public bool HasId
     {
       get
@@ -135,6 +140,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component ID is already locked.
     /// </summary>
+    /// <since>6.0</since>
     public bool IdIsLocked
     {
       get
@@ -147,6 +153,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Locks the component Id property.
     /// </summary>
+    /// <since>6.0</since>
     public void LockId()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -159,8 +166,9 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// When setting the Index failed.
-    /// This usually happend because the instance Index is already locked.
+    /// This usually happens because the instance Index is already locked.
     /// </exception>
+    /// <since>6.0</since>
     public virtual int Index
     {
       get
@@ -183,6 +191,7 @@ namespace Rhino.DocObjects
     /// Resets the HasIndex property of the model component to false, if possible.
     /// </summary>
     /// <exception cref="InvalidOperationException">If the index is locked.</exception>
+    /// <since>6.0</since>
     public void ClearIndex()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -196,6 +205,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component has an Index.
     /// </summary>
+    /// <since>6.0</since>
     public bool HasIndex
     {
       get
@@ -208,6 +218,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component Index is already locked.
     /// </summary>
+    /// <since>6.0</since>
     public bool IndexIsLocked
     {
       get
@@ -220,6 +231,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Locks the component Index property.
     /// </summary>
+    /// <since>6.0</since>
     public void LockIndex()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -229,6 +241,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the component status of the model component.
     /// </summary>
+    /// <since>6.0</since>
     public virtual ComponentStatus ComponentStatus
     {
       get
@@ -248,6 +261,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// The component status itself can be locked. This returns an indication.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsComponentStatusLocked
     {
       get
@@ -262,6 +276,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="name">The string to validate.</param>
     /// <returns>true if the string is a valid model component name, false otherwise.</returns>
+    /// <since>6.15</since>
     public static bool IsValidComponentName(string name)
     {
       return UnsafeNativeMethods.ON_ModelComponent_IsValidComponentName(name);
@@ -272,13 +287,14 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// When setting the Name failed.
-    /// This usually happend because the instance Name is already locked.
+    /// This usually happens because the instance Name is already locked.
     /// </exception>
     /// <example>
     /// <code source='examples\vbnet\ex_hatchcurve.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public virtual string Name
     {
       get
@@ -308,6 +324,7 @@ namespace Rhino.DocObjects
     /// Resets the HasName property of the model component to false, if possible.
     /// </summary>
     /// <exception cref="InvalidOperationException">If the name is locked.</exception>
+    /// <since>6.0</since>
     public void ClearName()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -321,6 +338,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component has a Name.
     /// </summary>
+    /// <since>6.0</since>
     public bool HasName
     {
       get
@@ -333,6 +351,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns a value indicating whether the component Name is already locked.
     /// </summary>
+    /// <since>6.0</since>
     public bool NameIsLocked
     {
       get
@@ -345,6 +364,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Locks the component Name property.
     /// </summary>
+    /// <since>6.0</since>
     public void LockName()
     {
       IntPtr non_const_ptr = NonConstPointer();
@@ -354,6 +374,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the name of a component that is deleted.
     /// </summary>
+    /// <since>6.2</since>
     public string DeletedName
     {
       get
@@ -371,7 +392,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// A value identifing the model that manages this component.
+    /// A value identifying the model that manages this component.
     /// </summary>
     /// <remarks>
     /// If the component is being managed by a model, this value identifies the model.
@@ -379,6 +400,7 @@ namespace Rhino.DocObjects
     /// Typically this value is set and locked by the code that adds a component to a model.
     /// This value is not saved in .3dm archives.
     /// </remarks>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public virtual uint ModelSerialNumber
     {
@@ -397,6 +419,7 @@ namespace Rhino.DocObjects
     /// Typically this value is set and locked by the code that adds a component to a model.
     /// This value is not saved in .3dm archives.
     /// </remarks>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public virtual uint ReferenceModelSerialNumber
     {
@@ -409,13 +432,14 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// When a component is in a model as part of the information required for a linked instance definition,
-    /// this value identifies the the linked instance definition reference model.
+    /// this value identifies the linked instance definition reference model.
     /// </summary>
     /// <remarks>
     /// Reference components are not saved in .3dm archives. 
     /// Typically this value is set and locked by the code that adds a component to a model.
     /// This value is not saved in .3dm archives.
     /// </remarks>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public virtual uint InstanceDefinitionModelSerialNumber
     {
@@ -430,6 +454,7 @@ namespace Rhino.DocObjects
     /// Gets the <see cref="ModelComponentType"/> for this object.
     /// Useful in switch statements.
     /// </summary>
+    /// <since>6.0</since>
     public abstract ModelComponentType ComponentType { get; }
 
     // Provides the default copying behavior using ON_Object_Duplicate.
@@ -456,6 +481,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns>true with render materials and model geometry; false otherwise.</returns>
+    /// <since>6.0</since>
     public static bool ModelComponentTypeRequiresUniqueName(ModelComponentType type)
     {
       return UnsafeNativeMethods.ON_ModelComponent_RequiresUniqueName(type);
@@ -466,6 +492,7 @@ namespace Rhino.DocObjects
     /// This is currently true with groups; false otherwise.
     /// </summary>
     /// <param name="type">True if the component ignores case.</param>
+    /// <since>6.0</since>
     public static bool ModelComponentTypeIgnoresCase(ModelComponentType type)
     {
       return UnsafeNativeMethods.ON_ModelComponent_UniqueNameIgnoresCase(type);
@@ -475,6 +502,7 @@ namespace Rhino.DocObjects
     /// Informs the developer if a particular model component type will include the hash of the parent.
     /// </summary>
     /// <param name="type">True if the component includes parent hash.</param>
+    /// <since>6.0</since>
     public static bool ModelComponentTypeIncludesParent(ModelComponentType type)
     {
       return UnsafeNativeMethods.ON_ModelComponent_UniqueNameIncludesParent(type);

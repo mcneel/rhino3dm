@@ -27,6 +27,7 @@ namespace Rhino.Geometry
     /// <param name="t1">Parameter on first curve close to desired solution.</param>
     /// <param name="t2">Parameter on second curve closet to desired solution.</param>
     /// <returns>Valid circle on success, Circle.Unset on failure.</returns>
+    /// <since>5.0</since>
     public static Circle TryFitCircleTT(Curve c1, Curve c2, double t1, double t2)
     {
       if (c1 == null) { throw new ArgumentNullException("c1"); }
@@ -52,6 +53,7 @@ namespace Rhino.Geometry
     /// <param name="t2">Parameter on second curve closet to desired solution.</param>
     /// <param name="t3">Parameter on third curve close to desired solution.</param>
     /// <returns>Valid circle on success, Circle.Unset on failure.</returns>
+    /// <since>5.0</since>
     public static Circle TryFitCircleTTT(Curve c1, Curve c2, Curve c3, double t1, double t2, double t3)
     {
       if (c1 == null) { throw new ArgumentNullException("c1"); }
@@ -79,6 +81,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a circle with Unset components.
     /// </summary>
+    /// <since>5.0</since>
     static public Circle Unset
     {
       get
@@ -93,6 +96,7 @@ namespace Rhino.Geometry
     /// Initializes a circle with center (0,0,0) in the world XY plane.
     /// </summary>
     /// <param name="radius">Radius of circle, should be a positive number.</param>
+    /// <since>5.0</since>
     public Circle(double radius) : this(Plane.WorldXY, radius) { }
 
     /// <summary>
@@ -105,6 +109,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addcircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Circle(Plane plane, double radius)
     {
       m_plane = plane;
@@ -121,6 +126,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addtruncatedcone.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtruncatedcone.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Circle(Point3d center, double radius)
     {
       m_plane = Plane.WorldXY;
@@ -132,6 +138,7 @@ namespace Rhino.Geometry
     /// Initializes a circle from an arc.
     /// </summary>
     /// <param name="arc">Arc that defines the plane and radius.</param>
+    /// <since>5.0</since>
     public Circle(Arc arc)
     {
       m_plane = arc.Plane;
@@ -144,6 +151,7 @@ namespace Rhino.Geometry
     /// <param name="point1">The start/end of the circle is at point1.</param>
     /// <param name="point2">Second point on the circle.</param>
     /// <param name="point3">Third point on the circle.</param>
+    /// <since>5.0</since>
     public Circle(Point3d point1, Point3d point2, Point3d point3)
       : this()
     {
@@ -156,6 +164,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Plane for circle.</param>
     /// <param name="center">Center point override.</param>
     /// <param name="radius">Radius of circle (should be a positive value).</param>
+    /// <since>5.0</since>
     public Circle(Plane plane, Point3d center, double radius)
     {
       m_plane = plane;
@@ -171,6 +180,7 @@ namespace Rhino.Geometry
     /// <param name="tangentAtP">Tangent vector at start.</param>
     /// <param name="pointOnCircle">Point coincident with desired circle.</param>
     /// <remarks>May create an Invalid circle</remarks>
+    /// <since>5.0</since>
     public Circle(Point3d startPoint, Vector3d tangentAtP, Point3d pointOnCircle)
       : this()
     {
@@ -185,6 +195,7 @@ namespace Rhino.Geometry
     /// <summary> 
     /// A valid circle has radius larger than 0.0 and a base plane which is must also be valid.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -199,6 +210,7 @@ namespace Rhino.Geometry
     /// Gets or sets the radius of this circle. 
     /// Radii should be positive values.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius
     {
       get { return m_radius; }
@@ -209,6 +221,7 @@ namespace Rhino.Geometry
     /// Gets or sets the diameter (radius * 2.0) of this circle. 
     /// Diameters should be positive values.
     /// </summary>
+    /// <since>5.0</since>
     public double Diameter
     {
       get { return m_radius * 2.0; }
@@ -218,6 +231,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the plane of the circle.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_plane; }
@@ -227,6 +241,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the center point of this circle.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       // David asks : since Point3d is a value type, can't we just return the origin directly?
@@ -237,6 +252,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the normal vector for this circle.
     /// </summary>
+    /// <since>5.0</since>
     public Vector3d Normal
     {
       get { return m_plane.ZAxis; }
@@ -245,6 +261,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the circumference of this circle.
     /// </summary>
+    /// <since>5.0</since>
     public double Circumference
     {
       get
@@ -275,6 +292,7 @@ namespace Rhino.Geometry
     /// Gets the circle's 3d axis aligned bounding box.
     /// </summary>
     /// <returns>3d bounding box.</returns>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       // David changed this on april 16th 2010, we need to provide tight boundingboxes for atomic types.
@@ -342,6 +360,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Plane.</param>
     /// <param name="tolerance">Tolerance to use.</param>
     /// <returns>true if the circle plane is co-planar with the given plane within tolerance.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool IsInPlane(Plane plane, double tolerance)
     {
@@ -354,6 +373,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Parameter of point to evaluate.</param>
     /// <returns>The point on the circle at the given parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -366,6 +386,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Parameter of tangent to evaluate.</param>
     /// <returns>The tangent at the circle at the given parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d TangentAt(double t)
     {
@@ -380,6 +401,7 @@ namespace Rhino.Geometry
     /// <param name="derivative">Which order of derivative is wanted.</param>
     /// <param name="t">Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.</param>
     /// <returns>The derivative of the circle at the given parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d DerivativeAt(int derivative, double t)
     {
@@ -457,6 +479,7 @@ namespace Rhino.Geometry
     /// <param name="testPoint">Point to project onto the circle.</param>
     /// <param name="t">Parameter on circle closes to testPoint.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool ClosestParameter(Point3d testPoint, out double t)
     {
@@ -472,6 +495,7 @@ namespace Rhino.Geometry
     /// The point on the circle that is closest to testPoint or
     /// Point3d.Unset on failure.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -484,14 +508,15 @@ namespace Rhino.Geometry
 
     #region transformation methods
     /// <summary>
-    /// Transforms this circle using an xform matrix. 
+    /// Transforms this circle using an transformation matrix. 
     /// </summary>
     /// <param name="xform">Transformation to apply.</param>
     /// <returns>true on success, false on failure.</returns>
     /// <remarks>
-    /// Circles may not be transformed accurately if the xform defines a 
-    /// non-euclidian transformation.
+    /// Circles may not be transformed accurately if the transformation defines a 
+    /// non-euclidean transformation.
     /// </remarks>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       return UnsafeNativeMethods.ON_Circle_Transform(ref this, ref xform);
@@ -504,6 +529,7 @@ namespace Rhino.Geometry
     /// <param name="cosAngle">The value returned by Math.Cos(angle) to compose the rotation.</param>
     /// <param name="axis">A rotation axis.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axis)
     {
       return m_plane.Rotate(sinAngle, cosAngle, axis);
@@ -517,6 +543,7 @@ namespace Rhino.Geometry
     /// <param name="axis">A rotation direction.</param>
     /// <param name="point">A rotation base point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double sinAngle, double cosAngle, Vector3d axis, Point3d point)
     {
       return m_plane.Rotate(sinAngle, cosAngle, axis, point);
@@ -528,6 +555,7 @@ namespace Rhino.Geometry
     /// <param name="angle">Angle (in radians) of the rotation.</param>
     /// <param name="axis">Rotation axis.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angle, Vector3d axis)
     {
       return m_plane.Rotate(angle, axis);
@@ -540,6 +568,7 @@ namespace Rhino.Geometry
     /// <param name="axis">Rotation axis.</param>
     /// <param name="point">Rotation anchor point.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angle, Vector3d axis, Point3d point)
     {
       return m_plane.Rotate(angle, axis, point);
@@ -550,6 +579,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="delta">Translation vector.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Translate(Vector3d delta)
     {
       return m_plane.Translate(delta);
@@ -560,6 +590,7 @@ namespace Rhino.Geometry
     /// Reverse the orientation of the circle. Changes the domain from [a,b]
     /// to [-b,-a].
     /// </summary>
+    /// <since>5.0</since>
     public void Reverse()
     {
       m_plane.YAxis = -m_plane.YAxis;
@@ -571,6 +602,7 @@ namespace Rhino.Geometry
     /// This amounts to the same as calling NurbsCurve.CreateFromCircle().
     /// </summary>
     /// <returns>A nurbs curve representation of this circle or null if no such representation could be made.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -579,11 +611,12 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Create a uniform non-ratonal cubic NURBS approximation of a circle.
+    /// Create a uniform non-rational cubic NURBS approximation of a circle.
     /// </summary>
     /// <param name="degree">&gt;=1</param>
     /// <param name="cvCount">cv count &gt;=5</param>
     /// <returns>NURBS curve approximation of a circle on success</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve(int degree, int cvCount)
     {
@@ -596,6 +629,7 @@ namespace Rhino.Geometry
     /// <param name="points">The points through which to fit.</param>
     /// <param name="circle">The resulting circle on success.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.2</since>
     public static bool TryFitCircleToPoints(IEnumerable<Point3d> points, out Circle circle)
     {
       circle = new Circle();
@@ -695,6 +729,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Circle other, double epsilon)
     {

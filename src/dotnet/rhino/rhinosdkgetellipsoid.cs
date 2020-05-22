@@ -11,6 +11,7 @@ namespace Rhino.Input.Custom
   {
     IntPtr m_ptr_argsrhinogetellipse;
 
+    /// <since>7.0</since>
     public GetEllipsoid()
     {
       m_ptr_argsrhinogetellipse = UnsafeNativeMethods.CArgsRhinoGetEllipse_New();
@@ -30,6 +31,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -56,6 +58,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Indicates the user wants the ellipsoid foci marked with point objects.
     /// </summary>
+    /// <since>7.0</since>
     public bool MarkFoci
     {
       get
@@ -73,6 +76,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Indicates the ellipsoid was created from foci.
     /// </summary>
+    /// <since>7.0</since>
     public bool IsModeFromFoci
     {
       get
@@ -85,6 +89,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Returns the first point. If in "from foci" mode, then this is the first foci point.
     /// </summary>
+    /// <since>7.0</since>
     public Geometry.Point3d FirstPoint
     {
       get
@@ -99,6 +104,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Returns the second point. If in "from foci" mode, then this is the second foci point.
     /// </summary>
+    /// <since>7.0</since>
     public Geometry.Point3d SecondPoint
     {
       get
@@ -115,6 +121,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="ellipsoid">The truncated cone in NURB form.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result Get(out Geometry.NurbsSurface ellipsoid)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -131,14 +138,31 @@ namespace Rhino.Input.Custom
     /// <param name="aroundFaces">The number of faces in the around direction</param>
     /// <param name="ellipsoid">The ellipsoid in Mesh form.</param>
     /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
     public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, out Geometry.Mesh ellipsoid)
+    {
+      bool quadCaps = false;
+      return GetMesh(ref verticalFaces, ref aroundFaces, ref quadCaps, out ellipsoid);
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a mesh ellipsoid.
+    /// </summary>
+    /// <param name="verticalFaces">The number of faces in the vertical direction.</param>
+    /// <param name="aroundFaces">The number of faces in the around direction</param>
+    /// <param name="quadCaps">Set true to create quad faces at the caps, false for triangles.</param>
+    /// <param name="ellipsoid">The ellipsoid in Mesh form.</param>
+    /// <returns>The result of the getting operation.</returns>
+    /// <since>7.0</since>
+    public Commands.Result GetMesh(ref int verticalFaces, ref int aroundFaces, ref bool quadCaps, out Geometry.Mesh ellipsoid)
     {
       IntPtr ptr_this = NonConstPointer();
       ellipsoid = new Geometry.Mesh();
       IntPtr ptr_ellipsoid = ellipsoid.NonConstPointer();
-      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshEllipsoid(ptr_ellipsoid, ref verticalFaces, ref aroundFaces, ptr_this);
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshEllipsoid(ptr_ellipsoid, ref verticalFaces, ref aroundFaces, ref quadCaps, ptr_this);
       return (Commands.Result)rc;
     }
+
   }
 }
 #endif

@@ -6,7 +6,7 @@ namespace Rhino.Geometry
 {
   /// <summary>
   /// Represents the value of a plane, two angles and a radius in
-  /// a subcurve of a three-dimensional circle.
+  /// a sub-curve of a three-dimensional circle.
   /// 
   /// <para>The curve is parameterized by an angle expressed in radians. For an IsValid arc
   /// the total subtended angle AngleRadians() = Domain()(1) - Domain()(0) must satisfy
@@ -15,7 +15,7 @@ namespace Rhino.Geometry
   /// <para>The parameterization of the Arc is inherited from the Circle it is derived from.
   /// In particular</para>
   /// <para>t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis</para>
-  /// <para>where xaxis and yaxis, (part of Circle.Plane) form an othonormal frame of the plane
+  /// <para>where xaxis and yaxis, (part of Circle.Plane) form an orthonormal frame of the plane
   /// containing the circle.</para>
   /// </summary>
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 152)]
@@ -40,6 +40,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets an Arc with Unset components.
     /// </summary>
+    /// <since>5.0</since>
     public static Arc Unset
     {
       get
@@ -55,6 +56,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="circle">Circle to base arc upon.</param>
     /// <param name="angleRadians">Sweep angle of arc (in radians)</param>
+    /// <since>5.0</since>
     public Arc(Circle circle, double angleRadians)
       : this()
     {
@@ -68,6 +70,7 @@ namespace Rhino.Geometry
     /// <param name="angleIntervalRadians">
     /// Increasing angle interval in radians with angleIntervalRadians.Length() &lt;= 2.0*Math.PI.
     /// </param>
+    /// <since>5.0</since>
     public Arc(Circle circle, Interval angleIntervalRadians)
       : this()
     {
@@ -80,6 +83,7 @@ namespace Rhino.Geometry
     /// <param name="plane">The plane of the arc (arc center will be located at plane origin)</param>
     /// <param name="radius">Radius of arc.</param>
     /// <param name="angleRadians">Sweep angle of arc (in radians)</param>
+    /// <since>5.0</since>
     public Arc(Plane plane, double radius, double angleRadians)
       : this()
     {
@@ -92,6 +96,7 @@ namespace Rhino.Geometry
     /// <param name="center">Center point of arc.</param>
     /// <param name="radius">Radius of arc.</param>
     /// <param name="angleRadians">Sweep angle of arc (in radians)</param>
+    /// <since>5.0</since>
     public Arc(Point3d center, double radius, double angleRadians)
       : this()
     {
@@ -105,6 +110,7 @@ namespace Rhino.Geometry
     /// <param name="center">Center point for arc.</param>
     /// <param name="radius">Radius of arc.</param>
     /// <param name="angleRadians">Sweep angle of arc (in radians)</param>
+    /// <since>5.0</since>
     public Arc(Plane plane, Point3d center, double radius, double angleRadians)
       : this()
     {
@@ -113,11 +119,12 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Initializes a new arc through three points. If the points are coincident 
-    /// or colinear, this will result in an Invalid arc.
+    /// or co-linear, this will result in an Invalid arc.
     /// </summary>
     /// <param name="startPoint">Start point of arc.</param>
     /// <param name="pointOnInterior">Point on arc interior.</param>
     /// <param name="endPoint">End point of arc.</param>
+    /// <since>5.0</since>
     public Arc(Point3d startPoint, Point3d pointOnInterior, Point3d endPoint)
       : this()
     {
@@ -131,6 +138,7 @@ namespace Rhino.Geometry
     /// <param name="pointA">Start point of arc.</param>
     /// <param name="tangentA">Tangent at start of arc.</param>
     /// <param name="pointB">End point of arc.</param>
+    /// <since>5.0</since>
     public Arc(Point3d pointA, Vector3d tangentA, Point3d pointB)
       : this()
     {
@@ -161,6 +169,7 @@ namespace Rhino.Geometry
     ///	 Radius&gt;0 and 0&lt;AngleRadians()&lt;=2*Math.Pi.
     /// </summary>
     /// <returns>true if the arc is valid.</returns>
+    /// <since>5.0</since>
     public bool IsValid
     {
       get
@@ -173,6 +182,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a value indicating whether or not this arc is a complete circle.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsCircle
     {
       get
@@ -185,6 +195,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the plane in which this arc lies.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_plane; }
@@ -194,6 +205,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the radius of this arc.
     /// </summary>
+    /// <since>5.0</since>
     public double Radius
     {
       get { return m_radius; }
@@ -203,6 +215,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Diameter of this arc.
     /// </summary>
+    /// <since>5.0</since>
     public double Diameter
     {
       get { return m_radius * 2.0; }
@@ -212,6 +225,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the center point for this arc.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Center
     {
       get { return m_plane.Origin; }
@@ -221,6 +235,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the circumference of the circle that is coincident with this arc.
     /// </summary>
+    /// <since>5.0</since>
     public double Circumference
     {
       get { return Math.Abs(2.0 * Math.PI * m_radius); }
@@ -229,6 +244,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the length of the arc. (Length = Radius * (subtended angle in radians)).
     /// </summary>
+    /// <since>5.0</since>
     public double Length
     {
       get { return Math.Abs(Angle * m_radius); }
@@ -237,6 +253,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the start point of the arc.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d StartPoint
     {
       get { return PointAt(m_angle[0]); }
@@ -245,6 +262,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the mid-point of the arc.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d MidPoint
     {
       get { return PointAt(m_angle.Mid); }
@@ -253,6 +271,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the end point of the arc.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d EndPoint
     {
       get { return PointAt(m_angle[1]); }
@@ -263,6 +282,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the angle domain (in Radians) of this arc.
     /// </summary>
+    /// <since>5.0</since>
     public Interval AngleDomain
     {
       get { return m_angle; }
@@ -272,6 +292,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the start angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double StartAngle
     {
       get { return m_angle.T0; }
@@ -281,6 +302,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the end angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double EndAngle
     {
       get { return m_angle.T1; }
@@ -290,6 +312,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double Angle
     {
       get { return m_angle.Length; }
@@ -300,6 +323,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the start angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double StartAngleDegrees
     {
       get { return RhinoMath.ToDegrees(StartAngle); }
@@ -309,6 +333,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the end angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double EndAngleDegrees
     {
       get { return RhinoMath.ToDegrees(EndAngle); }
@@ -318,6 +343,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment.
     /// </summary>
+    /// <since>5.0</since>
     public double AngleDegrees
     {
       get { return RhinoMath.ToDegrees(Angle); }
@@ -325,12 +351,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sets arc's angle domain (in radians) as a subdomain of the circle.
+    /// Sets arc's angle domain (in radians) as a sub-domain of the circle.
     /// </summary>
     /// <param name="domain">
     /// 0 &lt; domain[1] - domain[0] &lt;= 2.0 * RhinoMath.Pi.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Trim(Interval domain)
     {
       bool rc = false;
@@ -366,6 +393,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">An arc.</param>
     /// <returns>true if obj is equal to this arc; otherwise false.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public bool Equals(Arc other)
     {
@@ -388,6 +416,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first arc.</param>
     /// <param name="b">The second arc.</param>
     /// <returns>true if all values of the two arcs are exactly equal; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator ==(Arc a, Arc b)
     {
       return a.Equals(b);
@@ -399,6 +428,7 @@ namespace Rhino.Geometry
     /// <param name="a">The first arc.</param>
     /// <param name="b">The second arc.</param>
     /// <returns>true if any value of the two arcs differ; otherwise false.</returns>
+    /// <since>5.0</since>
     public static bool operator !=(Arc a, Arc b)
     {
       return !a.Equals(b);
@@ -408,6 +438,7 @@ namespace Rhino.Geometry
     /// Computes the 3D axis aligned bounding box for this arc.
     /// </summary>
     /// <returns>Bounding box of arc.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox BoundingBox()
     {
@@ -425,6 +456,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Arc parameter to evaluate.</param>
     /// <returns>The point at the given parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d PointAt(double t)
     {
@@ -436,6 +468,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="t">Parameter of tangent to evaluate.</param>
     /// <returns>The tangent at the arc at the given parameter.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Vector3d TangentAt(double t)
     {
@@ -453,6 +486,7 @@ namespace Rhino.Geometry
     /// of the arc, then the starting point of the arc is
     /// (arc.Domain()[0]) returned. If no parameter could be found, 
     /// RhinoMath.UnsetValue is returned.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public double ClosestParameter(Point3d testPoint)
     {
@@ -469,6 +503,7 @@ namespace Rhino.Geometry
     /// the center of the arc, then the starting point of the arc is returned.
     /// UnsetPoint on failure.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Point3d ClosestPoint(Point3d testPoint)
     {
@@ -481,6 +516,7 @@ namespace Rhino.Geometry
     /// Reverses the orientation of the arc. Changes the domain from [a,b]
     /// to [-b,-a].
     /// </summary>
+    /// <since>5.0</since>
     public void Reverse()
     {
       m_angle.Reverse();
@@ -492,8 +528,9 @@ namespace Rhino.Geometry
     /// Transforms the arc using a Transformation matrix.
     /// </summary>
     /// <param name="xform">Transformations to apply. 
-    /// Note that arcs cannot handle non-euclidian transformations.</param>
+    /// Note that arcs cannot handle non-euclidean transformations.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       return UnsafeNativeMethods.ON_Arc_Transform(ref this, ref xform);
@@ -504,6 +541,7 @@ namespace Rhino.Geometry
     /// This amounts to the same as calling NurbsCurve.CreateFromArc().
     /// </summary>
     /// <returns>A nurbs curve representation of this arc or null if no such representation could be made.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
@@ -516,6 +554,7 @@ namespace Rhino.Geometry
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
     /// <returns></returns>
+    /// <since>5.4</since>
     [ConstOperation]
     public bool EpsilonEquals(Arc other, double epsilon)
     {
@@ -526,11 +565,12 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Create a uniform non-ratonal cubic NURBS approximation of an arc.
+    /// Create a uniform non-rational cubic NURBS approximation of an arc.
     /// </summary>
     /// <param name="degree">&gt;=1</param>
     /// <param name="cvCount">cv count &gt;=5</param>
     /// <returns>NURBS curve approximation of an arc on success</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public NurbsCurve ToNurbsCurve(int degree, int cvCount)
     {

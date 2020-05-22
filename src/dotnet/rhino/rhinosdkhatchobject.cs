@@ -20,6 +20,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_replacehatchpattern.cs' lang='cs'/>
     /// <code source='examples\py\ex_replacehatchpattern.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Hatch HatchGeometry
     {
       get { return Geometry as Hatch; }
@@ -30,6 +31,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="hatch">The replacement hatch geometry.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public bool SetHatchGeometry(Hatch hatch)
     {
       if (null == hatch || !hatch.IsValid) return false;

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Rhino.Display
 {
   /// <summary>
-  /// Defines enmerated constants for display blend modes.
+  /// Defines enumerated constants for display blend modes.
   /// </summary>
   public enum BlendMode
   {
@@ -81,6 +81,7 @@ namespace Rhino.Display
     /// Constructs a DisplayBitmap from an existing bitmap.
     /// </summary>
     /// <param name="bitmap">The original bitmap.</param>
+    /// <since>5.0</since>
     public DisplayBitmap(System.Drawing.Bitmap bitmap)
     {
       IntPtr hbmp = bitmap.GetHbitmap();
@@ -97,6 +98,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="path">A location from which to load the file.</param>
     /// <returns>The new display bitmap, or null on error.</returns>
+    /// <since>5.0</since>
     public static DisplayBitmap Load(string path)
     {
       IntPtr ptr_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New2(path);
@@ -107,13 +109,14 @@ namespace Rhino.Display
 
     /// <summary>
     /// Sets blending function used to determine how this bitmap is blended
-    /// with the current framebuffer color.  The default setting is SourceAlpha
+    /// with the current frame buffer color.  The default setting is SourceAlpha
     /// for source and OneMinusSourceAlpha for destination.  See OpenGL's
     /// glBlendFunc for details.
     /// <para>http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml</para>
     /// </summary>
     /// <param name="source">The source blend mode.</param>
     /// <param name="destination">The destination blend mode.</param>
+    /// <since>5.0</since>
     public void SetBlendFunction(BlendMode source, BlendMode destination)
     {
       UnsafeNativeMethods.CRhCmnDisplayBitmap_SetBlendFunction(m_ptr_display_bmp, (int)source, (int)destination);
@@ -124,6 +127,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="source">The source blend mode is assigned to this out parameter.</param>
     /// <param name="destination">The destination blend mode is assigned to this out parameter.</param>
+    /// <since>5.0</since>
     public void GetBlendModes(out BlendMode source, out BlendMode destination)
     {
       int s = 0, d = 0;
@@ -140,6 +144,7 @@ namespace Rhino.Display
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -174,6 +179,7 @@ namespace Rhino.Display
     internal Geometry.Point3d[] m_points;
     internal int[] m_colors_argb;
 
+    /// <since>5.0</since>
     public DisplayBitmapDrawList()
     {
       MaximumCachedSortLists = 10;
@@ -181,6 +187,7 @@ namespace Rhino.Display
     }
 
     Geometry.BoundingBox m_bbox = Geometry.BoundingBox.Unset;
+    /// <since>5.0</since>
     public Geometry.BoundingBox BoundingBox
     {
       get{ return m_bbox; }
@@ -192,12 +199,14 @@ namespace Rhino.Display
     /// may get better performance by setting this value to a certain percentage
     /// of the point count.
     /// </summary>
+    /// <since>5.0</since>
     public int MaximumCachedSortLists { get; set; }
 
     /// <summary>
     /// Angle in radians used to determine if an index list is "parallel enough"
     /// to a viewports camera angle. Default is 0.0873 radians (5 degrees)
     /// </summary>
+    /// <since>5.0</since>
     public double SortAngleTolerance { get; set; }
 
     
@@ -231,6 +240,7 @@ namespace Rhino.Display
       return 0;
     }
 
+    /// <since>5.0</since>
     public int[] Sort(Geometry.Vector3d cameraDirection)
     {
       DirectedOrder d = null;
@@ -262,11 +272,13 @@ namespace Rhino.Display
       return indices;
     }
 
+    /// <since>5.0</since>
     public void SetPoints(IEnumerable<Geometry.Point3d> points)
     {
       SetPoints(points, System.Drawing.Color.White);
     }
 
+    /// <since>5.0</since>
     public void SetPoints(IEnumerable<Geometry.Point3d> points, System.Drawing.Color blendColor)
     {
       m_order = new LinkedList<DirectedOrder>();
@@ -276,6 +288,7 @@ namespace Rhino.Display
       m_bbox = new Geometry.BoundingBox(m_points);
     }
 
+    /// <since>5.0</since>
     public void SetPoints(IEnumerable<Rhino.Geometry.Point3d> points, IEnumerable<System.Drawing.Color> colors)
     {
       var _points = new List<Geometry.Point3d>(points);
@@ -310,6 +323,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new instance of the <see cref="Particle"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public Particle()
     {
       Color = System.Drawing.Color.White;
@@ -318,12 +332,14 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the parent particle system of this particle.
     /// </summary>
+    /// <since>5.0</since>
     public ParticleSystem ParentSystem { get; internal set; }
 
     /// <summary>
     /// Index in ParentSystem for this Particle. Can change when the particle
     /// system is modified.
     /// </summary>
+    /// <since>5.0</since>
     public int Index
     {
       get
@@ -339,6 +355,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>3d Location of the Particle.</summary>
+    /// <since>5.0</since>
     public Point3d Location
     {
       get { return m_location; }
@@ -353,15 +370,19 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>5.0</since>
     public float Size { get; set; }
 
+    /// <since>5.0</since>
     public System.Drawing.Color Color { get; set; }
 
+    /// <since>5.0</since>
     public int DisplayBitmapIndex { get; set; }
 
     /// <summary>
     /// Base class implementation does nothing.
     /// </summary>
+    /// <since>5.0</since>
     public virtual void Update(){}
   }
 
@@ -377,10 +398,13 @@ namespace Rhino.Geometry
     internal float[] m_sizes = new float[0];
     internal int[] m_display_bitmap_ids = new int[0];
 
+    /// <since>5.0</since>
     public bool DrawRequiresDepthSorting { get; set; }
+    /// <since>5.0</since>
     public bool DisplaySizesInWorldUnits { get; set; }
 
 
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -405,6 +429,7 @@ namespace Rhino.Geometry
     /// true if this particle was added to the system or if is already in the system.
     /// false if the particle already exists in a different system.
     /// </returns>
+    /// <since>5.0</since>
     public virtual bool Add(Particle particle)
     {
       ParticleSystem existing_system = particle.ParentSystem;
@@ -444,6 +469,7 @@ namespace Rhino.Geometry
     /// Removes a single particle from this system.
     /// </summary>
     /// <param name="particle">The particle to be removed.</param>
+    /// <since>5.0</since>
     public virtual void Remove(Particle particle)
     {
       int index = particle.Index;
@@ -465,6 +491,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Remove all Particles from this system.
     /// </summary>
+    /// <since>5.0</since>
     public virtual void Clear()
     {
       for (int i = 0; i < m_particles.Count; i++)
@@ -484,6 +511,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Calls Update on every particle in the system.
     /// </summary>
+    /// <since>5.0</since>
     public virtual void Update()
     {
       foreach (var particle in this)
@@ -546,6 +574,7 @@ namespace Rhino.Geometry
     }
 
     #region enumerable support
+    /// <since>5.0</since>
     public IEnumerator<Particle> GetEnumerator()
     {
       for( int i=0; i<m_particles.Count; i++ )
@@ -556,6 +585,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       return GetEnumerator();

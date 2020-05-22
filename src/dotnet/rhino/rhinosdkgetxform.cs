@@ -8,10 +8,12 @@ using Rhino.Input.Custom;
 namespace Rhino.Collections
 {
   /// <summary>
+  /// A collection of Rhino object, grip objects, and the Rhino objects that owns the grips.
   /// Used by the TransformCommand and GetTransform classes.
   /// </summary>
   public class TransformObjectList : IDisposable
   {
+    /// <since>5.0</since>
     public TransformObjectList()
     {
       m_ptr = UnsafeNativeMethods.CRhinoXformObjectList_New();
@@ -23,7 +25,7 @@ namespace Rhino.Collections
       m_parent = parent;
     }
 
-#region IDisposable/Pointer handling
+    #region IDisposable/Pointer handling
 
     readonly Input.Custom.GetTransform m_parent;
     IntPtr m_ptr;
@@ -51,6 +53,7 @@ namespace Rhino.Collections
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -65,7 +68,7 @@ namespace Rhino.Collections
       }
       m_ptr = IntPtr.Zero;
     }
-#endregion
+    #endregion
 
     /// <summary>
     /// Gets the bounding box of all of the objects that this list contains.
@@ -75,6 +78,7 @@ namespace Rhino.Collections
     /// <returns>
     /// Unset BoundingBox if this list is empty.
     /// </returns>
+    /// <since>5.0</since>
     public BoundingBox GetBoundingBox(bool regularObjects, bool grips)
     {
       BoundingBox rc = BoundingBox.Unset;
@@ -83,6 +87,7 @@ namespace Rhino.Collections
       return rc;
     }
 
+    /// <since>5.0</since>
     public bool DisplayFeedbackEnabled
     {
       get
@@ -97,6 +102,7 @@ namespace Rhino.Collections
       }
     }
 
+    /// <since>5.0</since>
     public bool UpdateDisplayFeedbackTransform(Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -104,6 +110,7 @@ namespace Rhino.Collections
     }
 
     /// <summary> Remove all elements from this list </summary>
+    /// <since>5.10</since>
     public void Clear()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -111,6 +118,7 @@ namespace Rhino.Collections
     }
 
     /// <summary> Number of elements in this list </summary>
+    /// <since>5.10</since>
     public int Count
     {
       get
@@ -121,6 +129,7 @@ namespace Rhino.Collections
     }
 
     /// <summary> Number of elements in grip list </summary>
+    /// <since>6.0</since>
     public int GripCount
     {
       get
@@ -131,6 +140,7 @@ namespace Rhino.Collections
     }
 
     /// <summary> Number of elements in grip owner list </summary>
+    /// <since>6.0</since>
     public int GripOwnerCount
     {
       get
@@ -142,6 +152,7 @@ namespace Rhino.Collections
 
     /// <summary> Add a RhinoObject to this list </summary>
     /// <param name="rhinoObject"></param>
+    /// <since>5.10</since>
     public void Add(DocObjects.RhinoObject rhinoObject)
     {
       IntPtr const_ptr_rhinoobject = rhinoObject.ConstPointer();
@@ -150,9 +161,10 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// Add an ObjRef to this list. Use this to add Polyedges so the references are properly counted
+    /// Add an ObjRef to this list. Use this to add polyedges so the references are properly counted
     /// </summary>
     /// <param name="objref"></param>
+    /// <since>5.10</since>
     public void Add(DocObjects.ObjRef objref)
     {
       IntPtr const_ptr_objref = objref.ConstPointer();
@@ -163,11 +175,12 @@ namespace Rhino.Collections
     /// <summary>
     /// Add objects to list with a GetObject
     /// </summary>
-    /// <param name="go">Setup the GetObject, ie. prompt, geometry filter, allow pre/post select 
+    /// <param name="go">Setup the GetObject, i.e. prompt, geometry filter, allow pre/post select 
     /// before passing it as an argument.</param>
     /// <param name="allowGrips">Specifically allow grips to be selected.  if true, grips must also be included in geometry filter
     /// of the GetObject in order to be selected.</param>
     /// <returns>Number of objects selected.</returns>
+    /// <since>6.0</since>
     public int AddObjects(GetObject go, bool allowGrips)
     {
       IntPtr const_ptr_getobj = go.ConstPointer();
@@ -176,9 +189,31 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// Gets access to the GripObject array of the TransformObjectList object.
+    /// Gets access to the internal RhinoObject array of the TransformObjectList object.
     /// </summary>
-    /// <returns>An array of GripObjects, empty if there were no GripObjects</returns>
+    /// <returns>An array of Rhino objects, or an empty array if there were no Rhino objects.</returns>
+    /// <since>7.0</since>
+    public RhinoObject[] ObjectArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new RhinoObject[0];
+
+      RhinoObject[] rc = new RhinoObject[count];
+      IntPtr const_ptr_this = ConstPointer();
+      for (var i = 0; i < count; i++)
+      {
+        var ptr_grip_owner = UnsafeNativeMethods.CRhinoXformObjectList_GetObject(const_ptr_this, i);
+        rc[i] = RhinoObject.CreateRhinoObjectHelper(ptr_grip_owner);
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets access to the internal GripObject array of the TransformObjectList object.
+    /// </summary>
+    /// <returns>An array of grip objects, or an empty array if there were no grip objects.</returns>
+    /// <since>6.0</since>
     public GripObject[] GripArray()
     {
       int count = GripCount;
@@ -196,10 +231,13 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// Gets access to the  GripOwner array of the TransformObjectList object.
+    /// Gets access to the internal GripOwner array of the TransformObjectList object.
     /// </summary>
-    /// <returns>An array of GripOwner, empty if there were no GripOwners.</returns>
-    /// <remarks>Count may not necessarily equal count of GripObjects from GripArray().</remarks>
+    /// <returns>A
+    /// n array of Rhino objects that are the owners of the grip objects the collection, 
+    /// or an empty array if there were no Rhino objects.
+    /// </returns>
+    /// <since>6.0</since>
     public RhinoObject[] GripOwnerArray()
     {
       int count = GripOwnerCount;
@@ -254,10 +292,11 @@ namespace Rhino.Input.Custom
 
     /// <summary>
     /// Adds any objects you want transformed and grips you want transformed.
-    /// Make sure no duplicates are in the list and that no grip ownwers are
+    /// Make sure no duplicates are in the list and that no grip owners are
     /// passed in as objects.
     /// </summary>
     /// <param name="list">A custom transform object list.</param>
+    /// <since>5.0</since>
     public void AddTransformObjects(Collections.TransformObjectList list)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -275,6 +314,7 @@ namespace Rhino.Input.Custom
     /// <param name="viewport">A Rhino viewport that the user is using.</param>
     /// <param name="point">A point that the user is selecting.</param>
     /// <returns>A transformation matrix value.</returns>
+    /// <since>5.0</since>
     public abstract Transform CalculateTransform(Display.RhinoViewport viewport, Point3d point);
 
     // I think this can be handled in the Get() function in the base class
@@ -286,6 +326,7 @@ namespace Rhino.Input.Custom
     //void OnMouseMove( CRhinoViewport& vp, UINT nFlags, const ON_3dPoint& pt, const CPoint* p );
     //void DynamicDraw( HDC, CRhinoViewport& vp, const ON_3dPoint& pt );
 
+    /// <since>5.0</since>
     public bool HaveTransform
     {
       get
@@ -299,6 +340,7 @@ namespace Rhino.Input.Custom
         UnsafeNativeMethods.CRhinoGetXform_SetHaveTransform(ptr_this, value);
       }
     }
+    /// <since>5.0</since>
     public Transform Transform
     {
       get
@@ -319,6 +361,7 @@ namespace Rhino.Input.Custom
   ON_3dPoint m_basepoint;
     */
     Collections.TransformObjectList m_object_list;
+    /// <since>5.0</since>
     public Collections.TransformObjectList ObjectList
     {
       get
@@ -356,6 +399,7 @@ namespace Rhino.Input.Custom
     /// <para>Call this after having set up options and so on.</para>
     /// </summary>
     /// <returns>The result based on user choice.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public GetResult GetXform()
     {

@@ -19,9 +19,11 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <since>5.0</since>
       public Guid Id { get { return m_id; } }
 
       /// <summary>Full path to this file on disk</summary>
+      /// <since>5.0</since>
       public string Path
       {
         get
@@ -35,6 +37,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public string Name
       {
         get
@@ -48,6 +51,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public bool Close(bool prompt)
       {
         if (prompt)
@@ -61,26 +65,31 @@ namespace Rhino
         return UnsafeNativeMethods.CRhinoUiFile_FileClose(m_id);
       }
 
+      /// <since>5.0</since>
       public bool Save()
       {
         return UnsafeNativeMethods.CRhinoUiFile_FileSave(m_id);
       }
 
+      /// <since>5.0</since>
       public bool SaveAs(string path)
       {
         return UnsafeNativeMethods.CRhinoUiFile_FileSaveAs(m_id, path);
       }
 
+      /// <since>5.0</since>
       public int GroupCount
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_GroupCount(m_id); }
       }
 
+      /// <since>5.0</since>
       public int ToolbarCount
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_ToolbarCount(m_id); }
       }
 
+      /// <since>5.0</since>
       public Toolbar GetToolbar(int index)
       {
         Guid id = UnsafeNativeMethods.CRhinoUiFile_ToolBarID(m_id, index);
@@ -89,6 +98,7 @@ namespace Rhino
         return new Toolbar(this, id);
       }
 
+      /// <since>5.0</since>
       public ToolbarGroup GetGroup(int index)
       {
         Guid id = UnsafeNativeMethods.CRhinoUiFile_GroupID(m_id, index);
@@ -97,6 +107,7 @@ namespace Rhino
         return new ToolbarGroup(this, id);
       }
 
+      /// <since>5.0</since>
       public ToolbarGroup GetGroup(string name)
       {
         int count = GroupCount;
@@ -121,11 +132,13 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <since>5.0</since>
       public Guid Id
       {
         get { return m_id; }
       }
 
+      /// <since>5.0</since>
       public string Name
       {
         get
@@ -139,6 +152,7 @@ namespace Rhino
         }
       }
 
+      /// <since>6.0</since>
       public static Size BitmapSize
       {
         get
@@ -154,6 +168,7 @@ namespace Rhino
         }
       }
 
+      /// <since>6.0</since>
       public static Size TabSize
       {
         get
@@ -181,11 +196,13 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <since>5.0</since>
       public Guid Id
       {
         get { return m_id; }
       }
 
+      /// <since>5.0</since>
       public string Name
       {
         get
@@ -199,6 +216,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public bool Visible
       {
         get
@@ -211,6 +229,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public bool IsDocked
       {
         get
@@ -227,6 +246,7 @@ namespace Rhino
       /// <summary>
       /// Number of open toolbar files
       /// </summary>
+      /// <since>5.0</since>
       public int Count
       {
         get{ return UnsafeNativeMethods.CRhinoUiFile_FileCount(); }
@@ -243,6 +263,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public ToolbarFile FindByName(string name, bool ignoreCase)
       {
         foreach (ToolbarFile tb in this)
@@ -253,6 +274,7 @@ namespace Rhino
         return null;
       }
 
+      /// <since>5.0</since>
       public ToolbarFile FindByPath(string path)
       {
         foreach (ToolbarFile tb in this)
@@ -263,6 +285,7 @@ namespace Rhino
         return null;
       }
 
+      /// <since>5.0</since>
       public ToolbarFile Open(string path)
       {
         if( !System.IO.File.Exists(path) )
@@ -273,24 +296,28 @@ namespace Rhino
         return new ToolbarFile(id);
       }
 
+      /// <since>5.0</since>
       public IEnumerator<ToolbarFile> GetEnumerator()
       {
         int count = Count;
         for( int i=0; i<count; i++ ) yield return this[i];
       }
 
+      /// <since>5.0</since>
       System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
       {
         int count = Count;
         for (int i = 0; i < count; i++) yield return this[i];
       }
 
+      /// <since>5.0</since>
       public static bool SidebarIsVisible
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_SidebarIsVisible(false); }
         set { UnsafeNativeMethods.CRhinoUiFile_ShowSidebar(false, value); }
       }
 
+      /// <since>5.0</since>
       public static bool MruSidebarIsVisible
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_SidebarIsVisible(true); }
@@ -314,6 +341,7 @@ namespace Rhino
         }
       }
       ///<summary>Set to true to enable menu item or false to disable menu item</summary>
+      /// <since>5.11</since>
       public bool Enabled
       {
         set { UnsafeNativeMethods.CRuiUpdateUi_SetBool(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateBoolConsts.Enabled, value); }
@@ -324,6 +352,7 @@ namespace Rhino
         }
       }
       ///<summary>Set to true to enable menu item or false to check menu item</summary>
+      /// <since>5.11</since>
       public bool Checked
       {
         set { UnsafeNativeMethods.CRuiUpdateUi_SetBool(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateBoolConsts.Checked, value); }
@@ -334,6 +363,7 @@ namespace Rhino
         }
       }
       ///<summary>Set to true to enable menu item or false to check menu item</summary>
+      /// <since>5.11</since>
       public bool RadioChecked
       {
         set { UnsafeNativeMethods.CRuiUpdateUi_SetBool(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateBoolConsts.RadioChecked, value); }
@@ -341,6 +371,7 @@ namespace Rhino
         { return UnsafeNativeMethods.CRuiUpdateUi_GetBool(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateBoolConsts.RadioChecked, false); }
       }
       ///<summary>Menu item text</summary>
+      /// <since>5.11</since>
       public string Text
       {
         set { UnsafeNativeMethods.CRuiUpdateUi_SetString(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateStringConsts.Text, value); }
@@ -356,31 +387,37 @@ namespace Rhino
         }
       }
       ///<summary>Id of the RUI file that owns this menu item</summary>
+      /// <since>5.11</since>
       public Guid FileId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.FileId); }
       }
       ///<summary>Id of the menu that owns this menu item</summary>
+      /// <since>5.11</since>
       public Guid MenuId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.MenuId); }
       }
       ///<summary>Id of the menu item that owns this menu item</summary>
+      /// <since>5.11</since>
       public Guid MenuItemId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.MenuItemId); }
       }
       ///<summary>Windows menu handle of menu that contains this item</summary>
+      /// <since>5.11</since>
       public IntPtr MenuHandle
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetMenuHandle(m_ptr); }
       }
       ///<summary>Zero based index of item in the Windows menu</summary>
+      /// <since>5.11</since>
       public int MenuIndex
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_MenuItemIndex(m_ptr); }
       }
       ///<summary>Windows menu item ID</summary>
+      /// <since>5.11</since>
       [CLSCompliant(false)]
       public uint WindowsMenuItemId
       {
@@ -400,6 +437,7 @@ namespace Rhino
       /// <param name="item">Menu item Id</param>
       /// <param name="callBack"></param>
       /// <returns>true if Registered otherwise false</returns>
+      /// <since>5.11</since>
       static public bool RegisterMenuItem(Guid file, Guid menu, Guid item, UpdateMenuItemEventHandler callBack)
       {
         SetHooks();
@@ -412,6 +450,7 @@ namespace Rhino
       /// <param name="itemId">Menu item Id</param>
       /// <param name="callBack"></param>
       /// <returns>true if Registered otherwise false</returns>
+      /// <since>5.11</since>
       static public bool RegisterMenuItem(string fileId, string menuId, string itemId, UpdateMenuItemEventHandler callBack)
       {
         SetHooks();

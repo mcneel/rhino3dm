@@ -18,27 +18,32 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a new, empty Interpolator.
     /// </summary>
+    /// <since>5.0</since>
     public Interpolator() { }
     /// <summary>
     /// Constructs an empty Interpolator with a certain capacity.
     /// </summary>
     /// <param name="initialCapacity">Number of items this interpolator can store without resizing.</param>
+    /// <since>5.0</since>
     public Interpolator(int initialCapacity) : base(initialCapacity) { }
     /// <summary>
     /// Copy all the numbers from an existing RhinoList.
     /// </summary>
     /// <param name="list">List to mimic.</param>
+    /// <since>5.0</since>
     public Interpolator(RhinoList<double> list) : base(list) { }
     /// <summary>
     /// Constructs an Interpolator from a collection of numbers.
     /// </summary>
     /// <param name="collection">Collection of numbers to duplicate.</param>
+    /// <since>5.0</since>
     public Interpolator(IEnumerable<double> collection) : base(collection) { }
     /// <summary>
     /// Constructs a new Interpolator with a specified amount of numbers.
     /// </summary>
     /// <param name="amount">Number of values to add to this Interpolator. Must be equal to or larger than zero.</param>
     /// <param name="defaultValue">Number to add.</param>
+    /// <since>5.0</since>
     public Interpolator(int amount, double defaultValue) : base(amount, defaultValue) { }
     #endregion
 
@@ -47,6 +52,7 @@ namespace Rhino.Geometry
     /// Gets or sets a value indicating whether or not the values inside this Interpolator 
     /// are to be treated as cyclical (i.e. circular).
     /// </summary>
+    /// <since>5.0</since>
     public bool Cyclical
     {
       get { return m_cyclical; }
@@ -56,12 +62,13 @@ namespace Rhino.Geometry
 
     #region interpolation
     /// <summary>
-    /// Sample the list of numbers with Nearest Neighbour interpolation. 
+    /// Sample the list of numbers with Nearest Neighbor interpolation. 
     /// </summary>
     /// <param name="t">Parameter to sample at. The integer portion of the parameter 
     /// indicates the index of the left-hand value. If this Interpolator is cyclical, 
     /// parameters will be wrapped.</param>
     /// <returns>The sampled value at t.</returns>
+    /// <since>5.0</since>
     public double InterpolateNearestNeighbour(double t)
     {
       if (m_size == 0) { throw new IndexOutOfRangeException("The Interpolator must contain at least one sample value"); }
@@ -82,6 +89,7 @@ namespace Rhino.Geometry
     /// indicates the index of the left-hand value. If this Interpolator is cyclical, 
     /// parameters will be wrapped.</param>
     /// <returns>The sampled value at t.</returns>
+    /// <since>5.0</since>
     public double InterpolateLinear(double t)
     {
       if (m_size == 0) { throw new IndexOutOfRangeException("The Interpolator must contain at least one sample value"); }
@@ -102,6 +110,7 @@ namespace Rhino.Geometry
     /// indicates the index of the left-hand value. If this Interpolator is cyclical, 
     /// parameters will be wrapped.</param>
     /// <returns>The sampled value at t.</returns>
+    /// <since>5.0</since>
     public double InterpolateCosine(double t)
     {
       if (m_size == 0) { throw new IndexOutOfRangeException("The Interpolator must contain at least one sample value"); }
@@ -123,6 +132,7 @@ namespace Rhino.Geometry
     /// indicates the index of the left-hand value. If this Interpolator is cyclical, 
     /// parameters will be wrapped.</param>
     /// <returns>The sampled value at t.</returns>
+    /// <since>5.0</since>
     public double InterpolateCubic(double t)
     {
       if (m_size == 0) { throw new IndexOutOfRangeException("The Interpolator must contain at least one sample value"); }
@@ -150,6 +160,7 @@ namespace Rhino.Geometry
     /// indicates the index of the left-hand value. If this Interpolator is cyclical, 
     /// parameters will be wrapped.</param>
     /// <returns>The sampled value at t.</returns>
+    /// <since>5.0</since>
     public double InterpolateCatmullRom(double t)
     {
       if (m_size == 0) { throw new IndexOutOfRangeException("The Interpolator must contain at least one sample value"); }

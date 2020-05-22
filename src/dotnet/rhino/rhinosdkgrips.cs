@@ -40,12 +40,14 @@ namespace Rhino.DocObjects.Custom
   bool m_bMoved;
      */
 
+    /// <since>5.0</since>
     public bool Culled
     {
       get{ return GetBool(idxCulled); }
       set{ SetBool(idxCulled, value); }
     }
 
+    /// <since>5.0</since>
     public bool Visible
     {
       get { return GetBool(idxIsVisible); }
@@ -69,6 +71,7 @@ namespace Rhino.DocObjects.Custom
     /// If true, then draw stuff that moves when grips are dragged,
     /// like the curve being bent by a dragged control point.
     /// </summary>
+    /// <since>5.0</since>
     public bool DrawStaticStuff
     {
       get
@@ -81,6 +84,7 @@ namespace Rhino.DocObjects.Custom
     /// If true, then draw stuff that does not move when grips are
     /// dragged, like the control polygon of the "original" curve.
     /// </summary>
+    /// <since>5.0</since>
     public bool DrawDynamicStuff
     {
       get
@@ -98,6 +102,7 @@ namespace Rhino.DocObjects.Custom
     /// What kind of line is used to display things like control polygons.
     /// 0 = no control polygon,  1 = solid control polygon,  2 = dotted control polygon.
     /// </summary>
+    /// <since>5.0</since>
     public int ControlPolygonStyle
     {
       get { return UnsafeNativeMethods.CRhinoDrawGripSettings_GetInt(m_pGripsDrawSettings, idxCpGripLineStyle); }
@@ -113,16 +118,19 @@ namespace Rhino.DocObjects.Custom
       return Rhino.Runtime.Interop.ColorFromWin32(abgr);
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Color GripColor
     {
       get { return GetColor(idxGripColor); }
       set { UnsafeNativeMethods.CRhinoDrawGripSettings_SetColor(m_pGripsDrawSettings, idxGripColor, value.ToArgb()); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color LockedGripColor
     {
       get { return GetColor(idxLockedGripColor); }
       set { UnsafeNativeMethods.CRhinoDrawGripSettings_SetColor(m_pGripsDrawSettings, idxLockedGripColor, value.ToArgb()); }
     }
+    /// <since>5.0</since>
     public System.Drawing.Color SelectedGripColor
     {
       get { return GetColor(idxSelectedGripColor); }
@@ -130,6 +138,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     int m_gripstatus_count = -1;
+    /// <since>5.0</since>
     public int GripStatusCount
     {
       get
@@ -141,6 +150,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     List<GripStatus> m_gs;
+    /// <since>5.0</since>
     public GripStatus GripStatus(int index)
     {
       if (null == m_gs)
@@ -159,6 +169,7 @@ namespace Rhino.DocObjects.Custom
     /// <param name="line">Line between two grips.</param>
     /// <param name="startStatus">Grip status at start of line.</param>
     /// <param name="endStatus">Grip status at end of line.</param>
+    /// <since>5.0</since>
     public void DrawControlPolygonLine( Rhino.Geometry.Line line, GripStatus startStatus, GripStatus endStatus )
     {
       DrawControlPolygonLine(line, startStatus.m_index, endStatus.m_index);
@@ -170,6 +181,7 @@ namespace Rhino.DocObjects.Custom
     /// <param name="line">Line between two grips.</param>
     /// <param name="startStatus">Index of Grip status at start of line.</param>
     /// <param name="endStatus">Index if Grip status at end of line.</param>
+    /// <since>5.0</since>
     public void DrawControlPolygonLine(Rhino.Geometry.Line line, int startStatus, int endStatus)
     {
       DrawControlPolygonLine(line.From, line.To, startStatus, endStatus);
@@ -182,11 +194,13 @@ namespace Rhino.DocObjects.Custom
     /// <param name="end">The point end.</param>
     /// <param name="startStatus">Index of Grip status at start of line defined by start and end.</param>
     /// <param name="endStatus">Index if Grip status at end of line defined by start and end.</param>
+    /// <since>5.0</since>
     public void DrawControlPolygonLine(Rhino.Geometry.Point3d start, Rhino.Geometry.Point3d end, int startStatus, int endStatus)
     {
       UnsafeNativeMethods.CRhinoDrawGripsSettings_DrawControlPolygonLine(m_pGripsDrawSettings, start, end, startStatus, endStatus);
     }
 
+    /// <since>5.0</since>
     public void RestoreViewportSettings()
     {
       UnsafeNativeMethods.CRhinoDrawGripSettings_RestoreViewportSettings(m_pGripsDrawSettings);
@@ -216,6 +230,7 @@ namespace Rhino.DocObjects.Custom
       return null;
     }
 
+    /// <since>5.0</since>
     public static void RegisterGripsEnabler(TurnOnGripsEventHandler enabler, Type customGripsType)
     {
       if (!customGripsType.IsSubclassOf(typeof(CustomObjectGrips)))
@@ -274,11 +289,13 @@ namespace Rhino.DocObjects.Custom
       UnsafeNativeMethods.CRhinoObjectGrips_AddGrip(pThis, pGrip);      
     }
 
+    /// <since>5.0</since>
     public int GripCount
     {
       get { return m_grip_list.Count; }
     }
 
+    /// <since>5.0</since>
     public CustomGripObject Grip(int index)
     {
       return m_grip_list[index];
@@ -292,6 +309,7 @@ namespace Rhino.DocObjects.Custom
     /// Determines if grips are currently being dragged.
     /// </summary>
     /// <returns>true if grips are dragged.</returns>
+    /// <since>5.0</since>
     public static bool Dragging()
     {
       return UnsafeNativeMethods.CRhinoObjectGrips_GetBool(IntPtr.Zero, idxDragging);
@@ -302,6 +320,7 @@ namespace Rhino.DocObjects.Custom
     /// NewLocation=true.  Derived classes can set NewLocation to false after 
     /// updating temporary display information.
     /// </summary>
+    /// <since>5.0</since>
     public bool NewLocation
     {
       get
@@ -320,6 +339,7 @@ namespace Rhino.DocObjects.Custom
     /// If GripsMoved is true if some of the grips have ever been moved
     /// GripObject.NewLocation() sets GripsMoved=true.
     /// </summary>
+    /// <since>5.0</since>
     public bool GripsMoved
     {
       get
@@ -331,6 +351,7 @@ namespace Rhino.DocObjects.Custom
 
 
     /// <summary>Owner of the grips.</summary>
+    /// <since>5.0</since>
     public Rhino.DocObjects.RhinoObject OwnerObject
     {
       get
@@ -419,15 +440,15 @@ namespace Rhino.DocObjects.Custom
     /// <param name="gripIndex">index of grip where the search begins.</param>
     /// <param name="dr">
     /// <para>1 = next grip in the first parameter direction.</para>
-    /// <para>-1 = prev grip in the first parameter direction.</para>
+    /// <para>-1 = previous grip in the first parameter direction.</para>
     /// </param>
     /// <param name="ds">
     /// <para>1 = next grip in the second parameter direction.</para>
-    /// <para>-1 = prev grip in the second parameter direction.</para>
+    /// <para>-1 = previous grip in the second parameter direction.</para>
     /// </param>
     /// <param name="dt">
     /// <para>1 = next grip in the third parameter direction.</para>
-    /// <para>-1 = prev grip in the third parameter direction.</para>
+    /// <para>-1 = rev grip in the third parameter direction.</para>
     /// </param>
     /// <param name="wrap">If true and object is "closed", the search will wrap.</param>
     /// <returns>Pointer to the desired neighbor or NULL if there is no neighbor.</returns>
@@ -435,11 +456,11 @@ namespace Rhino.DocObjects.Custom
 
     /// <summary>
     /// If the grips are control points of a NURBS surface, then this gets the
-    /// index of the grip that controls the (i,j)-th cv.
+    /// index of the grip that controls the (i,j)-th CV.
     /// </summary>
     /// <param name="i">The index in the first dimension.</param>
     /// <param name="j">The index in the second dimension.</param>
-    /// <returns>A grip controling a NURBS surface CV or null.</returns>
+    /// <returns>A grip controlling a NURBS surface CV or null.</returns>
     protected virtual GripObject NurbsSurfaceGrip(int i, int j) { return null; }
 
     /// <summary>
@@ -450,6 +471,7 @@ namespace Rhino.DocObjects.Custom
     protected virtual Rhino.Geometry.NurbsSurface NurbsSurface() { return null; }
 
     ~CustomObjectGrips() { Dispose(false); }
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);

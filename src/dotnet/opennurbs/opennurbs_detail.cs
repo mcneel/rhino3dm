@@ -35,6 +35,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets whether the view is parallel.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsParallelProjection
     {
       get
@@ -55,6 +56,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets whether the view is perspective.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsPerspectiveProjection
     {
       get
@@ -80,6 +82,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IsProjectionLocked
     {
       get
@@ -100,6 +103,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the page units/model units quotient.
     /// </summary>
+    /// <since>5.0</since>
     public double PageToModelRatio
     {
       get
@@ -126,6 +130,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool SetScale(double modelLength, Rhino.UnitSystem modelUnits, double pageLength, Rhino.UnitSystem pageUnits)
     {
       // SetScale only works on parallel projections

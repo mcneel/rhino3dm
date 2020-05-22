@@ -12,6 +12,7 @@ namespace Rhino.DocObjects
     internal LightObject(uint serialNumber)
       : base(serialNumber) { }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -20,6 +21,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public Light LightGeometry
     {
       get
@@ -28,6 +30,7 @@ namespace Rhino.DocObjects
         return rc;
       }
     }
+    /// <since>5.0</since>
     public Light DuplicateLightGeometry()
     {
       Light rc = DuplicateGeometry() as Light;
@@ -74,22 +77,26 @@ namespace Rhino.DocObjects.Tables
     }
 
     RhinoDoc m_doc;
+    /// <since>5.3</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
     }
 
+    /// <since>5.3</since>
     public LightTableEventType EventType
     {
       get { return m_event_type; }
     }
 
+    /// <since>5.3</since>
     public int LightIndex
     {
       get { return m_light_index; }
     }
 
     LightObject m_new_light;
+    /// <since>5.3</since>
     public LightObject NewState
     {
       get
@@ -99,6 +106,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     Light m_old_light;
+    /// <since>5.3</since>
     public Light OldState
     {
       get
@@ -118,6 +126,7 @@ namespace Rhino.DocObjects.Tables
     internal LightTable(RhinoDoc doc) : base(doc) { }
 
     /// <summary>Document that owns this light table.</summary>
+    /// <since>5.0</since>
     public new RhinoDoc Document
     {
       get { return m_doc; }
@@ -128,6 +137,7 @@ namespace Rhino.DocObjects.Tables
     /// <para>If the RDK is loaded, an instance is always returned.</para>
     /// </summary>
     /// <exception cref="Rhino.Runtime.RdkNotLoadedException">If the RDK is not loaded.</exception>
+    /// <since>5.0</since>
     public Render.Sun Sun
     {
       get
@@ -137,6 +147,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public Render.Skylight Skylight
     {
       get
@@ -147,6 +158,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Number of lights in the light table.  Does not include Sun or Skylight.</summary>
+    /// <since>5.0</since>
     public override int Count
     {
       get
@@ -155,6 +167,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -181,6 +194,7 @@ namespace Rhino.DocObjects.Tables
     //{
     //}
 
+    /// <since>5.0</since>
     public int Find(Guid id, bool ignoreDeleted)
     {
       return UnsafeNativeMethods.CRhinoLightTable_Find(m_doc.RuntimeSerialNumber, id, ignoreDeleted);
@@ -194,6 +208,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// A layer. If no layer is found, null is returned.
     /// </returns>
+    /// <since>6.0</since>
     public LightObject FindName(string name)
     {
       return __FindNameInternal(name);
@@ -204,26 +219,30 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="nameHash">The name hash of the LightObject to be searched.</param>
     /// <returns>A LightObject, or null on error.</returns>
+    /// <since>6.0</since>
     public LightObject FindNameHash(NameHash nameHash)
     {
       return __FindNameHashInternal(nameHash);
     }
 
     /// <summary>
-    /// Retrieves a  object based on Index. This seach type of search is discouraged.
+    /// Retrieves a  object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A  object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public LightObject FindIndex(int index)
     {
       return __FindIndexInternal(index);
     }
 
+    /// <since>5.0</since>
     public int Add(Geometry.Light light)
     {
       return Add(light, null);
     }
+    /// <since>5.0</since>
     public int Add(Geometry.Light light, ObjectAttributes attributes)
     {
       IntPtr pConstLight = light.ConstPointer();
@@ -232,11 +251,13 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoLightTable_Add(m_doc.RuntimeSerialNumber, pConstLight, pConstAttributes);
     }
 
+    /// <since>6.0</since>
     public bool Delete(int index, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoLightTable_Delete(m_doc.RuntimeSerialNumber, index, quiet);
     }
 
+    /// <since>6.0</since>
     public override bool Delete(LightObject item)
     {
       return Delete(item.Index, true);
@@ -247,12 +268,14 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_modifylightcolor.cs' lang='cs'/>
     /// <code source='examples\py\ex_modifylightcolor.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Modify(Guid id, Geometry.Light light)
     {
       int index = Find(id, true);
       return Modify(index, light);
     }
 
+    /// <since>5.0</since>
     public bool Modify(int index, Geometry.Light light)
     {
       bool rc = false;
@@ -265,6 +288,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     // for IEnumerable<Layer>
+    /// <since>5.0</since>
     public override IEnumerator<LightObject> GetEnumerator()
     {
       return base.GetEnumerator();

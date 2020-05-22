@@ -10,6 +10,7 @@ using Rhino.Collections;
 using System.Collections.Generic;
 using Rhino.DocObjects;
 using Rhino.Render;
+using Rhino.Render.PostEffects;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects.Tables;
 using Rhino.FileIO;
@@ -32,17 +33,23 @@ namespace Rhino.Commands
       Document = doc;
     }
 
+    /// <since>5.0</since>
     public Guid CommandId { get; }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint UndoSerialNumber { get; }
 
+    /// <since>5.0</since>
     public string ActionDescription { get; }
 
+    /// <since>5.0</since>
     public bool CreatedByRedo { get; }
 
+    /// <since>5.0</since>
     public object Tag { get; }
 
+    /// <since>5.0</since>
     public RhinoDoc Document { get; }
   }
 }
@@ -85,11 +92,17 @@ namespace Rhino
         SessionId = sessionId;
         EllapsedTime = ellapsedTime;
       }
+      /// <since>5.11</since>
       public ImageFileEvent Event { get; private set; }
+      /// <since>5.11</since>
       public string FileName { get; private set; }
+      /// <since>5.11</since>
       public string RenderEngine { get; private set; }
+      /// <since>5.11</since>
       public Guid RenderEngineId { get; private set; }
+      /// <since>5.11</since>
       public Guid SessionId { get; private set; }
+      /// <since>5.11</since>
       public int EllapsedTime { get; private set; }
     }
 
@@ -120,6 +133,7 @@ namespace Rhino
       /// write it to the same folder as the Rhino render image file.  Rhino
       /// will take care of deleting old data.
       /// </summary>
+      /// <since>5.11</since>
       public static event EventHandler<ImageFileEventArgs> Saved
       {
         add
@@ -141,6 +155,7 @@ namespace Rhino
       /// this event is raised after the render window has been created and the
       /// saved scene has been loaded.
       /// </summary>
+      /// <since>5.11</since>
       public static event EventHandler<ImageFileEventArgs> Loaded
       {
         add
@@ -162,6 +177,7 @@ namespace Rhino
       /// plug-in should delete any plug-in specific image files at this
       /// time.
       /// </summary>
+      /// <since>5.11</since>
       public static event EventHandler<ImageFileEventArgs> Deleted
       {
         add
@@ -237,14 +253,18 @@ namespace Rhino
           var render_engine_pointer = render_engine_string_holder.NonConstPointer();
           var render_engine = Guid.Empty;
           var session_id = Guid.Empty;
-          var ellapsed_time = 0;
+          var elapsed_time = 0; // Legacy.
+          var sta_time_ms = (ulong)0;
+          var end_time_ms = (ulong)0;
           UnsafeNativeMethods.CRdkCmnEventWatcher_GetRenderingFileInfoArgs(
             args,
             file_name_pointer,
             render_engine_pointer,
             ref render_engine,
             ref session_id,
-            ref ellapsed_time);
+            ref elapsed_time,
+            ref sta_time_ms,
+            ref end_time_ms);
           // Data passed to the Rhino Common event
           var event_args = new ImageFileEventArgs(
             event_id,
@@ -252,7 +272,9 @@ namespace Rhino
             render_engine_string_holder.ToString(),
             render_engine,
             session_id,
-            ellapsed_time
+            elapsed_time
+//          sta_time_ms, // TODO: [MAXLOOK] Not sure if it would break the SDK.
+//          end_time_ms, // TODO:
             );
           // Raise the event in RhinoCommon
           switch (event_id)
@@ -308,6 +330,7 @@ namespace Rhino
     /// <returns>
     /// Returns the newly opened document on success or null on error.
     /// </returns>
+    /// <since>6.0</since>
     public static RhinoDoc Open(string filePath, out bool wasAlreadyOpen)
     {
       wasAlreadyOpen = (null != FromFilePath(filePath));
@@ -327,6 +350,7 @@ namespace Rhino
     /// </summary>
     /// <returns>The file name to search for</returns>
     /// <param name="filePath">The full path to the file to search for.</param>
+    /// <since>6.0</since>
     public static RhinoDoc FromFilePath(string filePath)
     {
       if (string.IsNullOrWhiteSpace(filePath))
@@ -341,12 +365,14 @@ namespace Rhino
       return null;
     }
 
+    /// <since>5.0</since>
     [Obsolete("OpenFile is obsolete, use Open instead")]
     public static bool OpenFile(string path)
     {
       return UnsafeNativeMethods.CRhinoFileMenu_Open(path);
     }
 
+    /// <since>5.0</since>
     public static bool ReadFile(string path, FileReadOptions options)
     {
       if (ActiveDoc == null)
@@ -357,8 +383,10 @@ namespace Rhino
     }
 #endregion
 
+    /// <since>7.0</since>
     public bool IsHeadless => UnsafeNativeMethods.CRhinoDoc_IsHeadless(RuntimeSerialNumber) != 0;
 
+    /// <since>7.0</since>
     public void Dispose()
     {
       if (!IsHeadless)
@@ -420,6 +448,7 @@ namespace Rhino
     /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
     /// lifetime is under your control. 
     /// </returns>
+    /// <since>7.0</since>
     [Obsolete("This function is being removed; use CreateHeadless function instead", true)]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static RhinoDoc New(string file3dmTemplatePath)
@@ -438,6 +467,7 @@ namespace Rhino
     /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
     /// lifetime is under your control. 
     /// </returns>
+    /// <since>7.0</since>
     public static RhinoDoc CreateHeadless(string file3dmTemplatePath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -461,6 +491,7 @@ namespace Rhino
     /// Path of a Rhino model to load.
     /// </param>
     /// <returns></returns>
+    /// <since>7.0</since>
     [Obsolete("This function is being removed; use OpenHeadless function instead", true)]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static RhinoDoc Load(string file3dmPath)
@@ -475,6 +506,7 @@ namespace Rhino
     /// Path of a Rhino model to load.
     /// </param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static RhinoDoc OpenHeadless(string file3dmPath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -496,6 +528,7 @@ namespace Rhino
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool Import(string filePath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -524,6 +557,7 @@ namespace Rhino
     /// Save doc to disk using the document's Path
     /// </summary>
     /// <returns></returns>
+    /// <since>7.0</since>
     public bool Save()
     {
       if (string.IsNullOrEmpty(Path))
@@ -577,6 +611,7 @@ namespace Rhino
     /// </summary>
     /// <param name="file3dmPath"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool SaveAs(string file3dmPath)
     {
       return SaveAs(file3dmPath, 0);
@@ -588,6 +623,7 @@ namespace Rhino
     /// <param name="file3dmPath"></param>
     /// <param name="version">Rhino file version</param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool SaveAs(string file3dmPath, int version)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -618,6 +654,7 @@ namespace Rhino
     /// </summary>
     /// <param name="file3dmTemplatePath"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool SaveAsTemplate(string file3dmTemplatePath)
     {
       return SaveAsTemplate(file3dmTemplatePath, 0);
@@ -629,6 +666,7 @@ namespace Rhino
     /// <param name="file3dmTemplatePath"></param>
     /// <param name="version"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool SaveAsTemplate(string file3dmTemplatePath, int version)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -660,6 +698,7 @@ namespace Rhino
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool Export(string filePath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -687,6 +726,7 @@ namespace Rhino
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>true on success</returns>
+    /// <since>7.0</since>
     public bool ExportSelected(string filePath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -724,6 +764,7 @@ namespace Rhino
     /// locking and unlocking, loading file writing plug-ins,
     /// and many other details.
     /// </remarks>
+    /// <since>5.0</since>
     public bool WriteFile(string path, FileWriteOptions options)
     {
       IntPtr const_ptr_options = options.ConstPointer();
@@ -737,6 +778,7 @@ namespace Rhino
     /// <param name="path">The name of the .3dm file to write.</param>
     /// <param name="options">The file writing options.</param>
     /// <returns>true if successful, false on failure.</returns>
+    /// <since>6.5</since>
     public bool Write3dmFile(string path, FileWriteOptions options)
     {
       IntPtr const_ptr_options = options.ConstPointer();
@@ -756,6 +798,7 @@ namespace Rhino
     /// <returns>
     /// Path to existing file if found, an empty string if no file was found
     /// </returns>
+    /// <since>5.0</since>
     public string FindFile(string filename)
     {
       using (var sh = new StringHolder())
@@ -784,6 +827,7 @@ namespace Rhino
     /// If null, an empty document with no views is created
     /// </param>
     /// <returns></returns>
+    /// <since>6.4</since>
     public static RhinoDoc Create(string modelTemplateFileName)
     {
       uint serial_number = UnsafeNativeMethods.CRhinoDoc_Create(modelTemplateFileName);
@@ -794,6 +838,7 @@ namespace Rhino
     /// Returns a list of currently open Rhino documents
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static RhinoDoc[] OpenDocuments()
     {
       var list = new List<RhinoDoc>();
@@ -823,6 +868,7 @@ namespace Rhino
     /// can change while a command is running. Use the doc that is passed to you in your RunCommand
     /// function or continue to use the same doc after the first call to ActiveDoc.
     /// </summary>
+    /// <since>5.0</since>
     public static RhinoDoc ActiveDoc
     {
       get
@@ -839,6 +885,7 @@ namespace Rhino
       }
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use FromRuntimeSerialNumber")]
     public static RhinoDoc FromId(int docId)
     {
@@ -849,6 +896,7 @@ namespace Rhino
 
     static int HeadlessDocumentCountOnLastCull = 0;
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public static RhinoDoc FromRuntimeSerialNumber(uint serialNumber)
     {
@@ -951,6 +999,7 @@ namespace Rhino
     const int IDX_TEMPLATE_FILE_USED = 4;
 
     ///<summary>Returns the name of the currently loaded Rhino document (3DM file).</summary>
+    /// <since>5.0</since>
     public string Name
     {
       get
@@ -965,6 +1014,7 @@ namespace Rhino
     }
 
     ///<summary>Returns the path of the currently loaded Rhino document (3DM file).</summary>
+    /// <since>5.0</since>
     public string Path
     {
       get
@@ -984,12 +1034,14 @@ namespace Rhino
         }
     */
     ///<summary>Returns or sets the document&apos;s notes.</summary>
+    /// <since>5.0</since>
     public string Notes
     {
       get { return GetString(IDX_NOTES); }
       set { UnsafeNativeMethods.CRhinoDoc_GetSetString(RuntimeSerialNumber, IDX_NOTES, true, value, IntPtr.Zero); }
     }
 
+    /// <since>5.0</since>
     public DateTime DateCreated
     {
       get
@@ -1005,6 +1057,7 @@ namespace Rhino
         return new DateTime(year, month, day, hour, minute, 0);
       }
     }
+    /// <since>5.0</since>
     public DateTime DateLastEdited
     {
       get
@@ -1028,6 +1081,7 @@ namespace Rhino
     /// </summary>
     /// <param name="plane">The active plane.</param>
     /// <returns>true if the auto-gumball widget is enabled and visible. False otherwise.</returns>
+    /// <since>6.0</since>
     public bool GetGumballPlane(out Plane plane)
     {
       plane = new Plane();
@@ -1047,18 +1101,21 @@ namespace Rhino
     internal const double DefaultModelAngleToleranceRadians = Math.PI / 180.0; 
 
     /// <summary>Model space absolute tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAbsoluteTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelAbsTol); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelAbsTol, value); }
     }
     /// <summary>Model space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAngleToleranceRadians
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelAngleTol); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelAngleTol, value); }
     }
     /// <summary>Model space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAngleToleranceDegrees
     {
       get
@@ -1074,6 +1131,7 @@ namespace Rhino
       }
     }
     /// <summary>Model space relative tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelRelativeTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelRelTol); }
@@ -1085,12 +1143,14 @@ namespace Rhino
     /// <code source='examples\cs\ex_displayprecision.cs' lang='cs'/>
     /// <code source='examples\py\ex_displayprecision.py' lang='py'/>
     /// </example>
+    /// <since>5.8</since>
     public int ModelDistanceDisplayPrecision
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_DistanceDisplayPrecision(RuntimeSerialNumber, true, 0, false); }
       set { UnsafeNativeMethods.CRhinoDocProperties_DistanceDisplayPrecision(RuntimeSerialNumber, true, value, true); }
     }
 
+    /// <since>5.8</since>
     public int PageDistanceDisplayPrecision
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_DistanceDisplayPrecision(RuntimeSerialNumber, false, 0, false); }
@@ -1098,18 +1158,21 @@ namespace Rhino
     }
 
     /// <summary>Page space absolute tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAbsoluteTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageAbsTol); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageAbsTol, value); }
     }
     /// <summary>Page space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAngleToleranceRadians
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageAngleTol); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageAngleTol, value); }
     }
     /// <summary>Page space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAngleToleranceDegrees
     {
       get
@@ -1125,6 +1188,7 @@ namespace Rhino
       }
     }
     /// <summary>Page space relative tolerance.</summary>
+    /// <since>5.0</since>
     public double PageRelativeTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageRelTol); }
@@ -1135,6 +1199,7 @@ namespace Rhino
     /// The base point in the model that is used when inserting the model into another as a block definition.
     /// By default the base point in any model is 0,0,0.
     /// </summary>
+    /// <since>6.10</since>
     public Point3d ModelBasepoint
     {
       get
@@ -1155,6 +1220,7 @@ namespace Rhino
     }
 
     ///<summary>Returns or sets the document's modified flag.</summary>
+    /// <since>5.0</since>
     public bool Modified
     {
       get { return GetBool(UnsafeNativeMethods.DocumentStatusBool.idxModified); }
@@ -1168,17 +1234,20 @@ namespace Rhino
     ///<returns>
     ///The file version (e.g. 1, 2, 3, 4, etc.) or -1 if the document has not been read from disk.
     ///</returns>
+    /// <since>5.0</since>
     public int ReadFileVersion()
     {
       return UnsafeNativeMethods.CRhinoDocProperties_ReadFileVersion(RuntimeSerialNumber);
     }
 
+    /// <since>5.0</since>
     public UnitSystem ModelUnitSystem
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_GetUnitSystem(RuntimeSerialNumber, true); }
       set { UnsafeNativeMethods.CRhinoDocProperties_SetUnitSystem(RuntimeSerialNumber, true, value); }
     }
 
+    /// <since>5.0</since>
     public string GetUnitSystemName(bool modelUnits, bool capitalize, bool singular, bool abbreviate)
     {
       using (var sh = new StringHolder())
@@ -1189,6 +1258,7 @@ namespace Rhino
       }
     }
 
+    /// <since>5.0</since>
     public void AdjustModelUnitSystem(UnitSystem newUnitSystem, bool scale)
     {
       UnsafeNativeMethods.CRhinoDocProperties_AdjustUnitSystem(RuntimeSerialNumber, true, newUnitSystem, scale);
@@ -1199,17 +1269,20 @@ namespace Rhino
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public UnitSystem PageUnitSystem
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_GetUnitSystem(RuntimeSerialNumber, false); }
       set { UnsafeNativeMethods.CRhinoDocProperties_SetUnitSystem(RuntimeSerialNumber, false, value); }
     }
 
+    /// <since>5.0</since>
     public void AdjustPageUnitSystem(UnitSystem newUnitSystem, bool scale)
     {
       UnsafeNativeMethods.CRhinoDocProperties_AdjustUnitSystem(RuntimeSerialNumber, false, newUnitSystem, scale);
     }
 
+    /// <since>5.0</since>
     public int DistanceDisplayPrecision => ModelDistanceDisplayPrecision;
 
     #endregion
@@ -1220,6 +1293,7 @@ namespace Rhino
     /// true if the document can be viewed but NOT saved.
     /// false if document can be viewed and saved.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsReadOnly => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsDocumentReadOnly);
 
     /// <summary>
@@ -1227,21 +1301,28 @@ namespace Rhino
     /// locked then this is the only document that will be able to write the file.  Other
     /// instances of Rhino will fail to write this document.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsLocked => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsDocumentLocked);
 
+    /// <since>6.0</since>
     public bool IsInitializing => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsInitializing);
 
+    /// <since>6.0</since>
     public bool IsCreating => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsCreating);
 
+    /// <since>6.0</since>
     public bool IsOpening => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsOpening);
 
+    /// <since>6.0</since>
     public bool IsAvailable => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsAvailable);
 
+    /// <since>6.0</since>
     public bool IsClosing => GetBool(UnsafeNativeMethods.DocumentStatusBool.IsClosing);
 
     /// <summary>
     /// Gets the Document Id.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use RuntimeSerialNumber instead")]
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int DocumentId => (int)RuntimeSerialNumber;
@@ -1250,9 +1331,11 @@ namespace Rhino
     /// Unique serialNumber for the document while the application is running.
     /// This is not a persistent value.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber { get; private set; }
 
+    /// <since>5.0</since>
     public DocObjects.EarthAnchorPoint EarthAnchorPoint
     {
       get { return new DocObjects.EarthAnchorPoint(this); }
@@ -1263,6 +1346,7 @@ namespace Rhino
       }
     }
 
+    /// <since>5.0</since>
     public RenderSettings RenderSettings
     {
       get { return new RenderSettings(this); }
@@ -1273,6 +1357,7 @@ namespace Rhino
       }
     }
 
+    /// <since>6.11</since>
     public AnimationProperties AnimationProperties
     {
       get { return new AnimationProperties(this); }
@@ -1283,6 +1368,7 @@ namespace Rhino
       }
     }
 
+    /// <since>6.0</since>
     public List<System.Drawing.Size> CustomRenderSizes
     {
       get
@@ -1300,6 +1386,7 @@ namespace Rhino
     /// <summary>
     /// Type of MeshingParameters currently used by the document to mesh objects
     /// </summary>
+    /// <since>5.1</since>
     public MeshingParameterStyle MeshingParameterStyle
     {
       get
@@ -1325,6 +1412,7 @@ namespace Rhino
     /// </summary>
     /// <param name="style"></param>
     /// <returns></returns>
+    /// <since>5.1</since>
     public MeshingParameters GetMeshingParameters(MeshingParameterStyle style)
     {
       IntPtr ptr_meshingparameters = UnsafeNativeMethods.CRhinoDocProperties_GetRenderMeshParameters(RuntimeSerialNumber, (int)style);
@@ -1338,6 +1426,7 @@ namespace Rhino
     /// Get analysis meshing parameters currently used by the document
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public MeshingParameters GetAnalysisMeshingParameters()
     {
       IntPtr ptr_meshingparameters = UnsafeNativeMethods.CRhinoDocProperties_GetAnalysisMeshParameters(RuntimeSerialNumber);
@@ -1352,6 +1441,7 @@ namespace Rhino
     /// parameters to be used
     /// </summary>
     /// <param name="mp"></param>
+    /// <since>5.1</since>
     public void SetCustomMeshingParameters(MeshingParameters mp)
     {
       IntPtr const_ptr_meshingparameters = mp.ConstPointer();
@@ -1361,6 +1451,7 @@ namespace Rhino
     /// <summary>
     /// Get the custom meshing parameters that this document will use.
     /// </summary>
+    /// <since>6.0</since>
     public MeshingParameters GetCurrentMeshingParameters()
     {
       return MeshingParameters.DocumentCurrentSetting(this);
@@ -1369,6 +1460,7 @@ namespace Rhino
     /// <summary>
     /// The scale factor for hatches in model space when Hatch Scaling is enabled
     /// </summary>
+    /// <since>6.1</since>
     public double ModelSpaceHatchScale
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelSpaceHatchScale); }
@@ -1378,6 +1470,7 @@ namespace Rhino
     /// <summary>
     /// True if hatch scaling is enabled, false if not.
     /// </summary>
+    /// <since>6.16</since>
     public bool ModelSpaceHatchScalingEnabled
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_IsHatchScalingEnabled(RuntimeSerialNumber); }
@@ -1387,6 +1480,7 @@ namespace Rhino
     /// <summary>
     /// The scale factor for text in model space when Annotation Scaling is enabled
     /// </summary>
+    /// <since>6.1</since>
     public double ModelSpaceTextScale
     {
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelSpaceTextScale); }
@@ -1397,6 +1491,7 @@ namespace Rhino
     /// If ModelSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by 
     /// dimscale when the annotation is displayed in a model space viewport not in a detail
     /// </summary>
+    /// <since>6.0</since>
     public bool ModelSpaceAnnotationScalingEnabled
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_IsModelSpaceAnnotationScalingEnabled(RuntimeSerialNumber); }
@@ -1407,6 +1502,7 @@ namespace Rhino
     /// If LayoutSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by 
     /// dimscale when the annotation is displayed in a detail viewport not in a detail
     /// </summary>
+    /// <since>6.0</since>
     public bool LayoutSpaceAnnotationScalingEnabled
     {
       get { return UnsafeNativeMethods.CRhinoDocProperties_IsLayoutSpaceAnnotationScalingEnabled(RuntimeSerialNumber); }
@@ -1417,16 +1513,20 @@ namespace Rhino
     /// <summary>
     /// Provides access to the document's worksession.
     /// </summary>
+    /// <since>6.0</since>
     public Worksession Worksession => m_worksession ?? (m_worksession = new Worksession(this));
 
     #region tables
     private ViewTable m_view_table;
+    /// <since>5.0</since>
     public ViewTable Views => m_view_table ?? (m_view_table = new ViewTable(this));
 
     private ObjectTable m_object_table;
+    /// <since>5.0</since>
     public ObjectTable Objects => m_object_table ?? (m_object_table = new ObjectTable(this));
 
     private ManifestTable m_manifest_table;
+    /// <since>6.0</since>
     public ManifestTable Manifest => m_manifest_table ?? (m_manifest_table = new RhinoDocManifestTable(this));
 
     /// <summary>
@@ -1439,6 +1539,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_objectdecoration.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdecoration.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public DocObjects.ObjectAttributes CreateDefaultAttributes()
     {
       var rc = new DocObjects.ObjectAttributes();
@@ -1451,6 +1552,7 @@ namespace Rhino
     /// <summary>
     /// bitmaps used in textures, backgrounds, wallpapers, ...
     /// </summary>
+    /// <since>5.0</since>
     public BitmapTable Bitmaps => m_bitmap_table ?? (m_bitmap_table = new BitmapTable(this));
 
     //[skipping]
@@ -1459,18 +1561,21 @@ namespace Rhino
     private MaterialTable m_material_table;
 
     /// <summary>Materials in the document.</summary>
+    /// <since>5.0</since>
     public MaterialTable Materials => m_material_table ?? (m_material_table = new MaterialTable(this));
 
     private LinetypeTable m_linetype_table;
     /// <summary>
     /// Linetypes in the document.
     /// </summary>
+    /// <since>5.0</since>
     public LinetypeTable Linetypes => m_linetype_table ?? (m_linetype_table = new LinetypeTable(this));
 
     private LayerTable m_layer_table;
     /// <summary>
     /// Layers in the document.
     /// </summary>
+    /// <since>5.0</since>
     public LayerTable Layers => m_layer_table ?? (m_layer_table = new LayerTable(this));
 
     private GroupTable m_group_table;
@@ -1479,10 +1584,12 @@ namespace Rhino
     /// <code source='examples\cs\ex_addobjectstogroup.cs' lang='cs'/>
     /// <code source='examples\py\ex_addobjectstogroup.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public GroupTable Groups => m_group_table ?? (m_group_table = new GroupTable(this));
 
     private FontTable m_font_table;
     
+    /// <since>5.0</since>
     [Obsolete("Use DimStyles table instead")]
     public FontTable Fonts => m_font_table ?? (m_font_table = new FontTable(this));
 
@@ -1492,9 +1599,11 @@ namespace Rhino
     /// <code source='examples\cs\ex_dimstyle.cs' lang='cs'/>
     /// <code source='examples\py\ex_dimstyle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public DimStyleTable DimStyles => m_dimstyle_table ?? (m_dimstyle_table = new DimStyleTable(this));
 
     private LightTable m_light_table;
+    /// <since>5.0</since>
     public LightTable Lights => m_light_table ?? (m_light_table = new LightTable(this));
 
     private HatchPatternTable m_hatchpattern_table;
@@ -1503,6 +1612,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public HatchPatternTable HatchPatterns => m_hatchpattern_table ?? (m_hatchpattern_table = new HatchPatternTable(this));
 
     private InstanceDefinitionTable m_instance_definition_table;
@@ -1512,6 +1622,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_printinstancedefinitiontree.cs' lang='cs'/>
     /// <code source='examples\py\ex_printinstancedefinitiontree.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public InstanceDefinitionTable InstanceDefinitions => m_instance_definition_table ?? (m_instance_definition_table = new InstanceDefinitionTable(this));
 
     //[skipping]
@@ -1521,6 +1632,7 @@ namespace Rhino
     /// <summary>
     /// Collection of named construction planes.
     /// </summary>
+    /// <since>5.0</since>
     public NamedConstructionPlaneTable NamedConstructionPlanes => m_named_cplane_table ?? (m_named_cplane_table = new NamedConstructionPlaneTable(this));
 
     private NamedViewTable m_named_view_table;
@@ -1532,6 +1644,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_addnamedview.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnamedview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public NamedViewTable NamedViews => m_named_view_table ?? (m_named_view_table = new NamedViewTable(this));
 
     private StringTable m_strings;
@@ -1539,15 +1652,17 @@ namespace Rhino
     /// <summary>
     /// Collection of document user data strings in this document
     /// </summary>
+    /// <since>5.0</since>
     public StringTable Strings => m_strings ?? (m_strings = new StringTable(this));
 
     /// <summary>
     /// Collection of document runtime data. This is a good place to
     /// put non-serializable, per document data, such as panel view models.  
     /// Note well: This data will be dispose with the document and does not
-    /// get serailzed.
+    /// get serialized.
     /// </summary>
     /// <value>The runtime document data table.</value>
+    /// <since>6.3</since>
     public RuntimeDocumentDataTable RuntimeData => m_runtime_data ?? (m_runtime_data = new RuntimeDocumentDataTable(this));
     RuntimeDocumentDataTable m_runtime_data;
 
@@ -1561,33 +1676,46 @@ namespace Rhino
     /// <summary>
     /// Collection of named positions.
     /// </summary>
+    /// <since>6.0</since>
     public NamedPositionTable NamedPositions => m_named_position_table ?? (m_named_position_table = new NamedPositionTable(this));
 
     private SnapshotTable m_snapshot_table;
     /// <summary>
     /// Collection of snapshots.
     /// </summary>
+    /// <since>6.7</since>
     public SnapshotTable Snapshots => m_snapshot_table ?? (m_snapshot_table = new SnapshotTable(this));
 
     private NamedLayerStateTable m_named_layer_state_table;
     /// <summary>
     /// Collection of named layer states.
     /// </summary>
+    /// <since>6.14</since>
     public NamedLayerStateTable NamedLayerStates => m_named_layer_state_table ?? (m_named_layer_state_table = new NamedLayerStateTable(this));
 
     #endregion
 
     private RenderMaterialTable m_render_materials;
+    /// <since>5.7</since>
     public RenderMaterialTable RenderMaterials => (m_render_materials ?? (m_render_materials = new RenderMaterialTable(this)));
     private RenderEnvironmentTable m_render_environments;
+    /// <since>5.7</since>
     public RenderEnvironmentTable RenderEnvironments => (m_render_environments ?? (m_render_environments = new RenderEnvironmentTable(this)));
     private RenderTextureTable m_render_textures;
+    /// <since>5.7</since>
     public RenderTextureTable RenderTextures => (m_render_textures ?? (m_render_textures = new RenderTextureTable(this)));
 
     /// <summary>
     /// Access to the current environment for various uses
     /// </summary>
+    /// <since>6.0</since>
     public ICurrentEnvironment CurrentEnvironment => new CurrentEnvironmentImpl(RuntimeSerialNumber);
+
+    /// <summary>
+    /// Access to the post effects
+    /// </summary>
+    /// <since>7.0</since>
+    public PostEffects PostEffects => new PostEffects(RuntimeSerialNumber);
 
     /// <summary>
     /// Get a enumerable list of custom mesh primitives
@@ -1599,6 +1727,7 @@ namespace Rhino
     /// Iterate quietly, if true then no user interface will be displayed
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, null, forceTriangleMeshes, quietly);
@@ -1616,6 +1745,7 @@ namespace Rhino
     /// Iterate quietly, if true then no user interface will be displayed
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, viewport, forceTriangleMeshes, quietly);
@@ -1636,6 +1766,7 @@ namespace Rhino
     /// Iterate quietly, if true then no user interface will be displayed
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(Guid plugInId, DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly) 
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, plugInId, viewport, forceTriangleMeshes, quietly);
@@ -1644,6 +1775,7 @@ namespace Rhino
     private GroundPlane m_ground_plane;
     /// <summary>Gets the ground plane of this document.</summary>
     /// <exception cref="Rhino.Runtime.RdkNotLoadedException">If the RDK is not loaded.</exception>
+    /// <since>5.0</since>
     public GroundPlane GroundPlane
     {
       get
@@ -1657,6 +1789,7 @@ namespace Rhino
       }
     }
 
+    /// <since>6.0</since>
     public string[] GetEmbeddedFilesList(bool missingOnly)
     {
         using (var list = new ClassArrayString())
@@ -1688,6 +1821,7 @@ namespace Rhino
     /// <summary>
     /// true if Rhino is in the process of sending this document as an email attachment.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsSendingMail
     {
       get
@@ -1702,24 +1836,29 @@ namespace Rhino
     /// name of the template file used to create this document. This is a runtime value
     /// only present if the document was newly created.
     /// </summary>
+    /// <since>5.0</since>
     public string TemplateFileUsed => GetString(IDX_TEMPLATE_FILE_USED);
 
+    /// <since>5.0</since>
     public void ClearUndoRecords(bool purgeDeletedObjects)
     {
       UnsafeNativeMethods.CRhinoDoc_ClearUndoRecords(RuntimeSerialNumber, purgeDeletedObjects);
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public void ClearUndoRecords(uint undoSerialNumber, bool purgeDeletedObjects)
     {
       UnsafeNativeMethods.CRhinoDoc_ClearUndoRecordsSN(RuntimeSerialNumber, undoSerialNumber, purgeDeletedObjects);
     }
 
+    /// <since>5.0</since>
     public void ClearRedoRecords()
     {
       UnsafeNativeMethods.CRhinoDoc_ClearRedoRecords(RuntimeSerialNumber);
     }
 
+    /// <since>5.0</since>
     public bool UndoRecordingEnabled
     {
       get { return GetBool(UnsafeNativeMethods.DocumentStatusBool.UndoRecordingEnable); }
@@ -1729,6 +1868,7 @@ namespace Rhino
     /// <summary>
     /// true if undo recording is actually happening now.
     /// </summary>
+    /// <since>5.0</since>
     public bool UndoRecordingIsActive => GetBool(UnsafeNativeMethods.DocumentStatusBool.UndoRecordingIsActive);
 
     /// <summary>
@@ -1743,6 +1883,7 @@ namespace Rhino
     /// because undo information is already being recorded or
     /// undo is disabled.
     /// </returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint BeginUndoRecord(string description)
     {
@@ -1753,6 +1894,7 @@ namespace Rhino
     /// The serial number that will be assigned to the next undo record that is
     /// constructed.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint NextUndoRecordSerialNumber => UnsafeNativeMethods.CRhinoDoc_NextUndoRecordSerialNumber(RuntimeSerialNumber);
 
@@ -1762,6 +1904,7 @@ namespace Rhino
     /// 0: undo recording is not active. (Disabled or nothing is being
     ///    recorded.)
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint CurrentUndoRecordSerialNumber
     {
@@ -1770,6 +1913,7 @@ namespace Rhino
 
     /// <summary> Undo the last action </summary>
     /// <returns> true on success </returns>
+    /// <since>6.16</since>
     public bool Undo()
     {
       return UnsafeNativeMethods.CRhinoDoc_Undo(RuntimeSerialNumber);
@@ -1777,6 +1921,7 @@ namespace Rhino
 
     /// <summary> Redo the last action that was "undone" </summary>
     /// <returns> true on success </returns>
+    /// <since>6.16</since>
     public bool Redo()
     {
       return UnsafeNativeMethods.CRhinoDoc_Redo(RuntimeSerialNumber);
@@ -1833,6 +1978,7 @@ namespace Rhino
       }
     }
 
+    /// <since>5.0</since>
     public bool AddCustomUndoEvent(string description, EventHandler<Commands.CustomUndoEventArgs> handler)
     {
       return AddCustomUndoEvent(description, handler, null);
@@ -1851,6 +1997,7 @@ namespace Rhino
     /// <code source='examples\cs\ex_customundo.cs' lang='cs'/>
     /// <code source='examples\py\ex_customundo.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool AddCustomUndoEvent(string description, EventHandler<Commands.CustomUndoEventArgs> handler, object tag)
     {
       if (string.IsNullOrEmpty(description) || handler == null)
@@ -1874,6 +2021,7 @@ namespace Rhino
     /// </summary>
     /// <param name="undoRecordSerialNumber">The serial number of the undo record.</param>
     /// <returns>True if successful, false otherwise.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool EndUndoRecord(uint undoRecordSerialNumber)
     {
@@ -1883,6 +2031,7 @@ namespace Rhino
     /// <summary>
     /// Returns true if Undo is currently active. 
     /// </summary>
+    /// <since>6.0</since>
     public bool UndoActive
     {
       get { return UnsafeNativeMethods.CRhinoDoc_UndoRedoActive(RuntimeSerialNumber, true); }
@@ -1891,6 +2040,7 @@ namespace Rhino
     /// <summary>
     /// Returns true if Redo is currently active. 
     /// </summary>
+    /// <since>6.0</since>
     public bool RedoActive
     {
       get { return UnsafeNativeMethods.CRhinoDoc_UndoRedoActive(RuntimeSerialNumber, false); }
@@ -1992,6 +2142,7 @@ namespace Rhino
     ///If null, the currently loaded model is used.
     ///</param>
     ///<returns>true on success.</returns>
+    /// <since>5.0</since>
     static public System.Drawing.Bitmap ExtractPreviewImage(string path)
     {
       return File3dm.ReadPreviewImage (path);
@@ -1999,7 +2150,7 @@ namespace Rhino
 
 
     /// <summary>
-    /// Determines if custom render meshes will be built for this document (ie - GH meshes).
+    /// Determines if custom render meshes will be built for this document (i.e. - GH meshes).
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
     /// <param name="attrs">
@@ -2009,6 +2160,7 @@ namespace Rhino
     /// <returns>
     /// Returns true if custom render mesh(es) will get built for this document.
     /// </returns>
+    /// <since>6.9</since>
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2021,7 +2173,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Build custom render mesh(es) for this document (ie - GH meshes).
+    /// Build custom render mesh(es) for this document (i.e. - GH meshes).
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
     /// <param name="attrs">
@@ -2030,6 +2182,7 @@ namespace Rhino
     /// <returns>
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
+    /// <since>6.9</since>
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2048,7 +2201,7 @@ namespace Rhino
 
     /// <summary>
     /// Get the bounding box for the custom render meshes associated with this
-    /// document (ie - GH meshes).
+    /// document (i.e. - GH meshes).
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
     /// <param name="attrs">
@@ -2063,6 +2216,7 @@ namespace Rhino
     /// Returns true if the bounding box was successfully calculated otherwise
     /// returns false on error.
     /// </returns>
+    /// <since>6.9</since>
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -2088,6 +2242,7 @@ namespace Rhino
     /// <summary>
     /// Returns true if Rhino is currently running a command.
     /// </summary>
+    /// <since>7.0</since>
     public bool IsCommandRunning
     {
       get
@@ -2234,6 +2389,7 @@ namespace Rhino
 
     private static readonly object g_event_lock = new object();
     internal static EventHandler<DocumentEventArgs> m_close_document;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentEventArgs> CloseDocument
     {
       add
@@ -2266,6 +2422,7 @@ namespace Rhino
     }
 
     internal static EventHandler<DocumentEventArgs> m_new_document;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentEventArgs> NewDocument
     {
       add
@@ -2308,6 +2465,7 @@ namespace Rhino
     /// <see cref="EndOpenDocument"/> events when a new or existing model is
     /// opened.
     /// </summary>
+    /// <since>6.0</since>
     public static event EventHandler<DocumentEventArgs> ActiveDocumentChanged
     {
       add
@@ -2341,6 +2499,7 @@ namespace Rhino
     internal static EventHandler<DocumentEventArgs> g_set_active_document;
 
     internal static EventHandler<DocumentEventArgs> m_document_properties_changed;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentEventArgs> DocumentPropertiesChanged
     {
       add
@@ -2384,6 +2543,7 @@ namespace Rhino
     /// operation occurs, as Rhino opens a .tmp file in the User's
     /// Local folder with the contents of the pasted document.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocumentOpenEventArgs> BeginOpenDocument
     {
       add
@@ -2416,6 +2576,7 @@ namespace Rhino
     }
 
     internal static EventHandler<DocumentOpenEventArgs> m_end_open_document;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentOpenEventArgs> EndOpenDocument
     {
       add
@@ -2452,6 +2613,7 @@ namespace Rhino
     /// This event is raised after <see cref="EndOpenDocument"/> when the
     /// documents initial views have been created and initialized.
     /// </summary>
+    /// <since>5.11</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Typo: use EndOpenDocumentInitialViewUpdate")]
     public static event EventHandler<DocumentOpenEventArgs> EndOpenDocumentInitialiViewUpdate
@@ -2489,6 +2651,7 @@ namespace Rhino
     /// This event is raised after <see cref="EndOpenDocument"/> when the
     /// documents initial views have been created and initialized.
     /// </summary>
+    /// <since>6.18</since>
     public static event EventHandler<DocumentOpenEventArgs> EndOpenDocumentInitialViewUpdate
     {
       add
@@ -2521,6 +2684,7 @@ namespace Rhino
     }
 
     internal static EventHandler<DocumentSaveEventArgs> m_begin_save_document;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentSaveEventArgs> BeginSaveDocument
     {
       add
@@ -2553,6 +2717,7 @@ namespace Rhino
     }
 
     internal static EventHandler<DocumentSaveEventArgs> m_end_save_document;
+    /// <since>5.0</since>
     public static event EventHandler<DocumentSaveEventArgs> EndSaveDocument
     {
       add
@@ -2608,6 +2773,7 @@ namespace Rhino
 
     internal static EventHandler<DocObjects.RhinoObjectEventArgs> m_add_object;
     /// <summary>Called if a new object is added to the document.</summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectEventArgs> AddRhinoObject
     {
       add
@@ -2660,6 +2826,7 @@ namespace Rhino
     /// <summary>
     /// Called if an object is deleted. At some later point the object can be un-deleted.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectEventArgs> DeleteRhinoObject
     {
       add
@@ -2716,6 +2883,7 @@ namespace Rhino
     /// then immediately after the ReplaceObject event, there will be a DeleteObject
     /// event followed by an UndeleteObject event.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoReplaceObjectEventArgs> ReplaceRhinoObject
     {
       add
@@ -2763,6 +2931,7 @@ namespace Rhino
     }
     internal static EventHandler<DocObjects.RhinoObjectEventArgs> m_undelete_object;
     /// <summary>Called if an object is un-deleted.</summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectEventArgs> UndeleteRhinoObject
     {
       add
@@ -2812,6 +2981,7 @@ namespace Rhino
     /// <summary>
     /// Called if an object is being purged from a document. The object will cease to exist forever.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectEventArgs> PurgeRhinoObject
     {
       add
@@ -2880,6 +3050,7 @@ namespace Rhino
     /// <summary>
     /// Called when object(s) are selected.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectSelectionEventArgs> SelectObjects
     {
       add
@@ -2914,6 +3085,7 @@ namespace Rhino
     /// <summary>
     /// Called when object(s) are deselected.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoObjectSelectionEventArgs> DeselectObjects
     {
       add
@@ -2968,6 +3140,7 @@ namespace Rhino
     /// <summary>
     /// Called when all objects are deselected.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoDeselectAllObjectsEventArgs> DeselectAllObjects
     {
       add
@@ -3023,6 +3196,7 @@ namespace Rhino
     /// <summary>
     /// Called when all object attributes are changed.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoModifyObjectAttributesEventArgs> ModifyObjectAttributes
     {
       add
@@ -3080,6 +3254,7 @@ namespace Rhino
     /// <code source='examples\vbnet\ex_rhinogettransform.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_rhinogettransform.cs' lang='cs'/>
     /// </example>
+    /// <since>5.10</since>
     public static event EventHandler<DocObjects.RhinoTransformObjectsEventArgs> BeforeTransformObjects
     {
       add
@@ -3133,6 +3308,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's layer table.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<LayerTableEventArgs> LayerTableEvent
     {
       add
@@ -3186,6 +3362,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's dimension style table.
     /// </summary>
+    /// <since>6.0</since>
     public static event EventHandler<DimStyleTableEventArgs> DimensionStyleTableEvent
     {
       add
@@ -3239,6 +3416,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's light table.
     /// </summary>
+    /// <since>5.3</since>
     public static event EventHandler<InstanceDefinitionTableEventArgs> InstanceDefinitionTableEvent
     {
       add
@@ -3291,6 +3469,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's light table.
     /// </summary>
+    /// <since>5.3</since>
     public static event EventHandler<LightTableEventArgs> LightTableEvent
     {
       add
@@ -3345,6 +3524,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's material table.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<MaterialTableEventArgs> MaterialTableEvent
     {
       add
@@ -3398,6 +3578,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document's group table.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<GroupTableEventArgs> GroupTableEvent
     {
       add
@@ -3469,10 +3650,12 @@ namespace Rhino
       /// <summary>
       /// Document the table belongs to
       /// </summary>
+      /// <since>5.7</since>
       public RhinoDoc Document { get { return m_rhino_doc; } }
       /// <summary>
       /// Event type
       /// </summary>
+      /// <since>5.7</since>
       public RenderContentTableEventType EventType { get { return m_event_type; } }
 
       private readonly RhinoDoc m_rhino_doc;
@@ -3649,11 +3832,17 @@ namespace Rhino
         m_old_material_content_id = oldMaterialContentId;
         m_new_material_content_id = newMaterialContentId;
       }
+      /// <since>5.10</since>
       public bool IsLayer{get { return LayerId != Guid.Empty; } }
+      /// <since>5.10</since>
       public bool IsObject { get { return ObjectId != Guid.Empty; } }
+      /// <since>5.10</since>
       public Guid LayerId { get { return m_layer_id; } }
+      /// <since>5.10</since>
       public Guid ObjectId { get { return m_object_id; } }
+      /// <since>5.10</since>
       public Guid OldRenderMaterial { get { return m_old_material_content_id; } }
+      /// <since>5.10</since>
       public Guid NewRenderMaterial { get { return m_new_material_content_id; } }
 
       private readonly Guid m_layer_id;
@@ -3665,6 +3854,7 @@ namespace Rhino
     /// Called when the <see cref="RenderMaterialTable"/> has been loaded, is
     /// about to be cleared or has been cleared.  See <see cref="RenderContentTableEventType"/> for more
     /// information.
+    /// <since>5.7</since>
     public static event EventHandler<RenderContentTableEventArgs> RenderMaterialsTableEvent
     {
       add
@@ -3708,6 +3898,7 @@ namespace Rhino
     /// Called when the <see cref="RenderEnvironmentTable"/> has been loaded, is
     /// about to be cleared or has been cleared.  See <see cref="RenderContentTableEventType"/> for more
     /// information.
+    /// <since>5.7</since>
     public static event EventHandler<RenderContentTableEventArgs> RenderEnvironmentTableEvent
     {
       add
@@ -3754,6 +3945,7 @@ namespace Rhino
     /// about to be cleared or has been cleared.  See <see cref="RenderContentTableEventType"/> for more
     /// information.
     /// </summary>
+    /// <since>5.7</since>
     public static event EventHandler<RenderContentTableEventArgs> RenderTextureTableEvent
     {
       add
@@ -3829,22 +4021,26 @@ namespace Rhino
       }
 
       RhinoDoc m_doc;
+      /// <since>5.8</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = FromRuntimeSerialNumber(m_doc_serial_number)); }
       }
 
+      /// <since>5.8</since>
       public TextureMappingEventType EventType
       {
         get { return m_event_type; }
       }
 
+      /// <since>5.8</since>
       public TextureMapping OldMapping
       {
         get { return (m_old_mapping ?? (m_old_mapping = new TextureMapping(m_const_pointer_old_mapping))); }
       }
       private TextureMapping m_old_mapping;
 
+      /// <since>5.8</since>
       public TextureMapping NewMapping
       {
         get { return (m_new_mapping ?? (m_new_mapping = new TextureMapping(m_const_pointer_new_mapping))); }
@@ -3854,6 +4050,7 @@ namespace Rhino
     /// <summary>
     /// Called when any modification happens to a document objects texture mapping.
     /// </summary>
+    /// <since>5.8</since>
     public static event EventHandler<TextureMappingEventArgs> TextureMappingEvent
     {
       add
@@ -3920,6 +4117,7 @@ namespace Rhino
   /// </summary>
   public class RhinoDocObserverArgs
   {
+    /// <since>6.0</since>
     public RhinoDocObserverArgs(RhinoDoc doc)
     {
       m_doc = doc;
@@ -3928,10 +4126,12 @@ namespace Rhino
     /// <summary>
     /// Document
     /// </summary>
+    /// <since>6.0</since>
     public RhinoDoc Doc { get { return m_doc; } }
     /// <summary>
     /// Document runtime serial number, will be different across Rhino sessions.
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber { get { return (m_doc == null ? 0u : m_doc.RuntimeSerialNumber); } }
   }
@@ -3946,6 +4146,7 @@ namespace Rhino
     /// When a document is closed
     /// </summary>
     /// <param name="e"></param>
+    /// <since>6.0</since>
     void RhinoDocClosed(RhinoDocObserverArgs e);
     /// <summary>
     /// In Windows Rhino this will mean a new document has been created or
@@ -3953,6 +4154,7 @@ namespace Rhino
     /// indicate switching from one active open document to another.
     /// </summary>
     /// <param name="e"></param>
+    /// <since>6.0</since>
     void ActiveRhinoDocChanged(RhinoDocObserverArgs e);
   }
 
@@ -3970,18 +4172,21 @@ namespace Rhino
     /// <summary>
     /// Gets the document Id of the document for this event.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use DocumentSerialNumber or Document properties")]
     public int DocumentId => (int)DocumentSerialNumber;
 
     /// <summary>
     /// Gets the uniques document serial number for this event
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint DocumentSerialNumber { get; }
 
     /// <summary>
     /// Gets the document for this event. This field might be null.
     /// </summary>
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber)); }
@@ -4004,17 +4209,20 @@ namespace Rhino
     /// <summary>
     /// Name of file being opened.
     /// </summary>
+    /// <since>5.0</since>
     public string FileName { get; }
 
     /// <summary>
     /// true if file is being merged into the current document. This
     /// occurs during the "Import" command.
     /// </summary>
+    /// <since>5.0</since>
     public bool Merge { get; }
 
     /// <summary>
     /// true if file is opened as a reference file.
     /// </summary>
+    /// <since>5.0</since>
     public bool Reference { get; }
   }
 
@@ -4033,11 +4241,13 @@ namespace Rhino
     /// <summary>
     /// Name of file being written.
     /// </summary>
+    /// <since>5.0</since>
     public string FileName { get; }
 
     /// <summary>
     /// true if only selected objects are being written to a file.
     /// </summary>
+    /// <since>5.0</since>
     public bool ExportSelected { get; }
   }
 
@@ -4054,6 +4264,7 @@ namespace Rhino
         m_pRhinoObject = pRhinoObject;
       }
 
+      /// <since>5.0</since>
       public Guid ObjectId
       {
         get
@@ -4066,6 +4277,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public RhinoObject TheObject
       {
         get
@@ -4095,17 +4307,20 @@ namespace Rhino
 
       /// <summary>
       /// Returns true if objects are being selected.
-      /// Returns false if objects are being deseleced.
+      /// Returns false if objects are being deselected.
       /// </summary>
+      /// <since>5.0</since>
       public bool Selected { get; }
 
       RhinoDoc m_doc;
+      /// <since>5.0</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number)); }
       }
 
       List<RhinoObject> m_objects;
+      /// <since>5.0</since>
       public RhinoObject[] RhinoObjects
       {
         get
@@ -4147,6 +4362,7 @@ namespace Rhino
         m_pNewRhinoObject = pNewRhinoObject;
       }
 
+      /// <since>5.0</since>
       public Guid ObjectId
       {
         get
@@ -4159,6 +4375,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public RhinoObject OldRhinoObject
       {
         get
@@ -4173,6 +4390,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public RhinoObject NewRhinoObject
       {
         get
@@ -4189,6 +4407,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number);
     }
 
@@ -4202,9 +4421,11 @@ namespace Rhino
         ObjectCount = count;
       }
 
+      /// <since>5.0</since>
       public int ObjectCount { get; }
 
       RhinoDoc m_doc;
+      /// <since>5.0</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number)); }
@@ -4225,18 +4446,21 @@ namespace Rhino
       }
 
       RhinoDoc m_doc;
+      /// <since>5.0</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number)); }
       }
 
       RhinoObject m_object;
+      /// <since>5.0</since>
       public RhinoObject RhinoObject
       {
         get { return m_object ?? (m_object = RhinoObject.CreateRhinoObjectHelper(m_pRhinoObject)); }
       }
 
       ObjectAttributes m_old_attributes;
+      /// <since>5.0</since>
       public ObjectAttributes OldAttributes
       {
         get
@@ -4250,6 +4474,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.0</since>
       public ObjectAttributes NewAttributes => RhinoObject.Attributes;
     }
 
@@ -4271,10 +4496,13 @@ namespace Rhino
         m_ptr_transform_object = IntPtr.Zero;
       }
 
+      /// <since>5.10</since>
       public int ObjectCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object);
 
+      /// <since>5.10</since>
       public bool ObjectsWillBeCopied => UnsafeNativeMethods.CRhinoOnTransformObject_Copy(m_ptr_transform_object);
 
+      /// <since>5.10</since>
       public Transform Transform
       {
         get
@@ -4285,6 +4513,7 @@ namespace Rhino
         }
       }
 
+      /// <since>5.10</since>
       public RhinoObject[] Objects
       {
         get
@@ -4357,12 +4586,13 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// Document this user data table is associated with
+    /// <since>6.3</since>
     public RhinoDoc Document { get; }
 
     /// <summary>
     /// Checks the dictionary for the specified key, if found and the value is not
-    /// null then then the value is returned.  If the key is not found or its value
-    /// is null then newT(Document) is called to create a new value instnce which
+    /// null then the value is returned.  If the key is not found or its value
+    /// is null then newT(Document) is called to create a new value instance which
     /// is put in the dictionary and returned.
     /// </summary>
     /// <typeparam name="T">
@@ -4404,6 +4634,7 @@ namespace Rhino.DocObjects.Tables
     /// Returns the document specific instance of type T using the specified
     /// dictionary key or null if not found.
     /// </returns>
+    /// <since>6.15</since>
     public T TryGetValue<T>(object key) where T : class
     {
       TryGetValue(key, out object value);
@@ -4419,6 +4650,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this object table.</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document { get; }
 
     /// <summary>
@@ -4429,6 +4661,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoView ActiveView
     {
       get
@@ -4450,6 +4683,7 @@ namespace Rhino.DocObjects.Tables
     /// if null, then all views are tested. If not null, then just view is tested.
     /// </param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool IsCameraIconVisible(RhinoView view)
     {
       uint view_sn = view == null ? 0 : view.RuntimeSerialNumber;
@@ -4463,6 +4697,7 @@ namespace Rhino.DocObjects.Tables
     /// If null, any camera icon is turned off. If not null, the camera icon for that
     /// view is turned on.
     /// </param>
+    /// <since>6.0</since>
     public void EnableCameraIcon(RhinoView view)
     {
       uint view_sn = view == null ? 0 : view.RuntimeSerialNumber;
@@ -4478,6 +4713,7 @@ namespace Rhino.DocObjects.Tables
     /// If true, flash between object color and selection color. If false,
     /// flash between visible and invisible.
     /// </param>
+    /// <since>5.0</since>
     public void FlashObjects(IEnumerable<RhinoObject> list, bool useSelectionColor)
     {
       var rharray = new Runtime.InternalRhinoObjectArray(list);
@@ -4500,6 +4736,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addcircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void Redraw()
     {
       UnsafeNativeMethods.CRhinoDoc_Redraw(Document.RuntimeSerialNumber);
@@ -4508,7 +4745,8 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Gets an array of all the views.</summary>
     /// <param name="includeStandardViews">true if "Right", "Perspective", etc., view should be included; false otherwise.</param>
     /// <param name="includePageViews">true if page-related views should be included; false otherwise.</param>
-    /// <returns>A array of Rhino views. This array can be emptry, but not null.</returns>
+    /// <returns>A array of Rhino views. This array can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public RhinoView[] GetViewList(bool includeStandardViews, bool includePageViews)
     {
       if (!includeStandardViews && !includePageViews)
@@ -4529,6 +4767,7 @@ namespace Rhino.DocObjects.Tables
       return views.ToArray();
     }
 
+    /// <since>5.0</since>
     public RhinoView[] GetStandardRhinoViews()
     {
       return GetViewList(true, false);
@@ -4543,6 +4782,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoPageView[] GetPageViews()
     {
       var views = GetViewList(false, true);
@@ -4561,6 +4801,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="mainViewportId">The ID of the main viewport looked for.</param>
     /// <returns>View on success. null if the view could not be found in this document.</returns>
+    /// <since>5.0</since>
     public RhinoView Find(Guid mainViewportId)
     {
       IntPtr ptr_view = UnsafeNativeMethods.CRhinoDoc_FindView(Document.RuntimeSerialNumber, mainViewportId);
@@ -4576,6 +4817,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="mainViewportName">The name of the main viewport.</param>
     /// <param name="compareCase">true if capitalization influences comparison; otherwise, false.</param>
     /// <returns>A Rhino view on success; null on error.</returns>
+    /// <since>5.0</since>
     public RhinoView Find(string mainViewportName, bool compareCase)
     {
       IntPtr ptr_view = UnsafeNativeMethods.CRhinoDoc_FindView2(Document.RuntimeSerialNumber, mainViewportName, compareCase);
@@ -4586,20 +4828,24 @@ namespace Rhino.DocObjects.Tables
     const int idxFourViewLayout = 1;
     const int idxThreeViewLayout = 2;
 
+    /// <since>5.0</since>
     public void DefaultViewLayout()
     {
       UnsafeNativeMethods.CRhinoDoc_ViewLayout(Document.RuntimeSerialNumber, idxDefaultViewLayout, false);
     }
+    /// <since>5.0</since>
     public void FourViewLayout(bool useMatchingViews)
     {
       UnsafeNativeMethods.CRhinoDoc_ViewLayout(Document.RuntimeSerialNumber, idxFourViewLayout, useMatchingViews);
     }
+    /// <since>5.0</since>
     public void ThreeViewLayout(bool useMatchingViews)
     {
       UnsafeNativeMethods.CRhinoDoc_ViewLayout(Document.RuntimeSerialNumber, idxThreeViewLayout, useMatchingViews);
     }
 
     ///<summary>Returns or sets (enable or disables) screen redrawing.</summary>
+    /// <since>5.0</since>
     public bool RedrawEnabled
     {
       get { return Document.GetBool(UnsafeNativeMethods.DocumentStatusBool.RedrawEnabled); }
@@ -4614,6 +4860,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="position">A position.</param>
     /// <param name="floating">true if the view floats; false if it is docked.</param>
     /// <returns>The newly constructed Rhino view; or null on error.</returns>
+    /// <since>5.0</since>
     public RhinoView Add(string title, DefinedViewportProjection projection, System.Drawing.Rectangle position, bool floating)
     {
       uint view_sn = UnsafeNativeMethods.CRhinoView_Create(Document.RuntimeSerialNumber, position.Left, position.Top, position.Right, position.Bottom, floating);
@@ -4636,6 +4883,7 @@ namespace Rhino.DocObjects.Tables
     /// If null or empty, a name will be generated as "Page #" where # is the largest page number.
     /// </param>
     /// <returns>The newly created page view on success; or null on error.</returns>
+    /// <since>5.0</since>
     public RhinoPageView AddPageView(string title)
     {
       IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, 0, 0);
@@ -4656,12 +4904,14 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoPageView AddPageView(string title, double pageWidth, double pageHeight)
     {
       IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, pageWidth, pageHeight);
       return RhinoView.FromIntPtr(ptr_page_view) as RhinoPageView;
     }
 
+    /// <since>5.0</since>
     public bool ModelSpaceIsActive
     {
       get
@@ -4671,12 +4921,14 @@ namespace Rhino.DocObjects.Tables
     }
 #region IEnumerable<RhinoView> Members
 
+    /// <since>5.0</since>
     public IEnumerator<RhinoView> GetEnumerator()
     {
       RhinoView[] views = GetViewList(true, true);
       return new List<RhinoView>(views).GetEnumerator();
     }
 
+    /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
       RhinoView[] views = GetViewList(true, true);
@@ -4694,6 +4946,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Gets the document that owns this object table.
     /// </summary>
+    /// <since>5.0</since>
     public new RhinoDoc Document
     {
       get { return m_doc; }
@@ -4704,6 +4957,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objectId">Do not use this method.</param>
     /// <returns>Do not use this method.</returns>
+    /// <since>5.0</since>
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public RhinoObject Find(Guid objectId)
     {
@@ -4717,10 +4971,11 @@ namespace Rhino.DocObjects.Tables
     /// replaced with a new object, then the guid  persists. For example, if the _Move command
     /// moves an object, then the moved object inherits it's guid from the starting object.
     /// If the Copy command copies an object, then the copy gets a new guid. This guid persists
-    /// through file saving/openning operations. This function will not find grip objects.
+    /// through file saving/opening operations. This function will not find grip objects.
     /// </summary>
     /// <param name="id">ID of object to search for.</param>
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public override RhinoObject FindId(Guid id)
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoDoc_LookupObject(m_doc.RuntimeSerialNumber, id);
@@ -4733,6 +4988,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="id">ID of point object to search for.</param>
     /// <param name="point">The point will be passed here.</param>
     /// <returns>true on success; false if point was not found, id represented another geometry type, or on error.</returns>
+    /// <since>6.0</since>
     public bool TryFindPoint(Guid id, out Point3d point)
     {
       bool rc = false;
@@ -4747,6 +5003,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="id">ID of object to search for.</param>
     /// <returns>Reference to the geometry in the rhino object with the objectId or null if no such object could be found.</returns>
+    /// <since>6.0</since>
     public GeometryBase FindGeometry(Guid id)
     {
       var temp = this.FindId(id);
@@ -4762,12 +5019,13 @@ namespace Rhino.DocObjects.Tables
     /// RhinoObject.RuntimeObjectSerialNumber. The RhinoObject constructor sets the runtime serial number and every
     /// instance of a RhinoObject class will have a unique serial number for the duration of the Rhino application.
     /// If an object is replaced with a new object, then the new object will have a different runtime serial number.
-    /// Deleted objects stored in the undo list maintain their runtime serial numbers and this funtion will return
+    /// Deleted objects stored in the undo list maintain their runtime serial numbers and this function will return
     /// pointers to these objects. Call RhinoObject.IsDeleted if you need to determine if the returned object is
     /// active or deleted.  The runtime serial number is not saved in files.
     /// </summary>
     /// <param name="runtimeSerialNumber">Runtime serial number to search for.</param>
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public RhinoObject Find(uint runtimeSerialNumber)
     {
@@ -4780,6 +5038,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="groupIndex">Index of group to search for.</param>
     /// <returns>An array of objects that belong to the specified group or null if no objects could be found.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByGroup(int groupIndex)
     {
       var rhobjs = new Runtime.InternalRhinoObjectArray();
@@ -4797,6 +5056,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Array of objects that belong to the specified group or null if no objects could be found.
     /// </returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByLayer(Layer layer)
     {
       int layer_index = layer.Index;
@@ -4820,6 +5080,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_sellayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_sellayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public RhinoObject[] FindByLayer(string layerName)
     {
       Layer layer = Document.Layers.FindName(layerName);
@@ -4832,13 +5093,15 @@ namespace Rhino.DocObjects.Tables
     /// Same as GetObjectList but converts the result to an array.
     /// </summary>
     /// <param name="filter">The object enumerator filter to customize inclusion requirements.</param>
-    /// <returns>A Rhino object array. This array can be emptry but not null.</returns>
+    /// <returns>A Rhino object array. This array can be empty but not null.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByFilter(ObjectEnumeratorSettings filter)
     {
       var list = new List<RhinoObject>(GetObjectList(filter));
       return list.ToArray();
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByObjectType(ObjectType typeFilter)
     {
@@ -4853,6 +5116,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="value">Search pattern for UserString values (supported wildcards are: ? = any single character, * = any sequence of characters).</param>
     /// <param name="caseSensitive">If true, string comparison will be case sensitive.</param>
     /// <returns>An array of all objects whose UserString matches with the search patterns or null when no such objects could be found.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByUserString(string key, string value, bool caseSensitive)
     {
       return FindByUserString(key, value, caseSensitive, true, true, ObjectType.AnyObject);
@@ -4867,6 +5131,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="searchAttributes">If true, UserStrings attached to the attributes of an object will be searched.</param>
     /// <param name="filter">Object type filter.</param>
     /// <returns>An array of all objects whose UserString matches with the search patterns or null when no such objects could be found.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByUserString(string key, string value, bool caseSensitive, bool searchGeometry, bool searchAttributes, ObjectType filter)
     {
@@ -4898,6 +5163,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="searchAttributes">If true, UserStrings attached to the attributes of an object will be searched.</param>
     /// <param name="filter">Filter used to restrict the number of objects searched.</param>
     /// <returns>An array of all objects whose UserString matches with the search patterns or null when no such objects could be found.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByUserString(string key, string value, bool caseSensitive, bool searchGeometry, bool searchAttributes, ObjectEnumeratorSettings filter)
     {
       var rhobjs = new Runtime.InternalRhinoObjectArray();
@@ -4919,6 +5185,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="drawColor">The alpha value of this color is ignored.</param>
     /// <param name="includeLights">true if lights should be included.</param>
     /// <returns>An array of Rhino document objects. This array can be empty.</returns>
+    /// <since>5.0</since>
     public RhinoObject[] FindByDrawColor(System.Drawing.Color drawColor, bool includeLights)
     {
       var it = new ObjectEnumeratorSettings
@@ -4984,6 +5251,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="inside">should objects returned be the ones inside of this region (or outside)</param>
     /// <param name="filter">filter down list by object type</param>
     /// <returns>An array of RhinoObjects that are inside of this region</returns>
+    /// <since>5.7</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByWindowRegion(RhinoViewport viewport, IEnumerable<Point3d> region, bool inside, ObjectType filter)
     {
@@ -5000,6 +5268,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="inside">should objects returned be the ones inside of this region (or outside)</param>
     /// <param name="filter">filter down list by object type</param>
     /// <returns>An array of RhinoObjects that are inside of this region</returns>
+    /// <since>5.8</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByWindowRegion(RhinoViewport viewport, Point2d screen1, Point2d screen2, bool inside, ObjectType filter)
     {
@@ -5015,6 +5284,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="inside">should objects returned be the ones inside of this region (or outside)</param>
     /// <param name="filter">filter down list by object type</param>
     /// <returns>An array of RhinoObjects that are inside of this region</returns>
+    /// <since>5.7</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByCrossingWindowRegion(RhinoViewport viewport, IEnumerable<Point3d> region, bool inside, ObjectType filter)
     {
@@ -5031,6 +5301,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="inside">should objects returned be the ones inside of this region (or outside)</param>
     /// <param name="filter">filter down list by object type</param>
     /// <returns>An array of RhinoObjects that are inside of this region</returns>
+    /// <since>5.8</since>
     [CLSCompliant(false)]
     public RhinoObject[] FindByCrossingWindowRegion(RhinoViewport viewport, Point2d screen1, Point2d screen2, bool inside, ObjectType filter)
     {
@@ -5042,7 +5313,8 @@ namespace Rhino.DocObjects.Tables
     /// Finds all of the clipping plane objects that actively clip a viewport.
     /// </summary>
     /// <param name="viewport">The viewport in which clipping planes are searched.</param>
-    /// <returns>An array of clipping plane objects. The array can be emptry but not null.</returns>
+    /// <returns>An array of clipping plane objects. The array can be empty but not null.</returns>
+    /// <since>5.0</since>
     public ClippingPlaneObject[] FindClippingPlanesForViewport(RhinoViewport viewport)
     {
       Guid id = viewport.Id;
@@ -5072,33 +5344,39 @@ namespace Rhino.DocObjects.Tables
     }
 
     #region Object addition
+    /// <since>5.0</since>
     public void AddRhinoObject(Custom.CustomMeshObject meshObject)
     {
       AddRhinoObjectHelper(meshObject, null, null);
     }
 
+    /// <since>6.1</since>
     public void AddRhinoObject(Custom.CustomMeshObject meshObject, HistoryRecord history)
     {
       AddRhinoObjectHelper(meshObject, null, history);
     }
 
+    /// <since>5.0</since>
     public void AddRhinoObject(MeshObject meshObject, Mesh mesh)
     {
       AddRhinoObjectHelper(meshObject, mesh, null);
     }
 
+    /// <since>5.0</since>
     public void AddRhinoObject(Custom.CustomBrepObject brepObject)
     {
       //helper will use geometry already hung off of the custom object
       AddRhinoObjectHelper(brepObject, null, null);
     }
 
+    /// <since>6.1</since>
     public void AddRhinoObject(Custom.CustomBrepObject brepObject, HistoryRecord history)
     {
       //helper will use geometry already hung off of the custom object
       AddRhinoObjectHelper(brepObject, null, history);
     }
 
+    /// <since>5.0</since>
     public void AddRhinoObject(BrepObject brepObject, Brep brep)
     {
       AddRhinoObjectHelper(brepObject, brep, null);
@@ -5109,23 +5387,28 @@ namespace Rhino.DocObjects.Tables
       AddRhinoObjectHelper(pointCloudObject, pointCloud);
     }
     */
+    /// <since>5.6</since>
     public void AddRhinoObject(Custom.CustomPointObject pointObject)
     {
       AddRhinoObjectHelper(pointObject, null, null);
     }
+    /// <since>6.1</since>
     public void AddRhinoObject(Custom.CustomPointObject pointObject, HistoryRecord history)
     {
       AddRhinoObjectHelper(pointObject, null, history);
     }
 
+    /// <since>5.6</since>
     public void AddRhinoObject(PointObject pointObject, Point point)
     {
       AddRhinoObjectHelper(pointObject, point, null);
     }
+    /// <since>5.0</since>
     public void AddRhinoObject(CurveObject curveObject, Curve curve)
     {
       AddRhinoObjectHelper(curveObject, curve, null);
     }
+    /// <since>6.1</since>
     public void AddRhinoObject(Custom.CustomCurveObject curveObject, HistoryRecord history)
     {
       AddRhinoObjectHelper(curveObject, null, history);
@@ -5240,6 +5523,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="geometry">The base geometry. This cannot be null.</param>
     /// <returns>The new object ID on success.</returns>
     /// <exception cref="ArgumentNullException">If geometry is null.</exception>
+    /// <since>5.0</since>
     public Guid Add(GeometryBase geometry)
     {
       return Add(geometry, null);
@@ -5253,6 +5537,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="attributes">The object attributes. This can be null.</param>
     /// <returns>The new object ID on success.</returns>
     /// <exception cref="ArgumentNullException">If geometry is null.</exception>
+    /// <since>5.0</since>
     public Guid Add(GeometryBase geometry, ObjectAttributes attributes)
     {
       return Add(geometry, attributes, null, false);
@@ -5268,6 +5553,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="reference">If reference is true, object will not be saved in the 3dm file.</param>
     /// <returns>The new object ID on success.</returns>
     /// <exception cref="ArgumentNullException">If geometry is null.</exception>
+    /// <since>6.0</since>
     public Guid Add(GeometryBase geometry, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (geometry == null)
@@ -5394,6 +5680,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns the amount of history records in this document.
     /// </summary>
+    /// <since>6.0</since>
     public int HistoryRecordCount
     {
       get
@@ -5410,6 +5697,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="y">Y component of point coordinate.</param>
     /// <param name="z">Z component of point coordinate.</param>
     /// <returns>A unique identifier for the object..</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(double x, double y, double z)
     {
       return AddPoint(new Point3d(x, y, z));
@@ -5422,14 +5710,16 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3d point)
     {
       return AddPoint(point, null);
     }
     /// <summary>Adds a point object to the document.</summary>
     /// <param name="point">location of point.</param>
-    /// <param name="attributes">attributes to apply to point. null is acceptible</param>
+    /// <param name="attributes">attributes to apply to point. null is acceptable</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3d point, ObjectAttributes attributes)
     {
       return AddPoint(point, attributes, null, false);
@@ -5437,13 +5727,14 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>Adds a point object to the document</summary>
     /// <param name="point">location of point</param>
-    /// <param name="attributes">attributes to apply to point. null is acceptible</param>
+    /// <param name="attributes">attributes to apply to point. null is acceptable</param>
     /// <param name="history">history associated with this point. null is acceptable</param>
     /// <param name="reference">
     /// true if the object is from a reference file.  Reference objects do
     /// not persist in archives
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3d point, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -5453,7 +5744,7 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>Adds a point object and its geometry-linked information to the document</summary>
     /// <param name="point">A point geometry class.</param>
-    /// <param name="attributes">attributes to apply to point. null is acceptible</param>
+    /// <param name="attributes">attributes to apply to point. null is acceptable</param>
     /// <param name="history">history associated with this point. null is acceptable</param>
     /// <param name="reference">
     /// true if the object is from a reference file.  Reference objects do
@@ -5461,6 +5752,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
     /// <exception cref="ArgumentNullException">If point is null.</exception>
+    /// <since>6.0</since>
     public Guid AddPoint(Point point, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (point == null)
@@ -5480,6 +5772,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3f point)
     {
       Point3d pt = new Point3d(point);
@@ -5489,6 +5782,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="point">location of point.</param>
     /// <param name="attributes">attributes to apply to point.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPoint(Point3f point, ObjectAttributes attributes)
     {
       var pt = new Point3d(point);
@@ -5501,6 +5795,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="points">Points to add.</param>
     /// <returns>List of object ids.</returns>
+    /// <since>5.0</since>
     public RhinoList<Guid> AddPoints(IEnumerable<Point3d> points)
     {
       if (points == null)
@@ -5520,6 +5815,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="points">Points to add.</param>
     /// <param name="attributes">Attributes to apply to point objects.</param>
     /// <returns>List of object ids.</returns>
+    /// <since>5.0</since>
     public RhinoList<Guid> AddPoints(IEnumerable<Point3d> points, ObjectAttributes attributes)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -5538,6 +5834,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="points">Points to add.</param>
     /// <returns>List of object ids.</returns>
+    /// <since>5.0</since>
     public RhinoList<Guid> AddPoints(IEnumerable<Point3f> points)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -5556,6 +5853,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="points">Points to add.</param>
     /// <param name="attributes">Attributes to apply to point objects.</param>
     /// <returns>List of object ids.</returns>
+    /// <since>5.0</since>
     public RhinoList<Guid> AddPoints(IEnumerable<Point3f> points, ObjectAttributes attributes)
     {
       if (points == null) { throw new ArgumentNullException("points"); }
@@ -5572,6 +5870,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="cloud">PointCloud to add.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(PointCloud cloud)
     {
       return AddPointCloud(cloud, null);
@@ -5580,6 +5879,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="cloud">PointCloud to add.</param>
     /// <param name="attributes">Attributes to apply to point cloud.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(PointCloud cloud, ObjectAttributes attributes)
     {
       return AddPointCloud(cloud, attributes, null, false);
@@ -5588,12 +5888,13 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="cloud">PointCloud to add.</param>
     /// <param name="attributes">Attributes to apply to point cloud. null is acceptable</param>
-    /// <param name="history">history associated with this pointcloud. null is acceptable</param>
+    /// <param name="history">history associated with this point cloud. null is acceptable</param>
     /// <param name="reference">
     /// true if the object is from a reference file.  Reference objects do
     /// not persist in archives
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(PointCloud cloud, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (cloud == null)
@@ -5609,6 +5910,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of points.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(IEnumerable<Point3d> points)
     {
       return AddPointCloud(points, null);
@@ -5617,6 +5919,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="points">A list, an array or any enumerable set of points.</param>
     /// <param name="attributes">attributes to apply to point cloud.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(IEnumerable<Point3d> points, ObjectAttributes attributes)
     {
       int count;
@@ -5634,12 +5937,13 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of points</param>
     /// <param name="attributes">Attributes to apply to point cloud. null is acceptable</param>
-    /// <param name="history">history associated with this pointcloud. null is acceptable</param>
+    /// <param name="history">history associated with this point cloud. null is acceptable</param>
     /// <param name="reference">
     /// true if the object is from a reference file.  Reference objects do
     /// not persist in archives
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPointCloud(IEnumerable<Point3d> points, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       int count;
@@ -5666,6 +5970,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addclippingplane.cs' lang='cs'/>
     /// <code source='examples\py\ex_addclippingplane.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, Guid clippedViewportId)
     {
       return AddClippingPlane(plane, uMagnitude, vMagnitude, new [] { clippedViewportId });
@@ -5680,6 +5985,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="clippedViewportIds">A list, an array or any enumerable set of viewport IDs
     /// that the new clipping plane will clip.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds)
     {
       if (null == clippedViewportIds)
@@ -5704,6 +6010,7 @@ namespace Rhino.DocObjects.Tables
     /// that the new clipping plane will clip.</param>
     /// <param name="attributes">Document attributes for the plane.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds, ObjectAttributes attributes)
     {
       if (null == attributes)
@@ -5722,10 +6029,12 @@ namespace Rhino.DocObjects.Tables
       return rc;
     }
 
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, Guid clippedViewportId, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       return AddClippingPlane(plane, uMagnitude, vMagnitude, new Guid[] { clippedViewportId }, attributes, history, reference);
     }
+    /// <since>5.0</since>
     public Guid AddClippingPlane(Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       List<Guid> ids = new List<Guid>(clippedViewportIds);
@@ -5746,11 +6055,13 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addradialdimension.cs' lang='cs'/>
     /// <code source='examples\py\ex_addradialdimension.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddRadialDimension(RadialDimension dimension)
     {
       return AddRadialDimension(dimension, null);
     }
 
+    /// <since>5.0</since>
     public Guid AddRadialDimension(RadialDimension dimension, ObjectAttributes attributes)
     {
       return AddRadialDimension(dimension, attributes, null, false);
@@ -5764,6 +6075,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddRadialDimension(RadialDimension dimension, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == dimension)
@@ -5782,6 +6094,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="rectangle">The rectangle.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddRectangle(Rectangle3d rectangle)
     {
       return AddRectangle(rectangle, null);
@@ -5793,6 +6106,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="rectangle">The rectangle.</param>
     /// <param name="attributes">Attributes that will be linked with the surface object.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddRectangle(Rectangle3d rectangle, ObjectAttributes attributes)
     {
       return AddRectangle(rectangle, attributes, null, false);
@@ -5806,6 +6120,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">History data records.</param>
     /// <param name="reference">If a reference, object will not be saved in the document.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddRectangle(Rectangle3d rectangle, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (!rectangle.IsValid)
@@ -5820,6 +6135,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="box">The box.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddBox(Box box)
     {
       return AddBox(box, null);
@@ -5831,6 +6147,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="box">The box.</param>
     /// <param name="attributes">Attributes that will be linked with the surface object.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddBox(Box box, ObjectAttributes attributes)
     {
       return AddBox(box, attributes, null, false);
@@ -5844,6 +6161,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">History data records.</param>
     /// <param name="reference">If a reference, object will not be saved in the document.</param>
     /// <returns>The ID.</returns>
+    /// <since>6.0</since>
     public Guid AddBox(Box box, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (!box.IsValid)
@@ -5863,6 +6181,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addline.cs' lang='cs'/>
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddLine(Point3d from, Point3d to)
     {
       return AddLine(from, to, null);
@@ -5872,11 +6191,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="to">The line end.</param>
     /// <param name="attributes">Attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Point3d from, Point3d to, ObjectAttributes attributes)
     {
       return AddLine(from, to, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddLine(Point3d from, Point3d to, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -5886,6 +6207,7 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>Adds a line object to Rhino.</summary>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Line line)
     {
       return AddLine(line.From, line.To);
@@ -5894,6 +6216,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="line">The line value.</param>
     /// <param name="attributes">Attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddLine(Line line, ObjectAttributes attributes)
     {
       return AddLine(line.From, line.To, attributes);
@@ -5908,6 +6231,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_tightboundingbox.cs' lang='cs'/>
     /// <code source='examples\py\ex_tightboundingbox.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddPolyline(IEnumerable<Point3d> points)
     {
       return AddPolyline(points, null);
@@ -5916,11 +6240,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="points">A <see cref="Polyline"/>; a list, an array, or any enumerable set of <see cref="Point3d"/>.</param>
     /// <param name="attributes">attributes to apply to line.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddPolyline(IEnumerable<Point3d> points, ObjectAttributes attributes)
     {
       return AddPolyline(points, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddPolyline(IEnumerable<Point3d> points, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       int count;
@@ -5936,6 +6262,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a curve object to the document representing an arc.</summary>
     /// <param name="arc">An arc value.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddArc(Arc arc)
     {
       return AddArc(arc, null, null, false);
@@ -5944,11 +6271,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="arc">An arc value.</param>
     /// <param name="attributes">Attributes to apply to arc.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddArc(Arc arc, ObjectAttributes attributes)
     {
       return AddArc(arc, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddArc(Arc arc, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -5964,6 +6293,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addcircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addcircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddCircle(Circle circle)
     {
       return AddCircle(circle, null, null, false);
@@ -5972,11 +6302,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="circle">A circle value.</param>
     /// <param name="attributes">Attributes to apply to circle.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCircle(Circle circle, ObjectAttributes attributes)
     {
       return AddCircle(circle, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddCircle(Circle circle, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -5988,6 +6320,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a curve object to the document representing an ellipse.</summary>
     /// <param name="ellipse">An ellipse value.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddEllipse(Ellipse ellipse)
     {
       return AddEllipse(ellipse, null, null, false);
@@ -5996,11 +6329,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="ellipse">An ellipse value.</param>
     /// <param name="attributes">Attributes to apply to ellipse.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddEllipse(Ellipse ellipse, ObjectAttributes attributes)
     {
       return AddEllipse(ellipse, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddEllipse(Ellipse ellipse, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -6013,15 +6348,18 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addsphere.cs' lang='cs'/>
     /// <code source='examples\py\ex_addsphere.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddSphere(Sphere sphere)
     {
       return AddSphere(sphere, null, null, false);
     }
+    /// <since>5.0</since>
     public Guid AddSphere(Sphere sphere, ObjectAttributes attributes)
     {
       return AddSphere(sphere, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddSphere(Sphere sphere, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -6041,6 +6379,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addnurbscircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_addnurbscircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddCurve(Curve curve)
     {
       return AddCurve(curve, null);
@@ -6049,11 +6388,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="curve">A curve. A duplicate of this curve is added to Rhino.</param>
     /// <param name="attributes">Attributes to apply to curve.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddCurve(Curve curve, ObjectAttributes attributes)
     {
       return AddCurve(curve, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddCurve(Curve curve, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == curve)
@@ -6068,6 +6409,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="text">A text string.</param>
     /// <param name="location">A point position.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(string text, Point3d location)
     {
       return AddTextDot(text, location, null);
@@ -6077,6 +6419,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="location">A point position.</param>
     /// <param name="attributes">Attributes to apply to curve.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(string text, Point3d location, ObjectAttributes attributes)
     {
       using (var dot = new TextDot(text, location))
@@ -6089,6 +6432,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a text dot object to Rhino.</summary>
     /// <param name="dot">A text dot that will be copied.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(TextDot dot)
     {
       return AddTextDot(dot, null);
@@ -6097,11 +6441,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="dot">A text dot that will be copied.</param>
     /// <param name="attributes">Attributes to apply to text dot.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddTextDot(TextDot dot, ObjectAttributes attributes)
     {
       return AddTextDot(dot, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddTextDot(TextDot dot, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == dot)
@@ -6115,6 +6461,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary> Adds a v6_TextObject to the document. </summary>
     /// <param name="text"> Text object to add. </param>
     /// <returns> The Id of the newly added object or Guid.Empty on failure. </returns>
+    /// <since>5.0</since>
     public Guid AddText(TextEntity text)
     {
       return AddText(text, null);
@@ -6124,6 +6471,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="text">Text object to add.</param>
     /// <param name="attributes"></param>
     /// <returns>The Id of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(TextEntity text, ObjectAttributes attributes)
     {
       return AddText(text, attributes, null, false);
@@ -6135,6 +6483,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Id of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(TextEntity text, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == text)
@@ -6153,14 +6502,16 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="leader">The leader object.</param>
     /// <returns>The Id of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>6.0</since>
     public Guid AddLeader(Leader leader)
     {
       return AddLeader(leader, null);
     }
-    /// <summary> Addsa Leader object to the document. </summary>
+    /// <summary> Adds Leader object to the document. </summary>
     /// <param name="leader">The leader object.</param>
     /// <param name="attributes">Attributes to apply to rich text.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>6.0</since>
     public Guid AddLeader(Leader leader, ObjectAttributes attributes)
     {
       return AddLeader(leader, attributes, null, false);
@@ -6174,6 +6525,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>6.0</since>
     public Guid AddLeader(Leader leader, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == leader)
@@ -6201,6 +6553,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addlineardimension.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlineardimension.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddLinearDimension(LinearDimension dimension)
     {
       return AddLinearDimension(dimension, null);
@@ -6212,6 +6565,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="dimension">Dimension object to add.</param>
     /// <param name="attributes"></param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLinearDimension(LinearDimension dimension, ObjectAttributes attributes)
     {
       return AddLinearDimension(dimension, attributes, null, false);
@@ -6225,6 +6579,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddLinearDimension(LinearDimension dimension, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == dimension)
@@ -6247,6 +6602,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// The Id of the newly added object or Guid.Empty on failure.
     /// </returns>
+    /// <since>5.0</since>
     public Guid AddAngularDimension(AngularDimension dimension)
     {
       return AddAngularDimension(dimension, null);
@@ -6258,6 +6614,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="dimension">Dimension object to add.</param>
     /// <param name="attributes"></param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddAngularDimension(AngularDimension dimension, ObjectAttributes attributes)
     {
       return AddAngularDimension(dimension, attributes, null, false);
@@ -6271,6 +6628,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddAngularDimension(AngularDimension dimension, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == dimension)
@@ -6293,6 +6651,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>6.0</since>
     public Guid AddOrdinateDimension(Geometry.OrdinateDimension dimordinate, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == dimordinate)
@@ -6314,6 +6673,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history">Object history to save.</param>
     /// <param name="reference">If reference, then object will not be saved into the 3dm file.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>6.0</since>
     public Guid AddCentermark(Centermark centermark, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == centermark)
@@ -6336,6 +6696,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_textjustify.cs' lang='cs'/>
     /// <code source='examples\py\ex_textjustify.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddText(Text3d text3d)
     {
       return AddText(text3d, null);
@@ -6346,6 +6707,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="text3d">The text object to add.</param>
     /// <param name="attributes">Object Attributes.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(Text3d text3d, ObjectAttributes attributes)
     {
       TextJustification justification = TextJustification.None;
@@ -6392,11 +6754,13 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addtext.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtext.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic)
     {
       return AddText(text, plane, height, fontName, bold, italic, null);
     }
 
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification)
     {
       return AddText(text, plane, height, fontName, bold, italic, justification, null);
@@ -6413,21 +6777,25 @@ namespace Rhino.DocObjects.Tables
     /// <param name="italic">Italic flag.</param>
     /// <param name="attributes">Attributes that will be linked with the object.</param>
     /// <returns>The Guid of the newly added object or Guid.Empty on failure.</returns>
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, ObjectAttributes attributes)
     {
       return AddText(text, plane, height, fontName, bold, italic, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, ObjectAttributes attributes)
     {
       return AddText(text, plane, height, fontName, bold, italic, justification, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       return AddText(text, plane, height, fontName, bold, italic, (TextJustification)(-1), attributes, history, reference);
     }
 
+    /// <since>5.0</since>
     public Guid AddText(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(fontName))
@@ -6447,6 +6815,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds a SubD object to Rhino.</summary>
     /// <param name="subD">A duplicate of this SubD is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.0</since>
     public Guid AddSubD(SubD subD)
     {
       return AddSubD(subD, null);
@@ -6456,6 +6825,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="subD">A duplicate of this SubD is added to Rhino.</param>
     /// <param name="attributes">Attributes that will be linked with the object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.0</since>
     public Guid AddSubD(SubD subD, ObjectAttributes attributes)
     {
       return AddSubD(subD, attributes, null, false);
@@ -6467,6 +6837,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="history"></param>
     /// <param name="reference"></param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.0</since>
     public Guid AddSubD(SubD subD, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (subD == null) throw new ArgumentNullException(nameof(subD));
@@ -6490,6 +6861,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addtorus.cs' lang='cs'/>
     /// <code source='examples\py\ex_addtorus.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddSurface(Surface surface)
     {
       return AddSurface(surface, null);
@@ -6498,11 +6870,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="surface">A duplicate of this surface is added to Rhino.</param>
     /// <param name="attributes">Attributes that will be linked with the surface object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddSurface(Surface surface, ObjectAttributes attributes)
     {
       return AddSurface(surface, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddSurface(Surface surface, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == surface)
@@ -6516,6 +6890,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Adds an extrusion object to Rhino.</summary>
     /// <param name="extrusion">A duplicate of this extrusion is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddExtrusion(Extrusion extrusion)
     {
       return AddExtrusion(extrusion, null);
@@ -6524,11 +6899,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="extrusion">A duplicate of this extrusion is added to Rhino.</param>
     /// <param name="attributes">Attributes that will be linked with the extrusion object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddExtrusion(Extrusion extrusion, ObjectAttributes attributes)
     {
       return AddExtrusion(extrusion, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddExtrusion(Extrusion extrusion, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == extrusion)
@@ -6547,6 +6924,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addmesh.cs' lang='cs'/>
     /// <code source='examples\py\ex_addmesh.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddMesh(Geometry.Mesh mesh)
     {
       return AddMesh(mesh, null);
@@ -6555,17 +6933,20 @@ namespace Rhino.DocObjects.Tables
     /// <param name="mesh">A duplicate of this mesh is added to Rhino.</param>
     /// <param name="attributes">Attributes that will be linked with the mesh object.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddMesh(Mesh mesh, ObjectAttributes attributes)
     {
       return AddMesh(mesh, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddMesh(Mesh mesh, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       return AddMesh(mesh, attributes, history, reference, true);
     }
 
 
+    /// <since>6.0</since>
     public Guid AddMesh(Mesh mesh, ObjectAttributes attributes, HistoryRecord history, bool reference, bool requireValidMesh)
     {
       if (null == mesh)
@@ -6584,6 +6965,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_addbrepbox.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbrepbox.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddBrep(Brep brep)
     {
       return AddBrep(brep, null);
@@ -6592,11 +6974,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="brep">A duplicate of this brep is added to Rhino.</param>
     /// <param name="attributes">attributes to apply to brep.</param>
     /// <returns>A unique identifier for the object.</returns>
+    /// <since>5.0</since>
     public Guid AddBrep(Brep brep, ObjectAttributes attributes)
     {
       return AddBrep(brep, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddBrep(Brep brep, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (null == brep)
@@ -6607,6 +6991,7 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, -1);
     }
 
+    /// <since>5.0</since>
     public Guid AddBrep(Brep brep, ObjectAttributes attributes, HistoryRecord history, bool reference, bool splitKinkySurfaces)
     {
       if (null == brep)
@@ -6617,6 +7002,7 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, splitKinkySurfaces ? 1 : 0);
     }
 
+    /// <since>5.11</since>
     public Guid[] AddExplodedInstancePieces(InstanceObject instance, bool explodeNestedInstances = true, bool deleteInstance = false)
     {
       var guids = new List<Guid>();
@@ -6653,25 +7039,46 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// 
+    /// Adds an instance object to the document.
     /// </summary>
-    /// <param name="instanceDefinitionIndex"></param>
-    /// <param name="instanceXform"></param>
-    /// <returns></returns>
-    /// <example>
-    /// <code source='examples\cs\ex_nestedblock.cs' lang='cs'/>
-    /// </example>
+    /// <param name="instanceDefinitionIndex">The index of the instance definition.</param>
+    /// <param name="instanceXform">The instance transformation.</param>
+    /// <returns>A unique identifier for the object if successful. Guid.Empty it not successful.</returns>
+    /// <since>5.0</since>
     public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform)
     {
       return UnsafeNativeMethods.CRhinoDoc_AddInstanceObject(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, IntPtr.Zero);
     }
 
+    /// <summary>
+    /// Adds an instance object to the document.
+    /// </summary>
+    /// <param name="instanceDefinitionIndex">The index of the instance definition.</param>
+    /// <param name="instanceXform">The instance transformation.</param>
+    /// <param name="attributes">The attributes to apply to the instance object.</param>
+    /// <returns>A unique identifier for the object if successful. Guid.Empty it not successful.</returns>
+    /// <since>5.0</since>
     public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
     {
-      if (null == attributes)
-        return AddInstanceObject(instanceDefinitionIndex, instanceXform);
-      IntPtr pAttributes = attributes.ConstPointer();
+      IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoDoc_AddInstanceObject(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes);
+    }
+
+    /// <summary>
+    /// Adds an instance object to the document.
+    /// </summary>
+    /// <param name="instanceDefinitionIndex">The index of the instance definition.</param>
+    /// <param name="instanceXform">The instance transformation.</param>
+    /// <param name="attributes">The attributes to apply to the instance object.</param>
+    /// <param name="history">The history record associated with this instance object.</param>
+    /// <param name="reference">true if the object is from a reference file. Reference objects do not persist in archives.</param>
+    /// <returns>A unique identifier for the object if successful. Guid.Empty it not successful.</returns>
+    /// <since>6.24</since>
+    public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    {
+      IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
+      return UnsafeNativeMethods.CRhinoDoc_AddInstanceObject2(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes, pHistory, reference);
     }
 
     /// <example>
@@ -6679,20 +7086,24 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_leader.cs' lang='cs'/>
     /// <code source='examples\py\ex_leader.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddLeader(Plane plane, IEnumerable<Point2d> points)
     {
       return AddLeader(null, plane, points);
     }
+    /// <since>5.0</since>
     public Guid AddLeader(Plane plane, IEnumerable<Point2d> points, ObjectAttributes attributes)
     {
       return AddLeader(null, plane, points, attributes);
     }
 
+    /// <since>5.0</since>
     public Guid AddLeader(string text, Plane plane, IEnumerable<Point2d> points, ObjectAttributes attributes)
     {
       return AddLeader(text, plane, points, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddLeader(string text, Plane plane, IEnumerable<Point2d> points, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       string s = null;
@@ -6707,11 +7118,13 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddLeader(m_doc.RuntimeSerialNumber, s, ref plane, count, pts.m_items, pConstAttributes, pHistory, reference);
     }
 
+    /// <since>5.0</since>
     public Guid AddLeader(string text, Plane plane, IEnumerable<Point2d> points)
     {
       return AddLeader(text, plane, points, null);
     }
 
+    /// <since>5.0</since>
     public Guid AddLeader(string text, IEnumerable<Point3d> points)
     {
       Plane plane;
@@ -6734,6 +7147,7 @@ namespace Rhino.DocObjects.Tables
       }
       return AddLeader(text, plane, points2d);
     }
+    /// <since>5.0</since>
     public Guid AddLeader(IEnumerable<Point3d> points)
     {
       return AddLeader(null, points);
@@ -6744,15 +7158,18 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_hatchcurve.cs' lang='cs'/>
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch)
     {
       return AddHatch(hatch, null);
     }
+    /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch, ObjectAttributes attributes)
     {
       return AddHatch(hatch, attributes, null, false);
     }
 
+    /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pConstHatch = hatch.ConstPointer();
@@ -6761,16 +7178,19 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddHatch(m_doc.RuntimeSerialNumber, pConstHatch, pConstAttributes, pHistory, reference);
     }
 
+    /// <since>5.0</since>
     public Guid AddMorphControl(MorphControl morphControl)
     {
       return AddMorphControl(morphControl, null);
     }
 
+    /// <since>5.0</since>
     public Guid AddMorphControl(MorphControl morphControl, ObjectAttributes attributes)
     {
       return AddMorphControl(morphControl, attributes, null, false);
     }
 
+    /// <since>6.0</since>
     public Guid AddMorphControl(MorphControl morphControl, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pConstMorph = morphControl.ConstPointer();
@@ -6799,12 +7219,12 @@ namespace Rhino.DocObjects.Tables
     /// If true, the function will make a MeshObject rather than a surface
     /// </param>
     /// <param name="width">
-    /// Width of the resulting PictureFrame. If 0.0, the width of the pictureframe
+    /// Width of the resulting PictureFrame. If 0.0, the width of the picture frame
     /// is the width of the image if height is also 0.0 or calculated from the
     /// height and aspect ratio of the image if height is not 0.0.
     /// </param>
     /// <param name="height">
-    /// Height of the resulting PictureFrame. If 0.0, the height of the pictureframe
+    /// Height of the resulting PictureFrame. If 0.0, the height of the picture frame
     /// is the height of the image if width is also 0.0 or calculated from the width
     /// and aspect ratio of the image if width is not 0.0.
     /// </param>
@@ -6813,10 +7233,11 @@ namespace Rhino.DocObjects.Tables
     /// intensity and is not affected by light or shadow.
     /// </param>
     /// <param name="embedBitmap">
-    /// If true, the funtion adds the the image to the bitmaptable of the document
+    /// If true, the function adds the image to the bitmap table of the document
     /// to which the PictureFrame will be added
     /// </param>
     /// <returns>A unique identifier for the object</returns>
+    /// <since>5.10</since>
     public Guid AddPictureFrame(Plane plane, string texturePath, bool asMesh, double width, double height, bool selfIllumination, bool embedBitmap)
     {
       return UnsafeNativeMethods.RHC_RhinoCreatePictureFrame(m_doc.RuntimeSerialNumber, ref plane, texturePath, asMesh, false, width, height, selfIllumination, embedBitmap);
@@ -6835,6 +7256,7 @@ namespace Rhino.DocObjects.Tables
     /// are locked, hidden, or on locked or hidden layers are not deleted.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool Delete(ObjRef objref, bool quiet, bool ignoreModes)
     {
       if (null == objref)
@@ -6848,6 +7270,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">objref.Object() will be deleted.</param>
     /// <param name="quiet">If false, a message box will appear when an object cannot be deleted.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Delete(ObjRef objref, bool quiet)
     {
       return Delete(objref, quiet, false);
@@ -6858,6 +7281,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="obj">The object to delete.</param>
     /// <param name="quiet">If false, a message box will appear when an object cannot be deleted.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Delete(RhinoObject obj, bool quiet)
     {
       return Delete(obj, quiet, false);
@@ -6872,6 +7296,7 @@ namespace Rhino.DocObjects.Tables
     /// are locked, hidden, or on locked or hidden layers are not deleted.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public bool Delete(RhinoObject obj, bool quiet, bool ignoreModes)
     {
       if (null == obj)
@@ -6888,6 +7313,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of the object to delete.</param>
     /// <param name="quiet">If false, a message box will appear when an object cannot be deleted.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Delete(Guid objectId, bool quiet)
     {
       var objref = new ObjRef(objectId);
@@ -6901,6 +7327,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectIds">Ids of all objects to delete.</param>
     /// <param name="quiet">If false, a message box will appear when an object cannot be deleted.</param>
     /// <returns>The number of successfully deleted objects.</returns>
+    /// <since>5.0</since>
     public int Delete(IEnumerable<Guid> objectIds, bool quiet)
     {
       if (objectIds == null) { throw new ArgumentNullException("objectIds"); }
@@ -6918,6 +7345,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="item">The object to delete.</param>
     /// <returns>True on success.</returns>
+    /// <since>6.0</since>
     public override bool Delete(RhinoObject item)
     {
       return Delete(item, true);
@@ -6929,6 +7357,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="gripId">The id of the grip object to delete.</param>
     /// <returns>True on success.</returns>
+    /// <since>6.5</since>
     public bool DeleteGrip(Guid gripId)
     {
       if (null == gripId) { throw new ArgumentNullException(nameof(gripId)); }
@@ -6940,6 +7369,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="gripRef">A reference to the grip object to delete.</param>
     /// <returns>True on success.</returns>
+    /// <since>6.5</since>
     public bool DeleteGrip(ObjRef gripRef)
     {
       if (null == gripRef) { throw new ArgumentNullException(nameof(gripRef)); }
@@ -6958,6 +7388,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="grip">The grip object to delete.</param>
     /// <returns>True on success.</returns>
+    /// <since>6.5</since>
     public bool DeleteGrip(GripObject grip)
     {
       if (null == grip) { throw new ArgumentNullException(nameof(grip)); }
@@ -6970,7 +7401,7 @@ namespace Rhino.DocObjects.Tables
 
 
     /// <summary>
-    /// Internal class to track grip object ownwers and their indices
+    /// Internal class to track grip object owners and their indices
     /// </summary>
     internal class GripMap
     {
@@ -6998,6 +7429,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="gripIds">The ids of the grip objects to delete.</param>
     /// <returns>The number of successfully deleted grip objects.</returns>
+    /// <since>6.5</since>
     public int DeleteGrips(IEnumerable<Guid> gripIds)
     {
       if (null == gripIds) { throw new ArgumentNullException(nameof(gripIds)); }
@@ -7014,6 +7446,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="gripRefs">References to the grip objects to delete.</param>
     /// <returns>The number of successfully deleted grip objects.</returns>
+    /// <since>6.5</since>
     public int DeleteGrips(IEnumerable<ObjRef> gripRefs)
     {
       if (null == gripRefs) { throw new ArgumentNullException(nameof(gripRefs)); }
@@ -7039,6 +7472,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="grips">The grip objects to delete.</param>
     /// <returns>The number of successfully deleted grip objects.</returns>
+    /// <since>6.5</since>
     public int DeleteGrips(IEnumerable<GripObject> grips)
     {
       if (null == grips) { throw new ArgumentNullException(nameof(grips)); }
@@ -7063,6 +7497,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="owner">The owner of the grip objects.</param>
     /// <param name="gripIndices">The indices of the grip objects to delete.</param>
     /// <returns>The number of successfully deleted grip objects.</returns>
+    /// <since>6.5</since>
     public int DeleteGrips(RhinoObject owner, IEnumerable<int> gripIndices)
     {
       if (null == owner) { throw new ArgumentNullException(nameof(owner)); }
@@ -7084,6 +7519,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="runtimeSerialNumber">A runtime serial number of the object that will be deleted.</param>
     /// <returns>true if the object was purged; otherwise false.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Purge(uint runtimeSerialNumber)
     {
@@ -7096,17 +7532,20 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="rhinoObject">A Rhino object that will be deleted.</param>
     /// <returns>true if the object was purged; otherwise false.</returns>
+    /// <since>5.0</since>
     public bool Purge(RhinoObject rhinoObject)
     {
       return Purge(rhinoObject.RuntimeSerialNumber);
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public bool Undelete(uint runtimeSerialNumber)
     {
       return UnsafeNativeMethods.CRhinoDoc_UndeleteObject(m_doc.RuntimeSerialNumber, runtimeSerialNumber);
     }
 
+    /// <since>5.0</since>
     public bool Undelete(RhinoObject rhinoObject)
     {
       return Undelete(rhinoObject.RuntimeSerialNumber);
@@ -7119,6 +7558,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objref">Object represented by this ObjRef is selected.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(ObjRef objref)
     {
       return Select(objref, true);
@@ -7129,6 +7569,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">Object represented by this ObjRef is selected.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(ObjRef objref, bool select)
     {
       return Select(objref, select, true);
@@ -7140,9 +7581,10 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(ObjRef objref, bool select, bool syncHighlight)
     {
       return Select(objref, select, syncHighlight, true);
@@ -7154,12 +7596,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
     /// Objects that are persistently selected stay selected when a command terminates.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(ObjRef objref, bool select, bool syncHighlight, bool persistentSelect)
     {
       return Select(objref, select, syncHighlight, persistentSelect, false, false, false);
@@ -7171,7 +7614,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
     /// Objects that are persistently selected stay selected when a command terminates.
@@ -7188,6 +7631,7 @@ namespace Rhino.DocObjects.Tables
     /// If true, then objects on hidden layers can be selectable.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(ObjRef objref, bool select, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
       if (objref == null) { throw new ArgumentNullException("objref"); }
@@ -7202,6 +7646,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objRefs">References to objects to select.</param>
     /// <returns>Number of objects successfully selected.</returns>
+    /// <since>5.0</since>
     public int Select(IEnumerable<ObjRef> objRefs)
     {
       return Select(objRefs, true);
@@ -7215,6 +7660,7 @@ namespace Rhino.DocObjects.Tables
     /// If false, objects will be deselected.
     /// </param>
     /// <returns>Number of objects successfully selected or deselected.</returns>
+    /// <since>5.0</since>
     public int Select(IEnumerable<ObjRef> objRefs, bool select)
     {
       if (objRefs == null) { throw new ArgumentNullException("objRefs"); }
@@ -7236,6 +7682,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
     /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Select(Guid objectId)
     {
       ObjRef objref = new ObjRef(objectId);
@@ -7247,6 +7694,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to select.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(Guid objectId, bool select)
     {
       ObjRef objref = new ObjRef(objectId);
@@ -7259,9 +7707,10 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight)
     {
       ObjRef objref = new ObjRef(objectId);
@@ -7274,12 +7723,13 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
     /// Objects that are persistently selected stay selected when a command terminates.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight, bool persistentSelect)
     {
       ObjRef objref = new ObjRef(objectId);
@@ -7292,7 +7742,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
     /// If true, then the object is highlighted if it is selected 
-    /// and unhighlighted if is is not selected.
+    /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
     /// Objects that are persistently selected stay selected when a command terminates.
@@ -7309,6 +7759,7 @@ namespace Rhino.DocObjects.Tables
     /// If true, then objects on hidden layers can be selectable.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
       ObjRef objref = new ObjRef(objectId);
@@ -7325,6 +7776,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_curvesurfaceintersect.cs' lang='cs'/>
     /// <code source='examples\py\ex_curvesurfaceintersect.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int Select(IEnumerable<Guid> objectIds)
     {
       return Select(objectIds, true);
@@ -7338,6 +7790,7 @@ namespace Rhino.DocObjects.Tables
     /// If false, objects will be deselected.
     /// </param>
     /// <returns>Number of objects successfully selected or deselected.</returns>
+    /// <since>5.0</since>
     public int Select(IEnumerable<Guid> objectIds, bool select)
     {
       if (objectIds == null) { throw new ArgumentNullException("objectIds"); }
@@ -7354,6 +7807,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, then objects that are persistently selected will not be unselected.
     /// </param>
     /// <returns>Number of object that were unselected.</returns>
+    /// <since>5.0</since>
     public int UnselectAll(bool ignorePersistentSelections)
     {
       return UnsafeNativeMethods.CRhinoDoc_UnselectAll(m_doc.RuntimeSerialNumber, ignorePersistentSelections);
@@ -7365,6 +7819,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_crvdeviation.cs' lang='cs'/>
     /// <code source='examples\py\ex_crvdeviation.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int UnselectAll()
     {
       return UnselectAll(false);
@@ -7379,6 +7834,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newAttributes">new attributes.</param>
     /// <param name="quiet">if true, then warning message boxes are disabled.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool ModifyAttributes(ObjRef objref, ObjectAttributes newAttributes, bool quiet)
     {
       if (null == objref || null == newAttributes)
@@ -7394,6 +7850,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newAttributes">new attributes.</param>
     /// <param name="quiet">if true, then warning message boxes are disabled.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool ModifyAttributes(RhinoObject obj, ObjectAttributes newAttributes, bool quiet)
     {
       if (null == obj || null == newAttributes)
@@ -7407,6 +7864,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newAttributes">new attributes.</param>
     /// <param name="quiet">if true, then warning message boxes are disabled.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool ModifyAttributes(Guid objectId, ObjectAttributes newAttributes, bool quiet)
     {
       if (Guid.Empty == objectId || null == newAttributes)
@@ -7430,6 +7888,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true on success otherwise returns false.
     /// </returns>
+    /// <since>5.7</since>
     public bool ModifyRenderMaterial(RhinoObject obj, RenderMaterial material)
     {
       if (null == obj) return false;
@@ -7449,6 +7908,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true on success otherwise returns false.
     /// </returns>
+    /// <since>5.7</since>
     public bool ModifyRenderMaterial(ObjRef objRef, RenderMaterial material)
     {
       if (null == objRef) return false;
@@ -7466,6 +7926,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// Returns true on success otherwise returns false.
     /// </returns>
+    /// <since>5.7</since>
     public bool ModifyRenderMaterial(Guid objectId, RenderMaterial material)
     {
       var objref = new ObjRef(objectId);
@@ -7480,6 +7941,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="channel"></param>
     /// <param name="mapping"></param>
     /// <returns></returns>
+    /// <since>5.7</since>
     public bool ModifyTextureMapping(ObjRef objRef, int channel, TextureMapping mapping)
     {
       var obj = (objRef == null ? null : objRef.Object());
@@ -7492,6 +7954,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="channel"></param>
     /// <param name="mapping"></param>
     /// <returns></returns>
+    /// <since>5.7</since>
     public bool ModifyTextureMapping(Guid objId, int channel, TextureMapping mapping)
     {
       var obj_ref = new ObjRef(objId);
@@ -7504,6 +7967,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="channel"></param>
     /// <param name="mapping"></param>
     /// <returns></returns>
+    /// <since>5.7</since>
     public bool ModifyTextureMapping(RhinoObject obj, int channel, TextureMapping mapping)
     {
       if (null == obj) return false;
@@ -7521,6 +7985,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">reference to old object to be replaced. The objref.Object() will be deleted.</param>
     /// <param name="newObject">new replacement object - must not be in document.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, RhinoObject newObject)
     {
       if (null == objref || null == newObject || newObject.Document != null)
@@ -7570,6 +8035,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="point">new point to be added.  The point is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Point3d point)
     {
       // 7 Jan. 2009 S. Baer
@@ -7587,6 +8053,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="point">new point to be added.  The point is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Point3d point)
     {
       using (var objref = new ObjRef(objectId))
@@ -7601,6 +8068,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="point">new point to be added.  The point is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(ObjRef objref, Point point)
     {
       if (null == objref || null == point)
@@ -7614,6 +8082,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="point">new point to be added.  The point is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(Guid objectId, Point point)
     {
       using (var objref = new ObjRef(objectId))
@@ -7628,6 +8097,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="text">new text to be added.  The text is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, TextEntity text)
     {
       if(null == objref || null == text)
@@ -7642,6 +8112,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="text">new text to be added.  The text is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, TextEntity text)
     {
       using(var objref = new ObjRef(objectId))
@@ -7656,6 +8127,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="leader">new leader to be added.  The leader is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(ObjRef objref, Leader leader)
     {
       if(null == objref || null == leader)
@@ -7670,6 +8142,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="leader">new leader to be added.  The leader is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(Guid objectId, Leader leader)
     {
       using(var objref = new ObjRef(objectId))
@@ -7678,12 +8151,13 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
-    /// <summary>Replaces one object with new textdot object.</summary>
+    /// <summary>Replaces one object with new text dot object.</summary>
     /// <param name="objref">
     /// Reference to old object to be replaced. The object objref.Object() will be deleted.
     /// </param>
-    /// <param name="dot">new textdot to be added.  The textdot is copied.</param>
+    /// <param name="dot">new text dot to be added.  The text dot is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, TextDot dot)
     {
       if (null == objref || null == dot)
@@ -7694,10 +8168,11 @@ namespace Rhino.DocObjects.Tables
       return rc;
     }
 
-    /// <summary>Replaces one object with new textdot object.</summary>
+    /// <summary>Replaces one object with new text dot object.</summary>
     /// <param name="objectId">Id of object to be replaced.</param>
-    /// <param name="dot">new textdot to be added.  The textdot is copied.</param>
+    /// <param name="dot">new text dot to be added.  The text dot is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, TextDot dot)
     {
       using (var objref = new ObjRef(objectId))
@@ -7712,6 +8187,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="hatch">new hatch to be added. The hatch is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.1</since>
     public bool Replace(ObjRef objref, Hatch hatch)
     {
       if (null == objref || null == hatch)
@@ -7726,6 +8202,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="hatch">new hatch to be added. The hatch is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.1</since>
     public bool Replace(Guid objectId, Hatch hatch)
     {
       using (var objref = new ObjRef(objectId))
@@ -7740,6 +8217,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="line">new line to be added.  The line is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Line line)
     {
       return Replace(objref, new LineCurve(line));
@@ -7749,6 +8227,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="line">new line to be added.  The line is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Line line)
     {
       using (var objref = new ObjRef(objectId))
@@ -7763,6 +8242,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="circle">new circle to be added.  The circle is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Circle circle)
     {
       return Replace(objref, new ArcCurve(circle));
@@ -7772,6 +8252,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="circle">new circle to be added.  The circle is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Circle circle)
     {
       using (var objref = new ObjRef(objectId))
@@ -7786,6 +8267,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="arc">new arc to be added.  The arc is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Arc arc)
     {
       return Replace(objref, new ArcCurve(arc));
@@ -7795,6 +8277,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="arc">new arc to be added.  The arc is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Arc arc)
     {
       using (var objref = new ObjRef(objectId))
@@ -7809,6 +8292,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="polyline">new polyline to be added.  The polyline is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Polyline polyline)
     {
       return Replace(objref, new PolylineCurve(polyline));
@@ -7818,6 +8302,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="polyline">new polyline to be added.  The polyline is copied.</param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Polyline polyline)
     {
       using (var objref = new ObjRef(objectId))
@@ -7839,6 +8324,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_insertknot.cs' lang='cs'/>
     /// <code source='examples\py\ex_insertknot.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Curve curve)
     {
       if (null == objref || null == curve)
@@ -7855,6 +8341,7 @@ namespace Rhino.DocObjects.Tables
     /// New curve to be added. A duplicate of the curve is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Curve curve)
     {
       using (var objref = new ObjRef(objectId))
@@ -7872,6 +8359,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the surface is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Surface surface)
     {
       if (null == objref || null == surface)
@@ -7889,6 +8377,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the surface is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Surface surface)
     {
       using (var objref = new ObjRef(objectId))
@@ -7906,12 +8395,14 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the brep is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Brep brep)
     {
       return Replace(objref, brep, false);
     }
 
 
+    /// <since>6.1</since>
     public bool Replace(ObjRef objref, Brep brep, bool splitKinkySurfaces)
     {
       if (null == objref || null == brep)
@@ -7929,11 +8420,13 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the brep is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Brep brep)
     {
       return Replace(objectId, brep, false);
     }
 
+    /// <since>6.1</since>
     public bool Replace(Guid objectId, Brep brep, bool splitKinkySurfaces)
     {
       using (var objref = new ObjRef(objectId))
@@ -7946,6 +8439,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">reference to old object to be replaced. The objref.Object() will be deleted.</param>
     /// <param name="extrusion">New extrusion to be added. A duplicate of the extrusion is added to the Rhino model.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(ObjRef objref, Extrusion extrusion)
     {
       if (null == objref || null == extrusion)
@@ -7960,6 +8454,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="extrusion">New extrusion to be added. A duplicate of the extrusion is added to the Rhino model.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.0</since>
     public bool Replace(Guid objectId, Extrusion extrusion)
     {
       using (var objref = new ObjRef(objectId))
@@ -7977,6 +8472,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the mesh is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, Mesh mesh)
     {
       if (null == objref || null == mesh)
@@ -7996,6 +8492,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the SubD is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>7.0</since>
     public bool Replace(ObjRef objref, SubD subD)
     {
       if (null == objref || null == subD)
@@ -8015,6 +8512,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the mesh is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, Mesh mesh)
     {
       using (var objref = new ObjRef(objectId))
@@ -8030,6 +8528,7 @@ namespace Rhino.DocObjects.Tables
     /// A duplicate of the mesh is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>7.0</since>
     public bool Replace(Guid objectId, SubD subD)
     {
       using (var objref = new ObjRef(objectId))
@@ -8039,14 +8538,15 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Replaces one object with new pointcloud object.
+    /// Replaces one object with new point cloud object.
     /// </summary>
     /// <param name="objref">reference to old object to be replaced. The objref.Object() will be deleted.</param>
     /// <param name="pointcloud">
-    /// new pointcloud to be added
-    /// A duplicate of the pointcloud is added to the Rhino model.
+    /// new point cloud to be added
+    /// A duplicate of the point cloud is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(ObjRef objref, PointCloud pointcloud)
     {
       if (null == objref || null == pointcloud)
@@ -8058,14 +8558,15 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Replaces one object with new pointcloud object.
+    /// Replaces one object with new point cloud object.
     /// </summary>
     /// <param name="objectId">Id of object to be replaced.</param>
     /// <param name="pointcloud">
-    /// new pointcloud to be added
-    /// A duplicate of the pointcloud is added to the Rhino model.
+    /// new point cloud to be added
+    /// A duplicate of the point cloud is added to the Rhino model.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool Replace(Guid objectId, PointCloud pointcloud)
     {
       using (var objref = new ObjRef(objectId))
@@ -8080,6 +8581,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of the instance object to be replaced.</param>
     /// <param name="instanceDefinitionIndex">The index of the new instance definition to use.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.8</since>
     public bool ReplaceInstanceObject(Guid objectId, int instanceDefinitionIndex)
     {
       using (var objref = new ObjRef(objectId))
@@ -8095,6 +8597,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">Reference to the instance object to be replaced. The objref.Object() will be deleted.</param>
     /// <param name="instanceDefinitionIndex">The index of the new instance definition to use.</param>
     /// <returns>true if successful.</returns>
+    /// <since>6.8</since>
     public bool ReplaceInstanceObject(ObjRef objref, int instanceDefinitionIndex)
     {
       if (null == objref)
@@ -8111,6 +8614,7 @@ namespace Rhino.DocObjects.Tables
     /// Gets the most recently added object that is still in the Document.
     /// </summary>
     /// <returns>The most recent (non-deleted) object in the document, or null if no such object exists.</returns>
+    /// <since>5.0</since>
     public RhinoObject MostRecentObject()
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoDoc_MostRecentObject(m_doc.RuntimeSerialNumber);
@@ -8121,6 +8625,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="runtimeSerialNumber">Runtime serial number of the last object not to include in the list.</param>
     /// <returns>An array of objects or null if no objects were added since the given runtime serial number.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public RhinoObject[] AllObjectsSince(uint runtimeSerialNumber)
     {
@@ -8168,6 +8673,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be hidden even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully hidden.</returns>
+    /// <since>5.0</since>
     public bool Hide(ObjRef objref, bool ignoreLayerMode)
     {
       if (null == objref)
@@ -8183,6 +8689,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be hidden even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully hidden.</returns>
+    /// <since>5.0</since>
     public bool Hide(RhinoObject obj, bool ignoreLayerMode)
     {
       if (null == obj)
@@ -8197,6 +8704,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be hidden even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully hidden.</returns>
+    /// <since>5.0</since>
     public bool Hide(Guid objectId, bool ignoreLayerMode)
     {
       if (Guid.Empty == objectId)
@@ -8216,6 +8724,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be shown even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully shown.</returns>
+    /// <since>5.0</since>
     public bool Show(ObjRef objref, bool ignoreLayerMode)
     {
       if (null == objref)
@@ -8231,6 +8740,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be shown even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully shown.</returns>
+    /// <since>5.0</since>
     public bool Show(RhinoObject obj, bool ignoreLayerMode)
     {
       if (null == obj)
@@ -8245,6 +8755,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be shown even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully shown.</returns>
+    /// <since>5.0</since>
     public bool Show(Guid objectId, bool ignoreLayerMode)
     {
       if (Guid.Empty == objectId)
@@ -8264,6 +8775,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be locked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully locked.</returns>
+    /// <since>5.0</since>
     public bool Lock(ObjRef objref, bool ignoreLayerMode)
     {
       if (null == objref)
@@ -8279,6 +8791,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be locked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully locked.</returns>
+    /// <since>5.0</since>
     public bool Lock(RhinoObject obj, bool ignoreLayerMode)
     {
       if (null == obj)
@@ -8293,6 +8806,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be locked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully locked.</returns>
+    /// <since>5.0</since>
     public bool Lock(Guid objectId, bool ignoreLayerMode)
     {
       if (Guid.Empty == objectId)
@@ -8312,6 +8826,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be unlocked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully unlocked.</returns>
+    /// <since>5.0</since>
     public bool Unlock(ObjRef objref, bool ignoreLayerMode)
     {
       if (null == objref)
@@ -8327,6 +8842,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be unlocked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully unlocked.</returns>
+    /// <since>5.0</since>
     public bool Unlock(RhinoObject obj, bool ignoreLayerMode)
     {
       if (null == obj)
@@ -8341,6 +8857,7 @@ namespace Rhino.DocObjects.Tables
     /// if true, the object will be unlocked even if it is on a layer that is locked or off.
     /// </param>
     /// <returns>true if the object was successfully unlocked.</returns>
+    /// <since>5.0</since>
     public bool Unlock(Guid objectId, bool ignoreLayerMode)
     {
       if (Guid.Empty == objectId)
@@ -8355,10 +8872,11 @@ namespace Rhino.DocObjects.Tables
 
     #region Object transforms
     /// <summary>
-    /// Gets the boundingbox for all objects (normal, locked and hidden) in this
+    /// Gets the bounding box for all objects (normal, locked and hidden) in this
     /// document that exist in "model" space. This bounding box does not include
     /// objects that exist in layout space.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBox
     {
       get
@@ -8373,10 +8891,11 @@ namespace Rhino.DocObjects.Tables
       }
     }
     /// <summary>
-    /// Gets the boundingbox for all visible objects (normal and locked) in this
+    /// Gets the bounding box for all visible objects (normal and locked) in this
     /// document that exist in "model" space. This bounding box does not include
     /// hidden objects or any objects that exist in layout space.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox BoundingBoxVisible
     {
       get
@@ -8391,6 +8910,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -8423,6 +8943,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_orientonsrf.cs' lang='cs'/>
     /// <code source='examples\py\ex_orientonsrf.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public Guid Transform(ObjRef objref, Transform xform, bool deleteOriginal)
     {
       if (null == objref)
@@ -8449,6 +8970,7 @@ namespace Rhino.DocObjects.Tables
     /// <remarks>
     /// If the object is locked or on a locked layer, then it cannot be transformed.
     /// </remarks>
+    /// <since>5.0</since>
     public Guid Transform(RhinoObject obj, Transform xform, bool deleteOriginal)
     {
       if (null == obj)
@@ -8477,6 +8999,7 @@ namespace Rhino.DocObjects.Tables
     /// <remarks>
     /// If the object is locked or on a locked layer, then it cannot be transformed.
     /// </remarks>
+    /// <since>5.0</since>
     public Guid Transform(Guid objectId, Transform xform, bool deleteOriginal)
     {
       var objref = new ObjRef(objectId);
@@ -8502,6 +9025,7 @@ namespace Rhino.DocObjects.Tables
     /// <remarks>
     /// If the object is locked or on a locked layer, then it cannot be transformed.
     /// </remarks>
+    /// <since>5.0</since>
     public Guid TransformWithHistory(ObjRef objref, Transform xform)
     {
       if (null == objref)
@@ -8526,6 +9050,7 @@ namespace Rhino.DocObjects.Tables
     /// <remarks>
     /// If the object is locked or on a locked layer, then it cannot be transformed.
     /// </remarks>
+    /// <since>5.0</since>
     public Guid TransformWithHistory(RhinoObject obj, Transform xform)
     {
       if (null == obj)
@@ -8552,6 +9077,7 @@ namespace Rhino.DocObjects.Tables
     /// <remarks>
     /// If the object is locked or on a locked layer, then it cannot be transformed.
     /// </remarks>
+    /// <since>5.0</since>
     public Guid TransformWithHistory(Guid objectId, Transform xform)
     {
       var objref = new ObjRef(objectId);
@@ -8566,6 +9092,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objref">A Rhino object reference to follow for object duplication.</param>
     /// <returns>The new object ID.</returns>
+    /// <since>5.0</since>
     public Guid Duplicate(ObjRef objref)
     {
       return Transform(objref, Geometry.Transform.Identity, false);
@@ -8576,6 +9103,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="obj">A Rhino object to duplicate.</param>
     /// <returns>The new object ID.</returns>
+    /// <since>5.0</since>
     public Guid Duplicate(RhinoObject obj)
     {
       return Transform(obj, Geometry.Transform.Identity, false);
@@ -8585,6 +9113,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objectId">An ID to an object in the document that needs to be duplicated.</param>
     /// <returns>The new object ID.</returns>
+    /// <since>5.0</since>
     public Guid Duplicate(Guid objectId)
     {
       return Transform(objectId, Geometry.Transform.Identity, false);
@@ -8683,6 +9212,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="pickContext">settings used to define what is picked</param>
     /// <returns>zero or more objects</returns>
+    /// <since>6.0</since>
     public ObjRef[] PickObjects(Input.Custom.PickContext pickContext)
     {
       IntPtr const_ptr_pickcontext = pickContext.ConstPointer();
@@ -8701,6 +9231,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="obj">object with modified grips to update.</param>
     /// <param name="deleteOriginal">if true, obj is deleted from the document.</param>
     /// <returns>new RhinoObject on success; otherwise null.</returns>
+    /// <since>5.0</since>
     public RhinoObject GripUpdate(RhinoObject obj, bool deleteOriginal)
     {
       if (null == obj)
@@ -8762,6 +9293,7 @@ namespace Rhino.DocObjects.Tables
     }
 
 
+    /// <since>5.0</since>
     public int ObjectCount(ObjectEnumeratorSettings filter)
     {
       ObjectIterator it = new ObjectIterator(m_doc, filter);
@@ -8777,6 +9309,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
     /// <code source='examples\py\ex_findobjectsbyname.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public IEnumerable<RhinoObject> GetObjectList(ObjectEnumeratorSettings settings)
     {
       IEnumerator<RhinoObject> e = GetEnumerator(settings);
@@ -8788,6 +9321,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_dimstyle.cs' lang='cs'/>
     /// <code source='examples\py\ex_dimstyle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public IEnumerable<RhinoObject> GetObjectList(Type typeFilter)
     {
       var settings = new ObjectEnumeratorSettings { ClassTypeFilter = typeFilter };
@@ -8795,11 +9329,13 @@ namespace Rhino.DocObjects.Tables
       return new EnumeratorWrapper(it);
     }
 
+    /// <since>6.0</since>
     public IEnumerable<T> GetObjectsByType<T>() where T : RhinoObject
     {
       var settings = new ObjectEnumeratorSettings { ClassTypeFilter = typeof(T) };
       return GetObjectsByType<T>(settings);
     }
+    /// <since>6.0</since>
     public IEnumerable<T> GetObjectsByType<T>(ObjectEnumeratorSettings settings) where T : RhinoObject
     {
       settings.ClassTypeFilter = typeof(T);
@@ -8808,6 +9344,7 @@ namespace Rhino.DocObjects.Tables
     }
 
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public IEnumerable<RhinoObject> GetObjectList(ObjectType typeFilter)
     {
@@ -8815,6 +9352,7 @@ namespace Rhino.DocObjects.Tables
       return GetObjectList(settings);
     }
 
+    /// <since>5.0</since>
     public IEnumerable<RhinoObject> GetSelectedObjects(bool includeLights, bool includeGrips)
     {
       var s = new ObjectEnumeratorSettings
@@ -8827,12 +9365,14 @@ namespace Rhino.DocObjects.Tables
       return GetObjectList(s);
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public ObjectType GetSelectedObjectTypes()
     {
       return (ObjectType)UnsafeNativeMethods.CRhinoDoc_SelectedObjectTypes(m_doc.RuntimeSerialNumber);
     }
 
+    /// <since>5.0</since>
     public override IEnumerator<RhinoObject> GetEnumerator()
     {
       var s = new ObjectEnumeratorSettings();
@@ -9020,13 +9560,16 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Document that owns this object table.</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document { get; }
 
     /// <summary>
     /// The number of user data strings in the current document.
     /// </summary>
+    /// <since>5.0</since>
     public int Count => UnsafeNativeMethods.CRhinoDoc_GetDocTextCount(Document.RuntimeSerialNumber);
 
+    /// <since>6.0</since>
     public int DocumentDataCount
     {
       get
@@ -9037,6 +9580,7 @@ namespace Rhino.DocObjects.Tables
         return cnt;
       }
     }
+    /// <since>6.0</since>
     public int DocumentUserTextCount
     {
       get
@@ -9048,6 +9592,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>5.0</since>
     public string GetKey(int i)
     {
       using (var sh = new StringHolder())
@@ -9058,6 +9603,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>5.0</since>
     public string GetValue(int i)
     {
       using (var sh = new StringHolder())
@@ -9067,6 +9613,7 @@ namespace Rhino.DocObjects.Tables
         return sh.ToString();
       }
     }
+    /// <since>5.0</since>
     public string GetValue(string key)
     {
       using (var sh = new StringHolder())
@@ -9083,6 +9630,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="section">The section at which to get the value.</param>
     /// <param name="entry">The entry to search for.</param>
     /// <returns>The user data.</returns>
+    /// <since>5.0</since>
     public string GetValue(string section, string entry)
     {
       if (String.IsNullOrEmpty(section) || String.IsNullOrEmpty(entry))
@@ -9096,6 +9644,7 @@ namespace Rhino.DocObjects.Tables
     /// <para>By default a section name is a key that is prefixed with a string separated by a backslash.</para>
     /// </summary>
     /// <returns>An array of section names. This can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public string[] GetSectionNames()
     {
       int count = Count;
@@ -9121,6 +9670,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="section">The section from which to retrieve section names.</param>
     /// <returns>An array of section names. This can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public string[] GetEntryNames(string section)
     {
       section += "\\";
@@ -9147,6 +9697,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// The previous value if successful and a previous value existed.
     /// </returns>
+    /// <since>5.0</since>
     public string SetString(string section, string entry, string value)
     {
       string key = section;
@@ -9165,6 +9716,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// The previous value if successful and a previous value existed.
     /// </returns>
+    /// <since>5.0</since>
     public string SetString(string key, string value)
     {
       // 10-Mar-2017 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-38337
@@ -9183,6 +9735,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="section">name of section to delete. If null, all sections will be deleted.</param>
     /// <param name="entry">name of entry to delete. If null, all entries will be deleted for a given section.</param>
+    /// <since>5.0</since>
     public void Delete(string section, string entry)
     {
       if (null == section && null != entry)
@@ -9214,6 +9767,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>5.0</since>
     public void Delete(string key)
     {
       UnsafeNativeMethods.CRhinoDoc_DeleteDocTextString(Document.RuntimeSerialNumber, key);
@@ -9271,11 +9825,13 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
     /// <code source='examples\py\ex_findobjectsbyname.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public ObjectEnumeratorSettings()
     {
     }
 
 #region object state
+    /// <since>5.0</since>
     public bool NormalObjects
     {
       get
@@ -9290,6 +9846,7 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.normal_objects;
       }
     }
+    /// <since>5.0</since>
     public bool LockedObjects
     {
       get
@@ -9304,6 +9861,7 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.locked_objects;
       }
     }
+    /// <since>5.0</since>
     public bool HiddenObjects
     {
       get
@@ -9322,6 +9880,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// When true, ONLY Instance Definitions will be returned
     /// </summary>
+    /// <since>5.0</since>
     public bool IdefObjects
     {
       get
@@ -9336,6 +9895,7 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.idef_objects;
       }
     }
+    /// <since>5.0</since>
     public bool DeletedObjects
     {
       get
@@ -9353,6 +9913,7 @@ namespace Rhino.DocObjects
     #endregion
 
 #region object category
+    /// <since>5.0</since>
     public bool ActiveObjects
     {
       get
@@ -9367,6 +9928,7 @@ namespace Rhino.DocObjects
           m_object_category &= ~object_category.active_objects;
       }
     }
+    /// <since>5.0</since>
     public bool ReferenceObjects
     {
       get
@@ -9388,6 +9950,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_objectiterator.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectiterator.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IncludeLights { get; set; }
 
     /// <example>
@@ -9395,14 +9958,19 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_objectiterator.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectiterator.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool IncludeGrips { get; set; }
 
+    /// <since>5.0</since>
     public bool IncludePhantoms { get; set; }
 
+    /// <since>5.0</since>
     public bool SelectedObjectsFilter { get; set; }
 
+    /// <since>5.0</since>
     public bool VisibleFilter { get; set; }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public ObjectType ObjectTypeFilter
     {
@@ -9410,8 +9978,10 @@ namespace Rhino.DocObjects
       set { m_objectfilter = value; }
     }
 
+    /// <since>5.0</since>
     public Type ClassTypeFilter { get; set; }
 
+    /// <since>5.0</since>
     public int LayerIndexFilter
     {
       get { return m_layerindex_filter; }
@@ -9424,6 +9994,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
     /// <code source='examples\py\ex_findobjectsbyname.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string NameFilter
     {
       get
@@ -9447,6 +10018,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Filter on value of object->IsActiveInViewport()
     /// </summary>
+    /// <since>5.6</since>
     public RhinoViewport ViewportFilter { get; set; }
   }
 

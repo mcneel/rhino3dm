@@ -723,7 +723,7 @@ RH_C_FUNCTION bool ON_Mesh_GetBool(const ON_Mesh* pMesh, enum MeshBoolConst whic
   return rc;
 }
 
-RH_C_FUNCTION void ON_Mesh_Flip(ON_Mesh* ptr, bool vertNorm, bool faceNorm, bool faceOrientation)
+RH_C_FUNCTION void ON_Mesh_Flip(ON_Mesh* ptr, bool vertNorm, bool faceNorm, bool faceOrientation, bool ngons)
 {
   if (ptr)
   {
@@ -733,6 +733,8 @@ RH_C_FUNCTION void ON_Mesh_Flip(ON_Mesh* ptr, bool vertNorm, bool faceNorm, bool
       ptr->FlipFaceNormals();
     if (vertNorm)
       ptr->FlipVertexNormals();
+    if (ngons)
+      ptr->FlipNgonOrientation();
   }
 }
 
@@ -1081,24 +1083,53 @@ RH_C_FUNCTION bool ON_Mesh_IsPointInside(const ON_Mesh* pConstMesh, ON_3DPOINT_S
   // These input parameters are not currently used, but should be once a proper OpenNURBS
   // implementation is done
   tolerance = 0;
-  strictlyin = false;
 
-  if (pConstMesh)
+  if (
+    nullptr != pConstMesh &&
+    pConstMesh->IsValid() &&
+    pConstMesh->IsClosed() &&
+    pConstMesh->IsManifold() 
+    )
   {
     ON_3dPoint _point(point.val);
-
-    if (pConstMesh->IsSolid())
+    if (_point.IsValid())
     {
       ON_BoundingBox bbox = pConstMesh->BoundingBox();
-      ON_Line line(_point, bbox.m_max + ON_3dPoint(100, 100, 100));
-
-      const ON_MeshTree* mesh_tree = pConstMesh->MeshTree(true);
-      if (mesh_tree)
+      if (bbox.IsPointIn(_point, strictlyin)) // eliminate the obvious
       {
-        ON_SimpleArray<ON_CMX_EVENT> events;
-        if (mesh_tree->IntersectLine(line, events))
+        ON_Line line(_point, bbox.m_max + ON_3dPoint(100, 100, 100)); // a random direction
+        const ON_MeshTree* mesh_tree = pConstMesh->MeshTree(true);
+        if (mesh_tree)
         {
-          rc = (events.Count() % 2) == 1;
+          ON_SimpleArray<ON_CMX_EVENT> events;
+          if (mesh_tree->IntersectLine(line, events))
+          {
+            ON_SimpleArray<ON_3dPoint> hit_points;
+            for (int i = 0; i < events.Count(); i++)
+              hit_points.Append(events[i].m_M[0].m_P);
+
+            // 6-Apr-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57774
+            // Its possible for a point to be inside a closed mesh. But if the random line
+            // happens to intersect the mesh at an edge, you will get two intersection events.
+            // So sort and cull the events.
+            if (hit_points.Count() > 1)
+            {
+              // sort and cull
+              hit_points.QuickSort(&ON_CompareIncreasing<ON_3dPoint>);
+              ON_3dPoint hit = *hit_points.Last();
+              for (int i = hit_points.Count() - 2; i >= 0; i--)
+              {
+                if (hit_points[i].DistanceTo(hit) < ON_ZERO_TOLERANCE)
+                  hit_points.Remove(i);
+                else
+                  hit = hit_points[i];
+              }
+            }
+
+            rc = (hit_points.Count() % 2 == 1) ? true : false;
+            if (rc && strictlyin)
+              rc = (hit_points[0].DistanceTo(_point) > ON_ZERO_TOLERANCE);
+          }
         }
       }
     }
@@ -2705,6 +2736,7 @@ enum TextureMappingType : int
   tmtMeshMappingPrimitive = 6, // m_mapping_primitive is an ON_Mesh 
   tmtSrfMappingPrimitive = 7, // m_mapping_primitive is an ON_Surface
   tmtBrepMappingPrimitive = 8, // m_mapping_primitive is an ON_Brep
+  tmtOcsMapping = 9,
 };
 
 RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_TextureMapping* pTextureMapping)
@@ -2730,6 +2762,8 @@ RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_Textu
     return tmtSrfMappingPrimitive;
   case ON_TextureMapping::TYPE::brep_mapping_primitive:
     return tmtBrepMappingPrimitive;
+  case ON_TextureMapping::TYPE::ocs_mapping:
+    return tmtOcsMapping;
   }
   // Unknown type, add support for it to the list above
   return tmtNoMapping;
@@ -2995,7 +3029,7 @@ RH_C_FUNCTION int ON_TextureMapping_GetObjectTextureChannels(const CRhinoObject*
   return channelCount;
 }
 
-RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoObject, int iChannelId, ON_TextureMapping* mapping)
+RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObject* rhinoObject, int iChannelId, ON_TextureMapping* mapping, ON_Xform* transform)
 {
   if (nullptr == rhinoObject)
     return 0;
@@ -3025,6 +3059,11 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoOb
         xform = mc.m_object_xform;
       }
     }
+  }
+
+  if (nullptr != transform)
+  {
+    xform = *transform;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -3057,6 +3096,27 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoOb
   {
     //This does everything.
     success = table.ModifyTextureMapping(*mapping, index);
+
+    if (success && nullptr != transform)
+    {
+      ON_3dmObjectAttributes newAttrs = rhinoObject->Attributes();
+      ON_ClassArray<ON_MappingRef>& mappingRefs = newAttrs.m_rendering_attributes.m_mappings;
+      for (int i = 0; i < mappingRefs.Count(); i++)
+      {
+        if (0 == ON_UuidCompare(mappingRefs[i].m_plugin_id, plug_in_id))
+        {
+          ON_SimpleArray<ON_MappingChannel>& channels = mappingRefs[i].m_mapping_channels;
+          for (int j = 0; j < channels.Count(); j++)
+          {
+            if (iChannelId == channels[j].m_mapping_channel_id)
+            {
+              channels[j].m_object_xform = *transform;
+            }
+          }
+        }
+      }
+      success = rhino_doc->ModifyObjectAttributes(CRhinoObjRef(rhinoObject), newAttrs, true);
+    }
   }
   else
   {
@@ -3084,6 +3144,7 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoOb
         continue;
       //We found one - we can just modify it.
       mc.m_mapping_index = index;
+      mc.m_mapping_id = table[index].Id();
       mc.m_object_xform = xform;
       found = true;
       break;
@@ -3100,6 +3161,11 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoOb
   }
 
   return (success ? 1 : 0);
+}
+
+RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoObject, int iChannelId, ON_TextureMapping* mapping)
+{
+  return ON_TextureMapping_SetObjectMappingAndTransform(rhinoObject, iChannelId, mapping, nullptr);
 }
 #endif
 
@@ -3283,6 +3349,19 @@ RH_C_FUNCTION int ON_MeshNgon_OuterBoundaryEdgeCount(
 {
   const ON_MeshNgon* ngon = GetNgon(mesh, ngonIdx);
   return ngon ? ngon->OuterBoundaryEdgeCount() : 0;
+}
+
+RH_C_FUNCTION int ON_MeshNgon_Orientation(const ON_Mesh* constMesh, unsigned int ngonIdx, bool permitHoles)
+{
+  const ON_MeshNgon* ngon = GetNgon(constMesh, ngonIdx);
+  return ngon ? ngon->Orientation(constMesh, permitHoles) : 0;
+}
+
+RH_C_FUNCTION void ON_MeshNgon_ReverseOuterBoundary(ON_Mesh* mesh, unsigned int ngonIdx)
+{
+  ON_MeshNgon* ngon = (mesh && ngonIdx<mesh->m_Ngon.UnsignedCount()) ? mesh->m_Ngon[ngonIdx] : nullptr;
+  if (ngon)
+    ngon->ReverseOuterBoundary();
 }
 
 RH_C_FUNCTION int ON_MeshNgon_MeshVertexIndex(
@@ -3585,6 +3664,13 @@ RH_C_FUNCTION int ON_Mesh_GetNgonBoundaryPoints(
   return ngon_boundary_points->Count();
 }
 
+RH_C_FUNCTION bool ON_Mesh_OrientNgons(ON_Mesh* pMesh, bool permitHoles)
+{
+  if (pMesh)
+    return pMesh->OrientNgons(permitHoles);
+  return false;
+}
+
 RH_C_FUNCTION ON_MeshNgonIterator* ON_Mesh_NgonIterator_New(
   const ON_Mesh* mesh)
 {
@@ -3711,5 +3797,17 @@ RH_C_FUNCTION void ON_Mesh_UseDoublePrecisionVertices(ON_Mesh* mesh, bool use)
   else
   {
     mesh->DestroyDoublePrecisionVertices();
+  }
+}
+
+RH_C_FUNCTION void ON_Mesh_GetVertexColorsAsArgb(const ON_Mesh* constMesh, int count, /*ARRAY*/int* colors)
+{
+  if (constMesh && constMesh->m_C.Count() == count && colors)
+  {
+    for (int i = 0; i < count; i++)
+    {
+      const ON_Color& color = constMesh->m_C[i];
+      colors[i] = ABGR_to_ARGB(color);
+    }
   }
 }

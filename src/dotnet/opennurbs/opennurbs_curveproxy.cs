@@ -24,6 +24,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// True if "this" is a curve is reversed from the "real" curve geometry
     /// </summary>
+    /// <since>5.10</since>
     public bool ProxyCurveIsReversed
     {
       get

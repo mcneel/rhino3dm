@@ -60,6 +60,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new block definition.
     /// </summary>
+    /// <since>5.0</since>
     public InstanceDefinitionGeometry()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_InstanceDefinition_New(IntPtr.Zero);
@@ -72,6 +73,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the description of the definition.
     /// </summary>
+    /// <since>5.0</since>
     public string Description
     {
       get
@@ -94,6 +96,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -139,6 +142,7 @@ namespace Rhino.Geometry
     /// list of object ids in the instance geometry table
     /// </summary>
     /// <returns></returns>
+    /// <since>5.6</since>
     [ConstOperation]
     public Guid[] GetObjectIds()
     {
@@ -165,6 +169,7 @@ namespace Rhino.Geometry
     /// <example>
     /// <code source='examples\cs\ex_nestedblock.cs' lang='cs'/>
     /// </example>
+    /// <since>5.1</since>
     public InstanceReferenceGeometry(Guid instanceDefinitionId, Transform transform)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_InstanceRef_New(instanceDefinitionId, ref transform);
@@ -178,6 +183,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The unique id for the parent instance definition of this instance reference.
     /// </summary>
+    /// <since>5.6</since>
     public Guid ParentIdefId
     {
       get
@@ -188,6 +194,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Transformation for this reference.</summary>
+    /// <since>5.6</since>
     public Transform Xform
     {
       get

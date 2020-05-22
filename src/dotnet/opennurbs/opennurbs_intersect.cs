@@ -65,6 +65,7 @@ namespace Rhino.Geometry.Intersect
     /// End If
     /// </code>
     /// </remarks>
+    /// <since>5.0</since>
     public static bool LineLine(Line lineA, Line lineB, out double a, out double b, double tolerance, bool finiteSegments)
     {
       bool rc = LineLine(lineA, lineB, out a, out b);
@@ -113,6 +114,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_intersectlines.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectlines.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static bool LineLine(Line lineA, Line lineB, out double a, out double b)
     {
       a = 0; b = 0;
@@ -129,6 +131,7 @@ namespace Rhino.Geometry.Intersect
     /// If the parameter is not within the {0, 1} Interval then the finite segment 
     /// does not intersect the plane.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool LinePlane(Line line, Plane plane, out double lineParameter)
     {
       lineParameter = 0.0;
@@ -143,6 +146,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionLine">If this function returns true, 
     /// the intersectionLine parameter will return the line where the planes intersect.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool PlanePlane(Plane planeA, Plane planeB, out Line intersectionLine)
     {
       intersectionLine = new Line();
@@ -157,6 +161,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionPoint">Point where all three planes converge.</param>
     /// <returns>true on success, false on failure. If at least two out of the three planes 
     /// are parallel or coincident, failure is assumed.</returns>
+    /// <since>5.0</since>
     public static bool PlanePlanePlane(Plane planeA, Plane planeB, Plane planeC, out Point3d intersectionPoint)
     {
       intersectionPoint = new Point3d();
@@ -170,7 +175,8 @@ namespace Rhino.Geometry.Intersect
     /// <param name="circle">Circe to intersect.</param>
     /// <param name="firstCircleParameter">First intersection parameter on circle if successful or RhinoMath.UnsetValue if not.</param>
     /// <param name="secondCircleParameter">Second intersection parameter on circle if successful or RhinoMath.UnsetValue if not.</param>
-    /// <returns>The type of intersection that occured.</returns>
+    /// <returns>The type of intersection that occurred.</returns>
+    /// <since>5.0</since>
     public static PlaneCircleIntersection PlaneCircle(Plane plane, Circle circle, out double firstCircleParameter, out double secondCircleParameter)
     {
       firstCircleParameter = RhinoMath.UnsetValue;
@@ -220,6 +226,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCircle">Intersection result.</param>
     /// <returns>If <see cref="PlaneSphereIntersection.None"/> is returned, the intersectionCircle has a radius of zero and the center point 
     /// is the point on the plane closest to the sphere.</returns>
+    /// <since>5.0</since>
     public static PlaneSphereIntersection PlaneSphere(Plane plane, Sphere sphere, out Circle intersectionCircle)
     {
       intersectionCircle = new Circle();
@@ -245,6 +252,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_intersectlinecircle.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectlinecircle.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static LineCircleIntersection LineCircle(Line line, Circle circle, out double t1, out Point3d point1, out double t2, out Point3d point2)
     {
       t1 = 0.0;
@@ -268,6 +276,7 @@ namespace Rhino.Geometry.Intersect
     /// the second point is the point on the sphere closest to the line. 
     /// If <see cref="LineSphereIntersection.Single"/> is returned, the first point is the point on the line and the second point is the 
     /// same point on the sphere.</returns>
+    /// <since>5.0</since>
     public static LineSphereIntersection LineSphere(Line line, Sphere sphere, out Point3d intersectionPoint1, out Point3d intersectionPoint2)
     {
       intersectionPoint1 = new Point3d();
@@ -289,6 +298,7 @@ namespace Rhino.Geometry.Intersect
     /// <para>If <see cref="LineCylinderIntersection.Single"/> is returned, the first point
     /// is the point on the line and the second point is the  same point on the
     /// cylinder.</para></returns>
+    /// <since>5.0</since>
     public static LineCylinderIntersection LineCylinder(Line line, Cylinder cylinder, out Point3d intersectionPoint1, out Point3d intersectionPoint2)
     {
       intersectionPoint1 = new Point3d();
@@ -308,6 +318,7 @@ namespace Rhino.Geometry.Intersect
     /// <returns>
     /// The intersection type.
     /// </returns>
+    /// <since>5.0</since>
     public static SphereSphereIntersection SphereSphere(Sphere sphereA, Sphere sphereB, out Circle intersectionCircle)
     {
       intersectionCircle = new Circle();
@@ -333,6 +344,7 @@ namespace Rhino.Geometry.Intersect
     /// The chord from line.PointAt(lineParameters.T0) to line.PointAt(lineParameters.T1) is the intersection.
     /// </param>
     /// <returns>true if the line intersects the box, false if no intersection occurs.</returns>
+    /// <since>5.0</since>
     public static bool LineBox(Line line, BoundingBox box, double tolerance, out Interval lineParameters)
     {
       lineParameters = new Interval();
@@ -351,6 +363,7 @@ namespace Rhino.Geometry.Intersect
     /// The chord from line.PointAt(lineParameters.T0) to line.PointAt(lineParameters.T1) is the intersection.
     /// </param>
     /// <returns>true if the line intersects the box, false if no intersection occurs.</returns>
+    /// <since>5.0</since>
     public static bool LineBox(Line line, Box box, double tolerance, out Interval lineParameters)
     {
       //David: test this!
@@ -372,6 +385,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="plane">Plane to intersect with.</param>
     /// <param name="tolerance">Tolerance to use during intersection.</param>
     /// <returns>A list of intersection events or null if no intersections were recorded.</returns>
+    /// <since>5.0</since>
     public static CurveIntersections CurvePlane(Curve curve, Plane plane, double tolerance)
     {
       if (!plane.IsValid)
@@ -390,6 +404,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="plane">Plane to intersect with.</param>
     /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
+    /// <since>5.0</since>
     public static Polyline[] MeshPlane(Mesh mesh, Plane plane)
     {
       Rhino.Collections.RhinoList<Plane> planes = new Rhino.Collections.RhinoList<Plane>(1, plane);
@@ -402,6 +417,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="planes">Planes to intersect with.</param>
     /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
     /// <exception cref="ArgumentNullException">If planes is null.</exception>
+    /// <since>5.0</since>
     public static Polyline[] MeshPlane(Mesh mesh, IEnumerable<Plane> planes)
     {
       if (planes == null) throw new ArgumentNullException("planes");
@@ -445,6 +461,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool BrepPlane(Brep brep, Plane plane, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionPoints = null;
@@ -518,6 +535,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curve approaches itself to within tolerance, 
     /// an intersection is assumed.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>5.0</since>
     public static CurveIntersections CurveSelf(Curve curve, double tolerance)
     {
       IntPtr pCurve = curve.ConstPointer();
@@ -539,6 +557,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_intersectcurves.cs' lang='cs'/>
     /// <code source='examples\py\ex_intersectcurves.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static CurveIntersections CurveCurve(Curve curveA, Curve curveB, double tolerance, double overlapTolerance)
     {
       IntPtr pCurveA = curveA.ConstPointer();
@@ -556,8 +575,9 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
-    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <param name="textLog">A text log that contains tails about the invalid intersection events.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>7.0</since>
     public static CurveIntersections CurveCurveValidate(Curve curveA, Curve curveB, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
     {
       invalidIndices = new int[0];
@@ -584,6 +604,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curves approach each other to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>6.0</since>
     public static CurveIntersections CurveLine(Curve curve, Line line, double tolerance, double overlapTolerance)
     {
       // Extend the line through the curve's bounding box
@@ -614,6 +635,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_curvesurfaceintersect.cs' lang='cs'/>
     /// <code source='examples\py\ex_curvesurfaceintersect.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static CurveIntersections CurveSurface(Curve curve, Surface surface, double tolerance, double overlapTolerance)
     {
       IntPtr pCurve = curve.ConstPointer();
@@ -634,8 +656,9 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
-    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <param name="textLog">A text log that contains tails about the invalid intersection events.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>7.0</since>
     public static CurveIntersections CurveSurfaceValidate(Curve curve, Surface surface, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
     {
       invalidIndices = new int[0];
@@ -667,6 +690,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>5.0</since>
     public static CurveIntersections CurveSurface(Curve curve, Interval curveDomain, Surface surface, double tolerance, double overlapTolerance)
     {
       Interval domain = curve.Domain;
@@ -690,8 +714,9 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance. If the curve approaches the surface to within tolerance, an intersection is assumed.</param>
     /// <param name="overlapTolerance">The tolerance with which the curves are tested.</param>
     /// <param name="invalidIndices">The indices in the resulting CurveIntersections collection that are invalid.</param>
-    /// <param name="textLog">A textlog that contains tails about the invalid intersection events.</param>
+    /// <param name="textLog">A text log that contains tails about the invalid intersection events.</param>
     /// <returns>A collection of intersection events.</returns>
+    /// <since>7.0</since>
     public static CurveIntersections CurveSurfaceValidate(Curve curve, Interval curveDomain, Surface surface, double tolerance, double overlapTolerance, out int[] invalidIndices, out TextLog textLog)
     {
       invalidIndices = new int[0];
@@ -735,6 +760,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_elevation.cs' lang='cs'/>
     /// <code source='examples\py\ex_elevation.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static bool CurveBrep(Curve curve, Brep brep, double tolerance, out Curve[] overlapCurves, out Point3d[] intersectionPoints)
     {
       overlapCurves = new Curve[0];
@@ -777,6 +803,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <param name="curveParameters">The intersection curve parameters will be returned here.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>6.0</since>
     public static bool CurveBrep(Curve curve, Brep brep, double tolerance, out Curve[] overlapCurves, out Point3d[] intersectionPoints, out double[] curveParameters)
     {
       overlapCurves = new Curve[0];
@@ -824,6 +851,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="angleTolerance">Angle tolerance in radians.</param>
     /// <param name="t">Curve parameters at intersections.</param>
     /// <returns>True on success, false on failure.</returns>
+    /// <since>6.0</since>
     public static bool CurveBrep(Curve curve, Brep brep, double tolerance, double angleTolerance, out double[] t)
     {
       if (curve == null) throw new ArgumentNullException(nameof(curve));
@@ -856,6 +884,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="overlapCurves">A overlap curves array argument. This out reference is assigned during the call.</param>
     /// <param name="intersectionPoints">A points array argument. This out reference is assigned during the call.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool CurveBrepFace(Curve curve, BrepFace face, double tolerance, out Curve[] overlapCurves, out Point3d[] intersectionPoints)
     {
       overlapCurves = new Curve[0];
@@ -894,6 +923,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
     public static bool SurfaceSurface(Surface surfaceA, Surface surfaceB, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionCurves = new Curve[0];
@@ -932,6 +962,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public static bool BrepBrep(Brep brepA, Brep brepB, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionCurves = new Curve[0];
@@ -970,6 +1001,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCurves">The intersection curves array argument. This out reference is assigned during the call.</param>
     /// <param name="intersectionPoints">The intersection points array argument. This out reference is assigned during the call.</param>
     /// <returns>true on success; false on failure.</returns>
+    /// <since>5.0</since>
     public static bool BrepSurface(Brep brep, Surface surface, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionCurves = new Curve[0];
@@ -1006,7 +1038,8 @@ namespace Rhino.Geometry.Intersect
     /// </summary>
     /// <param name="meshA">First mesh for intersection.</param>
     /// <param name="meshB">Second mesh for intersection.</param>
-    /// <returns>An array of intersection line segments, or null.</returns>
+    /// <returns>An array of intersection line segments, or null if no intersections were found.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
@@ -1017,6 +1050,7 @@ namespace Rhino.Geometry.Intersect
         var arr = new[] { meshA, meshB };
         var made_it = MeshMesh(arr, fixed_tolerance, out Polyline[] result, false, out Polyline[] _, false, out Mesh _, null, System.Threading.CancellationToken.None, null);
         if (!made_it) return null;
+        if (result == null) return new Line[0];
         return result.SelectMany((pl) => pl.GetSegments()).ToArray();
       }
       else
@@ -1053,7 +1087,7 @@ namespace Rhino.Geometry.Intersect
       }
     }
 
-    private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "NewMeshIntersections.RequestedDiminishTolerancesCoefficient";
+    private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "MeshIntersections.RequestedDiminishTolerancesCoefficient";
     private const double DiminishMeshIntersectionsTolerancesRequest_DEFAULT = 0.0001;
 
     /// <summary>
@@ -1069,7 +1103,8 @@ namespace Rhino.Geometry.Intersect
     /// This coefficient is provided to translate absolute document tolerances to values more suitable for good mesh intersections.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">When the value is negative.</exception>
-    internal static double MeshIntersectionsTolerancesCoefficient
+    /// <since>7.0</since>
+    public static double MeshIntersectionsTolerancesCoefficient
     {
       get
       {
@@ -1199,6 +1234,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
     /// <param name="progress">A progress reporter to inform the user about progress, or null. The reported value is indicative.</param>
     /// <returns>True, if the operation succeeded, otherwise false.</returns>
+    /// <since>7.0</since>
     public static bool MeshMesh(IEnumerable<Mesh> meshes, double tolerance,
       out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
       FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
@@ -1217,6 +1253,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
     /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
     /// <returns>An array of intersection and overlaps polylines.</returns>
+    /// <since>5.0</since>
     public static Polyline[] MeshMeshAccurate(Mesh meshA, Mesh meshB, double tolerance)
     {
       if (UseNewMeshIntersections)
@@ -1263,6 +1300,7 @@ namespace Rhino.Geometry.Intersect
     /// >= 0.0 parameter along ray if successful.
     /// &lt; 0.0 if no intersection found.
     /// </returns>
+    /// <since>5.0</since>
     public static double MeshRay(Mesh mesh, Ray3d ray)
     {
       IntPtr pConstMesh = mesh.ConstPointer();
@@ -1284,6 +1322,7 @@ namespace Rhino.Geometry.Intersect
     /// The ray may intersect more than one face in cases where the ray hits
     /// the edge between two faces or the vertex corner shared by multiple faces.
     /// </remarks>
+    /// <since>5.0</since>
     public static double MeshRay(Mesh mesh, Ray3d ray, out int[] meshFaceIndices)
     {
       meshFaceIndices = null;
@@ -1306,6 +1345,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="curve">A polyline curves to intersect.</param>
     /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
     /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <since>5.0</since>
     public static Point3d[] MeshPolyline(Mesh mesh, PolylineCurve curve, out int[] faceIds)
     {
       faceIds = null;
@@ -1330,6 +1370,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="line">The line to intersect with the mesh</param>
     /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
     /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <since>5.0</since>
     public static Point3d[] MeshLine(Mesh mesh, Line line, out int[] faceIds)
     {
       faceIds = null;
@@ -1347,52 +1388,88 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Computes point intersections that occur when shooting a ray to a collection of surfaces.
+    /// Computes point intersections that occur when shooting a ray to a collection of surfaces and Breps.
     /// </summary>
     /// <param name="ray">A ray used in intersection.</param>
     /// <param name="geometry">Only Surface and Brep objects are currently supported. Trims are ignored on Breps.</param>
     /// <param name="maxReflections">The maximum number of reflections. This value should be any value between 1 and 1000, inclusive.</param>
-    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <returns>An array of points: one for each surface or Brep face that was hit, or an empty array on failure.</returns>
     /// <exception cref="ArgumentNullException">geometry is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">maxReflections is strictly outside the [1-1000] range.</exception>
+    /// <since>5.0</since>
     public static Point3d[] RayShoot(Ray3d ray, IEnumerable<GeometryBase> geometry, int maxReflections)
     {
-      if (geometry == null) throw new ArgumentNullException("geometry");
+      if (null == geometry) throw new ArgumentNullException(nameof(geometry));
       if (maxReflections < 1 || maxReflections > 1000)
         throw new ArgumentOutOfRangeException("maxReflections", "maxReflections must be between 1-1000");
-      // We should handle better the case of a null entry inside the geometry collection.
-      // Currently a NullReferenceException occurs.
 
-      using (Rhino.Runtime.InteropWrappers.SimpleArrayGeometryPointer geom = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry))
+      using (var in_geom = new SimpleArrayGeometryPointer(geometry))
+      using (var out_points = new SimpleArrayPoint3d())
       {
-        IntPtr pGeometry = geom.ConstPointer();
-        Point3d[] rc = null;
-        using (Rhino.Runtime.InteropWrappers.SimpleArrayPoint3d points = new Rhino.Runtime.InteropWrappers.SimpleArrayPoint3d())
-        {
-          IntPtr pPoints = points.NonConstPointer();
-          int count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ray.Position, ray.Direction, pGeometry, pPoints, maxReflections);
-          if (count > 0) rc = points.ToArray();
-        }
-        return rc;
+        var ptr_const_geom = in_geom.ConstPointer();
+        var ptr_out_points = out_points.NonConstPointer();
+        int count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, IntPtr.Zero, IntPtr.Zero);
+        if (count > 0) 
+          return out_points.ToArray();
       }
+      return new Point3d[0];
     }
+
+    /// <summary>
+    /// Computes point intersections that occur when shooting a ray to a collection of surfaces and Breps.
+    /// </summary>
+    /// <param name="geometry">The collection of surfaces and Breps to intersect. Trims are ignored on Breps.</param>
+    /// <param name="ray">>A ray used in intersection.</param>
+    /// <param name="maxReflections">The maximum number of reflections. This value should be any value between 1 and 1000, inclusive.</param>
+    /// <returns>An array of RayShootEvent structs if successful, or an empty array on failure.</returns>
+    /// <exception cref="ArgumentNullException">geometry is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">maxReflections is strictly outside the [1-1000] range.</exception>
+    /// <since>7.0</since>
+    public static RayShootEvent[] RayShoot(IEnumerable<GeometryBase> geometry, Ray3d ray, int maxReflections)
+    {
+      if (null == geometry) throw new ArgumentNullException(nameof(geometry));
+      if (maxReflections < 1 || maxReflections > 1000)
+        throw new ArgumentOutOfRangeException("maxReflections", "maxReflections must be between 1-1000");
+
+      using (var in_geom = new SimpleArrayGeometryPointer(geometry))
+      using (var out_geom_idx = new SimpleArrayInt())
+      using (var out_face_idx = new SimpleArrayInt())
+      using (var out_points = new SimpleArrayPoint3d())
+      {
+        var ptr_const_geom = in_geom.ConstPointer();
+        var ptr_out_geom_idx = out_geom_idx.NonConstPointer();
+        var ptr_out_face_idx = out_face_idx.NonConstPointer();
+        var ptr_out_points = out_points.NonConstPointer();
+        var count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, ptr_out_geom_idx, ptr_out_face_idx);
+        if (count > 0)
+        {
+          var points = out_points.ToArray();
+          var geom_idx = out_geom_idx.ToArray();
+          var face_idx = out_face_idx.ToArray();
+          if (count == points.Length && 
+            count == geom_idx.Length && 
+            count == face_idx.Length
+            )
+          {
+            var rc = new RayShootEvent[count];
+            for (var i = 0; i < count; i++)
+            {
+              rc[i] = new RayShootEvent
+              {
+                Point = points[i],
+                GeometryIndex = geom_idx[i],
+                BrepFaceIndex = face_idx[i]
+              };
+            }
+            return rc;
+          }
+        }
+      }
+      return new RayShootEvent[0];
+    }
+
 #endif
-    //public static Point3d[] RaySurfaces(Ray3d ray, IEnumerable<Surface> surfaces, int maxReflections)
-    //{
-    //  if (maxReflections < 1 || maxReflections > 1000)
-    //    throw new ArgumentException("maxReflections must be between 1-1000");
-    //  Rhino.Runtime.INTERNAL_GeometryArray srfs = new Rhino.Runtime.INTERNAL_GeometryArray(surfaces);
-    //  IntPtr pSrfs = srfs.ConstPointer();
-    //  Point3d[] rc = null;
-    //  using (Rhino.Runtime.InteropWrappers.SimpleArrayPoint3d points = new Rhino.Runtime.InteropWrappers.SimpleArrayPoint3d())
-    //  {
-    //    IntPtr pPoints = points.NonConstPointer();
-    //    int count = UnsafeNativeMethods.ON_RayShooter_MultiSurface(ray.Position, ray.Direction, pSrfs, pPoints, maxReflections);
-    //    if (count > 0) rc = points.ToArray();
-    //  }
-    //  srfs.Dispose();
-    //  return rc;
-    //}
+
     #endregion
 
 #if RHINO_SDK
@@ -1408,6 +1485,7 @@ namespace Rhino.Geometry.Intersect
     /// <returns>
     /// Array of projected points, or null in case of any error or invalid input.
     /// </returns>
+    /// <since>5.0</since>
     public static Point3d[] ProjectPointsToMeshes(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
     {
       Point3d[] rc = null;
@@ -1453,6 +1531,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_projectpointstomeshesex.cs' lang='cs'/>
     /// <code source='examples\py\ex_projectpointstomeshesex.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public static Point3d[] ProjectPointsToMeshesEx(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance, out int[] indices)
     {
       Point3d[] rc = null;
@@ -1501,6 +1580,7 @@ namespace Rhino.Geometry.Intersect
     /// <code source='examples\cs\ex_projectpointstobreps.cs' lang='cs'/>
     /// <code source='examples\py\ex_projectpointstobreps.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static Point3d[] ProjectPointsToBreps(IEnumerable<Brep> breps, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
     {
       Point3d[] rc = null;
@@ -1538,6 +1618,7 @@ namespace Rhino.Geometry.Intersect
     /// <returns>
     /// Array of projected points, or null in case of any error or invalid input.
     /// </returns>
+    /// <since>5.10</since>
     public static Point3d[] ProjectPointsToBrepsEx(IEnumerable<Brep> breps, IEnumerable<Point3d> points, Vector3d direction, double tolerance, out int[] indices)
     {
       Point3d[] rc = null;

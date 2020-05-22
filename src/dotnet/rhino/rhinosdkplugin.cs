@@ -1,4 +1,4 @@
-﻿#pragma warning disable 1591
+#pragma warning disable 1591
 #if RHINO_SDK
 using System;
 using System.Collections.Concurrent;
@@ -40,23 +40,28 @@ namespace Rhino.PlugIns
   [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
   public sealed class PlugInDescriptionAttribute : Attribute
   {
+    /// <since>5.0</since>
     public PlugInDescriptionAttribute(DescriptionType descriptionType, string value)
     {
       DescriptionType = descriptionType;
       Value = value;
     }
+    /// <since>5.0</since>
     public DescriptionType DescriptionType { get; }
 
+    /// <since>5.0</since>
     public string Value { get; }
   }
 
   [AttributeUsage(AttributeTargets.Assembly)]
   public sealed class LicenseIdAttribute : Attribute
   {
+    /// <since>6.0</since>
     public LicenseIdAttribute(string value)
     {
       Value = value;
     }
+    /// <since>6.0</since>
     public string Value { get; }
   }
 
@@ -257,7 +262,7 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Gets an icon from a loaded RhinoCommon plugin and returns it as a bitmap.
+    /// Gets an icon from a loaded RhinoCommon plug-in and returns it as a bitmap.
     /// 5-Jul-2017 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-39494
     /// </summary>
     internal static Bitmap GetLoadedPlugInIcon(Guid id, string iconName, int sizeDesired)
@@ -281,7 +286,7 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Gets an icon from unloaed RhinoCommon plugin and returns it as a bitmap.
+    /// Gets an icon from unloaded RhinoCommon plug in and returns it as a bitmap.
     /// 5-Jul-2017 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-39494
     /// </summary>
     internal static Bitmap GetUnloadedPlugInIcon(string path, int sizeDesired)
@@ -349,11 +354,12 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="path">full path to plug-in to attempt to load</param>
     /// <param name="plugInId">
-    /// If successfull (or the plug-in is already loaded), the unique id for the
+    /// If successful (or the plug-in is already loaded), the unique id for the
     /// plug-in is returned here. Guid.Empty on failure
     /// </param>
     /// <returns>
     /// </returns>
+    /// <since>6.0</since>
     public static LoadPlugInResult LoadPlugIn(string path, out Guid plugInId)
     {
       plugInId = Guid.Empty;
@@ -371,6 +377,7 @@ namespace Rhino.PlugIns
     /// <param name="pluginAssembly">The plug-in assembly.
     /// <para>You can get the assembly instance at runtime with the <see cref="System.Type.Assembly"/> instance property.</para></param>
     /// <returns>The assembly plug-in instance if successful. Otherwise, null.</returns>
+    /// <since>5.0</since>
     public static PlugIn Find(System.Reflection.Assembly pluginAssembly)
     {
       if (null == pluginAssembly)
@@ -389,6 +396,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="plugInId">The plug-in Id.</param>
     /// <returns>The plug-in instance if successful. Otherwise, null.</returns>
+    /// <since>5.5</since>
     public static PlugIn Find(Guid plugInId)
     {
       if (Guid.Empty == plugInId)
@@ -402,8 +410,9 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Used by compute's startup code to load plugins that have registered custom endpoints
+    /// Used by compute's startup code to load plug-ins that have registered custom endpoints
     /// </summary>
+    /// <since>7.0</since>
     public static void LoadComputeExtensionPlugins()
     {
       var installedPlugins = GetInstalledPlugIns();
@@ -424,6 +433,7 @@ namespace Rhino.PlugIns
     }
 
 
+    /// <since>6.0</since>
     public static PersistentSettings GetPluginSettings(Guid plugInId, bool load)
     {
       if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) > 0)
@@ -442,11 +452,30 @@ namespace Rhino.PlugIns
         var plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
         return (plug_in_settings == null ? null : plug_in_settings.PluginSettings);
       }
+      else
+      {
+        // 16.03.2020 Max: CRhinoApp_GetPlugInObject() returns always null on the Mac.
+        // That is probably a bug, not implemented or then windows specific. I do not know
+        // why? The below code finds Cpp plugins settings, which is why I added it. However
+        // I think this could be fixed better by someone who knows this part of the code.
+        // Is the native_plugin_in != IntPtr.Zero check needed? Anyone can and should change
+        // this if he or she knows what should be done.
+        if (HostUtils.RunningOnOSX)
+        {
+          // Unmanaged plug-in
+          var unmanaged_plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
+          if (unmanaged_plug_in_settings != null)
+            return unmanaged_plug_in_settings.PluginSettings;
+        }
+      }
+
+
       if (!load)
         return null;
       return (LoadPlugIn(plugInId) ? GetPluginSettings(plugInId, false) : null);
     }
 
+    /// <since>6.0</since>
     public static void SavePluginSettings(Guid plugInId)
     {
       if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) > 0)
@@ -472,28 +501,33 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Raise any pending OnPlugInSettingsSaved events, the events are normally
-    /// queued while a command is running and and fired while Rhino is in an
+    /// queued while a command is running and fired while Rhino is in an
     /// idle state.  Calling this method will raise any pending changed events
     /// regardless of Rhino's current idle state or if a command is running.
     /// </summary>
+    /// <since>6.0</since>
     public static void RaiseOnPlugInSettingsSavedEvent()
     {
       PlugInSettings.FlushSettingsChangedEventQueue();
     }
 
+    /// <since>6.0</since>
     public static void FlushSettingsSavedQueue()
     {
       PlugInSettings.FlushSettingsSavedQueue();
     }
 
     /// <summary>Source assembly for this plug-in.</summary>
+    /// <since>5.0</since>
     public System.Reflection.Assembly Assembly { get { return m_assembly; } }
 
     /// <summary>
     /// Returns the Guid, or unique Id, of the plug-in.
     /// </summary>
+    /// <since>5.0</since>
     public Guid Id { get { return m_id; } }
 
+    /// <since>6.0</since>
     public Guid LicenseId {
       get {
         try
@@ -513,11 +547,13 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the name of the plug-in, as found in the plug-in's assembly attributes.
     /// </summary>
+    /// <since>5.0</since>
     public string Name { get { return m_name; } }
 
     /// <summary>
     /// Returns the version of the plug-in, as found in the plug-in's assembly attributes.
     /// </summary>
+    /// <since>5.0</since>
     public string Version { get { return m_version; } }
 
     /// <summary>
@@ -525,6 +561,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="size">The desired size in pixels.</param>
     /// <returns>The icon if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap Icon(System.Drawing.Size size)
     {
       PlugInInfo info = PlugIn.GetPlugInInfo(Id);
@@ -536,6 +573,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the description of the plug-in, as found in the plug-in's assembly attributes.
     /// </summary>
+    /// <since>6.0</since>
     public string Description
     {
       get
@@ -550,11 +588,13 @@ namespace Rhino.PlugIns
     /// <summary>
     /// All of the commands associated with this plug-in.
     /// </summary>
+    /// <since>5.0</since>
     public Commands.Command[] GetCommands()
     {
       return m_commands.ToArray();
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use LoadTime virtual property instead")]
     public virtual bool LoadAtStartup
     {
@@ -566,6 +606,7 @@ namespace Rhino.PlugIns
     /// this behavior to load the plug-in at during different stages in time by overriding
     /// this property.
     /// </summary>
+    /// <since>5.0</since>
     public virtual PlugInLoadTime LoadTime
     {
       get { return PlugInLoadTime.WhenNeeded; }
@@ -1102,6 +1143,7 @@ namespace Rhino.PlugIns
     }
 
 
+    /// <since>5.0</since>
     public virtual object GetPlugInObject()
     {
       return null;
@@ -1296,6 +1338,7 @@ namespace Rhino.PlugIns
     /// licensing system. Note, most plug-ins do not need to call this as the
     /// Rhino licensing system will return all licenses when Rhino shuts down. 
     /// </summary>
+    /// <since>5.0</since>
     protected bool ReturnLicense()
     {
       return LicenseUtils.ReturnLicense(Assembly.Location, Id, Name);
@@ -1308,6 +1351,7 @@ namespace Rhino.PlugIns
     /// <param name="registeredOwner"></param>
     /// <param name="registeredOrganization"></param>
     /// <returns></returns>
+    /// <since>5.11</since>
     protected bool GetLicenseOwner(out string registeredOwner, out string registeredOrganization)
     {
       var registered_owner = string.Empty;
@@ -1321,6 +1365,7 @@ namespace Rhino.PlugIns
     #endregion
 
     string m_all_users_settings_dir;
+    /// <since>5.0</since>
     public string SettingsDirectoryAllUsers
     {
       get
@@ -1332,6 +1377,7 @@ namespace Rhino.PlugIns
     }
 
     string m_local_user_settings_dir;
+    /// <since>5.0</since>
     public string SettingsDirectory
     {
       get
@@ -1430,6 +1476,7 @@ namespace Rhino.PlugIns
     /// property.
     /// </summary>
     /// <seealso cref="SaveSettings"/>
+    /// <since>6.0</since>
     public event EventHandler<PersistentSettingsSavedEventArgs> SettingsSaved;
 
     /// <summary>
@@ -1437,11 +1484,20 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="writing"></param>
-    internal void InvokeSetingsSaved(object sender, bool writing)
+    /// <param name="dirty">
+    /// Will be true if the settings are in the to be written queue indicating that there is
+    /// an additional change that needs to be written.
+    /// </param>
+    internal void InvokeSetingsSaved(object sender, bool writing, bool dirty)
     {
       if (null == SettingsSaved) return;
       var old_settings = InternalPlugInSettings.Duplicate(false);
-      if (!HostUtils.RunningOnOSX)
+      // 11 December 2019 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-55242
+      // If dirty == true then there was a change to this settings dictionary after the file was
+      // previously written and the file change notification recieved so do NOT read the file now
+      // since the current dictionary is about to be written again
+      if (!HostUtils.RunningOnOSX && !dirty)
       {
         var read_settings = ReadSettings ();
         InternalPlugInSettings.MergeChangedSettingsFile (read_settings);
@@ -1454,6 +1510,7 @@ namespace Rhino.PlugIns
     /// Write settings to disk which will raise a <see cref="SettingsSaved"/>
     /// event.
     /// </summary>
+    /// <since>6.0</since>
     public void SaveSettings()
     {
       if (null == m_settings_manager) return;
@@ -1491,6 +1548,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Persistent plug-in settings.
     /// </summary>
+    /// <since>5.0</since>
     public PersistentSettings Settings
     {
       get 
@@ -1501,6 +1559,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    /// <since>6.0</since>
     public PersistentSettings WindowPositionSettings
     {
       get
@@ -1511,6 +1570,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    /// <since>5.0</since>
     public PersistentSettings CommandSettings(string name)
     {
       if (m_settings_manager == null)
@@ -1524,6 +1584,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginId">The id of the plug-in.</param>
     /// <returns>Detailed information about an installed Rhino plug-in if successful, null otherwise.</returns>
+    /// <since>6.0</since>
     public static PlugInInfo GetPlugInInfo(Guid pluginId)
     {
       IntPtr ptr = UnsafeNativeMethods.CRhinoPluginManager_GetPlugInRecord(pluginId);
@@ -1536,6 +1597,7 @@ namespace Rhino.PlugIns
     /// If true, Rhino will display a warning dialog when load-protected plug-ins are attempting to load. 
     /// If false, load-protected plug-ins will silently not load.
     /// </summary>
+    /// <since>6.0</since>
     public static bool AskOnLoadProtection
     {
       get { return UnsafeNativeMethods.CRhinoPlugInManager_GetAskOnLoadProtection(); }
@@ -1545,6 +1607,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the number of installed Rhino plug-ins.
     /// </summary>
+    /// <since>5.0</since>
     public static int InstalledPlugInCount
     {
       get { return UnsafeNativeMethods.CRhinoPlugInManager_PlugInCount(); }
@@ -1557,6 +1620,7 @@ namespace Rhino.PlugIns
     /// <param name="loaded">The loaded state of the plug-in.</param>
     /// <param name="loadProtected">The load protected state of the plug-in.</param>
     /// <returns>Returns true if the plug-in exists, or is installed.</returns>
+    /// <since>5.0</since>
     public static bool PlugInExists(Guid id, out bool loaded, out bool loadProtected)
     {
       loaded = loadProtected = false;
@@ -1568,6 +1632,7 @@ namespace Rhino.PlugIns
       return true;
     }
 
+    /// <since>5.0</since>
     public static Dictionary<Guid, string> GetInstalledPlugIns()
     {
       int count = InstalledPlugInCount;
@@ -1594,6 +1659,7 @@ namespace Rhino.PlugIns
     /// Returns the names of all installed Rhino plug-ins.
     /// </summary>
     /// <returns>The names if successful.</returns>
+    /// <since>5.0</since>
     public static string[] GetInstalledPlugInNames()
     {
       return GetInstalledPlugInNames(PlugInType.Any, true, true);
@@ -1608,6 +1674,7 @@ namespace Rhino.PlugIns
     /// <param name="loaded">true if loaded plug-ins are returned.</param>
     /// <param name="unloaded">true if unloaded plug-ins are returned.</param>
     /// <returns>An array of installed plug-in names. This can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public static string[] GetInstalledPlugInNames(PlugInType typeFilter, bool loaded, bool unloaded)
     {
       int count = InstalledPlugInCount;
@@ -1629,6 +1696,7 @@ namespace Rhino.PlugIns
       return names.ToArray();
     }
 
+    /// <since>5.0</since>
     public static string[] GetInstalledPlugInFolders()
     {
       var dirs = new List<string>(32);
@@ -1674,6 +1742,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginPath">The path of the plug-in.</param>
     /// <returns>The plug-in name.</returns>
+    /// <since>5.0</since>
     public static string NameFromPath(string pluginPath)
     {
       string rc;
@@ -1705,6 +1774,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginName"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public static string PathFromName(string pluginName)
     {
       Guid id = IdFromName(pluginName);
@@ -1716,6 +1786,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginId"></param>
     /// <returns></returns>
+    /// <since>5.9</since>
     public static string PathFromId(Guid pluginId)
     {
       using (var sh = new StringWrapper())
@@ -1731,6 +1802,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginPath">The path to the installed plug-in.</param>
     /// <returns>The id if successful.</returns>
+    /// <since>5.0</since>
     public static Guid IdFromPath(string pluginPath)
     {
       Guid rc = UnsafeNativeMethods.CRhinoPlugInManager_IdFromPath(pluginPath);
@@ -1756,6 +1828,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginName">The name of the installed plug-in.</param>
     /// <returns>The id if successful.</returns>
+    /// <since>5.5</since>
     public static Guid IdFromName(string pluginName)
     {
       Guid rc = UnsafeNativeMethods.CRhinoPlugInManager_IdFromName(pluginName);
@@ -1780,6 +1853,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginId">The id of the installed plug-in.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool LoadPlugIn(Guid pluginId)
     {
       return LoadPlugIn(pluginId, true, false);
@@ -1792,6 +1866,7 @@ namespace Rhino.PlugIns
     /// <param name="loadQuietly">Load the plug-in quietly.</param>
     /// <param name="forceLoad">Load plug-in even if previous attempt to load has failed.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public static bool LoadPlugIn(Guid pluginId, bool loadQuietly, bool forceLoad)
     {
       return UnsafeNativeMethods.CRhinoPlugInManager_LoadPlugIn(pluginId, loadQuietly, forceLoad);
@@ -1802,6 +1877,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginId">The plug-in ID.</param>
     /// <returns>An array with all plug-in names. This can be empty, but not null.</returns>
+    /// <since>5.0</since>
     public static string[] GetEnglishCommandNames(Guid pluginId)
     {
       using (var strings = new ClassArrayString())
@@ -1817,6 +1893,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="pluginId"></param>
     /// <param name="loadSilently"></param>
+    /// <since>5.5</since>
     public static void SetLoadProtection(Guid pluginId, bool loadSilently)
     {
       int state = loadSilently ? 1 : 2;
@@ -1829,6 +1906,7 @@ namespace Rhino.PlugIns
     /// <param name="pluginId"></param>
     /// <param name="loadSilently"></param>
     /// <returns></returns>
+    /// <since>5.5</since>
     public static bool GetLoadProtection(Guid pluginId, out bool loadSilently)
     {
       loadSilently = true;
@@ -2051,7 +2129,7 @@ namespace Rhino.PlugIns
         var plugin_assembly = System.Reflection.Assembly.LoadFrom(path);
         
         if(displayDebugInfo)
-          RhinoApp.Write("- extracting plug-in attributes to detemine vendor information\n");
+          RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
         // Fill out all of the info strings using Assembly attributes in the plugin
         ExtractPlugInAttributes( plugin_assembly, pluginInfo );
         if (UnsafeNativeMethods.CRhinoPlugInInfo_SilentBlock(pluginInfo))
@@ -2192,7 +2270,7 @@ namespace Rhino.PlugIns
         else
           extra_text = $" (and {dlls.Length} other assemblies)";
       }
-      RhinoApp.WriteLine($"Testing {path}{extra_text} for compatibility...");
+      var msg = string.Format("Testing {0} for compatibility", Path.GetFileName(path) + extra_text);
 
       // start the timer
       var start = DateTime.Now;
@@ -2207,17 +2285,29 @@ namespace Rhino.PlugIns
         tasks[i + 1] = System.Threading.Tasks.Task.Run<bool>(() => RunCompat(dll_path));
       }
 
-      // periodically check if compat has completed and write "progress" so
-      // windows doesn't think rhino has hung
-      var prog_chars = "-\\|/"; // borrowed from github.com/iarna/gauge
-      var rnd = new Random();
-      while (!System.Threading.Tasks.Task.WaitAll(tasks, 200))
-      //while (!task.Wait(200))
+      var incomplete_tasks = new List<System.Threading.Tasks.Task>(tasks);
+
+      // run tasks with progress meter and keep rhino alive
+      int lower = 0;
+      int upper = tasks.Length;
+      Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, msg, false, true);
+      while (!System.Threading.Tasks.Task.WaitAll(tasks, 250))
       {
-        RhinoApp.Write(prog_chars[rnd.Next(0, 4)].ToString());
+        Rhino.UI.StatusBar.UpdateProgressMeter(lower, true);
+        RhinoApp.Wait();
+        for (int i = incomplete_tasks.Count - 1; i >= 0; i--)
+        {
+          var t = incomplete_tasks[i];
+          if (t.IsCompleted)
+          {
+            incomplete_tasks.RemoveAt(i);
+          }
+        }
+        lower = tasks.Length - incomplete_tasks.Count;
+        HostUtils.DebugString($"- Tested {lower} / {tasks.Length}");
       }
+      Rhino.UI.StatusBar.HideProgressMeter();
       var time = DateTime.Now - start; // end timer
-      RhinoApp.WriteLine(); // end progress
 
       // fail if one or more of the dlls failed
       bool result = true;
@@ -2242,23 +2332,23 @@ namespace Rhino.PlugIns
       return result;
     }
 
-    private static bool RunCompat(string path, bool displayDebugInfo = false)
+    private static bool RunCompat(string path)
     {
       // get path to rhinocommon
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
-      HostUtils.DebugString ($"rhino_common_path = {rhino_common_path}");
       if (!File.Exists (rhino_common_path)) {
-        HostUtils.DebugString ("RhinoCommond.dll not found");
+        HostUtils.DebugString ($"RhinoCommon.dll not found: {rhino_common_path}");
         throw new FileNotFoundException ("RhinoCommon.dll not found");
       }
 
       // get path to compat (should be next to RhinoCommon.dll)
       string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Compat.exe");
-      HostUtils.DebugString ($"compat_path = {compat_path}");
       if (!File.Exists (compat_path)) {
-        HostUtils.DebugString ("Compat.exe not found");
+        HostUtils.DebugString ($"Compat.exe not found: {compat_path}");
         throw new FileNotFoundException ("Compat.exe not found");
       }
+
+      HostUtils.DebugString(path);
 
       string rhino_dotnet_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Rhino_DotNet.dll");
       if (!File.Exists(rhino_dotnet_path)) rhino_dotnet_path = null;
@@ -2302,17 +2392,13 @@ namespace Rhino.PlugIns
       string errout = proc.StandardError.ReadToEnd ();
       proc.WaitForExit();
 
-      HostUtils.DebugString ($"Compat output: {output}");
-
-      //if (displayDebugInfo)
-      //  RhinoApp.WriteLine("- Compat ran in {0}s", proc.TotalProcessorTime.Seconds);
+      //HostUtils.DebugString ($"Compat output: {output}");
 
       if (proc.ExitCode == 110) // don't fail if dll is not dotnet (native)
         return true;
 
-      HostUtils.DebugString ("====================");
-      HostUtils.DebugString (errout);
-      HostUtils.DebugString ("====================");
+      if (!string.IsNullOrWhiteSpace(errout))
+        HostUtils.DebugString("ERROR: " + errout);
 
       bool result = (proc.ExitCode == 0) && !CheckForRhinoSdkClasses(output);
       
@@ -2540,6 +2626,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's Id.
     /// </summary>
+    /// <since>6.0</since>
     public Guid Id
     {
       get
@@ -2552,6 +2639,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's Windows Registry path.
     /// </summary>
+    /// <since>6.0</since>
     public string RegistryPath
     { 
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.RegistryPath); }
@@ -2560,6 +2648,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's name.
     /// </summary>
+    /// <since>6.0</since>
     public string Name
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Name); }
@@ -2568,6 +2657,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's description.
     /// </summary>
+    /// <since>6.0</since>
     public string Description
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Description); }
@@ -2598,6 +2688,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's icon in bitmap form.
     /// </summary>
+    /// <since>6.0</since>
     public System.Drawing.Bitmap Icon(System.Drawing.Size size)
     {
       System.Drawing.Bitmap rc = null;
@@ -2627,6 +2718,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's file name.
     /// </summary>
+    /// <since>6.0</since>
     public string FileName
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.FileName); }
@@ -2635,6 +2727,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's version.
     /// </summary>
+    /// <since>6.0</since>
     public string Version
     {
       get
@@ -2669,6 +2762,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Organization
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Organization); }
@@ -2677,6 +2771,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the address of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Address
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Address); }
@@ -2685,6 +2780,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the country of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Country
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Country); }
@@ -2693,6 +2789,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the email address of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Email
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Email); }
@@ -2701,6 +2798,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the phone number of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Phone
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Phone); }
@@ -2709,22 +2807,25 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the fax number of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string Fax
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.Fax); }
     }
 
     /// <summary>
-    /// Returns the web site, or url, of the organization or company that created the plug-in.
+    /// Returns the web site, or URL, of the organization or company that created the plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string WebSite
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.WebSite); }
     }
 
     /// <summary>
-    /// Returns the web site, or url, were an updated version of the plug-in can be found.
+    /// Returns the web site, or URL, were an updated version of the plug-in can be found.
     /// </summary>
+    /// <since>6.0</since>
     public string UpdateUrl
     {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.UpdateUrl); }
@@ -2733,6 +2834,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in type.
     /// </summary>
+    /// <since>6.0</since>
     public PlugInType PlugInType
     {
       get
@@ -2765,6 +2867,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the plug-in's load time.
     /// </summary>
+    /// <since>6.0</since>
     public PlugInLoadTime PlugInLoadTime
     {
       get
@@ -2793,6 +2896,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns true if the plug-in is loaded, false otherwise.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsLoaded
     {
       get { return GetBool(UnsafeNativeMethods.RhinoPlugInRecordBool.IsLoaded); }
@@ -2803,6 +2907,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="loadSilently">The plug-in's load silently state.</param>
     /// <returns>true if the plug-in is load protected, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool IsLoadProtected(out bool loadSilently)
     {
       loadSilently = true;
@@ -2816,6 +2921,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns true if the plug-in ships with Rhino, false otherwise.
     /// </summary>
+    /// <since>6.0</since>
     public bool ShipsWithRhino
     {
       get { return GetBool(UnsafeNativeMethods.RhinoPlugInRecordBool.ShipsWithRhino); }
@@ -2824,6 +2930,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns true if the plug-in is based on .NET, false otherwise.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsDotNet
     {
       get { return GetBool(UnsafeNativeMethods.RhinoPlugInRecordBool.IsDotNet); }
@@ -2832,6 +2939,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns a plug-in's English command names.
     /// </summary>
+    /// <since>6.0</since>
     public string[] CommandNames
     {
       get
@@ -2848,6 +2956,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the description of supported file types for file import and file export plug-in.
     /// </summary>
+    /// <since>6.0</since>
     public string[] FileTypeDescriptions
     {
       get
@@ -2864,6 +2973,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the file types extensions supported for file import and file export plug-in.
     /// </summary>
+    /// <since>7.0</since>
     public string[] FileTypeExtensions
     {
       get
@@ -2890,30 +3000,39 @@ namespace Rhino.PlugIns
 
   public sealed class FileTypeList
   {
+    /// <since>5.0</since>
     public FileTypeList() { }
 
+    /// <since>6.0</since>
     public FileTypeList(string description, string extension)
     {
       AddFileType(description, extension, false);
     }
+    /// <since>6.0</since>
     public FileTypeList(string description, string extension, bool showOptionsButtonInFileDialog)
     {
       AddFileType(description, extension, showOptionsButtonInFileDialog);
     }
 
+    /// <since>5.0</since>
     public int AddFileType(string description, string extension) => AddFileType(description, extension, false);
 
+    /// <since>6.0</since>
     public int AddFileType(string description, string extension, bool showOptionsButtonInFileDialog)
     {
       return AddFileType(description, new string[] { extension }, showOptionsButtonInFileDialog);
     }
 
+    /// <since>5.0</since>
     public int AddFileType(string description, string extension1, string extension2) => AddFileType(description, extension1, extension2, false);
+    /// <since>6.0</since>
     public int AddFileType(string description, string extension1, string extension2, bool showOptionsButtonInFileDialog)
     {
       return AddFileType(description, new string[] { extension1, extension2 }, showOptionsButtonInFileDialog);
     }
+    /// <since>5.0</since>
     public int AddFileType(string description, IEnumerable<string> extensions) => AddFileType(description, extensions, false);
+    /// <since>6.0</since>
     public int AddFileType(string description, IEnumerable<string> extensions, bool showOptionsButtonInFileDialog)
     {
       if (string.IsNullOrEmpty(description))
@@ -2991,7 +3110,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in AddFileType\n Details:\n";
+          string error_msg = "Error occurred during plug-in AddFileType\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3018,7 +3137,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in ReadFile\n Details:\n";
+          string error_msg = "Error occurred during plug-in ReadFile\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3095,7 +3214,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in AddFileType\n Details:\n";
+          string error_msg = "Error occurred during plug-in AddFileType\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3122,7 +3241,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in WriteFile\n Details:\n";
+          string error_msg = "Error occurred during plug-in WriteFile\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3147,6 +3266,7 @@ namespace Rhino.PlugIns
       m_previewnotification_ptr = pPreviewNotificationPtr;
     }
 
+    /// <since>6.0</since>
     public void NotifyIntermediateUpdate(RenderWindow rw)
     {
       UnsafeNativeMethods.Rdk_RenderPlugin_PreviewRenderNotifications_IntermediateUpdate(m_previewnotification_ptr, rw.ConstPointer());
@@ -3277,7 +3397,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in RenderWindow\n Details:\n";
+          string error_msg = "Error occurred during plug-in RenderWindow\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3578,11 +3698,12 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// This function returns a list of uuid for the render settings pages that should be displayed.
+    /// This function returns a list of Guids for the render settings pages that should be displayed.
     /// </summary>
     /// <returns>
-    /// Return a Id list of of the Render settings sections that will be displayed
+    /// Return a Id list of the Render settings sections that will be displayed
     /// </returns>
+    /// <since>6.17</since>
     public List<Guid> GetRenderSettingsSections()
     {
       return RenderSettingsSections();
@@ -3686,6 +3807,7 @@ namespace Rhino.PlugIns
       return true;
     }
 
+    /// <since>6.1</since>
     public static bool CurrentRendererSupportsFeature(RenderFeature feature)
     {
       return UnsafeNativeMethods.RdkCurrentRendererSupportsFeature((UnsafeNativeMethods.CRhinoRenderPlugInFeatures)feature);
@@ -3711,7 +3833,7 @@ namespace Rhino.PlugIns
     /// Creates the preview bitmap that will appear in the content editor's
     /// thumbnail display when previewing materials and environments. If this
     /// function is not overridden or the PreviewImage is not set on the
-    /// args, then the internal OpenGL renderer will generate a simulation of
+    /// arguments, then the internal OpenGL renderer will generate a simulation of
     /// the content.
     /// 
     /// This function is called with four different preview quality settings.
@@ -3728,7 +3850,7 @@ namespace Rhino.PlugIns
     /// thumbnail display when previewing textures in 2d (UV) mode.
     ///
     /// If this function is not overridden or the PreviewImage is not set on the
-    /// args, then the internal OpenGL renderer will generate a simulation.
+    /// arguments, then the internal OpenGL renderer will generate a simulation.
     /// </summary>
     /// <param name="args">Event argument with several preview option state properties.</param>
     protected virtual void CreateTexture2dPreview(CreateTexture2dPreviewEventArgs args) { }
@@ -3745,7 +3867,7 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Returns a list of output types which your renderer can write.
-    /// <para>The default implementation returns bmp, jpg, png, tif, tga.</para>
+    /// <para>The default implementation returns BMP, JPG, PNG, TIF, TGA.</para>
     /// </summary>
     /// <returns>A list of file types.</returns>
     protected virtual List<FileIO.FileType> SupportedOutputTypes()
@@ -3782,7 +3904,7 @@ namespace Rhino.PlugIns
     protected virtual bool SupportsEditProperties { get { return false; } }
 
     /// <summary>
-    /// Override this function to handle showing a modal dialog with your plugin's
+    /// Override this function to handle showing a modal dialog with your plug-in's
     /// custom decal properties.  You will be passed the current properties for the 
     /// object being edited.  The defaults will be set in InitializeDecalProperties.
     /// </summary>
@@ -3855,6 +3977,7 @@ namespace Rhino.PlugIns
     /// content in response to 'Create New' commands. Set to false if you would
     /// prefer Rhino to display the render content chooser dialog.
     /// </summary>
+    /// <since>5.12</since>
     public bool PerferBasicContent
     {
       get { return m_perfer_basic_content; }
@@ -3881,7 +4004,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in OnCreateScenePreviewAbort\n Details:\n";
+          string error_msg = "Error occurred during plug-in OnCreateScenePreviewAbort\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -3906,7 +4029,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in OnAllowChooseContent\n Details:\n";
+          string error_msg = "Error occurred during plug-in OnAllowChooseContent\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -4158,7 +4281,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Override this method to replace the render properties page in the Rhino
     /// document properties dialog.  The default implementation returns null
-    /// which means just use the the default Rhino page.
+    /// which means just use the default Rhino page.
     /// </summary>
     /// <param name="doc">
     /// The document properties to edit.
@@ -4191,6 +4314,7 @@ namespace Rhino.PlugIns
     /// <param name="doc"></param>
     /// <param name="material"></param>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool OnAssignMaterial(IntPtr parent, RhinoDoc doc, ref DocObjects.Material material)
     {
       return false;
@@ -4203,6 +4327,7 @@ namespace Rhino.PlugIns
     /// disabled then the OnAssignMaterial function is never called.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool EnableAssignMaterialButton()
     {
       return false;
@@ -4218,6 +4343,7 @@ namespace Rhino.PlugIns
     /// <param name="doc"></param>
     /// <param name="material"></param>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool OnEditMaterial(IntPtr parent, RhinoDoc doc, ref DocObjects.Material material)
     {
       return false;
@@ -4232,6 +4358,7 @@ namespace Rhino.PlugIns
     /// <param name="doc"></param>
     /// <param name="material"></param>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool EnableEditMaterialButton(RhinoDoc doc, DocObjects.Material material)
     {
       return false;
@@ -4245,6 +4372,7 @@ namespace Rhino.PlugIns
     /// <param name="doc"></param>
     /// <param name="material"></param>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool OnCreateMaterial(IntPtr parent, RhinoDoc doc, ref DocObjects.Material material)
     {
       return false;
@@ -4256,6 +4384,7 @@ namespace Rhino.PlugIns
     /// the OnEditMaterial function is never called.
     /// </summary>
     /// <returns></returns>
+    /// <since>5.12</since>
     public virtual bool EnableCreateMaterialButton()
     {
       return false;
@@ -4266,6 +4395,7 @@ namespace Rhino.PlugIns
     /// when your plug-in is the current render plug-in.
     /// </summary>
     /// <param name="sections">Create your sections and return a list of them</param>
+    /// <since>6.0</since>
     public virtual void SunCustomSections(List<ICollapsibleSection> sections)
     {
     }
@@ -4275,6 +4405,7 @@ namespace Rhino.PlugIns
     /// when your plug-in is the current render plug-in.
     /// </summary>
     /// <param name="sections">Create your sections and return a list of them</param>
+    /// <since>6.0</since>
     public virtual void RenderSettingsCustomSections(List<ICollapsibleSection> sections)
     {
     }
@@ -4325,7 +4456,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="extensions">
     /// List of one or more file extension associated with this custom type,
-    /// for example: hdr, hdri
+    /// for example: HDR, HDRI
     /// </param>
     /// <param name="description">
     /// File extension description which appears in the file save dialog file
@@ -4334,6 +4465,7 @@ namespace Rhino.PlugIns
     /// Called by the rendered scene to write the save file.
     /// <param name="saveFileHandler">
     /// </param>
+    /// <since>5.11</since>
     public void RegisterFileType(IEnumerable<string> extensions, string description, SaveFileHandler saveFileHandler)
     {
       m_type_list.Add(new CustomRenderSaveFileType(extensions, description, saveFileHandler));
@@ -4388,7 +4520,7 @@ namespace Rhino.PlugIns
     internal Guid RuntimeId { get; private set; }
 
     /// <summary>
-    /// Custom file extensions for this type for example: "hdr", "hdri"
+    /// Custom file extensions for this type for example: "HDR", "HDRI"
     /// </summary>
     public string[] FileExtensions { get; private set; }
 
@@ -4442,7 +4574,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in EnableDigitizer\n Details:\n";
+          string error_msg = "Error occurred during plug-in EnableDigitizer\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -4466,7 +4598,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in UnitSystem\n Details:\n";
+          string error_msg = "Error occurred during plug-in UnitSystem\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -4490,7 +4622,7 @@ namespace Rhino.PlugIns
         }
         catch (Exception ex)
         {
-          string error_msg = "Error occured during plug-in PointTolerance\n Details:\n";
+          string error_msg = "Error occurred during plug-in PointTolerance\n Details:\n";
           error_msg += ex.Message;
           HostUtils.DebugString("Error " + error_msg);
         }
@@ -4536,6 +4668,7 @@ namespace Rhino.PlugIns
     /// <param name="mousebuttons">corresponding digitizer button is down.</param>
     /// <param name="shiftKey">true if the Shift keyboard key was pressed. Otherwise, false.</param>
     /// <param name="controlKey">true if the Control keyboard key was pressed. Otherwise, false.</param>
+    /// <since>6.0</since>
     public void SendPoint(Geometry.Point3d point, MouseButton mousebuttons, bool shiftKey, bool controlKey)
     {
       uint flags = CreateFlags(mousebuttons, shiftKey, controlKey);
@@ -4552,6 +4685,7 @@ namespace Rhino.PlugIns
     /// <param name="mousebuttons">corresponding digitizer button is down.</param>
     /// <param name="shiftKey">true if the Shift keyboard key was pressed. Otherwise, false.</param>
     /// <param name="controlKey">true if the Control keyboard key was pressed. Otherwise, false.</param>
+    /// <since>6.0</since>
     public void SendRay(Geometry.Ray3d ray, MouseButton mousebuttons, bool shiftKey, bool controlKey)
     {
       uint flags = CreateFlags(mousebuttons, shiftKey, controlKey);
@@ -4590,6 +4724,7 @@ namespace Rhino.PlugIns
   public static class LicenseUtils
   {
     /// <summary> Initializes the license manager. </summary>
+    /// <since>5.0</since>
     public static bool Initialize()
     {
       LicenseManager.SetCallbacks();
@@ -4610,12 +4745,14 @@ namespace Rhino.PlugIns
     /// <param name="mode"></param>
     /// <param name="result"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool ShowRhinoExpiredMessage(Rhino.Runtime.Mode mode, ref int result)
     {
       return ZooClient.ShowRhinoExpiredMessage(mode, ref result);
     }
 
     /// <summary> Test connectivity with the Zoo. </summary>
+    /// <since>5.0</since>
     public static string Echo(string message)
     {
       if (string.IsNullOrEmpty(message))
@@ -4636,6 +4773,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// ShowLicenseValidationUi
     /// </summary>
+    /// <since>5.0</since>
     public static bool ShowLicenseValidationUi(string cdkey)
     {
       if (string.IsNullOrEmpty(cdkey))
@@ -4684,6 +4822,7 @@ namespace Rhino.PlugIns
       return false;
     }
 
+    /// <since>6.0</since>
     public static bool GetLicense(ValidateProductKeyDelegate validateProductKeyDelegate,
       OnLeaseChangedDelegate leaseChangedDelegate, VerifyLicenseKeyDelegate verifyLicenseKeyDelegate, VerifyPreviousVersionLicenseDelegate verifyPreviousVersionLicenseKeyDelegate, int product_type,
       int capabilities, string textMask, string product_path, string product_title, Guid pluginId, Guid licenseId)
@@ -4724,6 +4863,7 @@ namespace Rhino.PlugIns
     /// This version of Rhino.PlugIns.LicenseUtils.GetLicense
     /// is used by Rhino C++ plug-ins.
     /// </summary>
+    /// <since>6.0</since>
     public static bool GetLicense(ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate leaseChangedDelegate, int product_type, int capabilities, string textMask, string product_path, string product_title, Guid pluginId, Guid licenseId)
     {
       // 20-May-2013 Dale Fugier
@@ -4765,6 +4905,7 @@ namespace Rhino.PlugIns
       return false;
     }
 
+    /// <since>6.0</since>
     public static bool AskUserForLicense(int productType, bool standAlone, object parentWindow, string textMask,
       ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate onLeaseChangedDelegate, 
       VerifyLicenseKeyDelegate verifyLicenseKeyDelegate, VerifyPreviousVersionLicenseDelegate verifyPreviousVersionLicenseKeyDelegate,
@@ -4810,6 +4951,7 @@ namespace Rhino.PlugIns
     /// This version of Rhino.PlugIns.LicenseUtils.AskUserForLicense
     /// is used by Rhino C++ plug-ins.
     /// </summary>
+    /// <since>6.0</since>
     public static bool AskUserForLicense(int productType, bool standAlone, object parentWindow, string textMask, ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate onLeaseChangedDelegate, string product_path, string product_title, Guid pluginId, Guid licenseId, LicenseCapabilities capabilities)
     {
       return AskUserForLicense(productType, standAlone, parentWindow, textMask, validateProductKeyDelegate,
@@ -4861,6 +5003,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// OBSOLETE - REMOVE WHEN POSSIBLE.
     /// </summary>
+    /// <since>5.0</since>
     public static bool ReturnLicense(Guid productId)
     {
       try
@@ -4886,6 +5029,7 @@ namespace Rhino.PlugIns
     /// true if the license was checked out successful.
     /// false if not successful or on error.
     /// </returns>
+    /// <since>5.0</since>
     public static bool CheckOutLicense(Guid productId)
     {
       try
@@ -4911,6 +5055,7 @@ namespace Rhino.PlugIns
     /// true if the license was checked in successful.
     /// false if not successful or on error.
     /// </returns>
+    /// <since>5.0</since>
     public static bool CheckInLicense(Guid productId)
     {
       try
@@ -4936,6 +5081,7 @@ namespace Rhino.PlugIns
     /// true if the license was successfully converted.
     /// false if not successful or on error.
     /// </returns>
+    /// <since>5.0</since>
     public static bool ConvertLicense(Guid productId)
     {
       try
@@ -4953,6 +5099,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Deletes a license along with its license file.
     /// </summary>
+    /// <since>6.0</since>
     public static bool DeleteLicense(Guid productId)
     {
       // 31-Mar-2015 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/MR-1725
@@ -4971,6 +5118,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns the contentType of a specified product license
     /// </summary>
+    /// <since>5.0</since>
     public static int GetLicenseType(Guid productId)
     {
       try
@@ -4988,6 +5136,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns whether or not license checkout is enabled.
     /// </summary>
+    /// <since>5.0</since>
     public static bool IsCheckOutEnabled()
     {
       try
@@ -5003,8 +5152,9 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Returns the current status of every license for ui purposes.
+    /// Returns the current status of every license for UI purposes.
     /// </summary>
+    /// <since>5.0</since>
     public static LicenseStatus[] GetLicenseStatus()
     {
       try
@@ -5020,8 +5170,9 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Returns the current status of a license for ui purposes.
+    /// Returns the current status of a license for UI purposes.
     /// </summary>
+    /// <since>5.5</since>
     public static LicenseStatus GetOneLicenseStatus(Guid productid)
     {
       try
@@ -5039,6 +5190,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Converts an integer to a LicenseCapabilities flag
     /// </summary>
+    /// <since>5.5</since>
     public static LicenseCapabilities GetLicenseCapabilities(int filter)
     {
       var license_capabilities = LicenseCapabilities.NoCapabilities;
@@ -5063,6 +5215,7 @@ namespace Rhino.PlugIns
       return license_capabilities;
     }
 
+    /// <since>6.0</since>
     public static bool LicenseOptionsHandler(Guid pluginId, Guid licenseId, string productTitle, bool standAlone)
     {
       // 11-Jul-2013 Dale Fugier
@@ -5089,6 +5242,7 @@ namespace Rhino.PlugIns
       return false;
     }
 
+    /// <since>5.5</since>
     public static void ShowBuyLicenseUi(Guid productId)
     {
       // 11-Jul-2013 Dale Fugier
@@ -5123,11 +5277,13 @@ namespace Rhino.PlugIns
       return false;
     }
 
+    /// <since>6.0</since>
     public static bool LoginToCloudZoo()
     {
       return ZooClient.LoginToCloudZoo();
     }
 
+    /// <since>6.0</since>
     public static bool LogoutOfCloudZoo()
     {
       return ZooClient.LogoutOfCloudZoo();
@@ -5196,11 +5352,11 @@ namespace Rhino.PlugIns
   {
     /// <summary>An unspecified build</summary>
     Unspecified = 0,
-    /// <summary>A release build (e.g. commercial, education, nfr, etc.)</summary>
+    /// <summary>A release build (e.g. commercial, education, NFR, etc.)</summary>
     Release = 100,
     /// <summary>A evaluation build</summary>
     Evaluation = 200,
-    /// <summary>A beta build (e.g. wip)</summary>
+    /// <summary>A beta build (e.g. WIP)</summary>
     Beta = 300
   }
 
@@ -5269,17 +5425,20 @@ namespace Rhino.PlugIns
       }
     }
 
+    /// <since>6.0</since>
     public LicenseLease(IntPtr unmanagedPointer)
     {
       Pointer = unmanagedPointer;
       m_auto_delete = false;
     }
 
+    /// <since>6.0</since>
     public LicenseLease(string productId, string groupName, string groupId, string userName, string userId, string productTitle, string productVersion, string productEdition, string leaseId, DateTime iat, DateTime exp)
     {
       Pointer = UnsafeNativeMethods.RHC_RhinoLicenseLease_Create(productId, groupName, groupId, userName, userId, productTitle, productVersion, productEdition, leaseId, DateToInt64(iat), DateToInt64(exp), 0);
     }
 
+    /// <since>6.4</since>
     public LicenseLease(string productId, string groupName, string groupId, string userName, string userId, string productTitle, string productVersion, string productEdition, string leaseId, DateTime iat, DateTime exp, DateTime renewable_until)
     {
       Pointer = UnsafeNativeMethods.RHC_RhinoLicenseLease_Create(productId, groupName, groupId, userName, userId, productTitle, productVersion, productEdition, leaseId, DateToInt64(iat), DateToInt64(exp), DateToInt64(renewable_until));
@@ -5288,56 +5447,67 @@ namespace Rhino.PlugIns
     /// <summary>
     /// The ID of the product that this lease is issued to
     /// </summary>
+    /// <since>6.0</since>
     public string ProductId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.ProductId);
 
     /// <summary>
     /// Name of Rhino Accounts group that this lease came from
     /// </summary>
+    /// <since>6.0</since>
     public string GroupName => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.GroupName);
 
     /// <summary>
     /// ID of Rhino Accounts group that this lease came from
     /// </summary>
+    /// <since>6.0</since>
     public string GroupId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.GroupId);
   
     /// <summary>
     /// Name of Rhino Accounts user that was logged in when this lease was obtained
     /// </summary>
+    /// <since>6.0</since>
     public string UserName => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.UserName);
 
     /// <summary>
     /// ID of Rhino Accounts user that was logged in when this lease was obtained
     /// </summary>
+    /// <since>6.0</since>
     public string UserId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.UserId);
 
     /// <summary>
     /// Title of product that this lease is issued to. For example, "Rhino 6"
     /// </summary>
+    /// <since>6.0</since>
     public string ProductTitle => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.ProductTitle);
 
     /// <summary>
     /// Version of product that this lease is issued to. For example, "6.0"
     /// </summary>
+    /// <since>6.0</since>
     public string ProductVersion => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.ProductVersion);
 
     /// <summary>
     /// Edition of product that this lease is issued to. For example, "Commercial" or "Beta"
     /// </summary>
+    /// <since>6.0</since>
     public string ProductEdition => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.ProductEdition);
 
     /// <summary>
     /// The ID of this lease. 
     /// </summary>
+    /// <since>6.0</since>
     public string LeaseId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.LeaseId);
 
     /// <summary>
     /// The date this lease was issued
     /// </summary>
+    /// <since>6.0</since>
     public DateTime IssuedAt => Int64ToDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.Iat));
 
     /// <summary>
     /// The date when this lease will expire
     /// </summary>
+    /// <since>6.0</since>
     public DateTime Expiration => Int64ToDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.Exp));
 
     ~LicenseLease()
@@ -5355,6 +5525,7 @@ namespace Rhino.PlugIns
   {
     internal readonly IntPtr m_ptr;
 
+    /// <since>6.0</since>
     public LicenseLeaseChangedEventArgs(LicenseLease lease)
     {
       m_ptr = UnsafeNativeMethods.RHC_RhinoLeaseChangedEventArgs_Create(lease?.Pointer ?? IntPtr.Zero);
@@ -5368,6 +5539,7 @@ namespace Rhino.PlugIns
     /// <summary>
     ///  The lease returned by Rhino Accounts server
     /// </summary>
+    /// <since>6.0</since>
     public LicenseLease Lease
     {
       get
@@ -5378,7 +5550,7 @@ namespace Rhino.PlugIns
     }
   }
 
-  /// <summary>Zoo plugin license data.</summary>
+  /// <summary>Zoo plug-in license data.</summary>
   public class LicenseData
   {
     #region Constructors
@@ -5386,6 +5558,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Public constructor.
     /// </summary>
+    /// <since>5.0</since>
     public LicenseData()
     {
       ProductLicense = string.Empty;
@@ -5403,6 +5576,7 @@ namespace Rhino.PlugIns
     /// <param name="productLicense">License string to be saved by ZooClient</param>
     /// <param name="serialNumber">Serial number to be displayed to end user</param>
     /// <param name="licenseTitle">Title of license (Rhino 6.0 Evaluation)</param>
+    /// <since>5.0</since>
     public LicenseData(string productLicense, string serialNumber, string licenseTitle)
       : this(productLicense, serialNumber, licenseTitle, LicenseBuildType.Release, 1, null, null)
     {
@@ -5415,6 +5589,7 @@ namespace Rhino.PlugIns
     /// <param name="serialNumber">Serial number to be displayed to end user</param>
     /// <param name="licenseTitle">Title of license (Rhino 6.0 Evaluation)</param>
     /// <param name="buildType">A LicenseBuildType value</param>
+    /// <since>5.0</since>
     public LicenseData(string productLicense, string serialNumber, string licenseTitle, LicenseBuildType buildType)
       : this(productLicense, serialNumber, licenseTitle, buildType, 1, null, null)
     {
@@ -5428,6 +5603,7 @@ namespace Rhino.PlugIns
     /// <param name="licenseTitle">Title of license (Rhino 6.0 Evaluation)</param>
     /// <param name="buildType">A LicenseBuildType value</param>
     /// <param name="licenseCount">Number of licenses represented by this string. Allows the Zoo to hand out multiple license keys when greater than 1.</param>
+    /// <since>5.0</since>
     public LicenseData(string productLicense, string serialNumber, string licenseTitle, LicenseBuildType buildType, int licenseCount)
       : this(productLicense, serialNumber, licenseTitle, buildType, licenseCount, null, null)
     {
@@ -5493,11 +5669,13 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Public validator.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsValid()
     {
       return IsValid(false);
     }
 
+    /// <since>6.0</since>
     public bool IsValid(bool ignoreExpirationDate)
     {
       try // Try-catch block will catch null values
@@ -5531,6 +5709,7 @@ namespace Rhino.PlugIns
 
     #region Public Members
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       if (null != m_product_icon)
@@ -5540,21 +5719,24 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// The actual product license. 
-    /// This is provided by the plugin that validated the license.
+    /// This is provided by the plug-in that validated the license.
     /// </summary>
+    /// <since>5.0</since>
     public string ProductLicense{ get; set; }
 
     /// <summary>
     /// The "for display only" product license.
-    /// This is provided by the plugin that validated the license.
+    /// This is provided by the plug-in that validated the license.
     /// </summary>
+    /// <since>5.0</since>
     public string SerialNumber{ get; set; }
 
     /// <summary>
     /// The title of the license.
-    /// This is provided by the plugin that validated the license.
+    /// This is provided by the plug-in that validated the license.
     /// (e.g. "Rhinoceros 6.0 Commercial")
     /// </summary>
+    /// <since>5.0</since>
     public string LicenseTitle{ get; set; }
 
     /// <summary>
@@ -5562,36 +5744,42 @@ namespace Rhino.PlugIns
     /// When your product requests a license from the Zoo, it
     /// will specify one of these build types.
     /// </summary>
+    /// <since>5.0</since>
     public LicenseBuildType BuildType{ get; set; }
 
     /// <summary>
     /// The number of instances supported by this license.
-    /// This is provided by the plugin that validated the license.
+    /// This is provided by the plug in that validated the license.
     /// </summary>
+    /// <since>5.0</since>
     public int LicenseCount{ get; set; }
 
     /// <summary>
     /// The date and time the license is set to expire.
-    /// This is provided by the plugin that validated the license.
+    /// This is provided by the plug in that validated the license.
     /// This time value should be in Coordinated Universal Time (UTC).
     /// </summary>
+    /// <since>5.0</since>
     public DateTime? DateToExpire{ get; set;}
 
     /// <summary>
     /// Set to true if this license requires online validation.
     /// Caller must also pass VerifyOnlineValidationCodeDelegate to GetLicense/AskUserForLicense
     /// </summary>
+    /// <since>6.0</since>
     public bool RequiresOnlineValidation { get; set; }
 
     /// <summary>
     /// Set to true if this license requires a previous version license to be entered.
     /// Caller must also pass VerifyPreviousVersionLicenseDelegate to GetLicense/AskUserForLicense.
     /// </summary>
+    /// <since>6.0</since>
     public bool IsUpgradeFromPreviousVersion { get; set; }
 
     /// <summary>
     /// Error message set by calls to callback functions
     /// </summary>
+    /// <since>6.0</since>
     public string ErrorMessage { get; set; }
 
     /// <summary>
@@ -5599,6 +5787,7 @@ namespace Rhino.PlugIns
     /// page in the Options dialog. Note, this can be null.
     /// Note, LicenseData creates it's own copy of the icon.
     /// </summary>
+    /// <since>5.0</since>
     public Icon ProductIcon
     {
       get { return m_product_icon; }
@@ -5616,6 +5805,7 @@ namespace Rhino.PlugIns
 
     #region Public methods
 
+    /// <since>6.0</since>
     public bool LicenseExpires
     {
       get
@@ -5632,6 +5822,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Indicates whether a LicenseData object is either null or invalid.
     /// </summary>
+    /// <since>5.0</since>
     public static bool IsNotValid(LicenseData data)
     {
       if (null != data && data.IsValid())
@@ -5642,6 +5833,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Indicates whether a LicenseData object is not null and valid.
     /// </summary>
+    /// <since>5.0</since>
     public static bool IsValid(LicenseData data)
     {
       if (null != data && data.IsValid())
@@ -5677,27 +5869,33 @@ namespace Rhino.PlugIns
     /// <summary>
     /// The ID of the plug-in that owns this license information
     /// </summary>
+    /// <since>6.0</since>
     public Guid PluginId { get;
       set; }
 
-    /// <summary>The id of the product or plugin.</summary>
+    /// <summary>The id of the product or plug in.</summary>
+    /// <since>5.0</since>
     public Guid ProductId{ get; set; }
 
     /// <summary>
     /// The build contentType of the product, where:
-    ///   100 = A release build, either commercical, education, nfr, etc.
+    ///   100 = A release build, either commercial, education, NFR, etc.
     ///   200 = A evaluation build
-    ///   300 = A beta build, such as a wip.
+    ///   300 = A beta build, such as a WIP.
     /// </summary>
+    /// <since>5.0</since>
     public LicenseBuildType BuildType{ get; set; }
 
     /// <summary>The title of the license. (e.g. "Rhinoceros 6.0 Commercial")</summary>
+    /// <since>5.0</since>
     public string LicenseTitle{ get; set; }
 
     /// <summary>The "for display only" product license or serial number.</summary>
+    /// <since>5.0</since>
     public string SerialNumber{ get; set; }
 
     /// <summary>The license contentType. (e.g. Standalone, Network, etc.)</summary>
+    /// <since>5.0</since>
     public LicenseType LicenseType{ get; set; }
 
     /// <summary>
@@ -5708,6 +5906,7 @@ namespace Rhino.PlugIns
     ///   3.) The license contentType is "NetworkCheckedOut" and the checkout does not expire
     /// Note, date and time is in local time coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public DateTime? ExpirationDate{ get; set; }
 
     /// <summary>
@@ -5716,30 +5915,37 @@ namespace Rhino.PlugIns
     /// and if "limited license checkout" was enabled on the Zoo server in the case of Standalone.
     /// Note, date and time is in local time coordinates.
     /// </summary>
+    /// <since>5.0</since>
     public DateTime? CheckOutExpirationDate{ get; set; }
 
     /// <summary>The registered owner of the product. (e.g. "Dale Fugier")</summary>
+    /// <since>5.0</since>
     public string RegisteredOwner{ get; set; }
 
     /// <summary>The registered organization of the product (e.g. "Robert McNeel and Associates")</summary>
+    /// <since>5.0</since>
     public string RegisteredOrganization { get; set; }
 
     /// <summary>The product's icon. Note, this can be null.</summary>
+    /// <since>5.0</since>
     public Icon ProductIcon{ get; set; }
 
     /// <summary>
     /// Returns true if the Cloud Zoo Lease represented by this instance is actively being managed by the Cloud Zoo Manager; else returns false.
     /// </summary>
+    /// <since>6.0</since>
     public bool CloudZooLeaseIsValid { get; set; }
 
     /// <summary>
     /// Returns the expiration date of the lease this instance represents.
     /// </summary>
+    /// <since>6.4</since>
     public DateTime? CloudZooLeaseExpiration { get; set; }
 
     #endregion
 
     /// <summary>Public constructor.</summary>
+    /// <since>5.0</since>
     public LicenseStatus()
     {
       PluginId = Guid.Empty;
@@ -5763,12 +5969,15 @@ namespace Rhino.FileIO
 {
   public class FileType
   {
+    /// <since>5.0</since>
     public FileType(string extension, string description)
     {
       Description = description;
       Extension = extension;
     }
+    /// <since>5.0</since>
     public string Description { get; private set; }
+    /// <since>5.0</since>
     public string Extension { get; private set; }
   }
 }

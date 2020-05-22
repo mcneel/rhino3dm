@@ -7,6 +7,7 @@ namespace Rhino.Input.Custom
   public class GetArc : IDisposable
   { 
     IntPtr m_ptr_argsrhinogetarc;
+    /// <since>6.0</since>
     public GetArc()
     {
       m_ptr_argsrhinogetarc = UnsafeNativeMethods.CArgsRhinoGetArc_New();
@@ -26,6 +27,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -50,6 +52,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary> Allow for deformable options </summary>
+    /// <since>6.0</since>
     public bool AllowDeformable
     {
       get
@@ -65,6 +68,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary> Is the deformable option set </summary>
+    /// <since>6.0</since>
     public bool Deformable
     {
       get
@@ -79,6 +83,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>6.0</since>
     public int DeformablePointCount
     {
       get
@@ -93,6 +98,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>6.0</since>
     public int DeformableDegree
     {
       get
@@ -110,6 +116,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Default radius used for start and end radius
     /// </summary>
+    /// <since>6.0</since>
     public double DefaultRadius
     {
       get
@@ -127,6 +134,7 @@ namespace Rhino.Input.Custom
     /// <summary> Perform the 'get' operation. </summary>
     /// <param name="arc"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public Commands.Result Get(out Geometry.Arc arc)
     {
       IntPtr ptr_this = NonConstPointer();

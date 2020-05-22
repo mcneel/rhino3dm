@@ -40,6 +40,7 @@ namespace Rhino.Display
     }
 
     bool m_enabled;
+    /// <since>5.0</since>
     public bool Enabled
     {
       get { return m_enabled; }
@@ -111,6 +112,7 @@ namespace Rhino.Display
     /// then set this filter to that specific space. The default is None meaning
     /// no filter is applied
     /// </summary>
+    /// <since>6.0</since>
     public DocObjects.ActiveSpace SpaceFilter
     {
       get; set;

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DefineConstants>RHINO3DM_BUILD DOTNETCORE</DefineConstants>
+    <AssemblyName>Rhino3dm</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup Condition="exists('..\build\windows\win32\Release\librhino3dm_native.dll')">
+    <None Include="..\build\windows\win32\Release\librhino3dm_native.dll">
+      <PackagePath>native/</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <!-- <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
+    <None Include="..\build\windows\win64\Release\librhino3dm_native.dll">
+      <PackagePath>native/</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup> -->
+
+
+</Project>

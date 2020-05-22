@@ -1,4 +1,4 @@
-﻿#if RHINO_SDK
+#if RHINO_SDK
 using System;
 using Rhino.Runtime.InteropWrappers;
 
@@ -19,12 +19,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the document that owns this worksession.
     /// </summary>
+    /// <since>6.0</since>
     public RhinoDoc Document => m_doc;
 
     /// <summary>
     /// Unique serial number for the worksession while the application is running.
     /// This is not a persistent value.
     /// </summary>
+    /// <since>6.3</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber
     {
@@ -39,6 +41,7 @@ namespace Rhino.DocObjects
     /// If there is no worksession file open, or the active worksession
     /// has not yet been saved, then null is returned.
     /// </summary>
+    /// <since>6.0</since>
     public string FileName
     {
       get
@@ -61,6 +64,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="runtimeSerialNumber"></param>
     /// <returns></returns>
+    /// <since>6.3</since>
     [CLSCompliant(false)]
     public static string FileNameFromRuntimeSerialNumber(uint runtimeSerialNumber)
     {
@@ -78,6 +82,7 @@ namespace Rhino.DocObjects
     /// Returns the number of models in the worksession. The active model will included
     /// in this count whether or not it has been saved.
     /// </summary>
+    /// <since>6.0</since>
     public int ModelCount
     {
       get
@@ -92,6 +97,7 @@ namespace Rhino.DocObjects
     /// Returns the paths to the models used by the worksession. If the active model has
     /// not been saved, then it will not be included in the output array.
     /// </summary>
+    /// <since>6.0</since>
     public string[] ModelPaths
     {
       get
@@ -110,6 +116,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="modelSerialNumber">The reference model serial number.</param>
     /// <returns>The path to the model if successful, null otherwise.</returns>
+    /// <since>6.12</since>
     [CLSCompliant(false)]
     public string ModelPathFromSerialNumber(uint modelSerialNumber)
     {

@@ -104,8 +104,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// The mesh that is ralated to this point.
+    /// The mesh that is related to this point.
     /// </summary>
+    /// <since>5.0</since>
     public Mesh Mesh
     {
       get { return m_parent; }
@@ -114,6 +115,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Edge parameter when found.
     /// </summary>
+    /// <since>5.0</since>
     public double EdgeParameter
     {
       get { return m_data.m_et; }
@@ -122,6 +124,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the component index of the intersecting element in the mesh.
     /// </summary>
+    /// <since>5.0</since>
     public ComponentIndex ComponentIndex
     {
       get
@@ -133,6 +136,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// When set, EdgeIndex is an index of an edge in the mesh's edge list.
     /// </summary>
+    /// <since>5.0</since>
     public int EdgeIndex
     {
       get { return m_data.m_edge_index; }
@@ -144,6 +148,7 @@ namespace Rhino.Geometry
     /// may appear as FaceIndex.  When ComponenctIndex refers to an Edge or
     /// EdgeIndex is set, then any face that uses that edge may appear as FaceIndex.
     /// </summary>
+    /// <since>5.0</since>
     public int FaceIndex
     {
       get { return m_data.m_face_index; }
@@ -157,6 +162,7 @@ namespace Rhino.Geometry
     /// intersection is on the face takes into consideration
     /// the way the quad was split during the intersection.
     /// </summary>
+    /// <since>5.0</since>
     public bool GetTriangle(out int a, out int b, out int c)
     {
       IntPtr pConstMesh = m_parent.ConstPointer();
@@ -175,6 +181,7 @@ namespace Rhino.Geometry
     /// <para>C is 0,1,3</para>
     /// <para>D is 1,2,3</para>
     /// </summary>
+    /// <since>5.0</since>
     public char Triangle
     {
       get { return m_data.m_Triangle; }
@@ -194,6 +201,7 @@ namespace Rhino.Geometry
     /// vi[1], vi[3], and m_t[0] will be 0.0 when point is on the
     /// triangle defined by vi[1], vi[2], vi[3].
     /// </summary>
+    /// <since>5.0</since>
     public double[] T
     {
       get { return m_t ?? (m_t = new double[] { m_data.m_t0, m_data.m_t1, m_data.m_t2, m_data.m_t3 }); }
@@ -203,6 +211,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the location (position) of this point.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d Point
     {
       get { return new Point3d(m_data.m_Px, m_data.m_Py, m_data.m_Pz); }
@@ -256,7 +265,7 @@ namespace Rhino.Geometry.Intersect
 #if RHINO_SDK
 
   /// <summary>
-  /// Represents an element which is part of a curve region boundary.
+  /// Represents an element which is part of a clash or intersection between two meshes.
   /// </summary>
   public struct MeshInterference
   {
@@ -271,6 +280,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// The index of the first clashing, or interfering object.
     /// </summary>
+    /// <since>7.0</since>
     public int IndexA
     {
       get { return m_index_a; }
@@ -280,6 +290,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// The index of the second clashing, or interfering object.
     /// </summary>
+    /// <since>7.0</since>
     public int IndexB
     {
       get { return m_index_b; }
@@ -289,6 +300,7 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Array of hit points where the objects of IndexA and IndexB interfere.
     /// </summary>
+    /// <since>7.0</since>
     public Point3d[] HitPoints
     {
       get { return m_hit_points; }
@@ -316,22 +328,26 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Gets the first mesh.
     /// </summary>
+    /// <since>5.0</since>
     public Mesh MeshA { get { return m_mesh_a; } }
 
     /// <summary>
     /// Gets the second mesh.
     /// </summary>
+    /// <since>5.0</since>
     public Mesh MeshB { get { return m_mesh_b; } }
 
     /// <summary>
     /// If valid, then the sphere centered at ClashPoint of ClashRadius
     /// distance intersects the clashing meshes.
     /// </summary>
+    /// <since>5.0</since>
     public Point3d ClashPoint { get { return m_P; } }
 
     /// <summary>
     /// Gets the clash, or intersection, radius.
     /// </summary>
+    /// <since>5.0</since>
     public double ClashRadius { get { return m_radius; } }
 
     /// <summary>
@@ -344,6 +360,7 @@ namespace Rhino.Geometry.Intersect
     /// All values smaller than this cause a clash as well.</param>
     /// <param name="maxEventCount">The maximum number of clash objects.</param>
     /// <returns>An array of clash objects.</returns>
+    /// <since>5.0</since>
     public static MeshClash[] Search(IEnumerable<Mesh> setA, IEnumerable<Mesh> setB, double distance, int maxEventCount)
     {
       IList<Mesh> _setA = setA as IList<Mesh> ?? new List<Mesh>(setA);
@@ -401,6 +418,7 @@ namespace Rhino.Geometry.Intersect
     /// All values smaller than this cause a clash as well.</param>
     /// <param name="maxEventCount">The maximum number of clash objects.</param>
     /// <returns>An array of clash objects.</returns>
+    /// <since>5.0</since>
     public static MeshClash[] Search(Mesh meshA, IEnumerable<Mesh> setB, double distance, int maxEventCount)
     {
       return Search(new Mesh[] { meshA }, setB, distance, maxEventCount);
@@ -416,6 +434,7 @@ namespace Rhino.Geometry.Intersect
     /// All values smaller than this cause a clash as well.</param>
     /// <param name="maxEventCount">The maximum number of clash objects.</param>
     /// <returns>An array of clash objects.</returns>
+    /// <since>5.0</since>
     public static MeshClash[] Search(Mesh meshA, Mesh meshB, double distance, int maxEventCount)
     {
       return Search(new Mesh[] { meshA }, new Mesh[] { meshB }, distance, maxEventCount);
@@ -431,6 +450,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="setB">The second set of Rhino objects.</param>
     /// <param name="distance">The largest distance at which a clash can occur.</param>
     /// <returns>An array of mesh interference object if successful, or an empty array on failure.</returns>
+    /// <since>7.0</since>
     public static MeshInterference[] Search(IEnumerable<RhinoObject> setA, IEnumerable<RhinoObject> setB, double distance)
     {
       return Search(setA, setB, distance, MeshType.Render, MeshingParameters.FastRenderMesh);
@@ -448,6 +468,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="meshType">The type of mesh to be used for the calculation.</param>
     /// <param name="meshingParameters">The meshing parameters used to generate meshes for the calculation.</param>
     /// <returns>An array of mesh interference object if successful, or an empty array on failure.</returns>
+    /// <since>7.0</since>
     public static MeshInterference[] Search(IEnumerable<RhinoObject> setA, IEnumerable<RhinoObject> setB, double distance, MeshType meshType, MeshingParameters meshingParameters)
     {
       using (var set_a_array = new Runtime.InternalRhinoObjectArray(setA))
@@ -499,6 +520,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="objB">The second Rhino object.</param>
     /// <param name="distance">The largest distance at which a clash can occur.</param>
     /// <returns>The resulting meshes are sub-meshes of the input meshes if successful, or an empty array on error.</returns>
+    /// <since>7.0</since>
     public static Mesh[] FindDetail(RhinoObject objA, RhinoObject objB, double distance)
     {
       return FindDetail(objA, objB, distance, MeshType.Render, MeshingParameters.FastRenderMesh);
@@ -515,6 +537,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="meshType">The type of mesh to be used for the calculation.</param>
     /// <param name="meshingParameters">The meshing parameters used to generate meshes for the calculation.</param>
     /// <returns>The resulting meshes are sub-meshes of the input meshes if successful, or an empty array on error.</returns>
+    /// <since>7.0</since>
     public static Mesh[] FindDetail(RhinoObject objA, RhinoObject objB, double distance, MeshType meshType, MeshingParameters meshingParameters)
     {
       if (null == objA)

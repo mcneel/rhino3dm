@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Rhino.Input;
 using Rhino.Runtime.InteropWrappers;
 
@@ -35,6 +35,7 @@ namespace Rhino
     }
 
     /// <summary>actively reclaim native allocated ON_LenghtValue*</summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       PrivateDispose();
@@ -54,6 +55,7 @@ namespace Rhino
     /// <param name="s">string to parse</param>
     /// <param name="ps"></param>
     /// <param name="parsedAll">true if the whole string was parsed</param>
+    /// <since>6.0</since>
     public static LengthValue Create(string s, StringParserSettings ps, out bool parsedAll)
     {
       IntPtr const_ptr_parse_settings = ps.ConstPointer();
@@ -67,6 +69,7 @@ namespace Rhino
     /// <param name="length">Numeric length value</param>
     /// <param name="us">Unit system</param>
     /// <param name="format"></param>
+    /// <since>6.0</since>
     public static LengthValue Create(double length, UnitSystem us, StringFormat format)
     {
       return Create(length, us, format, 0);
@@ -77,6 +80,7 @@ namespace Rhino
     /// <param name="us">Unit system</param>
     /// <param name="format"></param>
     /// <param name="localeId"></param>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public static LengthValue Create(double length, UnitSystem us, StringFormat format, uint localeId)
     {
@@ -89,6 +93,7 @@ namespace Rhino
     /// Length value in this instance's current unit system
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public double Length()
     {
       return Length(UnitSystem);
@@ -97,6 +102,7 @@ namespace Rhino
     /// <summary> Length value in a given unit system </summary>
     /// <param name="units"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public double Length(UnitSystem units)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -107,6 +113,7 @@ namespace Rhino
     /// Return length as a string
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public string LengthString
     {
       get
@@ -127,6 +134,7 @@ namespace Rhino
     /// </summary>
     /// <param name="newLength"></param>
     /// <returns>A new LengthValue</returns>
+    /// <since>6.0</since>
     public LengthValue ChangeLength(double newLength)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -141,6 +149,7 @@ namespace Rhino
     /// </summary>
     /// <param name="newUnits"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public LengthValue ChangeUnitSystem(UnitSystem newUnits)
     {
       double rl = Length(newUnits);
@@ -150,6 +159,7 @@ namespace Rhino
     }
     
     /// <summary> Parse settings </summary>
+    /// <since>6.0</since>
     public StringParserSettings ParseSettings
     {
       get
@@ -162,6 +172,7 @@ namespace Rhino
     /// <summary>
     /// UnitSystem used by this LengthValue
     /// </summary>
+    /// <since>6.0</since>
     public UnitSystem UnitSystem
     {
       get { return UnsafeNativeMethods.ON_LengthValue_LengthUnitSystem(ConstPointer()); }
@@ -170,6 +181,7 @@ namespace Rhino
     /// <summary>
     /// Returns the StringFormat from this LengthValue
     /// </summary>
+    /// <since>6.0</since>
     public StringFormat LengthStringFormat
     {
       get { return UnsafeNativeMethods.ON_LengthValue_LengthStringFormat(ConstPointer()); }
@@ -178,6 +190,7 @@ namespace Rhino
     /// <summary>
     /// returns the context LocaleId from this LengthValue
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint ContextLocaleId
     {
@@ -187,6 +200,7 @@ namespace Rhino
     /// <summary>
     /// Returns the context AngleUnitSystem from this LengthValue's ParseSettings
     /// </summary>
+    /// <since>6.0</since>
     public AngleUnitSystem ContextAngleUnitSystem
     {
       get { return UnsafeNativeMethods.ON_LengthValue_ContextAngleUnitSystem(ConstPointer()); }
@@ -196,6 +210,7 @@ namespace Rhino
     /// Test IsUnset
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool IsUnset()
     {
       return UnsafeNativeMethods.ON_LengthValue_IsUnset(ConstPointer());
@@ -361,6 +376,7 @@ namespace Rhino
     /// <summary>
     /// Default constructor
     /// </summary>
+    /// <since>6.0</since>
     public ScaleValue()
     {
       m_ptr = UnsafeNativeMethods.ON_ScaleValue_New(IntPtr.Zero);
@@ -382,6 +398,7 @@ namespace Rhino
     /// Make a new ScaleValue set to OneToOne
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static ScaleValue OneToOne()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_OneToOne();
@@ -393,6 +410,7 @@ namespace Rhino
     /// </summary>
     /// <param name="ps"></param>
     /// <param name="s"></param>
+    /// <since>6.0</since>
     public static ScaleValue Create(string s, StringParserSettings ps)
     {
       IntPtr const_ptr_settings = ps.ConstPointer();
@@ -406,6 +424,7 @@ namespace Rhino
     /// <param name="left"></param>
     /// <param name="right"></param>
     /// <param name="format"></param>
+    /// <since>6.0</since>
     public static ScaleValue Create(LengthValue left, LengthValue right, ScaleStringFormat format)
     {
       IntPtr const_ptr_left = left.ConstPointer();
@@ -424,6 +443,7 @@ namespace Rhino
     internal IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>actively reclaim native allocated ON_SacleValue*</summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       PrivateDispose();
@@ -441,6 +461,7 @@ namespace Rhino
     /// Test IsUnset
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public bool IsUnset()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -451,6 +472,7 @@ namespace Rhino
     /// Get the Left LengthValue from Scale
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public LengthValue LeftLengthValue()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_LeftLengthValue(ConstPointer());
@@ -461,6 +483,7 @@ namespace Rhino
     /// Get the Right LengthValue from Scale
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public LengthValue RightLengthValue()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_RightLengthValue(ConstPointer());
@@ -470,6 +493,7 @@ namespace Rhino
     /// <summary>
     /// LeftLengthValue / RightLengthValue
     /// </summary>
+    /// <since>6.0</since>
     public double LeftToRightScale
     {
       get { return UnsafeNativeMethods.ON_ScaleValue_LeftToRightScale(ConstPointer()); }
@@ -477,6 +501,7 @@ namespace Rhino
     /// <summary>
     /// RightLengthValue / LeftLengthValue
     /// </summary>
+    /// <since>6.0</since>
     public double RightToLeftScale
     {
       get { return UnsafeNativeMethods.ON_ScaleValue_RightToLeftScale(ConstPointer()); }

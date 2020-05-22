@@ -571,12 +571,13 @@ enum DisplayModeSpecialType : int
   dmstShaded = 1,
   dmstRendered = 2,
   dmstRenderedShadows = 3,
-  dmstXRay = 4,
-  dmstTech = 5,
-  dmstGhosted = 6,
-  dmstPen = 7,
-  dmstAmbientOcclusion = 8,
-  dmstRaytraced = 9,
+  dmstGhosted = 4,
+  dmstXRay = 5,
+  dmstTech = 6,
+  dmstArtistic = 7,
+  dmstPen = 8,
+  dmstAmbientOcclusion = 9,
+  dmstRaytraced = 10,
 };
 
 RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpecialType displayModeSpecialType)
@@ -591,8 +592,14 @@ RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpe
     case dmstShaded:
       id = CRhinoDisplayAttrsMgr::ShadedModeId();
       break;
+    case dmstRendered:
+      id = CRhinoDisplayAttrsMgr::RenderedModeId();
+      break;
     case dmstRenderedShadows:
       id = CRhinoDisplayAttrsMgr::RenderedShadowsModeId();
+      break;
+    case dmstGhosted:
+      id = CRhinoDisplayAttrsMgr::GhostedModeId();
       break;
     case dmstXRay:
       id = CRhinoDisplayAttrsMgr::XRayModeId();
@@ -600,8 +607,8 @@ RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpe
     case dmstTech:
       id = CRhinoDisplayAttrsMgr::TechModeId();
       break;
-    case dmstGhosted:
-      id = CRhinoDisplayAttrsMgr::GhostedModeId();
+    case dmstArtistic:
+      id = CRhinoDisplayAttrsMgr::ArtisticModeId();
       break;
     case dmstPen:
       id = CRhinoDisplayAttrsMgr::PenModeId();

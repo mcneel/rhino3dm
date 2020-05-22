@@ -7,6 +7,7 @@ namespace Rhino.Input.Custom
   public class GetCircle : IDisposable
   { 
     IntPtr m_ptr_argsrhinogetcircle;
+    /// <since>6.0</since>
     public GetCircle()
     {
       m_ptr_argsrhinogetcircle = UnsafeNativeMethods.CArgsRhinoGetCircle_New();
@@ -26,6 +27,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -50,6 +52,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary> Allow for deformable options </summary>
+    /// <since>6.0</since>
     public bool AllowDeformable
     {
       get
@@ -65,6 +68,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary> Is the deformable option set </summary>
+    /// <since>6.0</since>
     public bool Deformable
     {
       get
@@ -79,6 +83,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>6.0</since>
     public int DeformablePointCount
     {
       get
@@ -93,6 +98,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>6.0</since>
     public int DeformableDegree
     {
       get
@@ -110,6 +116,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Default radius or diameter (based on InDiameterMode)
     /// </summary>
+    /// <since>6.0</since>
     public double DefaultSize
     {
       get
@@ -125,8 +132,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Determines if the "size" value is reperesenting a radius or diameter
+    /// Determines if the "size" value is representing a radius or diameter
     /// </summary>
+    /// <since>6.0</since>
     public bool InDiameterMode
     {
       get
@@ -144,6 +152,7 @@ namespace Rhino.Input.Custom
     /// <summary> Perform the 'get' operation. </summary>
     /// <param name="circle"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public Commands.Result Get(out Geometry.Circle circle)
     {
       IntPtr ptr_this = NonConstPointer();

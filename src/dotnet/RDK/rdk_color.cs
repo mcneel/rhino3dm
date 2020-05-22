@@ -20,6 +20,7 @@ namespace Rhino.Display
     readonly float m_b;
     readonly float m_a;
 
+    /// <since>5.0</since>
     public Color4f(System.Drawing.Color color)
     {
       m_r = color.R / 255.0f;
@@ -28,6 +29,7 @@ namespace Rhino.Display
       m_a = color.A / 255.0f;
     }
 
+    /// <since>5.0</since>
     public Color4f(Color4f color)
     {
       m_r = color.R;
@@ -36,12 +38,22 @@ namespace Rhino.Display
       m_a = color.A;
     }
 
+    /// <since>5.0</since>
     public Color4f(float red, float green, float blue, float alpha)
     {
       m_r = red;
       m_g = green;
       m_b = blue;
       m_a = alpha;
+    }
+
+    /// <since>7.0</since>
+    public Color4f(int argb)
+    {
+      m_a = (float)((argb >> 0) & 255) / 255.0f;
+      m_r = (float)((argb >> 8) & 255) / 255.0f;
+      m_g = (float)((argb >> 16) & 255) / 255.0f;
+      m_b = (float)((argb >> 24) & 255) / 255.0f;
     }
 
     private Color4f(SerializationInfo info, StreamingContext context)
@@ -62,42 +74,54 @@ namespace Rhino.Display
     }
 
 
+    /// <since>5.0</since>
     public static Color4f Empty
     {
       get { return new Color4f(0, 0, 0, 0); }
     }
 
+    /// <since>5.0</since>
     public static Color4f Black
     {
       get { return new Color4f(0, 0, 0, 1); }
     }
 
+    /// <since>5.0</since>
     public static Color4f White
     {
       get { return new Color4f(1, 1, 1, 1); }
     }
 
+    /// <since>5.11</since>
     public static Color4f FromArgb(float a, float r, float g, float b)
     {
       return new Color4f(r, g, b, a);
     }
 
+    /// <since>5.11</since>
     public static Color4f FromArgb(float a, Color4f color)
     {
       return new Color4f(color.R, color.G, color.B, a);
     }
 
+    /// <since>5.0</since>
     public float R { get { return m_r; } }
+    /// <since>5.0</since>
     public float G { get { return m_g; } }
+    /// <since>5.0</since>
     public float B { get { return m_b; } }
+    /// <since>5.0</since>
     public float A { get { return m_a; } }
+    /// <since>6.3</since>
     public float L { get { return (m_r * 0.299f) + (m_g * 0.587f) + (m_b * 0.114f); ; } }
 
+    /// <since>5.0</since>
     public static bool operator ==(Color4f a, Color4f b)
     {
       return (a.m_r == b.m_r && a.m_g == b.m_g && a.m_b == b.m_b && a.m_a == b.m_a);
     }
 
+    /// <since>5.0</since>
     public static bool operator !=(Color4f a, Color4f b)
     {
       return (a.m_r != b.m_r || a.m_g != b.m_g || a.m_b != b.m_b || a.m_a != b.m_a);
@@ -115,6 +139,7 @@ namespace Rhino.Display
     }
 
 
+    /// <since>5.0</since>
     public Color4f BlendTo(float t, Color4f col)
     {
       float r = m_r + (t * (col.m_r - m_r));
@@ -126,6 +151,7 @@ namespace Rhino.Display
     }
 
 
+    /// <since>6.0</since>
     public static Color4f ApplyGamma(Color4f col, float gamma)
     {
       if (Math.Abs(gamma - 1.0f) > float.Epsilon)
@@ -140,6 +166,7 @@ namespace Rhino.Display
       return col;
     }
 
+    /// <since>5.0</since>
     public System.Drawing.Color AsSystemColor()
     {
       return System.Drawing.Color.FromArgb((int)(m_a * 255.0f),

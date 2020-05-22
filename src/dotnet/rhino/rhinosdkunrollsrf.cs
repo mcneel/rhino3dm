@@ -24,6 +24,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the <see cref="Unroller"/> class with surface.
     /// </summary>
     /// <param name="surface">A surface to be unrolled.</param>
+    /// <since>5.0</since>
     public Unroller(Surface surface)
     {
       m_surface = surface;
@@ -33,6 +34,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the <see cref="Unroller"/> class with a brep.
     /// </summary>
     /// <param name="brep">A brep to be unrolled.</param>
+    /// <since>5.0</since>
     public Unroller(Brep brep)
     {
       m_brep = brep;
@@ -42,6 +44,7 @@ namespace Rhino.Geometry
     /// Adds curves that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="curves">An array, a list or any enumerable set of curves.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(IEnumerable<Curve> curves)
     {
       m_curves.AddRange(curves);
@@ -50,6 +53,7 @@ namespace Rhino.Geometry
     /// Adds a curve that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="curve">The curve.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(Curve curve)
     {
       m_curves.Add(curve);
@@ -59,6 +63,7 @@ namespace Rhino.Geometry
     /// Adds points that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="points">An array, a list or any enumerable set of points.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(IEnumerable<Point3d> points)
     {
       m_points.AddRange(points);
@@ -67,6 +72,7 @@ namespace Rhino.Geometry
     /// Adds a point that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(Point3d point)
     {
       m_points.Add(point);
@@ -75,6 +81,7 @@ namespace Rhino.Geometry
     /// Adds a point that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="point">A point.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(Point point)
     {
       m_points.Add(point.Location);
@@ -84,6 +91,7 @@ namespace Rhino.Geometry
     /// Adds text dots that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="dots">An array, a list or any enumerable set of text dots.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(IEnumerable<TextDot> dots)
     {
       m_dots.AddRange(dots);
@@ -92,6 +100,7 @@ namespace Rhino.Geometry
     /// Adds a text dot that should be unrolled along with the surface/brep.
     /// </summary>
     /// <param name="dot">A text dot.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(TextDot dot)
     {
       m_dots.Add(dot);
@@ -102,6 +111,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="dotLocations">An array, a list, or any enumerable set of dot locations.</param>
     /// <param name="dotText">An array, a list, or any enumerable set of dot strings.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(IEnumerable<Point3d> dotLocations, IEnumerable<string> dotText)
     {
       var pts = new List<Point3d>(dotLocations);
@@ -117,6 +127,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="dotLocation">A dot point.</param>
     /// <param name="dotText">A dot text.</param>
+    /// <since>5.0</since>
     public void AddFollowingGeometry(Point3d dotLocation, string dotText)
     {
       var dot = new TextDot(dotText, dotLocation);
@@ -126,6 +137,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets a value determining whether geometry should be exploded.
     /// </summary>
+    /// <since>5.0</since>
     public bool ExplodeOutput
     {
       get { return m_explode_output; }
@@ -135,6 +147,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets a value determining whether spacing should be exploded.
     /// </summary>
+    /// <since>5.0</since>
     public double ExplodeSpacing
     {
       get { return m_explode_spacing; }
@@ -144,10 +157,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the absolute tolerance for the unrolling operation.
     /// <para>Absolute tolerance is used in the evaluation of new entities,
-    /// such as intersections, reprojections and splits.</para>
+    /// such as intersections, re-projections and splits.</para>
     /// <para>In the current implementation, absolute tolerance is used 
     /// in tessellating rails, fitting curves and pulling back trims.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double AbsoluteTolerance
     {
       get { return m_absolute_tolerance; }
@@ -164,6 +178,7 @@ namespace Rhino.Geometry
     /// to be considered linear for that purpose. Otherwise smash will ignore that tolerance and
     /// unroll anything.</para>
     /// </summary>
+    /// <since>5.0</since>
     public double RelativeTolerance
     {
       get { return m_relative_tolerance; }
@@ -177,6 +192,7 @@ namespace Rhino.Geometry
     /// <param name="unrolledPoints">An array of unrolled points is assigned during the call in this out parameter.</param>
     /// <param name="unrolledDots">An array of unrolled text dots is assigned during the call in this out parameter.</param>
     /// <returns>An array of breps. This array can be empty.</returns>
+    /// <since>5.0</since>
     public Brep[] PerformUnroll(out Curve[] unrolledCurves, out Point3d[] unrolledPoints, out TextDot[] unrolledDots)
     {
       unrolledCurves = new Curve[0];
@@ -275,8 +291,9 @@ namespace Rhino.Geometry
     /// <summary>
     /// Executes unrolling operations.
     /// </summary>
-    /// <param name="flatbreps">List of breps containg flattened results.</param>
+    /// <param name="flatbreps">List of breps containing flattened results.</param>
     /// <returns>Number of breps in result </returns>
+    /// <since>6.0</since>
     public int PerformUnroll(List<Brep> flatbreps)
     {
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-44294
@@ -334,6 +351,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="dot">An unrolled text dot returned by Unroller.PerformUnroll.</param>
     /// <returns>The index of the text dot added by Unroller.AddFollowingGeometry if successful, otherwise -1.</returns>
+    /// <since>6.0</since>
     public int FollowingGeometryIndex(TextDot dot)
     {
       if (dot == null) throw new ArgumentNullException("dot");
@@ -347,6 +365,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curve">An unrolled curve returned by Unroller.PerformUnroll.</param>
     /// <returns>The index of the curve added by Unroller.AddFollowingGeometry if successful, otherwise -1.</returns>
+    /// <since>6.0</since>
     public int FollowingGeometryIndex(Curve curve)
     {
       if (curve == null) throw new ArgumentNullException("curve");
@@ -365,11 +384,11 @@ namespace Rhino.Geometry
     /// Finds minimum twist ruling between 2 curves at local domains
     /// </summary>
     /// <param name="rail0">  First rail </param>
-    /// <param name="t0">     Seed param on first rail </param>
-    /// <param name="dom0">   Param subdomain to adjust in on first rail </param>
+    /// <param name="t0">     Seed parameter on first rail </param>
+    /// <param name="dom0">   Parameter sub-domain to adjust in on first rail </param>
     /// <param name="rail1">  Second rail </param>
-    /// <param name="t1">     Seed param on second rail </param>
-    /// <param name="dom1">   Param subdomain to adjust in on second rail </param>
+    /// <param name="t1">     Seed parameter on second rail </param>
+    /// <param name="dom1">   Parameter sub-domain to adjust in on second rail </param>
     /// <param name="t0_out"> Result ruling on first rail </param>
     /// <param name="t1_out"> Result ruling on second rail </param>
     /// <returns> 
@@ -378,6 +397,7 @@ namespace Rhino.Geometry
     ///  1: Ruling found between t0_out and t1_out that has less twist 
     ///       the ruling between t0 and t1
     /// </returns>
+    /// <since>6.0</since>
     static public int GetLocalDevopableRuling(
       NurbsCurve rail0, double t0, Interval dom0,
       NurbsCurve rail1, double t1, Interval dom1,
@@ -402,6 +422,7 @@ namespace Rhino.Geometry
     /// <param name="t1_out"></param>
     /// <param name="cos_twist_out"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     static public bool RulingMinTwist(
       NurbsCurve rail0, double t0,
       NurbsCurve rail1, double t1, Interval dom1,
@@ -429,6 +450,7 @@ namespace Rhino.Geometry
     /// <param name="t1_out"></param>
     /// <param name="cos_twist_out"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     static public bool RulingMinTwist(
       NurbsCurve rail0, double t0, Interval dom0,
       NurbsCurve rail1, double t1, Interval dom1,

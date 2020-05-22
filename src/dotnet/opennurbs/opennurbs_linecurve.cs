@@ -13,6 +13,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Initializes a new instance of the <see cref="LineCurve"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public LineCurve()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New(IntPtr.Zero);
@@ -23,6 +24,7 @@ namespace Rhino.Geometry
     /// Initializes a new instance of the <see cref="LineCurve"/> class, by
     /// copying values from another linear curve.
     /// </summary>
+    /// <since>5.0</since>
     public LineCurve(LineCurve other)
     {
       IntPtr pOther = IntPtr.Zero;
@@ -37,6 +39,7 @@ namespace Rhino.Geometry
     /// setting start and end point from two <see cref="Point2d">2D points</see>.</summary>
     /// <param name="from">A start point.</param>
     /// <param name="to">An end point.</param>
+    /// <since>5.0</since>
     public LineCurve(Point2d from, Point2d to)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New2(from,to);
@@ -52,6 +55,7 @@ namespace Rhino.Geometry
     /// setting start and end point from two <see cref="Point3d">3D points</see>.</summary>
     /// <param name="from">A start point.</param>
     /// <param name="to">An end point.</param>
+    /// <since>5.0</since>
     public LineCurve(Point3d from, Point3d to)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New3(from, to);
@@ -63,6 +67,7 @@ namespace Rhino.Geometry
     /// retrieving its value from a <see cref="Line">line</see>.
     /// </summary>
     /// <param name="line">A line to use as model.</param>
+    /// <since>5.0</since>
     public LineCurve(Line line)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New3(line.From, line.To);
@@ -76,6 +81,7 @@ namespace Rhino.Geometry
     /// <param name="line">A line to use as model.</param>
     /// <param name="t0">The new domain start.</param>
     /// <param name="t1">The new domain end.</param>
+    /// <since>5.0</since>
     public LineCurve(Line line, double t0, double t1)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New4(line.From, line.To, t0, t1);
@@ -114,6 +120,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the Line value inside this curve.
     /// </summary>
+    /// <since>5.0</since>
     public Line Line
     {
       get

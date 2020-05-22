@@ -73,6 +73,7 @@ namespace Rhino.Display
       return UnsafeNativeMethods.DisplayAttrsMgrListDesc_DisplayAttributes(pThis);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -102,6 +103,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_advanceddisplay.cs' lang='cs'/>
     /// <code source='examples\py\ex_advanceddisplay.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static DisplayModeDescription[] GetDisplayModes()
     {
       IntPtr pDisplayAttrsMgrList = UnsafeNativeMethods.DisplayAttrsMgrList_New();
@@ -119,6 +121,7 @@ namespace Rhino.Display
       return rc;
     }
 
+    /// <since>5.0</since>
     public static DisplayModeDescription GetDisplayMode(Guid id)
     {
       IntPtr pDisplayMode = UnsafeNativeMethods.DisplayAttrsMgrListDesc_FindById(id);
@@ -127,6 +130,7 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <since>5.0</since>
     public static DisplayModeDescription FindByName(string englishName)
     {
       DisplayModeDescription[] modes = GetDisplayModes();
@@ -141,6 +145,7 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <since>5.0</since>
     public static Guid AddDisplayMode(DisplayModeDescription displayMode)
     {
       IntPtr pDisplayMode = displayMode.NonConstPointer();
@@ -152,6 +157,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="name">The name of the new display mode.</param>
     /// <returns>The id of the new display mode if successful. Guid.Empty on error.</returns>
+    /// <since>6.7</since>
     public static Guid AddDisplayMode(string name)
     {
       if (string.IsNullOrEmpty(name))
@@ -165,6 +171,7 @@ namespace Rhino.Display
     /// <param name="id">The id of the existing display mode to copy.</param>
     /// <param name="name">The name of the new display mode.</param>
     /// <returns>The id of the new display mode if successful. Guid.Empty on error.</returns>
+    /// <since>6.7</since>
     public static Guid CopyDisplayMode(Guid id, string name)
     {
       if (string.IsNullOrEmpty(name))
@@ -177,6 +184,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_advanceddisplay.cs' lang='cs'/>
     /// <code source='examples\py\ex_advanceddisplay.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public static bool UpdateDisplayMode(DisplayModeDescription displayMode)
     {
       IntPtr pConstDisplayMode = displayMode.ConstPointer();
@@ -187,7 +195,8 @@ namespace Rhino.Display
     /// Deletes an existing display mode.
     /// </summary>
     /// <param name="id">The id of the existing display mode to delete.</param>
-    /// <returns>true if successful, false oteherwise.</returns>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use DisplayModeDescription.DeleteDisplayMode")]
     public static bool DeleteDiplayMode(Guid id)
     {
@@ -198,7 +207,8 @@ namespace Rhino.Display
     /// Deletes an existing display mode.
     /// </summary>
     /// <param name="id">The id of the existing display mode to delete.</param>
-    /// <returns>true if successful, false oteherwise.</returns>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
     public static bool DeleteDisplayMode(Guid id)
     {
       return UnsafeNativeMethods.CRhinoDisplayAttrsMgr_DeleteDescription(id);
@@ -208,7 +218,8 @@ namespace Rhino.Display
     /// Imports a DisplayModeDescription from a Windows-style .ini file.
     /// </summary>
     /// <param name="filename">The name of the file to import.</param>
-    /// <returns>The id of the DisplayModeDescription if successsful.</returns>
+    /// <returns>The id of the DisplayModeDescription if successful.</returns>
+    /// <since>6.0</since>
     public static Guid ImportFromFile(string filename)
     {
       if (string.IsNullOrEmpty(filename))
@@ -222,6 +233,7 @@ namespace Rhino.Display
     /// <param name="displayMode">The DisplayModeDescription to export.</param>
     /// <param name="filename">The name of the file to create.</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static bool ExportToFile(DisplayModeDescription displayMode, string filename)
     {
       if (null == displayMode || string.IsNullOrEmpty(filename))
@@ -252,36 +264,43 @@ namespace Rhino.Display
       UnsafeNativeMethods.DisplayAttrsMgrListDesc_SetBool(pThis, which, b);
     }
     
+    /// <since>5.0</since>
     public bool InMenu
     {
       get { return GetBool(idxAddToMenu); }
       set { SetBool(idxAddToMenu, value); }
     }
+    /// <since>5.0</since>
     public bool SupportsShadeCommand
     {
       get { return GetBool(idxSupportsShadeCmd); }
       set { SetBool(idxSupportsShadeCmd, value); }
     }
+    /// <since>5.0</since>
     public bool SupportsShading
     {
       get { return GetBool(idxSupportsShading); }
       set { SetBool(idxSupportsShading, value); }
     }
+    /// <since>5.0</since>
     public bool AllowObjectAssignment
     {
       get { return GetBool(idxAllowObjectAssignment); }
       set { SetBool(idxAllowObjectAssignment, value); }
     }
+    /// <since>5.0</since>
     public bool ShadedPipelineRequired
     {
       get { return GetBool(idxShadedPipelineRequired); }
       set { SetBool(idxShadedPipelineRequired, value); }
     }
+    /// <since>5.0</since>
     public bool WireframePipelineRequired
     {
       get { return GetBool(idxWireframePipelineRequired); }
       set { SetBool(idxWireframePipelineRequired, value); }
     }
+    /// <since>5.0</since>
     public bool PipelineLocked
     {
       get { return GetBool(idxPipelineLocked); }
@@ -294,26 +313,41 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_advanceddisplay.cs' lang='cs'/>
     /// <code source='examples\py\ex_advanceddisplay.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public DisplayPipelineAttributes DisplayAttributes
     {
       get { return m_display_attrs ?? (m_display_attrs = new DisplayPipelineAttributes(this)); }
     }
 
+    /// <since>5.0</since>
     public string EnglishName
     {
       get { return DisplayAttributes.EnglishName; }
       set { DisplayAttributes.EnglishName = value; }
     }
+    /// <since>5.0</since>
     public Guid Id
     {
       get { return DisplayAttributes.Id; }
     }
 
+    /// <since>5.0</since>
     public string LocalName
     {
       get { return DisplayAttributes.LocalName; }
     }
 
+    public static Guid ArtisticId
+    {
+      get
+      {
+        return
+          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
+            UnsafeNativeMethods.DisplayModeSpecialType.Artistic);
+      }
+    }
+
+    /// <since>6.0</since>
     public static Guid GhostedId
     {
       get
@@ -324,6 +358,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid PenId
     {
       get
@@ -334,6 +369,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid RenderedId
     {
       get
@@ -344,6 +380,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid RenderedShadowsId
     {
       get
@@ -354,6 +391,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid ShadedId
     {
       get
@@ -364,6 +402,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid TechId
     {
       get
@@ -374,6 +413,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid WireframeId
     {
       get
@@ -384,6 +424,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid XRayId
     {
       get
@@ -394,6 +435,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid AmbientOcclusionId
     {
       get
@@ -404,6 +446,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>6.0</since>
     public static Guid RaytracedId
     {
       get

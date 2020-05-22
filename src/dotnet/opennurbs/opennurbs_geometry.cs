@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.Runtime;
@@ -93,7 +93,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Is called when a non-const operation occurs.
+    /// Is called when a non-constant operation occurs.
     /// </summary>
     protected override void OnSwitchToNonConst()
     {
@@ -105,6 +105,7 @@ namespace Rhino.Geometry
     /// If true this object may not be modified. Any properties or functions that attempt
     /// to modify this object when it is set to "IsReadOnly" will throw a NotSupportedException.
     /// </summary>
+    /// <since>5.0</since>
     public sealed override bool IsDocumentControlled
     {
       get
@@ -126,6 +127,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns>An object of the same type as this object.
     /// <para>This behavior is overridden by implementing classes.</para></returns>
+    /// <since>5.0</since>
     public GeometryBase DuplicateShallow()
     {
       GeometryBase rc = DuplicateShallowHelper();
@@ -142,6 +144,7 @@ namespace Rhino.Geometry
     /// Constructs a deep (full) copy of this object.
     /// </summary>
     /// <returns>An object of the same type as this, with the same properties and behavior.</returns>
+    /// <since>5.0</since>
     public virtual GeometryBase Duplicate()
     {
       IntPtr ptr = ConstPointer();
@@ -335,6 +338,7 @@ namespace Rhino.Geometry
     /// Useful for switch statements that need to differentiate between
     /// basic object types like points, curves, surfaces, and so on.
     /// </summary>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public ObjectType ObjectType
     {
@@ -357,6 +361,7 @@ namespace Rhino.Geometry
     /// Transformation to apply to geometry.
     /// </param>
     /// <returns>true if geometry successfully transformed.</returns>
+    /// <since>5.0</since>
     public bool Transform(Transform xform)
     {
       if (xform.IsIdentity)
@@ -369,6 +374,7 @@ namespace Rhino.Geometry
     /// <summary>Translates the object along the specified vector.</summary>
     /// <param name="translationVector">A moving vector.</param>
     /// <returns>true if geometry successfully translated.</returns>
+    /// <since>5.0</since>
     public bool Translate(Vector3d translationVector)
     {
       IntPtr ptr = NonConstPointer();
@@ -380,6 +386,7 @@ namespace Rhino.Geometry
     /// <param name="y">The Y component.</param>
     /// <param name="z">The Z component.</param>
     /// <returns>true if geometry successfully translated.</returns>
+    /// <since>5.0</since>
     public bool Translate(double x, double y, double z)
     {
       Vector3d t = new Vector3d(x, y, z);
@@ -391,6 +398,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="scaleFactor">The uniform scaling factor.</param>
     /// <returns>true if geometry successfully scaled.</returns>
+    /// <since>5.0</since>
     public bool Scale(double scaleFactor)
     {
       IntPtr ptr = NonConstPointer();
@@ -405,6 +413,7 @@ namespace Rhino.Geometry
     /// <param name="rotationAxis">Direction of the axis of rotation.</param>
     /// <param name="rotationCenter">Point on the axis of rotation.</param>
     /// <returns>true if geometry successfully rotated.</returns>
+    /// <since>5.0</since>
     public bool Rotate(double angleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       IntPtr ptr = NonConstPointer();
@@ -416,6 +425,7 @@ namespace Rhino.Geometry
     /// Computes an estimate of the number of bytes that this object is using in memory.
     /// </summary>
     /// <returns>An estimated memory footprint.</returns>
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     [ConstOperation]
     public uint MemoryEstimate()
@@ -425,15 +435,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Boundingbox solver. Gets the world axis aligned boundingbox for the geometry.
+    /// Bounding box solver. Gets the world axis aligned bounding box for the geometry.
     /// </summary>
-    /// <param name="accurate">If true, a physically accurate boundingbox will be computed. 
-    /// If not, a boundingbox estimate will be computed. For some geometry types there is no 
-    /// difference between the estimate and the accurate boundingbox. Estimated boundingboxes 
+    /// <param name="accurate">If true, a physically accurate bounding box will be computed. 
+    /// If not, a bounding box estimate will be computed. For some geometry types there is no 
+    /// difference between the estimate and the accurate bounding box. Estimated bounding boxes 
     /// can be computed much (much) faster than accurate (or "tight") bounding boxes. 
     /// Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</param>
     /// <returns>
-    /// The boundingbox of the geometry in world coordinates or BoundingBox.Empty 
+    /// The bounding box of the geometry in world coordinates or BoundingBox.Empty 
     /// if not bounding box could be found.
     /// </returns>
     /// <example>
@@ -441,6 +451,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_curveboundingbox.cs' lang='cs'/>
     /// <code source='examples\py\ex_curveboundingbox.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox GetBoundingBox(bool accurate)
     {
@@ -491,12 +502,13 @@ namespace Rhino.Geometry
       }
     }
     /// <summary>
-    /// Aligned Boundingbox solver. Gets the world axis aligned boundingbox for the transformed geometry.
+    /// Aligned Bounding box solver. Gets the world axis aligned bounding box for the transformed geometry.
     /// </summary>
     /// <param name="xform">Transformation to apply to object prior to the BoundingBox computation. 
     /// The geometry itself is not modified.</param>
-    /// <returns>The accurate boundingbox of the transformed geometry in world coordinates 
+    /// <returns>The accurate bounding box of the transformed geometry in world coordinates 
     /// or BoundingBox.Empty if not bounding box could be found.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
@@ -517,7 +529,7 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_Geometry_GetTightBoundingBox(ptr, ref bbox, ref xform, true) ? bbox : BoundingBox.Empty;
     }
     /// <summary>
-    /// Aligned Boundingbox solver. Gets the plane aligned boundingbox.
+    /// Aligned Bounding box solver. Gets the plane aligned bounding box.
     /// </summary>
     /// <param name="plane">Orientation plane for BoundingBox.</param>
     /// <returns>A BoundingBox in plane coordinates.</returns>
@@ -526,6 +538,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_curveboundingbox.cs' lang='cs'/>
     /// <code source='examples\py\ex_curveboundingbox.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox GetBoundingBox(Plane plane)
     {
@@ -536,11 +549,12 @@ namespace Rhino.Geometry
       return rc;
     }
     /// <summary>
-    /// Aligned Boundingbox solver. Gets the plane aligned boundingbox.
+    /// Aligned Bounding box solver. Gets the plane aligned bounding box.
     /// </summary>
     /// <param name="plane">Orientation plane for BoundingBox.</param>
     /// <param name="worldBox">Aligned box in World coordinates.</param>
     /// <returns>A BoundingBox in plane coordinates.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public BoundingBox GetBoundingBox(Plane plane, out Box worldBox)
     {
@@ -566,6 +580,7 @@ namespace Rhino.Geometry
     /// true if object can be accurately modified with "squishy" transformations like
     /// projections, shears, and non-uniform scaling.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDeformable
     {
       get
@@ -583,6 +598,7 @@ namespace Rhino.Geometry
     /// false if object cannot be converted to a deformable object. true if object was
     /// already deformable or was converted into a deformable object.
     /// </returns>
+    /// <since>5.0</since>
     public bool MakeDeformable()
     {
       IntPtr ptr = NonConstPointer();
@@ -599,6 +615,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns true if the Brep.TryConvertBrep function will be successful for this object
     /// </summary>
+    /// <since>5.6</since>
     public bool HasBrepForm
     {
       get
@@ -622,6 +639,7 @@ namespace Rhino.Geometry
     /// m_type = ComponentIndex.InvalidType
     /// and m_index = -1.
     /// </returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public ComponentIndex ComponentIndex()
     {
@@ -641,6 +659,7 @@ namespace Rhino.Geometry
     /// <param name="key">id used to retrieve this string.</param>
     /// <param name="value">string associated with key.</param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SetUserString(string key, string value)
     {
       return _SetUserString(key, value);
@@ -650,6 +669,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="key">id used to retrieve the string.</param>
     /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>5.0</since>
     public string GetUserString(string key)
     {
       return _GetUserString(key);
@@ -658,6 +678,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the amount of user strings.
     /// </summary>
+    /// <since>5.0</since>
     public int UserStringCount
     {
       get
@@ -670,6 +691,7 @@ namespace Rhino.Geometry
     /// Gets a copy of all (user key string, user value string) pairs attached to this geometry.
     /// </summary>
     /// <returns>A new collection.</returns>
+    /// <since>5.0</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings()
     {
       return _GetUserStrings();
@@ -749,6 +771,7 @@ namespace Rhino.Geometry
     /// <param name="first">The first geometry</param>
     /// <param name="second">The second geometry</param>
     /// <returns>The indication of equality</returns>
+    /// <since>6.0</since>
     public static bool GeometryEquals(GeometryBase first, GeometryBase second)
     {
       if (first == null && second == null)

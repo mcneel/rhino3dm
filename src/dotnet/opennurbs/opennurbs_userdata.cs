@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -26,6 +26,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -88,6 +89,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     /// <summary>Descriptive name of the user data.</summary>
+    /// <since>5.0</since>
     public virtual string Description { get { return "RhinoCommon UserData"; } }
 
     /// <summary>
@@ -95,6 +97,7 @@ namespace Rhino.DocObjects.Custom
     /// ShouldWrite and return true.  If you do support serialization,
     /// you must also override the Read and Write functions.
     /// </summary>
+    /// <since>5.0</since>
     public virtual bool ShouldWrite { get { return false; } }
 
     /// <summary>Writes the content of this data to a stream archive.</summary>
@@ -210,6 +213,10 @@ namespace Rhino.DocObjects.Custom
           UserData new_ud = Activator.CreateInstance(t) as UserData;
           if (new_ud != null)
           {
+            // 5 March 2020 S. Baer (RH-56767)
+            // This is user data created from C++ and it's lifetime is managed
+            // by C++. No need to let this have it's lifetime managed by the GC
+            GC.SuppressFinalize(new_ud);
             new_ud.m_serial_number = g_next_serial_number++;
             new_ud.m_native_pointer = pNativeUserData;
             StoreInRuntimeList(new_ud);
@@ -310,6 +317,7 @@ namespace Rhino.DocObjects.Custom
     /// </summary>
     /// <param name="source">A source object for the data.</param>
     /// <param name="destination">A destination object for the data.</param>
+    /// <since>5.0</since>
     public static void Copy(Runtime.CommonObject source, Runtime.CommonObject destination)
     {
       IntPtr const_source = source.ConstPointer();
@@ -320,7 +328,7 @@ namespace Rhino.DocObjects.Custom
 
     /// <summary>
     /// Moves the user data from objectWithUserData to a temporary data storage
-    /// identifierd by the return Guid.  When MoveUserDataFrom returns, the
+    /// identified by the return Guid.  When MoveUserDataFrom returns, the
     /// objectWithUserData will not have any user data.
     /// </summary>
     /// <param name="objectWithUserData">Object with user data attached.</param>
@@ -330,6 +338,7 @@ namespace Rhino.DocObjects.Custom
     /// to transfer the user data to a different object.
     /// Returns Guid.Empty if there was no user data to transfer.
     /// </returns>
+    /// <since>5.0</since>
     public static Guid MoveUserDataFrom(Runtime.CommonObject objectWithUserData)
     {
       Guid id = Guid.NewGuid();
@@ -347,6 +356,7 @@ namespace Rhino.DocObjects.Custom
     /// <param name="objectToGetUserData">Object data source.</param>
     /// <param name="id">Target.</param>
     /// <param name="append">If the data should be appended or replaced.</param>
+    /// <since>5.0</since>
     public static void MoveUserDataTo(Runtime.CommonObject objectToGetUserData, Guid id, bool append)
     {
       if (id != Guid.Empty)
@@ -365,6 +375,7 @@ namespace Rhino.DocObjects.Custom
     /// base class OnTransform() in your override.
     /// The default constructor sets Transform to the identity.
     /// </summary>
+    /// <since>5.0</since>
     public Geometry.Transform Transform
     {
       get
@@ -396,6 +407,7 @@ namespace Rhino.DocObjects.Custom
     /// Constructs a new unknown data entity.
     /// </summary>
     /// <param name="pointerNativeUserData">A pointer to the entity.</param>
+    /// <since>5.0</since>
     public UnknownUserData(IntPtr pointerNativeUserData)
     {
     }
@@ -411,6 +423,7 @@ namespace Rhino.DocObjects.Custom
     /// Create new UserDataListEnumerator
     /// </summary>
     /// <param name="udl">UserDataList to enumerate</param>
+    /// <since>6.0</since>
     public UserDataListEnumerator(UserDataList udl)
     {
       _udl = udl;
@@ -421,6 +434,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Get current UserData on the enumerator.
     /// </summary>
+    /// <since>6.0</since>
     public UserData Current
     {
       get
@@ -430,11 +444,13 @@ namespace Rhino.DocObjects.Custom
       }
     }
 
+    /// <since>6.0</since>
     object IEnumerator.Current => Current;
 
     /// <summary>
     /// Implement Dispose(). NOP.
     /// </summary>
+    /// <since>6.0</since>
     public void Dispose()
     {
     }
@@ -443,6 +459,7 @@ namespace Rhino.DocObjects.Custom
     /// Advance enumerator to next UserData item.
     /// </summary>
     /// <returns>True if there is a next item.</returns>
+    /// <since>6.0</since>
     public bool MoveNext()
     {
       index++;
@@ -452,6 +469,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Reset the enumerator
     /// </summary>
+    /// <since>6.0</since>
     public void Reset()
     {
       index = -1;
@@ -468,6 +486,7 @@ namespace Rhino.DocObjects.Custom
     }
 
     /// <summary>Number of UserData objects in this list.</summary>
+    /// <since>5.0</since>
     public int Count
     {
       get
@@ -478,11 +497,12 @@ namespace Rhino.DocObjects.Custom
     }
 
     /// <summary>
-    /// If the userdata is already in a different UserDataList, it
+    /// If the user-data is already in a different UserDataList, it
     /// will be removed from that list and added to this list.
     /// </summary>
     /// <param name="userdata">Data element.</param>
     /// <returns>Whether this operation succeeded.</returns>
+    /// <since>5.0</since>
     public bool Add(UserData userdata)
     {
       if (!(userdata is SharedUserDictionary))
@@ -490,7 +510,7 @@ namespace Rhino.DocObjects.Custom
         Type t = userdata.GetType();
         System.Reflection.ConstructorInfo constructor = t.GetConstructor(Type.EmptyTypes);
         if (!t.IsPublic || constructor == null)
-          throw new ArgumentException("userdata must be a public class and have a parameterless constructor");
+          throw new ArgumentException("user-data must be a public class and have a parameterless constructor");
       }
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
       IntPtr ptr_userdata = userdata.NonConstPointer(true);
@@ -502,10 +522,11 @@ namespace Rhino.DocObjects.Custom
     }
     
     /// <summary>
-    /// Remove the userdata from this list
+    /// Remove the user-data from this list
     /// </summary>
     /// <param name="userdata"></param>
     /// <returns>true if the user data was successfully removed</returns>
+    /// <since>5.6</since>
     public bool Remove(UserData userdata)
     {
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
@@ -522,6 +543,7 @@ namespace Rhino.DocObjects.Custom
     /// </summary>
     /// <param name="userdataType">A data type.</param>
     /// <returns>The found data, or null of nothing was found.</returns>
+    /// <since>5.0</since>
     public UserData Find(Type userdataType)
     {
       if (!userdataType.IsSubclassOf(typeof(UserData)))
@@ -548,11 +570,12 @@ namespace Rhino.DocObjects.Custom
     }
 
     /// <summary>
-    /// Checks for the existence of a specific type of userdata in this list
-    /// Both .NET and native userdata is checked
+    /// Checks for the existence of a specific type of user-data in this list
+    /// Both .NET and native user-data is checked
     /// </summary>
     /// <param name="userdataId"></param>
     /// <returns></returns>
+    /// <since>6.1</since>
     public bool Contains(Guid userdataId)
     {
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
@@ -563,6 +586,7 @@ namespace Rhino.DocObjects.Custom
     /// Get enumerator for UserDataList
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public IEnumerator<UserData> GetEnumerator()
     {
       return new UserDataListEnumerator(this);
@@ -570,6 +594,7 @@ namespace Rhino.DocObjects.Custom
 
 
     private IEnumerator GetEnumerator1() { return this.GetEnumerator(); }
+    /// <since>6.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator1();
@@ -580,6 +605,7 @@ namespace Rhino.DocObjects.Custom
     /// Removes all user data from this geometry.
     /// </summary>
     /// <remarks>User <see cref="Remove"/> to delete a single, known, item.</remarks>
+    /// <since>6.0</since>
     public void Purge()
     {
       IntPtr non_const_ptr_onobject = m_parent.NonConstPointer();
@@ -598,6 +624,7 @@ namespace Rhino.DocObjects.Custom
     /// Gets the dictionary that is associated with this class.
     /// <para>This dictionary is unique.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Collections.ArchivableDictionary Dictionary
     {
       get { return m_dictionary??(m_dictionary=new Collections.ArchivableDictionary(this)); }
@@ -606,6 +633,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Gets the text "RhinoCommon UserDictionary".
     /// </summary>
+    /// <since>5.0</since>
     public override string Description
     {
       get
@@ -647,6 +675,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Writes this entity if the count is larger than 0.
     /// </summary>
+    /// <since>5.0</since>
     public override bool ShouldWrite
     {
       get { return m_dictionary.Count > 0; }
@@ -686,8 +715,9 @@ namespace Rhino.DocObjects.Custom
   [AttributeUsage(AttributeTargets.Class)]
   public sealed class ClassIdAttribute : Attribute
   {
-    /// <summary>Initializes a class id attrbute.</summary>
+    /// <summary>Initializes a class id attribute.</summary>
     /// <param name="id">String in the form of a Guid.</param>
+    /// <since>6.0</since>
     public ClassIdAttribute(string id)
     {
       Guid guid;
@@ -698,6 +728,7 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// Gets the associated style.
     /// </summary>
+    /// <since>6.0</since>
     public Guid Id { get; private set; }
 
     internal static Guid GetGuid(Type t)

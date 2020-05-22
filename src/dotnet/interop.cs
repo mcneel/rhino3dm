@@ -23,6 +23,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="ptrManagedFont"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static DocObjects.Font FontFromPointer(IntPtr ptrManagedFont)
     {
       if (IntPtr.Zero == ptrManagedFont)
@@ -36,6 +37,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="ptrViewCapture"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static Display.ViewCaptureSettings ViewCaptureFromPointer(IntPtr ptrViewCapture)
     {
       if (IntPtr.Zero == ptrViewCapture)
@@ -48,6 +50,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="doc">A document.</param>
     /// <returns>A pointer value.</returns>
+    /// <since>5.0</since>
     public static IntPtr NativeRhinoDocPointer(RhinoDoc doc)
     {
       if (doc == null)
@@ -60,6 +63,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <returns>NSFont* on success. IntPtr.Zero on failure</returns>
     /// <param name="font"></param>
+    /// <since>6.9</since>
     public static IntPtr NSFontFromFont(Rhino.DocObjects.Font font)
     {
 #if MONO_BUILD
@@ -79,6 +83,7 @@ namespace Rhino.Runtime
     /// <returns>NSFont* on success. IntPtr.Zero on failure</returns>
     /// <param name="font"></param>
     /// <param name="pointSize">Point size</param>
+    /// <since>6.9</since>
     public static IntPtr NSFontFromFont(Rhino.DocObjects.Font font, double pointSize)
     {
 #if MONO_BUILD
@@ -100,6 +105,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="geometry">A geometry object. This can be null and in such a case <see cref="IntPtr.Zero"/> is returned.</param>
     /// <returns>A pointer to the const geometry.</returns>
+    /// <since>5.0</since>
     public static IntPtr NativeGeometryConstPointer(Geometry.GeometryBase geometry)
     {
       IntPtr rc = IntPtr.Zero;
@@ -114,6 +120,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="geometry">A geometry object. This can be null and in such a case <see cref="IntPtr.Zero"/> is returned.</param>
     /// <returns>A pointer to the non-const geometry.</returns>
+    /// <since>5.0</since>
     public static IntPtr NativeGeometryNonConstPointer(Geometry.GeometryBase geometry)
     {
       IntPtr rc = IntPtr.Zero;
@@ -151,6 +158,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="settings"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static IntPtr NativeNonConstPointer(Display.ViewCaptureSettings settings)
     {
       return settings.NonConstPointer();
@@ -161,6 +169,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="viewport"></param>
     /// <returns></returns>
+    /// <since>5.1</since>
     public static IntPtr NativeNonConstPointer(DocObjects.ViewportInfo viewport)
     {
       return viewport.NonConstPointer();
@@ -171,6 +180,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="viewport"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static IntPtr NativeNonConstPointer(Display.RhinoViewport viewport)
     {
       return viewport.NonConstPointer();
@@ -181,6 +191,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="pipeline"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static IntPtr NativeNonConstPointer(Display.DisplayPipeline pipeline)
     {
       return pipeline.NonConstPointer();
@@ -192,6 +203,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="getPoint"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static IntPtr NativeNonConstPointer(Input.Custom.GetPoint getPoint)
     {
       return getPoint.NonConstPointer();
@@ -203,6 +215,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="rhinoObject">A Rhino object.</param>
     /// <returns>A pointer to the Rhino const object.</returns>
+    /// <since>5.0</since>
     public static IntPtr RhinoObjectConstPointer(DocObjects.RhinoObject rhinoObject)
     {
       IntPtr rc = IntPtr.Zero;
@@ -216,6 +229,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="pRhinoObject">The original pointer.</param>
     /// <returns>A new Rhino object, or null if the pointer was invalid or <see cref="IntPtr.Zero"/>.</returns>
+    /// <since>5.0</since>
     public static DocObjects.RhinoObject RhinoObjectFromPointer(IntPtr pRhinoObject)
     {
       return DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
@@ -227,6 +241,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="options">A FileWriteOptions object.</param>
     /// <returns>A pointer to the Rhino const object.</returns>
+    /// <since>6.0</since>
     public static IntPtr FileWriteOptionsConstPointer(FileIO.FileWriteOptions options)
     {
       IntPtr rc = IntPtr.Zero;
@@ -241,6 +256,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="options">A FileReadOptions object.</param>
     /// <returns>A pointer to the Rhino const object.</returns>
+    /// <since>6.0</since>
     public static IntPtr FileReadOptionsConstPointer(FileIO.FileReadOptions options)
     {
       IntPtr rc = IntPtr.Zero;
@@ -257,6 +273,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="pGeometry">ON_Geometry*</param>
     /// <returns>The appropriate geometry class in RhinoCommon on success.</returns>
+    /// <since>5.0</since>
     public static Geometry.GeometryBase CreateFromNativePointer(IntPtr pGeometry)
     {
       return Geometry.GeometryBase.CreateGeometryHelper(pGeometry, null);
@@ -268,6 +285,7 @@ namespace Rhino.Runtime
     /// <param name="source">A source OnArc.</param>
     /// <param name="destination">A destination arc.</param>
     /// <returns>true if the operation succeeded; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool TryCopyFromOnArc(object source, out Geometry.Arc destination)
     {
       destination = new Geometry.Arc();
@@ -287,6 +305,7 @@ namespace Rhino.Runtime
     /// <param name="source">A source arc.</param>
     /// <param name="destination">A destination OnArc.</param>
     /// <returns>true if the operation succeeded; false otherwise.</returns>
+    /// <since>5.0</since>
     public static bool TryCopyToOnArc(Geometry.Arc source, object destination)
     {
       bool rc = false;
@@ -330,6 +349,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// RhinoCommon object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static Geometry.Brep FromOnBrep(object source)
     {
       Geometry.GeometryBase g = CopyHelper(source, "RMA.OpenNURBS.OnBrep");
@@ -349,6 +369,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// RhinoCommon object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static Geometry.Surface FromOnSurface(object source)
     {
       Geometry.GeometryBase g = CopyHelper(source, "RMA.OpenNURBS.OnSurface");
@@ -375,6 +396,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// RhinoCommon object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static Geometry.Mesh FromOnMesh(object source)
     {
       Geometry.GeometryBase g = CopyHelper(source, "RMA.OpenNURBS.OnMesh");
@@ -391,6 +413,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// RhinoCommon object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static Geometry.Curve FromOnCurve(object source)
     {
       Geometry.GeometryBase g = CopyHelper(source, "RMA.OpenNURBS.OnCurve");
@@ -423,6 +446,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToOnBrep(Geometry.Brep source)
     {
       object rc = null;
@@ -444,6 +468,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToOnSurface(Geometry.Surface source)
     {
       object rc = null;
@@ -465,6 +490,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToOnMesh(Geometry.Mesh source)
     {
       object rc = null;
@@ -486,6 +512,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToOnCurve(Geometry.Curve source)
     {
       object rc = null;
@@ -507,6 +534,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToOnXform(Geometry.Transform source)
     {
       object rc = null;
@@ -534,6 +562,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Rhino_DotNet IRhinoViewport object on success. This will be an independent copy.
     /// </returns>
+    /// <since>5.0</since>
     public static object ToIRhinoViewport(Display.RhinoViewport source)
     {
       object rc = null;
@@ -608,6 +637,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="plugin">A plug-in.</param>
     /// <returns>A pointer.</returns>
+    /// <since>5.0</since>
     public static IntPtr PlugInPointer(PlugIns.PlugIn plugin)
     {
       return null == plugin ? IntPtr.Zero : plugin.NonConstPointer();
@@ -631,7 +661,7 @@ namespace Rhino.Runtime.InteropWrappers
     }
 
     /// <summary>
-    /// Convert unmanged CRhinoDib pointer to a System.Drawing bitmap.
+    /// Convert unmanaged CRhinoDib pointer to a System.Drawing bitmap.
     /// </summary>
     /// <returns>
     /// If the pointer to the CRhinoDib is null then null is returned otherwise;
@@ -639,10 +669,10 @@ namespace Rhino.Runtime.InteropWrappers
     /// otherwise null is returned. 
     /// </returns>
     /// <param name="rhinoDibPointer">
-    /// Unmanged CRhinoDib pointer
+    /// Unmanaged CRhinoDib pointer
     /// </param>
     /// <param name="deletePointer">
-    /// If set to <c>true</c> delete the unmanged pointer otherwise;
+    /// If set to <c>true</c> delete the unmanaged pointer otherwise;
     /// don't delete the pointer.
     /// </param>
     public static System.Drawing.Bitmap ToBitmap(IntPtr rhinoDibPointer, bool deletePointer)
@@ -658,10 +688,10 @@ namespace Rhino.Runtime.InteropWrappers
     /// Create a new RhinoDib and attach it to the specified CRhinoDib pointer.
     /// </summary>
     /// <param name="rhinoDibPointer">
-    /// Unmanged CRhinoDib pointer to attach to.
+    /// Unmanaged CRhinoDib pointer to attach to.
     /// </param>
     /// <param name="deletePointer">
-    /// If set to <c>true</c> delete the unmanged pointer when the returned RhinoDib
+    /// If set to <c>true</c> delete the unmanaged pointer when the returned RhinoDib
     /// is disposed of otherwise; don't delete the unmanaged pointer.
     /// </param>
     public static RhinoDib Attach(IntPtr rhinoDibPointer, bool deletePointer)
@@ -674,13 +704,13 @@ namespace Rhino.Runtime.InteropWrappers
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Rhino.Runtime.InteropWrappers.RhinoDib"/>
-    /// class and attache it to a unmanged CRhinoDib pointer.
+    /// class and attach it to a unmanaged CRhinoDib pointer.
     /// </summary>
     /// <param name="rhinoDibPointer">
-    /// Unmanged CRhinoDib pointer to attach to.
+    /// Unmanaged CRhinoDib pointer to attach to.
     /// </param>
     /// <param name="autoDelete">
-    /// If set to <c>true</c> delete the unmanged pointer when this object
+    /// If set to <c>true</c> delete the unmanaged pointer when this object
     /// is disposed of otherwise; don't delete the unmanaged pointer.
     /// </param>
     private RhinoDib(IntPtr rhinoDibPointer, bool autoDelete)
@@ -751,6 +781,9 @@ namespace Rhino.Runtime.InteropWrappers
     {
       IntPtr const_ptr_this = ConstPointer;
       IntPtr native_bitmap = UnsafeNativeMethods.CRhinoDib_Bitmap (const_ptr_this);
+
+      if (native_bitmap == IntPtr.Zero)
+        return null;
 
       // If NOT running in Windows or the color depth is NOT 32bit
       if (!HostUtils.RunningOnWindows || UnsafeNativeMethods.CRhinoDib_ColorDepth(const_ptr_this) != 32)

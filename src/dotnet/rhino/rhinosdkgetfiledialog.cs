@@ -147,6 +147,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public OpenFileDialog()
     {
       m_base = new FileDialogBase();
@@ -161,6 +162,7 @@ namespace Rhino.UI
     /// <summary>
     /// The default file name extension. The returned string does not include the period.
     /// </summary>
+    /// <since>5.0</since>
     public string DefaultExt
     {
       get { return m_base.DefaultExt; }
@@ -175,6 +177,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string FileName
     {
       get { return m_base.FileName; }
@@ -184,6 +187,7 @@ namespace Rhino.UI
     /// <summary>
     /// Gets or sets the file dialog box title.
     /// </summary>
+    /// <since>5.0</since>
     public string Title
     {
       get { return m_base.Title; }
@@ -200,6 +204,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string Filter
     {
       get { return m_base.Filter; }
@@ -209,6 +214,7 @@ namespace Rhino.UI
     /// <summary>
     /// Gets or sets the initial directory displayed by the file dialog box.
     /// </summary>
+    /// <since>5.0</since>
     public string InitialDirectory
     {
       get { return m_base.InitialDirectory; }
@@ -218,11 +224,13 @@ namespace Rhino.UI
     /// <summary>
     /// Gets or sets a value indicating whether the dialog box allows multiple files to be selected
     /// </summary>
+    /// <since>5.0</since>
     public bool MultiSelect { get; set; }
 
     /// <summary>
     /// Gets the names of all of the selected files in the dialog box
     /// </summary>
+    /// <since>5.0</since>
     public string[] FileNames { get; private set; } = new string[0];
 
     /// <summary>Show the actual dialog to allow the user to select a file.</summary>
@@ -231,7 +239,8 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_addbackgroundbitmap.cs' lang='cs'/>
     /// <code source='examples\py\ex_addbackgroundbitmap.py' lang='py'/>
     /// </example>
-    /// <returns>true if a file was selected. false if the dialog was cancelled</returns>
+    /// <returns>true if a file was selected. false if the dialog was canceled</returns>
+    /// <since>5.10</since>
     public bool ShowOpenDialog()
     {
       var def_ext = DefaultExt;
@@ -261,6 +270,7 @@ namespace Rhino.UI
       return rc == idok;
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use ShowOpenDialog")]
     public System.Windows.Forms.DialogResult ShowDialog()
     {
@@ -283,6 +293,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public SaveFileDialog()
     {
       m_base = new FileDialogBase();
@@ -297,6 +308,7 @@ namespace Rhino.UI
     /// <summary>
     /// The default file name extension. The returned string does not include the period.
     /// </summary>
+    /// <since>5.0</since>
     public string DefaultExt
     {
       get { return m_base.DefaultExt; }
@@ -311,6 +323,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string FileName
     {
       get { return m_base.FileName; }
@@ -320,6 +333,7 @@ namespace Rhino.UI
     /// <summary>
     /// Gets or sets the file dialog box title.
     /// </summary>
+    /// <since>5.0</since>
     public string Title
     {
       get { return m_base.Title; }
@@ -336,6 +350,7 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string Filter
     {
       get { return m_base.Filter; }
@@ -350,24 +365,27 @@ namespace Rhino.UI
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string InitialDirectory
     {
       get { return m_base.InitialDirectory; }
       set { m_base.InitialDirectory = value; }
     }
 
+    /// <since>5.0</since>
     [Obsolete("Use ShowSaveDialog")]
     public System.Windows.Forms.DialogResult ShowDialog()
     {
       return ShowSaveDialog() ? System.Windows.Forms.DialogResult.OK : System.Windows.Forms.DialogResult.Cancel;
     }
 
-    /// <returns>true if a file was selected. false if the dialog was cancelled</returns>
+    /// <returns>true if a file was selected. false if the dialog was canceled</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_screencaptureview.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_screencaptureview.cs' lang='cs'/>
     /// <code source='examples\py\ex_screencaptureview.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public bool ShowSaveDialog()
     {
       string def_ext = DefaultExt;

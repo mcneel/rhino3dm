@@ -138,3 +138,15 @@ RH_C_FUNCTION bool ON_PolyCurve_Append(ON_PolyCurve* pPolyCurve, const ON_Curve*
   return rc;
 }
 
+#if !defined(RHINO3DM_BUILD)  //not available in opennurbs build
+
+RH_C_FUNCTION ON_Curve* RHC_RhinoCleanUpPolyCurve(const ON_PolyCurve* pPolyCurve)
+{
+  ON_Curve* rc = nullptr;
+  if (pPolyCurve)
+    rc = RhinoCleanUpPolyCurve(*pPolyCurve);
+  return rc;
+}
+
+
+#endif

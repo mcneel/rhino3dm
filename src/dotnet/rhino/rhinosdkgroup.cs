@@ -62,6 +62,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// The document in which the event occurred.
       /// </summary>
+      /// <since>5.0</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number)); }
@@ -70,6 +71,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// The event type.
       /// </summary>
+      /// <since>5.0</since>
       public GroupTableEventType EventType
       {
         get { return m_event_type; }
@@ -78,6 +80,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// The index of the Group that has changed.
       /// </summary>
+      /// <since>6.10</since>
       public int GroupIndex
       {
         get { return m_group_index; }
@@ -87,6 +90,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// The Group that has changed.
       /// </summary>
+      /// <since>6.10</since>
       public Group NewState
       {
         get { return m_new_group ?? (m_new_group = new Group(GroupIndex, Document)); }
@@ -96,6 +100,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// If the event is GroupTableEventType.Modified, then the old Group.
       /// </summary>
+      /// <since>6.10</since>
       public Group OldState
       {
         get
@@ -120,6 +125,7 @@ namespace Rhino.DocObjects
       {
       }
 
+      /// <since>6.0</since>
       public override ModelComponentType ComponentType
       {
         get
@@ -137,6 +143,7 @@ namespace Rhino.DocObjects
       /// &gt;=0 index of the group with the given name.
       /// <see cref="RhinoMath.UnsetIntIndex">UnsetIntIndex</see> no group found with the given name.
       /// </returns>
+      /// <since>6.0</since>
       [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
       public int Find(string groupName)
       {
@@ -154,6 +161,7 @@ namespace Rhino.DocObjects
       /// &gt;=0 index of the group with the given name.
       /// -1 no group found with the given name.
       /// </returns>
+      /// <since>5.0</since>
       [Obsolete("Use the overload without the ignoreDeletedGroups input. Note that the new method might return UnsetIntIndex.")]
       [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
       public int Find(string groupName, bool ignoreDeletedGroups)
@@ -167,6 +175,7 @@ namespace Rhino.DocObjects
       /// </summary>
       /// <param name="name">The name of the Linetype to be searched.</param>
       /// <returns>An Linetype, or null on error.</returns>
+      /// <since>6.0</since>
       public Group FindName(string name)
       {
         return __FindNameInternal(name);
@@ -177,17 +186,19 @@ namespace Rhino.DocObjects
       /// </summary>
       /// <param name="nameHash">The name hash of the Linetype to be searched.</param>
       /// <returns>An Linetype, or null on error.</returns>
+      /// <since>6.0</since>
       public Group FindNameHash(NameHash nameHash)
       {
         return __FindNameHashInternal(nameHash);
       }
 
       /// <summary>
-      /// Retrieves a Group object based on Index. This seach type of search is discouraged.
+      /// Retrieves a Group object based on Index. This search type of search is discouraged.
       /// We are moving towards using only IDs for all tables.
       /// </summary>
       /// <param name="index">The index to search for.</param>
       /// <returns>A Group object, or null if none was found.</returns>
+      /// <since>6.0</since>
       public Group FindIndex(int index)
       {
         return __FindIndexInternal(index);
@@ -202,6 +213,7 @@ namespace Rhino.DocObjects
       /// <remarks>
       /// In some cases, calling Add() can cause the group indices to become invalid.
       /// </remarks>
+      /// <since>5.0</since>
       public int Add(string groupName)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_Add(m_doc.RuntimeSerialNumber, groupName, 0, null);
@@ -222,6 +234,7 @@ namespace Rhino.DocObjects
       /// <remarks>
       /// In some cases, calling Add() can cause the group indices to become invalid.
       /// </remarks>
+      /// <since>5.0</since>
       public int Add()
       {
         return UnsafeNativeMethods.CRhinoGroupTable_Add(m_doc.RuntimeSerialNumber, null, 0, null);
@@ -239,6 +252,7 @@ namespace Rhino.DocObjects
       /// <remarks>
       /// In some cases, calling Add() can cause the group indices to become invalid.
       /// </remarks>
+      /// <since>5.0</since>
       public int Add(string groupName, System.Collections.Generic.IEnumerable<Guid> objectIds)
       {
         if (null == objectIds)
@@ -269,6 +283,7 @@ namespace Rhino.DocObjects
       /// <code source='examples\cs\ex_addobjectstogroup.cs' lang='cs'/>
       /// <code source='examples\py\ex_addobjectstogroup.py' lang='py'/>
       /// </example>
+      /// <since>5.0</since>
       public int Add(System.Collections.Generic.IEnumerable<Guid> objectIds)
       {
         return Add(null, objectIds);
@@ -280,6 +295,7 @@ namespace Rhino.DocObjects
       /// <param name="groupIndex">The group index value.</param>
       /// <param name="objectId">An ID of an object.</param>
       /// <returns>true if the operation was successful.</returns>
+      /// <since>5.0</since>
       public bool AddToGroup(int groupIndex, Guid objectId)
       {
         Guid[] ids = new Guid[] { objectId };
@@ -292,6 +308,7 @@ namespace Rhino.DocObjects
       /// <param name="groupIndex">The group index value.</param>
       /// <param name="objectIds">An array, a list or any enumerable set of IDs to objects.</param>
       /// <returns>true if at least an operation was successful.</returns>
+      /// <since>5.0</since>
       public bool AddToGroup(int groupIndex, System.Collections.Generic.IEnumerable<Guid> objectIds)
       {
         if (null == objectIds)
@@ -313,27 +330,32 @@ namespace Rhino.DocObjects
       /// </summary>
       /// <param name="groupIndex">An group index to be deleted.</param>
       /// <returns>true if the operation was successful.</returns>
+      /// <since>5.0</since>
       public bool Delete(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_DeleteGroup(m_doc.RuntimeSerialNumber, groupIndex, true);
       }
 
+      /// <since>6.0</since>
       public override bool Delete(Group item)
       {
         if (item == null) return false;
         return Delete(item.Index);
       }
 
+      /// <since>5.0</since>
       public bool Undelete(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_DeleteGroup(m_doc.RuntimeSerialNumber, groupIndex, false);
       }
 
+      /// <since>5.0</since>
       public bool IsDeleted(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_IsDeleted(m_doc.RuntimeSerialNumber, groupIndex);
       }
 
+      /// <since>5.0</since>
       public string GroupName(int groupIndex)
       {
         using (var sh = new StringHolder())
@@ -344,11 +366,13 @@ namespace Rhino.DocObjects
         }
       }
 
+      /// <since>5.0</since>
       public bool ChangeGroupName(int groupIndex, string newName)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_ChangeGroupName(m_doc.RuntimeSerialNumber, groupIndex, newName);
       }
 
+      /// <since>5.0</since>
       public string[] GroupNames(bool ignoreDeletedGroups)
       {
         int count = Count;
@@ -374,22 +398,27 @@ namespace Rhino.DocObjects
       const int idxUnlockGroup = 3;
       const int idxGroupObjectCount = 4;
 
+      /// <since>5.0</since>
       public int Hide(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxHideGroup);
       }
+      /// <since>5.0</since>
       public int Show(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxShowGroup);
       }
+      /// <since>5.0</since>
       public int Lock(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxLockGroup);
       }
+      /// <since>5.0</since>
       public int Unlock(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxUnlockGroup);
       }
+      /// <since>5.0</since>
       public int GroupObjectCount(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxGroupObjectCount);
@@ -400,6 +429,7 @@ namespace Rhino.DocObjects
       /// </summary>
       /// <param name="groupIndex">The index of the group in this table.</param>
       /// <returns>An array with all the objects in the specified group.</returns>
+      /// <since>5.0</since>
       public RhinoObject[] GroupMembers(int groupIndex)
       {
         using (Rhino.Runtime.InternalRhinoObjectArray rhobjs = new Runtime.InternalRhinoObjectArray())
@@ -495,6 +525,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.Group"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -511,6 +542,7 @@ namespace Rhino.DocObjects
     /// <param name="key">id used to retrieve this string.</param>
     /// <param name="value">string associated with key.</param>
     /// <returns>true on success.</returns>
+    /// <since>6.4</since>
     public bool SetUserString(string key, string value)
     {
       return _SetUserString(key, value);
@@ -520,6 +552,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="key">id used to retrieve the string.</param>
     /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>6.4</since>
     public string GetUserString(string key)
     {
       return _GetUserString(key);
@@ -528,6 +561,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the amount of user strings.
     /// </summary>
+    /// <since>6.4</since>
     public int UserStringCount
     {
       get
@@ -540,6 +574,7 @@ namespace Rhino.DocObjects
     /// Gets a copy of all (user key string, user value string) pairs attached to this geometry.
     /// </summary>
     /// <returns>A new collection.</returns>
+    /// <since>6.4</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings()
     {
       return _GetUserStrings();

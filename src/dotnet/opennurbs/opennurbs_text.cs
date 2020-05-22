@@ -30,6 +30,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_textjustify.cs' lang='cs'/>
     /// <code source='examples\py\ex_textjustify.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public TextEntity()
     {
       var ptr = UnsafeNativeMethods.ON_V6_TextObject_New();
@@ -63,6 +64,7 @@ namespace Rhino.Geometry
     /// <param name="rectWidth"></param>
     /// <param name="rotationRadians"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static TextEntity Create(string text, Plane plane, DimensionStyle style, bool wrapped, double rectWidth, double rotationRadians)
     {
       return CreateWithRichText(AnnotationBase.PlainTextToRtf(text), plane, style, wrapped, rectWidth,
@@ -77,6 +79,7 @@ namespace Rhino.Geometry
     /// <param name="rectWidth"></param>
     /// <param name="rotationRadians"></param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public static TextEntity CreateWithRichText(string richTextString, Plane plane, DimensionStyle style, bool wrapped, double rectWidth, double rotationRadians)
     {
       var const_ptr_dimstyle = style.ConstPointer();
@@ -97,6 +100,7 @@ namespace Rhino.Geometry
     /// <code source='examples\cs\ex_textjustify.cs' lang='cs'/>
     /// <code source='examples\py\ex_textjustify.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public TextJustification Justification
     {
       get
@@ -200,6 +204,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public TextHorizontalAlignment TextHorizontalAlignment
     {
       get
@@ -219,6 +224,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public TextVerticalAlignment TextVerticalAlignment
     {
       get
@@ -238,6 +244,7 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <since>6.0</since>
     public TextOrientation TextOrientation
     {
       get
@@ -271,6 +278,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// Returns true on success otherwise returns false.
     /// </returns>
+    /// <since>6.0</since>
     public bool Transform(Transform transform, DimensionStyle style)
     {
       var style_pointer = style?.ConstPointer() ?? IntPtr.Zero;
@@ -282,6 +290,7 @@ namespace Rhino.Geometry
     /// <summary> Get the transform for this text object's text geometry </summary>
     /// <param name="textscale"></param>
     /// <param name="dimstyle"></param>
+    /// <since>6.0</since>
     [ConstOperation]
     public Transform GetTextTransform(double textscale, DimensionStyle dimstyle)
     {
@@ -297,6 +306,7 @@ namespace Rhino.Geometry
     /// Explodes this text entity into an array of curves.
     /// </summary>
     /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
+    /// <since>5.0</since>
     [ConstOperation]
     public Curve[] Explode()
     {
@@ -334,6 +344,7 @@ namespace Rhino.Geometry
     /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of planar breps.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Brep[] CreateSurfaces(DimensionStyle dimstyle, double smallCapsScale = 1.0, double spacing = 0.0)
     {
@@ -357,10 +368,11 @@ namespace Rhino.Geometry
     /// Creates breps from the outline curves with specified height.
     /// </summary>
     /// <param name="dimstyle"></param>
-    /// <param name="height"> Height in direction perpedicular to plane of text.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
     /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of planar breps.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Brep[] CreatePolySurfaces(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
@@ -384,10 +396,11 @@ namespace Rhino.Geometry
     /// Creates extrusions from the outline curves with specified height.
     /// </summary>
     /// <param name="dimstyle"></param>
-    /// <param name="height"> Height in direction perpedicular to plane of text.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
     /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of planar breps.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Extrusion[] CreateExtrusions(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
@@ -415,6 +428,7 @@ namespace Rhino.Geometry
     /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
+    /// <since>6.0</since>
     [ConstOperation]
     public Curve[] CreateCurves(DimensionStyle dimstyle, bool bAllowOpen, double smallCapsScale = 1.0, double spacing = 0.0)
     {

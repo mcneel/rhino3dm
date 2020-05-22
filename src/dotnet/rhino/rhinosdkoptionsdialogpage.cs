@@ -11,6 +11,7 @@ namespace Rhino.UI
 
     }
 
+    /// <since>5.0</since>
     public virtual Commands.Result RunScript(RhinoDoc doc, Commands.RunMode mode)
     {
       RhinoApp.WriteLine(Localization.LocalizeString("Scripting not supported for this option", 33));

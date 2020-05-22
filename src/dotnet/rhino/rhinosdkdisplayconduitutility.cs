@@ -80,6 +80,7 @@ namespace Rhino.Display
     /// the display methods will never be switched off.
     /// </summary>
     /// <param name="enable">If true, the display will be enabled immediately.</param>
+    /// <since>5.0</since>
     public CustomDisplay(bool enable)
     {
       m_clip = BoundingBox.Empty;
@@ -92,6 +93,7 @@ namespace Rhino.Display
     /// Gets or sets the Enabled state of this CustomDisplay instance. 
     /// If you wish to terminate this CustomDisplay, place a call to Dispose() instead.
     /// </summary>
+    /// <since>5.0</since>
     public bool Enabled
     {
       get { return m_enabled; }
@@ -116,6 +118,7 @@ namespace Rhino.Display
     /// Gets a value indicating whether this CustomDisplay instance has been disposed. 
     /// Once a CustomDisplay has been disposed, you can no longer use it.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsDisposed
     {
       get { return m_disposed; }
@@ -123,6 +126,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets the clipping box of this CustomDisplay.
     /// </summary>
+    /// <since>5.0</since>
     public BoundingBox ClippingBox
     {
       get { return m_clip; }
@@ -133,6 +137,7 @@ namespace Rhino.Display
     /// <summary>
     /// Clear the drawing lists.
     /// </summary>
+    /// <since>5.0</since>
     public void Clear()
     {
       m_clip = BoundingBox.Empty;
@@ -168,6 +173,7 @@ namespace Rhino.Display
     /// Adds a new, black point to the display list.
     /// </summary>
     /// <param name="point">Point to add.</param>
+    /// <since>5.0</since>
     public void AddPoint(Point3d point)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -178,6 +184,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="point">Point to add.</param>
     /// <param name="color">Color of point.</param>
+    /// <since>5.0</since>
     public void AddPoint(Point3d point, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -190,6 +197,7 @@ namespace Rhino.Display
     /// <param name="color">Color of point.</param>
     /// <param name="style">Display style of point.</param>
     /// <param name="radius">Radius of point widget.</param>
+    /// <since>5.0</since>
     public void AddPoint(Point3d point, Color color, PointStyle style, int radius)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -208,6 +216,7 @@ namespace Rhino.Display
     /// Adds a collection of black points to the display list.
     /// </summary>
     /// <param name="points">Points to add.</param>
+    /// <since>5.0</since>
     public void AddPoints(IEnumerable<Point3d> points)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -218,6 +227,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="points">Points to add.</param>
     /// <param name="color">Color of points.</param>
+    /// <since>5.0</since>
     public void AddPoints(IEnumerable<Point3d> points, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -230,6 +240,7 @@ namespace Rhino.Display
     /// <param name="color">Color of points.</param>
     /// <param name="style">Display style of points.</param>
     /// <param name="radius">Radius of point widgets.</param>
+    /// <since>5.0</since>
     public void AddPoints(IEnumerable<Point3d> points, Color color, PointStyle style, int radius)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -243,6 +254,7 @@ namespace Rhino.Display
     /// Adds a new, black line to the display list.
     /// </summary>
     /// <param name="line">Line to add.</param>
+    /// <since>5.0</since>
     public void AddLine(Line line)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -253,6 +265,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="line">Line to add.</param>
     /// <param name="color">Color of line.</param>
+    /// <since>5.0</since>
     public void AddLine(Line line, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -264,6 +277,7 @@ namespace Rhino.Display
     /// <param name="line">Line to add.</param>
     /// <param name="color">Color of line.</param>
     /// <param name="thickness">Thickness of line.</param>
+    /// <since>5.0</since>
     public void AddLine(Line line, Color color, int thickness)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -283,6 +297,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="anchor">Anchor point of vector.</param>
     /// <param name="span">Direction and magnitude of vector.</param>
+    /// <since>5.0</since>
     public void AddVector(Point3d anchor, Vector3d span)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -294,6 +309,7 @@ namespace Rhino.Display
     /// <param name="anchor">Anchor point of vector.</param>
     /// <param name="span">Direction and magnitude of vector.</param>
     /// <param name="color">Color of vector.</param>
+    /// <since>5.0</since>
     public void AddVector(Point3d anchor, Vector3d span, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -306,6 +322,7 @@ namespace Rhino.Display
     /// <param name="span">Direction and magnitude of vector.</param>
     /// <param name="color">Color of vector.</param>
     /// <param name="drawAnchor">Include a point at the vector anchor.</param>
+    /// <since>5.0</since>
     public void AddVector(Point3d anchor, Vector3d span, Color color, bool drawAnchor)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -325,6 +342,7 @@ namespace Rhino.Display
     /// Adds a new, black arc to the display list.
     /// </summary>
     /// <param name="arc">Arc to add.</param>
+    /// <since>5.0</since>
     public void AddArc(Arc arc)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -335,6 +353,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="arc">Arc to add.</param>
     /// <param name="color">Color of arc.</param>
+    /// <since>5.0</since>
     public void AddArc(Arc arc, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -346,6 +365,7 @@ namespace Rhino.Display
     /// <param name="arc">Arc to add.</param>
     /// <param name="color">Color of arc.</param>
     /// <param name="thickness">Thickness of arc.</param>
+    /// <since>5.0</since>
     public void AddArc(Arc arc, Color color, int thickness)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -364,6 +384,7 @@ namespace Rhino.Display
     /// Adds a new, black circle to the display list.
     /// </summary>
     /// <param name="circle">Circle to add.</param>
+    /// <since>5.0</since>
     public void AddCircle(Circle circle)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -374,6 +395,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="circle">Circle to add.</param>
     /// <param name="color">Color of circle.</param>
+    /// <since>5.0</since>
     public void AddCircle(Circle circle, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -385,6 +407,7 @@ namespace Rhino.Display
     /// <param name="circle">Circle to add.</param>
     /// <param name="color">Color of circle.</param>
     /// <param name="thickness">Thickness of circle.</param>
+    /// <since>5.0</since>
     public void AddCircle(Circle circle, Color color, int thickness)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -399,6 +422,7 @@ namespace Rhino.Display
     /// original will not affect the display.
     /// </summary>
     /// <param name="curve">Curve to add.</param>
+    /// <since>5.0</since>
     public void AddCurve(Curve curve)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -411,6 +435,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="curve">Curve to add.</param>
     /// <param name="color">Color of curve.</param>
+    /// <since>5.0</since>
     public void AddCurve(Curve curve, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -424,6 +449,7 @@ namespace Rhino.Display
     /// <param name="curve">Curve to add.</param>
     /// <param name="color">Color of curve.</param>
     /// <param name="thickness">Thickness of curve.</param>
+    /// <since>5.0</since>
     public void AddCurve(Curve curve, Color color, int thickness)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -448,6 +474,7 @@ namespace Rhino.Display
     /// <param name="edgeColor">Edge color of polygon.</param>
     /// <param name="drawFill">If true, the polygon contents will be drawn.</param>
     /// <param name="drawEdge">If true, the polygon edge will be drawn.</param>
+    /// <since>5.0</since>
     public void AddPolygon(IEnumerable<Point3d> polygon, Color fillColor, Color edgeColor, bool drawFill, bool drawEdge)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -471,6 +498,7 @@ namespace Rhino.Display
     /// <param name="text">Text to add.</param>
     /// <param name="plane">Plane for text orientation.</param>
     /// <param name="size">Height (in units) of font.</param>
+    /// <since>5.0</since>
     public void AddText(string text, Plane plane, double size)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -483,6 +511,7 @@ namespace Rhino.Display
     /// <param name="plane">Plane for text orientation.</param>
     /// <param name="size">Height (in units) of font.</param>
     /// <param name="color">Color of text.</param>
+    /// <since>5.0</since>
     public void AddText(string text, Plane plane, double size, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -505,6 +534,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="text">Text object to add.</param>
     /// <param name="color">Color of text object.</param>
+    /// <since>5.0</since>
     public void AddText(Text3d text, Color color)
     {
       if (m_disposed) { throw new ObjectDisposedException("This CustomDisplay instance has been disposed and cannot be modified"); }
@@ -595,6 +625,7 @@ namespace Rhino.Display
     /// Dispose this CustomDisplay instance. You must call this function in order to 
     /// properly shut down the CustomDisplay.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       if (m_disposed) { return; }

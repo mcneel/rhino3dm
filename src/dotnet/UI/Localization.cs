@@ -10,7 +10,7 @@ using Rhino.Runtime.InteropWrappers;
 namespace Rhino.UI
 {
   /// <summary>
-  /// Used a placeholded which is used by LocalizationProcessor application to create contextId
+  /// Used a placeholder which is used by LocalizationProcessor application to create contextId
   /// mapped localized strings.
   /// </summary>
   public static class LOC
@@ -22,6 +22,7 @@ namespace Rhino.UI
     /// call to Localization.LocalizeString using a unique context ID.
     ///</summary>
     ///<param name='english'>[in] The English string to localize.</param>
+    /// <since>5.0</since>
     public static string STR(string english)
     {
       return english;
@@ -33,6 +34,7 @@ namespace Rhino.UI
     /// <param name="english">The English name.</param>
     /// <param name="assemblyOrObject">Unused.</param>
     /// <returns>English name.</returns>
+    /// <since>5.0</since>
     public static string STR(string english, object assemblyOrObject)
     {
       return english;
@@ -46,6 +48,7 @@ namespace Rhino.UI
     /// which should call Rhino.UI.Localization.LocalizeCommandName(EnglishName)
     ///</summary>
     ///<param name='english'>[in] The English string to localize.</param>
+    /// <since>5.0</since>
     public static string COMMANDNAME(string english)
     {
       return english;
@@ -59,6 +62,7 @@ namespace Rhino.UI
     ///</summary>
     ///<param name='english'>[in] The English string to localize.</param>
     /// <returns>Returns localized string pair with both the English and local names set to the English value.</returns>
+    /// <since>5.0</since>
     public static LocalizeStringPair CON(string english)
     {
       return new LocalizeStringPair(english, english);
@@ -73,6 +77,7 @@ namespace Rhino.UI
     ///<param name='english'>[in] The English string to localize.</param>
     ///<param name='assemblyFromObject'>[in] The object that identifies the assembly that owns the command option name.</param>
     /// <returns>Returns localized string pair with both the English and local names set to the English value.</returns>
+    /// <since>5.0</since>
     public static LocalizeStringPair CON(string english, object assemblyFromObject)
     {
       return new LocalizeStringPair(english, english);
@@ -86,6 +91,7 @@ namespace Rhino.UI
     ///</summary>
     ///<param name='english'>[in] The English string to localize.</param>
     /// <returns>Returns localized string pair with both the English and local names set to the English value.</returns>
+    /// <since>5.0</since>
     public static LocalizeStringPair COV(string english)
     {
       return new LocalizeStringPair(english, english);
@@ -100,6 +106,7 @@ namespace Rhino.UI
     ///<param name='english'>[in] The English string to localize.</param>
     ///<param name='assemblyFromObject'>[in] The object that identifies the assembly that owns the command option value.</param>
     /// <returns>Returns localized string pair with both the English and local names set to the English value.</returns>
+    /// <since>5.0</since>
     public static LocalizeStringPair COV(string english, object assemblyFromObject)
     {
       return new LocalizeStringPair(english, english);
@@ -115,9 +122,13 @@ namespace Rhino.UI
 
   public interface ILocalizationService
   {
+    /// <since>6.0</since>
     string LocalizeCommandName(Assembly assembly, int languageId, string english);
+    /// <since>6.0</since>
     string LocalizeDialogItem(Assembly assembly, int languageId, string key, string english);
+    /// <since>6.0</since>
     void LocalizeForm(Assembly assembly, int languageId, object formOrUserControl);
+    /// <since>6.0</since>
     string LocalizeString(Assembly assembly, int languageId, string english, int contextId);
   }
 
@@ -160,6 +171,7 @@ namespace Rhino.UI
     /// <param name="singular">true if the name is expressed for a singular element.</param>
     /// <param name="abbreviate">true if name should be the abbreviation.</param>
     /// <returns>The unit system name.</returns>
+    /// <since>5.0</since>
     public static string UnitSystemName(UnitSystem units, bool capitalize, bool singular, bool abbreviate)
     {
       using (var sh = new StringHolder())
@@ -179,6 +191,7 @@ namespace Rhino.UI
     /// <param name="precision">The precision of the number.</param>
     /// <param name="appendUnitSystemName">Adds unit system name to the end of the number.</param>
     /// <returns>The formatted number.</returns>
+    /// <since>5.0</since>
     public static string FormatNumber( double x, UnitSystem units, DistanceDisplayMode mode, int precision, bool appendUnitSystemName )
     {
       using (var sh = new StringHolder())
@@ -197,6 +210,7 @@ namespace Rhino.UI
     /// <param name="dimStyle"></param>
     /// <param name="alternate">primary or alternate</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static string FormatDistanceAndTolerance(double distance, UnitSystem units, Rhino.DocObjects.DimensionStyle dimStyle, bool alternate)
     {
       using (var sw = new StringWrapper())
@@ -209,13 +223,14 @@ namespace Rhino.UI
     }
 
     /// <summary>
-    /// 
+    /// Format an Area string from a number
     /// </summary>
     /// <param name="area"></param>
     /// <param name="units"></param>
     /// <param name="dimStyle"></param>
     /// <param name="alternate"></param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static string FormatArea(double area, UnitSystem units, Rhino.DocObjects.DimensionStyle dimStyle, bool alternate)
     {
       using (var sw = new StringWrapper())
@@ -227,16 +242,37 @@ namespace Rhino.UI
       }
     }
 
+    /// <summary>
+    /// Format a Volume string from a number
+    /// </summary>
+    /// <param name="volume"></param>
+    /// <param name="units"></param>
+    /// <param name="dimStyle"></param>
+    /// <param name="alternate"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public static string FormatVolume(double volume, UnitSystem units, Rhino.DocObjects.DimensionStyle dimStyle, bool alternate)
+    {
+      using (var sw = new StringWrapper())
+      {
+        IntPtr pString = sw.NonConstPointer;
+        IntPtr const_ptr_dimstyle = dimStyle == null ? IntPtr.Zero : dimStyle.ConstPointer();
+        UnsafeNativeMethods.ON_TextContext_FormatVolume(volume, units, const_ptr_dimstyle, alternate, pString);
+        return sw.ToString();
+      }
+    }
+
 
 
 #endif
     /// <summary>
-    /// Returns localized version of a given English string. This function should be autogenerated by the
+    /// Returns localized version of a given English string. This function should be auto-generated by the
     /// RmaLDotNetLocalizationProcessor application for every function that uses RMASTR.
     /// </summary>
     /// <param name="english">The text in English.</param>
     /// <param name="contextId">The context ID.</param>
     /// <returns>The localized string.</returns>
+    /// <since>5.0</since>
     public static string LocalizeString(string english, int contextId)
     {
       if( RunningAsEnglish )
@@ -245,13 +281,14 @@ namespace Rhino.UI
       return Service.LocalizeString(assembly, CurrentLanguageId, english, contextId);
     }
     /// <summary>
-    /// Returns localized version of a given English string. This function should be autogenerated by the
+    /// Returns localized version of a given English string. This function should be auto-generated by the
     /// RmaLDotNetLocalizationProcessor application for every function that uses RMASTR.
     /// </summary>
     /// <param name="english">The text in English.</param>
     /// <param name="assemblyOrObject">An assembly or an object from an assembly.</param>
     /// <param name="contextId">The context ID.</param>
     /// <returns>The localized string.</returns>
+    /// <since>5.0</since>
     public static string LocalizeString(string english, object assemblyOrObject, int contextId)
     {
       if( RunningAsEnglish )
@@ -270,6 +307,7 @@ namespace Rhino.UI
     /// Look in the dialog item list for the specified key and return the translated
     /// localized string if the key is found otherwise return the English string.
     /// </returns>
+    /// <since>5.5</since>
     public static string LocalizeDialogItem(object assemblyOrObject, string key, string english)
     {
       if( RunningAsEnglish )
@@ -282,6 +320,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="assemblyOrObject">An assembly or an object from an assembly.</param>
     /// <returns>The localized string.</returns>
+    /// <since>5.0</since>
     private static Assembly GetAssemblyFromObject(object assemblyOrObject)
     {
       Assembly assembly = assemblyOrObject as Assembly;
@@ -298,6 +337,7 @@ namespace Rhino.UI
     /// localized string if the key is found otherwise return the English string.
     /// </summary>
     /// <param name="formOrUserControl"></param>
+    /// <since>6.0</since>
     public static void LocalizeForm(object formOrUserControl)
     {
       if (RunningAsEnglish)
@@ -309,6 +349,7 @@ namespace Rhino.UI
     /// Commands that need to be localized should call this function.
     ///</summary>
     ///<param name='english'>The localized command name.</param>
+    /// <since>5.0</since>
     public static string LocalizeCommandName(string english)
     {
       if( RunningAsEnglish )
@@ -317,6 +358,7 @@ namespace Rhino.UI
       return Service.LocalizeCommandName(assembly, CurrentLanguageId, english);
     }
 
+    /// <since>5.0</since>
     public static string LocalizeCommandName(string english, object assemblyOrObject)
     {
       if( RunningAsEnglish )
@@ -325,24 +367,28 @@ namespace Rhino.UI
       return Service.LocalizeCommandName(assembly, CurrentLanguageId, english);
     }
 
+    /// <since>5.0</since>
     public static LocalizeStringPair LocalizeCommandOptionName(string english, int contextId)
     {
       Assembly assembly = Assembly.GetCallingAssembly();
       return LocalizeCommandOptionName(english, assembly, contextId);
     }
 
+    /// <since>5.0</since>
     public static LocalizeStringPair LocalizeCommandOptionName(string english, object assemblyOrObject, int contextId)
     {
       string local = LocalizeString(english, assemblyOrObject, contextId);
       return new LocalizeStringPair(english, local);
     }
 
+    /// <since>5.0</since>
     public static LocalizeStringPair LocalizeCommandOptionValue(string english, int contextId)
     {
       Assembly assembly = Assembly.GetCallingAssembly();
       return LocalizeCommandOptionValue(english, assembly, contextId);
     }
 
+    /// <since>5.0</since>
     public static LocalizeStringPair LocalizeCommandOptionValue(string english, object assemblyOrObject, int contextId)
     {
       string local = LocalizeString(english, assemblyOrObject, contextId);
@@ -363,6 +409,7 @@ namespace Rhino.UI
     }
     static int g_language_id = -1;
 
+    /// <since>6.0</since>
     public static int CurrentLanguageId
     {
       get
@@ -384,6 +431,7 @@ namespace Rhino.UI
       }
     }
 
+    /// <since>6.0</since>
     public static bool RunningAsEnglish
     {
       get { return CurrentLanguageId == 1033; }
@@ -395,6 +443,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="id"></param>
     /// <returns>true if the language id could be set</returns>
+    /// <since>5.0</since>
     public static bool SetLanguageId(int id)
     {
 #if RHINO_SDK
@@ -409,13 +458,16 @@ namespace Rhino.UI
   /// <summary>Pair of strings used for localization.</summary>
   public sealed class LocalizeStringPair
   {
+    /// <since>5.0</since>
     public LocalizeStringPair(string english, string local)
     {
       English = english;
       Local = local;
     }
 
+    /// <since>5.0</since>
     public string English { get; private set; }
+    /// <since>5.0</since>
     public string Local { get; private set; }
 
     public override string ToString() { return Local; }

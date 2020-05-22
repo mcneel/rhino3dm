@@ -11,6 +11,7 @@ namespace Rhino.DocObjects
     { }
 
     /// <summary> Get the text geometry for this object. </summary>
+    /// <since>5.0</since>
     public Geometry.TextEntity TextGeometry => Geometry as Geometry.TextEntity;
 
     internal override CommitGeometryChangesFunc GetCommitFunc()

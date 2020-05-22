@@ -61,6 +61,7 @@ namespace Rhino.DocObjects
 
     #region properties
     /// <summary>The name of this bitmap.</summary>
+    /// <since>5.1</since>
     public string FileName
     {
       get
@@ -82,6 +83,7 @@ namespace Rhino.DocObjects
     /// Gets a value indicting whether this bitmap is a referenced bitmap. 
     /// Referenced bitmaps are part of referenced documents.
     /// </summary>
+    /// <since>5.1</since>
     public bool IsReference
     {
       get
@@ -99,6 +101,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Returns <see cref="ModelComponentType.Image"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -115,6 +118,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="fileName"></param>
     /// <returns></returns>
+    /// <since>5.1</since>
     public bool Save(string fileName)
     {
 #if RHINO_SDK
@@ -144,6 +148,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns <see cref="ModelComponentType.Image"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -171,11 +176,12 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Retrieves a BitmapEntry object based on Index. This seach type of search is discouraged.
+    /// Retrieves a BitmapEntry object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A BitmapEntry object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public BitmapEntry FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -210,6 +216,7 @@ namespace Rhino.DocObjects.Tables
     /// returns the BitmapEntry with the specified name if it is found in the bitmap table
     /// and null if it was not found in the bitmap table.
     /// </returns>
+    /// <since>5.1</since>
     public BitmapEntry Find(string name, bool createFile, out string fileName)
     {
       fileName = string.Empty;
@@ -239,12 +246,13 @@ namespace Rhino.DocObjects.Tables
     /// If NULL or empty, then a unique name of the form "Bitmap 01" will be automatically created.
     /// </param>
     /// <param name="replaceExisting">
-    /// If true and the there is alread a bitmap using the specified name, then that bitmap is replaced.
+    /// If true and the there is already a bitmap using the specified name, then that bitmap is replaced.
     /// If false and there is already a bitmap using the specified name, then -1 is returned.
     /// </param>
     /// <returns>
     /// index of new bitmap in table on success. -1 on error.
     /// </returns>
+    /// <since>5.0</since>
     public int AddBitmap(string bitmapFilename, bool replaceExisting)
     {
       return UnsafeNativeMethods.CRhinoBitmapTable_AddBitmap(m_doc.RuntimeSerialNumber, bitmapFilename, replaceExisting);
@@ -261,6 +269,7 @@ namespace Rhino.DocObjects.Tables
     /// true if successful. false if the bitmap cannot be deleted because it
     /// is the current bitmap or because it bitmap contains active geometry.
     /// </returns>
+    /// <since>5.0</since>
     public bool DeleteBitmap(string bitmapFilename)
     {
       return UnsafeNativeMethods.CRhinoBitmapTable_DeleteBitmap(m_doc.RuntimeSerialNumber, bitmapFilename);
@@ -271,6 +280,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="item">The item to remove. Null will always return false.</param>
     /// <returns>True if the item could be deleted; otherwise, false.</returns>
+    /// <since>6.0</since>
     public override bool Delete(BitmapEntry item)
     {
       if (item == null) return false;
@@ -284,6 +294,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="overwrite">0 = no, 1 = yes, 2 = ask.</param>
     /// <returns>Number of bitmaps written.</returns>
+    /// <since>5.0</since>
     public int ExportToFiles(string directoryPath, int overwrite)
     {
       return UnsafeNativeMethods.CRhinoBitmapTable_ExportToFiles(m_doc.RuntimeSerialNumber, directoryPath, overwrite);
@@ -295,6 +306,7 @@ namespace Rhino.DocObjects.Tables
     /// The full path, including file name and extension, name of the file to write.
     /// </param>
     /// <returns>true if successful.</returns>
+    /// <since>5.0</since>
     public bool ExportToFile(int index, string path)
     {
       return UnsafeNativeMethods.CRhinoBitmapTable_ExportToFile(m_doc.RuntimeSerialNumber, index, path);

@@ -24,6 +24,7 @@ namespace Rhino.DocObjects
     internal Guid m_id = Guid.Empty;
 
     /// <summary> Create a new non-document controlled annotation style </summary>
+    /// <since>5.0</since>
     public DimensionStyle()
     {
       var ptr_on_dimstyle = UnsafeNativeMethods.ON_DimStyle_New(IntPtr.Zero);
@@ -76,6 +77,7 @@ namespace Rhino.DocObjects
 
     /// <summary> Construct a deep (full) copy of this object. </summary>
     /// <returns>An object of the same type as this, with the same properties and behavior.</returns>
+    /// <since>6.0</since>
     public DimensionStyle Duplicate()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -85,6 +87,7 @@ namespace Rhino.DocObjects
 
     /// <summary> Construct a deep (full) copy of this object. </summary>
     /// <returns>An object of the same type as this, with the same properties and behavior.</returns>
+    /// <since>6.0</since>
     public DimensionStyle Duplicate(string newName, Guid newId, Guid newParentId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -105,6 +108,7 @@ namespace Rhino.DocObjects
     /// <param name="source">
     /// DimensionStyle to copy settings from.
     /// </param>
+    /// <since>6.0</since>
     public void CopyFrom(DimensionStyle source)
     {
       if (source == null)
@@ -151,6 +155,7 @@ namespace Rhino.DocObjects
       return base.NonConstPointer();
     }
 
+    /// <since>5.0</since>
     public bool IsReference
     {
       get
@@ -166,6 +171,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public bool IsDeleted
     {
       get
@@ -181,6 +187,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public Font Font
     {
       get
@@ -198,6 +205,7 @@ namespace Rhino.DocObjects
     }
 
 #if RHINO_SDK
+    /// <since>6.0</since>
     public Bitmap CreatePreviewBitmap(int width, int height)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -210,6 +218,7 @@ namespace Rhino.DocObjects
     /// Scales all length values by 'scale'
     /// </summary>
     /// <param name="scale"></param>
+    /// <since>6.0</since>
     public void ScaleLengthValues(double scale)
     {
       IntPtr dimstyle = NonConstPointer();
@@ -257,18 +266,21 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_DimStyle_SetGuid(ptr_this, field, id, true);
     }
 
+    /// <since>6.0</since>
     public Guid ArrowBlockId1
     {
       get { return GetGuid(Field.ArrowBlockId1); }
       set { SetGuid(Field.ArrowBlockId1, value); }
     }
 
+    /// <since>6.0</since>
     public Guid ArrowBlockId2
     {
       get { return GetGuid(Field.ArrowBlockId2); }
       set { SetGuid(Field.ArrowBlockId2, value); }
     }
 
+    /// <since>6.0</since>
     public Guid LeaderArrowBlockId
     {
       get { return GetGuid(Field.LeaderArrowBlock); }
@@ -288,66 +300,77 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetBool(ptr_this, field, b, true);
     }
+    /// <since>6.0</since>
     public bool SuppressExtension1
     {
       get { return GetBool(Field.SuppressExtension1); }
       set { SetBool(Field.SuppressExtension1, value); }
     }
 
+    /// <since>6.0</since>
     public bool SuppressExtension2
     {
       get { return GetBool(Field.SuppressExtension2); }
       set { SetBool(Field.SuppressExtension2, value); }
     }
 
+    /// <since>6.0</since>
     public bool SuppressArrow1
     {
       get { return GetBool(Field.SuppressArrow1); }
       set { SetBool(Field.SuppressArrow1, value); }
     }
 
+    /// <since>6.0</since>
     public bool SuppressArrow2
     {
       get { return GetBool(Field.SuppressArrow2); }
       set { SetBool(Field.SuppressArrow2, value); }
     }
 
+    /// <since>6.0</since>
     public bool AlternateUnitsDisplay
     {
       get { return GetBool(Field.Alternate); }
       set { SetBool(Field.Alternate, value); }
     }
 
+    /// <since>6.0</since>
     public bool AlternateBelowLine
     {
       get { return GetBool(Field.AltBelow); }
       set { SetBool(Field.AltBelow, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawTextMask
     {
       get { return GetBool(Field.DrawMask); }
       set { SetBool(Field.DrawMask, value); }
     }
 
+    /// <since>6.0</since>
     public bool FixedExtensionOn
     {
       get { return GetBool(Field.FixedExtensionOn); }
       set { SetBool(Field.FixedExtensionOn, value); }
     }
 
+    /// <since>6.0</since>
     public bool LeaderHasLanding
     {
       get { return GetBool(Field.LeaderHasLanding); }
       set { SetBool(Field.LeaderHasLanding, value); }
     }
 
+    /// <since>6.0</since>
     public bool DrawForward
     {
       get { return GetBool(Field.DrawForward); }
       set { SetBool(Field.DrawForward, value); }
     }
 
+    /// <since>6.0</since>
     public bool TextUnderlined
     {
       get { return GetBool(Field.TextUnderlined); }
@@ -368,138 +391,161 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_DimStyle_SetDouble(ptr_this, field, d, true);
     }
 
+    /// <since>6.0</since>
     public double MaskOffset
     {
       get { return GetDouble(Field.MaskBorder); }
       set { SetDouble(Field.MaskBorder, value); }
     }
 
+    /// <since>5.0</since>
     public double ExtensionLineExtension
     {
       get { return GetDouble(Field.ExtensionLineExtension); }
       set { SetDouble(Field.ExtensionLineExtension, value); }
     }
 
+    /// <since>5.0</since>
     public double ExtensionLineOffset
     {
       get { return GetDouble(Field.ExtensionLineOffset); }
       set { SetDouble(Field.ExtensionLineOffset, value); }
     }
 
+    /// <since>6.0</since>
     public double DimensionLineExtension
     {
       get { return GetDouble(Field.DimensionLineExtension); }
       set { SetDouble(Field.DimensionLineExtension, value); }
     }
 
+    /// <since>5.0</since>
     public double ArrowLength
     {
       get { return GetDouble(Field.Arrowsize); }
       set { SetDouble(Field.Arrowsize, value); }
     }
 
+    /// <since>5.0</since>
     public double LeaderArrowLength
     {
       get { return GetDouble(Field.LeaderArrowsize); }
       set { SetDouble(Field.LeaderArrowsize, value); }
     }
 
+    /// <since>5.0</since>
     public double CentermarkSize
     {
       get { return GetDouble(Field.Centermark); }
       set { SetDouble(Field.Centermark, value); }
     }
 
+    /// <since>5.0</since>
     public double TextGap
     {
       get { return GetDouble(Field.TextGap); }
       set { SetDouble(Field.TextGap, value); }
     }
 
+    /// <since>5.0</since>
     public double TextHeight
     {
       get { return GetDouble(Field.TextHeight); }
       set { SetDouble(Field.TextHeight, value); }
     }
 
+    /// <since>5.0</since>
     public double LengthFactor
     {
       get { return GetDouble(Field.LengthFactor); }
       set { SetDouble(Field.LengthFactor, value); }
     }
 
+    /// <since>5.0</since>
     public double AlternateLengthFactor
     {
       get { return GetDouble(Field.AlternateLengthFactor); }
       set { SetDouble(Field.AlternateLengthFactor, value); }
     }
 
+    /// <since>6.0</since>
     public double ToleranceUpperValue
     {
       get { return GetDouble(Field.ToleranceUpperValue); }
       set { SetDouble(Field.ToleranceUpperValue, value); }
     }
 
+    /// <since>6.0</since>
     public double ToleranceLowerValue
     {
       get { return GetDouble(Field.ToleranceLowerValue); }
       set { SetDouble(Field.ToleranceLowerValue, value); }
     }
 
+    /// <since>6.0</since>
     public double ToleranceHeightScale
     {
       get { return GetDouble(Field.ToleranceHeightScale); }
       set { SetDouble(Field.ToleranceHeightScale, value); }
     }
 
+    /// <since>6.0</since>
     public double BaselineSpacing
     {
       get { return GetDouble(Field.BaselineSpacing); }
       set { SetDouble(Field.BaselineSpacing, value); }
     }
 
+    /// <since>6.0</since>
     public double DimensionScale
     {
       get { return GetDouble(Field.DimensionScale); }
       set { SetDouble(Field.DimensionScale, value); }
     }
 
+    /// <since>6.0</since>
     public double FixedExtensionLength
     {
       get { return GetDouble(Field.FixedExtensionLength); }
       set { SetDouble(Field.FixedExtensionLength, value); }
     }
 
+    /// <since>6.0</since>
     public double TextRotation
     {
       get { return GetDouble(Field.TextRotation); }
       set { SetDouble(Field.TextRotation, value); }
     }
 
+    /// <since>6.0</since>
     public double StackHeightScale
     {
       get { return GetDouble(Field.StackTextheightScale); }
       set { SetDouble(Field.StackTextheightScale, value); }
     }
 
+    /// <since>6.0</since>
     public double Roundoff
     {
       get { return GetDouble(Field.Round); }
       set { SetDouble(Field.Round, value); }
     }
 
+    /// <since>6.0</since>
     public double AlternateRoundoff
     {
       get { return GetDouble(Field.AltRound); }
       set { SetDouble(Field.AltRound, value); }
     }
 
+    /// <since>6.0</since>
     public double AngularRoundoff
     {
       get { return GetDouble(Field.AngularRound); }
       set { SetDouble(Field.AngularRound, value); }
     }
 
+    /// <since>6.0</since>
     public double LeaderLandingLength
     {
       get { return GetDouble(Field.LeaderLandingLength); }
@@ -509,12 +555,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Angle of leader text for Rotated style
     /// </summary>
+    /// <since>6.0</since>
     public double LeaderTextRotationRadians
     {
       get { return GetDouble(Field.LeaderContentAngle); }
       set { SetDouble(Field.LeaderContentAngle, value); }
     }
 
+    /// <since>6.0</since>
     public double LeaderTextRotationDegrees
     {
       get
@@ -532,6 +580,7 @@ namespace Rhino.DocObjects
 
 #endregion
 
+    /// <since>6.0</since>
     public ScaleValue DimensionScaleValue
     {
       get
@@ -547,6 +596,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public double ScaleLeftLengthMillimeters
     {
       get
@@ -569,6 +619,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
     public double ScaleRightLengthMillimeters
     {
       get
@@ -591,6 +642,7 @@ namespace Rhino.DocObjects
     }
 
 #region enum properties
+    /// <since>6.20</since>
     public DimensionStyle.TextFit FitText
     {
       get
@@ -605,6 +657,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.20</since>
     public DimensionStyle.ArrowFit FitArrow
     {
       get
@@ -619,6 +672,7 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.20</since>
     public bool ForceDimensionLineBetweenExtensionLines
     {
       get { return GetBool(Field.ForceDimLine); }
@@ -642,18 +696,21 @@ namespace Rhino.DocObjects
     //  set { SetInt(Field.DimTextLocation, (int)value); }
     //}
 
+    /// <since>6.0</since>
     public LengthDisplay DimensionLengthDisplay
     {
       get { return (LengthDisplay)GetInt(Field.DimensionLengthDisplay); }
       set { SetInt(Field.DimensionLengthDisplay, (int)value); }
     }
 
+    /// <since>6.0</since>
     public LengthDisplay AlternateDimensionLengthDisplay
     {
       get { return (LengthDisplay)GetInt(Field.AlternateDimensionLengthDisplay); }
       set { SetInt(Field.AlternateDimensionLengthDisplay, (int)value); }
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public UnitSystem DimensionLengthDisplayUnit(uint model_serial_number )
     {
@@ -662,6 +719,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.ON_Dimstyle_GetDimensionLengthDisplayUnit(ptr_this, model_serial_number);
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public UnitSystem AlternateDimensionLengthDisplayUnit(uint model_serial_number)
     {
@@ -670,42 +728,56 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.ON_Dimstyle_GetAlternateDimensionLengthDisplayUnit(ptr_this, model_serial_number);
     }
 
+    /// <since>6.0</since>
     public AngleDisplayFormat AngleFormat
     {
       get { return (AngleDisplayFormat)GetInt(Field.AngleFormat); }
       set { SetInt(Field.AngleFormat, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ToleranceDisplayFormat ToleranceFormat
     {
       get { return (ToleranceDisplayFormat)GetInt(Field.ToleranceFormat); }
       set { SetInt(Field.ToleranceFormat, (int)value); }
     }
 
+    /// <since>6.0</since>
     public MaskType MaskColorSource
     {
       get { return (MaskType)GetInt(Field.MaskColorSource); }
       set { SetInt(Field.MaskColorSource, (int)value); }
     }
 
+    /// <since>7.0</since>
+    public MaskFrame MaskFrameType
+    {
+      get { return (MaskFrame)GetInt(Field.MaskFrameType); }
+      set { SetInt(Field.MaskFrameType, (int)value); }
+    }
+
+    /// <since>6.0</since>
     public StackDisplayFormat StackFractionFormat
     {
       get { return (StackDisplayFormat)GetInt(Field.StackFormat); }
       set { SetInt(Field.StackFormat, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ZeroSuppression ZeroSuppress
     {
       get { return (ZeroSuppression)GetInt(Field.ZeroSuppress); }
       set { SetInt(Field.ZeroSuppress, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ZeroSuppression AlternateZeroSuppress
     {
       get { return (ZeroSuppression)GetInt(Field.AltZeroSuppress); }
       set { SetInt(Field.AltZeroSuppress, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ZeroSuppression ToleranceZeroSuppress
     {
       // OBSOLETE - dimensions use ZeroSuppress and AltZeroSuppress when
@@ -714,42 +786,49 @@ namespace Rhino.DocObjects
       set { } //OBSOLETE - nothing to set 
     }
 
+    /// <since>6.0</since>
     public ZeroSuppression AngleZeroSuppress
     {
       get { return (ZeroSuppression)GetInt(Field.AngleZeroSuppress); }
       set { SetInt(Field.AngleZeroSuppress, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ArrowType ArrowType1
     {
       get { return (ArrowType)GetInt(Field.ArrowType1); }
       set { SetInt(Field.ArrowType1, (int)value); }
     }
 
+    /// <since>6.0</since>
     public ArrowType ArrowType2
     {
       get { return (ArrowType)GetInt(Field.ArrowType2); }
       set { SetInt(Field.ArrowType2, (int)value); }
     }
 
+    /// <since>5.6</since>
     public ArrowType LeaderArrowType
     {
       get { return (ArrowType)GetInt(Field.LeaderArrowType); }
       set { SetInt(Field.LeaderArrowType, (int)value); }
     }
 
+    /// <since>6.0</since>
     public int TextMoveLeader
     {
       get { return GetInt(Field.TextmoveLeader); }
       set { SetInt(Field.TextmoveLeader, value); }
     }
 
+    /// <since>6.0</since>
     public int ArcLengthSymbol
     {
       get { return GetInt(Field.ArclengthSymbol); }
       set { SetInt(Field.ArclengthSymbol, value); }
     }
 
+    /// <since>6.0</since>
     public CenterMarkStyle CenterMarkType
     {
       get { return (CenterMarkStyle)GetInt(Field.CentermarkStyle); }
@@ -762,84 +841,98 @@ namespace Rhino.DocObjects
     /// Aligned
     /// Rotated
     /// </summary>
+    /// <since>6.0</since>
     public LeaderContentAngleStyle LeaderContentAngleType
     {
       get { return (LeaderContentAngleStyle)GetInt(Field.LeaderContentAngle); }
       set { SetInt(Field.LeaderContentAngle, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextVerticalAlignment TextVerticalAlignment
     {
       get { return (TextVerticalAlignment)GetInt(Field.TextVerticalAlignment); }
       set { SetInt(Field.TextVerticalAlignment, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextHorizontalAlignment TextHorizontalAlignment
     {
       get { return (TextHorizontalAlignment)GetInt(Field.TextHorizontalAlignment); }
       set { SetInt(Field.TextHorizontalAlignment, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextVerticalAlignment LeaderTextVerticalAlignment
     {
       get { return (TextVerticalAlignment)GetInt(Field.LeaderTextVerticalAlignment); }
       set { SetInt(Field.LeaderTextVerticalAlignment, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextHorizontalAlignment LeaderTextHorizontalAlignment
     {
       get { return (TextHorizontalAlignment)GetInt(Field.LeaderTextHorizontalAlignment); }
       set { SetInt(Field.LeaderTextHorizontalAlignment, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextLocation DimTextLocation
     {
       get { return (TextLocation) GetInt(Field.DimTextLocation); }
       set { SetInt(Field.DimTextLocation, (int) value); }
     }
 
+    /// <since>6.0</since>
     public TextLocation DimRadialTextLocation
     {
       get { return (TextLocation)GetInt(Field.DimRadialTextLocation); }
       set { SetInt(Field.DimRadialTextLocation, (int)value); }
     }
 
+    /// <since>6.0</since>
     public LeaderCurveStyle LeaderCurveType
     {
       get { return (LeaderCurveStyle)GetInt(Field.LeaderCurveType); }
       set { SetInt(Field.LeaderCurveType, (int)value); }
     }
 
+    /// <since>6.0</since>
     public LeaderContentAngleStyle DimTextAngleType
     {
       get { return (LeaderContentAngleStyle)GetInt(Field.DimTextAngleStyle); }
       set { SetInt(Field.DimTextAngleStyle, (int)value); }
     }
 
+    /// <since>6.0</since>
     public LeaderContentAngleStyle DimRadialTextAngleType
     {
       get { return (LeaderContentAngleStyle)GetInt(Field.DimRadialTextAngleStyle); }
       set { SetInt(Field.DimRadialTextAngleStyle, (int)value); }
     }
     
+    /// <since>6.0</since>
     public TextOrientation TextOrientation
     {
       get { return (TextOrientation)GetInt(Field.TextOrientation); }
       set { SetInt(Field.TextOrientation, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextOrientation LeaderTextOrientation
     {
       get { return (TextOrientation)GetInt(Field.LeaderTextOrientation); }
       set { SetInt(Field.LeaderTextOrientation, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextOrientation DimTextOrientation
     {
       get { return (TextOrientation)GetInt(Field.DimTextOrientation); }
       set { SetInt(Field.DimTextOrientation, (int)value); }
     }
 
+    /// <since>6.0</since>
     public TextOrientation DimRadialTextOrientation
     {
       get { return (TextOrientation)GetInt(Field.DimRadialTextOrientation); }
@@ -851,30 +944,35 @@ namespace Rhino.DocObjects
 
 #region int properties
 
+    /// <since>5.0</since>
     public int LengthResolution
     {
       get { return GetInt(Field.LengthResolution); }
       set { SetInt(Field.LengthResolution, value); }
     }
 
+    /// <since>6.0</since>
     public int AlternateLengthResolution
     {
       get { return GetInt(Field.AlternateLengthResolution); }
       set { SetInt(Field.AlternateLengthResolution, value); }
     }
 
+    /// <since>5.0</since>
     public int AngleResolution
     {
       get { return GetInt(Field.AngleResolution); }
       set { SetInt(Field.AngleResolution, value); }
     }
 
+    /// <since>6.0</since>
     public int ToleranceResolution
     {
       get { return GetInt(Field.ToleranceResolution); }
       set { SetInt(Field.ToleranceResolution, value); }
     }
 
+    /// <since>6.0</since>
     public int AlternateToleranceResolution
     {
       get { return GetInt(Field.AltToleranceResolution); }
@@ -894,6 +992,7 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_DimStyle_SetColor(ptr_this, field, argb, true);
     }
 
+    /// <since>6.0</since>
     public Color MaskColor
     {
       get { return GetColor(Field.MaskColor); }
@@ -904,6 +1003,7 @@ namespace Rhino.DocObjects
 
 #region string properties
 
+    /// <since>7.0</since>
     public char DecimalSeparator
     {
       get
@@ -949,24 +1049,28 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_DimStyle_SetString(ptr_this, field, s, true);
     }
 
+    /// <since>5.0</since>
     public string Prefix
     {
       get { return GetString(Field.Prefix); }
       set { SetString(Field.Prefix, value); }
     }
 
+    /// <since>5.0</since>
     public string Suffix
     {
       get { return GetString(Field.Suffix); }
       set { SetString(Field.Suffix, value); }
     }
 
+    /// <since>6.0</since>
     public string AlternatePrefix
     {
       get { return GetString(Field.AlternatePrefix); }
       set { SetString(Field.AlternatePrefix, value); }
     }
 
+    /// <since>6.0</since>
     public string AlternateSuffix
     {
       get { return GetString(Field.AlternateSuffix); }
@@ -976,6 +1080,7 @@ namespace Rhino.DocObjects
 #endregion string properties
 
     /// <summary> Returns <see cref="ModelComponentType.ModelGeometry"/>. </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -1006,6 +1111,7 @@ namespace Rhino.DocObjects
     /// True if the field corresponding to field_id is overridden in this AnnotationStyle
     /// False if the field is not overridden
     /// </returns>
+    /// <since>6.0</since>
     public bool IsFieldOverriden(Field field)
     {
       return UnsafeNativeMethods.ON_DimStyle_IsFieldOverride(ConstPointer(), field);
@@ -1013,6 +1119,7 @@ namespace Rhino.DocObjects
 
     /// <summary> Set a field as overridden </summary>
     /// <param name="field"></param>
+    /// <since>6.0</since>
     public void SetFieldOverride(Field field)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1022,6 +1129,7 @@ namespace Rhino.DocObjects
     /// Set the field as not overridden
     /// </summary>
     /// <param name="field"></param>
+    /// <since>6.0</since>
     public void ClearFieldOverride(Field field)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1032,6 +1140,7 @@ namespace Rhino.DocObjects
     /// Sets all the fields in this DimensionStyle to be not overridden
     /// Does not change any dimstyle_id's or parent_id's
     /// </summary>
+    /// <since>6.0</since>
     public void ClearAllFieldOverrides()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1045,6 +1154,7 @@ namespace Rhino.DocObjects
     /// True if any fields are overrides
     /// False is no fields are overrides
     /// </returns>
+    /// <since>6.0</since>
     public bool HasFieldOverrides
     {
       get
@@ -1061,6 +1171,7 @@ namespace Rhino.DocObjects
     /// True if this is a child DimensionStyle, 
     /// False otherwise.
     /// </returns>
+    /// <since>6.0</since>
     public bool IsChild
     {
       get
@@ -1078,6 +1189,7 @@ namespace Rhino.DocObjects
     /// True if this is a child of the DimensionStyle with Parent
     /// False otherwise.
     /// </returns>
+    /// <since>6.0</since>
     public bool IsChildOf(Guid parentId)
     {
       return UnsafeNativeMethods.ON_DimStyle_IsChildOf(ConstPointer(), parentId);
@@ -1087,6 +1199,7 @@ namespace Rhino.DocObjects
     /// Get or Set the Id of this DimensionStyle's parent.
     /// If ParentId is Guid.Empty, this DimensionStyle has no parent
     /// </summary>
+    /// <since>6.0</since>
     public Guid ParentId
     {
       get { return UnsafeNativeMethods.ON_DimStyle_GetParentId(ConstPointer()); }
@@ -1134,22 +1247,27 @@ namespace Rhino.DocObjects.Tables
     }
 
     RhinoDoc m_doc;
+    /// <since>6.0</since>
     public RhinoDoc Document
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
     }
 
+    /// <since>6.0</since>
     public DimStyleTableEventType EventType { get; }
 
+    /// <since>6.0</since>
     public int Index { get; }
 
     DimensionStyle m_new;
+    /// <since>6.0</since>
     public DimensionStyle NewState
     {
       get { return m_new ?? (m_new = new DimensionStyle(Index, Document)); }
     }
 
     DimensionStyle m_old;
+    /// <since>6.0</since>
     public DimensionStyle OldState
     {
       get
@@ -1175,6 +1293,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Creates an array of default AnnotationStyle objects
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle[] BuiltInStyles
     {
       get
@@ -1206,11 +1325,12 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Retrieves a DimensionStyle object based on Index. This seach type of search is discouraged.
+    /// Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
     /// We are moving towards using only IDs for all tables.
     /// </summary>
     /// <param name="index">The index to search for.</param>
     /// <returns>A DimensionStyle object, or null if none was found.</returns>
+    /// <since>6.0</since>
     public DimensionStyle FindIndex(int index)
     {
       return __FindIndexInternal(index);
@@ -1229,6 +1349,7 @@ namespace Rhino.DocObjects.Tables
     /// Name of the new AnnotationStyle. If null or empty, Rhino automatically generates the name.
     /// </param>
     /// <returns>index of new AnnotationStyle.</returns>
+    /// <since>5.0</since>
     public int Add(string name)
     {
       return Add(name, false);
@@ -1240,6 +1361,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="dimstyle">The dimension style to add </param>
     /// <param name="reference">if true the dimstyle will not be saved in files.</param>
     /// <returns>index of new AnnotationStyle.</returns>
+    /// <since>6.0</since>
     public int Add(DimensionStyle dimstyle, bool reference)
     {
       if (!dimstyle.IsChild)
@@ -1258,6 +1380,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <param name="reference">if true the dimstyle will not be saved in files.</param>
     /// <returns>index of new AnnotationStyle.</returns>
+    /// <since>5.0</since>
     public int Add(string name, bool reference)
     {
       return UnsafeNativeMethods.CRhinoDimStyleTable_Add(m_doc.RuntimeSerialNumber, name, reference);
@@ -1268,6 +1391,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\cs\ex_dimstyle.cs' lang='cs'/>
     /// <code source='examples\py\ex_dimstyle.py' lang='py'/>
     /// </example>
+    /// <since>6.0</since>
     public int CurrentIndex
     {
       get
@@ -1276,6 +1400,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public Guid CurrentId
     {
       get
@@ -1287,6 +1412,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Do not use. Use the <see cref="Current"/> property.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("Use the Current property.")]
     public DimensionStyle CurrentDimensionStyle
     {
@@ -1299,6 +1425,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns an instance of the current <see cref="DimensionStyle"/>.
     /// </summary>
+    /// <since>6.0</since>
     public DimensionStyle Current
     {
       get
@@ -1310,6 +1437,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Returns <see cref="ModelComponentType.DimStyle"/>.
     /// </summary>
+    /// <since>6.0</since>
     public override ModelComponentType ComponentType
     {
       get
@@ -1325,6 +1453,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="index">The index of the current DimStyle.</param>
     /// <param name="quiet">true if error dialog boxes are disabled. False if they are enabled.</param>
     /// <returns>true if the method achieved its goal; otherwise false.</returns>
+    /// <since>6.0</since>
     public bool SetCurrent(int index, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoDimStyleTable_SetCurrentDimStyleIndex(m_doc.RuntimeSerialNumber, index, quiet);
@@ -1337,12 +1466,14 @@ namespace Rhino.DocObjects.Tables
     /// <param name="index">Do not use.</param>
     /// <param name="quiet">Do not use.</param>
     /// <returns>Do not use.</returns>
+    /// <since>5.0</since>
     [Obsolete("Use the SetCurrent property.")]
     public bool SetCurrentDimensionStyleIndex(int index, bool quiet)
     {
       return SetCurrent(index, quiet);
     }
 
+    /// <since>5.0</since>
     [Obsolete("ignoreDeleted is always considered true now. Use FindName.")]
     public DimensionStyle Find(string name, bool ignoreDeleted)
     {
@@ -1354,16 +1485,18 @@ namespace Rhino.DocObjects.Tables
 
 
     /// <summary>
-    /// Finds the DimensionStyle with a given name and retuns it. None is returned if no DimensionStyle is found.
+    /// Finds the DimensionStyle with a given name and returns it. None is returned if no DimensionStyle is found.
     /// </summary>
     /// <param name="name">The string to search. Deleted styles are ignored.</param>
     /// <returns>The instance, or null.</returns>
+    /// <since>6.0</since>
     public DimensionStyle FindName(string name)
     {
       return __FindNameInternal(name);
     }
 
 
+    /// <since>6.0</since>
     public DimensionStyle Find(Guid styleId, bool ignoreDeleted)
     {
       const int not_found_value = -100000;
@@ -1373,6 +1506,7 @@ namespace Rhino.DocObjects.Tables
       return rc == not_found_value ? null : new DimensionStyle(rc, m_doc);
     }
 
+    /// <since>6.0</since>
     public DimensionStyle FindRoot(Guid styleId, bool ignoreDeleted)
     {
       const int not_found_value = -100000;
@@ -1386,6 +1520,7 @@ namespace Rhino.DocObjects.Tables
     /// Get a unique name for a style that does not already exist in the DimStyle table
     /// </summary>
     /// <returns></returns>
+    /// <since>6.0</since>
     public string GetUnusedStyleName()
     {
       using(var sh = new StringWrapper())
@@ -1400,6 +1535,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="rootName">prefix in name; typically the parent style name</param>
     /// <returns></returns>
+    /// <since>6.0</since>
     public string GetUnusedStyleName(string rootName)
     {
       using (var sh = new StringWrapper())
@@ -1410,6 +1546,7 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <since>6.0</since>
     public bool Delete(int index, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoDimStyleTable_DeleteDimStyle(m_doc.RuntimeSerialNumber, index, quiet);
@@ -1420,6 +1557,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="item">The item to remove.</param>
     /// <returns>True if the item was removed; false otherwise.</returns>
+    /// <since>6.0</since>
     public override bool Delete(DimensionStyle item)
     {
       if(item == null)
@@ -1436,6 +1574,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if successful. false if dimstyleIndex is out of range
     /// </returns>
+    /// <since>6.0</since>
     public bool Modify(DimensionStyle newSettings, int dimstyleIndex, bool quiet)
     {
       if (null == newSettings)
@@ -1454,6 +1593,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if successful. false if Id is not already in table
     /// </returns>
+    /// <since>6.0</since>
     public bool Modify(DimensionStyle newSettings, Guid dimstyleId, bool quiet)
     {
       if (null == newSettings)
@@ -1465,6 +1605,7 @@ namespace Rhino.DocObjects.Tables
       return Modify(newSettings, index, quiet);
     }
 
+    /// <since>6.0</since>
     public ModifyType Modify(DimensionStyle dimstyle, Geometry.AnnotationBase annotation)
     {
       ModifyType save_type = ModifyType.NotSaved;
@@ -1488,6 +1629,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     // for IEnumerable<AnnotationStyle>
+    /// <since>5.0</since>
     public override IEnumerator<DimensionStyle> GetEnumerator()
     {
       return base.GetEnumerator();

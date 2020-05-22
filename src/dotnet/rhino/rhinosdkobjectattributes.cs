@@ -1,4 +1,4 @@
-﻿using Rhino.Geometry;
+using Rhino.Geometry;
 #pragma warning disable 1591
 using System;
 using System.Runtime.Serialization;
@@ -13,6 +13,7 @@ namespace Rhino.DocObjects
   public class ObjectAttributes : Runtime.CommonObject
   {
 #if RHINO_SDK
+    /// <since>5.0</since>
     public override bool IsDocumentControlled
     {
       get
@@ -91,6 +92,7 @@ namespace Rhino.DocObjects
       ConstructConstObject(parent, -1);
     }
 
+    /// <since>5.0</since>
     public ObjectAttributes()
     {
 #if RHINO_SDK
@@ -111,6 +113,7 @@ namespace Rhino.DocObjects
     /// Constructs a copy of this <see cref="ObjectAttributes"/> instance.
     /// </summary>
     /// <returns>A new instance on success, or null on failure.</returns>
+    /// <since>5.0</since>
     public ObjectAttributes Duplicate()
     {
       IntPtr ptr_this = ConstPointer();
@@ -143,6 +146,7 @@ namespace Rhino.DocObjects
     /// visibility by the object cannot be selected. If the object is hidden, it is
     /// not visible and it cannot be selected.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectMode Mode
     {
       get
@@ -168,7 +172,8 @@ namespace Rhino.DocObjects
     /// Apply a transformation.
     /// </summary>
     /// <param name="xform">The transformation.</param>
-    /// <returns>trueif successful, false otherwise.</returns>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>6.0</since>
     public bool Transform(Transform xform)
     {
       var pointer = NonConstPointer();
@@ -179,12 +184,14 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Use this query to determine if an object is part of an instance definition.
     /// </summary>
+    /// <since>5.0</since>
     public bool IsInstanceDefinitionObject
     {
       get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.IsInstanceDefinitionObject); }
     }
 
-    /// <summary>Gets or sets an object's visiblity.</summary>
+    /// <summary>Gets or sets an object's visibility.</summary>
+    /// <since>5.0</since>
     public bool Visible
     {
       get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.IsVisible); }
@@ -194,6 +201,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets an object's casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.
     /// </summary>
+    /// <since>6.0</since>
     public bool CastsShadows
     {
       get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.CastsShadows); }
@@ -203,6 +211,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets an object's receives shadows property, or whether or not an object receives shadows from other objects.
     /// </summary>
+    /// <since>6.0</since>
     public bool ReceivesShadows
     {
       get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.ReceivesShadows); }
@@ -214,6 +223,7 @@ namespace Rhino.DocObjects
     /// If LinetypeSource is ON::linetype_from_layer, then the object's layer ON_Layer::Linetype() is used.
     /// If LinetypeSource is ON::linetype_from_object, then value of m_linetype is used.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectLinetypeSource LinetypeSource
     {
       get
@@ -237,6 +247,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_modifyobjectcolor.cs' lang='cs'/>
     /// <code source='examples\py\ex_modifyobjectcolor.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public ObjectColorSource ColorSource
     {
       get
@@ -252,6 +263,7 @@ namespace Rhino.DocObjects
     /// If PlotColorSource is ON::plot_color_from_layer, then the object's layer ON_Layer::PlotColor() is used.
     /// If PlotColorSource is ON::plot_color_from_object, then value of PlotColor() is used.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectPlotColorSource PlotColorSource
     {
       get
@@ -262,6 +274,7 @@ namespace Rhino.DocObjects
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.PlotColorSource, (int)value); }
     }
 
+    /// <since>5.0</since>
     public ObjectPlotWeightSource PlotWeightSource
     {
       get
@@ -282,6 +295,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_objectdisplaymode.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdisplaymode.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool HasDisplayModeOverride(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -293,6 +307,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="viewportId">Id of a Rhino Viewport.</param>
     /// <returns>A display node id if the object has a display mode override for the viewport; otherwise Guid.Empty is returned.</returns>
+    /// <since>6.18</since>
     public Guid GetDisplayModeOverride(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -308,6 +323,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="mode">The display mode.</param>
     /// <returns>true if setting was successful.</returns>
+    /// <since>5.0</since>
     public bool SetDisplayModeOverride(Display.DisplayModeDescription mode)
     {
       return SetDisplayModeOverride(mode, Guid.Empty);
@@ -326,6 +342,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_objectdisplaymode.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdisplaymode.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool SetDisplayModeOverride(Display.DisplayModeDescription mode, Guid rhinoViewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -341,6 +358,7 @@ namespace Rhino.DocObjects
     /// This function resets an object to use the viewport's display mode for all
     /// viewports.
     /// </summary>
+    /// <since>5.0</since>
     public void RemoveDisplayModeOverride()
     {
       RemoveDisplayModeOverride(Guid.Empty);
@@ -358,6 +376,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_objectdisplaymode.cs' lang='cs'/>
     /// <code source='examples\py\ex_objectdisplaymode.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void RemoveDisplayModeOverride(Guid rhinoViewportId)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -367,6 +386,7 @@ namespace Rhino.DocObjects
     /// <summary> Make this object hidden in a given detail </summary>
     /// <param name="detailId"></param>
     /// <returns></returns>
+    /// <since>6.1</since>
     public bool AddHideInDetailOverride(Guid detailId)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -376,6 +396,7 @@ namespace Rhino.DocObjects
     /// <summary> Remove hidden in detail flag for a specific detail </summary>
     /// <param name="detailId"></param>
     /// <returns></returns>
+    /// <since>6.1</since>
     public bool RemoveHideInDetailOverride(Guid detailId)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -385,6 +406,7 @@ namespace Rhino.DocObjects
     /// <summary>Is this object supposed to be hidden in a given detail</summary>
     /// <param name="detailId"></param>
     /// <returns></returns>
+    /// <since>6.1</since>
     public bool HasHideInDetailOverrideSet(Guid detailId)
     {
       Guid[] ids = GetHideInDetailOverrides();
@@ -400,6 +422,7 @@ namespace Rhino.DocObjects
     /// Get list of details that this object is supposed to be hidden in
     /// </summary>
     /// <returns></returns>
+    /// <since>6.1</since>
     public Guid[] GetHideInDetailOverrides()
     {
       using (var guids = new SimpleArrayGuid())
@@ -472,6 +495,7 @@ namespace Rhino.DocObjects
     /// </para>
     /// <para>This value is the same as the one returned by object.Id.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Guid ObjectId
     {
       get
@@ -510,6 +534,7 @@ namespace Rhino.DocObjects
     /// <para>More than one object in a model can have the same name and
     /// some objects may have no name.</para>
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get { return GetString(IDX_NAME); }
@@ -521,6 +546,7 @@ namespace Rhino.DocObjects
     /// URL may have. As an example, if the object came from a commercial part
     /// library, the URL might point to the definition of that part.
     /// </summary>
+    /// <since>6.8</since>
     public string Url
     {
       get{ return GetString(IDX_URL); }
@@ -532,13 +558,14 @@ namespace Rhino.DocObjects
     /// <para>Layer definitions in an OpenNURBS model are stored in a layer table.
     /// The layer table is conceptually an array of ON_Layer classes.  Every
     /// OpenNURBS object in a model is on some layer.  The object's layer
-    /// is specified by zero based indicies into the ON_Layer array.</para>
+    /// is specified by zero based indices into the ON_Layer array.</para>
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_moveobjectstocurrentlayer.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_moveobjectstocurrentlayer.cs' lang='cs'/>
     /// <code source='examples\py\ex_moveobjectstocurrentlayer.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int LayerIndex
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.LayerIndex); }
@@ -549,9 +576,10 @@ namespace Rhino.DocObjects
     /// <para>Linetype definitions in an OpenNURBS model are stored in a linetype table.
     /// The linetype table is conceptually an array of ON_Linetype classes. Every
     /// OpenNURBS object in a model references some linetype.  The object's linetype
-    /// is specified by zero based indicies into the ON_Linetype array.</para>
+    /// is specified by zero based indices into the ON_Linetype array.</para>
     /// <para>Index 0 is reserved for continuous linetype (no pattern).</para>
     /// </summary>
+    /// <since>5.0</since>
     public int LinetypeIndex
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.LinetypeIndex); }
@@ -562,12 +590,7 @@ namespace Rhino.DocObjects
     /// <para>If you want something simple and fast, set the index of
     /// the rendering material.</para>
     /// </summary>
-    /*
-     * ...and ignore m_rendering_attributes. If you are developing
-     * a high quality plug-in renderer, and a user is assigning one of your fabulous
-     * rendering materials to this object, then add rendering material information to
-     * the m_rendering_attributes.m_materials[] array.
-    */
+    /// <since>5.0</since>
     public int MaterialIndex
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialIndex); }
@@ -581,6 +604,7 @@ namespace Rhino.DocObjects
     /// Determines if the simple material should come from the object or from it's layer.
     /// High quality rendering plug-ins should use m_rendering_attributes.
     /// </summary>
+    /// <since>5.0</since>
     public ObjectMaterialSource MaterialSource
     {
       get { return (ObjectMaterialSource)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialSource); }
@@ -606,6 +630,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets all object decals associated with this object.
     /// </summary>
+    /// <since>5.10</since>
     public Render.Decals Decals
     {
       get { return (m_decals ?? (m_decals = new Render.Decals(this))); }
@@ -623,6 +648,7 @@ namespace Rhino.DocObjects
     ///  material queries slow down.  Do not populate the MaterialRefs
     /// dictionary when setting the MaterialIndex will take care of your needs.
     /// </summary>
+    /// <since>5.10</since>
     public MaterialRefs MaterialRefs
     {
       get { return m_material_refs ?? (m_material_refs = new MaterialRefs(this)); }
@@ -636,6 +662,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_modifyobjectcolor.cs' lang='cs'/>
     /// <code source='examples\py\ex_modifyobjectcolor.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public System.Drawing.Color ObjectColor
     {
       get { return GetColor(IDX_COLOR); }
@@ -644,6 +671,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color PlotColor
     {
       get { return GetColor(IDX_PLOT_COLOR); }
@@ -651,9 +679,10 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// A mapping from any plugin source is associated with these attributes
+    /// A mapping from any plug-in source is associated with these attributes
     /// Need to do this here to respond correctly to ModifyObjectAttributes event
     /// </summary>
+    /// <since>5.10</since>
     public bool HasMapping
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_HasMapping(NonConstPointer()); }
@@ -661,10 +690,12 @@ namespace Rhino.DocObjects
 
 
 #if RHINO_SDK
+    /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document)
     {
       return DrawColor(document, Guid.Empty);
     }
+    /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -672,10 +703,12 @@ namespace Rhino.DocObjects
       return Runtime.Interop.ColorFromWin32(abgr);
     }
 
+    /// <since>5.6</since>
     public System.Drawing.Color ComputedPlotColor(RhinoDoc document)
     {
       return ComputedPlotColor(document, Guid.Empty);
     }
+    /// <since>5.6</since>
     public System.Drawing.Color ComputedPlotColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -683,10 +716,12 @@ namespace Rhino.DocObjects
       return Runtime.Interop.ColorFromWin32(abgr);
     }
 
+    /// <since>5.6</since>
     public double ComputedPlotWeight(RhinoDoc document)
     {
       return ComputedPlotWeight(document, Guid.Empty);
     }
+    /// <since>5.6</since>
     public double ComputedPlotWeight(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -707,6 +742,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_displayorder.cs' lang='cs'/>
     /// <code source='examples\py\ex_displayorder.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public int DisplayOrder
     {
       get
@@ -724,6 +760,7 @@ namespace Rhino.DocObjects
     /// =0.0 means use the default width
     /// &lt;0.0 means don't plot (visible for screen display, but does not show on plot)
     /// </summary>
+    /// <since>5.0</since>
     public double PlotWeight
     {
       get
@@ -741,6 +778,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Used to indicate an object has a decoration (like an arrowhead on a curve)
     /// </summary>
+    /// <since>5.0</since>
     public ObjectDecoration ObjectDecoration
     {
       get { return (ObjectDecoration)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.ObjectDecoration); }
@@ -761,6 +799,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\cs\ex_isocurvedensity.cs' lang='cs'/>
     /// <code source='examples\py\ex_isocurvedensity.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public int WireDensity
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.WireDensity); }
@@ -774,6 +813,7 @@ namespace Rhino.DocObjects
     /// space objects to a specific page, but it can also be used to restrict model space to a
     /// specific view.
     /// </summary>
+    /// <since>5.0</since>
     public Guid ViewportId
     {
       get
@@ -793,6 +833,7 @@ namespace Rhino.DocObjects
     /// If an object is in page space, then ViewportId is not nil and
     /// identifies the page it is on.
     /// </summary>
+    /// <since>5.0</since>
     public ActiveSpace Space
     {
       get { return (ActiveSpace)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.Space); }
@@ -800,6 +841,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>number of groups object belongs to.</summary>
+    /// <since>5.0</since>
     public int GroupCount
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.GroupCount); }
@@ -810,6 +852,7 @@ namespace Rhino.DocObjects
     /// Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.
     /// </summary>
     /// <returns>An array of group indices. null might be returned in place of an empty array.</returns>
+    /// <since>5.0</since>
     public int[] GetGroupList()
     {
       int count = GroupCount;
@@ -837,6 +880,7 @@ namespace Rhino.DocObjects
     /// <para>If the object is already in group, nothing is changed.</para>
     /// </summary>
     /// <param name="groupIndex">The index that will be added.</param>
+    /// <since>5.0</since>
     public void AddToGroup(int groupIndex)
     {
       IntPtr ptr = NonConstPointer();
@@ -847,6 +891,7 @@ namespace Rhino.DocObjects
     /// <para>If the object is not in the group, nothing is changed.</para>
     /// </summary>
     /// <param name="groupIndex">The index that will be removed.</param>
+    /// <since>5.0</since>
     public void RemoveFromGroup(int groupIndex)
     {
       IntPtr ptr = NonConstPointer();
@@ -857,6 +902,7 @@ namespace Rhino.DocObjects
     // void RemoveFromTopGroup(); don't understand how this is used
 
     /// <summary>Removes object from all groups.</summary>
+    /// <since>5.0</since>
     public void RemoveFromAllGroups()
     {
       IntPtr ptr = NonConstPointer();
@@ -879,6 +925,7 @@ namespace Rhino.DocObjects
     /// <param name="key">id used to retrieve this string.</param>
     /// <param name="value">string associated with key. If null, the key will be removed</param>
     /// <returns>true on success.</returns>
+    /// <since>5.0</since>
     public bool SetUserString(string key, string value)
     {
       return _SetUserString(key, value);
@@ -888,11 +935,13 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="key">id used to retrieve the string.</param>
     /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>5.0</since>
     public string GetUserString(string key)
     {
       return _GetUserString(key);
     }
 
+    /// <since>5.0</since>
     public int UserStringCount
     {
       get
@@ -905,16 +954,19 @@ namespace Rhino.DocObjects
     /// Gets an independent copy of the collection of (user text key, user text value) pairs attached to this object.
     /// </summary>
     /// <returns>A collection of key strings and values strings. This </returns>
+    /// <since>5.0</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings()
     {
       return _GetUserStrings();
     }
 
+    /// <since>6.0</since>
     public bool DeleteUserString(string key)
     {
       return SetUserString(key, null);
     }
 
+    /// <since>6.0</since>
     public void DeleteAllUserStrings()
     {
       _DeleteAllUserStrings();

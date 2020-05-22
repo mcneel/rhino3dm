@@ -1,4 +1,4 @@
-﻿using Rhino.Runtime.InteropWrappers;
+using Rhino.Runtime.InteropWrappers;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +18,7 @@ namespace Rhino.Geometry
         /// </summary>
         /// <param name="inputMesh">Mesh to use as starting point. Will not be modified.</param>
         /// <param name="componentIndices">Mesh faces, edges and ngons to extrude.</param>
+        /// <since>6.3</since>
         public MeshExtruder(Mesh inputMesh, IEnumerable<ComponentIndex> componentIndices)
         {
             ComponentIndices = new INTERNAL_ComponentIndexArray();
@@ -38,6 +39,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Dispose of this object and any unmanaged memory associated with it.
         /// </summary>
+        /// <since>6.3</since>
         public void Dispose()
         {
             Dispose(true);
@@ -55,6 +57,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Gets Line objects to preview extruded mesh.
         /// </summary>
+        /// <since>6.3</since>
         public Line[] PreviewLines
         {
             get
@@ -73,6 +76,7 @@ namespace Rhino.Geometry
         /// Creates new extruded mesh. Returns true if any edges or faces were extruded.
         /// </summary>
         /// <param name="extrudedMeshOut">Extruded mesh</param>
+        /// <since>6.3</since>
         public bool ExtrudedMesh(out Mesh extrudedMeshOut)
         {
             extrudedMeshOut = new Mesh();
@@ -105,6 +109,7 @@ namespace Rhino.Geometry
         /// Return list of faces that were added to connect transformed edges/faces to non-transformed edges/faces.
         /// </summary>
         /// <returns>List of wall faces</returns>
+        /// <since>6.16</since>
         public List<int> GetWallFaces()
         {
           List<int> res = new List<int>();
@@ -120,6 +125,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Transform of extrusion
         /// </summary>
+        /// <since>6.3</since>
         public Transform Transform
         {
             get
@@ -137,6 +143,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Whether or not to perform extrude in UVN basis.
         /// </summary>
+        /// <since>6.3</since>
         public bool UVN
         {
             get
@@ -152,6 +159,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Edge based UVN defines UVN directions according to boundary edge directions
         /// </summary>
+        /// <since>6.4</since>
         public bool EdgeBasedUVN
         {
             get
@@ -167,6 +175,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Whether or not to keep original faces.
         /// </summary>
+        /// <since>6.3</since>
         public bool KeepOriginalFaces
         {
             get
@@ -182,6 +191,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Mode for creating texture coordinates for extruded areas
         /// </summary>
+        /// <since>6.3</since>
         public MeshExtruderParameterMode TextureCoordinateMode
         {
             get
@@ -197,6 +207,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Mode for creating surface parameters for extruded areas
         /// </summary>
+        /// <since>6.3</since>
         public MeshExtruderParameterMode SurfaceParameterMode
         {
             get
@@ -212,6 +223,7 @@ namespace Rhino.Geometry
         /// <summary>
         /// Face direction mode determines how faces are oriented
         /// </summary>
+        /// <since>6.3</since>
         public MeshExtruderFaceDirectionMode FaceDirectionMode
         {
             get

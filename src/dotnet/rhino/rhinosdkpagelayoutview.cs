@@ -19,6 +19,7 @@ namespace Rhino.Display
     /// <summary> Copy a page view </summary>
     /// <param name="duplicatePageGeometry"></param>
     /// <returns></returns>
+    /// <since>6.3</since>
     public RhinoPageView Duplicate(bool duplicatePageGeometry)
     {
       IntPtr ptrPageView = UnsafeNativeMethods.CRhinoPageView_Duplicate(RuntimeSerialNumber, duplicatePageGeometry);
@@ -32,6 +33,7 @@ namespace Rhino.Display
     /// Most of the time, you will use ActiveViewport unless you explicitly need to work with
     /// the main viewport.
     /// </summary>
+    /// <since>5.0</since>
     public override RhinoViewport ActiveViewport
     {
       get
@@ -49,6 +51,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public void SetPageAsActive()
     {
       if (!PageIsActive)
@@ -67,6 +70,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool SetActiveDetail(Guid detailId)
     {
       bool rc = false;
@@ -86,6 +90,7 @@ namespace Rhino.Display
       return rc;
     }
 
+    /// <since>5.0</since>
     public bool SetActiveDetail(string detailName, bool compareCase)
     {
       bool rc = false;
@@ -115,6 +120,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_activeviewport.cs' lang='cs'/>
     /// <code source='examples\py\ex_activeviewport.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public bool PageIsActive
     {
       get
@@ -136,6 +142,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public DetailViewObject AddDetailView(string title, Geometry.Point2d corner0, Geometry.Point2d corner1, DefinedViewportProjection initialProjection)
     {
       IntPtr ptr_detail = UnsafeNativeMethods.CRhinoPageView_AddDetailView(RuntimeSerialNumber, corner0, corner1, title, (int)initialProjection);
@@ -152,6 +159,7 @@ namespace Rhino.Display
     /// Gets a list of the detail view objects associated with this layout.
     /// </summary>
     /// <returns>An array of detail view objects if successful, an empty array if the layout has no details.</returns>
+    /// <since>5.0</since>
     public DetailViewObject[] GetDetailViews()
     {
       IntPtr ptr_list = UnsafeNativeMethods.CRhinoDetailViewArray_New();
@@ -180,6 +188,7 @@ namespace Rhino.Display
     /// Gets or sets the runtime page number and updates the page number for all
     /// of the other pages. The first page has a value of 0.
     /// </summary>
+    /// <since>5.0</since>
     public int PageNumber
     {
       get
@@ -193,31 +202,12 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Gets or sets the contents, or description, of the page.
-    /// </summary>
-    public string PageDescription
-    {
-      get
-      {
-        using (var sh = new StringHolder())
-        {
-          IntPtr ptr_string = sh.NonConstPointer();
-          UnsafeNativeMethods.CRhinoPageView_GetSetDescription(RuntimeSerialNumber, null, ptr_string);
-          return sh.ToString();
-        }
-      }
-      set
-      {
-        UnsafeNativeMethods.CRhinoPageView_GetSetDescription(RuntimeSerialNumber, value, IntPtr.Zero);
-      }
-    }
-
-    /// <summary>
     /// Creates a preview image of the page.
     /// </summary>
     /// <param name="size">The size of the preview image.</param>
     /// <param name="grayScale">Set true to produce a grayscale image, false to produce a color image.</param>
-    /// <returns>A bitmap if successful, null othewise.</returns>
+    /// <returns>A bitmap if successful, null otherwise.</returns>
+    /// <since>7.0</since>
     public System.Drawing.Bitmap GetPreviewImage(System.Drawing.Size size, bool grayScale)
     {
       using (var dib = new RhinoDib())
@@ -240,6 +230,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_rhinopageviewwidthheight.cs' lang='cs'/>
     /// <code source='examples\py\ex_rhinopageviewwidthheight.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public double PageWidth
     {
       get
@@ -260,6 +251,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_rhinopageviewwidthheight.cs' lang='cs'/>
     /// <code source='examples\py\ex_rhinopageviewwidthheight.py' lang='py'/>
     /// </example>
+    /// <since>5.10</since>
     public double PageHeight
     {
       get
@@ -278,6 +270,7 @@ namespace Rhino.Display
     /// <code source='examples\cs\ex_activeviewport.cs' lang='cs'/>
     /// <code source='examples\py\ex_activeviewport.py' lang='py'/>
     /// </example>
+    /// <since>5.0</since>
     public string PageName
     {
       get
@@ -298,6 +291,7 @@ namespace Rhino.Display
     /// <summary>
     /// Returns the name of the layout's destination printer.
     /// </summary>
+    /// <since>6.15</since>
     public string PrinterName
     {
       get
@@ -316,6 +310,7 @@ namespace Rhino.Display
     /// Returns the name of the layout's media, or paper (e.g. Letter, Legal, A1, etc.),
     /// used to determine the page width and page height.
     /// </summary>
+    /// <since>6.15</since>
     public string PaperName
     {
       get
@@ -339,6 +334,7 @@ namespace Rhino.Display
       if (g_detail_space_change != null)
         g_detail_space_change(null, new PageViewSpaceChangeEventArgs(pPageView, newDetailId, oldDetailId));
     }
+    /// <since>5.0</since>
     public static event EventHandler<PageViewSpaceChangeEventArgs> PageViewSpaceChange
     {
       add

@@ -43,7 +43,7 @@ namespace Rhino.Commands
     /// </summary>
     DoNotRepeat = 8,
     /// <summary>
-    /// By default, all commands are undoable.
+    /// By default, all commands are undo-able.
     /// </summary>
     NotUndoable = 16
   }
@@ -81,6 +81,7 @@ namespace Rhino.Commands
     /// Set of values combined using a bitwise OR operation to get the desired combination
     /// of command styles.
     /// </param>
+    /// <since>5.0</since>
     public CommandStyleAttribute(Style styles)
     {
       m_style = styles;
@@ -89,6 +90,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the associated style.
     /// </summary>
+    /// <since>5.0</since>
     public Style Styles
     {
       get { return m_style; }
@@ -121,7 +123,9 @@ namespace Rhino.Commands
   /// </summary>
   public class MostRecentCommandDescription
   {
+    /// <since>5.0</since>
     public string DisplayString { get; set; }
+    /// <since>5.0</since>
     public string Macro { get; set; }
   }
 
@@ -135,6 +139,7 @@ namespace Rhino.Commands
     /// </summary>
     /// <param name="name">A string.</param>
     /// <returns>true if the string is a valid command name.</returns>
+    /// <since>5.0</since>
     public static bool IsValidCommandName(string name)
     {
       return UnsafeNativeMethods.CRhinoCommand_IsValidCommandName(name);
@@ -143,6 +148,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the ID of the last commands.
     /// </summary>
+    /// <since>5.0</since>
     public static Guid LastCommandId
     {
       get
@@ -154,6 +160,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the result code of the last command.
     /// </summary>
+    /// <since>5.0</since>
     public static Result LastCommandResult
     {
       get
@@ -167,6 +174,7 @@ namespace Rhino.Commands
     /// Gets an array of most recent command descriptions.
     /// </summary>
     /// <returns>An array of command descriptions.</returns>
+    /// <since>5.0</since>
     public static MostRecentCommandDescription[] GetMostRecentCommands()
     {
       using(var display_strings = new ClassArrayString())
@@ -194,6 +202,7 @@ namespace Rhino.Commands
     /// <param name="doc"></param>
     /// <param name="commandCallback"></param>
     /// <param name="data">optional extra data to pass to callback</param>
+    /// <since>6.13</since>
     public static void RunProxyCommand(RunCommandDelegate commandCallback, RhinoDoc doc, object data)
     {
       const string commandName = "RhinoCommonProxyCommand";
@@ -242,7 +251,7 @@ namespace Rhino.Commands
     }
 
     /// <summary>
-    /// Default protected constructor. It only allows instantiation through subclassing.
+    /// Default protected constructor. It only allows instantiation through sub-classing.
     /// </summary>
     protected Command()
     {
@@ -257,13 +266,15 @@ namespace Rhino.Commands
         m_ReplayHistory = OnReplayHistory;
         m_SelFilter = SelCommand.OnSelFilter;
         UnsafeNativeMethods.CRhinoCommand_SetCallbacks(0, m_RunCommand, m_DoHelp, m_ContextHelp, m_ReplayHistory, m_SelFilter);
+        EndCommand += Rhino.Runtime.HostUtils.DeleteObjectsOnMainThread;
       }
     }
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets the plug-in where this commands is placed.
     /// </summary>
+    /// <since>5.0</since>
     public PlugIns.PlugIn PlugIn
     {
       get
@@ -284,6 +295,7 @@ namespace Rhino.Commands
     /// keep the id consistent between sessions of Rhino
     /// <see cref="System.Runtime.InteropServices.GuidAttribute">GuidAttribute</see>
     /// </summary>
+    /// <since>5.0</since>
     public virtual Guid Id
     {
       get
@@ -302,11 +314,13 @@ namespace Rhino.Commands
     /// Gets the name of the command.
     /// This method is abstract.
     /// </summary>
+    /// <since>5.0</since>
     public abstract string EnglishName{ get; }
 
     /// <summary>
     /// Gets the local name of the command.
     /// </summary>
+    /// <since>5.0</since>
     public virtual string LocalName
     {
       get { return Rhino.UI.Localization.LocalizeCommandName(EnglishName, this); }
@@ -315,6 +329,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the settings of the command.
     /// </summary>
+    /// <since>5.0</since>
     public PersistentSettings Settings
     {
       get { return PlugIn.CommandSettings( EnglishName ); }
@@ -415,6 +430,7 @@ namespace Rhino.Commands
     /// Ids of running commands or null if no commands are currently running. 
     /// The "active" command is at the end of this list.
     /// </returns>
+    /// <since>5.0</since>
     public static Guid[] GetCommandStack()
     {
       System.Collections.Generic.List<Guid> ids = new System.Collections.Generic.List<Guid>();
@@ -434,6 +450,7 @@ namespace Rhino.Commands
     /// Determines if Rhino is currently running a command.
     /// </summary>
     /// <returns>true if a command is currently running, false if no commands are currently running.</returns>
+    /// <since>5.0</since>
     public static bool InCommand()
     {
       return GetCommandStack() != null;
@@ -445,6 +462,7 @@ namespace Rhino.Commands
     /// plug-in's "RunScript".
     /// </summary>
     /// <returns>true if a script running command is active.</returns>
+    /// <since>5.0</since>
     public static bool InScriptRunnerCommand()
     {
       int rc = RhinoApp.GetInt(UnsafeNativeMethods.RhinoAppInt.InScriptRunner);
@@ -456,6 +474,7 @@ namespace Rhino.Commands
     /// </summary>
     /// <param name="name">A string.</param>
     /// <returns>true if the string is a command.</returns>
+    /// <since>5.0</since>
     public static bool IsCommand(string name)
     {
       return UnsafeNativeMethods.RhCommand_IsCommand(name);
@@ -467,6 +486,7 @@ namespace Rhino.Commands
     /// <param name="name">The name of the command.</param>
     /// <param name="searchForEnglishName">true if the name is to searched in English. This ensures that a '_' is prepended to the name.</param>
     /// <returns>An of the command, or <see cref="Guid.Empty"/> on error.</returns>
+    /// <since>5.0</since>
     public static Guid LookupCommandId(string name, bool searchForEnglishName)
     {
       if( searchForEnglishName && !name.StartsWith("_", StringComparison.Ordinal))
@@ -482,6 +502,7 @@ namespace Rhino.Commands
     /// <param name="commandId">A command ID.</param>
     /// <param name="englishName">true if the requested command is in English.</param>
     /// <returns>The command name, or null on error.</returns>
+    /// <since>5.0</since>
     public static string LookupCommandName(Guid commandId, bool englishName)
     {
       IntPtr pName = UnsafeNativeMethods.CRhinoApp_LookupCommandById(commandId, englishName);
@@ -494,7 +515,7 @@ namespace Rhino.Commands
     /// Gets list of command names in Rhino. This list does not include Test, Alpha, or System commands.
     /// </summary>
     /// <param name="english">
-    ///  if true, retrieve the english name for every command.
+    ///  if true, retrieve the English name for every command.
     ///  if false, retrieve the local name for every command.
     /// </param>
     /// <param name="loaded">
@@ -502,6 +523,7 @@ namespace Rhino.Commands
     /// if false, get names of all registered (may not be currently loaded) commands.
     /// </param>
     /// <returns>An array instance with command names. This array could be empty, but not null.</returns>
+    /// <since>5.0</since>
     public static string[] GetCommandNames(bool english, bool loaded)
     {
       using (var strings = new ClassArrayString())
@@ -516,6 +538,7 @@ namespace Rhino.Commands
     /// Displays help for a command.
     /// </summary>
     /// <param name="commandId">A command ID.</param>
+    /// <since>5.0</since>
     public static void DisplayHelp(Guid commandId)
     {
       UnsafeNativeMethods.CRhinoApp_DisplayCommandHelp(commandId);
@@ -573,6 +596,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Called just before command.RunCommand().
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<CommandEventArgs> BeginCommand
     {
       add
@@ -601,6 +625,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Called immediately after command.RunCommand().
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<CommandEventArgs> EndCommand
     {
       add
@@ -645,6 +670,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Used to monitor Rhino's built in undo/redo support.
     /// </summary>
+    /// <since>5.0</since>
     public static event EventHandler<UndoRedoEventArgs> UndoRedo
     {
       add
@@ -718,6 +744,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the ID of the command that raised this event.
     /// </summary>
+    /// <since>5.0</since>
     public Guid CommandId
     {
       get { return UnsafeNativeMethods.CRhinoCommand_Id(m_pCommand); }
@@ -728,6 +755,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the English name of the command that raised this event.
     /// </summary>
+    /// <since>5.0</since>
     public string CommandEnglishName
     {
       get
@@ -748,6 +776,7 @@ namespace Rhino.Commands
     /// <summary>
     /// Gets the name of the command that raised this event in the local language.
     /// </summary>
+    /// <since>5.0</since>
     public string CommandLocalName
     {
       get
@@ -768,8 +797,9 @@ namespace Rhino.Commands
     string m_plugin_name;
     /// <summary>
     /// Gets the name of the plug-in that this command belongs to.  If the command is internal
-    /// to Rhino, then this propert is an empty string.
+    /// to Rhino, then this property is an empty string.
     /// </summary>
+    /// <since>5.0</since>
     public string CommandPluginName
     {
       get
@@ -791,13 +821,16 @@ namespace Rhino.Commands
     /// Gets the result of the command that raised this event. 
     /// This value is only meaningful during EndCommand events.
     /// </summary>
+    /// <since>5.0</since>
     public Result CommandResult
     {
       get { return m_result; }
     }
 
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint DocumentRuntimeSerialNumber { get; private set; }
+    /// <since>6.0</since>
     public RhinoDoc Document { get { return RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerialNumber); } }
   }
 
@@ -813,23 +846,32 @@ namespace Rhino.Commands
       m_command_id = id;
     }
 
+    /// <since>5.0</since>
     public Guid CommandId
     {
       get { return m_command_id; }
     }
 
+    /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint UndoSerialNumber
     {
       get { return m_serial_number; }
     }
 
+    /// <since>5.0</since>
     public bool IsBeginRecording { get { return 1 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsEndRecording { get { return 2 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsBeginUndo { get { return 3 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsEndUndo { get { return 4 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsBeginRedo { get { return 5 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsEndRedo { get { return 6 == m_event_type; } }
+    /// <since>5.0</since>
     public bool IsPurgeRecord { get { return 86 == m_event_type; } }
   }
 
@@ -869,16 +911,19 @@ namespace Rhino.Commands
     const int idxTestGrips = 1;
     const int idxBeQuite = 2;
 
+    /// <since>5.0</since>
     public bool TestLights
     {
       get { return UnsafeNativeMethods.CRhinoSelCommand_GetBool(Id, idxTestLights); }
       set { UnsafeNativeMethods.CRhinoSelCommand_SetBool(Id, idxTestLights, value); }
     }
+    /// <since>5.0</since>
     public bool TestGrips
     {
       get { return UnsafeNativeMethods.CRhinoSelCommand_GetBool(Id, idxTestGrips); }
       set { UnsafeNativeMethods.CRhinoSelCommand_SetBool(Id, idxTestGrips, value); }
     }
+    /// <since>5.0</since>
     public bool BeQuiet
     {
       get { return UnsafeNativeMethods.CRhinoSelCommand_GetBool(Id, idxBeQuite); }
@@ -945,6 +990,56 @@ namespace Rhino.Commands
     //CRhinoView* View() { return m_view; }
     //bool ObjectsWerePreSelected() { return m_objects_were_preselected; }
   }
+
+  /// <summary>
+  /// This class may be used to replace the built in BlockEdit command with a
+  /// plug-in version.  Make sure to make your plug-in a load at startup plug-in
+  /// when replacing the command to ensure the command is properly overridden.
+  /// </summary>
+  public abstract class BlockEditCommand
+  {
+    /// <summary>
+    /// Call this method to register your replacement command, the last command
+    /// registered will be called.
+    /// </summary>
+    /// <param name="replacementCommand"></param>
+    public static void ReplaceWith(BlockEditCommand replacementCommand)
+    {
+      Replacement = replacementCommand;
+    }
+
+    /// <summary>
+    /// The current replacement command
+    /// </summary>
+    public static BlockEditCommand Replacement { get; private set; }
+
+    /// <summary>
+    /// Call this method to determine if a document is being blocked edited.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>
+    /// Returns true if the specified document is editing a block.
+    /// </returns>
+    public static bool InBlockEditMode(RhinoDoc doc)
+    {
+      return Replacement?.IsBlockEditing(doc) ?? false;
+    }
+
+    /// <summary>
+    /// Called to determine if the specified document was not block edit mode.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns></returns>
+    public abstract bool IsBlockEditing(RhinoDoc doc);
+
+    /// <summary>
+    /// Called by the internal BlockEdit command when the command is executed.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="mode"></param>
+    /// <returns></returns>
+    public abstract Result RunCommand(RhinoDoc doc, RunMode mode);
+  }
 }
 
 
@@ -963,8 +1058,10 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Wrapped native C++ pointer to CRhinoHistory instance
     /// </summary>
+    /// <since>5.0</since>
     public IntPtr Handle { get { return m_pRhinoHistory; } }
 
+    /// <since>5.0</since>
     public HistoryRecord(Commands.Command command, int version)
     {
       m_pRhinoHistory = UnsafeNativeMethods.CRhinoHistory_New(command.Id, version);
@@ -983,6 +1080,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1006,58 +1104,69 @@ namespace Rhino.DocObjects
       m_pRhinoHistory = IntPtr.Zero;
     }
     
+    /// <since>5.0</since>
     public bool SetBool( int id, bool value )
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetBool(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetInt(int id, int value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetInt(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetDouble(int id, double value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetDouble(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetPoint3d(int id, Rhino.Geometry.Point3d value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetPoint3d(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetVector3d(int id, Rhino.Geometry.Vector3d value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetVector3d(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetTransorm(int id, Rhino.Geometry.Transform value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetXform(pThis, id, ref value);
     }
+    /// <since>5.0</since>
     public bool SetColor(int id, System.Drawing.Color value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetColor(pThis, id, value.ToArgb());
     }
+    /// <since>5.0</since>
     public bool SetObjRef(int id, ObjRef value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = value.ConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetObjRef(pThis, id, pConstObjRef);
     }
+    /// <since>5.0</since>
     public bool SetPoint3dOnObject(int id, ObjRef objref, Rhino.Geometry.Point3d value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = objref.ConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetPoint3dOnObject(pThis, id, pConstObjRef, value);
     }
+    /// <since>5.0</since>
     public bool SetGuid(int id, Guid value)
     {
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetUuid(pThis, id, value);
     }
+    /// <since>5.0</since>
     public bool SetString(int id, string value)
     {
       IntPtr pThis = NonConstPointer();
@@ -1067,24 +1176,28 @@ namespace Rhino.DocObjects
     // Don't wrap until we really need it
     //public bool SetGeometry( int id, Geometry.GeometryBase value){ return false; }
 
+    /// <since>5.0</since>
     public bool SetCurve(int id, Geometry.Curve value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstCurve = value.ConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetCurve(pThis, id, pConstCurve);
     }
+    /// <since>5.0</since>
     public bool SetSurface(int id, Geometry.Surface value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstSurface = value.ConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetSurface(pThis, id, pConstSurface);
     }
+    /// <since>5.0</since>
     public bool SetBrep(int id, Geometry.Brep value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstBrep = value.ConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetBrep(pThis, id, pConstBrep);
     }
+    /// <since>5.0</since>
     public bool SetMesh(int id, Geometry.Mesh value)
     {
       IntPtr pThis = NonConstPointer();
@@ -1095,6 +1208,7 @@ namespace Rhino.DocObjects
     // PolyEdge not wrapped yet
     //bool SetPolyEdgeValue( CRhinoDoc& doc, int value_id, const class CRhinoPolyEdge& polyedge );
 
+    /// <since>5.0</since>
     public bool SetBools(int id, IEnumerable<bool> values)
     {
       List<bool> v = new List<bool>(values);
@@ -1102,6 +1216,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetBools(pThis, id, _v.Length, _v);
     }
+    /// <since>5.0</since>
     public bool SetInts(int id, IEnumerable<int> values)
     {
       List<int> v = new List<int>(values);
@@ -1109,6 +1224,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetInts(pThis, id, _v.Length, _v);
     }
+    /// <since>5.0</since>
     public bool SetDoubles(int id, IEnumerable<double> values)
     {
       List<double> v = new List<double>(values);
@@ -1116,6 +1232,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetDoubles(pThis, id, _v.Length, _v);
     }
+    /// <since>5.0</since>
     public bool SetPoint3ds(int id, IEnumerable<Rhino.Geometry.Point3d> values)
     {
       List<Geometry.Point3d> v = new List<Geometry.Point3d>(values);
@@ -1123,6 +1240,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       return UnsafeNativeMethods.CRhinoHistory_SetPoints(pThis, id, _v.Length, _v);
     }
+    /// <since>5.0</since>
     public bool SetVector3ds(int id, IEnumerable<Rhino.Geometry.Vector3d> values)
     {
       List<Geometry.Vector3d> v = new List<Geometry.Vector3d>(values);
@@ -1138,6 +1256,7 @@ namespace Rhino.DocObjects
     //  return UnsafeNativeMethods.CRhinoHistory_SetXforms(pThis, id, _v.Length, _v);
     //}
 
+    /// <since>5.0</since>
     public bool SetColors(int id, IEnumerable<System.Drawing.Color> values)
     {
       List<int> argb = new List<int>();
@@ -1151,6 +1270,7 @@ namespace Rhino.DocObjects
     // need ON_ClassArray<CRhinoObjRef>* wrapper
     //public bool SetObjRefs(int id, IEnumerable<ObjRef> values);
 
+    /// <since>5.0</since>
     public bool SetGuids(int id, IEnumerable<Guid> values)
     {
       List<Guid> v = new List<Guid>(values);
@@ -1159,6 +1279,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoHistory_SetUuids(pThis, id, _v.Length, _v);
     }
 
+    /// <since>5.0</since>
     public bool SetStrings(int id, IEnumerable<string> values)
     {
       using (var strings = new ClassArrayString())
@@ -1186,6 +1307,7 @@ namespace Rhino.DocObjects
     /// <param name="historyVersion">Any non-zero integer.
     /// It is strongly suggested that something like YYYYMMDD be used.</param>
     /// <returns>True if successful.</returns>
+    /// <since>6.0</since>
     public bool SetHistoryVersion(int historyVersion)
     {
       IntPtr p_this = NonConstPointer();
@@ -1198,6 +1320,7 @@ namespace Rhino.DocObjects
     /// That allows a descendant object to continue the history linkage after
     /// it is edited.
     /// </summary>
+    /// <since>6.0</since>
     public bool CopyOnReplaceObject
     {
       get
@@ -1232,6 +1355,7 @@ namespace Rhino.DocObjects
       m_pObjectPairArray = pObjectPairArray;
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       m_pConstRhinoHistoryRecord = IntPtr.Zero;
@@ -1245,6 +1369,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="id">HistoryRecord value id</param>
     /// <returns>ObjRef on success, null if not successful</returns>
+    /// <since>5.0</since>
     public Rhino.DocObjects.ObjRef GetRhinoObjRef(int id)
     {
       ObjRef objref = new ObjRef();
@@ -1258,6 +1383,7 @@ namespace Rhino.DocObjects
     // public Commands.Command Command{ get { return null; } }
 
     /// <summary>The document this record belongs to</summary>
+    /// <since>5.0</since>
     public RhinoDoc Document
     {
       get
@@ -1272,6 +1398,7 @@ namespace Rhino.DocObjects
     /// saved in the history record is compatible with the current implementation
     /// of ReplayHistory
     /// </summary>
+    /// <since>5.0</since>
     public int HistoryVersion
     {
       get { return UnsafeNativeMethods.CRhinoHistoryRecord_HistoryVersion(m_pConstRhinoHistoryRecord); }
@@ -1281,6 +1408,7 @@ namespace Rhino.DocObjects
     /// Each history record has a unique id that Rhino assigns when it adds the
     /// history record to the history record table
     /// </summary>
+    /// <since>5.0</since>
     public Guid RecordId
     {
       get { return UnsafeNativeMethods.CRhinoHistoryRecord_HistoryRecordId(m_pConstRhinoHistoryRecord); }
@@ -1293,6 +1421,7 @@ namespace Rhino.DocObjects
     /// <para>Use this property to then call an appropriate UpdateToX() method and make your
     /// custom history support work.</para>
     /// </summary>
+    /// <since>5.0</since>
     public ReplayHistoryResult[] Results
     {
       get
@@ -1308,42 +1437,49 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>5.0</since>
     public bool TryGetBool(int id, out bool value)
     {
       value = false;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetBool(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetInt(int id, out int value)
     {
       value = 0;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetInt(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetDouble(int id, out double value)
     {
       value = 0;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetDouble(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetPoint3d(int id, out Geometry.Point3d value)
     {
       value = new Geometry.Point3d();
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetPoint3d(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetVector3d(int id, out Geometry.Vector3d value)
     {
       value = new Geometry.Vector3d();
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetVector3d(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetTransform(int id, out Geometry.Transform value)
     {
       value = Geometry.Transform.Identity;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetTransform(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetColor(int id, out System.Drawing.Color value)
     {
       value = System.Drawing.Color.Empty;
@@ -1354,6 +1490,7 @@ namespace Rhino.DocObjects
       return rc;
     }
 
+    /// <since>6.0</since>
     public bool TryGetPoint3dOnObject(int id, out Geometry.Point3d value)
     {
       value = new Geometry.Point3d();
@@ -1376,12 +1513,14 @@ namespace Rhino.DocObjects
     }
     */
 
+    /// <since>5.0</since>
     public bool TryGetGuid(int id, out Guid value)
     {
       value = Guid.Empty;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetGuid(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>5.0</since>
     public bool TryGetString(int id, out string value)
     {
       value = string.Empty;
@@ -1443,6 +1582,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoHistory_SetInts(pThis, id, _v.Length, _v);
     }
     */
+    /// <since>6.10</since>
     public bool TryGetDoubles(int id, out double[] values)
     {
       values = new double[]{ };
@@ -1529,6 +1669,7 @@ namespace Rhino.DocObjects
     /// The previously existing object.
     /// <para>Do not attempt to edit this object. It might have been already deleted by, for example, dragging.</para>
     /// </summary>
+    /// <since>5.0</since>
     public RhinoObject ExistingObject
     {
       get
@@ -1543,12 +1684,14 @@ namespace Rhino.DocObjects
     }
 
 
+    /// <since>5.0</since>
     public bool UpdateToPoint(Rhino.Geometry.Point3d point, ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult1(m_parent.m_pObjectPairArray, m_index, point, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToPointCloud(Rhino.Geometry.PointCloud cloud, ObjectAttributes attributes)
     {
       IntPtr pCloud = cloud.ConstPointer();
@@ -1556,6 +1699,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult2(m_parent.m_pObjectPairArray, m_index, pCloud, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToPointCloud(IEnumerable<Rhino.Geometry.Point3d> points, DocObjects.ObjectAttributes attributes)
     {
       int count;
@@ -1567,10 +1711,12 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult3(m_parent.m_pObjectPairArray, m_index, count, ptArray, pAttrs);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToClippingPlane(Geometry.Plane plane, double uMagnitude, double vMagnitude, Guid clippedViewportId, ObjectAttributes attributes)
     {
       return UpdateToClippingPlane(plane, uMagnitude, vMagnitude, new Guid[] { clippedViewportId }, attributes);
     }
+    /// <since>5.0</since>
     public bool UpdateToClippingPlane(Geometry.Plane plane, double uMagnitude, double vMagnitude, IEnumerable<Guid> clippedViewportIds, ObjectAttributes attributes)
     {
       List<Guid> ids = new List<Guid>(clippedViewportIds);
@@ -1583,6 +1729,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult4(m_parent.m_pObjectPairArray, m_index, ref plane, uMagnitude, vMagnitude, count, clippedIds, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToLinearDimension(Geometry.LinearDimension dimension, ObjectAttributes attributes)
     {
       IntPtr pConstDimension = dimension.ConstPointer();
@@ -1591,6 +1738,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult5(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToRadialDimension(Geometry.RadialDimension dimension, ObjectAttributes attributes)
     {
       IntPtr pConstDimension = dimension.ConstPointer();
@@ -1599,6 +1747,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult6(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToAngularDimension(Geometry.AngularDimension dimension, ObjectAttributes attributes)
     {
       IntPtr pConstDimension = dimension.ConstPointer();
@@ -1607,12 +1756,14 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult7(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToLine(Geometry.Point3d from, Geometry.Point3d to, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult8(m_parent.m_pObjectPairArray, m_index, from, to, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToPolyline(IEnumerable<Geometry.Point3d> points, DocObjects.ObjectAttributes attributes)
     {
       int count;
@@ -1623,30 +1774,35 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToPolyline(m_parent.m_pObjectPairArray, m_index, count, ptArray, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToArc(Geometry.Arc arc, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToArc(m_parent.m_pObjectPairArray, m_index, ref arc, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToCircle(Geometry.Circle circle, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCircle(m_parent.m_pObjectPairArray, m_index, ref circle, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToEllipse(Geometry.Ellipse ellipse, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToEllipse(m_parent.m_pObjectPairArray, m_index, ref ellipse, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToSphere(Geometry.Sphere sphere, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSphere(m_parent.m_pObjectPairArray, m_index, ref sphere, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToCurve(Geometry.Curve curve, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1654,6 +1810,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCurve(m_parent.m_pObjectPairArray, m_index, pConstCurve, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToTextDot(Geometry.TextDot dot, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1661,6 +1818,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToTextDot(m_parent.m_pObjectPairArray, m_index, pConstDot, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToText(string text, Geometry.Plane plane, double height, string fontName, bool bold, bool italic, Geometry.TextJustification justification, DocObjects.ObjectAttributes attributes)
     {
       if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(fontName))
@@ -1676,6 +1834,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText(m_parent.m_pObjectPairArray, docId, m_index, text, ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToText(Geometry.TextEntity text, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1683,6 +1842,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText2(m_parent.m_pObjectPairArray, m_index, pConstText, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToSurface(Geometry.Surface surface, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1690,6 +1850,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSurface(m_parent.m_pObjectPairArray, m_index, pConstSurface, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToExtrusion(Geometry.Extrusion extrusion, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1697,6 +1858,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToExtrusion(m_parent.m_pObjectPairArray, m_index, pConstExtrusion, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToMesh(Geometry.Mesh mesh, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1711,6 +1873,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSubD(m_parent.m_pObjectPairArray, m_index, pConstSubD, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToBrep(Geometry.Brep brep, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1718,6 +1881,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToBrep(m_parent.m_pObjectPairArray, m_index, pConstBrep, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToLeader(Geometry.Leader leader, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -1726,6 +1890,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToLeader(m_parent.m_pObjectPairArray, m_index, pConstLeader, pConstAttributes);
     }
 
+    /// <since>5.0</since>
     public bool UpdateToHatch(Geometry.Hatch hatch, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();

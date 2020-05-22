@@ -29,6 +29,7 @@ namespace Rhino.Display
     /// <summary>
     /// Constructs a default material.
     /// </summary>
+    /// <since>5.0</since>
     public DisplayMaterial()
     {
       m_ptr = UnsafeNativeMethods.CDisplayPipelineMaterial_New(IntPtr.Zero);
@@ -36,12 +37,14 @@ namespace Rhino.Display
     /// <summary>
     /// Duplicate another material.
     /// </summary>
+    /// <since>5.0</since>
     public DisplayMaterial(DisplayMaterial other)
     {
       IntPtr ptr = other.ConstPointer();
       m_ptr = UnsafeNativeMethods.CDisplayPipelineMaterial_New(ptr);
     }
 
+    /// <since>5.0</since>
     public DisplayMaterial(DocObjects.Material material)
     {
       IntPtr pConstMaterial = material.ConstPointer();
@@ -52,6 +55,7 @@ namespace Rhino.Display
     /// Constructs a default material with a specific diffuse color.
     /// </summary>
     /// <param name="diffuse">Diffuse color of material. The alpha component of the Diffuse color is ignored.</param>
+    /// <since>5.0</since>
     public DisplayMaterial(Color diffuse)
     {
       int argb = StripAlpha(diffuse.ToArgb());
@@ -62,6 +66,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="diffuse">Diffuse color of material. The alpha component of the Diffuse color is ignored.</param>
     /// <param name="transparency">Transparency factor (0.0 = opaque, 1.0 = transparent)</param>
+    /// <since>5.0</since>
     public DisplayMaterial(Color diffuse, double transparency)
     {
       int argb = StripAlpha(diffuse.ToArgb());
@@ -76,6 +81,7 @@ namespace Rhino.Display
     /// <param name="emission">Emission color of material. The alpha component of the Emission color is ignored.</param>
     /// <param name="shine">Shine (highlight size) of material.</param>
     /// <param name="transparency">Transparency of material (0.0 = opaque, 1.0 = transparent)</param>
+    /// <since>5.0</since>
     public DisplayMaterial(Color diffuse, Color specular, Color ambient, Color emission, double shine, double transparency)
     {
       int argbDiffuse = StripAlpha(diffuse.ToArgb());
@@ -91,6 +97,7 @@ namespace Rhino.Display
       Dispose(false);
     }
 
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -111,6 +118,7 @@ namespace Rhino.Display
     /// Gets or sets the Diffuse color of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color Diffuse
     {
       get { return GetColor(idxDiffuse); }
@@ -121,6 +129,7 @@ namespace Rhino.Display
     /// Gets or sets the Diffuse color of the back side of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color BackDiffuse
     {
       get { return GetColor(idxBackDiffuse); }
@@ -131,6 +140,7 @@ namespace Rhino.Display
     /// Gets or sets the Specular color of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color Specular
     {
       get { return GetColor(idxSpecular); }
@@ -141,6 +151,7 @@ namespace Rhino.Display
     /// Gets or sets the Specular color of the back side of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color BackSpecular
     {
       get { return GetColor(idxBackSpecular); }
@@ -151,6 +162,7 @@ namespace Rhino.Display
     /// Gets or sets the Ambient color of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("This property is obsolete: ambient is no longer supported"),
      System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Color Ambient
@@ -162,6 +174,7 @@ namespace Rhino.Display
     /// Gets or sets the Ambient color of the back side of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     [Obsolete("This property is obsolete: ambient is no longer supported"),
      System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Color BackAmbient
@@ -174,6 +187,7 @@ namespace Rhino.Display
     /// Gets or sets the Emissive color of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color Emission
     {
       get { return GetColor(idxEmission); }
@@ -183,6 +197,7 @@ namespace Rhino.Display
     /// Gets or sets the Emissive color of the back side of the Material. 
     /// The alpha component of the color will be ignored.
     /// </summary>
+    /// <since>5.0</since>
     public Color BackEmission
     {
       get { return GetColor(idxBackEmission); }
@@ -192,6 +207,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the shine factor of the material (0.0 to 1.0)
     /// </summary>
+    /// <since>5.0</since>
     public double Shine
     {
       get { return GetDouble(idxShine); }
@@ -200,6 +216,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the shine factor of the back side of the material (0.0 to 1.0)
     /// </summary>
+    /// <since>5.0</since>
     public double BackShine
     {
       get { return GetDouble(idxBackShine); }
@@ -209,6 +226,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the transparency of the material (0.0 = opaque to 1.0 = transparent)
     /// </summary>
+    /// <since>5.0</since>
     public double Transparency
     {
       get { return GetDouble(idxTransparency); }
@@ -218,6 +236,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets the transparency of the back side material (0.0 = opaque to 1.0 = transparent)
     /// </summary>
+    /// <since>5.0</since>
     public double BackTransparency
     {
       get { return GetDouble(idxBackTransparency); }
@@ -226,6 +245,7 @@ namespace Rhino.Display
 
     const int idxIsTwoSided = 0;
 
+    /// <since>5.0</since>
     public bool IsTwoSided
     {
       get
@@ -319,14 +339,17 @@ namespace Rhino.Display
     #endregion
 
     #region Bitmap
+    /// <since>5.0</since>
     public Rhino.DocObjects.Texture GetBitmapTexture(bool front)
     {
       return GetTexture(Rhino.DocObjects.TextureType.Bitmap, front);
     }
+    /// <since>5.0</since>
     public bool SetBitmapTexture(string filename, bool front)
     {
       return AddTexture(filename, Rhino.DocObjects.TextureType.Bitmap, front);
     }
+    /// <since>5.0</since>
     public bool SetBitmapTexture(Rhino.DocObjects.Texture texture, bool front)
     {
       return SetTexture(texture, Rhino.DocObjects.TextureType.Bitmap, front);
@@ -338,14 +361,17 @@ namespace Rhino.Display
     /// Gets the bump texture for this display material.
     /// </summary>
     /// <returns>The texture, or null if no bump texture has been added to this material.</returns>
+    /// <since>5.0</since>
     public Rhino.DocObjects.Texture GetBumpTexture(bool front)
     {
       return GetTexture(Rhino.DocObjects.TextureType.Bump, front);
     }
+    /// <since>5.0</since>
     public bool SetBumpTexture(string filename, bool front)
     {
       return AddTexture(filename, Rhino.DocObjects.TextureType.Bump, front);
     }
+    /// <since>5.0</since>
     public bool SetBumpTexture(Rhino.DocObjects.Texture texture, bool front)
     {
       return SetTexture(texture, Rhino.DocObjects.TextureType.Bump, front);
@@ -353,14 +379,17 @@ namespace Rhino.Display
     #endregion
 
     #region Environment
+    /// <since>5.0</since>
     public Rhino.DocObjects.Texture GetEnvironmentTexture(bool front)
     {
       return GetTexture(Rhino.DocObjects.TextureType.Emap, front);
     }
+    /// <since>5.0</since>
     public bool SetEnvironmentTexture(string filename, bool front)
     {
       return AddTexture(filename, Rhino.DocObjects.TextureType.Emap, front);
     }
+    /// <since>5.0</since>
     public bool SetEnvironmentTexture(Rhino.DocObjects.Texture texture, bool front)
     {
       return SetTexture(texture, Rhino.DocObjects.TextureType.Emap, front);
@@ -368,14 +397,17 @@ namespace Rhino.Display
     #endregion
 
     #region Transparency
+    /// <since>5.0</since>
     public Rhino.DocObjects.Texture GetTransparencyTexture(bool front)
     {
       return GetTexture(Rhino.DocObjects.TextureType.Transparency, front);
     }
+    /// <since>5.0</since>
     public bool SetTransparencyTexture(string filename, bool front)
     {
       return AddTexture(filename, Rhino.DocObjects.TextureType.Transparency, front);
     }
+    /// <since>5.0</since>
     public bool SetTransparencyTexture(Rhino.DocObjects.Texture texture, bool front)
     {
       return SetTexture(texture, Rhino.DocObjects.TextureType.Transparency, front);

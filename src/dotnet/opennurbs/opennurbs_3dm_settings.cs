@@ -10,7 +10,7 @@ namespace Rhino.DocObjects
   // is not included in the OpenNURBS flavor build of RhinoCommon
 
   /// <summary>
-  /// Represents a contruction plane inside the document.
+  /// Represents a construction plane inside the document.
   /// <para>Use Rhino.DocObjects.Tables.NamedConstructionPlaneTable
   /// methods and indexers to add and access a <see cref="ConstructionPlane"/>.</para>
   /// </summary>
@@ -70,6 +70,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new instance of <see cref="ConstructionPlane"/>.
     /// </summary>
+    /// <since>5.0</since>
     public ConstructionPlane()
     {
       m_plane = Plane.WorldXY;
@@ -92,6 +93,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the geometric plane to use for construction.
     /// </summary>
+    /// <since>5.0</since>
     public Plane Plane
     {
       get { return m_plane; }
@@ -101,6 +103,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the distance between grid lines.
     /// </summary>
+    /// <since>5.0</since>
     public double GridSpacing
     {
       get { return m_grid_spacing; }
@@ -111,6 +114,7 @@ namespace Rhino.DocObjects
     /// when "grid snap" is enabled, the distance between snap points.
     /// Typically this is the same distance as grid spacing.
     /// </summary>
+    /// <since>5.0</since>
     public double SnapSpacing
     {
       get { return m_snap_spacing; }
@@ -120,6 +124,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the total amount of grid lines in each direction.
     /// </summary>
+    /// <since>5.0</since>
     public int GridLineCount
     {
       get { return m_grid_line_count; }
@@ -134,6 +139,7 @@ namespace Rhino.DocObjects
     /// <para>3: One line in three lines is thick (and two are thin).</para>
     /// <para>4: ...</para>
     /// </summary>
+    /// <since>5.0</since>
     public int ThickLineFrequency
     {
       get { return m_grid_thick_frequency; }
@@ -145,6 +151,7 @@ namespace Rhino.DocObjects
     /// <para>false=grid is always drawn behind 3d geometry</para>
     /// <para>true=grid is drawn at its depth as a 3d plane and grid lines obscure things behind the grid.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool DepthBuffered
     {
       get { return m_bDepthBuffered; }
@@ -154,6 +161,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the name of the construction plane.
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get
@@ -182,6 +190,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets whether the grid itself should be visible. 
     /// </summary>
+    /// <since>5.0</since>
     public bool ShowGrid
     {
       get { return m_bShowGrid; }
@@ -189,8 +198,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets whether the axes of the grid shuld be visible.
+    /// Gets or sets whether the axes of the grid should be visible.
     /// </summary>
+    /// <since>5.0</since>
     public bool ShowAxes
     {
       get { return m_bShowAxes; }
@@ -198,8 +208,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets whether the Z axis of the grid shuld be visible.
+    /// Gets or sets whether the Z axis of the grid should be visible.
     /// </summary>
+    /// <since>6.0</since>
     public bool ShowZAxis
     {
       get { return m_bShowZAxis; }
@@ -209,11 +220,13 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the color of the thinner, less prominent line.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color ThinLineColor { get; set; }
 
     /// <summary>
     /// Gets or sets the color of the thicker, wider line.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color ThickLineColor
     {
       get { return m_thick_line_color; }
@@ -223,6 +236,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the color of the grid X-axis mark.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color GridXColor
     {
       get { return m_grid_x_color; }
@@ -232,6 +246,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the color of the grid Y-axis mark.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color GridYColor
     {
       get { return m_grid_y_color; }
@@ -241,6 +256,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the color of the grid Z-axis mark.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color GridZColor
     {
       get { return m_grid_z_color; }
@@ -262,7 +278,7 @@ namespace Rhino.DocObjects
   {
     /// <summary> No focal blur </summary>
     None,
-    /// <summary>Autofocus on selected objects</summary>
+    /// <summary>Auto-focus on selected objects</summary>
     Automatic,
     /// <summary>Fully manual focus</summary>
     Manual
@@ -314,6 +330,7 @@ namespace Rhino.DocObjects
     /// Access to the ViewInfo for given RhinoViewport
     /// </summary>
     /// <param name="rhinoViewPort"></param>
+    /// <since>6.0</since>
     public ViewInfo(Display.RhinoViewport rhinoViewPort)
     {
       m_parent = null;
@@ -328,6 +345,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="docRuntimeSerialNumber">Runtime serial number of the
     /// document to query for the active viewport</param>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public ViewInfo(uint docRuntimeSerialNumber)
     {
@@ -391,6 +409,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -420,6 +439,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the name of the view.
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get
@@ -442,6 +462,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Get filename for wallpaper set to this view, if any.
     /// </summary>
+    /// <since>6.0</since>
     public string WallpaperFilename
     {
       get
@@ -459,6 +480,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// True if wallpaper (if any) is to be shown in gray scale in this view.
     /// </summary>
+    /// <since>6.0</since>
     public bool ShowWallpaperInGrayScale
     {
       get
@@ -471,6 +493,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// True if wallpaper (if any) is to be hidden from this view.
     /// </summary>
+    /// <since>6.0</since>
     public bool WallpaperHidden
     {
       get
@@ -483,6 +506,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the Focal blur distance of the active viewport
     /// </summary>
+    /// <since>6.0</since>
     public double FocalBlurDistance
     {
       get
@@ -501,6 +525,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the Focal blur aperture of the active viewport
     /// </summary>
+    /// <since>6.0</since>
     public double FocalBlurAperture
     {
       get
@@ -519,6 +544,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the Focal blur jitter of the active viewport
     /// </summary>
+    /// <since>6.0</since>
     public double FocalBlurJitter
     {
       get
@@ -538,6 +564,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the Focal blur sample count of the active viewport
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint FocalBlurSampleCount
     {
@@ -557,6 +584,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the Focal blur mode of the active viewport
     /// </summary>
+    /// <since>6.0</since>
     [CLSCompliant(false)]
     public ViewInfoFocalBlurModes FocalBlurMode
     {
@@ -596,6 +624,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the viewport, or viewing frustum, associated with this view.
     /// </summary>
+    /// <since>5.0</since>
     public ViewportInfo Viewport
     {
       get
@@ -626,6 +655,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new instance of the <see cref="EarthAnchorPoint"/> class.
     /// </summary>
+    /// <since>5.0</since>
     public EarthAnchorPoint()
     {
       m_ptr = UnsafeNativeMethods.ON_EarthAnchorPoint_New();
@@ -654,6 +684,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>5.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -692,6 +723,7 @@ namespace Rhino.DocObjects
     /// Gets or sets a point latitude on earth, in decimal degrees.
     /// +90 = north pole, 0 = equator, -90 = south pole.
     /// </summary>
+    /// <since>5.0</since>
     public double EarthBasepointLatitude
     {
       get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.EarthBasepointLatitude); }
@@ -703,6 +735,7 @@ namespace Rhino.DocObjects
     /// <para>0 = prime meridian (Greenwich meridian)</para>
     /// <para>Values increase towards West</para>
     /// </summary>
+    /// <since>5.0</since>
     public double EarthBasepointLongitude
     {
       get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.EarthBasepointLongitude); }
@@ -712,6 +745,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the point elevation on earth, in meters.
     /// </summary>
+    /// <since>5.0</since>
     public double EarthBasepointElevation
     {
       get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.EarthBasepointElevation); }
@@ -721,6 +755,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value indicating the zero level convention relating to a location on Earth.
     /// </summary>
+    /// <since>5.0</since>
     public BasepointZero EarthBasepointElevationZero
     {
       get
@@ -736,6 +771,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Corresponding model point in model coordinates.</summary>
+    /// <since>5.0</since>
     public Point3d ModelBasePoint
     {
       get
@@ -753,6 +789,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Earth directions in model coordinates.</summary>
+    /// <since>5.0</since>
     public Vector3d ModelNorth
     {
       get
@@ -770,6 +807,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Earth directions in model coordinates.</summary>
+    /// <since>5.0</since>
     public Vector3d ModelEast
     {
       get
@@ -792,6 +830,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the short form of the identifying information about this location.
     /// </summary>
+    /// <since>5.0</since>
     public string Name
     {
       get
@@ -814,6 +853,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the long form of the identifying information about this location.
     /// </summary>
+    /// <since>5.0</since>
     public string Description
     {
       get
@@ -839,7 +879,8 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Checks if the earth location is set or not.
     /// </summary>
-    /// <returns>Bool value, true if set else false</returns>
+    /// <returns>Boolean value, true if set else false</returns>
+    /// <since>6.0</since>
     public bool EarthLocationIsSet()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -853,6 +894,7 @@ namespace Rhino.DocObjects
     /// is set to ModelBasepoint.
     /// </summary>
     /// <returns>A plane value. This might be invalid on error.</returns>
+    /// <since>5.0</since>
     public Plane GetModelCompass()
     {
       Plane rc = Plane.Unset;
@@ -868,7 +910,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="modelUnitSystem">The model unit system.</param>
     /// <returns>
-    /// Transform on success. Inalid Transform on error.
+    /// Transform on success. Invalid Transform on error.
     /// </returns>
     /// <remarks>
     /// If M is a point in model coordinates and E = model_to_earth*M,
@@ -890,6 +932,7 @@ namespace Rhino.DocObjects
     /// longitude error &lt;=
     /// elevation error &lt;= 8 centimeters.
     /// </remarks>
+    /// <since>5.0</since>
     public Transform GetModelToEarthTransform(UnitSystem modelUnitSystem)
     {
       Transform rc = Transform.Unset;
@@ -901,6 +944,7 @@ namespace Rhino.DocObjects
     /// <summary> Returns the earth anchor plane </summary>
     /// <param name="anchorNorth"></param>
     /// <returns>A plane value.</returns>
+    /// <since>6.0</since>
     public Plane GetEarthAnchorPlane(out Vector3d anchorNorth)
     {
       Plane plane = new Plane();
@@ -1001,6 +1045,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimationProperties"/> class.
     /// </summary>
+    /// <since>6.11</since>
     public AnimationProperties()
     {
       m_ptr = UnsafeNativeMethods.ON_3dmAnimationProperties_New(IntPtr.Zero);
@@ -1008,6 +1053,7 @@ namespace Rhino.DocObjects
 
     /// <summary> Initialize new instance of the AnimationProperties class. </summary>
     /// <param name="source">If not null, settings are copied from source</param>
+    /// <since>6.11</since>
     public AnimationProperties(AnimationProperties source)
     {
       m_ptr = UnsafeNativeMethods.ON_3dmAnimationProperties_New(source.ConstPointer());
@@ -1045,6 +1091,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>6.11</since>
     public void Dispose()
     {
       Dispose(true);
@@ -1091,6 +1138,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the capture type of the animation.
     /// </summary>
+    /// <since>6.11</since>
     [CLSCompliant(false)]
     public CaptureTypes CaptureType
     {
@@ -1163,6 +1211,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the file extension of the saved frames created by the animation.
     /// </summary>
+    /// <since>6.11</since>
     public string FileExtension
     {
       set
@@ -1186,6 +1235,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the capture method of the animation which is either preview or full.
     /// </summary>
+    /// <since>6.11</since>
     public string CaptureMethod
     {
       set
@@ -1209,6 +1259,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the viewport that will be captured.
     /// </summary>
+    /// <since>6.11</since>
     public string ViewportName
     {
       set
@@ -1232,6 +1283,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the name of the animation sequence.
     /// </summary>
+    /// <since>6.11</since>
     public string AnimationName
     {
       set
@@ -1255,6 +1307,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the ID of the view display mode (wireframe, shaded...).
     /// </summary>
+    /// <since>6.11</since>
     public Guid DisplayMode
     {
       set
@@ -1271,6 +1324,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets points of the camera path.
     /// </summary>
+    /// <since>6.11</since>
     public Point3d[] CameraPoints
     {
       set
@@ -1295,6 +1349,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets points of the target path.
     /// </summary>
+    /// <since>6.11</since>
     public Point3d[] TargetPoints
     {
       set
@@ -1319,6 +1374,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the number of frames to be captured.
     /// </summary>
+    /// <since>6.11</since>
     public int FrameCount
     {
       set
@@ -1335,6 +1391,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the object ID of the camera path.
     /// </summary>
+    /// <since>6.11</since>
     public Guid CameraPathId
     {
       set
@@ -1351,6 +1408,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the object ID of the target path.
     /// </summary>
+    /// <since>6.11</since>
     public Guid TargetPathId
     {
       set
@@ -1367,6 +1425,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the latitude for sun animations in the range of -90 to +90.
     /// </summary>
+    /// <since>6.11</since>
     public double Latitude
     {
       set
@@ -1383,6 +1442,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the longitude for sun animations in the range of -180 to +180.
     /// </summary>
+    /// <since>6.11</since>
     public double Longitude
     {
       set
@@ -1400,6 +1460,7 @@ namespace Rhino.DocObjects
     /// Gets or sets the world angle corresponding to North in degrees.
     /// This angle is zero along the x-axis and increases anticlockwise.
     /// </summary>
+    /// <since>6.11</since>
     public double NorthAngle
     {
       set
@@ -1416,6 +1477,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start day for seasonal/one day sun animation in the range 1 to 31.
     /// </summary>
+    /// <since>6.11</since>
     public int StartDay
     {
       set
@@ -1432,6 +1494,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start month for seasonal/one day sun animation in the range 1 to 12.
     /// </summary>
+    /// <since>6.11</since>
     public int StartMonth
     {
       set
@@ -1448,6 +1511,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start year for seasonal/one day sun animation in the range 1800 to 2199.
     /// </summary>
+    /// <since>6.11</since>
     public int StartYear
     {
       set
@@ -1464,6 +1528,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start hour for seasonal/one day sun animation in the range 0 to 23.
     /// </summary>
+    /// <since>6.11</since>
     public int StartHour
     {
       set
@@ -1480,6 +1545,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start minutes for seasonal/one day sun animation in the range 0 to 59.
     /// </summary>
+    /// <since>6.11</since>
     public int StartMinutes
     {
       set
@@ -1496,6 +1562,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the start seconds for seasonal/one day sun animation in the range 0 to 59.
     /// </summary>
+    /// <since>6.11</since>
     public int StartSeconds
     {
       set
@@ -1512,6 +1579,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end day for seasonal day sun animation in the range 1 to 31.
     /// </summary>
+    /// <since>6.11</since>
     public int EndDay
     {
       set
@@ -1528,6 +1596,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end month for seasonal day sun animation in the range 1 to 12.
     /// </summary>
+    /// <since>6.11</since>
     public int EndMonth
     {
       set
@@ -1544,6 +1613,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end year for seasonal day sun animation in the range 1800 to 2199.
     /// </summary>
+    /// <since>6.11</since>
     public int EndYear
     {
       set
@@ -1560,6 +1630,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end hour for one day sun animation in the range 0 to 23.
     /// </summary>
+    /// <since>6.11</since>
     public int EndHour
     {
       set
@@ -1576,6 +1647,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end minutes for one day sun animation in the range 0 to 59.
     /// </summary>
+    /// <since>6.11</since>
     public int EndMinutes
     {
       set
@@ -1592,6 +1664,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the end seconds for one day sun animation in the range 0 to 59.
     /// </summary>
+    /// <since>6.11</since>
     public int EndSeconds
     {
       set
@@ -1608,6 +1681,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the days between captured frames for seasonal sun animation.
     /// </summary>
+    /// <since>6.11</since>
     public int DaysBetweenFrames
     {
       set
@@ -1624,6 +1698,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the minutes between captured frames for one day sun animation.
     /// </summary>
+    /// <since>6.11</since>
     public int MinutesBetweenFrames
     {
       set
@@ -1640,6 +1715,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Internal value used while previewing animation.
     /// </summary>
+    /// <since>6.11</since>
     public int LightIndex
     {
       set
@@ -1656,6 +1732,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the location for the saved frames.
     /// </summary>
+    /// <since>6.11</since>
     public string FolderName
     {
       set
@@ -1679,6 +1756,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the full path to the saved frames of an animation.
     /// </summary>
+    /// <since>6.11</since>
     public string[] Images
     {
       set
@@ -1704,6 +1782,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the dates that are calculated for seasonal/one day sun animations.
     /// </summary>
+    /// <since>6.11</since>
     public string[] Dates
     {
       set
@@ -1729,6 +1808,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value indicating whether to capture a frame in rendered mode.
     /// </summary>
+    /// <since>6.11</since>
     public bool RenderFull
     {
       set
@@ -1745,6 +1825,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value indicating whether to capture a frame in preview rendered mode.
     /// </summary>
+    /// <since>6.11</since>
     public bool RenderPreview
     {
       set
@@ -1793,6 +1874,7 @@ namespace Rhino.Render
 
     /// <summary> Initialize new instance of the RenderSettings class. </summary>
     /// <param name="source">If not null, settings are copied from source</param>
+    /// <since>6.0</since>
     public RenderSettings(RenderSettings source)
     {
       var const_ptr_source = source == null ? IntPtr.Zero : source.ConstPointer();
@@ -1801,6 +1883,7 @@ namespace Rhino.Render
     }
 
     /// <summary> Initialize a new instance of the RenderSettings class. </summary>
+    /// <since>5.0</since>
     public RenderSettings()
     {
       IntPtr ptr_this = UnsafeNativeMethods.ON_3dmRenderSettings_New(IntPtr.Zero);
@@ -1874,6 +1957,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets the ambient light color used in rendering.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color AmbientLight
     {
       get { return GetColor(UnsafeNativeMethods.RenderSettingColor.AmbientLight); }
@@ -1884,6 +1968,7 @@ namespace Rhino.Render
     /// Gets or sets the background top color used in rendering.
     /// <para>Sets also the background color if a solid background color is set.</para>
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color BackgroundColorTop
     {
       get { return GetColor(UnsafeNativeMethods.RenderSettingColor.BackgroundColorTop); }
@@ -1893,6 +1978,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets the background bottom color used in rendering.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Color BackgroundColorBottom
     {
       get { return GetColor(UnsafeNativeMethods.RenderSettingColor.BackgroundColorBottom); }
@@ -1914,6 +2000,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to render using lights that are on layers that are off.
     /// </summary>
+    /// <since>5.0</since>
     public bool UseHiddenLights
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.UseHiddenLights); }
@@ -1924,6 +2011,7 @@ namespace Rhino.Render
     /// Gets or sets a value indicating whether to render using depth cues.
     /// <para>These are clues to help the perception of position and orientation of objects in the image.</para>
     /// </summary>
+    /// <since>5.0</since>
     public bool DepthCue
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.DepthCue); }
@@ -1933,6 +2021,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to render using flat shading.
     /// </summary>
+    /// <since>5.0</since>
     public bool FlatShade
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.FlatShade); }
@@ -1942,6 +2031,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to render back faces.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderBackfaces
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderBackFaces); }
@@ -1951,6 +2041,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to instruct the rendering engine to show points.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderPoints
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderPoints); }
@@ -1960,6 +2051,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to instruct the rendering engine to show curves.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderCurves
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderCurves); }
@@ -1969,6 +2061,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to instruct the rendering engine to show isocurves.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderIsoparams
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderIsoparams); }
@@ -1978,6 +2071,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets a value indicating whether to instruct the rendering engine to show mesh edges.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderMeshEdges
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderMeshEdges); }
@@ -1988,6 +2082,7 @@ namespace Rhino.Render
     /// Gets or sets a value indicating whether to instruct the rendering engine to show annotations,
     /// such as linear dimensions or angular dimensions.
     /// </summary>
+    /// <since>5.0</since>
     public bool RenderAnnotations
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.RenderAnnotation); }
@@ -2007,8 +2102,9 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Gets or sets antialias level, used for render quality
+    /// Gets or sets anti-alias level, used for render quality
     /// </summary>
+    /// <since>5.0</since>
     public AntialiasLevel AntialiasLevel
     {
       get { return (AntialiasLevel)GetInt(UnsafeNativeMethods.RenderSettingInt.AntialiasStyle); }
@@ -2019,6 +2115,7 @@ namespace Rhino.Render
     /// Gets or sets a value indicating whether to use the resolution of the
     /// viewport being rendered or ImageSize when rendering
     /// </summary>
+    /// <since>5.0</since>
     public bool UseViewportSize
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.UseViewportSize); }
@@ -2030,6 +2127,7 @@ namespace Rhino.Render
     /// background or not. This is meaningful only if the viewport has a wallpaper
     /// and render settings are set to render Wallpaper into the background.
     /// </summary>
+    /// <since>6.0</since>
     public bool ScaleBackgroundToFit
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.ScaleBackgroundToFit); }
@@ -2039,6 +2137,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets whether rendering should be done with transparent background.
     /// </summary>
+    /// <since>6.0</since>
     public bool TransparentBackground
     {
       get { return GetBool(UnsafeNativeMethods.RenderSettingBool.TransparentBackground); }
@@ -2046,9 +2145,10 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// unit system to use when converting image pixel size and dpi information
+    /// unit system to use when converting image pixel size and DPI information
     /// into a print size.  Default = inches
     /// </summary>
+    /// <since>5.11</since>
     public UnitSystem ImageUnitSystem
     {
       get
@@ -2067,6 +2167,7 @@ namespace Rhino.Render
     /// Number of dots/inch (dots=pixels) to use when printing and saving
     /// bitmaps. The default is 72.0 dots/inch.
     /// </summary>
+    /// <since>5.11</since>
     public double ImageDpi
     {
       get
@@ -2087,6 +2188,7 @@ namespace Rhino.Render
     /// UseViewportSize is set to false.  If UseViewportSize is set to true,
     /// then this value is ignored.
     /// </summary>
+    /// <since>5.0</since>
     public System.Drawing.Size ImageSize
     {
       get
@@ -2105,6 +2207,7 @@ namespace Rhino.Render
     /// <summary>
     /// 0=none, 1=normal, 2=best.
     /// </summary>
+    /// <since>5.0</since>
     public int ShadowmapLevel
     {
       get { return GetInt(UnsafeNativeMethods.RenderSettingInt.ShadowmapStyle); }
@@ -2112,8 +2215,9 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// How the viewport's backgroun should be filled.
+    /// How the viewport's background should be filled.
     /// </summary>
+    /// <since>5.0</since>
     public Display.BackgroundStyle BackgroundStyle
     {
       get { return (Display.BackgroundStyle)GetInt(UnsafeNativeMethods.RenderSettingInt.BackgroundStyle); }
@@ -2124,6 +2228,7 @@ namespace Rhino.Render
     /// <summary>
     /// Get the document linear workflow interface
     /// </summary>
+    /// <since>6.0</since>
     public LinearWorkflow LinearWorkflow
     {
       get { return new LinearWorkflow(m_doc.RuntimeSerialNumber); }
@@ -2132,6 +2237,7 @@ namespace Rhino.Render
     /// <summary>
     /// Get the document dithering interface
     /// </summary>
+    /// <since>6.0</since>
     public Dithering Dithering
     {
       get { return new Dithering(m_doc.RuntimeSerialNumber); }
@@ -2140,6 +2246,7 @@ namespace Rhino.Render
     /// <summary>
     /// Get or set the given named view
     /// </summary>
+    /// <since>6.1</since>
     public string NamedView
     {
       set
@@ -2161,8 +2268,9 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Set os get the given snapshot view
+    /// Set or get the given snapshot view
     /// </summary>
+    /// <since>6.1</since>
     public string Snapshot
     {
       set
@@ -2186,6 +2294,7 @@ namespace Rhino.Render
     /// <summary>
     /// Set or get the given specific viewport
     /// </summary>
+    /// <since>6.1</since>
     public string SpecificViewport
     {
       set
@@ -2209,6 +2318,7 @@ namespace Rhino.Render
     /// <summary>
     /// Gets or sets the render source <see cref="RenderingSources"/> enumeration.
     /// </summary>
+    /// <since>6.1</since>
     [CLSCompliant(false)]
     public RenderingSources RenderSource
     {
@@ -2293,6 +2403,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets a Uniform Resource Locator (URL) direction for the model.
     /// </summary>
+    /// <since>5.0</since>
     public string ModelUrl
     {
       get
@@ -2313,9 +2424,10 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Gets or sets the model basepoint that is used when the file is read as an instance definition.
+    /// Gets or sets the model base point that is used when the file is read as an instance definition.
     /// <para>This point is mapped to the origin in the instance definition.</para>
     /// </summary>
+    /// <since>5.0</since>
     public Point3d ModelBasepoint
     {
       get
@@ -2365,18 +2477,21 @@ namespace Rhino.FileIO
     }
 
     /// <summary>Gets or sets the model space absolute tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAbsoluteTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelAbsTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelAbsTol, value); }
     }
     /// <summary>Gets or sets the model space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAngleToleranceRadians
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelAngleTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelAngleTol, value); }
     }
     /// <summary>Gets or sets the model space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelAngleToleranceDegrees
     {
       get
@@ -2392,24 +2507,28 @@ namespace Rhino.FileIO
       }
     }
     /// <summary>Gets or sets the model space relative tolerance.</summary>
+    /// <since>5.0</since>
     public double ModelRelativeTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelRelTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelRelTol, value); }
     }
     /// <summary>Gets or sets the page space absolute tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAbsoluteTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageAbsTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageRelTol, value); }
     }
     /// <summary>Gets or sets the page space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAngleToleranceRadians
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageAngleTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageAngleTol, value); }
     }
     /// <summary>Gets or sets the page space angle tolerance.</summary>
+    /// <since>5.0</since>
     public double PageAngleToleranceDegrees
     {
       get
@@ -2425,6 +2544,7 @@ namespace Rhino.FileIO
       }
     }
     /// <summary>Gets or sets the page space relative tolerance.</summary>
+    /// <since>5.0</since>
     public double PageRelativeTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageRelTol); }
@@ -2434,6 +2554,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the model unit system, using <see cref="Rhino.UnitSystem"/> enumeration.
     /// </summary>
+    /// <since>5.0</since>
     public UnitSystem ModelUnitSystem
     {
       get
@@ -2453,6 +2574,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the page unit system, using <see cref="Rhino.UnitSystem"/> enumeration.
     /// </summary>
+    /// <since>5.0</since>
     public UnitSystem PageUnitSystem
     {
       get

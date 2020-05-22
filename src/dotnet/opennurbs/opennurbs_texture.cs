@@ -108,7 +108,7 @@ namespace Rhino.DocObjects
     /// </summary>
     PBR_Emission = 25,
     /// <summary>
-    /// Physically based materials only - occulusion (greyscale)
+    /// Physically based materials only - occlusion (greyscale)
     /// </summary>
     PBR_AmbientOcclusion = 26,
     //// <summary>
@@ -176,6 +176,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new texture.
     /// </summary>
+    /// <since>5.0</since>
     public Texture()
     {
       IntPtr ptr_this = UnsafeNativeMethods.ON_Texture_New();
@@ -260,6 +261,7 @@ namespace Rhino.DocObjects
     /// for this user, use the BitmapTable.Find function using this
     /// property.</para>
     /// </summary>
+    /// <since>5.0</since>
     public string FileName
     {
       get
@@ -286,6 +288,7 @@ namespace Rhino.DocObjects
     /// <remarks>After the get or the set method complete,
     /// you own the copy you received or passed in, and can Dispose() of it.</remarks>
     /// </summary>
+    /// <since>6.0</since>
     public FileReference FileReference
     {
       get
@@ -309,6 +312,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets the globally unique identifier of this texture.
     /// </summary>
+    /// <since>5.0</since>
     public Guid Id
     {
       get
@@ -322,6 +326,7 @@ namespace Rhino.DocObjects
     /// If the texture is enabled then it will be visible in the rendered
     /// display otherwise it will not.
     /// </summary>
+    /// <since>5.0</since>
     public bool Enabled
     {
       get
@@ -339,6 +344,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Controls how the pixels in the bitmap are interpreted
     /// </summary>
+    /// <since>5.6</since>
     public TextureType TextureType
     {
       get
@@ -357,6 +363,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// 
     /// </summary>
+    /// <since>5.10</since>
     public int MappingChannelId
     {
       get { return UnsafeNativeMethods.ON_Texture_GetMappingChannelId(ConstPointer()); }
@@ -366,6 +373,7 @@ namespace Rhino.DocObjects
     /// Determines how this texture is combined with others in a material's
     /// texture list.
     /// </summary>
+    /// <since>5.6</since>
     public TextureCombineMode TextureCombineMode
     {
       get
@@ -405,6 +413,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Texture wrapping mode in the U direction
     /// </summary>
+    /// <since>5.6</since>
     public TextureUvwWrapping WrapU
     {
       get { return WrapUvwHelper(IDX_WRAPMODE_U); }
@@ -418,6 +427,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Texture wrapping mode in the V direction
     /// </summary>
+    /// <since>5.6</since>
     public TextureUvwWrapping WrapV
     {
       get { return WrapUvwHelper(IDX_WRAPMODE_V); }
@@ -431,6 +441,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Texture wrapping mode in the W direction
     /// </summary>
+    /// <since>5.6</since>
     public TextureUvwWrapping WrapW
     {
       get { return WrapUvwHelper(IDX_WRAPMODE_W); }
@@ -445,6 +456,7 @@ namespace Rhino.DocObjects
     /// If true then the UVW transform is applied to the texture
     /// otherwise the UVW transform is ignored.
     /// </summary>
+    /// <since>5.6</since>
     public bool ApplyUvwTransform
     {
       get
@@ -463,6 +475,7 @@ namespace Rhino.DocObjects
     /// Transform to be applied to each instance of this texture
     /// if ApplyUvw is true
     /// </summary>
+    /// <since>5.6</since>
     public Transform UvwTransform
     {
       get
@@ -501,6 +514,7 @@ namespace Rhino.DocObjects
     /// <param name="a1"></param>
     /// <param name="a2"></param>
     /// <param name="a3"></param>
+    /// <since>5.6</since>
     public void GetAlphaBlendValues(out double constant, out double a0, out double a1, out double a2, out double a3)
     {
       constant = 0;
@@ -528,6 +542,7 @@ namespace Rhino.DocObjects
     /// <param name="a1"></param>
     /// <param name="a2"></param>
     /// <param name="a3"></param>
+    /// <since>5.6</since>
     public void SetAlphaBlendValues(double constant, double a0, double a1, double a2, double a3)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -550,6 +565,7 @@ namespace Rhino.DocObjects
     /// <param name="a1"></param>
     /// <param name="a2"></param>
     /// <param name="a3"></param>
+    /// <since>6.0</since>
     public void SetRGBBlendValues(Color color, double a0, double a1, double a2, double a3)
     {
       IntPtr ptr_this = NonConstPointer();
