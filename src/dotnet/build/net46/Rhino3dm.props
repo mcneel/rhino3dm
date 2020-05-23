@@ -1,0 +1,9 @@
+<!--
+    this file is included for .net framework projects to ensure that
+    the native libraries get copied to the build output directory
+-->
+<Project>
+  <ItemGroup>
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\**\*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
