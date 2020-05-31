@@ -1,10 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <DefineConstants>RHINO3DM_BUILD DOTNETCORE</DefineConstants>
+    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);RHINO3DM_BUILD</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">$(DefineConstants);DOTNETCORE</DefineConstants>
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Rhino</RootNamespace>
+    <Version>0.1.0</Version>
+    <PackageId>Rhino3dm</PackageId>
+    <Authors>mcneel</Authors>
+    <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
+    <PackageDescription>rhino3dm is a set of libraries based on the OpenNURBS geometry library with a "RhinoCommon" style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.</PackageDescription>
+    <RepositoryUrl>https://github.com/mcneel/rhino3dm</RepositoryUrl>
+    <PackageTags>rhino3d</PackageTags>
+    <Copyright>Copyright (c) 1997-2020 Robert McNeel &amp; Associates</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIconUrl>https://github.com/mcneel/developer-rhino3d-com/raw/6/images/logo-rhino3dmio-128x128.png</PackageIconUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
+    <None Include="..\build\windows\win64\Release\librhino3dm_native.dll">
+      <PackagePath>runtimes\win-x64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
+    <None Include="..\build\macos\Release\librhino3dm_native.dylib">
+      <PackagePath>runtimes\osx-x64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="exists('..\build\linux\Release\librhino3dm_native.so')">
+    <None Include="..\build\linux\Release\librhino3dm_native.so">
+      <PackagePath>runtimes\linux-x64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="build\**" Pack="True" PackagePath="build\" />
+  </ItemGroup>
 
 </Project>
