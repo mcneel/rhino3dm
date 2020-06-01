@@ -74,16 +74,20 @@ jobs:
       - checkout
       - run: git submodule update --init
       - run: python3 --version && cmake --version && dotnet --version
-      - run: cd src && python3 build_dotnet.py
+      - run: python3 script/bootstrap.py -p linux
+      - run: python3 script/setup.py -p linux -v
+      - run: python3 script/build.py -p linux -v
 
-  build_dotnet_amazonlinux2:
+  build_dotnet_amzn2:
     docker:
-      - image: mcneel/rhino3dm-dev-amazonlinux2:latest
+      - image: mcneel/rhino3dm-dev-amzn2:latest
     steps:
       - checkout
       - run: git submodule update --init
       - run: python3 --version && cmake --version && dotnet --version
-      - run: cd src && python3 build_dotnet.py
+      - run: python3 script/bootstrap.py -p linux
+      - run: python3 script/setup.py -p linux -v
+      - run: python3 script/build.py -p linux -v
 
 workflows:
   version: 2
@@ -97,4 +101,4 @@ workflows:
       - build_py3
       - build_py3_mac
       - build_dotnet
-      - build_dotnet_amazonlinux2
+      - build_dotnet_amzn2

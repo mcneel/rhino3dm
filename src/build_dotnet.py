@@ -42,7 +42,7 @@ def methodgen(dotnetcore):
         # compile methodgen
         system('dotnet build ' + './' + build_dir)
         # execute methodgen
-        system('dotnet ./'+build_dir+'/bin/Debug/netcoreapp2.2/methodgen.dll '+ args)
+        system('dotnet run --project ' + build_dir + '/methodgen.csproj ' + args)
     else:
         # compile methodgen
         system('msbuild ./methodgen')
