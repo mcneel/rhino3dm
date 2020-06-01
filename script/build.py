@@ -260,7 +260,7 @@ def build_linux():
     target_path = os.path.join(build_folder, platform_full_names.get("linux").lower())
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    command = 'dotnet build -f netstandard2.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
