@@ -2589,7 +2589,7 @@
 
     
 
-    <h4 class="name" id="getBoundingBox"><span class="type-signature"></span>getBoundingBox<span class="signature">(accurate)</span><span class="type-signature"> &rarr; {<a href="BoundingBox.html">BoundingBox</a>}</span></h4>
+    <h4 class="name" id="getBoundingBox"><span class="type-signature"></span>getBoundingBox<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -2641,7 +2641,7 @@
 
 
 <div class="description">
-    Bounding box solver. Gets the world axis aligned bounding box for the geometry.
+    ...
 </div>
 
 
@@ -2654,57 +2654,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>accurate</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If true, a physically accurate bounding box will be computed. 
-     If not, a bounding box estimate will be computed. For some geometry types there is no 
-     difference between the estimate and the accurate bounding box. Estimated bounding boxes 
-     can be computed much (much) faster than accurate (or "tight") bounding boxes. 
-     Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -2717,31 +2666,6 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The bounding box of the geometry in world coordinates or BoundingBox.Empty 
-     if not bounding box could be found.
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="BoundingBox.html">BoundingBox</a></span>
-
-
-    </dd>
-</dl>
-
-    
 
 
         
@@ -3326,7 +3250,7 @@
 
     
 
-    <h4 class="name" id="isArc"><span class="type-signature"></span>isArc<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isArc"><span class="type-signature"></span>isArc<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -3378,7 +3302,7 @@
 
 
 <div class="description">
-    Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
+    Test a curve to see if it can be represented by an arc or circle within the given tolerance.
 </div>
 
 
@@ -3389,6 +3313,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -3432,7 +3405,7 @@
 
     
 
-    <h4 class="name" id="isCircle"><span class="type-signature"></span>isCircle<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isCircle"><span class="type-signature"></span>isCircle<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -3484,7 +3457,7 @@
 
 
 <div class="description">
-    Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.
+    Test a curve to see if it can be represented by a circle within the given tolerance.
 </div>
 
 
@@ -3495,6 +3468,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -3513,7 +3535,7 @@
 
         
 <div class="param-desc">
-    true if the Curve can be represented by a circle within tolerance.
+    true if the curve can be represented by a circle to within tolerance.
 </div>
 
 
@@ -3538,7 +3560,7 @@
 
     
 
-    <h4 class="name" id="isEllipse"><span class="type-signature"></span>isEllipse<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isEllipse"><span class="type-signature"></span>isEllipse<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -3590,7 +3612,7 @@
 
 
 <div class="description">
-    Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
+    Test a curve to see if it can be represented by an ellipse within a given tolerance.
 </div>
 
 
@@ -3601,6 +3623,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tolerance to use for checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -3644,7 +3715,7 @@
 
     
 
-    <h4 class="name" id="isLinear"><span class="type-signature"></span>isLinear<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isLinear"><span class="type-signature"></span>isLinear<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -3696,7 +3767,7 @@
 
 
 <div class="description">
-    Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
+    Test a curve to see if it is linear to within the custom tolerance.
 </div>
 
 
@@ -3707,6 +3778,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tolerance to use when checking linearity.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -3725,7 +3845,9 @@
 
         
 <div class="param-desc">
-    true if the curve is linear.
+    true if the ends of the curve are farther than tolerance apart
+     and the maximum distance from any point on the curve to
+     the line segment connecting the curve ends is <= tolerance.
 </div>
 
 
@@ -3750,7 +3872,7 @@
 
     
 
-    <h4 class="name" id="isPlanar"><span class="type-signature"></span>isPlanar<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isPlanar"><span class="type-signature"></span>isPlanar<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -3815,6 +3937,55 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
 
 
 
@@ -3831,7 +4002,7 @@
 
         
 <div class="param-desc">
-    true if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+    true if there is a plane such that the maximum distance from the curve to the plane is <= tolerance.
 </div>
 
 
@@ -5844,7 +6015,7 @@
 
 
 <div class="description">
-    Create a JSON string representation of this object
+    ...
 </div>
 
 
@@ -6783,7 +6954,7 @@
 
     
 
-    <h4 class="name" id="tryGetPolyline"><span class="type-signature"></span>tryGetPolyline<span class="signature">(polyline)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="tryGetPolyline"><span class="type-signature"></span>tryGetPolyline<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -6835,11 +7006,7 @@
 
 
 <div class="description">
-    Several types of Curve can have the form of a polyline 
-     including a degree 1 NurbsCurve, a PolylineCurve, 
-     and a PolyCurve all of whose segments are some form of 
-     polyline. IsPolyline tests a curve to see if it can be 
-     represented as a polyline.
+    ...
 </div>
 
 
@@ -6852,53 +7019,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>polyline</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Polyline.html">Polyline</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If true is returned, then the polyline form is returned here.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -6911,30 +7031,6 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if this curve can be represented as a polyline; otherwise, false.
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
         
@@ -6957,7 +7053,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:47 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:32 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

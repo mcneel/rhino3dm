@@ -2562,7 +2562,7 @@
 
     
 
-    <h4 class="name" id="getBoundingBox"><span class="type-signature"></span>getBoundingBox<span class="signature">(accurate)</span><span class="type-signature"> &rarr; {<a href="BoundingBox.html">BoundingBox</a>}</span></h4>
+    <h4 class="name" id="getBoundingBox"><span class="type-signature"></span>getBoundingBox<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -2614,7 +2614,7 @@
 
 
 <div class="description">
-    Bounding box solver. Gets the world axis aligned bounding box for the geometry.
+    ...
 </div>
 
 
@@ -2627,57 +2627,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>accurate</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If true, a physically accurate bounding box will be computed. 
-     If not, a bounding box estimate will be computed. For some geometry types there is no 
-     difference between the estimate and the accurate bounding box. Estimated bounding boxes 
-     can be computed much (much) faster than accurate (or "tight") bounding boxes. 
-     Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -2690,31 +2639,6 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The bounding box of the geometry in world coordinates or BoundingBox.Empty 
-     if not bounding box could be found.
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="BoundingBox.html">BoundingBox</a></span>
-
-
-    </dd>
-</dl>
-
-    
 
 
         
@@ -4031,7 +3955,7 @@
 
     
 
-    <h4 class="name" id="isCone"><span class="type-signature"></span>isCone<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isCone"><span class="type-signature"></span>isCone<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -4083,7 +4007,7 @@
 
 
 <div class="description">
-    Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.
+    Determines if the surface is a portion of a cone within a given tolerance.
 </div>
 
 
@@ -4094,6 +4018,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4137,7 +4110,7 @@
 
     
 
-    <h4 class="name" id="isCylinder"><span class="type-signature"></span>isCylinder<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isCylinder"><span class="type-signature"></span>isCylinder<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -4189,7 +4162,7 @@
 
 
 <div class="description">
-    Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.
+    Determines if the surface is a portion of a cylinder within a given tolerance.
 </div>
 
 
@@ -4200,6 +4173,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4398,7 +4420,7 @@
 
     
 
-    <h4 class="name" id="isPlanar"><span class="type-signature"></span>isPlanar<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isPlanar"><span class="type-signature"></span>isPlanar<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -4450,7 +4472,7 @@
 
 
 <div class="description">
-    Tests a surface to see if it is planar to zero tolerance.
+    Tests a surface to see if it is planar to a given tolerance.
 </div>
 
 
@@ -4461,6 +4483,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4479,7 +4550,8 @@
 
         
 <div class="param-desc">
-    true if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+    true if there is a plane such that the maximum distance from
+     the surface to the plane is <= tolerance.
 </div>
 
 
@@ -4660,7 +4732,7 @@
 
     
 
-    <h4 class="name" id="isSphere"><span class="type-signature"></span>isSphere<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isSphere"><span class="type-signature"></span>isSphere<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -4712,7 +4784,7 @@
 
 
 <div class="description">
-    Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.
+    Determines if the surface is a portion of a sphere within a given tolerance.
 </div>
 
 
@@ -4723,6 +4795,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4766,7 +4887,7 @@
 
     
 
-    <h4 class="name" id="isTorus"><span class="type-signature"></span>isTorus<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="isTorus"><span class="type-signature"></span>isTorus<span class="signature">(tolerance)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -4818,7 +4939,7 @@
 
 
 <div class="description">
-    Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.
+    Determines if the surface is a portion of a torus within a given tolerance.
 </div>
 
 
@@ -4829,6 +4950,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tolerance to use when checking.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -6485,7 +6655,7 @@
 
     
 
-    <h4 class="name" id="setPathAndUp"><span class="type-signature"></span>setPathAndUp<span class="signature">(a, b, up)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="setPathAndUp"><span class="type-signature"></span>setPathAndUp<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -6532,7 +6702,7 @@
 
 
 <div class="description">
-    Allows to set the two points at the extremes and the up vector.
+    ...
 </div>
 
 
@@ -6545,99 +6715,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>a</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;x, y, z></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The start point.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>b</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;x, y, z></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The end point.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>up</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;x, y, z></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The up vector.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -6650,31 +6727,6 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if the operation succeeded; otherwise false.
-     Setting up=a-b will make the operation fail.
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
         
@@ -7126,7 +7178,7 @@
 
 
 <div class="description">
-    Create a JSON string representation of this object
+    ...
 </div>
 
 
@@ -7893,7 +7945,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:46 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:32 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
