@@ -150,7 +150,7 @@
 
     
 
-    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(item)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -197,7 +197,7 @@
 
 
 <div class="description">
-    Duplicates the object, then adds a copy of the object to the document.
+    ...
 </div>
 
 
@@ -210,55 +210,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>item</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="File3dmObject.html">File3dmObject</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The item to duplicate and add.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
 
 
 
@@ -278,7 +229,7 @@
 
     
 
-    <h4 class="name" id="addArc"><span class="type-signature"></span>addArc<span class="signature">(arc)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addArc"><span class="type-signature"></span>addArc<span class="signature">(arc, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -379,7 +330,30 @@
 
             
 
-            <td class="description last">An arc.</td>
+            <td class="description last">An arc to add.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">attributes to apply to arc.</td>
         </tr>
 
     
@@ -428,7 +402,7 @@
 
     
 
-    <h4 class="name" id="addBrep"><span class="type-signature"></span>addBrep<span class="signature">(brep)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addBrep"><span class="type-signature"></span>addBrep<span class="signature">(brep, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -533,6 +507,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to apply to brep.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -578,7 +575,7 @@
 
     
 
-    <h4 class="name" id="addCircle"><span class="type-signature"></span>addCircle<span class="signature">(circle)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addCircle"><span class="type-signature"></span>addCircle<span class="signature">(circle, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -683,6 +680,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">attributes to apply to circle.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -728,7 +748,7 @@
 
     
 
-    <h4 class="name" id="addCurve"><span class="type-signature"></span>addCurve<span class="signature">(curve)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addCurve"><span class="type-signature"></span>addCurve<span class="signature">(curve, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -829,7 +849,30 @@
 
             
 
-            <td class="description last">A curve to add.</td>
+            <td class="description last">A duplicate of this curve is added to Rhino.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to apply to curve.</td>
         </tr>
 
     
@@ -878,7 +921,7 @@
 
     
 
-    <h4 class="name" id="addEllipse"><span class="type-signature"></span>addEllipse<span class="signature">(ellipse)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addEllipse"><span class="type-signature"></span>addEllipse<span class="signature">(ellipse, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -983,6 +1026,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">attributes to apply to ellipse.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1028,7 +1094,7 @@
 
     
 
-    <h4 class="name" id="addExtrusion"><span class="type-signature"></span>addExtrusion<span class="signature">(extrusion)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addExtrusion"><span class="type-signature"></span>addExtrusion<span class="signature">(extrusion, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -1130,6 +1196,29 @@
             
 
             <td class="description last">A duplicate of this extrusion is added to Rhino.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to link to the object.</td>
         </tr>
 
     
@@ -1351,7 +1440,7 @@
 
     
 
-    <h4 class="name" id="addMesh"><span class="type-signature"></span>addMesh<span class="signature">(mesh)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addMesh"><span class="type-signature"></span>addMesh<span class="signature">(mesh, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -1456,6 +1545,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to link to the object.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1893,7 +2005,7 @@
 
     
 
-    <h4 class="name" id="addPointCloud"><span class="type-signature"></span>addPointCloud<span class="signature">(cloud)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addPointCloud"><span class="type-signature"></span>addPointCloud<span class="signature">(cloud, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -1998,6 +2110,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">attributes to apply to point cloud.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2043,7 +2178,7 @@
 
     
 
-    <h4 class="name" id="addSphere"><span class="type-signature"></span>addSphere<span class="signature">(sphere)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addSphere"><span class="type-signature"></span>addSphere<span class="signature">(sphere, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -2148,6 +2283,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to link with the sphere.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2193,7 +2351,7 @@
 
     
 
-    <h4 class="name" id="addSurface"><span class="type-signature"></span>addSurface<span class="signature">(surface)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addSurface"><span class="type-signature"></span>addSurface<span class="signature">(surface, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -2298,6 +2456,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to link to the object.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2343,7 +2524,7 @@
 
     
 
-    <h4 class="name" id="addTextDot"><span class="type-signature"></span>addTextDot<span class="signature">(text, location)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
+    <h4 class="name" id="addTextDot"><span class="type-signature"></span>addTextDot<span class="signature">(text, location, attributes)</span><span class="type-signature"> &rarr; {Guid}</span></h4>
 
     
 
@@ -2468,6 +2649,29 @@
             
 
             <td class="description last">The location.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DocObjects.ObjectAttributes</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Attributes to link with curve.</td>
         </tr>
 
     
@@ -2869,7 +3073,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:46 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:32 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

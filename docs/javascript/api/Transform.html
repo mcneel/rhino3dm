@@ -634,7 +634,7 @@
 
     
 
-    <h4 class="name" id=".rotation"><span class="type-signature">(static) </span>rotation<span class="signature">(sinAngle, cosAngle, rotationAxis, rotationCenter)</span><span class="type-signature"> &rarr; {<a href="Transform.html">Transform</a>}</span></h4>
+    <h4 class="name" id=".rotation"><span class="type-signature">(static) </span>rotation<span class="signature">(angleRadians, rotationAxis, rotationCenter)</span><span class="type-signature"> &rarr; {<a href="Transform.html">Transform</a>}</span></h4>
 
     
 
@@ -719,7 +719,7 @@
 
         <tr>
             
-                <td class="name"><code>sinAngle</code></td>
+                <td class="name"><code>angleRadians</code></td>
             
 
             <td class="type">
@@ -735,30 +735,7 @@
 
             
 
-            <td class="description last">Sin of the rotation angle.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cosAngle</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">double</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Cos of the rotation angle.</td>
+            <td class="description last">Angle (in Radians) of the rotation.</td>
         </tr>
 
     
@@ -781,7 +758,7 @@
 
             
 
-            <td class="description last">Axis direction of rotation.</td>
+            <td class="description last">Axis direction of rotation operation.</td>
         </tr>
 
     
@@ -804,7 +781,7 @@
 
             
 
-            <td class="description last">Center point of rotation.</td>
+            <td class="description last">Center point of rotation. Rotation axis is vertical.</td>
         </tr>
 
     
@@ -1026,7 +1003,7 @@
 
     
 
-    <h4 class="name" id=".translation"><span class="type-signature">(static) </span>translation<span class="signature">(motion)</span><span class="type-signature"> &rarr; {<a href="Transform.html">Transform</a>}</span></h4>
+    <h4 class="name" id=".translation"><span class="type-signature">(static) </span>translation<span class="signature">(dx, dy, dz)</span><span class="type-signature"> &rarr; {<a href="Transform.html">Transform</a>}</span></h4>
 
     
 
@@ -1073,7 +1050,8 @@
 
 
 <div class="description">
-    Constructs a new translation (move) transformation.
+    Constructs a new translation (move) transformation. 
+     Right column is (dx, dy, dz, 1.0).
 </div>
 
 
@@ -1111,13 +1089,13 @@
 
         <tr>
             
-                <td class="name"><code>motion</code></td>
+                <td class="name"><code>dx</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;x, y, z></span>
+<span class="param-type">double</span>
 
 
             
@@ -1127,7 +1105,53 @@
 
             
 
-            <td class="description last">Translation (motion) vector.</td>
+            <td class="description last">Distance to translate (move) geometry along the world X axis.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Distance to translate (move) geometry along the world Y axis.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dz</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Distance to translate (move) geometry along the world Z axis.</td>
         </tr>
 
     
@@ -1151,7 +1175,7 @@
 
         
 <div class="param-desc">
-    A transform matrix which moves geometry along the motion vector.
+    A transform matrix which moves geometry with the specified distances.
 </div>
 
 
@@ -1460,7 +1484,7 @@
 
 
 <div class="description">
-    Return the matrix as a linear array of 16 float values
+    ...
 </div>
 
 
@@ -1674,7 +1698,7 @@
 
     
 
-    <h4 class="name" id="tryGetInverse"><span class="type-signature"></span>tryGetInverse<span class="signature">(inverseTransform)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="tryGetInverse"><span class="type-signature"></span>tryGetInverse<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -1721,7 +1745,7 @@
 
 
 <div class="description">
-    Attempts to get the inverse transform of this transform.
+    ...
 </div>
 
 
@@ -1734,53 +1758,6 @@
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>inverseTransform</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Transform.html">Transform</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The inverse transform. This out reference will be assigned during this call.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -1793,32 +1770,6 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true on success. 
-     If false is returned and this Transform is Invalid, inserveTransform will be set to this Transform. 
-     If false is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
         
@@ -1841,7 +1792,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:47 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:33 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

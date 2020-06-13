@@ -12,6 +12,26 @@ namespace docgen
         {
         }
 
+        PythonClass _sisterPythonClass;
+
+        public override void AddMethod(string name, bool isStatic, string[] argList)
+        {
+            if( _sisterPythonClass==null)
+            {
+                _sisterPythonClass = AllPythonClasses[this.ClassName.ToLowerInvariant()];
+            }
+            for( int i=0; i<_sisterPythonClass.Methods.Count; i++)
+            {
+                var pyMethod = _sisterPythonClass.Methods[i];
+                if( pyMethod.Item2.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    argList = pyMethod.Item3;
+                    break;
+                }
+            }
+            base.AddMethod(name, isStatic, argList);
+        }
+
         /// <summary>
         /// Create API documentation file(s). Currently javascript help is created
         /// by first creating a fake javascript file that mocks rhino3dm wasm and
@@ -84,14 +104,27 @@ namespace docgen
                             }
                         }
                         js.AppendLine("){}");
+
+                        // jsdoc doesn't allow multiple constructors. Skip constructor
+                        // overloads for now
+                        break;
                     }
                 }
                 foreach (var (isStatic, method, args) in jsclass.Methods)
                 {
                     MethodDeclarationSyntax methodDecl = null;
                     doccomment = null;
+
+                    if( method.Equals("rotation"))
+                    {
+                        int bh = 0;
+                    }
+
                     for (int i = 0; i < rhcommon.Methods.Count; i++)
                     {
+                        if (rhcommon.Methods[i].Item1.ParameterList.Parameters.Count != args.Length)
+                            continue;
+
                         if (method.Equals(rhcommon.Methods[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
                         {
                             methodDecl = rhcommon.Methods[i].Item1;

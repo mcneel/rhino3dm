@@ -195,7 +195,7 @@ namespace docgen
             Properties.Add(name);
         }
 
-        public void AddMethod(string name, bool isStatic, string[] argList)
+        public virtual void AddMethod(string name, bool isStatic, string[] argList)
         {
             Methods.Add(new Tuple<bool, string, string[]>(isStatic, name, argList));
         }
