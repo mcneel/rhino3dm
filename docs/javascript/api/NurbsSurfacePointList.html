@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Group - Documentation</title>
+    <title>NurbsSurfacePointList - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -31,7 +31,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Group</h1>
+    <h1 class="page-title">NurbsSurfacePointList</h1>
     
 
     
@@ -44,108 +44,18 @@
 <header>
     
         <h2>
-        Group
+        NurbsSurfacePointList
         </h2>
         
-            <div class="class-description">Group</div>
+            <div class="class-description"><summary>
+   Provides access to the control points of a NURBS surface.
+   </summary></div>
         
     
 </header>
 
 <article>
     
-        <div class="container-overview">
-        
-            
-
-    
-    <h2>Constructor</h2>
-    
-
-    <h4 class="name" id="Group"><span class="type-signature"></span>new Group<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        </div>
-    
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        
-
-
-    <ul>
-        <li><a href="CommonObject.html">CommonObject</a></li>
-    </ul>
-
 
     
 
@@ -162,7 +72,7 @@
 
         
             
-<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
+<h4 class="name" id="count"><span class="type-signature"></span>count<span class="type-signature"></span></h4>
 
 
 
@@ -216,7 +126,7 @@
 
         
             
-<h4 class="name" id="index"><span class="type-signature"></span>index<span class="type-signature"></span></h4>
+<h4 class="name" id="countU"><span class="type-signature"></span>countU<span class="type-signature"> :int</span></h4>
 
 
 
@@ -261,7 +171,21 @@
 
 
 
+<div class="description">
+    Gets the number of control points in the U direction of this surface.
+</div>
 
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">int</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -270,7 +194,7 @@
 
         
             
-<h4 class="name" id="name"><span class="type-signature"></span>name<span class="type-signature"></span></h4>
+<h4 class="name" id="countV"><span class="type-signature"></span>countV<span class="type-signature"> :int</span></h4>
 
 
 
@@ -315,66 +239,21 @@
 
 
 
+<div class="description">
+    Gets the number of control points in the V direction of this surface.
+</div>
 
 
 
-
-
-
-
-        
+    <h5>Type:</h5>
+    <ul>
+        <li>
             
-<h4 class="name" id="userStringCount"><span class="type-signature"></span>userStringCount<span class="type-signature"></span></h4>
+<span class="param-type">int</span>
 
 
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#userStringCount">CommonObject#userStringCount</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
+        </li>
+    </ul>
 
 
 
@@ -392,7 +271,7 @@
 
     
 
-    <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -407,11 +286,6 @@
 
     
 
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#encode">CommonObject#encode</a>
-    </li></ul></dd>
     
 
     
@@ -476,7 +350,7 @@
 
     
 
-    <h4 class="name" id="getUserString"><span class="type-signature"></span>getUserString<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="makeNonRational"><span class="type-signature"></span>makeNonRational<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -491,11 +365,6 @@
 
     
 
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#getUserString">CommonObject#getUserString</a>
-    </li></ul></dd>
     
 
     
@@ -560,7 +429,7 @@
 
     
 
-    <h4 class="name" id="getUserStrings"><span class="type-signature"></span>getUserStrings<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="makeRational"><span class="type-signature"></span>makeRational<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -575,11 +444,6 @@
 
     
 
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#getUserStrings">CommonObject#getUserStrings</a>
-    </li></ul></dd>
     
 
     
@@ -644,7 +508,7 @@
 
     
 
-    <h4 class="name" id="rdkXml"><span class="type-signature"></span>rdkXml<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -659,11 +523,6 @@
 
     
 
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#rdkXml">CommonObject#rdkXml</a>
-    </li></ul></dd>
     
 
     
@@ -697,174 +556,6 @@
 
 <div class="description">
     ...
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="setUserString"><span class="type-signature"></span>setUserString<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#setUserString">CommonObject#setUserString</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    ...
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="toJSON"><span class="type-signature"></span>toJSON<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonObject.html#toJSON">CommonObject#toJSON</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    Create a JSON string representation of this object
 </div>
 
 
@@ -911,7 +602,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:46 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 08:38:47 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
