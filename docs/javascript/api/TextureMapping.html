@@ -1300,7 +1300,7 @@
 
     
 
-    <h4 class="name" id="evaluate"><span class="type-signature"></span>evaluate<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="evaluate"><span class="type-signature"></span>evaluate<span class="signature">(p, n, t, pXform, nXform)</span><span class="type-signature"> &rarr; {int}</span></h4>
 
     
 
@@ -1347,7 +1347,7 @@
 
 
 <div class="description">
-    ...
+    Evaluate the mapping to get a texture coordinate
 </div>
 
 
@@ -1360,6 +1360,148 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Vertex location</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If the mapping projection is ray_projection, then this
+     is the vertex unit normal.  Otherwise n is ignored.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>t</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Texture coordinate (u,v,w)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pXform</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Transform.html">Transform</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transformation to be applied to P before performing the mapping calculation.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nXform</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Transform.html">Transform</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transformation to be applied to N before performing the mapping
+     calculation. One way to calculate nXxform is to use the call
+     pXform::GetVectorTransform(nXform).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -1372,6 +1514,33 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Nonzero if evaluation is successful.  When the mapping is a box or
+     capped cylinder mapping, the value indicates which side was evaluated.
+     Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap
+     Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">int</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -2004,7 +2173,7 @@
 
 
 <div class="description">
-    ...
+    Create a JSON string representation of this object
 </div>
 
 
@@ -2036,7 +2205,7 @@
 
     
 
-    <h4 class="name" id="tryGetMappingCylinder"><span class="type-signature"></span>tryGetMappingCylinder<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="tryGetMappingCylinder"><span class="type-signature"></span>tryGetMappingCylinder<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -2083,7 +2252,7 @@
 
 
 <div class="description">
-    ...
+    Get a cylindrical projection parameters from this texture mapping.
 </div>
 
 
@@ -2108,6 +2277,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns true if a valid cylinder is returned.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -2115,7 +2306,7 @@
 
     
 
-    <h4 class="name" id="tryGetMappingSphere"><span class="type-signature"></span>tryGetMappingSphere<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="tryGetMappingSphere"><span class="type-signature"></span>tryGetMappingSphere<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -2162,7 +2353,7 @@
 
 
 <div class="description">
-    ...
+    Get a spherical projection parameters from this texture mapping.
 </div>
 
 
@@ -2187,6 +2378,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns true if a valid sphere is returned.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -2209,7 +2422,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:33 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:55:12 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

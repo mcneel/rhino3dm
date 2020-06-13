@@ -122,14 +122,15 @@ namespace docgen
 
                     for (int i = 0; i < rhcommon.Methods.Count; i++)
                     {
-                        if (rhcommon.Methods[i].Item1.ParameterList.Parameters.Count != args.Length)
-                            continue;
-
                         if (method.Equals(rhcommon.Methods[i].Item1.Identifier.ToString(), StringComparison.InvariantCultureIgnoreCase))
                         {
                             methodDecl = rhcommon.Methods[i].Item1;
                             doccomment = rhcommon.Methods[i].Item2;
-                            break;
+
+                            // only break if the parameter count is a match, otherwise keep searching
+                            // and hope for a best match
+                            if (rhcommon.Methods[i].Item1.ParameterList.Parameters.Count == args.Length)
+                                break;
                         }
                     }
 
