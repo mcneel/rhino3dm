@@ -77,7 +77,7 @@
 
     
 
-    <h4 class="name" id=".lineBox"><span class="type-signature">(static) </span>lineBox<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".lineBox"><span class="type-signature">(static) </span>lineBox<span class="signature">(box, line, tolerance, lineParameters)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -124,7 +124,7 @@
 
 
 <div class="description">
-    ...
+    Intersects an infinite line with a box volume.
 </div>
 
 
@@ -137,6 +137,123 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>box</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Box.html">Box</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Box to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>line</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Line.html">Line</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Line for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If tolerance > 0.0, then the intersection is performed against a box 
+     that has each side moved out by tolerance.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>lineParameters</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Interval</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The chord from line.PointAt(lineParameters.T0) to line.PointAt(lineParameters.T1) is the intersection.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -149,6 +266,30 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if the line intersects the box, false if no intersection occurs.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -472,7 +613,7 @@
 
     
 
-    <h4 class="name" id=".linePlane"><span class="type-signature">(static) </span>linePlane<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".linePlane"><span class="type-signature">(static) </span>linePlane<span class="signature">(line, plane, lineParameter)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -519,7 +660,9 @@
 
 
 <div class="description">
-    ...
+    Intersects a line and a plane. This function only returns true if the 
+     intersection result is a single point (i.e. if the line is coincident with 
+     the plane then no intersection is assumed).
 </div>
 
 
@@ -532,6 +675,101 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>line</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Line.html">Line</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Line for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>plane</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Plane to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>lineParameter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">double</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Parameter on line where intersection occurs. 
+     If the parameter is not within the {0, 1} Interval then the finite segment 
+     does not intersect the plane.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -544,6 +782,30 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -630,7 +892,7 @@
 
     
 
-    <h4 class="name" id=".planePlane"><span class="type-signature">(static) </span>planePlane<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".planePlane"><span class="type-signature">(static) </span>planePlane<span class="signature">(planeA, planeB, intersectionLine)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -677,7 +939,8 @@
 
 
 <div class="description">
-    ...
+    Intersects two planes and return the intersection line. If the planes are 
+     parallel or coincident, no intersection is assumed.
 </div>
 
 
@@ -690,6 +953,100 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>planeA</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">First plane for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>planeB</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Second plane for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersectionLine</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Line.html">Line</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If this function returns true, 
+     the intersectionLine parameter will return the line where the planes intersect.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -702,6 +1059,30 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -709,7 +1090,7 @@
 
     
 
-    <h4 class="name" id=".planePlanePlane"><span class="type-signature">(static) </span>planePlanePlane<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".planePlanePlane"><span class="type-signature">(static) </span>planePlanePlane<span class="signature">(planeA, planeB, planeC, intersectionPoint)</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
@@ -756,7 +1137,7 @@
 
 
 <div class="description">
-    ...
+    Intersects three planes to find the single point they all share.
 </div>
 
 
@@ -769,6 +1150,122 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>planeA</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">First plane for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>planeB</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Second plane for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>planeC</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Third plane for intersection.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersectionPoint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;x, y, z></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Point where all three planes converge.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -781,6 +1278,31 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true on success, false on failure. If at least two out of the three planes 
+     are parallel or coincident, failure is assumed.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -788,7 +1310,7 @@
 
     
 
-    <h4 class="name" id=".planeSphere"><span class="type-signature">(static) </span>planeSphere<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".planeSphere"><span class="type-signature">(static) </span>planeSphere<span class="signature">(plane, sphere, intersectionCircle)</span><span class="type-signature"> &rarr; {PlaneSphereIntersection}</span></h4>
 
     
 
@@ -835,7 +1357,7 @@
 
 
 <div class="description">
-    ...
+    Intersects a plane with a sphere using exact calculations.
 </div>
 
 
@@ -848,6 +1370,99 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>plane</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Plane.html">Plane</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Plane to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sphere</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Sphere.html">Sphere</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sphere to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersectionCircle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Circle.html">Circle</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Intersection result.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -860,6 +1475,31 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    If  is returned, the intersectionCircle has a radius of zero and the center point 
+     is the point on the plane closest to the sphere.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">PlaneSphereIntersection</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -867,7 +1507,7 @@
 
     
 
-    <h4 class="name" id=".sphereSphere"><span class="type-signature">(static) </span>sphereSphere<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".sphereSphere"><span class="type-signature">(static) </span>sphereSphere<span class="signature">(sphereA, sphereB, intersectionCircle)</span><span class="type-signature"> &rarr; {SphereSphereIntersection}</span></h4>
 
     
 
@@ -914,7 +1554,7 @@
 
 
 <div class="description">
-    ...
+    Intersects two spheres using exact calculations.
 </div>
 
 
@@ -927,6 +1567,99 @@
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sphereA</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Sphere.html">Sphere</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">First sphere to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sphereB</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Sphere.html">Sphere</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Second sphere to intersect.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersectionCircle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Circle.html">Circle</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If intersection is a point, then that point will be the center, radius 0.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -939,6 +1672,30 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The intersection type.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">SphereSphereIntersection</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -961,7 +1718,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:46:32 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jun 13 2020 11:55:11 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
