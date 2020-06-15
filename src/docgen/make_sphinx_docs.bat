@@ -4,7 +4,7 @@ pushd %~dp0
 
 REM Command file for Sphinx documentation
 
-set SPHINXBUILD=C:\Users\sbaer\AppData\Roaming\Python\Python37\Scripts\sphinx-build
+set SPHINXBUILD=sphinx-build
 
 set SOURCEDIR=./out/py_apidocs
 set BUILDDIR=./out/py_apidocs/sphinxout
