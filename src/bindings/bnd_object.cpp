@@ -1387,26 +1387,20 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
         int count;
         if (archive.ReadInt(&count) && count > 0)
         {
-#if defined(ON_PYTHON_COMPILE)
-          pybind11::list geometrylist;
-#else
-          std::vector<BND_CommonObject*> geometrylist;
-#endif
+          BND_TUPLE geometryList = CreateTuple(count);
+          int tupleIndex = 0;
           while(count>0)
           {
             count--;
             ON_Object* pObject = nullptr;
             if (archive.ReadObject(&pObject))
             {
-              auto binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
-#if defined(ON_PYTHON_COMPILE)
-              geometrylist.append(binding);
-#else
-              geometrylist.push_back(binding);
-#endif
+              BND_CommonObject* binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
+              SetTuple(geometryList, tupleIndex, binding);
             }
+            tupleIndex++;
           }
-          SetDictValue(rc, keyname, geometrylist);
+          SetDictValue(rc, keyname, geometryList);
         }
         break;
       default:
