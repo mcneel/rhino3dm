@@ -29,6 +29,7 @@ public:
   int GetIndex() const { return m_layer->Index(); }
   //public Guid ParentLayerId {get;set;}
   BND_UUID GetParentLayerId() const { return ON_UUID_to_Binding(m_layer->ParentId()); }
+  void SetParentLayerId(BND_UUID id) { m_layer->SetParentLayerId(Binding_to_ON_UUID(id)); }
   int GetIgesLevel() const { return m_layer->IgesLevel(); }
   void SetIgesLevel(int level) { m_layer->SetIgesLevel(level); }
   bool HasPerViewportSettings(BND_UUID viewportId) const;
