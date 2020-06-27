@@ -238,8 +238,32 @@ class BND_MeshVertexColorList
 public:
   BND_MeshVertexColorList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
   int Count() const { return m_mesh->m_C.Count(); }
+  void SetCount(int c) { m_mesh->m_C.SetCount(c); }
   BND_Color GetColor(int i) const { return ON_Color_to_Binding(m_mesh->m_C[i]); }
-  void SetColor(int i, BND_Color color) { m_mesh->m_C[i] = Binding_to_ON_Color(color); }
+  void SetColor(int index, BND_Color color) {
+    // if index == count, then we are appending
+    if (index >= 0)
+    {
+      if (index < m_mesh->m_C.Count())
+        m_mesh->m_C[index] = Binding_to_ON_Color(color);
+      else if (index == m_mesh->m_C.Count())
+        m_mesh->m_C.Append(Binding_to_ON_Color(color));
+    }
+  }
+  //    public int[] ToARGBArray()
+  void Clear() { m_mesh->m_C.SetCount(0); }
+  int Add(int red, int green, int blue) {
+    m_mesh->m_C.Append(ON_Color(red, green, blue));
+    return m_mesh->m_C.Count() - 1;
+  }
+  //    public int Add(Color color)
+  //    public bool SetColor(MeshFace face, Color color)
+  int Capacity() const { return m_mesh->m_C.Capacity(); }
+  void SetCapacity(int c) { m_mesh->m_C.SetCapacity(c); }
+  //    public bool CreateMonotoneMesh(Color baseColor)
+  //    public bool SetColors(Color[] colors)
+  //    public bool AppendColors(Color[] colors)
+  //    public void Destroy()
 };
 
 
