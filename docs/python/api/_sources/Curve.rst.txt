@@ -166,10 +166,10 @@ Curve
 
    .. py:method:: ClosedCurveOrientation()
 
-      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world xy plane.
+      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world XY plane.
       Only works with simple (no self intersections) closed, planar curves.
 
-      :return: The orientation of this curve with respect to world xy plane.
+      :return: The orientation of this curve with respect to world XY plane.
       :rtype: CurveOrientation
 
    .. py:method:: PointAt(t)
@@ -226,7 +226,7 @@ Curve
       :param float t0: Start of the trimming interval. Portions of the curve before curve(t0) are removed.
       :param float t1: End of the trimming interval. Portions of the curve after curve(t1) are removed.
 
-      :return: Trimmed portion of this curve is successfull, None on failure.
+      :return: Trimmed portion of this curve is successful, None on failure.
       :rtype: rhino3dm.Curve
 
    .. py:method:: Split(t)

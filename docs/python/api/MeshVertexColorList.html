@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MeshVertexColorList &mdash; rhino3dm 0.9.0 documentation</title>
+  <title>MeshVertexColorList &mdash; rhino3dm 0.12.0 documentation</title>
   
 
   
@@ -17,36 +17,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="MeshVertexList" href="MeshVertexList.html" />
-    <link rel="prev" title="MeshTextureCoordinateList" href="MeshTextureCoordinateList.html" /> 
+    <link rel="prev" title="MeshTopologyEdgeList" href="MeshTopologyEdgeList.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -60,7 +58,7 @@
             
             
               <div class="version">
-                0.9.0
+                0.12.0
               </div>
             
           
@@ -95,6 +93,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdge.html">BrepEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
@@ -107,6 +107,8 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -144,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTopologyEdgeList.html">MeshTopologyEdgeList</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">MeshVertexColorList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
@@ -151,7 +154,10 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
@@ -166,7 +172,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
@@ -251,7 +257,19 @@
 <dl class="class">
 <dt id="rhino3dm.MeshVertexColorList">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">MeshVertexColorList</code><a class="headerlink" href="#rhino3dm.MeshVertexColorList" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><dl class="attribute">
+<dt id="rhino3dm.MeshVertexColorList.Count">
+<code class="descname">Count</code><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Count" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the number of mesh colors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.MeshVertexColorList.Capacity">
+<code class="descname">Capacity</code><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: Gets or sets the total number of vertex colors the internal data structure can hold without resizing.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.MeshVertexColorList.__len__">
 <code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.__len__" title="Permalink to this definition">¶</a></dt>
 <dd><p>[todo] add documentation</p>
@@ -269,6 +287,45 @@
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="rhino3dm.MeshVertexColorList.Clear">
+<code class="descname">Clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the vertex color list on the mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.MeshVertexColorList.Add">
+<code class="descname">Add</code><span class="sig-paren">(</span><em>red</em>, <em>green</em>, <em>blue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new vertex color to the end of the color list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>red</strong> (<em>int</em>) – Red component of color, must be in the 0~255 range.</li>
+<li><strong>green</strong> (<em>int</em>) – Green component of color, must be in the 0~255 range.</li>
+<li><strong>blue</strong> (<em>int</em>) – Blue component of color, must be in the 0~255 range.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The index of the newly added color.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -284,7 +341,7 @@
         <a href="MeshVertexList.html" class="btn btn-neutral float-right" title="MeshVertexList" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="MeshTextureCoordinateList.html" class="btn btn-neutral float-left" title="MeshTextureCoordinateList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="MeshTopologyEdgeList.html" class="btn btn-neutral" title="MeshTopologyEdgeList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -310,16 +367,26 @@
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

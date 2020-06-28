@@ -1,0 +1,57 @@
+PhysicallyBasedMaterial
+=======================
+
+.. py:module:: rhino3dm
+
+.. py:class:: PhysicallyBasedMaterial
+
+   .. py:attribute:: Supported
+
+
+   .. py:attribute:: Subsurface
+
+
+   .. py:attribute:: SubsurfaceScatteringRadius
+
+
+   .. py:attribute:: Metallic
+
+
+   .. py:attribute:: Specular
+
+
+   .. py:attribute:: ReflectiveIOR
+
+
+   .. py:attribute:: SpecularTint
+
+
+   .. py:attribute:: Roughness
+
+
+   .. py:attribute:: Anisotropic
+
+
+   .. py:attribute:: AnisotropicRotation
+
+
+   .. py:attribute:: Sheen
+
+
+   .. py:attribute:: SheenTint
+
+
+   .. py:attribute:: Clearcoat
+
+
+   .. py:attribute:: ClearcoatRoughness
+
+
+   .. py:attribute:: OpacityIOR
+
+
+   .. py:attribute:: Opacity
+
+
+   .. py:attribute:: OpacityRoughness
+

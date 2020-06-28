@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Point &mdash; rhino3dm 0.9.0 documentation</title>
+  <title>Point &mdash; rhino3dm 0.12.0 documentation</title>
   
 
   
@@ -17,36 +17,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Point2d" href="Point2d.html" />
     <link rel="prev" title="PlaneSurface" href="PlaneSurface.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -60,7 +58,7 @@
             
             
               <div class="version">
-                0.9.0
+                0.12.0
               </div>
             
           
@@ -95,6 +93,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdge.html">BrepEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
@@ -107,6 +107,8 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -144,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTopologyEdgeList.html">MeshTopologyEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexColorList.html">MeshVertexColorList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
@@ -151,7 +154,10 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Point</a></li>
@@ -166,7 +172,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
@@ -292,7 +298,7 @@
         <a href="Point2d.html" class="btn btn-neutral float-right" title="Point2d" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="PlaneSurface.html" class="btn btn-neutral float-left" title="PlaneSurface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="PlaneSurface.html" class="btn btn-neutral" title="PlaneSurface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -318,16 +324,26 @@
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

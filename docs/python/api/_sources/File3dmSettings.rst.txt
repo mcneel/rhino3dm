@@ -11,7 +11,7 @@ File3dmSettings
 
    .. py:attribute:: ModelBasePoint
 
-      rhino3dm.Point3d: Gets or sets the model basepoint that is used when the file is read as an instance definition.
+      rhino3dm.Point3d: Gets or sets the model base point that is used when the file is read as an instance definition.
       This point is mapped to the origin in the instance definition.
 
    .. py:attribute:: ModelAbsoluteTolerance

@@ -96,7 +96,7 @@ RenderSettings
 
    .. py:attribute:: SnapShot
 
-      str: Set os get the given snapshot view
+      str: Set or get the given snapshot view
 
    .. py:attribute:: SpecificViewport
 

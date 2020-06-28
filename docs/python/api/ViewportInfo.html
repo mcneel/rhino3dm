@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ViewportInfo &mdash; rhino3dm 0.9.0 documentation</title>
+  <title>ViewportInfo &mdash; rhino3dm 0.12.0 documentation</title>
   
 
   
@@ -17,35 +17,33 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="ViewInfo" href="ViewInfo.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -59,7 +57,7 @@
             
             
               <div class="version">
-                0.9.0
+                0.12.0
               </div>
             
           
@@ -94,6 +92,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdge.html">BrepEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
@@ -106,6 +106,8 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -143,6 +145,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTopologyEdgeList.html">MeshTopologyEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexColorList.html">MeshVertexColorList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
@@ -150,7 +153,10 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
@@ -165,7 +171,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
@@ -329,7 +335,7 @@
 <dl class="attribute">
 <dt id="rhino3dm.ViewportInfo.ScreenPortAspect">
 <code class="descname">ScreenPortAspect</code><a class="headerlink" href="#rhino3dm.ViewportInfo.ScreenPortAspect" title="Permalink to this definition">¶</a></dt>
-<dd><p>float: Gets the sceen aspect ratio.
+<dd><p>float: Gets the screen aspect ratio.
 This is width / height.</p>
 </dd></dl>
 
@@ -358,6 +364,18 @@ There is no approved way to change the viewport
 id once it is set in order to maintain consistency
 across multiple viewports and those routines that
 manage them.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.ViewportInfo.DefaultTop">
+<em class="property">static </em><code class="descname">DefaultTop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultTop" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.ViewportInfo.DefaultPerspective">
+<em class="property">static </em><code class="descname">DefaultPerspective</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultPerspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
@@ -401,7 +419,7 @@ are all equal, then no changes are made and True is returned.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be perserved.</li>
+<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</li>
 <li><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</li>
 <li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
 </ul>
@@ -433,7 +451,7 @@ made and True is returned.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored.  Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be perserved.</li>
+<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored.  Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</li>
 <li><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – The locked up direction. Pass Vector3d.Zero if you want to use the world axis direction that is closest to the current up direction. Pass CameraY() if you want to preserve the current up direction.</li>
 <li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
 </ul>
@@ -610,6 +628,33 @@ See documentation for SetScreenPort.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhino3dm.ViewportInfo.Extents">
+<code class="descname">Extents</code><span class="sig-paren">(</span><em>halfViewAngleRadians</em>, <em>worldBbox</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.Extents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extends this viewport view to include a bounding box.
+Use Extents() as a quick way to set a viewport to so that bounding
+volume is inside of a viewports frustum.
+The view angle is used to determine the position of the camera.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>halfViewAngleRadians</strong> (<em>float</em>) – 1/2 smallest subtended view angle in radians.</li>
+<li><strong>bbox</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – A bounding box in 3d world coordinates.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.ViewportInfo.DollyExtents">
 <code class="descname">DollyExtents</code><span class="sig-paren">(</span><em>bbox</em>, <em>border</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DollyExtents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dolly the camera location and so that the view frustum contains
@@ -622,6 +667,45 @@ If the projection is perspective, the camera angle is not changed.</p>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ViewportInfo.FrustumCenterPoint">
+<code class="descname">FrustumCenterPoint</code><span class="sig-paren">(</span><em>targetDistance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.FrustumCenterPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a point on the central axis of the view frustum.
+This point is a good choice for a general purpose target point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targetDistance</strong> (<em>float</em>) – If targetDistance &gt; 0.0, then the distance from the returned point to the camera plane will be targetDistance. Note that if the frustum is not symmetric, the distance from the returned point to the camera location will be larger than targetDistance. If targetDistance == ON_UNSET_VALUE and the frustum is valid with near &gt; 0.0, then 0.5*(near + far) will be used as the targetDistance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A point on the frustum’s central axis.  If the viewport or input is not valid, then ON_3dPoint::UnsetPoint is returned.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.ViewportInfo.TargetDistance">
+<code class="descname">TargetDistance</code><span class="sig-paren">(</span><em>useFrustumCenterFallback</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.TargetDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the distance from the target point to the camera plane.
+Note that if the frustum is not symmetric, then this distance
+is shorter than the distance from the target to the camera location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>useFrustumCenterFallback</strong> (<em>bool</em>) – If bUseFrustumCenterFallback is False and the target point is not valid, then ON_UNSET_VALUE is returned. If bUseFrustumCenterFallback is True and the frustum is valid and current target point is not valid or is behind the camera, then 0.5*(near + far) is returned.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Shortest signed distance from camera plane to target point. If the target point is on the visible side of the camera, a positive value is returned.  ON_UNSET_VALUE is returned when the input of view is not valid.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
 </tr>
 </tbody>
 </table>
@@ -640,7 +724,7 @@ If the projection is perspective, the camera angle is not changed.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="ViewInfo.html" class="btn btn-neutral float-left" title="ViewInfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ViewInfo.html" class="btn btn-neutral" title="ViewInfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -666,16 +750,26 @@ If the projection is perspective, the camera angle is not changed.</p>
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

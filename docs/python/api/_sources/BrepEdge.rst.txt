@@ -1,0 +1,6 @@
+BrepEdge
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: BrepEdge

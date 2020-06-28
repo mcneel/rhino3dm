@@ -143,3 +143,19 @@ File3dm
    .. py:method:: Decode()
 
       [todo] add documentation
+
+   .. py:method:: EmbeddedFilePaths()
+
+      [todo] add documentation
+
+   .. py:method:: GetEmbeddedFileAsBase64()
+
+      [todo] add documentation
+
+   .. py:method:: GetEmbeddedFileAsBase64()
+
+      [todo] add documentation
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation

@@ -19,12 +19,12 @@ Plane
 
    .. py:method:: Plane(origin, xPoint, yPoint)
 
-      Initializes a plane from three non-colinear points.
+      Initializes a plane from three non-collinear points.
 
       :param rhino3dm.Point3d origin: Origin point of the plane.
       :param rhino3dm.Point3d xPoint: Second point in the plane. The x-axis will be parallel to x_point-origin.
-      :param rhino3dm.Point3d yPoint: Third point on the plane that is not colinear with the first two points. \
-         yaxis*(y_point-origin) will be > 0.
+      :param rhino3dm.Point3d yPoint: Third point on the plane that is not collinear with the first two points. \
+         taxis*(y_point-origin) will be > 0.
 
    .. py:method:: Plane(origin, xDirection, yDirection)
 
@@ -33,7 +33,7 @@ Plane
       :param rhino3dm.Point3d origin: Origin point of the plane.
       :param rhino3dm.Vector3d xDirection: Non-zero vector in the plane that determines the x-axis direction.
       :param rhino3dm.Vector3d yDirection: Non-zero vector not parallel to x_dir that is used to determine the \
-         yaxis direction. y_dir does not need to be perpendicular to x_dir.
+         y-axis direction. y_dir does not need to be perpendicular to x_dir.
 
    .. py:method:: Plane()
 

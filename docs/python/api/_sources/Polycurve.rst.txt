@@ -110,11 +110,11 @@ PolyCurve
 
    .. py:method:: SegmentDomain(segmentIndex)
 
-      Returns the polycurve subdomain assigned to a segment curve.
+      Returns the polycurve sub-domain assigned to a segment curve.
 
       :param int segmentIndex: Index of segment.
 
-      :return: The polycurve subdomain assigned to a segment curve. \
+      :return: The polycurve sub-domain assigned to a segment curve. \
          Returns Interval.Unset if segment_index < 0 or segment_index >= Count().
       :rtype: rhino3dm.Interval
 

@@ -19,6 +19,8 @@ Welcome to rhino3dm's documentation!
    BoundingBox
    Box
    Brep
+   BrepEdge
+   BrepEdgeList
    BrepFace
    BrepFaceList
    BrepSurfaceList
@@ -31,6 +33,8 @@ Welcome to rhino3dm's documentation!
    CurveProxy
    Cylinder
    DimensionStyle
+   DracoCompression
+   DracoCompressionOptions
    Ellipse
    Extrusion
    File3dm
@@ -68,6 +72,7 @@ Welcome to rhino3dm's documentation!
    MeshingParameters
    MeshNormalList
    MeshTextureCoordinateList
+   MeshTopologyEdgeList
    MeshVertexColorList
    MeshVertexList
    ModelComponent
@@ -75,7 +80,10 @@ Welcome to rhino3dm's documentation!
    NurbsCurveKnotList
    NurbsCurvePointList
    NurbsSurface
+   NurbsSurfaceKnotList
+   NurbsSurfacePointList
    ObjectAttributes
+   PhysicallyBasedMaterial
    Plane
    PlaneSurface
    Point
@@ -90,7 +98,7 @@ Welcome to rhino3dm's documentation!
    PointGrid
    PolyCurve
    Polyline
-   Polylinecurve
+   PolylineCurve
    RenderSettings
    RevSurface
    Sphere

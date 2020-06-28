@@ -24,6 +24,11 @@ Mesh
 
       Collections.MeshVertexList: Gets access to the vertices set of this mesh.
 
+   .. py:attribute:: TopologyEdges
+
+      Collections.MeshTopologyEdgeList: Gets the  object associated with this mesh.
+      This object stores edge connectivity.
+
    .. py:attribute:: Faces
 
       Collections.MeshFaceList: Gets access to the mesh face list.
@@ -79,9 +84,21 @@ Mesh
 
       :rtype: void
 
+   .. py:method:: SetTextureCoordinates(tm, xf, lazy)
+
+      Set texture coordinates using given mapping and applying given transform.
+      
+      Set lazy to False to generate texture coordinates right away.
+
+      :param TextureMapping tm: Texture mapping
+      :param Transform xf: Transform to apply to the texture mapping
+      :param bool lazy: Whether to generate lazily (true) or right away (false)
+
+      :rtype: void
+
    .. py:method:: Compact()
 
-      Removes any unreferenced objects from arrays, reindexes as needed
+      Removes any unreferenced objects from arrays, re-indexes as needed
       and shrinks arrays to minimum required size.
 
       :return: True on success, False on failure.
@@ -97,7 +114,7 @@ Mesh
 
    .. py:method:: CreatePartitions(maximumVertexCount, maximumTriangleCount)
 
-      In ancient times (or modern smartphone times), some rendering engines
+      In ancient times (or modern smart phone times), some rendering engines
       were only able to process small batches of triangles and the
       CreatePartitions() function was provided to partition the mesh into
       subsets of vertices and faces that those rendering engines could handle.

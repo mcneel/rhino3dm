@@ -4,3 +4,7 @@ ModelComponent
 .. py:module:: rhino3dm
 
 .. py:class:: ModelComponent
+
+   .. py:attribute:: Id
+
+      Guid: Gets or sets the ID of the current instance.

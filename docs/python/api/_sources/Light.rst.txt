@@ -79,7 +79,7 @@ Light
    .. py:attribute:: SpotExponent
 
       float: The spot exponent varies from 0.0 to 128.0 and provides
-      an exponential interface for controling the focus or
+      an exponential interface for controlling the focus or
       concentration of a spotlight (like the
       OpenGL GL_SPOT_EXPONENT parameter).  The spot exponent
       and hot spot parameters are linked; changing one will
@@ -90,7 +90,7 @@ Light
    .. py:attribute:: HotSpot
 
       float: The hot spot setting runs from 0.0 to 1.0 and is used to
-      provides a linear interface for controling the focus or
+      provides a linear interface for controlling the focus or
       concentration of a spotlight.
       A hot spot setting of 0.0 corresponds to a spot exponent of 128.
       A hot spot setting of 1.0 corresponds to a spot exponent of 0.0.

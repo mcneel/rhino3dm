@@ -12,15 +12,15 @@ TextDot
 
    .. py:attribute:: Point
 
-      rhino3dm.Point3d: Gets or sets the position of the textdot.
+      rhino3dm.Point3d: Gets or sets the position of the text dot.
 
    .. py:attribute:: Text
 
-      str: Gets or sets the primiary text of the textdot.
+      str: Gets or sets the primary text of the text dot.
 
    .. py:attribute:: SecondaryText
 
-      str: Gets or sets the secondary text of the textdot.
+      str: Gets or sets the secondary text of the text dot.
 
    .. py:attribute:: FontHeight
 

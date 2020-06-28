@@ -51,7 +51,7 @@ TextureMapping
 
       :param rhino3dm.Sphere sphere: sphere in world space used to define a spherical coordinate system. \
          The longitude parameter maps (0,2pi) to texture "u" (0,1). \
-         The latitude paramter maps (-pi/2,+pi/2) to texture "v" (0,1). \
+         The latitude parameter maps (-pi/2,+pi/2) to texture "v" (0,1). \
          The radial parameter maps (0,r) to texture "w" (0,1).
 
       :return: TextureMapping instance if input is valid
@@ -65,13 +65,13 @@ TextureMapping
          planes.  The dx, dy, dz intervals determine the location of the sides.
       :param rhino3dm.Interval dx: Determines the location of the front and back planes. The vector \
          plane.xaxis is perpendicular to these planes and they pass through \
-         plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectivly.
+         plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectively.
       :param rhino3dm.Interval dy: Determines the location of the left and right planes. The vector \
          plane.yaxis is perpendicular to these planes and they pass through \
-         plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectivly.
+         plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectively.
       :param rhino3dm.Interval dz: Determines the location of the top and bottom planes. The vector \
          plane.zaxis is perpendicular to these planes and they pass through \
-         plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectivly.
+         plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectively.
       :param bool capped: If true, the box is treated as a finite capped box.
 
       :return: TextureMapping instance if input is valid

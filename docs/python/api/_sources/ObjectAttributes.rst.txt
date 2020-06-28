@@ -24,7 +24,7 @@ ObjectAttributes
 
    .. py:attribute:: Visible
 
-      bool: Gets or sets an object's visiblity.
+      bool: Gets or sets an object's visibility.
 
    .. py:attribute:: CastsShadows
 
@@ -79,7 +79,7 @@ ObjectAttributes
       Layer definitions in an OpenNURBS model are stored in a layer table.
       The layer table is conceptually an array of ON_Layer classes.  Every
       OpenNURBS object in a model is on some layer.  The object's layer
-      is specified by zero based indicies into the ON_Layer array.
+      is specified by zero based indices into the ON_Layer array.
 
    .. py:attribute:: LinetypeIndex
 
@@ -87,7 +87,7 @@ ObjectAttributes
       Linetype definitions in an OpenNURBS model are stored in a linetype table.
       The linetype table is conceptually an array of ON_Linetype classes. Every
       OpenNURBS object in a model references some linetype.  The object's linetype
-      is specified by zero based indicies into the ON_Linetype array.Index 0 is reserved for continuous linetype (no pattern).
+      is specified by zero based indices into the ON_Linetype array.Index 0 is reserved for continuous linetype (no pattern).
 
    .. py:attribute:: MaterialIndex
 
@@ -154,7 +154,7 @@ ObjectAttributes
 
       :param Transform xform: The transformation.
 
-      :return: trueif successful, False otherwise.
+      :return: True if successful, False otherwise.
       :rtype: bool
 
    .. py:method:: HasDisplayModeOverride(viewportId)
@@ -165,6 +165,10 @@ ObjectAttributes
 
       :return: True if the object has a display mode override for the viewport; otherwise, false.
       :rtype: bool
+
+   .. py:method:: DrawColor(doc)
+
+      [todo] add documentation
 
    .. py:method:: GetGroupList()
 

@@ -39,7 +39,7 @@ Line
 
       Evaluates the line at the specified parameter.
 
-      :param float t: Parameter to evaluate line segment at. Line parameters are normalised parameters.
+      :param float t: Parameter to evaluate line segment at. Line parameters are normalized parameters.
 
       :return: The point at the specified parameter.
       :rtype: rhino3dm.Point3d

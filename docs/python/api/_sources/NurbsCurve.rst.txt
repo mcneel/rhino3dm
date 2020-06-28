@@ -32,19 +32,19 @@ NurbsCurve
 
    .. py:attribute:: HasBezierSpans
 
-      bool: Returns True if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)
+      bool: Returns True if the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree)
 
    .. py:attribute:: Points
 
-      Collections.NurbsCurvePointList: Gets access to the control points of this nurbs curve.
+      Collections.NurbsCurvePointList: Gets access to the control points of this NURBS curve.
 
    .. py:attribute:: Knots
 
-      Collections.NurbsCurveKnotList: Gets access to the knots (or "knot vector") of this nurbs curve.
+      Collections.NurbsCurveKnotList: Gets access to the knots (or "knot vector") of this NURBS curve.
 
    .. py:staticmethod:: CreateFromLine(line)
 
-      Gets a non-rational, degree 1 Nurbs curve representation of the line.
+      Gets a non-rational, degree 1 NURBS curve representation of the line.
 
       :return: Curve on success, None on failure.
       :rtype: rhino3dm.NurbsCurve
@@ -53,7 +53,7 @@ NurbsCurve
 
       Gets a rational degree 2 NURBS curve representation
       of the arc. Note that the parameterization of NURBS curve
-      does not match arc's transcendental paramaterization.
+      does not match arc's transcendental parameterization.
 
       :return: Curve on success, None on failure.
       :rtype: rhino3dm.NurbsCurve
@@ -62,7 +62,7 @@ NurbsCurve
 
       Gets a rational degree 2 NURBS curve representation
       of the circle. Note that the parameterization of NURBS curve
-      does not match circle's transcendental paramaterization.
+      does not match circle's transcendental parameterization.
       Use GetRadianFromNurbFormParameter() and
       GetParameterFromRadian() to convert between the NURBS curve
       parameter and the transcendental parameter.
@@ -74,9 +74,9 @@ NurbsCurve
 
       Gets a rational degree 2 NURBS curve representation of the ellipse.
       Note that the parameterization of the NURBS curve does not match
-      with the transcendental paramaterization of the ellipsis.
+      with the transcendental parameterization of the ellipsis.
 
-      :return: A nurbs curve representation of this ellipse or None if no such representation could be made.
+      :return: A NURBS curve representation of this ellipse or None if no such representation could be made.
       :rtype: rhino3dm.NurbsCurve
 
    .. py:staticmethod:: Create(periodic, degree, points)
@@ -103,21 +103,21 @@ NurbsCurve
 
    .. py:method:: MakePiecewiseBezier(setEndWeightsToOne)
 
-      Clamps ends and adds knots so the NURBS curve has bezier spans
-      (all distinct knots have multiplitity = degree).
+      Clamps ends and adds knots so the NURBS curve has Bezier spans
+      (all distinct knots have multiplicity = degree).
 
       :param bool setEndWeightsToOne: If True and the first or last weight is not one, then the first and \
-         last spans are reparameterized so that the end weights are one.
+         last spans are re-parameterized so that the end weights are one.
 
       :return: True on success, False on failure.
       :rtype: bool
 
    .. py:method:: Reparameterize(c)
 
-      Use a linear fractional transformation to reparameterize the NURBS curve.
+      Use a linear fractional transformation to re-parameterize the NURBS curve.
       This does not change the curve's domain.
 
-      :param float c: reparameterization constant (generally speaking, c should be > 0). The \
+      :param float c: re-parameterization constant (generally speaking, c should be > 0). The \
          control points and knots are adjusted so that \
          output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ). \
          Note that lambda(0) = 0, lambda(1) = 1, lambda'(t) > 0, \

@@ -103,8 +103,11 @@ namespace docgen
                 sb.Append(summary.ToString());
             }
 
-            foreach (var (isStatic, method, args) in pythonClass.Methods)
+            foreach (var pyMethod in pythonClass.Methods)
             {
+                bool isStatic = pyMethod.IsStatic;
+                string method = pyMethod.Name;
+                string[] args = pyMethod.ArgList;
                 sb.AppendLine();
                 if (isStatic)
                     sb.Append($"   .. py:staticmethod:: {method}(");

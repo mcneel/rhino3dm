@@ -58,7 +58,7 @@ ViewportInfo
 
    .. py:attribute:: ScreenPortAspect
 
-      float: Gets the sceen aspect ratio.
+      float: Gets the screen aspect ratio.
       This is width / height.
 
    .. py:attribute:: CameraAngle
@@ -81,6 +81,14 @@ ViewportInfo
       id once it is set in order to maintain consistency
       across multiple viewports and those routines that
       manage them.
+
+   .. py:staticmethod:: DefaultTop()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: DefaultPerspective()
+
+      [todo] add documentation
 
    .. py:method:: ChangeToParallelProjection(symmetricFrustum)
 
@@ -110,7 +118,7 @@ ViewportInfo
       are all equal, then no changes are made and True is returned.
 
       :param float targetDistance: If RhinoMath.UnsetValue this parameter is ignored. \
-         Otherwise it must be > 0 and indicates which plane in the current view frustum should be perserved.
+         Otherwise it must be > 0 and indicates which plane in the current view frustum should be preserved.
       :param bool symmetricFrustum: True if you want the resulting frustum to be symmetric.
       :param float lensLength: (pass 50.0 when in doubt) \
          35 mm lens length to use when changing from parallel \
@@ -134,7 +142,7 @@ ViewportInfo
 
       :param float targetDistance: If RhinoMath.UnsetValue this parameter is ignored.  Otherwise \
          it must be > 0 and indicates which plane in the current \
-         view frustum should be perserved.
+         view frustum should be preserved.
       :param rhino3dm.Vector3d up: The locked up direction. Pass Vector3d.Zero if you want to use the world \
          axis direction that is closest to the current up direction. \
          Pass CameraY() if you want to preserve the current up direction.
@@ -232,6 +240,19 @@ ViewportInfo
       :return: The 4x4 transformation matrix (acts on the left).
       :rtype: Transform
 
+   .. py:method:: Extents(halfViewAngleRadians, worldBbox)
+
+      Extends this viewport view to include a bounding box.
+      Use Extents() as a quick way to set a viewport to so that bounding
+      volume is inside of a viewports frustum.
+      The view angle is used to determine the position of the camera.
+
+      :param float halfViewAngleRadians: 1/2 smallest subtended view angle in radians.
+      :param rhino3dm.BoundingBox bbox: A bounding box in 3d world coordinates.
+
+      :return: True if the operation succeeded; otherwise, false.
+      :rtype: bool
+
    .. py:method:: DollyExtents(bbox, border)
 
       Dolly the camera location and so that the view frustum contains
@@ -240,3 +261,39 @@ ViewportInfo
 
       :return: True if successful.
       :rtype: bool
+
+   .. py:method:: FrustumCenterPoint(targetDistance)
+
+      Return a point on the central axis of the view frustum.
+      This point is a good choice for a general purpose target point.
+
+      :param float targetDistance: If targetDistance > 0.0, then the distance from the returned \
+         point to the camera plane will be targetDistance. Note that \
+         if the frustum is not symmetric, the distance from the \
+         returned point to the camera location will be larger than \
+         targetDistance. \
+         If targetDistance == ON_UNSET_VALUE and the frustum \
+         is valid with near > 0.0, then 0.5*(near + far) will be used \
+         as the targetDistance.
+
+      :return: A point on the frustum's central axis.  If the viewport or input \
+         is not valid, then ON_3dPoint::UnsetPoint is returned.
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: TargetDistance(useFrustumCenterFallback)
+
+      Gets the distance from the target point to the camera plane.
+      Note that if the frustum is not symmetric, then this distance
+      is shorter than the distance from the target to the camera location.
+
+      :param bool useFrustumCenterFallback: If bUseFrustumCenterFallback is False and the target point is \
+         not valid, then ON_UNSET_VALUE is returned. \
+         If bUseFrustumCenterFallback is True and the frustum is valid \
+         and current target point is not valid or is behind the camera, \
+         then 0.5*(near + far) is returned.
+
+      :return: Shortest signed distance from camera plane to target point. \
+         If the target point is on the visible side of the camera, \
+         a positive value is returned.  ON_UNSET_VALUE is returned \
+         when the input of view is not valid.
+      :rtype: float

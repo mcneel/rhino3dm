@@ -1,0 +1,11 @@
+DracoCompressionOptions
+=======================
+
+.. py:module:: rhino3dm
+
+.. py:class:: DracoCompressionOptions
+
+   .. py:method:: DracoCompressionOptions()
+
+      DracoCompressionOptions constructor
+

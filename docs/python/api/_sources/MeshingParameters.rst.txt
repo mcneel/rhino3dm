@@ -36,12 +36,12 @@ MeshingParameters
    .. py:attribute:: FastRenderMesh
 
       rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when
-      meshing speed is prefered over mesh quality.
+      meshing speed is preferred over mesh quality.
 
    .. py:attribute:: QualityRenderMesh
 
       rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when mesh
-      quality is prefered over meshing speed.
+      quality is preferred over meshing speed.
 
    .. py:attribute:: DefaultAnalysisMesh
 

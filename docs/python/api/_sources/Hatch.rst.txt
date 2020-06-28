@@ -20,7 +20,7 @@ Hatch
 
    .. py:attribute:: BasePoint
 
-      rhino3dm.Point3d: Gets or sets the hatchpattern basepoint
+      rhino3dm.Point3d: Gets or sets the hatch pattern base point
 
    .. py:attribute:: Plane
 
