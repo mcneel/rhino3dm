@@ -253,7 +253,11 @@ BND_DICT BND_Mesh::ToThreejsJSONRotate(bool rotateToYUp) const
       indexList.set(current++, face.vi[0]);
     }
   }
-  index.set("type", "Uint16Array");
+  if (pMesh->m_V.Count() > 65536) {
+    index.set("type", "Uint32Array");
+  } else {
+    index.set("type", "Uint16Array");
+  }
   index.set("array", indexList);
 
   emscripten::val attributes(emscripten::val::object());
