@@ -10,10 +10,11 @@
 Rhino3dm.js requires two files `rhino3dm.wasm` and `rhino3dm.js`.  It is easiest to simply reference the *latest* build directly from our servers:
 
 ```html
+<!DOCTYPE html>
 <html>
   <!-- stuff -->
   <body>
-    <script type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rhino3dm@0.12.0/rhino3dm.min.js"></script>
     <script>
       // NOTE: the rhino3dm library is compiled with the MODULARIZE
       // option to avoid collisions with other web assemblies
