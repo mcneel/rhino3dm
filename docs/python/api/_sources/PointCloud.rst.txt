@@ -17,7 +17,7 @@ PointCloud
 
    .. py:attribute:: Count
 
-      int: Gets the number of points in this pointcloud.
+      int: Gets the number of points in this point cloud.
 
    .. py:attribute:: HiddenPointCount
 
@@ -26,17 +26,17 @@ PointCloud
    .. py:attribute:: ContainsColors
 
       bool: Gets a value indicating whether or not the points in this
-      pointcloud have colors assigned to them.
+      point cloud have colors assigned to them.
 
    .. py:attribute:: ContainsNormals
 
       bool: Gets a value indicating whether or not the points in this
-      pointcloud have normals assigned to them.
+      point cloud have normals assigned to them.
 
    .. py:attribute:: ContainsHiddenFlags
 
       bool: Gets a value indicating whether or not the points in this
-      pointcloud have hidden flags assigned to them.
+      point cloud have hidden flags assigned to them.
 
    .. py:method:: __len__()
 
@@ -82,7 +82,7 @@ PointCloud
 
    .. py:method:: Merge(other)
 
-      Copies the point values of another pointcloud into this one.
+      Copies the point values of another point cloud into this one.
 
       :param PointCloud other: PointCloud to merge with this one.
 

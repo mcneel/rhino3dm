@@ -18,6 +18,10 @@ Brep
 
       Collections.BrepSurfaceList: Parametric surfaces used by faces
 
+   .. py:attribute:: Edges
+
+      Collections.BrepEdgeList: Gets the brep edges list accessor.
+
    .. py:attribute:: IsSolid
 
       bool: Determines whether this brep is a solid, or a closed oriented manifold.

@@ -113,8 +113,11 @@ namespace docgen
                         py.AppendLine(T2 + "pass");
                     }
                 }
-                foreach (var (isStatic, method, args) in pyclass.Methods)
+                foreach (var pyMethod in pyclass.Methods)
                 {
+                    bool isStatic = pyMethod.IsStatic;
+                    string method = pyMethod.Name;
+                    string[] args = pyMethod.ArgList;
                     var m = rhcommon.GetMethod(method);
                     if (m == null)
                         continue;
@@ -280,8 +283,11 @@ Indices and tables
                 }
 
                 var py3 = new StringBuilder();
-                foreach (var (isStatic, method, args) in pyclass.Methods)
+                foreach (var pyMethod in pyclass.Methods)
                 {
+                    bool isStatic = pyMethod.IsStatic;
+                    string method = pyMethod.Name;
+                    string[] args = pyMethod.ArgList;
                     var m = rhcommon.GetMethod(method);
                     if (m == null)
                         continue;

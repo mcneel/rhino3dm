@@ -7,7 +7,7 @@ NurbsSurface
 
    .. py:attribute:: IsRational
 
-      bool: Gets a value indicating whether or not the nurbs surface is rational.
+      bool: Gets a value indicating whether or not the NURBS surface is rational.
 
    .. py:attribute:: OrderU
 
@@ -16,6 +16,18 @@ NurbsSurface
    .. py:attribute:: OrderV
 
       int: Gets the order in the V direction.
+
+   .. py:attribute:: KnotsU
+
+      Collections.NurbsSurfaceKnotList: The U direction knot vector.
+
+   .. py:attribute:: KnotsV
+
+      Collections.NurbsSurfaceKnotList: The V direction knot vector.
+
+   .. py:attribute:: Points
+
+      Collections.NurbsSurfacePointList: Gets a collection of surface control points that form this surface.
 
    .. py:staticmethod:: Create(dimension, isRational, order0, order1, controlPointCount0, controlPointCount1)
 

@@ -1,18 +1,18 @@
-Polylinecurve
+PolylineCurve
 =============
 
 .. py:module:: rhino3dm
 
-.. py:class:: Polylinecurve
+.. py:class:: PolylineCurve
 
-   .. py:method:: Polylinecurve()
+   .. py:method:: PolylineCurve()
 
-      Polylinecurve constructor
+      PolylineCurve constructor
 
 
-   .. py:method:: Polylinecurve()
+   .. py:method:: PolylineCurve()
 
-      Polylinecurve constructor
+      PolylineCurve constructor
 
 
    .. py:attribute:: PointCount

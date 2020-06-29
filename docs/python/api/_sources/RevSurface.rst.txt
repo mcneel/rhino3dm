@@ -17,8 +17,8 @@ RevSurface
 
       :param rhino3dm.Curve revoluteCurve: A generatrix.
       :param Line axisOfRevolution: An axis.
-      :param float startAngleRadians: An angle in radias for the start.
-      :param float endAngleRadians: An angle in radias for the end.
+      :param float startAngleRadians: An angle in radians for the start.
+      :param float endAngleRadians: An angle in radians for the end.
 
       :return: A new surface of revolution, or None if any of the inputs is invalid or on error.
       :rtype: RevSurface

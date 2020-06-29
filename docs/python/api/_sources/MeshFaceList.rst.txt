@@ -79,7 +79,7 @@ MeshFaceList
 
    .. py:method:: ConvertNonPlanarQuadsToTriangles()
 
-      Splits non-planar quads into two triangles based on given params.
+      Splits non-planar quads into two triangles based on given parameters.
 
       :return: Number of quads that were converted to triangles.
       :rtype: int

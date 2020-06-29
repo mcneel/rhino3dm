@@ -23,7 +23,7 @@ Arc
    .. py:method:: Arc(startPoint, pointOnInterior, endPoint)
 
       Initializes a new arc through three points. If the points are coincident
-      or colinear, this will result in an Invalid arc.
+      or co-linear, this will result in an Invalid arc.
 
       :param rhino3dm.Point3d startPoint: Start point of arc.
       :param rhino3dm.Point3d pointOnInterior: Point on arc interior.
@@ -89,7 +89,7 @@ Arc
 
    .. py:method:: Trim(domain)
 
-      Sets arc's angle domain (in radians) as a subdomain of the circle.
+      Sets arc's angle domain (in radians) as a sub-domain of the circle.
 
       :param rhino3dm.Interval domain: 0 < domain[1] - domain[0] <= 2.0 * RhinoMath.Pi.
 
@@ -144,7 +144,7 @@ Arc
       Transforms the arc using a Transformation matrix.
 
       :param Transform xform: Transformations to apply. \
-         Note that arcs cannot handle non-euclidian transformations.
+         Note that arcs cannot handle non-euclidean transformations.
 
       :return: True on success, False on failure.
       :rtype: bool

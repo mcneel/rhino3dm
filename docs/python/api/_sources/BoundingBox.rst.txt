@@ -7,14 +7,14 @@ BoundingBox
 
    .. py:method:: BoundingBox(min, max)
 
-      Constructs a new boundingbox from two corner points.
+      Constructs a new bounding box from two corner points.
 
       :param rhino3dm.Point3d min: Point containing all the minimum coordinates.
       :param rhino3dm.Point3d max: Point containing all the maximum coordinates.
 
    .. py:method:: BoundingBox(minX, minY, minZ, maxX, maxY, maxZ)
 
-      Constructs a boundingbox from numeric extremes.
+      Constructs a bounding box from numeric extremes.
 
       :param float minX: Lower extreme for box X size.
       :param float minY: Lower extreme for box Y size.
@@ -25,7 +25,7 @@ BoundingBox
 
    .. py:attribute:: IsValid
 
-      bool: Gets a value that indicates whether or not this boundingbox is valid.
+      bool: Gets a value that indicates whether or not this bounding box is valid.
       Empty boxes are not valid, and neither are boxes with unset points.
 
    .. py:attribute:: Min
@@ -38,7 +38,7 @@ BoundingBox
 
    .. py:attribute:: Center
 
-      rhino3dm.Point3d: Gets the point in the center of the boundingbox.
+      rhino3dm.Point3d: Gets the point in the center of the bounding box.
 
    .. py:attribute:: Area
 
@@ -55,20 +55,38 @@ BoundingBox
 
    .. py:method:: ClosestPoint(point)
 
-      Finds the closest point on or in the boundingbox.
+      Finds the closest point on or in the bounding box.
 
       :param rhino3dm.Point3d point: Sample point.
 
       :return: The point on or in the box that is closest to the sample point.
       :rtype: rhino3dm.Point3d
 
+   .. py:method:: Inflate(amount)
+
+      Inflates the box with equal amounts in all directions.
+      Inflating with negative amounts may result in decreasing boxes.
+      Invalid boxes can not be inflated.
+
+      :param float amount: Amount (in model units) to inflate this box in all directions.
+
+      :rtype: void
+
+   .. py:method:: Inflate(xAmount, yAmount, zAmount)
+
+      Inflates the box with equal amounts in all directions.
+      Inflating with negative amounts may result in decreasing boxes.
+      Invalid boxes can not be inflated.
+
+      :rtype: void
+
    .. py:method:: Contains(point)
 
-      Tests a point for boundingbox inclusion. This is the same as calling Contains(point, false)
+      Tests a point for bounding box inclusion. This is the same as calling Contains(point, false)
 
       :param rhino3dm.Point3d point: Point to test.
 
-      :return: True if the point is on the inside of or coincident with this boundingbox; otherwise false.
+      :return: True if the point is on the inside of or coincident with this bounding box; otherwise false.
       :rtype: bool
 
    .. py:method:: IsDegenerate(tolerance)
@@ -76,7 +94,7 @@ BoundingBox
       Determines whether a bounding box is degenerate (flat) in one or more directions.
 
       :param float tolerance: Distances <= tolerance will be considered to be zero.  If tolerance \
-         is negative (default), then a scale invarient tolerance is used.
+         is negative (default), then a scale invariant tolerance is used.
 
       :return: 0 = box is not degenerate \
          1 = box is a rectangle (degenerate in one direction). \
@@ -87,20 +105,20 @@ BoundingBox
 
    .. py:method:: Transform(xform)
 
-      Updates this boundingbox to be the smallest axis aligned
-      boundingbox that contains the transformed result of its 8 original corner
+      Updates this bounding box to be the smallest axis aligned
+      bounding box that contains the transformed result of its 8 original corner
       points.
 
       :param Transform xform: A transform.
 
-      :return: True if this operation is sucessfull; otherwise false.
+      :return: True if this operation is successful; otherwise false.
       :rtype: bool
 
    .. py:method:: ToBrep()
 
-      Constructs a  representation of this boundingbox.
+      Constructs a  representation of this bounding box.
 
-      :return: If this operation is sucessfull, a Brep representation of this box; otherwise null.
+      :return: If this operation is successful, a Brep representation of this box; otherwise null.
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: Union(a, b)

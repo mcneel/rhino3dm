@@ -14,22 +14,25 @@ namespace docgen
 
         PythonClass _sisterPythonClass;
 
-        public override void AddMethod(string name, bool isStatic, string[] argList)
+        public override void AddMethod(string name, bool isStatic, string cppFunction, string[] argList)
         {
-            if( _sisterPythonClass==null)
+            if (!string.IsNullOrWhiteSpace(cppFunction))
             {
-                _sisterPythonClass = AllPythonClasses[this.ClassName.ToLowerInvariant()];
-            }
-            for( int i=0; i<_sisterPythonClass.Methods.Count; i++)
-            {
-                var pyMethod = _sisterPythonClass.Methods[i];
-                if( pyMethod.Item2.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                if (_sisterPythonClass == null)
                 {
-                    argList = pyMethod.Item3;
-                    break;
+                    _sisterPythonClass = AllPythonClasses[this.ClassName.ToLowerInvariant()];
+                }
+                for (int i = 0; i < _sisterPythonClass.Methods.Count; i++)
+                {
+                    var pyMethod = _sisterPythonClass.Methods[i];
+                    if (pyMethod.CppFunction.Equals(cppFunction, StringComparison.Ordinal))
+                    {
+                        argList = pyMethod.ArgList;
+                        break;
+                    }
                 }
             }
-            base.AddMethod(name, isStatic, argList);
+            base.AddMethod(name, isStatic, cppFunction, argList);
         }
 
         /// <summary>
@@ -110,15 +113,13 @@ namespace docgen
                         break;
                     }
                 }
-                foreach (var (isStatic, method, args) in jsclass.Methods)
+                foreach (var jsMethod in jsclass.Methods)
                 {
+                    bool isStatic = jsMethod.IsStatic;
+                    string method = jsMethod.Name;
+                    string[] args = jsMethod.ArgList;
                     MethodDeclarationSyntax methodDecl = null;
                     doccomment = null;
-
-                    if( method.Equals("rotation"))
-                    {
-                        int bh = 0;
-                    }
 
                     for (int i = 0; i < rhcommon.Methods.Count; i++)
                     {
@@ -327,8 +328,11 @@ namespace docgen
                 }
 
                 // Declare methods
-                foreach (var (isStatic, method, args) in jsclass.Methods)
+                foreach (var jsMethod in jsclass.Methods)
                 {
+                    bool isStatic = jsMethod.IsStatic;
+                    string method = jsMethod.Name;
+                    string[] args = jsMethod.ArgList;
                     MethodDeclarationSyntax methodDecl = null;
                     DocumentationCommentTriviaSyntax doccomment = null;
                     for (int i = 0; i < rhcommon.Methods.Count; i++)

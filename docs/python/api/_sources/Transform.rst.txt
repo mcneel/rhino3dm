@@ -28,7 +28,7 @@ Transform
    .. py:attribute:: IsZero
 
       bool: True if matrix is Zero4x4, ZeroTransformation, or some other type of
-      zero.The value xform[3][3] can be anything.
+      zero. The value xform[3][3] can be anything.
 
    .. py:attribute:: IsZero4x4
 
@@ -89,8 +89,8 @@ Transform
 
    .. py:method:: TransformBoundingBox(bbox)
 
-      Computes a new boundingbox that is the smallest axis aligned
-      boundingbox that contains the transformed result of its 8 original corner
+      Computes a new bounding box that is the smallest axis aligned
+      bounding box that contains the transformed result of its 8 original corner
       points.
 
       :return: A new bounding box.

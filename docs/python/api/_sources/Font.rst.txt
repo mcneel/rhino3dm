@@ -15,7 +15,7 @@ Font
 
    .. py:attribute:: FaceName
 
-      str: Returns Facename
+      str: Returns Face name
 
    .. py:attribute:: PostScriptName
 

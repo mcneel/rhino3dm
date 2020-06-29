@@ -60,7 +60,7 @@ Surface
 
    .. py:method:: IsPeriodic(direction)
 
-      Gets a value indicating if thr surface is periodic in a direction (default is false).
+      Gets a value indicating if the surface is periodic in a direction (default is false).
 
       :param int direction: 0 = U, 1 = V.
 

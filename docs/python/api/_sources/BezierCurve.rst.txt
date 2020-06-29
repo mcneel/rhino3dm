@@ -60,7 +60,7 @@ BezierCurve
 
       Make bezier non-rational
 
-      :return: treu if successful
+      :return: True if successful
       :rtype: bool
 
    .. py:method:: IncreaseDegree(desiredDegree)

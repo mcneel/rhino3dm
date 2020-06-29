@@ -63,9 +63,9 @@ GeometryBase
 
    .. py:method:: GetBoundingBox()
 
-      Boundingbox solver. Gets the world axis aligned boundingbox for the geometry.
+      Bounding box solver. Gets the world axis aligned bounding box for the geometry.
 
-      :return: The boundingbox of the geometry in world coordinates or BoundingBox.Empty \
+      :return: The bounding box of the geometry in world coordinates or BoundingBox.Empty \
          if not bounding box could be found.
       :rtype: rhino3dm.BoundingBox
 

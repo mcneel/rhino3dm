@@ -109,7 +109,7 @@ Polyline
 
    .. py:staticmethod:: CreateCircumscribedPolygon(circle, sideCount)
 
-      Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tanget to the circle.
+      Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tangent to the circle.
 
       :param Circle circle: The circle.
       :param int sideCount: The number of sides

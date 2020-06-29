@@ -1,0 +1,51 @@
+DracoCompression
+================
+
+.. py:module:: rhino3dm
+
+.. py:class:: DracoCompression
+
+   .. py:staticmethod:: Compress(mesh)
+
+      Compress a mesh using default compression options.
+
+      :param Rhino.Geometry.Mesh mesh: mesh to compress
+
+      :return: instance of class representing the compressed data
+      :rtype: DracoCompression
+
+   .. py:staticmethod:: Compress(mesh, options)
+
+      Compress a mesh using default compression options.
+
+      :return: instance of class representing the compressed data
+      :rtype: DracoCompression
+
+   .. py:method:: Write()
+
+      Write the compressed data to disk
+
+      :return: True on success
+      :rtype: bool
+
+   .. py:staticmethod:: DecompressByteArray()
+
+      Decompress data into either a mesh or point cloud.
+
+      :return: Mesh or point cloud on success. None on failure
+      :rtype: Rhino.Geometry.GeometryBase
+
+   .. py:staticmethod:: DecompressBase64String(encoded)
+
+      Decompress base64 encoded version of Draco data into either a mesh or point cloud
+
+      :param str encoded: compressed Draco data
+
+      :return: Mesh or point cloud on success. None on failure
+      :rtype: Rhino.Geometry.GeometryBase
+
+   .. py:method:: ToBase64String()
+
+      Convert byte array of Draco compressed data into a base64 encoded string
+
+      :rtype: str

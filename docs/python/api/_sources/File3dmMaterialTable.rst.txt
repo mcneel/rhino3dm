@@ -34,3 +34,7 @@ File3dmMaterialTable
    .. py:method:: FindId(id)
 
       [todo] add documentation
+
+   .. py:method:: FindFromAttributes()
+
+      [todo] add documentation

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>NurbsCurve &mdash; rhino3dm 0.9.0 documentation</title>
+  <title>NurbsCurve &mdash; rhino3dm 0.12.0 documentation</title>
   
 
   
@@ -17,36 +17,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="NurbsCurveKnotList" href="NurbsCurveKnotList.html" />
     <link rel="prev" title="ModelComponent" href="ModelComponent.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -60,7 +58,7 @@
             
             
               <div class="version">
-                0.9.0
+                0.12.0
               </div>
             
           
@@ -95,6 +93,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdge.html">BrepEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
@@ -107,6 +107,8 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -144,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshingParameters.html">MeshingParameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshNormalList.html">MeshNormalList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshTextureCoordinateList.html">MeshTextureCoordinateList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshTopologyEdgeList.html">MeshTopologyEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexColorList.html">MeshVertexColorList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshVertexList.html">MeshVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ModelComponent.html">ModelComponent</a></li>
@@ -151,7 +154,10 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurveKnotList.html">NurbsCurveKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsCurvePointList.html">NurbsCurvePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurface.html">NurbsSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Point.html">Point</a></li>
@@ -166,7 +172,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PointGrid.html">PointGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Polylinecurve.html">Polylinecurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
@@ -305,25 +311,25 @@ Rational curves have control-points with custom weights.</p>
 <dl class="attribute">
 <dt id="rhino3dm.NurbsCurve.HasBezierSpans">
 <code class="descname">HasBezierSpans</code><a class="headerlink" href="#rhino3dm.NurbsCurve.HasBezierSpans" title="Permalink to this definition">¶</a></dt>
-<dd><p>bool: Returns True if the NURBS curve has bezier spans (all distinct knots have multiplitity = degree)</p>
+<dd><p>bool: Returns True if the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.NurbsCurve.Points">
 <code class="descname">Points</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Collections.NurbsCurvePointList: Gets access to the control points of this nurbs curve.</p>
+<dd><p>Collections.NurbsCurvePointList: Gets access to the control points of this NURBS curve.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.NurbsCurve.Knots">
 <code class="descname">Knots</code><a class="headerlink" href="#rhino3dm.NurbsCurve.Knots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Collections.NurbsCurveKnotList: Gets access to the knots (or “knot vector”) of this nurbs curve.</p>
+<dd><p>Collections.NurbsCurveKnotList: Gets access to the knots (or “knot vector”) of this NURBS curve.</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.NurbsCurve.CreateFromLine">
 <em class="property">static </em><code class="descname">CreateFromLine</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a non-rational, degree 1 Nurbs curve representation of the line.</p>
+<dd><p>Gets a non-rational, degree 1 NURBS curve representation of the line.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -341,7 +347,7 @@ Rational curves have control-points with custom weights.</p>
 <em class="property">static </em><code class="descname">CreateFromArc</code><span class="sig-paren">(</span><em>arc</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromArc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets a rational degree 2 NURBS curve representation
 of the arc. Note that the parameterization of NURBS curve
-does not match arc’s transcendental paramaterization.</p>
+does not match arc’s transcendental parameterization.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -359,7 +365,7 @@ does not match arc’s transcendental paramaterization.</p>
 <em class="property">static </em><code class="descname">CreateFromCircle</code><span class="sig-paren">(</span><em>circle</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromCircle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets a rational degree 2 NURBS curve representation
 of the circle. Note that the parameterization of NURBS curve
-does not match circle’s transcendental paramaterization.
+does not match circle’s transcendental parameterization.
 Use GetRadianFromNurbFormParameter() and
 GetParameterFromRadian() to convert between the NURBS curve
 parameter and the transcendental parameter.</p>
@@ -380,12 +386,12 @@ parameter and the transcendental parameter.</p>
 <em class="property">static </em><code class="descname">CreateFromEllipse</code><span class="sig-paren">(</span><em>ellipse</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.CreateFromEllipse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets a rational degree 2 NURBS curve representation of the ellipse.
 Note that the parameterization of the NURBS curve does not match
-with the transcendental paramaterization of the ellipsis.</p>
+with the transcendental parameterization of the ellipsis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A nurbs curve representation of this ellipse or None if no such representation could be made.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A NURBS curve representation of this ellipse or None if no such representation could be made.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
 </tr>
@@ -439,13 +445,13 @@ with the transcendental paramaterization of the ellipsis.</p>
 <dl class="method">
 <dt id="rhino3dm.NurbsCurve.MakePiecewiseBezier">
 <code class="descname">MakePiecewiseBezier</code><span class="sig-paren">(</span><em>setEndWeightsToOne</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.MakePiecewiseBezier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clamps ends and adds knots so the NURBS curve has bezier spans
-(all distinct knots have multiplitity = degree).</p>
+<dd><p>Clamps ends and adds knots so the NURBS curve has Bezier spans
+(all distinct knots have multiplicity = degree).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>setEndWeightsToOne</strong> (<em>bool</em>) – If True and the first or last weight is not one, then the first and last spans are reparameterized so that the end weights are one.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>setEndWeightsToOne</strong> (<em>bool</em>) – If True and the first or last weight is not one, then the first and last spans are re-parameterized so that the end weights are one.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
 </tr>
@@ -458,13 +464,13 @@ with the transcendental paramaterization of the ellipsis.</p>
 <dl class="method">
 <dt id="rhino3dm.NurbsCurve.Reparameterize">
 <code class="descname">Reparameterize</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.NurbsCurve.Reparameterize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use a linear fractional transformation to reparameterize the NURBS curve.
+<dd><p>Use a linear fractional transformation to re-parameterize the NURBS curve.
 This does not change the curve’s domain.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>c</strong> (<em>float</em>) – reparameterization constant (generally speaking, c should be &gt; 0). The control points and knots are adjusted so that output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ). Note that lambda(0) = 0, lambda(1) = 1, lambda’(t) &gt; 0, lambda’(0) = c and lambda’(1) = 1/c.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>c</strong> (<em>float</em>) – re-parameterization constant (generally speaking, c should be &gt; 0). The control points and knots are adjusted so that output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ). Note that lambda(0) = 0, lambda(1) = 1, lambda’(t) &gt; 0, lambda’(0) = c and lambda’(1) = 1/c.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if successful.</td>
 </tr>
@@ -523,7 +529,7 @@ to the control point at the specified index.</p>
         <a href="NurbsCurveKnotList.html" class="btn btn-neutral float-right" title="NurbsCurveKnotList" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ModelComponent.html" class="btn btn-neutral float-left" title="ModelComponent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ModelComponent.html" class="btn btn-neutral" title="ModelComponent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -549,16 +555,26 @@ to the control point at the specified index.</p>
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

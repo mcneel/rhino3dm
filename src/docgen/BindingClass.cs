@@ -113,14 +113,15 @@ namespace docgen
                         if (line.StartsWith(".function") || line.StartsWith(".def("))
                         {
                             string funcName = (line.Split(new char[] { '"' }))[1];
-                            activeClass.AddMethod(funcName, false, GetArgList(line));
+                            string cppFunction = GetCppFunctionName(line);
+                            activeClass.AddMethod(funcName, false, cppFunction, GetArgList(line));
                         }
 
-                        if (line.StartsWith(".class_function") ||
-                          line.StartsWith(".def_static"))
+                        if (line.StartsWith(".class_function") || line.StartsWith(".def_static"))
                         {
                             string funcName = (line.Split(new char[] { '"' }))[1];
-                            activeClass.AddMethod(funcName, true, GetArgList(line));
+                            string cppFunction = GetCppFunctionName(line);
+                            activeClass.AddMethod(funcName, true, cppFunction, GetArgList(line));
                         }
                         if (line.StartsWith(";"))
                         {
@@ -150,6 +151,18 @@ namespace docgen
                 index = line.IndexOf("py::arg", index+1);
             }
             return args.ToArray();
+        }
+
+        static string GetCppFunctionName(string line)
+        {
+            int start = line.IndexOf('&');
+            if (-1 == start)
+                return string.Empty;
+            int end = line.IndexOf(',', start);
+            if (-1 == end)
+                end = line.IndexOf(')', start);
+            string function = line.Substring(start, end - start).Trim();
+            return function;
         }
 
         public static JavascriptClass GetJS(string className)
@@ -195,9 +208,16 @@ namespace docgen
             Properties.Add(name);
         }
 
-        public virtual void AddMethod(string name, bool isStatic, string[] argList)
+        public virtual void AddMethod(string name, bool isStatic, string cppFunction, string[] argList)
         {
-            Methods.Add(new Tuple<bool, string, string[]>(isStatic, name, argList));
+            var method = new Method
+            {
+                Name = name,
+                IsStatic = isStatic,
+                CppFunction = cppFunction,
+                ArgList = argList
+            };
+            Methods.Add(method);
         }
 
         public string[] GetParamNames(ParameterListSyntax p, bool pythonSafe = false)
@@ -216,8 +236,16 @@ namespace docgen
             return paramNames.ToArray();
         }
 
-        public List<Tuple<bool, string, string[]>> Methods { get; } = new List<Tuple<bool, string, string[]>>();
+        public List<Method> Methods { get; } = new List<Method>();
         public List<string> Properties { get; } = new List<string>();
         public List<string[]> Constructors { get; } = new List<string[]>();
+
+        public class Method
+        {
+            public bool IsStatic { get; set; }
+            public string Name { get; set; }
+            public string CppFunction { get; set; }
+            public string[] ArgList { get; set; }
+        }
     }
 }

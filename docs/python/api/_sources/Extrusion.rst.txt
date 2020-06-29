@@ -118,7 +118,7 @@ Extrusion
       :param bool splitKinkyFaces: If True and the profiles have kinks, then the faces corresponding to those profiles are split \
          so they will be G1.
 
-      :return: A brep with a similar shape like this extrustion, or None on error.
+      :return: A brep with a similar shape like this extrusion, or None on error.
       :rtype: rhino3dm.Brep
 
    .. py:method:: SetPathAndUp()
@@ -131,7 +131,7 @@ Extrusion
 
    .. py:method:: GetProfileTransformation(s)
 
-      Gets the transformation that maps the xy profile curve to its 3d location.
+      Gets the transformation that maps the XY profile curve to its 3d location.
 
       :param float s: 0.0 = starting profile \
          1.0 = ending profile.
@@ -189,7 +189,7 @@ Extrusion
       :param int profileIndex: 0 <= profileIndex < ProfileCount \
          The outer profile has index 0.
       :param float s: 0.0 <= s <= 1.0 \
-         A relative parameter controling which profile is returned. \
+         A relative parameter controlling which profile is returned. \
          0 = bottom profile and 1 = top profile.
 
       :return: The profile.

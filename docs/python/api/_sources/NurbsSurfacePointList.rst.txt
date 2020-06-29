@@ -1,0 +1,34 @@
+NurbsSurfacePointList
+=====================
+
+.. py:module:: rhino3dm
+
+.. py:class:: NurbsSurfacePointList
+
+   .. py:attribute:: CountU
+
+      int: Gets the number of control points in the U direction of this surface.
+
+   .. py:attribute:: CountV
+
+      int: Gets the number of control points in the V direction of this surface.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: MakeRational()
+
+      [todo] add documentation
+
+   .. py:method:: MakeNonRational()
+
+      [todo] add documentation

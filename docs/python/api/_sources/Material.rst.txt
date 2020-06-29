@@ -50,7 +50,7 @@ Material
 
    .. py:attribute:: FresnelReflections
 
-      bool: Gets or sets if fresnel reflections are used.
+      bool: Gets or sets if Fresnel reflections are used.
 
    .. py:attribute:: DisableLighting
 
@@ -82,11 +82,20 @@ Material
    .. py:attribute:: TransparentColor
 
 
+   .. py:attribute:: PhysicallyBased
+
+
    .. py:method:: Default()
 
       Set material to default settings.
 
       :rtype: void
+
+   .. py:method:: GetTexture(which)
+
+      Get the texture that corresponds with the specified texture type for this material.
+
+      :rtype: Texture
 
    .. py:method:: GetBitmapTexture()
 
