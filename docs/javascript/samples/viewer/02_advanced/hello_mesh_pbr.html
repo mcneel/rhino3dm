@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -15,10 +16,10 @@
             <div id="canvas"></div>
         </div>
 
-        <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
-        <script type="text/javascript" src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-        <script type="text/javascript" src="rhino3dm.js"></script>
-        <script type="text/javascript">
+        <script src="https://cdn.jsdelivr.net/npm/three@0.118.1/build/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.118.1/examples/js/controls/OrbitControls.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/rhino3dm/rhino3dm.min.js"></script> <!-- latest -->
+        <script>
             
             let url = 'hello_mesh.3dm';
             let fetchPromise = fetch(url);

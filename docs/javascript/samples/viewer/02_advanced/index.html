@@ -1,4 +1,5 @@
-﻿<html>
+﻿<!DOCTYPE html>
+<html>
     <head>
         <meta charset="utf-8">
         <title>PBR Material Example</title>
@@ -15,10 +16,10 @@
             <div id="canvas"></div>
         </div>
 
-        <script type="text/javascript" src="../../resources/rhino3dm.js"></script>
-        <script type="text/javascript" src="../../resources/three.min.js"></script>
-        <script type="text/javascript" src="../../resources/OrbitControls.js"></script>
-        <script type="text/javascript" src="../../resources/dat.gui.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.118.1/build/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.118.1/examples/js/controls/OrbitControls.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/rhino3dm/rhino3dm.min.js"></script> <!-- latest -->
+        <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js"></script>
         <script type="module">
           let scene, camera, renderer, controls, composer, material;
           let url = '../../resources/models/hello_mesh.3dm';

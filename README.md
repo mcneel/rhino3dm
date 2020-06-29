@@ -34,10 +34,11 @@ See [our python documentation](docs/python/RHINO3DM.PY.md) for details
 <img src="docs/images/rhino3dm_rhinologo.png" width="200"></img>
 
 ```html
+<!DOCTYPE html>
 <html>
   <!-- stuff -->
   <body>
-    <script type="text/javascript" src="https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rhino3dm@0.12.0/rhino3dm.min.js"></script>
     <script>
       rhino3dm.then((Module) => {
         sphere = new Module.Sphere([1,2,3], 12)
