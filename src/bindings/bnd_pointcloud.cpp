@@ -463,6 +463,74 @@ int BND_PointCloud::ClosestPoint(const ON_3dPoint& testPoint)
   return -1;
 }
 
+#if defined(ON_WASM_COMPILE)
+
+
+BND_DICT BND_PointCloud::ToThreejsJSON() const
+{
+  ON_PointCloud* p_pointcloud = m_pointcloud;
+
+  emscripten::val attributes(emscripten::val::object());
+
+  // positions
+  emscripten::val position(emscripten::val::object());
+  position.set("itemSize", 3);
+  position.set("type", "Float32Array");
+  emscripten::val positionList(emscripten::val::array());
+  for (int i = 0; i < p_pointcloud->m_P.Count(); i++)
+  {
+    positionList.set(i * 3, p_pointcloud->m_P[i].x);
+    positionList.set(i * 3+1, p_pointcloud->m_P[i].y);
+    positionList.set(i * 3+2, p_pointcloud->m_P[i].z);
+  }
+  position.set("array", positionList);
+  attributes.set("position", position);
+
+  //colors
+  if (p_pointcloud->HasPointColors())
+  {
+    emscripten::val colors(emscripten::val::object());
+    colors.set("itemSize", 3);
+    colors.set("type", "Float32Array");
+    emscripten::val colorList(emscripten::val::array());
+    for (int i = 0; i < p_pointcloud->m_C.Count(); i++)
+    {
+      colorList.set(i * 3, p_pointcloud->m_C[i].Red() / 255.0);
+      colorList.set(i * 3 + 1, p_pointcloud->m_C[i].Green() / 255.0);
+      colorList.set(i * 3 + 2, p_pointcloud->m_C[i].Blue() / 255.0);
+    }
+    colors.set("array", colorList);
+    attributes.set("color",colors);
+  }
+
+  if (m_pointcloud->HasPointNormals())
+  {
+    emscripten::val normal(emscripten::val::object());
+    normal.set("itemSize", 3);
+    normal.set("type", "Float32Array");
+    emscripten::val normalList(emscripten::val::array());
+    for (int i = 0; i < p_pointcloud->m_N.Count(); i++)
+    {
+      normalList.set(i * 3, p_pointcloud->m_N[i].x);
+      normalList.set(i * 3 + 1, p_pointcloud->m_N[i].y);
+      normalList.set(i * 3 + 2, p_pointcloud->m_N[i].z);
+    }
+    normal.set("array", normalList);
+    attributes.set("normal", normal);
+  }
+
+  emscripten::val data(emscripten::val::object());
+  data.set("attributes", attributes);
+
+  emscripten::val rc(emscripten::val::object());
+  rc.set("data", data);
+  
+  return rc;
+
+}
+
+
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -571,6 +639,7 @@ void initPointCloudBindings(void*)
     .function("getNormals", &BND_PointCloud::GetNormals)
     .function("getColors", &BND_PointCloud::GetColors)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
+    .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
     ;
 }
 #endif

@@ -89,4 +89,8 @@ public:
   std::vector<ON_3dVector> GetNormals() const;
   std::vector<BND_Color> GetColors() const;
   int ClosestPoint(const ON_3dPoint& testPoint);
+
+#if defined(ON_WASM_COMPILE)
+  BND_DICT ToThreejsJSON() const;
+#endif
 };
