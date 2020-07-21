@@ -305,6 +305,22 @@ BND_DICT BND_Mesh::ToThreejsJSONRotate(bool rotateToYUp) const
     attributes.set("uv", tcs);
   }
 
+  if (pMesh->HasVertexColors())
+  {
+    emscripten::val vcs(emscripten::val::object());
+    vcs.set("itemSize", 3);
+    vcs.set("type", "Float32Array");
+    emscripten::val vcsList(emscripten::val::array());
+    for (int i = 0; i < pMesh->m_C.Count(); i++)
+    {
+      vcsList.set(i * 3, pMesh->m_C[i].Red() / 255.0);
+      vcsList.set(i * 3 + 1, pMesh->m_C[i].Green() / 255.0);
+      vcsList.set(i * 3 + 2, pMesh->m_C[i].Blue() / 255.0);
+    }
+    vcs.set("array", vcsList);
+    attributes.set("color",vcs);
+  }
+
   // need data.index and data.attributes
   emscripten::val data(emscripten::val::object());
   data.set("index", index);
