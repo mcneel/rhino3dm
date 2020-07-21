@@ -639,6 +639,7 @@ void initPointCloudBindings(void*)
     .function("getNormals", &BND_PointCloud::GetNormals)
     .function("getColors", &BND_PointCloud::GetColors)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
+    .function("toThreejsJSON", &BND_Mesh::ToThreejsJSON)
     ;
 }
 #endif
