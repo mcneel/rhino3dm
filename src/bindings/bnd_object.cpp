@@ -171,6 +171,10 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     if (light)
       return new BND_Light(light, compref);
 
+    ON_SubD* subd = ON_SubD::Cast(obj);
+    if (subd)
+      return new BND_SubD(subd, compref);
+
     return new BND_GeometryBase(geometry, compref);
   }
 
