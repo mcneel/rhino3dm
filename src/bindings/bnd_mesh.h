@@ -288,12 +288,15 @@ class BND_Mesh : public BND_GeometryBase
 public:
   ON_Mesh* m_mesh = nullptr;
 public:
+  static BND_Mesh* CreateFromSubDControlNet(class BND_SubD* subd);
+
   BND_Mesh();
   BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref);
 
   bool IsClosed() const { return m_mesh->IsClosed(); }
   BND_TUPLE IsManifold(bool topologicalTest) const;
   bool HasCachedTextureCoordinates() const { return m_mesh->HasCachedTextureCoordinates(); }
+  bool HasPrincipalCurvatures() const { return m_mesh->HasPrincipalCurvatures(); }
 
   BND_MeshVertexList GetVertices();
   //public Collections.MeshTopologyVertexList TopologyVertices

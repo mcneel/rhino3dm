@@ -105,6 +105,17 @@ BND_MeshingParameters* BND_MeshingParameters::Decode(emscripten::val jsonObject)
 
 #endif
 
+BND_Mesh* BND_Mesh::CreateFromSubDControlNet(class BND_SubD* subd)
+{
+  if (subd)
+  {
+    const ON_SubD* _subd = ON_SubD::Cast(subd->GeometryPointer());
+    ON_Mesh* mesh = _subd->GetControlNetMesh(nullptr);
+    if (mesh)
+      return new BND_Mesh(mesh, nullptr);
+  }
+  return nullptr;
+}
 
 
 BND_Mesh::BND_Mesh()
@@ -879,9 +890,11 @@ void initMeshBindings(pybind11::module& m)
 
   py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
     .def(py::init<>())
+    .def_static("CreateFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, py::arg("subd"))
     .def_property_readonly("IsClosed", &BND_Mesh::IsClosed)
     .def("IsManifold", &BND_Mesh::IsManifold, py::arg("topologicalTest"))
     .def_property_readonly("HasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
+    .def_property_readonly("HasPrincipalCurvatures", &BND_Mesh::HasPrincipalCurvatures)
     .def_property_readonly("Vertices", &BND_Mesh::GetVertices)
     .def_property_readonly("TopologyEdges", &BND_Mesh::GetTopologyEdges)
     .def_property_readonly("Faces", &BND_Mesh::GetFaces)
@@ -1011,9 +1024,11 @@ void initMeshBindings(void*)
 
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
     .constructor<>()
+    .class_function("createFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, allow_raw_pointers())
     .property("isClosed", &BND_Mesh::IsClosed)
     .function("isManifold", &BND_Mesh::IsManifold)
     .property("hasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)
+    .property("hasPrincipalCurvatures", &BND_Mesh::HasPrincipalCurvatures)
     .function("vertices", &BND_Mesh::GetVertices)
     .function("topologyEdges", &BND_Mesh::GetTopologyEdges)
     .function("faces", &BND_Mesh::GetFaces)
