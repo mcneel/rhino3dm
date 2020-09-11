@@ -204,6 +204,19 @@ void initDefines(pybind11::module& m)
     .value("Unset", ON::LengthUnitSystem::Unset)
     .def_static("UnitScale", [](ON::LengthUnitSystem a, ON::LengthUnitSystem b) { return ON::UnitScale(a, b);})
     ;
+
+  py::enum_<ON::light_style>(m, "LightStyle")
+    .value("None", ON::light_style::unknown_light_style)
+    .value("CameraDirectional", ON::light_style::camera_directional_light)
+    .value("CameraPoint", ON::light_style::camera_point_light)
+    .value("CameraSpot", ON::light_style::camera_spot_light)
+    .value("WorldDirectional", ON::light_style::world_directional_light)
+    .value("WorldPoint", ON::light_style::world_point_light)
+    .value("WorldSpot", ON::light_style::world_spot_light)
+    .value("Ambient", ON::light_style::ambient_light)
+    .value("WorldLinear", ON::light_style::world_linear_light)
+    .value("WorldRectangular", ON::light_style::world_rectangular_light)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
@@ -440,6 +453,19 @@ void initDefines(void*)
     .value("Parsecs", ON::LengthUnitSystem::Parsecs)
     .value("CustomUnits", ON::LengthUnitSystem::CustomUnits)
     .value("Unset", ON::LengthUnitSystem::Unset)
+    ;
+
+  enum_<ON::light_style>(m, "LightStyle")
+    .value("None", ON::light_style::unknown_light_style)
+    .value("CameraDirectional", ON::light_style::camera_directional_light)
+    .value("CameraPoint", ON::light_style::camera_point_light)
+    .value("CameraSpot", ON::light_style::camera_spot_light)
+    .value("WorldDirectional", ON::light_style::world_directional_light)
+    .value("WorldPoint", ON::light_style::world_point_light)
+    .value("WorldSpot", ON::light_style::world_spot_light)
+    .value("Ambient", ON::light_style::ambient_light)
+    .value("WorldLinear", ON::light_style::world_linear_light)
+    .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
 }
