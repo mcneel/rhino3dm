@@ -70,6 +70,7 @@ namespace Rhino.Display
           var bitmap = dib.ToBitmap();
           return bitmap;
         }
+        GC.KeepAlive(settings);
       }
       return null;
     }
@@ -104,6 +105,7 @@ namespace Rhino.Display
       var svgwriter = new SvgWriter(svgroot, dpi, new Size((int)x,(int)y));
       IntPtr ptr_page = Runtime.Interop.NativeNonConstPointer(settings);
       svgwriter.Draw(ptr_page, settings.Document);
+      GC.KeepAlive(settings);
       return doc;
     }
   }
@@ -564,6 +566,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoPrintInfo_GetOffset(const_ptr_this, lengthUnits, ref fromMargin, ref x, ref y);
     }
 
+    /// <since>6.2</since>
     public enum AnchorLocation
     {
       LowerLeft = UnsafeNativeMethods.PrintInfoAnchor.LowerLeft,
@@ -740,6 +743,7 @@ namespace Rhino.Display
       set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM, value); }
     }
 
+    /// <since>6.8</since>
     public enum ColorMode
     {
       DisplayColor,
@@ -892,6 +896,7 @@ namespace Rhino.Runtime
       /// <since>6.0</since>
       public float Width { get; internal set; }
     }
+    /// <since>6.0</since>
     public enum PointType
     {
       Move,

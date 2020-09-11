@@ -13,6 +13,7 @@ namespace Rhino.DocObjects
   /// The possible relationships between the instance definition geometry
   /// and the archive containing the original definition.
   /// </summary>
+  /// <since>5.0</since>
   public enum InstanceDefinitionUpdateType : int
   {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -56,6 +57,7 @@ namespace Rhino.DocObjects
   /// must have LayerStyle = Unset, a InstanceDefinitionUpdateType.Linked InstanceDefnition must
   /// have LayerStyle = Active or Reference
   /// </summary>
+  /// <since>5.0</since>
   public enum InstanceDefinitionLayerStyle
   {
     None = 0,
@@ -67,6 +69,7 @@ namespace Rhino.DocObjects
   /// The archive file of a linked instance definition can have the following possible states.
   /// Use InstanceObject.ArchiveFileStatus to query a instance definition's archive file status.
   /// </summary>
+  /// <since>5.2</since>
   public enum InstanceDefinitionArchiveFileStatus : int
   {
     /// <summary>
@@ -506,43 +509,9 @@ namespace Rhino.DocObjects
     }
 
     /// <since>5.0</since>
-    public override string Name
-    {
-      get{ return base.Name; }
-    }
-
-    /// <since>5.0</since>
-    public new string Description
-    {
-      get{ return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.Description); }
-    }
-
-    /// <since>5.0</since>
-    public override Guid Id
-    {
-      get { return base.Id; }
-    }
-
-    /// <since>5.0</since>
     public string SourceArchive
     {
       get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.SourceArchive); }
-    }
-    /// <summary>
-    /// The URL description displayed as a hyperlink in the Insert and Block UI
-    /// </summary>
-    /// <since>5.0</since>
-    public string UrlDescription
-    {
-      get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.UrlTag); }
-    }
-    /// <summary>
-    /// The hyperlink URL that is executed when the UrlDescription hyperlink is clicked on in the Insert and Block UI
-    /// </summary>
-    /// <since>5.0</since>
-    public string Url
-    {
-      get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.Url); }
     }
 
     /// <summary>
@@ -693,6 +662,7 @@ namespace Rhino.DocObjects
 
 namespace Rhino.DocObjects.Tables
 {
+  /// <since>5.3</since>
   public enum InstanceDefinitionTableEventType : int
   {
     Added = 0,
@@ -844,6 +814,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\py\ex_createblock.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedInstanceDefinitions is now redundant. Remove the second argument. Definitions are now always deleted permanently.")]
     public InstanceDefinition Find(string instanceDefinitionName, bool ignoreDeletedInstanceDefinitions)
     {
@@ -902,6 +873,42 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="name">The definition name.</param>
     /// <param name="description">The definition description.</param>
+    /// <param name="url">A URL or hyperlink.</param>
+    /// <param name="urlTag">A description of the URL or hyperlink.</param>
+    /// <param name="basePoint">A base point.</param>
+    /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
+    /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
+    /// <returns>
+    /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
+    /// </returns>
+    /// <since>7.0</since>
+    public int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
+    {
+      using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
+      {
+        IntPtr ptr_array_attributes = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
+        if (attributes != null)
+        {
+          foreach (ObjectAttributes att in attributes)
+          {
+            IntPtr const_ptr_attributes = att.ConstPointer();
+            UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Add(ptr_array_attributes, const_ptr_attributes);
+          }
+        }
+        IntPtr const_ptr_geometry = g.ConstPointer();
+        int rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Add(m_doc.RuntimeSerialNumber, name, description, url, urlTag, basePoint, const_ptr_geometry, ptr_array_attributes);
+
+        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_array_attributes);
+        return rc;
+      }
+
+    }
+    
+    /// <summary>
+    /// Adds an instance definition to the instance definition table.
+    /// </summary>
+    /// <param name="name">The definition name.</param>
+    /// <param name="description">The definition description.</param>
     /// <param name="basePoint">A base point.</param>
     /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
     /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
@@ -916,23 +923,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
-      using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
-      {
-        IntPtr ptr_array_attributes = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
-        if (attributes != null)
-        {
-          foreach (ObjectAttributes att in attributes)
-          {
-            IntPtr const_ptr_attributes = att.ConstPointer();
-            UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Add(ptr_array_attributes, const_ptr_attributes);
-          }
-        }
-        IntPtr const_ptr_geometry = g.ConstPointer();
-        int rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Add(m_doc.RuntimeSerialNumber, name, description, basePoint, const_ptr_geometry, ptr_array_attributes);
-
-        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_array_attributes);
-        return rc;
-      }
+      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, attributes);
     }
 
     /// <summary>
@@ -951,7 +942,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry)
     {
-      return Add(name, description, basePoint, geometry, null);
+      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, null);
     }
 
     /// <summary>
@@ -968,7 +959,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, GeometryBase geometry, ObjectAttributes attributes)
     {
-      return Add(name, description, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
+      return Add(name, description, string.Empty, string.Empty, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
     }
 
     /// <summary>
@@ -1100,6 +1091,7 @@ namespace Rhino.DocObjects.Tables
     /// Returns true if the definition was successfully modified otherwise returns false.
     /// </returns>
     /// <since>6.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use the overload taking a FileReference.")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool ModifySourceArchive(int idefIndex, string sourceArchive, InstanceDefinitionUpdateType updateType, bool quiet)
@@ -1160,6 +1152,7 @@ namespace Rhino.DocObjects.Tables
     /// true if the instance definition could be modified.
     /// </returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Source paths are always absolute at runtime. They cannot be changed.")]
     public bool MakeSourcePathRelative(InstanceDefinition idef, bool relative, bool quiet)
     {
@@ -1361,6 +1354,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <returns>An unused instance definition name string.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [CLSCompliant(false)]
     [Obsolete("The defaultSuffix parameter is now ignored. Remove the second argument.")]
     public string GetUnusedInstanceDefinitionName(string root, uint defaultSuffix)

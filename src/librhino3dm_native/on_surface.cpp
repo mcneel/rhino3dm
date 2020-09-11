@@ -149,6 +149,68 @@ RH_C_FUNCTION bool ON_Surface_IsCylinder(const ON_Surface* pConstSurface, ON_Cyl
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Surface_IsCylinder2(const ON_Surface* pConstSurface, ON_Cylinder* cylinder, double tolerance)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-60245
+  bool rc = false;
+  if (pConstSurface && cylinder)
+  {
+    ON_Cylinder cyl;
+    rc = pConstSurface->IsCylinder(&cyl, tolerance);
+    if (rc)
+    {
+      ON_Plane plane = cyl.circle.plane;
+      ON_3dPoint origin = plane.Origin();
+      double height = 0.0;
+
+      ON_Xform world_to_plane, plane_to_world;
+      world_to_plane.ChangeBasis(ON_xy_plane, plane);
+      plane_to_world.ChangeBasis(plane, ON_xy_plane);
+
+      ON_BoundingBox bbox;
+      
+      const ON_BrepFace* pConstFace = ON_BrepFace::Cast(pConstSurface);
+      if (pConstFace)
+      {
+        const ON_Brep* pConstBrep = pConstFace->Brep();
+        if (pConstBrep)
+        {
+          ON_Brep* brep = pConstBrep->DuplicateFace(pConstFace->m_face_index, true);
+          if (brep)
+          {
+            // A better boundingbox
+            rc = brep->GetTightBoundingBox(bbox, false, &world_to_plane);
+            delete brep;
+          }
+        }
+      }
+      else
+      {
+        rc = pConstSurface->GetTightBoundingBox(bbox, false, &world_to_plane);
+      }
+      if (rc)
+      {
+        // Create a plane through the base of the bounding box
+        ON_Plane bbox_plane(bbox.Corner(0, 0, 0), bbox.Corner(1, 0, 0), bbox.Corner(0, 1, 0));
+        // Transform the plane to the world xy-plane
+        bbox_plane.Transform(plane_to_world);
+        // Project the cylinder plane's origin onto the bounding box plane
+        origin = bbox_plane.ClosestPointTo(origin);
+        // Update the cylinder plane
+        plane.SetOrigin(origin);
+        // Cylinder height is bounding box height
+        ON_3dPoint pt0 = bbox.Corner(0, 0, 0);
+        ON_3dPoint pt1 = bbox.Corner(0, 0, 1);
+        height = (pt1 - pt0).Length();
+        // Create from scratch
+        cylinder->Create(ON_Circle(plane, cyl.circle.radius), height);
+        rc = cylinder->IsValid();
+      }
+    }
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Surface_IsCone( const ON_Surface* pConstSurface, ON_Cone* cone, double tolerance, bool computeCone)
 {
   bool rc = false;

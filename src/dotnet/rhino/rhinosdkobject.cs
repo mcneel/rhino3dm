@@ -5,6 +5,7 @@ using Rhino.Render;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Display;
 using System.Collections.Generic;
+using Rhino.UI.Gumball;
 
 namespace Rhino.DocObjects
 {
@@ -143,7 +144,7 @@ namespace Rhino.DocObjects
       // Don't allow plug-in code to bring down Rhino.
       try
       {
-        OnDraw(new Display.DrawEventArgs(pDisplayPipeline, IntPtr.Zero));
+        OnDraw(new Display.DrawEventArgs(pDisplayPipeline, 0));
       }
       catch (Exception ex)
       {
@@ -744,6 +745,7 @@ namespace Rhino.DocObjects
     /// <param name="rhinoObjects">A collection of Rhino objects.</param>
     /// <param name="boundingBox">A tight bounding box.</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static bool GetTightBoundingBox(IEnumerable<RhinoObject> rhinoObjects, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -761,6 +763,7 @@ namespace Rhino.DocObjects
     /// <param name="plane">A valid alignment plane.</param>
     /// <param name="boundingBox">A tight bounding box.</param>
     /// <returns></returns>
+    /// <since>7.0</since>
     public static bool GetTightBoundingBox(IEnumerable<RhinoObject> rhinoObjects, Plane plane, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -1836,6 +1839,26 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// If a Rhino object has been manipulated by Rhino's gumball, and the gumball is not in its default position,
+    /// then the object's repositioned gumball frame is returned.
+    /// </summary>
+    /// <param name="frame">The gumball frame.</param>
+    /// <returns>true if the object has a gumball frame, otherwise false.</returns>
+    /// <since>7.0</since>
+    public bool TryGetGumballFrame(out GumballFrame frame)
+    {
+      frame = new GumballFrame();
+      var ptr_const_this = ConstPointer();
+      var plane = new Plane();
+      var distance = new Vector3d();
+      var mode = 0;
+      var rc = UnsafeNativeMethods.RHC_RhTryGetRhinoObjectGumballFrame(ptr_const_this, ref plane, ref distance, ref mode);
+      if (rc)
+        frame = new GumballFrame(plane, distance, (GumballScaleMode)mode);
+      return rc;
+    }
+
+    /// <summary>
     /// Determines if custom render meshes will be built for a particular object.
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
@@ -1847,6 +1870,7 @@ namespace Rhino.DocObjects
     /// Returns true if custom render mesh(es) will get built for this object.
     /// </returns>
     /// <since>5.7</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
@@ -1896,6 +1920,7 @@ namespace Rhino.DocObjects
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
     /// <since>5.7</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
@@ -1962,6 +1987,7 @@ namespace Rhino.DocObjects
     /// returns false on error.
     /// </returns>
     /// <since>5.7</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, bool preview, out BoundingBox boundingBox)
     {
@@ -2029,9 +2055,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets an array of sub-objects.
+    /// Explodes the object into sub-objects. It is up to the caller to add the returned objects to the document.
     /// </summary>
-    /// <returns>An array of sub-objects, or null if there are none.</returns>
+    /// <returns>An array of Rhino objects, or null if this object cannot be exploded.</returns>
     /// <since>5.0</since>
     public RhinoObject[] GetSubObjects()
     {
@@ -2119,6 +2145,7 @@ namespace Rhino.DocObjects
     /// <param name="tm"></param>
     /// <param name="objectTransform">Mapping channel object transform</param>
     /// <returns></returns>
+    /// <since>6.26</since>
     public int SetTextureMapping(int channel, TextureMapping tm, Transform objectTransform)
     {
       return UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm.ConstPointer(), ref objectTransform);
@@ -2687,6 +2714,7 @@ namespace Rhino.DocObjects
   /// <summary>
   /// Defines enumerated values for several kinds of selection methods.
   /// </summary>
+  /// <since>5.0</since>
   public enum SelectionMethod
   {
     /// <summary>
@@ -2729,7 +2757,12 @@ namespace Rhino.DocObjects
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_New();
     }
 
-    internal ObjRef(ObjRef other)
+    /// <summary>
+    /// Copy constructor
+    /// </summary>
+    /// <param name="other"></param>
+    /// <since>7.0</since>
+    public ObjRef(ObjRef other)
     {
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_Copy(other.m_ptr);
     }

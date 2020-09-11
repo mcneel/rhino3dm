@@ -9,39 +9,42 @@ RH_C_FUNCTION ON_InstanceDefinition* ON_InstanceDefinition_New(const ON_Instance
 
 RH_C_FUNCTION void ON_InstanceDefinition_GetString(const ON_InstanceDefinition* pConstInstanceDefinition, int which, CRhCmnStringHolder* pStringHolder)
 {
-  const int idxName = 0;
-  const int idxDescription = 1;
+  const int IDX_NAME = 0;
+  const int IDX_DESCRIPTION = 1;
+  const int IDX_URL = 2;
+  const int IDX_URLTAG = 3;
 
-  if( pConstInstanceDefinition && pStringHolder )
+  if (pConstInstanceDefinition && pStringHolder)
   {
-    if( idxName == which )
-    {
-      pStringHolder->Set( pConstInstanceDefinition->Name() );
-    }
-    else if( idxDescription == which )
-    {
-
-      pStringHolder->Set( pConstInstanceDefinition->Description() );
-    }
+    if (IDX_NAME == which)
+      pStringHolder->Set(pConstInstanceDefinition->Name());
+    else if (IDX_DESCRIPTION == which)
+      pStringHolder->Set(pConstInstanceDefinition->Description());
+    else if (IDX_URL == which)
+      pStringHolder->Set(pConstInstanceDefinition->URL());
+    else if (IDX_URLTAG == which)
+      pStringHolder->Set(pConstInstanceDefinition->URL_Tag());
   }
 }
 
-RH_C_FUNCTION void ON_InstanceDefinition_SetString( ON_InstanceDefinition* pInstanceDefinition, int which, const RHMONO_STRING* _str)
+RH_C_FUNCTION void ON_InstanceDefinition_SetString(ON_InstanceDefinition* pInstanceDefinition, int which, const RHMONO_STRING* _str)
 {
-  const int idxName = 0;
-  const int idxDescription = 1;
+  const int IDX_NAME = 0;
+  const int IDX_DESCRIPTION = 1;
+  const int IDX_URL = 2;
+  const int IDX_URLTAG = 3;
 
-  if( pInstanceDefinition )
+  if (pInstanceDefinition)
   {
     INPUTSTRINGCOERCE(str, _str);
-    if( idxName == which )
-    {
+    if (IDX_NAME == which)
       pInstanceDefinition->SetName(str);
-    }
-    else if( idxDescription == which )
-    {
+    else if (IDX_DESCRIPTION == which)
       pInstanceDefinition->SetDescription(str);
-    }
+    else if (IDX_URL == which)
+      pInstanceDefinition->SetURL(str);
+    else if (IDX_URLTAG == which)
+      pInstanceDefinition->SetURL_Tag(str);
   }
 }
 

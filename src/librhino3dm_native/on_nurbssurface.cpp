@@ -53,6 +53,21 @@ RH_C_FUNCTION bool ON_NurbsSurface_GetBoolDir(ON_NurbsSurface* pSurface, int whi
   return rc;
 }
 
+RH_C_FUNCTION int ON_NurbsSurface_KnotStyle(const ON_NurbsSurface* pConstNurbsSurface, int dir)
+{
+  ON::knot_style rc = ON::unknown_knot_style;
+  if (pConstNurbsSurface)
+  {
+    // 3 Aug 2020 S. Baer
+    // RHINO_CLAMP macro is not available in OpenNURBS based builds
+    //dir = RHINO_CLAMP(dir, 0, 1);
+    if (dir < 0) dir = 0;
+    if (dir > 1) dir = 1;
+    rc = ON_KnotVectorStyle(pConstNurbsSurface->m_order[dir], pConstNurbsSurface->m_cv_count[dir], pConstNurbsSurface->m_knot[dir]);
+  }
+  return (int)rc;
+}
+
 RH_C_FUNCTION double ON_NurbsSurface_SuperfluousKnot(const ON_NurbsSurface* pConstNurbsSurface, int dir, int end)
 {
   double rc = 0;

@@ -7,6 +7,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Specifies enumerated constants used to indicate the internal alignment and justification of text.
   /// </summary>
+  /// <since>5.0</since>
   [Flags]
   public enum TextJustification
   {

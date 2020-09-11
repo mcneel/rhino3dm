@@ -13,6 +13,7 @@ namespace Rhino.Input.Custom
 
   /// <summary>
   /// </summary>
+  /// <since>5.0</since>
   public enum GetFileNameMode
   {
     Open = 0,
@@ -271,6 +272,7 @@ namespace Rhino.UI
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use ShowOpenDialog")]
     public System.Windows.Forms.DialogResult ShowDialog()
     {
@@ -373,6 +375,7 @@ namespace Rhino.UI
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use ShowSaveDialog")]
     public System.Windows.Forms.DialogResult ShowDialog()
     {

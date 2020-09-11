@@ -100,6 +100,14 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(ptr);
     }
 
+    internal ViewportInfo(IntPtr ptrOnViewport, bool controlPointer)
+    {
+      IntPtr ptr = ptrOnViewport;
+      if (!controlPointer)
+        ptr = UnsafeNativeMethods.ON_Viewport_New(ptrOnViewport);
+      ConstructNonConstObject(ptr);
+    }
+
     internal ViewportInfo(ViewInfo parent)
     {
       m_parent = parent;

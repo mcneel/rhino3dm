@@ -9,6 +9,7 @@ using Rhino.FileIO;
 
 namespace Rhino.DocObjects
 {
+  /// <since>5.0</since>
   public enum HatchPatternFillType
   {
     Solid = 0,
@@ -442,6 +443,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\py\ex_hatchcurve.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeleted is now ignored. Items are removed permanently now. Use FindName.")]
     public int Find(string name, bool ignoreDeleted)
     {

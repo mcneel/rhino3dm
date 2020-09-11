@@ -4,6 +4,7 @@ using System;
 
 namespace Rhino.Input.Custom
 {
+  /// <since>6.0</since>
   public enum ConeConstraint
   {
     None = 0,

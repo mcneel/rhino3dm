@@ -18,6 +18,7 @@ namespace Rhino.FileIO
   public class File3dm : IDisposable
   {
     /// <summary></summary>
+    /// <since>5.9</since>
     [CLSCompliant(false)]
     [Flags]
     public enum TableTypeFilter : uint
@@ -61,6 +62,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary></summary>
+    /// <since>5.9</since>
     [CLSCompliant(false)]
     [Flags]
     public enum ObjectTypeFilter : uint
@@ -220,7 +222,18 @@ namespace Rhino.FileIO
         return ptr_onx_model == IntPtr.Zero ? null : new File3dm(ptr_onx_model);
       }
     }
-    
+
+    /// <summary>
+    /// Read a 3dm file from a byte array
+    /// </summary>
+    /// <param name="bytes"></param>
+    /// <returns>New File3dm on success, null on error.</returns>
+    /// <since>7.0</since>
+    public static File3dm FromByteArray(byte[] bytes)
+    {
+      IntPtr ptr_onx_model = UnsafeNativeMethods.ONX_Model_FromByteArray(bytes.Length, bytes);
+      return ptr_onx_model == IntPtr.Zero ? null : new File3dm(ptr_onx_model);
+    }
 
     /// <summary>Reads only the notes from an existing 3dm file.</summary>
     /// <param name="path">The file from which to read the notes.</param>
@@ -502,6 +515,7 @@ namespace Rhino.FileIO
     /// </param>
     /// <returns>true in any case.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("IsValid now returns always true.")]
     public bool IsValid(out string errors)
     {
@@ -518,6 +532,7 @@ namespace Rhino.FileIO
     /// </param>
     /// <returns>>true in any case.</returns>
     /// <since>5.1</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("IsValid now returns always true.")]
     public bool IsValid(TextLog errors)
     {
@@ -529,6 +544,7 @@ namespace Rhino.FileIO
     /// This function is only kept for forward assembly compatibility.
     /// </summary>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Polish and Audit functionality no longer exist.")]
     public void Polish()
     {
@@ -550,6 +566,7 @@ namespace Rhino.FileIO
     /// Returns 0.
     /// </returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Polish and Audit functionality no longer exist.")]
     public int Audit(bool attemptRepair, out int repairCount, out string errors, out int[] warnings)
     {
@@ -3356,23 +3373,74 @@ namespace Rhino.FileIO
   }
 
   /// <summary>
-  /// Custom data in the file supplied by a plug-in
+  /// Represents custom plug-in data in the 3dm file written by a plug-in.
   /// </summary>
-  public class File3dmPlugInData
+  public class File3dmPlugInData : IDisposable
   {
     readonly Guid m_id;
-    internal File3dmPlugInData(Guid id)
+    // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
+    // Modified class to inherit from IDisposable so as to propery delete the ON_Read3dmBufferArchive*
+    readonly File3dm m_parent;
+    IntPtr m_ptr_buffer_archive = IntPtr.Zero; // ON_Read3dmBufferArchive*
+
+    internal File3dmPlugInData(File3dm parent, Guid id)
     {
+      m_parent = parent;
       m_id = id;
     }
 
     /// <summary>
-    /// Plug-in this data is associated with
+    /// Returns the id of the plug-in that is associated with this custom data.
     /// </summary>
     /// <since>5.0</since>
-    public Guid PlugInId
+    public Guid PlugInId => m_id;
+
+    /// <summary>
+    /// Gets a binary archive reader that can be used to read custom data that was written to the 3dm file
+    /// by a Rhino plug-in. This custom data must be read in exactly the same manner that owning plug-in
+    /// reads the data.
+    /// </summary>
+    /// <returns>A binary archive reader if successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public BinaryArchiveReader ArchiveReader()
     {
-      get { return m_id; }
+      // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
+      if (IntPtr.Zero == m_ptr_buffer_archive)
+      {
+        IntPtr ptr_const_parent = m_parent.ConstPointer();
+        m_ptr_buffer_archive = UnsafeNativeMethods.ONX_Model_UserData_NewGoo(ptr_const_parent, m_id);
+        if (IntPtr.Zero == m_ptr_buffer_archive)
+          return null;
+      }
+      BinaryArchiveReader reader = new BinaryArchiveReader(m_ptr_buffer_archive);
+      return reader;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~File3dmPlugInData()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr_buffer_archive)
+      {
+        UnsafeNativeMethods.ONX_Model_UserData_DeleteGoo(m_ptr_buffer_archive);
+        m_ptr_buffer_archive = IntPtr.Zero;
+      }
     }
   }
 
@@ -3430,7 +3498,7 @@ namespace Rhino.FileIO
         Guid id = UnsafeNativeMethods.ONX_Model_UserDataTable_Uuid(pModel, index);
         if (Guid.Empty == id)
           throw new IndexOutOfRangeException();
-        return new File3dmPlugInData(id);
+        return new File3dmPlugInData(m_parent, id);
       }
     }
 #endregion
@@ -3848,14 +3916,16 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="name">The definition name.</param>
     /// <param name="description">The definition description.</param>
+    /// <param name="url">A URL or hyperlink.</param>
+    /// <param name="urlTag">A description of the URL or hyperlink.</param>
     /// <param name="basePoint">A base point.</param>
     /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
     /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
     /// <returns>
     /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
     /// </returns>
-    /// <since>6.5</since>
-    public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
+    /// <since>7.0</since>
+    public int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
       using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
       {
@@ -3870,11 +3940,29 @@ namespace Rhino.FileIO
         }
         IntPtr const_ptr_geometry = g.ConstPointer();
         IntPtr ptr_this = m_parent.NonConstPointer();
-        int rc = UnsafeNativeMethods.ONX_Model_File3dmInstanceDefinitionTable_Add(ptr_this, name, description, basePoint, const_ptr_geometry, ptr_array_attributes);
+        int rc = UnsafeNativeMethods.ONX_Model_File3dmInstanceDefinitionTable_Add(ptr_this, name, description, url, urlTag, basePoint, const_ptr_geometry, ptr_array_attributes);
 
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_array_attributes);
         return rc;
       }
+    }
+
+
+    /// <summary>
+    /// Adds an instance definition to the instance definition table.
+    /// </summary>
+    /// <param name="name">The definition name.</param>
+    /// <param name="description">The definition description.</param>
+    /// <param name="basePoint">A base point.</param>
+    /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
+    /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
+    /// <returns>
+    /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
+    /// </returns>
+    /// <since>6.5</since>
+    public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
+    {
+      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, attributes);
     }
 
     /// <summary>
@@ -3890,7 +3978,7 @@ namespace Rhino.FileIO
     /// <since>6.5</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry)
     {
-      return Add(name, description, basePoint, geometry, null);
+      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, null);
     }
 
     /// <summary>
@@ -3907,7 +3995,7 @@ namespace Rhino.FileIO
     /// <since>6.5</since>
     public int Add(string name, string description, Point3d basePoint, GeometryBase geometry, ObjectAttributes attributes)
     {
-      return Add(name, description, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
+      return Add(name, description, string.Empty, string.Empty, basePoint, new GeometryBase[] { geometry }, new ObjectAttributes[] { attributes });
     }
 
     /// <summary>

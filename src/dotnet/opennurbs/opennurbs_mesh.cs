@@ -384,6 +384,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Type of Mesh Parameters used by the RhinoDoc for meshing objects
   /// </summary>
+  /// <since>5.1</since>
   public enum MeshingParameterStyle
   {
     /// <summary>No style</summary>
@@ -402,6 +403,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// The direction of the smoothing used by Curve, Surface, and Mesh Smooth.
   /// </summary>
+  /// <since>6.0</since>
   public enum SmoothingCoordinateSystem
   {
     /// <summary>
@@ -712,6 +714,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines how to pack render/meshes textures.
   /// </summary>
+  /// <since>6.0</since>
   public enum MeshingParameterTextureRange
   {
     /// <summary>This value is not set.</summary>
@@ -1501,6 +1504,7 @@ namespace Rhino.Geometry
   }
 
   /// <summary> Symmetrical meshing axis </summary>
+  /// <since>7.0</since>
   [Flags]
   public enum QuadRemeshSymmetryAxis
   {
@@ -1578,6 +1582,7 @@ namespace Rhino.Geometry
     /// <para>If the amount does not match the length of the face list, the pattern is repeated. If it exceeds the amount
     /// of faces in the mesh face list, the pattern is truncated. This items can be null or empty, and the mesh will simply be duplicated.</para>
     /// </param>
+    /// <since>7.0</since>
     public static Mesh CreateFromFilteredFaceList(Mesh original, IEnumerable<bool> inclusion)
     {
       if (original == null) { return new Mesh(); }
@@ -1854,6 +1859,7 @@ namespace Rhino.Geometry
     /// Do not use.
     /// </returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Mesh CreateFromPlanarBoundary(Curve boundary, MeshingParameters parameters)
     {
@@ -1951,6 +1957,7 @@ namespace Rhino.Geometry
     /// <code source='examples\py\ex_tightboundingbox.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes MeshingParameters as input")]
     public static Mesh[] CreateFromBrep(Brep brep)
     {
@@ -2036,12 +2043,11 @@ namespace Rhino.Geometry
       GC.KeepAlive(subd);
       return null;
     }
+#endif
 
-    /// <summary>
-    /// Create a mesh from a SubD control net
-    /// </summary>
+    /// <summary>Create a mesh from a SubD control net</summary>
     /// <param name="subd"></param>
-    /// <returns></returns>
+    /// <returns>mesh representing control net on success, null on failure</returns>
     /// <since>7.0</since>
     public static Mesh CreateFromSubDControlNet(SubD subd)
     {
@@ -2051,9 +2057,9 @@ namespace Rhino.Geometry
         return new Mesh(ptrMesh, null);
       GC.KeepAlive(subd);
       return null;
-
     }
 
+#if RHINO_SDK
     /// <summary>
     /// Construct a mesh patch from a variety of input geometry.
     /// </summary>
@@ -2571,6 +2577,7 @@ namespace Rhino.Geometry
     #endregion
 
     #region properties
+#if RHINO_SDK
     /// <summary>
     /// Gets the number of disjoint (topologically unconnected) pieces in this mesh.
     /// </summary>
@@ -2583,6 +2590,7 @@ namespace Rhino.Geometry
         return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.DisjointMeshCount);
       }
     }
+#endif
 
     /// <summary>
     /// Gets a value indicating whether a mesh is considered to be closed (solid).
@@ -2876,6 +2884,24 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Set texture coordinates using given mapping and applying given transform.
+    /// 
+    /// Set lazy to false to generate texture coordinates right away.
+    /// </summary>
+    /// <param name="tm">Texture mapping</param>
+    /// <param name="xf">Transform to apply to the texture mapping</param>
+    /// <param name="lazy">Whether to generate lazily (true) or right away (false)</param>
+    /// <param name="seamCheck">If true then some mesh edges might be unwelded to better 
+    /// represent UV discontinuities in the texture mapping.
+    /// This only happens for the following mappings:
+    /// Box, Sphere, Cylinder</param>
+    /// <since>7.0</since>
+    public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy, bool seamCheck)
+    {
+      UnsafeNativeMethods.ON_Mesh_SetTextureCoordinatesFromMappingAndTransformEx(NonConstPointer(), tm.ConstPointer(), ref xf, lazy, seamCheck);
+    }
+
+    /// <summary>
     /// Set cached texture coordinates using the specified mapping.
     /// </summary>
     /// <param name="tm"></param>
@@ -2972,6 +2998,8 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.SolidOrientation);
     }
 
+#if RHINO_SDK
+
     /// <summary>
     /// Determines if a point is inside a solid mesh.
     /// </summary>
@@ -3009,7 +3037,6 @@ namespace Rhino.Geometry
     //int GetMeshEdgeList(ON_SimpleArray<ON_2dex>& edge_list, ON_SimpleArray<int>& ci_meshtop_edge_map, int edge_type_partition[5]) const;
     //int GetMeshEdgeList(ON_SimpleArray<ON_2dex>& edge_list, ON_SimpleArray<int>& ci_meshtop_edge_map, ON_SimpleArray<int>& ci_meshtop_vertex_map, int edge_type_partition[5]) const;
 
-#if RHINO_SDK
     /// <summary>
     /// Smooths a mesh by averaging the positions of mesh vertices in a specified region.
     /// </summary>
@@ -3103,6 +3130,27 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, edges.m_items, modifyNormals);
+    }
+
+    /// <summary>
+    /// Ensures that faces sharing a common topological vertex have unique indices into the <see cref="Collections.MeshVertexList"/> collection.
+    /// </summary>
+    /// <param name="topologyVertexIndices">
+    /// Topological vertex indices, from the <see cref="Collections.MeshTopologyVertexList"/> collection, to be unwelded.
+    /// Use <see cref="Collections.MeshTopologyVertexList.TopologyVertexIndex"/> to convert from vertex indices to topological vertex indices.
+    /// </param>
+    /// <param name="modifyNormals">If true, the new vertex normals will be calculated from the face normal.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool UnweldVertices(IEnumerable<int> topologyVertexIndices, bool modifyNormals)
+    {
+      var vertices = new RhinoList<int>(topologyVertexIndices);
+      var count = vertices.Count;
+      if (count <= 0)
+        return false;
+
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, vertices.m_items, modifyNormals);
     }
 
     /// <summary>
@@ -3251,7 +3299,7 @@ namespace Rhino.Geometry
       }
     }
     /// <summary>
-    /// Split a mesh with another mesh.
+    /// Split a mesh with another mesh. Suggestion: upgrade to overload with tolerance.
     /// </summary>
     /// <param name="mesh">Mesh to split with.</param>
     /// <returns>An array of mesh segments representing the split result.</returns>
@@ -3259,10 +3307,10 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Mesh[] Split(Mesh mesh)
     {
-      return Split(new Mesh[] { mesh });
+      return Split(new Mesh[] { mesh }, RhinoMath.SqrtEpsilon * 10, false, null, CancellationToken.None, null);
     }
     /// <summary>
-    /// Split a mesh with a collection of meshes.
+    /// Split a mesh with a collection of meshes. Suggestion: upgrade to overload with tolerance.
     /// Does not split at coplanar intersections.
     /// </summary>
     /// <param name="meshes">Meshes to split with.</param>
@@ -3273,6 +3321,7 @@ namespace Rhino.Geometry
     {
       return Split(meshes, RhinoMath.SqrtEpsilon * 10, false, null, CancellationToken.None, null);
     }
+
     /// <summary>
     /// Split a mesh with a collection of meshes.
     /// </summary>
@@ -3289,6 +3338,26 @@ namespace Rhino.Geometry
     /// <since>7.0</since>
     [ConstOperation]
     public Mesh[] Split(IEnumerable<Mesh> meshes, double tolerance, bool splitAtCoplanar, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
+    {
+      return Split(meshes, tolerance, splitAtCoplanar, true, textLog, cancel, progress);
+    }
+
+    /// <summary>
+    /// Split a mesh with a collection of meshes.
+    /// </summary>
+    /// <param name="meshes">Meshes to split with.</param>
+    /// <param name="tolerance">A value for intersection tolerance.
+    /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
+    /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// </param>
+    /// <param name="splitAtCoplanar">If false, coplanar areas will not be separated.</param>
+    /// <param name="createNgons">If true, creates ngons along the split ridge.</param>
+    /// <param name="textLog">A text log to write onto.</param>
+    /// <param name="cancel">A cancellation token.</param>
+    /// <param name="progress">A progress reporter item. This can be null.</param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
+    /// <since>7.0</since>
+    public Mesh[] Split(IEnumerable<Mesh> meshes, double tolerance, bool splitAtCoplanar, bool createNgons, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
     {
       Interop.MarshalProgressAndCancelToken(cancel, progress,
         out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
@@ -3308,7 +3377,8 @@ namespace Rhino.Geometry
           IntPtr const_ptr_input_meshes = input_meshes.ConstPointer();
           IntPtr const_ptr_splitters = splitters.ConstPointer();
           IntPtr ptr_result_meshes = on_meshes.NonConstPointer();
-          int results = UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, tolerance, splitAtCoplanar, ptr_result_meshes,
+          int results = UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, tolerance, splitAtCoplanar,
+            ptr_result_meshes, createNgons,
             textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
           GC.KeepAlive(meshes);
           GC.KeepAlive(textLog);
@@ -4005,8 +4075,6 @@ namespace Rhino.Geometry
     /// Updates the Mesh data with the information that was stored via the <see cref="MeshUnsafeLock"/>.
     /// </summary>
     /// <param name="meshData">The data that will be unlocked.</param>
-
-    /// <since>6.0</since>
     /// <since>6.0</since>
     public void ReleaseUnsafeLock(MeshUnsafeLock meshData)
     {
@@ -7450,10 +7518,10 @@ namespace Rhino.Geometry.Collections
     public double GetFaceAspectRatio(int index)
     {
       MeshFace face = m_mesh.Faces.GetFace(index);
-      Point3d a = m_mesh.Vertices[face.A];
-      Point3d b = m_mesh.Vertices[face.B];
-      Point3d c = m_mesh.Vertices[face.C];
-      Point3d d = m_mesh.Vertices[face.D];
+      Point3d a = m_mesh.Vertices.Point3dAt(face.A);
+      Point3d b = m_mesh.Vertices.Point3dAt(face.B);
+      Point3d c = m_mesh.Vertices.Point3dAt(face.C);
+      Point3d d = m_mesh.Vertices.Point3dAt(face.D);
       return UnsafeNativeMethods.RHC_RhinoCalculateAspectRatio(ref a, ref b, ref c, ref d);
     }
 #endif
@@ -7687,7 +7755,7 @@ namespace Rhino.Geometry.Collections
     /// Removes a collection of faces from the mesh without affecting the remaining geometry.
     /// </summary>
     /// <param name="faceIndexes">An array containing all the face indices to be removed.</param>
-    /// <param name="compact">No longer used.</param>
+    /// <param name="compact">If true, removes vertices that are no longer referenced.</param>
     /// <returns>The number of faces deleted on success.</returns>
     /// <since>6.6</since>
     public int DeleteFaces(IEnumerable<int> faceIndexes, bool compact)
@@ -7700,7 +7768,7 @@ namespace Rhino.Geometry.Collections
         return 0;
       var f = face_indexes.m_items;
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr, face_indexes.Count, f);
+      return UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr, face_indexes.Count, f, compact);
     }
 
 
@@ -7719,14 +7787,14 @@ namespace Rhino.Geometry.Collections
     /// Removes a face from the mesh.
     /// </summary>
     /// <param name="index">The index of the face that will be removed.</param>
-    /// <param name="compact">No longer used.</param>
+    /// <param name="compact">If true, removes vertices that are no longer referenced.</param>
     /// <exception cref="ArgumentOutOfRangeException">If index is &lt; 0 or &gt;= Count.</exception>
     /// <since>6.6</since>
     public void RemoveAt(int index, bool compact)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       int[] indices = { index };
-      int count = UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr_mesh, 1, indices);
+      int count = UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr_mesh, 1, indices, compact);
       if (count != 1 && (index < 0 || index > Count))
         throw new ArgumentOutOfRangeException("index");
     }

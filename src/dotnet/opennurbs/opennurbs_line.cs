@@ -164,14 +164,14 @@ namespace Rhino.Geometry
     #region properties
     /// <summary>
     /// Gets a value indicating whether or not this line is valid. 
-    /// Valid lines must have valid start and end points.
+    /// Valid lines must have valid start and end points, and the points must not be equal.
     /// </summary>
     /// <since>5.0</since>
     public bool IsValid
     {
       get
       {
-        return From.IsValid && To.IsValid;
+        return From != To && From.IsValid && To.IsValid;
       }
     }
 

@@ -106,6 +106,7 @@ namespace Rhino
       public int EllapsedTime { get; private set; }
     }
 
+    /// <since>5.11</since>
     public enum ImageFileEvent
     {
       /// <summary>
@@ -366,6 +367,7 @@ namespace Rhino
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("OpenFile is obsolete, use Open instead")]
     public static bool OpenFile(string path)
     {
@@ -449,25 +451,6 @@ namespace Rhino
     /// lifetime is under your control. 
     /// </returns>
     /// <since>7.0</since>
-    [Obsolete("This function is being removed; use CreateHeadless function instead", true)]
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static RhinoDoc New(string file3dmTemplatePath)
-    {
-      return CreateHeadless(file3dmTemplatePath);
-    }
-
-    /// <summary>
-    /// Create a new headless RhinoDoc from a template file
-    /// </summary>
-    /// <param name="file3dmTemplatePath">
-    /// Name of a Rhino model to use as a template to initialize the document.
-    /// If null, an empty document is created
-    /// </param>
-    /// <returns>
-    /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
-    /// lifetime is under your control. 
-    /// </returns>
-    /// <since>7.0</since>
     public static RhinoDoc CreateHeadless(string file3dmTemplatePath)
     {
       // This line checks filePath is a valid path, well formated, not too long...
@@ -481,22 +464,6 @@ namespace Rhino
 
       uint serial_number = UnsafeNativeMethods.CRhinoDoc_New(file3dmTemplatePath);
       return RhinoDoc.FromRuntimeSerialNumber(serial_number);
-    }
-
-    /// <summary>
-    /// Loads a 3DM file into a new headless RhinoDoc. Load is different than New in that
-    /// load sets the document path
-    /// </summary>
-    /// <param name="file3dmPath">
-    /// Path of a Rhino model to load.
-    /// </param>
-    /// <returns></returns>
-    /// <since>7.0</since>
-    [Obsolete("This function is being removed; use OpenHeadless function instead", true)]
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static RhinoDoc Load(string file3dmPath)
-    {
-      return OpenHeadless(file3dmPath);
     }
 
     /// <summary>
@@ -886,6 +853,7 @@ namespace Rhino
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use FromRuntimeSerialNumber")]
     public static RhinoDoc FromId(int docId)
     {
@@ -1715,7 +1683,7 @@ namespace Rhino
     /// Access to the post effects
     /// </summary>
     /// <since>7.0</since>
-    public PostEffects PostEffects => new PostEffects(RuntimeSerialNumber);
+    public IPostEffects PostEffects => new PostEffectsImpl(RuntimeSerialNumber);
 
     /// <summary>
     /// Get a enumerable list of custom mesh primitives
@@ -3616,6 +3584,7 @@ namespace Rhino
     /// <summary>
     /// Type of content table event
     /// </summary>
+    /// <since>5.7</since>
     public enum RenderContentTableEventType
     {
       /// <summary>
@@ -3970,6 +3939,7 @@ namespace Rhino
 
     #endregion RenderTexturesTable events
 
+    /// <since>5.8</since>
     public enum TextureMappingEventType
     {
       /// <summary>
@@ -4485,6 +4455,8 @@ namespace Rhino
     {
       IntPtr m_ptr_transform_object;
       RhinoObject[] m_objects;
+      GripObject[] m_grips;
+      RhinoObject[] m_grip_owners;
 
       internal RhinoTransformObjectsEventArgs(IntPtr pRhinoOnTransformObject)
       {
@@ -4496,12 +4468,9 @@ namespace Rhino
         m_ptr_transform_object = IntPtr.Zero;
       }
 
-      /// <since>5.10</since>
-      public int ObjectCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object);
-
-      /// <since>5.10</since>
-      public bool ObjectsWillBeCopied => UnsafeNativeMethods.CRhinoOnTransformObject_Copy(m_ptr_transform_object);
-
+      /// <summary>
+      /// The transformation to be applied.
+      /// </summary>
       /// <since>5.10</since>
       public Transform Transform
       {
@@ -4513,6 +4482,40 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// True if the objects will be copied.
+      /// </summary>
+      /// <since>5.10</since>
+      public bool ObjectsWillBeCopied => UnsafeNativeMethods.CRhinoOnTransformObject_Copy(m_ptr_transform_object);
+
+      private const int idxObjectCount = 0;
+      private const int idxGripCount = 1;
+      private const int idxGripOwnerCount = 2;
+
+      /// <summary>
+      /// The number of Rhino objects that will be transformed.
+      /// </summary>
+      /// <since>5.10</since>
+      public int ObjectCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxObjectCount);
+
+      /// <summary>
+      /// The number of Rhino object grips that will be transformed.
+      /// </summary>
+      /// <since>7.0</since>
+      public int GripCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxGripCount);
+
+      /// <summary>
+      /// The number of Rhino object grip owners that will be changed when the grips are transformed.
+      /// </summary>
+      /// <since>7.0</since>
+      public int GripOwnerCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxGripOwnerCount);
+
+      /// <summary>
+      /// An array of Rhino objects to be transformed.
+      /// WARNING: these objects may be deleted at anytime after the event handler has been notified.
+      /// Do not save references to these objects. Use the object's runtime serial number
+      /// to safely reference these objects at a later time.
+      /// </summary>
       /// <since>5.10</since>
       public RhinoObject[] Objects
       {
@@ -4529,6 +4532,61 @@ namespace Rhino
             }
           }
           return m_objects;
+        }
+      }
+
+      /// <summary>
+      /// An array of Rhino object grips that will be transformed.
+      /// WARNING: these objects may be deleted at anytime after the event handler has been notified.
+      /// Do not save references to these objects. Use the object's runtime serial number
+      /// to safely reference these objects at a later time.
+      /// </summary>
+      /// <since>7.0</since>
+      public GripObject[] Grips
+      {
+        get
+        {
+          if (m_grips == null)
+          {
+            int count = GripCount;
+            m_grips = new GripObject[count];
+            for (int i = 0; i < count; i++)
+            {
+              IntPtr ptr_grip_object = UnsafeNativeMethods.CRhinoOnTransformObject_Grip(m_ptr_transform_object, i);
+              var sn = UnsafeNativeMethods.CRhinoObject_RuntimeSN(ptr_grip_object);
+              if (IntPtr.Zero != ptr_grip_object && sn > 0)
+              {
+                var g = new GripObject(sn);
+                m_grips[i] = g;
+              }
+            }
+          }
+          return m_grips;
+        }
+      }
+
+      /// <summary>
+      /// An array of Rhino object grip owners that will be changed when the grips are transformed.
+      /// WARNING: these objects may be deleted at anytime after the event handler has been notified.
+      /// Do not save references to these objects. Use the object's runtime serial number
+      /// to safely reference these objects at a later time.
+      /// </summary>
+      /// <since>7.0</since>
+      public RhinoObject[] GripOwners
+      {
+        get
+        {
+          if (m_grip_owners == null)
+          {
+            int count = GripOwnerCount;
+            m_grip_owners = new RhinoObject[count];
+            for (int i = 0; i < count; i++)
+            {
+              IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoOnTransformObject_GripOwner(m_ptr_transform_object, i);
+              m_grip_owners[i] = RhinoObject.CreateRhinoObjectHelper(ptr_rhino_object);
+            }
+          }
+          return m_grip_owners;
         }
       }
     }
@@ -4666,7 +4724,7 @@ namespace Rhino.DocObjects.Tables
     {
       get
       {
-        IntPtr ptr = UnsafeNativeMethods.CRhinoDoc_ActiveView();
+        IntPtr ptr = UnsafeNativeMethods.CRhinoDoc_ActiveView(Document.RuntimeSerialNumber);
         if (ptr == IntPtr.Zero)
           return null;
         return RhinoView.FromIntPtr(ptr);
@@ -5092,7 +5150,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Same as GetObjectList but converts the result to an array.
     /// </summary>
-    /// <param name="filter">The object enumerator filter to customize inclusion requirements.</param>
+    /// <param name="filter">The <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> filter to customize inclusion requirements.</param>
     /// <returns>A Rhino object array. This array can be empty but not null.</returns>
     /// <since>5.0</since>
     public RhinoObject[] FindByFilter(ObjectEnumeratorSettings filter)
@@ -5161,7 +5219,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="caseSensitive">If true, string comparison will be case sensitive.</param>
     /// <param name="searchGeometry">If true, UserStrings attached to the geometry of an object will be searched.</param>
     /// <param name="searchAttributes">If true, UserStrings attached to the attributes of an object will be searched.</param>
-    /// <param name="filter">Filter used to restrict the number of objects searched.</param>
+    /// <param name="filter"><see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> filter used to restrict the number of objects searched.</param>
     /// <returns>An array of all objects whose UserString matches with the search patterns or null when no such objects could be found.</returns>
     /// <since>5.0</since>
     public RhinoObject[] FindByUserString(string key, string value, bool caseSensitive, bool searchGeometry, bool searchAttributes, ObjectEnumeratorSettings filter)
@@ -9292,8 +9350,11 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
-
-    /// <since>5.0</since>
+    /// <summary>
+    /// Returns the number objects that pass a filter.
+    /// </summary>
+    /// <param name="filter">The <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> filter.</param>
+    /// <returns>The number of objects that pass the filter.</returns>
     public int ObjectCount(ObjectEnumeratorSettings filter)
     {
       ObjectIterator it = new ObjectIterator(m_doc, filter);
@@ -9304,12 +9365,11 @@ namespace Rhino.DocObjects.Tables
       return count;
     }
 
-    /// <example>
-    /// <code source='examples\vbnet\ex_findobjectsbyname.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
-    /// <code source='examples\py\ex_findobjectsbyname.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
+    /// <summary>
+    /// Returns an enumerable based on a <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> filter.
+    /// </summary>
+    /// <param name="settings">The <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> settings.</param>
+    /// <returns>The enumerable.</returns>
     public IEnumerable<RhinoObject> GetObjectList(ObjectEnumeratorSettings settings)
     {
       IEnumerator<RhinoObject> e = GetEnumerator(settings);
@@ -9329,12 +9389,21 @@ namespace Rhino.DocObjects.Tables
       return new EnumeratorWrapper(it);
     }
 
+    /// <summary>
+    /// Returns Rhino object by type.
+    /// </summary>
+    /// <returns>The enumerable.</returns>
     /// <since>6.0</since>
     public IEnumerable<T> GetObjectsByType<T>() where T : RhinoObject
     {
       var settings = new ObjectEnumeratorSettings { ClassTypeFilter = typeof(T) };
       return GetObjectsByType<T>(settings);
     }
+
+    /// <summary>
+    /// Returns Rhino object by type.
+    /// </summary>
+    /// <returns>The enumerable.</returns>
     /// <since>6.0</since>
     public IEnumerable<T> GetObjectsByType<T>(ObjectEnumeratorSettings settings) where T : RhinoObject
     {
@@ -9342,7 +9411,6 @@ namespace Rhino.DocObjects.Tables
       var it = new ObjectIteratorOfType<T>(m_doc, settings);
       return new EnumeratorWrapperOfType<T>(it);
     }
-
 
     /// <since>5.0</since>
     [CLSCompliant(false)]
@@ -9803,8 +9871,10 @@ namespace Rhino.DocObjects
 
 
   /// <summary>
-  /// Settings used for getting an enumerator of objects in a document
-  /// See Rhino.Collections.ObjectTable.GetEnumerator()
+  /// Settings used for getting an enumerator of objects in a document.
+  /// See <see cref="ObjectTable.FindByFilter(ObjectEnumeratorSettings)"/>, 
+  /// <see cref="ObjectTable.GetObjectsByType{T}(ObjectEnumeratorSettings)"/>, 
+  /// and <see cref="ObjectTable.GetEnumerator(ObjectEnumeratorSettings)"/>.
   /// </summary>
   /// <example>
   /// <code source='examples\vbnet\ex_moveobjectstocurrentlayer.vb' lang='vbnet'/>
@@ -9820,6 +9890,10 @@ namespace Rhino.DocObjects
     internal ObjectType m_objectfilter = ObjectType.None;
     int m_layerindex_filter = -1;
 
+    /// <summary>
+    /// Constructs object enumerator settings that will iterate the document looking for
+    /// normal object and locked object that are active, or part of current model and saved in file.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_findobjectsbyname.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
@@ -9830,7 +9904,10 @@ namespace Rhino.DocObjects
     {
     }
 
-#region object state
+    #region object state
+    /// <summary>
+    /// When true, normal objects (e.g. not locked and not hidden) are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool NormalObjects
     {
@@ -9846,6 +9923,10 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.normal_objects;
       }
     }
+
+    /// <summary>
+    /// When true, locked objects or objects on locked layers are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool LockedObjects
     {
@@ -9861,6 +9942,10 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.locked_objects;
       }
     }
+
+    /// <summary>
+    /// When true, hidden objects or objects on hidden layers are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool HiddenObjects
     {
@@ -9878,7 +9963,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// When true, ONLY Instance Definitions will be returned
+    /// When true, objects in instance definitions (not the instance references) are returned.
     /// </summary>
     /// <since>5.0</since>
     public bool IdefObjects
@@ -9895,6 +9980,10 @@ namespace Rhino.DocObjects
           m_object_state &= ~object_state.idef_objects;
       }
     }
+
+    /// <summary>
+    /// When true, deleted objects are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool DeletedObjects
     {
@@ -9912,7 +10001,10 @@ namespace Rhino.DocObjects
     }
     #endregion
 
-#region object category
+    #region object category
+    /// <summary>
+    /// When true, objects that are part of current model and saved in file are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool ActiveObjects
     {
@@ -9928,6 +10020,10 @@ namespace Rhino.DocObjects
           m_object_category &= ~object_category.active_objects;
       }
     }
+
+    /// <summary>
+    /// When true, objects that are for reference and not saved in file are returned.
+    /// </summary>
     /// <since>5.0</since>
     public bool ReferenceObjects
     {
@@ -9945,6 +10041,10 @@ namespace Rhino.DocObjects
     }
     #endregion
 
+    /// <summary>
+    /// The default object enumerator settings will not iterate through render light objects.
+    /// If you want the iterator to include lights, then set this property to true.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_objectiterator.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_objectiterator.cs' lang='cs'/>
@@ -9953,6 +10053,10 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public bool IncludeLights { get; set; }
 
+    /// <summary>
+    /// The default object enumerator settings will not iterate through grip objects.
+    /// If you want the iterator to include grips, then set this property to true.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_objectiterator.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_objectiterator.cs' lang='cs'/>
@@ -9961,15 +10065,31 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public bool IncludeGrips { get; set; }
 
+    /// <summary>
+    /// The default object enumerator settings will not iterate through phantom objects.
+    /// If you want the iterator to include phantom objects, then set this property to true.
+    /// </summary>
     /// <since>5.0</since>
     public bool IncludePhantoms { get; set; }
 
+    /// <summary>
+    /// The default object enumerator settings ignore the selected state of objects.
+    /// If you want the iterator to limit itself to selected objects, then set this property to true.
+    /// </summary>
     /// <since>5.0</since>
     public bool SelectedObjectsFilter { get; set; }
 
+    /// <summary>
+    /// The default object enumerator settings ignore the visiblity state of objects.
+    /// If you want the iterator to limit itself to visible objects, then set this property to true.
+    /// </summary>
     /// <since>5.0</since>
     public bool VisibleFilter { get; set; }
 
+    /// <summary>
+    /// The object type filter property can be used to limit the iteration to specific types of geometry.
+    /// The default is to iterate all objects types.
+    /// </summary>
     /// <since>5.0</since>
     [CLSCompliant(false)]
     public ObjectType ObjectTypeFilter
@@ -9981,6 +10101,10 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public Type ClassTypeFilter { get; set; }
 
+    /// <summary>
+    /// The layer filter property can be used to limit the iteration to objects on a specific layer.
+    /// The default is to iterate through all layers.
+    /// </summary>
     /// <since>5.0</since>
     public int LayerIndexFilter
     {
@@ -9989,6 +10113,9 @@ namespace Rhino.DocObjects
     }
 
     internal string m_name_filter; // = null; initialized to null by runtime
+    /// <summary>
+    /// The name filter property can be used to limit the iteration to objects with a specific name.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_findobjectsbyname.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_findobjectsbyname.cs' lang='cs'/>
@@ -10016,7 +10143,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Filter on value of object->IsActiveInViewport()
+    /// The viewport filter property can be used to limit the iteration to objects that are active in a specific viewport.
     /// </summary>
     /// <since>5.6</since>
     public RhinoViewport ViewportFilter { get; set; }

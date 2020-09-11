@@ -197,6 +197,7 @@ namespace Rhino.Display
     /// <param name="id">The id of the existing display mode to delete.</param>
     /// <returns>true if successful, false otherwise.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use DisplayModeDescription.DeleteDisplayMode")]
     public static bool DeleteDiplayMode(Guid id)
     {
@@ -337,6 +338,7 @@ namespace Rhino.Display
       get { return DisplayAttributes.LocalName; }
     }
 
+    /// <since>6.26</since>
     public static Guid ArtisticId
     {
       get

@@ -8,6 +8,7 @@ namespace Rhino.UI.Gumball
   /// <summary>
   /// Transformation modes for gumballs.
   /// </summary>
+  /// <since>5.0</since>
   public enum GumballMode : int
   {
     None = 0,
@@ -660,6 +661,7 @@ namespace Rhino.UI.Gumball
     }
   }
 
+  /// <since>5.0</since>
   public enum GumballScaleMode : int
   {
     Independent = 0,

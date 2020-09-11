@@ -2,14 +2,23 @@
 
 namespace Rhino
 {
-  /// <summary>
-  /// The Rhino namespace contains fundamental types that
-  /// define commonly-used value types and classes used in Rhino.
-  /// </summary>
+  /// <summary>Contains commonly-used value types and classes used in Rhino.</summary>
   [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-  class NamespaceDoc
-  {
-  }
+  class NamespaceDoc {}
+}
+
+namespace Rhino.ApplicationSettings
+{
+  /// <summary>Static settings global to the entire Rhino application</summary>
+  [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+  class NamespaceDoc {}
+}
+
+namespace Rhino.Input
+{
+  /// <summary>Classes related to getting user input for things like points, objects, and numbers</summary>
+  [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+  class NamespaceDoc { }
 }
 
 namespace Rhino.Geometry
@@ -19,9 +28,7 @@ namespace Rhino.Geometry
   /// <para>Examples are lines, curves, meshes and boundary representations.</para>
   /// </summary>
   [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-  class NamespaceDoc
-  {
-  }
+  class NamespaceDoc {}
 }
 
 namespace Rhino.DocObjects
@@ -33,7 +40,5 @@ namespace Rhino.DocObjects
   /// distinctive ID.</para>
   /// </summary>
   [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-  class NamespaceDoc
-  {
-  }
+  class NamespaceDoc {}
 }

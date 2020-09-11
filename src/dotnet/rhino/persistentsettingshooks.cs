@@ -15,6 +15,7 @@ namespace Rhino
     {
       UnsafeNativeMethods.CRhCmnPersistentSettingHooks_SetHooks(CreateHook,
                                                                 SaveHook,
+                                                                FlushSavedHook,
                                                                 GetKeysHook,
                                                                 GetPlugInPersistentSettingsPointerHook,
                                                                 GetManagedPlugInPersistentSettingsPointerHook,
@@ -226,7 +227,7 @@ namespace Rhino
       // 11 December 2019 John Morse
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-55242
       // If dirty == true then there was a change to this settings dictionary after the file was
-      // previously written and the file change notification recieved so do NOT read the file now
+      // previously written and the file change notification received so do NOT read the file now
       // since the current dictionary is about to be written again
       if (!Runtime.HostUtils.RunningOnOSX && !dirty)
       {
@@ -258,8 +259,19 @@ namespace Rhino
       PlugInSettings plug_in_settings;
       if (g_dictionary.TryGetValue(plugInId, out plug_in_settings))
         return 1;
-
-      plug_in_settings = new PlugInSettings(null, plugInId, new PlugInSettings(null, plugInId, null, false), true);
+      // 10 June 2020 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-58733
+      // Get the plug-in settings from the PersistentSettings system, it will
+      // create a new settings object if necessary.  DO NOT new up a
+      // PlugInSettings and add it as it will be different than the runtime
+      // instance used by .NET plug-ins.  This was causing .NET calls into the
+      // core Rhino settings class to get a different instance of settings
+      // which did not contain any Options causing all options to get reset to
+      // default values when writing which would cause a file changed event
+      // which would trigger a read and reset everything.
+      var settings = Rhino.PersistentSettings.FromPlugInId(plugInId);
+      // The settings parent is the plug-in settings we are looking for
+      plug_in_settings = settings.Parent;
       g_dictionary.Add(plugInId, plug_in_settings);
       return 1;
     }
@@ -272,7 +284,17 @@ namespace Rhino
     {
       var settings = PlugInSettings(plugInId);
       if (settings == null) return 0;
-      return (settings.WriteSettings(shuttingDown) ? 1 : 0);
+      // 08 June 2020 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-58733
+      // See comments in SaveSettingsUnmanagedHook
+      return (settings.SaveSettingsUnmanagedHook(shuttingDown) ? 1 : 0);
+    }
+
+    internal delegate void FlushSavedDelegate();
+    internal static FlushSavedDelegate FlushSavedHook = FlushSaved;
+    private static void FlushSaved()
+    {
+      Rhino.PlugInSettings.FlushSettingsSavedQueue();
     }
     #endregion Save settings hook
 
@@ -856,9 +878,9 @@ namespace Rhino
         var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString, legacyKeyList, count);
         if (helper == null) return 0;
         var rc = 1;
-        var color = Runtime.Interop.ColorFromWin32(value);
+        var color = System.Drawing.Color.FromArgb(value);
         if (useDefault)
-          color = helper.Settings.GetColor(helper.Key, Runtime.Interop.ColorFromWin32(defaultValue), helper.LegacyKeyList);
+          color = helper.Settings.GetColor(helper.Key, System.Drawing.Color.FromArgb(defaultValue), helper.LegacyKeyList);
         else
           rc = helper.Settings.TryGetColor(helper.Key, out color, helper.LegacyKeyList) ? 1 : 0;
         value = color.ToArgb();

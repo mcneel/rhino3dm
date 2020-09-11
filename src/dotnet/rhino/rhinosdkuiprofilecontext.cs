@@ -1941,6 +1941,7 @@ namespace Rhino
     readonly Dictionary<string, SettingValue> m_settings;
     readonly Dictionary<string, Delegate> m_settings_validators;
     readonly Dictionary<string, PersistentSettings> m_children = new Dictionary<string, PersistentSettings>();
+    readonly object m_lock_settings = new object();
 
     internal Dictionary<string, SettingValue> Settings => m_settings;
     internal Dictionary<string, PersistentSettings> Children => m_children;
@@ -2282,6 +2283,8 @@ namespace Rhino
     public static PersistentSettings FromPlugInId(Guid pluginId)
     {
 #if RHINO_SDK
+      if (pluginId == Guid.Empty)
+        throw new System.ComponentModel.InvalidEnumArgumentException($"pluginId Can not be Guid.Empty");
       PersistentSettingsManager manager = PersistentSettingsManager.Create(pluginId);
       return manager.PluginSettings;
 #else
@@ -2291,15 +2294,7 @@ namespace Rhino
 
     static PersistentSettings _rhinoAppSettings;
     /// <since>6.14</since>
-    public static PersistentSettings RhinoAppSettings
-    {
-      get
-      {
-        if (null == _rhinoAppSettings)
-          _rhinoAppSettings = FromPlugInId(RhinoApp.CurrentRhinoId);
-        return _rhinoAppSettings;
-      }
-    }
+    public static PersistentSettings RhinoAppSettings => _rhinoAppSettings ?? (_rhinoAppSettings = FromPlugInId(RhinoApp.CurrentRhinoId));
 
     internal PersistentSettings(PlugInSettings parent, PersistentSettings allUserSettings, bool windowPositionSettings, bool isCommandSettings, string key)
     {
@@ -2320,62 +2315,65 @@ namespace Rhino
 
     internal void MergeChangedSettingsFile(PersistentSettings source)
     {
-      if (source == null)
+      lock (m_lock_settings)
       {
-        // Set all values to default value
-        foreach (var setting in m_settings)
-          setting.Value.SetValue(false, setting.Value.GetValue(true), false);
-        // Set all child settings to default values
-        foreach (var settings in m_children)
-          settings.Value.MergeChangedSettingsFile(null);
-      }
-      else
-      {
-        // Make values match source
-        foreach (var setting in m_settings)
+        if (source == null)
         {
-          SettingValue value;
-          if (source.m_settings.TryGetValue(setting.Key, out value) && value != null)
-          {
-            // Value found in source so make the value and default match
-            setting.Value.SetValue(true, value.GetValue(true), false);
-            setting.Value.SetValue(false, value.GetValue(false), false);
-          }
-          else
-          {
-            // Value not found in source so set to default value
+          // Set all values to default value
+          foreach (var setting in m_settings)
             setting.Value.SetValue(false, setting.Value.GetValue(true), false);
+          // Set all child settings to default values
+          foreach (var settings in m_children)
+            settings.Value.MergeChangedSettingsFile(null);
+        }
+        else
+        {
+          // Make values match source
+          foreach (var setting in m_settings)
+          {
+            SettingValue value;
+            if (source.m_settings.TryGetValue(setting.Key, out value) && value != null)
+            {
+              // Value found in source so make the value and default match
+              setting.Value.SetValue(true, value.GetValue(true), false);
+              setting.Value.SetValue(false, value.GetValue(false), false);
+            }
+            else
+            {
+              // Value not found in source so set to default value
+              setting.Value.SetValue(false, setting.Value.GetValue(true), false);
+            }
           }
-        }
-        // Now look for values that are in the source dictionary but not in
-        // this settings dictionary
-        foreach (var setting in source.m_settings)
-        {
-          // synched in loop above
-          if (m_settings.ContainsKey(setting.Key))
-            continue;
-          // In source dictionary but not in the current dictionary so add it
-          m_settings.Add(setting.Key, new SettingValue(this, setting.Key, setting.Value.RuntimeType, setting.Value.GetValue(false), setting.Value.GetValue(true)));
-        }
-        // Process child settings
-        foreach (var settings in m_children)
-        {
-          PersistentSettings other;
-          source.m_children.TryGetValue(settings.Key, out other);
-          settings.Value.MergeChangedSettingsFile(other);
-        }
-        // Check source children for settings that are not in the current
-        // settings child dictionary
-        foreach (var settings in source.m_children)
-        {
-          // In the current child dictionary so nothing to do
-          if (m_children.ContainsKey(settings.Key)) continue;
-          // Create a new child settings
-          var child = new PersistentSettings(Parent, null, IsWindowPositionSettings, settings.Value.IsCommandsSettings, settings.Key){ Owner = this };
-          // Merge source settings into new child
-          child.MergeChangedSettingsFile(settings.Value);
-          // Add child to this child dictionary
-          m_children.Add(settings.Key, child);
+          // Now look for values that are in the source dictionary but not in
+          // this settings dictionary
+          foreach (var setting in source.m_settings)
+          {
+            // synched in loop above
+            if (m_settings.ContainsKey(setting.Key))
+              continue;
+            // In source dictionary but not in the current dictionary so add it
+            m_settings.Add(setting.Key, new SettingValue(this, setting.Key, setting.Value.RuntimeType, setting.Value.GetValue(false), setting.Value.GetValue(true)));
+          }
+          // Process child settings
+          foreach (var settings in m_children)
+          {
+            PersistentSettings other;
+            source.m_children.TryGetValue(settings.Key, out other);
+            settings.Value.MergeChangedSettingsFile(other);
+          }
+          // Check source children for settings that are not in the current
+          // settings child dictionary
+          foreach (var settings in source.m_children)
+          {
+            // In the current child dictionary so nothing to do
+            if (m_children.ContainsKey(settings.Key)) continue;
+            // Create a new child settings
+            var child = new PersistentSettings(Parent, null, IsWindowPositionSettings, settings.Value.IsCommandsSettings, settings.Key) { Owner = this };
+            // Merge source settings into new child
+            child.MergeChangedSettingsFile(settings.Value);
+            // Add child to this child dictionary
+            m_children.Add(settings.Key, child);
+          }
         }
       }
     }
@@ -2384,24 +2382,27 @@ namespace Rhino
     {
       if (null != source)
       {
-        foreach (var item in source.m_settings)
+        lock (m_lock_settings)
         {
-          if (m_settings.ContainsKey(item.Key))
-            m_settings[item.Key].CopyFrom(item.Value);
-          else
-            m_settings.Add(item.Key, new SettingValue(this, item.Key, item.Value.RuntimeType, item.Value.GetValue(false), item.Value.GetValue(true)));
-          // Tag the item as ReadOnly so the global setting can  not be changed.
-          m_settings[item.Key].ReadOnly = true;
-        }
-        foreach (var item in source.m_children)
-        {
-          if (m_children.ContainsKey(item.Key))
-            m_children[item.Key].CopyFrom(item.Value);
-          else
+          foreach (var item in source.m_settings)
           {
-            var value = new PersistentSettings(Parent, null, IsWindowPositionSettings, item.Value.IsCommandsSettings, item.Key){ Owner = this };
-            value.CopyFrom(item.Value);
-            m_children.Add(item.Key, value);
+            if (m_settings.ContainsKey(item.Key))
+              m_settings[item.Key].CopyFrom(item.Value);
+            else
+              m_settings.Add(item.Key, new SettingValue(this, item.Key, item.Value.RuntimeType, item.Value.GetValue(false), item.Value.GetValue(true)));
+            // Tag the item as ReadOnly so the global setting can  not be changed.
+            m_settings[item.Key].ReadOnly = true;
+          }
+          foreach (var item in source.m_children)
+          {
+            if (m_children.ContainsKey(item.Key))
+              m_children[item.Key].CopyFrom(item.Value);
+            else
+            {
+              var value = new PersistentSettings(Parent, null, IsWindowPositionSettings, item.Value.IsCommandsSettings, item.Key) { Owner = this };
+              value.CopyFrom(item.Value);
+              m_children.Add(item.Key, value);
+            }
           }
         }
       }
@@ -2467,36 +2468,42 @@ namespace Rhino
     /// <since>6.0</since>
     public void ClearChangedFlag()
     {
-      foreach (var key_value_pair in m_settings)
-        key_value_pair.Value.ChangedSinceSave = false;
-      foreach (var child in m_children)
-        child.Value.ClearChangedFlag();
-      ItemDeletedSinceSave = false;
+      lock (m_lock_settings)
+      {
+        foreach (var key_value_pair in m_settings)
+          key_value_pair.Value.ChangedSinceSave = false;
+        foreach (var child in m_children)
+          child.Value.ClearChangedFlag();
+        ItemDeletedSinceSave = false;
+      }
     }
 
     /// <since>5.0</since>
     public bool ContainsModifiedValues(PersistentSettings allUserSettings)
     {
-      if (null != m_settings && m_settings.Count > 0)
+      lock (m_lock_settings)
       {
-        foreach (var v in m_settings)
+        if (null != m_settings && m_settings.Count > 0)
         {
-          if (v.Value.ValueDifferentThanDefault)
-            return true;
-          if (null != allUserSettings && allUserSettings.m_settings.ContainsKey(v.Key) &&
-              0 !=
-              string.Compare(v.Value.GetValue(false), allUserSettings.m_settings[v.Key].GetValue(false),
-                StringComparison.Ordinal))
-            return true;
+          foreach (var v in m_settings)
+          {
+            if (v.Value.ValueDifferentThanDefault)
+              return true;
+            if (null != allUserSettings && allUserSettings.m_settings.ContainsKey(v.Key) &&
+                0 !=
+                string.Compare(v.Value.GetValue(false), allUserSettings.m_settings[v.Key].GetValue(false),
+                  StringComparison.Ordinal))
+              return true;
+          }
         }
+        if (null != m_children && m_children.Count > 0)
+        {
+          foreach (var child in m_children)
+            if (child.Value.ContainsModifiedValues(null))
+              return true;
+        }
+        return false;
       }
-      if (null != m_children && m_children.Count > 0)
-      {
-        foreach (var child in m_children)
-          if (child.Value.ContainsModifiedValues(null))
-            return true;
-      }
-      return false;
     }
 
     internal string this[string key]
@@ -2626,13 +2633,13 @@ namespace Rhino
       // effect is the setting gets added to the m_settings dictionary.
       // Mac Rhino will also look for the setting in the Rhino PLIST and
       // if found initialize the SettingValue.ValueString with the PLIST
-      // value.  If this happens then there is not need to set the crrent
+      // value.  If this happens then there is not need to set the current
       // value to the default value, doing so will actually cause the 
       // saved value to get deleted from the PLIST because
-      // SettingValue.SetValue deletes PLIST entries when settiing to 
+      // SettingValue.SetValue deletes PLIST entries when setting to 
       // the default value.
       var setting = m_settings[key];
-      // If the new SettingValue.ValueString is NOT emtpy then it was
+      // If the new SettingValue.ValueString is NOT empty then it was
       // initialized using the PLIST so DO NOT set the value to the 
       // default value.  If the new SettingValue.ValueString IS EMPTY
       // then set the current value to the provided default value.
@@ -3830,76 +3837,79 @@ namespace Rhino
         if (HiddenFromUserInterface)
           xmlWriter.WriteAttributeString("hidden", "True");
 
-        foreach (var item in m_settings)
+        lock (m_lock_settings)
         {
-          string all_user_value = null;
-          if (null != allUserSettings && allUserSettings.m_settings.ContainsKey(item.Key))
-            all_user_value = allUserSettings.m_settings[item.Key].GetValue(false);
-          var value = item.Value.GetValue(false);
-          var value_different_than_all_user = (null != all_user_value &&
-                                               0 != string.Compare(value, all_user_value, StringComparison.Ordinal));
-          if (!value_different_than_all_user && !item.Value.ValueDifferentThanDefault) continue;
-          // Write current value
-          xmlWriter.WriteStartElement("entry");
-          xmlWriter.WriteAttributeString("key", item.Key);
-          // Not sure about this yet, writing the child settings hidden flag is okay but not
-          // sure it is a good idea on an item by item basis yet.
-          //if (item.Value.Hidden)
-          //  xmlWriter.WriteAttributeString("hidden", "True");
-          // The following is used when you want to write the default and all user values as item attributes
-          // to the settings output file, useful when trying to determine why a value was written
-          //const bool bWriteDefaultValue = false;
-          //if (bWriteDefaullValue)
-          //{
-          //  string defaultValue = item.Value.GetValue(true);
-          //  xmlWriter.WriteAttributeString("DefaultValue", null == defaultValue ? "" : defaultValue);
-          //  if (null != allUserValue)
-          //    xmlWriter.WriteAttributeString("AllUsersValue", allUserValue);
-          //}
-
-          if (!string.IsNullOrEmpty(value))
+          foreach (var item in m_settings)
           {
-            var write_string = true;
-            // Special case for string arrays
-            if (value.Contains("<list"))
+            string all_user_value = null;
+            if (null != allUserSettings && allUserSettings.m_settings.ContainsKey(item.Key))
+              all_user_value = allUserSettings.m_settings[item.Key].GetValue(false);
+            var value = item.Value.GetValue(false);
+            var value_different_than_all_user = (null != all_user_value &&
+                                                 0 != string.Compare(value, all_user_value, StringComparison.Ordinal));
+            if (!value_different_than_all_user && !item.Value.ValueDifferentThanDefault) continue;
+            // Write current value
+            xmlWriter.WriteStartElement("entry");
+            xmlWriter.WriteAttributeString("key", item.Key);
+            // Not sure about this yet, writing the child settings hidden flag is okay but not
+            // sure it is a good idea on an item by item basis yet.
+            //if (item.Value.Hidden)
+            //  xmlWriter.WriteAttributeString("hidden", "True");
+            // The following is used when you want to write the default and all user values as item attributes
+            // to the settings output file, useful when trying to determine why a value was written
+            //const bool bWriteDefaultValue = false;
+            //if (bWriteDefaullValue)
+            //{
+            //  string defaultValue = item.Value.GetValue(true);
+            //  xmlWriter.WriteAttributeString("DefaultValue", null == defaultValue ? "" : defaultValue);
+            //  if (null != allUserValue)
+            //    xmlWriter.WriteAttributeString("AllUsersValue", allUserValue);
+            //}
+
+            if (!string.IsNullOrEmpty(value))
             {
-              string[] strings;
-              if (item.Value.TryGetStringList(false, null, out strings))
+              var write_string = true;
+              // Special case for string arrays
+              if (value.Contains("<list"))
               {
-                write_string = false;
-                xmlWriter.WriteStartElement("list");
-                if (strings != null)
-                  foreach (var s in strings)
-                    xmlWriter.WriteElementString("value", s);
-                xmlWriter.WriteEndElement();
+                string[] strings;
+                if (item.Value.TryGetStringList(false, null, out strings))
+                {
+                  write_string = false;
+                  xmlWriter.WriteStartElement("list");
+                  if (strings != null)
+                    foreach (var s in strings)
+                      xmlWriter.WriteElementString("value", s);
+                  xmlWriter.WriteEndElement();
+                }
               }
-            }
-            else if (value.Contains("<dictionary"))
-            {
-              KeyValuePair<string, string>[] items;
-              if (item.Value.TryGetStringDictionary(false, out items))
+              else if (value.Contains("<dictionary"))
               {
-                write_string = false;
-                xmlWriter.WriteStartElement("dictionary");
-                if (items != null)
-                  foreach (var entry in items)
-                  {
-                    xmlWriter.WriteStartElement("value");
-                    xmlWriter.WriteAttributeString("key", entry.Key);
-                    xmlWriter.WriteString(entry.Value);
-                    xmlWriter.WriteEndElement();
-                  }
-                xmlWriter.WriteEndElement();
+                KeyValuePair<string, string>[] items;
+                if (item.Value.TryGetStringDictionary(false, out items))
+                {
+                  write_string = false;
+                  xmlWriter.WriteStartElement("dictionary");
+                  if (items != null)
+                    foreach (var entry in items)
+                    {
+                      xmlWriter.WriteStartElement("value");
+                      xmlWriter.WriteAttributeString("key", entry.Key);
+                      xmlWriter.WriteString(entry.Value);
+                      xmlWriter.WriteEndElement();
+                    }
+                  xmlWriter.WriteEndElement();
+                }
               }
+              if (write_string)
+                xmlWriter.WriteString(value);
             }
-            if (write_string)
-              xmlWriter.WriteString(value);
+            xmlWriter.WriteEndElement();
           }
+          foreach (var item in m_children)
+            item.Value.WriteXmlElement(xmlWriter, "child", "key", item.Key, null);
           xmlWriter.WriteEndElement();
         }
-        foreach (var item in m_children)
-          item.Value.WriteXmlElement(xmlWriter, "child", "key", item.Key, null);
-        xmlWriter.WriteEndElement();
       }
     }
 
@@ -4154,25 +4164,70 @@ namespace Rhino
       m_enable_on_setting_changed_since_save = enable_changed;
     }
 
-    public static void FlushSettingsSavedQueue()
+    /// <summary>
+    /// Should get call from PersistentSettingsHooks.Save when core Rhino has
+    /// called SaveProfile on a application settings class and wants to update
+    /// the applications settings XML file.
+    /// </summary>
+    /// <param name="shuttingDown"></param>
+    /// <returns></returns>
+    internal bool SaveSettingsUnmanagedHook(bool shuttingDown)
     {
       lock (g_settings_changed_lock)
       {
-        RhinoApp.Idle -= WriteSettingsOnIdle;
-        KillChangedTimer ();
-        if (g_changed_settings == null)
-          return;
-        foreach (var item in g_changed_settings.Where(item => item.ContainsChangedSinceSavedValues()))
+        // 08 June 2020 John Morse
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-58733
+        // Check to see if the file being saved is in the changed list, if
+        // it is then remove it to avoid multiple writes for the same change
+        // event.
+        for (var i = (g_settings_changed_list?.Count ?? 0) - 1; i >= 0; i--)
+          if (g_settings_changed_list[i].PlugInId == PlugInId)
+            g_settings_changed_list.RemoveAt(i);
+        // If the list is empty then kill the changed timer and the changed
+        // hook to avoid getting changed notifications for an empty list
+        if (shuttingDown || (g_settings_changed_list?.Count ?? 0) < 1)
         {
-          item.WriteSettings(false);
-          // If running on Mac OS-X then there will only be a single instance of 
-          // Rhino running and file watchers wont be working so manually raise the
-          // settings changed event
-          if (PersistentSettings.Service.RaiseChangedEventAfterWriting)
-            InvokeSettingsSaved(item.m_plugin_id, true);
+          RhinoApp.Idle -= WriteSettingsOnIdle;
+          KillChangedTimer();
+          g_changed_settings?.Clear();
+          g_changed_settings = null;
         }
-        g_changed_settings.Clear();
-        g_changed_settings = null;
+        return WriteSettings(shuttingDown);
+      }
+    }
+
+    public static void FlushSettingsSavedQueue()
+    {
+      try
+      {
+        lock (g_settings_changed_lock)
+        {
+          RhinoApp.Idle -= WriteSettingsOnIdle;
+          KillChangedTimer();
+          if (g_changed_settings == null)
+            return;
+          foreach (var item in g_changed_settings.Where(item => item.ContainsChangedSinceSavedValues()))
+          {
+            item.WriteSettings(false);
+            // If running on Mac OS-X then there will only be a single instance of 
+            // Rhino running and file watchers wont be working so manually raise the
+            // settings changed event
+            if (PersistentSettings.Service.RaiseChangedEventAfterWriting)
+              InvokeSettingsSaved(item.m_plugin_id, true);
+          }
+          g_changed_settings.Clear();
+          g_changed_settings = null;
+        }
+      }
+      catch
+      {
+
+        lock (g_settings_changed_lock)
+        {
+          KillChangedTimer();
+          g_changed_settings?.Clear();
+          g_changed_settings = null;
+        }
       }
     }
 
@@ -4672,16 +4727,24 @@ namespace Rhino
     internal static void FlushSettingsChangedEventQueue()
     {
       RhinoApp.Idle -= SettingsChangedOnIdle;
-      // Lock the settings changed list while raising changed events
-      lock (g_settings_changed_lock)
+      try
       {
-        // Process the changed event list
-        if (g_settings_changed_list != null)
+        // Lock the settings changed list while raising changed events
+        lock (g_settings_changed_lock)
         {
-          foreach (var saved_event in g_settings_changed_list)
-            InvokeSettingsSaved(saved_event.PlugInId, saved_event.Writing);
+          // Process the changed event list
+          if (g_settings_changed_list != null)
+          {
+            foreach (var saved_event in g_settings_changed_list)
+              InvokeSettingsSaved(saved_event.PlugInId, saved_event.Writing);
+          }
+          g_settings_changed_list = null;
         }
-        g_settings_changed_list = null;
+      }
+      catch
+      {
+        lock (g_settings_changed_lock)
+          g_settings_changed_list = null;
       }
     }
 
@@ -4705,7 +4768,10 @@ namespace Rhino
           g_settings_changed_list = new List<SettingsSavedEvent>();
           RhinoApp.Idle += SettingsChangedOnIdle;
         }
-        g_settings_changed_list.Add(new SettingsSavedEvent(m_plugin_id, m_writing));
+        // Only add changed item to the list if it is not currently in the list
+        var found = g_settings_changed_list.FirstOrDefault(item => item.PlugInId == m_plugin_id && item.Writing == m_writing) != null;
+        if (!found)
+          g_settings_changed_list.Add(new SettingsSavedEvent(m_plugin_id, m_writing));
       }
       //
       // Only do the following if the OnIdle processing is turned off above
@@ -5000,6 +5066,8 @@ namespace Rhino
 
     public static PersistentSettingsManager Create(Guid pluginId)
     {
+      if (pluginId == Guid.Empty)
+        throw new System.ComponentModel.InvalidEnumArgumentException($"pluginId Can not be Guid.Empty");
       for (int i = 0; i < g_all_managers.Count; i++)
         if (g_all_managers[i].m_plugin_id == pluginId)
           return g_all_managers[i];

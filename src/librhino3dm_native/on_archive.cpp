@@ -1037,6 +1037,23 @@ RH_C_FUNCTION ONX_Model* ONX_Model_ReadFile(const RHMONO_STRING* path, CRhCmnStr
   return rc;
 }
 
+RH_C_FUNCTION ONX_Model* ONX_Model_FromByteArray(int length, /*ARRAY*/ const unsigned char* buffer)
+{
+  //ON_Read3dmBufferArchive archive(length, buffer, false, ON_BinaryArchive::CurrentArchiveVersion(), ON::Version());
+  // 20 Aug 2020 S. Baer
+  // Setting the archive version and on version on the buffer class is just plain weird. It also
+  // causes the reader to fail. This is a bug we should eventually fix, but for now 0, 0 will work
+  // just fine
+  ON_Read3dmBufferArchive archive(length, buffer, false, 0, 0);
+
+  ONX_Model* model = new ONX_Model();
+  if (!model->Read(archive)) {
+    delete model;
+    return nullptr;
+  }
+  return model;
+}
+
 enum ReadFileTableTypeFilter : int
 {
   ttfNone = 0,
@@ -1589,7 +1606,9 @@ RH_C_FUNCTION int ONX_Model_File3dmInstanceDefinitionTable_Add(
   ONX_Model* pModel, 
   const RHMONO_STRING* name, 
   const RHMONO_STRING* description, 
-  ON_3DPOINT_STRUCT base_point, 
+  const RHMONO_STRING* url,
+  const RHMONO_STRING* url_tag,
+  ON_3DPOINT_STRUCT base_point,
   ON_SimpleArray<const ON_Geometry*>* pGeometry, 
   ON_SimpleArray<const ON_3dmObjectAttributes*>* pAttributes
 )
@@ -1597,6 +1616,8 @@ RH_C_FUNCTION int ONX_Model_File3dmInstanceDefinitionTable_Add(
   int rc = -1;
   INPUTSTRINGCOERCE(_name, name);
   INPUTSTRINGCOERCE(_description, description);
+  INPUTSTRINGCOERCE(_url, url);
+  INPUTSTRINGCOERCE(_url_tag, url_tag);
   if (pModel && pGeometry)
   {
     // Determine if we need to transform geometry to world origin
@@ -1655,6 +1676,8 @@ RH_C_FUNCTION int ONX_Model_File3dmInstanceDefinitionTable_Add(
         idef->SetInstanceDefinitionType(ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static);
         idef->SetName(_name);
         idef->SetDescription(_description);
+        idef->SetURL(_url);
+        idef->SetURL_Tag(_url_tag);
         ON_ModelComponentReference model_component_reference = pModel->AddManagedModelComponent(idef, true);
         if (!model_component_reference.IsEmpty())
         {
@@ -2585,6 +2608,45 @@ RH_C_FUNCTION ON_UUID ONX_Model_UserDataTable_Uuid(const ONX_Model* pConstModel,
   return ::ON_nil_uuid;
 }
 
+RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_UserData_NewGoo(const ONX_Model* pConstModel, ON_UUID id)
+{
+  // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
+  ON_Read3dmBufferArchive* rc = nullptr;
+  if (pConstModel)
+  {
+    // Search for plug-in's document user data
+    ONX_Model_UserData* model_ud = nullptr;
+    for (unsigned int i = 0; i < pConstModel->m_userdata_table.UnsignedCount(); i++)
+    {
+      ONX_Model_UserData* ptr = pConstModel->m_userdata_table[i];
+      if (ptr && ptr->m_uuid == id)
+      {
+        model_ud = ptr;
+        break;
+      }
+    }
+
+    if (model_ud)
+    {
+      // Create a buffer archive using using the model user data's goo
+      rc = new ON_Read3dmBufferArchive(
+        model_ud->m_goo.m_value,
+        (const void*)model_ud->m_goo.m_goo,
+        false, // Do not copy the imput buffer
+        pConstModel->m_3dm_file_version,
+        pConstModel->m_3dm_opennurbs_version
+      );
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ONX_Model_UserData_DeleteGoo(ON_Read3dmBufferArchive* pArchive)
+{
+  if (pArchive)
+    delete pArchive;
+}
+
 RH_C_FUNCTION void ONX_Model_UserDataTable_Clear(ONX_Model* pModel)
 {
   if( pModel )
@@ -2766,7 +2828,7 @@ RH_C_FUNCTION void ON_WindowsBitmap_SizeAndColorDepth(const ON_WindowsBitmap* pB
   }
 }
 
-// 16-Aug-2018 Dale Fugier. The commented code (below) is fast. But Rhino3dm isn't
+// 16-Aug-2018 Dale Fugier. The commented code (below) is fast. But Rhino3dmIO isn't
 // build with the "Allow unsafe code" option. So this block of code causes a build error.
 // If somebody complains about this being slow, we can revisit this.
 //RH_C_FUNCTION void ON_WindowsBitmap_CopyBytes(const ON_WindowsBitmap* pBitmap, void* systemBitmapBytes, int lineLength, int bitsPerPixel)

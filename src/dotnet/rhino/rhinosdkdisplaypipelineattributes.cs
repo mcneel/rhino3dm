@@ -8,6 +8,15 @@ using System.Drawing;
 #if RHINO_SDK
 namespace Rhino.Display
 {
+  /// <since>7.0</since>
+  public enum StereoContext : int
+  {
+    None = 0,
+    LeftEye = 1,
+    RightEye = 2,
+    BothEyes = 3 /*LeftEye | RightEye*/
+  }
+
   /// <summary>
   /// Represents display pipeline settings, such as "show transparency" and "show grips".
   /// </summary>
@@ -178,6 +187,7 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowGrips, value); }
     }
 
+    /// <since>6.0</since>
     public enum FrameBufferFillMode
     {
       DefaultColor = UnsafeNativeMethods.FrameBufferFillMode.DEFAULT_COLOR,
@@ -267,6 +277,7 @@ namespace Rhino.Display
       bottomRight = Color.FromArgb(br);
     }
 
+    /// <since>6.1</since>
     public enum BoundingBoxDisplayMode : int
     {
       None = UnsafeNativeMethods.DisplayPipelineAttributesBBox.BBoxOff,
@@ -973,6 +984,7 @@ public:
       }
     }
 
+    /// <since>6.5</since>
     public enum ContextsForDraw : int
     {
       Unset = 0,          //CRhinoDisplayPipeline::DrawToDC will ASSERT if called with this value.  Proceed your call with one of the values below.
@@ -1033,24 +1045,16 @@ public:
     }
 #endregion
 
-    public enum StereoRenderContextEnum : int
-    {
-      NotApplicable = 0,
-      RenderingLeftEye = 1,
-      RenderingRightEye = 2,
-      RenderingBothEyes = 3 /*RenderingLeftEye | RenderingRightEye*/
-    }
-
     /// <summary>
     /// Get or set the stereo render context.
     /// </summary>
     /// <since>7.0</since>
-    public StereoRenderContextEnum StereoRenderContext
+    public StereoContext StereoContext
     {
       get
       {
         IntPtr ptr = ConstPointer();
-        return (StereoRenderContextEnum)UnsafeNativeMethods.CDisplayPipelineAttributes_GetStereoRenderContext(ptr);
+        return (StereoContext)UnsafeNativeMethods.CDisplayPipelineAttributes_GetStereoRenderContext(ptr);
       }
       set
       {

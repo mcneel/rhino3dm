@@ -113,6 +113,7 @@ namespace Rhino.UI
     }
   }
 
+  /// <since>5.0</since>
   public enum DistanceDisplayMode
   {
     Decimal = 0,

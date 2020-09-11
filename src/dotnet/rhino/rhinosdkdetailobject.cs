@@ -135,6 +135,7 @@ namespace Rhino.DocObjects
     /// <summary>
     ///  Detail view object scale formats.
     /// </summary>
+    /// <since>7.0</since>
     public enum ScaleFormat : int
     {
       /// <summary>

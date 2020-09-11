@@ -7,6 +7,7 @@ namespace Rhino.Render
   /// <summary>
   /// Defines enumerated constants for mapping types such as planar, cylindrical or spherical.
   /// </summary>
+  /// <since>5.0</since>
   public enum TextureMappingType : int
   {
     /// <summary>No mapping is selected.</summary>
@@ -47,7 +48,7 @@ namespace Rhino.Render
   /// </summary>
   public sealed class TextureMapping : ModelComponent
   {
-    private TextureMapping()
+    internal TextureMapping()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_TextureMapping_New();
       ConstructNonConstObject(ptr);

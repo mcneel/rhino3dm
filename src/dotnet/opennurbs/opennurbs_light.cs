@@ -625,6 +625,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Types of light attenuation available.
     /// </summary>
+    /// <since>7.0</since>
     public enum Attenuation {
       /// <summary>
       /// Constant light attenuation, meaning no light energy fall-off.

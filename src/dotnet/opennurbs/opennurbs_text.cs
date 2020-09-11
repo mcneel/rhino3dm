@@ -7,6 +7,7 @@ using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
+  /// <since>6.0</since>
   public enum TextRunType
   {
     None = UnsafeNativeMethods.TextRunTypeConsts.None,
@@ -327,14 +328,16 @@ namespace Rhino.Geometry
       if(null == parent)
         const_ptr_this_dimstyle = dimstyle.ConstPointer();
 
-      Runtime.InteropWrappers.SimpleArrayCurvePointer curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer();
-      IntPtr ptr_curves = curves.NonConstPointer();
-      UnsafeNativeMethods.RHC_RhinoGetTextOutlines(const_ptr_parent, const_ptr_this, const_ptr_this_dimstyle, ptr_curves);
+      using (var curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_curves = curves.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetTextOutlines(const_ptr_parent, const_ptr_this, const_ptr_this_dimstyle, ptr_curves);
 
-      GC.KeepAlive(dimstyle);   // GC_KeepAlive: Nov. 1, 2018
-      GC.KeepAlive(parent);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(parent);   // GC_KeepAlive: Nov. 1, 2018
 
-      return curves.ToNonConstArray();
+        return curves.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -357,11 +360,13 @@ namespace Rhino.Geometry
       else
         const_ptr_this = ConstPointer();
 
-      Runtime.InteropWrappers.SimpleArrayBrepPointer breps = new Runtime.InteropWrappers.SimpleArrayBrepPointer();
-      IntPtr ptr_breps = breps.NonConstPointer();
-      var const_ptr_dimstyle = dimstyle.ConstPointer();
-      UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps);
-      return breps.ToNonConstArray();
+      using (var breps = new Runtime.InteropWrappers.SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_breps = breps.NonConstPointer();
+        var const_ptr_dimstyle = dimstyle.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps);
+        return breps.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -385,11 +390,13 @@ namespace Rhino.Geometry
       else
         const_ptr_this = ConstPointer();
 
-      Runtime.InteropWrappers.SimpleArrayBrepPointer breps = new Runtime.InteropWrappers.SimpleArrayBrepPointer();
-      IntPtr ptr_breps = breps.NonConstPointer();
-      var const_ptr_dimstyle = dimstyle.ConstPointer();
-      UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps);
-      return breps.ToNonConstArray();
+      using (var breps = new Runtime.InteropWrappers.SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_breps = breps.NonConstPointer();
+        var const_ptr_dimstyle = dimstyle.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps);
+        return breps.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -413,11 +420,13 @@ namespace Rhino.Geometry
       else
         const_ptr_this = ConstPointer();
 
-      Runtime.InteropWrappers.SimpleArrayExtrusionPointer extrusions = new Runtime.InteropWrappers.SimpleArrayExtrusionPointer();
-      IntPtr ptr_extrusions = extrusions.NonConstPointer();
-      var const_ptr_dimstyle = dimstyle.ConstPointer();
-      UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions);
-      return extrusions.ToNonConstArray();
+      using (var extrusions = new Runtime.InteropWrappers.SimpleArrayExtrusionPointer())
+      {
+        IntPtr ptr_extrusions = extrusions.NonConstPointer();
+        var const_ptr_dimstyle = dimstyle.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions);
+        return extrusions.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -441,11 +450,13 @@ namespace Rhino.Geometry
       else
         const_ptr_this = ConstPointer();
 
-      Runtime.InteropWrappers.SimpleArrayCurvePointer curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer();
-      IntPtr ptr_curves = curves.NonConstPointer();
-      var const_ptr_dimstyle = dimstyle.ConstPointer();
-      UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !bAllowOpen, smallCapsScale, spacing, ptr_curves);
-      return curves.ToNonConstArray();
+      using (var curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_curves = curves.NonConstPointer();
+        var const_ptr_dimstyle = dimstyle.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !bAllowOpen, smallCapsScale, spacing, ptr_curves);
+        return curves.ToNonConstArray();
+      }
     }
 #endif
 

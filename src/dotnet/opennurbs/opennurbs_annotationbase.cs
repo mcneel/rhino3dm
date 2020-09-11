@@ -1095,34 +1095,38 @@ namespace Rhino.Geometry
       BoundingBox bbox = BoundingBox.Empty;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr parent_dimstyle = ConstParentDimStylePointer();
+      DimensionStyle dimstyle = null;
+      if (parent_dimstyle == IntPtr.Zero)
+      {
+        dimstyle = DimensionStyle;
+        if (dimstyle != null)
+          parent_dimstyle = dimstyle.ConstPointer();
+      }
       BoundingBox b = UnsafeNativeMethods.ON_Annotation_GetAnnotationBoundingBox(const_ptr_this, parent_dimstyle, ref bbox) ? bbox : BoundingBox.Empty;
-      GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(dimstyle);
       return b;
     }
 
     /// <summary>
     /// Replace text within a formatted string
     /// </summary>
-    /// <param name="repl_string"></param>
-    /// <param name="start_run_idx"></param>
-    /// <param name="start_run_pos"></param>
-    /// <param name="end_run_idx"></param>
-    /// <param name="end_run_pos"></param>
+    /// <param name="replaceString"></param>
+    /// <param name="startRunIndex"></param>
+    /// <param name="startRunPosition"></param>
+    /// <param name="endRunIndex"></param>
+    /// <param name="endRunPosition"></param>
     /// <returns></returns>
     /// <since>7.0</since>
     public bool RunReplace(
-      string repl_string,
-      int start_run_idx, 
-      int start_run_pos,
-      int end_run_idx,
-      int end_run_pos)
+      string replaceString,
+      int startRunIndex, 
+      int startRunPosition,
+      int endRunIndex,
+      int endRunPosition)
     {
-      bool rc = false;
-
       var this_ptr = NonConstPointer();
       IntPtr styleptr = ConstParentDimStylePointer();
-      rc = UnsafeNativeMethods.ON_V6_Annotation_RunReplace(this_ptr, styleptr, repl_string, start_run_idx, start_run_pos, end_run_idx, end_run_pos);
-
+      bool rc = UnsafeNativeMethods.ON_V6_Annotation_RunReplace(this_ptr, styleptr, replaceString, startRunIndex, startRunPosition, endRunIndex, endRunPosition);
       return rc;
     }
 

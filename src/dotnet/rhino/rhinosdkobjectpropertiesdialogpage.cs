@@ -300,12 +300,12 @@ namespace Rhino.UI
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="documentRuntimeSerailNumber">
+    /// <param name="documentRuntimeSerialNumber">
     /// Document associated with the Rhino properties panel.
     /// </param>
-    internal ObjectPropertiesPageCollection(uint documentRuntimeSerailNumber)
+    internal ObjectPropertiesPageCollection(uint documentRuntimeSerialNumber)
     {
-      DocumentRuntimeSerailNumber = documentRuntimeSerailNumber;
+      DocumentRuntimeSerialNumber = documentRuntimeSerialNumber;
     }
 
     /// <summary>
@@ -329,13 +329,13 @@ namespace Rhino.UI
     /// </summary>
     /// <since>7.0</since>
     [CLSCompliant(false)]
-    public uint DocumentRuntimeSerailNumber { get; }
+    public uint DocumentRuntimeSerialNumber { get; }
 
     /// <summary>
     /// Document associated with the Rhino properties panel.
     /// </summary>
     /// <since>7.0</since>
-    public RhinoDoc Document => _doc ?? (_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerailNumber));
+    public RhinoDoc Document => _doc ?? (_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerialNumber));
     private RhinoDoc _doc;
   }
 
@@ -434,6 +434,7 @@ namespace Rhino.UI
     /// to the beginning of the list.  By default this returns -1 which puts the
     /// button at the end of the list.
     /// </summary>
+    /// <since>7.0</since>
     public virtual int Index => -1;
 
     #region Public virtual methods
@@ -475,6 +476,7 @@ namespace Rhino.UI
     /// <param name="rhObj"></param>
     /// <returns></returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ShouldDisplay(RhinoObject rhObj) is obsolete, override ShouldDisplay(ObjectPropertiesPageEventArgs e) instead")]
     public virtual bool ShouldDisplay(RhinoObject rhObj)
     {
@@ -502,6 +504,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="rhObj"></param>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("InitializeControls is obsolete, override UpdatePage instead")]
     public virtual void InitializeControls(RhinoObject rhObj) { }
 
@@ -579,6 +582,7 @@ namespace Rhino.UI
     /// </param>
     /// <returns></returns>
     /// <since>6.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("RunScript(RhinoDoc doc, RhinoObject[] objectList) is obsolete, override RunScript(ObjectPropertiesPageEventArgs e) instead")]
     public virtual Commands.Result RunScript(RhinoDoc doc, RhinoObject[] objectList)
     {

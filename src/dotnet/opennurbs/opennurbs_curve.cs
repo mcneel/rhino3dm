@@ -12,6 +12,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Used in curve and surface blending functions
   /// </summary>
+  /// <since>5.0</since>
   public enum BlendContinuity : int
   {
     /// <summary></summary>
@@ -25,6 +26,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for all implemented corner styles in curve offsets.
   /// </summary>
+  /// <since>5.0</since>
   public enum CurveOffsetCornerStyle : int
   {
     /// <summary>
@@ -56,6 +58,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for all implemented end styles in curve offsets.
   /// </summary>
+  /// <since>7.0</since>
   public enum CurveOffsetEndStyle : int
   {
     /// <summary>
@@ -75,6 +78,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for knot spacing styles in interpolated curves.
   /// </summary>
+  /// <since>5.0</since>
   public enum CurveKnotStyle : int
   {
     /// <summary>
@@ -111,6 +115,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for closed curve orientations.
   /// </summary>
+  /// <since>5.0</since>
   public enum CurveOrientation : int
   {
     /// <summary>
@@ -132,6 +137,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for closed curve/point spatial relationships.
   /// </summary>
+  /// <since>5.0</since>
   public enum PointContainment : int
   {
     /// <summary>
@@ -158,6 +164,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for closed curve/closed curve relationships.
   /// </summary>
+  /// <since>5.0</since>
   public enum RegionContainment : int
   {
     /// <summary>
@@ -184,6 +191,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for styles to use during curve extension, such as "Line", "Arc" or "Smooth".
   /// </summary>
+  /// <since>5.0</since>
   public enum CurveExtensionStyle : int
   {
     /// <summary>
@@ -205,6 +213,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates the options to use when simplifying a curve.
   /// </summary>
+  /// <since>5.0</since>
   [FlagsAttribute]
   public enum CurveSimplifyOptions : int
   {
@@ -260,6 +269,7 @@ namespace Rhino.Geometry
   /// <code source='examples\cs\ex_extendcurve.cs' lang='cs'/>
   /// <code source='examples\py\ex_extendcurve.py' lang='py'/>
   /// </example>
+  /// <since>5.0</since>
   [FlagsAttribute]
   public enum CurveEnd : int
   {
@@ -287,6 +297,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for the options that defines a curve evaluation side when evaluating kinks.
   /// </summary>
+  /// <since>5.0</since>
   public enum CurveEvaluationSide : int
   {
     /// <summary>
@@ -308,6 +319,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values for types of conic sections.
   /// </summary>
+  /// <since>6.0</since>
   public enum ConicSectionType : int
   {
     /// <summary>
@@ -948,6 +960,7 @@ namespace Rhino.Geometry
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <returns>An array of joint curves. This array can be empty.</returns>
     /// <since>5.2</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateTweenCurves(Curve curve0, Curve curve1, int numCurves)
     {
@@ -989,6 +1002,7 @@ namespace Rhino.Geometry
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <returns>An array of joint curves. This array can be empty.</returns>
     /// <since>5.2</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateTweenCurvesWithMatching(Curve curve0, Curve curve1, int numCurves)
     {
@@ -1032,6 +1046,7 @@ namespace Rhino.Geometry
     /// <param name="numSamples">Number of sample points along input curves.</param>
     /// <returns>>An array of joint curves. This array can be empty.</returns>
     /// <since>5.2</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateTweenCurvesWithSampling(Curve curve0, Curve curve1, int numCurves, int numSamples)
     {
@@ -1285,6 +1300,7 @@ namespace Rhino.Geometry
     /// <param name="curves">The co-planar curves to union.</param>
     /// <returns>Result curves on success, empty array if no union could be calculated.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateBooleanUnion(IEnumerable<Curve> curves)
     {
@@ -1325,6 +1341,7 @@ namespace Rhino.Geometry
     /// <param name="curveB">The second closed, planar curve.</param>
     /// <returns>Result curves on success, empty array if no intersection could be calculated.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateBooleanIntersection(Curve curveA, Curve curveB)
     {
@@ -1365,6 +1382,7 @@ namespace Rhino.Geometry
     /// <param name="curveB">The second closed, planar curve.</param>
     /// <returns>Result curves on success, empty array if no difference could be calculated.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateBooleanDifference(Curve curveA, Curve curveB)
     {
@@ -1395,6 +1413,7 @@ namespace Rhino.Geometry
     /// <param name="subtractors">curves to subtract from the first closed curve.</param>
     /// <returns>Result curves on success, empty array if no difference could be calculated.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Curve[] CreateBooleanDifference(Curve curveA, IEnumerable<Curve> subtractors)
     {
@@ -2938,6 +2957,7 @@ namespace Rhino.Geometry
     /// <param name="t">>Parameter of the curve that is closest to testPoint.</param>
     /// <returns>true if the search is successful, false if the search fails.</returns>
     /// <since>6.3</since>
+    /// <deprecated>6.18</deprecated>
     [ConstOperation]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Typo: use LocalClosestPoint")]
@@ -3085,6 +3105,7 @@ namespace Rhino.Geometry
     /// <param name="testPoint">Point to test.</param>
     /// <returns>Relationship between point and curve region.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes a tolerance")]
     [ConstOperation]
     public PointContainment Contains(Point3d testPoint)
@@ -3099,6 +3120,7 @@ namespace Rhino.Geometry
     /// <param name="plane">Plane in which to compare point and region.</param>
     /// <returns>Relationship between point and curve region.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes a tolerance")]
     [ConstOperation]
     public PointContainment Contains(Point3d testPoint, Plane plane)
@@ -4364,6 +4386,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">A tolerance for computing intersections.</param>
     /// <returns>An array of curves. This array can be empty.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes an angle tolerance")]
     [ConstOperation]
     public Curve[] Split(Brep cutter, double tolerance)
@@ -4404,6 +4427,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">A tolerance for computing intersections.</param>
     /// <returns>An array of curves. This array can be empty.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes an angle tolerance")]
     [ConstOperation]
     public Curve[] Split(Surface cutter, double tolerance)

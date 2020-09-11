@@ -350,6 +350,317 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
 
+
+
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;unsigned char&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class SimpleArrayByte : IDisposable
+  {
+    //This should be private eventually and have everything call either ConstPointer or NonConstPointer
+    internal IntPtr m_ptr; // ON_SimpleArray<unsigned char>
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> class.
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayByte()
+    {
+      m_ptr = UnsafeNativeMethods.ON_ByteArray_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> class.
+    /// <param name="initialSize">Initial size of the array - all values are set to zero.</param>
+    /// 
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayByte(int initialSize)
+    {
+      m_ptr = UnsafeNativeMethods.ON_ByteArray_New(null, initialSize);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> with the contents of another SimpleArrayByte.
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayByte(SimpleArrayByte other)
+    {
+      if (other == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteArray_New(null, 0);
+      }
+      else
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteArray_CopyNew(other.ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Copies the contents of a <see cref="SimpleArrayByte"/> into another SimpleArrayByte.
+    /// </summary>
+    /// <since>7.0</since>
+    public void CopyTo(SimpleArrayByte other)
+    {
+      if (other != null)
+      {
+        UnsafeNativeMethods.ON_ByteArray_CopyTo(ConstPointer(), other.NonConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> class
+    /// </summary>
+    /// <param name="values">initial set of integers to add to the array</param>
+    /// <since>7.0</since>
+    public SimpleArrayByte(IEnumerable<byte> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteArray_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<byte>(values);
+        byte[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_ByteArray_New(array_values, list_values.Count);
+      }
+    }
+
+    /// <summary>
+    /// Gets the amount of elements in this array.
+    /// </summary>
+    /// <since>7.0</since>
+    public int Count
+    {
+      get { return UnsafeNativeMethods.ON_ByteArray_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Return the raw data.
+    /// </summary>
+    /// <since>7.0</since>
+    public IntPtr Array()
+    {
+      return UnsafeNativeMethods.ON_ByteArray_Array(m_ptr);
+    }
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>7.0</since>
+    public byte[] ToArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new byte[0];
+      byte[] rc = new byte[count];
+      UnsafeNativeMethods.ON_ByteArray_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayByte()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_ByteArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
+
+
+
+
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;float&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class SimpleArrayFloat : IDisposable
+  {
+    //This should be private eventually and have everything call either ConstPointer or NonConstPointer
+    internal IntPtr m_ptr; // ON_SimpleArray<float>
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>7.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayFloat"/> class.
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayFloat()
+    {
+      m_ptr = UnsafeNativeMethods.ON_FloatArray_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayFloat"/> class.
+    /// <param name="initialSize">Initial size of the array - all values are set to zero.</param>
+    /// 
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayFloat(int initialSize)
+    {
+      m_ptr = UnsafeNativeMethods.ON_FloatArray_New(null, initialSize);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayFloat"/> with the contents of another SimpleArrayFloat.
+    /// </summary>
+    /// <since>7.0</since>
+    public SimpleArrayFloat(SimpleArrayFloat other)
+    {
+      if (other == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatArray_New(null, 0);
+      }
+      else
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatArray_CopyNew(other.ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Copies the contents of a <see cref="SimpleArrayFloat"/> into another SimpleArrayFloat.
+    /// </summary>
+    /// <since>7.0</since>
+    public void CopyTo(SimpleArrayFloat other)
+    {
+      if (other != null)
+      {
+        UnsafeNativeMethods.ON_FloatArray_CopyTo(ConstPointer(), other.NonConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayFloat"/> class
+    /// </summary>
+    /// <param name="values">initial set of integers to add to the array</param>
+    /// <since>7.0</since>
+    public SimpleArrayFloat(IEnumerable<float> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatArray_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<float>(values);
+        float[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_FloatArray_New(array_values, list_values.Count);
+      }
+    }
+
+    /// <summary>
+    /// Gets the amount of elements in this array.
+    /// </summary>
+    /// <since>7.0</since>
+    public int Count
+    {
+      get { return UnsafeNativeMethods.ON_FloatArray_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Return the raw data.
+    /// </summary>
+    /// <since>7.0</since>
+    public IntPtr Array()
+    {
+      return UnsafeNativeMethods.ON_FloatArray_Array(m_ptr);
+    }
+
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>7.0</since>
+    public float[] ToArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new float[0];
+      float[] rc = new float[count];
+      UnsafeNativeMethods.ON_FloatArray_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayFloat()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_FloatArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
+
+
   /// <summary>
   /// Wrapper for ON_SimpleArray&lt;ON_UUID&gt;. If you are not writing C++ code
   /// then this class is not for you.
@@ -483,7 +794,26 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public SimpleArrayGuid()
     {
-      m_ptr = UnsafeNativeMethods.ON_UUIDArray_New();
+      m_ptr = UnsafeNativeMethods.ON_UUIDArray_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayGuid"/> class
+    /// </summary>
+    /// <param name="values">initial set of Guids to add to the array</param>
+    /// <since>7.0</since>
+    public SimpleArrayGuid(IEnumerable<Guid> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_UUIDArray_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<Guid>(values);
+        Guid[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_UUIDArray_New(array_values, list_values.Count);
+      }
     }
 
     /// <summary>
@@ -2744,9 +3074,9 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
 #if RHINO_SDK
-	/// <summary>
-	/// ON_SimpleArray of CRhinoClippingPlaneObject*
-	/// </summary>
+  /// <summary>
+  /// ON_SimpleArray of CRhinoClippingPlaneObject*
+  /// </summary>
   public class SimpleArrayClippingPlaneObjectPointer : IDisposable
   {
     IntPtr m_ptr; // ON_SimpleArray<CRhinoClippingPlaneObject*>*

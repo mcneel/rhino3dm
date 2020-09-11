@@ -11,6 +11,7 @@ using Rhino.Runtime.InteropWrappers;
 namespace Rhino.ApplicationSettings
 {
   /// <summary>License node types.</summary>
+  /// <since>5.0</since>
   public enum LicenseNode
   {
     /// <summary>An independent node.</summary>
@@ -22,6 +23,7 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>The type of Rhino executable that is executing</summary>
+  /// <since>5.0</since>
   public enum Installation
   {
     ///<summary>Unknown</summary>
@@ -1046,6 +1048,7 @@ namespace Rhino
 
     /// <summary> Main Rhino Window </summary>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use MainWindowHandle or RhinoEtoApp.MainWindow in Rhino.UI")]
     public static System.Windows.Forms.IWin32Window MainWindow()
@@ -1382,6 +1385,7 @@ namespace Rhino
     /// Returns true if Rhino is in the process of closing, false otherwise.
     /// This can be true even before the Closing event fires, such as when RhinoDoc.CloseDocument event is called.
     /// </summary>
+    /// <since>6.26</since>
     public static bool IsClosing
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsClosing); }
@@ -1391,6 +1395,7 @@ namespace Rhino
     /// Returns true if Rhino is in the process of exiting, false otherwise.
     /// This can be true even before the Closing event fires, such as when RhinoDoc.CloseDocument event is called.
     /// </summary>
+    /// <since>6.26</since>
     public static bool IsExiting
     {
       get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsExiting); }
@@ -1767,30 +1772,6 @@ namespace Rhino
       var licenseStateChangedArgs = new Runtime.LicenseStateChangedEventArgs(canSave);
 
       LicenseStateChanged?.Invoke(null, licenseStateChangedArgs);
-    }
-
-    /// <summary>
-    /// This function makes it so that Rhino's main loop is executed continuously.
-    /// This is useful when Rhino needs to be doing something as often as possible, 
-    /// such as rendering a view at interactive frame rates.
-    /// </summary>
-    /// <returns>
-    /// True if the functionality was enabled successfully, false otherwise.
-    /// </returns>
-    /// <since>7.0</since>
-    public static bool EnableContinuousMainLoop()
-    {
-      return UnsafeNativeMethods.RhinoMainLoop_EnableContinuousMainLoop();
-    }
-
-    /// <summary>
-    /// This function makes it so that Rhino's main loop is not executed continuously.
-    /// This is default behavior.
-    /// </summary>
-    /// <since>7.0</since>
-    public static void DisableContinuousMainLoop()
-    {
-      UnsafeNativeMethods.RhinoMainLoop_DisableContinuousMainLoop();
     }
 
 #endregion

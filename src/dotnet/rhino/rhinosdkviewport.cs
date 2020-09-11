@@ -7,6 +7,7 @@ using Rhino.DocObjects;
 namespace Rhino.Display
 {
   /// <summary>Parallel and perspective projections that are "standard" in Rhino</summary>
+  /// <since>5.0</since>
   public enum DefinedViewportProjection
   {
     None = 0,
@@ -1871,6 +1872,7 @@ namespace Rhino.Display
   }
 #endif
 
+  /// <since>5.0</since>
   public enum ViewportType
   {
     StandardModelingViewport = 0,

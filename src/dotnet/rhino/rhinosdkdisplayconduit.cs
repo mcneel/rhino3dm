@@ -1,10 +1,16 @@
 #pragma warning disable 1591
+using Rhino.DocObjects;
+using Rhino.Runtime;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 #if RHINO_SDK
 namespace Rhino.Display
 {
+  /// <since>5.0</since>
   [Flags]
   [CLSCompliant(false)]
   public enum DrawFrameStages : uint
@@ -32,14 +38,49 @@ namespace Rhino.Display
     All = 0xFFFFFFFF & ~ViewExtents
   }
 
+  // intentionally private
+  [Flags]
+  enum CSupportChannels : uint
+  {
+    None = 0,
+    SC_INITFRAMEBUFFER = 0x00000001,
+    SC_SETUPFRUSTUM = 0x00000002,
+    SC_OBJECTCULLING = 0x00000004,
+    SC_CALCBOUNDINGBOX = 0x00000008,
+    SC_CALCCLIPPINGPLANES = 0x00000010,
+    SC_SETUPLIGHTING = 0x00000020,
+    SC_DRAWBACKGROUND = 0x00000040,
+    SC_PREDRAWOBJECTS = 0x00000080,
+    SC_DRAWOBJECT = 0x00000100,
+    SC_POSTDRAWOBJECTS = 0x00000200,
+    SC_DRAWFOREGROUND = 0x00000400,
+    SC_DRAWOVERLAY = 0x00000800,
+    SC_POSTPROCESSFRAMEBUFFER = 0x00001000,
+    SC_MESHINGPARAMETERS = 0x00002000,
+    SC_OBJECTDISPLAYATTRS = 0x00004000,
+    SC_PREOBJECTDRAW = 0x00008000,
+    SC_POSTOBJECTDRAW = 0x00010000,
+    SC_VIEWEXTENTS = 0x00020000,
+    SC_PREDRAWMIDDLEGROUND = 0x00040000,
+    SC_PREDRAWTRANSPARENTOBJECTS = 0x00080000,
+  }
+
   public abstract class DisplayConduit
   {
+    uint _nativeRuntimeSerialNumber = 0;
+    private static DisplayPipeline.ConduitCallback _callback = ExecConduit;
+    private static Dictionary<uint, DisplayConduit> _enabledConduits = new Dictionary<uint, DisplayConduit>();
+    bool m_enabled;
+    ObjectType _geometryFilter = ObjectType.AnyObject;
+    bool _selectedObjectFilter = false;
+    bool _subObjectSelectedFilter = false;
+    Guid[] _objectIdFilter = new Guid[0];
+
     protected DisplayConduit()
     {
       SpaceFilter = DocObjects.ActiveSpace.None;
     }
 
-    bool m_enabled;
     /// <since>5.0</since>
     public bool Enabled
     {
@@ -49,9 +90,15 @@ namespace Rhino.Display
         if (m_enabled == value)
           return;
 
+        _enabledConduits.Remove(_nativeRuntimeSerialNumber);
+
+        UnsafeNativeMethods.CRhinoDisplayConduit_Delete(_nativeRuntimeSerialNumber);
+        _nativeRuntimeSerialNumber = 0;
+
         m_enabled = value;
         if (m_enabled)
         {
+          CSupportChannels supportChannels = CSupportChannels.None;
           Type base_type = typeof(DisplayConduit);
           Type t = GetType();
 
@@ -63,35 +110,41 @@ namespace Rhino.Display
 
           MethodInfo mi = t.GetMethod("CalculateBoundingBox", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.CalculateBoundingBox += _CalculateBoundingBox;
+            supportChannels |= CSupportChannels.SC_CALCBOUNDINGBOX;
 
           mi = t.GetMethod("CalculateBoundingBoxZoomExtents", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.CalculateBoundingBoxZoomExtents += _CalculateBoundingBoxZoomExtents;
+            supportChannels |= CSupportChannels.SC_VIEWEXTENTS;
 
           mi = t.GetMethod("DrawForeground", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.DrawForeground += _DrawForeground;
+            supportChannels |= CSupportChannels.SC_DRAWFOREGROUND;
 
           mi = t.GetMethod("DrawOverlay", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.DrawOverlay += _DrawOverlay;
+            supportChannels |= CSupportChannels.SC_DRAWOVERLAY;
 
           mi = t.GetMethod("PostDrawObjects", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.PostDrawObjects += _PostDrawObjects;
+            supportChannels |= CSupportChannels.SC_POSTDRAWOBJECTS;
 
           mi = t.GetMethod("PreDrawObject", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.PreDrawObject += _PreDrawObject;
+            supportChannels |= CSupportChannels.SC_DRAWOBJECT;
 
           mi = t.GetMethod("PreDrawObjects", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.PreDrawObjects += _PreDrawObjects;
+            supportChannels |= CSupportChannels.SC_PREDRAWOBJECTS;
 
           mi = t.GetMethod("ObjectCulling", flags);
           if (mi.DeclaringType != base_type)
-            DisplayPipeline.ObjectCulling += _ObjectCulling;
+            supportChannels |= CSupportChannels.SC_OBJECTCULLING;
+
+          _nativeRuntimeSerialNumber = UnsafeNativeMethods.CRhinoDisplayConduit_New((uint)supportChannels);
+          _enabledConduits[_nativeRuntimeSerialNumber] = this;
+          _callback = ExecConduit;
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(_nativeRuntimeSerialNumber, 0, _callback, null);
+          UpdateNativeInstance();
         }
         else
         {
@@ -104,7 +157,90 @@ namespace Rhino.Display
           DisplayPipeline.PreDrawObject -= _PreDrawObject;
           DisplayPipeline.ObjectCulling -= _ObjectCulling;
         }
+
+        OnEnable(m_enabled);
       }
+    }
+
+    /// <summary>
+    /// Called when the enabled state changes for this class instance
+    /// </summary>
+    /// <param name="enable"></param>
+    /// <since>7.0</since>
+    protected virtual void OnEnable(bool enable)
+    {
+    }
+
+    /// <summary>
+    /// The geometry filter will ensure that your conduit's per-object functions
+    /// will only be called for objects that are of certain geometry type
+    /// </summary>
+    /// <since>7.0</since>
+    [CLSCompliant(false)]
+    public ObjectType GeometryFilter
+    {
+      get { return _geometryFilter; }
+      set
+      {
+        _geometryFilter = value;
+        UpdateNativeInstance();
+      }
+    }
+
+    /// <summary>
+    /// The selection filter will make per-object conduit functions only be
+    /// called for selected objects (when the filter is turned on)
+    /// </summary>
+    /// <param name="on"></param>
+    /// <param name="checkSubObjects"></param>
+    /// <since>7.0</since>
+    public void SetSelectionFilter(bool on, bool checkSubObjects)
+    {
+      _selectedObjectFilter = on;
+      _subObjectSelectedFilter = on && checkSubObjects;
+      UpdateNativeInstance();
+    }
+
+    /// <summary>
+    /// The selection filter will make per-object conduit functions only be
+    /// called for selected objects (when the filter is turned on)
+    /// </summary>
+    /// <param name="on"></param>
+    /// <param name="checkSubObjects"></param>
+    /// <since>7.0</since>
+    public void GetSelectionFilter(out bool on, out bool checkSubObjects)
+    {
+      on = _selectedObjectFilter;
+      checkSubObjects = _subObjectSelectedFilter;
+    }
+
+    /// <summary>
+    /// Set an object Id that this conduit's per-object functions will
+    /// only be called for
+    /// </summary>
+    /// <param name="id"></param>
+    /// <since>7.0</since>
+    public void SetObjectIdFilter(Guid id)
+    {
+      SetObjectIdFilter(new Guid[] { id });
+    }
+
+    /// <summary>
+    /// Set object Ids that this conduit's per-object functions will
+    /// only be called for
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <since>7.0</since>
+    public void SetObjectIdFilter(IEnumerable<Guid> ids)
+    {
+      _objectIdFilter = ids.ToArray();
+      UpdateNativeInstance();
+    }
+
+    void UpdateNativeInstance()
+    {
+      UnsafeNativeMethods.CRhinoDisplayConduit_SetFilters(_nativeRuntimeSerialNumber, (uint)_geometryFilter, _selectedObjectFilter, _subObjectSelectedFilter);
+      UnsafeNativeMethods.CRhinoDisplayConduit_SetObjectFilter(_nativeRuntimeSerialNumber, _objectIdFilter.Length, _objectIdFilter);
     }
 
     /// <summary>
@@ -241,6 +377,74 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="e">The event argument contains the current viewport and display state.</param>
     protected virtual void DrawOverlay(DrawEventArgs e) {}
+
+
+    private static void ExecConduit(IntPtr pPipeline, uint conduitSerialNumber, uint channel)
+    {
+      if( _enabledConduits.TryGetValue(conduitSerialNumber, out DisplayConduit conduit) && conduit != null)
+      {
+        try
+        {
+          switch (channel)
+          {
+            case (uint)CSupportChannels.SC_CALCBOUNDINGBOX:
+              conduit._CalculateBoundingBox(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_CALCCLIPPINGPLANES:
+              break;
+            case (uint)CSupportChannels.SC_DRAWBACKGROUND:
+              break;
+            case (uint)CSupportChannels.SC_DRAWFOREGROUND:
+              conduit._DrawForeground(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_DRAWOBJECT:
+              conduit._PreDrawObject(null, new DrawObjectEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_DRAWOVERLAY:
+              conduit._DrawOverlay(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_INITFRAMEBUFFER:
+              break;
+            case (uint)CSupportChannels.SC_MESHINGPARAMETERS:
+              break;
+            case (uint)CSupportChannels.SC_OBJECTCULLING:
+              conduit._ObjectCulling(null, new CullObjectEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_OBJECTDISPLAYATTRS:
+              break;
+            case (uint)CSupportChannels.SC_POSTDRAWOBJECTS:
+              conduit._PostDrawObjects(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_POSTOBJECTDRAW:
+              break;
+            case (uint)CSupportChannels.SC_POSTPROCESSFRAMEBUFFER:
+              break;
+            case (uint)CSupportChannels.SC_PREDRAWMIDDLEGROUND:
+              break;
+            case (uint)CSupportChannels.SC_PREDRAWOBJECTS:
+              conduit._PreDrawObjects(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            case (uint)CSupportChannels.SC_PREDRAWTRANSPARENTOBJECTS:
+              break;
+            case (uint)CSupportChannels.SC_PREOBJECTDRAW:
+              break;
+            case (uint)CSupportChannels.SC_SETUPFRUSTUM:
+              break;
+            case (uint)CSupportChannels.SC_SETUPLIGHTING:
+              break;
+            case (uint)CSupportChannels.SC_VIEWEXTENTS:
+              conduit._CalculateBoundingBoxZoomExtents(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
+              break;
+            default:
+              break;
+          }
+        }
+        catch(Exception ex)
+        {
+          HostUtils.ExceptionReport("DisplayConduit", ex);
+        }
+      }
+    }
   }
 }
 #endif

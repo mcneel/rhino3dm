@@ -46,6 +46,7 @@ namespace Rhino.DocObjects
 
 namespace Rhino.DocObjects.Tables
 {
+  /// <since>5.3</since>
   public enum LightTableEventType : int
   {
     Added = 0,

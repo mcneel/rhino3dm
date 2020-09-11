@@ -41,11 +41,29 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public Color LockedObjectColor{ get; set; }
 
-    //public static Color LockedRefereceObjectColor
-    //{
-    //  get { return GetColor(idxLockedReferenceObjectColor); }
-    //  set { SetColor(idxLockedReferenceObjectColor, value); }
-    //}
+    /// <summary>
+    /// Gets or sets the color used to draw the stroke of a selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public Color SelectionWindowStrokeColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the color used to fill a selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public Color SelectionWindowFillColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the color used to draw the stroke of a crossing selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public Color SelectionWindowCrossingStrokeColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the color used to fill a crossing selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public Color SelectionWindowCrossingFillColor { get; set; }
 
     /// <summary>Gets or sets the color of the world X axis of the world coordinates icon,
     /// appearing usually bottom left in viewports.</summary>
@@ -84,6 +102,9 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the command prompt background color.</summary>
     /// <since>5.0</since>
     public Color CommandPromptBackgroundColor{ get; set; }
+    /// <summary>Size of the font used in the command prompt (in points)</summary>
+    /// <since>7.0</since>
+    public int CommandPromptFontSize { get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
     /// <since>5.0</since>
     public Color CrosshairColor{ get; set; }
@@ -101,6 +122,10 @@ namespace Rhino.ApplicationSettings
     ///</summary>
     /// <since>5.0</since>
     public Color CurrentLayerBackgroundColor{ get; set; }
+
+    ///<summary>Gets or sets the color of objects that are eligible to be edited.</summary>
+    /// <since>7.0</since>
+    public Color EditCandidateColor { get; set; }
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -136,6 +161,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Defines enumerated constant values for default positions of the command prompt inside the frame of the full editor window.
   /// </summary>
+  /// <since>5.0</since>
   public enum CommandPromptPosition : int
   {
     /// <summary>The command prompt is shown on top.</summary>
@@ -166,6 +192,10 @@ namespace Rhino.ApplicationSettings
       rc.DefaultLayerColor = GetColor(idxDefaultLayerColor, pAppearanceSettings);
       rc.SelectedObjectColor = GetColor(idxSelectedObjectColor, pAppearanceSettings);
       rc.LockedObjectColor = GetColor(idxLockedObjectColor, pAppearanceSettings);
+      rc.SelectionWindowStrokeColor = GetColor(idxSelectionWindowStroke, pAppearanceSettings);
+      rc.SelectionWindowFillColor = GetColor(idxSelectionWindowFill, pAppearanceSettings);
+      rc.SelectionWindowCrossingStrokeColor = GetColor(idxSelectionWindowCrossingStroke, pAppearanceSettings);
+      rc.SelectionWindowCrossingFillColor = GetColor(idxSelectionWindowCrossingFill, pAppearanceSettings);
       rc.WorldCoordIconXAxisColor = GetColor(idxWorldIconXColor, pAppearanceSettings);
       rc.WorldCoordIconYAxisColor = GetColor(idxWorldIconYColor, pAppearanceSettings);
       rc.WorldCoordIconZAxisColor = GetColor(idxWorldIconZColor, pAppearanceSettings);
@@ -177,9 +207,11 @@ namespace Rhino.ApplicationSettings
       rc.CommandPromptTextColor = GetColor(idxCommandPromptTextColor, pAppearanceSettings);
       rc.CommandPromptHypertextColor = GetColor(idxCommandPromptHypertextColor, pAppearanceSettings);
       rc.CommandPromptBackgroundColor = GetColor(idxCommandPromptBackgroundColor, pAppearanceSettings);
+      rc.CommandPromptFontSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptFontSize, pAppearanceSettings);
       rc.CrosshairColor = GetColor(idxCrosshairColor, pAppearanceSettings);
       rc.PageviewPaperColor = GetColor(idxPageviewPaperColor, pAppearanceSettings);
       rc.CurrentLayerBackgroundColor = GetColor(idxCurrentLayerBackgroundColor, pAppearanceSettings);
+      rc.EditCandidateColor = GetColor(idxEditCandidateColor, pAppearanceSettings);
       rc.EchoPromptsToHistoryWindow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoPromptsToHistoryWindow, pAppearanceSettings);
       rc.EchoCommandsToHistoryWindow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoCommandsToHistoryWindow, pAppearanceSettings);
       rc.ShowFullPathInTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxFullPathInTitleBar, pAppearanceSettings);
@@ -239,6 +271,10 @@ namespace Rhino.ApplicationSettings
       DefaultLayerColor = state.DefaultLayerColor;
       SelectedObjectColor = state.SelectedObjectColor;
       LockedObjectColor = state.LockedObjectColor;
+      SelectionWindowStrokeColor = state.SelectionWindowStrokeColor;
+      SelectionWindowFillColor = state.SelectionWindowFillColor;
+      SelectionWindowCrossingStrokeColor = state.SelectionWindowCrossingStrokeColor;
+      SelectionWindowCrossingFillColor = state.SelectionWindowCrossingFillColor;
       WorldCoordIconXAxisColor = state.WorldCoordIconXAxisColor;
       WorldCoordIconYAxisColor = state.WorldCoordIconYAxisColor;
       WorldCoordIconZAxisColor = state.WorldCoordIconZAxisColor;
@@ -248,11 +284,13 @@ namespace Rhino.ApplicationSettings
       ViewportBackgroundColor = state.ViewportBackgroundColor;
       FrameBackgroundColor = state.FrameBackgroundColor;
       CommandPromptBackgroundColor = state.CommandPromptBackgroundColor;
+      CommandPromptFontSize = state.CommandPromptFontSize;
       CommandPromptHypertextColor = state.CommandPromptHypertextColor;
       CommandPromptTextColor = state.CommandPromptTextColor;
       CrosshairColor = state.CrosshairColor;
       PageviewPaperColor = state.PageviewPaperColor;
       CurrentLayerBackgroundColor = state.CurrentLayerBackgroundColor;
+      EditCandidateColor = state.EditCandidateColor;
       EchoCommandsToHistoryWindow = state.EchoCommandsToHistoryWindow;
       EchoPromptsToHistoryWindow = state.EchoPromptsToHistoryWindow;
       ShowFullPathInTitleBar = state.ShowFullPathInTitleBar;
@@ -303,6 +341,10 @@ namespace Rhino.ApplicationSettings
     const int idxPageviewPaperColor = 17;
     const int idxCurrentLayerBackgroundColor = 18;
     const int idxEditCandidateColor = 19;
+    const int idxSelectionWindowStroke = 20;
+    const int idxSelectionWindowFill = 21;
+    const int idxSelectionWindowCrossingStroke = 22;
+    const int idxSelectionWindowCrossingFill = 23;
 
     static Color GetColor(int which, IntPtr pAppearanceSettings)
     {
@@ -321,15 +363,40 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets the .Net library color that is currently associated with a paint color.
+    /// Gets the color that is currently associated with a paint color.
     /// </summary>
     /// <param name="whichColor">A color association.</param>
     /// <returns>A .Net library color.</returns>
     /// <since>5.0</since>
     public static Color GetPaintColor(PaintColor whichColor)
     {
-      int abgr = UnsafeNativeMethods.RhColors_GetColor(whichColor);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      return GetPaintColor(whichColor, true);
+    }
+
+    /// <summary>
+    /// Gat a paint color. This overload provides a compute option for cases where colors
+    /// are computed when they are "unset" colors.
+    /// </summary>
+    /// <param name="whichColor"></param>
+    /// <param name="compute">if true, a color is computed in some cases</param>
+    /// <returns></returns>
+    public static Color GetPaintColor(PaintColor whichColor, bool compute)
+    {
+      int argb = UnsafeNativeMethods.RhColors_GetColor(whichColor, compute);
+      return Color.FromArgb(argb);
+    }
+
+    /// <summary>
+    /// Get a default paint color for Rhino. The current paint color may
+    /// be different than the default
+    /// </summary>
+    /// <param name="whichColor">The color to retrieve</param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public static Color DefaultPaintColor(PaintColor whichColor)
+    {
+      int argb = UnsafeNativeMethods.RhColors_GetDefaultColor(whichColor);
+      return Color.FromArgb(argb);
     }
 
     /// <summary>
@@ -437,11 +504,46 @@ namespace Rhino.ApplicationSettings
       set { SetColor(idxLockedObjectColor, value); }
     }
 
-    //public static Color LockedRefereceObjectColor
-    //{
-    //  get { return GetColor(idxLockedReferenceObjectColor); }
-    //  set { SetColor(idxLockedReferenceObjectColor, value); }
-    //}
+    /// <summary>
+    /// Color used to draw stroke for selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public static Color SelectionWindowStrokeColor
+    {
+      get { return GetColor(idxSelectionWindowStroke); }
+      set { SetColor(idxSelectionWindowStroke, value); }
+    }
+
+    /// <summary>
+    /// Color used to fill selection window
+    /// </summary>
+    /// <since>7.0</since>
+    public static Color SelectionWindowFillColor
+    {
+      get { return GetColor(idxSelectionWindowFill); }
+      set { SetColor(idxSelectionWindowFill, value); }
+    }
+
+    /// <summary>
+    /// Color used to draw stroke for selection crossing window
+    /// </summary>
+    /// <since>7.0</since>
+    public static Color SelectionWindowCrossingStrokeColor
+    {
+      get { return GetColor(idxSelectionWindowCrossingStroke); }
+      set { SetColor(idxSelectionWindowCrossingStroke, value); }
+    }
+
+    /// <summary>
+    /// Color used to fill selection crossing window
+    /// </summary>
+    /// <since>7.0</since>
+    public static Color SelectionWindowCrossingFillColor
+    {
+      get { return GetColor(idxSelectionWindowCrossingFill); }
+      set { SetColor(idxSelectionWindowCrossingFill, value); }
+    }
+
 
     /// <summary>
     /// Gets or sets the color of the world coordinate X axis.
@@ -684,7 +786,6 @@ namespace Rhino.ApplicationSettings
     public static property bool FlagTextOnTop{ bool get(); void set(bool); }
 
     public static property System::String^ CommandPromptFontName{System::String^ get(); void set(System::String^);}
-    public static property int CommandPromptFontHeight{ int get(); void set(int); }
     public static property int CommandPromptHeightInLines{ int get(); void set(int); }
     
     public static property bool StatusBarVisible{ bool get(); void set(bool); }
@@ -692,6 +793,7 @@ namespace Rhino.ApplicationSettings
     */
 
     const int idxCommandPromptPosition = 0;
+    const int idxCommandPromptFontSize = 1;
 
     /// <summary>
     /// Gets or sets the command prompt position.
@@ -709,12 +811,30 @@ namespace Rhino.ApplicationSettings
       }
     }
 
+    /// <summary>
+    /// Size of font used in command prompt (in points)
+    /// </summary>
+    /// <since>7.0</since>
+    public static int CommandPromptFontSize
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptFontSize, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetInt(idxCommandPromptFontSize, value);
+      }
+    }
+
     const int idxEchoPromptsToHistoryWindow = 0;
     const int idxEchoCommandsToHistoryWindow = 1;
     const int idxFullPathInTitleBar = 2;
     const int idxCrosshairsVisible = 3;
     const int idxMenuVisible = 4;
     const int idxShowSideBar = 5;
+    const int idxShowOsnapBar = 6;
+    const int idxShowStatusBar = 7;
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -745,7 +865,7 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxCrosshairsVisible, value); }
     }
     /// <summary>
-    /// Should the side bar be displayed
+    /// Shows or hides the side bar user interface.
     /// </summary>
     /// <since>6.0</since>
     public static bool ShowSideBar
@@ -753,6 +873,25 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowSideBar, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowSideBar, value); }
     }
+    /// <summary>
+    /// Shows or hides the object snap user interface.
+    /// </summary>
+    /// <since>7.0</since>
+    public static bool ShowOsnapBar
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowOsnapBar, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowOsnapBar, value); }
+    }
+    /// <summary>
+    /// Shows or hides the status bar user interface.
+    /// </summary>
+    /// <since>7.0</since>
+    public static bool ShowStatusBar
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowStatusBar, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowStatusBar, value); }
+    }
+
     /*
     public static property bool ViewportTitleVisible{ bool get(); void set(bool); }
     public static property bool MainWindowTitleVisible{ bool get(); void set(bool); }
@@ -1857,6 +1996,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Defines enumerated constant values to indicate a particular window selection mode.
   /// </summary>
+  /// <since>5.0</since>
   public enum MouseSelectMode : int
   {
     /// <summary>Anything that crosses this window will be selected.</summary>
@@ -1871,6 +2011,7 @@ namespace Rhino.ApplicationSettings
   /// Defines enumerated constant values to define what happens when
   /// either the middle mouse button on a three-button mouse is clicked or after pressing the wheel on a wheeled mouse.
   /// </summary>
+  /// <since>5.0</since>
   public enum MiddleMouseMode : int
   {
     /// <summary>Pops up two-part menu at the cursor location.
@@ -2249,6 +2390,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Defines enumerated constant values for different behavior that is related to clipboard data.
   /// </summary>
+  /// <since>5.0</since>
   public enum ClipboardState : int
   {
     ///<summary>Always keep clipboard data, regardless of size and never prompt the user.</summary>
@@ -2262,6 +2404,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Defines enumerated constant values for particular OSnap cursor colors.
   /// </summary>
+  /// <since>5.0</since>
   public enum CursorMode : int
   {
     /// <summary>
@@ -2284,6 +2427,7 @@ namespace Rhino.ApplicationSettings
   /// Defines several bit masks for each of the OSnap that are defined.
   /// <para>Refer to the Rhino Help file for further information.</para>
   /// </summary>
+  /// <since>5.0</since>
   [FlagsAttribute]
   public enum OsnapModes : int
   {
@@ -2319,6 +2463,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Defines enumerated constant values for world coordinates and CPlane point display modes.
   /// </summary>
+  /// <since>5.0</since>
   public enum PointDisplayMode : int
   {
     ///<summary>Points are displayed in world coordinates.</summary>
@@ -3270,6 +3415,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Shortcut key combinations
   /// </summary>
+  /// <since>5.0</since>
   public enum ShortcutKey : int
   {
     /// <summary>F1</summary>
@@ -4191,6 +4337,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Curvature analysis styles
     /// </summary>
+    /// <since>6.0</since>
     public enum CurvatureStyle : int
     {
       /// <summary>

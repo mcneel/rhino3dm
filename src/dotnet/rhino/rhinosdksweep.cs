@@ -433,6 +433,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2)
     {
@@ -481,6 +482,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweep(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters1, IEnumerable<double> crossSectionParameters2)
     {
@@ -516,6 +518,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, double refitTolerance)
     {
@@ -555,6 +558,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, double refitTolerance)
     {
@@ -590,6 +594,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, int rebuildCount)
     {
@@ -629,6 +634,7 @@ namespace Rhino.Geometry
     }
 
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, int rebuildCount)
     {

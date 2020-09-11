@@ -141,6 +141,14 @@ RH_C_FUNCTION int ON_NurbsCurve_GetInt(const ON_NurbsCurve* pCurve, int which)
   return rc;
 }
 
+RH_C_FUNCTION int ON_NurbsCurve_KnotStyle(const ON_NurbsCurve* pConstNurbsCurve)
+{
+  ON::knot_style rc = ON::unknown_knot_style;
+  if (pConstNurbsCurve)
+    rc = ON_KnotVectorStyle(pConstNurbsCurve->m_order, pConstNurbsCurve->m_cv_count, pConstNurbsCurve->m_knot);
+  return (int)rc;
+}
+
 RH_C_FUNCTION double ON_NurbsCurve_SuperfluousKnot(const ON_NurbsCurve* pConstNurbsCurve, int end)
 {
   double rc = 0;

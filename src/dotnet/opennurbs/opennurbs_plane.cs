@@ -7,6 +7,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates all possible outcomes of a Least-Squares plane fitting operation.
   /// </summary>
+  /// <since>5.0</since>
   public enum PlaneFitResult
   {
     /// <summary>

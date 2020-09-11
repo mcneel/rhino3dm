@@ -16,9 +16,9 @@ namespace Rhino.Display
     {
     }
 
-    /// <summary> Copy a page view </summary>
-    /// <param name="duplicatePageGeometry"></param>
-    /// <returns></returns>
+    /// <summary>Copies a page view.</summary>
+    /// <param name="duplicatePageGeometry">Set true if you want the page view geometry copied, along with the view.</param>
+    /// <returns>The new page view if successful, null otherwise.</returns>
     /// <since>6.3</since>
     public RhinoPageView Duplicate(bool duplicatePageGeometry)
     {
@@ -28,6 +28,7 @@ namespace Rhino.Display
 
 
     /// <summary>
+    /// Gets the active viewport.
     /// The ActiveViewport is the same as the MainViewport for standard RhinoViews. In
     /// a RhinoPageView, the active viewport may be the RhinoViewport of a child detail object.
     /// Most of the time, you will use ActiveViewport unless you explicitly need to work with
@@ -46,6 +47,9 @@ namespace Rhino.Display
       }
     }
 
+    /// <summary>
+    /// Deactivates the active details and sets the page view as active.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
@@ -65,6 +69,52 @@ namespace Rhino.Display
       }
     }
 
+    /// <summary>
+    /// Returns the id of the active detail. 
+    /// If no detail is active, or if the page is active, then Guid.Empty is returned.
+    /// </summary>
+    /// <since>7.0</since>
+    public Guid ActiveDetailId
+    {
+      get
+      {
+        DetailViewObject detail = ActiveDetail;
+        return detail != null 
+          ? detail.Id 
+          : Guid.Empty;
+      }
+    }
+
+    /// <summary>
+    /// Returns the active detail object. 
+    /// If no detail is active, or if the page is active, then null is returned.
+    /// </summary>
+    /// <since>7.0</since>
+    public DetailViewObject ActiveDetail
+    {
+      get
+      {
+        if (!PageIsActive)
+        {
+          var details = GetDetailViews();
+          if (details != null)
+          {
+            foreach (DetailViewObject detail in details)
+            {
+              if (detail != null && detail.IsActive)
+                return detail;
+            }
+          }
+        }
+        return null;
+      }
+    }
+
+    /// <summary>
+    /// Sets the active detail. 
+    /// </summary>
+    /// <param name="detailId">The id of the detail view object to set active.</param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
@@ -90,6 +140,12 @@ namespace Rhino.Display
       return rc;
     }
 
+    /// <summary>
+    /// Sets the active detail. 
+    /// </summary>
+    /// <param name="detailName">The name, or title, of the detail to set active.</param>
+    /// <param name="compareCase">Unused.</param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <since>5.0</since>
     public bool SetActiveDetail(string detailName, bool compareCase)
     {
@@ -112,8 +168,8 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// true if the page is active instead of any detail views. This occurs
-    /// when the MainViewport.Id == ActiveViewportID.
+    /// Returns true if the page is active, rather than any detail view. 
+    /// This occurs when the MainViewport.Id == ActiveViewportID.
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_activeviewport.vb' lang='vbnet'/>
@@ -130,13 +186,13 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Creates a detail view object that is displayed on this page and adds it to the doc.
+    /// Creates a detail view object that is displayed on this page and adds it to the document.
     /// </summary>
     /// <param name="title">The detail view title.</param>
     /// <param name="corner0">Corners of the detail view in world coordinates.</param>
     /// <param name="corner1">Corners of the detail view in world coordinates.</param>
     /// <param name="initialProjection">The defined initial projection type.</param>
-    /// <returns>Newly created detail view on success. null on error.</returns>
+    /// <returns>Newly created detail view on success, null on error.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
@@ -129,6 +130,11 @@ namespace Rhino.Geometry
       RuntimeSerialNumber = UnsafeNativeMethods.ON_SubD_RuntimeSerialNumber(const_ptr_subd);
     }
 
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new SubD(IntPtr.Zero, null);
+    }
+
     /// <summary>
     /// Deletes the underlying native pointer during a Dispose call or GC collection
     /// </summary>
@@ -215,13 +221,25 @@ namespace Rhino.Geometry
       get
       {
         if (m_edges == null)
+        {
           m_edges = new Collections.SubDEdgeList(this);
+#if RHINO_SDK
+          if (IsNonConst)
+          {
+            IntPtr ptr_this = NonConstPointer();
+            // 29 April 2020 S. Baer (RH-53342)
+            // The following call ensures that edge curves will exist. We may want
+            // move this call to another location.
+            UnsafeNativeMethods.ON_SubD_UpdateSurfaceMeshCache(ptr_this);
+          }
+#endif
+        }
         return m_edges;
       }
     }
 
     /// <summary>
-    /// Test subd to see if the active level is a solid.  
+    /// Test SubD to see if the active level is a solid.  
     /// A "solid" is a closed oriented manifold, or a closed oriented manifold.
     /// </summary>
     /// <since>7.0</since>
@@ -237,9 +255,9 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Create a Brep based on this SubD geometry
+    /// Create a Brep based on this SubD geometry.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A new Brep if successful, or null on failure.</returns>
     /// <since>7.0</since>
     public Brep ToBrep()
     {
@@ -247,10 +265,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Create a new SubD from a mesh
+    /// Create a new SubD from a mesh.
     /// </summary>
-    /// <param name="mesh"></param>
-    /// <returns></returns>
+    /// <param name="mesh">The input mesh.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
     /// <since>7.0</since>
     public static SubD CreateFromMesh(Mesh mesh)
     {
@@ -258,11 +276,11 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Create a new SubD from a mesh
+    /// Create a new SubD from a mesh.
     /// </summary>
-    /// <param name="mesh"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
+    /// <param name="mesh">The input mesh.</param>
+    /// <param name="options">The SubD creation options.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
     /// <since>7.0</since>
     public static SubD CreateFromMesh(Mesh mesh, SubDCreationOptions options)
     {
@@ -273,6 +291,128 @@ namespace Rhino.Geometry
         return new SubD(ptr_subd, null);
       GC.KeepAlive(mesh);
       return null;
+    }
+
+    /// <summary>
+    /// Makes a new SubD with vertices offset at distance in the direction of the control net vertex normals.
+    /// Optionally, based on the value of solidify, adds the input SubD and a ribbon of faces along any naked edges.
+    /// </summary>
+    /// <param name="distance">The distance to offset.</param>
+    /// <param name="solidify">true if the output SubD should be turned into a closed SubD.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <since>7.0</since>
+    [ConstOperation]
+    public SubD Offset(double distance, bool solidify)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_subd = UnsafeNativeMethods.RHC_RhinoOffsetSubD(const_ptr_this, distance, solidify);
+      if (IntPtr.Zero == ptr_subd)
+        return null;
+      return new SubD(ptr_subd, null);
+    }
+
+    /// <summary>
+    /// Creates a SubD lofted through shape curves.
+    /// </summary>
+    /// <param name="curves">An enumeration of SubD-friendly NURBS curves to loft through.</param>
+    /// <param name="closed">Creates a SubD that is closed in the lofting direction. Must have three or more shape curves.</param>
+    /// <param name="addCorners">With open curves, adds creased vertices to the SubD at both ends of the first and last curves.</param>
+    /// <param name="addCreases">With kinked curves, adds creased edges to the SubD along the kinks.</param>
+    /// <param name="divisions">The segment number between adjacent input curves.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <remarks>
+    /// Shape curves must be in the proper order and orientation and have point counts for the desired surface.
+    /// Shape curves must be either all open or all closed.
+    /// </remarks>
+    /// <since>7.0</since>
+    public static SubD CreateFromLoft(IEnumerable<NurbsCurve> curves, bool closed, bool addCorners, bool addCreases, int divisions)
+    {
+      using (var curves_array = new SimpleArrayCurvePointer(curves))
+      {
+        IntPtr const_ptr_curves = curves_array.ConstPointer();
+        IntPtr ptr_subd = UnsafeNativeMethods.RHC_RhinoSubDLoft(const_ptr_curves, closed, addCorners, addCreases, divisions);
+        GC.KeepAlive(curves);
+        if (IntPtr.Zero == ptr_subd)
+          return null;
+        return new SubD(ptr_subd, null);
+      }
+    }
+
+    /// <summary>
+    /// Fits a SubD through a series of profile curves that define the SubD cross-sections and one curve that defines a SubD edge.
+    /// </summary>
+    /// <param name="rail1">A SubD-friendly NURBS curve to sweep along.</param>
+    /// <param name="shapes">An enumeration of SubD-friendly NURBS curves to sweep through.</param>
+    /// <param name="closed">Creates a SubD that is closed in the rail curve direction.</param>
+    /// <param name="addCorners">With open curves, adds creased vertices to the SubD at both ends of the first and last curves.</param>
+    /// <param name="roadlikeFrame">
+    /// Determines how sweep frame rotations are calculated.
+    /// If false (Freeform), frame are propogated based on a refrence direction taken from the rail curve curvature direction.
+    /// If true (Roadlike), frame rotations are calculated based on a vector supplied in "roadlikeNormal" and the world coordinate system.
+    /// </param>
+    /// <param name="roadlikeNormal">
+    /// If roadlikeFrame = true, provide 3D vector used to calculate the frame rotations for sweep shapes.
+    /// If roadlikeFrame = false, then pass <see cref=" Vector3d.Unset"/>.
+    /// </param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <remarks>
+    /// Shape curves must be in the proper order and orientation.
+    /// Shape curves must have the same point counts and rail curves must have the same point counts.
+    /// Shape curves will relocated to the nearest pair of Greville points on the rails.
+    /// Shape curves will be made at each pair of rail edit points where there isn't an input shape.
+    /// </remarks>
+    /// <since>7.0</since>
+    public static SubD CreateFromSweep(NurbsCurve rail1, IEnumerable<NurbsCurve> shapes, bool closed, bool addCorners, bool roadlikeFrame, Vector3d roadlikeNormal)
+    {
+      if (null == rail1)
+        throw new ArgumentNullException(nameof(rail1));
+      using (var curves_array = new SimpleArrayCurvePointer(shapes))
+      {
+        IntPtr const_ptr_rail1 = rail1.ConstPointer();
+        IntPtr const_ptr_curves = curves_array.ConstPointer();
+        IntPtr ptr_subd = UnsafeNativeMethods.RHC_RhinoSubDSweep1(const_ptr_rail1, const_ptr_curves, closed, addCorners, roadlikeFrame, roadlikeNormal);
+        GC.KeepAlive(rail1);
+        GC.KeepAlive(shapes);
+        if (IntPtr.Zero == ptr_subd)
+          return null;
+        return new SubD(ptr_subd, null);
+      }
+    }
+
+    /// <summary>
+    /// Fits a SubD through a series of profile curves that define the SubD cross-sections and two curves that defines SubD edges.
+    /// </summary>
+    /// <param name="rail1">The first SubD-friendly NURBS curve to sweep along.</param>
+    /// <param name="rail2">The second SubD-friendly NURBS curve to sweep along.</param>
+    /// <param name="shapes">An enumeration of SubD-friendly NURBS curves to sweep through.</param>
+    /// <param name="closed">Creates a SubD that is closed in the rail curve direction.</param>
+    /// <param name="addCorners">With open curves, adds creased vertices to the SubD at both ends of the first and last curves.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <remarks>
+    /// Shape curves must be in the proper order and orientation.
+    /// Shape curves must have the same point counts and rail curves must have the same point counts.
+    /// Shape curves will relocated to the nearest pair of Greville points on the rails.
+    /// Shape curves will be made at each pair of rail edit points where there isn't an input shape.
+    /// </remarks>
+    /// <since>7.0</since>
+    public static SubD CreateFromSweep(NurbsCurve rail1, NurbsCurve rail2, IEnumerable<NurbsCurve> shapes, bool closed, bool addCorners)
+    {
+      if (null == rail1)
+        throw new ArgumentNullException(nameof(rail1));
+      if (null == rail2)
+        throw new ArgumentNullException(nameof(rail2));
+      using (var curves_array = new SimpleArrayCurvePointer(shapes))
+      {
+        IntPtr const_ptr_rail1 = rail1.ConstPointer();
+        IntPtr const_ptr_rail2 = rail2.ConstPointer();
+        IntPtr const_ptr_curves = curves_array.ConstPointer();
+        IntPtr ptr_subd = UnsafeNativeMethods.RHC_RhinoSubDSweep2(const_ptr_rail1, const_ptr_rail2, const_ptr_curves, closed, addCorners);
+        Runtime.CommonObject.GcProtect(rail1, rail2);
+        GC.KeepAlive(shapes);
+        if (IntPtr.Zero == ptr_subd)
+          return null;
+        return new SubD(ptr_subd, null);
+      }
     }
 #endif
 
@@ -346,8 +486,9 @@ namespace Rhino.Geometry
     {
     }
 
-    SubDCreationOptions(int which)
+    SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts which)
     {
+
       m_ptr = UnsafeNativeMethods.ON_ToSubDParameters_New(which);
     }
 
@@ -359,33 +500,19 @@ namespace Rhino.Geometry
     {
       get
       {
-        return new SubDCreationOptions(0);
+        return new SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts.Smooth);
       }
     }
 
     /// <summary>
-    /// Create an interior sub-D crease along coincident input mesh edges
-    /// where the vertex normal directions at one end differ by at 
-    /// least 30 degrees.
+    /// Create an interior sub-D crease along all input mesh double edges
     /// </summary>
     /// <since>7.0</since>
-    public static SubDCreationOptions InteriorCreaseAtMeshCrease
+    public static SubDCreationOptions InteriorCreases
     {
       get
       {
-        return new SubDCreationOptions(1);
-      }
-    }
-
-    /// <summary>
-    /// Create an interior sub-D crease along all coincident input mesh edges.
-    /// </summary>
-    /// <since>7.0</since>
-    public static SubDCreationOptions InteriorCreaseAtMeshEdge
-    {
-      get
-      {
-        return new SubDCreationOptions(2);
+        return new SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts.InteriorCreases);
       }
     }
 
@@ -394,11 +521,11 @@ namespace Rhino.Geometry
     /// included angle &lt;= 90 degrees.
     /// </summary>
     /// <since>7.0</since>
-    public static SubDCreationOptions ConvexCornerAtMeshCorner
+    public static SubDCreationOptions ConvexCornersAndInteriorCreases
     {
       get
       {
-        return new SubDCreationOptions(3);
+        return new SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts.ConvexCornersAndInteriorCreases);
       }
     }
 
@@ -422,7 +549,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// how interior creases are treated
+    /// Get or sets the interior crease test option.
     /// </summary>
     /// <since>7.0</since>
     public InteriorCreaseOption InteriorCreaseTest
@@ -441,7 +568,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// how convex corners are treated
+    /// Get or sets the convex corner test option.
     /// </summary>
     /// <since>7.0</since>
     public ConvexCornerOption ConvexCornerTest
@@ -460,31 +587,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// When the interior crease option is AtMeshCreases the value of
-    /// MinimumCreaseAngleRadians determines which coincident input mesh edges
-    /// generate sub-D creases.
-    /// If the input mesh has vertex normals, and the angle between vertex
-    /// normals is &gt; MinimumCreaseAngleRadians at an end of a coincident
-    /// input mesh edge, the corresponding sub-D edge will be a crease.
-    /// </summary>
-    /// <since>7.0</since>
-    public double MinimumCreaseAngleRadians
-    {
-      get
-      {
-        IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_ToSubDParameters_MinimumCreaseAngleRadians(const_ptr_this);
-      }
-      set
-      {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.ON_ToSubDParameters_SetMinimumCreaseAngleRadians(ptr_this, value);
-      }
-    }
-
-    /// <summary>
-    /// If ConvexCornerTest is at_mesh_corner, then an input mesh boundary
-    /// vertex becomes a sub-D corner when the number of edges that end at the
+    /// If ConvexCornerTest == ConvexCornerOption.AtMeshCorner, then an input mesh boundary
+    /// vertex becomes a SubD corner when the number of edges that end at the
     /// vertex is &lt;= MaximumConvexCornerEdgeCount edges and the corner angle
     /// is &lt;= MaximumConvexCornerAngleRadians.
     /// </summary>
@@ -505,8 +609,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// If ConvexCornerTest is at_mesh_corner, then an input mesh boundary
-    /// vertex becomes a sub-D corner when the number of edges that end at the
+    /// If ConvexCornerTest == ConvexCornerOption.AtMeshCorner, then an input mesh boundary
+    /// vertex becomes a SubD corner when the number of edges that end at the
     /// vertex is &lt;= MaximumConvexCornerEdgeCount edges and the corner angle
     /// is &lt;= MaximumConvexCornerAngleRadians.
     /// </summary>
@@ -525,10 +629,72 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Get or sets the concave corner test option.
+    /// </summary>
+    /// <since>7.0</since>
+    public SubDCreationOptions.ConcaveCornerOption ConcaveCornerTest
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        uint rc = UnsafeNativeMethods.ON_ToSubDParameters_ConcaveCornerOption(const_ptr_this);
+        return (ConcaveCornerOption)rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_ToSubDParameters_SetConcaveCornerOption(ptr_this, (uint)value);
+      }
+    }
+
+    /// <summary>
+    /// If ConcaveCornerTest == ConcaveCornerOption.AtMeshCorner, then an
+    /// input mesh boundary vertex becomes a SubD corner when the number of
+    /// edges that end at the vertex is &gt;= MinimumConcaveCornerEdgeCount edges
+    /// and the corner angle is &gt;= MinimumConcaveCornerAngleRadians.
+    /// </summary>
+    /// <since>7.0</since>
+    public double MinimumConcaveCornerAngleRadians
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_ToSubDParameters_MinimumConcaveCornerAngleRadians(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_ToSubDParameters_SetMinimumConcaveCornerAngleRadians(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// If ConcaveCornerTest == ConcaveCornerOption.AtMeshCorner, then an
+    /// input mesh boundary vertex becomes a SubD corner when the number of
+    /// edges that end at the vertex is &gt;= MinimumConcaveCornerEdgeCount edges
+    /// and the corner angle is &gt;= MinimumConcaveCornerAngleRadians.
+    /// </summary>
+    /// <since>7.0</since>
+    [CLSCompliant(false)]
+    public uint MinimumConcaveCornerEdgeCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_ToSubDParameters_MinimumConcaveCornerEdgeCount(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_ToSubDParameters_SetMinimumConcaveCornerEdgeCount(ptr_this, value);
+      }
+    }
+
 #if RHINO_SDK
     /// <summary>
-    /// If false, input mesh vertex locations will be used to set subd vertex control net locations.
-    /// If true, input mesh vertex locations will be used to set subd vertex limit surface locations.
+    /// If false, input mesh vertex locations will be used to set SubD vertex control net locations.
+    /// If true, input mesh vertex locations will be used to set SubD vertex limit surface locations.
     /// </summary>
     /// <since>7.0</since>
     public bool InterpolateMeshVertices
@@ -646,6 +812,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// If per-face color is "Empty", then this face does not have a custom color
     /// </summary>
+    /// <since>7.0</since>
     public System.Drawing.Color PerFaceColor
     {
       get

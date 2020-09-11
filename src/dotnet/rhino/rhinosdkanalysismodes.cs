@@ -14,6 +14,7 @@ namespace Rhino.Display
     /// <summary>
     /// Contains enumerated values for analysis styles, such as wireframe, texture or false colors..
     /// </summary>
+    /// <since>5.0</since>
     public enum AnalysisStyle : int
     {
       /// <summary>The analysis is showing with wires.</summary>

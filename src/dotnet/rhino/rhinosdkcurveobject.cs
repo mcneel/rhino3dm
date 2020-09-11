@@ -16,6 +16,9 @@ namespace Rhino.DocObjects
 
     internal CurveObject() { }
 
+    /// <summary>
+    /// Returns the underlying curve geometry.
+    /// </summary>
     /// <since>5.0</since>
     public Curve CurveGeometry
     {
@@ -26,6 +29,9 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Returns a copy of the underlying curve geometry.
+    /// </summary>
     /// <since>5.0</since>
     public Curve DuplicateCurveGeometry()
     {

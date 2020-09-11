@@ -9,6 +9,7 @@ using Rhino.Runtime;
 namespace Rhino.Geometry
 {
   /// <summary>Defines styles used for creating Brep pipes.</summary>
+  /// <since>5.0</since>
   public enum PipeCapMode
   {
     /// <summary>No cap.</summary>
@@ -22,6 +23,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Specifies enumerated constants for all supported loft types.
   /// </summary>
+  /// <since>5.0</since>
   public enum LoftType
   {
     /// <summary>
@@ -57,6 +59,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Corner types used for creating a tapered extrusion
   /// </summary>
+  /// <since>5.1</since>
   public enum ExtrudeCornerType
   {
     /// <summary>No Corner</summary>
@@ -74,6 +77,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Blend types used for creating filleted Brep edges
   /// </summary>
+  /// <since>6.0</since>
   public enum BlendType
   {
     /// <summary>
@@ -93,6 +97,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Rail types used for creating filleted Brep edges
   /// </summary>
+  /// <since>6.0</since>
   public enum RailType
   {
     /// <summary>
@@ -112,6 +117,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Rebuild types for creating swept surfaces
   /// </summary>
+  /// <since>6.16</since>
   public enum SweepRebuild
   {
     /// <summary>
@@ -126,6 +132,58 @@ namespace Rhino.Geometry
     /// Refit cross section curves to tolerance.
     /// </summary>
     Refit = 2
+  }
+
+  /// <summary>
+  /// Frame types for creating swept surfaces
+  /// </summary>
+  /// <since>7.0</since>
+  public enum SweepFrame
+  {
+    /// <summary>
+    /// The cross-section curve rotates to maintain its angle to the rail throughout the sweep.
+    /// </summary>
+    Freeform = 0,
+    /// <summary>
+    /// Specify an axis for calculating the 3-D rotation of the cross-section.
+    /// </summary>
+    Roadlike = 1
+  }
+
+  /// <summary>
+  /// Blend types for creating swept surfaces
+  /// </summary>
+  /// <since>7.0</since>
+  public enum SweepBlend
+  {
+    /// <summary>
+    /// The sweep stays constant at the ends and changes more rapidly in the middle.
+    /// </summary>
+    Local = 0,
+    /// <summary>
+    /// The sweep is linearly blended from one end to the other, creating sweeps that taper from one cross-section curve to the other.
+    /// </summary>
+    Global = 1
+  }
+
+  /// <summary>
+  /// Miter types for creating swept surfaces
+  /// </summary>
+  /// <since>7.0</since>
+  public enum SweepMiter
+  {
+    /// <summary>
+    /// No mitering
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// If the sweep creates a polysurface with kinks, the component surfaces will be trimmed.
+    /// </summary>
+    Trimmed = 1,
+    /// <summary>
+    /// If the sweep creates a polysurface with kinks, the component surfaces will be untrimmed.
+    /// </summary>
+    Untrimmed = 2,
   }
 
   /// <summary>  /// Boundary Representation. A surface or polysurface along with trim curve information.
@@ -548,6 +606,7 @@ namespace Rhino.Geometry
     /// <param name="inputLoops">Curve loops that delineate the planar boundaries.</param>
     /// <returns>An array of Planar Breps.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Brep[] CreatePlanarBreps(IEnumerable<Curve> inputLoops)
     {
@@ -577,6 +636,7 @@ namespace Rhino.Geometry
     /// <param name="inputLoop">A curve that should form the boundaries of the surfaces or polysurfaces.</param>
     /// <returns>An array of Planar Breps.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Brep[] CreatePlanarBreps(Curve inputLoop)
     {
@@ -608,6 +668,7 @@ namespace Rhino.Geometry
     /// <param name="surfaceSource">Surface that trims of BrepFace will be applied to.</param>
     /// <returns>A brep with the shape of surfaceSource and the trims of trimSource or null on failure.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Brep CreateTrimmedSurface(BrepFace trimSource, Surface surfaceSource)
     {
@@ -636,13 +697,13 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Makes a brep with one face.
+    /// Makes a Brep with one face from three corner points.
     /// </summary>
     /// <param name="corner1">A first corner.</param>
     /// <param name="corner2">A second corner.</param>
     /// <param name="corner3">A third corner.</param>
     /// <param name="tolerance">
-    /// Minimum edge length without collapsing to a singularity.
+    /// Minimum edge length allowed before collapsing the side into a singularity.
     /// </param>
     /// <returns>A boundary representation, or null on error.</returns>
     /// <since>5.0</since>
@@ -654,7 +715,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// make a Brep with one face.
+    /// Makes a Brep with one face from four corner points.
     /// </summary>
     /// <param name="corner1">A first corner.</param>
     /// <param name="corner2">A second corner.</param>
@@ -713,6 +774,7 @@ namespace Rhino.Geometry
     /// <param name="inputLoops">Curve loops that delineate the planar boundaries.</param>
     /// <returns>An array of Planar Breps or null on error.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Brep[] CreatePlanarBreps(Rhino.Collections.CurveList inputLoops)
     {
@@ -993,26 +1055,27 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Creates a single walled pipe
+    /// Creates a single walled pipe.
     /// </summary>
-    /// <param name="rail">the path curve for the pipe</param>
-    /// <param name="radius">radius of the pipe</param>
+    /// <param name="rail">The rail, or path, curve.</param>
+    /// <param name="radius">The radius of the pipe.</param>
     /// <param name="localBlending">
+    /// The shape blending.
     /// If True, Local (pipe radius stays constant at the ends and changes more rapidly in the middle) is applied.
-    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied
+    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied.
     /// </param>
-    /// <param name="cap">end cap mode</param>
+    /// <param name="cap">The end cap mode.</param>
     /// <param name="fitRail">
     /// If the curve is a polycurve of lines and arcs, the curve is fit and a single surface is created;
-    /// otherwise the result is a polysurface with joined surfaces created from the polycurve segments.
+    /// otherwise the result is a Brep with joined surfaces created from the polycurve segments.
     /// </param>
     /// <param name="absoluteTolerance">
-    /// The sweeping and fitting tolerance. If you are unsure what to use, then use the document's absolute tolerance
+    /// The sweeping and fitting tolerance. When in doubt, use the document's absolute tolerance.
     /// </param>
     /// <param name="angleToleranceRadians">
-    /// The angle tolerance. If you are unsure what to use, then either use the document's angle tolerance in radians
+    /// The angle tolerance. When in doubt, use the document's angle tolerance in radians.
     /// </param>
-    /// <returns>Array of created pipes on success</returns>
+    /// <returns>Array of Breps success.</returns>
     /// <since>5.0</since>
     public static Brep[] CreatePipe(Curve rail, double radius, bool localBlending, PipeCapMode cap, bool fitRail, double absoluteTolerance, double angleToleranceRadians)
     {
@@ -1020,30 +1083,32 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Creates a single walled pipe
+    /// Creates a single walled pipe.
     /// </summary>
-    /// <param name="rail">the path curve for the pipe</param>
+    /// <param name="rail">The rail, or path, curve.</param>
     /// <param name="railRadiiParameters">
-    /// one or more normalized curve parameters where changes in radius occur.
+    /// One or more normalized curve parameters where changes in radius occur.
     /// Important: curve parameters must be normalized - ranging between 0.0 and 1.0.
+    /// Use Interval.NormalizedParameterAt to calculate these.
     /// </param>
-    /// <param name="radii">An array of radii - one at each normalized curve parameter in railRadiiParameters.</param>
+    /// <param name="radii">One or more radii - one at each normalized curve parameter in railRadiiParameters.</param>
     /// <param name="localBlending">
+    /// The shape blending.
     /// If True, Local (pipe radius stays constant at the ends and changes more rapidly in the middle) is applied.
-    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied
+    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied.
     /// </param>
-    /// <param name="cap">end cap mode</param>
+    /// <param name="cap">The end cap mode.</param>
     /// <param name="fitRail">
     /// If the curve is a polycurve of lines and arcs, the curve is fit and a single surface is created;
-    /// otherwise the result is a polysurface with joined surfaces created from the polycurve segments.
+    /// otherwise the result is a Brep with joined surfaces created from the polycurve segments.
     /// </param>
     /// <param name="absoluteTolerance">
-    /// The sweeping and fitting tolerance. If you are unsure what to use, then use the document's absolute tolerance
+    /// The sweeping and fitting tolerance. When in doubt, use the document's absolute tolerance.
     /// </param>
     /// <param name="angleToleranceRadians">
-    /// The angle tolerance. If you are unsure what to use, then either use the document's angle tolerance in radians
+    /// The angle tolerance. When in doubt, use the document's angle tolerance in radians.
     /// </param>
-    /// <returns>Array of created pipes on success</returns>
+    /// <returns>Array of Breps success.</returns>
     /// <since>5.0</since>
     public static Brep[] CreatePipe(Curve rail, IEnumerable<double> railRadiiParameters, IEnumerable<double> radii, bool localBlending, PipeCapMode cap, bool fitRail, double absoluteTolerance, double angleToleranceRadians)
     {
@@ -1058,6 +1123,90 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_breps = breps.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoPipeBreps(const_ptr_rail, array_radii_params.Length, array_radii_params, array_radii, localBlending, (int)cap, fitRail, absoluteTolerance, angleToleranceRadians, ptr_breps);
+        GC.KeepAlive(rail);
+        return breps.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Creates a double-walled pipe.
+    /// </summary>
+    /// <param name="rail">The rail, or path, curve.</param>
+    /// <param name="radius0">The first radius of the pipe.</param>
+    /// <param name="radius1">The second radius of the pipe.</param>
+    /// <param name="localBlending">
+    /// The shape blending.
+    /// If True, Local (pipe radius stays constant at the ends and changes more rapidly in the middle) is applied.
+    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied.
+    /// </param>
+    /// <param name="cap">The end cap mode.</param>
+    /// <param name="fitRail">
+    /// If the curve is a polycurve of lines and arcs, the curve is fit and a single surface is created;
+    /// otherwise the result is a Brep with joined surfaces created from the polycurve segments.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// The sweeping and fitting tolerance. When in doubt, use the document's absolute tolerance.
+    /// </param>
+    /// <param name="angleToleranceRadians">
+    /// The angle tolerance. When in doubt, use the document's angle tolerance in radians.
+    /// </param>
+    /// <returns>Array of Breps success.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreateThickPipe(Curve rail, double radius0, double radius1, bool localBlending, PipeCapMode cap, bool fitRail, double absoluteTolerance, double angleToleranceRadians)
+    {
+      return CreateThickPipe(rail, new[] { 0.0 }, new[] { radius0 }, new[] { radius1 }, localBlending, cap, fitRail, absoluteTolerance, angleToleranceRadians);
+    }
+
+    /// <summary>
+    /// Creates a double-walled pipe.
+    /// </summary>
+    /// <param name="rail">The rail, or path, curve.</param>
+    /// <param name="railRadiiParameters">
+    /// One or more normalized curve parameters where changes in radius occur.
+    /// Important: curve parameters must be normalized - ranging between 0.0 and 1.0.
+    /// Use Interval.NormalizedParameterAt to calculate these.
+    /// </param>
+    /// <param name="radii0">
+    /// One or more radii for the first wall - one at each normalized curve parameter in railRadiiParameters.
+    /// </param>
+    /// <param name="radii1">
+    /// One or more radii for the second wall - one at each normalized curve parameter in railRadiiParameters.
+    /// </param>
+    /// <param name="localBlending">
+    /// The shape blending.
+    /// If True, Local (pipe radius stays constant at the ends and changes more rapidly in the middle) is applied.
+    /// If False, Global (radius is linearly blended from one end to the other, creating pipes that taper from one radius to the other) is applied.
+    /// </param>
+    /// <param name="cap">The end cap mode.</param>
+    /// <param name="fitRail">
+    /// If the curve is a polycurve of lines and arcs, the curve is fit and a single surface is created;
+    /// otherwise the result is a Brep with joined surfaces created from the polycurve segments.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// The sweeping and fitting tolerance. When in doubt, use the document's absolute tolerance.
+    /// </param>
+    /// <param name="angleToleranceRadians">
+    /// The angle tolerance. When in doubt, use the document's angle tolerance in radians.
+    /// </param>
+    /// <returns>Array of Breps success.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreateThickPipe(Curve rail, IEnumerable<double> railRadiiParameters, IEnumerable<double> radii0, IEnumerable<double> radii1, bool localBlending, PipeCapMode cap, bool fitRail, double absoluteTolerance, double angleToleranceRadians)
+    {
+      var list_radii_params = new List<double>(railRadiiParameters);
+      var list_radii0 = new List<double>(radii0);
+      var list_radii1 = new List<double>(radii1);
+      if (list_radii_params.Count < 1 || list_radii_params.Count != list_radii0.Count)
+        throw new ArgumentException("railRadiiParameters and radii0 must have at least one element and must have equal lengths");
+      if (list_radii_params.Count < 1 || list_radii_params.Count != list_radii1.Count)
+        throw new ArgumentException("railRadiiParameters and radii1 must have at least one element and must have equal lengths");
+      IntPtr const_ptr_rail = rail.ConstPointer();
+      double[] array_radii_params = list_radii_params.ToArray();
+      double[] array_radii0 = list_radii0.ToArray();
+      double[] array_radii1 = list_radii1.ToArray();
+      using (var breps = new SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_breps = breps.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoPipeBreps2(const_ptr_rail, array_radii_params.Length, array_radii_params, array_radii0, array_radii1, localBlending, (int)cap, fitRail, absoluteTolerance, angleToleranceRadians, ptr_breps);
         GC.KeepAlive(rail);
         return breps.ToNonConstArray();
       }
@@ -1104,6 +1253,70 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Sweep1 function that fits a surface through a series of profile curves that define the surface cross-sections
+    /// and one curve that defines a surface edge.
+    /// </summary>
+    /// <param name="rail">Rail to sweep shapes along.</param>
+    /// <param name="shapes">Shape curves.</param>
+    /// <param name="startPoint">Optional starting point of sweep. Use Point3d.Unset if you do not want to include a start point.</param>
+    /// <param name="endPoint">Optional ending point of sweep. Use Point3d.Unset if you do not want to include an end point.</param>
+    /// <param name="frameType">The frame type.</param>
+    /// <param name="roadlikeNormal">The roadlike normal directoion. Use Vector3d.Unset if the frame type is not set to roadlike.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="blendType">The shape blending type.</param>
+    /// <param name="miterType">The mitering type.</param>
+    /// <param name="tolerance"></param>
+    /// <param name="rebuildType">The rebuild style.</param>
+    /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
+    /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <since>7.0</since>    
+    public static Brep[] CreateFromSweep(
+      Curve rail,
+      IEnumerable<Curve> shapes,
+      Point3d startPoint,
+      Point3d endPoint,
+      SweepFrame frameType,
+      Vector3d roadlikeNormal,
+      bool closed,
+      SweepBlend blendType,
+      SweepMiter miterType,
+      double tolerance,
+      SweepRebuild rebuildType,
+      int rebuildPointCount,
+      double refitTolerance
+      )
+    {
+      IntPtr const_ptr_rail = rail.ConstPointer();
+      using (var shapearray = new SimpleArrayCurvePointer(shapes))
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_shapes = shapearray.ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.RHC_Rhino1RailSweep2(
+          const_ptr_rail,
+          const_ptr_shapes,
+          startPoint,
+          endPoint,
+          (int)frameType,
+          roadlikeNormal,
+          closed,
+          (int)blendType,
+          (int)miterType,
+          tolerance,
+          (int)rebuildType,
+          rebuildPointCount,
+          refitTolerance,
+          ptr_breps
+          );
+
+        GC.KeepAlive(rail);
+        GC.KeepAlive(shapes);
+        return rc.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
     /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
     /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
     /// and sweeps each piece separately, then put the results together into a Brep.
@@ -1124,11 +1337,11 @@ namespace Rhino.Geometry
     /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
     /// and sweeps each piece separately, then put the results together into a Brep.
     /// </summary>
-    /// <param name="rail">Rail to sweep shapes along</param>
-    /// <param name="shapes">Shape curves</param>
-    /// <param name="closed">Only matters if shapes are closed</param>
-    /// <param name="tolerance">Tolerance for fitting surface and rails</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail">Rail to sweep shapes along.</param>
+    /// <param name="shapes">Shape curves.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>6.14</since>
     public static Brep[] CreateFromSweepSegmented(Curve rail, IEnumerable<Curve> shapes, bool closed, double tolerance)
     {
@@ -1139,6 +1352,71 @@ namespace Rhino.Geometry
         IntPtr const_ptr_shapes = shapearray.ConstPointer();
         IntPtr ptr_breps = rc.NonConstPointer();
         UnsafeNativeMethods.RHC_Rhino1RailSweepSegmented(const_ptr_rail, const_ptr_shapes, closed, tolerance, ptr_breps);
+        GC.KeepAlive(rail);
+        GC.KeepAlive(shapes);
+        return rc.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Sweep1 function that fits a surface through a series of profile curves that define the surface cross-sections
+    /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
+    /// and sweeps each piece separately, then put the results together into a Brep.
+    /// </summary>
+    /// <param name="rail">Rail to sweep shapes along.</param>
+    /// <param name="shapes">Shape curves.</param>
+    /// <param name="startPoint">Optional starting point of sweep. Use Point3d.Unset if you do not want to include a start point.</param>
+    /// <param name="endPoint">Optional ending point of sweep. Use Point3d.Unset if you do not want to include an end point.</param>
+    /// <param name="frameType">The frame type.</param>
+    /// <param name="roadlikeNormal">The roadlike normal directoion. Use Vector3d.Unset if the frame type is not set to roadlike.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="blendType">The shape blending type.</param>
+    /// <param name="miterType">The mitering type.</param>
+    /// <param name="tolerance"></param>
+    /// <param name="rebuildType">The rebuild style.</param>
+    /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
+    /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <since>7.0</since>    
+    public static Brep[] CreateFromSweepSegmented(
+      Curve rail,
+      IEnumerable<Curve> shapes,
+      Point3d startPoint,
+      Point3d endPoint,
+      SweepFrame frameType,
+      Vector3d roadlikeNormal,
+      bool closed,
+      SweepBlend blendType,
+      SweepMiter miterType,
+      double tolerance,
+      SweepRebuild rebuildType,
+      int rebuildPointCount,
+      double refitTolerance
+      )
+    {
+      IntPtr const_ptr_rail = rail.ConstPointer();
+      using (var shapearray = new SimpleArrayCurvePointer(shapes))
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_shapes = shapearray.ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.RHC_Rhino1RailSweepSegmented2(
+          const_ptr_rail,
+          const_ptr_shapes,
+          startPoint,
+          endPoint,
+          (int)frameType,
+          roadlikeNormal,
+          closed,
+          (int)blendType,
+          (int)miterType,
+          tolerance,
+          (int)rebuildType,
+          rebuildPointCount,
+          refitTolerance,
+          ptr_breps
+          );
+
         GC.KeepAlive(rail);
         GC.KeepAlive(shapes);
         return rc.ToNonConstArray();
@@ -1190,7 +1468,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
-    /// and two curves that defines a surface edge.
+    /// and two curves that defines the surface edges.
     /// </summary>
     /// <param name="rail1">Rail to sweep shapes along</param>
     /// <param name="rail2">Rail to sweep shapes along</param>
@@ -1296,6 +1574,7 @@ namespace Rhino.Geometry
     /// <returns>array of breps on success</returns>
     /// <remarks>tolerances used are based on the active doc tolerance</remarks>
     /// <since>5.1</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
     public static Brep[] CreateFromTaperedExtrude(Curve curveToExtrude, double distance, Vector3d direction, Point3d basePoint, double draftAngleRadians, ExtrudeCornerType cornerType)
     {
@@ -1733,7 +2012,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Brep[] CreateFromLoft(IEnumerable<Curve> curves, Point3d start, Point3d end, LoftType loftType, bool closed)
     {
-      return LoftHelper(curves, start, end, loftType, 0, 0, 0.0, closed);
+      return LoftHelper(curves, start, end, false, false, null, null, loftType, 0, 0, 0.0, closed);
     }
     /// <summary>
     /// Constructs one or more Breps by lofting through a set of curves. Input for the loft is simplified by
@@ -1762,7 +2041,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Brep[] CreateFromLoftRebuild(IEnumerable<Curve> curves, Point3d start, Point3d end, LoftType loftType, bool closed, int rebuildPointCount)
     {
-      return LoftHelper(curves, start, end, loftType, 1, rebuildPointCount, 0.0, closed);
+      return LoftHelper(curves, start, end, false, false, null, null, loftType, 1, rebuildPointCount, 0.0, closed);
     }
     /// <summary>
     /// Constructs one or more Breps by lofting through a set of curves. Input for the loft is simplified by
@@ -1791,20 +2070,160 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Brep[] CreateFromLoftRefit(IEnumerable<Curve> curves, Point3d start, Point3d end, LoftType loftType, bool closed, double refitTolerance)
     {
-      return LoftHelper(curves, start, end, loftType, 2, 0, refitTolerance, closed);
+      return LoftHelper(curves, start, end, false, false, null, null, loftType, 2, 0, refitTolerance, closed);
     }
-    static Brep[] LoftHelper(IEnumerable<Curve> curves, Point3d start, Point3d end,
-      LoftType loftType, int simplifyMethod, int rebuildCount, double refitTol, bool closed)
+    /// <summary>
+    /// Constructs one or more Breps by lofting through a set of curves, optionally matching start and
+    /// end tangents of surfaces when first and/or last loft curves are surface edges
+    /// </summary>
+    /// <param name="curves">
+    /// The curves to loft through. This function will not perform any curve sorting. You must pass in
+    /// curves in the order you want them lofted. This function will not adjust the directions of open
+    /// curves. Use Curve.DoDirectionsMatch and Curve.Reverse to adjust the directions of open curves.
+    /// This function will not adjust the seams of closed curves. Use Curve.ChangeClosedCurveSeam to
+    /// adjust the seam of closed curves.
+    /// </param>
+    /// <param name="start">
+    /// Optional starting point of loft. Use Point3d.Unset if you do not want to include a start point.
+    /// "start" and "StartTangent" cannot both be true.
+    /// </param>
+    /// <param name="end">
+    /// Optional ending point of loft. Use Point3d.Unset if you do not want to include an end point.
+    /// "end and "EndTangent" cannot both be true.
+    /// </param>
+    /// <param name="StartTangent">
+    /// If StartTangent is true and the first loft curve is a surface edge, the loft will match the tangent 
+    /// of the surface behind that edge.
+    /// </param>param>
+    /// <param name="EndTangent">
+    /// If EndTangent is true and the first loft curve is a surface edge, the loft will match the tangent 
+    /// of the surface behind that edge.
+    /// </param>
+    /// <param name="StartTrim">
+    /// BrepTrim from the surface edge where start tangent is to be matched
+    /// </param>
+    /// <param name="EndTrim">
+    /// BrepTrim from the surface edge where end tangent is to be matched
+    /// </param>
+    /// <param name="loftType">type of loft to perform.</param>
+    /// <param name="closed">true if the last curve in this loft should be connected back to the first one.</param>
+    /// <returns>
+    /// Constructs a closed surface, continuing the surface past the last curve around to the
+    /// first curve. Available when you have selected three shape curves.
+    /// </returns>
+    /// <since>7.0</since>
+    public static Brep[] CreateFromLoft(IEnumerable<Curve> curves, Point3d start, Point3d end, 
+      bool StartTangent, bool EndTangent, BrepTrim StartTrim, BrepTrim EndTrim,
+      LoftType loftType, bool closed)
+    {
+      return LoftHelper(curves, start, end, StartTangent, EndTangent, StartTrim, EndTrim, loftType, 0, 0, 0.0, closed);
+    }
+
+    static Brep[] LoftHelper(IEnumerable<Curve> curves, Point3d start, Point3d end, bool StartTangent, bool EndTangent,
+      BrepTrim start_trim, BrepTrim end_trim, LoftType loftType, int simplifyMethod, int rebuildCount, double refitTol, bool closed)
     {
       using (var curve_array = new SimpleArrayCurvePointer(curves))
       using (var brep_array = new SimpleArrayBrepPointer())
       {
         IntPtr const_ptr_curves = curve_array.ConstPointer();
         IntPtr ptr_breps = brep_array.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoSdkLoft(const_ptr_curves, start, end, (int)loftType, simplifyMethod, rebuildCount, refitTol, closed, ptr_breps);
+        IntPtr pStartTrim = null == start_trim ? IntPtr.Zero : start_trim.ConstPointer();
+        IntPtr pEndTrim = null == end_trim ? IntPtr.Zero : end_trim.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoSdkLoftEx(const_ptr_curves, start, end, StartTangent, EndTangent, pStartTrim, pEndTrim,
+          (int)loftType, simplifyMethod, rebuildCount, refitTol, closed, ptr_breps);
         GC.KeepAlive(curves);
         return brep_array.ToNonConstArray();
       }
+    }
+    /// <summary>
+    /// CreatePlanarUnion
+    /// </summary>
+    /// <param name="breps">The planar regions on which to preform the union operation.</param>
+    /// <param name="plane">The plane in which all the input breps lie</param>
+    /// <param name="tolerance">Tolerance to use for union operation.</param>
+    /// <returns>An array of Brep results or null on failure.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreatePlanarUnion(IEnumerable<Brep> breps, Plane plane, double tolerance)
+    {
+      using (var input = new SimpleArrayBrepPointer())
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        foreach (var brep in breps)
+          input.Add(brep, true);
+
+        IntPtr const_ptr_input = input.ConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+        
+        bool rc = UnsafeNativeMethods.RHC_RhPlanarUnion(const_ptr_input, ref plane, tolerance, ptr_output);
+        if (rc) return output.ToNonConstArray();
+      }
+      return null;
+    }
+
+    /// <summary>
+    /// CreatePlanarUnion
+    /// </summary>
+    /// <param name="b0">The first brep to union.</param>
+    /// <param name="b1">The first brep to union.</param>
+    /// <param name="plane">The plane in which all the input breps lie</param>
+    /// <param name="tolerance">Tolerance to use for union operation.</param>
+    /// <returns>An array of Brep results or null on failure.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreatePlanarUnion(Brep b0, Brep b1, Plane plane, double tolerance)
+    {
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+
+        bool rc = UnsafeNativeMethods.RHC_RhPlanarUnion2(b0.ConstPointer(), b1.ConstPointer(), ref plane, tolerance, ptr_output);
+        if (rc) return output.ToNonConstArray();
+      }
+      return null;
+    }
+
+    /// <summary>
+    /// CreatePlanarDifference
+    /// </summary>
+    /// <param name="b0">The first brep to intersect.</param>
+    /// <param name="b1">The first brep to intersect.</param>
+    /// <param name="plane">The plane in which all the input breps lie</param>
+    /// <param name="tolerance">Tolerance to use for Difference operation.</param>
+    /// <returns>An array of Brep results or null on failure.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreatePlanarDifference(Brep b0, Brep b1, Plane plane, double tolerance)
+    {
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+
+        bool rc = UnsafeNativeMethods.RHC_RhPlanarDifference(b0.ConstPointer(), b1.ConstPointer(), ref plane, tolerance, ptr_output);
+        GC.KeepAlive(b0);
+        GC.KeepAlive(b1);
+        if (rc) return output.ToNonConstArray();
+      }
+      return null;
+    }
+    /// <summary>
+    /// CreatePlanarIntersection
+    /// </summary>
+    /// <param name="b0">The first brep to intersect.</param>
+    /// <param name="b1">The first brep to intersect.</param>
+    /// <param name="plane">The plane in which all the input breps lie</param>
+    /// <param name="tolerance">Tolerance to use for intersection operation.</param>
+    /// <returns>An array of Brep results or null on failure.</returns>
+    /// <since>7.0</since>
+    public static Brep[] CreatePlanarIntersection(Brep b0, Brep b1, Plane plane, double tolerance)
+    {
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+
+        bool rc = UnsafeNativeMethods.RHC_RhPlanarRegionIntersection(b0.ConstPointer(), b1.ConstPointer(), ref plane, tolerance, ptr_output);
+        GC.KeepAlive(b0);
+        GC.KeepAlive(b1);
+        if (rc) return output.ToNonConstArray();
+      }
+      return null;
     }
 
     /// <summary>
@@ -3698,6 +4117,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates the possible point/BrepFace spatial relationships.
   /// </summary>
+  /// <since>5.0</since>
   public enum PointFaceRelation
   {
     /// <summary>
@@ -3719,6 +4139,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates all possible Solid Orientations for a Brep.
   /// </summary>
+  /// <since>5.0</since>
   public enum BrepSolidOrientation
   {
     /// <summary>
@@ -3745,6 +4166,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates all possible Topological Edge adjacency types.
   /// </summary>
+  /// <since>5.0</since>
   public enum EdgeAdjacency
   {
     /// <summary>
@@ -3771,6 +4193,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates the possible types of edge concavity types.
   /// </summary>
+  /// <since>6.2</since>
   public enum Concavity
   {
     /// <summary>
@@ -4146,6 +4569,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Each brep trim has a defined type.
   /// </summary>
+  /// <since>5.1</since>
   public enum BrepTrimType
   {
     /// <summary>Unknown type</summary>
@@ -4521,6 +4945,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Each brep loop has a defined type, e.g. outer, inner or point on surface.
   /// </summary>
+  /// <since>5.0</since>
   public enum BrepLoopType
   {
     /// <summary>
@@ -4766,6 +5191,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// This face's rendering material channel index.
     /// </summary>
+    /// <since>6.26</since>
     public int MaterialChannelIndex
     {
       get
@@ -4866,7 +5292,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Extrude a face in a Brep.
     /// </summary>
-    /// <param name="pathCurve">The path to extrude along.</param>
+    /// <param name="pathCurve">The path to extrude along. Note, the direction of the extrusion will follow the direction of the curve.</param>
     /// <param name="cap">If true, the extrusion is capped with a translation of the face being extruded</param>
     /// <returns>A Brep on success or null on failure.</returns>
     /// <since>5.3</since>
@@ -4886,6 +5312,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Defines bitwise mask flags indicating what side of a surface to not shrink.
     /// </summary>
+    /// <since>6.0</since>
     [Flags]
     public enum ShrinkDisableSide
     {
@@ -4931,14 +5358,39 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Shrinks the underlying untrimmed surface of this Brep face right to the trimming boundaries.
-    /// Note, shrinking the trimmed surface can sometimes cause problems later since having
-    /// the edges so close to the trimming boundaries can cause commands that use the surface
-    /// edges as input to fail.
+    /// 
     /// </summary>
-    /// <returns>true on success, false on failure.</returns>
-    /// <since>6.16</since>
-    public bool ShrinkSurfaceToEdge()
+    /// <param name="edge"></param>
+    /// <param name="knots"></param>
+    /// <param name="tolerance"></param>
+    /// <param name="bSections"></param>
+    /// <param name="fitQuality"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public Surface[] RefitTrim(BrepEdge edge, IEnumerable<double> knots, double tolerance, bool bSections, ref double fitQuality)
+    {
+      using (var simpleKnots = new SimpleArrayDouble(knots))
+      using (var output = new SimpleArraySurfacePointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+        Surface[] fitSurfaces;
+        int nSurfaces = UnsafeNativeMethods.RHC_RhFitTrimSurface(this.ConstPointer(), edge.ConstPointer(), simpleKnots.ConstPointer(), tolerance, bSections, ptr_output, ref fitQuality);
+        if (nSurfaces > 0) fitSurfaces = output.ToNonConstArray();
+        else fitSurfaces = new Surface[0];
+        GC.KeepAlive(edge);
+        return fitSurfaces;
+      }
+    }
+
+/// <summary>
+/// Shrinks the underlying untrimmed surface of this Brep face right to the trimming boundaries.
+/// Note, shrinking the trimmed surface can sometimes cause problems later since having
+/// the edges so close to the trimming boundaries can cause commands that use the surface
+/// edges as input to fail.
+/// </summary>
+/// <returns>true on success, false on failure.</returns>
+/// <since>6.16</since>
+public bool ShrinkSurfaceToEdge()
     {
       IntPtr ptr_brep = m_brep.NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoBrepShrinkSurfaceToEdge(ptr_brep, FaceIndex);
@@ -5032,17 +5484,35 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Tests if a parameter space point is on the interior of a trimmed face.
+    /// Tests if a parameter space point is in the active region of a face.
     /// </summary>
-    /// <param name="u">Parameter space point u value.</param>
-    /// <param name="v">Parameter space point v value.</param>
-    /// <returns>A value describing the spatial relationship between the point and the face.</returns>
+    /// <param name="u">Parameter space point U value.</param>
+    /// <param name="v">Parameter space point V value.</param>
+    /// <returns>A value describing the relationship between the point and the face.</returns>
     /// <since>5.0</since>
     [ConstOperation]
     public PointFaceRelation IsPointOnFace(double u, double v)
     {
       IntPtr ptr_const_brep = m_brep.ConstPointer();
-      int rc = UnsafeNativeMethods.TL_Brep_PointIsOnFace(ptr_const_brep, FaceIndex, u, v);
+      int rc = UnsafeNativeMethods.TL_Brep_PointIsOnFace(ptr_const_brep, FaceIndex, u, v, 0.0);
+      if (1 == rc)
+        return PointFaceRelation.Interior;
+      return 2 == rc ? PointFaceRelation.Boundary : PointFaceRelation.Exterior;
+    }
+
+    /// <summary>
+    /// Tests if a parameter space point is in the active region of a face.
+    /// </summary>
+    /// <param name="u">Parameter space point U value.</param>
+    /// <param name="v">Parameter space point V value.</param>
+    /// <param name="tolerance">3D tolerance used when checking to see if the point is on a face or inside of a loop.</param>
+    /// <returns>A value describing the relationship between the point and the face.</returns>
+    /// <since>7.0</since>
+    [ConstOperation]
+    public PointFaceRelation IsPointOnFace(double u, double v, double tolerance)
+    {
+      IntPtr ptr_const_brep = m_brep.ConstPointer();
+      int rc = UnsafeNativeMethods.TL_Brep_PointIsOnFace(ptr_const_brep, FaceIndex, u, v, tolerance);
       if (1 == rc)
         return PointFaceRelation.Interior;
       return 2 == rc ? PointFaceRelation.Boundary : PointFaceRelation.Exterior;
@@ -5215,6 +5685,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// If per-face color is "Empty", then this face does not have a custom color
     /// </summary>
+    /// <since>7.0</since>
     public System.Drawing.Color PerFaceColor
     {
       get
@@ -5236,6 +5707,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Clear this face's rendering material channel index.
     /// </summary>
+    /// <since>6.26</since>
     public void ClearMaterialChannelIndex()
     {
       IntPtr ptr_this = NonConstPointer();

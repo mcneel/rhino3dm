@@ -99,7 +99,7 @@ RH_C_FUNCTION int ON_SubD_GetInt(const ON_SubD* pConstSubD, enum SubDIntConst wh
   return rc;
 }
 
-RH_C_FUNCTION ON_SubDEdge* ON_SubD_AddEdge(ON_SubD* pSubD, const ON_SubD::EdgeTag tag, ON_SubDVertex* v0, ON_SubDVertex* v1, unsigned int* id)
+RH_C_FUNCTION ON_SubDEdge* ON_SubD_AddEdge(ON_SubD* pSubD, const ON_SubDEdgeTag tag, ON_SubDVertex* v0, ON_SubDVertex* v1, unsigned int* id)
 {
   ON_SubDEdge* edge = nullptr;
   if (pSubD)
@@ -114,6 +114,12 @@ RH_C_FUNCTION ON_SubDEdge* ON_SubD_AddEdge(ON_SubD* pSubD, const ON_SubD::EdgeTa
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 
+RH_C_FUNCTION void ON_SubD_UpdateSurfaceMeshCache(ON_SubD* ptrSubD)
+{
+  if (ptrSubD)
+    ptrSubD->UpdateSurfaceMeshCache(true);
+}
+
 RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, unsigned int mesh_density )
 {
   if (nullptr == constSubdPtr)
@@ -127,7 +133,7 @@ RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, 
 RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr)
 {
   if (constSubDPtr)
-    return constSubDPtr->GetControlNetMesh(nullptr);
+    return constSubDPtr->GetControlNetMesh(nullptr, ON_SubDGetControlNetMeshPriority::Geometry);
   return nullptr;
 }
 
@@ -177,7 +183,7 @@ RH_C_FUNCTION const ON_SubDEdge* ON_SubD_FirstEdge(const ON_SubD* constSubDPtr, 
   return edge;
 }
 
-RH_C_FUNCTION const ON_SubDVertex* ON_SubD_AddVertex(ON_SubD* pSubD, ON_SubD::VertexTag tag, ON_3DPOINT_STRUCT value, unsigned int* id)
+RH_C_FUNCTION const ON_SubDVertex* ON_SubD_AddVertex(ON_SubD* pSubD, ON_SubDVertexTag tag, ON_3DPOINT_STRUCT value, unsigned int* id)
 {
   ON_SubDVertex* vertex = nullptr;
   if (pSubD)
@@ -206,23 +212,30 @@ RH_C_FUNCTION const ON_SubDVertex* ON_SubD_FirstVertex(const ON_SubD* constSubDP
 }
 
 /////////////////////
-
-RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(int which)
+enum OnSubDMeshParameterTypeConsts : int
 {
+  smpSmooth = 0,
+  smpInteriorCreases = 1,
+  smpConvexCornersAndInteriorCreases = 2
+};
+
+RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(enum OnSubDMeshParameterTypeConsts which)
+{
+  // July 28, 2020 Dale Lear writes:
+  //   This function is not right.
+  //   There should not be two values (1 and 2) that return ON_SubDFromMeshParameters::InteriorCreases.
+  //   There is no documentation for the function that calls this, so I cannot determine what the correct fix is.
   ON_SubDFromMeshParameters* rc = new ON_SubDFromMeshParameters();
   switch (which)
   {
-  case 0:
+  case smpSmooth:
     *rc = ON_SubDFromMeshParameters::Smooth;
     break;
-  case 1:
-    *rc = ON_SubDFromMeshParameters::InteriorCreaseAtMeshCrease;
+  case smpInteriorCreases:
+    *rc = ON_SubDFromMeshParameters::InteriorCreases;
     break;
-  case 2:
-    *rc = ON_SubDFromMeshParameters::InteriorCreaseAtMeshEdge;
-    break;
-  case 3:
-    *rc = ON_SubDFromMeshParameters::ConvexCornerAtMeshCorner;
+  case smpConvexCornersAndInteriorCreases:
+    *rc = ON_SubDFromMeshParameters::ConvexCornersAndInteriorCreases;
     break;
   }
   return rc;
@@ -232,19 +245,6 @@ RH_C_FUNCTION void ON_ToSubDParameters_Delete(ON_SubDFromMeshParameters* paramet
 {
   if (parameters)
     delete parameters;
-}
-
-RH_C_FUNCTION double ON_ToSubDParameters_MinimumCreaseAngleRadians(const ON_SubDFromMeshParameters* constParameters)
-{
-  if (constParameters)
-    return constParameters->MinimumCreaseAngleRadians();
-  return 0;
-}
-
-RH_C_FUNCTION void ON_ToSubDParameters_SetMinimumCreaseAngleRadians(ON_SubDFromMeshParameters* parameters, double val)
-{
-  if (parameters)
-    parameters->SetMinimumCreaseAngleRadians(val);
 }
 
 RH_C_FUNCTION unsigned int ON_ToSubDParameters_MaximumConvexCornerEdgeCount(const ON_SubDFromMeshParameters* constParameters)
@@ -294,21 +294,20 @@ RH_C_FUNCTION void ON_ToSubDParameters_SetInterpolateMeshVertices(ON_SubDFromMes
 RH_C_FUNCTION unsigned int ON_ToSubDParameters_InteriorCreaseOption(const ON_SubDFromMeshParameters* constParameters)
 {
   if (constParameters)
-    return (unsigned int)constParameters->InteriorCreaseTest();
+    return (unsigned int)constParameters->GetInteriorCreaseOption();
   return (unsigned int)ON_SubDFromMeshParameters::InteriorCreaseOption::Unset;
 }
 
 RH_C_FUNCTION void ON_ToSubDParameters_SetInteriorCreaseOption(ON_SubDFromMeshParameters* parameters, unsigned int option)
 {
-  ON_SubDFromMeshParameters::InteriorCreaseOption op = ON_SubDFromMeshParameters::InteriorCreaseOptionFromUnsigned(option);
   if (parameters)
-    parameters->SetInteriorCreaseOption(op);
+    parameters->SetInteriorCreaseOption(ON_SubDFromMeshParameters::InteriorCreaseOptionFromUnsigned(option));
 }
 
 RH_C_FUNCTION unsigned int ON_ToSubDParameters_ConvexCornerOption(const ON_SubDFromMeshParameters* constParameters)
 {
   if (constParameters)
-    return (unsigned int)constParameters->ConvexCornerTest();
+    return (unsigned int)constParameters->GetConvexCornerOption();
   return (unsigned int)ON_SubDFromMeshParameters::ConvexCornerOption::Unset;
 }
 
@@ -317,6 +316,47 @@ RH_C_FUNCTION void ON_ToSubDParameters_SetConvexCornerOption(ON_SubDFromMeshPara
   ON_SubDFromMeshParameters::ConvexCornerOption op = ON_SubDFromMeshParameters::ConvexCornerOptionFromUnsigned(option);
   if (parameters)
     parameters->SetConvexCornerOption(op);
+}
+
+RH_C_FUNCTION unsigned int ON_ToSubDParameters_ConcaveCornerOption(const ON_SubDFromMeshParameters* constParameters)
+{
+  if (constParameters)
+    return (unsigned int)constParameters->GetConcaveCornerOption();
+  return (unsigned int)ON_SubDFromMeshParameters::ConcaveCornerOption::Unset;
+}
+
+RH_C_FUNCTION void ON_ToSubDParameters_SetConcaveCornerOption(ON_SubDFromMeshParameters* parameters, unsigned int option)
+{
+  ON_SubDFromMeshParameters::ConcaveCornerOption op = ON_SubDFromMeshParameters::ConcaveCornerOptionFromUnsigned(option);
+  if (parameters)
+    parameters->SetConcaveCornerOption(op);
+}
+
+RH_C_FUNCTION double ON_ToSubDParameters_MinimumConcaveCornerAngleRadians(const ON_SubDFromMeshParameters* constParameters)
+{
+  if (constParameters)
+    return constParameters->MinimumConcaveCornerAngleRadians();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_ToSubDParameters_SetMinimumConcaveCornerAngleRadians(ON_SubDFromMeshParameters* parameters, double val)
+{
+  if (parameters)
+    parameters->SetMinimumConcaveCornerAngleRadians(val);
+}
+
+
+RH_C_FUNCTION unsigned int ON_ToSubDParameters_MinimumConcaveCornerEdgeCount(const ON_SubDFromMeshParameters* constParameters)
+{
+  if (constParameters)
+    return constParameters->MinimumConcaveCornerEdgeCount();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_ToSubDParameters_SetMinimumConcaveCornerEdgeCount(ON_SubDFromMeshParameters* parameters, unsigned int val)
+{
+  if (parameters)
+    parameters->SetMinimumConcaveCornerEdgeCount(val);
 }
 
 
@@ -429,14 +469,14 @@ RH_C_FUNCTION const ON_SubDVertex* ON_SubDEdge_GetVertex(const ON_SubDEdge* cons
   return vertex;
 }
 
-RH_C_FUNCTION ON_SubD::EdgeTag ON_SubDEdge_GetEdgeTag(const ON_SubDEdge* constEdgePtr)
+RH_C_FUNCTION ON_SubDEdgeTag ON_SubDEdge_GetEdgeTag(const ON_SubDEdge* constEdgePtr)
 {
   if (constEdgePtr)
     return constEdgePtr->m_edge_tag;
-  return ON_SubD::EdgeTag::Unset;
+  return ON_SubDEdgeTag::Unset;
 }
 
-RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag(ON_SubDEdge* edgePtr, const ON_SubD::EdgeTag tag)
+RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag(ON_SubDEdge* edgePtr, const ON_SubDEdgeTag tag)
 {
   if (edgePtr)
     edgePtr->m_edge_tag = tag;

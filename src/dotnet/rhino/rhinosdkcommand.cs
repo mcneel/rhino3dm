@@ -12,6 +12,7 @@ namespace Rhino.Commands
   /// Defines bitwise mask flags for different styles of commands, such as
   /// <see cref="Style.Hidden">Hidden</see> or <see cref="Style.DoNotRepeat">DoNotRepeat</see>.
   /// </summary>
+  /// <since>5.0</since>
   [Flags]
   public enum Style
   {
@@ -51,6 +52,7 @@ namespace Rhino.Commands
   /// <summary>
   /// Provides enumerated constants for a command running mode. This is currently interactive or scripted.
   /// </summary>
+  /// <since>5.0</since>
   public enum RunMode
   {
     /// <summary>
@@ -100,6 +102,7 @@ namespace Rhino.Commands
   /// <summary>
   /// Defines enumerated constant values for several command result types.
   /// </summary>
+  /// <since>5.0</since>
   public enum Result
   {
     /// <summary>Command worked.</summary>
@@ -989,56 +992,6 @@ namespace Rhino.Commands
 
     //CRhinoView* View() { return m_view; }
     //bool ObjectsWerePreSelected() { return m_objects_were_preselected; }
-  }
-
-  /// <summary>
-  /// This class may be used to replace the built in BlockEdit command with a
-  /// plug-in version.  Make sure to make your plug-in a load at startup plug-in
-  /// when replacing the command to ensure the command is properly overridden.
-  /// </summary>
-  public abstract class BlockEditCommand
-  {
-    /// <summary>
-    /// Call this method to register your replacement command, the last command
-    /// registered will be called.
-    /// </summary>
-    /// <param name="replacementCommand"></param>
-    public static void ReplaceWith(BlockEditCommand replacementCommand)
-    {
-      Replacement = replacementCommand;
-    }
-
-    /// <summary>
-    /// The current replacement command
-    /// </summary>
-    public static BlockEditCommand Replacement { get; private set; }
-
-    /// <summary>
-    /// Call this method to determine if a document is being blocked edited.
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <returns>
-    /// Returns true if the specified document is editing a block.
-    /// </returns>
-    public static bool InBlockEditMode(RhinoDoc doc)
-    {
-      return Replacement?.IsBlockEditing(doc) ?? false;
-    }
-
-    /// <summary>
-    /// Called to determine if the specified document was not block edit mode.
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <returns></returns>
-    public abstract bool IsBlockEditing(RhinoDoc doc);
-
-    /// <summary>
-    /// Called by the internal BlockEdit command when the command is executed.
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <param name="mode"></param>
-    /// <returns></returns>
-    public abstract Result RunCommand(RhinoDoc doc, RunMode mode);
   }
 }
 

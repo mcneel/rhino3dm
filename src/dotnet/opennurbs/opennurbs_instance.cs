@@ -67,8 +67,10 @@ namespace Rhino.Geometry
       ConstructNonConstObject(ptr);
     }
 
-    const int IDX_NAME = 0;
+    //const int IDX_NAME = 0;
     const int IDX_DESCRIPTION = 1;
+    const int IDX_URL = 2;
+    const int IDX_URLTAG = 3;
 
     /// <summary>
     /// Gets or sets the description of the definition.
@@ -90,6 +92,52 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_DESCRIPTION, value);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the URL or hyperlink of the definition.
+    /// </summary>
+    /// <since>7.0</since>
+    public string Url
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_URL, ptr_string);
+          return sh.ToString();
+        }
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_URL, value);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the description of the URL or hyperlink of the definition.
+    /// </summary>
+    /// <since>7.0</since>
+    public string UrlDescription
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_URLTAG, ptr_string);
+          return sh.ToString();
+        }
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_URLTAG, value);
       }
     }
 
