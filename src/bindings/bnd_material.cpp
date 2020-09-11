@@ -111,7 +111,7 @@ bool BND_Material::SetTransparencyTexture2(const BND_Texture& texture)
 
 bool BND_PhysicallyBasedMaterial::Supported() const
 {
-  return m_material->PhysicallyBased().Supported();
+  return m_material->IsPhysicallyBased();
 }
 
 //////////////////////////////////////////////////////////////////////////////

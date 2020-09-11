@@ -93,38 +93,38 @@ public:
   //public Rhino.Display.Color4f BaseColor{ get; set; }
   //public BRDFs BRDF{ get; set; }
   //public Rhino.Display.Color4f SubsurfaceScatteringColor{ get; set; }
-  double Subsurface() const { return m_material->PhysicallyBased().Subsurface(); }
-  void SetSubsurface(double s) { m_material->PhysicallyBased().SetSubsurface(s); }
-  double SubsurfaceScatteringRadius() const { return m_material->PhysicallyBased().SubsurfaceScatteringRadius(); }
-  void SetSubsurfaceScatteringRadius(double s) { m_material->PhysicallyBased().SetSubsurfaceScatteringRadius(s); }
-  double Metallic() const { return m_material->PhysicallyBased().Metallic(); }
-  void SetMetallic(double m) { m_material->PhysicallyBased().SetMetallic(m); }
-  double Specular() const { return m_material->PhysicallyBased().Specular(); }
-  void SetSpecular(double s) { m_material->PhysicallyBased().SetSpecular(s); }
-  double ReflectiveIOR() const { return m_material->PhysicallyBased().ReflectiveIOR(); }
-  void SetReflectiveIOR(double r) { m_material->PhysicallyBased().SetReflectiveIOR(r); }
-  double SpecularTint() const { return m_material->PhysicallyBased().SpecularTint(); }
-  void SetSpecularTint(double st) { m_material->PhysicallyBased().SetSpecularTint(st); }
-  double Roughness() const { return m_material->PhysicallyBased().Roughness(); }
-  void SetRoughness(double r) { m_material->PhysicallyBased().SetRoughness(r); }
-  double Anisotropic() const { return m_material->PhysicallyBased().Anisotropic(); }
-  void SetAnisotropic(double a) { m_material->PhysicallyBased().SetAnisotropic(a); }
-  double AnisotropicRotation() const { return m_material->PhysicallyBased().AnisotropicRotation(); }
-  void SetAnisotropicRotation(double ar) { m_material->PhysicallyBased().SetAnisotropicRotation(ar); }
-  double Sheen() const { return m_material->PhysicallyBased().Sheen(); }
-  void SetSheen(double s) { m_material->PhysicallyBased().SetSheen(s); }
-  double SheenTint() const { return m_material->PhysicallyBased().SheenTint(); }
-  void SetSheenTint(double st) { m_material->PhysicallyBased().SetSheenTint(st); }
-  double Clearcoat() const { return m_material->PhysicallyBased().Clearcoat(); }
-  void SetClearcoat(double cc) { m_material->PhysicallyBased().SetClearcoat(cc); }
-  double ClearcoatRoughness() const { return m_material->PhysicallyBased().ClearcoatRoughness(); }
-  void SetClearcoatRoughness(double c) { m_material->PhysicallyBased().SetClearcoatRoughness(c); }
-  double OpacityIOR() const { return m_material->PhysicallyBased().OpacityIOR(); }
-  void SetOpacityIOR(double o) { m_material->PhysicallyBased().SetOpacityIOR(o); }
-  double Opacity() const { return m_material->PhysicallyBased().Opacity(); }
-  void SetOpacity(double o) { m_material->PhysicallyBased().SetOpacity(o); }
-  double OpacityRoughness() const { return m_material->PhysicallyBased().OpacityRoughness(); }
-  void SetOpacityRoughness(double o) { m_material->PhysicallyBased().SetOpacityRoughness(o); }
+  double Subsurface() const { return m_material->PhysicallyBased()->Subsurface(); }
+  void SetSubsurface(double s) { m_material->PhysicallyBased()->SetSubsurface(s); }
+  double SubsurfaceScatteringRadius() const { return m_material->PhysicallyBased()->SubsurfaceScatteringRadius(); }
+  void SetSubsurfaceScatteringRadius(double s) { m_material->PhysicallyBased()->SetSubsurfaceScatteringRadius(s); }
+  double Metallic() const { return m_material->PhysicallyBased()->Metallic(); }
+  void SetMetallic(double m) { m_material->PhysicallyBased()->SetMetallic(m); }
+  double Specular() const { return m_material->PhysicallyBased()->Specular(); }
+  void SetSpecular(double s) { m_material->PhysicallyBased()->SetSpecular(s); }
+  double ReflectiveIOR() const { return m_material->PhysicallyBased()->ReflectiveIOR(); }
+  void SetReflectiveIOR(double r) { m_material->PhysicallyBased()->SetReflectiveIOR(r); }
+  double SpecularTint() const { return m_material->PhysicallyBased()->SpecularTint(); }
+  void SetSpecularTint(double st) { m_material->PhysicallyBased()->SetSpecularTint(st); }
+  double Roughness() const { return m_material->PhysicallyBased()->Roughness(); }
+  void SetRoughness(double r) { m_material->PhysicallyBased()->SetRoughness(r); }
+  double Anisotropic() const { return m_material->PhysicallyBased()->Anisotropic(); }
+  void SetAnisotropic(double a) { m_material->PhysicallyBased()->SetAnisotropic(a); }
+  double AnisotropicRotation() const { return m_material->PhysicallyBased()->AnisotropicRotation(); }
+  void SetAnisotropicRotation(double ar) { m_material->PhysicallyBased()->SetAnisotropicRotation(ar); }
+  double Sheen() const { return m_material->PhysicallyBased()->Sheen(); }
+  void SetSheen(double s) { m_material->PhysicallyBased()->SetSheen(s); }
+  double SheenTint() const { return m_material->PhysicallyBased()->SheenTint(); }
+  void SetSheenTint(double st) { m_material->PhysicallyBased()->SetSheenTint(st); }
+  double Clearcoat() const { return m_material->PhysicallyBased()->Clearcoat(); }
+  void SetClearcoat(double cc) { m_material->PhysicallyBased()->SetClearcoat(cc); }
+  double ClearcoatRoughness() const { return m_material->PhysicallyBased()->ClearcoatRoughness(); }
+  void SetClearcoatRoughness(double c) { m_material->PhysicallyBased()->SetClearcoatRoughness(c); }
+  double OpacityIOR() const { return m_material->PhysicallyBased()->OpacityIOR(); }
+  void SetOpacityIOR(double o) { m_material->PhysicallyBased()->SetOpacityIOR(o); }
+  double Opacity() const { return m_material->PhysicallyBased()->Opacity(); }
+  void SetOpacity(double o) { m_material->PhysicallyBased()->SetOpacity(o); }
+  double OpacityRoughness() const { return m_material->PhysicallyBased()->OpacityRoughness(); }
+  void SetOpacityRoughness(double o) { m_material->PhysicallyBased()->SetOpacityRoughness(o); }
   //public Rhino.Display.Color4f Emission{ get; set; }
 };
 
