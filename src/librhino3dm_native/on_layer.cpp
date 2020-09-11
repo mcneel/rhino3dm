@@ -255,7 +255,7 @@ RH_C_FUNCTION int ON_Layer_GetPerViewportColor(const ON_Layer* pLayer, ON_UUID v
     else
       rc = pLayer->PerViewportPlotColor(viewportId);
   }
-  return (int)rc.WindowsRGB();
+  return (int)rc;
 }
 
 RH_C_FUNCTION void ON_Layer_SetPerViewportColor(ON_Layer* pLayer, ON_UUID viewportId, int argb, bool regularColor)

@@ -5,6 +5,7 @@ using System;
 namespace Rhino.Input.Custom
 {
   /// <summary> Provides picking values that describe common CAD picking behavior. </summary>
+  /// <since>5.0</since>
   public enum PickStyle
   {
     None = 0,
@@ -14,6 +15,7 @@ namespace Rhino.Input.Custom
   }
 
   /// <summary> Picking can happen in wireframe or shaded display mode </summary>
+  /// <since>5.0</since>
   public enum PickMode
   {
     Wireframe = 1,
@@ -417,6 +419,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>5.0</since>
     public enum MeshPickStyle
     {
       /// <summary>Checks for vertex and edge hits</summary>
@@ -427,6 +430,7 @@ namespace Rhino.Input.Custom
       VertexOnlyPicking = 2
     }
 
+    /// <since>5.0</since>
     public enum MeshHitFlag
     {
       Invalid = -1,

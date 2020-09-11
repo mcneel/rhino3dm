@@ -1,21 +1,16 @@
-#if RHINO_SDK
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Rhino.Runtime.InteropWrappers;
+using Rhino.Runtime;
+
+#if RHINO_SDK
 namespace Rhino
 {
   static class RhinoFileEventWatcherHooks
   {
     public static void SetHooks()
     {
-      UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_SetHooks(
-        g_attach_hook,
-        g_detatch_hook,
-        g_watch_hook,
-        g_enable_hook
-      );
+      HostUtils.RegisterNamedCallback("CRhCmnFileEventWatcherInteropHook", HookProc);
     }
 
     internal static void DumpException(Exception exception)
@@ -34,90 +29,110 @@ namespace Rhino
       DumpException(exception);
     }
 
-    internal delegate void AttachFileWatcherDelegate(IntPtr pointerToIRhinoFileEventWatcher);
-    private static readonly AttachFileWatcherDelegate g_attach_hook = AttachHook;
-    private static void AttachHook(IntPtr pointerToIRhinoFileEventWatcher)
+    enum HookProcAction
     {
+      Attach  = 1,
+      Detatch = 2,
+      Watch   = 3,
+      Enable  = 4
+    }
+
+    public static void HookProc(object sender, NamedParametersEventArgs args)
+    {
+      var result = -1;
       try
       {
-        if (g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
-          return;
-        watcher = new RhinoFileWatcher(pointerToIRhinoFileEventWatcher);
-        g_watchers[pointerToIRhinoFileEventWatcher] = watcher;
+        if (args.TryGetUnsignedInt("runtimeSerialNumber", out uint sn) && sn > 0 && args.TryGetInt("action", out int action))
+        {
+          if (!Enum.IsDefined(typeof(HookProcAction), action))
+            return;
+          switch ((HookProcAction)action)
+          {
+            case HookProcAction.Attach:
+              result = AttachHook(sn) ? 1 : 0;
+              break;
+            case HookProcAction.Detatch:
+              result = DetatchHook(sn) ? 1 : 0;
+              break;
+            case HookProcAction.Watch:
+              if (args.TryGetString("directory", out string directory) && args.TryGetString("fileName", out string file_name))
+                result = WatchHook(sn, directory, file_name) ? 1 : 0;
+              break;
+            case HookProcAction.Enable:
+              if (args.TryGetBool("enable", out bool enable) && args.TryGetBool("set", out bool set))
+                result = EnableHook(sn, enable, set);
+              break;
+          }
+        }
       }
       catch (Exception exception)
       {
         ReportException(exception);
       }
+      finally
+      {
+        args.Set("result", result);
+      }
     }
 
-    private static readonly AttachFileWatcherDelegate g_detatch_hook = DetatchHook;
-    private static void DetatchHook(IntPtr pointerToIRhinoFileEventWatcher)
+    private static bool AttachHook(uint runtimeSerialNumber)
     {
-      try
-      {
-        if (!g_watchers.TryGetValue(pointerToIRhinoFileEventWatcher, out RhinoFileWatcher watcher))
-          return;
-        g_watchers.Remove(pointerToIRhinoFileEventWatcher);
-        watcher.Dispose();
-      }
-      catch (Exception exception)
-      {
-        ReportException(exception);
-      }
+      if (g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher))
+        return true;
+      watcher = new RhinoFileWatcher(runtimeSerialNumber);
+      g_watchers[runtimeSerialNumber] = watcher;
+      return true;
     }
 
-    internal delegate void FileWatcherWatchDelegate(IntPtr pointerToIRhinoFileEventWatcher, IntPtr pathWStringPointer, IntPtr filterWStringPointer);
-    private static readonly FileWatcherWatchDelegate g_watch_hook = WatchHook;
-    private static void WatchHook(IntPtr pointerToIRhinoFileEventWatcher, IntPtr pathWStringPointer, IntPtr filterWStringPointer)
+    private static bool DetatchHook(uint runtimeSerialNumber)
     {
-      try
-      {
-        AttachHook(pointerToIRhinoFileEventWatcher);
-        var path = StringWrapper.GetStringFromPointer(pathWStringPointer);
-        var filter = StringWrapper.GetStringFromPointer(filterWStringPointer);
-        g_watchers[pointerToIRhinoFileEventWatcher].Watch(path, filter);
-      }
-      catch (Exception exception)
-      {
-        ReportException(exception);
-      }
+      if (!g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher))
+        return false;
+      g_watchers.Remove(runtimeSerialNumber);
+      watcher.Dispose();
+      return true;
     }
 
-    internal delegate int FileWatcherEnableDelegate(IntPtr pointerToIRhinoFileEventWatcher, int enanble, int set);
-    private static readonly FileWatcherEnableDelegate g_enable_hook = EnableHook;
-    private static int EnableHook(IntPtr pointerToIRhinoFileEventWatcher, int enanble, int set)
+    private static bool WatchHook(uint runtimeSerialNumber, string directory, string fileName)
     {
-      try
-      {
-        AttachHook(pointerToIRhinoFileEventWatcher);
-        if (set > 0)
-          g_watchers[pointerToIRhinoFileEventWatcher].Enabled = enanble > 0;
-        return g_watchers[pointerToIRhinoFileEventWatcher].Enabled ? 1 : 0;
-      }
-      catch (Exception exception)
-      {
-        ReportException(exception);
-        return 0;
-      }
+      AttachHook(runtimeSerialNumber);
+      g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher);
+      return watcher?.Watch(directory, fileName) ?? false;
     }
 
-    private static Dictionary<IntPtr, RhinoFileWatcher> g_watchers = new Dictionary<IntPtr, RhinoFileWatcher>();
+    private static int EnableHook(uint runtimeSerialNumber, bool enanble, bool set)
+    {
+      AttachHook(runtimeSerialNumber);
+      g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher);
+      if (set && watcher != null)
+        watcher.Enabled = enanble;
+      return watcher == null ? -1 : (watcher.Enabled ? 1 : 0);
+    }
+
+    internal static void DisposedOf(uint runtimeSerialNumber)
+    {
+      if (g_watchers.ContainsKey(runtimeSerialNumber))
+        g_watchers.Remove(runtimeSerialNumber);
+    }
+
+    private static Dictionary<uint, RhinoFileWatcher> g_watchers = new Dictionary<uint, RhinoFileWatcher>();
   }
 
   class RhinoFileWatcher : IDisposable
   {
-    internal RhinoFileWatcher(IntPtr pointerToIRhinoFileEventWatcher)
+    internal RhinoFileWatcher(uint runtimeSerialNumber)
     {
       try
       {
-        Pointer = pointerToIRhinoFileEventWatcher;
+        RuntimeSerialNumber = runtimeSerialNumber;
         Watcher = new FileSystemWatcher
         {
           // Disable watching
           EnableRaisingEvents = false,
           // Watch for changes in LastAccess and LastWrite times, and the renaming of files or directories.
-          NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+          //ALB - I'm fairly sure we don't need to know when a file was last accessed...and it seems like this would be a bad thing
+          //to notify about.
+          NotifyFilter = /*NotifyFilters.LastAccess | */NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
         };
         // Add event handlers.
         Watcher.Changed += OnChanged;
@@ -181,32 +196,32 @@ namespace Rhino
     // Define the event handlers.
     private void OnChanged(object source, FileSystemEventArgs e)
     {
-      RhinoApp.InvokeOnUiThread(ChangedHook, Pointer, (RhinoFileWatcherChangeReason)e.ChangeType, e.FullPath);
+      RhinoApp.InvokeOnUiThread(ChangedHook, RuntimeSerialNumber, (RhinoFileWatcherChangeReason)e.ChangeType, e.FullPath);
     }
 
-    private delegate void ChangedDelegate(IntPtr pointer, Rhino.RhinoFileWatcherChangeReason reason, string path);
+    private delegate void ChangedDelegate(uint runtimeSerialNumber, RhinoFileWatcherChangeReason reason, string path);
     private static ChangedDelegate ChangedHook = ChangedFunc;
-    private static void ChangedFunc(IntPtr pointer, Rhino.RhinoFileWatcherChangeReason reason, string path)
+    private static void ChangedFunc(uint runtimeSerialNumber, RhinoFileWatcherChangeReason reason, string path)
     {
       // Specify what is done when a file is changed, created, or deleted.
-      UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Changed(pointer, reason, path);
+      UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Changed(runtimeSerialNumber, reason, path);
     }
 
     private void OnRenamed(object source, RenamedEventArgs e)
     {
-      RhinoApp.InvokeOnUiThread(RenamedHook, Pointer, e.OldFullPath, e.FullPath);
+      RhinoApp.InvokeOnUiThread(RenamedHook, RuntimeSerialNumber, e.OldFullPath, e.FullPath);
     }
 
-    private delegate void RenamedDelegate(IntPtr pointer, string oldName, string newName);
+    private delegate void RenamedDelegate(uint runtimeSerialNumber, string oldName, string newName);
     private static RenamedDelegate RenamedHook = RenamedFunc;
-    private static void RenamedFunc(IntPtr pointer, string oldName, string newName)
+    private static void RenamedFunc(uint runtimeSerialNumber, string oldName, string newName)
     {
       // Specify what is done when a file is renamed.
-      UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Renamed(pointer, oldName, newName);
+      UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Renamed(runtimeSerialNumber, oldName, newName);
     }
 
     private FileSystemWatcher Watcher { get; set; }
-    private IntPtr Pointer { get; }
+    private uint RuntimeSerialNumber { get; }
     private bool _enabled;
     public bool Enabled
     {
@@ -226,6 +241,7 @@ namespace Rhino
 
     public void Dispose()
     {
+      RhinoFileEventWatcherHooks.DisposedOf(RuntimeSerialNumber);
       if (Watcher == null)
         return;
       Watcher.EnableRaisingEvents = false;
@@ -241,5 +257,4 @@ namespace Rhino
     public bool IsFile { get; private set; }
   }
 }
-
 #endif

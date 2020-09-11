@@ -5,6 +5,7 @@ using Rhino.Runtime.InteropWrappers;
 #if RHINO_SDK
 namespace Rhino.Input.Custom
 {
+  /// <since>5.1</since>
   public enum GetLineMode : int
   {
     TwoPoint = 0,

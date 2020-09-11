@@ -9,6 +9,7 @@ namespace Rhino.DocObjects
   public class FontQuartet
   {
     // make constructor public after conversation with Steve on slack #dev channel on March 9th 2020
+    /// <since>6.26</since>
     public FontQuartet(string name, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
     {
       QuartetName = name;
@@ -61,7 +62,7 @@ namespace Rhino.DocObjects
       m_managed_font = managedFont;
     }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !MOBILE_BUILD
     /// <since>5.0</since>
     public static string[] AvailableFontFaceNames()
     {

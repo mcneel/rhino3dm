@@ -168,6 +168,11 @@ RH_C_FUNCTION void ON_Mesh_SetCachedTextureCoordinates(ON_Mesh* pMesh, ON_Textur
   pMesh->SetCachedTextureCoordinates(*pMapping, pXform, bLazy);
 }
 
+RH_C_FUNCTION void ON_Mesh_SetCachedTextureCoordinatesEx(ON_Mesh* pMesh, ON_TextureMapping* pMapping, ON_Xform* pXform, bool bLazy, bool bSeamCheck)
+{
+  pMesh->SetCachedTextureCoordinatesEx(*pMapping, pXform, bLazy, bSeamCheck);
+}
+
 RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_CachedTextureCoordinates(ON_Mesh* pMesh, ON_UUID id)
 
 {
@@ -382,14 +387,19 @@ RH_C_FUNCTION bool ON_Mesh_SetTextureCoordinates2(ON_Mesh* pMesh, const ON_Textu
   return rc;
 }
 
-RH_C_FUNCTION bool ON_Mesh_SetTextureCoordinatesFromMappingAndTransform(ON_Mesh* pMesh, const ON_TextureMapping* pConstTextureMapping, const ON_Xform* xf, bool lazy)
+RH_C_FUNCTION bool ON_Mesh_SetTextureCoordinatesFromMappingAndTransformEx(ON_Mesh* pMesh, const ON_TextureMapping* pConstTextureMapping, const ON_Xform* xf, bool lazy, bool seamCheck)
 {
   bool rc = false;
   if (pMesh && pConstTextureMapping && xf)
   {
-    rc = pMesh->SetTextureCoordinates(*pConstTextureMapping, xf, lazy);
+    rc = pMesh->SetTextureCoordinatesEx(*pConstTextureMapping, xf, lazy, seamCheck);
   }
   return rc;
+}
+
+RH_C_FUNCTION bool ON_Mesh_SetTextureCoordinatesFromMappingAndTransform(ON_Mesh* pMesh, const ON_TextureMapping* pConstTextureMapping, const ON_Xform* xf, bool lazy)
+{
+  return ON_Mesh_SetTextureCoordinatesFromMappingAndTransformEx(pMesh, pConstTextureMapping, xf, lazy, true);
 }
 
 RH_C_FUNCTION void ON_Mesh_GetMappingTag(const ON_Mesh* pConstMesh, int which_tag, ON_UUID* id, int* mapping_type, unsigned int* crc, ON_Xform* xf)
@@ -872,7 +882,7 @@ RH_C_FUNCTION bool ON_Mesh_IsManifold(const ON_Mesh* ptr, bool topotest, bool* i
   return rc;
 }
 
-RH_C_FUNCTION int ON_Mesh_DeleteFace(ON_Mesh* pMesh, int count, /*ARRAY*/const int* indices)
+RH_C_FUNCTION int ON_Mesh_DeleteFace(ON_Mesh* pMesh, int count, /*ARRAY*/const int* indices, bool compact)
 {
   int init_ct = 0;
   if (pMesh && count > 0 && indices)
@@ -895,7 +905,22 @@ RH_C_FUNCTION int ON_Mesh_DeleteFace(ON_Mesh* pMesh, int count, /*ARRAY*/const i
     }
 
     init_ct = pMesh->FaceCount();
-    pMesh->DeleteComponents(index_array);
+
+    //defaults in DeleteComponents() if not passed as arguments
+    bool bIgnoreInvalidComponents = true;
+    bool bRemoveDegenerateFaces = false;
+    bool bRemoveUnusedVertices = true;
+    bool bRemoveEmptyNgons = true;
+
+    bRemoveUnusedVertices = compact;
+
+    pMesh->DeleteComponents(
+      index_array, index_array.Count(),
+      bIgnoreInvalidComponents,
+      bRemoveDegenerateFaces,
+      bRemoveUnusedVertices,
+      bRemoveEmptyNgons
+    );
     return init_ct - pMesh->FaceCount();
   }
 

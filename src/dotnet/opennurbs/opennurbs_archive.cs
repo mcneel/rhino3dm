@@ -1913,6 +1913,14 @@ namespace Rhino.Collections
     public bool Set(string key, IEnumerable<DocObjects.ObjRef> val) { return SetItem(key, ItemType.ArrayObjRef, val); }
 #endif
 
+    /// <summary>
+    /// Sets an array of <see cref="Rhino.Geometry.GeometryBase"/>
+    /// </summary>
+    /// <param name="key">A text key</param>
+    /// <param name="val">An object for that key
+    /// <para>Because this class is a reference type and is mutable, changes to this object <b>will propagate</b> to the object inside the dictionary.</para>
+    /// <para>It is up to the user to clone this entry when appropriate.</para></param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <since>7.0</since>
     public bool Set(string key, IEnumerable<Geometry.GeometryBase> val) { return SetItem(key, ItemType.ArrayGeometry, val); }
 
@@ -3123,6 +3131,7 @@ namespace Rhino.FileIO
     /// V5 files, the CheckSum read is discarded
     /// </summary>
     /// <since>6.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("This is only present to allow writing of old, empty ON_CheckSum data")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public void WriteEmptyCheckSum()
@@ -4207,6 +4216,7 @@ namespace Rhino.FileIO
     /// V5 files, the CheckSum read is discarded
     /// </summary>
     /// <since>6.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("This is only present to allow reading of old ON_CheckSum data")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public void ReadCheckSum()
@@ -4322,6 +4332,7 @@ namespace Rhino.FileIO
     #endregion
   }
 
+  /// <since>5.1</since>
   public enum BinaryArchiveMode : int
   {
     Unknown = 0,

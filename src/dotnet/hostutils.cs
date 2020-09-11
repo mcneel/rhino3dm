@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Rhino.Runtime.InteropWrappers;
 using System.Net.NetworkInformation;
+using Rhino.DocObjects;
+using System.Diagnostics;
 
 #if RHINO_SDK
 using Rhino.PlugIns;
@@ -320,7 +322,31 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Try to get a Point3d value for a given key name
+    /// Try to get a Vector3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetVector(string name, out Geometry.Vector3d value)
+    {
+      value = Rhino.Geometry.Vector3d.Unset;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetVector3d(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set a Vector3d value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>7.0</since>
+    public void Set(string name, Geometry.Vector3d value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetVector3d(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Try to get a Color value for a given key name
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
@@ -337,7 +363,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Set a Point3d value for a given key name
+    /// Set a Color value for a given key name
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
@@ -345,6 +371,25 @@ namespace Rhino.Runtime
     public void Set(string name, Color value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetColor(m_pNamedParams, name, value.ToArgb());
+    }
+
+    /// <summary>
+    /// Try to get a viewport for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="viewport"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetViewport(string name, out ViewportInfo viewport)
+    {
+      viewport = null;
+      IntPtr ptr_viewport = UnsafeNativeMethods.CRhParameterDictionary_GetViewport(m_pNamedParams, name);
+      if( ptr_viewport != IntPtr.Zero)
+      {
+        viewport = new ViewportInfo(ptr_viewport, true);
+        return true;
+      }
+      return false;
     }
 
     /// <summary>
@@ -754,6 +799,33 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Get/Set additional search paths used by the python interpreter
+    /// </summary>
+    public static string[] SearchPaths
+    {
+      get
+      {
+        var script = Create();
+        if (script != null)
+          return script.GetSearchPaths();
+        return new string[0];
+      }
+      set
+      {
+        var script = Create();
+        if (script != null)
+          script.SetSearchPaths(value);
+      }
+    }
+
+    /// <summary>Protected helper function for static SearchPaths</summary>
+    /// <returns></returns>
+    protected abstract string[] GetSearchPaths();
+    /// <summary>Protected helper function for static SearchPaths</summary>
+    /// <param name="paths"></param>
+    protected abstract void SetSearchPaths(string[] paths);
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="PythonScript"/> class.
     /// </summary>
     protected PythonScript()
@@ -1023,6 +1095,30 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Indicates whether Rhino is running inside another application.
+    /// returns false if Rhino.exe is the top-level application.
+    /// returns true if some other application is the top-level application.
+    /// </summary>
+    /// <since>7.0</since>
+    public static bool RunningAsRhinoInside
+    {
+      get
+      {
+        string processName;
+        Version processVersion;
+        GetCurrentProcessInfo(out processName, out processVersion);
+        if (processName == "Rhino")
+        {
+          return false;
+        }
+        else
+        {
+          return true;
+        }
+      }
+    }
+
+    /// <summary>
     /// Returns information about the current process. If Rhino is the top level process,
     /// processName is "Rhino". Otherwise, processName is the name, without extension, of the main
     /// module that is executing. For example, "compute.backend" or "Revit".
@@ -1082,6 +1178,12 @@ namespace Rhino.Runtime
         //RH-55659 Docker environment should always report "Server".
         if (string.Equals(Environment.UserName, "ContainerAdministrator", StringComparison.InvariantCultureIgnoreCase))
           return "Server";
+
+#if DEBUG
+        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHINO_TOKEN")))
+          return "Server";
+#endif
+
 
         //RH-55179 Plain Cloud Zoo files: always report "Server"
         var settings = Rhino.PlugIns.PlugIn.GetPluginSettings(Rhino.RhinoApp.CurrentRhinoId, false);
@@ -1160,32 +1262,31 @@ namespace Rhino.Runtime
       if (!g_platform_locator.ContainsKey(assemblyPath))
       {
         g_platform_locator[assemblyPath] = new DoNothingLocator();
-        if (RunningInRhino)
-        {
-          var service_type = typeof(IPlatformServiceLocator);
-          var path_to_rhinocommon = service_type.Assembly.Location;
-          var path = System.IO.Path.GetDirectoryName(path_to_rhinocommon);
-          path = System.IO.Path.Combine(path, assemblyPath);
-          var platform_assembly = System.Reflection.Assembly.LoadFrom(path);
+#if RHINO_SDK
+        var service_type = typeof(IPlatformServiceLocator);
+        var path_to_rhinocommon = service_type.Assembly.Location;
+        var path = System.IO.Path.GetDirectoryName(path_to_rhinocommon);
+        path = System.IO.Path.Combine(path, assemblyPath);
+        var platform_assembly = System.Reflection.Assembly.LoadFrom(path);
 
-          if (typeFullName == null)
+        if (typeFullName == null)
+        {
+          Type[] types = platform_assembly.GetExportedTypes();
+          foreach (var t in types)
           {
-            Type[] types = platform_assembly.GetExportedTypes();
-            foreach (var t in types)
+            if (!t.IsAbstract && service_type.IsAssignableFrom(t))
             {
-              if (!t.IsAbstract && service_type.IsAssignableFrom(t))
-              {
-                g_platform_locator[assemblyPath] = Activator.CreateInstance(t) as IPlatformServiceLocator;
-                break;
-              }
+              g_platform_locator[assemblyPath] = Activator.CreateInstance(t) as IPlatformServiceLocator;
+              break;
             }
           }
-          else
-          {
-            object instantiated = platform_assembly.CreateInstance(typeFullName);
-            g_platform_locator[assemblyPath] = instantiated as IPlatformServiceLocator;
-          }
         }
+        else
+        {
+          object instantiated = platform_assembly.CreateInstance(typeFullName);
+          g_platform_locator[assemblyPath] = instantiated as IPlatformServiceLocator;
+        }
+#endif
       }
       return g_platform_locator[assemblyPath].GetService<T>();
     }
@@ -1238,11 +1339,11 @@ namespace Rhino.Runtime
     /// <param name="name"></param>
     /// <param name="args"></param>
     /// <since>7.0</since>
-    public static void ExecuteNamedCallback(string name, NamedParametersEventArgs args)
+    public static bool ExecuteNamedCallback(string name, NamedParametersEventArgs args)
     {
       // Don't directly call the function on our dictionary and instead indirectly call
       // through C++. This allows for cross AppDomain calls
-      UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
+      return UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
     }
 
     static int ExecuteNamedCallbackHelper(IntPtr name, IntPtr ptrNamedParams)
@@ -1319,6 +1420,16 @@ namespace Rhino.Runtime
       string rhino_common_location = typeof(HostUtils).Assembly.Location;
       directories.Add(System.IO.Path.GetDirectoryName(rhino_common_location));
       directories.AddRange(PlugIn.GetInstalledPlugInFolders());
+
+      // 6 May 2020 S. Baer
+      // It seems like there are cases where Grasshopper isn't getting picked up as an installed
+      // plug-in on OSX at start. Just tell the resolver "this is a good place to look"
+      if(HostUtils.RunningOnOSX)
+      {
+        string rhinoCommonDir = System.IO.Path.GetDirectoryName(rhino_common_location);
+        string grasshopperDirectory = System.IO.Path.Combine(rhinoCommonDir, "ManagedPlugIns", "GrasshopperPlugin.rhp");
+        directories.Add(grasshopperDirectory);
+      }
 
       // 3 June 2019 S. Baer (RH-48975)
       // Add the grasshopper components directory so we can find galapagos and kangaroosolver
@@ -1904,6 +2015,7 @@ namespace Rhino.Runtime
     /// Represents the type of message that is being sent to the OnSendLogMessageToCloud event
     /// </summary>
     ///
+    /// <since>6.4</since>
     public enum LogMessageType : int
     {
       /// <summary>
@@ -2592,6 +2704,15 @@ namespace Rhino.Runtime
       try
       {
         string str_path = StringWrapper.GetStringFromPointer (path);
+        if (RunningOnOSX)
+        {
+          if(System.IO.Directory.Exists(str_path))
+          {
+            var files = System.IO.Directory.GetFiles(str_path, "*.rhp");
+            if (files != null && files.Length > 0)
+              str_path = files[0];
+          }
+        }
         var reflect_assembly = System.Reflection.Assembly.ReflectionOnlyLoadFrom(str_path);
         object[] idAttr = reflect_assembly.GetCustomAttributes(typeof(GuidAttribute), false);
         GuidAttribute id = (GuidAttribute)(idAttr[0]);
@@ -2755,10 +2876,8 @@ namespace Rhino.Runtime
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(true);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(true);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(true);
-      Rhino.Render.PostEffects.EarlyPostEffectPlugIn.SetCppHooks(true);
-      Rhino.Render.PostEffects.ToneMappingPostEffectPlugIn.SetCppHooks(true);
-      Rhino.Render.PostEffects.LatePostEffectPlugIn.SetCppHooks(true);
-      Rhino.Render.PostEffects.PostEffectFactory.SetCppHooks(true);
+      Rhino.Render.PostEffects.PostEffect.SetCppHooks(true);
+      Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
       Rhino.UI.Controls.FactoryBase.Register();
@@ -2778,10 +2897,8 @@ namespace Rhino.Runtime
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(false);
-      Rhino.Render.PostEffects.EarlyPostEffectPlugIn.SetCppHooks(false);
-      Rhino.Render.PostEffects.ToneMappingPostEffectPlugIn.SetCppHooks(false);
-      Rhino.Render.PostEffects.LatePostEffectPlugIn.SetCppHooks(false);
-      Rhino.Render.PostEffects.PostEffectFactory.SetCppHooks(false);
+      Rhino.Render.PostEffects.PostEffect.SetCppHooks(false);
+      Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
     }

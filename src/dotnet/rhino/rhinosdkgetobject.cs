@@ -355,6 +355,7 @@ namespace Rhino.Input.Custom
     /// If a subd (or a subd component) cannot be selected, but a brep (or brep
     /// component) can be selected, then automatically create and use a proxy brep.
     /// </summary>
+    /// <since>7.0</since>
     public bool ProxyBrepFromSubD
     {
       get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.ProxyBrepFromSubD); }
@@ -663,6 +664,7 @@ namespace Rhino.Input.Custom
   /// If an object passes the geometry TYPE filter, then the geometry ATTRIBUTE
   /// filter is applied.
   /// </summary>
+  /// <since>5.0</since>
   [Flags, CLSCompliant(false)]
   public enum GeometryAttributeFilter : uint
   {

@@ -24,6 +24,7 @@ namespace Rhino.Runtime
         else
           m_assembly_resolve = CurrentDomain_AssemblyResolve;
         AppDomain.CurrentDomain.AssemblyResolve += m_assembly_resolve;
+        AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += m_assembly_resolve;
       }
     }
 

@@ -304,6 +304,7 @@ namespace Rhino
       /// registered.
       /// </returns>
       /// <since>5.0</since>
+      /// <deprecated>6.0</deprecated>
       [Obsolete("Obsolete method, use GetPanel<MyClass>(RhinoDoc)")]
       public static object GetPanel(Guid panelId)
       {
@@ -317,6 +318,7 @@ namespace Rhino
       /// <typeparam name="T"></typeparam>
       /// <returns></returns>
       /// <since>6.0</since>
+      /// <deprecated>6.0</deprecated>
       [Obsolete("Obsolete method, use GetPanel<MyClass>(RhinoDoc)")]
       public static T GetPanel<T>() where T : class
       {
@@ -766,6 +768,7 @@ namespace Rhino
       /// Used by the FloatPanel method to determine if the floating panel
       /// should be shown or hidden.
       /// </summary>
+      /// <since>6.2</since>
       public enum FloatPanelMode
       {
         /// <summary>

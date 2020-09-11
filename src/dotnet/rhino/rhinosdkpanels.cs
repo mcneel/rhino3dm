@@ -11,6 +11,7 @@ namespace Rhino.UI
   /// <summary>
   /// Panel type
   /// </summary>
+  /// <since>6.1</since>
   public enum PanelType
   {
     /// <summary>
@@ -680,7 +681,7 @@ namespace Rhino.UI
         // Call the default constructor if args is null or empty otherwise
         // call the constructor passing a single uint
         var panel_object = Activator.CreateInstance(panelType, constructor_args);
-        var native_pointer = StackedDialogPage.Service.GetNativePageWindow(panel_object, true, out object host);
+        var native_pointer = StackedDialogPage.Service.GetNativePageWindow(panel_object, true, true, out object host);
         return native_pointer == IntPtr.Zero
                  ? null 
                  : new PanelInstance(panel_object, native_pointer, host, documentSerailNumber);

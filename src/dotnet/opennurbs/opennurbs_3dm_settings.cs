@@ -273,6 +273,7 @@ namespace Rhino.DocObjects
   /// <summary>
   /// The different focal blur modes of the ViewInfo
   /// </summary>
+  /// <since>6.0</since>
   [CLSCompliant(false)]
   public enum ViewInfoFocalBlurModes : uint
   {
@@ -720,7 +721,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets a point latitude on earth, in decimal degrees.
+    /// Gets or sets a point latitude on earth, in degrees.
     /// +90 = north pole, 0 = equator, -90 = south pole.
     /// </summary>
     /// <since>5.0</since>
@@ -731,9 +732,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets the point longitude on earth, in decimal degrees.
-    /// <para>0 = prime meridian (Greenwich meridian)</para>
-    /// <para>Values increase towards West</para>
+    /// Gets or sets the point longitude on earth, in degrees.
     /// </summary>
     /// <since>5.0</since>
     public double EarthBasepointLongitude
@@ -1014,6 +1013,7 @@ namespace Rhino.DocObjects
   /// Specifies enumerated constants used to indicate the zero level convention relating to a location on Earth.
   /// <para>This is used in conjunction with the <see cref="EarthAnchorPoint"/> class.</para>
   /// </summary>
+  /// <since>5.0</since>
   public enum BasepointZero
   {
     /// <summary>
@@ -1118,6 +1118,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Constants that define the mode of the animation tools.
     /// </summary>
+    /// <since>6.11</since>
     [CLSCompliant(false)]
     public enum CaptureTypes : uint
     {
@@ -1851,6 +1852,7 @@ namespace Rhino.Render
     /// <summary>
     /// Rendering source (render directly from a NamedView or Snapshot)
     /// </summary>
+    /// <since>6.1</since>
     [CLSCompliant(false)]
     public enum RenderingSources : uint
     {
@@ -2231,7 +2233,12 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public LinearWorkflow LinearWorkflow
     {
-      get { return new LinearWorkflow(m_doc.RuntimeSerialNumber); }
+      get
+      {
+        if (m_doc != null)
+          return new LinearWorkflow(m_doc.RuntimeSerialNumber);
+        return new LinearWorkflow();
+      }
     }
 
     /// <summary>
@@ -2240,7 +2247,26 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public Dithering Dithering
     {
-      get { return new Dithering(m_doc.RuntimeSerialNumber); }
+      get
+      {
+        if (m_doc != null)
+          return new Dithering(m_doc.RuntimeSerialNumber);
+        return new Dithering();
+      }
+    }
+
+    /// <summary>
+    /// Get the document render channels interface
+    /// </summary>
+    /// <since>7.0</since>
+    public RenderChannels RenderChannels
+    {
+      get
+      {
+        if (m_doc != null)
+          return new RenderChannels(m_doc.RuntimeSerialNumber);
+        return new RenderChannels();
+      }
     }
 #endif
     /// <summary>
@@ -2364,6 +2390,7 @@ namespace Rhino.Display
   /// <summary>
   /// Constants that define how the background of a viewport should be filled.
   /// </summary>
+  /// <since>5.0</since>
   public enum BackgroundStyle
   {
     /// <summary>Single solid color fill.</summary>

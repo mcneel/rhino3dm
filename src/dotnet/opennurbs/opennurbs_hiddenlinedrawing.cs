@@ -602,6 +602,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The different types of HiddenLineObjectPoint visibility
     /// </summary>
+    /// <since>6.8</since>
     public enum Visibility
     {
       /// <summary>
@@ -939,6 +940,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// The different types of HiddenLineDrawingSegment visibility
     /// </summary>
+    /// <since>6.0</since>
     public enum Visibility
     {
       /// <summary>
@@ -999,6 +1001,7 @@ namespace Rhino.Geometry
     /// and projects to a curve (not a point), the image area to the left or right of a projected silhouette
     /// curve is filled with either the surface or a void.
     /// </summary>
+    /// <since>6.0</since>
     public enum SideFill
     {
       /// <summary>

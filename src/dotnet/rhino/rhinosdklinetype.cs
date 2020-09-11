@@ -555,6 +555,7 @@ namespace Rhino.DocObjects.Tables
     /// -1  no linetype has the given name.
     /// </returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedLinetypes is now ignored. Items are removed permanently now. Remove the second method argument.")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(string name, bool ignoreDeletedLinetypes)
@@ -761,6 +762,7 @@ namespace Rhino.DocObjects.Tables
     /// </param>
     /// <returns>The unused linetype name.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeleted is now ignored. Items are removed permanently now. Remove the second method argument.")]
     public string GetUnusedLinetypeName(bool ignoreDeleted)
     {

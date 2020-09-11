@@ -10,6 +10,7 @@ namespace Rhino.DocObjects
   /// The TextureType controls how the pixels in the bitmap
   /// are interpreted.
   /// </summary>
+  /// <since>5.6</since>
   public enum TextureType : int
   {
     /// <summary> 
@@ -129,6 +130,7 @@ namespace Rhino.DocObjects
   /// Determines how this texture is combined with others in a material's
   /// texture list.
   /// </summary>
+  /// <since>5.6</since>
   public enum TextureCombineMode : int
   {
     /// <summary>
@@ -153,6 +155,7 @@ namespace Rhino.DocObjects
   /// <summary>
   /// Defines Texture UVW wrapping modes
   /// </summary>
+  /// <since>5.6</since>
   public enum TextureUvwWrapping : int
   {
     /// <summary>

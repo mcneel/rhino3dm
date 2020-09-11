@@ -1040,6 +1040,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="meshB">Second mesh for intersection.</param>
     /// <returns>An array of intersection line segments, or null if no intersections were found.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
@@ -1095,22 +1096,23 @@ namespace Rhino.Geometry.Intersect
     /// The value can be used to multiply the document absolute tolerance.</para>
     /// <para>This is only a UI value; it is up to developer to honor (or not) this request, depending on application needs.</para>
     /// </summary>
-    /// <value><para>Setting the value to 1.0 results in the setting doing nothing.</para>
-    /// <para>Setting the value to 0.0 results in the default value being reset.</para>
-    /// <para>Setting negative values results in an exception.</para></value>
     /// <remarks>Generally, document tolerances are around 0.001 for objects sized about 100 units.
     /// However, good mesh triangles for these objects are often a few orders of magnitude smaller than these values.
-    /// This coefficient is provided to translate absolute document tolerances to values more suitable for good mesh intersections.
+    /// This coefficient is provided to scale absolute document tolerances to values more suitable for good mesh intersections.
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">When the value is negative.</exception>
     /// <since>7.0</since>
+
+    // <value><para>Setting the value to 1.0 results in the setting doing nothing.</para>
+    // <para>Setting the value to 0.0 results in the default value being reset.</para>
+    // <para>Setting negative values results in an exception.</para></value>
+    // <exception cref="ArgumentOutOfRangeException">When the value is negative.</exception>
     public static double MeshIntersectionsTolerancesCoefficient
     {
       get
       {
         return PersistentSettings.RhinoAppSettings.GetDouble(DiminishMeshIntersectionsTolerancesRequest_CODE, DiminishMeshIntersectionsTolerancesRequest_DEFAULT);
       }
-      set
+      private set //[Giulio, 2020 May 2. This should generally not be modified by users, or reproducing errors will become more difficult]
       {
         if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Value cannot be negative.");
         if (value == 0) value = DiminishMeshIntersectionsTolerancesRequest_DEFAULT;
@@ -1338,15 +1340,7 @@ namespace Rhino.Geometry.Intersect
       }
     }
 
-    /// <summary>
-    /// Finds the intersection of a mesh and a polyline.
-    /// </summary>
-    /// <param name="mesh">A mesh to intersect.</param>
-    /// <param name="curve">A polyline curves to intersect.</param>
-    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
-    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
-    /// <since>5.0</since>
-    public static Point3d[] MeshPolyline(Mesh mesh, PolylineCurve curve, out int[] faceIds)
+    private static Point3d[] MeshPolyline_Helper(Mesh mesh, PolylineCurve curve, out int[] faceIds, bool sorted)
     {
       faceIds = null;
       IntPtr pConstMesh = mesh.ConstPointer();
@@ -1358,20 +1352,38 @@ namespace Rhino.Geometry.Intersect
 
       Point3d[] points = new Point3d[count];
       faceIds = new int[count];
-      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds);
-      Runtime.CommonObject.GcProtect(mesh, curve);
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds, sorted);
+      Runtime.CommonObject.GcProtect(mesh, curve, points, faceIds);
       return points;
     }
 
     /// <summary>
-    /// Finds the intersection of a mesh and a line
+    /// Finds the intersection of a mesh and a polyline. Points are not guaranteed to be sorted along the polyline.
     /// </summary>
-    /// <param name="mesh">A mesh to intersect</param>
-    /// <param name="line">The line to intersect with the mesh</param>
+    /// <param name="mesh">A mesh to intersect.</param>
+    /// <param name="curve">A polyline curves to intersect.</param>
     /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
     /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
     /// <since>5.0</since>
-    public static Point3d[] MeshLine(Mesh mesh, Line line, out int[] faceIds)
+    public static Point3d[] MeshPolyline(Mesh mesh, PolylineCurve curve, out int[] faceIds)
+    {
+      return MeshPolyline_Helper(mesh, curve, out faceIds, false);
+    }
+
+    /// <summary>
+    /// Finds the intersection of a mesh and a polyline. Points are guaranteed to be sorted along the polyline.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect.</param>
+    /// <param name="curve">A polyline curves to intersect.</param>
+    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <since>5.0</since>
+    public static Point3d[] MeshPolylineSorted(Mesh mesh, PolylineCurve curve, out int[] faceIds)
+    {
+      return MeshPolyline_Helper(mesh, curve, out faceIds, true);
+    }
+
+    private static Point3d[] MeshLine_Helper(Mesh mesh, Line line, out int[] faceIds, bool sorted)
     {
       faceIds = null;
       IntPtr pConstMesh = mesh.ConstPointer();
@@ -1382,9 +1394,36 @@ namespace Rhino.Geometry.Intersect
 
       Point3d[] points = new Point3d[count];
       faceIds = new int[count];
-      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds);
-      GC.KeepAlive(mesh);
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds, sorted);
+      Runtime.CommonObject.GcProtect(mesh, points, faceIds);
       return points;
+    }
+
+
+    /// <summary>
+    /// Finds the intersections of a mesh and a line. The points are not necessarily sorted.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect</param>
+    /// <param name="line">The line to intersect with the mesh</param>
+    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <since>5.0</since>
+    public static Point3d[] MeshLine(Mesh mesh, Line line, out int[] faceIds)
+    {
+      return MeshLine_Helper(mesh, line, out faceIds, false);
+    }
+
+    /// <summary>
+    /// Finds the intersections of a mesh and a line. Points are sorted along the line.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect</param>
+    /// <param name="line">The line to intersect with the mesh</param>
+    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <since>5.0</since>
+    public static Point3d[] MeshLineSorted(Mesh mesh, Line line, out int[] faceIds)
+    {
+      return MeshLine_Helper(mesh, line, out faceIds, true);
     }
 
     /// <summary>
@@ -1657,6 +1696,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Plane|Circle intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum PlaneCircleIntersection : int
   {
     /// <summary>
@@ -1689,6 +1729,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Plane|Sphere intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum PlaneSphereIntersection : int
   {
     /// <summary>
@@ -1710,6 +1751,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Line|Circle intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum LineCircleIntersection : int
   {
     /// <summary>
@@ -1731,6 +1773,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Line|Sphere intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum LineSphereIntersection : int
   {
     /// <summary>
@@ -1752,6 +1795,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Line|Cylinder intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum LineCylinderIntersection : int
   {
     /// <summary>
@@ -1778,6 +1822,7 @@ namespace Rhino.Geometry.Intersect
   /// <summary>
   /// Represents all possible cases of a Sphere|Sphere intersection event.
   /// </summary>
+  /// <since>5.0</since>
   public enum SphereSphereIntersection : int
   {
     /// <summary>

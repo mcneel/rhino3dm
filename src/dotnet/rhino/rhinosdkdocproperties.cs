@@ -290,6 +290,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool Restore(int index, Display.RhinoView view, bool backgroundBitmap)
     {
@@ -299,6 +300,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.9</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool Restore(int index, Display.RhinoViewport viewport, bool backgroundBitmap)
     {
@@ -307,6 +309,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoView view, bool backgroundBitmap)
     {
@@ -314,6 +317,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoView view, bool backgroundBitmap, int frames, int frameRate)
     {
@@ -323,6 +327,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.9</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoViewport viewport, bool backgroundBitmap)
     {
@@ -330,6 +335,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.9</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Support for backgroundBitmap is ended")]
     public bool RestoreAnimated(int index, Display.RhinoViewport viewport, bool backgroundBitmap, int frames, int frameRate)
     {
@@ -875,6 +881,7 @@ namespace Rhino.DocObjects.Tables
     }
   }
 
+  /// <since>6.14</since>
   [Flags, CLSCompliant(false)]
   public enum RestoreLayerProperties : uint
   {

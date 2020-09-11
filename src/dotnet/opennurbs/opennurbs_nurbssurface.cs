@@ -122,6 +122,26 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Creates a NURBS surface from a plane and additonal parameters.
+    /// </summary>
+    /// <param name="plane">The plane.</param>
+    /// <param name="uInterval">The interval describing the extends of the output surface in the U direction.</param>
+    /// <param name="vInterval">The interval describing the extends of the output surface in the V direction.</param>
+    /// <param name="uDegree">The degree of the output surface in the U direction.</param>
+    /// <param name="vDegree">The degree of the output surface in the V direction.</param>
+    /// <param name="uPointCount">The number of control points of the output surface in the U direction.</param>
+    /// <param name="vPointCount">The number of control points of the output surface in the V direction.</param>
+    /// <returns>A NURBS surface if successful, or null on failure.</returns>
+    /// <since>7.0</since>
+    public static NurbsSurface CreateFromPlane(Plane plane, Interval uInterval, Interval vInterval, int uDegree, int vDegree, int uPointCount, int vPointCount)
+    {
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoSurfaceFromPlane(ref plane, uInterval, vInterval, uDegree, vDegree, uPointCount, vPointCount);
+      if (ptr == IntPtr.Zero)
+        return null;
+      return new NurbsSurface(ptr, null);
+    }
+
+    /// <summary>
     /// Computes a discrete spline curve on the surface. In other words, computes a sequence 
     /// of points on the surface, each with a corresponding parameter value.
     /// </summary>
@@ -931,7 +951,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns>The const pointer.</returns>
     /// <since>7.0</since>
-    public IntPtr ConstPointer()
+    IntPtr ConstPointer()
     {
       return m_ptr;
     }
@@ -941,7 +961,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns>The non-const pointer.</returns>
     /// <since>7.0</since>
-    public IntPtr NonConstPointer()
+    IntPtr NonConstPointer()
     {
       return m_ptr;
     }
@@ -1325,6 +1345,7 @@ namespace Rhino.Geometry.Collections
     /// <param name="cp">The control point location to set (weight is assumed to be 1.0).</param>
     /// <returns>true on success, false on failure.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use one of the SetPoint() overrides")]
     public bool SetControlPoint(int u, int v, Point3d cp)
     {
@@ -1750,6 +1771,18 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr const_ptr_surface = m_surface.ConstPointer();
       return UnsafeNativeMethods.ON_NurbsSurface_SuperfluousKnot(const_ptr_surface, m_direction, start ? 0 : 1);
+    }
+
+    /// <summary>
+    /// Gets the style of the knot vector.
+    /// </summary>
+    public KnotStyle KnotStyle
+    {
+      get
+      {
+        IntPtr const_ptr_surface = m_surface.ConstPointer();
+        return (KnotStyle)UnsafeNativeMethods.ON_NurbsSurface_KnotStyle(const_ptr_surface, m_direction);
+      }
     }
 
     /// <summary>

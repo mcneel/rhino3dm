@@ -5,6 +5,7 @@ using Rhino.Geometry;
 
 namespace Rhino.Display
 {
+  /// <since>5.0</since>
   public enum DepthMode
   {
     Neutral = 0,
@@ -16,6 +17,7 @@ namespace Rhino.Display
   /// Biasing applied to geometry to attempt to get coplanar items
   /// to draw on top of or below other geometry
   /// </summary>
+  /// <since>5.0</since>
   public enum ZBiasMode
   {
     Neutral = 0,
@@ -23,6 +25,7 @@ namespace Rhino.Display
     AwayFromCamera = 2
   }
 
+  /// <since>5.0</since>
   public enum CullFaceMode
   {
     DrawFrontAndBack = 0,
@@ -171,7 +174,7 @@ namespace Rhino.Display
     private static readonly Runtime.HostUtils.ReportCallback m_report = ConduitReport;
 
     // Callback used by C++ conduit to call into .NET
-    internal delegate void ConduitCallback(IntPtr pPipeline, IntPtr pConduit);
+    internal delegate void ConduitCallback(IntPtr pPipeline, uint conduitSerialNumber, uint channel);
     private static ConduitCallback m_ObjectCullingCallback;
     private static ConduitCallback m_CalcBoundingBoxCallback;
     private static ConduitCallback m_CalcBoundingBoxZoomExtentsCallback;
@@ -201,13 +204,13 @@ namespace Rhino.Display
     private static EventHandler<DrawEventArgs> m_projectionchanged;
     private static EventHandler<DisplayModeChangedEventArgs> m_displaymode_changed;
 
-    private static void OnObjectCulling(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnObjectCulling(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_objectCulling != null)
       {
         try
         {
-          m_objectCulling(null, new CullObjectEventArgs(pPipeline, pConduit));
+          m_objectCulling(null, new CullObjectEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -216,13 +219,13 @@ namespace Rhino.Display
       }
     }
 
-    private static void OnCalcBoundingBox(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnCalcBoundingBox(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_calcbbox != null)
       {
         try
         {
-          m_calcbbox(null, new CalculateBoundingBoxEventArgs(pPipeline, pConduit));
+          m_calcbbox(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -230,13 +233,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnCalcBoundingBoxZoomExtents(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnCalcBoundingBoxZoomExtents(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_calcbbox_zoomextents != null)
       {
         try
         {
-          m_calcbbox_zoomextents(null, new CalculateBoundingBoxEventArgs(pPipeline, pConduit));
+          m_calcbbox_zoomextents(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -245,13 +248,13 @@ namespace Rhino.Display
       }
     }
 
-    private static void OnInitFrameBuffer(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnInitFrameBuffer(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_init_framebuffer != null)
       {
         try
         {
-          m_init_framebuffer(null, new InitFrameBufferEventArgs(pPipeline, pConduit));
+          m_init_framebuffer(null, new InitFrameBufferEventArgs(pPipeline, conduitSerialNumber));
         }
         catch(Exception ex)
         {
@@ -260,13 +263,13 @@ namespace Rhino.Display
       }
     }
 
-    private static void OnPreDrawObjects(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnPreDrawObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_predrawobjects != null)
       {
         try
         {
-          m_predrawobjects(null, new DrawEventArgs(pPipeline, pConduit));
+          m_predrawobjects(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -275,13 +278,13 @@ namespace Rhino.Display
       }
     }
 
-    private static void OnPreDrawTransparentObjects(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnPreDrawTransparentObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_predrawtransparentobjects != null)
       {
         try
         {
-          var args = new DrawEventArgs(pPipeline, pConduit);
+          var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
 
           args.Display.MeshCacheEnabled = true;
           m_predrawtransparentobjects(null, args);
@@ -294,13 +297,13 @@ namespace Rhino.Display
       }
     }
 
-    private static void OnDrawObject(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnDrawObject(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if( m_drawobject != null )
       {
         try
         {
-          var e = new DrawObjectEventArgs(pPipeline, pConduit);
+          var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
           m_drawobject(null, e);
           if (e.m_rhino_object != null)
             e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
@@ -311,13 +314,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnPostDrawObject(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnPostDrawObject(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_postdrawobject != null)
       {
         try
         {
-          var e = new DrawObjectEventArgs(pPipeline, pConduit);
+          var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
           m_postdrawobject(null, e);
           if (e.m_rhino_object != null)
             e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
@@ -328,13 +331,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnPostDrawObjects(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnPostDrawObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_postdrawobjects != null)
       {
         try
         {
-          var args = new DrawEventArgs(pPipeline, pConduit);
+          var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
 
           // David R: Caching is disabled for 6.0, because RH-42617.
           // Jeff L: I've fixed the real issue within the pipeline,
@@ -350,13 +353,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnDrawForeground(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnDrawForeground(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_drawforeground != null)
       {
         try
         {
-          m_drawforeground(null, new DrawForegroundEventArgs(pPipeline, pConduit));
+          m_drawforeground(null, new DrawForegroundEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -364,13 +367,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnDrawOverlay(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnDrawOverlay(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_drawoverlay != null)
       {
         try
         {
-          m_drawoverlay(null, new DrawEventArgs(pPipeline, pConduit));
+          m_drawoverlay(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -378,13 +381,13 @@ namespace Rhino.Display
         }
       }
     }
-    private static void OnProjectionChanged(IntPtr pPipeline, IntPtr pConduit)
+    private static void OnProjectionChanged(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if( m_projectionchanged != null)
       {
         try
         {
-          m_projectionchanged(null, new DrawEventArgs(pPipeline, pConduit));
+          m_projectionchanged(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
         }
         catch (Exception ex)
         {
@@ -420,7 +423,7 @@ namespace Rhino.Display
         if (null == m_objectCulling)
         {
           m_ObjectCullingCallback = OnObjectCulling;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxObjectCulling, m_ObjectCullingCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxObjectCulling, m_ObjectCullingCallback, m_report);
         }
 
         m_objectCulling -= value;
@@ -431,7 +434,7 @@ namespace Rhino.Display
         m_objectCulling -= value;
         if (m_objectCulling == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxObjectCulling, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxObjectCulling, null, m_report);
           m_ObjectCullingCallback = null;
         }
       }
@@ -449,7 +452,7 @@ namespace Rhino.Display
         if (null == m_calcbbox)
         {
           m_CalcBoundingBoxCallback = OnCalcBoundingBox;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxCalcBoundingBox, m_CalcBoundingBoxCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxCalcBoundingBox, m_CalcBoundingBoxCallback, m_report);
         }
 
         m_calcbbox -= value;
@@ -460,7 +463,7 @@ namespace Rhino.Display
         m_calcbbox -= value;
         if (m_calcbbox == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxCalcBoundingBox, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxCalcBoundingBox, null, m_report);
           m_CalcBoundingBoxCallback = null;
         }
       }
@@ -480,7 +483,7 @@ namespace Rhino.Display
         if (null == m_calcbbox_zoomextents)
         {
           m_CalcBoundingBoxZoomExtentsCallback = OnCalcBoundingBoxZoomExtents;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxCalcBoundingBoxZoomExtents, m_CalcBoundingBoxZoomExtentsCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxCalcBoundingBoxZoomExtents, m_CalcBoundingBoxZoomExtentsCallback, m_report);
         }
 
         m_calcbbox_zoomextents -= value;
@@ -491,7 +494,7 @@ namespace Rhino.Display
         m_calcbbox_zoomextents -= value;
         if (m_calcbbox_zoomextents == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxCalcBoundingBoxZoomExtents, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxCalcBoundingBoxZoomExtents, null, m_report);
           m_CalcBoundingBoxZoomExtentsCallback = null;
         }
       }
@@ -508,7 +511,7 @@ namespace Rhino.Display
         if (null == m_init_framebuffer)
         {
           m_InitFrameBufferCallback = OnInitFrameBuffer;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxInitFrameBuffer, m_InitFrameBufferCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxInitFrameBuffer, m_InitFrameBufferCallback, m_report);
         }
         m_init_framebuffer -= value;
         m_init_framebuffer += value;
@@ -518,7 +521,7 @@ namespace Rhino.Display
         m_init_framebuffer -= value;
         if (m_init_framebuffer == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxInitFrameBuffer, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxInitFrameBuffer, null, m_report);
           m_InitFrameBufferCallback = null;
         }
       }
@@ -538,7 +541,7 @@ namespace Rhino.Display
         if (null == m_predrawobjects)
         {
           m_PreDrawObjectsCallback = OnPreDrawObjects;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPreDrawObjects, m_PreDrawObjectsCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPreDrawObjects, m_PreDrawObjectsCallback, m_report);
         }
         m_predrawobjects -= value;
         m_predrawobjects += value;
@@ -548,7 +551,7 @@ namespace Rhino.Display
         m_predrawobjects -= value;
         if (m_predrawobjects == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPreDrawObjects, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPreDrawObjects, null, m_report);
           m_PreDrawObjectsCallback = null;
         }
       }
@@ -568,7 +571,7 @@ namespace Rhino.Display
         if (null == m_predrawtransparentobjects)
         {
           m_PreDrawTransparentObjectsCallback = OnPreDrawTransparentObjects;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPreDrawTransparentObjects, m_PreDrawTransparentObjectsCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPreDrawTransparentObjects, m_PreDrawTransparentObjectsCallback, m_report);
         }
         m_predrawtransparentobjects -= value;
         m_predrawtransparentobjects += value;
@@ -578,7 +581,7 @@ namespace Rhino.Display
         m_predrawtransparentobjects -= value;
         if (m_predrawtransparentobjects == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPreDrawTransparentObjects, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPreDrawTransparentObjects, null, m_report);
           m_PreDrawTransparentObjectsCallback = null;
         }
       }
@@ -600,7 +603,7 @@ namespace Rhino.Display
         if (null == m_drawobject)
         {
           m_DrawObjectCallback = OnDrawObject;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawObject, m_DrawObjectCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawObject, m_DrawObjectCallback, m_report);
         }
         m_drawobject -= value;
         m_drawobject += value;
@@ -610,7 +613,7 @@ namespace Rhino.Display
         m_drawobject -= value;
         if (m_drawobject == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawObject, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawObject, null, m_report);
           m_DrawObjectCallback = null;
         }
       }
@@ -632,7 +635,7 @@ namespace Rhino.Display
         if (null == m_postdrawobject)
         {
           m_PostDrawObjectCallback = OnPostDrawObject;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObject, m_PostDrawObjectCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostDrawObject, m_PostDrawObjectCallback, m_report);
         }
         m_postdrawobject -= value;
         m_postdrawobject += value;
@@ -642,7 +645,7 @@ namespace Rhino.Display
         m_postdrawobject -= value;
         if (m_postdrawobject == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObject, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostDrawObject, null, m_report);
           m_PostDrawObjectCallback = null;
         }
       }
@@ -663,7 +666,7 @@ namespace Rhino.Display
         if (null == m_postdrawobjects)
         {
           m_PostDrawObjectsCallback = OnPostDrawObjects;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObjects, m_PostDrawObjectsCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostDrawObjects, m_PostDrawObjectsCallback, m_report);
         }
         m_postdrawobjects -= value;
         m_postdrawobjects += value;
@@ -673,7 +676,7 @@ namespace Rhino.Display
         m_postdrawobjects -= value;
         if (m_postdrawobjects == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxPostDrawObjects, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostDrawObjects, null, m_report);
           m_PostDrawObjectsCallback = null;
         }
       }
@@ -700,7 +703,7 @@ namespace Rhino.Display
         if (null == m_drawforeground)
         {
           m_DrawForegroundCallback = OnDrawForeground;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawForeground, m_DrawForegroundCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawForeground, m_DrawForegroundCallback, m_report);
         }
         m_drawforeground -= value;
         m_drawforeground += value;
@@ -710,7 +713,7 @@ namespace Rhino.Display
         m_drawforeground -= value;
         if (m_drawforeground == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawForeground, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawForeground, null, m_report);
           m_DrawForegroundCallback = null;
         }
       }
@@ -731,7 +734,7 @@ namespace Rhino.Display
         if (null == m_drawoverlay)
         {
           m_DrawOverlayCallback = OnDrawOverlay;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawOverlay, m_DrawOverlayCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawOverlay, m_DrawOverlayCallback, m_report);
         }
         m_drawoverlay -= value;
         m_drawoverlay += value;
@@ -741,7 +744,7 @@ namespace Rhino.Display
         m_drawoverlay -= value;
         if (m_drawoverlay == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxDrawOverlay, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawOverlay, null, m_report);
           m_DrawOverlayCallback = null;
         }
       }
@@ -761,7 +764,7 @@ namespace Rhino.Display
         if (null == m_projectionchanged)
         {
           m_ProjectionChangedCallback = OnProjectionChanged;
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxProjectionChanged, m_ProjectionChangedCallback, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxProjectionChanged, m_ProjectionChangedCallback, m_report);
         }
 
         m_projectionchanged -= value;
@@ -772,7 +775,7 @@ namespace Rhino.Display
         m_projectionchanged -= value;
         if (m_projectionchanged == null)
         {
-          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(idxProjectionChanged, null, m_report);
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxProjectionChanged, null, m_report);
           m_ProjectionChangedCallback = null;
         }
       }
@@ -1401,6 +1404,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="enable">ClipTesting flag.</param>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use PushDepthTesting")]
     public void PushClipTesting(bool enable)
     {
@@ -1413,6 +1417,7 @@ namespace Rhino.Display
     /// Pop a ClipTesting flag off the engine's stack.
     /// </summary>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use PopDepthTesting")]
     public void PopClipTesting()
     {
@@ -1488,24 +1493,6 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Convert HLSL code to a different shading language
-    /// </summary>
-    /// <param name="hlsl"></param>
-    /// <param name="functionName"></param>
-    /// <param name="targetLanguage"></param>
-    /// <returns></returns>
-    /// <since>7.0</since>
-    public static string CrossCompileHLSL(string hlsl, string functionName, ShaderLanguage targetLanguage)
-    {
-      using (var outString = new Rhino.Runtime.InteropWrappers.StringWrapper())
-      {
-        IntPtr ptrString = outString.NonConstPointer;
-        UnsafeNativeMethods.RHC_TranslateHLSLFromMem(hlsl, functionName, 0, targetLanguage, ptrString);
-        return outString.ToString();
-      }
-    }
-
-    /// <summary>
     /// Returns a value indicating if only points on the side of the surface that
     /// face the camera are displayed.
     /// </summary>
@@ -1520,6 +1507,7 @@ namespace Rhino.Display
     /// <summary>
     /// Force the pipeline to immediately flush any cached geometry to the display
     /// </summary>
+    /// <since>7.0</since>
     public void Flush()
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Flush(m_ptr);
@@ -3487,6 +3475,20 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap2(m_ptr, ptr_bitmap, screenLocation, size, blendColor.ToArgb());
     }
 
+    /// <summary>
+    /// Draw screen oriented image centered at 2d screen location
+    /// </summary>
+    /// <param name="bitmap"></param>
+    /// <param name="screenLocation"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <since>7.0</since>
+    public void DrawSprite(DisplayBitmap bitmap, Point2d screenLocation, float width, float height)
+    {
+      IntPtr ptr_bitmap = bitmap.NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap4(m_ptr, ptr_bitmap, screenLocation, width, height);
+    }
+
     /// <since>5.0</since>
     public void DrawSprites(DisplayBitmap bitmap, DisplayBitmapDrawList items, float size, bool sizeInWorldSpace)
     {
@@ -3571,13 +3573,13 @@ namespace Rhino.Display
   public class DrawEventArgs : EventArgs
   {
     internal IntPtr m_ptr_display_pipeline;
-    internal readonly IntPtr m_pDisplayConduit;
+    internal readonly uint m_conduitSerialNumber;
     internal RhinoViewport m_viewport;
     DisplayPipeline m_dp;
-    internal DrawEventArgs(IntPtr pDisplayPipeline, IntPtr pDisplayConduit)
+    internal DrawEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
     {
       m_ptr_display_pipeline = pDisplayPipeline;
-      m_pDisplayConduit = pDisplayConduit;
+      m_conduitSerialNumber = conduitSerialNumber;
     }
     internal DrawEventArgs() { }
 
@@ -3624,18 +3626,18 @@ namespace Rhino.Display
 
     internal bool GetChannelAttributeBool(int which)
     {
-      return UnsafeNativeMethods.CChannelAttributes_GetBool(m_pDisplayConduit, which);
+      return UnsafeNativeMethods.CChannelAttributes_GetBool(m_conduitSerialNumber, which);
     }
     internal void SetChannelAttributeBool(int which, bool value)
     {
-      UnsafeNativeMethods.CChannelAttributes_SetBool(m_pDisplayConduit, which, value);
+      UnsafeNativeMethods.CChannelAttributes_SetBool(m_conduitSerialNumber, which, value);
     }
   }
 
   public class DrawForegroundEventArgs : DrawEventArgs
   {
-    internal DrawForegroundEventArgs(IntPtr pDisplayPipeline, IntPtr pDisplayConduit)
-      : base(pDisplayPipeline, pDisplayConduit)
+    internal DrawForegroundEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
+      : base(pDisplayPipeline, conduitSerialNumber)
     {
     }
     /// <since>5.0</since>
@@ -3654,8 +3656,8 @@ namespace Rhino.Display
 
   public class CullObjectEventArgs : DrawEventArgs
   {
-    internal CullObjectEventArgs(IntPtr pDisplayPipeline, IntPtr pDisplayConduit)
-      : base(pDisplayPipeline, pDisplayConduit)
+    internal CullObjectEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
+      : base(pDisplayPipeline, conduitSerialNumber)
     {
     }
 
@@ -3667,7 +3669,7 @@ namespace Rhino.Display
       {
         if (m_rhino_object == null)
         {
-          IntPtr ptr_rhino_object = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_pDisplayConduit);
+          IntPtr ptr_rhino_object = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_conduitSerialNumber);
           m_rhino_object = DocObjects.RhinoObject.CreateRhinoObjectHelper(ptr_rhino_object);
         }
         return m_rhino_object;
@@ -3684,7 +3686,7 @@ namespace Rhino.Display
     {
       get
       {
-        IntPtr ptr_rhino_object = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_pDisplayConduit);
+        IntPtr ptr_rhino_object = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_conduitSerialNumber);
         var sn = UnsafeNativeMethods.CRhinoObject_RuntimeSN(ptr_rhino_object);
         return sn;
       }
@@ -3701,8 +3703,8 @@ namespace Rhino.Display
 
   public class DrawObjectEventArgs : DrawEventArgs
   {
-    internal DrawObjectEventArgs(IntPtr pDisplayPipeline, IntPtr pDisplayConduit)
-      : base(pDisplayPipeline, pDisplayConduit)
+    internal DrawObjectEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
+      : base(pDisplayPipeline, conduitSerialNumber)
     {
     }
 
@@ -3714,7 +3716,7 @@ namespace Rhino.Display
       {
         if (m_rhino_object == null)
         {
-          IntPtr pRhinoObject = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_pDisplayConduit);
+          IntPtr pRhinoObject = UnsafeNativeMethods.CChannelAttributes_RhinoObject(m_conduitSerialNumber);
           m_rhino_object = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
         }
         return m_rhino_object;
@@ -3733,10 +3735,10 @@ namespace Rhino.Display
   {
     private BoundingBox m_bbox;
 
-    internal CalculateBoundingBoxEventArgs(IntPtr pDisplayPipeline, IntPtr pDisplayConduit)
-      : base(pDisplayPipeline, pDisplayConduit)
+    internal CalculateBoundingBoxEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
+      : base(pDisplayPipeline, conduitSerialNumber)
     {
-      UnsafeNativeMethods.CChannelAttr_GetSetBBox(m_pDisplayConduit, false, ref m_bbox);
+      UnsafeNativeMethods.CChannelAttr_GetSetBBox(m_conduitSerialNumber, false, ref m_bbox);
     }
 
     /// <summary>
@@ -3757,18 +3759,18 @@ namespace Rhino.Display
     public void IncludeBoundingBox(BoundingBox box)
     {
       m_bbox.Union(box);
-      UnsafeNativeMethods.CChannelAttr_GetSetBBox(m_pDisplayConduit, true, ref m_bbox);
+      UnsafeNativeMethods.CChannelAttr_GetSetBBox(m_conduitSerialNumber, true, ref m_bbox);
     }
   }
 
   public class InitFrameBufferEventArgs : EventArgs
   {
     IntPtr m_pDisplayPipeline;
-    IntPtr m_pConduit;
-    internal InitFrameBufferEventArgs(IntPtr pDisplayPipeline, IntPtr pConduit)
+    uint m_conduitSerialNumber;
+    internal InitFrameBufferEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
     {
       m_pDisplayPipeline = pDisplayPipeline;
-      m_pConduit = pConduit;
+      m_conduitSerialNumber = conduitSerialNumber;
     }
 
     /// <since>6.18</since>
@@ -3790,7 +3792,7 @@ namespace Rhino.Display
       int bl = bottomLeft.ToArgb();
       int tr = topRight.ToArgb();
       int br = bottomRight.ToArgb();
-      UnsafeNativeMethods.CChannelAttributes_SetFill(m_pConduit, tl, bl, tr, br);
+      UnsafeNativeMethods.CChannelAttributes_SetFill(m_conduitSerialNumber, tl, bl, tr, br);
     }
   }
 

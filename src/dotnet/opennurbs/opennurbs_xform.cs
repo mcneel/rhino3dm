@@ -1161,7 +1161,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="yaw">Angle of rotation, in radians, about the Z axis.</param>
     /// <param name="pitch">Angle of rotation, in radians, about the Y axis.</param>
-    /// <param name="roll">Angle of rotation, in radians, about the Z axis.</param>
+    /// <param name="roll">Angle of rotation, in radians, about the X axis.</param>
     /// <returns>If true, then RotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll) 
     /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
     /// If false, then this is not a rotation.
@@ -1395,6 +1395,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Lists all possible outcomes for transform similarity.
   /// </summary>
+  /// <since>5.0</since>
   public enum TransformSimilarityType : int
   {
     /// <summary>
@@ -1416,6 +1417,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Lists all possible outcomes for rigid transformation.
   /// </summary>
+  /// <since>6.12</since>
   public enum TransformRigidType : int
   {
     /// <summary>

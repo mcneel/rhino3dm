@@ -47,11 +47,12 @@ namespace Rhino.Geometry
     /// <returns>An array of hatches. The array might be empty on error.</returns>
     /// <exception cref="ArgumentNullException">If curves is null.</exception>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Hatch[] Create(IEnumerable<Curve> curves, int hatchPatternIndex, double rotationRadians, double scale)
     {
-      double tol, angle_tol;
-      RhinoDoc.ActiveDocTolerances(out tol, out angle_tol);
+      double tol;
+      RhinoDoc.ActiveDocTolerances(out tol, out _);
       return Create(curves, hatchPatternIndex, rotationRadians, scale, tol);
     }
 
@@ -103,6 +104,7 @@ namespace Rhino.Geometry
     /// <param name="scale">A scaling factor.</param>
     /// <returns>An array of hatches. The array might be empty on error.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes a tolerance parameter instead")]
     public static Hatch[] Create(Curve curve, int hatchPatternIndex, double rotationRadians, double scale)
     {

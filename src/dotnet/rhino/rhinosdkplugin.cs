@@ -14,9 +14,14 @@ using Rhino.UI;
 using Rhino.UI.Controls;
 using Rhino.Render;
 using System.Reflection;
+using Rhino.Render.PostEffects;
 
 namespace Rhino.PlugIns
 {
+  /// <summary>
+  /// Rhino plug-in developer information fields.
+  /// </summary>
+  /// <since>5.0</since>
   public enum DescriptionType
   {
     Organization,
@@ -30,6 +35,10 @@ namespace Rhino.PlugIns
     Icon
   }
 
+  /// <summary>
+  /// Rhino plug-in loading return codes.
+  /// </summary>
+  /// <since>5.0</since>
   public enum LoadReturnCode
   {
     Success = 1,
@@ -37,6 +46,9 @@ namespace Rhino.PlugIns
     ErrorNoDialog = -1
   }
 
+  /// <summary>
+  /// Rhino plug-in developer information attributes.
+  /// </summary>
   [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
   public sealed class PlugInDescriptionAttribute : Attribute
   {
@@ -65,6 +77,10 @@ namespace Rhino.PlugIns
     public string Value { get; }
   }
 
+  /// <summary>
+  /// Rhino plug-in load time enumeration.
+  /// </summary>
+  /// <since>5.0</since>
   public enum PlugInLoadTime
   {
     /// <summary>never load plug-in.</summary>
@@ -81,6 +97,10 @@ namespace Rhino.PlugIns
     WhenNeededOrTabbedDockBar = 18
   }
 
+  /// <summary>
+  /// Rhino plug-in type enumeration.
+  /// </summary>
+  /// <since>5.0</since>
   [Flags]
   public enum PlugInType
   {
@@ -96,6 +116,7 @@ namespace Rhino.PlugIns
   }
 
   /// <summary>Result of attempting to load a plug-in</summary>
+  /// <since>6.0</since>
   public enum LoadPlugInResult
   {
     /// <summary>Successfully loaded</summary>
@@ -107,6 +128,9 @@ namespace Rhino.PlugIns
   public class LicenseChangedEventArgs : EventArgs
   { }
 
+  /// <summary>
+  /// A general purpose utility plug-in that can contain one or more commands.
+  /// </summary>
   public class PlugIn
   {
     System.Reflection.Assembly m_assembly;
@@ -731,6 +755,7 @@ namespace Rhino.PlugIns
           // to properly initialize in their OnLoad implementation prior to having to use
           // their probably protected code.
           RenderContent.RegisterContent(p);
+          PostEffect.RegisterPostEffect(p);
           RealtimeDisplayMode.RegisterDisplayModes(p);
           LightManagerSupport.RegisterLightManager(p);
 
@@ -3060,6 +3085,9 @@ namespace Rhino.PlugIns
     internal List<FileType> m_filetypes = new List<FileType>();
   }
 
+  /// <summary>
+  /// Rhino plug-in that imports data from other file formats into Rhino; can support more that one format.
+  /// </summary>
   public abstract class FileImportPlugIn : PlugIn
   {
     protected FileImportPlugIn()
@@ -3158,12 +3186,17 @@ namespace Rhino.PlugIns
     }
   }
 
+  /// <since>5.0</since>
   public enum WriteFileResult
   {
     Cancel = -1,
     Failure = 0,
     Success = 1
   }
+
+  /// <summary>
+  /// Rhino plug-in that exports data from Rhino to other file formats; can support more than one format.
+  /// </summary>
   public abstract class FileExportPlugIn : PlugIn
   {
     protected FileExportPlugIn()
@@ -3273,6 +3306,9 @@ namespace Rhino.PlugIns
     }
   }
 
+  /// <summary>
+  /// A Rhino rendering plugin; applies materials, textures, and lights to a scene to produce rendered images.
+  /// </summary>
   public abstract class RenderPlugIn : PlugIn
   {
     private static IntPtr m_render_command_context = IntPtr.Zero;
@@ -3711,7 +3747,7 @@ namespace Rhino.PlugIns
 
 
     /// <summary>
-    /// Override this method and call <see cref="RenderPanels.RegisterPanel"/>
+    /// Override this method and call <see cref="RenderPanels.RegisterPanel(PlugIn, RenderPanelType, Type, string, bool, bool)"/>
     /// to add custom render UI to the render output window.
     /// </summary>
     protected virtual void RegisterRenderPanels(RenderPanels panels)
@@ -3720,7 +3756,7 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// Override this method and call <see cref="RenderTabs.RegisterTab"/>
+    /// Override this method and call <see cref="RenderTabs.RegisterTab(PlugIn, Type, Guid, string, Icon)"/>
     /// to add custom tabs to the render output window
     /// </summary>
     protected virtual void RegisterRenderTabs(RenderTabs tabs)
@@ -3742,29 +3778,31 @@ namespace Rhino.PlugIns
       return null;
     }
 
+    /// <since>5.0</since>
     public enum RenderFeature : int
     {
-      Materials = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Materials,
-      Environments = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Environments,
-      Textures = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Textures,
-      PostEffects = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.PostEffects,
-      Sun = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Sun,
-      CustomRenderMeshes = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomRenderMeshes,
-      Decals = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Decals,
-      GroundPlane = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.GroundPlane,
-      SkyLight = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.SkyLight,
-      CustomDecalProperties = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomDecalProperties,
-      LinearWorkflow = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.LinearWorkflow,
-      Exposure = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Exposure,
-      ShadowOnlyGroundPlane = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.ShadowOnlyGroundPlane,
-      RenderBlowup = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderBlowup,
-      RenderWindow = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderWindow,
-      RenderInWindow = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderInWindow,
-      FocalBlur = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderFocalBlur,
-      RenderArctic = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderArctic,
-      RenderViewSource  = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderViewSource,
-      CustomSkylightEnvironment = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomSkylightEnvironment,
+      Materials                   = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Materials,
+      Environments                = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Environments,
+      Textures                    = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Textures,
+      PostEffects                 = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.PostEffects,
+      Sun                         = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Sun,
+      CustomRenderMeshes          = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomRenderMeshes,
+      Decals                      = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Decals,
+      GroundPlane                 = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.GroundPlane,
+      SkyLight                    = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.SkyLight,
+      CustomDecalProperties       = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomDecalProperties,
+      LinearWorkflow              = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.LinearWorkflow,
+      Exposure                    = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Exposure,
+      ShadowOnlyGroundPlane       = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.ShadowOnlyGroundPlane,
+      RenderBlowup                = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderBlowup,
+      RenderWindow                = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderWindow,
+      RenderInWindow              = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderInWindow,
+      FocalBlur                   = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderFocalBlur,
+      RenderArctic                = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderArctic,
+      RenderViewSource            = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderViewSource,
+      CustomSkylightEnvironment   = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomSkylightEnvironment,
       CustomReflectionEnvironment = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomReflectionEnvironment,
+      RenderChannels              = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderChannels,
     }
 
     static RenderFeature ToRenderFeature(UnsafeNativeMethods.CRhinoRenderPlugInFeatures feature)
@@ -3790,6 +3828,7 @@ namespace Rhino.PlugIns
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderFocalBlur:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderArctic:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderViewSource:
+        case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderChannels:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomSkylightEnvironment:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomReflectionEnvironment:
           return (RenderFeature)feature;
@@ -3813,6 +3852,7 @@ namespace Rhino.PlugIns
       return UnsafeNativeMethods.RdkCurrentRendererSupportsFeature((UnsafeNativeMethods.CRhinoRenderPlugInFeatures)feature);
     }
 
+    /// <since>6.0</since>
     public enum PreviewRenderTypes : int
     {
       None = 0,
@@ -3867,7 +3907,7 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Returns a list of output types which your renderer can write.
-    /// <para>The default implementation returns BMP, JPG, PNG, TIF, TGA.</para>
+    /// <para>The default implementation returns BMP, JPG, PNG, TIF, TGA, HDR, EXR and RIMAGE.</para>
     /// </summary>
     /// <returns>A list of file types.</returns>
     protected virtual List<FileIO.FileType> SupportedOutputTypes()
@@ -4536,6 +4576,9 @@ namespace Rhino.PlugIns
     internal CustomRenderSaveFileTypes.SaveFileHandler SaveFileCallback { get; set; }
   }
 
+  /// <summary>
+  /// A Rhino plug-in that interfaces with 3-D digitizing or input devices.
+  /// </summary>
   public abstract class DigitizerPlugIn : PlugIn
   {
     protected DigitizerPlugIn()
@@ -5292,6 +5335,7 @@ namespace Rhino.PlugIns
   }
 
   /// <summary>ValidateProductKeyDelegate result code.</summary>
+  /// <since>5.0</since>
   public enum ValidateResult
   {
     /// <summary>The product key or license is validated successfully.</summary>
@@ -5348,6 +5392,7 @@ namespace Rhino.PlugIns
   //public delegate void 
 
   /// <summary>License build contentType enumerations.</summary>
+  /// <since>5.0</since>
   public enum LicenseBuildType
   {
     /// <summary>An unspecified build</summary>
@@ -5365,6 +5410,7 @@ namespace Rhino.PlugIns
   /// that is displayed if a license for the requesting product is not found.
   /// Note, the "Close" button will always be displayed.
   /// </summary>
+  /// <since>5.5</since>
   [Flags]
   public enum LicenseCapabilities
   {
@@ -5845,6 +5891,7 @@ namespace Rhino.PlugIns
   }
 
   /// <summary>LicenseType enumeration.</summary>
+  /// <since>5.0</since>
   public enum LicenseType
   {
     /// <summary>A standalone license</summary>

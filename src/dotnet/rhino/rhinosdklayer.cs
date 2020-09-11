@@ -103,6 +103,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\py\ex_locklayer.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("No longer needed. Layer changes in the document are now immediate")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool CommitChanges() { return false; }
@@ -1253,6 +1254,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {
+  /// <since>5.0</since>
   public enum LayerTableEventType
   {
     Added = 0,
@@ -1466,6 +1468,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(string layerName, bool ignoreDeletedLayers)
@@ -1475,6 +1478,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int FindNext(int index, string layerName, bool ignoreDeletedLayers)
@@ -1497,6 +1501,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int FindByFullPath(string layerPath, bool ignoreDeletedLayers)
@@ -1529,6 +1534,7 @@ namespace Rhino.DocObjects.Tables
     /// -1  no layer has the given name.
     /// </returns>
     /// <since>6.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeletedLayers is no longer supported for research by name. Use the overload with notFoundReturnValue (-1 was the previous default).")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid parentId, string layerName, bool ignoreDeletedLayers)
@@ -1557,6 +1563,7 @@ namespace Rhino.DocObjects.Tables
     /// -1  no layer has the given name.
     /// </returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("notFoundReturnValue should be specified. Add a third argument, its previous value was -1 but consider RhinoMath.UnsetIntIndex.")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(Guid layerId, bool ignoreDeletedLayers)
@@ -1999,6 +2006,7 @@ namespace Rhino.DocObjects.Tables
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("'ignoreDeleted' is now redundant. Layers are now permanently removed. Use the overload with this argument.")]
     public string GetUnusedLayerName(bool ignoreDeleted)
     {

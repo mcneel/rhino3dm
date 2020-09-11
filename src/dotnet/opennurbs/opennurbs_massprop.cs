@@ -519,6 +519,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Product moments with respect to centroid coordinate system.
     /// </summary>
+    /// <since>6.26</since>
     public Vector3d CentroidCoordinatesProductMoments
     {
       get
@@ -531,6 +532,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in product moments with respect to centroid coordinate system.
     /// </summary>
+    /// <since>6.26</since>
     public Vector3d CentroidCoordinatesProductMomentsError
     {
       get
@@ -1131,6 +1133,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Product moments with respect to centroid coordinate system.
     /// </summary>
+    /// <since>6.26</since>
     public Vector3d CentroidCoordinatesProductMoments
     {
       get
@@ -1143,6 +1146,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Uncertainty in product moments with respect to centroid coordinate system.
     /// </summary>
+    /// <since>6.26</since>
     public Vector3d CentroidCoordinatesProductMomentsError
     {
       get

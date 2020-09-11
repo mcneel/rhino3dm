@@ -602,6 +602,7 @@ namespace Rhino
   /// <summary>
   /// Provides the anti-alias levels used for render quality
   /// </summary>
+  /// <since>6.0</since>
   public enum AntialiasLevel
   {
     /// <summary>
@@ -629,6 +630,7 @@ namespace Rhino
     /// Provides enumerated values for continuity along geometry,
     /// such as continuous first derivative or continuous unit tangent and curvature.
     /// </summary>
+    /// <since>5.0</since>
     public enum Continuity
     {
       /// <summary>
@@ -763,6 +765,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for various mesh types.
     /// </summary>
+    /// <since>5.0</since>
     public enum MeshType
     {
       /// <summary>
@@ -795,6 +798,7 @@ namespace Rhino
   namespace DocObjects
   {
     /// <summary>Defines the current working space.</summary>
+    /// <since>5.0</since>
     public enum ActiveSpace
     {
       /// <summary>There is no working space.</summary>
@@ -808,6 +812,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for coordinate systems to use as references.
     /// </summary>
+    /// <since>5.0</since>
     public enum CoordinateSystem
     {
       /// <summary>
@@ -835,6 +840,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the display and behavior of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectMode
     {
       ///<summary>Object mode comes from layer.</summary>
@@ -854,6 +860,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the source of display color of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectColorSource
     {
       /// <summary>use color assigned to layer.</summary>
@@ -872,6 +879,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the source of plotting/printing color of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectPlotColorSource
     {
       /// <summary>use plot color assigned to layer.</summary>
@@ -890,6 +898,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the source of plotting/printing weight of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectPlotWeightSource
     {
       /// <summary>use plot color assigned to layer.</summary>
@@ -906,6 +915,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the source of linetype of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectLinetypeSource
     {
       /// <summary>use line style assigned to layer.</summary>
@@ -922,6 +932,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the source of material of single objects.
     /// </summary>
+    /// <since>5.0</since>
     public enum ObjectMaterialSource
     {
       /// <summary>use material assigned to layer.</summary>
@@ -941,6 +952,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for display modes, such as wireframe or shaded.
     /// </summary>
+    /// <since>5.0</since>
     public enum DisplayMode
     {
       /// <summary>
@@ -972,6 +984,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the display of distances in US customary and Imperial units.
     /// </summary>
+    /// <since>5.0</since>
     public enum DistanceDisplayMode
     {
       /// <summary>
@@ -993,6 +1006,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the display of angles.
     /// </summary>
+    /// <since>6.0</since>
     public enum AngleDisplayMode
     {
       /// <summary>
@@ -1014,6 +1028,7 @@ namespace Rhino
     /// <summary>
     /// Defines enumerated values for the line alignment of text.
     /// </summary>
+    /// <since>5.0</since>
     public enum TextDisplayAlignment
     {
       /// <summary>
@@ -1040,6 +1055,7 @@ namespace Rhino
     /// <summary>
     /// Defines binary mask values for each object type that can be found in a document.
     /// </summary>
+    /// <since>5.0</since>
     [Flags, CLSCompliant(false)]
     public enum ObjectType : uint
     {
@@ -1190,6 +1206,7 @@ namespace Rhino
     /// <summary>
     /// Defines bit mask values to represent object decorations.
     /// </summary>
+    /// <since>5.0</since>
     [Flags]
     public enum ObjectDecoration
     {
@@ -1235,6 +1252,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values to represent light styles or types, such as directional or spotlight.
   /// </summary>
+  /// <since>5.0</since>
   public enum LightStyle
   {
     /// <summary>
@@ -1273,6 +1291,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Defines enumerated values to represent component index types.
   /// </summary>
+  /// <since>5.0</since>
   public enum ComponentIndexType
   {
     /// <summary>
@@ -1531,6 +1550,7 @@ namespace Rhino.Display
   ///<summary>
   ///Style of color gradient
   ///</summary>
+  /// <since>7.0</since>
   public enum GradientType
   {
     ///<summary>No gradient</summary>

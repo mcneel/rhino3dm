@@ -8,6 +8,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Enumerates the different types of silhouettes and their origins.
   /// </summary>
+  /// <since>6.0</since>
   [Flags]
   public enum SilhouetteType
   {

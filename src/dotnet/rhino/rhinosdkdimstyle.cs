@@ -1214,6 +1214,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {
+  /// <since>6.0</since>
   public enum DimStyleTableEventType
   {
     Added,
@@ -1467,6 +1468,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="quiet">Do not use.</param>
     /// <returns>Do not use.</returns>
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("Use the SetCurrent property.")]
     public bool SetCurrentDimensionStyleIndex(int index, bool quiet)
     {
@@ -1474,6 +1476,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <since>5.0</since>
+    /// <deprecated>6.0</deprecated>
     [Obsolete("ignoreDeleted is always considered true now. Use FindName.")]
     public DimensionStyle Find(string name, bool ignoreDeleted)
     {
@@ -1636,6 +1639,7 @@ namespace Rhino.DocObjects.Tables
     }
   }
 
+  /// <since>6.0</since>
   public enum ModifyType
   {
     Modify,

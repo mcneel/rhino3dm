@@ -722,3 +722,161 @@ RH_C_FUNCTION void ON_Material_SetBool(ON_Material* pMaterial, enum MaterialBool
   }
 
 }
+
+
+
+RH_C_FUNCTION bool ON_Material_PBR_Supported(const ON_Material* p)
+{
+  return p ? p->IsPhysicallyBased() : false;
+}
+
+RH_C_FUNCTION void ON_Material_PBR_SynchronizeLegacyMaterial(ON_Material* p)
+{
+  if (p)
+  {
+    p->PhysicallyBased()->SynchronizeLegacyMaterial();
+  }
+}
+
+RH_C_FUNCTION void ON_Material_PBR_BaseColor(const ON_Material* p, ON_4fPoint* pColor)
+{
+  if (p && pColor && p->IsPhysicallyBased())
+  {
+    auto c = p->PhysicallyBased()->BaseColor();
+    pColor->x = c.Red();
+    pColor->y = c.Green();
+    pColor->z = c.Blue();
+    pColor->w = c.Alpha();
+  }
+}
+
+RH_C_FUNCTION void ON_Material_PBR_SetBaseColor(ON_Material* p, ON_4FVECTOR_STRUCT in_color)
+{
+  if (p && p->IsPhysicallyBased())
+  {
+    ON_4fColor color;
+    color.SetRed(in_color.val[0]);
+    color.SetGreen(in_color.val[1]);
+    color.SetBlue(in_color.val[2]);
+    color.SetAlpha(in_color.val[3]);
+    p->PhysicallyBased()->SetBaseColor(color);
+  }
+}
+
+RH_C_FUNCTION double ON_Material_PBR_Subsurface(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Subsurface() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSubsurface(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSubsurface(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_SubsurfaceScatteringRadius(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Subsurface() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSubsurfaceScatteringRadius(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSubsurfaceScatteringRadius(d); } }
+
+RH_C_FUNCTION void ON_Material_PBR_SubsurfaceScatteringColor(const ON_Material* p, ON_4fPoint* pColor)
+{
+  if (p && pColor)
+  {
+    auto c = p->PhysicallyBased()->SubsurfaceScatteringColor();
+    pColor->x = c.Red();
+    pColor->y = c.Green();
+    pColor->z = c.Blue();
+    pColor->w = c.Alpha();
+  }
+}
+
+RH_C_FUNCTION void ON_Material_PBR_SetSubsurfaceScatteringColor(ON_Material* p, ON_4FVECTOR_STRUCT in_color)
+{
+  if (p)
+  {
+    ON_4fColor color;
+    color.SetRed(in_color.val[0]);
+    color.SetGreen(in_color.val[1]);
+    color.SetBlue(in_color.val[2]);
+    color.SetAlpha(in_color.val[3]);
+    p->PhysicallyBased()->SetSubsurfaceScatteringColor(color);
+  }
+}
+
+RH_C_FUNCTION int ON_Material_PBR_BRDF(const ON_Material* p) { return p && p->IsPhysicallyBased() ? (int)p->PhysicallyBased()->BRDF() : (int)ON_PhysicallyBasedMaterial::BRDFs::GGX; }
+RH_C_FUNCTION void ON_Material_PBR_SetBRDF(ON_Material* p, int i) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetBRDF((ON_PhysicallyBasedMaterial::BRDFs)i); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Metallic(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Metallic() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetMetallic(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetMetallic(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Specular(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Specular() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSpecular(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSpecular(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_ReflectiveIOR(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->ReflectiveIOR() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetReflectiveIOR(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetReflectiveIOR(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_SpecularTint(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->SpecularTint() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSpecularTint(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSpecularTint(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Roughness(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Roughness() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetRoughness(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetRoughness(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Anisotropic(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Anisotropic() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetAnisotropic(ON_Material* p, double d) { if (p) { p->PhysicallyBased()->SetAnisotropic(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_AnisotropicRotation(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->AnisotropicRotation() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetAnisotropicRotation(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetAnisotropicRotation(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Sheen(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Sheen() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSheen(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSheen(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_SheenTint(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->SheenTint() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetSheenTint(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSheenTint(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Clearcoat(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Clearcoat() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetClearcoat(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetClearcoat(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_ClearcoatRoughness(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->ClearcoatRoughness() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetClearcoatRoughness(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetClearcoatRoughness(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_OpacityIOR(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->OpacityIOR() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetOpacityIOR(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetOpacityIOR(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Opacity(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Opacity() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetOpacity(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetOpacity(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_OpacityRoughness(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->OpacityRoughness() : 0.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetOpacityRoughness(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetOpacityRoughness(d); } }
+
+RH_C_FUNCTION void ON_Material_PBR_Emission(const ON_Material* p, ON_4fPoint* pColor)
+{
+  if (p && pColor && p->IsPhysicallyBased())
+  {
+    auto c = p->PhysicallyBased()->Emission();
+    pColor->x = c.Red();
+    pColor->y = c.Green();
+    pColor->z = c.Blue();
+    pColor->w = c.Alpha();
+  }
+}
+
+RH_C_FUNCTION void ON_Material_PBR_SetEmission(ON_Material* p, ON_4FVECTOR_STRUCT in_color)
+{
+  if (p && p->IsPhysicallyBased())
+  {
+    ON_4fColor color;
+    color.SetRed(in_color.val[0]);
+    color.SetGreen(in_color.val[1]);
+    color.SetBlue(in_color.val[2]);
+    color.SetAlpha(in_color.val[3]);
+    p->PhysicallyBased()->SetEmission(color);
+  }
+}
+
+RH_C_FUNCTION bool ON_Material_IsPhysicallyBased(const ON_Material* p)
+{
+  if (p)
+  {
+    return p->IsPhysicallyBased();
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_Material_ConvertToPBR(ON_Material* p)
+{
+  if (p)
+  {
+    p->ToPhysicallyBased();
+  }
+}

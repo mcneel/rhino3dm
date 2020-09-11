@@ -6,6 +6,7 @@ using System;
 
 namespace Rhino.UI
 {
+  /// <since>6.0</since>
   [Flags]
   public enum MouseButton
   {
@@ -15,6 +16,7 @@ namespace Rhino.UI
     Middle = 4,
   }
 
+  /// <since>6.0</since>
   [Flags]
   public enum ModifierKey
   {

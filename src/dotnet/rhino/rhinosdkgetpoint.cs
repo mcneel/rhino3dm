@@ -3,20 +3,15 @@ using System;
 using System.Reflection;
 using Rhino.Geometry;
 using Rhino.Display;
-using System.Collections.Generic;
 
 #if RHINO_SDK
 namespace Rhino.Input.Custom
 {
-
   /// <summary>
   /// Used to interactively get a point.
   /// </summary>
   public class GetPoint : GetBaseClass
   {
-    internal readonly string m_contextName = null;
-    internal readonly object m_contextObject = null;
-    internal int m_callCount = 0; // number of times Get has been called for this instance
     /// <summary>Create a new GetPoint.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addline.vb' lang='vbnet'/>
@@ -24,14 +19,8 @@ namespace Rhino.Input.Custom
     /// <code source='examples\py\ex_addline.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
-    public GetPoint() :this(null, null)
+    public GetPoint()
     {
-    }
-
-    public GetPoint(string contextName, object contextObject)
-    {
-      m_contextName = contextName;
-      m_contextObject = contextObject;
       IntPtr ptr = UnsafeNativeMethods.CRhinoGetPoint_New();
       Construct(ptr);
     }
@@ -809,14 +798,14 @@ namespace Rhino.Input.Custom
       return rc;
     }
 
-    private static void GetPointPostDrawObjectsCallback(IntPtr pPipeline, IntPtr pConduit)
+    private static void GetPointPostDrawObjectsCallback(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (null == m_active_gp)
         return;
 
       try
       {
-        var e = new DrawEventArgs(pPipeline, pConduit);
+        var e = new DrawEventArgs(pPipeline, conduitSerialNumber);
         m_active_gp.OnPostDrawObjects(e);
       }
       catch (Exception ex)
@@ -958,16 +947,6 @@ namespace Rhino.Input.Custom
     [CLSCompliant(false)]
     public GetResult Get(bool onMouseUp, bool get2DPoint)
     {
-      m_callCount++;
-      GetContextCallback callback = GetContextCallback.FromCallback(m_contextName);
-      if (callback != null )
-      {
-        GetContextArgs args = new GetContextArgs(this);
-        callback.BeforeGetPoint(this, onMouseUp, get2DPoint, args);
-        var overrideResult = this.Result();
-        if (overrideResult != GetResult.NoResult)
-          return overrideResult;
-      }
       var old = m_active_gp;
       m_active_gp = this;
 
@@ -1165,7 +1144,7 @@ namespace Rhino.Input.Custom
     //private IntPtr m_pRhinoViewport;
     private readonly Point3d m_point;
     private readonly GetPoint m_source;
-    internal GetPointDrawEventArgs(GetPoint source, IntPtr pDisplayPipeline, Point3d point) : base(pDisplayPipeline, IntPtr.Zero)
+    internal GetPointDrawEventArgs(GetPoint source, IntPtr pDisplayPipeline, Point3d point) : base(pDisplayPipeline, 0)
     {
       //m_pRhinoViewport = pRhinoViewport;
       m_point = point;
@@ -1277,129 +1256,6 @@ namespace Rhino.Input.Custom
         return (m_flags & MK_MBUTTON) == MK_MBUTTON;
       }
     }
-  }
-
-  public class GetContextArgs
-  {
-    GetPoint m_gp;
-    internal GetContextArgs(GetPoint gp)
-    {
-      m_gp = gp;
-    }
-
-    /// <summary>
-    /// Name of the context that this get operation is happening under
-    /// </summary>
-    public string ContextName
-    {
-      get
-      {
-        return m_gp.m_contextName;
-      }
-    }
-
-    /// <summary>
-    /// Optional object that may be associated with this get operation
-    /// </summary>
-    public object ContextObject
-    {
-      get
-      {
-        return m_gp.m_contextObject;
-      }
-    }
-
-    /// <summary>
-    /// Number of times Get() has been called for a given getter
-    /// </summary>
-    public int CallCount
-    {
-      get
-      {
-        return m_gp.m_callCount;
-      }
-    }
-
-    public void SetPoint(Point3d point)
-    {
-      IntPtr ptr_getpoint = m_gp.NonConstPointer();
-      UnsafeNativeMethods.CRhinoGetPoint_SetResultPoint(ptr_getpoint, point);
-    }
-
-    [CLSCompliant(false)]
-    public void SetGetResult(GetResult result)
-    {
-      IntPtr ptr_getpoint = m_gp.NonConstPointer();
-      UnsafeNativeMethods.CRhinoGetPoint_SetResult(ptr_getpoint, (uint)result);
-    }
-  }
-
-  public abstract class GetContextCallback
-  {
-    internal static GetContextCallback FromCallback(string name)
-    {
-      if( m_callbacks != null && !string.IsNullOrWhiteSpace(name) )
-      {
-        GetContextCallback cb;
-        if (m_callbacks.TryGetValue(name, out cb))
-          return cb;
-      }
-      return null;
-    }
-
-    // Simple single callback support for now
-    static Dictionary<string, GetContextCallback> m_callbacks;
-
-    public void EnableForContext(string contextName)
-    {
-      if (m_callbacks == null)
-        m_callbacks = new Dictionary<string, GetContextCallback>();
-      m_callbacks[contextName] = this;
-    }
-
-    public void DisableForContext(string contextName)
-    {
-      if( m_callbacks != null && m_callbacks.ContainsKey(contextName) )
-      {
-        m_callbacks.Remove(contextName);
-        if (m_callbacks.Count == 0)
-          m_callbacks = null;
-      }
-    }
-
-    public void DisableForAllContexts()
-    {
-      if (m_callbacks != null)
-      {
-        List<string> keys = new List<string>(m_callbacks.Keys);
-        foreach(var key in keys)
-        {
-          if( m_callbacks.ContainsKey(key) && m_callbacks[key] == this)
-          {
-            m_callbacks.Remove(key);
-          }
-        }
-        if (m_callbacks.Count == 0)
-          m_callbacks = null;
-      }
-    }
-
-    /// <summary>
-    /// Called before a GetPoint() operation. Setting the point or result
-    /// on the input arguments will cause the default GetPoint operation to be
-    /// skipped and results will immediately be returned to the caller of
-    /// the initial GetPoint.
-    /// </summary>
-    /// <param name="gp"></param>
-    /// <param name="onMouseUp"></param>
-    /// <param name="get2DPoint"></param>
-    /// <param name="args"></param>
-    /// <returns></returns>
-    [CLSCompliant(false)]
-    public virtual void BeforeGetPoint(GetPoint gp, bool onMouseUp, bool get2DPoint, GetContextArgs args)
-    {
-    }
-
   }
 }
 

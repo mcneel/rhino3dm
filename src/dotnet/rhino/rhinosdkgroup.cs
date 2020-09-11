@@ -16,6 +16,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Defines the types of group table events.
     /// </summary>
+    /// <since>5.0</since>
     public enum GroupTableEventType : int
     {
       /// <summary>
@@ -162,6 +163,7 @@ namespace Rhino.DocObjects
       /// -1 no group found with the given name.
       /// </returns>
       /// <since>5.0</since>
+      /// <deprecated>6.0</deprecated>
       [Obsolete("Use the overload without the ignoreDeletedGroups input. Note that the new method might return UnsetIntIndex.")]
       [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
       public int Find(string groupName, bool ignoreDeletedGroups)
@@ -171,10 +173,10 @@ namespace Rhino.DocObjects
       }
 
       /// <summary>
-      /// Finds a Linetype given its name. Returns the instance, rather than the index.
+      /// Finds a group given its name. Returns the instance, rather than the index.
       /// </summary>
-      /// <param name="name">The name of the Linetype to be searched.</param>
-      /// <returns>An Linetype, or null on error.</returns>
+      /// <param name="name">The name of the group to be searched.</param>
+      /// <returns>An group, or null on error.</returns>
       /// <since>6.0</since>
       public Group FindName(string name)
       {
@@ -182,10 +184,10 @@ namespace Rhino.DocObjects
       }
 
       /// <summary>
-      /// Finds a Linetype given its name hash.
+      /// Finds a group given its name hash.
       /// </summary>
-      /// <param name="nameHash">The name hash of the Linetype to be searched.</param>
-      /// <returns>An Linetype, or null on error.</returns>
+      /// <param name="nameHash">The name hash of the group to be searched.</param>
+      /// <returns>An group, or null on error.</returns>
       /// <since>6.0</since>
       public Group FindNameHash(NameHash nameHash)
       {
@@ -326,7 +328,7 @@ namespace Rhino.DocObjects
       /// <summary>
       /// Deletes a group from this table.
       /// <para>Deleted groups are kept in the runtime group table so that undo
-      /// will work with groups.  Call IsDeleted() to determine if a group is deleted.</para>
+      /// will work with groups. Call IsDeleted() to determine if a group is deleted.</para>
       /// </summary>
       /// <param name="groupIndex">An group index to be deleted.</param>
       /// <returns>true if the operation was successful.</returns>
@@ -343,18 +345,32 @@ namespace Rhino.DocObjects
         return Delete(item.Index);
       }
 
+      /// <summary>
+      /// Undeletes a previously deleted group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>true if successful, false otherwise.</returns>
       /// <since>5.0</since>
       public bool Undelete(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_DeleteGroup(m_doc.RuntimeSerialNumber, groupIndex, false);
       }
 
-      /// <since>5.0</since>
+      /// <summary>
+      /// Verifies a group is deleted.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>true if the group is deleted, false otherwise.</returns>
       public bool IsDeleted(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_IsDeleted(m_doc.RuntimeSerialNumber, groupIndex);
       }
 
+      /// <summary>
+      /// Returns the name of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The group name.</returns>
       /// <since>5.0</since>
       public string GroupName(int groupIndex)
       {
@@ -366,12 +382,22 @@ namespace Rhino.DocObjects
         }
       }
 
-      /// <since>5.0</since>
+      /// <summary>
+      /// Changes the name of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <param name="newName">The new group name.</param>
+      /// <returns>true if successful, false otherwise.</returns>
       public bool ChangeGroupName(int groupIndex, string newName)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_ChangeGroupName(m_doc.RuntimeSerialNumber, groupIndex, newName);
       }
 
+      /// <summary>
+      /// Returns an array of all group names.
+      /// </summary>
+      /// <param name="ignoreDeletedGroups">Ignore any groups that were deleted.</param>
+      /// <returns>An array if group names if succesful, null if there are no groups.</returns>
       /// <since>5.0</since>
       public string[] GroupNames(bool ignoreDeletedGroups)
       {
@@ -398,26 +424,55 @@ namespace Rhino.DocObjects
       const int idxUnlockGroup = 3;
       const int idxGroupObjectCount = 4;
 
+      /// <summary>
+      /// Hides all objects that are members of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The number of objects that were hidden.</returns>
       /// <since>5.0</since>
       public int Hide(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxHideGroup);
       }
+
+      /// <summary>
+      /// Shows, or unhides, all objects that are members of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The number of objects that were shown.</returns>
       /// <since>5.0</since>
       public int Show(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxShowGroup);
       }
+
+      /// <summary>
+      /// Locks all objects that are members of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The number of objects that were locked.</returns>
       /// <since>5.0</since>
       public int Lock(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxLockGroup);
       }
+
+      /// <summary>
+      /// Unlocks all objects that are members of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The number of objects that were unlocked.</returns>
       /// <since>5.0</since>
       public int Unlock(int groupIndex)
       {
         return UnsafeNativeMethods.CRhinoGroupTable_GroupOp(m_doc.RuntimeSerialNumber, groupIndex, idxUnlockGroup);
       }
+
+      /// <summary>
+      /// Returns the number of objects that are members of a group.
+      /// </summary>
+      /// <param name="groupIndex">The index of the group.</param>
+      /// <returns>The nnumber of objects that are members of the group.</returns>
       /// <since>5.0</since>
       public int GroupObjectCount(int groupIndex)
       {

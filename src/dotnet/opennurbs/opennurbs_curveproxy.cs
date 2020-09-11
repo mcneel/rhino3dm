@@ -3,7 +3,8 @@ using System;
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Provides strongly-typed access to Brep edges.
+  /// Represent curve geometry. Usually this is part of another piece of geometry
+  /// that can be represented as a "proxy".
   /// </summary>
   public class CurveProxy : Curve
   {

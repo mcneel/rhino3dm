@@ -35,20 +35,22 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="nativeWindowObject"></param>
     /// <param name="isRhinoPanel"></param>
+    /// <param name="applyPanelStyles"></param>
     /// <param name="host"></param>
     /// <returns></returns>
     /// <since>6.0</since>
-    IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, out object host);
+    IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, bool applyPanelStyles, out object host);
     /// <summary>
     /// Get the unmanaged pointer associated with the pages content control
     /// </summary>
     /// <param name="pageObject"></param>
     /// <param name="nativeWindowObject"></param>
     /// <param name="isRhinoPanel"></param>
+    /// <param name="applyPanelStyles"></param>
     /// <param name="host"></param>
     /// <returns></returns>
     /// <since>6.1</since>
-    IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, out object nativeWindowObject, out object host);
+    IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, bool applyPanelStyles, out object nativeWindowObject, out object host);
     /// <summary>
     /// Redraw the specified control.
     /// </summary>
@@ -83,11 +85,11 @@ namespace Rhino.UI
     {
       throw new NotImplementedException ();
     }
-    public IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, out object host)
+    public IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, bool applyPanelStyles, out object host)
     {
       throw new NotImplementedException();
     }
-    public IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, out object nativeWindowObject, out object host)
+    public IntPtr GetNativePageWindow(object pageObject, bool isRhinoPanel, bool applyPanelStyles, out object nativeWindowObject, out object host)
     {
       throw new NotImplementedException();
     }

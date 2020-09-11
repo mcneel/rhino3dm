@@ -22,6 +22,7 @@ namespace Rhino.Input
   /// <summary>
   /// Enumerates all Box getter modes.
   /// </summary>
+  /// <since>5.0</since>
   public enum GetBoxMode
   {
     /// <summary>
@@ -798,6 +799,21 @@ namespace Rhino.Input
       return rc;
     }
 
+    /// <summary>
+    /// Asks the user to specify meshing parameters.
+    /// </summary>
+    /// <param name="doc">The active document</param>
+    /// <param name="parameters">The initial meshing parameters. If successful, the updated meshing parameters are returned here.</param>
+    /// <param name="uiStyle">The user interface style, where: 0 = simple dialog, 1 = details dialog, 2 = script or batch mode.</param>
+    /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>7.0</since>
+    public static Result GetMeshParameters(RhinoDoc doc, ref MeshingParameters parameters, ref int uiStyle)
+    {
+      var ptr_mesh_parameters = parameters.NonConstPointer();
+      Result rc = (Result)UnsafeNativeMethods.RHC_RhinoGetMeshParameters(doc.RuntimeSerialNumber, ptr_mesh_parameters, ref uiStyle);
+      return rc;
+    }
+
     static Result GetGripsHelper(out GripObject[] grips, string prompt, bool singleGrip)
     {
       grips = null;
@@ -1006,6 +1022,7 @@ namespace Rhino.Input
       return Result.Failure;
     }
 
+    /// <since>6.0</since>
     [FlagsAttribute]
     public enum BitmapFileTypes : int
     {
@@ -1079,6 +1096,7 @@ namespace Rhino.Input
   /// <summary>
   /// Possible results from GetObject.Get(), GetPoint.Get(), etc...
   /// </summary>
+  /// <since>5.0</since>
   [CLSCompliant(false)]
   public enum GetResult : uint
   {

@@ -321,6 +321,179 @@ RH_C_FUNCTION void ON_IntArray_Delete(ON_SimpleArray<int>* p)
     delete p;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION ON_SimpleArray<unsigned char>* ON_ByteArray_New(/*ARRAY*/const unsigned char* vals, int count)
+{
+  if (count < 1)
+  {
+    return new ON_SimpleArray<unsigned char>();
+  }
+
+  ON_SimpleArray<unsigned char>* rc = new ON_SimpleArray<unsigned char>(count);
+  if (nullptr == vals)
+  {
+    //We have to do this to ensure the array is actually filled.
+    for (int i = 0; i < count; i++)
+    {
+      rc->Append(0);
+    }
+  }
+  else
+  {
+    rc->Append(count, vals);
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION ON_SimpleArray<unsigned char>* ON_ByteArray_CopyNew(const ON_SimpleArray<unsigned char>* other)
+{
+  if (nullptr == other)
+  {
+    return new ON_SimpleArray<unsigned char>();
+  }
+
+  ON_SimpleArray<unsigned char>* rc = new ON_SimpleArray<unsigned char>(*other);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_ByteArray_CopyTo(const ON_SimpleArray<unsigned char>* source, ON_SimpleArray<unsigned char>* target)
+{
+  if (nullptr == source || nullptr == target)
+    return;
+
+  *target = *source;
+}
+
+
+RH_C_FUNCTION void ON_ByteArray_CopyValues(const ON_SimpleArray<unsigned char>* ptr, /*ARRAY*/unsigned char* vals)
+{
+  if (ptr && vals)
+  {
+    int count = ptr->Count();
+    if (count > 0)
+    {
+      const unsigned char* source = ptr->Array();
+      ::memcpy(vals, source, count * sizeof(unsigned char));
+    }
+  }
+}
+
+RH_C_FUNCTION int ON_ByteArray_Count(const ON_SimpleArray<unsigned char>* ptr)
+{
+  int rc = 0;
+  if (ptr)
+    rc = ptr->Count();
+  return rc;
+}
+
+RH_C_FUNCTION unsigned char* ON_ByteArray_Array(ON_SimpleArray<unsigned char>* ptr)
+{
+  unsigned char* rc = nullptr;
+  if (ptr)
+  {
+    rc = ptr->Array();
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_ByteArray_Delete(ON_SimpleArray<unsigned char>* p)
+{
+  if (p)
+    delete p;
+}
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION ON_SimpleArray<float>* ON_FloatArray_New(/*ARRAY*/const float* vals, int count)
+{
+  if (count < 1)
+  {
+    return new ON_SimpleArray<float>();
+  }
+
+  ON_SimpleArray<float>* rc = new ON_SimpleArray<float>(count);
+  if (nullptr == vals)
+  {
+    for (int i = 0; i < count; i++)
+    {
+      rc->Append(0.f);
+    }
+  }
+  else
+  {
+    rc->Append(count, vals);
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION ON_SimpleArray<float>* ON_FloatArray_CopyNew(const ON_SimpleArray<float>* other)
+{
+  if (nullptr == other)
+  {
+    return new ON_SimpleArray<float>();
+  }
+
+  ON_SimpleArray<float>* rc = new ON_SimpleArray<float>(*other);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_FloatArray_CopyTo(const ON_SimpleArray<float>* source, ON_SimpleArray<float>* target)
+{
+  if (nullptr == source || nullptr == target)
+    return;
+
+  *target = *source;
+}
+
+
+RH_C_FUNCTION void ON_FloatArray_CopyValues(const ON_SimpleArray<float>* ptr, /*ARRAY*/float* vals)
+{
+  if (ptr && vals)
+  {
+    int count = ptr->Count();
+    if (count > 0)
+    {
+      const float* source = ptr->Array();
+      ::memcpy(vals, source, count * sizeof(float));
+    }
+  }
+}
+
+RH_C_FUNCTION int ON_FloatArray_Count(const ON_SimpleArray<float>* ptr)
+{
+  int rc = 0;
+  if (ptr)
+    rc = ptr->Count();
+  return rc;
+}
+
+RH_C_FUNCTION float* ON_FloatArray_Array(ON_SimpleArray<float>* ptr)
+{
+  float* rc = nullptr;
+  if (ptr)
+  {
+    rc = ptr->Array();
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_FloatArray_Delete(ON_SimpleArray<float>* p)
+{
+  if (p)
+    delete p;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION ON_SimpleArray<unsigned int>* ON_UintArray_New(int initial_capacity)
@@ -367,9 +540,27 @@ RH_C_FUNCTION void ON_UintArray_Delete(ON_SimpleArray<unsigned int>* p)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-RH_C_FUNCTION ON_SimpleArray<ON_UUID>* ON_UUIDArray_New()
+RH_C_FUNCTION ON_SimpleArray<ON_UUID>* ON_UUIDArray_New(/*ARRAY*/const ON_UUID* vals, int count)
 {
-  return new ON_SimpleArray<ON_UUID>();
+  if (count < 1)
+  {
+    return new ON_SimpleArray<ON_UUID>();
+  }
+
+  ON_SimpleArray<ON_UUID>* rc = new ON_SimpleArray<ON_UUID>(count);
+  if (nullptr == vals)
+  {
+    for (int i = 0; i < count; i++)
+    {
+      rc->Append(ON_nil_uuid);
+    }
+  }
+  else
+  {
+    rc->Append(count, vals);
+  }
+
+  return rc;
 }
 
 RH_C_FUNCTION void ON_UUIDArray_CopyValues(const ON_SimpleArray<ON_UUID>* ptr, /*ARRAY*/ON_UUID* vals)

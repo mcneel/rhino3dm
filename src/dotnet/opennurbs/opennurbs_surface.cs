@@ -12,6 +12,7 @@ namespace Rhino.Geometry
   /// and curve sides, such as North or West boundary.
   /// <para>Note: odd values are all x-constant; even values > 0 are all y-constant.</para>
   /// </summary>
+  /// <since>5.0</since>
   public enum IsoStatus : int
   {
     /// <summary>
@@ -1091,29 +1092,9 @@ namespace Rhino.Geometry
     [ConstOperation]
     public bool TryGetFiniteCylinder(out Cylinder cylinder, double tolerance)
     {
-      bool rc = false;
-      if (TryGetCylinder(out cylinder, tolerance))
-      {
-        Plane plane = cylinder.BasePlane;
-        if (plane.ZAxis.Z < 0)
-        {
-          plane.Flip(); // we don't want the plane to look downwards
-        }
-
-        Box box;
-        if (GetBoundingBox(plane, out box).IsDegenerate(RhinoMath.ZeroTolerance) == 0) // 0 == non-degenerate
-        {
-          Point3d new_origin = box.PointAt(0.5, 0.5, 0);
-          plane.m_origin = new_origin;
-          cylinder.BasePlane = plane;
-
-          cylinder.Height1 = 0;
-          cylinder.Height2 = Math.Abs(box.m_dz.Length);
-
-          rc = true;
-        }
-      }
-      return rc;
+      cylinder = new Cylinder();
+      IntPtr ptr_this = ConstPointer();
+      return UnsafeNativeMethods.ON_Surface_IsCylinder2(ptr_this, ref cylinder, tolerance);
     }
 
     /// <summary>

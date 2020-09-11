@@ -10,6 +10,40 @@ using Rhino.Runtime;
 namespace Rhino.Geometry
 {
   /// <summary>
+  /// Knot styles for NURBS curves and surfaces.
+  /// If a knot vector meets the conditions of two styles,
+  /// then the style with the lowest value is used.
+  /// </summary>
+  /// <since>7.0</since>
+  public enum KnotStyle
+  {
+    /// <summary>
+    /// Unknown knot style
+    /// </summary>
+    Unknown = 0,
+    /// <summary>
+    /// Uniform knots (ends not clamped).
+    /// </summary>
+    Uniform = 1,
+    /// <summary>
+    /// Uniform knots (clamped ends, degree >= 2).
+    /// </summary>
+    QuasiUniform = 2,
+    /// <summary>
+    /// All internal knots have full multiplicity.
+    /// </summary>
+    PiecewiseBezier= 3,
+    /// <summary>
+    /// Clamped end knots (with at least one interior non-uniform knot).
+    /// </summary>
+    ClampedEnd = 4,
+    /// <summary>
+    /// Known to be none of the other styles
+    /// </summary>
+    NonUniform = 5
+  }
+
+  /// <summary>
   /// Represents a Non Uniform Rational B-Splines (NURBS) curve.
   /// </summary>
   [Serializable]
@@ -532,6 +566,7 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary> What end conditions to set </summary>
+    /// <since>6.0</since>
     public enum NurbsCurveEndConditionType
     {
       /// <summary>
@@ -845,7 +880,7 @@ namespace Rhino.Geometry
 #if RHINO_SDK
     /// <summary>
     /// Creates a C1 cubic NURBS approximation of a helix or spiral. For a helix,
-    /// you may have radius0 == radius1. For a spiral radius0 == radius0 produces
+    /// you may have radius0 == radius1. For a spiral radius0 == radius1 produces
     /// a circle. Zero and negative radii are permissible.
     /// </summary>
     /// <param name="axisStart">Helix's axis starting point or center of spiral.</param>
@@ -1342,6 +1377,18 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr const_ptr_curve = m_curve.ConstPointer();
       return UnsafeNativeMethods.ON_NurbsCurve_SuperfluousKnot(const_ptr_curve, start ? 0 : 1);
+    }
+
+    /// <summary>
+    /// Gets the style of the knot vector.
+    /// </summary>
+    public KnotStyle KnotStyle
+    {
+      get
+      {
+        IntPtr const_ptr_curve = m_curve.ConstPointer();
+        return (KnotStyle)UnsafeNativeMethods.ON_NurbsCurve_KnotStyle(const_ptr_curve);
+      }
     }
 
 #if RHINO_SDK

@@ -6,8 +6,23 @@ using System.Collections.Generic;
 namespace Rhino.Display
 {
   /// <summary>
+  /// Graphics display techologies.
+  /// </summary>
+  /// <since>7.0</since>
+  public enum DisplayTechnology : int
+  { 
+    None = 0,
+    OpenGL = 1,
+    Metal = 2,
+    DirectX = 3,
+    Software = 4,
+    Vulkan = 5
+  };
+
+  /// <summary>
   /// Defines enumerated constants for display blend modes.
   /// </summary>
+  /// <since>5.0</since>
   public enum BlendMode
   {
     /// <summary>
@@ -94,13 +109,33 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Load a DisplayBitmap from and image file on disk.
+    /// Load a DisplayBitmap from and image file on disk or from URL. If path starts
+    /// with http:// or https:// then an attempt is made to load the bitmap from an
+    /// online resource
     /// </summary>
     /// <param name="path">A location from which to load the file.</param>
     /// <returns>The new display bitmap, or null on error.</returns>
     /// <since>5.0</since>
     public static DisplayBitmap Load(string path)
     {
+      if (path.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
+          path.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
+      {
+        try
+        {
+          using (var client = new System.Net.WebClient())
+          {
+            var stream = client.OpenRead(path);
+            var bmp = new System.Drawing.Bitmap(stream);
+            return new DisplayBitmap(bmp);
+          }
+        }
+        catch(Exception)
+        {
+          return null;
+        }
+      }
+
       IntPtr ptr_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New2(path);
       if (IntPtr.Zero == ptr_bmp)
         return null;
@@ -134,6 +169,20 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhCmnDisplayBitmap_GetBlendFunction(m_ptr_display_bmp, ref s, ref d);
       source = (BlendMode)s;
       destination = (BlendMode)d;
+    }
+
+    /// <summary>
+    /// Size of the underlying bitmap image
+    /// </summary>
+    /// <since>7.0</since>
+    public System.Drawing.Size Size
+    {
+      get
+      {
+        int width = 0, height = 0;
+        UnsafeNativeMethods.CRhCmnDisplayBitmap_Size(m_ptr_display_bmp, ref width, ref height);
+        return new System.Drawing.Size(width, height);
+      }
     }
 
     /// <summary>

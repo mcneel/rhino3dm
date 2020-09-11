@@ -1100,25 +1100,31 @@ namespace Rhino.DocObjects
       }
     }
 
-#if RHINO_SDK
     /// <since>7.0</since>
-    public Rhino.Render.PhysicallyBasedMaterial PhysicallyBased
+    public bool IsPhysicallyBased
     {
       get
       {
-        return new Render.PhysicallyBasedMaterial(this);
+        return UnsafeNativeMethods.ON_Material_IsPhysicallyBased(ConstPointer());
       }
     }
 
-    public Rhino.Render.PhysicallyBasedMaterial ConvertToPhysicallyBased()
+// not really, but we need to move PhysicallyBasedMaterial to the right file
+#if RHINO_SDK
+    /// <since>7.0</since>
+    public PhysicallyBasedMaterial PhysicallyBased
     {
-      var material = new Material(this);
-
-      UnsafeNativeMethods.ON_Material_ConvertToPBR(material.NonConstPointer());
-
-      return material.PhysicallyBased;
+      get
+      {
+        return IsPhysicallyBased ? new PhysicallyBasedMaterial(this) : null;
+      }
     }
 #endif
+    /// <since>7.0</since>
+    public void ToPhysicallyBased()
+    {
+      UnsafeNativeMethods.ON_Material_ConvertToPBR(NonConstPointer());
+    }
 
     /// <summary>
     /// Gets or sets how reflective a material is, 0f is no reflection
@@ -1264,18 +1270,21 @@ namespace Rhino.DocObjects
 
     #region Bitmap
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use GetTexture instead")]
     public Texture GetBitmapTexture()
     {
       return GetTexture(TextureType.Bitmap);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bitmap);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetBitmapTexture(Texture texture)
     {
@@ -1289,18 +1298,21 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <returns>A texture; or null if no bump texture has been added to this material.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use GetTexture instead")]
     public Texture GetBumpTexture()
     {
       return GetTexture(TextureType.Bump);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bump);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetBumpTexture(Texture texture)
     {
@@ -1310,18 +1322,21 @@ namespace Rhino.DocObjects
 
     #region Environment
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use GetTexture instead")]
     public Texture GetEnvironmentTexture()
     {
       return GetTexture(TextureType.Emap);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(string filename)
     {
       return AddTexture(filename, TextureType.Emap);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetEnvironmentTexture(Texture texture)
     {
@@ -1331,18 +1346,21 @@ namespace Rhino.DocObjects
 
     #region Transparency
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use GetTexture instead")]
     public Texture GetTransparencyTexture()
     {
       return GetTexture(TextureType.Transparency);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(string filename)
     {
       return AddTexture(filename, TextureType.Transparency);
     }
     /// <since>5.0</since>
+    /// <deprecated>7.0</deprecated>
     [Obsolete("Use SetTexture instead")]
     public bool SetTransparencyTexture(Texture texture)
     {
@@ -1356,6 +1374,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="material_channel_index">Index</param>
     /// <returns>Id of the material channel</returns>
+    /// <since>6.26</since>
     public Guid MaterialChannelIdFromIndex(int material_channel_index)
     {
       var ptr_const_this = ConstPointer();
@@ -1369,6 +1388,7 @@ namespace Rhino.DocObjects
     /// <param name="material_channel_id">Id</param>
     /// <param name="bAddIdIfNotPresent">Controls whether to add channel if none exist</param>
     /// <returns>Index of the material channel</returns>
+    /// <since>6.26</since>
     public int MaterialChannelIndexFromId(Guid material_channel_id, bool bAddIdIfNotPresent)
     {
       var ptr_this = NonConstPointer();
@@ -1378,6 +1398,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Removes all material channels
     /// </summary>
+    /// <since>6.26</since>
     public void ClearMaterialChannels()
     {
       var ptr_this = NonConstPointer();
@@ -1447,6 +1468,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {
+  /// <since>5.0</since>
   public enum MaterialTableEventType
   {
     Added = 0,
