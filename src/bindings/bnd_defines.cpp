@@ -455,7 +455,7 @@ void initDefines(void*)
     .value("Unset", ON::LengthUnitSystem::Unset)
     ;
 
-  enum_<ON::light_style>(m, "LightStyle")
+  enum_<ON::light_style>("LightStyle")
     .value("None", ON::light_style::unknown_light_style)
     .value("CameraDirectional", ON::light_style::camera_directional_light)
     .value("CameraPoint", ON::light_style::camera_point_light)
