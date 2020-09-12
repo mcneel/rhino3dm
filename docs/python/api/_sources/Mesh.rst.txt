@@ -20,6 +20,10 @@ Mesh
       bool: Will return True if SetCachedTextureCoordinates has been called;
       otherwise will return false.
 
+   .. py:attribute:: HasPrincipalCurvatures
+
+      bool: HasPrincipalCurvatures
+
    .. py:attribute:: Vertices
 
       Collections.MeshVertexList: Gets access to the vertices set of this mesh.
@@ -49,6 +53,13 @@ Mesh
 
       int: Number of partition information chunks stored on this mesh based
       on the last call to CreatePartitions
+
+   .. py:staticmethod:: CreateFromSubDControlNet(subd)
+
+      Create a mesh from a SubD control net
+
+      :return: mesh representing control net on success, None on failure
+      :rtype: rhino3dm.Mesh
 
    .. py:method:: IsManifold(topologicalTest)
 

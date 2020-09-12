@@ -14,6 +14,10 @@ Light
 
       bool: Gets or sets a value that defines if the light is turned on (true) or off (false).
 
+   .. py:attribute:: LightStyle
+
+      LightStyle: Gets or sets a light style on this camera.
+
    .. py:attribute:: IsPointLight
 
       bool: Gets a value indicating whether the light style
@@ -66,6 +70,18 @@ Light
    .. py:attribute:: PowerCandela
 
       float: Gets or sets the light power in candelas (cd).
+
+   .. py:attribute:: Ambient
+
+      System.Drawing.Color: Gets or sets the ambient color.
+
+   .. py:attribute:: Diffuse
+
+      System.Drawing.Color: Gets or sets the diffuse color.
+
+   .. py:attribute:: Specular
+
+      System.Drawing.Color: Gets or sets the specular color.
 
    .. py:attribute:: AttenuationVector
 

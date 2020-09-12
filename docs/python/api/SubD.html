@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>SubD &mdash; rhino3dm 0.12.0 documentation</title>
+  <title>SubD &mdash; rhino3dm 0.13.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.12.0
+                0.13.0
               </div>
             
           
@@ -257,7 +257,73 @@
 <dl class="class">
 <dt id="rhino3dm.SubD">
 <em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">SubD</code><a class="headerlink" href="#rhino3dm.SubD" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="method">
+<dt id="rhino3dm.SubD.SubD">
+<code class="descname">SubD</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.SubD" title="Permalink to this definition">¶</a></dt>
+<dd><p>SubD constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.SubD.IsSolid">
+<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.SubD.IsSolid" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool: Test SubD to see if the active level is a solid.
+A “solid” is a closed oriented manifold, or a closed oriented manifold.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.SubD.ClearEvaluationCache">
+<code class="descname">ClearEvaluationCache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.ClearEvaluationCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear cached information that depends on the location of vertex control points</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients">
+<code class="descname">UpdateAllTagsAndSectorCoefficients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates vertex tag, edge tag, and edge coefficient values on the active
+level. After completing custom editing operations that modify the
+topology of the SubD control net or changing values of vertex or edge
+tags, the tag and sector coefficients information on nearby components
+in the edited areas need to be updated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of vertices and edges that were changed during the update.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">uint</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.SubD.Subdivide">
+<code class="descname">Subdivide</code><span class="sig-paren">(</span><em>count</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.Subdivide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the Catmull-Clark subdivision algorithm and save the results in
+this SubD</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>count</strong> (<em>int</em>) – Number of times to subdivide (must be greater than 0)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 

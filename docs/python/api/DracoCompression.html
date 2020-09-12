@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>DracoCompression &mdash; rhino3dm 0.12.0 documentation</title>
+  <title>DracoCompression &mdash; rhino3dm 0.13.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.12.0
+                0.13.0
               </div>
             
           
@@ -260,99 +260,37 @@
 <dd><dl class="staticmethod">
 <dt id="rhino3dm.DracoCompression.Compress">
 <em class="property">static </em><code class="descname">Compress</code><span class="sig-paren">(</span><em>mesh</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.Compress" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compress a mesh using default compression options.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mesh</strong> (<em>Rhino.Geometry.Mesh</em>) – mesh to compress</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">instance of class representing the compressed data</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.DracoCompression" title="rhino3dm.DracoCompression">DracoCompression</a></td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt>
 <em class="property">static </em><code class="descname">Compress</code><span class="sig-paren">(</span><em>mesh</em>, <em>options</em><span class="sig-paren">)</span></dt>
-<dd><p>Compress a mesh using default compression options.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">instance of class representing the compressed data</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.DracoCompression" title="rhino3dm.DracoCompression">DracoCompression</a></td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.DracoCompression.Write">
 <code class="descname">Write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.Write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the compressed data to disk</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.DracoCompression.DecompressByteArray">
 <em class="property">static </em><code class="descname">DecompressByteArray</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.DecompressByteArray" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decompress data into either a mesh or point cloud.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Mesh or point cloud on success. None on failure</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Rhino.Geometry.GeometryBase</td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.DracoCompression.DecompressBase64String">
 <em class="property">static </em><code class="descname">DecompressBase64String</code><span class="sig-paren">(</span><em>encoded</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.DecompressBase64String" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decompress base64 encoded version of Draco data into either a mesh or point cloud</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoded</strong> (<em>str</em>) – compressed Draco data</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Mesh or point cloud on success. None on failure</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Rhino.Geometry.GeometryBase</td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhino3dm.DracoCompression.ToBase64String">
 <code class="descname">ToBase64String</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.ToBase64String" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert byte array of Draco compressed data into a base64 encoded string</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

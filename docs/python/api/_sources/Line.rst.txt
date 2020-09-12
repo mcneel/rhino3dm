@@ -15,7 +15,7 @@ Line
    .. py:attribute:: IsValid
 
       bool: Gets a value indicating whether or not this line is valid.
-      Valid lines must have valid start and end points.
+      Valid lines must have valid start and end points, and the points must not be equal.
 
    .. py:attribute:: Length
 
