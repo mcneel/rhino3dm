@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; rhino3dm 0.12.0 documentation</title>
+  <title>Index &mdash; rhino3dm 0.13.0 documentation</title>
   
 
   
@@ -57,7 +57,7 @@
             
             
               <div class="version">
-                0.12.0
+                0.13.0
               </div>
             
           
@@ -513,9 +513,11 @@
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateBelowLine">AlternateBelowLine (rhino3dm.DimensionStyle attribute)</a>
 </li>
+      <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateLengthFactor">AlternateLengthFactor (rhino3dm.DimensionStyle attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.AlternateLengthFactor">AlternateLengthFactor (rhino3dm.DimensionStyle attribute)</a>
+      <li><a href="Light.html#rhino3dm.Light.Ambient">Ambient (rhino3dm.Light attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.AmbientColor">AmbientColor (rhino3dm.Material attribute)</a>
 </li>
@@ -757,6 +759,8 @@
 </li>
       <li><a href="PointCloud.html#rhino3dm.PointCloud.ClearColors">ClearColors() (rhino3dm.PointCloud method)</a>
 </li>
+      <li><a href="SubD.html#rhino3dm.SubD.ClearEvaluationCache">ClearEvaluationCache() (rhino3dm.SubD method)</a>
+</li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.ClearFieldOverride">ClearFieldOverride() (rhino3dm.DimensionStyle method)</a>
 </li>
       <li><a href="PointCloud.html#rhino3dm.PointCloud.ClearHiddenFlags">ClearHiddenFlags() (rhino3dm.PointCloud method)</a>
@@ -913,6 +917,8 @@
         <li><a href="NurbsSurface.html#rhino3dm.NurbsSurface.CreateFromSphere">(rhino3dm.NurbsSurface static method)</a>
 </li>
       </ul></li>
+      <li><a href="Mesh.html#rhino3dm.Mesh.CreateFromSubDControlNet">CreateFromSubDControlNet() (rhino3dm.Mesh static method)</a>
+</li>
       <li><a href="Brep.html#rhino3dm.Brep.CreateFromSurface">CreateFromSurface() (rhino3dm.Brep static method)</a>
 </li>
       <li><a href="Polyline.html#rhino3dm.Polyline.CreateInscribedPolygon">CreateInscribedPolygon() (rhino3dm.Polyline static method)</a>
@@ -1033,10 +1039,10 @@
       </ul></li>
       <li><a href="Mesh.html#rhino3dm.Mesh.DestroyPartition">DestroyPartition() (rhino3dm.Mesh method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Mesh.html#rhino3dm.Mesh.DestroyTopology">DestroyTopology() (rhino3dm.Mesh method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Mesh.html#rhino3dm.Mesh.DestroyTree">DestroyTree() (rhino3dm.Mesh method)</a>
 </li>
       <li><a href="Transform.html#rhino3dm.Transform.Determinant">Determinant() (rhino3dm.Transform method)</a>
@@ -1051,6 +1057,8 @@
         <li><a href="Sphere.html#rhino3dm.Sphere.Diameter">(rhino3dm.Sphere attribute)</a>
 </li>
       </ul></li>
+      <li><a href="Light.html#rhino3dm.Light.Diffuse">Diffuse (rhino3dm.Light attribute)</a>
+</li>
       <li><a href="Material.html#rhino3dm.Material.DiffuseColor">DiffuseColor (rhino3dm.Material attribute)</a>
 </li>
       <li><a href="BezierCurve.html#rhino3dm.BezierCurve.Dimension">Dimension (rhino3dm.BezierCurve attribute)</a>
@@ -1423,6 +1431,8 @@
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.HasPerViewportSettings">HasPerViewportSettings() (rhino3dm.Layer method)</a>
 </li>
+      <li><a href="Mesh.html#rhino3dm.Mesh.HasPrincipalCurvatures">HasPrincipalCurvatures (rhino3dm.Mesh attribute)</a>
+</li>
       <li><a href="Hatch.html#rhino3dm.Hatch">Hatch (class in rhino3dm)</a>
 </li>
   </ul></td>
@@ -1587,10 +1597,10 @@
 </li>
       <li><a href="Curve.html#rhino3dm.Curve.IsEllipse">IsEllipse() (rhino3dm.Curve method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Light.html#rhino3dm.Light.IsEnabled">IsEnabled (rhino3dm.Light attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Font.html#rhino3dm.Font.IsEngravingFont">IsEngravingFont (rhino3dm.Font attribute)</a>
 </li>
       <li><a href="DimensionStyle.html#rhino3dm.DimensionStyle.IsFieldOverridden">IsFieldOverridden() (rhino3dm.DimensionStyle method)</a>
@@ -1665,6 +1675,8 @@
 
       <ul>
         <li><a href="Extrusion.html#rhino3dm.Extrusion.IsSolid">(rhino3dm.Extrusion attribute)</a>
+</li>
+        <li><a href="SubD.html#rhino3dm.SubD.IsSolid">(rhino3dm.SubD attribute)</a>
 </li>
         <li><a href="Surface.html#rhino3dm.Surface.IsSolid">(rhino3dm.Surface attribute)</a>
 </li>
@@ -1791,14 +1803,16 @@
 </li>
       <li><a href="Light.html#rhino3dm.Light.Light">Light() (rhino3dm.Light method)</a>
 </li>
+      <li><a href="Light.html#rhino3dm.Light.LightStyle">LightStyle (rhino3dm.Light attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Line.html#rhino3dm.Line">Line (class in rhino3dm)</a>
 
       <ul>
         <li><a href="LineCurve.html#rhino3dm.LineCurve.Line">(rhino3dm.LineCurve attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Line.html#rhino3dm.Line.Line">Line() (rhino3dm.Line method)</a>
 </li>
       <li><a href="Intersection.html#rhino3dm.Intersection.LineBox">LineBox() (rhino3dm.Intersection static method)</a>
@@ -2467,10 +2481,10 @@
 </li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.ShadowMapLevel">ShadowMapLevel (rhino3dm.RenderSettings attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.Sheen">Sheen (rhino3dm.PhysicallyBasedMaterial attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.SheenTint">SheenTint (rhino3dm.PhysicallyBasedMaterial attribute)</a>
 </li>
       <li><a href="Material.html#rhino3dm.Material.Shine">Shine (rhino3dm.Material attribute)</a>
@@ -2499,8 +2513,12 @@
 </li>
       <li><a href="RenderSettings.html#rhino3dm.RenderSettings.SpecificViewport">SpecificViewport (rhino3dm.RenderSettings attribute)</a>
 </li>
-      <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.Specular">Specular (rhino3dm.PhysicallyBasedMaterial attribute)</a>
+      <li><a href="Light.html#rhino3dm.Light.Specular">Specular (rhino3dm.Light attribute)</a>
+
+      <ul>
+        <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.Specular">(rhino3dm.PhysicallyBasedMaterial attribute)</a>
 </li>
+      </ul></li>
       <li><a href="Material.html#rhino3dm.Material.SpecularColor">SpecularColor (rhino3dm.Material attribute)</a>
 </li>
       <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.SpecularTint">SpecularTint (rhino3dm.PhysicallyBasedMaterial attribute)</a>
@@ -2528,6 +2546,10 @@
       <li><a href="File3dm.html#rhino3dm.File3dm.Strings">Strings (rhino3dm.File3dm attribute)</a>
 </li>
       <li><a href="SubD.html#rhino3dm.SubD">SubD (class in rhino3dm)</a>
+</li>
+      <li><a href="SubD.html#rhino3dm.SubD.SubD">SubD() (rhino3dm.SubD method)</a>
+</li>
+      <li><a href="SubD.html#rhino3dm.SubD.Subdivide">Subdivide() (rhino3dm.SubD method)</a>
 </li>
       <li><a href="PhysicallyBasedMaterial.html#rhino3dm.PhysicallyBasedMaterial.Subsurface">Subsurface (rhino3dm.PhysicallyBasedMaterial attribute)</a>
 </li>
@@ -2756,6 +2778,8 @@
       <li><a href="Layer.html#rhino3dm.Layer.UnsetPersistentLocking">UnsetPersistentLocking() (rhino3dm.Layer method)</a>
 </li>
       <li><a href="Layer.html#rhino3dm.Layer.UnsetPersistentVisibility">UnsetPersistentVisibility() (rhino3dm.Layer method)</a>
+</li>
+      <li><a href="SubD.html#rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients">UpdateAllTagsAndSectorCoefficients() (rhino3dm.SubD method)</a>
 </li>
       <li><a href="ObjectAttributes.html#rhino3dm.ObjectAttributes.Url">Url (rhino3dm.ObjectAttributes attribute)</a>
 </li>

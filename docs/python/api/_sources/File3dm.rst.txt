@@ -115,7 +115,10 @@ File3dm
 
    .. py:staticmethod:: FromByteArray()
 
-      [todo] add documentation
+      Read a 3dm file from a byte array
+
+      :return: New File3dm on success, None on error.
+      :rtype: File3dm
 
    .. py:method:: Write(path, version)
 
