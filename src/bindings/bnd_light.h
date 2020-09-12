@@ -21,7 +21,8 @@ protected:
 public:
   bool IsEnabled() const { return m_light->IsEnabled(); }
   void SetEnabled(bool on) { m_light->Enable(on); }
-  //    public LightStyle LightStyle{get;set;}
+  ON::light_style GetLightStyle() const { return m_light->Style(); }
+  void SetLightStyle(ON::light_style ls) { m_light->SetStyle(ls); }
   bool IsPointLight() const { return m_light->IsPointLight(); }
   bool IsDirectionalLight() const { return m_light->IsDirectionalLight(); }
   bool IsSpotLight() const { return m_light->IsSpotLight(); }
@@ -41,9 +42,12 @@ public:
   void SetPowerLumens(double pl) { m_light->SetPowerLumens(pl); }
   double GetPowerCandela() const { return m_light->PowerCandela(); }
   void SetPowerCandela(double pc) { m_light->SetPowerCandela(pc); }
-  //     public System.Drawing.Color Ambient {get;set;}
-  //    public System.Drawing.Color Diffuse {get;set;}
-  //     public System.Drawing.Color Specular {get;set;}
+  BND_Color GetAmbient() const { return ON_Color_to_Binding(m_light->Ambient()); }
+  void SetAmbient(BND_Color c) { m_light->SetAmbient(Binding_to_ON_Color(c)); }
+  BND_Color GetDiffuse() const { return ON_Color_to_Binding(m_light->Diffuse()); }
+  void SetDiffuse(BND_Color c) { m_light->SetDiffuse(Binding_to_ON_Color(c)); }
+  BND_Color GetSpecular() const { return ON_Color_to_Binding(m_light->Specular()); }
+  void SetSpecular(BND_Color c) { m_light->SetSpecular(Binding_to_ON_Color(c)); }
   void SetAttenuation(double a0, double a1, double a2) { m_light->SetAttenuation(a0, a1, a2); }
   ON_3dVector GetAttenuationVector() const { return m_light->m_attenuation; }
   void SetAttenuationVector(ON_3dVector v) { m_light->m_attenuation = v; }
