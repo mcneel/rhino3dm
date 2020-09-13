@@ -68,7 +68,7 @@ def print_warning_message(warning_message):
     if xcode_logging:
         print(warning_prefix + warning_message)
     else:
-        print(bcolors.BOLD + bcolors.FAIL + warning_prefix.upper() + bcolors.ENDC + bcolors.FAIL + warning_message +
+        print(bcolors.BOLD + bcolors.WARNING + warning_prefix.upper() + bcolors.ENDC + bcolors.WARNING + warning_message +
               bcolors.ENDC)
 
 
