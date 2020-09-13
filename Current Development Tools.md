@@ -17,9 +17,9 @@ We are currently using msbuild 16.5.0.12403.  Scripts read this:
 
 ### dotnet
 
-We are currently using the .NET Core SDK 2.2.402.  Scripts read this:
+We are currently using the .NET Core SDK 3.1.302.  Scripts read this:
 
-`dotnet_currently_using = 2.2.402`
+`dotnet_currently_using = 3.1.302`
 `dotnet_install_notes_linux = On Ubuntu, you can install the dotnet SDK using the apt-get package manager.  Follow these instructions: https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804`
 
 ## iOS

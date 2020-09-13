@@ -190,7 +190,7 @@ def build_methodgen():
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
-        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp2.2", "methodgen.dll")
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp3.1", "methodgen.dll")
     else:
         msbuild_path = 'msbuild'
         # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
@@ -231,12 +231,12 @@ def run_methodgen():
     # On Linux, we execute methodgen with dotnet core SDK
     if _platform == "linux" or _platform == "linux2":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
-        path_to_methodgen_executable = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp2.2", "methodgen.dll")
+        path_to_methodgen_executable = os.path.join(methodgen_build_dir, "methodgen.csproj")
         if not os.path.exists(path_to_methodgen_executable):
             print_error_message(path_to_methodgen_executable + " not found.")
             return False
         
-        command = 'dotnet '
+        command = 'dotnet run --no-build -p '
     else:
         path_to_methodgen_executable = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
         # On Windows, we need to flip the path separators to appease run_command()
