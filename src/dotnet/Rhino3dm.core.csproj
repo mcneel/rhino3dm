@@ -16,7 +16,7 @@
     <PackageTags>rhino3d</PackageTags>
     <Copyright>Copyright (c) 1997-2020 Robert McNeel &amp; Associates</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIconUrl>https://github.com/mcneel/developer-rhino3d-com/raw/6/images/logo-rhino3dmio-128x128.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
@@ -44,7 +44,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\**" Pack="True" PackagePath="build\" />
+    <None Include="build\**" Pack="true" PackagePath="build\" />
+    <None Include="icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 </Project>
