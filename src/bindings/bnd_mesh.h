@@ -333,6 +333,7 @@ public:
 #if defined(ON_WASM_COMPILE)
   BND_DICT ToThreejsJSON() const;
   BND_DICT ToThreejsJSONRotate(bool rotateToYUp) const;
+  static BND_DICT ToThreejsJSONMerged(BND_TUPLE meshes, bool rotateYUp);
   static BND_Mesh* CreateFromThreejsJSON(BND_DICT data);
 #endif
 

@@ -342,6 +342,23 @@ BND_DICT BND_Mesh::ToThreejsJSONRotate(bool rotateToYUp) const
   
   return rc;
 }
+BND_DICT BND_Mesh::ToThreejsJSONMerged(BND_TUPLE meshes, bool rotateYUp)
+{
+  int length = meshes["length"].as<int>();
+  if (1 == length)
+  {
+    BND_Mesh mesh = meshes[0].as<BND_Mesh>();
+    return mesh.ToThreejsJSONRotate(rotateYUp);
+  }
+  BND_Mesh tempMesh;
+  for (int i=0; i<length; i++)
+  {
+    BND_Mesh mesh = meshes[i].as<BND_Mesh>();
+    tempMesh.m_mesh->Append(*(mesh.m_mesh));
+  }
+  return tempMesh.ToThreejsJSONRotate(rotateYUp);
+}
+
 
 
 BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
@@ -1025,6 +1042,7 @@ void initMeshBindings(void*)
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
     .constructor<>()
     .class_function("createFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, allow_raw_pointers())
+    .class_function("toThreejsJSONMerged", &BND_Mesh::ToThreejsJSONMerged)
     .property("isClosed", &BND_Mesh::IsClosed)
     .function("isManifold", &BND_Mesh::IsManifold)
     .property("hasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)

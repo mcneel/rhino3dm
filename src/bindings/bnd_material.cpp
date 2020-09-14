@@ -22,6 +22,12 @@ void BND_Material::SetTrackedPointer(ON_Material* material, const ON_ModelCompon
   BND_ModelComponent::SetTrackedPointer(material, compref);
 }
 
+int BND_Material::CompareAppearance(const BND_Material& mat1, const BND_Material& mat2)
+{
+  return ON_Material::CompareAppearance(*(mat1.m_material), *(mat2.m_material));
+}
+
+
 BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
 {
   BND_PhysicallyBasedMaterial* pbr = new BND_PhysicallyBasedMaterial();
@@ -143,6 +149,7 @@ void initMaterialBindings(pybind11::module& m)
   py::class_<BND_Material, BND_ModelComponent>(m, "Material")
     .def(py::init<>())
     .def(py::init<const BND_Material&>(), py::arg("other"))
+    .def_static("CompareAppearance", &BND_Material::CompareAppearance, py::arg("material1"), py::arg("material2"))
     .def_property("RenderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
     .def_property("Name", &BND_Material::GetName, &BND_Material::SetName)
     .def_property("Shine", &BND_Material::GetShine, &BND_Material::SetShine)
@@ -208,6 +215,7 @@ void initMaterialBindings(void*)
   class_<BND_Material, base<BND_ModelComponent>>("Material")
     .constructor<>()
     .constructor<const BND_Material&>()
+    .class_function("compareAppearance", &BND_Material::CompareAppearance)
     .property("renderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
     .property("name", &BND_Material::GetName, &BND_Material::SetName)
     .property("shine", &BND_Material::GetShine, &BND_Material::SetShine)

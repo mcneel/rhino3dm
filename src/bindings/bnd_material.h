@@ -20,6 +20,8 @@ public:
   BND_Material(const BND_Material& other);
   BND_Material(ON_Material* material, const ON_ModelComponentReference* compref);
 
+  static int CompareAppearance(const BND_Material& mat1, const BND_Material& mat2);
+
   //public void CopyFrom(Material other)
   BND_UUID GetRenderPlugInId() const { return ON_UUID_to_Binding(m_material->MaterialPlugInId()); }
   void SetRenderPlugInId(const BND_UUID& id) { m_material->SetMaterialPlugInId(Binding_to_ON_UUID(id)); }
