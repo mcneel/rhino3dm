@@ -231,6 +231,7 @@ public:
 public:
   BND_ONXModel();
   BND_ONXModel(ONX_Model* m);
+  void Destroy();
   static BND_ONXModel* Read(std::wstring path);
   //public static File3dm Read(string path, TableTypeFilter tableTypeFilterFilter, ObjectTypeFilter objectTypeFilter)
   //public static File3dm ReadWithLog(string path, TableTypeFilter tableTypeFilterFilter, ObjectTypeFilter objectTypeFilter, out string errorLog)

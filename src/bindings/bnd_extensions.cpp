@@ -187,6 +187,15 @@ BND_ONXModel::BND_ONXModel(ONX_Model* m)
   m_model.reset(m);
 }
 
+void BND_ONXModel::Destroy()
+{
+  ONX_Model* model = m_model.get();
+  if(model)
+    delete model;
+  model = nullptr;
+  m_model.reset(model);
+}
+
 BND_ONXModel* BND_ONXModel::Read(std::wstring path)
 {
   ONX_Model* m = new ONX_Model();
@@ -1506,6 +1515,7 @@ void initExtensionsBindings(void*)
 
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
+    .function("destroy", &BND_ONXModel::Destroy)
     .class_function("fromByteArray", &BND_ONXModel::WasmFromByteArray, allow_raw_pointers())
     .property("startSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
