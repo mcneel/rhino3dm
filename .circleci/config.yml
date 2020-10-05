@@ -4,6 +4,9 @@ jobs:
   build_js:
     docker:
       - image: trzeci/emscripten-ubuntu:sdk-incoming-64bit
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
@@ -16,6 +19,9 @@ jobs:
   deploy_js:
     docker:
       - image: circleci/python:2.7-jessie
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     environment:
       S3_BASE_URL: s3://files.na.mcneel.com/rhino3dm/js
     steps:
@@ -39,6 +45,9 @@ jobs:
   build_py2:
     docker:
       - image: mcneel/rhino3dm-dev:latest
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
@@ -48,6 +57,9 @@ jobs:
   build_py3:
     docker:
       - image: python:3.8-slim-buster
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - run: apt update && apt install -yy git cmake gcc g++
       - checkout
@@ -70,6 +82,9 @@ jobs:
   build_dotnet:
     docker:
       - image: mcneel/rhino3dm-dev:latest
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
@@ -81,6 +96,9 @@ jobs:
   build_dotnet_amzn2:
     docker:
       - image: mcneel/rhino3dm-dev-amzn2:latest
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
@@ -93,13 +111,25 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_js
+      - build_js:
+          context:
+            - docker-hub-creds
       # 2020-06-28: use jsdelivr instead of publishing to files.mcneel.com
       # - deploy_js:
       #     requires:
       #       - build_js
-      - build_py2
-      - build_py3
-      - build_py3_mac
-      - build_dotnet
-      - build_dotnet_amzn2
+      - build_py2:
+          context:
+            - docker-hub-creds
+      - build_py3:
+          context:
+            - docker-hub-creds
+      - build_py3_mac:
+          context:
+            - docker-hub-creds
+      - build_dotnet:
+          context:
+            - docker-hub-creds
+      - build_dotnet_amzn2:
+          context:
+            - docker-hub-creds
