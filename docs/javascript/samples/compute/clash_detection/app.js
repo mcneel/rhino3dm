@@ -13,8 +13,18 @@ rhino3dm().then( async m => {
     console.log('Loaded rhino3dm.');
     rhino = m; // global
 
-    // authenticate
+    /* 
+    *  Variables for Rhino.Compute
+    */
+
+    // if calling McNeel's public Rhino.Compute Server, get an auth token:
     RhinoCompute.authToken = RhinoCompute.getAuthToken();
+
+    // if calling your own compute server, comment the RhinoCompute.authToken line
+    // and uncomment the following two lines:
+
+    //RhinoCompute.url = 'http://your-compute-server-address/'
+    //RhinoCompute.apiKey = 'your-compute-apikey'
 
     init();
     compute();
@@ -91,10 +101,16 @@ function doMeshClash() {
 
                 let m = rhino.CommonObject.decode(result[i].MeshB);
                 let material = new THREE.MeshBasicMaterial({ wireframe: true, color: 0x00ff00 });
-                let threemesh = meshToThreejs(m, material);
+     
+                const loader = new THREE.BufferGeometryLoader();
+                const geometry = loader.parse((m.toThreejsJSON()));
+                let threemesh = new THREE.Mesh(geometry, material);
+                
                 //need to rotate these
                 threemesh.rotateOnWorldAxis(new THREE.Vector3(1,0,0), THREE.Math.degToRad(-90));
                 scene.add(threemesh);
+
+                m.delete();
             }
 
     });
@@ -134,40 +150,4 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
     animate();
-}
-
-function meshToThreejs(mesh, material) {
-    var geometry = new THREE.BufferGeometry();
-    var vertices = mesh.vertices();
-    var vertexbuffer = new Float32Array(3 * vertices.count);
-    for( var i=0; i<vertices.count; i++) {
-      pt = vertices.get(i);
-      vertexbuffer[i*3] = pt[0];
-      vertexbuffer[i*3+1] = pt[1];
-      vertexbuffer[i*3+2] = pt[2];
-    }
-    // itemSize = 3 because there are 3 values (components) per vertex
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertexbuffer, 3 ) );
-  
-    indices = [];
-    var faces = mesh.faces();
-    for( var i=0; i<faces.count; i++) {
-      face = faces.get(i);
-      indices.push(face[0], face[1], face[2]);
-      if( face[2] != face[3] ) {
-        indices.push(face[2], face[3], face[0]);
-      }
-    }
-    geometry.setIndex(indices);
-  
-    var normals = mesh.normals();
-    var normalBuffer = new Float32Array(3*normals.count);
-    for( var i=0; i<normals.count; i++) {
-      pt = normals.get(i);
-      normalBuffer[i*3] = pt[0];
-      normalBuffer[i*3+1] = pt[1];
-      normalBuffer[i*3+2] = pt[1];
-    }
-    geometry.setAttribute( 'normal', new THREE.BufferAttribute( normalBuffer, 3 ) );
-    return new THREE.Mesh( geometry, material );
 }
