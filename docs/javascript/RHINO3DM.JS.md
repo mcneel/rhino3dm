@@ -49,16 +49,18 @@ Note: A list of builds is available on our [Circleci project](https://circleci.c
 $ node
 > rhino3dm = require('rhino3dm')() // note the trailing "()"
 > sphere = new rhino3dm.Sphere([1,2,3,], 12)
+> sphere.radius
+12
 ```
 
 It takes a moment to load the ~5 MB wasm file – this happens asycnhronously. Unlike interactive usage, when scripting with `rhino3dm` you can use the fact that the `rhino3dm()` function returns a `Promise`.
 
 ```js
-# script.js
-rhino3dm = require('rhino3dm')
+// script.js
+const rhino3dm = require('rhino3dm')
 
 rhino3dm().then((rhino) => {
-  sphere = new rhino.Sphere([1,2,3,], 12)
+  const sphere = new rhino.Sphere([1,2,3,], 12)
   console.log(sphere.radius)
 })
 ```
