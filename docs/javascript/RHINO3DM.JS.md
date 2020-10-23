@@ -1,26 +1,24 @@
 # rhino3dm.js
-**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
 
 [![CircleCI](https://circleci.com/gh/mcneel/rhino3dm/tree/master.svg?style=shield&circle-token=53733a2fe2cf99a11808d1e5210bc1aeb3f13ea9)](https://circleci.com/gh/mcneel/rhino3dm/tree/master)
+[![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
 
-----
+**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
+
 
 ## Usage
 
-Rhino3dm.js requires two files `rhino3dm.wasm` and `rhino3dm.js`.  It is easiest to simply reference the *latest* build directly from our servers:
+The easiest way to get started is to reference a specific version of the library using jsDelivr.
 
 ```html
 <!DOCTYPE html>
 <html>
   <!-- stuff -->
   <body>
-    <script src="https://cdn.jsdelivr.net/npm/rhino3dm@0.12.0/rhino3dm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rhino3dm@0.13.0/rhino3dm.min.js"></script>
     <script>
-      // NOTE: the rhino3dm library is compiled with the MODULARIZE
-      // option to avoid collisions with other web assemblies
-      // here's one way of using it...
-      rhino3dm().then((Module) => {
-        sphere = new Module.Sphere([1,2,3], 12)
+      rhino3dm().then((rhino) => {
+        sphere = new rhino.Sphere([1,2,3], 12)
         // more stuff
       })
       // even more stuff
@@ -30,20 +28,12 @@ Rhino3dm.js requires two files `rhino3dm.wasm` and `rhino3dm.js`.  It is easiest
 </html>
 ```
 
-### Download the files
+You can also [download the files](https://www.jsdelivr.com/package/npm/rhino3dm) if you want to bake them into your site or application. You'll need the `.wasm` web assembly along with the `.js` (or `.min.js`) wrapper.
 
-If it would be better to download a static build locally, download the latest build of the two files:
--  [rhino3dm.js](https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.js)
--  [rhino3dm.wasm](https://files.mcneel.com/rhino3dm/js/latest/rhino3dm.wasm)
-
-
-Place these in the same folder. The `rhino3dm.js` references the `rhino3d.wasm`.
-
-Note: A list of builds is available on our [Circleci project](https://circleci.com/gh/mcneel/rhino3dm). You can replace latest with dujour/BUILD_NUMBER if you know what you're looking for!
 
 ### Node.js
 
-**rhino3dm.js** is available on npm; try `npm install rhino3dm`.
+**rhino3dm.js** is available on [npm](https://www.npmjs.com/package/rhino3dm); try `npm install rhino3dm`.
 
 ```js
 $ node
@@ -67,7 +57,9 @@ rhino3dm().then((rhino) => {
 
 
 ## API Docs
+
 The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
+
 
 ## Examples
 
