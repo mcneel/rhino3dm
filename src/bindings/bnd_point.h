@@ -13,6 +13,7 @@ class BND_Interval
 public:
   BND_Interval() = default;
   BND_Interval(const ON_Interval& i);
+  BND_Interval(double t0, double t1);
   double m_t0;
   double m_t1;
 };
