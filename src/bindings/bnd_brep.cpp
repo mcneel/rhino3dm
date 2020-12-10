@@ -191,7 +191,7 @@ BND_BrepFace::BND_BrepFace(ON_BrepFace* brepface, const ON_ModelComponentReferen
 
 void BND_BrepFace::SetTrackedPointer(ON_BrepFace* brepface, const ON_ModelComponentReference* compref)
 {
-  m_brepface = brepface;;
+  m_brepface = brepface;
   BND_SurfaceProxy::SetTrackedPointer(brepface, compref);
 }
 
