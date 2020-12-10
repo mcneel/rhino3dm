@@ -63,7 +63,7 @@ The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/jav
 
 ## Examples
 
-There a few samples are available in the [Github Repo Samples folder](https://github.com/mcneel/rhino3dm/tree/master/docs/javascript/samples)
+There a few samples are available in the [Rhino Developer Samples repository](https://github.com/mcneel/rhino-developer-samples/tree/7/rhino3dm#samples)
 
 An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
