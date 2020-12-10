@@ -10,6 +10,12 @@ BND_Interval::BND_Interval(const ON_Interval& i)
   m_t1 = i.m_t[1];
 }
 
+BND_Interval::BND_Interval(double t0, double t1)
+{
+  m_t0 = t0;
+  m_t1 = t1;
+}
+
 ON_3dPoint BND_Point3d::Transform(const ON_3dPoint& pt, const BND_Transform& transform)
 {
   ON_3dPoint rc = transform.m_xform * pt;
@@ -162,6 +168,7 @@ void initPointBindings(pybind11::module& m)
     .def(py::self + py::self);
 
   py::class_<BND_Interval>(m, "Interval")
+    .def(py::init<double, double>(), py::arg("t0"), py::arg("t1"))
     .def_readwrite("T0", &BND_Interval::m_t0)
     .def_readwrite("T1", &BND_Interval::m_t1);
 
