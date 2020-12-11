@@ -68,6 +68,8 @@ void BND_CommonObject::SetTrackedPointer(ON_Object* obj, const ON_ModelComponent
   else
   {
     ON_ModelComponent* model_component = ON_ModelComponent::Cast(obj);
+    if (nullptr == model_component)
+      model_component = ON_ModelGeometryComponent::CreateManaged(obj, nullptr, nullptr);
     if (model_component)
       m_component_ref = ON_ModelComponentReference::CreateForExperts(model_component, true);
   }
