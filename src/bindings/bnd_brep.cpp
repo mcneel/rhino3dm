@@ -195,6 +195,24 @@ void BND_BrepFace::SetTrackedPointer(ON_BrepFace* brepface, const ON_ModelCompon
   BND_SurfaceProxy::SetTrackedPointer(brepface, compref);
 }
 
+BND_Brep* BND_BrepFace::DuplicateFace(bool duplicateMeshes)
+{
+  const ON_Brep* parentBrep = m_brepface->Brep();
+  if (parentBrep)
+  {
+    ON_Brep* rc = parentBrep->DuplicateFace(m_brepface->m_face_index, duplicateMeshes);
+    if (rc)
+      return new BND_Brep(rc, nullptr);
+  }
+  return nullptr;
+}
+
+BND_Surface* BND_BrepFace::DuplicateSurface()
+{
+  BND_CommonObject* co = BND_CommonObject::CreateWrapper(m_brepface->DuplicateSurface(), nullptr);
+  return dynamic_cast<BND_Surface*>(co);
+}
+
 BND_Surface* BND_BrepFace::UnderlyingSurface()
 {
   ON_Surface* srf = const_cast<ON_Surface*>(m_brepface->SurfaceOf());
@@ -264,6 +282,8 @@ void initBrepBindings(pybind11::module& m)
 
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
     .def("UnderlyingSurface", &BND_BrepFace::UnderlyingSurface)
+    .def("DuplicateFace", &BND_BrepFace::DuplicateFace, py::arg("duplicateMeshes"))
+    .def("DuplicateSurface", &BND_BrepFace::DuplicateSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
     ;
 
@@ -315,6 +335,8 @@ void initBrepBindings(void*)
 
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
     .function("underlyingSurface", &BND_BrepFace::UnderlyingSurface, allow_raw_pointers())
+    .function("duplicateFace", &BND_BrepFace::DuplicateFace, allow_raw_pointers())
+    .function("duplicateSurface", &BND_BrepFace::DuplicateSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
     ;
 

@@ -135,8 +135,8 @@ public:
   //Brep CreateExtrusion(Curve pathCurve, bool cap)
   //bool ShrinkFace(ShrinkDisableSide disableSide)
   //override bool SetDomain(int direction, Interval domain)
-  //Brep DuplicateFace(bool duplicateMeshes)
-  //Surface DuplicateSurface()
+  class BND_Brep* DuplicateFace(bool duplicateMeshes);
+  class BND_Surface* DuplicateSurface();
   class BND_Surface* UnderlyingSurface();
   class BND_Mesh* GetMesh(ON::mesh_type mt);
   //bool SetMesh(MeshType meshType, Mesh mesh)
