@@ -4,3 +4,10 @@ Interval
 .. py:module:: rhino3dm
 
 .. py:class:: Interval
+
+   .. py:method:: Interval(t0, t1)
+
+      Initializes a new instance of the Rhino.Geometry.Interval class.
+
+      :param float t0: The first value.
+      :param float t1: The second value.

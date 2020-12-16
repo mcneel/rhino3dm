@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Transform &mdash; rhino3dm 0.13.0 documentation</title>
+  <title>Transform &mdash; rhino3dm 0.14.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.13.0
+                0.14.0
               </div>
             
           
@@ -329,7 +329,25 @@ zero. The value xform[3][3] can be anything.</p>
 
 <dl class="staticmethod">
 <dt id="rhino3dm.Transform.Translation">
-<em class="property">static </em><code class="descname">Translation</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Translation" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">Translation</code><span class="sig-paren">(</span><em>motion</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Translation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new translation (move) transformation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>motion</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Translation (motion) vector.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A transform matrix which moves geometry along the motion vector.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt>
+<em class="property">static </em><code class="descname">Translation</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span></dt>
 <dd><p>Constructs a new translation (move) transformation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -368,6 +386,22 @@ zero. The value xform[3][3] can be anything.</p>
 </dd></dl>
 
 <dl class="staticmethod">
+<dt>
+<em class="property">static </em><code class="descname">Scale</code><span class="sig-paren">(</span><em>plane</em>, <em>xScaleFactor</em>, <em>yScaleFactor</em>, <em>zScaleFactor</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a new uniform scaling transformation with a specified scaling anchor point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transform matrix which scales geometry uniformly around the anchor point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
 <dt id="rhino3dm.Transform.Rotation">
 <em class="property">static </em><code class="descname">Rotation</code><span class="sig-paren">(</span><em>angleRadians</em>, <em>rotationAxis</em>, <em>rotationCenter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Rotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a new rotation transformation with specified angle, rotation center and rotation axis.</p>
@@ -376,6 +410,52 @@ zero. The value xform[3][3] can be anything.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transformation matrix which rotates geometry around an anchor point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rhino3dm.Transform.Mirror">
+<em class="property">static </em><code class="descname">Mirror</code><span class="sig-paren">(</span><em>pointOnMirrorPlane</em>, <em>normalToMirrorPlane</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Mirror" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create mirror transformation matrix
+The mirror transform maps a point Q to
+Q - (2*(Q-P)oN)*N, where
+P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</li>
+<li><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which mirrors geometry in a specified plane.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt>
+<em class="property">static </em><code class="descname">Mirror</code><span class="sig-paren">(</span><em>mirrorPlane</em><span class="sig-paren">)</span></dt>
+<dd><p>Create mirror transformation matrix
+The mirror transform maps a point Q to
+Q - (2*(Q-P)oN)*N, where
+P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transformation matrix which mirrors geometry in a specified plane.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
 </tr>

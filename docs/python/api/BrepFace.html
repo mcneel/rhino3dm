@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>BrepFace &mdash; rhino3dm 0.13.0 documentation</title>
+  <title>BrepFace &mdash; rhino3dm 0.14.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.13.0
+                0.14.0
               </div>
             
           
@@ -266,6 +266,40 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A surface, or None on error.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.BrepFace.DuplicateFace">
+<code class="descname">DuplicateFace</code><span class="sig-paren">(</span><em>duplicateMeshes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateFace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicate a face from the brep to create new single face brep.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>duplicateMeshes</strong> (<em>bool</em>) – If true, shading meshes will be copied as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new single-face brep synonymous with the current Face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.BrepFace.DuplicateSurface">
+<code class="descname">DuplicateSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a copy to the untrimmed surface that this face is based on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A copy of this face’s underlying surface.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></td>
 </tr>
