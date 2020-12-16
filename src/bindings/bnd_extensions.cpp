@@ -815,6 +815,41 @@ BND_Group* BND_File3dmGroupTable::FindName(std::wstring name)
   return nullptr;
 }
 
+BND_TUPLE BND_File3dmGroupTable::GroupMembers(int groupIndex)
+{
+  ON_SimpleArray<BND_FileObject*> fileObjects;
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponentReference compref = iterator.FirstComponentReference();
+  while (!compref.IsEmpty())
+  {
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+    if (geometryComponent)
+    {
+      const ON_3dmObjectAttributes* attrs = geometryComponent->Attributes(nullptr);
+      if (attrs && attrs->IsInGroup(groupIndex))
+      {
+        BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(BND_CommonObject::CreateWrapper(compref));
+        if (geometry)
+        {
+          BND_FileObject* rc = FileObjectFromCompRef(compref);
+          if (rc)
+            fileObjects.Append(rc);
+        }
+      }
+    }
+    compref = iterator.NextComponentReference();
+  }
+
+  BND_TUPLE rc = CreateTuple(fileObjects.Count());
+  for (int i = 0; i < fileObjects.Count(); i++)
+  {
+    SetTuple<BND_FileObject*>(rc, i, fileObjects[i]);
+  }
+  return rc;
+}
+
+
 int BND_File3dmViewTable::Count() const
 {
   return m_named_views ? m_model->m_settings.m_named_views.Count() : m_model->m_settings.m_views.Count();
@@ -1296,6 +1331,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
     .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
     .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
+    .def("GroupMembers", &BND_File3dmGroupTable::GroupMembers, py::arg("groupIndex"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
