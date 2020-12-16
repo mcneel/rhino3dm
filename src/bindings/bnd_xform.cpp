@@ -6,6 +6,11 @@ BND_Transform BND_Transform::Identity()
   return rc;
 }
 
+BND_Transform BND_Transform::Translation1(ON_3dVector motion)
+{
+  return BND_Transform(ON_Xform::TranslationTransformation(motion));
+}
+
 BND_Transform BND_Transform::Translation(double x, double y, double z)
 {
   return BND_Transform(ON_Xform::TranslationTransformation(x, y, z));
@@ -16,12 +21,32 @@ BND_Transform BND_Transform::Scale(ON_3dPoint anchor, double scaleFactor)
   return BND_Transform(ON_Xform::ScaleTransformation(anchor, scaleFactor));
 }
 
+BND_Transform BND_Transform::Scale2(BND_Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor)
+{
+  return BND_Transform(ON_Xform::ScaleTransformation(plane.ToOnPlane(), xScaleFactor, yScaleFactor, zScaleFactor));
+}
+
 BND_Transform BND_Transform::Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter)
 {
   BND_Transform rc(1);
   rc.m_xform.Rotation(angleRadians, rotationAxis, rotationCenter);
   return rc;
 }
+
+BND_Transform BND_Transform::Mirror(ON_3dPoint pointOnMirrorPlane, ON_3dVector normalToMirrorPlane)
+{
+  BND_Transform rc(1);
+  rc.m_xform.Mirror(pointOnMirrorPlane, normalToMirrorPlane);
+  return rc;
+}
+BND_Transform BND_Transform::Mirror2(BND_Plane mirrorPlane)
+{
+  ON_Plane pl = mirrorPlane.ToOnPlane();
+  BND_Transform rc(1);
+  rc.m_xform.Mirror(pl.Origin(), pl.zaxis);
+  return rc;
+}
+
 
 BND_Transform* BND_Transform::TryGetInverse() const
 {
@@ -73,9 +98,13 @@ void initXformBindings(pybind11::module& m)
     .def_static("Identity", &BND_Transform::Identity)
     .def_static("ZeroTransformation", &BND_Transform::ZeroTransformation)
     .def_static("Unset", &BND_Transform::Unset)
+    .def_static("Translation", &BND_Transform::Translation1, py::arg("motion"))
     .def_static("Translation", &BND_Transform::Translation, py::arg("x"), py::arg("y"), py::arg("z"))
     .def_static("Scale", &BND_Transform::Scale, py::arg("anchor"), py::arg("scaleFactor"))
+    .def_static("Scale", &BND_Transform::Scale2, py::arg("plane"), py::arg("xScaleFactor"), py::arg("yScaleFactor"), py::arg("zScaleFactor"))
     .def_static("Rotation", &BND_Transform::Rotation, py::arg("angleRadians"), py::arg("rotationAxis"), py::arg("rotationCenter"))
+    .def_static("Mirror", &BND_Transform::Mirror, py::arg("pointOnMirrorPlane"), py::arg("normalToMirrorPlane"))
+    .def_static("Mirror", &BND_Transform::Mirror2, py::arg("mirrorPlane"))
     .def_property_readonly("IsIdentity", &BND_Transform::IsIdentity)
     .def_property_readonly("IsValid", &BND_Transform::IsValid)
     .def_property_readonly("IsZero", &BND_Transform::IsZero)

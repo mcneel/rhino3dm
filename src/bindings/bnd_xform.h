@@ -21,19 +21,19 @@ public:
   static BND_Transform Identity();
   static BND_Transform ZeroTransformation() {return BND_Transform(ON_Xform::ZeroTransformation);}
   static BND_Transform Unset() { return BND_Transform(ON_Xform::Unset); }
-  //static BND_Transform Translation(Vector3d motion)
+  static BND_Transform Translation1(ON_3dVector motion);
   static BND_Transform Translation(double dx, double dy, double dz);
   static BND_Transform Scale(ON_3dPoint anchor, double scaleFactor);
-  //static BND_Transform Scale(Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor)
+  static BND_Transform Scale2(BND_Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor);
   //static BND_Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
   //static BND_Transform Rotation(double angleRadians, Point3d rotationCenter)
   static BND_Transform Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter);
   //static BND_Transform Rotation(Vector3d startDirection, Vector3d endDirection, Point3d rotationCenter)
   //static BND_Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0,
   //  Vector3d x1, Vector3d y1, Vector3d z1)
-  //public static BND_Transform Mirror(Point3d pointOnMirrorPlane, Vector3d normalToMirrorPlane)
-  //public static BND_Transform Mirror(Plane mirrorPlane)
-  //public static BND_Transform ChangeBasis(Plane plane0, Plane plane1)
+  static BND_Transform Mirror(ON_3dPoint pointOnMirrorPlane, ON_3dVector normalToMirrorPlane);
+  static BND_Transform Mirror2(BND_Plane mirrorPlane);
+  //static BND_Transform ChangeBasis(BND_Plane plane0, BND_Plane plane1);
   //public static BND_Transform PlaneToPlane(Plane plane0, Plane plane1)
   //public static BND_Transform ChangeBasis(Vector3d initialBasisX, Vector3d initialBasisY, Vector3d initialBasisZ,
   //  Vector3d finalBasisX, Vector3d finalBasisY, Vector3d finalBasisZ)
