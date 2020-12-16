@@ -63,6 +63,7 @@ void init3dmSettingsBindings(pybind11::module& m)
     ;
 
   py::class_<BND_ViewInfo>(m, "ViewInfo")
+    .def(py::init<>())
     .def_property("Name", &BND_ViewInfo::GetName, &BND_ViewInfo::SetName)
     .def_property_readonly("WallpaperName", &BND_ViewInfo::GetWallpaperFilename)
     .def_property("ShowWallpaperInGrayScale", &BND_ViewInfo::ShowWallpaperInGrayScale, &BND_ViewInfo::SetShowWallpaperInGrayScale)
