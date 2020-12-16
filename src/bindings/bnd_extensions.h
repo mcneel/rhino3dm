@@ -138,6 +138,7 @@ public:
 	class BND_Group* FindIndex(int index);
 	class BND_Group* IterIndex(int index); // helper function for iterator
   class BND_Group* FindName(std::wstring name);
+  BND_TUPLE GroupMembers(int groupIndex);
 };
 
 class BND_File3dmDimStyleTable
