@@ -7,3 +7,5 @@ recursive-include src/lib *.cpp
 recursive-include src/lib *.c
 recursive-include src/rhino3dm *.pyd
 recursive-include src/rhino3dm *.so
+recursive-include src/lib/draco *.cmake
+recursive-include src/lib/draco *.cc
