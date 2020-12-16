@@ -85,6 +85,10 @@ Material
    .. py:attribute:: PhysicallyBased
 
 
+   .. py:staticmethod:: CompareAppearance(material1, material2)
+
+      [todo] add documentation
+
    .. py:method:: Default()
 
       Set material to default settings.

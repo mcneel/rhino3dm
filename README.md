@@ -20,7 +20,7 @@ Functionality includes
 ---
 
 ### rhino3dm.py (Python)
-**rhino3dm.py** is a python package that can be used on all current versions of CPython (both 2.7 and 3.7) and is available on all platforms (Windows, macOS, Linux) [through PyPi.org](https://pypi.org/project/rhino3dm/).
+**rhino3dm.py** is a python package that can be used on all current versions of CPython (2.7 and 3.7+) and is available on all platforms (Windows, macOS, Linux) [through PyPi.org](https://pypi.org/project/rhino3dm/).
 
 `pip install --user rhino3dm`
 
