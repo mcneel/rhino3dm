@@ -3,44 +3,18 @@ version: 2
 jobs:
   build_js:
     docker:
-      - image: trzeci/emscripten-ubuntu:sdk-incoming-64bit
+      - image: emscripten/emsdk:2.0.10
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
-      - run: python --version && emcc --version && cmake --version
-      - run: python src/build_javascript.py
-      - persist_to_workspace:
-          root: src/build/artifacts_js
-          paths:
-            - .
-  deploy_js:
-    docker:
-      - image: circleci/python:2.7-jessie
-        auth:
-          username: $DOCKERHUB_USER
-          password: $DOCKERHUB_PASSWORD
-    environment:
-      S3_BASE_URL: s3://files.na.mcneel.com/rhino3dm/js
-    steps:
-      - attach_workspace:
-          at: src/build/artifacts_js
-      - run: ls -l src/build/artifacts_js
-      - run: python --version
-      - run: sudo pip install awscli
-        # upload artifacts to s3
-      - run: aws s3 cp src/build/artifacts_js $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --recursive --acl public-read
-        # re-upload rhino3dm.wasm with mime-type "application/wasm"
-      - run: aws s3 cp src/build/artifacts_js/rhino3dm.wasm $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ --acl public-read --content-type "application/wasm"
-        # copy artifacts from dujour/$CIRCLE_BUILD_NUM/ to latest/
-      - run:
-          name: Copy artifacts to latest/
-          command: |
-            if [ "${CIRCLE_BRANCH}" = "master" ]; then
-              aws s3 cp $S3_BASE_URL/dujour/$CIRCLE_BUILD_NUM/ $S3_BASE_URL/latest/ --recursive --acl public-read
-            fi
+      - run: python3 --version && emcc --version && cmake --version
+      - run: python3 src/build_javascript.py
+      - store_artifacts:
+          path: src/build/artifacts_js
+          destination: .
 
   build_py2:
     docker:
@@ -114,10 +88,6 @@ workflows:
       - build_js:
           context:
             - docker-hub-creds
-      # 2020-06-28: use jsdelivr instead of publishing to files.mcneel.com
-      # - deploy_js:
-      #     requires:
-      #       - build_js
       - build_py2:
           context:
             - docker-hub-creds
