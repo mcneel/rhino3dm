@@ -507,7 +507,7 @@ if (${INCLUDE_DRACO})
 endif()
 
 if(${RHINO3DM_JS})
-  set(CMAKE_EXECUTABLE_SUFFIX ".wasm.js")
+  set(CMAKE_EXECUTABLE_SUFFIX ".js")
 endif()
 
 if(${RHINO3DM_JS})
