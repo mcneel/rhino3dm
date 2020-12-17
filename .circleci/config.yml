@@ -3,15 +3,15 @@ version: 2
 jobs:
   build_js:
     docker:
-      - image: trzeci/emscripten-ubuntu:sdk-incoming-64bit
+      - image: emscripten/emsdk:2.0.10
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - run: git submodule update --init
-      - run: python --version && emcc --version && cmake --version
-      - run: python src/build_javascript.py
+      - run: python3 --version && emcc --version && cmake --version
+      - run: python3 src/build_javascript.py
       - persist_to_workspace:
           root: src/build/artifacts_js
           paths:
