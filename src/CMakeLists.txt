@@ -484,6 +484,7 @@ if(${RHINO3DM_JS})
   # we will eventually want the following warnging flags on both compiles
   # for now, just WASM
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s 'EXPORT_NAME=\"rhino3dm\"'")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --bind")
 endif()
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
@@ -531,17 +532,4 @@ if (${RHINO3DM_PY})
   if(${INCLUDE_DRACO})
     target_link_libraries(_rhino3dm PRIVATE draco dracoenc dracodec)
   endif()
-endif()
-
-
-# I plan to mode the following install phase out of this file and into the top
-# level python script for generating wasm 
-# dan@mcneel.com: this is already in the build.py -p js (this can be deleted as soon
-# as the scripts are used in the build process)
-if(${RHINO3DM_JS})
-  install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/../docs/javascript/samples/resources")
-  install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/../docs/javascript/samples/resources")
 endif()

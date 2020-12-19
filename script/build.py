@@ -465,25 +465,13 @@ def build_js():
             artifacts_folder_path = os.path.abspath(os.path.join(target_path, "artifacts_js"))
             if not os.path.exists(artifacts_folder_path):
                 os.mkdir(artifacts_folder_path)
-            shutil.move(path_to_item, os.path.abspath(os.path.join(artifacts_folder_path, item)))
+            shutil.copyfile(path_to_item, os.path.abspath(os.path.join(artifacts_folder_path, item)))
 
     if all_items_built:
         print_ok_message("built target rhino3dm succeeded. see: " + artifacts_folder_path)
     else:
         print_error_message("failed to build all rhino3dm build artifacts.")
         return False
-
-    # Copy artifacts into samples folder
-    for item in items_to_check:
-        artifacts_folder_path = os.path.abspath(os.path.join(target_path, "artifacts_js"))
-        path_to_item = os.path.abspath(os.path.join(artifacts_folder_path, item))
-        if os.path.exists(path_to_item):
-            resources_path = os.path.abspath(os.path.join(docs_folder, platform_full_names.get("js").lower(),
-                                                          "samples", "resources"))
-            destination_path = os.path.abspath(os.path.join(resources_path, item))
-            shutil.copyfile(path_to_item, destination_path)
-            if os.path.exists(destination_path):
-                print_ok_message("copied " + item + " to: " + destination_path)
     
 
 def build_handler(platform_target):

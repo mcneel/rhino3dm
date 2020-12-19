@@ -11,7 +11,8 @@ jobs:
       - checkout
       - run: git submodule update --init
       - run: python3 --version && emcc --version && cmake --version
-      - run: python3 src/build_javascript.py
+      - run: python3 script/setup.py -p js -v
+      - run: python3 script/build.py -p js -v
       - store_artifacts:
           path: src/build/artifacts_js
           destination: .
