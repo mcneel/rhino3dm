@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
 
 jobs:
   build_js:
@@ -53,6 +56,15 @@ jobs:
       - run: python3 --version && cmake --version
       - run: python3 setup.py bdist_wheel
 
+  build_py3_win:
+    executor: win/default
+    steps:
+      - checkout
+      - run: git submodule update --init
+      - run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      - run: python --version; cmake --version
+      - run: python setup.py bdist_wheel
+
   build_dotnet:
     docker:
       - image: mcneel/rhino3dm-dev:latest
@@ -97,6 +109,7 @@ workflows:
       - build_py3_mac:
           context:
             - docker-hub-creds
+      - build_py3_win
       - build_dotnet:
           context:
             - docker-hub-creds
