@@ -482,7 +482,7 @@ def setup_js():
     
     os.chdir(target_path)
 
-    command = "emcmake cmake -DCMAKE_CXX_FLAGS=\"-s MODULARIZE=1 -s 'EXPORT_NAME=\\\"rhino3dm\\\"'\" " + src_folder
+    command = "emcmake cmake " + src_folder
     try:
         p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except OSError:
