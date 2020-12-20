@@ -15,6 +15,8 @@ Compiling *rhino3dm.js* can be done on macOS, Linux and Windows (via [Windows Su
 * [Emscripten](https://emscripten.org/) - See Emscripten's [Getting started guide](https://emscripten.org/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk) or WebAssembly's [Developer's Guide](https://webassembly.org/getting-started/developers-guide/) .
 * [CMake](https://cmake.org/) (>3.12.2) - _**Note:** The version of CMake distributed with Ubuntu 18.04 LTS isn't new enough so you'll have to [build it from source](https://cmake.org/install/). This may also be true for other package managers._
 
+⭐️ _**TIP**: A great way to get a build environment that's ready to go for building rhino3dm.js is to use a [Dev Container](#dev-container) in VS Code!_ 🐳
+
 ## Scripts
 
 A number of scripts are used to setup and build rhino3dm:
@@ -40,7 +42,7 @@ to check for all the tools needed to build the javascript version of rhino3dm.
 The _setup.py_ script uses CMake to generate the make files necessary to build the project.  These projects are generated into _build/javascript_ folder.  To setup a JavaScript build, you can run:
 
 ```bash
-$ python3 setup.py --platform js
+$ python3 setup.py --platform js --verbose
 ```
 
 ### build.py
@@ -48,7 +50,7 @@ $ python3 setup.py --platform js
 The _build.py_ script run `make` to build the _rhino3dm.js_ and _rhino3dm.wasm_ files to the _build/javascript/artifacts\_js_ folder.  To build, run:
 
 ```bash
-$ python3 build.py --platform js --overwrite
+$ python3 build.py --platform js --verbose --overwrite
 ```
 
 The build might take a few minutes, but if everything is configured correctly you should now have _rhino3dm.js_ and _rhino3dm.wasm_ in the _build/javascript/artifacts\_js_ folder.  The script also copies these files to the _docs/javascript/samples/resources_ folder where they can be used for testing.  
@@ -68,6 +70,15 @@ The build might take a few minutes, but if everything is configured correctly yo
 > brep = sphere.toBrep();
 > jsonobject = brep.encode();
 ```
+
+## Dev Container
+
+Getting the toolchain set up for building rhino3dm.js can be painful. Visual Studio Code can help by using a preconfigured Docker container as a development environment. There are two options (assuming you already have Docker installed and running)...
+
+1. Open the project in VS Code and run the **Remote-Containers: Reopen Folder in Container** command to start a container with the Emscripten toolchain set up and the current directory mapped to a volume.
+1. Alternatively, for slightly faster build times (I/O between the container and the host filesystem can slow things down), open VS Code and run the **Remote-Containers: Clone Repository in Container Volume...** command. Enter `mcneel/rhino3dm` in the input box and press <kbd>Enter</kbd>. Note, that if you need to copy any files from the container volume to the host filesystem, you can right-click on them in the Explorer side bar and choose _Download_.
+
+In both cases, once VS Code has relaunched you may need to open a new terminal (**Terminal** > **New Terminal**). This terminal will be running inside the container and that's where you'll run the [setup](#setuppy) and [build](#buildpy) scripts.
 
 ## Related Topics
 
