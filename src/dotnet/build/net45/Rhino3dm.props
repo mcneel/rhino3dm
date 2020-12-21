@@ -4,6 +4,10 @@
 -->
 <Project>
   <ItemGroup>
-    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\**\*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\**\*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /> -->
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\osx-x64\native\*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\linux-x64\native\*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\win-x64\native\*" TargetPath="Win64\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)\..\..\runtimes\win-x86\native\*" TargetPath="Win32\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

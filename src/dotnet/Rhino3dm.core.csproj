@@ -27,6 +27,14 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup Condition="exists('..\build\windows\win32\Release\librhino3dm_native.dll')">
+    <None Include="..\build\windows\win32\Release\librhino3dm_native.dll">
+      <PackagePath>runtimes\win-x86\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
   <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
     <None Include="..\build\macos\Release\librhino3dm_native.dylib">
       <PackagePath>runtimes\osx-x64\native</PackagePath>
