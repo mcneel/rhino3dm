@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Rhino3dm.Android</id>
+    <version>0.1.0</version>
+    <title>.NET library based on OpenNURBS with a "RhinoCommon" style</title>
+    <authors>Robert McNeel and Associates</authors>
+    <owners>mcneel</owners>
+    <projectUrl>https://github.com/mcneel/rhino3dm</projectUrl>
+    <description>rhino3dm is a set of libraries based on the OpenNURBS geometry library with a "RhinoCommon" style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.</description>
+    <icon>icon.png</icon>
+    <copyright>Copyright (c) 1997-2020 Robert McNeel and Associates</copyright>
+    <tags>rhino3d</tags>
+    <dependencies>
+      <group targetFramework="MonoAndroid" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\build\android\dotnet\Rhino3dm.Android.dll" target="lib\MonoAndroid" />
+    <file src="icon.png" />
+  </files>
+</package>
