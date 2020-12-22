@@ -16,7 +16,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\Rhino3dm.Android.dll" target="lib\MonoAndroid" />
+    <file src="..\build\android\dotnet\Rhino3dm.Android.dll" target="lib\MonoAndroid" />
     <file src="icon.png" />
   </files>
 </package>
