@@ -213,13 +213,10 @@ def build_windows():
         return False
 
     print(" Building Rhino3dm.dll...")
-    build_tools = bootstrap.read_required_versions()
-    msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
-    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
-    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
-    output_dir = os.path.abspath(os.path.join(target_path, "dotnet")).replace('\\', '//')
-    
-    command = msbuild_path + ' ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
+    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+
+    command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -256,7 +253,7 @@ def build_linux():
         return False
 
     print(" Building Rhino3dm.dll...")
-    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.core.csproj"))
+    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     target_path = os.path.join(build_folder, platform_full_names.get("linux").lower())
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
@@ -296,7 +293,8 @@ def build_macos():
     print(" Building Rhino3dm.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
-    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+
+    command = 'dotnet build -f netstandard2.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -420,7 +418,6 @@ def build_android():
     print(" Building Rhino3dm.Android.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.Android.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
-    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.Android.dll"))
