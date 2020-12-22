@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Rhino3dm.iOS</id>
-    <version>$version$</version>
+    <version>0.1.0</version>
     <title>.NET library based on OpenNURBS with a "RhinoCommon" style</title>
     <authors>Robert McNeel and Associates</authors>
     <owners>mcneel</owners>
