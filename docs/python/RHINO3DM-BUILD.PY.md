@@ -1,31 +1,32 @@
 # Build rhino3dm.py for yourself
-### Get The Source
-
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
-  * `git submodule update --init`
 
 ## Install the Tools
 
-CMake 3.12.1 is the minimum required CMake version.
-
 * Mac
-  * Install Homebrew (https://brew.sh/)
-  * `brew install python2 cmake` (for Python 2.7 compile)
-  * `brew install python3 cmake` (for Python 3.7 compile)
+  * `brew install python3 cmake`
 * Windows
-  * This project uses Visual Studio 2017
-  * Install the flavor of CPython that you prefer to work with from python.org
-  * Install CMake (https://cmake.org/download/) and make sure that cmake.exe is added to the path
+  * Visual Studio 2019
+  * [Python](https://www.python.org/downloads/windows/)
+  * [CMake](https://cmake.org/download/) (make sure that cmake.exe is added to the `%PATH%`)
 * Linux
-  * Tested with Clang 3.8.0 on Linux Mint 18.3
-  * Install CMake 3.12.1
-  * `sudo aptitude install python2 python3 python2-dev python3-dev uuid uuid-dev`
+  * Tested with Ubuntu 20.04 LTS
+  * `sudo apt install git python3 python3-dev python3-setuptools cmake gcc g++`
+
+We've been using CMake 16.6.2, but you might be able to get away with an older version.
+
+## Get the source code
+
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules. Make sure they're properly initialised and updated.
+
+```commandline
+git clone --recurse-submodules https://github.com/mcneel/rhino3dm.git
+```
 
 ## Compile
 
 * (All platforms) run `python setup.py bdist` in the root directory to compile and configure. The library will compile for the version of python that you are executing.
 
-* (Windows) If you are on Windows, you can create a Visual Studio project file for editing and compiling code by running the `build_python_project.py` script in the `src` directory. This is the easiest way to add new code to the project.
+* (Windows) If you are on Windows, you can create a Visual Studio project file for editing and compiling code by running the `create_python_vcxproj.py` script in the `src` directory. This is the easiest way to add new code to the project.
 
 ## Compile and install a development version
 
