@@ -292,7 +292,7 @@ def build_macos():
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build -f netstandard2.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    command = 'dotnet build -f net45 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -416,6 +416,7 @@ def build_android():
     print(" Building Rhino3dm.Android.dll...")
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.Android.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    command = 'msbuild ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.Android.dll"))
