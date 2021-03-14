@@ -281,10 +281,10 @@ static bool DecodeDracoColors(const draco::PointCloud& pc, ON_Mesh& mesh)
 
   mesh.m_C.Reserve(att->size());
 
-  char argb[4];
+  unsigned char argb[4];
   for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(att->size()); i++)
   {
-    if (!att->ConvertValue<char, 4>(i, argb))
+    if (!att->ConvertValue<unsigned char, 4>(i, argb))
       return false;
     ON_Color& c = mesh.m_C.AppendNew();
     c.SetRGBA(argb[1], argb[2], argb[3], 255 - argb[0]);
