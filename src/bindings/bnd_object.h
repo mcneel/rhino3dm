@@ -25,6 +25,8 @@ public:
 #if defined(__EMSCRIPTEN__)
   BND_DICT toJSON(BND_DICT key);
 #endif
+
+  bool IsValid() const { return m_object->IsValid(); }
   BND_CommonObject* Duplicate() const;
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);

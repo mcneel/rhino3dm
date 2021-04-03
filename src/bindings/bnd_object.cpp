@@ -1508,6 +1508,7 @@ namespace py = pybind11;
 void initObjectBindings(pybind11::module& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
+    .def_property_readonly("IsValid", &BND_CommonObject::IsValid)
     .def("Encode", &BND_CommonObject::Encode)
     .def_static("Decode", &BND_CommonObject::Decode, py::arg("jsonObject"))
     .def("SetUserString", &BND_CommonObject::SetUserString, py::arg("key"), py::arg("value"))
@@ -1530,6 +1531,7 @@ using namespace emscripten;
 void initObjectBindings(void*)
 {
   class_<BND_CommonObject>("CommonObject")
+    .property("isValid", &BND_CommonObject::IsValid)
     .function("encode", &BND_CommonObject::Encode)
     .function("toJSON", &BND_CommonObject::toJSON)
     .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers())
