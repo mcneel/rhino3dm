@@ -735,10 +735,20 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
 }
 
 
-void BND_File3dmLayerTable::Add(const BND_Layer& layer)
+int BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
-  m_model->AddModelComponent(*l);
+  ON_ModelComponentReference mr = m_model->AddModelComponent(*l);
+  const ON_Layer* managed_layer = ON_Layer::FromModelComponentRef(mr, nullptr);
+  int layer_index = (nullptr != managed_layer) ? managed_layer->Index() : ON_UNSET_INT_INDEX;
+  return layer_index;
+}
+
+int BND_File3dmLayerTable::AddLayer(std::wstring name, BND_Color color)
+{
+  ON_Color c = Binding_to_ON_Color(color);
+  int rc = m_model->AddLayer(name.c_str(), c);
+  return rc;
 }
 
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
@@ -1314,6 +1324,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__getitem__", &BND_File3dmLayerTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>(s.cast<BND_File3dmLayerTable &>(), s); })
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
+    .def("AddLayer", &BND_File3dmLayerTable::AddLayer, py::arg("name"), py::arg("color"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
     .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
@@ -1497,6 +1508,7 @@ void initExtensionsBindings(void*)
     .function("count", &BND_File3dmLayerTable::Count)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLayerTable::Add)
+    .function("addLayer", &BND_File3dmLayerTable::AddLayer)
     .function("findName", &BND_File3dmLayerTable::FindName, allow_raw_pointers())
     .function("findIndex", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
