@@ -120,7 +120,8 @@ class BND_File3dmLayerTable
 public:
   BND_File3dmLayerTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Layer); }
-  void Add(const class BND_Layer& layer);
+  int Add(const class BND_Layer& layer);
+  int AddLayer(std::wstring name, BND_Color color);
   class BND_Layer* FindName(std::wstring name, BND_UUID parentId);
   //BND_Layer* FindNameHash(NameHash nameHash)
   class BND_Layer* FindIndex(int index);
