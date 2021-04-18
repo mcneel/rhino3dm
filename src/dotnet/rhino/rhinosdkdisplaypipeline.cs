@@ -1975,6 +1975,20 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Draws a shaded Mesh with Zebra stripe preview.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="color">Object color.</param>
+    /// <since>7.4</since>
+    public void DrawZebraPreview(Mesh mesh, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_mesh = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawZebraPreview2(m_ptr, const_ptr_mesh, argb, cache);
+    }
+
+    /// <summary>
     /// Draws a point in style used during "GetPoint" operations
     /// </summary>
     /// <param name="point">Location of the point in world coordinates</param>
@@ -2299,6 +2313,19 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLine(m_ptr, from, to, color.ToArgb(), thickness);
     }
 
+    /// <summary>
+    /// Draws a single line object .This version of line drawing will draw the
+    /// segments of the line that extend beyond the near and far planes of the
+    /// view frustum with depths on those planes
+    /// </summary>
+    /// <param name="from">Line from point.</param>
+    /// <param name="to">Line to point.</param>
+    /// <param name="color">Color to draw line in.</param>
+    /// <param name="thickness">Thickness (in pixels) of line.</param>
+    public void DrawLineNoClip(Point3d from, Point3d to, System.Drawing.Color color, int thickness)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineNoClip(m_ptr, from, to, color.ToArgb(), thickness);
+    }
     /// <summary>
     /// Draws a single dotted line.
     /// </summary>

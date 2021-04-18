@@ -447,7 +447,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="name"></param>
     /// <param name="values"></param>
@@ -1122,7 +1122,7 @@ namespace Rhino.Runtime
     /// Returns information about the current process. If Rhino is the top level process,
     /// processName is "Rhino". Otherwise, processName is the name, without extension, of the main
     /// module that is executing. For example, "compute.backend" or "Revit".
-    /// 
+    ///
     /// processVersion is the System.Version of the running process. It is the FileVersion
     /// of the executable.
     /// </summary>
@@ -1173,26 +1173,6 @@ namespace Rhino.Runtime
       get
       {
         var psl = GetPlatformService<IOperatingSystemInformation>();
-
-#if RHINO_SDK
-        //RH-55659 Docker environment should always report "Server".
-        if (string.Equals(Environment.UserName, "ContainerAdministrator", StringComparison.InvariantCultureIgnoreCase))
-          return "Server";
-
-#if DEBUG
-        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHINO_TOKEN")))
-          return "Server";
-#endif
-
-
-        //RH-55179 Plain Cloud Zoo files: always report "Server"
-        var settings = Rhino.PlugIns.PlugIn.GetPluginSettings(Rhino.RhinoApp.CurrentRhinoId, false);
-        var licensingSettings = settings.AddChild("LicensingSettings");
-
-        if (licensingSettings.GetBool("CloudZooPlainText", false))
-          return "Server";
-#endif
-
         return psl.InstallationType;
       }
     }
@@ -1517,6 +1497,92 @@ namespace Rhino.Runtime
     }
 
 #if RHINO_SDK
+    private static bool? m_docker;
+    /// <summary>
+    /// Tests if this process is currently executing inside a Windows Container.
+    /// </summary>
+    public static bool RunningInWindowsContainer
+    {
+      get
+      {
+        if (!m_docker.HasValue)
+          m_docker = RunningInWindowsContainerHelper();
+        return m_docker.Value;
+      }
+    }
+
+    private static bool RunningInWindowsContainerHelper()
+    {
+      if (!RunningOnWindows)
+        return false;
+
+      // Will 2020-10-09 (RH-60784)
+      // there isn't a silver bullet when it comes to detecting whether or not the current process
+      // is running inside a windows container but there are several indicators that we can check;
+      // you'd have to be trying hard and potentially compromising the container's functionality in
+      // order to fool every test
+
+      // these tests shouldn't affect rhino's start time - they're all very quick
+
+      // 1. check for ContainerType registry value
+      try
+      {
+        var key = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control";
+        var containerTypeObj = Microsoft.Win32.Registry.GetValue(key, "ContainerType", null);
+        if (containerTypeObj is int containerType)
+        {
+          // docker container isolation: process (1), hyperv (2)
+          // exit early if ContainerType exists but does not match these known values, e.g. in the
+          // case of Windows Sandbox (4) which would otherwise fail the cexecsvc check
+          return (containerType == 1 || containerType == 2);
+        }
+      }
+      catch { }
+
+      // 2. check if we're running as one of the default base image users (RH-55659)
+      // NOTE: if we need to tighten this up then we can check for the "User Manager" domain too
+      if (string.Equals(Environment.UserName, "ContainerAdministrator") ||
+          string.Equals(Environment.UserName, "ContainerUser"))
+        return true;
+
+      // 3. check for KUBERNETES_SERVICE_HOST environment variable (Kubernetes only)
+      // https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/#environment-variables
+      try
+      {
+        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")))
+          return true;
+      }
+      catch { }
+
+      // 4. check if CExecSvc.exe (Container Execution Agent) is running
+      if (Process.GetProcessesByName("cexecsvc").Length > 0)
+        return true;
+
+      // alt. method, in case the CExecSvc service was stopped for some reason
+      try
+      {
+        if (Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\cexecsvc", false) != null)
+          return true;
+      }
+      catch { }
+
+      // 5. check for Windows Container Base Image license
+      var licfile = "C:\\License.txt";
+      if (System.IO.File.Exists(licfile))
+      {
+        try
+        {
+          var text = System.IO.File.ReadAllText(licfile);
+          if (System.Text.RegularExpressions.Regex.IsMatch(text, "container", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            return true;
+        }
+        catch { }
+      }
+
+      return false;
+    }
+
+
     /// <summary>
     /// Returns true if the host operating system is in dark mode and Rhino
     /// supports dark mode.
@@ -1573,7 +1639,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Get the current operating system language.
     /// </summary>
-    /// <returns>A Windows LCID (on Windows and macOS).  On Windows, this will be 
+    /// <returns>A Windows LCID (on Windows and macOS).  On Windows, this will be
     /// LCID value regardless of those languages that Rhino supports.  On macOS, this only
     /// returns LCID values for languages that Rhino does support.</returns>
     /// <since>6.8</since>
@@ -2356,7 +2422,7 @@ namespace Rhino.Runtime
     }
 
 #if RHINO_SDK
-    internal static object ParseFieldExpression(string expression, RhinoDoc doc, 
+    internal static object ParseFieldExpression(string expression, RhinoDoc doc,
       Rhino.DocObjects.RhinoObject rhinoObject, Rhino.DocObjects.RhinoObject topLevelRhinoObject,
       Rhino.DocObjects.InstanceObject immediateParentObject,
       bool returnFormattedString, out bool parseSucceeded)
@@ -2370,48 +2436,7 @@ namespace Rhino.Runtime
 
       formula = formula.Replace("\n", "");
 
-      // tune up old V5 style fields to force every function to have a ()
-      // Skipping ones like "Area" since those always required parentheses
-      string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes" };
-      foreach(var field in oldFields)
-      {
-        if (!formula.StartsWith(field))
-          continue;
 
-        int tokenSearchStart = 0;
-        while(true)
-        {
-          
-          int functionNameStart = formula.IndexOf(field, tokenSearchStart);
-          if (functionNameStart < 0)
-            break;
-          int functionNameEnd = functionNameStart + field.Length - 1;
-
-          bool addParentheses = true;
-          for(int i=functionNameEnd+1; i<formula.Length; i++)
-          {
-            char c = formula[i];
-            if (c == ' ')
-              continue;
-            if (c == '(')
-              addParentheses = false;
-            if (i == (functionNameEnd+1))
-            {
-              // if this is another char, then ignore
-              if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-                addParentheses = false;
-            }
-            break;
-          }
-            
-          tokenSearchStart = functionNameStart + field.Length;
-          if(addParentheses)
-          {
-            tokenSearchStart += 2;
-            formula = formula.Insert(functionNameStart + field.Length, "()");
-          }
-        }
-      }
 
 
       //This should reflect a string list of the enum TextFieldType in TextFieldViewModel.cs
@@ -2446,17 +2471,67 @@ namespace Rhino.Runtime
         "PointCoordinate",
         "UserText",
         "Volume"
-      }; 
+      };
       foreach (var fx_name in function_name_list)
       {
         var str_index_of_function = formula.IndexOf(fx_name, 0, StringComparison.OrdinalIgnoreCase);
-        if (str_index_of_function == -1) 
+        if (str_index_of_function == -1)
           continue;
-       
-        var og_fx = formula.Substring(str_index_of_function, fx_name.Length); 
+
+        var og_fx = formula.Substring(str_index_of_function, fx_name.Length);
         formula = formula.Replace(og_fx, fx_name);
       }
-      #endregion 
+      #endregion
+
+
+
+
+      // tune up old V5 style fields to force every function to have a ()
+      // Skipping ones like "Area" since those always required parentheses
+      #region Add () to function names
+      string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes" };
+      foreach(var field in oldFields)
+      {
+        if (!formula.StartsWith(field))
+          continue;
+
+        int tokenSearchStart = 0;
+        while(true)
+        {
+
+          int functionNameStart = formula.IndexOf(field, tokenSearchStart);
+          if (functionNameStart < 0)
+            break;
+          int functionNameEnd = functionNameStart + field.Length - 1;
+
+          bool addParentheses = true;
+          for(int i=functionNameEnd+1; i<formula.Length; i++)
+          {
+            char c = formula[i];
+            if (c == ' ')
+              continue;
+            if (c == '(')
+              addParentheses = false;
+            if (i == (functionNameEnd+1))
+            {
+              // if this is another char, then ignore
+              if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                addParentheses = false;
+            }
+            break;
+          }
+
+          tokenSearchStart = functionNameStart + field.Length;
+          if(addParentheses)
+          {
+            tokenSearchStart += 2;
+            formula = formula.Insert(functionNameStart + field.Length, "()");
+          }
+        }
+      }
+      #endregion
+
+
 
       // I don't think is is possible to write bad things in a single line expression,
       // but check for import, exec, and clr just to be safe.
@@ -2507,14 +2582,14 @@ namespace Rhino.Runtime
 
               var annotation = rhinoObject as Rhino.DocObjects.AnnotationObjectBase;
               // Basic CurveLength expression
-              if (annotation != null && expression.StartsWith("CurveLength", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              if (annotation != null && formula.StartsWith("CurveLength", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
                 var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
                 if (!string.IsNullOrWhiteSpace(stringResult))
                   return stringResult;
               }
 
-              if (annotation != null && expression.StartsWith("Area", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              if (annotation != null && formula.StartsWith("Area", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
                 string stringResult = Rhino.UI.Localization.FormatArea(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
 
@@ -2522,7 +2597,7 @@ namespace Rhino.Runtime
                   return stringResult;
               }
 
-              if (annotation != null && expression.StartsWith("Volume", StringComparison.Ordinal) && expression.IndexOf(')') == (expression.Length - 1))
+              if (annotation != null && formula.StartsWith("Volume", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
                 string stringResult = Rhino.UI.Localization.FormatVolume(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
 
@@ -2594,7 +2669,7 @@ namespace Rhino.Runtime
       string result = ParseFieldExpression(formula, doc, rhobj, topParent, immediateParent, true, out success) as string;
 
       // Iterate parsed results to see if they contain nested functions
-      
+
       int max_iterations = 9;
       if (!string.IsNullOrWhiteSpace(result))
       {
@@ -2876,6 +2951,7 @@ namespace Rhino.Runtime
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(true);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(true);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(true);
+      Rhino.Render.UICommands.UICommand.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffect.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
@@ -2897,6 +2973,7 @@ namespace Rhino.Runtime
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(false);
+      Rhino.Render.UICommands.UICommand.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffect.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
@@ -2964,8 +3041,8 @@ namespace Rhino.Runtime
       g_write_log = false;
       // create a text file on the desktop to log exception information to
 
-      // Curtis 2018.09.04: 
-      // Any changes to the output of this file should be reflected on Mac in RhinoDotNet_Mono.cpp
+      // Curtis 2018.09.04:
+      // Any changes to the output of this file should be reflected on Mac in RhinoDotNet_Mono.mm
 
       var path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
       path = System.IO.Path.Combine(path, "RhinoDotNetCrash.txt");
@@ -3149,6 +3226,18 @@ namespace Rhino.Runtime
     public static void DisplayOleAlerts(bool display)
     {
       UnsafeNativeMethods.RHC_DisplayOleAlerts(display);
+    }
+
+    /// <summary>
+    /// Get the processor count on this hardware. It supports
+    /// querying on CPUs with more than 64 processors (Windows).
+    /// </summary>
+    public static int GetSystemProcessorCount()
+    {
+      if (RunningOnWindows)
+        return UnsafeNativeMethods.RHC_GetSystemCpuThreadCount();
+      else
+        return Environment.ProcessorCount;
     }
 #endif
 

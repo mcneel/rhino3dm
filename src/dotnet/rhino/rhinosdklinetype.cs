@@ -365,6 +365,49 @@ namespace Rhino.DocObjects
         return new Linetype[0];
       }
     }
+
+    /// <summary>
+    /// Creates a linetype from a pattern string.
+    /// Values greater than zero represent line segments, 
+    /// and values less than or equal to zero represents space segments.
+    /// </summary>
+    /// <param name="patternString">The pattern string.</param>
+    /// <param name="millimeters">
+    /// Specify true if the pattern is represented in millimeters. 
+    /// Specify false if the pattern is represented in inches.
+    /// </param>
+    /// <returns>A valid linetype if successful, null otherwise.</returns>
+    /// <since>7.4</since>
+    public static Linetype CreateFromPatternString(string patternString, bool millimeters)
+    {
+      IntPtr ptr_linetype = UnsafeNativeMethods.RHC_RhLinetypeFromPatternString(patternString, millimeters);
+      if (IntPtr.Zero != ptr_linetype)
+        return new DocObjects.Linetype(ptr_linetype);
+      return null;
+    }
+
+    /// <summary>
+    /// Returns a string that represents the pattern of the linetype, which can be used in user interface.
+    /// Values greater than zero represent line segments, 
+    /// and values less than or equal to zero represent space segments.
+    /// </summary>
+    /// <param name="millimeters">
+    /// If true, the string is formatted in millimeters. 
+    /// If false, the string is formatted in inches.
+    /// </param>
+    /// <returns>The pattern string.</returns>
+    /// <since>7.4</since>
+    public string PatternString(bool millimeters)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr ptr_string = sh.NonConstPointer();
+        IntPtr ptr_const_this = ConstPointer();
+        UnsafeNativeMethods.RHC_RhPatternStringFromLinetype(ptr_const_this, millimeters, ptr_string);
+        return sh.ToString();
+      }
+    }
+
 #endif
 
   }

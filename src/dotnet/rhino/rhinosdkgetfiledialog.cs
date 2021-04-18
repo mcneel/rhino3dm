@@ -253,13 +253,24 @@ namespace Rhino.UI
       var rc = UnsafeNativeMethods.CRhinoUiFileDialog_Show(ptr_dialog);
       var ptr_filename = UnsafeNativeMethods.CRhinoUiFileDialog_Filename(ptr_dialog);
       FileName = Marshal.PtrToStringUni(ptr_filename);
+      const int idok = 1;
       if (MultiSelect)
       {
-        using (var array = new Runtime.InteropWrappers.ClassArrayString())
+        // 1 February 2021 John Morse
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-62568
+        // Don't ask for file list when the dialog is canceled otherwise an ASSERT is triggered.
+        if (rc == idok)
         {
-          var ptr_array = array.NonConstPointer();
-          var count = UnsafeNativeMethods.CRhinoUiFileDialog_Filenames(ptr_dialog, ptr_array);
-          FileNames = count < 1 ? new string[0] : array.ToArray();
+          using (var array = new Runtime.InteropWrappers.ClassArrayString())
+          {
+            var ptr_array = array.NonConstPointer();
+            var count = UnsafeNativeMethods.CRhinoUiFileDialog_Filenames(ptr_dialog, ptr_array);
+            FileNames = count < 1 ? new string[0] : array.ToArray();
+          }
+        }
+        else
+        {
+          FileNames = new string[0];
         }
       }
       else
@@ -267,7 +278,6 @@ namespace Rhino.UI
         FileNames = new[] {FileName};
       }
       UnsafeNativeMethods.CRhinoUiFileDialog_Delete(ptr_dialog);
-      const int idok = 1;
       return rc == idok;
     }
 

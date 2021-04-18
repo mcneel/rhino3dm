@@ -261,8 +261,8 @@ namespace Rhino.Geometry
       return IntPtr.Zero == rc ? null : new AreaMassProperties(rc, false);
     }
 
-
     #region properties
+
     internal IntPtr ConstPointer()
     {
       return m_ptr;
@@ -369,7 +369,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns the world coordinate first moments if they were able to be calculated.
+    /// Returns the world coordinate second moments if they were able to be calculated.
     /// X is integral of "xx dm" over the area
     /// Y is integral of "yy dm" over the area
     /// Z is integral of "zz dm" over the area.
@@ -414,6 +414,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
@@ -450,6 +451,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in world coordinates moments of inertia calculation.
     /// </summary>
@@ -502,6 +504,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in centroid coordinates second moments calculation.
     /// </summary>
@@ -602,8 +605,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments and principal axes with respect to world coordinates. 
-    /// These are simply the eigenvalues and eigenvectors of the world coordinate inertia matrix.
+    /// Calculates the eigenvalues and eigenvectors of moments matrix in world coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -626,8 +628,30 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments and principal axes with respect to centroid coordinates. 
-    /// These are simply the eigenvalues and eigenvectors of the centroid coordinate inertia matrix.
+    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.3</since>
+    public bool WorldCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -649,6 +673,29 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
     }
 
+    /// <summary>
+    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.3</since>
+    public bool CentroidCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
     #endregion
 
     #region methods
@@ -664,6 +711,7 @@ namespace Rhino.Geometry
     //}
     #endregion
   }
+
 
   /// <summary>
   /// Contains static initialization methods and allows access to the computed
@@ -697,6 +745,7 @@ namespace Rhino.Geometry
     {
       Dispose(false);
     }
+
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
@@ -835,7 +884,7 @@ namespace Rhino.Geometry
     /// Computes the VolumeMassProperties for a collection of geometric objects. 
     /// At present only Breps, Surfaces, and Meshes are supported.
     /// </summary>
-    /// <param name="geometry">Objects to include in the area computation.</param>
+    /// <param name="geometry">Objects to include in the volume computation.</param>
     /// <returns>The VolumeMassProperties for the entire collection or null on failure.</returns>
     /// <since>6.3</since>
     public static VolumeMassProperties Compute(IEnumerable<GeometryBase> geometry)
@@ -847,7 +896,7 @@ namespace Rhino.Geometry
     /// Computes the VolumeMassProperties for a collection of geometric objects. 
     /// At present only Breps, Surfaces, Meshes and Planar Closed Curves are supported.
     /// </summary>
-    /// <param name="geometry">Objects to include in the area computation.</param>
+    /// <param name="geometry">Objects to include in the volume computation.</param>
     /// <param name="volume">true to calculate volume.</param>
     /// <param name="firstMoments">true to calculate volume first moments, volume, and volume centroid.</param>
     /// <param name="secondMoments">true to calculate volume second moments.</param>
@@ -867,6 +916,7 @@ namespace Rhino.Geometry
     }
     
     #region properties
+
     internal IntPtr ConstPointer()
     {
       return m_ptr;
@@ -883,7 +933,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public double Volume
     {
-      get { return UnsafeNativeMethods.ON_MassProperties_Mass(m_ptr); }
+      get { return UnsafeNativeMethods.ON_MassProperties_Volume(m_ptr); }
     }
 
     /// <summary>
@@ -983,10 +1033,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns the world coordinate first moments if they were able to be calculated.
-    /// X is integral of "xx dm" over the area
-    /// Y is integral of "yy dm" over the area
-    /// Z is integral of "zz dm" over the area.
+    /// Returns the world coordinate second moments if they were able to be calculated.
+    /// X is integral of "xx dm" over the volume
+    /// Y is integral of "yy dm" over the volume
+    /// Z is integral of "zz dm" over the volume.
     /// </summary>
     /// <since>5.0</since>
     public Vector3d WorldCoordinatesSecondMoments
@@ -998,6 +1048,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
@@ -1014,9 +1065,9 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Returns the world coordinate product moments if they were able to be calculated.
-    /// X is integral of "xy dm" over the area
-    /// Y is integral of "yz dm" over the area
-    /// Z is integral of "zx dm" over the area.
+    /// X is integral of "xy dm" over the volume
+    /// Y is integral of "yz dm" over the volume
+    /// Z is integral of "zx dm" over the volume.
     /// </summary>
     /// <since>5.0</since>
     public Vector3d WorldCoordinatesProductMoments
@@ -1028,6 +1079,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in world coordinates second moments calculation.
     /// </summary>
@@ -1064,6 +1116,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in world coordinates moments of inertia calculation.
     /// </summary>
@@ -1116,6 +1169,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in centroid coordinates second moments calculation.
     /// </summary>
@@ -1179,6 +1233,7 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
     /// <summary>
     /// Uncertainty in centroid coordinates moments of inertia calculation.
     /// </summary>
@@ -1214,6 +1269,99 @@ namespace Rhino.Geometry
         return moment;
       }
     }
+
+    /// <summary>
+    /// Calculates the eigenvalues and eigenvectors of moments matrix in world coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>6.9</since>
+    public bool WorldCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.3</since>
+    public bool WorldCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>6.9</since>
+    public bool CentroidCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.3</since>
+    public bool CentroidCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
     #endregion
 
     #region methods
@@ -1230,6 +1378,570 @@ namespace Rhino.Geometry
     }
     #endregion
   }
+
+
+  /// <summary>
+  /// Contains static initialization methods and allows access to the computed
+  /// metrics of length, length centroid, and length moments in curves.
+  /// </summary>
+  public class LengthMassProperties : IDisposable
+  {
+    #region members
+    private IntPtr m_ptr; // ON_MassProperties*
+    private readonly bool m_bIsConst;
+    #endregion
+
+    #region constructors
+    private LengthMassProperties(IntPtr ptr, bool isConst)
+    {
+      m_ptr = ptr;
+      m_bIsConst = isConst;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~LengthMassProperties()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>5.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!m_bIsConst && IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_MassProperties_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+    #endregion
+
+    /// <summary>
+    /// Calculates the length mass properties of a curve.
+    /// </summary>
+    /// <param name="curve">The curve to measure.</param>
+    /// <returns>The LengthMassProperties for the given curve, or null on failure.</returns>
+    /// <since>7.6</since>
+    public static LengthMassProperties Compute(Curve curve)
+    {
+      return Compute(curve, true, true, true, true);
+    }
+
+    /// <summary>
+    /// Calculates the length mass properties of a curve.
+    /// </summary>
+    /// <param name="curve">The curve to measure.</param>
+    /// <param name="length">true to calculate length.</param>
+    /// <param name="firstMoments">true to calculate length first moments, length, and length centroid.</param>
+    /// <param name="secondMoments">true to calculate length second moments.</param>
+    /// <param name="productMoments">true to calculate length product moments.</param>
+    /// <returns>The LengthMassProperties for the given curve, or null on failure.</returns>
+    /// <since>7.6</since>
+    public static LengthMassProperties Compute(Curve curve, bool length, bool firstMoments, bool secondMoments, bool productMoments)
+    {
+      if (curve == null)
+        throw new ArgumentNullException(nameof(curve));
+      const double rel_tol = 1.0e-6;
+      const double abs_tol = 1.0e-6;
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr ptr_mp = UnsafeNativeMethods.ON_Curve_LengthMassProperties(ptr_const_curve, length, firstMoments, secondMoments, productMoments, rel_tol, abs_tol);
+      GC.KeepAlive(curve);
+      return ptr_mp == IntPtr.Zero 
+        ? null 
+        : new LengthMassProperties(ptr_mp, false);
+    }
+
+    /// <summary>
+    /// Calculates the length mass properties of an enumeration of curves.
+    /// </summary>
+    /// <param name="curves"></param>
+    /// <returns>The LengthMassProperties for the given enumeration of curves, or null on failure.</returns>
+    /// <since>7.6</since>
+    public static LengthMassProperties Compute(IEnumerable<Curve> curves)
+    {
+      return Compute(curves, true, true, true, true);
+    }
+
+    /// <summary>
+    /// Calculates the length mass properties of an enumeration of curves.
+    /// </summary>
+    /// <param name="curves">An enumeration of curves.</param>
+    /// <param name="length">true to calculate length.</param>
+    /// <param name="firstMoments">true to calculate length first moments, length, and length centroid.</param>
+    /// <param name="secondMoments">true to calculate length second moments.</param>
+    /// <param name="productMoments">true to calculate length product moments.</param>
+    /// <returns>The LengthMassProperties for the given enumeration of curves, or null on failure.</returns>
+    /// <since>7.6</since>
+    public static LengthMassProperties Compute(IEnumerable<Curve> curves, bool length, bool firstMoments, bool secondMoments, bool productMoments)
+    {
+      const double rel_tol = 1.0e-6;
+      const double abs_tol = 1.0e-6;
+      Rhino.Runtime.InteropWrappers.SimpleArrayCurvePointer array = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves);
+      IntPtr ptr_const_curves = array.ConstPointer();
+      IntPtr ptr_mp = UnsafeNativeMethods.ON_Curve_LengthMassProperties2(ptr_const_curves, length, firstMoments, secondMoments, productMoments, rel_tol, abs_tol);
+      GC.KeepAlive(curves);
+      return ptr_mp == IntPtr.Zero
+        ? null
+        : new LengthMassProperties(ptr_mp, false);
+    }
+
+    #region properties
+
+    internal IntPtr ConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Gets the length solution.
+    /// </summary>
+    /// <since>7.6</since>
+    public double Length
+    {
+      get { return UnsafeNativeMethods.ON_MassProperties_Length(m_ptr); }
+    }
+
+    /// <summary>
+    /// Gets the uncertainty in the length calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public double LengthError
+    {
+      get { return UnsafeNativeMethods.ON_MassProperties_MassError(m_ptr); }
+    }
+
+    /// <summary>
+    /// Gets the length centroid in the world coordinate system.
+    /// </summary>
+    /// <since>7.6</since>
+    public Point3d Centroid
+    {
+      get
+      {
+        Point3d rc = new Point3d();
+        IntPtr ptr = ConstPointer();
+        UnsafeNativeMethods.ON_MassProperties_Centroid(ptr, ref rc);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the uncertainty in the centroid calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidError
+    {
+      get
+      {
+        Vector3d rc = new Vector3d();
+        IntPtr ptr = ConstPointer();
+        UnsafeNativeMethods.ON_MassProperties_CentroidError(ptr, ref rc);
+        return rc;
+      }
+    }
+    #endregion
+
+    #region moments
+    const int idx_wc_firstmoments = 0;
+    const int idx_wc_secondmoments = 1;
+    const int idx_wc_productmoments = 2;
+    const int idx_wc_momentsofinertia = 3;
+    const int idx_wc_radiiofgyration = 4;
+    const int idx_cc_secondmoments = 5;
+    const int idx_cc_momentsofinertia = 6;
+    const int idx_cc_radiiofgyration = 7;
+    const int idx_cc_productmoments = 8;
+
+    bool GetMoments(int which, out Vector3d moment, out Vector3d error)
+    {
+      moment = new Vector3d();
+      error = new Vector3d();
+      IntPtr pConstThis = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetMoments(pConstThis, which, ref moment, ref error);
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns the world coordinate first moments if they were able to be calculated.
+    /// X is integral of "x dm" over the length
+    /// Y is integral of "y dm" over the length
+    /// Z is integral of "z dm" over the length.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesFirstMoments
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_firstmoments, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in world coordinates first moments calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesFirstMomentsError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_firstmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Returns the world coordinate second moments if they were able to be calculated.
+    /// X is integral of "xx dm" over the length
+    /// Y is integral of "yy dm" over the length
+    /// Z is integral of "zz dm" over the length.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesSecondMoments
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_secondmoments, out moment, out error);
+        return moment;
+      }
+    }
+    /// <summary>
+    /// Uncertainty in world coordinates second moments calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesSecondMomentsError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_secondmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Returns the world coordinate product moments if they were able to be calculated.
+    /// X is integral of "xy dm" over the length
+    /// Y is integral of "yz dm" over the length
+    /// Z is integral of "zx dm" over the length.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesProductMoments
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_productmoments, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in world coordinates second moments calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesProductMomentsError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_productmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// The moments of inertia about the world coordinate axes.
+    /// X = integral of (y^2 + z^2) dm
+    /// Y = integral of (z^2 + x^2) dm
+    /// Z = integral of (z^2 + y^2) dm.
+    /// </summary>
+    /// <remarks>
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
+    /// The values returned here are the integrals listed in the Summary section.
+    /// Some applications may want the values from WorldCoordinatesSecondMoments
+    /// instead of the values returned here.
+    /// </remarks>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesMomentsOfInertia
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_momentsofinertia, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in world coordinates moments of inertia calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesMomentsOfInertiaError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_momentsofinertia, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Radii of gyration with respect to world coordinate system.
+    /// X = sqrt(integral of (y^2 + z^2) dm/M)
+    /// Y = sqrt(integral of (z^2 + x^2) dm/M)
+    /// Z = sqrt(integral of (z^2 + y^2) dm/M)
+    /// </summary>
+    /// <remarks>
+    /// What is meant by "radii of gyration" varies widely in textbooks and papers.
+    /// The values returned here are the integrals listed in the Returns section.
+    /// </remarks>
+    /// <since>7.6</since>
+    public Vector3d WorldCoordinatesRadiiOfGyration
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_wc_radiiofgyration, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Second moments with respect to centroid coordinate system.
+    /// X = integral of (x-x0)^2 dm
+    /// Y = integral of (y-y0)^2 dm
+    /// Z = integral of (z-z0)^2 dm
+    /// where (x0,y0,z0) = centroid.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesSecondMoments
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_cc_secondmoments, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in centroid coordinates second moments calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesSecondMomentsError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_cc_secondmoments, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Product moments with respect to centroid coordinate system.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesProductMoments
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in product moments with respect to centroid coordinate system.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesProductMomentsError
+    {
+      get
+      {
+        GetMoments(idx_cc_productmoments, out var moment, out var error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Moments of inertia with respect to centroid coordinate system.
+    /// X = integral of ((y-y0)^2 + (z-z0)^2) dm
+    /// Y = integral of ((z-z0)^2 + (x-x0)^2) dm
+    /// Z = integral of ((z-z0)^2 + (y-y0)^2) dm
+    /// where (x0,y0,z0) = centroid.
+    /// </summary>
+    /// <remarks>
+    /// What is meant by "moments of inertia" varies widely in textbooks and papers.
+    /// The values returned here are the integrals listed in the Summary section.
+    /// Some applications may want the values from WorldCoordinatesSecondMoments
+    /// instead of the values returned here.
+    /// </remarks>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesMomentsOfInertia
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_cc_momentsofinertia, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Uncertainty in centroid coordinates moments of inertia calculation.
+    /// </summary>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesMomentsOfInertiaError
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_cc_momentsofinertia, out moment, out error);
+        return error;
+      }
+    }
+
+    /// <summary>
+    /// Radii of gyration with respect to centroid coordinate system.
+    /// X = sqrt(integral of ((y-y0)^2 + (z-z0)^2) dm/M)
+    /// Y = sqrt(integral of ((z-z0)^2 + (x-x0)^2) dm/M)
+    /// Z = sqrt(integral of ((z-z0)^2 + (y-y0)^2) dm/M)
+    /// where (x0,y0,z0) = centroid.
+    /// </summary>
+    /// <remarks>
+    /// What is meant by "radii of gyration" varies widely in textbooks and papers.
+    /// The values returned here are the integrals listed in the Returns section.
+    /// </remarks>
+    /// <since>7.6</since>
+    public Vector3d CentroidCoordinatesRadiiOfGyration
+    {
+      get
+      {
+        Vector3d moment, error;
+        GetMoments(idx_cc_radiiofgyration, out moment, out error);
+        return moment;
+      }
+    }
+
+    /// <summary>
+    /// Calculates the eigenvalues and eigenvectors of moments matrix in world coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.6</since>
+    public bool WorldCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.6</since>
+    public bool WorldCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.6</since>
+    public bool CentroidCoordinatesPrincipalMoments(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    /// <summary>
+    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// </summary>
+    /// <param name="x">Principal moment.</param>
+    /// <param name="xaxis">Principal axis for x.</param>
+    /// <param name="y">Principal moment.</param>
+    /// <param name="yaxis">Principal axis for y.</param>
+    /// <param name="z">Principal moment.</param>
+    /// <param name="zaxis">Principal axis for z.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.6</since>
+    public bool CentroidCoordinatesPrincipalMomentsOfInertia(out double x, out Vector3d xaxis, out double y, out Vector3d yaxis, out double z, out Vector3d zaxis)
+    {
+      x = RhinoMath.UnsetValue;
+      y = RhinoMath.UnsetValue;
+      z = RhinoMath.UnsetValue;
+      xaxis = Vector3d.Unset;
+      yaxis = Vector3d.Unset;
+      zaxis = Vector3d.Unset;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+    }
+
+    #endregion
+  }
+
 }
 
 #endif

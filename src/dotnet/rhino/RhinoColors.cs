@@ -1,7 +1,406 @@
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Rhino.Display
 {
+  /// <summary>
+  /// Represents a RGBA (Red, Green, Blue, Alpha) color with double precision floating point channel.
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 32)]
+  [DebuggerDisplay("{R}, {G}, {B}, {A}")]
+  [Serializable]
+  public struct ColorRGBA : ISerializable, IFormattable, IComparable, IComparable<ColorRGBA>, IEquatable<ColorRGBA>, IEpsilonComparable<ColorRGBA>
+  {
+    #region members
+    private double _r;
+    private double _g;
+    private double _b;
+    private double _a;
+    #endregion
+
+    #region properties
+    /// <summary>
+    /// Gets or sets the red channel value. 
+    /// Red channels are limited to a 0~1 range.
+    /// </summary>
+    /// <since>7.0</since>
+    public double R
+    {
+      get => _r;
+      set => _r = RhinoMath.Clamp(value, 0.0, 1.0);
+    }
+
+    /// <summary>
+    /// Gets or sets the green channel value. 
+    /// Green channels are limited to a 0~1 range.
+    /// </summary>
+    /// <since>7.0</since>
+    public double G
+    {
+      get => _g;
+      set => _g = RhinoMath.Clamp(value, 0.0, 1.0);
+    }
+
+    /// <summary>
+    /// Gets or sets the blue channel value. 
+    /// Blue channels are limited to a 0~1 range.
+    /// </summary>
+    /// <since>7.0</since>
+    public double B
+    {
+      get => _b;
+      set => _b = RhinoMath.Clamp(value, 0.0, 1.0);
+    }
+
+    /// <summary>
+    /// Gets or sets the alpha channel value. 
+    /// Alpha channels are limited to a 0~1 range.
+    /// </summary>
+    /// <since>7.0</since>
+    public double A
+    {
+      get => _a;
+      set => _a = RhinoMath.Clamp(value, 0.0, 1.0);
+    }
+    #endregion
+
+    #region constructors
+    /// <since>7.0</since>
+    public ColorRGBA(ColorRGBA color)
+    {
+      _r = color._r;
+      _g = color._g;
+      _b = color._b;
+      _a = color._a;
+    }
+
+    /// <since>7.0</since>
+    public ColorRGBA(double red, double green, double blue)
+    {
+      _r = RhinoMath.Clamp(red, 0.0, 1.0);
+      _g = RhinoMath.Clamp(green, 0.0, 1.0);
+      _b = RhinoMath.Clamp(blue, 0.0, 1.0);
+      _a = 1.0;
+    }
+
+    /// <since>7.0</since>
+    public ColorRGBA(double red, double green, double blue, double alpha)
+    {
+      _r = RhinoMath.Clamp(red, 0.0, 1.0);
+      _g = RhinoMath.Clamp(green, 0.0, 1.0);
+      _b = RhinoMath.Clamp(blue, 0.0, 1.0);
+      _a = RhinoMath.Clamp(alpha, 0.0, 1.0);
+    }
+
+    /// <summary>
+    /// Constructs a new instance of ColorRGBA that is equivalent to an ARGB color.
+    /// </summary>
+    /// <param name="color">ARGB color to mimic.</param>
+    /// <since>7.0</since>
+    public ColorRGBA(System.Drawing.Color color)
+    {
+      _r = color.R / 255.0;
+      _g = color.G / 255.0;
+      _b = color.B / 255.0;
+      _a = color.A / 255.0;
+    }
+
+    /// <summary>
+    /// Constructs a new instance of ColorRGBA that is equivalent to an ARGB color.
+    /// </summary>
+    /// <param name="argb">ARGB color to mimic.</param>
+    /// <since>7.0</since>
+    public ColorRGBA(int argb)
+    {
+      _a = ((argb >> 0) & 255) / 255.0;
+      _r = ((argb >> 8) & 255) / 255.0;
+      _g = ((argb >> 16) & 255) / 255.0;
+      _b = ((argb >> 24) & 255) / 255.0;
+    }
+    #endregion
+
+    #region conversions
+    /// <summary>
+    /// Constructs the nearest RGBA equivalent of an HSL color.
+    /// </summary>
+    /// <param name="hsv">Target color in HSL space.</param>
+    /// <returns>The RGBA equivalent of the HSL color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromHSV(ColorHSV hsv)
+    {
+      ColorConverter.HSV_To_RGB(hsv.H, hsv.S, hsv.V, out double r, out double g, out double b);
+      return new ColorRGBA(r, g, b, hsv.A);
+    }
+
+    /// <summary>
+    /// Constructs the nearest RGBA equivalent of an HSV color.
+    /// </summary>
+    /// <param name="hsl">Target color in HSL space.</param>
+    /// <returns>The RGBA equivalent of the HSL color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromHSL(ColorHSL hsl)
+    {
+      ColorConverter.HSL_To_RGB(hsl.H, hsl.S, hsl.L, out double r, out double g, out double b);
+      return new ColorRGBA(r, g, b, hsl.A);
+    }
+
+    /// <summary>
+    /// Create the nearest RGBA equivalent of a CMYK color.
+    /// </summary>
+    /// <param name="cmyk">Target color in CMYK space.</param>
+    /// <returns>The RGBA equivalent of the CMYK color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromCMYK(ColorCMYK cmyk)
+    {
+      ColorConverter.CMYK_To_CMY(cmyk.m_c, cmyk.m_m, cmyk.m_y, cmyk.m_k, out double c0, out double m0, out double y0);
+      return new ColorRGBA(1.0 - c0, 1.0 - m0, 1.0 - y0, cmyk.A);
+    }
+
+    /// <summary>
+    /// Create the nearest RGBA equivalent of an XYZ color.
+    /// </summary>
+    /// <param name="xyz">Target color in XYZ space.</param>
+    /// <returns>The RGBA equivalent of the XYZ color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromXYZ(ColorXYZ xyz)
+    {
+      ColorConverter.XYZ_To_RGB(xyz.X, xyz.Y, xyz.Z, out double r, out double g, out double b);
+      return new ColorRGBA(r, g, b, xyz.A);
+    }
+
+    /// <summary>
+    /// Create the nearest RGBA equivalent of a LAB color.
+    /// </summary>
+    /// <param name="lab">Target color in LAB space.</param>
+    /// <returns>The RGBA equivalent of the LAB color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromLAB(ColorLAB lab)
+    {
+      return CreateFromXYZ(ColorXYZ.CreateFromLAB(lab));
+    }
+
+    /// <summary>
+    /// Create the nearest RGBA equivalent of a LCH color.
+    /// </summary>
+    /// <param name="lch">Target color in LCH space.</param>
+    /// <returns>The RGBA equivalent of the LCH color.</returns>
+    /// <since>6.0</since>
+    public static ColorRGBA CreateFromLCH(ColorLCH lch)
+    {
+      return CreateFromLAB(ColorLAB.CreateFromLCH(lch));
+    }
+    #endregion
+
+    #region ISerializable
+    private ColorRGBA(SerializationInfo info, StreamingContext context)
+    {
+      _r = info.GetDouble("R");
+      _g = info.GetDouble("G");
+      _b = info.GetDouble("B");
+      _a = info.GetDouble("A");
+    }
+
+    [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+    void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      info.AddValue("R", _r);
+      info.AddValue("G", _g);
+      info.AddValue("B", _b);
+      info.AddValue("A", _a);
+    }
+    #endregion
+
+    #region IFormattable
+    /// <since>7.0</since>
+    public override string ToString() => ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <since>7.0</since>
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      char separator = ',';
+      if (System.Globalization.NumberFormatInfo.GetInstance(formatProvider) is System.Globalization.NumberFormatInfo info)
+      {
+        if (info.NumberDecimalSeparator.Length > 0 && separator == info.NumberDecimalSeparator[0])
+          separator = ';';
+      }
+
+      return string.Format(formatProvider, "{1:" + format + "}{0}{2:" + format + "}{0}{3:" + format + "}{0}{4:" + format + "}", separator, _r, _g, _b, _a);
+    }
+    #endregion
+
+    #region IComparable
+    /// <summary>
+    /// Compares this <see cref="ColorRGBA" /> with another <see cref="ColorRGBA" />.
+    /// <para>Channels evaluation priority is first A, then R, then G, then B.</para>
+    /// </summary>
+    /// <param name="other">The other <see cref="ColorRGBA" /> to use in comparison.</param>
+    /// <returns>
+    /// <para> 0: if this is identical to other</para>
+    /// <para>-1: if this &lt; other</para>
+    /// <para>+1: if this &gt; other</para>
+    /// </returns>
+    /// <since>7.0</since>
+    public int CompareTo(ColorRGBA other)
+    {
+      if (_a < other._a)
+        return -1;
+      if (_a > other._a)
+        return 1;
+
+      if (_r < other._r)
+        return -1;
+      if (_r > other._r)
+        return 1;
+
+      if (_g < other._g)
+        return -1;
+      if (_g > other._g)
+        return 1;
+
+      if (_b < other._b)
+        return -1;
+      if (_b > other._b)
+        return 1;
+
+      return 0;
+    }
+
+    int IComparable.CompareTo(object obj)
+    {
+      if (obj is ColorRGBA)
+        return CompareTo((ColorRGBA)obj);
+
+      throw new ArgumentException("Input must be of type ColorRGBA", "obj");
+    }
+    #endregion
+
+    #region IEpsilonComparable
+    /// <summary>
+    /// Check that all values in other are within epsilon of the values in this
+    /// </summary>
+    /// <param name="other"></param>
+    /// <param name="epsilon"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool EpsilonEquals(ColorRGBA other, double epsilon)
+    {
+      return RhinoMath.EpsilonEquals(_r, other._r, epsilon) &&
+             RhinoMath.EpsilonEquals(_g, other._g, epsilon) &&
+             RhinoMath.EpsilonEquals(_b, other._b, epsilon) &&
+             RhinoMath.EpsilonEquals(_a, other._a, epsilon);
+    }
+    #endregion
+
+    #region IEquatable
+    /// <summary>
+    /// Determines whether the specified ColorRGBA has the same values as the present color.
+    /// </summary>
+    /// <param name="other">The specified color.</param>
+    /// <returns>true if color has the same channel values as this; otherwise false.</returns>
+    /// <since>7.0</since>
+    public bool Equals(ColorRGBA other)
+    {
+      return this == other;
+    }
+
+    /// <since>7.0</since>
+    public override bool Equals(object obj)
+    {
+      return obj is ColorRGBA d && this == d;
+    }
+
+    /// <since>7.0</since>
+    public override int GetHashCode()
+    {
+      // MSDN docs recommend XOR'ing the internal values to get a hash code
+      return _r.GetHashCode() ^ _g.GetHashCode() ^ _b.GetHashCode() ^ _a.GetHashCode();
+    }
+    #endregion
+
+    #region static properties
+    /// <since>7.0</since>
+    public static ColorRGBA Black => new ColorRGBA(0.0, 0.0, 0.0, 1.0);
+
+    /// <since>7.0</since>
+    public static ColorRGBA White => new ColorRGBA(1.0, 1.0, 1.0, 1.0);
+
+    /// <since>7.0</since>
+    public static ColorRGBA Red => new ColorRGBA(1.0, 0.0, 0.0, 1.0);
+
+    /// <since>7.0</since>
+    public static ColorRGBA Green => new ColorRGBA(0.0, 1.0, 0.0, 1.0);
+
+    /// <since>7.0</since>
+    public static ColorRGBA Blue => new ColorRGBA(0.0, 0.0, 1.0, 1.0);
+    #endregion
+
+    #region operators
+    /// <since>7.0</since>
+    public static bool operator ==(ColorRGBA a, ColorRGBA b)
+    {
+      return (a._r == b._r && a._g == b._g && a._b == b._b && a._a == b._a);
+    }
+
+    /// <since>7.0</since>
+    public static bool operator !=(ColorRGBA a, ColorRGBA b)
+    {
+      return (a._r != b._r || a._g != b._g || a._b != b._b || a._a != b._a);
+    }
+    #endregion
+
+    #region methods
+    /// <since>7.0</since>
+    public ColorRGBA BlendTo(ColorRGBA col, double coefficient)
+    {
+      double r = this._r + (coefficient * (col._r - this._r));
+      double g = this._g + (coefficient * (col._g - this._g));
+      double b = this._b + (coefficient * (col._b - this._b));
+      double a = this._a + (coefficient * (col._a - this._a));
+
+      return new ColorRGBA(r, g, b, a);
+    }
+
+    /// <since>7.0</since>
+    public static ColorRGBA ApplyGamma(ColorRGBA col, double gamma)
+    {
+      if (Math.Abs(gamma - 1.0f) > double.Epsilon)
+      {
+        double r = (double)Math.Pow(col._r, gamma);
+        double g = (double)Math.Pow(col._g, gamma);
+        double b = (double)Math.Pow(col._b, gamma);
+
+        return new ColorRGBA(r, g, b, col._a);
+      }
+
+      return col;
+    }
+    #endregion
+
+    #region casting operators
+    /// <summary>
+    /// Explicitly converts a ColorRGBA in a <see cref="System.Drawing.Color"/>.
+    /// </summary>
+    /// <param name="value">A RGBA color.</param>
+    /// <returns>An ARGB <see cref="System.Drawing.Color"/>.</returns>
+    /// <since>7.0</since>
+    public static explicit operator System.Drawing.Color(ColorRGBA value)
+    {
+      var r = (int) Math.Round(value._r * 255.0);
+      var g = (int) Math.Round(value._g * 255.0);
+      var b = (int) Math.Round(value._b * 255.0);
+      var a = (int) Math.Round(value._a * 255.0);
+
+      return System.Drawing.Color.FromArgb(a, r, g, b);
+    }
+
+    /// <since>7.0</since>
+    public static implicit operator ColorRGBA(System.Drawing.Color value) => new ColorRGBA(value);
+    #endregion
+  }
+
   /// <summary>
   /// Represents an HSL (Hue, Saturation, Luminance) color with double precision floating point channels. 
   /// HSL colors are used primarily in Graphical User Interface environments as they provide a 
@@ -22,14 +421,14 @@ namespace Rhino.Display
 
     #region constructors
     /// <summary>
-    /// Constructs a new instance of ColorHSL that is equivalent to an RGB color.
+    /// Constructs a new instance of ColorHSL that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>5.0</since>
     public ColorHSL(System.Drawing.Color rgb)
     {
-      m_a = 1.0 - Clip(rgb.A);
+      m_a = 1.0 - (rgb.A / 255.0);
       ColorConverter.RGB_To_HSL(rgb.R, rgb.G, rgb.B, out m_h, out m_s, out m_l);
     }
     /// <summary>
@@ -63,6 +462,17 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Create the nearest HSL equivalent of a RGBA color.
+    /// </summary>
+    /// <param name="rgba">Target color in RGBA space.</param>
+    /// <returns>The HSL equivalent of the RGBA color.</returns>
+    /// <since>7.0</since>
+    public static ColorHSL CreateFromRGBA(ColorRGBA rgba)
+    {
+      ColorConverter.RGB_To_HSL(rgba.R, rgba.G, rgba.B, out var h, out var s, out var l);
+      return new ColorHSL(rgba.A, h, s, l);
+    }
+    /// <summary>
     /// Create the nearest HSL equivalent of a CMYK color.
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
@@ -70,7 +480,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorHSL CreateFromCMYK(ColorCMYK cmyk)
     {
-      return new ColorHSL(cmyk);
+      return CreateFromRGBA(ColorRGBA.CreateFromCMYK(cmyk));
     }
     /// <summary>
     /// Create the nearest HSL equivalent of an XYZ color.
@@ -80,7 +490,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorHSL CreateFromXYZ(ColorXYZ xyz)
     {
-      return new ColorHSL(xyz);
+      return CreateFromRGBA(ColorRGBA.CreateFromXYZ(xyz));
     }
     /// <summary>
     /// Create the nearest HSL equivalent of a LAB color.
@@ -90,7 +500,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorHSL CreateFromLAB(ColorLAB lab)
     {
-      return new ColorHSL(lab);
+      return CreateFromRGBA(ColorRGBA.CreateFromLAB(lab));
     }
     /// <summary>
     /// Create the nearest HSL equivalent of a LCH color.
@@ -100,9 +510,8 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorHSL CreateFromLCH(ColorLCH lch)
     {
-      return new ColorHSL(lch);
+      return CreateFromRGBA(ColorRGBA.CreateFromLCH(lch));
     }
-
     /// <summary>
     /// Constructs the nearest HSL equivalent of an HSV color.
     /// </summary>
@@ -111,7 +520,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorHSL CreateFromHSV(ColorHSV hsv)
     {
-      return new ColorHSL(hsv);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSV(hsv));
     }
 
     #endregion
@@ -125,7 +534,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorHSL hsl)
     {
-      return hsl.ToArgbColor();
+      return (System.Drawing.Color)ColorRGBA.CreateFromHSL(hsl);
     }
     #endregion
 
@@ -185,13 +594,8 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>A .Net framework library color value.</returns>
     /// <since>5.0</since>
-    public System.Drawing.Color ToArgbColor()
-    {
-      byte a = (byte)(255.0 * A);
-      byte r, g, b;
-      ColorConverter.HSL_To_RGB(m_h, m_s, m_l, out r, out g, out b);
-      return System.Drawing.Color.FromArgb(a, r, g, b);
-    }
+    public System.Drawing.Color ToArgbColor() => (System.Drawing.Color)this;
+
     #endregion
   }
 
@@ -215,18 +619,17 @@ namespace Rhino.Display
 
     #region constructors
     /// <summary>
-    /// Initializes a new instance of ColorCMYK that is equivalent to an RGB color.
+    /// Initializes a new instance of ColorCMYK that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>5.0</since>
     public ColorCMYK(System.Drawing.Color rgb)
     {
-      double c0, m0, y0;
-      ColorConverter.RGB_To_CMY(rgb.R, rgb.G, rgb.B, out c0, out m0, out y0);
+      ColorConverter.RGB_To_CMY(rgb.R, rgb.G, rgb.B, out double c0, out double m0, out double y0);
       ColorConverter.CMY_To_CMYK(c0, m0, y0, out m_c, out m_m, out m_y, out m_k);
 
-      m_a = 1.0 - ((double)rgb.A / 255.0);
+      m_a = 1.0 - (rgb.A / 255.0);
     }
     /// <summary>
     /// Initializes a new instance of ColorCMYK with custom channel values. 
@@ -277,6 +680,7 @@ namespace Rhino.Display
       m_k = Clip(key);
       m_a = 0.0;
     }
+
     /// <summary>
     /// Initializes a new instance of ColorCMYK with custom channel values. 
     /// </summary>
@@ -296,6 +700,17 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Create the nearest CMYK equivalent of a RGBA color.
+    /// </summary>
+    /// <param name="rgba">Target color in RGBA space.</param>
+    /// <returns>The CMYK equivalent of the RGBA color.</returns>
+    /// <since>7.0</since>
+    public static ColorCMYK CreateFromRGBA(ColorRGBA rgba)
+    {
+      ColorConverter.CMY_To_CMYK(1.0 - rgba.R, 1.0 - rgba.G, 1.0 - rgba.B, out var c, out var m, out var y, out var k);
+      return new ColorCMYK(rgba.A, c, m, y, k);
+    }
+    /// <summary>
     /// Constructs the nearest CMYK equivalent of an HSL color.
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
@@ -303,7 +718,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorCMYK CreateFromHSL(ColorHSL hsl)
     {
-      return new ColorCMYK(hsl);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSL(hsl));
     }
     /// <summary>
     /// Constructs the nearest CMYK equivalent of an XYZ color.
@@ -313,7 +728,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorCMYK CreateFromXYZ(ColorXYZ xyz)
     {
-      return new ColorCMYK(xyz);
+      return CreateFromRGBA(ColorRGBA.CreateFromXYZ(xyz));
     }
     /// <summary>
     /// Constructs the nearest CMYK equivalent of a LAB color.
@@ -323,7 +738,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorCMYK CreateFromLAB(ColorLAB lab)
     {
-      return new ColorCMYK(lab);
+      return CreateFromRGBA(ColorRGBA.CreateFromLAB(lab));
     }
     /// <summary>
     /// Constructs the nearest CMYK equivalent of a LCH color.
@@ -333,9 +748,8 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorCMYK CreateFromLCH(ColorLCH lch)
     {
-      return new ColorCMYK(lch);
+      return CreateFromRGBA(ColorRGBA.CreateFromLCH(lch));
     }
-
     /// <summary>
     /// Constructs the nearest CMYK equivalent of an HSV color.
     /// </summary>
@@ -344,7 +758,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorCMYK CreateFromHSV(ColorHSV hsv)
     {
-      return new ColorCMYK(hsv);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSV(hsv));
     }
     #endregion
 
@@ -357,14 +771,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorCMYK cmyk)
     {
-      double c0, m0, y0;
-      ColorConverter.CMYK_To_CMY(cmyk.m_c, cmyk.m_m, cmyk.m_y, cmyk.m_k, out c0, out m0, out y0);
-
-      byte a = (byte)(cmyk.A * 255.0);
-      byte r, g, b;
-      ColorConverter.CMY_To_RGB(c0, m0, y0, out r, out g, out b);
-
-      return System.Drawing.Color.FromArgb(a, r, g, b);
+      return (System.Drawing.Color) ColorRGBA.CreateFromCMYK(cmyk);
     }
     #endregion
 
@@ -451,14 +858,14 @@ namespace Rhino.Display
 
     #region constructors
     /// <summary>
-    /// Constructs a new instance of ColorXYZ that is equivalent to an RGB color.
+    /// Constructs a new instance of ColorXYZ that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>5.0</since>
     public ColorXYZ(System.Drawing.Color rgb)
     {
-      m_a = 1.0 - ((double)rgb.A / 255.0);
+      m_a = 1.0 - (rgb.A / 255.0);
       ColorConverter.RGB_To_XYZ(rgb.R, rgb.G, rgb.B, out m_x, out m_y, out m_z);
     }
     /// <summary>
@@ -491,58 +898,17 @@ namespace Rhino.Display
       m_a = 1.0 - Clip(alpha);
     }
 
-    ///// <summary>
-    ///// Create the nearest XYZ equivalent of an RGB color.
-    ///// </summary>
-    ///// <param name="rgb">Target color in RGB space.</param>
-    ///// <returns>The XYZ equivalent of the RGB color.</returns>
-    //public static ColorXYZ CreateFromRGB(ColorRGB rgb)
-    //{
-    //  ColorXYZ newColor = new ColorXYZ();
-    //  double r = ((double)rgb.m_r / 255.0);        //R from 0 to 255
-    //  double g = ((double)rgb.m_g / 255.0);        //G from 0 to 255
-    //  double b = ((double)rgb.m_b / 255.0);        //B from 0 to 255
-    //  double a = ((double)rgb.m_a / 255.0);        //A from 0 to 255
-
-    //  if (r > 0.04045)
-    //  {
-    //    r = Math.Pow(((r + 0.055) / 1.055), 2.4);
-    //  }
-    //  else
-    //  {
-    //    r /= 12.92;
-    //  }
-
-    //  if (g > 0.04045)
-    //  {
-    //    g = Math.Pow(((g + 0.055) / 1.055), 2.4);
-    //  }
-    //  else
-    //  {
-    //    g /= 12.92;
-    //  }
-
-    //  if (b > 0.04045)
-    //  {
-    //    b = Math.Pow(((b + 0.055) / 1.055), 2.4);
-    //  }
-    //  else
-    //  {
-    //    b /= 12.92;
-    //  }
-
-    //  r *= 100.0;
-    //  g *= 100.0;
-    //  b *= 100.0;
-
-    //  //Observer. = 2�, Illuminant = D65
-    //  newColor.m_x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-    //  newColor.m_y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    //  newColor.m_z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-    //  newColor.m_a = a;
-
-    //  return newColor;
-    //}
+    /// <summary>
+    /// Create the nearest XYZ equivalent of a RGBA color.
+    /// </summary>
+    /// <param name="rgba">Target color in RGBA space.</param>
+    /// <returns>The XYZ equivalent of the RGBA color.</returns>
+    /// <since>7.0</since>
+    public static ColorXYZ CreateFromRGBA(ColorRGBA rgba)
+    {
+      ColorConverter.RGB_To_XYZ(rgba.R, rgba.G, rgba.B, out var x, out var y, out var z);
+      return new ColorXYZ(rgba.A, x, y, z);
+    }
     /// <summary>
     /// Create the nearest XYZ equivalent of an HSL color.
     /// </summary>
@@ -551,7 +917,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorXYZ CreateFromHSL(ColorHSL hsl)
     {
-      return new ColorXYZ(hsl);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSL(hsl));
     }
     /// <summary>
     /// Create the nearest XYZ equivalent of a CMYK color.
@@ -561,7 +927,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorXYZ CreateFromCMYK(ColorCMYK cmyk)
     {
-      return new ColorXYZ(cmyk);
+      return CreateFromRGBA(ColorRGBA.CreateFromCMYK(cmyk));
     }
     /// <summary>
     /// Create the nearest XYZ equivalent of a Lab color.
@@ -571,9 +937,8 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorXYZ CreateFromLAB(ColorLAB lab)
     {
-      double x, y, z;
-      ColorConverter.CIELAB_To_XYZ(lab.m_l, lab.m_a, lab.m_b, out x, out y, out z);
-      return new ColorXYZ(lab.A, x, y, z);
+      ColorConverter.CIELAB_To_XYZ(lab.m_l, lab.m_a, lab.m_b, out double x, out double y, out double z);
+      return new ColorXYZ(lab.Alpha, x, y, z);
     }
     /// <summary>
     /// Create the nearest XYZ equivalent of an LCH color.
@@ -594,7 +959,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorXYZ CreateFromHSV(ColorHSV hsv)
     {
-      return new ColorXYZ(hsv);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSV(hsv));
     }
     #endregion
 
@@ -607,10 +972,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorXYZ xyz)
     {
-      byte a = (byte)(xyz.A * 255.0);
-      byte r, g, b;
-      ColorConverter.XYZ_To_RGB(xyz.m_x, xyz.m_y, xyz.m_z, out r, out g, out b);
-      return System.Drawing.Color.FromArgb(a, r, g, b);
+      return (System.Drawing.Color)ColorRGBA.CreateFromXYZ(xyz);
     }
     #endregion
 
@@ -683,9 +1045,9 @@ namespace Rhino.Display
 
     #region constructors
     /// <summary>
-    /// Constructs a new instance of ColorLAB that is equivalent to an RGB color.
+    /// Constructs a new instance of ColorLAB that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>5.0</since>
     public ColorLAB(System.Drawing.Color rgb)
@@ -715,15 +1077,15 @@ namespace Rhino.Display
       m_alpha = 1.0 - Clip(alpha);
     }
 
-    ///// <summary>
-    ///// Create the nearest LAB equivalent of an RGB color.
-    ///// </summary>
-    ///// <param name="rgb">Target color in RGB space.</param>
-    ///// <returns>The LAB equivalent of the RGB color.</returns>
-    //public static ColorLAB CreateFromRGB(ColorRGB rgb)
-    //{
-    //  return CreateFromXYZ(ColorXYZ.CreateFromRGB(rgb));
-    //}
+    /// <summary>
+    /// Create the nearest LAB equivalent of an RGBA color.
+    /// </summary>
+    /// <param name="rgb">Target color in RGBA space.</param>
+    /// <returns>The LAB equivalent of the RGBA color.</returns>
+    public static ColorLAB CreateFromRGBA(ColorRGBA rgb)
+    {
+      return CreateFromXYZ(ColorXYZ.CreateFromRGBA(rgb));
+    }
     /// <summary>
     /// Create the nearest LAB equivalent of an HSL color.
     /// </summary>
@@ -742,7 +1104,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorLAB CreateFromCMYK(ColorCMYK cmyk)
     {
-      return new ColorLAB(cmyk);
+      return CreateFromXYZ(ColorXYZ.CreateFromCMYK(cmyk));
     }
     /// <summary>
     /// Create the nearest LAB equivalent of an XYZ color.
@@ -752,11 +1114,8 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorLAB CreateFromXYZ(ColorXYZ xyz)
     {
-      double l, a, b;
-      ColorConverter.XYZ_To_CIELAB(xyz.m_x, xyz.m_y, xyz.m_z, out l, out a, out b);
-
-      ColorLAB lab = new ColorLAB(l, a, b) { m_alpha = xyz.m_a };
-      return lab;
+      ColorConverter.XYZ_To_CIELAB(xyz.m_x, xyz.m_y, xyz.m_z, out double l, out double a, out double b);
+      return new ColorLAB(xyz.A, l, a, b);
     }
     /// <summary>
     /// Create the nearest LAB equivalent of an LCH color.
@@ -781,7 +1140,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorLAB CreateFromHSV(ColorHSV hsv)
     {
-      return new ColorLAB(hsv);
+      return CreateFromXYZ(ColorXYZ.CreateFromHSV(hsv));
     }
     #endregion
 
@@ -794,8 +1153,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorLAB lab)
     {
-      System.Drawing.Color col = ColorXYZ.CreateFromLAB(lab);
-      return col;
+      return (System.Drawing.Color) ColorRGBA.CreateFromLAB(lab);
     }
     #endregion
 
@@ -869,9 +1227,9 @@ namespace Rhino.Display
 
     #region constructors
     /// <summary>
-    /// Constructs a new instance of ColorLCH that is equivalent to an RGB color.
+    /// Constructs a new instance of ColorLCH that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>5.0</since>
     public ColorLCH(System.Drawing.Color rgb)
@@ -909,6 +1267,15 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Create the nearest LCH equivalent of an RGBA color.
+    /// </summary>
+    /// <param name="rgb">Target color in RGBA space.</param>
+    /// <returns>The LCH equivalent of the RGBA color.</returns>
+    public static ColorLCH CreateFromRGBA(ColorRGBA rgb)
+    {
+      return CreateFromLAB(ColorLAB.CreateFromRGBA(rgb));
+    }
+    /// <summary>
     /// Create the nearest LCH equivalent of an HSL color.
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
@@ -926,7 +1293,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorLCH CreateFromCMYK(ColorCMYK cmyk)
     {
-      return new ColorLCH(cmyk);
+      return CreateFromLAB(ColorLAB.CreateFromCMYK(cmyk));
     }
     /// <summary>
     /// Create the nearest LCH equivalent of an XYZ color.
@@ -946,11 +1313,8 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public static ColorLCH CreateFromLAB(ColorLAB lab)
     {
-      double l, c, h;
-      ColorConverter.CIELAB_To_CIELCH(lab.m_l, lab.m_a, lab.m_b, out l, out c, out h);
-
-      ColorLCH lch = new ColorLCH(l, c, h) { m_a = lab.m_alpha };
-      return lch;
+      ColorConverter.CIELAB_To_CIELCH(lab.m_l, lab.m_a, lab.m_b, out double l, out double c, out double h);
+      return new ColorLCH(lab.Alpha, l, c, h);
     }
     #endregion
 
@@ -963,8 +1327,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorLCH lch)
     {
-      System.Drawing.Color col = ColorLAB.CreateFromLCH(lch);
-      return col;
+      return (System.Drawing.Color)ColorRGBA.CreateFromLCH(lch);
     }
     #endregion
 
@@ -1065,14 +1428,14 @@ namespace Rhino.Display
     #region constructors
 
     /// <summary>
-    /// Constructs a new instance of ColorHSV that is equivalent to an RGB color.
+    /// Constructs a new instance of ColorHSV that is equivalent to an ARGB color.
     /// </summary>
-    /// <param name="rgb">RGB color to mimic.</param>
+    /// <param name="rgb">ARGB color to mimic.</param>
     /// <remarks>Exact conversions between color spaces are often not possible.</remarks>
     /// <since>6.0</since>
     public ColorHSV(System.Drawing.Color rgb)
     {
-      m_a = 1.0 - Clip(rgb.A);
+      m_a = 1.0 - (rgb.A / 255.0);
       ColorConverter.RGB_To_HSV(rgb.R, rgb.G, rgb.B, out m_h, out m_s, out m_v);
     }
 
@@ -1108,14 +1471,25 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Constructs the nearest CMYK equivalent of an HSV color.
+    /// Create the nearest HSV equivalent of a RGBA color.
+    /// </summary>
+    /// <param name="rgba">Target color in RGBA space.</param>
+    /// <returns>The HSV equivalent of the RGBA color.</returns>
+    /// <since>7.0</since>
+    public static ColorHSV CreateFromRGBA(ColorRGBA rgba)
+    {
+      ColorConverter.RGB_To_HSV(rgba.R, rgba.G, rgba.B, out var h, out var s, out var v);
+      return new ColorHSV(rgba.A, h, s, v);
+    }
+    /// <summary>
+    /// Constructs the nearest HSV equivalent of an HSL color.
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The HSV equivalent of the HSL color.</returns>
     /// <since>6.0</since>
     public static ColorHSV CreateFromHSL(ColorHSL hsl)
     {
-      return new ColorHSV(hsl);
+      return CreateFromRGBA(ColorRGBA.CreateFromHSL(hsl));
     }
     /// <summary>
     /// Create the nearest HSV equivalent of a CMYK color.
@@ -1125,7 +1499,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorHSV CreateFromCMYK(ColorCMYK cmyk)
     {
-      return new ColorHSV(cmyk);
+      return CreateFromRGBA(ColorRGBA.CreateFromCMYK(cmyk));
     }
 
     /// <summary>
@@ -1136,7 +1510,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorHSV CreateFromXYZ(ColorXYZ xyz)
     {
-      return new ColorHSV(xyz);
+      return CreateFromRGBA(ColorRGBA.CreateFromXYZ(xyz));
     }
     /// <summary>
     /// Create the nearest HSV equivalent of a LAB color.
@@ -1146,7 +1520,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorHSV CreateFromLAB(ColorLAB lab)
     {
-      return new ColorHSV(lab);
+      return CreateFromRGBA(ColorRGBA.CreateFromLAB(lab));
     }
     /// <summary>
     /// Create the nearest HSV equivalent of a LCH color.
@@ -1156,7 +1530,7 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static ColorHSV CreateFromLCH(ColorLCH lch)
     {
-      return new ColorHSV(lch);
+      return CreateFromRGBA(ColorRGBA.CreateFromLCH(lch));
     }
 
     #endregion
@@ -1170,7 +1544,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorHSV hsv)
     {
-      return hsv.ToArgbColor();
+      return (System.Drawing.Color)ColorRGBA.CreateFromHSV(hsv);
     }
     #endregion
 
@@ -1234,13 +1608,7 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>A .Net framework library color value.</returns>
     /// <since>6.0</since>
-    public System.Drawing.Color ToArgbColor()
-    {
-      byte a = (byte)(255.0 * A);
-      byte r, g, b;
-      ColorConverter.HSV_To_RGB(m_h, m_s, m_v, out r, out g, out b);
-      return System.Drawing.Color.FromArgb(a, r, g, b);
-    }
+    public System.Drawing.Color ToArgbColor() => (System.Drawing.Color) this;
 
     #endregion
   }
@@ -1251,24 +1619,38 @@ namespace Rhino.Display
   /// </summary>
   internal class ColorConverter
   {
+    #region integer conversions
+    internal static void RGB_To_HSV(byte r, byte g, byte b, out double h, out double s, out double v)
+    {
+      RGB_To_HSV(r / 255.0, g / 255.0, b / 255.0, out h, out s, out v);
+    }
+    internal static void RGB_To_HSL(byte r, byte g, byte b, out double h, out double s, out double l)
+    {
+      RGB_To_HSL(r / 255.0, g / 255.0, b / 255.0, out h, out s, out l);
+    }
+    internal static void RGB_To_XYZ(byte r, byte g, byte b, out double x, out double y, out double z)
+    {
+      RGB_To_XYZ(r / 255.0, g / 255.0, b / 255.0, out x, out y, out z);
+    }
+    #endregion
+
     /// <summary>
     /// Converts RGB space colors to HSV. 
     /// </summary>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
     /// <param name="h">Hue channel (0.0~1.0)</param>
     /// <param name="s">Saturation channel (0.0~1.0)</param>
     /// <param name="v">Value (Brightness) channel (0.0~1.0)</param>
-    internal static void RGB_To_HSV(int r, int g, int b, out double h, out double s, out double v)
+    internal static void RGB_To_HSV(double r, double g, double b, out double h, out double s, out double v)
     {
-
       h = 0.0;
       s = 0.0;
 
-      double vR = r / 255.0;
-      double vG = g / 255.0;
-      double vB = b / 255.0;
+      double vR = r;
+      double vG = g;
+      double vB = b;
 
       double vMin = Math.Min(Math.Min(vR, vG), vB);
       double vMax = Math.Max(Math.Max(vR, vG), vB);
@@ -1299,26 +1681,24 @@ namespace Rhino.Display
         if (h > 1) h -= 1.0;
       }
     }
+
     /// <summary>
     /// Converts HSV space colors to RGB. 
     /// </summary>
     /// <param name="h">Hue channel (0.0~1.0)</param>
     /// <param name="s">Saturation channel (0.0~1.0)</param>
     /// <param name="v">Value (Brightness) channel (0.0~1.0)</param>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
-    internal static void HSV_To_RGB(double h, double s, double v, out byte r, out byte g, out byte b)
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
+    internal static void HSV_To_RGB(double h, double s, double v, out double r, out double g, out double b)
     {
       if (s.Equals(0.0))
       {
-        r = (byte)(v * 255.0);
-        g = (byte)(v * 255.0);
-        b = (byte)(v * 255.0);
+        r = g = b = v;
       }
       else
       {
-
         //from http://www.easyrgb.com/index.php?X=MATH&H=21#text21
 
         double vH = h * 6.0;
@@ -1339,18 +1719,10 @@ namespace Rhino.Display
         else if (vI == 4) { vR = v3; vG = v1; vB = v; }
         else { vR = v; vG = v1; vB = v2; }
 
-        r = (byte)(vR * 255);
-        g = (byte)(vG * 255);
-        b = (byte)(vB * 255);
-
+        r = vR;
+        g = vG;
+        b = vB;
       }
-    }
-
-    private static byte ToByte(double v)
-    {
-      if (v < byte.MinValue) { return byte.MinValue; }
-      if (v > byte.MaxValue) { return byte.MaxValue; }
-      return Convert.ToByte(v);
     }
 
     /// <summary>
@@ -1359,10 +1731,10 @@ namespace Rhino.Display
     /// <param name="x">X channel (0.0~1.0)</param>
     /// <param name="y">Y channel (0.0~1.0)</param>
     /// <param name="z">Z channel (0.0~1.0)</param>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
-    internal static void XYZ_To_RGB(double x, double y, double z, out byte r, out byte g, out byte b)
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
+    internal static void XYZ_To_RGB(double x, double y, double z, out double r, out double g, out double b)
     {
       x *= (0.01 * 95.047);
       y *= (0.01 * 100.0);
@@ -1372,13 +1744,9 @@ namespace Rhino.Display
       double vG = x * -0.9689 + y * +1.8758 + z * +0.0415;
       double vB = x * +0.0557 + y * -0.2040 + z * +1.0570;
 
-      vR = xyzrgb_map(vR);
-      vG = xyzrgb_map(vG);
-      vB = xyzrgb_map(vB);
-
-      r = ToByte(vR * 255.0);
-      g = ToByte(vG * 255.0);
-      b = ToByte(vB * 255.0);
+      r = xyzrgb_map(vR);
+      g = xyzrgb_map(vG);
+      b = xyzrgb_map(vB);
     }
     private static double xyzrgb_map(double v)
     {
@@ -1392,17 +1760,17 @@ namespace Rhino.Display
     /// <summary>
     /// Converts RGB space colors to XYZ. 
     /// </summary>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
     /// <param name="x">X channel (0.0~1.0)</param>
     /// <param name="y">Y channel (0.0~1.0)</param>
     /// <param name="z">Z channel (0.0~1.0)</param>
-    internal static void RGB_To_XYZ(int r, int g, int b, out double x, out double y, out double z)
+    internal static void RGB_To_XYZ(double r, double g, double b, out double x, out double y, out double z)
     {
-      double vR = (double)r / 255.0;
-      double vG = (double)g / 255.0;
-      double vB = (double)b / 255.0;
+      double vR = r;
+      double vG = g;
+      double vB = b;
 
       vR = rgbxyz_map(vR);
       vG = rgbxyz_map(vG);
@@ -1564,20 +1932,20 @@ namespace Rhino.Display
     /// <summary>
     /// Converts RGB space colors to HSL. 
     /// </summary>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
     /// <param name="h">Hue channel (0.0~1.0)</param>
     /// <param name="s">Saturation channel (0.0~1.0)</param>
     /// <param name="l">Luminance channel (0.0~1.0)</param>
-    internal static void RGB_To_HSL(int r, int g, int b, out double h, out double s, out double l)
+    internal static void RGB_To_HSL(double r, double g, double b, out double h, out double s, out double l)
     {
       h = 0.0;
       s = 0.0;
 
-      double vR = r / 255.0;
-      double vG = g / 255.0;
-      double vB = b / 255.0;
+      double vR = r;
+      double vG = g;
+      double vB = b;
 
       double vMin = Math.Min(Math.Min(vR, vG), vB);
       double vMax = Math.Max(Math.Max(vR, vG), vB);
@@ -1622,16 +1990,14 @@ namespace Rhino.Display
     /// <param name="h">Hue channel (0.0~1.0)</param>
     /// <param name="s">Saturation channel (0.0~1.0)</param>
     /// <param name="l">Luminance channel (0.0~1.0)</param>
-    /// <param name="r">Red channel (0~255)</param>
-    /// <param name="g">Green channel (0~255)</param>
-    /// <param name="b">Blue channel (0~255)</param>
-    internal static void HSL_To_RGB(double h, double s, double l, out byte r, out byte g, out byte b)
+    /// <param name="r">Red channel (0.0~1.0)</param>
+    /// <param name="g">Green channel (0.0~1.0)</param>
+    /// <param name="b">Blue channel (0.0~1.0)</param>
+    internal static void HSL_To_RGB(double h, double s, double l, out double r, out double g, out double b)
     {
       if (s.Equals(0.0))
       {
-        r = (byte)(l * 255.0);
-        g = (byte)(l * 255.0);
-        b = (byte)(l * 255.0);
+        r = g = b = l;
       }
       else
       {
@@ -1644,13 +2010,9 @@ namespace Rhino.Display
 
         double v1 = 2.0 * l - v2;
 
-        double vR = huergb_map(v1, v2, h + (1.0 / 3.0));
-        double vG = huergb_map(v1, v2, h);
-        double vB = huergb_map(v1, v2, h - (1.0 / 3.0));
-
-        r = (byte)(255 * vR);
-        g = (byte)(255 * vG);
-        b = (byte)(255 * vB);
+        r = huergb_map(v1, v2, h + (1.0 / 3.0));
+        g = huergb_map(v1, v2, h);
+        b = huergb_map(v1, v2, h - (1.0 / 3.0));
       }
     }
     private static double huergb_map(double v1, double v2, double vH)
@@ -1673,7 +2035,7 @@ namespace Rhino.Display
     /// <param name="c">Cyan channel (0.0~1.0)</param>
     /// <param name="m">Magenta channel (0.0~1.0)</param>
     /// <param name="y">Yellow channel (0.0~1.0)</param>
-    internal static void RGB_To_CMY(int r, int g, int b, out double c, out double m, out double y)
+    internal static void RGB_To_CMY(byte r, byte g, byte b, out double c, out double m, out double y)
     {
       c = 1.0 - ((double)r / 255.0);
       m = 1.0 - ((double)g / 255.0);
@@ -1691,9 +2053,9 @@ namespace Rhino.Display
     /// <param name="b">Blue channel (0~255)</param>
     internal static void CMY_To_RGB(double c, double m, double y, out byte r, out byte g, out byte b)
     {
-      r = (byte)(255.0 * (1.0 - c));
-      g = (byte)(255.0 * (1.0 - m));
-      b = (byte)(255.0 * (1.0 - y));
+      r = (byte) Math.Round(255.0 * (1.0 - c));
+      g = (byte) Math.Round(255.0 * (1.0 - m));
+      b = (byte) Math.Round(255.0 * (1.0 - y));
     }
 
     /// <summary>

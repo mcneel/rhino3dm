@@ -14,6 +14,12 @@ RH_C_FUNCTION double ONC_UnitScale(ON::LengthUnitSystem usFrom, ON::LengthUnitSy
   return ON::UnitScale(usFrom, usTo);
 }
 
+RH_C_FUNCTION double ONC_MetersPerUnit(ON::LengthUnitSystem us)
+{
+  ON_UnitSystem unitSystem(us);
+  return unitSystem.MetersPerUnit(ON_DBL_QNAN);
+}
+
 RH_C_FUNCTION void ON_Revision(CRhCmnStringHolder* pStringHolder)
 {
   if( pStringHolder )

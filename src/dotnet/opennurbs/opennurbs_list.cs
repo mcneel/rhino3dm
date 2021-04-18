@@ -2229,7 +2229,7 @@ namespace Rhino.Collections
   /// Represents a list of <see cref="Point3d"/>.
   /// </summary>
   [Serializable]
-  public class Point3dList : RhinoList<Point3d>, ICloneable
+  public class Point3dList : RhinoList<Point3d>, ICloneable, IEquatable<Point3dList>
   {
     /// <summary>
     /// Initializes a new empty list with default capacity.
@@ -2582,6 +2582,51 @@ namespace Rhino.Collections
     public new Point3dList Duplicate()
     {
       return (Point3dList)(this as ICloneable).Clone();
+    }
+
+    /// <summary>
+    /// Overrides the dafault object equality to compare lists by value.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns>True is objects are exaclty equal in value.</returns>
+    public override bool Equals(object obj)
+    {
+      return base.Equals(obj as Point3dList);
+    }
+
+    /// <summary>
+    /// Determines if the point lists are exactly equal.
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns>True is objects are exaclty equal in value.</returns>
+    public bool Equals(Point3dList other)
+    {
+      if (object.ReferenceEquals(other, null)) return false;
+
+      if (other.Count != this.Count) return false;
+
+      for (int i = 0; i < Count; i++)
+      {
+        if (this[i] != other[i])
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    /// <summary>
+    /// Creates a hash code for this object.
+    /// </summary>
+    /// <returns>An int that serves as an hash code. This is currently a XOR of all doubles, XORed in line.</returns>
+    public override int GetHashCode()
+    {
+      int code = 0;
+      for (int i = 0; i < Count; i++)
+        code ^= this[i].GetHashCode();
+
+      return code;
     }
     #endregion
   }

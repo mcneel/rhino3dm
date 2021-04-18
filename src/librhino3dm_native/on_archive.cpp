@@ -1037,6 +1037,41 @@ RH_C_FUNCTION ONX_Model* ONX_Model_ReadFile(const RHMONO_STRING* path, CRhCmnStr
   return rc;
 }
 
+RH_C_FUNCTION bool ONX_Model_WriteOneObject(const RHMONO_STRING* pPath, const ON_Geometry* pGeometry)
+{
+  bool rc = false;
+  if (pPath && pGeometry)
+  {
+    INPUTSTRINGCOERCE(path, pPath);
+    FILE* fp = ON::OpenFile(path, L"wb");
+    if (fp)
+    {
+      ON_BinaryFile out_file(ON::archive_mode::write3dm, fp);
+      rc = ON_WriteOneObjectArchive(out_file, 0, *pGeometry);
+      ON::CloseFile(fp);
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ONX_Model_WriteMultipleObjects(const RHMONO_STRING* pPath, const ON_SimpleArray<const ON_Object*>* pObjects)
+{
+  bool rc = false;
+  if (pPath && pObjects)
+  {
+    INPUTSTRINGCOERCE(path, pPath);
+    FILE* fp = ON::OpenFile(path, L"wb");
+    if (fp)
+    {
+      ON_BinaryFile out_file(ON::archive_mode::write3dm, fp);
+      rc = ON_WriteMultipleObjectArchive(out_file, 0, *pObjects);
+      ON::CloseFile(fp);
+    }
+  }
+  return rc;
+}
+
+
 RH_C_FUNCTION ONX_Model* ONX_Model_FromByteArray(int length, /*ARRAY*/ const unsigned char* buffer)
 {
   //ON_Read3dmBufferArchive archive(length, buffer, false, ON_BinaryArchive::CurrentArchiveVersion(), ON::Version());
@@ -1053,6 +1088,7 @@ RH_C_FUNCTION ONX_Model* ONX_Model_FromByteArray(int length, /*ARRAY*/ const uns
   }
   return model;
 }
+
 
 enum ReadFileTableTypeFilter : int
 {
@@ -1117,6 +1153,28 @@ RH_C_FUNCTION ONX_Model* ONX_Model_ReadFile2(const RHMONO_STRING* path, ReadFile
   }
   return rc;
 }
+
+
+RH_C_FUNCTION bool ONX_Model_ToByteArray(const ONX_Model* model, ON_Write3dmBufferArchive* archive,
+  int version,
+  unsigned int enableRenderMeshesForThese,
+  unsigned int enableAnalysisMeshesForThese,
+  bool writeUserData)
+{
+  if (nullptr == model || nullptr == archive)
+    return false;
+
+  archive->SetShouldSerializeUserDataDefault(writeUserData);
+  archive->EnableSave3dmRenderMeshes(enableRenderMeshesForThese, true);
+  archive->EnableSave3dmRenderMeshes((~enableRenderMeshesForThese), false);
+
+  archive->EnableSave3dmAnalysisMeshes(enableAnalysisMeshesForThese, true);
+  archive->EnableSave3dmAnalysisMeshes((~enableAnalysisMeshesForThese), false);
+
+  bool success = model->Write(*archive, version);
+  return success;
+}
+
 
 RH_C_FUNCTION bool ONX_Model_WriteFile(ONX_Model* pModel, const RHMONO_STRING* path, int version,
   unsigned int enableRenderMeshesForThese,
@@ -1407,7 +1465,6 @@ static ON_UUID Internal_ONX_Model_AddModelGeometry(
   const ON_3dmObjectAttributes* attributes
   )
 {
-  // Oh,Look! A static function in one place instead of a zillion copy-n-pastes! What a concept!
   if ( nullptr == model )
     return ON_nil_uuid;
   if ( nullptr == geometry )
@@ -1855,6 +1912,11 @@ RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddLeader(ONX_Model* pModel, const R
 RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddHatch(ONX_Model* pModel, const ON_Hatch* pConstHatch, const ON_3dmObjectAttributes* pConstAttributes)
 {
   return Internal_ONX_Model_AddModelGeometry(pModel,pConstHatch,pConstAttributes);
+}
+
+RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddSubD(ONX_Model* pModel, const ON_SubD* pConstSubD, const ON_3dmObjectAttributes* pConstAttributes)
+{
+  return Internal_ONX_Model_AddModelGeometry(pModel, pConstSubD, pConstAttributes);
 }
 
 RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddPolyLine(ONX_Model* pModel, int count, /*ARRAY*/const ON_3dPoint* points, const ON_3dmObjectAttributes* pConstAttributes)
@@ -2608,7 +2670,7 @@ RH_C_FUNCTION ON_UUID ONX_Model_UserDataTable_Uuid(const ONX_Model* pConstModel,
   return ::ON_nil_uuid;
 }
 
-RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_UserData_NewGoo(const ONX_Model* pConstModel, ON_UUID id)
+RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_PlugIn_UserData_NewArchive(const ONX_Model* pConstModel, ON_UUID id)
 {
   // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
   ON_Read3dmBufferArchive* rc = nullptr;
@@ -2626,9 +2688,8 @@ RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_UserData_NewGoo(const ONX_Model
       }
     }
 
-    if (model_ud)
+    if (model_ud && model_ud->m_goo.m_value > 0 && model_ud->m_goo.m_goo)
     {
-      // Create a buffer archive using using the model user data's goo
       rc = new ON_Read3dmBufferArchive(
         model_ud->m_goo.m_value,
         (const void*)model_ud->m_goo.m_goo,
@@ -2641,7 +2702,80 @@ RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_UserData_NewGoo(const ONX_Model
   return rc;
 }
 
-RH_C_FUNCTION void ONX_Model_UserData_DeleteGoo(ON_Read3dmBufferArchive* pArchive)
+RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_ModelComponent_UserData_NewArchive(const ONX_Model* pConstModel, const ON_ModelComponent* pConstModelComponent, ON_UUID userdata_id)
+{
+  // 9-Sep-2020 Dale Fugier
+  ON_Read3dmBufferArchive* rc = nullptr;
+  if (pConstModel && pConstModelComponent)
+  {
+    const ON_UserData* user_data = pConstModelComponent->GetUserData(userdata_id);
+    if (user_data && user_data->IsUnknownUserData())
+    {
+      const ON_UnknownUserData* unknown_data = ON_UnknownUserData::Cast(user_data);
+      if (unknown_data && unknown_data->m_sizeof_buffer > 0 && unknown_data->m_buffer)
+      {
+        rc = new ON_Read3dmBufferArchive(
+          unknown_data->m_sizeof_buffer,
+          unknown_data->m_buffer,
+          false, // Do not copy the imput buffer
+          unknown_data->m_3dm_version,
+          unknown_data->m_3dm_opennurbs_version_number
+        );
+      }
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_Read3dmBufferArchive* ONX_Model_ModelGeometry_UserData_NewArchive(const ONX_Model* pConstModel, ON_UUID model_geometry_id, ON_UUID userdata_id, bool bFromAttributes)
+{
+  // 9-Sep-2020 Dale Fugier
+  ON_Read3dmBufferArchive* rc = nullptr;
+
+  const ON_ModelGeometryComponent* model_geometry = nullptr;
+  if (pConstModel)
+  {
+    ON_ModelComponentReference model_component_ref = pConstModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, model_geometry_id);
+    if (model_component_ref.IsEmpty())
+      model_component_ref = pConstModel->ComponentFromId(ON_ModelComponent::Type::RenderLight, model_geometry_id);
+    model_geometry = ON_ModelGeometryComponent::FromModelComponentRef(model_component_ref, &ON_ModelGeometryComponent::Unset);
+  }
+  if (nullptr == model_geometry)
+    return rc;
+
+  const ON_UserData* user_data = nullptr;
+  if (bFromAttributes)
+  {
+    const ON_3dmObjectAttributes* attributes = model_geometry->Attributes(nullptr);
+    if (attributes)
+      user_data = attributes->GetUserData(userdata_id);
+  }
+  else
+  {
+    const ON_Geometry* geometry = model_geometry->Geometry(nullptr);
+    if (geometry)
+      user_data = geometry->GetUserData(userdata_id);
+  }
+
+  if (user_data && user_data->IsUnknownUserData())
+  {
+    const ON_UnknownUserData* unknown_data = ON_UnknownUserData::Cast(user_data);
+    if (unknown_data && unknown_data->m_sizeof_buffer > 0 && unknown_data->m_buffer)
+    {
+      rc = new ON_Read3dmBufferArchive(
+        unknown_data->m_sizeof_buffer,
+        unknown_data->m_buffer,
+        false, // Do not copy the imput buffer
+        unknown_data->m_3dm_version,
+        unknown_data->m_3dm_opennurbs_version_number
+      );
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ONX_Model_UserData_DeleteArchive(ON_Read3dmBufferArchive* pArchive)
 {
   if (pArchive)
     delete pArchive;
@@ -2653,38 +2787,19 @@ RH_C_FUNCTION void ONX_Model_UserDataTable_Clear(ONX_Model* pModel)
     pModel->m_userdata_table.Empty();
 }
 
-#if !defined(RHINO3DM_BUILD)
-RH_C_FUNCTION bool ONX_Model_ReadPreviewImage(const RHMONO_STRING* path, CRhinoDib* pRhinoDib)
+RH_C_FUNCTION int ONX_Model_AddLayer(ONX_Model* pModel, const RHMONO_STRING* layerName, int argb)
 {
-  bool rc = false;
-  INPUTSTRINGCOERCE(_path, path);
-  if( nullptr==pRhinoDib )
-    return false;
+  if (nullptr == pModel)
+    return ON_UNSET_INT_INDEX;
 
-  FILE* fp = ON::OpenFile( _path, L"rb" );
-  if( fp )
-  {
-    ON_BinaryFile file( ON::archive_mode::read3dm, fp);
-    int version = 0;
-    ON_String comments;
-    if( file.Read3dmStartSection( &version, comments ) )
-    {
-      ON_3dmProperties prop;
-      if( file.Read3dmProperties(prop) )
-      {
-        BITMAPINFO* pBMI = prop.m_PreviewImage.m_bmi;
-        if( pBMI )
-        {
-          pRhinoDib->SetDib(pBMI, false);
-          rc = true;
-        }
-      }
-    }
-    ON::CloseFile(fp);
-  }
-  return rc;
+  INPUTSTRINGCOERCE(_layerName, layerName);
+  unsigned int abgr = ARGB_to_ABGR(argb);
+  ON_Color c(abgr);
+  int index = pModel->AddLayer(_layerName, c);
+  return index;
 }
 
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ONX_Model_GetPreviewImage(const ONX_Model* constModel, CRhinoDib* pRhinoDib)
 {
   bool rc = false;
@@ -2717,28 +2832,68 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
 #endif
   return rc;
 }
+#endif
 
-#if !defined(RHINO3DM_BUILD) && defined(ON_RUNTIME_APPLE)
-RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
+#if defined(ON_RUNTIME_WIN)
+RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 {
+  HBITMAP rc = nullptr;
   INPUTSTRINGCOERCE(_path, path);
-  int width = 128, height = 128;
-  
-  // Use OpenNURBS to extract the bitmap first so we can get the
-  // preview image size
-  FILE* fp = ON::OpenFile( _path, L"rb" );
+  FILE* fp = ON::OpenFile(_path, L"rb");
   if (fp)
   {
-    ON_BinaryFile file( ON::archive_mode::read3dm, fp);
+    ON_BinaryFile file(ON::archive_mode::read3dm, fp);
     int version = 0;
     ON_String comments;
     if (file.Read3dmStartSection(&version, comments))
     {
-      ON_3dmProperties prop;
-      if (file.Read3dmProperties(prop))
+      ON_3dmProperties props;
+      if (file.Read3dmProperties(props))
       {
-        width = prop.m_PreviewImage.Width();
-        height = prop.m_PreviewImage.Height();
+        // 1-Mar-2021 Dale Fugier,
+        // This non-CRhinoDib code is also used by the Windows
+        // Shell extension that displays thumbnails in Explorer.
+        if (props.m_PreviewImage.IsValid())
+        {
+          HDC hdc = GetDC(0);
+          rc = CreateDIBitmap(
+            hdc,                                      // handle to DC
+            &props.m_PreviewImage.m_bmi->bmiHeader,   // bitmap data
+            CBM_INIT,                                 // initialization option
+            (const void*)props.m_PreviewImage.m_bits, // initialization data
+            props.m_PreviewImage.m_bmi,               // color-format data
+            DIB_RGB_COLORS                            // color-data usage
+          );
+          ReleaseDC(0, hdc);
+        }
+      }
+    }
+    ON::CloseFile(fp);
+  }
+  return rc;
+}
+#endif // if defined(ON_RUNTIME_WIN)
+
+#if defined(ON_RUNTIME_APPLE)
+RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
+{
+  INPUTSTRINGCOERCE(_path, path);
+  int width = 128, height = 128;
+
+  // Use OpenNURBS to extract the bitmap first so we can get the preview image size
+  FILE* fp = ON::OpenFile(_path, L"rb");
+  if (fp)
+  {
+    ON_BinaryFile file(ON::archive_mode::read3dm, fp);
+    int version = 0;
+    ON_String comments;
+    if (file.Read3dmStartSection(&version, comments))
+    {
+      ON_3dmProperties props;
+      if (file.Read3dmProperties(props))
+      {
+        width = props.m_PreviewImage.Width();
+        height = props.m_PreviewImage.Height();
       }
     }
     ON::CloseFile(fp);
@@ -2747,16 +2902,14 @@ RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
   // This will try to get the preview image as a NSImage regardless of the
   // success of the OpenNURBS attempt above.  It will default to trying
   // to get a image 128x128
-  
+
   // It can take some time to generate a thumbnail, so generate it on a background thread
   NSSize maxThumbnailSize = { static_cast<CGFloat>(width), static_cast<CGFloat>(height) };
-  NSString* ns_path = [NSString stringWithLPCTSTR:_path];
-  NSImage* thumbnailImage = [NSImage imageWithPreviewOfFileAtPath: ns_path ofSize: maxThumbnailSize asIcon: NO];
+  NSString* ns_path = [NSString stringWithLPCTSTR : _path];
+  NSImage* thumbnailImage = [NSImage imageWithPreviewOfFileAtPath : ns_path ofSize : maxThumbnailSize asIcon : NO];
   return thumbnailImage;
 }
-#endif
-
-#endif
+#endif // if defined(ON_RUNTIME_APPLE)
 
 class CBinaryFileHelper : public ON_BinaryFile
 {

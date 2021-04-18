@@ -7,6 +7,18 @@ using System.Reflection;
 namespace Rhino.UI
 {
   /// <summary>
+  /// Style eto controls using rhino settings
+  /// </summary>
+  interface IEtoStylePageService
+  {
+    object StyleEtoControls(object eto_control);
+
+    void StyleEtoDialog(object eto_dialog);
+
+    void StyleEtoContextMenu(object eto_context_menu);
+  }
+
+  /// <summary>
   /// For internal use, the IStackedDialogPageService service is implemented in
   /// RhinoWindows or RhinoMac as appropriate and handles the communication
   /// with core Rhino
@@ -416,6 +428,16 @@ namespace Rhino.UI
       }
     }
     private System.Drawing.Color m_tree_item_color = System.Drawing.Color.Empty;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pageName"></param>
+    /// <param name="documentPropertiesPage"></param>
+    public bool SetActivePageTo(string pageName, bool documentPropertiesPage)
+    {
+      return RhinoPageHooks.SetActiveOptionsPage(this, pageName, documentPropertiesPage);
+    }
   }
 }
 #endif

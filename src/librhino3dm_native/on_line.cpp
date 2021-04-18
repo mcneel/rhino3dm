@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#if !defined(RHINO3DM_BUILD)
+#include "../../../rhino4/mesh_boolean_v7.h" // triangle coordinates more consistent with ray method
+#endif
 
 RH_C_FUNCTION double ON_Line_DistanceToPoint( const ON_Line* pLine, ON_3DPOINT_STRUCT point, bool minDist)
 {
@@ -75,3 +78,32 @@ RH_C_FUNCTION bool RHC_RhGetTanPerpPoint( const ON_Curve* pConstCurve0, const ON
   return rc;
 }
 #endif
+
+// 2020-Sep-22, Giulio http://mcneel.myjetbrains.com/youtrack/issue/RH-59727
+RH_C_FUNCTION bool ON_Triangle_BarycentricCoordsAt(ON_TRIANGLE_STRUCT triangle, const ON_3DPOINT_STRUCT test,
+  ON_2dPoint* result, double* height)
+{
+  if (!result) return false;
+
+  ON_Triangle tri{ triangle.val };
+  ON_3dPoint testpt{ test.val };
+#if defined(RHINO3DM_BUILD) 
+  bool rc = tri.GetBarycentricCoordinates(testpt, false, &result->x, &result->y);
+  if (rc && height)
+  {
+    ON_3dVector n = tri.Normal();
+    if (n.IsZero()) n = ON_3dVector::XAxis;
+    double len = ON_DotProduct(n, testpt - tri.PointAt(result->x, result->y));
+    *height = len / n.Length();
+  }
+  return rc;
+#else
+  //not available in standalone opennurbs
+  ON_2dPoint temp = MX_ClosestTriangleEdgeCoords(tri, testpt, height);
+  result->x = temp.x;
+  result->y = temp.y;
+#endif
+
+  return true;
+}
+

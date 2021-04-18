@@ -59,13 +59,18 @@ namespace Rhino.Geometry
     {
       if (!line.IsValid) { return null; }
 
-      NurbsCurve crv = new NurbsCurve(3, false, 2, 2);
-      // Using implicit operator on Point3d
-      crv.Points[0] = line.From;// new ControlPoint(line.From);
-      crv.Points[1] = line.To;// new ControlPoint(line.To);
+      // 14-Dec-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-61974
 
-      crv.Knots.CreateUniformKnots(1.0);
-      return crv;
+      //NurbsCurve crv = new NurbsCurve(3, false, 2, 2);
+      //// Using implicit operator on Point3d
+      //crv.Points[0] = line.From;// new ControlPoint(line.From);
+      //crv.Points[1] = line.To;// new ControlPoint(line.To);
+
+      //crv.Knots.CreateUniformKnots(1.0);
+      //return crv;
+
+      LineCurve line_crv = new LineCurve(line);
+      return line_crv.ToNurbsCurve();
     }
 
     /// <summary>
@@ -210,7 +215,7 @@ namespace Rhino.Geometry
     /// <param name="points">Points to interpolate</param>
     /// <param name="startTangent">Unit tangent vector or Unset</param>
     /// <param name="endTangent">Unit tangent vector or Unset</param>
-    /// <returns></returns>
+    /// <returns>NURBS curve approximation of an arc on success</returns>
     /// <since>7.0</since>
     public static NurbsCurve CreateHSpline(IEnumerable<Point3d> points, Vector3d startTangent, Vector3d endTangent)
     {
@@ -221,6 +226,69 @@ namespace Rhino.Geometry
         return null;
       return new NurbsCurve(rc, null, -1);
     }
+
+    /// <summary>
+    /// Create a NURBS curve, that is suitable for calculations like lofting SubD objects, through a sequence of curves.
+    /// </summary>
+    /// <param name="points">
+    /// An enumeration of points. Adjacent points must not be equal.
+    /// If periodicClosedCurve is false, there must be at least two points.
+    /// If periodicClosedCurve is true, there must be at least three points and it is not necessary to duplicate the first and last points.
+    /// When periodicClosedCurve is true and the first and last points are equal, the duplicate last point is automatically ignored.
+    /// </param>
+    /// <param name="interpolatePoints">
+    /// True if the curve should interpolate the points. False if points specify control point locations.
+    /// In either case, the curve will begin at the first point and end at the last point.
+    /// </param>
+    /// <param name="periodicClosedCurve">
+    /// True to create a periodic closed curve. Do not duplicate the start/end point in the point input.
+    /// </param>
+    /// <returns>A SubD friendly NURBS curve is successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public static NurbsCurve CreateSubDFriendly(IEnumerable<Point3d> points, bool interpolatePoints, bool periodicClosedCurve)
+    {
+      var pts = new List<Point3d>(points);
+      var pointsArray = pts.ToArray();
+      IntPtr rc = UnsafeNativeMethods.ON_SubD_CreateSubDFriendlyCurve(pointsArray.Length, pointsArray, interpolatePoints, periodicClosedCurve);
+      if (rc == IntPtr.Zero)
+        return null;
+      return new NurbsCurve(rc, null, -1);
+    }
+
+    /// <summary>
+    /// Create a NURBS curve, that is suitable for calculations like lofting SubD objects, from an existing curve.
+    /// </summary>
+    /// <param name="curve">Curve to rebuild as a SubD friendly curve.</param>
+    /// <returns>A SubD friendly NURBS curve is successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public static NurbsCurve CreateSubDFriendly(Curve curve)
+    {
+      return NurbsCurve.CreateSubDFriendly(curve, 0, false);
+    }
+
+    /// <summary>
+    /// Create a NURBS curve, that is suitable for calculations like lofting SubD objects, from an existing curve.
+    /// </summary>
+    /// <param name="curve">Curve to rebuild as a SubD friendly curve.</param>
+    /// <param name="pointCount">
+    /// Desired number of control points. If periodicClosedCurve is true, the number must be &gt;= 6, otherwise the number must be &gt;= 4.
+    /// </param>
+    /// <param name="periodicClosedCurve">True if the SubD friendly curve should be closed and periodic. False in all other cases.</param>
+    /// <returns>A SubD friendly NURBS curve is successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public static NurbsCurve CreateSubDFriendly(Curve curve, int pointCount, bool periodicClosedCurve)
+    {
+      if (null == curve)
+        return null;
+
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr rc = UnsafeNativeMethods.ON_SubD_CreateSubDFriendlyCurve2(ptr_const_curve, pointCount, periodicClosedCurve);
+      GC.KeepAlive(curve);
+      if (rc == IntPtr.Zero)
+        return null;
+      return new NurbsCurve(rc, null, -1);
+    }
+
 
     /// <summary>
     /// Computes planar rail sweep frames at specified parameters.

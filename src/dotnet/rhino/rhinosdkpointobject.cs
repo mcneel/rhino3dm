@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 using System;
 using Rhino.Geometry;
+using Rhino.Runtime.InteropWrappers;
 
 #if RHINO_SDK
 namespace Rhino.DocObjects
@@ -288,6 +289,27 @@ namespace Rhino.DocObjects
       set
       {
         throw new NotSupportedException("Cannot set Grip index.");
+      }
+    }
+  }
+
+
+  public class NamedViewWidgetObject : RhinoObject
+  {
+    internal NamedViewWidgetObject(uint serialNumber)
+      : base(serialNumber)
+    { }
+
+    public string AssociatedNamedView
+    {
+      get
+      {
+        using (var holder = new StringWrapper())
+        {
+          bool rc = UnsafeNativeMethods.CRhinoNamedViewWidgetObject_AssociatedNamedView(ConstPointer(), holder.NonConstPointer);
+
+          return rc ? holder.ToString() : null;
+        }
       }
     }
   }

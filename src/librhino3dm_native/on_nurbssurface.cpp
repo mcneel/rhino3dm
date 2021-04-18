@@ -23,6 +23,19 @@ RH_C_FUNCTION void ON_NurbsSurface_CopyFrom(const ON_NurbsSurface* pConstSourceN
     *pDestNurbsSurface = *pConstSourceNurbsSurface;
 }
 
+RH_C_FUNCTION ON_BezierSurface* ON_NurbsSurface_ConvertSpanToBezier(const ON_NurbsSurface* pConstNurbsSurface, int span0, int span1)
+{
+  if (nullptr == pConstNurbsSurface)
+    return nullptr;
+  ON_BezierSurface* pBez = new ON_BezierSurface();
+  if (!pConstNurbsSurface->ConvertSpanToBezier(span0, span1, *pBez))
+  {
+    delete pBez;
+    pBez = nullptr;
+  }
+  return pBez;
+}
+
 RH_C_FUNCTION bool ON_NurbsSurface_GetBoolDir(ON_NurbsSurface* pSurface, int which, int dir)
 {
   const int idxIsClampedStart = 1;

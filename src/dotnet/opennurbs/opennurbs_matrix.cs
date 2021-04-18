@@ -467,12 +467,9 @@ namespace Rhino.Geometry
       //        matrix cannot be stored in a hashtable while it is modified.
       int hash = 0;
       for (int i = 0; i < RowCount; i++)
-      {
-        for (int j = 0; j < RowCount; j++)
-        {
+        for (int j = 0; j < ColumnCount; j++)
           hash = -i ^ j ^ hash ^ this[i, j].GetHashCode();
-        }
-      }
+
       return hash;
     }
   }

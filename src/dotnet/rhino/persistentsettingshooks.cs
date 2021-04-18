@@ -66,7 +66,8 @@ namespace Rhino
       PersistentSettings settings;
       if (pointerId != 0)
       {
-        g_persistent_settings.TryGetValue(pointerId, out settings);
+        lock(g_persistent_settings_lock)
+          g_persistent_settings.TryGetValue(pointerId, out settings);
         return (settings == null ? 0 : pointerId);
       }
       var plug_in = PlugIns.PlugIn.Find(plugInId);
@@ -74,7 +75,8 @@ namespace Rhino
       settings = windowPositions ? plug_in.WindowPositionSettings : plug_in.Settings;
       if (settings == null) return 0;
       var id = ++g_next_persistent_settings_id;
-      g_persistent_settings.Add(id, settings);
+      lock(g_persistent_settings_lock)
+        g_persistent_settings.Add(id, settings);
       return id;
     }
 
@@ -82,7 +84,7 @@ namespace Rhino
     /// <summary>
     /// If Create(plugInId) was called then the runtime settings associated
     /// the plug-in are returned otherwise a new PlugInSettings is created
-    /// and and its settings are returned.  Creating a new plug-in settings
+    /// and its settings are returned.  Creating a new plug-in settings
     /// class is used when reading settings in response to a settings file
     /// saved event.
     /// </summary>
@@ -96,14 +98,18 @@ namespace Rhino
       if (pointerId == 0)
         g_dictionary.TryGetValue(plugInId, out plug_in_settings);
       else
-        g_plug_in_settings_read.TryGetValue(pointerId, out plug_in_settings);
+      {
+        lock (g_plug_in_settings_read_lock)
+          g_plug_in_settings_read.TryGetValue(pointerId, out plug_in_settings);
+      }
       if (plug_in_settings == null)
         return 0;
       var settings = windowPositions ? plug_in_settings.WindowPositionSettings : plug_in_settings.PluginSettings;
       if (settings == null)
         return 0;
       var id = ++g_next_persistent_settings_id;
-      g_persistent_settings.Add(id, settings);
+      lock(g_persistent_settings_lock)
+        g_persistent_settings.Add(id, settings);
       return id;
     }
     static internal PlugInSettings GetPlugInSettings(Guid plugInId)
@@ -119,15 +125,18 @@ namespace Rhino
       var child_name = IntPtrToString(stringPointerChildName);
       if (string.IsNullOrEmpty(child_name))
         return 0;
-      PersistentSettings settings;
-      if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
-        return 0;
-      PersistentSettings child_settings;
-      if (!settings.TryGetChild(child_name, out child_settings))
-        return 0;
-      var id = ++g_next_persistent_settings_id;
-      g_persistent_settings.Add(id, child_settings);
-      return id;
+      lock (g_persistent_settings_lock)
+      {
+        PersistentSettings settings;
+        if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
+          return 0;
+        PersistentSettings child_settings;
+        if (!settings.TryGetChild(child_name, out child_settings))
+          return 0;
+        var id = ++g_next_persistent_settings_id;
+        g_persistent_settings.Add(id, child_settings);
+        return id;
+      }
     }
     static internal GetChildPersistentSettingsPointerProc AddChildPersistentSettingsHook = AddChildPersistentSettingsFunc;
     static private uint AddChildPersistentSettingsFunc(uint parentPointerId, IntPtr stringPointerChildName)
@@ -135,15 +144,18 @@ namespace Rhino
       var child_name = IntPtrToString(stringPointerChildName);
       if (string.IsNullOrEmpty(child_name))
         return 0;
-      PersistentSettings settings;
-      if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
-        return 0;
-      var child_settings = settings.AddChild(child_name);
-      if (child_settings == null)
-        return 0;
-      var id = ++g_next_persistent_settings_id;
-      g_persistent_settings.Add(id, child_settings);
-      return id;
+      lock (g_persistent_settings_lock)
+      {
+        PersistentSettings settings;
+        if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
+          return 0;
+        var child_settings = settings.AddChild(child_name);
+        if (child_settings == null)
+          return 0;
+        var id = ++g_next_persistent_settings_id;
+        g_persistent_settings.Add(id, child_settings);
+        return id;
+      }
     }
     static internal GetChildPersistentSettingsPointerProc DeleteItemPersistentSettingsHook = DeleteItemPersistentSettingsFunc;
     static private uint DeleteItemPersistentSettingsFunc(uint pointerId, IntPtr keyString)
@@ -161,8 +173,11 @@ namespace Rhino
       if (string.IsNullOrEmpty(child_name))
         return 0;
       PersistentSettings settings;
-      if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
-        return 0;
+      lock (g_persistent_settings)
+      {
+        if (!g_persistent_settings.TryGetValue(parentPointerId, out settings))
+          return 0;
+      }
       PersistentSettings child;
       settings.TryGetChild(child_name, out child);
       if (child == null)
@@ -178,34 +193,43 @@ namespace Rhino
       var command_name = IntPtrToString(stringPointerCommandName);
       if (string.IsNullOrEmpty(command_name))
         return 0;
-      if (managedPlugIn)
+      lock (g_persistent_settings_lock)
       {
-        var plug_in = PlugIns.PlugIn.Find(plugInId);
-        if (plug_in == null) return 0;
-        var found = plug_in.CommandSettings(command_name);
-        if (null == found) return 0;
-        var found_id = ++g_next_persistent_settings_id;
-        g_persistent_settings.Add(found_id, found);
-        return found_id;
+        if (managedPlugIn)
+        {
+          var plug_in = PlugIns.PlugIn.Find(plugInId);
+          if (plug_in == null) return 0;
+          var found = plug_in.CommandSettings(command_name);
+          if (null == found) return 0;
+          var found_id = ++g_next_persistent_settings_id;
+          g_persistent_settings.Add(found_id, found);
+          return found_id;
+        }
+        PlugInSettings plug_in_settings;
+        if (!g_dictionary.TryGetValue(plugInId, out plug_in_settings))
+          return 0;
+        var settings = plug_in_settings.CommandSettings(command_name);
+        if (settings == null)
+          return 0;
+        var id = ++g_next_persistent_settings_id;
+        g_persistent_settings.Add(id, settings);
+        return id;
       }
-      PlugInSettings plug_in_settings;
-      if (!g_dictionary.TryGetValue(plugInId, out plug_in_settings))
-        return 0;
-      var settings = plug_in_settings.CommandSettings(command_name);
-      if (settings == null)
-        return 0;
-      var id = ++g_next_persistent_settings_id;
-      g_persistent_settings.Add(id, settings);
-      return id;
     }
     internal delegate void ReleasePlugInSettingsPointerProc(uint pointerId, bool readSettingsPointer);
     static internal ReleasePlugInSettingsPointerProc ReleasePlugInSettingsPointerHook = ReleasePlugInSettingsPointerFunc;
     static private void ReleasePlugInSettingsPointerFunc(uint pointerId, bool readSettingsPointer)
     {
-      if (readSettingsPointer && g_plug_in_settings_read.ContainsKey(pointerId))
-        g_plug_in_settings_read.Remove(pointerId);
-      if (!readSettingsPointer && g_persistent_settings.ContainsKey(pointerId))
-        g_persistent_settings.Remove(pointerId);
+      lock (g_plug_in_settings_read_lock)
+      {
+        if (readSettingsPointer && g_plug_in_settings_read.ContainsKey(pointerId))
+          g_plug_in_settings_read.Remove(pointerId);
+      }
+      lock (g_persistent_settings_lock)
+      {
+        if (!readSettingsPointer && g_persistent_settings.ContainsKey(pointerId))
+          g_persistent_settings.Remove(pointerId);
+      }
     }
 
     #region PlugInSettings saved notification
@@ -215,7 +239,7 @@ namespace Rhino
     /// <param name="plugInId"></param>
     /// <param name="thisRhinoIsSaving"></param>
     /// <param name="dirty">
-    /// Will be true if the settings are in the to be written queu indicating that there is
+    /// Will be true if the settings are in the to be written queue indicating that there is
     /// an additional change that needs to be written.
     /// </param>
     internal static void InvokeSetingsSaved(Guid plugInId, bool thisRhinoIsSaving, bool dirty)
@@ -238,9 +262,16 @@ namespace Rhino
         runtime_plug_in_settings.MergeChangedSettingsFile (read_settings);
       }
       var pointer_id = ++g_next_plug_in_settings_read_id;
-      g_plug_in_settings_read.Add(pointer_id, old_settings);
+      lock (g_plug_in_settings_read_lock)
+      {
+        g_plug_in_settings_read.Add(pointer_id, old_settings);
+      }
+      // 26 February 2021 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-62840
+      // Just call the method instead of trying to invoke it on the main thread
+      g_settings_saved(plugInId, pointer_id, thisRhinoIsSaving);
       // Invoke the changed call back on the main thread
-      RhinoApp.InvokeOnUiThread(g_settings_saved, plugInId, pointer_id, thisRhinoIsSaving);
+      //RhinoApp.InvokeOnUiThread(g_settings_saved, plugInId, pointer_id, thisRhinoIsSaving);
     }
     private delegate void SettingsSavedDelegate(Guid plugInId, uint pointerId, bool thisRhinoIsSaving);
     private static readonly SettingsSavedDelegate g_settings_saved = OnSettingsSaved;
@@ -998,8 +1029,11 @@ namespace Rhino
     /// <returns></returns>
     private static PersistentSettings PersistentSettings(uint pointerId)
     {
-      PersistentSettings settings;
-      return (g_persistent_settings.TryGetValue(pointerId, out settings) ? settings : null);
+      lock (g_persistent_settings_lock)
+      {
+        PersistentSettings settings;
+        return (g_persistent_settings.TryGetValue(pointerId, out settings) ? settings : null);
+      }
     }
 
     #region private members
@@ -1010,12 +1044,13 @@ namespace Rhino
     static private readonly Dictionary<Guid, PlugInSettings> g_dictionary = new Dictionary<Guid, PlugInSettings>();
     /// <summary>
     /// Dictionary of PersistentSettings references associated with unmanaged
-    /// objects.  Unmanaged object destructors are responsible for calling the
+    /// objects.  Unmanaged object destructor's are responsible for calling the
     /// ReleasePlugInSettingsPointerFunc to remove items from this dictionary.
     /// This is used to manage references to child nodes and when reading
     /// settings XML files.
     /// </summary>
     static private readonly Dictionary<uint, PersistentSettings> g_persistent_settings = new Dictionary<uint, PersistentSettings>();
+    static private readonly object g_persistent_settings_lock = new object();
     /// <summary>
     /// Runtime Id used by the g_persistent_settings dictionary
     /// </summary>
@@ -1023,10 +1058,11 @@ namespace Rhino
     /// <summary>
     /// Used to manage runtime reading of plug-in settings which will happen
     /// when a settings XML file is modified and a SettingsSaved event is 
-    /// raised.  Unmanaged object destructors are responsible for calling the
+    /// raised.  Unmanaged object destructor's are responsible for calling the
     /// ReleasePlugInSettingsPointerFunc to remove items from this dictionary.
     /// </summary>
     static private readonly Dictionary<uint, PlugInSettings> g_plug_in_settings_read = new Dictionary<uint, PlugInSettings>();
+    static private readonly object g_plug_in_settings_read_lock = new object();
     /// <summary>
     /// Runtime Id used by the g_plug_in_settings_read dictionary
     /// </summary>

@@ -3,6 +3,7 @@
 
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_New(ON_NurbsCurve* pOther)
 {
+  RHCHECK_LICENSE
   if (pOther)
     return ON_NurbsCurve::New(*pOther);
   return ON_NurbsCurve::New();
@@ -17,6 +18,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_IsDuplicate(ON_NurbsCurve* crv1, ON_NurbsCurve*
 
 RH_C_FUNCTION bool ON_NurbsCurve_Create(ON_NurbsCurve* crv, int dim, bool rat, int order, int cv_count)
 {
+  RHCHECK_LICENSE
   if (NULL == crv)
     return false;
   return crv->Create(dim, rat ? TRUE : FALSE, order, cv_count);
@@ -24,6 +26,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_Create(ON_NurbsCurve* crv, int dim, bool rat, i
 
 RH_C_FUNCTION bool ON_NurbsCurve_CreateClampedUniformNurbs(ON_NurbsCurve* crv, int dim, int order, int count, /*ARRAY*/const ON_3dPoint* pts, double knot_delta)
 {
+  RHCHECK_LICENSE
   if (NULL == crv || NULL == pts)
     return false;
   const ON_3dPoint* _pts = (const ON_3dPoint*)pts;
@@ -32,6 +35,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreateClampedUniformNurbs(ON_NurbsCurve* crv, i
 
 RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, int dim, int order, int count, /*ARRAY*/const ON_3dPoint* pts, double knot_delta)
 {
+  RHCHECK_LICENSE
   if (nullptr == crv || nullptr == pts)
     return false;
   return crv->CreatePeriodicUniformNurbs(dim, order, count, pts, knot_delta);
@@ -39,6 +43,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
 
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {
+  RHCHECK_LICENSE
   if (count < 2 || nullptr == points)
     return nullptr;
 
@@ -151,6 +156,7 @@ RH_C_FUNCTION int ON_NurbsCurve_KnotStyle(const ON_NurbsCurve* pConstNurbsCurve)
 
 RH_C_FUNCTION double ON_NurbsCurve_SuperfluousKnot(const ON_NurbsCurve* pConstNurbsCurve, int end)
 {
+  RHCHECK_LICENSE
   double rc = 0;
   if (pConstNurbsCurve)
     rc = pConstNurbsCurve->SuperfluousKnot(end);
@@ -167,6 +173,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_GetCV3(const ON_NurbsCurve* pCurve, int cvIndex
 
 RH_C_FUNCTION bool ON_NurbsCurve_SetCV3(ON_NurbsCurve* pCurve, int cvIndex, ON_3dPoint* point)
 {
+  RHCHECK_LICENSE
   // 1-Sep-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-29402
   bool rc = false;
   if (nullptr != pCurve && nullptr != point && cvIndex >= 0 && cvIndex < pCurve->CVCount())
@@ -185,6 +192,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_GetCV4(const ON_NurbsCurve* pCurve, int cvIndex
 
 RH_C_FUNCTION bool ON_NurbsCurve_SetCV4(ON_NurbsCurve* pCurve, int cvIndex, ON_4dPoint* point)
 {
+  RHCHECK_LICENSE
   // 1-Sep-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-29402
   bool rc = false;
   if (nullptr != pCurve && nullptr != point && cvIndex >= 0 && cvIndex < pCurve->CVCount())
@@ -219,6 +227,7 @@ RH_C_FUNCTION double ON_NurbsCurve_Weight(ON_NurbsCurve* pCurve, int cvIndex)
 RH_C_FUNCTION bool ON_NurbsCurve_SetWeight(ON_NurbsCurve* pCurve, int cvIndex, double weight)
 {
   bool rc = false;
+  RHCHECK_LICENSE
   if (nullptr != pCurve && cvIndex >= 0 && cvIndex < pCurve->CVCount())
     rc = pCurve->SetWeight(cvIndex, weight);
   return rc;
@@ -331,6 +340,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_Reparameterize(ON_NurbsCurve* pCurve, double c)
 
 RH_C_FUNCTION bool RHC_RhinoCreateSpiral0(ON_3DPOINT_STRUCT axis_start, ON_3DVECTOR_STRUCT axis_dir, ON_3DPOINT_STRUCT radius_point, double pitch, double turn_count, double radius0, double radius1, ON_NurbsCurve* pCurve)
 {
+  RHCHECK_LICENSE
   // 8-Feb-2013 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-15661
   bool rc = false;
   if (pCurve)
@@ -347,6 +357,7 @@ RH_C_FUNCTION bool RHC_RhinoCreateSpiral0(ON_3DPOINT_STRUCT axis_start, ON_3DVEC
 
 RH_C_FUNCTION bool RHC_RhinoCreateSpiral1(const ON_Curve* pRail, double rail_t0, double rail_t1, ON_3DPOINT_STRUCT radius_point, double pitch, double turn_count, double radius0, double radius1, int points_per_turn, ON_NurbsCurve* pCurve)
 {
+  RHCHECK_LICENSE
   // 8-Feb-2013 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-15661
   bool rc = false;
   if (pRail && pCurve)
@@ -373,6 +384,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_RemoveKnots(ON_NurbsCurve* pCurve, int index0, 
 /// This should eventually move to an on_ellipse.cpp file
 RH_C_FUNCTION int ON_Ellipse_GetNurbForm(ON_Ellipse* ellipse, ON_NurbsCurve* pNurbsCurve)
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if (ellipse && pNurbsCurve)
     rc = ellipse->GetNurbForm(*pNurbsCurve);
@@ -381,6 +393,7 @@ RH_C_FUNCTION int ON_Ellipse_GetNurbForm(ON_Ellipse* ellipse, ON_NurbsCurve* pNu
 //David: I think the above fails because Ellipse has a Plane whose memory layout is not synonymous with ON_Plane
 RH_C_FUNCTION int ON_Ellipse_GetNurbForm2(const ON_PLANE_STRUCT* plane, double r0, double r1, ON_NurbsCurve* pNurbsCurve)
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if (plane && pNurbsCurve)
   {

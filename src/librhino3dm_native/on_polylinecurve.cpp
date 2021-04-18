@@ -2,6 +2,7 @@
 
 RH_C_FUNCTION ON_PolylineCurve* ON_PolylineCurve_New( ON_PolylineCurve* pOther )
 {
+  RHCHECK_LICENSE
   if( pOther )
     return new ON_PolylineCurve(*pOther);
   return new ON_PolylineCurve();
@@ -9,6 +10,7 @@ RH_C_FUNCTION ON_PolylineCurve* ON_PolylineCurve_New( ON_PolylineCurve* pOther )
 
 RH_C_FUNCTION ON_PolylineCurve* ON_PolylineCurve_New2(int point_count, /*ARRAY*/const ON_3dPoint* points)
 {
+  RHCHECK_LICENSE
   if( point_count<1 || NULL==points )
     return new ON_PolylineCurve();
   

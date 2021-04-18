@@ -333,6 +333,51 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <summary>
+    /// Creates a simple 3dm file that contains a single geometric object.
+    /// </summary>
+    /// <param name="path">Path to the 3dm file to create.</param>
+    /// <param name="geometry">
+    /// The geometry to be saved in the archive's object table.
+    /// This is typically a Curve, Surface, Brep, Mesh, or SubD.
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public static bool WriteOneObject(string path, GeometryBase geometry)
+    {
+      if (string.IsNullOrEmpty(path) || null == geometry)
+        return false;
+
+      IntPtr ptr_const_geometry = geometry.ConstPointer();
+      return UnsafeNativeMethods.ONX_Model_WriteOneObject(path, ptr_const_geometry);
+    }
+
+    /// <summary>
+    /// Creates a simple 3dm file that contains a multiple geometric objects.
+    /// </summary>
+    /// <param name="path">Path to the 3dm file to create.</param>
+    /// <param name="geometry">
+    /// The geometry to be saved in the archive's object table.
+    /// This is typically some Curves, Surfaces, Breps, Meshs, or SubDs.
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public static bool WriteMultipleObjects(string path, IEnumerable<GeometryBase> geometry)
+    {
+      if (string.IsNullOrEmpty(path))
+        return false;
+
+      IntPtr ptr_object_array = UnsafeNativeMethods.ON_ObjectArray_New();
+      foreach(var geo in geometry)
+      {
+        IntPtr ptr_const_geometry = geo.ConstPointer();
+        UnsafeNativeMethods.ON_ObjectArray_Append(ptr_object_array, ptr_const_geometry);
+      }
+      bool rc = UnsafeNativeMethods.ONX_Model_WriteMultipleObjects(path, ptr_object_array);
+      UnsafeNativeMethods.ON_ObjectArray_Delete(ptr_object_array);
+      return rc;
+    }
+
 #if !MOBILE_BUILD
 #if RHINO_SDK
     /// <summary>
@@ -341,11 +386,6 @@ namespace Rhino.FileIO
     /// <param name="path">The location of the file.</param>
     /// <returns>A bitmap, or null on failure.</returns>
     /// <exception cref="FileNotFoundException">If the provided path is null, does not exist or cannot be accessed.</exception>
-    /// <example>
-    /// <code source='examples\vbnet\ex_extractthumbnail.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_extractthumbnail.cs' lang='cs'/>
-    /// <code source='examples\py\ex_extractthumbnail.py' lang='py'/>
-    /// </example>
     /// <since>5.0</since>
     public static System.Drawing.Bitmap ReadPreviewImage(string path)
     {
@@ -354,10 +394,10 @@ namespace Rhino.FileIO
       System.Drawing.Bitmap rc = null;
       if(Rhino.Runtime.HostUtils.RunningOnWindows)
       {
-        using(var dib = new RhinoDib())
+        IntPtr ptr_bitmap = UnsafeNativeMethods.ONX_Model_WinReadPreviewImage(path);
+        if (ptr_bitmap != IntPtr.Zero)
         {
-          if(UnsafeNativeMethods.ONX_Model_ReadPreviewImage(path, dib.NonConstPointer))
-            rc = dib.ToBitmap();
+          rc = System.Drawing.Image.FromHbitmap(ptr_bitmap);
         }
       }
       else if(Rhino.Runtime.HostUtils.RunningOnOSX)
@@ -368,8 +408,7 @@ namespace Rhino.FileIO
       }
       return rc;
     }
-
-#endif
+#endif // !MOBILE_BUILD
 #endif
 
 #if RHINO_SDK
@@ -504,6 +543,41 @@ namespace Rhino.FileIO
         errorLog = sh.ToString();
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Write to an in-memory byte[]
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ToByteArray()
+    {
+      return ToByteArray(null);
+    }
+
+    /// <summary>
+    /// Write to an in-memory byte[]
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public byte[] ToByteArray(File3dmWriteOptions options)
+    {
+      options = options ?? new File3dmWriteOptions();
+      int rhino_version = options.Version;
+      if (rhino_version > 4 && rhino_version < 50)
+        rhino_version *= 10;
+      IntPtr ptrBufferArchive = UnsafeNativeMethods.ON_WriteBufferArchive_NewMemoryWriter(rhino_version);
+      IntPtr constPtrThis = ConstPointer();
+      bool success = UnsafeNativeMethods.ONX_Model_ToByteArray(constPtrThis, ptrBufferArchive, rhino_version, (uint)options.RenderMeshFlags, (uint)options.AnalysisMeshFlags, options.SaveUserData);
+      byte[] bytearray = null;
+      if(success)
+      {
+        int sz = (int)UnsafeNativeMethods.ON_WriteBufferArchive_SizeOfArchive(ptrBufferArchive);
+        IntPtr pByteArray = UnsafeNativeMethods.ON_WriteBufferArchive_Buffer(ptrBufferArchive);
+        bytearray = new byte[sz];
+        System.Runtime.InteropServices.Marshal.Copy(pByteArray, bytearray, 0, sz);
+      }
+      UnsafeNativeMethods.ON_WriteBufferArchive_Delete(ptrBufferArchive);
+      return bytearray;
     }
 
     /// <summary>
@@ -1452,6 +1526,36 @@ namespace Rhino.FileIO
       var const_ptr = UnsafeNativeMethods.ONX_Model_ModelObjectGeometryConstPtrFromId(x_model_const_ptr, m_id);
       return const_ptr;
     }
+
+    /// <summary>
+    /// Attempts to read a Rhino plug-in's custom userdata from the <see cref="File3dmObject"/> object.
+    /// </summary>
+    /// <param name="userDataId">The id of the custom userdata object whose data you want to try to read</param>
+    /// <param name="readFromAttributes">
+    /// Set true to attempt to read custom userdata object from the object's <see cref="Attributes"/>.
+    /// Set false to attempt to read custom userdata object from the object's <see cref="Geometry"/>.
+    /// </param>
+    /// <param name="dataReader">
+    /// The function that will read the data.
+    /// This function must be implemented identical to the the originating <see cref="DocObjects.Custom.UserData"/>-inherited class's Read method.
+    /// </param>
+    /// <returns>The value returned by the data reading function if successful, false otherwise.</returns>
+    public bool TryReadUserData(Guid userDataId, bool readFromAttributes, Func<File3dm, BinaryArchiveReader, bool> dataReader)
+    {
+      if (null == dataReader)
+        return false;
+
+      IntPtr ptr_const_model = m_parent.ConstPointer();
+      IntPtr ptr_buffer_archive = UnsafeNativeMethods.ONX_Model_ModelGeometry_UserData_NewArchive(ptr_const_model, m_id, userDataId, readFromAttributes);
+      if (IntPtr.Zero == ptr_buffer_archive)
+        return false;
+
+      BinaryArchiveReader archive = new BinaryArchiveReader(ptr_buffer_archive);
+      bool rc = dataReader(m_parent, archive);
+      UnsafeNativeMethods.ONX_Model_UserData_DeleteArchive(ptr_buffer_archive);
+      return rc;
+    }
+
   }
 
   /// <summary>
@@ -2397,8 +2501,12 @@ namespace Rhino.FileIO
     /// <since>6.0</since>
     public override void Add(File3dmObject item)
     {
-      bool mem;
-      IntPtr ptr_item = item._InternalDuplicate(out mem);
+      // 14-Oct-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-61014
+      // ONX_Model::AddModelComponent make a copy of the input object. So, making
+      // a copy here just causes a memory leak.
+      //bool mem;
+      //IntPtr ptr_item = item._InternalDuplicate(out mem);
+      IntPtr ptr_item = item.ConstPointer();
       IntPtr parent = m_parent.NonConstPointer();
       if (!UnsafeNativeMethods.ONX_Model_AddModelComponent(parent, ptr_item))
         throw new NotSupportedException("Addition of model component failed.");
@@ -3299,7 +3407,7 @@ namespace Rhino.FileIO
     /// Adds a hatch to the document.
     /// </summary>
     /// <param name="hatch">A hatch.</param>
-    /// <param name="attributes">Attributes to apply to brep.</param>
+    /// <param name="attributes">Attributes to apply</param>
     /// <returns>A unique identifier for the hatch, or <see cref="Guid.Empty"/> on failure.</returns>
     /// <since>5.0</since>
     public Guid AddHatch(Hatch hatch, DocObjects.ObjectAttributes attributes)
@@ -3309,9 +3417,33 @@ namespace Rhino.FileIO
       IntPtr pThis = m_parent.NonConstPointer();
       return UnsafeNativeMethods.ONX_Model_ObjectTable_AddHatch(pThis, pConstHatch, pAttr);
     }
-#endregion
 
-#region Object deletion
+    /// <summary>
+    /// Adds a SubD to the document
+    /// </summary>
+    /// <param name="subd">the Subd to add</param>
+    /// <returns>A unique identifier for the SubD, or <see cref="Guid.Empty"/> on failure</returns>
+    public Guid AddSubD(SubD subd)
+    {
+      return AddSubD(subd, null);
+    }
+
+    /// <summary>
+    /// Adds a SubD to the document
+    /// </summary>
+    /// <param name="subd">the Subd to add</param>
+    /// <param name="attributes">Attributes to apply</param>
+    /// <returns>A unique identifier for the SubD, or <see cref="Guid.Empty"/> on failure</returns>
+    public Guid AddSubD(SubD subd, DocObjects.ObjectAttributes attributes)
+    {
+      IntPtr pConstSubD = subd.ConstPointer();
+      IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr pThis = m_parent.NonConstPointer();
+      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddSubD(pThis, pConstSubD, pAttr);
+    }
+    #endregion
+
+    #region Object deletion
     /// <summary>
     /// Deletes object from document.
     /// </summary>
@@ -3373,15 +3505,12 @@ namespace Rhino.FileIO
   }
 
   /// <summary>
-  /// Represents custom plug-in data in the 3dm file written by a plug-in.
+  /// Represents custom plug-in data, in the 3dm file, written by a plug-in.
   /// </summary>
-  public class File3dmPlugInData : IDisposable
+  public class File3dmPlugInData
   {
-    readonly Guid m_id;
-    // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
-    // Modified class to inherit from IDisposable so as to propery delete the ON_Read3dmBufferArchive*
     readonly File3dm m_parent;
-    IntPtr m_ptr_buffer_archive = IntPtr.Zero; // ON_Read3dmBufferArchive*
+    readonly Guid m_id;
 
     internal File3dmPlugInData(File3dm parent, Guid id)
     {
@@ -3390,68 +3519,20 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Returns the id of the plug-in that is associated with this custom data.
+    /// Gets the id of the plug-in that is associated with this custom data.
     /// </summary>
     /// <since>5.0</since>
     public Guid PlugInId => m_id;
-
-    /// <summary>
-    /// Gets a binary archive reader that can be used to read custom data that was written to the 3dm file
-    /// by a Rhino plug-in. This custom data must be read in exactly the same manner that owning plug-in
-    /// reads the data.
-    /// </summary>
-    /// <returns>A binary archive reader if successful, null otherwise.</returns>
-    /// <since>7.0</since>
-    public BinaryArchiveReader ArchiveReader()
-    {
-      // 27-Aug-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-60129
-      if (IntPtr.Zero == m_ptr_buffer_archive)
-      {
-        IntPtr ptr_const_parent = m_parent.ConstPointer();
-        m_ptr_buffer_archive = UnsafeNativeMethods.ONX_Model_UserData_NewGoo(ptr_const_parent, m_id);
-        if (IntPtr.Zero == m_ptr_buffer_archive)
-          return null;
-      }
-      BinaryArchiveReader reader = new BinaryArchiveReader(m_ptr_buffer_archive);
-      return reader;
-    }
-
-    /// <summary>
-    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
-    /// </summary>
-    ~File3dmPlugInData()
-    {
-      InternalDispose();
-    }
-
-    /// <summary>
-    /// Actively reclaims unmanaged resources that this instance uses.
-    /// </summary>
-    /// <since>7.0</since>
-    public void Dispose()
-    {
-      InternalDispose();
-      GC.SuppressFinalize(this);
-    }
-
-    private void InternalDispose()
-    {
-      if (IntPtr.Zero != m_ptr_buffer_archive)
-      {
-        UnsafeNativeMethods.ONX_Model_UserData_DeleteGoo(m_ptr_buffer_archive);
-        m_ptr_buffer_archive = IntPtr.Zero;
-      }
-    }
   }
 
   /// <summary>
   /// Table of custom data provided by plug-ins
   /// </summary>
   public class File3dmPlugInDataTable :
-    //FileIO.File3dmCommonComponentTable<File3dmPlugInData>,
     IEnumerable<File3dmPlugInData>, Collections.IRhinoTable<File3dmPlugInData>
   {
     readonly File3dm m_parent;
+
     internal File3dmPlugInDataTable(File3dm parent)
     {
       m_parent = parent;
@@ -3465,9 +3546,9 @@ namespace Rhino.FileIO
       return m_parent.Dump(File3dm.idxUserDataTable);
     }
 
-#region properties
+    #region properties
     /// <summary>
-    /// Gets the number of File3dmPlugInData in this table.
+    /// Gets the number of <see cref="File3dmPlugInData"/> objects in this table.
     /// </summary>
     /// <since>5.0</since>
     public int Count
@@ -3480,8 +3561,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Gets the File3dmPlugInData at the given index. 
-    /// The index must be valid or an IndexOutOfRangeException will be thrown.
+    /// Gets the <see cref="File3dmPlugInData"/> object at the given index. 
     /// </summary>
     /// <param name="index">Index of File3dmPlugInData to access.</param>
     /// <exception cref="IndexOutOfRangeException">Thrown when the index is invalid.</exception>
@@ -3501,10 +3581,35 @@ namespace Rhino.FileIO
         return new File3dmPlugInData(m_parent, id);
       }
     }
-#endregion
+    #endregion
 
     /// <summary>
-    /// Remove all entries from this table
+    /// Attempts to read a Rhino plug-in's custom data from the <see cref="File3dm"/> file.
+    /// </summary>
+    /// <param name="pluginData">The plug-in whose data you want to try to read.</param>
+    /// <param name="dataReader">
+    /// The function that will read the data.
+    /// This function must be implemented identical to the the originating plug-in's <see cref="PlugIns.PlugIn.ReadDocument(RhinoDoc, BinaryArchiveReader, FileReadOptions)"/> method.
+    /// </param>
+    /// <returns>The value returned by the data reading function if successful, false otherwise.</returns>
+    public bool TryRead(File3dmPlugInData pluginData, Func<File3dm, BinaryArchiveReader, bool> dataReader)
+    {
+      if (null == pluginData || null == dataReader)
+        return false;
+
+      IntPtr ptr_const_model = m_parent.ConstPointer();
+      IntPtr ptr_buffer_archive = UnsafeNativeMethods.ONX_Model_PlugIn_UserData_NewArchive(ptr_const_model, pluginData.PlugInId);
+      if (IntPtr.Zero == ptr_buffer_archive)
+        return false;
+
+      BinaryArchiveReader archive = new BinaryArchiveReader(ptr_buffer_archive);
+      bool rc = dataReader(m_parent, archive);
+      UnsafeNativeMethods.ONX_Model_UserData_DeleteArchive(ptr_buffer_archive);
+      return rc;
+    }
+
+    /// <summary>
+    /// Remove all entries from this table.
     /// </summary>
     /// <since>5.0</since>
     public void Clear()
@@ -3512,7 +3617,6 @@ namespace Rhino.FileIO
       IntPtr pParent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_UserDataTable_Clear(pParent);
     }
-
 
 #region IEnumerable Implementation
     /// <summary>
@@ -3644,6 +3748,22 @@ namespace Rhino.FileIO
       {
         return ModelComponentType.Layer;
       }
+    }
+
+    /// <summary>
+    /// Easy way to add a layer to the model
+    /// </summary>
+    /// <param name="name">new layer name</param>
+    /// <param name="color">new layer color</param>
+    /// <returns>
+    /// If layer_name is valid, the layer's index (>=0) is returned. Otherwise,
+    /// RhinoMath.UnsetIntIndex is returned.
+    /// </returns>
+    public int AddLayer(string name, System.Drawing.Color color)
+    {
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb());
+      return index;
     }
 
     /// <summary>

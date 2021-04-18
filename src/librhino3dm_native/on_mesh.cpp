@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
+RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_mesh.h")
+
 RH_C_FUNCTION ON_Mesh* ON_Mesh_New(const ON_Mesh* pOther)
 {
+  RHCHECK_LICENSE
   if (pOther)
     return new ON_Mesh(*pOther);
   return new ON_Mesh();
@@ -694,7 +697,10 @@ enum MeshBoolConst : int
   mbcHasPrincipalCurvatures = 4,
   mbcHasVertexColors = 5,
   mbcIsClosed = 6,
-  mbcHasDoublePrecisionVerts = 7
+  mbcHasDoublePrecisionVerts = 7,
+  mbcIsManifold = 8,
+  mbcIsOriented = 9,
+  mbcIsSolid = 10
 };
 
 RH_C_FUNCTION bool ON_Mesh_GetBool(const ON_Mesh* pMesh, enum MeshBoolConst which)
@@ -727,6 +733,15 @@ RH_C_FUNCTION bool ON_Mesh_GetBool(const ON_Mesh* pMesh, enum MeshBoolConst whic
       break;
     case mbcHasDoublePrecisionVerts:
       rc = pMesh->HasDoublePrecisionVertices();
+      break;
+    case mbcIsManifold:
+      rc = pMesh->IsManifold();
+      break;
+    case mbcIsOriented:
+      rc = pMesh->IsOriented();
+      break;
+    case mbcIsSolid:
+      rc = pMesh->IsSolid();
       break;
     }
   }
@@ -1090,76 +1105,6 @@ RH_C_FUNCTION bool ON_Mesh_NakedEdgePoints(const ON_Mesh* pMesh, /*ARRAY*/int* n
       rc = true;
     }
   }
-  return rc;
-}
-
-RH_C_FUNCTION bool ON_Mesh_IsPointInside(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT point, double tolerance, bool strictlyin)
-{
-  bool rc = false;
-#if defined(RHINO3DM_BUILD)
-  // do nothing, not supported
-#else
-  // 27 March 2012 - S. Baer
-  // The low-level ON_Mesh::IsPointInside has not been completed and always returns false.
-  // Calling an intersector for now and counting the number of crossings. Odd == inside.
-  // I realize this isn't foolproof since points on faces may cause problems, but it could
-  // hold us over until Dale completes the function (which looks nearly complete in TL_MeshTools.cpp)
-
-  // These input parameters are not currently used, but should be once a proper OpenNURBS
-  // implementation is done
-  tolerance = 0;
-
-  if (
-    nullptr != pConstMesh &&
-    pConstMesh->IsValid() &&
-    pConstMesh->IsClosed() &&
-    pConstMesh->IsManifold() 
-    )
-  {
-    ON_3dPoint _point(point.val);
-    if (_point.IsValid())
-    {
-      ON_BoundingBox bbox = pConstMesh->BoundingBox();
-      if (bbox.IsPointIn(_point, strictlyin)) // eliminate the obvious
-      {
-        ON_Line line(_point, bbox.m_max + ON_3dPoint(100, 100, 100)); // a random direction
-        const ON_MeshTree* mesh_tree = pConstMesh->MeshTree(true);
-        if (mesh_tree)
-        {
-          ON_SimpleArray<ON_CMX_EVENT> events;
-          if (mesh_tree->IntersectLine(line, events))
-          {
-            ON_SimpleArray<ON_3dPoint> hit_points;
-            for (int i = 0; i < events.Count(); i++)
-              hit_points.Append(events[i].m_M[0].m_P);
-
-            // 6-Apr-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57774
-            // Its possible for a point to be inside a closed mesh. But if the random line
-            // happens to intersect the mesh at an edge, you will get two intersection events.
-            // So sort and cull the events.
-            if (hit_points.Count() > 1)
-            {
-              // sort and cull
-              hit_points.QuickSort(&ON_CompareIncreasing<ON_3dPoint>);
-              ON_3dPoint hit = *hit_points.Last();
-              for (int i = hit_points.Count() - 2; i >= 0; i--)
-              {
-                if (hit_points[i].DistanceTo(hit) < ON_ZERO_TOLERANCE)
-                  hit_points.Remove(i);
-                else
-                  hit = hit_points[i];
-              }
-            }
-
-            rc = (hit_points.Count() % 2 == 1) ? true : false;
-            if (rc && strictlyin)
-              rc = (hit_points[0].DistanceTo(_point) > ON_ZERO_TOLERANCE);
-          }
-        }
-      }
-    }
-  }
-#endif
   return rc;
 }
 
@@ -2882,6 +2827,16 @@ RH_C_FUNCTION bool ON_TextureMapping_GetMappingPlane(const ON_TextureMapping* pT
   return true;
 }
 
+RH_C_FUNCTION bool ON_TextureMapping_SetSurfaceParameterMapping(ON_TextureMapping* pTextureMapping)
+{
+  bool rc = false;
+  if (pTextureMapping)
+  {
+    rc = pTextureMapping->SetSurfaceParameterMapping();
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_TextureMapping_SetPlaneMapping(ON_TextureMapping* pTextureMapping, const ON_PLANE_STRUCT* plane, ON_INTERVAL_STRUCT dx, ON_INTERVAL_STRUCT dy, ON_INTERVAL_STRUCT dz, bool capped)
 {
   bool rc = false;
@@ -3683,7 +3638,18 @@ RH_C_FUNCTION int ON_Mesh_GetNgonBoundaryPoints(
   if (constMesh)
   {
     ON_MeshNgon ngon = MakeTempNgon(vCount, vArray, fCount, fArray);
-    constMesh->GetNgonBoundaryPoints(&ngon, bAppendStartPoint, *ngon_boundary_points);
+
+    ON_SimpleArray<unsigned int> verts;
+    ON_MeshVertexFaceMap map;
+    map.SetFromMesh(constMesh, false);
+    if (0 < ngon.FindNgonOuterBoundary(ON_3dPointListRef(constMesh), ON_MeshFaceList(constMesh), &map, ngon.m_Fcount, ngon.m_fi, verts))
+    {
+      int i, ict = verts.Count();
+      for (i = 0; ict > i; i++)
+        ngon_boundary_points->Append(constMesh->Vertex(verts[i]));
+    }
+    if (true == bAppendStartPoint)
+      ngon_boundary_points->Append(constMesh->Vertex(verts[0]));
   }
 
   return ngon_boundary_points->Count();

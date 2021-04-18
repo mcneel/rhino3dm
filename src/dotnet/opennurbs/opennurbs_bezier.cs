@@ -468,4 +468,338 @@ namespace Rhino.Geometry
 #endif
     #endregion
   }
+
+  /// <summary>
+  /// Represents a Bezier surface.
+  /// </summary>
+  public class BezierSurface : IDisposable
+  {
+    IntPtr m_ptr; // This class is never const
+    internal IntPtr ConstPointer() { return m_ptr; }
+    internal IntPtr NonConstPointer() { return m_ptr; }
+    internal BezierSurface(IntPtr ptr)
+    {
+      m_ptr = ptr;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~BezierSurface()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>5.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_BezierSurface_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>Tests an object to see if it is valid.</summary>
+    public bool IsValid
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_BezierSurface_IsValid(const_ptr_this);
+      }
+    }
+
+    /// <summary>Dimension of Bezier</summary>
+    public int Dimension
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_BezierSurface_Dimension(const_ptr_this);
+      }
+    }
+
+    /// <summary>
+    /// Loft a bezier surface through a list of bezier curves.
+    /// </summary>
+    /// <param name="curves">list of curves that have the same degree</param>
+    /// <returns>new bezier curve if successful</returns>
+    public static BezierSurface CreateLoftedBezier(IEnumerable<BezierCurve> curves)
+    {
+      IntPtr ptrSimpleArray = UnsafeNativeMethods.ON_BezierCurve_NewSimpleArray();
+      foreach(var curve in curves)
+      {
+        IntPtr ptrCurve = curve.ConstPointer();
+        UnsafeNativeMethods.ON_BezierCurve_AppendToSimpleArray(ptrSimpleArray, ptrCurve);
+      }
+      IntPtr ptrNewBez = UnsafeNativeMethods.ON_BezierSurface_Loft(ptrSimpleArray);
+      UnsafeNativeMethods.ON_BezierCurve_DeleteSimpleArray(ptrSimpleArray);
+      if (ptrNewBez == IntPtr.Zero)
+        return null;
+      return new BezierSurface(ptrNewBez);
+    }
+
+    /// <summary>
+    /// Bounding box solver. Gets the world axis aligned bounding box for the surface.
+    /// </summary>
+    /// <returns>
+    /// The bounding box of the geometry in world coordinates or BoundingBox.Empty 
+    /// if not bounding box could be found.
+    /// </returns>
+    [ConstOperation]
+    public BoundingBox GetBoundingBox(bool accurate)
+    {
+      var bbox = new BoundingBox();
+      IntPtr const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_BezierSurface_BoundingBox(const_ptr_this, ref bbox);
+      return bbox;
+    }
+    
+    /// <summary>Transforms the surface</summary>
+    /// <param name="xform">
+    /// Transformation to apply to geometry.
+    /// </param>
+    /// <returns>true if geometry successfully transformed.</returns>
+    public bool Transform(Transform xform)
+    {
+      if (xform.IsIdentity)
+        return true;
+
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_BezierSurface_Transform(ptrThis, ref xform);
+    }
+
+    /// <summary>Gets the domain in a direction.</summary>
+    /// <param name="direction">0 gets first parameter, 1 gets second parameter.</param>
+    /// <returns>An interval value.</returns>
+    [ConstOperation]
+    public Interval Domain(int direction)
+    {
+      if (direction != 0)
+        direction = 1;
+      Interval domain = new Interval();
+      IntPtr constPtrThis = ConstPointer();
+      UnsafeNativeMethods.ON_BezierSurface_Domain(constPtrThis, direction, ref domain);
+      return domain;
+    }
+
+    /// <summary>
+    /// Reverses parameterization Domain changes from [a,b] to [-b,-a]
+    /// </summary>
+    /// <param name="direction">
+    /// 0 for first parameter's domain, 1 for second parameter's domain.
+    /// </param>
+    /// <returns>a new reversed surface on success.</returns>
+    [ConstOperation]
+    public BezierSurface Reverse(int direction)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr ptrNewSurface = UnsafeNativeMethods.ON_BezierSurface_Reverse(constPtrThis, direction);
+      if (ptrNewSurface == IntPtr.Zero)
+        return null;
+      return new BezierSurface(ptrNewSurface);
+    }
+
+    /// <summary>
+    /// Transposes surface parameterization (swap U and V)
+    /// </summary>
+    /// <returns>New transposed surface on success, null on failure.</returns>
+    [ConstOperation]
+    public BezierSurface Transpose()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr ptrNewSurface = UnsafeNativeMethods.ON_BezierSurface_Transpose(constPtrThis);
+      if (ptrNewSurface == IntPtr.Zero)
+        return null;
+      return new BezierSurface(ptrNewSurface);
+    }
+
+    /// <summary>Evaluates point at a surface parameter.</summary>
+    /// <param name="u">evaluation parameters.</param>
+    /// <param name="v">evaluation parameters.</param>
+    /// <returns>Point (location of surface at the parameter u,v).</returns>
+    /// <remarks>No error handling.</remarks>
+    [ConstOperation]
+    public Point3d PointAt(double u, double v)
+    {
+      var rc = new Point3d();
+      IntPtr constPtrThis = ConstPointer();
+      UnsafeNativeMethods.ON_BezierSurface_PointAt(constPtrThis, u, v, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Constructs a NURBS surface representation of this surface.
+    /// </summary>
+    /// <returns>NURBS representation of the surface on success, null on failure.</returns>
+    [ConstOperation]
+    public NurbsSurface ToNurbsSurface()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr ptrNurbsSurface = UnsafeNativeMethods.ON_BezierSurface_GetNurbForm(constPtrThis);
+      return GeometryBase.CreateGeometryHelper(ptrNurbsSurface, null) as NurbsSurface;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the surface is rational. 
+    /// Rational surfaces have control-points with custom weights.
+    /// </summary>
+    public bool IsRational
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_BezierSurface_IsRational(constPtrThis);
+      }
+    }
+
+    /// <summary>
+    /// Number of control vertices in this surface
+    /// </summary>
+    /// <param name="direction">
+    /// 0 for first parameter's domain, 1 for second parameter's domain.
+    /// </param>
+    public int ControlVertexCount(int direction)
+    {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_BezierSurface_CVCount(constPtrThis, direction);
+    }
+
+    /// <summary>Get location of a control vertex.</summary>
+    /// <param name="i">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <param name="j">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <returns>
+    /// If the bezier is rational, the euclidean location is returned.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">when i or j is out of range</exception>
+    [ConstOperation]
+    public Point2d GetControlVertex2d(int i, int j)
+    {
+      var pt = GetControlVertex3d(i, j);
+      return new Point2d(pt.X, pt.Y);
+    }
+
+    /// <summary>Get location of a control vertex.</summary>
+    /// <param name="i">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <param name="j">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <returns>
+    /// If the bezier is rational, the euclidean location is returned.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">when i or j is out of range</exception>
+    [ConstOperation]
+    public Point3d GetControlVertex3d(int i, int j)
+    {
+      if (i < 0 || i >= ControlVertexCount(0))
+        throw new ArgumentOutOfRangeException("i");
+      if (j < 0 || j >= ControlVertexCount(1))
+        throw new ArgumentOutOfRangeException("j");
+
+      var rc = new Point3d();
+      IntPtr constPtrThis = ConstPointer();
+      if (!UnsafeNativeMethods.ON_BezierSurface_GetCV3d(constPtrThis, i, j, ref rc))
+        return Point3d.Unset;
+      return rc;
+    }
+
+    /// <summary>Get location of a control vertex.</summary>
+    /// <param name="i">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <param name="j">
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// </param>
+    /// <returns>
+    /// Homogeneous value of control vertex. If the bezier is not
+    /// rational, the weight is 1.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    [ConstOperation]
+    public Point4d GetControlVertex4d(int i, int j)
+    {
+      if (i < 0 || i >= ControlVertexCount(0))
+        throw new ArgumentOutOfRangeException("i");
+      if (j < 0 || j >= ControlVertexCount(1))
+        throw new ArgumentOutOfRangeException("j");
+
+      var rc = new Point4d();
+      IntPtr constPtrThis = ConstPointer();
+      if (!UnsafeNativeMethods.ON_BezierSurface_GetCV4d(constPtrThis, i, j, ref rc))
+        return Point4d.Unset;
+      return rc;
+    }
+
+    /// <summary>Make bezier rational</summary>
+    /// <returns>true if successful</returns>
+    public bool MakeRational()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_BezierSurface_MakeRational(ptrThis, true);
+    }
+
+    /// <summary>Make bezier non-rational</summary>
+    /// <returns>true if successful</returns>
+    public bool MakeNonRational()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_BezierSurface_MakeRational(ptrThis, false);
+    }
+
+    /// <summary>
+    /// Divides the Bezier surface at the specified parameter.
+    /// </summary>
+    /// <param name="direction">0 is split along u and 1 is split along v</param>
+    /// <param name="t">parameter must satisfy 0 &lt; t &lt; 1</param>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns>true on success</returns>
+    [ConstOperation]
+    public bool Split(int direction, double t, out BezierSurface left, out BezierSurface right)
+    {
+      left = null;
+      right = null;
+      IntPtr ptr_left = UnsafeNativeMethods.ON_BezierSurface_New();
+      IntPtr ptr_right = UnsafeNativeMethods.ON_BezierSurface_New();
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_BezierSurface_Split(const_ptr_this, direction, t, ptr_left, ptr_right);
+      if (rc)
+      {
+        left = new BezierSurface(ptr_left);
+        right = new BezierSurface(ptr_right);
+      }
+      else
+      {
+        UnsafeNativeMethods.ON_BezierSurface_Delete(ptr_left);
+        UnsafeNativeMethods.ON_BezierSurface_Delete(ptr_right);
+      }
+      return rc;
+    }
+
+  }
 }

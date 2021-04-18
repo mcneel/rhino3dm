@@ -152,7 +152,6 @@ namespace Rhino.Geometry
       return CreateGeometryHelper(ptr_new_geometry, null);
     }
 
-
     internal GeometryBase(IntPtr ptr, object parent, int subobjectIndex)
     {
       if (subobjectIndex >= 0 && parent == null)
@@ -786,7 +785,28 @@ namespace Rhino.Geometry
       Runtime.CommonObject.GcProtect(first, second);
       return rc;
     }
- #endif
+#endif
+
+    /// <summary>
+    /// Determines if two objects are respectively shallow copies,
+    /// new managed instantiations of the same geometry, or similar
+    /// internal references to the exact same geometry, both in managed and in unmanaged code.
+    /// </summary>
+    /// <param name="one">The first object</param>
+    /// <param name="other">The other object</param>
+    /// <returns>True if indeed the objects are really the same. False otherwise.</returns>
+    public static bool GeometryReferenceEquals(GeometryBase one, GeometryBase other)
+    {
+      if (object.ReferenceEquals(one, other)) return true;
+      if (object.ReferenceEquals(one, null)) return false;
+      if (object.ReferenceEquals(other, null)) return false;
+      if (one.ConstPointer() != IntPtr.Zero && one.ConstPointer() == other.ConstPointer()) return true;
+      if (one.m_shallow_parent != null && other.ConstPointer() != IntPtr.Zero && one.m_shallow_parent.ConstPointer() == other.ConstPointer()) return true;
+      if (other.m_shallow_parent != null && one.ConstPointer() != IntPtr.Zero && other.m_shallow_parent.ConstPointer() == one.ConstPointer()) return true;
+      if (one.m_shallow_parent != null && other.m_shallow_parent != null && other.m_shallow_parent.ConstPointer() != IntPtr.Zero
+        && one.m_shallow_parent.ConstPointer() == one.m_shallow_parent.ConstPointer()) return true;
+      return false;
+    }
   }
 
   // DO NOT make public

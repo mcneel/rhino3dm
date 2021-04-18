@@ -110,8 +110,15 @@ namespace Rhino
         }
         if (actions == null || actions.Length < 1)
           return;
-        foreach (var item in actions)
-          item.Callback.DynamicInvoke(item.Args);
+
+        // 14 Dec 2020 S. Baer (RH-61572)
+        // Attempt to track down cause of crash for this method by adding a risky action spy
+        string name = actions[0].Callback.Method.Name;
+        using (var riskyAction = new Rhino.Runtime.RiskyAction(name, "InvokeHelper.InvokeCallback"))
+        {
+          foreach (var item in actions)
+            item.Callback.DynamicInvoke(item.Args);
+        }
       }
       catch (Exception ex)
       {
@@ -171,6 +178,7 @@ namespace Rhino
     {
       return UnsafeNativeMethods.CRhinoApp_GetBool(which);
     }
+
 
     ///<summary>
     ///Rhino SDK 9 digit SDK version number in the form YYYYMMDDn
@@ -467,18 +475,24 @@ namespace Rhino
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino4Id); }
     }
 
-    ///<summary>Gets the ID of Rhino 5.</summary>
+    ///<summary>Gets the ID of Rhino 5</summary>
     /// <since>5.0</since>
     public static Guid Rhino5Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino5Id); }
     }
 
-    ///<summary>Gets the ID of Rhino 6.</summary>
+    ///<summary>Gets the ID of Rhino 6</summary>
     /// <since>7.0</since>
     public static Guid Rhino6Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino6Id); }
+    }
+
+    ///<summary>Gets the ID of Rhino 7</summary>
+    public static Guid Rhino7Id
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino7Id); }
     }
 
     ///<summary>Gets the current ID of Rhino.</summary>
@@ -673,6 +687,23 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Enable or disable sending command window strings to the console
+    /// RhinoApp.Write(...) calls would be sent to the console when this
+    /// is enabled
+    /// </summary>
+    public static bool SendWriteToConsole
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoApp_SendCommandWindowPrintToConsoleEnabled();
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoApp_SendCommandWindowPrintToConsole(value);
+      }
+    }
+
+    /// <summary>
     /// Get list of strings sent to the command window through calls to Write or WriteLine
     /// when capturing has been enabled
     /// </summary>
@@ -844,6 +875,19 @@ namespace Rhino
     public static void Exit()
     {
       UnsafeNativeMethods.CRhinoApp_Exit();
+    }
+
+    /// <summary>
+    /// Exits, or closes Rhino with an option to forcefully exit without option to cancel.
+    /// A prompt to save will appear if necessary when forcefully exiting
+    /// Works on Windows and MacOS
+    /// </summary>
+    public static void Exit(bool forceExit)
+    {
+      if(forceExit)
+       UnsafeNativeMethods.CRhinoApp_TerminateWithExtremePrejudice();
+      else
+        Exit();
     }
 
     internal static bool InEventWatcher { get; set; }
@@ -1244,8 +1288,11 @@ namespace Rhino
         {
           return GetBool(UnsafeNativeMethods.RhinoAppBool.IsInternetAccessAllowed);
         }
-        catch (System.DllNotFoundException)
+        catch 
         {
+          // This Catch used to be specific; it turns out there are several ways for 
+          // RhinoCommon to fail to load, and we don't need to take everything down
+          // because of it.
           return true;
         }
       }

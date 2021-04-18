@@ -54,10 +54,17 @@ namespace Rhino.DocObjects
       }
     }
 
-    internal Layer(IntPtr pConstLayer)
+    internal Layer(IntPtr ptrLayer, bool isConstPointer)
     {
-      LayerHolder holder = new LayerHolder(pConstLayer);
-      ConstructConstObject(holder, -1);
+      if (isConstPointer)
+      {
+        LayerHolder holder = new LayerHolder(ptrLayer);
+        ConstructConstObject(holder, -1);
+      }
+      else
+      {
+        ConstructNonConstObject(ptrLayer);
+      }
     }
 
     internal Layer(Guid id, FileIO.File3dm onxModel)
@@ -407,8 +414,8 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        int abgr = UnsafeNativeMethods.ON_Layer_GetColor(const_ptr_this, true);
-        return Runtime.Interop.ColorFromWin32(abgr);
+        int argb = UnsafeNativeMethods.ON_Layer_GetColor(const_ptr_this, true);
+        return System.Drawing.Color.FromArgb(argb);
       }
       set
       {
@@ -428,8 +435,8 @@ namespace Rhino.DocObjects
     public System.Drawing.Color PerViewportColor(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      int abgr = UnsafeNativeMethods.ON_Layer_GetPerViewportColor(const_ptr_this, viewportId, true);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.ON_Layer_GetPerViewportColor(const_ptr_this, viewportId, true);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
     /// <summary>
@@ -1316,7 +1323,7 @@ namespace Rhino.DocObjects.Tables
       {
         if (m_old_layer == null && m_ptr_old_layer!=IntPtr.Zero)
         {
-          m_old_layer = new Layer(m_ptr_old_layer);
+          m_old_layer = new Layer(m_ptr_old_layer, true);
         }
         return m_old_layer;
       }

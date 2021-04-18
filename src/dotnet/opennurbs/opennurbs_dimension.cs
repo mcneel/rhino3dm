@@ -135,7 +135,7 @@ namespace Rhino.Geometry
     /// Gets the numeric value (or measurement), depending on geometry type.
     /// <para>LinearDimension: distance between arrow tips</para>
     /// <para>RadialDimension: radius or diameter depending on type</para>
-    /// <para>AngularDimension: angle in degrees</para>
+    /// <para>AngularDimension: angle in radians</para>
     /// </summary>
     /// <since>6.0</since>
     public double NumericValue

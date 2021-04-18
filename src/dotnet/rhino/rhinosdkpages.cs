@@ -333,6 +333,8 @@ namespace Rhino.UI
         var page = OptionsDialogPageFromRuntimeId(runtimeId);
         if (page == null)
           return default_result;
+        if (uInt < 1)
+          uInt = RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0;
         var doc = RhinoDoc.FromRuntimeSerialNumber(uInt);
         if (doc != null)
          return (int)page.RunScript(doc, Commands.RunMode.Scripted);
@@ -612,6 +614,13 @@ namespace Rhino.UI
     {
       var pointer = UnmanagedIRhinoPagePointerFromPage(page);
       var result = UnsafeNativeMethods.IRhinoOptionsPage_GetSetModified(pointer, set, value);
+      return result;
+    }
+
+    public static bool SetActiveOptionsPage(StackedDialogPage page, string englishPageName, bool documentPropertiesPage)
+    {
+      var pointer = UnmanagedIRhinoPagePointerFromPage(page);
+      var result = UnsafeNativeMethods.IRhinoOptionsPage_SetActiveOptionsPage(pointer, englishPageName, documentPropertiesPage);
       return result;
     }
 

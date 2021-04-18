@@ -223,10 +223,26 @@ namespace Rhino.Input
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>A command result based on user choice.</returns>
     /// <since>5.0</since>
+    [Obsolete("Use method that requires document")]
     public static Result GetPointOnMesh(Guid meshObjectId, string prompt, bool acceptNothing, out Point3d point)
     {
+      return GetPointOnMesh(null, meshObjectId, prompt, acceptNothing, out point);
+    }
+
+    /// <summary>
+    /// Gets a point constrained to an existing mesh in the document.
+    /// </summary>
+    /// <param name="doc">Document containing mesh object.</param>
+    /// <param name="meshObjectId">An ID of a mesh in the document.</param>
+    /// <param name="prompt">Text prompt.</param>
+    /// <param name="acceptNothing">true if nothing else should be accepted.</param>
+    /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
+    /// <returns>A command result based on user choice.</returns>
+    /// <since>7.6</since>
+    public static Result GetPointOnMesh(RhinoDoc doc, Guid meshObjectId, string prompt, bool acceptNothing, out Point3d point)
+    {
       point = new Point3d();
-      int gprc = UnsafeNativeMethods.RHC_RhinoGetPointOnMesh(meshObjectId, prompt, acceptNothing, ref point);
+      int gprc = UnsafeNativeMethods.RHC_RhinoGetPointOnMesh(doc?.RuntimeSerialNumber ?? 0, meshObjectId, prompt, acceptNothing, ref point);
       Result rc = Result.Failure;
       if (0 == gprc)
         rc = Result.Success;
@@ -246,9 +262,26 @@ namespace Rhino.Input
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>The command result based on user choice.</returns>
     /// <since>5.0</since>
+    [Obsolete("Use version that takes a document.")]
     public static Result GetPointOnMesh(MeshObject meshObject, string prompt, bool acceptNothing, out Point3d point)
     {
-      return GetPointOnMesh(meshObject.Id, prompt, acceptNothing, out point);
+      return GetPointOnMesh(null, meshObject.Id, prompt, acceptNothing, out point);
+    }
+
+
+    /// <summary>
+    /// Gets a point constrained to an existing mesh in the document.
+    /// </summary>
+    /// <param name="doc">The Rhino document</param>
+    /// <param name="meshObject">An mesh object in the document.</param>
+    /// <param name="prompt">Text prompt.</param>
+    /// <param name="acceptNothing">true if nothing else should be accepted.</param>
+    /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
+    /// <returns>The command result based on user choice.</returns>
+    /// <since>7.6</since>
+    public static Result GetPointOnMesh(RhinoDoc doc, MeshObject meshObject, string prompt, bool acceptNothing, out Point3d point)
+    {
+      return GetPointOnMesh(doc, meshObject.Id, prompt, acceptNothing, out point);
     }
 
     /// <summary>Easy to use color getter.</summary>

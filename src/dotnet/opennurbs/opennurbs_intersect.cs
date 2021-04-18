@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Rhino.Runtime.InteropWrappers;
 using System.Linq;
 using Rhino.FileIO;
+using System.Runtime.InteropServices;
 
 namespace Rhino.Geometry.Intersect
 {
@@ -331,6 +332,7 @@ namespace Rhino.Geometry.Intersect
 
       return (SphereSphereIntersection)rc;
     }
+
     /// <summary>
     /// Intersects an infinite line and an axis aligned bounding box.
     /// </summary>
@@ -1047,9 +1049,12 @@ namespace Rhino.Geometry.Intersect
       if (UseNewMeshIntersections)
       {
         const double fixed_tolerance = RhinoMath.SqrtEpsilon * 10;
-
         var arr = new[] { meshA, meshB };
-        var made_it = MeshMesh(arr, fixed_tolerance, out Polyline[] result, false, out Polyline[] _, false, out Mesh _, null, System.Threading.CancellationToken.None, null);
+
+        TextLog commandline = null;
+        if (PrintMeshIntersectionErrors) commandline = TextLog.NewCommandLine();
+
+        var made_it = MeshMesh(arr, fixed_tolerance, out Polyline[] result, false, out Polyline[] _, false, out Mesh _, commandline, System.Threading.CancellationToken.None, null);
         if (!made_it) return null;
         if (result == null) return new Line[0];
         return result.SelectMany((pl) => pl.GetSegments()).ToArray();
@@ -1080,12 +1085,28 @@ namespace Rhino.Geometry.Intersect
     {
       get
       {
-        return UnsafeNativeMethods.RH_MX_UseNew(false, false);
+        return UnsafeNativeMethods.RH_MX_UseNew(true, false);
       }
       set
       {
-        UnsafeNativeMethods.RH_MX_UseNew(true, value);
+        UnsafeNativeMethods.RH_MX_UseNew(false, value);
       }
+    }
+
+    /// <summary>
+    /// Mofify an internal debug mechanism. Talk to Giulio regarding this.
+    /// </summary>
+    internal static bool GetSet_MX_DebugOptions(int which, bool get, bool new_value)
+    {
+      return UnsafeNativeMethods.RH_GetSet_MX_DebugOptions(which, get, new_value);
+    }
+
+    /// <summary>
+    /// Instructs Rhino to print way way too much information regarding intersections.
+    /// </summary>
+    internal static bool PrintMeshIntersectionErrors
+    {
+      get; set;
     }
 
     private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "MeshIntersections.RequestedDiminishTolerancesCoefficient";
@@ -1299,66 +1320,103 @@ namespace Rhino.Geometry.Intersect
     /// <param name="mesh">A mesh to intersect.</param>
     /// <param name="ray">A ray to be casted.</param>
     /// <returns>
-    /// >= 0.0 parameter along ray if successful.
+    /// &gt;= 0.0 parameter along ray if successful.
     /// &lt; 0.0 if no intersection found.
     /// </returns>
     /// <since>5.0</since>
     public static double MeshRay(Mesh mesh, Ray3d ray)
     {
       IntPtr pConstMesh = mesh.ConstPointer();
-      double rc = UnsafeNativeMethods.ON_Intersect_MeshRay1(pConstMesh, ref ray, IntPtr.Zero);
+      int count = 0;
+      IntPtr zero = IntPtr.Zero;
+      double rc = UnsafeNativeMethods.ON_Intersect_MeshRay2(pConstMesh, ref ray, true, 0.0, ref count, ref zero, ref zero);
       GC.KeepAlive(mesh);
 
       return rc;
     }
+
+    /*
+    /// <summary>Finds all intersections of a ray with a mesh.</summary>
+    /// <param name="mesh">A mesh to intersect.</param>
+    /// <param name="ray">A ray to be casted.</param>
+    /// <param name="tolerance">A tolerance value to discard similar hits.</param>
+    /// <param name="tParameters">A list of t values along the ray.</param>
+    /// <param name="meshFaceIndices">For each t, returns a mesh face index that was hit.</param>
+    public static void MeshRay(Mesh mesh, Ray3d ray, double tolerance, out double[] tParameters, out int[] meshFaceIndices)
+    {
+      IntPtr pConstMesh = mesh.ConstPointer();
+
+      IntPtr tsOut = new IntPtr(int.MaxValue);
+      IntPtr faceIdsOut = new IntPtr(int.MaxValue);
+      int count = 0;
+      double rc = UnsafeNativeMethods.ON_Intersect_MeshRay2(pConstMesh, ref ray, false, tolerance, ref count, ref tsOut, ref faceIdsOut);
+
+      tParameters = new double[count];
+      meshFaceIndices = new int[count];
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_FillDelete(count, IntPtr.Zero, faceIdsOut, tsOut, null, meshFaceIndices, tParameters);
+
+      GC.KeepAlive(mesh);
+    }
+    */
 
     /// <summary>Finds the first intersection of a ray with a mesh.</summary>
     /// <param name="mesh">A mesh to intersect.</param>
     /// <param name="ray">A ray to be casted.</param>
     /// <param name="meshFaceIndices">faces on mesh that ray intersects.</param>
     /// <returns>
-    /// >= 0.0 parameter along ray if successful.
+    /// &gt;= 0.0 parameter along ray if successful.
     /// &lt; 0.0 if no intersection found.
     /// </returns>
     /// <remarks>
     /// The ray may intersect more than one face in cases where the ray hits
-    /// the edge between two faces or the vertex corner shared by multiple faces.
+    /// the edge between two faces or the vertex corner shared by multiple faces,
+    /// or more than one face is coplanar or happens to be intersecting at the
+    /// same location as the ray.
     /// </remarks>
     /// <since>5.0</since>
     public static double MeshRay(Mesh mesh, Ray3d ray, out int[] meshFaceIndices)
     {
       meshFaceIndices = null;
-      using (Runtime.InteropWrappers.SimpleArrayInt indices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
-      {
-        IntPtr pConstMesh = mesh.ConstPointer();
-        double rc = UnsafeNativeMethods.ON_Intersect_MeshRay1(pConstMesh, ref ray, indices.m_ptr);
-        int[] vals = indices.ToArray();
-        if (vals != null && vals.Length > 0)
-          meshFaceIndices = vals;
-        GC.KeepAlive(mesh);
-        return rc;
-      }
+      double rc;
+
+      IntPtr pConstMesh = mesh.ConstPointer();
+      int count = default;
+      IntPtr _ = IntPtr.Zero;
+      IntPtr faces = new IntPtr(int.MaxValue);
+      rc = UnsafeNativeMethods.ON_Intersect_MeshRay2(pConstMesh, ref ray, true, 0.0, ref count, ref _, ref faces);
+
+      GC.KeepAlive(mesh);
+      meshFaceIndices = new int[count];
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_FillDelete(count, _, faces, _, null, meshFaceIndices, null);
+      GC.KeepAlive(meshFaceIndices);
+
+      return rc;
     }
 
     private static Point3d[] MeshPolyline_Helper(Mesh mesh, PolylineCurve curve, out int[] faceIds, bool sorted)
     {
       faceIds = null;
       IntPtr pConstMesh = mesh.ConstPointer();
+      IntPtr points = default;
+      IntPtr faceIdsPtr = default;
       IntPtr pConstCurve = curve.ConstPointer();
-      int count = 0;
-      IntPtr rc = UnsafeNativeMethods.ON_Intersect_MeshPolyline1(pConstMesh, pConstCurve, ref count);
-      if (0 == count || IntPtr.Zero == rc)
+      int count = UnsafeNativeMethods.ON_Intersect_MeshPolyline1(pConstMesh, pConstCurve, sorted, ref points, ref faceIdsPtr);
+
+      GC.KeepAlive(mesh);
+
+      if (0 == count || IntPtr.Zero == points || IntPtr.Zero == faceIdsPtr)
         return new Point3d[0];
 
-      Point3d[] points = new Point3d[count];
+      var pointsOut = new Point3d[count];
       faceIds = new int[count];
-      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds, sorted);
-      Runtime.CommonObject.GcProtect(mesh, curve, points, faceIds);
-      return points;
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_FillDelete(count, points, faceIdsPtr, IntPtr.Zero, pointsOut, faceIds, null);
+
+      Runtime.CommonObject.GcProtect(curve, pointsOut, faceIds);
+      return pointsOut;
     }
 
     /// <summary>
-    /// Finds the intersection of a mesh and a polyline. Points are not guaranteed to be sorted along the polyline.
+    /// Finds the intersection of a mesh and a polyline. Starting from version 7, points are always sorted along the polyline.
     /// </summary>
     /// <param name="mesh">A mesh to intersect.</param>
     /// <param name="curve">A polyline curves to intersect.</param>
@@ -1367,7 +1425,7 @@ namespace Rhino.Geometry.Intersect
     /// <since>5.0</since>
     public static Point3d[] MeshPolyline(Mesh mesh, PolylineCurve curve, out int[] faceIds)
     {
-      return MeshPolyline_Helper(mesh, curve, out faceIds, false);
+      return MeshPolyline_Helper(mesh, curve, out faceIds, true);
     }
 
     /// <summary>
@@ -1383,20 +1441,28 @@ namespace Rhino.Geometry.Intersect
       return MeshPolyline_Helper(mesh, curve, out faceIds, true);
     }
 
-    private static Point3d[] MeshLine_Helper(Mesh mesh, Line line, out int[] faceIds, bool sorted)
+    private static Point3d[] MeshLine_Helper(Mesh mesh, Line line, bool faces, out int[] faceIds, bool sorted)
     {
-      faceIds = null;
-      IntPtr pConstMesh = mesh.ConstPointer();
-      int count = 0;
-      IntPtr rc = UnsafeNativeMethods.ON_Intersect_MeshLine(pConstMesh, line.From, line.To, ref count);
-      if (0 == count || IntPtr.Zero == rc)
-        return new Point3d[0];
+      sorted = true; //from Rhino 7 SR4, sorted is always on. Cost is frivolous.
 
-      Point3d[] points = new Point3d[count];
-      faceIds = new int[count];
-      UnsafeNativeMethods.ON_Intersect_MeshPolyline_Fill(rc, count, points, faceIds, sorted);
-      Runtime.CommonObject.GcProtect(mesh, points, faceIds);
-      return points;
+      if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+
+      IntPtr pConstMesh = mesh.ConstPointer();
+      IntPtr points = default;
+      IntPtr faceIdsPtr = default;
+      int count = UnsafeNativeMethods.ON_Intersect_MeshLine(pConstMesh, line.From, line.To, sorted, ref points, faces, ref faceIdsPtr);
+      if (0 == count || IntPtr.Zero == points)
+      {
+        faceIds = new int[0];
+        return new Point3d[0];
+      }
+
+      var pointsOut = new Point3d[count];
+      if (faces) faceIds = new int[count]; else faceIds = null;
+      UnsafeNativeMethods.ON_Intersect_MeshPolyline_FillDelete(count, points, faceIdsPtr, IntPtr.Zero, pointsOut, faceIds, null);
+      
+      Runtime.CommonObject.GcProtect(mesh, pointsOut, faceIds);
+      return pointsOut;
     }
 
 
@@ -1405,25 +1471,40 @@ namespace Rhino.Geometry.Intersect
     /// </summary>
     /// <param name="mesh">A mesh to intersect</param>
     /// <param name="line">The line to intersect with the mesh</param>
-    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
-    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call. Empty if nothing is found.</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.
+    /// Empty if no items are found.</returns>
     /// <since>5.0</since>
     public static Point3d[] MeshLine(Mesh mesh, Line line, out int[] faceIds)
     {
-      return MeshLine_Helper(mesh, line, out faceIds, false);
+      return MeshLine_Helper(mesh, line, true, out faceIds, false);
     }
+
+    /// <summary>
+    /// Finds the intersections of a mesh and a line.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect</param>
+    /// <param name="line">The line to intersect with the mesh</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.
+    /// Empty if no items are found.</returns>
+    public static Point3d[] MeshLine(Mesh mesh, Line line)
+    {
+      return MeshLine_Helper(mesh, line, false, out _, false);
+    }
+
 
     /// <summary>
     /// Finds the intersections of a mesh and a line. Points are sorted along the line.
     /// </summary>
     /// <param name="mesh">A mesh to intersect</param>
     /// <param name="line">The line to intersect with the mesh</param>
-    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call.</param>
-    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.</returns>
+    /// <param name="faceIds">The indices of the intersecting faces. This out reference is assigned during the call. Empty if nothing is found.</param>
+    /// <returns>An array of points: one for each face that was passed by the faceIds out reference.
+    /// Empty if no items are found.</returns>
     /// <since>5.0</since>
     public static Point3d[] MeshLineSorted(Mesh mesh, Line line, out int[] faceIds)
     {
-      return MeshLine_Helper(mesh, line, out faceIds, true);
+      return MeshLine_Helper(mesh, line, true, out faceIds, true);
     }
 
     /// <summary>
@@ -1509,23 +1590,23 @@ namespace Rhino.Geometry.Intersect
 
 #endif
 
-    #endregion
+#endregion
 
 #if RHINO_SDK
-    /// <summary>
-    /// Projects points onto meshes.
-    /// </summary>
-    /// <param name="meshes">the meshes to project on to.</param>
-    /// <param name="points">the points to project.</param>
-    /// <param name="direction">the direction to project.</param>
-    /// <param name="tolerance">
-    /// Projection tolerances used for culling close points and for line-mesh intersection.
-    /// </param>
-    /// <returns>
-    /// Array of projected points, or null in case of any error or invalid input.
-    /// </returns>
-    /// <since>5.0</since>
-    public static Point3d[] ProjectPointsToMeshes(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
+        /// <summary>
+        /// Projects points onto meshes.
+        /// </summary>
+        /// <param name="meshes">the meshes to project on to.</param>
+        /// <param name="points">the points to project.</param>
+        /// <param name="direction">the direction to project.</param>
+        /// <param name="tolerance">
+        /// Projection tolerances used for culling close points and for line-mesh intersection.
+        /// </param>
+        /// <returns>
+        /// Array of projected points, or null in case of any error or invalid input.
+        /// </returns>
+        /// <since>5.0</since>
+        public static Point3d[] ProjectPointsToMeshes(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
     {
       Point3d[] rc = null;
       if (meshes != null && points != null)

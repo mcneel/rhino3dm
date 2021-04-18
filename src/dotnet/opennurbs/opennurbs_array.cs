@@ -2933,7 +2933,33 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr_const_objref = UnsafeNativeMethods.ON_ClassArrayON_ObjRef_Get(ptr_const_this, i);
         if (IntPtr.Zero != ptr_const_objref)
-          rc[i] = new DocObjects.ObjRef(ptr_const_objref, false);
+          rc[i] = new DocObjects.ObjRef(null, ptr_const_objref, false);
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    /// <param name="doc">Document containing the array of objects</param>
+    /// <returns>The managed array.</returns>
+    /// <since>7.6</since>
+    public DocObjects.ObjRef[] ToNonConstArray(RhinoDoc doc)
+    {
+      if (doc == null)
+        throw new ArgumentNullException(nameof(doc));
+
+      int count = Count;
+      if (count < 1)
+        return new DocObjects.ObjRef[0];
+      IntPtr ptr_const_this = ConstPointer();
+
+      DocObjects.ObjRef[] rc = new DocObjects.ObjRef[count];
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr ptr_const_objref = UnsafeNativeMethods.ON_ClassArrayON_ObjRef_Get(ptr_const_this, i);
+        if (IntPtr.Zero != ptr_const_objref)
+          rc[i] = new DocObjects.ObjRef(doc, ptr_const_objref, false);
       }
       return rc;
     }

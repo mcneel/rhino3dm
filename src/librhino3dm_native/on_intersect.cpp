@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <map>
 
 #if !defined(RHINO3DM_BUILD)
 // ray shooter and mesh/mesh intersect not supported in stand alone OpenNURBS
@@ -541,7 +542,9 @@ static double RhCmnMaxDistance_Helper(const ON_BoundingBox& bbox, const ON_3dPoi
   return V.Length();
 }
 
-RH_C_FUNCTION double ON_Intersect_MeshRay1(const ON_Mesh* pMesh, ON_3dRay* ray, ON_SimpleArray<int>* face_indices)
+
+// [Giulio, 2020 12 24] Unused code. Can be deleted when we see fit
+RH_C_FUNCTION double ON_Intersect_MeshRay_OLD(const ON_Mesh* pMesh, ON_3dRay* ray, ON_SimpleArray<int>* face_indices)
 {
   double rc = -1.0;
   // it is ok if face_indices is null
@@ -612,59 +615,200 @@ RH_C_FUNCTION double ON_Intersect_MeshRay1(const ON_Mesh* pMesh, ON_3dRay* ray, 
   return rc;
 }
 
-RH_C_FUNCTION ON_SimpleArray<ON_CMX_EVENT>* ON_Intersect_MeshPolyline1(const ON_Mesh* pMesh, const ON_PolylineCurve* pCurve, int* count)
+
+RH_C_FUNCTION double ON_Intersect_MeshRay2(const ON_Mesh* pMesh, const ON_3dRay* ray, bool removeHidden, double tolerance, int* count_out, void** ts_out, void** faceIds_out)
 {
-  ON_SimpleArray<ON_CMX_EVENT>* rc = nullptr;
-  if( pMesh && pCurve && count )
+  double rc = ON_DBL_NINF;
+  if (count_out) *count_out = 0;
+  // it is ok if face_indices is null
+  if (pMesh && ray)
   {
-    *count = 0;
-    const ON_MeshTree* mesh_tree = pMesh->MeshTree(true);
-    if( mesh_tree )
+    ON_SimpleArray<double>* ts_arr = ts_out ? new ON_SimpleArray<double>() : nullptr;
+    ON_SimpleArray<int>* faceIds_out_arr = faceIds_out ? new ON_SimpleArray<int>() : nullptr;
+
+    rc = MX::PublicIntersectionOps::MeshRayIntersect(*pMesh, *ray, faceIds_out_arr, ts_arr, removeHidden, tolerance);
+
+    if (ts_out) *ts_out = ts_arr;
+    if (faceIds_out) *faceIds_out = faceIds_out_arr;
+    if (count_out && (ts_arr || faceIds_out_arr)) *count_out = ts_arr ? ts_arr->Count() : faceIds_out_arr->Count();
+  }
+
+  return rc;
+}
+
+
+RH_C_FUNCTION bool ON_Mesh_IsPointInside(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT point, double tolerance, bool strictlyin)
+{
+  bool rc = false;
+#if defined(RHINO3DMIO_BUILD)
+  // do nothing, not supported
+#else
+  // 27 March 2012 - S. Baer
+  // The low-level ON_Mesh::IsPointInside has not been completed and always returns false.
+  // Calling an intersector for now and counting the number of crossings. Odd == inside.
+  // I realize this isn't foolproof since points on faces may cause problems, but it could
+  // hold us over until Dale completes the function (which looks nearly complete in TL_MeshTools.cpp)
+
+  // These input parameters are not currently used, but should be once a proper OpenNURBS
+  // implementation is done
+  tolerance = 0;
+
+  if (
+    nullptr != pConstMesh && 
+    /*pConstMesh->IsValid() && [Giulio] The validy test is not cached and should only be done outside the call, and only once */
+    pConstMesh->IsClosed() && 
+    pConstMesh->IsManifold()
+    )
+  {
+    ON_3dPoint _point(point.val);
+    if (_point.IsValid())
     {
-      rc = new ON_SimpleArray<ON_CMX_EVENT>();
-      int pline_count = pCurve->m_pline.Count();
-      const ON_3dPoint* points = pCurve->m_pline.Array();
-      if( mesh_tree->IntersectPolyline(pline_count, points, *rc) )
+      ON_BoundingBox bbox = pConstMesh->BoundingBox();
+      
+      if (bbox.IsPointIn(_point, strictlyin)) // eliminate the obvious
       {
-        *count = rc->Count();
+        ON_3dRay ray { _point,
+          ON_3dVector(_point.x < (bbox.m_max.x+bbox.m_min.x)*0.5 ? -1 : 1, 0, 0) // a random direction toward a likely "outside"
+        }; 
+
+        ON_SimpleArray<double> ts;
+        if (ON_IntersectMeshRay(pConstMesh, ray, 0.0, ts) && ts.Count() > 0) //[Giulio, Feb 2021] band-aided by using new intersector
+        {
+          ON_SimpleArray<ON_3dPoint> hit_points;
+          for (int i = 0; i < ts.Count(); i++)
+            hit_points.Append(ray.m_P + (ray.m_V * ts[i]));
+
+          // 6-Apr-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57774
+          // Its possible for a point to be inside a closed mesh. But if the random line
+          // happens to intersect the mesh at an edge, you will get two intersection events.
+          // So sort and cull the events.
+          if (hit_points.Count() > 1)
+          {
+            // sort and cull
+            hit_points.QuickSort(&ON_CompareIncreasing<ON_3dPoint>);
+            ON_3dPoint hit = *hit_points.Last();
+            for (int i = hit_points.Count() - 2; i >= 0; i--)
+            {
+              if (hit_points[i].DistanceTo(hit) < ON_ZERO_TOLERANCE)
+                hit_points.Remove(i);
+              else
+                hit = hit_points[i];
+            }
+          }
+
+          rc = (hit_points.Count() % 2 == 1) ? true : false;
+          if (rc && strictlyin)
+            rc = (hit_points[0].DistanceTo(_point) > ON_ZERO_TOLERANCE);
+        }
       }
     }
   }
+#endif
   return rc;
 }
 
-RH_C_FUNCTION ON_SimpleArray<ON_CMX_EVENT>* ON_Intersect_MeshLine(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT from, ON_3DPOINT_STRUCT to, int* count)
+
+
+RH_C_FUNCTION int ON_Intersect_MeshPolyline1(const ON_Mesh* pConstMesh, const ON_PolylineCurve* pConstPolyCurve, bool sort,
+  void** points_out, void** faceIds_out)
 {
-  ON_SimpleArray<ON_CMX_EVENT>* rc = nullptr;
+  int rc = 0;
+  if (pConstMesh && pConstPolyCurve)
+  {
+    ON_SimpleArray<ON_3dPoint>* points_out_arr = new ON_SimpleArray<ON_3dPoint>();
+    ON_SimpleArray<int>* faceIds_out_arr = new ON_SimpleArray<int>();
+    ON_SimpleArray<double> ts_arr;
+
+    const ON_Polyline* poly_ptr = &pConstPolyCurve->m_pline;
+    if (poly_ptr != nullptr)
+    {
+      MX::PublicIntersectionOps::MeshPolylineIntersect(*pConstMesh, *poly_ptr, faceIds_out_arr, &ts_arr, sort, 0.0);
+
+      for (int i = 0; i < ts_arr.Count(); i++)
+      {
+        points_out_arr->Append(poly_ptr->PointAt(ts_arr[i]));
+      }
+
+      *points_out = (void**)points_out_arr;
+      *faceIds_out = (void**)faceIds_out_arr;
+      rc = ts_arr.Count();
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION int ON_Intersect_MeshLine(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT from, ON_3DPOINT_STRUCT to, bool sort,
+  void** points_out, bool faces, void** faceIds_out)
+{
+  int rc = 0;
   if( pConstMesh )
   {
-    ON_3dPoint start(from.val);
-    ON_3dPoint end(to.val);
-    ON_Line line(start, end);
-    const ON_MeshTree* mesh_tree = pConstMesh->MeshTree(true);
-    if( mesh_tree )
+    ON_Line line { ON_3dPoint(from.val), ON_3dPoint(to.val) };
+    
+    ON_SimpleArray<ON_3dPoint>* points_out_arr = new ON_SimpleArray<ON_3dPoint>();
+    ON_SimpleArray<int>* faceIds_out_arr = faces ? new ON_SimpleArray<int>() : nullptr;
+    ON_SimpleArray<double> ts_arr;
+
+    if (MX::PublicIntersectionOps::MeshLineIntersect(*pConstMesh, line, faceIds_out_arr, &ts_arr, false, sort, 0.0) >= 0)
     {
-      rc = new ON_SimpleArray<ON_CMX_EVENT>();
-      if( mesh_tree->IntersectLine(line, *rc) && count )
-        *count = rc->Count();
+      for (int i = 0; i < ts_arr.Count(); i++)
+        points_out_arr->Append(line.PointAt(ts_arr[i]));
+
+      *points_out = (void**)points_out_arr;
+      *faceIds_out = (void**)faceIds_out_arr;
+      rc = ts_arr.Count();
     }
   }
   return rc;
 }
 
-RH_C_FUNCTION void ON_Intersect_MeshPolyline_Fill(ON_SimpleArray<ON_CMX_EVENT>* pCMX, int count, /*ARRAY*/ON_3dPoint* points, /*ARRAY*/int* faceIds)
+RH_C_FUNCTION void ON_Intersect_MeshPolyline_FillDelete(int count, void* points_out_now_in, void* faceIds_out_now_in, void* ts_out_now_in,
+  /*ARRAY*/ON_3dPoint* points_out, /*ARRAY*/int* faceIds_out, /*ARRAY*/double* ts_out)
 {
-  if( pCMX && points && faceIds && pCMX->Count()==count )
+  if (points_out_now_in && points_out)
   {
-    for( int i=0; i<count; i++ )
+    auto smplarr = ((ON_SimpleArray<ON_3dPoint>*)points_out_now_in);
+    if (smplarr->Count() == count)
     {
-      points[i] = (*pCMX)[i].m_M[0].m_P;
-      faceIds[i] = (*pCMX)[i].m_M[0].m_face_index;
+      auto arr = smplarr->Array();
+      memcpy(points_out, arr, sizeof(ON_3dPoint) * count);
+      delete smplarr;
     }
   }
+  if (faceIds_out_now_in && faceIds_out)
+  {
+    auto smplarr = ((ON_SimpleArray<int>*)faceIds_out_now_in);
+    if (smplarr->Count() == count)
+    {
+      auto arr = smplarr->Array();
+      memcpy(faceIds_out, arr, sizeof(int) * count);
+      delete smplarr;
+    }
+  }
+  if (ts_out_now_in && ts_out)
+  {
+    auto smplarr = ((ON_SimpleArray<double>*)ts_out_now_in);
+    if (smplarr->Count() == count)
+    {
+      auto arr = smplarr->Array();
+      memcpy(ts_out, arr, sizeof(double) * count);
+      delete smplarr;
+    }
+  }
+}
 
-  if( pCMX )
-    delete pCMX;
+RH_C_FUNCTION bool RHC_Polyline_RemoveNearlyEqualSubsequentPoints(/*ARRAY*/ON_3dPoint* points, int* count, double tolerance)
+{
+  ON_Polyline pl;
+  pl.SetArray(points, *count, *count);
+
+  bool rc = MX::PublicIntersectionOps::RemoveNearlyEqualSubsequentPointsInPolyline(pl, tolerance);
+
+  *count = pl.Count();
+  pl.KeepArray();
+
+  return rc;
 }
 
 #endif
+

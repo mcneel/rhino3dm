@@ -1786,11 +1786,26 @@ namespace Rhino.Geometry
     /// <since>7.0</since>
     public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop, bool quadCaps)
     {
-      if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
-      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCylinderWithQuadCaps(ref cylinder, vertical, around, capBottom, capTop, quadCaps);
-      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+      return CreateFromCylinder(cylinder, vertical, around, capBottom, capTop, false, quadCaps);
     }
 
+    /// <summary>Constructs a mesh cylinder.</summary>
+    /// <param name="cylinder"></param>
+    /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="around">Number of faces around the cylinder.</param>
+    /// <param name="capBottom">If true end at Cylinder.Height1 should be capped.</param>
+    /// <param name="capTop">If true end at Cylinder.Height2 should be capped.</param>
+    /// <param name="circumscribe">If true end polygons will circumscribe circle.</param>
+    /// <param name="quadCaps">If true and it's possible to make quad caps, i.e.. around is even, then caps will have quad faces.</param>
+    /// <exception cref="ArgumentException">Thrown when cylinder is invalid.</exception>
+    /// <returns>Returns a mesh cylinder if successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public static Mesh CreateFromCylinder(Cylinder cylinder, int vertical, int around, bool capBottom, bool capTop, bool circumscribe, bool quadCaps)
+    {
+      if (!cylinder.IsValid) { throw new ArgumentException("cylinder is invalid"); }
+      IntPtr ptr_mesh = UnsafeNativeMethods.RHC_RhinoMeshCylinderWithQuadCaps(ref cylinder, vertical, around, capBottom, capTop, circumscribe, quadCaps);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
     /// <summary>Constructs a solid mesh cone.</summary>
     /// <param name="cone"></param>
     /// <param name="vertical">Number of faces in the top-to-bottom direction.</param>
@@ -2593,10 +2608,8 @@ namespace Rhino.Geometry
 #endif
 
     /// <summary>
-    /// Gets a value indicating whether a mesh is considered to be closed (solid).
-    /// A mesh is considered solid when every mesh edge borders two or more faces.
+    /// Returns true if every mesh "edge" has two or more faces.
     /// </summary>
-    /// <returns>true if the mesh is closed, false if it is not.</returns>
     /// <since>5.0</since>
     public bool IsClosed
     {
@@ -2605,6 +2618,43 @@ namespace Rhino.Geometry
         IntPtr ptr = ConstPointer();
         return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsClosed);
       }
+    }
+
+    /// <summary>
+    /// Returns true if the mesh is manifold and every pair of faces that share an "edge" have compatible orientations.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsOriented
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsOriented);
+      }
+    }
+
+    /// <summary>
+    /// Returns true if the mesh is solid. A "solid" is a closed oriented manifold.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsSolid
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsSolid);
+      }
+    }
+
+    /// <summary>
+    /// Returns true if every mesh "edge" has at most two faces.
+    /// </summary>
+    /// <returns>true if the mesh is manifold, false otherwise.</returns>
+    /// <since>7.6</since>
+    public bool IsManifold()
+    {
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsManifold);
     }
 
     /// <summary>
@@ -3006,7 +3056,7 @@ namespace Rhino.Geometry
     /// <param name="point">3d point to test.</param>
     /// <param name="tolerance">
     /// (&gt;=0) 3d distance tolerance used for ray-mesh intersection
-    /// and determining strict inclusion.
+    /// and determining strict inclusion. This is expected to be a tiny value.
     /// </param>
     /// <param name="strictlyIn">
     /// If strictlyIn is true, then point must be inside mesh by at least
@@ -3018,8 +3068,8 @@ namespace Rhino.Geometry
     /// true if point is inside the solid mesh, false if not.
     /// </returns>
     /// <remarks>
-    /// The caller is responsible for making certain the mesh is solid before
-    /// calling this function. If the mesh is not solid, the behavior is unpredictable.
+    /// The caller is responsible for making certain the mesh is valid, closed, and 2-manifold before
+    /// calling this function. If the mesh is not, the behavior is undetermined.
     /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
@@ -3233,6 +3283,25 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoFillMeshHole(ptr_this, topologyEdgeIndex);
+    }
+
+    /// <summary>
+    /// Moves face edges of an open mesh to meet adjacent face edges.
+    /// The method will first try to match vertices, and then then it will try to split edges to make the edges match.
+    /// </summary>
+    /// <param name="distance">The distance tolerance. Use larger tolerances only if you select specific edges to close.</param>
+    /// <param name="rachet">
+    /// If true, matching the mesh takes place in four passes starting at a tolerance that is smaller
+    /// than your specified tolerance and working up to the specified tolerance with successive passes.
+    /// This matches small edges first and works up to larger edges.
+    /// If false, then a single pass is made.
+    /// </param>
+    /// <returns>True of edges were matched, false otherwise.</returns>
+    /// <since>7.4</since>
+    public bool MatchEdges(double distance, bool rachet)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMatchMeshEdge(ptr_this, distance, rachet);
     }
 
     /// <summary>
@@ -4007,7 +4076,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="bGreaterThan">Determines whether edge with lengths greater than or less than edgeLength are collapsed.</param>
     /// <param name="edgeLength">Length with which to compare to edge lengths.</param>
-    /// <returns>Number of edges (faces) that were collapsed.</returns>
+    /// <returns>Number of edges (faces) that were collapsed, -1 for general failure (like bad topology or index out of range)
+    /// or -2 if all of the edges would be collapsed and the resulting mesh would be invalid.</returns>
     /// <remarks>
     /// This number may differ from the initial number of edges that meet
     /// the input criteria because the lengths of some initial edges may be altered as other edges are collapsed.
@@ -4938,26 +5008,28 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the self intersections of this mesh.
+    /// Gets the intersections of this mesh with itself.
     /// </summary>
-    /// <param name="tolerance"></param>
-    /// <param name="intersections"></param>
-    /// <param name="overlapsPolylines"></param>
-    /// <param name="overlapsPolylinesResult"></param>
-    /// <param name="overlapsMesh"></param>
-    /// <param name="overlapsMeshResult"></param>
-    /// <param name="textLog"></param>
-    /// <param name="cancel"></param>
-    /// <param name="progress"></param>
-    /// <returns></returns>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <returns>An array of intersection and overlaps polylines.</returns>
+    /// <param name="perforations">The array of perforations.</param>
+    /// <param name="overlapsPolylines">If true, the next argument is computed.</param>
+    /// <param name="overlapsPolylinesResult">The array of overlaps, in terms of polylines.</param>
+    /// <param name="overlapsMesh">If true, the next argument is computed.</param>
+    /// <param name="overlapsMeshResult">A mesh that represents the overlaps in terms of surfaces.</param>
+    /// <param name="textLog">A report of the outcome.</param>
+    /// <param name="cancel">A cancellation token.</param>
+    /// <param name="progress">A progress reporter.</param>
+    /// <returns>True on success, false on failure and cancellation.</returns>
     /// <since>7.0</since>
     public bool GetSelfIntersections(double tolerance,
-      out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
+      out Polyline[] perforations, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
       FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
     {
       var list = new RhinoList<Mesh>(1) { this };
       return Intersect.Intersection.MeshMesh_Helper(
-        list, tolerance, true, false, out intersections,
+        list, tolerance, true, false, out perforations,
         overlapsPolylines, out overlapsPolylinesResult,
         overlapsMesh, out overlapsMeshResult, textLog, cancel, progress);
     }
@@ -7509,6 +7581,17 @@ namespace Rhino.Geometry.Collections
 
 #if RHINO_SDK
     /// <summary>
+    /// Merges two triangular mesh faces that share an edge into one quadrangular face.
+    /// </summary>
+    /// <param name="edgeIndex">The common topological edge index.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool MergeAdjacentFaces(int edgeIndex)
+    {
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhMerge2AdjacentMeshFaces(ptr_mesh, edgeIndex);
+    }
+
+    /// <summary>
     /// Returns the mesh face at the given index. 
     /// </summary>
     /// <param name="index">Index of face to get. Must be larger than or equal to zero and 
@@ -7975,6 +8058,22 @@ namespace Rhino.Geometry.Collections
       }
     }
 
+    /// <summary>
+    /// Find all connected face indices
+    /// </summary>
+    /// <param name="faceIndex">face index to start from</param>
+    /// <returns>list of connected face indices</returns>
+    /// <since>7.1</since>
+    public int[] GetConnectedFaces(int faceIndex)
+    {
+      IntPtr ptr_const_mesh = m_mesh.ConstPointer();
+      using (var indices = new SimpleArrayInt())
+      {
+        IntPtr ptr_simplearray_int = indices.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoMakeConnectedMeshFaceList(ptr_const_mesh, faceIndex, 0, true, ptr_simplearray_int);
+        return indices.ToArray();
+      }
+    }
     /// <summary>
     /// Uses startFaceIndex and finds all connected face indexes up to unwelded
     /// or naked edges. If treatNonmanifoldLikeUnwelded is true then non-manifold

@@ -867,6 +867,21 @@ using Rhino.Runtime.InteropWrappers;
             return "ref Plane";
           }
 
+          if (s.Equals("CurveSegment"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "CurveSegment[]";
+              else
+                return "[In,Out] CurveSegment[]";
+            }
+            return "ref CurveSegment";
+          }
+
+          if (s.Equals("MeshCheckParameters"))
+            return "ref MeshCheckParameters";
+
           if (s.Equals("Circle"))
             return "ref Circle";
 
@@ -943,6 +958,9 @@ using Rhino.Runtime.InteropWrappers;
         if (s_type.Equals("ON_LINE_STRUCT"))
           return "Line";
 
+        if (s_type.Equals("ON_TRIANGLE_STRUCT"))
+          return "Triangle3d";
+
         if (s_type.Equals("ON_2INTS"))
           return "ComponentIndex";
 
@@ -993,7 +1011,13 @@ using Rhino.Runtime.InteropWrappers;
 
         if(s_type.Equals("ON_ARROWHEAD_STRUCT"))
           return "AnnotationArrowhead";
-        
+
+        if (s_type.Equals("ON_CURVE_REGION_BOUNDARY_ELEMENT_STRUCT"))
+          return "CurveSegment";
+
+        if (s_type.Equals("RhinoCheckMeshOutput"))
+          return "MeshCheckParameters";
+
         return enumTranslations.Translate(s_type, out translated);
       }
 

@@ -20,6 +20,7 @@ RH_C_FUNCTION bool ON_Curve_Domain( ON_Curve* pCurve, bool set, ON_Interval* iva
 
 RH_C_FUNCTION ON_Curve* ON_Curve_DuplicateCurve(ON_Curve* pCurve)
 {
+  RHCHECK_LICENSE
   ON_Curve* rc = nullptr;
   if( pCurve )
     rc = pCurve->DuplicateCurve();
@@ -256,6 +257,7 @@ RH_C_FUNCTION bool ON_Curve_SetPoint( ON_Curve* pCurve, ON_3DPOINT_STRUCT pt, bo
 
 RH_C_FUNCTION void ON_Curve_PointAt( const ON_Curve* pCurve, double t, ON_3dPoint* pt, int which )
 {
+  RHCHECK_LICENSE
   const int idxPointAtT = 0;
   const int idxPointAtStart = 1;
   const int idxPointAtEnd = 2;
@@ -288,6 +290,7 @@ RH_C_FUNCTION void ON_Curve_GetVector( const ON_Curve* pCurve, int which, double
 
 RH_C_FUNCTION bool ON_Curve_Evaluate( const ON_Curve* pCurve, int derivatives, int side, double t, ON_3dPointArray* outVectors )
 {
+  RHCHECK_LICENSE
   bool rc = false;
   
   if( pCurve && outVectors )
@@ -308,6 +311,7 @@ RH_C_FUNCTION bool ON_Curve_Evaluate( const ON_Curve* pCurve, int derivatives, i
 
 RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_PLANE_STRUCT* plane, bool zero_twisting)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pConstCurve && plane )
   {
@@ -330,6 +334,7 @@ RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_P
 
 RH_C_FUNCTION bool ON_Curve_GetClosestPoint( const ON_Curve* pCurve, ON_3DPOINT_STRUCT test_point, double* t, double maximum_distance)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pCurve )
   {
@@ -341,6 +346,7 @@ RH_C_FUNCTION bool ON_Curve_GetClosestPoint( const ON_Curve* pCurve, ON_3DPOINT_
 
 RH_C_FUNCTION bool ON_Curve_GetLocalClosestPoint(const ON_Curve* pCurve, ON_3DPOINT_STRUCT test_point, double s, double* t)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if (pCurve && t)
   {
@@ -353,6 +359,7 @@ RH_C_FUNCTION bool ON_Curve_GetLocalClosestPoint(const ON_Curve* pCurve, ON_3DPO
 
 RH_C_FUNCTION bool ON_Curve_GetLength(const ON_Curve* pCurve, double* length, double fractional_tol, ON_INTERVAL_STRUCT sub_domain, bool ignoreSubDomain)
 {
+  RHCHECK_LICENSE
   const ON_Interval* _sub_domain = nullptr;
   if (!ignoreSubDomain)
     _sub_domain = (const ON_Interval*)&sub_domain;
@@ -461,6 +468,7 @@ RH_C_FUNCTION bool ON_Curve_Split( const ON_Curve* pCurve, double t, ON_Curve** 
 
 RH_C_FUNCTION ON_NurbsCurve* ON_Curve_NurbsCurve(const ON_Curve* pCurve, double tolerance, ON_INTERVAL_STRUCT sub_domain, bool ignoreSubDomain)
 {
+  RHCHECK_LICENSE
   ON_NurbsCurve* rc = nullptr;
   if( pCurve )
   {
@@ -474,6 +482,7 @@ RH_C_FUNCTION ON_NurbsCurve* ON_Curve_NurbsCurve(const ON_Curve* pCurve, double 
 
 RH_C_FUNCTION bool ON_Curve_GetNurbParameter(const ON_Curve* pCurve, double t_in, double* t_out, bool nurbToCurve)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pCurve && t_out )
   {
@@ -520,6 +529,18 @@ RH_C_FUNCTION bool ON_Curve_GetNextDiscontinuity(const ON_Curve* curvePtr, int c
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Curve_GetNextDiscontinuity2(const ON_Curve* curvePtr, int continuityType, double t0, double t1,
+  double cosAngleTolerance, double curvatureTolerance, double* t)
+{
+  bool rc = false;
+  if (curvePtr)
+  {
+    ON::continuity c = ON::Continuity(continuityType);
+    rc = curvePtr->GetNextDiscontinuity(c, t0, t1, t, nullptr, nullptr, cosAngleTolerance, curvatureTolerance);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Curve_IsContinuous(const ON_Curve* curvePtr, int continuityType, double t)
 {
   bool rc = false;
@@ -539,6 +560,7 @@ RH_C_FUNCTION bool ON_Curve_IsContinuous(const ON_Curve* curvePtr, int continuit
 
 RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Curve_IntersectPlane(const ON_Curve* pConstCurve, ON_PLANE_STRUCT* plane, double tolerance)
 {
+  RHCHECK_LICENSE
   ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
   if(pConstCurve && plane)
   {
@@ -557,6 +579,7 @@ RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Curve_IntersectPlane(const ON_Curve
 
 RH_C_FUNCTION ON_MassProperties* ON_Curve_AreaMassProperties(const ON_Curve* pCurve, double rel_tol, double abs_tol, double curve_planar_tol)
 {
+  RHCHECK_LICENSE
   ON_MassProperties* rc = nullptr;
   if (pCurve)
   {
@@ -584,8 +607,50 @@ RH_C_FUNCTION ON_MassProperties* ON_Curve_AreaMassProperties(const ON_Curve* pCu
   return rc;
 }
 
+RH_C_FUNCTION ON_MassProperties* ON_Curve_LengthMassProperties(const ON_Curve* pCurve, bool bLength, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double rel_tol, double abs_tol)
+{
+  ON_MassProperties* rc = nullptr;
+  if (pCurve)
+  {
+    rc = new ON_MassProperties();
+    bool success = pCurve->LengthMassProperties(*rc, bLength, bFirstMoments, bSecondMoments, bProductMoments, rel_tol, abs_tol);
+    if (!success)
+    {
+      delete rc;
+      rc = nullptr;
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_MassProperties* ON_Curve_LengthMassProperties2(const ON_SimpleArray<const ON_Curve*>* pConstArray, bool bLength, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double rel_tol, double abs_tol)
+{
+  ON_MassProperties* rc = nullptr;
+  if (pConstArray && pConstArray->Count() > 0)
+  {
+    for (int i = 0; i < pConstArray->Count(); i++)
+    {
+      const ON_Curve* pCurve = (*pConstArray)[i];
+      if (nullptr == pCurve)
+        continue;
+
+      ON_MassProperties mp;
+      bool success = pCurve->LengthMassProperties(mp, bLength, bFirstMoments, bSecondMoments, bProductMoments, rel_tol, abs_tol);
+      if (success)
+      {
+        if (nullptr == rc)
+          rc = new ON_MassProperties(mp);
+        else
+          rc->Sum(1, &mp, true);
+      }
+    }
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool RHC_RhinoTweenCurves( const ON_Curve* pStartCurve, const ON_Curve* pEndCurve, int num_curves, double tolerance, ON_SimpleArray<ON_Curve*>* outputCurves )
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pStartCurve && pEndCurve && outputCurves )
     rc = RhinoTweenCurves( pStartCurve, pEndCurve, num_curves, tolerance, *outputCurves );
@@ -594,6 +659,7 @@ RH_C_FUNCTION bool RHC_RhinoTweenCurves( const ON_Curve* pStartCurve, const ON_C
 
 RH_C_FUNCTION bool RHC_RhinoTweenCurvesWithMatching( const ON_Curve* pStartCurve, const ON_Curve* pEndCurve, int num_curves, double tolerance, ON_SimpleArray<ON_Curve*>* outputCurves )
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pStartCurve && pEndCurve && outputCurves )
     rc = RhinoTweenCurvesWithMatching( pStartCurve, pEndCurve, num_curves, tolerance, *outputCurves );
@@ -630,7 +696,8 @@ RH_C_FUNCTION int RHC_RhinoIsCurveConicSection(const ON_Curve* pConstCurve, ON_3
 
 RH_C_FUNCTION bool RHC_RhinoCurve2View(const ON_Curve* curve1, const ON_Curve* curve2, ON_3DVECTOR_STRUCT vector1, ON_3DVECTOR_STRUCT vector2, ON_SimpleArray<ON_Curve*>* outputCurves, double tolerance, double angle_tolerance) 
 {
-	bool rc = false;
+  RHCHECK_LICENSE
+  bool rc = false;
 
 	if (curve1 && curve2 && outputCurves) {
 
@@ -656,7 +723,8 @@ RH_C_FUNCTION bool RHC_CreateTextOutlines(
 	double small_caps_scale,
 	ON_SimpleArray<ON_Curve*>* outputCurves)
 {
-	bool rc = false;
+  RHCHECK_LICENSE
+  bool rc = false;
 
 	INPUTSTRINGCOERCE(string, str);
 	INPUTSTRINGCOERCE(font_string, font_str);

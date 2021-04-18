@@ -141,7 +141,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the Kappa curvature value.
+    /// Gets the principal curvature values.
+    ///   Kappa(0) - Principal curvature with maximum absolute value
+    ///   Kappa(1) - Principal curvature with minimum absolute value
     /// </summary>
     /// <param name="direction">Kappa index, valid values are 0 and 1.</param>
     /// <returns>The specified kappa value.</returns>
@@ -702,6 +704,55 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_Surface_GetNextDiscontinuity(ptr, direction, (int)continuityType, t0, t1, ref t);
     }
 
+    /// <summary>
+    /// Searches for a derivative, tangent, or curvature discontinuity.
+    /// </summary>
+    /// <param name="direction">
+    /// If 0, then "u" parameter is checked. If 1, then the "v" parameter is checked.
+    /// </param>
+    /// <param name="continuityType">The desired continuity.</param>
+    /// <param name="t0">
+    /// Search begins at t0. If there is a discontinuity at t0, it will be ignored. 
+    /// This makes it possible to repeatedly call GetNextDiscontinuity and step through the discontinuities.
+    /// </param>
+    /// <param name="t1">
+    /// (t0 != t1) If there is a discontinuity at t1 is will be ignored unless c is a locus discontinuity
+    /// type and t1 is at the start or end of the curve.
+    /// </param>
+    /// <param name="cosAngleTolerance">
+    /// default = cos(1 degree) Used only  when continuityType is G1_continuous or G2_continuous.
+    /// If the cosine of the angle between two tangent vectors is &lt;= cos_angle_tolerance, then
+    /// a G1 discontinuity is reported.
+    /// </param>
+    /// <param name="curvatureTolerance">
+    /// (default = ON_SQRT_EPSILON) Used only when continuityType is G2_continuous. If K0 and K1
+    /// are curvatures evaluated from above and below and |K0 - K1| &gt; curvature_tolerance, then
+    /// a curvature discontinuity is reported.
+    /// </param>
+    /// <param name="t">
+    /// if a discontinuity is found, then t reports the parameter at the discontinuity.
+    /// </param>
+    /// <returns>
+    /// Parametric continuity tests c = (C0_continuous, ..., G2_continuous):
+    /// TRUE if a parametric discontinuity was found strictly between t0 and t1.
+    /// Note well that all curves are parametrically continuous at the ends of their domains.
+    /// 
+    /// Locus continuity tests c = (C0_locus_continuous, ...,G2_locus_continuous):
+    /// TRUE if a locus discontinuity was found strictly between t0 and t1 or at t1 is the
+    /// at the end of a curve. Note well that all open curves (IsClosed()=false) are locus
+    /// discontinuous at the ends of their domains.  All closed curves (IsClosed()=true) are
+    /// at least C0_locus_continuous at the ends of their domains.
+    /// </returns>
+    [ConstOperation]
+    public bool GetNextDiscontinuity(int direction, Continuity continuityType, double t0, double t1,
+      double cosAngleTolerance, double curvatureTolerance, out double t)
+    {
+      IntPtr ptr = ConstPointer();
+      t = 0;
+      return UnsafeNativeMethods.ON_Surface_GetNextDiscontinuity2(ptr, direction, (int)continuityType, t0, t1,
+        cosAngleTolerance, curvatureTolerance, ref t);
+    }
+
     // [skipping]
     //  ON_NurbsSurface* NurbsSurface(
     //  void DestroySurfaceTree();
@@ -829,6 +880,25 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_Surface_Split(cosnt_ptr_this, direction, parameter, const_ptr_surfaces);
         return surfaces.ToNonConstArray();
       }
+    }
+
+    /// <summary>
+    /// Analytically extends the surface to include the interval.
+    /// </summary>
+    /// <param name="direction">
+    /// If 0, Surface.Domain(0) will include the interval. (the first surface parameter).
+    /// If 1, Surface.Domain(1) will include the interval. (the second surface parameter).
+    /// </param>
+    /// <param name="interval">
+    /// If the interval is not included in surface domain, the surface will be extended so that its domain includes the interval.
+    /// Note, this method will fail if the surface is closed in the specified direction. 
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>7.4</since>
+    public bool Extend(int direction, Interval interval)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Surface_Extend(ptr_this, direction, interval);
     }
 
     #region converters
@@ -1185,6 +1255,22 @@ namespace Rhino.Geometry
 
     #region Rhino Build only
 #if RHINO_SDK
+
+    #region properties
+    /// <summary>
+    /// Returns true if the surface is a non-rational, uniform, natural or periodic, cubic NURBS surface. Otherwise, false is returend.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool IsSubDFriendly
+    {
+      get
+      {
+        IntPtr ptr_const_surface = ConstPointer();
+        return UnsafeNativeMethods.ON_SubD_IsSubDFriendlySurface(ptr_const_surface);
+      }
+    }
+    #endregion
+
     #region statics
 
     /// <summary>

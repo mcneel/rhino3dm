@@ -432,6 +432,33 @@ namespace Rhino.DocObjects
         return guids.ToArray();
       }
     }
+
+    /// <summary>
+    /// Returns or sets the per-object render meshing parameters, which controls the object's render mesh density.
+    /// If this property is null, then the object uses the document's render meshing parameters.
+    /// To remove the per-object render meshing parameters, set this property to null.
+    /// </summary>
+    /// <since>7.6</since>
+    public MeshingParameters CustomMeshingParameters
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        IntPtr ptr_meshingparameters = UnsafeNativeMethods.ON_3dmObjectAttributes_CustomRenderMeshParameters(ptr_const_this);
+        if (IntPtr.Zero == ptr_meshingparameters)
+          return null;
+        return new MeshingParameters(ptr_meshingparameters);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr ptr_const_meshingparameters = IntPtr.Zero;
+        if (null != value)
+          ptr_const_meshingparameters = value.ConstPointer();
+        UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ptr_this, ptr_const_meshingparameters);
+      }
+    }
+
 /*
     /// <summary>
     /// If "this" has attributes (color, plot weight, ...) with "by parent" sources,
@@ -616,8 +643,8 @@ namespace Rhino.DocObjects
     System.Drawing.Color GetColor(int which)
     {
       IntPtr ptr = ConstPointer();
-      int abgr = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, false, 0);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, false, 0);
+      return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(int which, System.Drawing.Color c)
     {
