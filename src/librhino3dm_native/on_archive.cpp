@@ -2834,6 +2834,7 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
 }
 #endif
 
+#if !defined(RHINO3DM_BUILD)
 #if defined(ON_RUNTIME_WIN)
 RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 {
@@ -2910,6 +2911,7 @@ RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
   return thumbnailImage;
 }
 #endif // if defined(ON_RUNTIME_APPLE)
+#endif
 
 class CBinaryFileHelper : public ON_BinaryFile
 {
