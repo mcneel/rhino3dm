@@ -33,7 +33,7 @@ RH_C_FUNCTION int ON_Layer_GetColor(const ON_Layer* pLayer, bool regularColor)
       abgr = (unsigned int)(pLayer->Color());
     else
       abgr = (unsigned int)(pLayer->PlotColor());
-    rc = static_cast<int>(abgr);
+    rc = (int)ABGR_to_ARGB(abgr);
   }
   return rc;
 }
@@ -247,15 +247,17 @@ RH_C_FUNCTION void ON_Layer_DeletePerViewportSettings(ON_Layer* pLayer, ON_UUID 
 
 RH_C_FUNCTION int ON_Layer_GetPerViewportColor(const ON_Layer* pLayer, ON_UUID viewportId, bool regularColor)
 {
-  ON_Color rc;
+  int rc = 0;
   if (nullptr != pLayer)
   {
+    unsigned int abgr;
     if (regularColor)
-      rc = pLayer->PerViewportColor(viewportId);
+      abgr = (unsigned int) pLayer->PerViewportColor(viewportId);
     else
-      rc = pLayer->PerViewportPlotColor(viewportId);
+      abgr = (unsigned int)  pLayer->PerViewportPlotColor(viewportId);
+    rc = (int)ABGR_to_ARGB(abgr);
   }
-  return (int)rc;
+  return rc;
 }
 
 RH_C_FUNCTION void ON_Layer_SetPerViewportColor(ON_Layer* pLayer, ON_UUID viewportId, int argb, bool regularColor)

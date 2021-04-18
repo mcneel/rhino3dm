@@ -20,6 +20,7 @@ namespace Rhino.Geometry
     public Polyline()
     {
     }
+
     /// <summary>
     /// Initializes a new empty polyline with an initial capacity.
     /// </summary>
@@ -898,6 +899,15 @@ namespace Rhino.Geometry
         rc[i] = new MeshFace(triangles[i * 3], triangles[i * 3 + 1], triangles[i * 3 + 2]);
       }
       return rc;
+    }
+
+    /// <summary>
+    /// Removes one copy of a point that is equal to the previous or later point, by an absolute tolerance factor.
+    /// </summary>
+    /// <param name="tolerance"></param>
+    public void RemoveNearlyEqualSubsequentPoints(double tolerance)
+    {
+      UnsafeNativeMethods.RHC_Polyline_RemoveNearlyEqualSubsequentPoints(m_items, ref m_size, tolerance);
     }
 #endif
 

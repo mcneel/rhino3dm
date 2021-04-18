@@ -2,11 +2,13 @@
 
 void CopyToCircleStruct(ON_CIRCLE_STRUCT& cs, const ON_Circle& circle)
 {
+  RHCHECK_LICENSE
   memcpy(&cs, &circle, sizeof(ON_CIRCLE_STRUCT));
 }
 
 ON_Circle FromCircleStruct(const ON_CIRCLE_STRUCT& cs)
 {
+  RHCHECK_LICENSE
   ON_Circle circle;
   memcpy(&circle, &cs, sizeof(ON_CIRCLE_STRUCT));
   circle.plane.UpdateEquation();
@@ -16,7 +18,8 @@ ON_Circle FromCircleStruct(const ON_CIRCLE_STRUCT& cs)
 
 RH_C_FUNCTION void ON_Circle_Create3Pt(ON_CIRCLE_STRUCT* c, ON_3DPOINT_STRUCT p, ON_3DPOINT_STRUCT q, ON_3DPOINT_STRUCT r)
 {
-  if( c )
+  RHCHECK_LICENSE
+    if( c )
   {
     const ON_3dPoint* _p = (const ON_3dPoint*)&p;
     const ON_3dPoint* _q = (const ON_3dPoint*)&q;
@@ -29,6 +32,7 @@ RH_C_FUNCTION void ON_Circle_Create3Pt(ON_CIRCLE_STRUCT* c, ON_3DPOINT_STRUCT p,
 
 RH_C_FUNCTION bool ON_Circle_CreatePtVecPt(ON_CIRCLE_STRUCT* c, ON_3DPOINT_STRUCT p, ON_3DVECTOR_STRUCT tan_at_p, ON_3DPOINT_STRUCT q)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( c )
   {
@@ -95,6 +99,7 @@ RH_C_FUNCTION bool ON_Circle_ClosestPointTo( const ON_CIRCLE_STRUCT* c,
 
 RH_C_FUNCTION int ON_Circle_GetNurbForm(const ON_CIRCLE_STRUCT* pCircle, ON_NurbsCurve* nurbs_curve)
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if( pCircle && nurbs_curve )
   {
@@ -108,6 +113,7 @@ RH_C_FUNCTION bool ON_Circle_TryFitTTT(const ON_Curve* c1, const ON_Curve* c2, c
                                        double seed1, double seed2, double seed3, 
                                        ON_CIRCLE_STRUCT* circleFit)
 {
+  RHCHECK_LICENSE
 #if !defined(RHINO3DM_BUILD)
   if (!c1 || !c2 || !c3) { return false; }
   if (!circleFit) { return false; }

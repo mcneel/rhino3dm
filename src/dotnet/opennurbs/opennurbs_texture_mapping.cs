@@ -140,7 +140,28 @@ namespace Rhino.Render
     /// srfp_mapping, then m_Pxyz and m_Nxyz are ignored.
     /// </summary>
     /// <since>5.10</since>
+    [Obsolete("Spelling error - use PrimitiveTransform")]
     public Transform PrimativeTransform
+    {
+      get
+      {
+        return PrimitiveTransform;
+      }
+      set
+      {
+        PrimitiveTransform = value;
+      }
+    }
+
+    /// <summary>
+    /// For primitive based mappings, these transformations are used to map
+    /// the world coordinate (x,y,z) point P and  surface normal N before it is
+    /// projected to the normalized mapping primitive. The surface normal
+    /// transformation, m_Nxyz, is always calculated from m_Pxyz.  It is a
+    /// runtime setting that is not saved in 3dm files. If m_type is
+    /// srfp_mapping, then m_Pxyz and m_Nxyz are ignored.
+    /// </summary>
+    public Transform PrimitiveTransform
     {
       get
       {
@@ -492,6 +513,20 @@ namespace Rhino.Render
       if (!success)
         mesh = null;
       return success;
+    }
+
+    /// <summary>Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.</summary>
+    /// <returns>TextureMapping instance or null if failed.</returns>
+    public static TextureMapping CreateSurfaceParameterMapping()
+    {
+      TextureMapping rc = new TextureMapping();
+      IntPtr pMapping = rc.NonConstPointer();
+      if (!UnsafeNativeMethods.ON_TextureMapping_SetSurfaceParameterMapping(pMapping))
+      {
+        rc.Dispose();
+        rc = null;
+      }
+      return rc;
     }
 
     /// <summary>Create a planar UV projection texture mapping</summary>

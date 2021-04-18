@@ -521,12 +521,23 @@ namespace Rhino.DocObjects.Tables
 
     #region enumerator
 
+    /// <summary>
+    /// Deletes a hatch pattern from the table.
+    /// </summary>
+    /// <param name="item">The hatch pattern to delete.</param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public override bool Delete(HatchPattern item)
     {
       return Delete(item, true);
     }
 
+    /// <summary>
+    /// Deletes a hatch pattern from the table.
+    /// </summary>
+    /// <param name="item">The hatch pattern to delete.</param>
+    /// <param name="quiet">If true, no warning message box appears if hatch pattern cannot be deleted.</param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public bool Delete(HatchPattern item, bool quiet)
     {
@@ -534,6 +545,58 @@ namespace Rhino.DocObjects.Tables
       IntPtr pPattern = item.ConstPointer();
       return UnsafeNativeMethods.CRhinoHatchPatternTable_DeleteHatchPattern(m_doc.RuntimeSerialNumber, pPattern, quiet);
     }
+
+    /// <summary>
+    /// Deletes a hatch pattern from the table.
+    /// </summary>
+    /// <param name="hatchPatternIndex">The index of the hatch pattern to delete.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool Delete(int hatchPatternIndex)
+    {
+      return Delete(hatchPatternIndex, true);
+    }
+
+    /// <summary>
+    /// Deletes a hatch pattern from the table.
+    /// </summary>
+    /// <param name="hatchPatternIndex">The index of the hatch pattern to delete.</param>
+    /// <param name="quiet">If true, no warning message box appears if hatch pattern cannot be deleted.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool Delete(int hatchPatternIndex, bool quiet)
+    {
+      return UnsafeNativeMethods.CRhinoHatchPatternTable_DeleteHatchPattern2(m_doc.RuntimeSerialNumber, hatchPatternIndex, quiet);
+    }
+
+    /// <summary>
+    /// Renames a hatch pattern in the table.
+    /// </summary>
+    /// <param name="item">The hatch pattern to rename</param>
+    /// <param name="hatchPatternName">The new hatch pattern name.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool Rename(HatchPattern item, string hatchPatternName)
+    {
+      if (null == item) return false;
+      if (string.IsNullOrEmpty(hatchPatternName)) return false;
+      IntPtr pPattern = item.ConstPointer();
+      return UnsafeNativeMethods.CRhinoHatchPatternTable_RenameHatchPattern2(m_doc.RuntimeSerialNumber, pPattern, hatchPatternName);
+    }
+
+    /// <summary>
+    /// Renames a hatch pattern in the table.
+    /// </summary>
+    /// <param name="hatchPatternIndex">The index of the hatch pattern to rename.</param>
+    /// <param name="hatchPatternName">The new hatch pattern name.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool Rename(int hatchPatternIndex, string hatchPatternName)
+    {
+      if (string.IsNullOrEmpty(hatchPatternName)) return false;
+      return UnsafeNativeMethods.CRhinoHatchPatternTable_RenameHatchPattern(m_doc.RuntimeSerialNumber, hatchPatternIndex, hatchPatternName);
+    }
+
     #endregion
   }
 }

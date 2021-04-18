@@ -164,7 +164,6 @@ namespace Rhino.Geometry
 
     #region constructors
     /// <summary>Copy constructor.
-    /// <para>This is nothing special and performs the same as assigning to another variable.</para>
     /// </summary>
     /// <param name="other">The source plane value.</param>
     /// <since>5.0</since>
@@ -791,7 +790,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns a deep of this instance.
+    /// Returns a deep copy of this instance.
     /// </summary>
     /// <returns>A plane with the same values as this item.</returns>
     /// <since>6.0</since>

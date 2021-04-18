@@ -187,6 +187,7 @@ namespace Rhino.Geometry
     private bool ClearOverrideDimStyle()
     {
       var ptr_this = NonConstPointer();
+      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
       return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
     }
 
@@ -497,14 +498,14 @@ namespace Rhino.Geometry
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         var font = new Rhino.DocObjects.Font(UnsafeNativeMethods.ON_V6_Annotation_Font(thisptr, styleptr));
-        //RhinoApp.WriteLine($"GET AnnotationBase Font family: {font.FamilyName}, face: {font.FaceName}"); //debug
+        //RhinoApp.WriteLine($"====GET= AnnotationBase Font qn:{font.QuartetName},  fam:{font.FamilyName}, face:{font.FaceName}, b:{font.Bold}, i:{font.Italic}"); //debug
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
         return font;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
-        //RhinoApp.WriteLine($"SET AnnotationBase Font family: {value.FamilyName}, face: {value.FaceName}"); //debug
+        //RhinoApp.WriteLine($"====SET= AnnotationBase Font qn:{value.QuartetName}, fam:{value.FamilyName}, face:{value.FaceName}, b:{value.Bold}, i:{value.Italic}"); //debug
         IntPtr fontptr = value.ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_Annotation_SetFont(thisptr, styleptr, fontptr);
@@ -716,7 +717,7 @@ namespace Rhino.Geometry
       get
       {
         var t = GetText(true);
-        //RhinoApp.WriteLine($"AnnotationBase RichText GET: \"{t}\""); //debug
+        //RhinoApp.WriteLine($"====GET= AnnotationBase RichText GET: \"{t}\""); //debug
         return t;
       }
       set
@@ -796,7 +797,7 @@ namespace Rhino.Geometry
     void SetRichText(string rtfText, IntPtr const_ptr_dimstyle)
     {
       var ptr_this = NonConstPointer();
-      //RhinoApp.WriteLine($"AnnotationBase SetRichText SET: \"{rtfText}\""); //debug
+      //RhinoApp.WriteLine($"====SET= AnnotationBase SetRichText SET: \"{rtfText}\""); //debug
       UnsafeNativeMethods.ON_V6_Annotation_SetTextString(
         ptr_this,
         rtfText ?? string.Empty,
@@ -1022,7 +1023,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       IntPtr styleptr = ConstPointerForDimStyle();
-      //RhinoApp.WriteLine($"ON_Annotation_SetBold: {set_on}"); //debug
+      //RhinoApp.WriteLine($"====SET= ON_Annotation_SetBold: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetBold(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return rc;
@@ -1038,6 +1039,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       IntPtr styleptr = ConstPointerForDimStyle();
+      //RhinoApp.WriteLine($"====SET= ON_annotation_SetItalic: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetItalic(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return rc;
@@ -1053,6 +1055,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       IntPtr styleptr = ConstPointerForDimStyle();
+      //RhinoApp.WriteLine($"====SET= AnnotationBase SetUnderline: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetUnderline(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return rc;
@@ -1069,7 +1072,7 @@ namespace Rhino.Geometry
     {
         IntPtr ptr = NonConstPointer();
         IntPtr styleptr = ConstPointerForDimStyle();
-        //RhinoApp.WriteLine($"set facename:{facename}"); //debug
+        //RhinoApp.WriteLine($"====SET= AnnotationBase SetFacename:{facename}"); //debug
         return UnsafeNativeMethods.ON_Annotation_SetFacename(ptr, set_on, facename, styleptr);
     }
 
@@ -1104,6 +1107,7 @@ namespace Rhino.Geometry
       }
       BoundingBox b = UnsafeNativeMethods.ON_Annotation_GetAnnotationBoundingBox(const_ptr_this, parent_dimstyle, ref bbox) ? bbox : BoundingBox.Empty;
       GC.KeepAlive(dimstyle);
+      GC.KeepAlive(this);  // Added because of RH-60715
       return b;
     }
 

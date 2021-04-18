@@ -744,6 +744,32 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Create a CommonObject instance from a JSON string
+    /// </summary>
+    /// <param name="json"></param>
+    /// <returns></returns>
+    public static CommonObject FromJSON(string json)
+    {
+      // using the following obscure technique as I don't want to add more
+      // references to RhinoCommon
+      var dict = new System.Collections.Generic.Dictionary<string, string>();
+
+      using (var jsonReader = System.Runtime.Serialization.Json.JsonReaderWriterFactory.CreateJsonReader(
+        System.Text.Encoding.UTF8.GetBytes(json), System.Xml.XmlDictionaryReaderQuotas.Max
+        ))
+      {
+        var root = System.Xml.Linq.XElement.Load(jsonReader);
+        foreach (var node in root.Elements())
+        {
+          string name = node.Name.LocalName;
+          string value = node.Value;
+          dict[name] = value;
+        }
+      }
+      return FromJSON(dict);
+    }
+
+    /// <summary>
     /// Create a CommonObject instance from a JSON dictionary
     /// </summary>
     /// <param name="jsonDictionary"></param>
@@ -826,6 +852,17 @@ namespace Rhino.Runtime
     static CommonObject CreateCommonObjectHelper(IntPtr pObject)
     {
       var geometry = Geometry.GeometryBase.CreateGeometryHelper(pObject, null);
+      if (geometry == null)
+      {
+        const uint LAYER = 0x40; // Not sure why this was not added to the DocObjects.ObjectType enum
+                                 // will just use the low level OpenNURBS value for now.
+        uint objectType = UnsafeNativeMethods.ON_Object_ObjectType(pObject);
+        if (objectType == LAYER)
+        {
+          return new Rhino.DocObjects.Layer(pObject, false);
+        }
+      }
+
       // TODO: handle other cases where this pointer is not specifically ON_Geometry
       return geometry;
     }

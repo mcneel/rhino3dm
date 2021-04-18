@@ -698,7 +698,7 @@ namespace Rhino.DocObjects
       get
       {
         return RenderContent.FromId(m_doc, RenderMaterialInstanceId) as RenderMaterial ??
-                 RenderMaterial.CreateBasicMaterial(this);
+                 RenderMaterial.FromMaterial(this, m_doc);
       }
     }
 
@@ -1109,8 +1109,6 @@ namespace Rhino.DocObjects
       }
     }
 
-// not really, but we need to move PhysicallyBasedMaterial to the right file
-#if RHINO_SDK
     /// <since>7.0</since>
     public PhysicallyBasedMaterial PhysicallyBased
     {
@@ -1119,7 +1117,7 @@ namespace Rhino.DocObjects
         return IsPhysicallyBased ? new PhysicallyBasedMaterial(this) : null;
       }
     }
-#endif
+
     /// <since>7.0</since>
     public void ToPhysicallyBased()
     {
@@ -1270,22 +1268,19 @@ namespace Rhino.DocObjects
 
     #region Bitmap
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use GetTexture instead")]
+    /// <seealso cref="GetTexture(TextureType)"/>
     public Texture GetBitmapTexture()
     {
       return GetTexture(TextureType.Bitmap);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetBitmapTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bitmap);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetBitmapTexture(Texture texture)
     {
       return SetTexture(texture, TextureType.Bitmap);
@@ -1298,22 +1293,19 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <returns>A texture; or null if no bump texture has been added to this material.</returns>
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use GetTexture instead")]
+    /// <seealso cref="GetTexture(TextureType)"/>
     public Texture GetBumpTexture()
     {
       return GetTexture(TextureType.Bump);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetBumpTexture(string filename)
     {
       return AddTexture(filename, TextureType.Bump);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetBumpTexture(Texture texture)
     {
       return SetTexture(texture, TextureType.Bump);
@@ -1322,22 +1314,19 @@ namespace Rhino.DocObjects
 
     #region Environment
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use GetTexture instead")]
+    /// <seealso cref="GetTexture(TextureType)"/>
     public Texture GetEnvironmentTexture()
     {
       return GetTexture(TextureType.Emap);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetEnvironmentTexture(string filename)
     {
       return AddTexture(filename, TextureType.Emap);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetEnvironmentTexture(Texture texture)
     {
       return SetTexture(texture, TextureType.Emap);
@@ -1346,22 +1335,19 @@ namespace Rhino.DocObjects
 
     #region Transparency
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use GetTexture instead")]
+    /// <seealso cref="GetTexture(TextureType)"/>
     public Texture GetTransparencyTexture()
     {
       return GetTexture(TextureType.Transparency);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetTransparencyTexture(string filename)
     {
       return AddTexture(filename, TextureType.Transparency);
     }
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use SetTexture instead")]
+    /// <seealso cref="SetTexture(Texture, TextureType)"/>
     public bool SetTransparencyTexture(Texture texture)
     {
       return SetTexture(texture, TextureType.Transparency);
@@ -1464,6 +1450,7 @@ namespace Rhino.DocObjects
 
   }
 }
+
 
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables

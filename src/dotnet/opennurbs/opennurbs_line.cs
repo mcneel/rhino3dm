@@ -699,4 +699,510 @@ namespace Rhino.Geometry
     }
     #endregion
   }
+  
+  /// <summary>
+  /// Represents a triangle, modeled using double three points that use double-precision floating point numbers.
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 72)]
+  public struct Triangle3d
+  {
+    #region fields
+    private Point3d m_A, m_B, m_C;
+    #endregion
+
+    #region constructors
+
+    /// <summary>
+    /// Instantiates a new triangle.
+    /// </summary>
+    /// <param name="a">First point.</param>
+    /// <param name="b">Second point.</param>
+    /// <param name="c">Third point.</param>
+    public Triangle3d(Point3d a, Point3d b, Point3d c)
+    {
+      m_A = a;
+      m_B = b;
+      m_C = c;
+    }
+    #endregion
+
+    #region properties
+    /// <summary>
+    /// Gets the first triangle corner.
+    /// </summary>
+    public Point3d A => m_A;
+
+    /// <summary>
+    /// Gets the second triangle corner.
+    /// </summary>
+    public Point3d B => m_B;
+    /// <summary>
+    /// Gets the third triangle corner.
+    /// </summary>
+    public Point3d C => m_C;
+
+    /// <summary>
+    /// Gets the circumcircle of this triangle.
+    /// </summary>
+    public Circle Circumcircle { get => new Circle(A, B, C); }
+
+    /// <summary>
+    /// Gets the bounding box of this triangle.
+    /// </summary>
+    public BoundingBox BoundingBox
+    {
+      get
+      {
+        return BoundingBox.Union(new BoundingBox(A, B), C);
+      }
+    }
+
+    /// <summary>
+    /// Gets the angle at the A corner.
+    /// </summary>
+    public double AngleA
+    {
+      get
+      {
+        return Vector3d.VectorAngle(B - A, C - A);
+      }
+    }
+    /// <summary>
+    /// Gets the angle at the B corner.
+    /// </summary>
+    public double AngleB
+    {
+      get
+      {
+        return Vector3d.VectorAngle(A - B, C - B);
+      }
+    }
+    /// <summary>
+    /// Gets the angle at the C corner.
+    /// </summary>
+    public double AngleC
+    {
+      get
+      {
+        return Vector3d.VectorAngle(A - C, B - C);
+      }
+    }
+
+    /// <summary>
+    /// Gets the triangle edge connecting the A and B corners.
+    /// </summary>
+    public Line AB
+    {
+      get { return new Line(A, B); }
+    }
+    /// <summary>
+    /// Gets the triangle edge connecting the B and C corners.
+    /// </summary>
+    public Line BC
+    {
+      get { return new Line(B, C); }
+    }
+    /// <summary>
+    /// Gets the triangle edge connecting the C and A corners.
+    /// </summary>
+    public Line CA
+    {
+      get { return new Line(C, A); }
+    }
+
+    /// <summary>
+    /// Gets the median line starting at corner A.
+    /// </summary>
+    public Line MedianA
+    {
+      get { return new Line(A, 0.5 * B + 0.5 * C); }
+    }
+    /// <summary>
+    /// Gets the median line starting at corner B.
+    /// </summary>
+    public Line MedianB
+    {
+      get { return new Line(B, 0.5 * A + 0.5 * C); }
+    }
+    /// <summary>
+    /// Gets the median line starting at corner C.
+    /// </summary>
+    public Line MedianC
+    {
+      get { return new Line(C, 0.5 * A + 0.5 * B); }
+    }
+
+    /// <summary>
+    /// Gets the altitude line starting at corner A.
+    /// </summary>
+    public Line AltitudeA
+    {
+      get { return new Line(A, BC.ClosestPoint(A, false)); }
+    }
+    /// <summary>
+    /// Gets the altitude line starting at corner B.
+    /// </summary>
+    public Line AltitudeB
+    {
+      get { return new Line(B, CA.ClosestPoint(B, false)); }
+    }
+    /// <summary>
+    /// Gets the altitude line starting at corner C.
+    /// </summary>
+    public Line AltitudeC
+    {
+      get { return new Line(C, AB.ClosestPoint(C, false)); }
+    }
+
+    /* This code does not work when B-A do not unitize
+    /// <summary>
+    /// Gets the bisector line starting at corner A.
+    /// </summary>
+    public Line BisectorA
+    {
+      get
+      {
+        var ab = B - A; ab.Unitize();
+        var ac = C - A; ac.Unitize();
+        return new Line(A, 0.5 * ab + 0.5 * ac);
+      }
+    }
+    /// <summary>
+    /// Gets the bisector line starting at corner B.
+    /// </summary>
+    public Line BisectorB
+    {
+      get
+      {
+        var ba = A - B; ba.Unitize();
+        var bc = C - B; bc.Unitize();
+        return new Line(B, 0.5 * ba + 0.5 * bc);
+      }
+    }
+    /// <summary>
+    /// Gets the bisector line starting at corner C.
+    /// </summary>
+    public Line BisectorC
+    {
+      get
+      {
+        var ca = A - C; ca.Unitize();
+        var cb = B - C; cb.Unitize();
+        return new Line(C, 0.5 * ca + 0.5 * cb);
+      }
+    }
+    */
+    /// <summary>
+    /// Gets the perpendicular bisector for edge AB.
+    /// </summary>
+    public Line PerpendicularAB
+    {
+      get
+      {
+        var span = B - A;
+        span.Rotate(RhinoMath.HalfPI, Circumcircle.Normal);
+        return new Line(0.5 * A + 0.5 * B, span);
+      }
+    }
+    /// <summary>
+    /// Gets the perpendicular bisector for edge BC.
+    /// </summary>
+    public Line PerpendicularBC
+    {
+      get
+      {
+        var span = C - B;
+        span.Rotate(RhinoMath.HalfPI, Circumcircle.Normal);
+        return new Line(0.5 * B + 0.5 * C, span);
+      }
+    }
+    /// <summary>
+    /// Gets the perpendicular bisector for edge CA.
+    /// </summary>
+    public Line PerpendicularCA
+    {
+      get
+      {
+        var span = A - C;
+        span.Rotate(RhinoMath.HalfPI, Circumcircle.Normal);
+        return new Line(0.5 * C + 0.5 * A, span);
+      }
+    }
+
+    /// <summary>
+    /// Gets the perimeter of this triangle. This is the sum of the lenghts of all edges.
+    /// </summary>
+    public double Perimeter
+    {
+      get
+      {
+        return A.DistanceTo(B) +
+               B.DistanceTo(C) +
+               C.DistanceTo(A);
+      }
+    }
+    /// <summary>
+    /// Gets the area inside this triangle.
+    /// </summary>
+    public double Area
+    {
+      get
+      {
+        return 0.5 * Vector3d.CrossProduct(B - A, C - A).Length;
+      }
+    }
+
+    /// <summary>
+    /// Gets the triangle area centroid.
+    /// </summary>
+    public Point3d AreaCenter
+    {
+      get { return (A + B + C) * (1.0/3.0); }
+    }
+    /// <summary>
+    /// Gets the triangle orthocenter.
+    /// </summary>
+    public Point3d Orthocenter
+    {
+      get { return TripleLineIntersect(AltitudeA, AltitudeB, AltitudeC); }
+    }
+    /* See problem below
+    /// <summary>
+    /// Gets the triangle incenter.
+    /// </summary>
+    public Point3d Incenter
+    {
+      get
+      {
+        return TripleLineIntersect(BisectorA, BisectorB, BisectorC);
+      }
+    }
+    */
+    /// <summary>
+    /// Gets the triangle circumcenter.
+    /// </summary>
+    public Point3d Circumcenter
+    {
+      get { return Circumcircle.Center; }
+    }
+
+    /// <summary>
+    /// Compute the average point of three lines intersecting.
+    /// This method assumes the lines all intersect at a single point,
+    /// though performs additional work to reduce the error.
+    /// </summary>
+    private static Point3d TripleLineIntersect(Line i, Line j, Line k)
+    {
+      var x = Point3d.Origin;
+      int n = 0;
+
+      if (Rhino.Geometry.Intersect.Intersection.LineLine(i, j, out var ij, out var ji))
+      {
+        x += i.PointAt(ij);
+        x += j.PointAt(ji);
+        n += 2;
+      }
+
+      if (Rhino.Geometry.Intersect.Intersection.LineLine(j, k, out var jk, out var kj))
+      {
+        x += j.PointAt(jk);
+        x += k.PointAt(kj);
+        n += 2;
+      }
+
+      if (Rhino.Geometry.Intersect.Intersection.LineLine(k, i, out var ki, out var ik))
+      {
+        x += k.PointAt(ki);
+        x += i.PointAt(ik);
+        n += 2;
+      }
+
+      return x / n;
+    }
+    #endregion
+
+    #region methods
+    /// <summary>
+    /// Transform this triangle.
+    /// </summary>
+    public Triangle3d Transform(Transform transform)
+    {
+      var a = A;
+      var b = B;
+      var c = C;
+      a.Transform(transform);
+      b.Transform(transform);
+      c.Transform(transform);
+      return new Triangle3d(a, b, c);
+    }
+
+    /// <summary>
+    /// Create a polyline from this triangle.
+    /// </summary>
+    public Polyline ToPolyline()
+    {
+      return new Polyline(4){ A, B, C, A };
+    }
+    /// <summary>
+    /// Create a mesh from this triangle.
+    /// </summary>
+    public Mesh ToMesh()
+    {
+      var mesh = new Mesh();
+      mesh.Vertices.Add(A);
+      mesh.Vertices.Add(B);
+      mesh.Vertices.Add(C);
+      mesh.Faces.AddFace(0, 1, 2);
+
+      mesh.Normals.ComputeNormals();
+      mesh.FaceNormals.ComputeFaceNormals();
+      return mesh;
+    }
+
+    /// <summary>
+    /// Replace the A corner.
+    /// </summary>
+    public Triangle3d WithA(Point3d a)
+    {
+      return new Triangle3d(a, B, C);
+    }
+    /// <summary>
+    /// Replace the B corner.
+    /// </summary>
+    public Triangle3d WithB(Point3d b)
+    {
+      return new Triangle3d(A, b, C);
+    }
+    /// <summary>
+    /// Replace the C corner.
+    /// </summary>
+    public Triangle3d WithC(Point3d c)
+    {
+      return new Triangle3d(A, B, c);
+    }
+
+    /// <summary>
+    /// Gets a point within this triangle using barycentric coordinates.
+    /// </summary>
+    /// <param name="coords">Barycentic mass for vertex B and C. A is valued as (1 - B - C).</param>
+    /// <returns>Point at barycentric mass.</returns>
+    public Point3d PointAtBarycentricCoords(Point2d coords)
+    {
+      return (1.0 - coords.X - coords.Y) * m_A + coords.X * m_B + coords.Y * m_C;
+    }
+
+    /// <summary>
+    /// Gets the projection of a point onto the barycentric coordinates.
+    /// </summary>
+    /// <param name="point">Point to project.</param>
+    /// <param name="signedHeight">A value indicating the height of the intersection in world units,
+    /// negative if the point is situated under the triangle.</param>
+    /// <returns>The computed barycentric mass values relating to B and C for point.</returns>
+    public Point2d BarycentricCoordsAt(Point3d point, out double signedHeight)
+    {
+      Point2d result = new Point2d();
+      signedHeight = 0.0;
+
+      if (UnsafeNativeMethods.ON_Triangle_BarycentricCoordsAt(this, point, ref result, ref signedHeight))
+      {
+        return result;
+      }
+
+      return Point2d.Unset;
+    }
+
+    /// <summary>
+    /// Gets the point along the boundary of the triangle.
+    /// The triangle boundary has a domain [0, 3] where each
+    /// subsequent unit domain maps to a different edge.
+    /// </summary>
+    /// <param name="t">Parameter along boundary.</param>
+    public Point3d PointAlongBoundary(double t)
+    {
+      t = RhinoMath.Wrap(t, 0, 3);
+
+      if (t.Equals(0.0)) return A;
+      if (t.Equals(1.0)) return B;
+      if (t.Equals(2.0)) return C;
+
+      if (t > 2.0) return CA.PointAt(t);
+      if (t > 1.0) return BC.PointAt(t - 1);
+      return AB.PointAt(t - 2);
+    }
+    /// <summary>
+    /// Gets the parameter on the triangle boundary closest to a test point.
+    /// </summary>
+    public double ClosestParameterOnBoundary(Point3d point)
+    {
+      double ab = RhinoMath.Clamp(AB.ClosestParameter(point), 0, 1);
+      double bc = RhinoMath.Clamp(BC.ClosestParameter(point), 0, 1);
+      double ca = RhinoMath.Clamp(CA.ClosestParameter(point), 0, 1);
+
+      var ab1 = AB.PointAt(ab);
+      var dab = (point - ab1).SquareLength;
+
+      var bc1 = BC.PointAt(ab);
+      var dbc = (point - bc1).SquareLength;
+
+      var ca1 = CA.PointAt(ab);
+      var dca = (point - ca1).SquareLength;
+
+      if (dab <= dbc && dab <= dca) return ab;
+      if (dbc <= dca) return 1.0 + bc;
+      return 2.0 + ca;
+    }
+    /// <summary>
+    /// Gets the point on the triangle boundary closest to a test point.
+    /// </summary>
+    public Point3d ClosestPointOnBoundary(Point3d point)
+    {
+      var ab = AB.ClosestPoint(point, true);
+      var dab = (point-ab).SquareLength;
+
+      var bc = BC.ClosestPoint(point, true);
+      var dbc = (point-bc).SquareLength;
+
+      var ca = CA.ClosestPoint(point, true);
+      var dca = (point-ca).SquareLength;
+
+      if (dab <= dbc && dab <= dca) return ab;
+      if (dbc <= dca) return bc;
+      return ca;
+    }
+
+    /// <summary>
+    /// Gets the point on the triangle using the AB and AC primary axes.
+    /// </summary>
+    /// <param name="u">Parameter along the AB edge.</param>
+    /// <param name="v">Parameter along the AC edge.</param>
+    /// <returns>Point at parameter.</returns>
+    public Point3d PointOnInterior(double u, double v)
+    {
+      var ab = B - A;
+      var ac = C - A;
+      return A + u * ab + v * ac;
+    }
+    /*
+    /// <summary>
+    /// Gets the axial parameters on the triangle interior which are closest to a test point.
+    /// </summary>
+    /// <param name="point">Point.</param>
+    /// <param name="u">First axial parameter.</param>
+    /// <param name="v">Second axial parameter.</param>
+    /// <returns>True on success.</returns>
+    public bool ClosestParameterOnInterior(Point3d point, out double u, out double v)
+    {
+      // TODO: implement this.
+    }
+
+    /// <summary>
+    /// Gets the point on the triangle interior or boundary closest to a test point.
+    /// </summary>
+    public Point3d ClosestPointOnInterior(Point3d point)
+    {
+      // TODO: implement this.
+    }
+    */
+    #endregion
+  }
 }

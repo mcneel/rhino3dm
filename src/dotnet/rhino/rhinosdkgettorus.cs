@@ -150,6 +150,96 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// Set true if you are prompting for a mesh or subd torus.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool PromptForMeshDensity
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTorus_PromptForMeshDensity(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTorus_SetPromptForMeshDensity(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// The number of faces in the vertical direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int VerticalDirectionCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionCount(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTorus_SetVerticalDirectionCount(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// The minumum number of faces in the vertical direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int VerticalDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionMinCount(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTorus_SetVerticalDirectionMinCount(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// The number of faces in the around direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int AroundDirectionCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionCount(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTorus_SetAroundDirectionCount(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// The minumum number of faces in the around direction.
+    /// </summary>
+    /// <since>7.0</since>
+    public int AroundDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionMinCount(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetTorus_SetAroundDirectionMinCount(ptr_this, value);
+      }
+    }
+
+    /// <summary>
     /// Prompt for the getting of a torus.
     /// </summary>
     /// <param name="torus">The torus geometry defined by the user.</param>

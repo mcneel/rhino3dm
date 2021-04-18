@@ -8,7 +8,7 @@ using Rhino.Runtime;
 
 namespace Rhino.Geometry
 {
-  /// <summary>Defines styles used for creating Brep pipes.</summary>
+  /// <summary>Styles used for creating Brep pipes.</summary>
   /// <since>5.0</since>
   public enum PipeCapMode
   {
@@ -1917,6 +1917,55 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public static Brep[] CreateOffsetBrep(Brep brep, double distance, bool solid, bool extend, double tolerance, out Brep[] outBlends, out Brep[] outWalls)
     {
+      outBlends = null;
+      outWalls = null;
+
+      return CreateOffsetBrep(
+        brep,
+        distance,
+        solid,
+        extend,
+        true,
+        tolerance,
+        out outBlends,
+        out outWalls
+        );
+    }
+
+    /// <summary>
+    /// Offsets a Brep.
+    /// </summary>
+    /// <param name="brep">The Brep to offset.</param>
+    /// <param name="distance">
+    /// The distance to offset. This is a signed distance value with respect to
+    /// face normals and flipped faces.
+    /// </param>
+    /// <param name="solid">
+    /// If true, then the function makes a closed solid from the input and offset
+    /// surfaces by lofting a ruled surface between all of the matching edges.
+    /// </param>
+    /// <param name="extend">
+    /// If true, then the function maintains the sharp corners when the original
+    /// surfaces have sharps corner. If False, then the function creates fillets
+    /// at sharp corners in the original surfaces.
+    /// </param>
+    /// <param name="shrink">
+    /// If true, then the function shrinks the underlying surfaces to their face's outer boundary loop.
+    /// </param>
+    /// <param name="tolerance">The offset tolerance.</param>
+    /// <param name="outBlends">The results of the calculation.</param>
+    /// <param name="outWalls">The results of the calculation.</param>
+    /// <returns>
+    /// Array of Breps if successful. If the function succeeds in offsetting, a
+    /// single Brep will be returned. Otherwise, the array will contain the 
+    /// offset surfaces, outBlends will contain the set of blends used to fill
+    /// in gaps (if extend is false), and outWalls will contain the set of wall
+    /// surfaces that was supposed to join the offset to the original (if solid
+    /// is true).
+    /// </returns>
+    /// <since>7.5</since>
+    public static Brep[] CreateOffsetBrep(Brep brep, double distance, bool solid, bool extend, bool shrink, double tolerance, out Brep[] outBlends, out Brep[] outWalls)
+    {
       if (brep == null) throw new ArgumentNullException(nameof(brep));
 
       outBlends = null;
@@ -1932,7 +1981,7 @@ namespace Rhino.Geometry
         var ptr_out_blends = out_blends.NonConstPointer();
         var ptr_out_walls = out_walls.NonConstPointer();
 
-        var rc = UnsafeNativeMethods.RHC_RhinoOffsetBrep(ptr_const_brep, distance, solid, extend, tolerance, ptr_out_breps, ptr_out_blends, ptr_out_walls);
+        var rc = UnsafeNativeMethods.RHC_RhinoOffsetBrep(ptr_const_brep, distance, solid, extend, shrink, tolerance, ptr_out_breps, ptr_out_blends, ptr_out_walls);
         if (rc)
         {
           outBlends = out_blends.ToNonConstArray();
@@ -1944,6 +1993,7 @@ namespace Rhino.Geometry
         return new Brep[0];
       }
     }
+
 
 #endif
 
@@ -2094,7 +2144,7 @@ namespace Rhino.Geometry
     /// <param name="StartTangent">
     /// If StartTangent is true and the first loft curve is a surface edge, the loft will match the tangent 
     /// of the surface behind that edge.
-    /// </param>param>
+    /// </param>
     /// <param name="EndTangent">
     /// If EndTangent is true and the first loft curve is a surface edge, the loft will match the tangent 
     /// of the surface behind that edge.
@@ -6849,6 +6899,35 @@ namespace Rhino.Geometry.Collections
 
     #region methods
 #if RHINO_SDK
+
+    /// <summary>
+    /// Finds any naked edges with the same start and end vertex and an arc-length less than tolerance
+    /// and attempts to remove them by removing trims and extending the adjacent to meet.
+    /// </summary>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>The number of naked micro edges that were removed.</returns>
+    /// <since>7.0</since>
+    public int RemoveNakedMicroEdges(double tolerance)
+    {
+      return RemoveNakedMicroEdges(tolerance, true);
+    }
+  
+    /// <summary>
+    /// Finds any naked edges with the same start and end vertex and an arc-length less than tolerance
+    /// and attempts to remove them by removing trims and extending the adjacent to meet.
+    /// </summary>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <param name="cleanUp">
+    /// If true, then the method cleans up the Brep by setting tolerances, boxes, flags, and then compacts.
+    /// If false, then the caller should do this at some point.
+    /// </param>
+    /// <returns>The number of naked micro edges that were removed.</returns>
+    /// <since>7.0</since>
+    public int RemoveNakedMicroEdges(double tolerance, bool cleanUp)
+    {
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      return UnsafeNativeMethods.TLC_RemoveAllNakedMicroEdges(ptr_brep, tolerance, cleanUp);
+    }
 
     /// <summary>
     /// Merge adjacent edges to a specified edge recursively.

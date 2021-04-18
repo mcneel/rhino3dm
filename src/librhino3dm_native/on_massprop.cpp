@@ -10,10 +10,18 @@ RH_C_FUNCTION void ON_MassProperties_Delete( ON_MassProperties* ptr )
 
 RH_C_FUNCTION double ON_MassProperties_Area(ON_MassProperties* pMassProp)
 {
-  double area = 0.0;
+  double rc = ON_UNSET_VALUE;
   if (pMassProp)
-    area = pMassProp->Area();
-  return area;
+    rc = pMassProp->Area();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_MassProperties_Length(ON_MassProperties* pMassProp)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pMassProp)
+    rc = pMassProp->Length();
+  return rc;
 }
 
 RH_C_FUNCTION void ON_MassProperties_Centroid( ON_MassProperties* pMassProp, ON_3dPoint* pt)
@@ -34,12 +42,12 @@ RH_C_FUNCTION void ON_MassProperties_CentroidError( ON_MassProperties* pMassProp
   }
 }
 
-RH_C_FUNCTION double ON_MassProperties_Mass(ON_MassProperties* pMassProp)
+RH_C_FUNCTION double ON_MassProperties_Volume(ON_MassProperties* pMassProp)
 {
-  double mass = 0.0;
-  if( pMassProp )
-    mass = pMassProp->m_mass;
-  return mass;
+  double rc = ON_UNSET_VALUE;
+  if (pMassProp)
+    rc = pMassProp->Volume();
+  return rc;
 }
 
 RH_C_FUNCTION double ON_MassProperties_MassError(ON_MassProperties* pMassProp)
@@ -181,5 +189,22 @@ RH_C_FUNCTION bool ON_MassProperties_GetPrincipalMoments(
   return rc;
 }
 
+RH_C_FUNCTION bool ON_MassProperties_GetPrincipalMomentsOfInertia(
+  const ON_MassProperties* pConstMassProps, bool world,
+  double* xx, ON_3dVector* ax,
+  double* yy, ON_3dVector* ay,
+  double* zz, ON_3dVector* az
+)
+{
+  bool rc = false;
+  if (pConstMassProps && xx && ax && yy && ay && zz && az)
+  {
+    if (world)
+      rc = pConstMassProps->WorldCoordPrincipalMomentsOfInertia(xx, *ax, yy, *ay, zz, *az);
+    else
+      rc = pConstMassProps->CentroidCoordPrincipalMomentsOfInertia(xx, *ax, yy, *ay, zz, *az);
+  }
+  return rc;
+}
 
 #endif

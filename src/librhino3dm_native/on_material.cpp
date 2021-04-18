@@ -766,7 +766,7 @@ RH_C_FUNCTION void ON_Material_PBR_SetBaseColor(ON_Material* p, ON_4FVECTOR_STRU
 RH_C_FUNCTION double ON_Material_PBR_Subsurface(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Subsurface() : 0.0; }
 RH_C_FUNCTION void ON_Material_PBR_SetSubsurface(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSubsurface(d); } }
 
-RH_C_FUNCTION double ON_Material_PBR_SubsurfaceScatteringRadius(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Subsurface() : 0.0; }
+RH_C_FUNCTION double ON_Material_PBR_SubsurfaceScatteringRadius(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->SubsurfaceScatteringRadius() : 0.0; }
 RH_C_FUNCTION void ON_Material_PBR_SetSubsurfaceScatteringRadius(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetSubsurfaceScatteringRadius(d); } }
 
 RH_C_FUNCTION void ON_Material_PBR_SubsurfaceScatteringColor(const ON_Material* p, ON_4fPoint* pColor)
@@ -838,6 +838,12 @@ RH_C_FUNCTION void ON_Material_PBR_SetOpacity(ON_Material* p, double d) { if (p 
 
 RH_C_FUNCTION double ON_Material_PBR_OpacityRoughness(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->OpacityRoughness() : 0.0; }
 RH_C_FUNCTION void ON_Material_PBR_SetOpacityRoughness(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetOpacityRoughness(d); } }
+
+RH_C_FUNCTION double ON_Material_PBR_Alpha(const ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->Alpha() : 1.0; }
+RH_C_FUNCTION void ON_Material_PBR_SetAlpha(ON_Material* p, double d) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetAlpha(d); } }
+
+RH_C_FUNCTION bool ON_Material_PBR_BaseColorTextureAlphaForObjectAlphaTransparencyTexture(ON_Material* p) { return p && p->IsPhysicallyBased() ? p->PhysicallyBased()->UseBaseColorTextureAlphaForObjectAlphaTransparencyTexture() : true; }
+RH_C_FUNCTION void ON_Material_PBR_SetBaseColorTextureAlphaForObjectAlphaTransparencyTexture(ON_Material* p, bool b) { if (p && p->IsPhysicallyBased()) { p->PhysicallyBased()->SetUseBaseColorTextureAlphaForObjectAlphaTransparencyTexture(b); } }
 
 RH_C_FUNCTION void ON_Material_PBR_Emission(const ON_Material* p, ON_4fPoint* pColor)
 {

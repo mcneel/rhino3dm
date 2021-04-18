@@ -189,7 +189,8 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.RenderPlugIn.GetCustomRenderSaveFileTypesCallback getCustomRenderSaveFileTypesCallback,
     Rhino.PlugIns.RenderPlugIn.UiContentTypesCallback uiContentTypesCallback,
     Rhino.PlugIns.RenderPlugIn.SaveCusomtomRenderFileCallback saveCustomRenderFile,
-    Rhino.PlugIns.RenderPlugIn.RenderSettingsSectionsCallback renderSettingsSections
+    Rhino.PlugIns.RenderPlugIn.RenderSettingsSectionsCallback renderSettingsSections,
+    Rhino.PlugIns.RenderPlugIn.PlugInIconCallback pluginiconcallback
     );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -592,13 +593,25 @@ internal partial class UnsafeNativeMethods
   internal static extern void Rdk_SetSetExtraRequirementParameterCallback(Rhino.Render.RenderContent.SetExtraRequirementParameterCallback callbackFunc);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_SetGetFilenameCallback(Rhino.Render.RenderContent.SetGetFilenameCallback callbackFunc);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_SetSetFilenameCallback(Rhino.Render.RenderContent.SetSetFilenameCallback callbackFunc);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void Rdk_SetGetContentIconCallback(Rhino.Render.RenderContent.SetContentIconCallback callbackFunction);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_SetOnMakeCopyCallback(Rhino.Render.RenderContent.OnMakeCopyCallback callbackFunction);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void Rdk_SetHarvestDataCallback(Rhino.Render.RenderContent.HarvestDataCallback callbackFunc);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void Rdk_SetGetShaderCallback(Rhino.Render.RenderContent.GetShaderCallback callbackFunc);
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_SetRenderContentGetUiHashCallback(Rhino.Render.RenderContent.RenderContentUiHashCallback callbackFunc);
 
   //Rhino.Render.UI.UserInterfaceSection is obsolete
 #pragma warning disable 0612
@@ -635,7 +648,9 @@ internal partial class UnsafeNativeMethods
                                                               Rhino.RDK.Delegates.GETGUIDPROC PlugInId,
                                                               Rhino.RDK.Delegates.GETSTRINGPROC CommandOptName,
                                                               Rhino.RDK.Delegates.GETINTPROC RunScript,
-                                                              Rhino.RDK.Delegates.GETGUIDPROC cid);
+                                                              Rhino.RDK.Delegates.GETGUIDPROC cid,
+                                                              Rhino.RDK.Delegates.ONATTACHEDTOHOLDERPROC onattachedtoholderproc,
+                                                              Rhino.RDK.Delegates.ONDETACHEDFROMHOLDERPROC ondetachedfromholderproc);
 
 
   // UiSection
@@ -675,7 +690,7 @@ internal partial class UnsafeNativeMethods
   // UiDynamicAcces
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void Rdk_UiDynamicAccess_SetCallbacks(
-    Rhino.RDK.Delegates.SETINTPTRPROC addsectionspre,
+    Rhino.RDK.Delegates.SETINTPTRINTPTRPROC addsectionspre,
     Rhino.RDK.Delegates.SETINTPTRPROC addsectionspost,
     Rhino.RDK.Delegates.SETINTPTRREFINTPTRPROC newcontentcreatorusingtypebrowser,
     Rhino.RDK.Delegates.GETGUIDINTPROC contenteditortabid,
@@ -687,7 +702,7 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.GETINTPTRPROC newfloatingpreviewmanager,
     Rhino.RDK.Delegates.SETINTPTRGETBOOLPROC openfloatingcontentedtirodlg,
     Rhino.RDK.Delegates.SETINTPTRINTPTRBOOLPROC gettagswindow,
-    Rhino.RDK.Delegates.SETREFINTREFINTREFBOOLBOOLPROC showdecalsmappingstyledialog,
+    Rhino.RDK.Delegates.SETREFINTREFINTREFINTBOOLPROC showdecalsmappingstyledialog,
     Rhino.RDK.Delegates.SETINTPTRINTPTRUINTUINTBOOLBOOLPROC showmodalsundialog,
     Rhino.RDK.Delegates.SETINTPTRGETBOOLPROC showmodalcontenteditordialog,
     Rhino.RDK.Delegates.SETUINTGUIDBOOLPROC showchooselayersdlg,
@@ -705,7 +720,7 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.SHOWLAYERMATERIALDIALOGPROC ShowLayerMaterialDialog,
     Rhino.RDK.Delegates.PROMPTFORIMAGEDRAGOPTIONSDLGPROC PromptForImageDragOptionsDlg,
     Rhino.RDK.Delegates.PROMPTFOROPENACTIONSDLGPROC PromptForOpenActionsDlg,
-    Rhino.RDK.Delegates.DISPLAYMISSINGTEXTURESDIALOG DisplayMissingTexturesDialog,
+    Rhino.RDK.Delegates.DISPLAYMISSINGIMAGESDIALOG DisplayMissingImagesDialog,
     Rhino.RDK.Delegates.OPENNAMEDVIEWANIMATIONSETTINGSDLG OpenNamedViewAnimationSettingsDlg,
     Rhino.RDK.Delegates.PEPPICKRECTANGLEONIMAGEPROC PepPickRectangleOnImage,
     Rhino.RDK.Delegates.SHOWCONTENTCTRLPROPDLGPROC ShowContentCtrlPropDlg,
@@ -719,6 +734,8 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsBloom,
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsDOF,
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsGamma,
+    Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsNoise,
+    Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsGaussianBlur,
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingNone,
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingBlackWhitePoint,
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsToneMappingLogarithmic,
@@ -732,7 +749,12 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.PEP_UI_ADDSECTIONS_PROC AddPostEffectUISectionsMultiplier,
     Rhino.RDK.Delegates.PEPRENDERSETTINGSPAGEPROC AttachRenderPostEffectsPage,
     Rhino.RDK.Delegates.NEWRENDERCHANNELSSECTIONPROC NewRenderChannelsSection,
-    Rhino.RDK.Delegates.CREATEPBRFROMFILESPROC CreatePBRFromFiles
+    Rhino.RDK.Delegates.CREATEPBRFROMFILESPROC CreatePBRFromFiles,
+    Rhino.RDK.Delegates.CREATEEXPANDABLEPAGEUIPROC CreateExpandablePageUI,
+    Rhino.RDK.Delegates.ADDTEXTURESUMMARYSECTIONPROC AddTextureSummarySection,
+    Rhino.RDK.Delegates.SHOWUNPACKEMBEDDEDFILESDIALOGPROC ShowUnpackEmbeddedFilesDialog,
+    Rhino.RDK.Delegates.NEWAUTOMATICSECTIONPROC NewAutomaticSection,
+    Rhino.RDK.Delegates.NEWPLAINAUTOMATICHOLDERPROC NewPlainAutomaticHolder
   );
 
   // PostEffect
@@ -766,6 +788,35 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.CLONEPOSTEFFECTJOBPROC clone,
     Rhino.RDK.Delegates.DELETETHISPOSTEFFECTJOB delete,
     Rhino.RDK.Delegates.EXECUTEPOSTEFFECTJOB execute
+  );
+
+  //CmnTask
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_Task_SetCallbacks(
+  Rhino.RDK.Delegates.REQUIREDDATASOURCESUICOMMANDPROC RequiredDataSources,
+  Rhino.RDK.Delegates.RENDERENGINEIDUICOMMANDPROC PluginId,
+  Rhino.RDK.Delegates.RENDERENGINEIDUICOMMANDPROC Id,
+  Rhino.RDK.Delegates.RENDERENGINEIDUICOMMANDPROC RenderEngineId,
+  Rhino.RDK.Delegates.ISENABLEDUICOMMANDPROC IsEnabled,
+  Rhino.RDK.Delegates.SUPPORTSSANDBOXUICOMMANDPROC SupportsSandbox,
+  Rhino.RDK.Delegates.QUERYUICOMMANDPROC Query,
+  Rhino.RDK.Delegates.USERUPDATEUICOMMANDPROC UserUpdate,
+  Rhino.RDK.Delegates.USEREXECUTEUICOMMANDPROC UserExecute,
+  Rhino.RDK.Delegates.MENUORDERUICOMMANDPROC MenuOrder,
+  Rhino.RDK.Delegates.MENUSEPARATORSUICOMMANDPROC MenuSeparators,
+  Rhino.RDK.Delegates.MENUSTRINGUICOMMANDPROC MenuString,
+  Rhino.RDK.Delegates.ICONOUTUICOMMANDPROC IconOut,
+  Rhino.RDK.Delegates.ICONOUTUICOMMANDPROC IconIn,
+  Rhino.RDK.Delegates.SETERRORUICOMMANDPROC SetError,
+  Rhino.RDK.Delegates.SUBMENUSUICOMMANDPROC SubMenu,
+  Rhino.RDK.Delegates.ISFORTOPLEVELCONTENTUICOMMANDPROC IsForTopLevelContent,
+  Rhino.RDK.Delegates.USEREXECUTEUICOMMANDPROC Execute,
+  Rhino.RDK.Delegates.USERUPDATEUICOMMANDPROC Update,
+  Rhino.RDK.Delegates.GETSUREMESSAGEUICOMMANDPROC GetSureMessage,
+  Rhino.RDK.Delegates.GETUNDOSTRINGUICOMMANDPROC GetUndoString,
+  Rhino.RDK.Delegates.SETSELECTIONUICOMMANDPROC SetSelection,
+  Rhino.RDK.Delegates.ERRORUICOMMANDPROC Error,
+  Rhino.RDK.Delegates.GETUNDOSTRINGUICOMMANDPROC FullUndoString
   );
 
   // FloatingPreviewManager

@@ -856,8 +856,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// True if all values are 0 and M33 is 1
+    /// True if all values are 0, except for M33 which is 1.
     /// </summary>
+    /// <seealso cref="Transform.IsZeroTransformationWithTolerance(double)"/>
     /// <since>6.1</since>
     public bool IsZeroTransformation
     {
@@ -868,13 +869,38 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// True if all values are 0 and M33 is 1 within tolerance.
+    /// True if all values are 0 within tolerance, except for M33 which is exactly 1.
     /// </summary>
     /// <param name="zeroTolerance">The zero tolerance.</param>
-    /// <returns>Returns true if all values are 0 and M33 is 1 within tolerance.</returns>
+    /// <returns>Returns true if all values are 0 within tolerance, except for M33 which is exactly 1.</returns>
+    /// <seealso cref="Transform.IsZeroTransformationWithTolerance(double)"/>
     /// <since>6.12</since>
+    /// <deprecated>7.1</deprecated>
+    [Obsolete("This method remains with a typo in its name for backwards compatibility. Use IsZeroTransformationWithTolerance instead.")]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [ConstOperation]
     public bool IsZeroTransformaton(double zeroTolerance)
+    {
+      return UnsafeNativeMethods.ON_Xform_IsZeroTransformation(ref this, zeroTolerance);
+    }
+
+    /// <summary>
+    /// True if all values are 0 within tolerance, except for M33 which is exactly 1.
+    /// </summary>
+    /// <param name="zeroTolerance">The tolerance for 0 elements.</param>
+    /// <returns>
+    /// True if the transformation matrix is ON_Xform::ZeroTransformation, with xform[3][3] equal to 1:
+    ///     0 0 0 0
+    ///     0 0 0 0
+    ///     0 0 0 0
+    ///     0 0 0 1
+    /// 
+    /// An element x of the matrix is "zero" if fabs(x) ≤ zeroTolerance.
+    /// IsZeroTransformation is the same as IsZeroTransformationWithTolerance(0.0)
+    /// </returns>
+    /// <since>7.1</since>
+    [ConstOperation]
+    public bool IsZeroTransformationWithTolerance(double zeroTolerance)
     {
       return UnsafeNativeMethods.ON_Xform_IsZeroTransformation(ref this, zeroTolerance);
     }
@@ -990,6 +1016,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Tests for an affine transformation.
+    /// A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// </summary>
     /// <since>6.12</since>
@@ -1003,6 +1030,8 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Tests for a linear transformation.
+    /// A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
+    /// If in addition its last column is ( 0, 0, 0, 1)^T then it is linear.
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// </summary>
     /// <since>6.12</since>
@@ -1016,6 +1045,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Decomposes an affine transformation.
+    /// A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// Note, a perspective transformation is not affine.
     /// </summary>
@@ -1037,6 +1067,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Decomposes an affine transformation.
+    /// A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
     /// An affine transformation can be broken into a linear transformation and a translation.
     /// Note, a perspective transformation is not affine.
     /// </summary>

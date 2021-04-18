@@ -39,7 +39,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Emap/Environment texture
     /// </summary>
-    Emap = 4,
+    Emap = 86,
     /// <summary>
     /// Physically based materials only - base color.  Re-uses diffuse texture slot.
     /// </summary>
@@ -123,7 +123,12 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Physically based materials only - clearcoat normal  or bump (normal map, RGB)
     /// </summary>
-    PBR_ClearcoatBump = 29
+    PBR_ClearcoatBump = 29,
+    /// <summary>
+    /// Physically based materials only - clearcoat normal  or bump (normal map, RGB)
+    /// </summary>
+    PBR_Alpha = 30
+
   }
 
   /// <summary>

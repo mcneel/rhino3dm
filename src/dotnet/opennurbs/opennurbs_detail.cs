@@ -75,7 +75,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets whether the view projection is locked.
+    /// Gets or sets whether the view is locked.
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>

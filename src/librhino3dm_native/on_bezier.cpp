@@ -54,6 +54,12 @@ RH_C_FUNCTION ON_BezierCurve* ON_BezierCurve_New4d(int count, /*ARRAY*/const ON_
   return rc;
 }
 
+RH_C_FUNCTION void ON_BezierCurve_Delete(ON_BezierCurve* pBez)
+{
+  if (pBez)
+    delete pBez;
+}
+
 RH_C_FUNCTION bool ON_BezierCurve_IsValid(const ON_BezierCurve* pConstBezierCurve)
 {
   bool rc = false;
@@ -251,3 +257,207 @@ RH_C_FUNCTION bool ON_BezierCurve_Split(const ON_BezierCurve* pConstBezierCurve,
   }
   return rc;
 }
+
+RH_C_FUNCTION ON_SimpleArray<ON_BezierCurve*>* ON_BezierCurve_NewSimpleArray()
+{
+  return new ON_SimpleArray<ON_BezierCurve*>();
+}
+
+RH_C_FUNCTION void ON_BezierCurve_DeleteSimpleArray(ON_SimpleArray<ON_BezierCurve*>* ptrArray)
+{
+  if (ptrArray)
+    delete ptrArray;
+}
+
+RH_C_FUNCTION void ON_BezierCurve_AppendToSimpleArray(ON_SimpleArray<ON_BezierCurve*>* ptrArray, ON_BezierCurve* ptrCurve)
+{
+  if (ptrArray)
+    ptrArray->Append(ptrCurve);
+}
+
+RH_C_FUNCTION ON_BezierSurface* ON_BezierSurface_New()
+{
+  return new ON_BezierSurface();
+}
+
+RH_C_FUNCTION void ON_BezierSurface_Delete(ON_BezierSurface* pBez)
+{
+  if (pBez)
+    delete pBez;
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_IsValid(const ON_BezierSurface* pConstBezierSurface)
+{
+  bool rc = false;
+  if (pConstBezierSurface)
+  {
+    rc = pConstBezierSurface->IsValid();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_BezierSurface_Dump(const ON_BezierSurface* pConstBezierSurface, CRhCmnStringHolder* pStringHolder)
+{
+  if (pConstBezierSurface && pStringHolder)
+  {
+    ON_wString s;
+    ON_TextLog textlog(s);
+    pConstBezierSurface->Dump(textlog);
+    pStringHolder->Set(s);
+  }
+}
+
+RH_C_FUNCTION int ON_BezierSurface_Dimension(const ON_BezierSurface* pConstBezierSurface)
+{
+  int rc = 0;
+  if (pConstBezierSurface)
+    rc = pConstBezierSurface->Dimension();
+  return rc;
+}
+
+RH_C_FUNCTION ON_BezierSurface* ON_BezierSurface_Loft(ON_SimpleArray<ON_BezierCurve*>* ptrBezCurveArray)
+{
+  if (nullptr == ptrBezCurveArray)
+    return nullptr;
+  ON_BezierSurface* rc = new ON_BezierSurface();
+  if (!rc->Loft(ptrBezCurveArray->Count(), ptrBezCurveArray->Array()))
+  {
+    delete rc;
+    rc = nullptr;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_BezierSurface_BoundingBox(const ON_BezierSurface* pConstBezierSurface, ON_BoundingBox* bounding_box)
+{
+  if (pConstBezierSurface && bounding_box)
+  {
+    *bounding_box = pConstBezierSurface->BoundingBox();
+  }
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_Transform(ON_BezierSurface* pBezierSurface, const ON_Xform* xform)
+{
+  if (pBezierSurface && xform)
+  {
+    return pBezierSurface->Transform(*xform);
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_BezierSurface_Domain(const ON_BezierSurface* pConstBezierSurface, int direction, ON_Interval* interval)
+{
+  if (pConstBezierSurface && interval)
+  {
+    *interval = pConstBezierSurface->Domain(direction);
+  }
+}
+
+RH_C_FUNCTION ON_BezierSurface* ON_BezierSurface_Reverse(const ON_BezierSurface* pConstBezierSurface, int direction)
+{
+  if (nullptr == pConstBezierSurface)
+    return nullptr;
+  ON_BezierSurface* rc = new ON_BezierSurface(*pConstBezierSurface);
+  if (!rc->Reverse(direction))
+  {
+    delete rc;
+    rc = nullptr;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_BezierSurface* ON_BezierSurface_Transpose(const ON_BezierSurface* pConstBezierSurface)
+{
+  if (nullptr == pConstBezierSurface)
+    return nullptr;
+  ON_BezierSurface* rc = new ON_BezierSurface(*pConstBezierSurface);
+  if (!rc->Transpose())
+  {
+    delete rc;
+    rc = nullptr;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_BezierSurface_PointAt(const ON_BezierSurface* pConstBezierSurface, double u, double v, ON_3dPoint* pt)
+{
+  if (pConstBezierSurface && pt)
+  {
+    *pt = pConstBezierSurface->PointAt(u, v);
+  }
+}
+
+RH_C_FUNCTION ON_NurbsSurface* ON_BezierSurface_GetNurbForm(const ON_BezierSurface* pConstBezierSurface)
+{
+  ON_NurbsSurface* rc = nullptr;
+  if (pConstBezierSurface)
+  {
+    // Always use static constructor
+    rc = ON_NurbsSurface::New();
+    if (!pConstBezierSurface->GetNurbForm(*rc))
+    {
+      delete rc;
+      rc = nullptr;
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_IsRational(const ON_BezierSurface* pConstBezierSurface)
+{
+  if (pConstBezierSurface)
+    return pConstBezierSurface->IsRational();
+  return false;
+}
+
+RH_C_FUNCTION int ON_BezierSurface_CVCount(const ON_BezierSurface* pConstBezierSurface, int direction)
+{
+  if (pConstBezierSurface)
+  {
+    if (0 == direction)
+      return pConstBezierSurface->m_order[0];
+    return pConstBezierSurface->m_order[1];
+  }
+  return 0;
+}
+
+
+RH_C_FUNCTION bool ON_BezierSurface_GetCV3d(const ON_BezierSurface* pConstBezierSurface, int i, int j, ON_3dPoint* point)
+{
+  bool rc = false;
+  if (pConstBezierSurface && point)
+    rc = pConstBezierSurface->GetCV(i, j, *point);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_GetCV4d(const ON_BezierSurface* pConstBezierSurface, int i, int j, ON_4dPoint* point)
+{
+  bool rc = false;
+  if (pConstBezierSurface && point)
+    rc = pConstBezierSurface->GetCV(i, j, *point);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_MakeRational(ON_BezierSurface* pBezierSurface, bool on)
+{
+  bool rc = false;
+  if (pBezierSurface)
+  {
+    if (on)
+      rc = pBezierSurface->MakeRational();
+    else
+      rc = pBezierSurface->MakeNonRational();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_BezierSurface_Split(const ON_BezierSurface* pConstBezierSurface, int direction, double t, ON_BezierSurface* left, ON_BezierSurface* right)
+{
+  bool rc = false;
+  if (pConstBezierSurface && left && right)
+  {
+    rc = pConstBezierSurface->Split(direction, t, *left, *right);
+  }
+  return rc;
+}
+

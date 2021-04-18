@@ -257,25 +257,24 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
   const int idxPlotColor = 1;
 
   int rc = setValue;
-  if(pAttributes)
+  if (pAttributes)
   {
-    if( set )
+    if (set)
     {
-      unsigned int abgr = ARGB_to_ABGR((unsigned int)setValue);
-      if( idxColor == which )
-        pAttributes->m_color = abgr;
-      else if( idxPlotColor == which )
-        pAttributes->m_plot_color = abgr;
+      ON_Color color = ARGB_to_ABGR(setValue);
+      if (idxColor == which)
+        pAttributes->m_color = color;
+      else if (idxPlotColor == which)
+        pAttributes->m_plot_color = color;
     }
     else
     {
-      ON_Color c;
-      if( idxColor == which )
-        c = pAttributes->m_color;
-      else if( idxPlotColor == which )
-        c = pAttributes->m_plot_color;
-      unsigned int abgr = (unsigned int)c;
-      rc = (int)abgr;
+      ON_Color color;
+      if (idxColor == which)
+        color = pAttributes->m_color;
+      else if (idxPlotColor == which)
+        color = pAttributes->m_plot_color;
+      rc = (int)ABGR_to_ARGB((unsigned int)color);
     }
   }
   return rc;
@@ -656,3 +655,32 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_HideInDetailIds(const ON_3dmObjectAttr
     }
   }
 }
+
+RH_C_FUNCTION ON_MeshParameters* ON_3dmObjectAttributes_CustomRenderMeshParameters(const ON_3dmObjectAttributes* pConstObjectAttributes)
+{
+  ON_MeshParameters* rc = nullptr;
+  if (pConstObjectAttributes)
+  {
+    const ON_MeshParameters* mp = pConstObjectAttributes->CustomRenderMeshParameters();
+    if (mp)
+      rc = new ON_MeshParameters(*mp);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ON_3dmObjectAttributes* pObjectAttributes, const ON_MeshParameters* pConstMeshParameters)
+{
+  if (pObjectAttributes)
+  {
+    if (pConstMeshParameters)
+    {
+      if (pObjectAttributes->SetCustomRenderMeshParameters(*pConstMeshParameters))
+        pObjectAttributes->EnableCustomRenderMeshParameters(true);
+    }
+    else
+    {
+      pObjectAttributes->DeleteCustomRenderMeshParameters();
+    }
+  }
+}
+

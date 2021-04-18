@@ -663,6 +663,9 @@ namespace Rhino.PlugIns
 
         g_display_options_dialog = DisplayOptionsDialogHook;
 
+        if (_LocalPlugInNameHook == null)
+          HostUtils.RegisterNamedCallback("CRhinoPlugIn_LocalPlugInName", (_LocalPlugInNameHook = InternalLocalPlugInName));
+
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks(
           0,
           m_OnLoad, m_OnShutDown
@@ -692,10 +695,11 @@ namespace Rhino.PlugIns
 
     internal delegate void DisplayOptionsDialogDelegate(int plugInSerialNumber, IntPtr hwndParent, [MarshalAs(UnmanagedType.LPWStr)]string fileDescription, [MarshalAs(UnmanagedType.LPWStr)]string fileExtension);
 
-    internal delegate void OnAddSectionsToSunPanelDelegate(int pluginSerialNumber, IntPtr pPageList);
-    internal delegate void OnAddSectionsToRenderSettingsPanelDelegate(int pluginSerialNumber, IntPtr pPageList);
+    internal delegate void OnAddSectionsToSunPanelDelegate(int pluginSerialNumber, uint modal, IntPtr pPageList);
+    internal delegate void OnAddSectionsToRenderSettingsPanelDelegate(int pluginSerialNumber, uint modal, IntPtr pPageList);
     internal delegate void LoadSaveProfileDelegate(int serialNumber, int load, IntPtr sectionString, IntPtr context);
 
+    private static EventHandler<NamedParametersEventArgs> _LocalPlugInNameHook;
     private static OnLoadDelegate m_OnLoad;
     private static OnShutdownDelegate m_OnShutDown;
     private static OnGetPlugInObjectDelegate m_OnGetPlugInObject;
@@ -756,6 +760,7 @@ namespace Rhino.PlugIns
           // their probably protected code.
           RenderContent.RegisterContent(p);
           PostEffect.RegisterPostEffect(p);
+          Rhino.Render.UICommands.UICommand.RegisterUICommand(p);
           RealtimeDisplayMode.RegisterDisplayModes(p);
           LightManagerSupport.RegisterLightManager(p);
 
@@ -894,6 +899,12 @@ namespace Rhino.PlugIns
       var export_plugin = plugin as FileExportPlugIn;
       export_plugin?.CallDisplayOptionsDialog(hwndParent, fileDescription, fileExtension);
     }
+    private static void InternalLocalPlugInName(object sender, Rhino.Runtime.NamedParametersEventArgs args)
+    {
+      if (args.TryGetInt("sn", out int sn) && sn > 0)
+        args.Set("name", LookUpBySerialNumber(sn)?.LocalPlugInName ?? "");
+    }
+
 
     private static int InternalWriteDocument(int pluginSerialNumber, uint docSerialNumber, IntPtr pBinaryArchive, IntPtr pWriteOptions)
     {
@@ -973,7 +984,7 @@ namespace Rhino.PlugIns
       }
     }
 
-    private static void InternalAddPagesToSunPanel(int pluginSerialNumber, IntPtr pSectionList)
+    private static void InternalAddPagesToSunPanel(int pluginSerialNumber, uint modal, IntPtr pSectionList)
     {
       RenderPlugIn plug_in = LookUpBySerialNumber(pluginSerialNumber) as RenderPlugIn;
       if (plug_in == null) return;
@@ -988,6 +999,17 @@ namespace Rhino.PlugIns
           {
             UnsafeNativeMethods.CRhRdkPlugIn_AddCustomSectionToList(pSectionList, ptr);
           }
+
+          // Add the win rhino eto style to the section if possible
+          if (HostUtils.RunningOnWindows && modal == 0)
+          {
+            var service = Rhino.Runtime.HostUtils.GetPlatformService<IEtoStylePageService>();
+
+            if (service != null)
+            {
+              service.StyleEtoControls(section);
+            }
+          }
         }
       }
       catch (Exception e)
@@ -996,7 +1018,7 @@ namespace Rhino.PlugIns
       }
     }
 
-    private static void InternalAddPagesToRenderSettingsPanel(int pluginSerialNumber, IntPtr pSectionList)
+    private static void InternalAddPagesToRenderSettingsPanel(int pluginSerialNumber, uint modal, IntPtr pSectionList)
     {
       RenderPlugIn plug_in = LookUpBySerialNumber(pluginSerialNumber) as RenderPlugIn;
       if (plug_in == null) return;
@@ -1010,6 +1032,17 @@ namespace Rhino.PlugIns
           if (ptr != IntPtr.Zero)
           {
             UnsafeNativeMethods.CRhRdkPlugIn_AddCustomSectionToList(pSectionList, ptr);
+          }
+
+          // Add the win rhino eto style to the section if possible
+          if (HostUtils.RunningOnWindows && modal == 0)
+          {
+            var service = Rhino.Runtime.HostUtils.GetPlatformService<IEtoStylePageService>();
+
+            if (service != null)
+            {
+              service.StyleEtoControls(section);
+            }
           }
         }
       }
@@ -1037,7 +1070,13 @@ namespace Rhino.PlugIns
         else
           plugin.DocumentPropertiesDialogPages(RhinoDoc.FromRuntimeSerialNumber(documentRuntimeSerialNumber), pages);
         foreach (var page in pages)
+        {
+          // 17 March 2021 John Morse
+          // Set page type when adding pages to allow RhinoMac to properly
+          // size the page based on which options window it is being hosted by
+          page.OptionsPageType = addToDocProps < 1 ? OptionsDialogPage.PageType.Options : OptionsDialogPage.PageType.DocumentProperties;
           RhinoPageHooks.AddNewIOptionsPageToCollection(collectionPointer, page, documentRuntimeSerialNumber, false);
+        }
       }
       catch (Exception e)
       {
@@ -1048,15 +1087,41 @@ namespace Rhino.PlugIns
 
     #region default virtual function implementations
     /// <summary>
-    /// Is called when the plug-in is being loaded.
+    /// Optionally override this to provide a localized plug-in name
     /// </summary>
-    /// <param name="errorMessage">
-    /// If a load error is returned and this string is set. This string is the 
-    /// error message that will be reported back to the user.
-    /// </param>
-    /// <returns>An appropriate load return code.
-    /// <para>The default implementation returns <see cref="LoadReturnCode.Success"/>.</para></returns>
-    protected virtual LoadReturnCode OnLoad(ref string errorMessage)
+    virtual protected string LocalPlugInName
+    {
+      get
+      {
+        // 28 October 2020 John Morse
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-61196
+        // Need to allow plug-ins to localize names which can not be handled
+        // in the assembly info.  Had to add this to get localized render plug-in
+        // names to appear in the Render menu.
+        if (string.IsNullOrEmpty(_localPlugInName))
+        {
+          var ass = GetType().Assembly;
+          object[] name = ass.GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
+          if (name.Length > 0)
+            _localPlugInName = ((AssemblyTitleAttribute)name[0]).Title;
+          else
+            _localPlugInName = ass.GetName().Name;
+        }
+        return _localPlugInName;
+      }
+    }
+    private string _localPlugInName;
+
+  /// <summary>
+  /// Is called when the plug-in is being loaded.
+  /// </summary>
+  /// <param name="errorMessage">
+  /// If a load error is returned and this string is set. This string is the 
+  /// error message that will be reported back to the user.
+  /// </param>
+  /// <returns>An appropriate load return code.
+  /// <para>The default implementation returns <see cref="LoadReturnCode.Success"/>.</para></returns>
+  protected virtual LoadReturnCode OnLoad(ref string errorMessage)
     {
       return LoadReturnCode.Success;
     }
@@ -1424,9 +1489,9 @@ namespace Rhino.PlugIns
       return plugin_name;
     }
 
-    static string PlugInNameFromId(Guid pluginId)
+    static string PlugInNameFromId(Guid pluginId, bool localizedPlugInName)
     {
-      Dictionary<Guid,string> plugins = GetInstalledPlugIns();
+      Dictionary<Guid,string> plugins = GetInstalledPlugIns(localizedPlugInName);
       string result;
       plugins.TryGetValue(pluginId, out result);
       return result;
@@ -1468,7 +1533,7 @@ namespace Rhino.PlugIns
       string name;
       if (null == assembly)
       {
-        name = PlugInNameFromId(pluginId);
+        name = PlugInNameFromId(pluginId, false);
       }
       else
       {
@@ -1520,7 +1585,7 @@ namespace Rhino.PlugIns
       // 11 December 2019 John Morse
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-55242
       // If dirty == true then there was a change to this settings dictionary after the file was
-      // previously written and the file change notification recieved so do NOT read the file now
+      // previously written and the file change notification received so do NOT read the file now
       // since the current dictionary is about to be written again
       if (!HostUtils.RunningOnOSX && !dirty)
       {
@@ -1528,7 +1593,11 @@ namespace Rhino.PlugIns
         InternalPlugInSettings.MergeChangedSettingsFile (read_settings);
       }
       var e = new PersistentSettingsSavedEventArgs(writing, old_settings);
-      RhinoApp.InvokeOnUiThread(SettingsSaved, sender, e);
+      // 26 February 2021 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-62840
+      // Just call the method instead of trying to invoke it on the main thread
+      SettingsSaved?.Invoke(sender, e);
+      //RhinoApp.InvokeOnUiThread(SettingsSaved, sender, e);
     }
 
     /// <summary>
@@ -1657,8 +1726,26 @@ namespace Rhino.PlugIns
       return true;
     }
 
+    /// <summary>
+    /// Get a list of all registered plug-in's regardless of if they are loaded or not.
+    /// </summary>
+    /// <returns>
+    /// Dictionary with plug-in ID as key and localized plug-in name as value
+    /// </returns>
     /// <since>5.0</since>
-    public static Dictionary<Guid, string> GetInstalledPlugIns()
+    public static Dictionary<Guid, string> GetInstalledPlugIns() => GetInstalledPlugIns(true);
+
+    /// <summary>
+    /// Get a list of all registered plug-in's regardless of if they are loaded or not.
+    /// </summary>
+    /// <param name="localizedPlugInName">
+    /// If true then the localize plug-in name is returned otherwise; the English name is used.
+    /// </param>
+    /// <returns>
+    /// Dictionary with plug-in ID as key and plug-in name as value
+    /// </returns>
+    /// <since>7.5</since>
+    public static Dictionary<Guid, string> GetInstalledPlugIns(bool localizedPlugInName)
     {
       int count = InstalledPlugInCount;
       var plug_in_dictionary = new Dictionary<Guid, string>(32);
@@ -1667,7 +1754,7 @@ namespace Rhino.PlugIns
         for (int i = 0; i < count; i++)
         {
           IntPtr ptr_string = holder.NonConstPointer;
-          UnsafeNativeMethods.CRhinoPlugInManager_GetName(i, ptr_string);
+          UnsafeNativeMethods.CRhinoPlugInManager_GetName(i, localizedPlugInName, ptr_string);
           string name = holder.ToString();
           if (!string.IsNullOrEmpty(name))
           {
@@ -1702,6 +1789,24 @@ namespace Rhino.PlugIns
     /// <since>5.0</since>
     public static string[] GetInstalledPlugInNames(PlugInType typeFilter, bool loaded, bool unloaded)
     {
+      return GetInstalledPlugInNames(typeFilter, loaded, unloaded, true);
+    }
+
+    /// <summary>
+    /// Gets a list of installed plug-in names.  The list can be restricted by some filters.
+    /// </summary>
+    /// <param name="typeFilter">
+    /// The enumeration flags that determine which types of plug-ins are included.
+    /// </param>
+    /// <param name="loaded">true if loaded plug-ins are returned.</param>
+    /// <param name="unloaded">true if unloaded plug-ins are returned.</param>
+    /// <param name="localizedPlugInName">
+    /// If true localized plug-in names are returned otherwise; English names are returned.
+    /// </param>
+    /// <returns>An array of installed plug-in names. This can be empty, but not null.</returns>
+    /// <since>7.5</since>
+    public static string[] GetInstalledPlugInNames(PlugInType typeFilter, bool loaded, bool unloaded, bool localizedPlugInName)
+    {
       int count = InstalledPlugInCount;
       var names = new List<string>(count);
       using (var holder = new StringWrapper())
@@ -1709,7 +1814,7 @@ namespace Rhino.PlugIns
         for (int i = 0; i < count; i++)
         {
           IntPtr ptr_holder = holder.NonConstPointer;
-          UnsafeNativeMethods.CRhinoPlugInManager_GetName(i, ptr_holder);
+          UnsafeNativeMethods.CRhinoPlugInManager_GetName(i, localizedPlugInName, ptr_holder);
           if (UnsafeNativeMethods.CRhinoPlugInManager_PassesFilter(i, (int)typeFilter, loaded, unloaded, false))
           {
             string name = holder.ToString();
@@ -2225,10 +2330,11 @@ namespace Rhino.PlugIns
     static bool g_rhcommon_hash_checked = false;
     static string ComputeMd5Hash(string path)
     {
-      using (var md5 = System.Security.Cryptography.MD5.Create())
+      // wfcook 2021-02-09 changed from MD5 to SHA256 because MD5 is not FIPS-compliant
+      using (var sha256 = System.Security.Cryptography.SHA256CryptoServiceProvider.Create())
       using (var stream = File.OpenRead(path))
       {
-        string hash = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower(); // unix-y md5 hash
+        string hash = BitConverter.ToString(sha256.ComputeHash(stream)).Replace("-", string.Empty).ToLower(); // unix-y md5 hash
         return hash;
       }
     }
@@ -2419,12 +2525,15 @@ namespace Rhino.PlugIns
 
       //HostUtils.DebugString ($"Compat output: {output}");
 
-      if (proc.ExitCode == 110) // don't fail if dll is not dotnet (native)
-        return true;
+      if ((proc.ExitCode == 110) // don't fail if dll is not dotnet (native)
+          || (proc.ExitCode == 128)) // don't fail for no assembly name (possibly obfuscated)
+          return true;
 
       if (!string.IsNullOrWhiteSpace(errout))
         HostUtils.DebugString("ERROR: " + errout);
 
+      if (proc.ExitCode == 112)
+        System.Diagnostics.Debug.Write(output);
       bool result = (proc.ExitCode == 0) && !CheckForRhinoSdkClasses(output);
       
       // TODO: throw if compat errored (check exit code)
@@ -2439,6 +2548,28 @@ namespace Rhino.PlugIns
       bool mixed_mode = mixed_mode_regex.IsMatch(output);
       if (!mixed_mode)
         return false;
+
+      // wfcook RH-60405 14-Sep-2020: If plugin version >= 6 we don't need to check because we 
+      // haven't broken the sdk.
+      bool bReferencesOK = true;
+      var RhinoCommonRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*RhinoCommon.*Version=)[0-9](?=\.)");
+      Match RhinoCommonMatch = RhinoCommonRegex.Match(output);
+      if (RhinoCommonMatch.Success)
+      {
+        int version;
+        if (int.TryParse(RhinoCommonMatch.Value, out version) && (version < 6)) bReferencesOK = false;
+      }
+      if (bReferencesOK)
+      {
+        var RhinoDotNetRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*Rhino_DotNet.*Version=)[0-9](?=\.)");
+        Match RhinoDotNetMatch = RhinoDotNetRegex.Match(output);
+        if (RhinoDotNetMatch.Success)
+        {
+          int version;
+          if (int.TryParse(RhinoDotNetMatch.Value, out version) && (version < 6)) bReferencesOK = false;
+        }
+      }
+      if (bReferencesOK) return false;
 
       // if we find any classes with the following prefixes, odds are the assembly references the rhino c++ sdk
       // we can't check for compatiblity with the c++ sdk so the plug-in fails the compatibility check
@@ -3482,7 +3613,8 @@ namespace Rhino.PlugIns
         g_get_custom_render_save_file_types_callback,
         g_ui_content_types_callback,
         g_save_custom_render_file_callback,
-        g_render_settings_sections_callback
+        g_render_settings_sections_callback,
+        g_plugin_icon_callback
         );
     }
 
@@ -3630,6 +3762,34 @@ namespace Rhino.PlugIns
       {
         UnsafeNativeMethods.Rdk_RenderPlugIn_SimpleUuidArray_AddUuid(renderSettingsArray, type);
       }
+    }
+
+    internal delegate bool PlugInIconCallback(int serialNumber, int width, int height, IntPtr dibOut);
+    private static readonly PlugInIconCallback g_plugin_icon_callback = PlugInIcon;
+    private static bool PlugInIcon(int serialNumber, int width, int height, IntPtr dibOut)
+    {
+      // Get the runtime plug-in to call
+      var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
+      if (render_plug_in == null)
+        return false;
+
+      try
+      {
+        Bitmap bitmap = render_plug_in.Icon(new Size(width, height));
+
+        if (null == bitmap) return false;
+        IntPtr handle;
+        handle = bitmap.GetHbitmap();
+
+        UnsafeNativeMethods.CRhinoDib_SetFromHBitmap(dibOut, handle, true);
+      }
+
+      catch (Exception exception)
+      {
+        Runtime.HostUtils.ExceptionReport(exception);
+      }
+
+      return true;
     }
 
 

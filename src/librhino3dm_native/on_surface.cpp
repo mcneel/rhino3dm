@@ -2,6 +2,7 @@
 
 RH_C_FUNCTION ON_Surface* ON_Surface_DuplicateSurface(ON_Surface* pSurface)
 {
+  RHCHECK_LICENSE
   if( pSurface )
     return pSurface->DuplicateSurface();
   return nullptr;
@@ -9,6 +10,7 @@ RH_C_FUNCTION ON_Surface* ON_Surface_DuplicateSurface(ON_Surface* pSurface)
 
 RH_C_FUNCTION ON_Brep* ON_Surface_BrepForm(const ON_Surface* pConstSurface)
 {
+  RHCHECK_LICENSE
   if( pConstSurface )
     return pConstSurface->BrepForm();
   return nullptr;
@@ -74,6 +76,7 @@ RH_C_FUNCTION int ON_Surface_Degree(const ON_Surface* pConstSurface, int directi
 
 RH_C_FUNCTION int ON_Surface_IsIsoparametric(const ON_Surface* pConstSurface, const ON_Curve* pCurve, ON_INTERVAL_STRUCT curveDomain)
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if( pConstSurface && pCurve )
   {
@@ -87,6 +90,7 @@ RH_C_FUNCTION int ON_Surface_IsIsoparametric(const ON_Surface* pConstSurface, co
 
 RH_C_FUNCTION int ON_Surface_IsIsoparametric2(const ON_Surface* pConstSurface, ON_3DPOINT_STRUCT bbox_min, ON_3DPOINT_STRUCT bbox_max)
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if( pConstSurface )
   {
@@ -287,6 +291,18 @@ RH_C_FUNCTION bool ON_Surface_GetNextDiscontinuity(const ON_Surface* pConstSurfa
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Surface_GetNextDiscontinuity2(const ON_Surface* pConstSurface, int direction, int continuityType, double t0, double t1,
+  double cosAngleTolerance, double curvatureTolerance, double* t)
+{
+  bool rc = false;
+  if (pConstSurface)
+  {
+    rc = pConstSurface->GetNextDiscontinuity(direction, ON::Continuity(continuityType), t0, t1, t,
+      nullptr, nullptr, cosAngleTolerance, curvatureTolerance);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Surface_IsContinuous(const ON_Surface* pConstSurface, int continuityType, double s, double t)
 {
   bool rc = false;
@@ -299,6 +315,7 @@ RH_C_FUNCTION bool ON_Surface_IsContinuous(const ON_Surface* pConstSurface, int 
 
 RH_C_FUNCTION void ON_Surface_NormalAt(const ON_Surface* pConstSurface, double u, double v, ON_3dVector* vector)
 {
+  RHCHECK_LICENSE
   if( pConstSurface && vector )
   {
     *vector = pConstSurface->NormalAt(u,v);
@@ -310,6 +327,7 @@ RH_C_FUNCTION void ON_Surface_NormalAt(const ON_Surface* pConstSurface, double u
 
 RH_C_FUNCTION bool ON_Surface_FrameAt(const ON_Surface* pConstSurface, double u, double v, ON_PLANE_STRUCT* frame)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pConstSurface && frame )
   {
@@ -325,6 +343,7 @@ RH_C_FUNCTION bool ON_Surface_FrameAt(const ON_Surface* pConstSurface, double u,
 
 RH_C_FUNCTION ON_Surface* ON_Surface_Trim(const ON_Surface* pConstSurface, ON_INTERVAL_STRUCT u_domain, ON_INTERVAL_STRUCT v_domain)
 {
+  RHCHECK_LICENSE
   ON_Surface* rc = nullptr;
   if( pConstSurface )
   {
@@ -345,6 +364,7 @@ RH_C_FUNCTION ON_Surface* ON_Surface_Trim(const ON_Surface* pConstSurface, ON_IN
 
 RH_C_FUNCTION ON_Curve* ON_Surface_IsoCurve(const ON_Surface* pConstSurface, int direction, double constantParameter)
 {
+  RHCHECK_LICENSE
   if( pConstSurface )
     return pConstSurface->IsoCurve(direction, constantParameter);
   return nullptr;
@@ -355,6 +375,7 @@ RH_C_FUNCTION ON_Curve* ON_Surface_IsoCurve(const ON_Surface* pConstSurface, int
 
 RH_C_FUNCTION ON_Curve* ON_Surface_Pushup(const ON_Surface* pConstSurface, const ON_Curve* pCurve2d, double tolerance, ON_INTERVAL_STRUCT curve2dSubdomain)
 {
+  RHCHECK_LICENSE
   ON_Curve* rc = nullptr;
   if( pConstSurface && pCurve2d )
   {
@@ -368,6 +389,7 @@ RH_C_FUNCTION ON_Curve* ON_Surface_Pushup(const ON_Surface* pConstSurface, const
 
 RH_C_FUNCTION ON_Curve* ON_Surface_Pullback(const ON_Surface* pConstSurface, const ON_Curve* pCurve3d, double tolerance, ON_INTERVAL_STRUCT curve3dSubdomain)
 {
+  RHCHECK_LICENSE
   ON_Curve* rc = nullptr;
   if( pConstSurface && pCurve3d )
   {
@@ -461,6 +483,7 @@ RH_C_FUNCTION bool ON_Surface_GetLocalClosestPoint(const ON_Surface* pConstSurfa
 
 RH_C_FUNCTION ON_NurbsSurface* ON_Surface_GetNurbForm(ON_Surface* pSurface, double tolerance, int* accuracy)
 {
+  RHCHECK_LICENSE
   ON_NurbsSurface* pNurbForm = nullptr;
   if (pSurface && accuracy)
   {
@@ -480,6 +503,7 @@ RH_C_FUNCTION ON_NurbsSurface* ON_Surface_GetNurbForm(ON_Surface* pSurface, doub
 
 RH_C_FUNCTION bool ON_Surface_TranslateParameter(const ON_Surface* constSurfacePtr, double fromS, double fromT, double* toS, double* toT, bool surfaceParameterFromNurbForm)
 {
+  RHCHECK_LICENSE
   bool rc = false;
 	if (constSurfacePtr && toS && toT)
 	{
@@ -500,6 +524,7 @@ RH_C_FUNCTION bool ON_Surface_TranslateParameter(const ON_Surface* constSurfaceP
 
 RH_C_FUNCTION ON_Surface* ON_Surface_Offset( const ON_Surface* pConstSurface, double offset, double tolerance)
 {
+  RHCHECK_LICENSE
   if( pConstSurface )
     return pConstSurface->Offset(offset, tolerance);
   return nullptr;
@@ -581,6 +606,7 @@ RH_C_FUNCTION void ON_Surface_Split(const ON_Surface* pConstSurface, int directi
 
 RH_C_FUNCTION bool ON_Surface_Evaluate(const ON_Surface* pConstSurface, double u, double v, int numDer, int stride, /*ARRAY*/double* der_array)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pConstSurface && der_array )
   {
@@ -589,9 +615,21 @@ RH_C_FUNCTION bool ON_Surface_Evaluate(const ON_Surface* pConstSurface, double u
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Surface_Extend(ON_Surface* pSurface, int dir, ON_INTERVAL_STRUCT interval)
+{
+  bool rc = false;
+  if (pSurface)
+  {
+    const ON_Interval* _interval = (const ON_Interval*)&interval;
+    rc = pSurface->Extend(dir, *_interval);
+  }
+  return rc;
+}
+
 // move to on_sumsurface.cpp once we have one
 RH_C_FUNCTION ON_SumSurface* ON_SumSurface_Create(const ON_Curve* pConstCurveA, const ON_Curve* pConstCurveB)
 {
+  RHCHECK_LICENSE
   ON_SumSurface* rc = nullptr;
   if( pConstCurveA && pConstCurveB )
   {
@@ -657,6 +695,7 @@ RH_C_FUNCTION int ON_Surface_ClosestSide( const ON_Surface* pConstSurface, doubl
 
 RH_C_FUNCTION ON_Mesh* ON_Surface_CreateMesh(const ON_Surface* pConstSurface, const ON_MeshParameters* pConstMeshingParameters)
 {
+  RHCHECK_LICENSE
   if (nullptr == pConstSurface)
     return nullptr;
 
@@ -670,6 +709,7 @@ RH_C_FUNCTION ON_Mesh* ON_Surface_CreateMesh(const ON_Surface* pConstSurface, co
 
 RH_C_FUNCTION ON_MassProperties* ON_Surface_MassProperties(bool bArea, const ON_Surface* pConstSurface, bool bVolume, bool bFirstMoments, bool bSecondMoments, bool bProductMoments, double relativeTolerance, double absoluteTolerance)
 {
+  RHCHECK_LICENSE
   ON_MassProperties* rc = nullptr;
   if (pConstSurface)
   {

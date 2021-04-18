@@ -214,7 +214,7 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Gets or sets the height and width of the viewport (in pixels)
+    /// Get or set the height and width of the viewport (in pixels)
     /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_viewportresolution.vb' lang='vbnet'/>
@@ -256,9 +256,9 @@ namespace Rhino.Display
       {
         using (var sh = new StringHolder())
         {
-          IntPtr ptr_this = NonConstPointer();
+          IntPtr const_ptr_this = ConstPointer();
           IntPtr ptr_string = sh.NonConstPointer();
-          UnsafeNativeMethods.CRhinoViewport_GetSetName(ptr_this, null, ptr_string);
+          UnsafeNativeMethods.CRhinoViewport_GetSetName(const_ptr_this, null, ptr_string);
           return sh.ToString();
         }
       }

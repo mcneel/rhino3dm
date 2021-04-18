@@ -5,11 +5,13 @@ RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_subd.h")
 
 RH_C_FUNCTION ON_SubDRef* ON_SubDRef_New()
 {
+  RHCHECK_LICENSE
   return new ON_SubDRef();
 }
 
 RH_C_FUNCTION ON_SubD* ON_SubDRef_NewSubD(ON_SubDRef* ptrSubDRef)
 {
+  RHCHECK_LICENSE
   ON_SubD* rc = nullptr;
   if (ptrSubDRef)
     rc = &(ptrSubDRef->NewSubD());
@@ -18,6 +20,7 @@ RH_C_FUNCTION ON_SubD* ON_SubDRef_NewSubD(ON_SubDRef* ptrSubDRef)
 
 RH_C_FUNCTION ON_SubDRef* ON_SubDRef_CreateAndAttach(ON_SubD* ptrSubD)
 {
+  RHCHECK_LICENSE
   if (ptrSubD && ptrSubD != &ON_SubD::Empty)
   {
     ON_SubDRef* rc = new ON_SubDRef();
@@ -40,9 +43,26 @@ RH_C_FUNCTION const ON_SubD* ON_SubDRef_ConstPointerSubD(const ON_SubDRef* const
   return nullptr;
 }
 
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION ON_Brep* ON_SubD_GetSurfaceBrep(const ON_SubD* pConstSubD, const ON_SubDToBrepParameters* toBrepParameters)
+{
+  RHCHECK_LICENSE
+  if (nullptr == pConstSubD)
+    return nullptr;
+    
+  ON_Brep* rc = nullptr;
+  if (nullptr == toBrepParameters)
+    rc = pConstSubD->GetSurfaceBrep(ON_SubDToBrepParameters::Default, nullptr);
+  else
+    rc = pConstSubD->GetSurfaceBrep(*toBrepParameters, nullptr);
+  return rc;
+}
+#endif
+
 
 RH_C_FUNCTION ON_SubD* ON_SubD_CreateFromMesh(const ON_Mesh* meshConstPtr, const ON_SubDFromMeshParameters* toSubDParameters)
 {
+  RHCHECK_LICENSE
   ON_SubD* subd = ON_SubD::CreateFromMesh(meshConstPtr, toSubDParameters, nullptr);
   return subd;
 }
@@ -68,6 +88,18 @@ RH_C_FUNCTION bool ON_SubD_GlobalSubdivide(ON_SubD* subd, unsigned int level)
     rc = subd->GlobalSubdivide(level);
   return rc;
 }
+
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION bool ON_SubD_InterpolateSurfacePoints(ON_SubD* subd, int count, /*ARRAY*/const ON_3dPoint* points)
+{
+  if (subd && points)
+  {
+    CHack3dPointArray pts(count, (ON_3dPoint*)points);
+    return subd->InterpolateSurfacePoints(pts);
+  }
+  return false;
+}
+#endif
 
 enum SubDIntConst : int
 {
@@ -122,6 +154,7 @@ RH_C_FUNCTION void ON_SubD_UpdateSurfaceMeshCache(ON_SubD* ptrSubD)
 
 RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, unsigned int mesh_density )
 {
+  RHCHECK_LICENSE
   if (nullptr == constSubdPtr)
     return nullptr;
   ON_SubDDisplayParameters limit_mesh_parameters = ON_SubDDisplayParameters::CreateFromDisplayDensity(mesh_density);
@@ -132,6 +165,7 @@ RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, 
 
 RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr)
 {
+  RHCHECK_LICENSE
   if (constSubDPtr)
     return constSubDPtr->GetControlNetMesh(nullptr, ON_SubDGetControlNetMeshPriority::Geometry);
   return nullptr;
@@ -210,6 +244,97 @@ RH_C_FUNCTION const ON_SubDVertex* ON_SubD_FirstVertex(const ON_SubD* constSubDP
     *id = vertex ? vertex->m_id : 0;
   return vertex;
 }
+
+RH_C_FUNCTION const ON_SubDVertex* ON_SubD_SubDVertexFromComponentIndex(const ON_SubD* constSubDPtr, ON_2INTS componentIndex, unsigned int* id)
+{
+  ON_SubDVertex* rc = nullptr;
+  if (constSubDPtr)
+  {
+    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
+    if (ci->m_type == ON_COMPONENT_INDEX::subd_vertex)
+    {
+      ON_SubDComponentPtr cptr = constSubDPtr->ComponentPtrFromComponentIndex(*ci);
+      if (cptr.IsNotNull())
+        rc = cptr.Vertex();
+    }
+  }
+  if (id)
+    *id = rc ? rc->m_id : 0;
+  return rc;
+}
+
+RH_C_FUNCTION const ON_SubDFace* ON_SubD_SubDFaceFromComponentIndex(const ON_SubD* constSubDPtr, ON_2INTS componentIndex, unsigned int* id)
+{
+  ON_SubDFace* rc = nullptr;
+  if (constSubDPtr)
+  {
+    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
+    if (ci->m_type == ON_COMPONENT_INDEX::subd_face)
+    {
+      ON_SubDComponentPtr cptr = constSubDPtr->ComponentPtrFromComponentIndex(*ci);
+      if (cptr.IsNotNull())
+        rc = cptr.Face();
+    }
+  }
+  if (id)
+    *id = rc ? rc->m_id : 0;
+  return rc;
+}
+
+RH_C_FUNCTION const ON_SubDEdge* ON_SubD_SubDEdgeFromComponentIndex(const ON_SubD* constSubDPtr, ON_2INTS componentIndex, unsigned int* id)
+{
+  ON_SubDEdge* rc = nullptr;
+  if (constSubDPtr)
+  {
+    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
+    if (ci->m_type == ON_COMPONENT_INDEX::subd_edge)
+    {
+      ON_SubDComponentPtr cptr = constSubDPtr->ComponentPtrFromComponentIndex(*ci);
+      if (cptr.IsNotNull())
+        rc = cptr.Edge();
+    }
+  }
+  if (id)
+    *id = rc ? rc->m_id : 0;
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SubD_ComponentStatusBool(const ON_SubDComponentBase* constComponentBasePtr, int which)
+{
+  bool rc = false;
+  const int idx_cs_selected = 0;
+  const int idx_cs_highlighted = 1;
+  const int idx_cs_hidden = 2;
+  const int idx_cs_locked = 3;
+  const int idx_cs_deleted = 4;
+  const int idx_cs_damaged = 5;
+  if (constComponentBasePtr)
+  {
+    switch (which)
+    {
+    case idx_cs_selected:
+      rc = constComponentBasePtr->Status().IsSelected();
+      break;
+    case idx_cs_highlighted:
+      rc = constComponentBasePtr->Status().IsHighlighted();
+      break;
+    case idx_cs_hidden:
+      rc = constComponentBasePtr->Status().IsHidden();
+      break;
+    case idx_cs_locked:
+      rc = constComponentBasePtr->Status().IsLocked();
+      break;
+    case idx_cs_deleted:
+      rc = constComponentBasePtr->Status().IsDeleted();
+      break;
+    case idx_cs_damaged:
+      rc = constComponentBasePtr->Status().IsDamaged();
+      break;
+    }
+  }
+  return rc;
+}
+
 
 /////////////////////
 enum OnSubDMeshParameterTypeConsts : int
@@ -359,9 +484,65 @@ RH_C_FUNCTION void ON_ToSubDParameters_SetMinimumConcaveCornerEdgeCount(ON_SubDF
     parameters->SetMinimumConcaveCornerEdgeCount(val);
 }
 
+///////////////////// ON_SubDToBrepParameters
+enum OnSubDToBrepParameterTypeConsts : int
+{
+  stbpDefault = 0,
+  stbpDefaultPacked = 1,
+  stbpDefaultUnpacked = 2
+};
+
+RH_C_FUNCTION ON_SubDToBrepParameters* ON_SubDToBrepParameters_New(enum OnSubDToBrepParameterTypeConsts which)
+{
+  ON_SubDToBrepParameters* rc = new ON_SubDToBrepParameters(ON_SubDToBrepParameters::Default);
+  switch (which)
+  {
+    case stbpDefault:
+      *rc = ON_SubDToBrepParameters::Default;
+      break;
+    case stbpDefaultPacked:
+      *rc = ON_SubDToBrepParameters::DefaultPacked;
+      break;
+    case stbpDefaultUnpacked:
+      *rc = ON_SubDToBrepParameters::DefaultUnpacked;
+      break;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_SubDToBrepParameters_Delete(ON_SubDToBrepParameters* parameters)
+{
+  if (parameters)
+    delete parameters;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDToBrepParameters_ExtraordinaryVertexProcess(const ON_SubDToBrepParameters* constParameters)
+{
+  if (constParameters)
+    return (unsigned int)constParameters->ExtraordinaryVertexProcess();
+  return (unsigned int)ON_SubDToBrepParameters::VertexProcess::None;
+}
+
+RH_C_FUNCTION void ON_SubDToBrepParameters_SetExtraordinaryVertexProcess(ON_SubDToBrepParameters* parameters, unsigned int option)
+{
+  if (parameters)
+    parameters->SetExtraordinaryVertexProcess(ON_SubDToBrepParameters::VertexProcessFromUnsigned(option));
+}
+
+RH_C_FUNCTION bool ON_SubDToBrepParameters_PackFaces(const ON_SubDToBrepParameters* constParameters)
+{
+  if (constParameters)
+    return constParameters->PackFaces();
+  return false;
+}
+
+RH_C_FUNCTION void ON_SubDToBrepParameters_SetPackFaces(ON_SubDToBrepParameters* parameters, bool option)
+{
+  if (parameters)
+    parameters->SetPackFaces(option);
+}
 
 ///////////////////// ON_SubDVertex
-
 RH_C_FUNCTION const ON_SubDVertex* ON_SubDVertex_FromId(const ON_SubD* constSubDPtr, unsigned int index)
 {
   //note: caller is supposed to check constVertexPtr against nullptr.
@@ -417,6 +598,27 @@ RH_C_FUNCTION const ON_SubDVertex* ON_SubDVertex_PreviousOrNext(const ON_SubDVer
 
   return vertex;
 }
+
+RH_C_FUNCTION ON_SubDVertexTag ON_SubDVertex_GetVertexTag(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->m_vertex_tag;
+  return ON_SubDVertexTag::Unset;
+}
+
+RH_C_FUNCTION void ON_SubDVertex_SetVertexTag(ON_SubDVertex* vertexPtr, const ON_SubDVertexTag tag)
+{
+  if (vertexPtr)
+    vertexPtr->m_vertex_tag = tag;
+}
+
+
+RH_C_FUNCTION void ON_SubDVertex_SurfacePoint(const ON_SubDVertex* constVertexPtr, ON_3dPoint* value)
+{
+  if (value && constVertexPtr)
+    *value = constVertexPtr->SurfacePoint();
+}
+
 
 
 ///////////////////// ON_SubDEdge
@@ -582,5 +784,46 @@ RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constF
     *pPointOut = constFace->SurfaceCenterPoint();
   }
 }
+
+RH_C_FUNCTION ON_NurbsCurve* ON_SubD_CreateSubDFriendlyCurve(int count, /*ARRAY*/const ON_3dPoint* points, bool bInterpolatePoints, bool bPeriodicClosedCurve)
+{
+  ON_NurbsCurve* rc = nullptr;
+  if (count > 0 && points)
+    rc = ON_SubD::CreateSubDFriendlyCurve(points, (size_t)count, bInterpolatePoints, bPeriodicClosedCurve, nullptr);
+  return rc;
+}
+
+RH_C_FUNCTION ON_NurbsCurve* ON_SubD_CreateSubDFriendlyCurve2(const ON_Curve* pConstCurve, int cv_count, bool bPeriodicClosedCurve)
+{
+  ON_NurbsCurve* rc = nullptr;
+  if (pConstCurve && cv_count >= 0)
+    rc = ON_SubD::CreateSubDFriendlyCurve(*pConstCurve, cv_count, bPeriodicClosedCurve, nullptr);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SubD_IsSubDFriendlyCurve(const ON_Curve* pConstCurve)
+{
+  bool rc = false;
+  if (pConstCurve)
+    rc = ON_SubD::IsSubDFriendlyCurve(pConstCurve);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SubD_IsSubDFriendlySurface(const ON_Surface* pConstSurface)
+{
+  bool rc = false;
+  if (pConstSurface)
+    rc = ON_SubD::IsSubDFriendlySurface(pConstSurface);
+  return rc;
+}
+
+RH_C_FUNCTION ON_NurbsSurface* ON_SubD_CreateSubDFriendlySurface(const ON_Surface* pConstSurface)
+{
+  ON_NurbsSurface* rc = nullptr;
+  if (pConstSurface)
+    rc = ON_SubD::CreateSubDFriendlySurface(*pConstSurface, nullptr);
+  return rc;
+}
+
 #endif
 

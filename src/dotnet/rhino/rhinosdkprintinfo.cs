@@ -197,11 +197,11 @@ namespace Rhino.Display
           attrib.Value = (pen.Color.A / 255.0).ToString(CultureInfo.InvariantCulture);
           elem.Attributes.Append(attrib);
         }
-
+        //Trav Feb-21-21 Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-62804
         if (brushColor == Color.Empty)
         {
-          attrib = m_doc.CreateAttribute("fill-opacity");
-          attrib.Value = "0";
+          attrib = m_doc.CreateAttribute("fill");
+          attrib.Value = "none";
           elem.Attributes.Append(attrib);
         }
         else
@@ -448,6 +448,24 @@ namespace Rhino.Display
       set
       {
         SetBool(UnsafeNativeMethods.PrintInfoBool.Raster, value);
+      }
+    }
+
+    /// <summary>
+    /// Default is true. Linetype scales are normally generated right before
+    /// printing/view capture in order to get linetypes to print to the same
+    /// lengths as defined. If false, the linetypes are not scaled and the
+    /// current pattern lengths as seen on the screen as used.
+    /// </summary>
+    public bool MatchLinetypePatternDefinition
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.PrintInfoBool.MatchLinetypePatternDefinition);
+      }
+      set
+      {
+        SetBool(UnsafeNativeMethods.PrintInfoBool.MatchLinetypePatternDefinition, value);
       }
     }
 
@@ -767,6 +785,50 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Text drawn at the top of the output
+    /// </summary>
+    public string HeaderText
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        using(var sw = new Rhino.Runtime.InteropWrappers.StringWrapper())
+        {
+          IntPtr ptrString = sw.NonConstPointer;
+          UnsafeNativeMethods.CRhinoPrintInfo_GetHeaderFooter(constPtrThis, true, ptrString);
+          return sw.ToString();
+        }
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.CRhinoPrintInfo_SetHeaderFooter(ptrThis, true, value);
+      }
+    }
+
+    /// <summary>
+    /// Text drawn at the bottom of the output
+    /// </summary>
+    public string FooterText
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        using (var sw = new Rhino.Runtime.InteropWrappers.StringWrapper())
+        {
+          IntPtr ptrString = sw.NonConstPointer;
+          UnsafeNativeMethods.CRhinoPrintInfo_GetHeaderFooter(constPtrThis, false, ptrString);
+          return sw.ToString();
+        }
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.CRhinoPrintInfo_SetHeaderFooter(ptrThis, false, value);
+      }
+    }
+
+    /// <summary>
     /// Returns the model scale factor.
     /// </summary>
     /// <param name="pageUnits">The current page units.</param>
@@ -827,6 +889,36 @@ namespace Rhino.Display
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleType(ptr_this, value);
       }
+    }
+
+    /// <summary>
+    /// Set the print area to a window selection based on two points in screen coordinates
+    /// </summary>
+    /// <param name="screenPoint1">
+    /// first point; it doesn't matter what corner of the rectangle this point represents
+    /// </param>
+    /// <param name="screenPoint2">point representing opposite corner of rectangle from screenPoint1</param>
+    public void SetWindowRect(Point2d screenPoint1, Point2d screenPoint2)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      Point3d pt1 = new Point3d(screenPoint1.X, screenPoint1.Y, 0);
+      Point3d pt2 = new Point3d(screenPoint2.X, screenPoint2.Y, 0);
+      UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, pt1, pt2, true);
+    }
+
+    /// <summary>
+    /// Set the print area to a window selection based on two points in world coordinates
+    /// </summary>
+    /// <param name="worldPoint1">
+    /// First point in world coordinates. This point is projected to screen coordinates
+    /// </param>
+    /// <param name="worldPoint2">
+    /// Second point in world coordinates. This point is projected to screen coordinates
+    /// </param>
+    public void SetWindowRect(Point3d worldPoint1, Point3d worldPoint2)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, worldPoint1, worldPoint2, false);
     }
 
 
@@ -1133,6 +1225,16 @@ namespace Rhino.Runtime
 
       var size = m_page_size;
       Point2d* pt = (Point2d*)points.ToPointer();
+
+      // 5 Feb 2021 S. Baer (RH-62125)
+      // Skip really short lines
+      if (2 == count)
+      {
+        Vector2d v = pt[1] - pt[0];
+        if (v.SquareLength < 0.6)
+          return;
+      }
+
       for (int i = 0; i < count; i++)
       {
         double x = ToPoints(pt[i].X);
@@ -1388,18 +1490,45 @@ namespace Rhino.Runtime
       }
     }
 
-    void TexturedPlane(IntPtr hBmp, double m11, double m12, double m21, double m22, double dx, double dy)
+    void TexturedPlane(IntPtr pRhinoDibOrNsImage, double m11, double m12, double m21, double m22, double dx, double dy)
     {
       DrawPath(); // this is a good point to 'flush' the path
       dx = ToPoints(dx);
       dy = ToPoints(dy);
-        m11 = ToPoints(m11);
-        m12 = ToPoints(m12);
-        m21 = ToPoints(m21);
-        m22 = ToPoints(m22);
+      m11 = ToPoints(m11);
+      m12 = ToPoints(m12);
+      m21 = ToPoints(m21);
+      m22 = ToPoints(m22);
 
-        using (var bmp = Image.FromHbitmap(hBmp))
-            DrawBitmap(bmp,m11,m12,m21,m22,dx,dy);
+      if (Rhino.Runtime.HostUtils.RunningOnWindows)
+      {
+        int width = 0;
+        int height = 0;
+        int bitsPerPixel = 0;
+        int scanWidth = 0;
+        IntPtr scan0 = UnsafeNativeMethods.CRhinoDib_GetPixelData(pRhinoDibOrNsImage, ref width, ref height, ref bitsPerPixel, ref scanWidth);
+        if (scan0 != IntPtr.Zero)
+        {
+          System.Drawing.Imaging.PixelFormat format = System.Drawing.Imaging.PixelFormat.Undefined;
+          if (bitsPerPixel == 24)
+            format = System.Drawing.Imaging.PixelFormat.Format24bppRgb;
+          if (bitsPerPixel == 32)
+            format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+          if (format != System.Drawing.Imaging.PixelFormat.Undefined)
+          {
+            using (var bmp = new Bitmap(width, height, scanWidth, format, scan0))
+            {
+              bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+              DrawBitmap(bmp, m11, m12, m21, m22, dx, dy);
+            }
+          }
+        }
+      }
+      else
+      {
+        using (var bmp = Image.FromHbitmap(pRhinoDibOrNsImage))
+          DrawBitmap(bmp, m11, m12, m21, m22, dx, dy);
+      }
     }
 
     void RoundedRect(float centerX, float centerY, float pixelWidth, float pixelHeight, float cornerRadius,

@@ -460,28 +460,49 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Gets whether objects ought to be drawn using their assigned rendering material.
+    /// Gets or sets whether objects ought to be drawn using their assigned rendering material.
     /// </summary>
     /// <since>6.0</since>
     public bool UseAssignedObjectMaterial
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseObjectMaterial); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseObjectMaterial, value); }
     }
     /// <summary>
-    /// Gets whether objects ought to be drawn using a custom color.
+    /// Gets or sets whether objects ought to be drawn using a custom color.
     /// </summary>
     /// <since>6.0</since>
     public bool UseCustomObjectColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.OverrideObjectColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.OverrideObjectColor, value); }
     }
     /// <summary>
-    /// Gets whether objects ought to be drawn using a custom material.
+    /// Gets or sets whether objects ought to be drawn using a custom material.
     /// </summary>
     /// <since>6.0</since>
     public bool UseCustomObjectMaterial
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomFrontMaterial); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomFrontMaterial, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets whether objects ought to be drawn using a custom color for back faces.
+    /// </summary>
+    public bool UseCustomObjectColorBackfaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BackOverrideObjectColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BackOverrideObjectColor, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets whether objects ought to be drawn using a custom material on backfaces.
+    /// </summary>
+    public bool UseCustomObjectMaterialBackfaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial, value); }
     }
     #endregion
 

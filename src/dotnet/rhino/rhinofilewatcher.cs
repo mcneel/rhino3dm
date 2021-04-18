@@ -6,7 +6,48 @@ using Rhino.Runtime;
 #if RHINO_SDK
 namespace Rhino
 {
-  static class RhinoFileEventWatcherHooks
+  #if DEBUG
+  /// <summary>
+  /// Debugging only
+  /// </summary>
+  public static class RhinoFileWatcherDebugging
+  {
+    /// <summary>
+    /// Dump the current status of the file watcher system to the Rhino command line.
+    /// </summary>
+    public static void DumpStatus()
+    {
+      var rhino_watchers = RhinoFileEventWatcherHooks.g_watchers;
+
+      RhinoApp.WriteLine("Currently " + rhino_watchers.Count + " RhinoFileWatcher objects active");
+      /*foreach (var entry in rhino_watchers)
+      {
+        var watcher = entry.Value;
+
+        if (watcher != null)
+        {
+          RhinoApp.WriteLine("Serial #" + entry.Key + " Path = \"" + watcher.Watcher.Path + "\" Filter = \"" + watcher.Watcher.Filter + "\" Enabled =" +  watcher.Enabled);
+        }
+      }*/
+
+      var file_watchers = RhinoFileWatcher.g_file_system_watchers;
+
+      RhinoApp.WriteLine("with " + file_watchers.Count + " FileSystemWatcher objects active");
+      foreach (var entry in file_watchers)
+      {
+        var watcher = entry.Value;
+
+        if (watcher != null)
+        {
+          RhinoApp.WriteLine("Path = \"" + watcher.Impl.Path + "\" Filter = \"" + watcher.Impl.Filter + "\" References = " + watcher.RefCount);
+        }
+      }
+
+    }
+  }
+  #endif
+
+  internal static class RhinoFileEventWatcherHooks
   {
     public static void SetHooks()
     {
@@ -32,7 +73,7 @@ namespace Rhino
     enum HookProcAction
     {
       Attach  = 1,
-      Detatch = 2,
+      Detach = 2,
       Watch   = 3,
       Enable  = 4
     }
@@ -46,13 +87,14 @@ namespace Rhino
         {
           if (!Enum.IsDefined(typeof(HookProcAction), action))
             return;
+
           switch ((HookProcAction)action)
           {
             case HookProcAction.Attach:
               result = AttachHook(sn) ? 1 : 0;
               break;
-            case HookProcAction.Detatch:
-              result = DetatchHook(sn) ? 1 : 0;
+            case HookProcAction.Detach:
+              result = DetachHook(sn) ? 1 : 0;
               break;
             case HookProcAction.Watch:
               if (args.TryGetString("directory", out string directory) && args.TryGetString("fileName", out string file_name))
@@ -79,73 +121,74 @@ namespace Rhino
     {
       if (g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher))
         return true;
+
       watcher = new RhinoFileWatcher(runtimeSerialNumber);
       g_watchers[runtimeSerialNumber] = watcher;
+
       return true;
     }
 
-    private static bool DetatchHook(uint runtimeSerialNumber)
+    private static bool DetachHook(uint runtimeSerialNumber)
     {
       if (!g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher))
         return false;
+
       g_watchers.Remove(runtimeSerialNumber);
       watcher.Dispose();
+
       return true;
     }
 
     private static bool WatchHook(uint runtimeSerialNumber, string directory, string fileName)
     {
       AttachHook(runtimeSerialNumber);
+
       g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher);
+
       return watcher?.Watch(directory, fileName) ?? false;
     }
 
     private static int EnableHook(uint runtimeSerialNumber, bool enanble, bool set)
     {
       AttachHook(runtimeSerialNumber);
+
       g_watchers.TryGetValue(runtimeSerialNumber, out RhinoFileWatcher watcher);
+
       if (set && watcher != null)
+      {
         watcher.Enabled = enanble;
+      }
+
       return watcher == null ? -1 : (watcher.Enabled ? 1 : 0);
     }
 
     internal static void DisposedOf(uint runtimeSerialNumber)
     {
       if (g_watchers.ContainsKey(runtimeSerialNumber))
+      {
         g_watchers.Remove(runtimeSerialNumber);
+      }
     }
 
-    private static Dictionary<uint, RhinoFileWatcher> g_watchers = new Dictionary<uint, RhinoFileWatcher>();
+    internal static Dictionary<uint, RhinoFileWatcher> g_watchers = new Dictionary<uint, RhinoFileWatcher>();
   }
 
-  class RhinoFileWatcher : IDisposable
+  /// <summary>
+  /// RhinoFileWatcher is basically a way of registering for the real events that FileSystemWatcher
+  /// raises.  There is not a one-to-one correspondance between RhinoFileWatchers and FileSystemWatchers anymore
+  /// - the idea is that we try to create as few FileSystemWatchers as possible to service the RhinoFileWatchers.
+  /// This way, clients can create as many RhinoFileWatchers as needed without causing tons of system objects to be
+  /// created - which is very expensive - at least on the Mac.  It also simplifies client code.
+  /// </summary>
+  internal class RhinoFileWatcher : IDisposable
   {
+
     internal RhinoFileWatcher(uint runtimeSerialNumber)
     {
-      try
-      {
-        RuntimeSerialNumber = runtimeSerialNumber;
-        Watcher = new FileSystemWatcher
-        {
-          // Disable watching
-          EnableRaisingEvents = false,
-          // Watch for changes in LastAccess and LastWrite times, and the renaming of files or directories.
-          //ALB - I'm fairly sure we don't need to know when a file was last accessed...and it seems like this would be a bad thing
-          //to notify about.
-          NotifyFilter = /*NotifyFilters.LastAccess | */NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-        };
-        // Add event handlers.
-        Watcher.Changed += OnChanged;
-        Watcher.Created += OnChanged;
-        Watcher.Deleted += OnChanged;
-        Watcher.Renamed += OnRenamed;
-        // Make sure they watchers are shutdown when closing Rhino
-        RhinoApp.Closing += (sender, args) => Dispose();
-      }
-      catch (Exception exception)
-      {
-        RhinoFileEventWatcherHooks.ReportException(exception);
-      }
+      RuntimeSerialNumber = runtimeSerialNumber;
+
+      RhinoApp.Closing += (sender, args) => Dispose();
+      RhinoApp.Idle += (sender, args) => Cleanup();
     }
 
     ~RhinoFileWatcher()
@@ -162,13 +205,20 @@ namespace Rhino
 
     public bool Watch(string path, string filter)
     {
+      if (Disposed)
+        return false;
+
+      UnWatch();
+
       try
       {
+        UnWatch();
         path = ConvertPathToOSPath(path);
         filter = ConvertPathToOSPath(filter);
 
         // Check to see if this is a path to a file name
         IsFile = !Directory.Exists(path);
+
         if (IsFile)
         {
           // Use the file name as the filter
@@ -176,10 +226,34 @@ namespace Rhino
           // Get the file directory to use as the path
           path = Path.GetDirectoryName(path);
         }
-        Watcher.EnableRaisingEvents = false;
-        Watcher.Path = path;
-        Watcher.Filter = filter ?? "*.*";
-        Watcher.EnableRaisingEvents = Enabled;
+
+        //Now find a corresponding watcher from the dictionary
+        string key = System.IO.Path.Combine(path, filter);
+        RefCountedFileSystemWatcher watcher = null;
+
+        if (g_file_system_watchers.TryGetValue(key, out watcher) && null != watcher)
+        {
+          Watcher = watcher;
+          Watcher.AddRef();
+        }
+        else
+        {
+          watcher = new RefCountedFileSystemWatcher();
+
+          g_file_system_watchers.Add(key, watcher);
+          watcher.Impl.Path = path;
+          watcher.Impl.Filter = filter ?? "*.*";
+
+          Watcher = watcher;
+        }
+
+        Watcher.Impl.Changed += OnChanged;
+        Watcher.Impl.Created += OnChanged;
+        Watcher.Impl.Deleted += OnChanged;
+        Watcher.Impl.Renamed += OnRenamed;
+
+        Watcher.Impl.EnableRaisingEvents = true;
+
         return true;
       }
       catch (Exception e)
@@ -187,29 +261,108 @@ namespace Rhino
         var message = string.IsNullOrWhiteSpace(path)
           ? UI.Localization.LocalizeString("RhinoFileWatcher.Watch *error* empty path", 39)
           : string.Format(UI.Localization.LocalizeString("RhinoFileWatcher.Watch *error* parsing path name \"{0}\"", 40), path);
+
         RhinoApp.WriteLine(message);
         RhinoFileEventWatcherHooks.DumpException(e);
+
         return false;
       }
     }
 
     // Define the event handlers.
-    private void OnChanged(object source, FileSystemEventArgs e)
+    private void OnChanged(object source, FileSystemEventArgs args)
     {
-      RhinoApp.InvokeOnUiThread(ChangedHook, RuntimeSerialNumber, (RhinoFileWatcherChangeReason)e.ChangeType, e.FullPath);
+      if (!Enabled)
+        return;
+
+      try
+      {
+        RhinoApp.InvokeOnUiThread(ChangedHook, RuntimeSerialNumber, (RhinoFileWatcherChangeReason)args.ChangeType, args.FullPath);
+      }
+      catch (Exception e)
+      {
+        RhinoFileEventWatcherHooks.DumpException(e);
+      }
     }
 
+    private void OnRenamed(object source, RenamedEventArgs args)
+    {
+      if (!Enabled)
+        return;
+
+      // 26 Feb 2021 John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-62972
+      // When saving a 3DM file is finishing it calls ReplaceFileW which causes a renamed
+      // instance which has a null e.OldName and a e.Name, this will ignore cases where 
+      // the old name is null and the new name is not or the new name is null and the old
+      // is not.
+      try
+      {
+        if (string.IsNullOrEmpty(args.Name) == string.IsNullOrEmpty(args.OldName))
+        { 
+          RhinoApp.InvokeOnUiThread(RenamedHook, RuntimeSerialNumber, args.OldFullPath, args.FullPath);
+        }
+      }
+      catch (Exception e)
+      {
+        RhinoFileEventWatcherHooks.DumpException(e);
+      }
+    }
+
+    public void UnWatch()
+    {
+      if (Watcher == null)
+        return;
+
+      if (Disposed)
+        return;
+
+      Watcher.Impl.Changed -= OnChanged;
+      Watcher.Impl.Created -= OnChanged;
+      Watcher.Impl.Deleted -= OnChanged;
+      Watcher.Impl.Renamed -= OnRenamed;
+
+      Watcher.Release();
+
+      Watcher = null;
+    }
+
+    //Note that cleanup is done on Idle so that if a watchers is removed and a similar one added immediately afterwards
+    //we can still use the same entry in the dictionary if it happens before the cleanup.
+    public void Cleanup()
+    {
+      var keysToDelete = new List<string>();
+
+      foreach ( var entry in g_file_system_watchers)
+      {
+        if (entry.Value.RefCount < 1)
+        {
+          keysToDelete.Add(entry.Key);
+        }
+      }
+
+      foreach(var key in keysToDelete)
+      {
+        g_file_system_watchers.Remove(key);
+      }
+    }
+
+    public void Dispose()
+    {
+      RhinoFileEventWatcherHooks.DisposedOf(RuntimeSerialNumber);
+
+      UnWatch();
+
+      Disposed = true;
+    }
+
+    #region C++ callbacks
     private delegate void ChangedDelegate(uint runtimeSerialNumber, RhinoFileWatcherChangeReason reason, string path);
     private static ChangedDelegate ChangedHook = ChangedFunc;
     private static void ChangedFunc(uint runtimeSerialNumber, RhinoFileWatcherChangeReason reason, string path)
     {
       // Specify what is done when a file is changed, created, or deleted.
       UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Changed(runtimeSerialNumber, reason, path);
-    }
-
-    private void OnRenamed(object source, RenamedEventArgs e)
-    {
-      RhinoApp.InvokeOnUiThread(RenamedHook, RuntimeSerialNumber, e.OldFullPath, e.FullPath);
     }
 
     private delegate void RenamedDelegate(uint runtimeSerialNumber, string oldName, string newName);
@@ -219,42 +372,49 @@ namespace Rhino
       // Specify what is done when a file is renamed.
       UnsafeNativeMethods.CRhCmnFileEventWatcherInterop_Renamed(runtimeSerialNumber, oldName, newName);
     }
+    #endregion
 
-    private FileSystemWatcher Watcher { get; set; }
+    public bool Disposed { get; private set; }
+    public bool IsFile { get; private set; }
+
+    internal RefCountedFileSystemWatcher Watcher { get; set; }
     private uint RuntimeSerialNumber { get; }
-    private bool _enabled;
-    public bool Enabled
+
+    public bool Enabled { get; set; }
+
+    internal class RefCountedFileSystemWatcher
     {
-      get => _enabled;
-      set
-      {
-        try
+      public FileSystemWatcher Impl 
+      { 
+        get
         {
-          Watcher.EnableRaisingEvents = _enabled = value;
-        }
-        catch (Exception e)
-        {
-          RhinoFileEventWatcherHooks.DumpException(e);
+          return _watcher;
         }
       }
+
+      public void AddRef() { _ref_count++; }
+      public void Release() {  _ref_count--; }
+
+      public int RefCount 
+      {
+        get 
+        { 
+          return _ref_count; 
+        }
+      }
+
+      private FileSystemWatcher _watcher = new FileSystemWatcher
+      {
+        // Disable watching
+        EnableRaisingEvents = false,
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+      };
+
+      private int _ref_count = 1;
     }
 
-    public void Dispose()
-    {
-      RhinoFileEventWatcherHooks.DisposedOf(RuntimeSerialNumber);
-      if (Watcher == null)
-        return;
-      Watcher.EnableRaisingEvents = false;
-      Watcher.Changed -= OnChanged;
-      Watcher.Created -= OnChanged;
-      Watcher.Deleted -= OnChanged;
-      Watcher.Renamed -= OnRenamed;
-      Watcher.Dispose();
-      Watcher = null;
-    }
-
-    public bool Disposed => Watcher == null;
-    public bool IsFile { get; private set; }
+    //The keys for this dictionary are path specs - either FQ paths to a file, or a directory + wildcard filename.
+    internal static Dictionary<string, RefCountedFileSystemWatcher> g_file_system_watchers = new Dictionary<string, RefCountedFileSystemWatcher>();
   }
 }
 #endif

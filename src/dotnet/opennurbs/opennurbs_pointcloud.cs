@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.Collections;
 using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
+using System.Threading;
 
 namespace Rhino.Geometry
 {
@@ -29,6 +31,7 @@ namespace Rhino.Geometry
     #endregion
 
     #region properties
+
     /// <summary>
     /// Gets or sets the location of this point cloud item.
     /// </summary>
@@ -48,6 +51,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_PointCloud_SetPoint(ptr, m_index, value);
       }
     }
+
     /// <summary>
     /// Gets or sets the X component of this point cloud item location.
     /// </summary>
@@ -65,6 +69,7 @@ namespace Rhino.Geometry
         Location = pt;
       }
     }
+
     /// <summary>
     /// Gets or sets the Y component of this point cloud item location.
     /// </summary>
@@ -82,6 +87,7 @@ namespace Rhino.Geometry
         Location = pt;
       }
     }
+
     /// <summary>
     /// Gets or sets the Z component of this point cloud item location.
     /// </summary>
@@ -102,13 +108,15 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets or sets the normal vector for this point cloud item.
+    /// If this point cloud item does not have a normal vector, 
+    /// Vector3d.Unset is returned.
     /// </summary>
     /// <since>5.0</since>
     public Vector3d Normal
     {
       get
       {
-        Vector3d rc = new Vector3d();
+        Vector3d rc = Vector3d.Unset;
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetNormal(ptr, m_index, ref rc);
         return rc;
@@ -119,8 +127,10 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_PointCloud_SetNormal(ptr, m_index, value);
       }
     }
+
     /// <summary>
     /// Gets or sets the color of this point cloud item.
+    /// If this point cloud item does not have a color, System.Drawing.Color.Black is returned.
     /// </summary>
     /// <since>5.0</since>
     public Color Color
@@ -138,8 +148,10 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_PointCloud_SetColor(ptr, m_index, value.ToArgb());
       }
     }
+
     /// <summary>
     /// Gets or sets the hidden flag of this point cloud item.
+    /// If this point cloud item does not have a hidden flag, false is returned.
     /// </summary>
     /// <since>5.0</since>
     public bool Hidden
@@ -159,6 +171,28 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Gets or set the extra value of this point cloud item.
+    /// The extra value can be used to store a user-defined value, such as intensity.
+    /// If this point cloud item does not have an extra value, RhinoMath.UnsetValue is returned.
+    /// </summary>
+    /// <since>7.5</since>
+    public double PointValue
+    {
+      get
+      {
+        double rc = RhinoMath.UnsetValue;
+        IntPtr ptr = m_parent.ConstPointer();
+        UnsafeNativeMethods.ON_PointCloud_GetExtra(ptr, m_index, ref rc);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr = m_parent.NonConstPointer();
+        UnsafeNativeMethods.ON_PointCloud_SetExtra(ptr, m_index, value);
+      }
+    }
+
+    /// <summary>
     /// Gets the index of this point cloud item.
     /// </summary>
     /// <since>5.0</since>
@@ -166,6 +200,7 @@ namespace Rhino.Geometry
     {
       get { return m_index; }
     }
+
     #endregion
   }
 
@@ -256,6 +291,7 @@ namespace Rhino.Geometry
     const int idx_ColorCount = 2;
     //const int idx_HiddenCount = 3;
     const int idx_HiddenPointCount = 4;
+    const int idx_ExtraCount = 5;
 
     #region properties
     /// <summary>
@@ -301,6 +337,7 @@ namespace Rhino.Geometry
     const int idx_Colors = 0;
     const int idx_Normals = 1;
     const int idx_Hidden = 2;
+    const int idx_Extra = 3;
 
     /// <summary>
     /// Gets a value indicating whether or not the points in this 
@@ -329,6 +366,7 @@ namespace Rhino.Geometry
         return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Normals);
       }
     }
+
     /// <summary>
     /// Gets a value indicating whether or not the points in this 
     /// point cloud have hidden flags assigned to them.
@@ -342,9 +380,25 @@ namespace Rhino.Geometry
         return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Hidden);
       }
     }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the points in this point cloud have extra values assigned to them.
+    /// Extra values can be used to store a user-defined values, such as intensity.
+    /// </summary>
+    /// <since>7.5</since>
+    public bool ContainsPointValues
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Extra);
+      }
+    }
+
     #endregion
 
     #region methods
+
     /// <summary>
     /// Destroys the color information in this point cloud.
     /// </summary>
@@ -357,6 +411,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Colors);
     }
+
     /// <summary>
     /// Destroys the normal vector information in this point cloud.
     /// </summary>
@@ -369,6 +424,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Normals);
     }
+
     /// <summary>
     /// Destroys the hidden flag information in this point cloud.
     /// </summary>
@@ -383,6 +439,20 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Destroys the extra value information in this point cloud.
+    /// Extra values can be used to store a user-defined values, such as intensity.
+    /// </summary>
+    /// <since>7.5</since>
+    public void ClearPointValues()
+    {
+      if (!ContainsPointValues)
+        return;
+
+      IntPtr ptr_this = NonConstPointer(); 
+      UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Extra);
+    }
+
+    /// <summary>
     /// Appends a new PointCloudItem to the end of this point cloud.
     /// </summary>
     /// <returns>The newly appended item.</returns>
@@ -392,6 +462,7 @@ namespace Rhino.Geometry
       Add(Point3d.Origin);
       return this[Count - 1];
     }
+
     /// <summary>
     /// Inserts a new <see cref="PointCloudItem"/> at a specific position of the point cloud.
     /// </summary>
@@ -426,6 +497,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint1(ptr_this, point);
     }
+
     /// <summary>
     /// Append a new point to the end of the list.
     /// </summary>
@@ -437,6 +509,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint3(ptr_this, point, normal);
     }
+
     /// <summary>
     /// Append a new point to the end of the list.
     /// </summary>
@@ -448,6 +521,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint2(ptr_this, point, color.ToArgb());
     }
+
     /// <summary>
     /// Append a new point to the end of the list.
     /// </summary>
@@ -460,6 +534,24 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint4(ptr_this, point, color.ToArgb(), normal);
     }
+
+    /// <summary>
+    /// Append a new point to the end of the list.
+    /// </summary>
+    /// <param name="point">Point to append.</param>
+    /// <param name="normal">Normal vector of new point.</param>
+    /// <param name="color">Color of new point.</param>
+    /// <param name="value">
+    /// Extra value of new point.
+    /// An extra value can be used to store a user-defined value, such as intensity.
+    /// </param>
+    /// <since>7.5</since>
+    public void Add(Point3d point, Vector3d normal, Color color, double value)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_PointCloud_AppendPoint5(ptr_this, point, color.ToArgb(), normal, value);
+    }
+
     /// <summary>
     /// Appends a collection of points to this point cloud.
     /// </summary>
@@ -536,16 +628,14 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints2(ptr, count, ptArray, argbArray);
-
-
     }
 
     /// <summary>
-    /// Appends a collection of points and normal vectors to this point cloud.
+    /// Appends a collection of points, normal vectors, and colors to this point cloud.
     /// </summary>
     /// <param name="points">Points to append.</param>
-    /// <param name="colors">Colors to append.</param>
     /// <param name="normals">Normal Vectors to append.</param>
+    /// <param name="colors">Colors to append.</param>
     /// <since>6.0</since>
     public void AddRange(IEnumerable<Point3d> points, IEnumerable<Vector3d> normals, IEnumerable<Color> colors)
     {
@@ -570,6 +660,47 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints4(ptr_this, point_count, point_array, normal_array, argb_array);
+    }
+
+    /// <summary>
+    /// Appends a collection of points, normal vectors, colors, and extra values to this point cloud.
+    /// </summary>
+    /// <param name="points">Points to append.</param>
+    /// <param name="normals">Normal Vectors to append.</param>
+    /// <param name="colors">Colors to append.</param>
+    /// <param name="values">
+    /// Exta point values to append.
+    /// Extra values can be used to store a user-defined values, such as intensity.
+    /// </param>
+    /// <since>7.5</since>
+    public void AddRange(IEnumerable<Point3d> points, IEnumerable<Vector3d> normals, IEnumerable<Color> colors, IEnumerable<double> values)
+    {
+      int point_count;
+      Point3d[] point_array = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out point_count);
+      if (point_array == null || point_count <= 0)
+        return;
+
+      int normal_count;
+      Vector3d[] normal_array = Rhino.Collections.RhinoListHelpers.GetConstArray(normals, out normal_count);
+      if (normal_array == null || normal_count <= 0)
+        return;
+
+      int value_count;
+      double[] value_array = Rhino.Collections.RhinoListHelpers.GetConstArray(values, out value_count);
+      if (value_array == null || value_count <= 0)
+        return;
+
+      var argb_list = new List<int>(point_count);
+      foreach (var color in colors)
+        argb_list.Add(color.ToArgb());
+      int color_count = argb_list.Count;
+      int[] argb_array = argb_list.ToArray();
+
+      if (point_count != normal_count || point_count != color_count || point_count != value_count)
+        throw new ArgumentException("Must supply equal number of points, vectors, colors, and values");
+
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_PointCloud_AppendPoints5(ptr_this, point_count, point_array, normal_array, argb_array, value_array);
     }
 
     /// <summary>Inserts a new point into the point list.</summary>
@@ -614,6 +745,7 @@ namespace Rhino.Geometry
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint2(ptr, index, point, color.ToArgb());
     }
+
     /// <summary>
     /// Inserts a new point into the point list.
     /// </summary>
@@ -630,6 +762,28 @@ namespace Rhino.Geometry
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint4(ptr, index, point, color.ToArgb(), normal);
     }
+
+    /// <summary>
+    /// Inserts a new point into the point list.
+    /// </summary>
+    /// <param name="index">Insertion index.</param>
+    /// <param name="point">Point to append.</param>
+    /// <param name="normal">Normal vector of new point.</param>
+    /// <param name="color">Color of new point.</param>
+    /// <param name="value">
+    /// An extra value of new point.
+    /// An extra values can be used to store a user-defined value, such as intensity.
+    /// </param>
+    /// <since>7.5</since>
+    public void Insert(int index, Point3d point, Vector3d normal, Color color, double value)
+    {
+      if (index < 0) { throw new IndexOutOfRangeException("index must be equal to or larger than zero"); }
+      if (index > Count) { throw new IndexOutOfRangeException("index must be equal to or smaller than Count"); }
+
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_PointCloud_InsertPoint5(ptr, index, point, color.ToArgb(), normal, value);
+    }
+
     /// <summary>
     /// Append a collection of points to this point cloud.
     /// </summary>
@@ -662,6 +816,22 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_RemovePoint(ptr_this, index);
+    }
+
+    /// <summary>
+    /// Removes points at given indices.
+    /// </summary>
+    /// <param name="indices">An array of indices of the points to remove.</param>
+    /// <returns>The number of points removed from the point cloud.</returns>
+    /// <since>7.5</since>
+    public int RemoveRange(IEnumerable<int> indices)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      using (var indexes = new SimpleArrayInt(indices))
+      {
+        IntPtr ptr_const_indexes = indexes.ConstPointer();
+        return UnsafeNativeMethods.ON_PointCloud_RemoveRange(ptr_this, ptr_const_indexes);
+      }
     }
 
     /// <summary>
@@ -718,6 +888,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_PointCloud_GetNormals(const_ptr_this, count, rc);
       return rc;
     }
+
     /// <summary>
     /// Copy all the point colors in this point cloud to an array.
     /// </summary>
@@ -740,7 +911,25 @@ namespace Rhino.Geometry
       return res;
     }
 
-#if RHINO_SDK
+    /// <summary>
+    /// Copy all the extra point values in this point cloud to an array.
+    /// Extra values can be used to store a user-defined value, such as intensity.
+    /// </summary>
+    /// <returns>An array containing all the extra point values in this point cloud.</returns>
+    /// <since>7.5</since>
+    [ConstOperation]
+    public double[] GetPointValues()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      int count = UnsafeNativeMethods.ON_PointCloud_GetInt(const_ptr_this, idx_ExtraCount);
+      if (count < 1)
+        return new double[0];
+
+      double[] rc = new double[count];
+      UnsafeNativeMethods.ON_PointCloud_GetExtras(const_ptr_this, count, rc);
+      return rc;
+    }
+
     /// <summary>
     /// Returns index of the closest point in the point cloud to a given test point.
     /// </summary>
@@ -753,7 +942,6 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.ON_PointCloud_GetClosestPoint(const_ptr_this, testPoint);
     }
-#endif
     #endregion
 
     #region IEnumerable<PointCloudItem> Members

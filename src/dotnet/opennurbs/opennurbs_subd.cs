@@ -254,14 +254,35 @@ namespace Rhino.Geometry
     }
 
 #if RHINO_SDK
+
+
     /// <summary>
     /// Create a Brep based on this SubD geometry.
     /// </summary>
+    /// <param name="options">
+    /// The SubD to Brep conversion options. Use SubDToBrepOptions.Default 
+    /// for sensible defaults. Currently, these return unpacked faces 
+    /// and locally-G1 vertices in the output Brep.
+    /// </param>
     /// <returns>A new Brep if successful, or null on failure.</returns>
     /// <since>7.0</since>
+    public Brep ToBrep(SubDToBrepOptions options)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr const_ptr_options = options != null ? options.ConstPointer() : IntPtr.Zero;
+      IntPtr ptr_brep = UnsafeNativeMethods.ON_SubD_GetSurfaceBrep(ptr_const_this, const_ptr_options);
+      return CreateGeometryHelper(ptr_brep, null) as Brep;
+    }
+
+    /// <summary>
+    /// Create a Brep based on this SubD geometry, based on SubDToBrepOptions.Default options.
+    /// </summary>
+    /// <returns>A new Brep if successful, or null on failure.</returns>
+    /// <since>7.6</since>
     public Brep ToBrep()
     {
-      return Brep.TryConvertBrep(this);
+      SubDToBrepOptions options = SubDToBrepOptions.Default;
+      return ToBrep(options);
     }
 
     /// <summary>
@@ -427,6 +448,37 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Returns a SubDComponent, eithere a SubDEdge, SubDFace, or SubDVertex, from a component index.
+    /// </summary>
+    /// <param name="componentIndex">The component index.</param>
+    /// <returns>The SubDComponent if successful, null otherwise.</returns>
+    /// <since>7.6</since>
+    public SubDComponent ComponentFromComponentIndex(ComponentIndex componentIndex)
+    {
+      var const_ptr_this = ConstPointer();
+      uint componentId = 0;
+      switch (componentIndex.ComponentIndexType)
+      {
+        case ComponentIndexType.SubdVertex:
+          {
+            IntPtr ptr = UnsafeNativeMethods.ON_SubD_SubDVertexFromComponentIndex(const_ptr_this, componentIndex, ref componentId);
+            return ptr != IntPtr.Zero ? new SubDVertex(this, ptr, componentId) : null;
+          }
+        case ComponentIndexType.SubdFace:
+          {
+            IntPtr ptr = UnsafeNativeMethods.ON_SubD_SubDFaceFromComponentIndex(const_ptr_this, componentIndex, ref componentId);
+            return ptr != IntPtr.Zero ? new SubDFace(this, ptr, componentId) : null;
+          }
+        case ComponentIndexType.SubdEdge:
+          {
+            IntPtr ptr = UnsafeNativeMethods.ON_SubD_SubDEdgeFromComponentIndex(const_ptr_this, componentIndex, ref componentId);
+            return ptr != IntPtr.Zero ? new SubDEdge(this, ptr, componentId) : null;
+          }
+      }
+      return null;
+    }
+
+    /// <summary>
     /// Updates vertex tag, edge tag, and edge coefficient values on the active
     /// level. After completing custom editing operations that modify the
     /// topology of the SubD control net or changing values of vertex or edge
@@ -467,6 +519,23 @@ namespace Rhino.Geometry
       IntPtr ptrSubD = NonConstPointer();
       return UnsafeNativeMethods.ON_SubD_GlobalSubdivide(ptrSubD, (uint)count);
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Modifies the SubD so that the SubD vertex limit surface points are
+    /// equal to surface_points[]
+    /// </summary>
+    /// <param name="surfacePoints">
+    /// point for limit surface to interpolate. surface_points[i] is the
+    /// location for the i-th vertex returned by SubVertexIterator vit(this)
+    /// </param>
+    /// <returns></returns>
+    public bool InterpolateSurfacePoints(Point3d[] surfacePoints)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_SubD_InterpolateSurfacePoints(ptrThis, surfacePoints.Length, surfacePoints);
+    }
+#endif
   }
 
   /// <summary>
@@ -715,6 +784,154 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
+  /// Options used for converting a SubD to a Brep
+  /// </summary>
+  public partial class SubDToBrepOptions : IDisposable
+  {
+    IntPtr m_ptr; // ON_SubDToBrepParameters*
+    internal IntPtr ConstPointer() { return m_ptr; }
+    IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Create default options
+    /// </summary>
+    /// <since>7.0</since>
+    public SubDToBrepOptions() : this(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.Default)
+    {
+    }
+
+    SubDToBrepOptions(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts which)
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDToBrepParameters_New(which);
+    }
+
+    /// <summary>
+    /// Create options from the given packFaces and vertexProcess values.
+    /// </summary>
+    /// <param name="packFaces">Sets the pack faces options.</param>
+    /// <param name="vertexProcess">Sets the extraordinary vertex process option.</param>
+    public SubDToBrepOptions(bool packFaces, ExtraordinaryVertexProcessOption vertexProcess) : this(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.Default)
+    {
+      PackFaces = packFaces;
+      ExtraordinaryVertexProcess = vertexProcess;
+    }
+
+    /// <summary>
+    /// Default SubDToBrepOptions settings.
+    /// Currently selects the same options as DefaultUnpacked:
+    /// Locally-G1 smoothing of extraordinary vertices, unpacked faces.
+    /// </summary>
+    /// <remarks>
+    /// These are the settings used by ON_SubD::BrepForm()
+    /// </remarks>
+    /// <since>7.0</since>
+    public static SubDToBrepOptions Default
+    {
+      get
+      {
+        return new SubDToBrepOptions(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.Default);
+      }
+    }
+
+    /// <summary>
+    /// Default ON_SubDToBrepParameters settings for creating a packed brep.
+    /// Locally-G1 smoothing of extraordinary vertices, packed faces.
+    /// </summary>
+    /// <since>7.0</since>
+    public static SubDToBrepOptions DefaultPacked
+    {
+      get
+      {
+        return new SubDToBrepOptions(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.DefaultPacked);
+      }
+    }
+
+    /// <summary>
+    /// Default ON_SubDToBrepParameters settings for creating an unpacked brep.
+    /// Locally-G1 smoothing of extraordinary vertices, unpacked faces.
+    /// </summary>
+    /// <since>7.0</since>
+    public static SubDToBrepOptions DefaultUnpacked
+    {
+      get
+      {
+        return new SubDToBrepOptions(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.DefaultUnpacked);
+      }
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SubDToBrepOptions()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubDToBrepParameters_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Get or sets the pack faces option.
+    /// </summary>
+    /// <since>7.0</since>
+    public bool PackFaces
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_SubDToBrepParameters_PackFaces(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_SubDToBrepParameters_SetPackFaces(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// Get or sets the extraordinary vertex process option.
+    /// </summary>
+    /// <since>7.0</since>
+    public ExtraordinaryVertexProcessOption ExtraordinaryVertexProcess
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return (ExtraordinaryVertexProcessOption)UnsafeNativeMethods.ON_SubDToBrepParameters_ExtraordinaryVertexProcess(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_SubDToBrepParameters_SetExtraordinaryVertexProcess(ptr_this, (uint)value);
+      }
+    }
+  }
+
+  /// <summary>
   /// A part of SubD geometry. Common base class for vertices, faces, and edges
   /// </summary>
   public abstract class SubDComponent
@@ -768,6 +985,74 @@ namespace Rhino.Geometry
     }
 
     internal abstract IntPtr UpdatePointer();
+
+    const int idx_cs_selected = 0;
+    const int idx_cs_highlighted = 1;
+    const int idx_cs_hidden = 2;
+    const int idx_cs_locked = 3;
+    const int idx_cs_deleted = 4;
+    const int idx_cs_damaged = 5;
+
+    internal bool GetComponentStatusBool(int which)
+    {
+      var const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_ComponentStatusBool(const_ptr_this, which);
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is selected.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsSelected
+    {
+      get { return GetComponentStatusBool(idx_cs_selected); }
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is highlighted.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsHighlighted
+    {
+      get { return GetComponentStatusBool(idx_cs_highlighted); }
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is hidden.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsHidden
+    {
+      get { return GetComponentStatusBool(idx_cs_hidden); }
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is locked.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsLocked
+    {
+      get { return GetComponentStatusBool(idx_cs_locked); }
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is deleted.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsDeleted
+    {
+      get { return GetComponentStatusBool(idx_cs_deleted); }
+    }
+
+    /// <summary>
+    /// Returns true if the SubD component is damaged.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsDamaged
+    {
+      get { return GetComponentStatusBool(idx_cs_damaged); }
+    }
+
   }
 
 
@@ -972,7 +1257,6 @@ namespace Rhino.Geometry
         if (const_ptr_next != IntPtr.Zero)
           return new SubDVertex(ParentSubD, const_ptr_next, id);
         return null;
-        
       }
     }
 
@@ -990,6 +1274,23 @@ namespace Rhino.Geometry
         if (const_ptr_next != IntPtr.Zero)
           return new SubDVertex(ParentSubD, const_ptr_next, id);
         return null;
+      }
+    }
+
+    /// <summary>
+    /// identifies the type of subdivision vertex
+    /// </summary>
+    public SubDVertexTag Tag
+    {
+      get
+      {
+        var const_ptr_vertex = ConstPointer();
+        return UnsafeNativeMethods.ON_SubDVertex_GetVertexTag(const_ptr_vertex);
+      }
+      set
+      {
+        var ptr_vertex = NonConstPointer();
+        UnsafeNativeMethods.ON_SubDVertex_SetVertexTag(ptr_vertex, value);
       }
     }
     #endregion
@@ -1033,6 +1334,18 @@ namespace Rhino.Geometry
           yield return EdgeAt(i);
         }
       }
+    }
+
+    /// <summary>
+    /// The SubD surface point
+    /// </summary>
+    /// <returns></returns>
+    public Point3d SurfacePoint()
+    {
+      IntPtr const_vertex_ptr = ConstPointer();
+      Point3d rc = default(Point3d);
+      UnsafeNativeMethods.ON_SubDVertex_SurfacePoint(const_vertex_ptr, ref rc);
+      return rc;
     }
   }
 

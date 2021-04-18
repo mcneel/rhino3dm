@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Rhino.UI.Controls.Definitions;
 using System.Collections.Generic;
 using Rhino.FileIO;
 using Rhino.Runtime.InteropWrappers;

@@ -356,7 +356,7 @@ namespace Rhino
     {
       if (string.IsNullOrWhiteSpace(filePath))
         return null;
-      var open_docs = OpenDocuments();
+      var open_docs = OpenDocuments(true);
       foreach (var doc in open_docs)
       {
         var path = doc == null ? string.Empty : doc.Path;
@@ -808,8 +808,18 @@ namespace Rhino
     /// <since>6.0</since>
     public static RhinoDoc[] OpenDocuments()
     {
+      return OpenDocuments(false);
+    }
+
+    /// <summary>
+    /// Returns a list of currently open Rhino documents
+    /// </summary>
+    /// <param name="includeHeadless">pass true to include headless docs in the list</param>
+    /// <returns></returns>
+    public static RhinoDoc[] OpenDocuments(bool includeHeadless)
+    {
       var list = new List<RhinoDoc>();
-      var iterator = UnsafeNativeMethods.CRhinoDocIterator_New();
+      var iterator = UnsafeNativeMethods.CRhinoDocIterator_New(includeHeadless);
       if (iterator != IntPtr.Zero)
       {
         try
@@ -1025,6 +1035,11 @@ namespace Rhino
         return new DateTime(year, month, day, hour, minute, 0);
       }
     }
+
+    /// <summary>
+    /// Returns the date the document was created in Coordinated Universal Time (UTC).
+    /// Use DateTime.ToLocalTime to convert to local time.
+    /// </summary>
     /// <since>5.0</since>
     public DateTime DateLastEdited
     {
@@ -1187,12 +1202,27 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDoc_GetSetBool(RuntimeSerialNumber, which, false, false);
     }
 
-    ///<summary>Returns or sets the document's modified flag.</summary>
+    /// <summary>
+    /// Returns or sets the document's modified flag.
+    /// </summary>
     /// <since>5.0</since>
     public bool Modified
     {
       get { return GetBool(UnsafeNativeMethods.DocumentStatusBool.idxModified); }
       set { UnsafeNativeMethods.CRhinoDoc_GetSetBool(RuntimeSerialNumber, UnsafeNativeMethods.DocumentStatusBool.idxModified, true, value); }
+    }
+
+    /// <summary>
+    /// Returns or sets the appearance of all SubD objects in the document.
+    /// </summary>
+    /// <remarks>
+    /// When setting this property, if the document contains SubD objects, then the document will be redrawn automatically.
+    /// </remarks>
+    /// <since>7.5</since>
+    public Rhino.Geometry.SubDComponentLocation SubDAppearance
+    {
+      get { return UnsafeNativeMethods.CRhinoDoc_SubDAppearance(RuntimeSerialNumber); }
+      set { UnsafeNativeMethods.CRhinoDoc_SetSubDAppearance(RuntimeSerialNumber, value); }
     }
 
     ///<summary>
@@ -3382,7 +3412,7 @@ namespace Rhino
     internal static EventHandler<InstanceDefinitionTableEventArgs> m_idef_table_event;
 
     /// <summary>
-    /// Called when any modification happens to a document's light table.
+    /// Called when any modification happens to a document's instance definition table.
     /// </summary>
     /// <since>5.3</since>
     public static event EventHandler<InstanceDefinitionTableEventArgs> InstanceDefinitionTableEvent
@@ -4908,6 +4938,18 @@ namespace Rhino.DocObjects.Tables
     {
       get { return Document.GetBool(UnsafeNativeMethods.DocumentStatusBool.RedrawEnabled); }
       set { UnsafeNativeMethods.CRhinoDoc_GetSetBool(Document.RuntimeSerialNumber, UnsafeNativeMethods.DocumentStatusBool.RedrawEnabled, true, value); }
+    }
+
+    /// <summary>
+    /// Enables or disables screen redrawing.
+    /// </summary>
+    /// <param name="enable">Enable redrawing.</param>
+    /// <param name="redrawDocument">If enabling, set to true to have the document redrawn.</param>
+    /// <param name="redrawLayers">If enabling, set to true to have the layer user interface redrawn.</param>
+    /// <since>7.3</since>
+    public void EnableRedraw(bool enable, bool redrawDocument, bool redrawLayers)
+    {
+      UnsafeNativeMethods.CRhinoDoc_EnableRedraw(Document.RuntimeSerialNumber, enable, redrawDocument, redrawLayers);
     }
 
     /// <summary>
@@ -7374,7 +7416,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Delete(Guid objectId, bool quiet)
     {
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       bool rc = Delete(objref, quiet);
       objref.Dispose();
       return rc;
@@ -7419,7 +7461,7 @@ namespace Rhino.DocObjects.Tables
     public bool DeleteGrip(Guid gripId)
     {
       if (null == gripId) { throw new ArgumentNullException(nameof(gripId)); }
-      return DeleteGrip(new ObjRef(gripId));
+      return DeleteGrip(new ObjRef(Document, gripId));
     }
 
     /// <summary>
@@ -7451,7 +7493,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (null == grip) { throw new ArgumentNullException(nameof(grip)); }
 
-      ObjRef objref_owner = new ObjRef(grip.OwnerId);
+      ObjRef objref_owner = new ObjRef(Document, grip.OwnerId);
       List<int> list = new List<int> { grip.Index };
 
       return DeleteGrips(objref_owner.Object(), list.ToArray()) > 0 ? true : false;
@@ -7494,7 +7536,7 @@ namespace Rhino.DocObjects.Tables
 
       List<ObjRef> list = new List<ObjRef>();
       foreach (Guid id in gripIds)
-        list.Add(new ObjRef(id));
+        list.Add(new ObjRef(Document, id));
 
       return DeleteGrips(list.ToArray());
     }
@@ -7542,7 +7584,7 @@ namespace Rhino.DocObjects.Tables
       int rc = 0;
       foreach (var item in map.Dictionary)
       {
-        var objref = new ObjRef(item.Key);
+        var objref = new ObjRef(Document, item.Key);
         rc += DeleteGrips(objref.Object(), item.Value.ToArray());
       }
 
@@ -7743,7 +7785,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(Guid objectId)
     {
-      ObjRef objref = new ObjRef(objectId);
+      ObjRef objref = new ObjRef(Document, objectId);
       return Select(objref);
     }
     /// <summary>
@@ -7755,7 +7797,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(Guid objectId, bool select)
     {
-      ObjRef objref = new ObjRef(objectId);
+      ObjRef objref = new ObjRef(Document, objectId);
       return Select(objref, select);
     }
     /// <summary>
@@ -7771,7 +7813,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight)
     {
-      ObjRef objref = new ObjRef(objectId);
+      ObjRef objref = new ObjRef(Document, objectId);
       return Select(objref, select, syncHighlight);
     }
     /// <summary>
@@ -7790,7 +7832,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight, bool persistentSelect)
     {
-      ObjRef objref = new ObjRef(objectId);
+      ObjRef objref = new ObjRef(Document, objectId);
       return Select(objref, select, syncHighlight, persistentSelect);
     }
     /// <summary>
@@ -7820,7 +7862,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(Guid objectId, bool select, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
-      ObjRef objref = new ObjRef(objectId);
+      ObjRef objref = new ObjRef(Document, objectId);
       return Select(objref, select, syncHighlight, persistentSelect, ignoreGripsState, ignoreLayerLocking, ignoreLayerVisibility);
     }
 
@@ -7927,7 +7969,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (Guid.Empty == objectId || null == newAttributes)
         return false;
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       IntPtr pObjRef = objref.ConstPointer();
       IntPtr pAttrs = newAttributes.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ModifyObjectAttributes(m_doc.RuntimeSerialNumber, pObjRef, pAttrs, quiet);
@@ -7987,7 +8029,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.7</since>
     public bool ModifyRenderMaterial(Guid objectId, RenderMaterial material)
     {
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       var obj = objref.Object();
       return ModifyRenderMaterial(obj, material);
     }
@@ -8015,7 +8057,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.7</since>
     public bool ModifyTextureMapping(Guid objId, int channel, TextureMapping mapping)
     {
-      var obj_ref = new ObjRef(objId);
+      var obj_ref = new ObjRef(Document, objId);
       return ModifyTextureMapping(obj_ref, channel, mapping);
     }
     /// <summary>
@@ -8114,7 +8156,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Point3d point)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, point);
       }
@@ -8143,7 +8185,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public bool Replace(Guid objectId, Point point)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, point);
       }
@@ -8173,7 +8215,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, TextEntity text)
     {
-      using(var objref = new ObjRef(objectId))
+      using(var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, text);
       }
@@ -8203,7 +8245,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public bool Replace(Guid objectId, Leader leader)
     {
-      using(var objref = new ObjRef(objectId))
+      using(var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, leader);
       }
@@ -8233,7 +8275,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, TextDot dot)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, dot);
       }
@@ -8263,7 +8305,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.1</since>
     public bool Replace(Guid objectId, Hatch hatch)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, hatch);
       }
@@ -8288,7 +8330,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Line line)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, line);
       }
@@ -8313,7 +8355,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Circle circle)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, circle);
       }
@@ -8338,7 +8380,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Arc arc)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, arc);
       }
@@ -8363,7 +8405,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Polyline polyline)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, polyline);
       }
@@ -8402,7 +8444,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Curve curve)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, curve);
       }
@@ -8438,7 +8480,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Surface surface)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, surface);
       }
@@ -8487,7 +8529,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.1</since>
     public bool Replace(Guid objectId, Brep brep, bool splitKinkySurfaces)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, brep, splitKinkySurfaces);
       }
@@ -8515,7 +8557,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public bool Replace(Guid objectId, Extrusion extrusion)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, extrusion);
       }
@@ -8573,7 +8615,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, Mesh mesh)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, mesh);
       }
@@ -8589,7 +8631,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>7.0</since>
     public bool Replace(Guid objectId, SubD subD)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, subD);
       }
@@ -8627,7 +8669,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(Guid objectId, PointCloud pointcloud)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return Replace(objref, pointcloud);
       }
@@ -8642,7 +8684,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.8</since>
     public bool ReplaceInstanceObject(Guid objectId, int instanceDefinitionIndex)
     {
-      using (var objref = new ObjRef(objectId))
+      using (var objref = new ObjRef(Document, objectId))
       {
         return ReplaceInstanceObject(objref, instanceDefinitionIndex);
       }
@@ -8767,7 +8809,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (Guid.Empty == objectId)
         return false;
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       IntPtr pObjRef = objref.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxHideObject);
       objref.Dispose();
@@ -8818,7 +8860,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (Guid.Empty == objectId)
         return false;
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       IntPtr pObjRef = objref.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxShowObject);
       objref.Dispose();
@@ -8869,7 +8911,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (Guid.Empty == objectId)
         return false;
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       IntPtr pObjRef = objref.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxLockObject);
       objref.Dispose();
@@ -8920,7 +8962,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (Guid.Empty == objectId)
         return false;
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       IntPtr pObjRef = objref.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxUnlockObject);
       objref.Dispose();
@@ -9060,7 +9102,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public Guid Transform(Guid objectId, Transform xform, bool deleteOriginal)
     {
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       Guid rc = Transform(objref, xform, deleteOriginal);
       objref.Dispose();
       return rc;
@@ -9138,7 +9180,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public Guid TransformWithHistory(Guid objectId, Transform xform)
     {
-      var objref = new ObjRef(objectId);
+      var objref = new ObjRef(Document, objectId);
       Guid rc = TransformWithHistory(objref, xform);
       objref.Dispose();
       return rc;
@@ -9886,7 +9928,6 @@ namespace Rhino.DocObjects
     // all variables are set to use same defaults as defined in CRhinoObjectIterator::Init
     internal object_category m_object_category = object_category.active_objects;
     internal object_state m_object_state = object_state.normal_or_locked_objects;
-    //internal bool m_bCheckSubObjects; //=false (initialized by Runtime)
     internal ObjectType m_objectfilter = ObjectType.None;
     int m_layerindex_filter = -1;
 
@@ -10002,6 +10043,13 @@ namespace Rhino.DocObjects
     #endregion
 
     #region object category
+
+    /// <summary>
+    /// If true then objects which only have a sub object selected
+    /// will be included. This is false by default.
+    /// </summary>
+    public bool SubObjectSelected { get; set; }
+
     /// <summary>
     /// When true, objects that are part of current model and saved in file are returned.
     /// </summary>
@@ -10229,14 +10277,13 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_viewport = IntPtr.Zero;
       if (s.ViewportFilter != null)
         const_ptr_viewport = s.ViewportFilter.ConstPointer();
-
       m_ptr = UnsafeNativeMethods.CRhinoObjectIterator_New(doc_id, (int)s.m_object_state, (int)s.m_object_category);
       UnsafeNativeMethods.CRhinoObjectIterator_Initialize(m_ptr,
         s.IncludeLights,
         s.IncludeGrips,
         s.IncludePhantoms,
         s.SelectedObjectsFilter,
-        false, /*s.m_bCheckSubObjects*/
+        s.SubObjectSelected,
         s.VisibleFilter,
         (uint)s.m_objectfilter,
         s.LayerIndexFilter,

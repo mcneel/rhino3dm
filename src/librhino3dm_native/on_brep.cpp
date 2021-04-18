@@ -363,6 +363,7 @@ RH_C_FUNCTION void ON_BrepFace_ClearMaterialChannelIndex(ON_BrepFace* pBrepFace)
 
 RH_C_FUNCTION ON_Brep* ON_Brep_New(const ON_Brep* pOther)
 {
+  RHCHECK_LICENSE
   if( pOther )
     return ON_Brep::New(*pOther);
   return ON_Brep::New();
@@ -443,6 +444,7 @@ RH_C_FUNCTION bool ON_Brep_IsValidTest(const ON_Brep* pConstBrep, enum BrepValid
 
 RH_C_FUNCTION ON_Brep* ONC_BrepFromMesh( const ON_Mesh* pConstMesh, bool bTrimmedTriangles)
 {
+  RHCHECK_LICENSE
   ON_Brep* rc = nullptr;
   if( pConstMesh )
   {
@@ -454,6 +456,7 @@ RH_C_FUNCTION ON_Brep* ONC_BrepFromMesh( const ON_Mesh* pConstMesh, bool bTrimme
 
 RH_C_FUNCTION ON_Brep* ON_Brep_FromBox( ON_3DPOINT_STRUCT boxmin, ON_3DPOINT_STRUCT boxmax)
 {
+  RHCHECK_LICENSE
   const ON_3dPoint* _boxmin = (const ON_3dPoint*)&boxmin;
   const ON_3dPoint* _boxmax = (const ON_3dPoint*)&boxmax;
 
@@ -492,6 +495,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromBox( ON_3DPOINT_STRUCT boxmin, ON_3DPOINT_STR
 
 RH_C_FUNCTION ON_Brep* ON_Brep_FromBox2( /*ARRAY*/const ON_3dPoint* corners )
 {
+  RHCHECK_LICENSE
   ON_Brep* rc = nullptr;
   if( corners )
     rc = ::ON_BrepBox(corners);
@@ -500,6 +504,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromBox2( /*ARRAY*/const ON_3dPoint* corners )
 
 RH_C_FUNCTION ON_Brep* ON_Brep_FromCylinder(ON_Cylinder* cylinder, bool capBottom, bool capTop)
 {
+  RHCHECK_LICENSE
   ON_Brep* rc = nullptr;
   if( cylinder )
   {
@@ -511,6 +516,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromCylinder(ON_Cylinder* cylinder, bool capBotto
 
 RH_C_FUNCTION void ON_Brep_DuplicateEdgeCurves(const ON_Brep* pConstBrep, ON_SimpleArray<ON_Curve*>* pOutCurves, bool nakedOnly, bool nakedOuter, bool nakedInner)
 {
+  RHCHECK_LICENSE
   if (pConstBrep && pOutCurves)
   {
     for (int i = 0; i < pConstBrep->m_E.Count(); i++)
@@ -796,6 +802,7 @@ RH_C_FUNCTION bool ON_Brep_MakeValidForV2(ON_Brep* pBrep)
 
 RH_C_FUNCTION bool ON_Brep_RebuildEdges(ON_Brep* pBrep, int face_index, double tolerance, bool rebuildSharedEdges, bool rebuildVertices)
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pBrep && face_index>=0 && face_index<pBrep->m_F.Count() )
   {
@@ -807,6 +814,8 @@ RH_C_FUNCTION bool ON_Brep_RebuildEdges(ON_Brep* pBrep, int face_index, double t
 
 RH_C_FUNCTION bool ON_Brep_Repair(ON_Brep* pBrep, double tol)
 {
+  RHCHECK_LICENSE
+
   if (pBrep)
     return RhinoRepairBrep(pBrep, tol);
 
@@ -917,6 +926,7 @@ RH_C_FUNCTION int ON_Brep_AddCurve( ON_Brep* pBrep, const ON_Curve* pConstCurve,
 
 RH_C_FUNCTION ON_Brep* ON_Brep_FromSurface( const ON_Surface* pConstSurface )
 {
+  RHCHECK_LICENSE
   ON_Brep* rc = nullptr;
   if( pConstSurface )
   {
@@ -941,6 +951,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromSurface( const ON_Surface* pConstSurface )
 
 RH_C_FUNCTION ON_Brep* ON_Brep_TrimmedPlane(ON_PLANE_STRUCT* plane, ON_SimpleArray<ON_Curve*>* pCurveArray)
 {
+  RHCHECK_LICENSE
   ON_Brep* rc = nullptr;
   if (plane && pCurveArray)
   {
@@ -1013,6 +1024,7 @@ RH_C_FUNCTION bool ON_BrepFace_SetMesh( ON_BrepFace* pBrepFace, ON_Mesh* pMesh, 
 
 RH_C_FUNCTION const ON_Brep* ON_BrepSubItem_Brep(const ON_Geometry* pConstGeometry, int* index)
 {
+  RHCHECK_LICENSE
   const ON_Brep* rc = nullptr;
   if (index)
   {
@@ -1292,6 +1304,7 @@ RH_C_FUNCTION ON_Brep* ON_Brep_CopyTrims( const ON_BrepFace* pConstBrepFace, con
 
 RH_C_FUNCTION int ON_Brep_AddTrimCurve( ON_Brep* pBrep, const ON_Curve* pConstCurve )
 {
+  RHCHECK_LICENSE
   int rc = -1;
   if( pBrep && pConstCurve )
   {
@@ -1304,6 +1317,7 @@ RH_C_FUNCTION int ON_Brep_AddTrimCurve( ON_Brep* pBrep, const ON_Curve* pConstCu
 
 RH_C_FUNCTION int ON_Brep_AddEdgeCurve( ON_Brep* pBrep, const ON_Curve* pConstCurve )
 {
+  RHCHECK_LICENSE
   int rc = -1;
   if( pBrep && pConstCurve )
   {
@@ -1316,6 +1330,7 @@ RH_C_FUNCTION int ON_Brep_AddEdgeCurve( ON_Brep* pBrep, const ON_Curve* pConstCu
 
 RH_C_FUNCTION int ON_Brep_AddSurface( ON_Brep* pBrep, const ON_Surface* pConstSurface )
 {
+  RHCHECK_LICENSE
   int rc = -1;
   if( pBrep && pConstSurface )
   {
@@ -1332,6 +1347,7 @@ RH_C_FUNCTION int ON_Brep_AddSurface( ON_Brep* pBrep, const ON_Surface* pConstSu
 
 RH_C_FUNCTION bool ON_Brep_SetEdgeCurve( ON_Brep* pBrep, int edgecurveIndex, int c3Index, ON_INTERVAL_STRUCT subdomain )
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pBrep && edgecurveIndex>=0 && edgecurveIndex<pBrep->m_E.Count() )
   {
@@ -1347,6 +1363,7 @@ RH_C_FUNCTION bool ON_Brep_SetEdgeCurve( ON_Brep* pBrep, int edgecurveIndex, int
 
 RH_C_FUNCTION bool ON_Brep_SetTrimCurve( ON_Brep* pBrep, int trimcurveIndex, int c3Index, ON_INTERVAL_STRUCT subdomain )
 {
+  RHCHECK_LICENSE
   bool rc = false;
   if( pBrep && trimcurveIndex>=0 && trimcurveIndex<pBrep->m_T.Count() )
   {
@@ -2200,6 +2217,7 @@ RH_C_FUNCTION ON_MassProperties* ON_Geometry_VolumeMassProperties(const ON_Simpl
 
 RH_C_FUNCTION int ON_Brep_CreateMesh( const ON_Brep* pConstBrep, ON_SimpleArray<ON_Mesh*>* meshes )
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if( pConstBrep && meshes )
   {
@@ -2272,6 +2290,7 @@ RH_C_FUNCTION int ON_Brep_CreateMesh2( const ON_Brep* pConstBrep, ON_SimpleArray
 
 RH_C_FUNCTION int ON_Brep_CreateMesh3( const ON_Brep* pConstBrep, ON_SimpleArray<ON_Mesh*>* meshes, const ON_MeshParameters* pConstMeshParameters )
 {
+  RHCHECK_LICENSE
   int rc = 0;
   if( pConstBrep && meshes && pConstMeshParameters )
   {

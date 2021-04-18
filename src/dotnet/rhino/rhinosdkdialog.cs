@@ -908,12 +908,46 @@ namespace Rhino
       /// <param name="panelId">
       /// Class type Id of the panel to close.
       /// </param>
+      /// <param name="doc">
+      /// Document associated with panel you wish to close.
+      /// </param>
+      /// <since>7.3</since>
+      public static void ClosePanel(Guid panelId, RhinoDoc doc)
+      {
+        // This won't be necessary Mac Rhino is ported to use the generic panel
+        // interfaces
+        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab((doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0, panelId, false, false);
+      }
+      /// <summary>
+      /// Will close or hide the specified panel type, in Windows Rhino, if it
+      /// is the only visible tab the tab dock bar will be closed as well.  In
+      /// Mac Rhino it will always close the modeless dialog hosting the panel.
+      /// </summary>
+      /// <param name="panelId">
+      /// Class type Id of the panel to close.
+      /// </param>
       /// <since>5.0</since>
       public static void ClosePanel(Guid panelId)
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
         // interfaces
-        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab(RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0, panelId, false, false);
+        ClosePanel(panelId, null);
+      }
+      /// <summary>
+      /// Will close or hide the specified panel type, in Windows Rhino, if it
+      /// is the only visible tab the tab dock bar will be closed as well.  In
+      /// Mac Rhino it will always close the modeless dialog hosting the panel.
+      /// </summary>
+      /// <param name="panelType">
+      /// Class type of the panel to close.
+      /// </param>
+      /// <param name="doc">
+      /// Document associated with panel you wish to close.
+      /// </param>
+      /// <since>7.3</since>
+      public static void ClosePanel(Type panelType, RhinoDoc doc)
+      {
+        ClosePanel(panelType, null);
       }
       /// <summary>
       /// Will close or hide the specified panel type, in Windows Rhino, if it

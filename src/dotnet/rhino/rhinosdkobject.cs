@@ -509,6 +509,9 @@ namespace Rhino.DocObjects
         case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoProxyObject: // 26
           rc = new ProxyObject(sn);
           break;
+        case UnsafeNativeMethods.RhinoObjectTypeConsts.CRhinoNamedViewCameraIcon: // 27
+          rc = new NamedViewWidgetObject(sn);
+          break;
         default:
           rc = new RhinoObject(sn);
           break;
@@ -656,7 +659,48 @@ namespace Rhino.DocObjects
     {
       var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects);
       var p_rh_object_array = rhinoobject_array.NonConstPointer();
-      var p_obj_ref_array = UnsafeNativeMethods.RHC_RhinoGetRenderMeshes(p_rh_object_array, okToCreate, returnAllObjects);
+      var p_obj_ref_array = UnsafeNativeMethods.RHC_RhinoGetRenderMeshes(p_rh_object_array, okToCreate, returnAllObjects, true, false);
+      rhinoobject_array.Dispose();
+
+      if (IntPtr.Zero == p_obj_ref_array)
+        return new ObjRef[0];
+
+      var count = UnsafeNativeMethods.RhinoObjRefArray_Count(p_obj_ref_array);
+      if (count < 1)
+        return new ObjRef[0];
+
+      var rc = new ObjRef[count];
+      for (var i = 0; i < count; i++)
+      {
+        var p_const_obj_ref = UnsafeNativeMethods.RhinoObjRefArray_GetItem(p_obj_ref_array, i);
+        rc[i] = new ObjRef(p_const_obj_ref);
+      }
+      UnsafeNativeMethods.RhinoObjRefArray_Delete(p_obj_ref_array);
+      return rc;
+    }
+
+
+    /// <summary>
+    /// Gets the render meshes of some objects.
+    /// </summary>
+    /// <param name="rhinoObjects">An array, a list, or any enumerable set of Rhino objects.</param>
+    /// <param name="okToCreate">true if the method is allowed to instantiate new meshes if they do not exist.</param>
+    /// <param name="returnAllObjects">true if all objects should be returned.</param>
+    /// <param name="skipHiddenObjects">true if if hidden objects should be ignored.</param>
+    /// <param name="updateMeshTCs">true if the TCs should be updated with a texture mapping.</param>
+    /// <returns>An array of object references.</returns>
+    /// <since>7.3</since>
+    public static ObjRef[] GetRenderMeshesWithUpdatedTCs(
+      System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, 
+      bool okToCreate, 
+      bool returnAllObjects,
+      bool skipHiddenObjects,
+      bool updateMeshTCs
+      )
+    {
+      var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects);
+      var p_rh_object_array = rhinoobject_array.NonConstPointer();
+      var p_obj_ref_array = UnsafeNativeMethods.RHC_RhinoGetRenderMeshes(p_rh_object_array, okToCreate, returnAllObjects, skipHiddenObjects, updateMeshTCs);
       rhinoobject_array.Dispose();
 
       if (IntPtr.Zero == p_obj_ref_array)
@@ -887,6 +931,18 @@ namespace Rhino.DocObjects
     {
       var ptr = ConstPointer();
       return UnsafeNativeMethods.CRhinoObject_GetBool(ptr, which);
+    }
+
+    /// <summary>
+    /// Returns true if object is a closed solid, otherwise false.
+    /// </summary>
+    /// <since>7.6</since>
+    public bool IsSolid
+    {
+      get 
+      { 
+        return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsSolid); 
+      }
     }
 
     /// <summary>
@@ -1763,19 +1819,59 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Meshing parameters that this object uses for generating render meshes. If the
-    /// object's attributes do not have custom meshing parameters, then the document's
-    /// meshing parameters are used.
+    /// Sets the per-object meshing parameters for this object. 
+    /// When set, this object will use these meshing parameters when generating a render mesh, 
+    /// instead of those provided by the document.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="mp">
+    /// The per-object meshing parameters. 
+    /// Note: if null, then the per-object meshing parameters will be removed, and this object will
+    /// revert to using the meshing parameters provided by the document.
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>7.0</since>
+    public bool SetRenderMeshParameters(MeshingParameters mp)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_mesh_parameters = (null != mp) ? mp.ConstPointer() : IntPtr.Zero;
+      return UnsafeNativeMethods.RHC_RhinoObjectSetMeshParameters(ptr_const_this, ptr_const_mesh_parameters);
+    }
+
+    /// <summary>
+    /// Returns the meshing parameters that this object uses for generating render meshes.
+    /// If this object does not have per-object meshing parameters, then the document's meshing parameters are returned.
+    /// </summary>
+    /// <returns>The render meshing parameters.</returns>
     /// <since>5.0</since>
     public MeshingParameters GetRenderMeshParameters()
     {
-      var rc = new MeshingParameters();
-      var p_meshing_parameters = rc.NonConstPointer();
-      var p_const_this = ConstPointer();
-      UnsafeNativeMethods.CRhinoObject_GetRenderMeshParameters(p_const_this, p_meshing_parameters);
-      return rc;
+      return GetRenderMeshParameters(true);
+    }
+
+    /// <summary>
+    /// Returns the meshing parameters that this object uses for generating render meshes.
+    /// </summary>
+    /// <param name="returnDocumentParametersIfUnset">
+    /// If true, then return the per-object meshing parameters for this object.
+    /// If this object does not have per-object meshing parameters, then the document's meshing parameters are returned.
+    /// If false, then return the per-object meshing parameters for this object.
+    /// If this object does not have per-object meshing parameters, then null is returned.
+    /// </param>
+    /// <returns>The render meshing parameters if successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public MeshingParameters GetRenderMeshParameters(bool returnDocumentParametersIfUnset)
+    {
+      if (returnDocumentParametersIfUnset)
+      {
+        var rc = new MeshingParameters();
+        var p_meshing_parameters = rc.NonConstPointer();
+        var p_const_this = ConstPointer();
+        UnsafeNativeMethods.CRhinoObject_GetRenderMeshParameters(p_const_this, p_meshing_parameters);
+        return rc;
+      }
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_mesh_parameters = UnsafeNativeMethods.RHC_RhinoObjectGetMeshParameters(ptr_const_this);
+      return (IntPtr.Zero != ptr_mesh_parameters) ? new MeshingParameters(ptr_mesh_parameters) : null;
     }
 
     /// <summary>
@@ -2661,6 +2757,52 @@ namespace Rhino.DocObjects
     protected virtual void OnSpaceMorph(SpaceMorph morph)
     {
     }
+
+    /// <summary>
+    /// If this object has a history record, the CopyOnReplace field is set
+    ///  When an object is replaced in a document and the old object has a history record with
+    /// this field set, the history record is copied and attached to the new object.
+    /// That allows a descendant object to continue the history linkage after
+    /// it is edited.
+    /// </summary>
+    /// <param name="bCopy"></param>
+    public void SetCopyHistoryOnReplace(bool bCopy)
+    {
+      var p_const_this = ConstPointer();
+      UnsafeNativeMethods.CRhinoObject_SetCopyHistoryOnReplace(p_const_this, bCopy);
+    }
+
+    /// <summary>
+    /// Gets the setting of the CopyOnReplace field in this object's history
+    /// </summary>
+    /// <returns>
+    /// true if this object has history and the field is set
+    /// false otherwise
+    /// </returns>
+    public bool CopyHistoryOnReplace()
+    {
+      var p_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoObject_CopyHistoryOnReplace(p_const_this);
+    }
+
+    /// <summary>
+    /// Returns whether this object has a history record
+    /// </summary>
+    /// <returns></returns>
+    public bool HasHistoryRecord()
+    {
+      var p_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoObject_HasHistoryRecord(p_const_this);
+    }
+
+    internal bool IsCustom
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.CRhinoObject_IsCustom(ptr);
+      }
+    }
   }
 
   /// <summary>
@@ -2771,9 +2913,9 @@ namespace Rhino.DocObjects
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_Copy(pOtherObjRef);
     }
 
-    internal ObjRef(IntPtr pOtherObjRef, bool ptrIsCRhinoObjRef)
+    internal ObjRef(RhinoDoc doc, IntPtr pOtherObjRef, bool ptrIsCRhinoObjRef)
     {
-      m_ptr = ptrIsCRhinoObjRef ? UnsafeNativeMethods.CRhinoObjRef_Copy(pOtherObjRef) : UnsafeNativeMethods.CRhinoObjRef_FromOnObjRef(pOtherObjRef);
+      m_ptr = ptrIsCRhinoObjRef ? UnsafeNativeMethods.CRhinoObjRef_Copy(pOtherObjRef) : UnsafeNativeMethods.CRhinoObjRef_FromOnObjRef(doc?.RuntimeSerialNumber ?? 0, pOtherObjRef);
     }
 
     internal ObjRef(RhinoObject parent, IntPtr pGeometry)
@@ -2787,9 +2929,24 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="id">The ID.</param>
     /// <since>5.0</since>
+    [Obsolete("Use version that takes a document.")]
     public ObjRef(Guid id)
     {
-      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New1(id);
+      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New1(0, id);
+    }
+
+    /// <summary>
+    /// Initializes a new object reference from a globally unique identifier (<see cref="Guid"/>).
+    /// </summary>
+    /// <param name="doc">The Rhino document</param>
+    /// <param name="id">The ID.</param>
+    /// <since>7.6</since>
+    public ObjRef(RhinoDoc doc, Guid id)
+    {
+      if (null == doc)
+        m_ptr = UnsafeNativeMethods.CRhinoObjRef_New1(0, id);
+      else
+        m_ptr = UnsafeNativeMethods.CRhinoObjRef_New1(doc.RuntimeSerialNumber, id);
     }
 
     /// <summary>
@@ -2799,10 +2956,25 @@ namespace Rhino.DocObjects
     /// <param name="id">The object's Id</param>
     /// <param name="ci">a portion of the object</param>
     /// <since>7.0</since>
+    [Obsolete("Use version that takes a document.")]
     public ObjRef(Guid id, Geometry.ComponentIndex ci)
     {
-      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New5(id, ref ci);
+      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New5(0, id, ref ci);
     }
+
+    /// <summary>
+    /// Initializes a new object reference from a guid and component index. The
+    /// component index is used to specify a "piece" of the geometry
+    /// </summary>
+    /// <param name="doc">The Rhino document</param>
+    /// <param name="id">The object's Id</param>
+    /// <param name="ci">a portion of the object</param>
+    /// <since>7.6</since>
+    public ObjRef(RhinoDoc doc, Guid id, Geometry.ComponentIndex ci)
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoObjRef_New5(doc.RuntimeSerialNumber, id, ref ci);
+    }
+
 
     /// <summary>
     /// Initializes a new object reference from a Rhino object.

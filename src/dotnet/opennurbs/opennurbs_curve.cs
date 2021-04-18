@@ -5,22 +5,51 @@ using System.Runtime.InteropServices;
 using Rhino.Runtime.InteropWrappers;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
-// don't wrap ON_MeshCurveParameters. It is only needed for the ON_Curve::MeshCurveFunction
 
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Used in curve and surface blending functions
+  /// Used in curve and surface blending and matching functions.
   /// </summary>
   /// <since>5.0</since>
   public enum BlendContinuity : int
   {
-    /// <summary></summary>
+    /// <summary>
+    /// G0: The curves or surfaces touch at the join point (position).
+    /// </summary>
     Position = 0,
-    /// <summary></summary>
+    /// <summary>
+    /// G1: The curves or surfaces also share a common tangent direction at the join point (tangent).
+    /// </summary>
     Tangency = 1,
-    /// <summary></summary>
+    /// <summary>
+    /// G2: The curves or surfaces also share a common center of curvature at the join point (curvature).
+    /// </summary>
     Curvature = 2
+  }
+
+  /// <summary>
+  /// Preserves, or maintains, the shape of the opposite the one being edited.
+  /// </summary>
+  /// <since>7.6</since>
+  public enum PreserveEnd : int
+  {
+    /// <summary>
+    /// No constraint.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Location only.
+    /// </summary>
+    Position = 1,
+    /// <summary>
+    /// Position and curve direction.
+    /// </summary>
+    Tangency = 2,
+    /// <summary>
+    /// Position, direction, and radius of curvature. 
+    /// </summary>
+    Curvature = 3
   }
 
   /// <summary>
@@ -951,6 +980,33 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Changes a curve end to meet a specified curve with a specified continuity.
+    /// </summary>
+    /// <param name="curve0">The open curve to change.</param>
+    /// <param name="reverse0">Reverse the directon of the curve to change before matching.</param>
+    /// <param name="continuity">The continuity at the curve end.</param>
+    /// <param name="curve1">The open curve to match.</param>
+    /// <param name="reverse1">Reverse the directon of the curve to match before matching.</param>
+    /// <param name="preserve">Prevent modification of the curvature at the end opposite the match for curves with fewer than six control points.</param>
+    /// <param name="average">Adjust both curves to match each other.</param>
+    /// <returns>The results of the curve matching, if successful, otherwise an empty array.</returns>
+    /// <since>7.6</since>
+    public static Curve[] CreateMatchCurve(Curve curve0, bool reverse0, BlendContinuity continuity,
+                                           Curve curve1, bool reverse1, PreserveEnd preserve, bool average)
+    {
+      IntPtr ptr_const_curve0 = curve0.ConstPointer();
+      IntPtr ptr_const_curve1 = curve1.ConstPointer();
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhMatchCurve(ptr_const_curve0, reverse0, (int)continuity, ptr_const_curve1, reverse1, (int)preserve, average, ptr_output);
+        GC.KeepAlive(curve0);
+        GC.KeepAlive(curve1);
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
+    }
+
+    /// <summary>
     /// Creates curves between two open or closed input curves. Uses the control points of the curves for finding tween curves.
     /// That means the first control point of first curve is matched to first control point of the second curve and so on.
     /// There is no matching of curves direction. Caller must match input curves direction before calling the function.
@@ -1844,7 +1900,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes the distances between two arbitrary curves that overlap.
+    /// Computes the maximum and minimum distances between two different curves.
     /// </summary>
     /// <param name="curveA">A curve.</param>
     /// <param name="curveB">Another curve.</param>
@@ -2007,8 +2063,9 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// Polylines will be exploded into line segments. ExplodeCurves will
-    /// return the curves in topological order.
+    /// Duplicates curve segments. 
+    /// Explodes polylines, polycurves and G1 discontinuous NURBS curves.
+    /// Single segment curves, such as lines, arcs, unkinked NURBS curves, are duplicated.
     /// </summary>
     /// <returns>
     /// An array of all the segments that make up this curve.
@@ -2123,6 +2180,24 @@ namespace Rhino.Geometry
       curveParameter = RhinoMath.UnsetValue;
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.TLC_GetLocalTangentPoint(const_ptr_this, testPoint, seedParmameter, ref curveParameter, subDomain);
+    }
+
+    /// <summary>
+    /// Returns true if the curve is a cubic, non-rational, uniform NURBS curve that is either periodic or has natural end conditions.
+    /// Othewise, false is returned.
+    /// </summary>
+    /// <remarks>
+    /// A "natural" spline has zero 2nd derivatives (and hence zero curvature) at the start and end.
+    /// A "periodic" spline has unclampled periodic knots and periodic control points.
+    /// </remarks>
+    /// <since>7.0</since>
+    public bool IsSubDFriendly
+    {
+      get
+      {
+        IntPtr ptr_const_curve = ConstPointer();
+        return UnsafeNativeMethods.ON_SubD_IsSubDFriendlyCurve(ptr_const_curve);
+      }
     }
 
 #endif
@@ -3512,6 +3587,7 @@ namespace Rhino.Geometry
       IntPtr ptr = ConstPointer();
       return UnsafeNativeMethods.ON_Curve_IsContinuous(ptr, (int)continuityType, t);
     }
+
     /// <summary>
     /// Searches for a derivative, tangent, or curvature discontinuity.
     /// </summary>
@@ -3543,6 +3619,48 @@ namespace Rhino.Geometry
       t = RhinoMath.UnsetValue;
       IntPtr ptr = ConstPointer();
       return UnsafeNativeMethods.ON_Curve_GetNextDiscontinuity(ptr, (int)continuityType, t0, t1, ref t);
+    }
+
+    /// <summary>
+    /// Searches for a derivative, tangent, or curvature discontinuity.
+    /// </summary>
+    /// <param name="continuityType">Type of continuity to search for.</param>
+    /// <param name="t0">
+    /// Search begins at t0. If there is a discontinuity at t0, it will be ignored. This makes it
+    /// possible to repeatedly call GetNextDiscontinuity() and step through the discontinuities.
+    /// </param>
+    /// <param name="cosAngleTolerance">
+    /// default = cos(1 degree) Used only when continuity is G1_continuous or G2_continuous.
+    /// If the  cosine of the angle between two tangent vectors is &lt;= cos_angle_tolerance,
+    /// then a G1 discontinuity is reported.
+    /// </param>
+    /// <param name="curvatureTolerance">
+    /// (default = ON_SQRT_EPSILON) Used only when continuity is G2_continuous. If K0 and K1
+    /// are curvatures evaluated from above and below and |K0 - K1| &gt; curvature_tolerance,
+    /// then a curvature discontinuity is reported.
+    /// </param>
+    /// <param name="t1">
+    /// (t0 != t1)  If there is a discontinuity at t1 it will be ignored unless continuityType is
+    /// a locus discontinuity type and t1 is at the start or end of the curve.
+    /// </param>
+    /// <param name="t">If a discontinuity is found, then t reports the parameter at the discontinuity.</param>
+    /// <returns>
+    /// Parametric continuity tests c = (C0_continuous, ..., G2_continuous):
+    ///  true if a parametric discontinuity was found strictly between t0 and t1. Note well that
+    ///  all curves are parametrically continuous at the ends of their domains.
+    /// 
+    /// Locus continuity tests c = (C0_locus_continuous, ...,G2_locus_continuous):
+    ///  true if a locus discontinuity was found strictly between t0 and t1 or at t1 is the at the end
+    ///  of a curve. Note well that all open curves (IsClosed()=false) are locus discontinuous at the
+    ///  ends of their domains.  All closed curves (IsClosed()=true) are at least C0_locus_continuous at 
+    ///  the ends of their domains.
+    /// </returns>
+    [ConstOperation]
+    public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, double cosAngleTolerance, double curvatureTolerance, out double t)
+    {
+      t = RhinoMath.UnsetValue;
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Curve_GetNextDiscontinuity2(ptr, (int)continuityType, t0, t1, cosAngleTolerance, curvatureTolerance, ref t);
     }
     #endregion
 

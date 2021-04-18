@@ -199,6 +199,27 @@ namespace Rhino
     const double PI = 3.141592653589793238462643;
 
     /// <summary>
+    /// Quarter of a rotation. 90 degrees. 1.57...
+    /// </summary>
+    public const double HalfPI = PI / 2;
+
+    /// <summary>
+    /// One eigth of a rotation. 45 degrees. 0.78...
+    /// </summary>
+    public const double QuarterPI = PI / 4;
+
+    /// <summary>
+    /// Full rotation. 360 degrees. 6.28...
+    /// </summary>
+    public const double TwoPI = Tau;
+
+    /// <summary>
+    /// Ratio of circumference divided by radius. Full rotation. 360 degrees. 6.28...
+    /// </summary>
+    public const double Tau = PI * 2;
+
+
+    /// <summary>
     /// Gets Rhino's Zero Tolerance constant, which is 2^-32. In cases when an
     /// absolute "zero" tolerance is required to compare model space coordinates, 
     /// ZeroTolerance is used. The value of ZeroTolerance should be no smaller than 
@@ -348,6 +369,16 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Return number of meters per one unit of a given unit system
+    /// </summary>
+    /// <param name="units"></param>
+    /// <returns></returns>
+    public static double MetersPerUnit(UnitSystem units)
+    {
+      return UnsafeNativeMethods.ONC_MetersPerUnit(units);
+    }
+
+    /// <summary>
     /// Restricts a <see cref="int"/> to be specified within an interval of two integers.
     /// </summary>
     /// <param name="value">An integer.</param>
@@ -373,7 +404,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Restricts a <see cref="double"/> to be specified within an interval of two numbers.
+    /// Limits a <see cref="double"/> to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
     /// </summary>
     /// <param name="value">A number.</param>
     /// <param name="bound1">A first bound.</param>
@@ -394,6 +425,30 @@ namespace Rhino
         value = max;
       if (value < min)
         value = min;
+      return value;
+    }
+
+    /// <summary>
+    /// Limits a <see cref="double"/> to be specified within an interval of two numbers by repeating the available interval cyclically.
+    /// </summary>
+    /// <param name="value">A number.</param>
+    /// <param name="bound1">A first bound.</param>
+    /// <param name="bound2">A second bound. This does not necessarily need to be larger or smaller than bound1.</param>
+    /// <returns></returns>
+    public static double Wrap(double value, double bound1, double bound2)
+    {
+      if (bound2 < bound1)
+      {
+        double tmp = bound1;
+        bound1 = bound2;
+        bound2 = tmp;
+      }
+      if (bound2 == bound1)
+        value = bound1;
+      else if (value < bound1)
+        value = bound2 - (bound1 - value) % (bound2 - bound1);
+      else if (bound2 < value)
+        value = bound1 + (value - bound1) % (bound2 - bound1);
       return value;
     }
 

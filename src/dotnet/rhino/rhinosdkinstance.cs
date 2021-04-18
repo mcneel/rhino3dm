@@ -30,39 +30,51 @@ namespace Rhino.DocObjects
     /// </summary>
     Static = 0,
     /// <summary>
-    /// This instance definition geometry was imported from another archive (m_source_archive)
-    /// and is embedded. If m_source_archive changes, the user is asked if they want to update
-    /// the instance definition.
+    /// This instance definition geometry was imported from another archive and is embedded. 
+    /// If the source archive changes, the user is asked if they want to update the instance definition.
     /// </summary>
     [Obsolete("Always use Static")]
     Embedded = 1,
     /// <summary>
-    /// This instance definition geometry was imported from another archive (m_source_archive)
-    /// and is embedded. If m_source_archive changes, the instance definition is automatically
-    /// updated. If m_source_archive is not available, the instance definition is still valid.
+    /// This instance definition geometry was imported from another archive and is embedded. 
+    /// If the source archive changes, the instance definition is automatically updated. 
+    /// If the soruce archive is not available, the instance definition is still valid.
     /// </summary>
     LinkedAndEmbedded = 2,
     /// <summary>
-    /// This instance definition geometry was imported from another archive (m_source_archive)
-    /// and is not embedded. If m_source_archive changes, the instance definition is automatically
-    /// updated. If m_source_archive is not available, the instance definition is not valid.
-    /// This does not save runtime memory.  It may save a little disk space, but it is a  foolish
-    /// option requested by people who do not understand all the issues.
+    /// This instance definition geometry was imported from another archive and is not embedded. 
+    /// If the source archive changes, the instance definition is automatically updated. 
+    /// If the source archive is not available, the instance definition is not valid.
     /// </summary>
     Linked = 3
   }
 
   /// <summary>
-  /// A InstanceDefinitionUpdateType.Static or InstanceDefinitionUpdateType.LinkedAndEmbedded instance definition
-  /// must have LayerStyle = Unset, a InstanceDefinitionUpdateType.Linked InstanceDefnition must
-  /// have LayerStyle = Active or Reference
+  /// InstanceDefinition.LayerStyle specifies how model components
+  /// (layers, materials, dimension styles, etc.) from linked instance definition files
+  /// appear in the active model.
   /// </summary>
   /// <since>5.0</since>
   public enum InstanceDefinitionLayerStyle
   {
+    /// <summary>
+    /// This is the only valid layer style when the instance definition type is InstanceDefinitionUpdateType.Static
+    /// or InstanceDefinitionUpdateType.LinkedAndEmbedded. This style is not valid when the instance definition type
+    /// is InstanceDefinitionUpdateType.Linked.
+    /// </summary>
     None = 0,
-    Active = 1,   // linked InstanceDefinition layers will be active
-    Reference = 2 // linked InstanceDefinition layers will be reference
+    /// <summary>
+    /// Model components (layers, materials, dimension styles, etc.) from 
+    /// linked instance definition files are embedded as ordinary components in the active model.
+    /// This layer style may be used when the instance definition type is InstanceDefinitionUpdateType.Linked.
+    /// </summary>
+    Active = 1,
+    /// <summary>
+    /// Layers from the linked instance definition are reference components in the model.
+    /// This is the default layer style when the instance definition type is InstanceDefinitionUpdateType.Linked.
+    /// This layer style may be used when the instance definition type is is InstanceDefinitionUpdateType.Linked.
+    /// </summary>
+    Reference = 2 
   }
 
   /// <summary>
@@ -340,6 +352,35 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Returns the number of references of this instance definition in the model. 
+    /// Both top-level references and nested instances are included in the count.
+    /// </summary>
+    /// <returns>The number of references of this instance definition in the model.</returns>
+    /// <since>7.4</since>
+    public int UseCount()
+    {
+      int topLevelReferenceCount = 0;
+      int nestedReferenceCount = 0;
+      return UseCount(out topLevelReferenceCount, out nestedReferenceCount);
+    }
+
+    /// <summary>
+    /// Returns the number of references of this instance definition in the model. 
+    /// Both top-level references and nested instances are included in the count.
+    /// </summary>
+    /// <param name="topLevelReferenceCount">The number of top-level references.</param>
+    /// <param name="nestedReferenceCount">The number of nested instances.</param>
+    /// <returns>The number of references of this instance definition in the model.</returns>
+    /// <since>7.4</since>
+    public int UseCount(out int topLevelReferenceCount, out int nestedReferenceCount)
+    {
+      topLevelReferenceCount = 0;
+      nestedReferenceCount = 0;
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.CRhinoInstanceDefinition_UseCount(const_ptr, ref topLevelReferenceCount, ref nestedReferenceCount);
+    }
+
+    /// <summary>
     /// Gets a list of all the InstanceDefinitions that contain a reference this InstanceDefinition.
     /// </summary>
     /// <returns>An array of instance definitions. The returned array can be empty, but not null.</returns>
@@ -433,6 +474,11 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// True if this instance definition is from a linked file.
+    /// It will be saved only if it is referenced by an instance reference object that is in the active geometry list and is being saved.
+    /// Note that there can be multiple linked instance definitions with references to tenuous instance definitions.
+    /// </summary>
     /// <since>5.0</since>
     public bool IsTenuous
     {
@@ -456,6 +502,10 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Specifies how model components (layers, materials, dimension styles, etc.) 
+    /// from linked instance definition files appear in the active model.
+    /// </summary>
     /// <since>5.0</since>
     public InstanceDefinitionLayerStyle LayerStyle
     {
@@ -471,6 +521,9 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Returns true if this instance definition is deleted. Deleted object are not saved to a file archive.
+    /// </summary>
     /// <example>
     /// <code source='examples\vbnet\ex_renameblock.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
@@ -485,6 +538,21 @@ namespace Rhino.DocObjects
         return UnsafeNativeMethods.CRhinoInstanceDefinition_IsDeleted(const_ptr);
       }
     }
+
+    /// <summary>
+    /// Gets the unit system of the instance definition. If the instance definition was
+    /// imported from another 3dm file, the unit system may differ from that of the document.
+    /// </summary>
+    /// <since>7.0</since>
+    public UnitSystem UnitSystem
+    {
+      get
+      {
+        IntPtr ptr_const_idef = ConstPointer();
+        return UnsafeNativeMethods.CRhinoInstanceDefinition_UnitSystem(ptr_const_idef);
+      }
+    }
+
     //[skipping]
     //BOOL CRhinoInstanceDefinition::GetBBox(
     //bool UsesLayer( int layer_index ) const;
@@ -508,6 +576,9 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Gets the full file path for linked instance definitions.
+    /// </summary>
     /// <since>5.0</since>
     public string SourceArchive
     {

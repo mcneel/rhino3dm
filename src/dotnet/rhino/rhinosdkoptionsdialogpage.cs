@@ -18,6 +18,24 @@ namespace Rhino.UI
       Dialogs.ShowMessage(Localization.LocalizeString("Scripting not supported for this option", 34), Localization.LocalizeString("Unsupported Option", 35));
       return Commands.Result.Success;
     }
+
+    /// <summary>
+    /// 17 March 2021 John Morse
+    /// For internal use in determining the page type.  RhinoMac uses this
+    /// to ensure pages are sized properly when hosting them.
+    /// </summary>
+    internal enum PageType
+    {
+      Options,
+      DocumentProperties
+    }
+
+    /// <summary>
+    /// 17 March 2021 John Morse
+    /// For internal use in determining the page type.  RhinoMac uses this
+    /// to ensure pages are sized properly when hosting them.
+    /// </summary>
+    internal PageType OptionsPageType { get; set; } = PageType.Options;
   }
 }
 #endif

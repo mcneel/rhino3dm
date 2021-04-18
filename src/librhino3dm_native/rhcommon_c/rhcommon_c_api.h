@@ -180,6 +180,7 @@ struct ON_4FVECTOR_STRUCT{ float val[4]; };
 struct ON_4FPOINT_STRUCT{ float val[4]; };
 
 struct ON_XFORM_STRUCT { double val[16]; };
+struct ON_TRIANGLE_STRUCT { double val[9]; };
 
 struct ON_PLANE_STRUCT
 {
@@ -268,3 +269,8 @@ ON_ComponentStatus ON_ComponentStatus_FromField(const unsigned int status);
 //hash mush have array of length 20 or behavior is undefined.
 static const ON_SHA1_Hash* ON_SHA1_Hash_From_Array_Reinterpret(const unsigned char* hash);
 
+#if defined(RHINO3DM_BUILD)
+#define RHCHECK_LICENSE
+#else
+#define RHCHECK_LICENSE RhCheckLicenseAndThrow(true);
+#endif

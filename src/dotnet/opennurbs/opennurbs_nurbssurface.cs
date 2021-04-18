@@ -122,6 +122,25 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Create a bi-cubic SubD friendly surface from a surface.
+    /// </summary>
+    /// <param name="surface">>Surface to rebuild as a SubD friendly surface.</param>
+    /// <returns>A SubD friendly NURBS surface is successful, null otherwise.</returns>
+    /// <since>7.0</since>
+    public static NurbsSurface CreateSubDFriendly(Surface surface)
+    {
+      if (null == surface)
+        return null;
+
+      IntPtr ptr_const_surface = surface.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.ON_SubD_CreateSubDFriendlySurface(ptr_const_surface);
+      GC.KeepAlive(surface);
+      if (ptr == IntPtr.Zero)
+        return null;
+      return new NurbsSurface(ptr, null);
+    }
+
+    /// <summary>
     /// Creates a NURBS surface from a plane and additonal parameters.
     /// </summary>
     /// <param name="plane">The plane.</param>
@@ -662,6 +681,23 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_NurbsSurface_CopyFrom(const_ptr_other, ptr_this);
       GC.KeepAlive(other);
     }
+
+    /// <summary>
+    /// Convert a NURBS surface bispan into a bezier surface.
+    /// </summary>
+    /// <param name="spanIndex0">Specifies the "u" span</param>
+    /// <param name="spanIndex1">Specifies the "v" span</param>
+    /// <returns>Bezier surface on success</returns>
+    [ConstOperation]
+    public BezierSurface ConvertSpanToBezier(int spanIndex0, int spanIndex1)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr ptrBezierSurface = UnsafeNativeMethods.ON_NurbsSurface_ConvertSpanToBezier(constPtrThis, spanIndex0, spanIndex1);
+      if (ptrBezierSurface == IntPtr.Zero)
+        return null;
+      return new BezierSurface(ptrBezierSurface);
+    }
+
     /*
     public double[] GetGrevilleAbcissae(int direction)
     {
@@ -736,6 +772,10 @@ namespace Rhino.Geometry
         return false;
 
       if (!KnotsV.EpsilonEquals(other.KnotsV, epsilon))
+        return false;
+
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-61937
+      if (!Points.EpsilonEquals(other.Points, epsilon))
         return false;
 
       return true;

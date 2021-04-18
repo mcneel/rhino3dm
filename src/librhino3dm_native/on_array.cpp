@@ -965,12 +965,6 @@ RH_C_FUNCTION ON_BezierCurve* ON_SimpleArray_BezierCurvePtr(ON_SimpleArray<ON_Be
   return rc;
 }
 
-RH_C_FUNCTION void ON_BezierCurve_Delete(ON_BezierCurve* pBez)
-{
-  if( pBez )
-    delete pBez;
-}
-
 // The following is available in opennurbs but only used the Rhino SDK
 // version of RhinoCommon.
 RH_C_FUNCTION ON_SimpleArray<const ON_3dmObjectAttributes*>* ON_SimpleArray_3dmObjectAttributes_New()

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Rhino.ApplicationSettings
 {
-  /// <summary>Represents a snapshot of the values in <see cref="AppearanceSettings"/>.</summary>
+  /// <summary>snapshot of the values in <see cref="AppearanceSettings"/></summary>
   public class AppearanceSettingsState
   {
     internal AppearanceSettingsState(){}
@@ -4755,6 +4755,29 @@ namespace Rhino.ApplicationSettings
     }
   }
 
+
+  /// <summary>
+  /// Settings specific to Rhino's package manager
+  /// </summary>
+  public static class PackageManagerSettings
+  {
+    /// <summary>
+    /// semicolon separated list of paths/urls that the package manager uses for sources
+    /// </summary>
+    public static string Sources
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr pStringHolder = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoAppSettings_GetPackageManagerSources(pStringHolder);
+          return sh.ToString();
+        }
+      }
+      set { UnsafeNativeMethods.CRhinoAppSettings_SetPackageManagerSources(value); }
+    }
+  }
 }
 
 #endif

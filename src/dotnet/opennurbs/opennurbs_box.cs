@@ -22,6 +22,15 @@ namespace Rhino.Geometry
     #endregion
 
     #region Constructors
+    /// <summary>Copy constructor.
+    /// </summary>
+    /// <param name="other">The source plane value.</param>
+    /// <since>7.0</since>
+    public Box(Box other)
+    {
+      this = other;
+    }
+
     /// <summary>
     /// Initializes a new Box that mimics a BoundingBox struct. 
     /// <para>The orientation plane of the Box is coincident with the 
