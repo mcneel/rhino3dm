@@ -792,6 +792,12 @@ ON_2fPoint* BND_MeshTextureCoordinateList::end()
   return m_mesh->m_T.At(count - 1);
 }
 
+int BND_MeshTextureCoordinateList::Add(float s, float t)
+{
+  m_mesh->SetTextureCoord(m_mesh->m_T.Count(), s, t);
+  return m_mesh->m_T.Count() - 1;
+}
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -901,6 +907,7 @@ void initMeshBindings(pybind11::module& m)
     .def("__len__", &BND_MeshTextureCoordinateList::Count)
     .def("__getitem__", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
     .def("__setitem__", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
+    .def("__add__", &BND_MeshTextureCoordinateList::Add)
     .def("__iter__", [](BND_MeshTextureCoordinateList &s) { return py::make_iterator(s.begin(), s.end()); },
       py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
     ;
@@ -1037,6 +1044,7 @@ void initMeshBindings(void*)
     .property("count", &BND_MeshTextureCoordinateList::Count)
     .function("get", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
     .function("set", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
+    .function("add", &BND_MeshTextureCoordinateList::Add)
     ;
 
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
