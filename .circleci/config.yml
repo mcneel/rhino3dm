@@ -109,7 +109,6 @@ workflows:
       - build_py3_mac:
           context:
             - docker-hub-creds
-      - build_py3_win
       - build_dotnet:
           context:
             - docker-hub-creds
