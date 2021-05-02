@@ -1139,16 +1139,11 @@ emscripten::val BND_ONXModel::ToByteArray2(const BND_File3dmWriteOptions* option
   m_model->Write(archive, options->VersionForWriting());
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
-
-  emscripten::val Uint8Array = emscripten::val::global("Uint8Array");
-  emscripten::val rc = Uint8Array.new_(emscripten::val::module_property("HEAPU8")["buffer"], size_t(buffer), length);
-  for (size_t i = 0; i < length; i++)
-  {
-    rc.set(i, buffer[i]);
-  }
-  //  rc.call<void>("set", sourceTypedArray);
-  //  std::string rc(reinterpret_cast<char const*>(buffer), length);
-  return rc;
+  
+  unsigned char* retBuffer = new unsigned char[length];
+  memcpy (retBuffer, buffer, length);
+  
+  return emscripten::val(emscripten::typed_memory_view(length, retBuffer));
 }
 
 #endif
