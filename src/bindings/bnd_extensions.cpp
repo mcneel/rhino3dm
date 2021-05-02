@@ -1140,10 +1140,10 @@ emscripten::val BND_ONXModel::ToByteArray2(const BND_File3dmWriteOptions* option
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
   
-  unsigned char* retBuffer = new unsigned char[length];
-  memcpy (retBuffer, buffer, length);
+  unsigned char* ret_buffer = new unsigned char[length];
+  memcpy (ret_buffer, buffer, length);
   
-  return emscripten::val(emscripten::typed_memory_view(length, retBuffer));
+  return emscripten::val(emscripten::typed_memory_view(length, ret_buffer));
 }
 
 #endif
