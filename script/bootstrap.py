@@ -364,6 +364,10 @@ def check_xcode(build_tool):
 
 
 def check_emscripten(build_tool):
+    def version_from_emscripten_output (output):
+        first_line = output.splitlines()[0]
+        return re.match (r".*([0-9]+\.[0-9]+\.[0-9]+).*", first_line).group (1)
+        
     print_check_preamble(build_tool)
 
     # check to make sure that the $EMSDK path variable has been set
@@ -389,7 +393,7 @@ def check_emscripten(build_tool):
         return False
         
     if sys.version_info[0] < 3:
-        running_version = p.communicate()[0].splitlines()[0].split()[4]
+        running_version = version_from_emscripten_output (p.communicate()[0])
         if not running_version:
             print_error_message(build_tool.name + " not found." + format_install_instructions(build_tool))
             return False
@@ -398,7 +402,7 @@ def check_emscripten(build_tool):
         if err:
             print_error_message(err)
             return False
-        running_version = running_version.decode('utf-8').splitlines()[0].split()[4]
+        running_version = version_from_emscripten_output (running_version.decode('utf-8'))
 
     print_version_comparison(build_tool, running_version)
 
