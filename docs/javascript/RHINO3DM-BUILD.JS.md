@@ -27,9 +27,20 @@ A number of scripts are used to setup and build rhino3dm:
 
 These scripts support Python 2 and 3 on Windows (linux subsystem), macOS, or Linux (Ubuntu).
 
-### Before running scripts
+### Running scripts on Windows
 
-You have to make sure that Emscripten environment is set up. On windows it can be done by running `emsdk_env.bat` before running the scripts.
+You have to make sure that the Emscripten environment is set up. Here are the steps to install Emscripten and the make tool to make it work. After that you can set up the environment by running `emsdk_env.bat`.
+
+```
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+git pull
+git checkout tags/2.0.5
+emsdk install 2.0.5
+emsdk activate 2.0.5
+emsdk install mingw-4.6.2-32bit
+emsdk activate mingw-4.6.2-32bit
+```
 
 ### bootstrap.py
 
