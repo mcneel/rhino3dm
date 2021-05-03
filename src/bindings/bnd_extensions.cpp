@@ -1139,11 +1139,10 @@ emscripten::val BND_ONXModel::ToByteArray2(const BND_File3dmWriteOptions* option
   m_model->Write(archive, options->VersionForWriting());
   const unsigned char* buffer = (const unsigned char*)archive.Buffer();
   size_t length = archive.SizeOfArchive();
-  
-  unsigned char* ret_buffer = new unsigned char[length];
-  memcpy (ret_buffer, buffer, length);
-  
-  return emscripten::val(emscripten::typed_memory_view(length, ret_buffer));
+
+  emscripten::val Uint8Array = emscripten::val::global("Uint8Array");
+  emscripten::val rc = Uint8Array.new_(emscripten::typed_memory_view(length, buffer));
+  return rc;
 }
 
 #endif
