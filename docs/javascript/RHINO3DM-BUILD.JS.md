@@ -27,6 +27,10 @@ A number of scripts are used to setup and build rhino3dm:
 
 These scripts support Python 2 and 3 on Windows (linux subsystem), macOS, or Linux (Ubuntu).
 
+### Before running scripts
+
+You have to make sure that Emscripten environment is set up. On windows it can be done by running `emsdk_env.bat` before running the scripts.
+
 ### bootstrap.py
 
 The `script/bootstrap.py` script can be used to check your system for (and, in some cases, download) the necessary tools for a specific build target.  For example, you can run:
