@@ -23,6 +23,7 @@ public:
   //public virtual bool SetDomain(int direction, Interval domain)
   int Degree(int direction) const { return m_surface->Degree(direction); }
   int SpanCount(int direction) const { return m_surface->SpanCount(direction); }
+  BND_Interval Domain(int direction) const { return m_surface->Domain(direction); }
   //public double[] GetSpanVector(int direction)
   //public Surface Reverse(int direction)
   //public Surface Reverse(int direction, bool inPlace)
