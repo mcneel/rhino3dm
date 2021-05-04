@@ -27,6 +27,7 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
+popen_shell_mode = False
 valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
 platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript' }
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -81,13 +82,19 @@ def print_ok_message(ok_message):
 
 # ------------------------------------------------ Command Runner ------------------------------------------------------
 
+def split_command (command):
+    posix = True
+    if _platform == "win32" or _platform == "win64":
+        posix = False
+    return shlex.split(command, posix=posix)
+
 def run_command(command, suppress_errors=False):
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
         dev_null = open(os.devnull, 'w')
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+        process = subprocess.Popen(split_command(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
     else:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
+        process = subprocess.Popen(split_command(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=popen_shell_mode)    
     
     while True:
         line = process.stdout.readline()               
@@ -484,7 +491,7 @@ def setup_js():
 
     command = "emcmake cmake " + src_folder
     try:
-        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p = subprocess.Popen(split_command(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
     except OSError:
         print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
         return False
@@ -566,8 +573,10 @@ def main():
     global xcode_logging
     xcode_logging = args.xcodelog
 
+    global popen_shell_mode
     if _platform == "win32" or _platform == "win64":
         xcode_logging = True
+        popen_shell_mode = True
 
     global verbose
     verbose = args.verbose

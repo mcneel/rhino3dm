@@ -32,6 +32,7 @@ import time
 xcode_logging = False
 verbose = False
 overwrite = False
+popen_shell_mode = False
 valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
 platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript' }
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -98,9 +99,9 @@ def print_platform_preamble(platform_target_name):
 def run_command(command, suppress_errors=False):
     if suppress_errors == True:                
         dev_null = open(os.devnull, 'w')
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
     else:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=popen_shell_mode)    
     
     while True:
         line = process.stdout.readline()               
@@ -439,14 +440,14 @@ def build_js():
 
     if overwrite:
         try:
-            subprocess.Popen(['make', 'clean'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            subprocess.Popen(['make', 'clean'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
         except OSError:
             print_error_message("unable to run make clean in " + target_path)
             return False
 
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
     # we'll pass suppress_errors argument as True here...
-    run_command("make", True)
+    run_command("emmake make", True)
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
@@ -523,8 +524,10 @@ def main():
     global xcode_logging
     xcode_logging = args.xcodelog
 
+    global popen_shell_mode
     if _platform == "win32":
         xcode_logging = True
+        popen_shell_mode = True
 
     global verbose
     verbose = args.verbose
