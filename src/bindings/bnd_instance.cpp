@@ -1,5 +1,25 @@
 #include "bindings.h"
 
+InstanceDefinitionUpdateType ON_UPDATE_TYPE_to_Binding(const ON_InstanceDefinition::IDEF_UPDATE_TYPE ON_type)
+{
+  InstanceDefinitionUpdateType type;
+  switch (ON_type)
+  {
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static:
+      type = InstanceDefinitionUpdateType::Static;
+      break;
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::LinkedAndEmbedded:
+      type = InstanceDefinitionUpdateType::LinkedAndEmbedded;
+      break;
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::Linked:
+      type = InstanceDefinitionUpdateType::Linked;
+      break;
+    default:
+      type = InstanceDefinitionUpdateType::Static;
+  }
+  return type;
+}
+
 BND_InstanceDefinitionGeometry::BND_InstanceDefinitionGeometry(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(idef, compref);
