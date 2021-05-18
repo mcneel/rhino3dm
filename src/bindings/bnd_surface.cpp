@@ -42,7 +42,6 @@ BND_TUPLE BND_Surface::FrameAt(double u, double v) {
     success = m_surface->FrameAt(u, v, frame);
     if (!success) 
     {
-      delete frame;
       frame = nullptr;
     }
   }
