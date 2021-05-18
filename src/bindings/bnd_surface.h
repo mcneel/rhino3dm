@@ -19,7 +19,6 @@ protected:
 public:
   BND_Surface(ON_Surface* surface, const ON_ModelComponentReference* compref);
   bool IsSolid() const { return m_surface->IsSolid(); }
-  //public Interval Domain(int direction)
   //public virtual bool SetDomain(int direction, Interval domain)
   int Degree(int direction) const { return m_surface->Degree(direction); }
   int SpanCount(int direction) const { return m_surface->SpanCount(direction); }
@@ -31,7 +30,7 @@ public:
   //public Surface Transpose(bool inPlace)
   ON_3dPoint PointAt(double u, double v) const { return m_surface->PointAt(u, v); }
   ON_3dVector NormalAt(double u, double v) const { return m_surface->NormalAt(u, v); }
-  //public bool FrameAt(double u, double v, out Plane frame)
+  std::tuple<bool, BND_Plane*> FrameAt(double u, double v);
   //public SurfaceCurvature CurvatureAt(double u, double v)
   //public IsoStatus IsIsoparametric(Curve curve, Interval curveDomain)
   //public IsoStatus IsIsoparametric(Curve curve)
