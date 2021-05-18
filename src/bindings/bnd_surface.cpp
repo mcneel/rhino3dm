@@ -55,9 +55,9 @@ BND_TUPLE BND_Surface::FrameAt(double u, double v) {
     SetTuple(rc, 1, nullptr);
   } else {
     SetTuple(rc, 0, true);
-    SetTuple(rc, 1, frame);
+    SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
   }
-  
+
   return rc;
 }
 
