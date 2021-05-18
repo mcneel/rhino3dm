@@ -34,7 +34,7 @@ std::tuple<BND_NurbsSurface*, int> BND_Surface::ToNurbsSurface(double tolerance)
   return std::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
 }
 
-std::tuple<bool, BND_Plane*> BND_Surface::FrameAt(double u, double v) {
+BND_TUPLE BND_Surface::FrameAt(double u, double v) {
   ON_Plane frame;
   bool success;
   if (m_surface != nullptr)
@@ -46,9 +46,19 @@ std::tuple<bool, BND_Plane*> BND_Surface::FrameAt(double u, double v) {
       frame = nullptr;
     }
   }
-  if (frame == nullptr)
-    return std::make_tuple(false, nullptr);
-  return std::make_tuple(success, frame);
+
+  BND_TUPLE rc = CreateTuple(2);
+
+  if (frame == nullptr) 
+  {
+    SetTuple(rc, 0, false);
+    SetTuple(rc, 1, nullptr);
+  } else {
+    SetTuple(rc, 0, true);
+    SetTuple(rc, 1, frame);
+  }
+  
+  return rc;
 }
 
 #if defined(ON_PYTHON_COMPILE)

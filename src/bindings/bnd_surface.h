@@ -30,7 +30,7 @@ public:
   //public Surface Transpose(bool inPlace)
   ON_3dPoint PointAt(double u, double v) const { return m_surface->PointAt(u, v); }
   ON_3dVector NormalAt(double u, double v) const { return m_surface->NormalAt(u, v); }
-  std::tuple<bool, BND_Plane*> FrameAt(double u, double v);
+  BND_TUPLE FrameAt(double u, double v);
   //public SurfaceCurvature CurvatureAt(double u, double v)
   //public IsoStatus IsIsoparametric(Curve curve, Interval curveDomain)
   //public IsoStatus IsIsoparametric(Curve curve)
