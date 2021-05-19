@@ -280,6 +280,7 @@ public:
   int Count() const { return m_mesh->m_T.Count(); }
   ON_2fPoint GetTextureCoordinate(int i) const { return m_mesh->m_T[i]; }
   void SetTextureCoordinate(int i, ON_2fPoint tc) { m_mesh->m_T[i] = tc; }
+  int Add(float s, float t);
 };
 
 
