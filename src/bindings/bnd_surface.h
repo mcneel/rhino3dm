@@ -49,7 +49,7 @@ public:
   //public Brep ToBrep()
   //public int HasNurbsForm()
   BND_NurbsSurface* ToNurbsSurfaceDefault() { return std::get<0>(ToNurbsSurface(0.0)); }
-  BND_TUPLE ToNurbsSurface(double tolerance);
+  std::tuple<BND_NurbsSurface*, int> ToNurbsSurface(double tolerance);
   bool IsPlanar(double tolerance = ON_ZERO_TOLERANCE) const { return m_surface->IsPlanar(nullptr, tolerance); }
   //public bool TryGetPlane(out Plane plane)
   //public bool TryGetPlane(out Plane plane, double tolerance)

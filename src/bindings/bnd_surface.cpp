@@ -16,7 +16,7 @@ void BND_Surface::SetTrackedPointer(ON_Surface* surface, const ON_ModelComponent
   BND_GeometryBase::SetTrackedPointer(surface, compref);
 }
 
-BND_TUPLE BND_Surface::ToNurbsSurface(double tolerance)
+std::tuple<BND_NurbsSurface*, int> BND_Surface::ToNurbsSurface(double tolerance)
 {
   int accuracy{0};
   ON_NurbsSurface* p_NurbForm = ON_NurbsSurface::New();
@@ -30,18 +30,9 @@ BND_TUPLE BND_Surface::ToNurbsSurface(double tolerance)
     }
   }
 
-  BND_TUPLE rc = CreateTuple(2);
-
   if (p_NurbForm == nullptr)
-  {
-    SetTuple(rc, 0, nullptr);
-    SetTuple(rc, 1, 0);
-  } else {
-    SetTuple(rc, 0, new BND_NurbsSurface(p_NurbForm, &m_component_ref));
-    SetTuple(rc, 1, accuracy);
-  }
-
-  return rc;
+    return std::make_tuple(nullptr, 0);
+  return std::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
 }
 
 BND_TUPLE BND_Surface::FrameAt(double u, double v) {
