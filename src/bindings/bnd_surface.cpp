@@ -29,11 +29,25 @@ std::tuple<BND_NurbsSurface*, int> BND_Surface::ToNurbsSurface(double tolerance)
       p_NurbForm = nullptr;
     }
   }
+
   if (p_NurbForm == nullptr)
     return std::make_tuple(nullptr, 0);
   return std::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
 }
 
+BND_TUPLE BND_Surface::FrameAt(double u, double v) {
+  ON_Plane frame;
+  bool success = false;
+  if (m_surface != nullptr)
+  {
+    success = m_surface->FrameAt(u, v, frame);
+  }
+
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
+  return rc;
+}
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -44,6 +58,7 @@ void initSurfaceBindings(pybind11::module& m)
     .def("Degree", &BND_Surface::Degree, py::arg("direction"))
     .def("SpanCount", &BND_Surface::SpanCount, py::arg("direction"))
     .def("PointAt", &BND_Surface::PointAt, py::arg("u"), py::arg("v"))
+    .def("FrameAt", &BND_Surface::FrameAt, py::arg("u"), py::arg("v"))
     .def("Domain", &BND_Surface::Domain, py::arg("direction"))
     .def("NormalAt", &BND_Surface::NormalAt, py::arg("u"), py::arg("v"))
     .def("IsClosed", &BND_Surface::IsClosed, py::arg("direction"))
@@ -74,6 +89,7 @@ void initSurfaceBindings(void*)
     .function("pointAt", &BND_Surface::PointAt)
     .function("domain", &BND_Surface::Domain)
     .function("normalAt", &BND_Surface::NormalAt)
+    .function("frameAt", &BND_Surface::FrameAt)
     .function("isClosed", &BND_Surface::IsClosed)
     .function("isPeriodic", &BND_Surface::IsPeriodic)
     .function("isSingular", &BND_Surface::IsSingular)
