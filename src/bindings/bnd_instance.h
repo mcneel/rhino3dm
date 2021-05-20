@@ -2,6 +2,16 @@
 
 #pragma once
 
+enum class InstanceDefinitionUpdateType : int
+{
+  Static = 0,
+  Embedded = 1,
+  LinkedAndEmbedded = 2,
+  Linked = 3
+};
+
+InstanceDefinitionUpdateType ON_UPDATE_TYPE_to_Binding(const ON_InstanceDefinition::IDEF_UPDATE_TYPE ON_type);
+
 #if defined(ON_PYTHON_COMPILE)
 void initInstanceBindings(pybind11::module& m);
 #else
@@ -21,6 +31,8 @@ public:
   std::wstring Description() const { return std::wstring(m_idef->Description()); }
   std::wstring Name() const { return std::wstring(m_idef->Name()); }
   BND_UUID Id() const { return ON_UUID_to_Binding(m_idef->Id()); }
+  std::wstring SourceArchive() const { return std::wstring(m_idef->LinkedFilePath()); }
+  InstanceDefinitionUpdateType UpdateType() const { return ON_UPDATE_TYPE_to_Binding(m_idef->InstanceDefinitionType()); }
   BND_TUPLE GetObjectIds() const;
   bool IsInstanceGeometryId(BND_UUID id) const { return m_idef->IsInstanceGeometryId(Binding_to_ON_UUID(id));}
 };

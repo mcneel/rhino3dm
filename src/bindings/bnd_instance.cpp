@@ -1,5 +1,25 @@
 #include "bindings.h"
 
+InstanceDefinitionUpdateType ON_UPDATE_TYPE_to_Binding(const ON_InstanceDefinition::IDEF_UPDATE_TYPE ON_type)
+{
+  InstanceDefinitionUpdateType type;
+  switch (ON_type)
+  {
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static:
+      type = InstanceDefinitionUpdateType::Static;
+      break;
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::LinkedAndEmbedded:
+      type = InstanceDefinitionUpdateType::LinkedAndEmbedded;
+      break;
+    case ON_InstanceDefinition::IDEF_UPDATE_TYPE::Linked:
+      type = InstanceDefinitionUpdateType::Linked;
+      break;
+    default:
+      type = InstanceDefinitionUpdateType::Static;
+  }
+  return type;
+}
+
 BND_InstanceDefinitionGeometry::BND_InstanceDefinitionGeometry(ON_InstanceDefinition* idef, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(idef, compref);
@@ -61,11 +81,20 @@ BND_Transform BND_InstanceReferenceGeometry::Xform() const
 namespace py = pybind11;
 void initInstanceBindings(pybind11::module& m)
 {
+  py::enum_<InstanceDefinitionUpdateType>(m, "InstanceDefinitionUpdateType")
+    .value("Static", InstanceDefinitionUpdateType::Static)
+    .value("Embedded", InstanceDefinitionUpdateType::Embedded)
+    .value("LinkedAndEmbedded", InstanceDefinitionUpdateType::LinkedAndEmbedded)
+    .value("Linked", InstanceDefinitionUpdateType::Linked)
+    ;
+  
   py::class_<BND_InstanceDefinitionGeometry, BND_CommonObject>(m, "InstanceDefinition")
     .def(py::init<>())
     .def_property_readonly("Description", &BND_InstanceDefinitionGeometry::Description)
     .def_property_readonly("Name", &BND_InstanceDefinitionGeometry::Name)
     .def_property_readonly("Id", &BND_InstanceDefinitionGeometry::Id)
+    .def_property_readonly("SourceArchive", &BND_InstanceDefinitionGeometry::SourceArchive)
+    .def_property_readonly("UpdateType", &BND_InstanceDefinitionGeometry::UpdateType)
     .def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
     .def("IsInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId, py::arg("id"))
     ;
@@ -83,11 +112,20 @@ using namespace emscripten;
 
 void initInstanceBindings(void*)
 {
+  enum_<InstanceDefinitionUpdateType>("InstanceDefinitionUpdateType")
+    .value("Static", InstanceDefinitionUpdateType::Static)
+    .value("Embedded", InstanceDefinitionUpdateType::Embedded)
+    .value("LinkedAndEmbedded", InstanceDefinitionUpdateType::LinkedAndEmbedded)
+    .value("Linked", InstanceDefinitionUpdateType::Linked)
+    ;
+
   class_<BND_InstanceDefinitionGeometry, base<BND_CommonObject>>("InstanceDefinition")
     .constructor<>()
     .property("description", &BND_InstanceDefinitionGeometry::Description)
     .property("name", &BND_InstanceDefinitionGeometry::Name)
     .property("id", &BND_InstanceDefinitionGeometry::Id)
+    .property("sourceArchive", &BND_InstanceDefinitionGeometry::SourceArchive)
+    .property("updateType", &BND_InstanceDefinitionGeometry::UpdateType)
     .function("getObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
     .function("isInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId)
     ;
