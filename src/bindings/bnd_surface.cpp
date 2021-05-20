@@ -37,27 +37,15 @@ std::tuple<BND_NurbsSurface*, int> BND_Surface::ToNurbsSurface(double tolerance)
 
 BND_TUPLE BND_Surface::FrameAt(double u, double v) {
   ON_Plane frame;
-  bool success;
+  bool success = false;
   if (m_surface != nullptr)
   {
     success = m_surface->FrameAt(u, v, frame);
-    if (!success) 
-    {
-      frame = nullptr;
-    }
   }
 
   BND_TUPLE rc = CreateTuple(2);
-
-  if (frame == nullptr) 
-  {
-    SetTuple(rc, 0, false);
-    SetTuple(rc, 1, nullptr);
-  } else {
-    SetTuple(rc, 0, true);
-    SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
-  }
-
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
   return rc;
 }
 
