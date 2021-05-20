@@ -23,7 +23,7 @@ A number of scripts are used to setup and build rhino3dm:
 
 - *script/bootstrap.py* - checks for (and downloads) the required tools
 - *script/setup.py* - generates the platform-specific project files using CMake
-- *script/cibuild.py* - builds the library project(s)
+- *script/build.py* - builds the library project(s)
 
 These scripts support Python 2 and 3 on Windows (linux subsystem), macOS, or Linux (Ubuntu).
 
