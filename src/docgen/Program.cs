@@ -8,7 +8,7 @@ namespace docgen
         static void Main(string[] args)
         {
             // read all RhinoCommon classes into memory
-            const string rhinocommonPath = @"../../dotnet";
+            const string rhinocommonPath = @"../dotnet";
             Console.WriteLine("[Parse RhinoCommon source]");
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             RhinoCommonClass.BuildClassDictionary(rhinocommonPath);
@@ -16,13 +16,13 @@ namespace docgen
 
             Console.WriteLine("[Parse C++ Bindings]");
             Console.ForegroundColor = ConsoleColor.Green;
-            const string bindingPath = @"../../bindings";
+            const string bindingPath = @"../bindings";
             BindingClass.BuildDictionary(bindingPath);
             Console.ResetColor();
             Console.WriteLine("[END PARSE]");
 
 
-            var outDir = new DirectoryInfo("../out");
+            var outDir = new DirectoryInfo("out");
             if (!outDir.Exists)
                 outDir.Create();
 
