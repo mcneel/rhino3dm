@@ -45,6 +45,34 @@ BND_RenderSettings::~BND_RenderSettings()
     m_render_settings = nullptr;
 }
 
+BND_Plane BND_EarthAnchorPoint::GetModelCompass() const
+{
+  ON_Plane compass;
+  if (m_anchor_point.GetModelCompass(compass))
+    return BND_Plane::FromOnPlane(compass);
+  return BND_Plane::Unset();
+}
+
+BND_Transform BND_EarthAnchorPoint::GetModelToEarthTransform(ON::LengthUnitSystem modelUnitSystem) const
+{
+  ON_Xform xform;
+  if (m_anchor_point.GetModelToEarthXform(modelUnitSystem, xform))
+    return BND_Transform(xform);
+  return BND_Transform(ON_Xform::Unset);
+}
+
+BND_EarthAnchorPoint BND_File3dmSettings::GetEarthAnchorPoint() const
+{
+  BND_EarthAnchorPoint rc;
+  rc.m_anchor_point = m_model->m_settings.m_earth_anchor_point;
+  return rc;
+}
+
+void BND_File3dmSettings::SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchorPoint)
+{
+  m_model->m_settings.m_earth_anchor_point = anchorPoint.m_anchor_point;
+}
+
 
 
 #if defined(ON_PYTHON_COMPILE)
@@ -100,9 +128,25 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property("SpecificViewport", &BND_RenderSettings::GetSpecificViewport, &BND_RenderSettings::SetSpecificViewport)
     ;
 
+  py::class_<BND_EarthAnchorPoint>(m, "EarthAnchorPoint")
+    .def_property("EarthBasepointLatitude", &BND_EarthAnchorPoint::EarthBasepointLatitude, &BND_EarthAnchorPoint::SetEarthBasepointLatitude)
+    .def_property("EarthBasepointLongitude", &BND_EarthAnchorPoint::EarthBasepointLongitude, &BND_EarthAnchorPoint::SetEarthBasepointLongitude)
+    .def_property("EarthBasepointElevation", &BND_EarthAnchorPoint::EarthBasepointElevation, &BND_EarthAnchorPoint::SetEarthBasepointElevation)
+    .def_property("EarthBasepointElevationZero", &BND_EarthAnchorPoint::EarthBasepointElevationZero, &BND_EarthAnchorPoint::SetEarthBasepointElevationZero)
+    .def_property("ModelBasePoint", &BND_EarthAnchorPoint::ModelBasePoint, &BND_EarthAnchorPoint::SetModelBasePoint)
+    .def_property("ModelNorth", &BND_EarthAnchorPoint::ModelNorth, &BND_EarthAnchorPoint::SetModelNorth)
+    .def_property("ModelEast", &BND_EarthAnchorPoint::ModelEast, &BND_EarthAnchorPoint::SetModelEast)
+    .def_property("Name", &BND_EarthAnchorPoint::Name, &BND_EarthAnchorPoint::SetName)
+    .def_property("Description", &BND_EarthAnchorPoint::Description, &BND_EarthAnchorPoint::SetDescription)
+    .def("EarthLocationIsSet", &BND_EarthAnchorPoint::EarthLocationIsSet)
+    .def("GetModelCompass", &BND_EarthAnchorPoint::GetModelCompass)
+    .def("GetModelToEarthTransform", &BND_EarthAnchorPoint::GetModelToEarthTransform, py::arg("modelUnitSystem"))
+    ;
+
   py::class_<BND_File3dmSettings>(m, "File3dmSettings")
     .def_property("ModelUrl", &BND_File3dmSettings::GetModelUrl, &BND_File3dmSettings::SetModelUrl)
     .def_property("ModelBasePoint", &BND_File3dmSettings::GetModelBasePoint, &BND_File3dmSettings::SetModelBasePoint)
+    .def_property("EarthAnchorPoint", &BND_File3dmSettings::GetEarthAnchorPoint, &BND_File3dmSettings::SetEarthAnchorPoint)
     .def_property("ModelAbsoluteTolerance", &BND_File3dmSettings::GetModelAbsoluteTolerance, &BND_File3dmSettings::SetModelAbsoluteTolerance)
     .def_property("ModelAngleToleranceRadians", &BND_File3dmSettings::GetModelAngleToleranceRadians, &BND_File3dmSettings::SetModelAngleToleranceRadians)
     .def_property("ModelAngleToleranceDegrees", &BND_File3dmSettings::GetModelAngleToleranceDegrees, &BND_File3dmSettings::SetModelAngleToleranceDegrees)
@@ -170,9 +214,25 @@ void init3dmSettingsBindings(void*)
     .property("specificViewport", &BND_RenderSettings::GetSpecificViewport, &BND_RenderSettings::SetSpecificViewport)
     ;
 
+  class_<BND_EarthAnchorPoint>("EarthAnchorPoint")
+    .property("earthBasepointLatitude", &BND_EarthAnchorPoint::EarthBasepointLatitude, &BND_EarthAnchorPoint::SetEarthBasepointLatitude)
+    .property("earthBasepointLongitude", &BND_EarthAnchorPoint::EarthBasepointLongitude, &BND_EarthAnchorPoint::SetEarthBasepointLongitude)
+    .property("earthBasepointElevation", &BND_EarthAnchorPoint::EarthBasepointElevation, &BND_EarthAnchorPoint::SetEarthBasepointElevation)
+    .property("earthBasepointElevationZero", &BND_EarthAnchorPoint::EarthBasepointElevationZero, &BND_EarthAnchorPoint::SetEarthBasepointElevationZero)
+    .property("modelBasePoint", &BND_EarthAnchorPoint::ModelBasePoint, &BND_EarthAnchorPoint::SetModelBasePoint)
+    .property("modelNorth", &BND_EarthAnchorPoint::ModelNorth, &BND_EarthAnchorPoint::SetModelNorth)
+    .property("modelEast", &BND_EarthAnchorPoint::ModelEast, &BND_EarthAnchorPoint::SetModelEast)
+    .property("name", &BND_EarthAnchorPoint::Name, &BND_EarthAnchorPoint::SetName)
+    .property("description", &BND_EarthAnchorPoint::Description, &BND_EarthAnchorPoint::SetDescription)
+    .function("earthLocationIsSet", &BND_EarthAnchorPoint::EarthLocationIsSet)
+    .function("getModelCompass", &BND_EarthAnchorPoint::GetModelCompass)
+    .function("getModelToEarthTransform", &BND_EarthAnchorPoint::GetModelToEarthTransform)
+    ;
+
   class_<BND_File3dmSettings>("File3dmSettings")
     .property("modelUrl", &BND_File3dmSettings::GetModelUrl, &BND_File3dmSettings::SetModelUrl)
     .property("modelBasePoint", &BND_File3dmSettings::GetModelBasePoint, &BND_File3dmSettings::SetModelBasePoint)
+    .property("earthAnchorPoint", &BND_File3dmSettings::GetEarthAnchorPoint, &BND_File3dmSettings::SetEarthAnchorPoint)
     .property("modelAbsoluteTolerance", &BND_File3dmSettings::GetModelAbsoluteTolerance, &BND_File3dmSettings::SetModelAbsoluteTolerance)
     .property("modelAngleToleranceRadians", &BND_File3dmSettings::GetModelAngleToleranceRadians, &BND_File3dmSettings::SetModelAngleToleranceRadians)
     .property("modelAngleToleranceDegrees", &BND_File3dmSettings::GetModelAngleToleranceDegrees, &BND_File3dmSettings::SetModelAngleToleranceDegrees)
