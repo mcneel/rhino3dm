@@ -116,6 +116,37 @@ public:
   //RenderSource
 };
 
+class BND_EarthAnchorPoint
+{
+public:
+  ON_EarthAnchorPoint m_anchor_point;
+public:
+  BND_EarthAnchorPoint() = default;
+
+  double EarthBasepointLatitude() const { return m_anchor_point.Latitude(); }
+  void SetEarthBasepointLatitude(double d) { m_anchor_point.SetLatitude(d); }
+  double EarthBasepointLongitude() const { return m_anchor_point.Longitude(); }
+  void SetEarthBasepointLongitude(double d) { m_anchor_point.SetLongitude(d); }
+  double EarthBasepointElevation() const { return m_anchor_point.ElevationInMeters(); }
+  void SetEarthBasepointElevation(double d) { m_anchor_point.SetElevation(ON::LengthUnitSystem::Meters, d); }
+  ON::EarthCoordinateSystem EarthBasepointElevationZero() const { return m_anchor_point.EarthCoordinateSystem(); }
+  void SetEarthBasepointElevationZero(ON::EarthCoordinateSystem cs) { m_anchor_point.SetEarthCoordinateSystem(cs); }
+  ON_3dPoint ModelBasePoint() const { return m_anchor_point.ModelPoint(); }
+  void SetModelBasePoint(const ON_3dPoint& pt) { m_anchor_point.SetModelPoint(pt); }
+  ON_3dVector ModelNorth() const { return m_anchor_point.ModelNorth(); }
+  void SetModelNorth(const ON_3dVector& v) { m_anchor_point.SetModelNorth(v); }
+  ON_3dVector ModelEast() const { return m_anchor_point.ModelEast(); }
+  void SetModelEast(const ON_3dVector& v) { m_anchor_point.SetModelEast(v); }
+  std::wstring Name() const { return std::wstring(m_anchor_point.m_name); }
+  void SetName(const std::wstring& name) { m_anchor_point.m_name = name.c_str(); }
+  std::wstring Description() const { return std::wstring(m_anchor_point.m_description); }
+  void SetDescription(const std::wstring& desc) { m_anchor_point.m_description = desc.c_str(); }
+  bool EarthLocationIsSet() const { return m_anchor_point.EarthLocationIsSet(); }
+  BND_Plane GetModelCompass() const;
+  BND_Transform GetModelToEarthTransform(ON::LengthUnitSystem modelUnitSystem) const;
+  //BND_TUPLE GetEarthAnchorPlane() const;
+};
+
 class BND_File3dmSettings
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -125,6 +156,9 @@ public:
   void SetModelUrl(const std::wstring& s) { m_model->m_settings.m_model_URL = s.c_str(); }
   ON_3dPoint GetModelBasePoint() const { return m_model->m_settings.m_model_basepoint; }
   void SetModelBasePoint(const ON_3dPoint& pt) { m_model->m_settings.m_model_basepoint = pt; }
+
+  BND_EarthAnchorPoint GetEarthAnchorPoint() const;
+  void SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchorPoint);
 
   double GetModelAbsoluteTolerance() const { return m_model->m_settings.m_ModelUnitsAndTolerances.m_absolute_tolerance; }
   void SetModelAbsoluteTolerance(double t) { m_model->m_settings.m_ModelUnitsAndTolerances.m_absolute_tolerance = t; }
