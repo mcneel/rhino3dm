@@ -312,16 +312,19 @@ Indices and tables
                     py3.AppendLine($") -> {ToPythonType(m.Item1.ReturnType.ToString())}: ...");
                 }
 
+                py.Append($"class {pyclass.ClassName}");
+                if (!string.IsNullOrWhiteSpace(pyclass.BaseClass))
+                    py.Append($"({pyclass.BaseClass})");
+
                 if( py1.Length == 0 && py2.Length == 0 && py3.Length == 0)
-                    py.AppendLine($"class {pyclass.ClassName}: ...");
+                    py.AppendLine(": ...");
                 else
                 {
-                    py.AppendLine($"class {pyclass.ClassName}:");
+                    py.AppendLine(":");
                     py.Append(py1);
                     py.Append(py2);
                     py.Append(py3);
                 }
-
             }
             py.AppendLine();
             System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "__init__.pyi"), py.ToString());

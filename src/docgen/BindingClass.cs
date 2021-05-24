@@ -100,7 +100,9 @@ namespace docgen
                         }
 
                         if (line.StartsWith(".property")
-                          || line.StartsWith(".def_property"))
+                          || line.StartsWith(".def_property")
+                          || line.StartsWith(".def_readonly")
+                          || line.StartsWith(".def_readwrite"))
                         {
                             string propName = (line.Split(new char[] { '"' }))[1];
                             activeClass.AddProperty(propName);
