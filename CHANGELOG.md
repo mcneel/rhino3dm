@@ -34,7 +34,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use emscripten 2.0.10 for web assembly compile from [@pearswj](https://github.com/pearswj)
 
 ## [0.14.0] - 2020-12-16
+### Added
+- (js/py) ViewInfo constructor
+- (js/py) File3dmGroupTable.GroupMembers function
+- (js/py) Transform.Translation, Scale and Mirror functions
+- (js/py) BrepFace.DuplicateFace and BrepFace.DuplicateSutrface functions
+- (js/py) Interval(double, double) constructor from [@pearswj](https://github.com/pearswj)
+- (js/py) File3dm.Destroy function
+- (js/py) Material.CompareAppearance function
+- (js) Mesh.toThreejsJSONMerged function
+
+### Changed
+- Based on public opennurbs from Rhino 7.1
+- Use pybind11 2.6.1 for python compile
+- (py/js) Improve pointer tracking for CommonObject classes
+
 ## [0.13.0] - 2020-09-11
+### Added
+- (js/py) LightStyle enum
+- (js/py) Light.LightStyle, Ambient, Diffuse and Specular properties
+- (js/py) Mesh.CreateFromSubDControlNet function
+- (js/py) Mesh.HasPrincipleCurvatures property
+- (js/py) SubD class
+- (js) PointCloud.toThreejsJSON function from [@fraguada](https://github.com/fraguada)
+
+### Fixed
+- (js) Mesh.thThreejsJSON function includes vertex colors when available from [@fraguada](https://github.com/fraguada)
+
+### Changed
+- Based on public opennurbs from Rhino 7.0
+
 ## [0.12.0] - 2020-06-27
 ## [0.11.0] - 2020-03-03
 ## [0.10.0] - 2020-01-29
