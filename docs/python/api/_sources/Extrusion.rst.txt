@@ -73,6 +73,7 @@ Extrusion
       :param bool cap: If the curve is closed and cap is true, then the resulting extrusion is capped.
 
       :return: If the input is valid, then a new extrusion is returned. Otherwise None is returned
+
       :rtype: Extrusion
 
    .. py:staticmethod:: CreateBoxExtrusion(box, cap)
@@ -83,6 +84,7 @@ Extrusion
       :param bool cap: If true, the base and the top of the box will be capped. Defaults to true.
 
       :return: Extrusion on success. None on failure.
+
       :rtype: Extrusion
 
    .. py:staticmethod:: CreateCylinderExtrusion(cylinder, capBottom, capTop)
@@ -94,6 +96,7 @@ Extrusion
       :param bool capTop: If true, the end at cylinder.Height2 will be capped.
 
       :return: Extrusion on success. None on failure.
+
       :rtype: Extrusion
 
    .. py:staticmethod:: CreatePipeExtrusion(cylinder, otherRadius, capBottom, capTop)
@@ -107,6 +110,7 @@ Extrusion
       :param bool capTop: If true, the end at cylinder.Height2 will be capped.
 
       :return: Extrusion on success. None on failure.
+
       :rtype: Extrusion
 
    .. py:method:: ToBrep(splitKinkyFaces)
@@ -119,14 +123,20 @@ Extrusion
          so they will be G1.
 
       :return: A brep with a similar shape like this extrusion, or None on error.
+
       :rtype: rhino3dm.Brep
 
    .. py:method:: SetPathAndUp()
 
       Allows to set the two points at the extremes and the up vector.
 
+      :param rhino3dm.Point3d a: The start point.
+      :param rhino3dm.Point3d b: The end point.
+      :param rhino3dm.Vector3d up: The up vector.
+
       :return: True if the operation succeeded; otherwise false. \
          Setting up=a-b will make the operation fail.
+
       :rtype: bool
 
    .. py:method:: GetProfileTransformation(s)
@@ -137,6 +147,7 @@ Extrusion
          1.0 = ending profile.
 
       :return: A Transformation. The transform is Invalid on failure.
+
       :rtype: Transform
 
    .. py:method:: GetProfilePlane(s)
@@ -147,6 +158,7 @@ Extrusion
          1.0 = ending profile.
 
       :return: A plane. The plane is Invalid on failure.
+
       :rtype: rhino3dm.Plane
 
    .. py:method:: GetPathPlane(s)
@@ -157,6 +169,7 @@ Extrusion
          1.0 = ending profile.
 
       :return: A plane. The plane is Invalid on failure.
+
       :rtype: rhino3dm.Plane
 
    .. py:method:: SetOuterProfile(outerProfile, cap)
@@ -171,6 +184,7 @@ Extrusion
          extrusion may also have inner profiles. If the outer profile is open, \
          the extrusion may not have inner profiles. If the extrusion already \
          has a profile, the set will fail.
+
       :rtype: bool
 
    .. py:method:: AddInnerProfile(innerProfile)
@@ -180,6 +194,7 @@ Extrusion
       :param rhino3dm.Curve innerProfile: Closed curve in the XY plane or a 2d curve.
 
       :return: True if the profile was set.
+
       :rtype: bool
 
    .. py:method:: Profile3d(profileIndex, s)
@@ -193,13 +208,21 @@ Extrusion
          0 = bottom profile and 1 = top profile.
 
       :return: The profile.
+
       :rtype: rhino3dm.Curve
 
    .. py:method:: Profile3d(ci)
 
       Gets a transversal isocurve of the extruded profile.
 
+      :param int profileIndex: 0 <= profileIndex < ProfileCount \
+         The outer profile has index 0.
+      :param float s: 0.0 <= s <= 1.0 \
+         A relative parameter controlling which profile is returned. \
+         0 = bottom profile and 1 = top profile.
+
       :return: The profile.
+
       :rtype: rhino3dm.Curve
 
    .. py:method:: WallEdge(ci)
@@ -209,6 +232,7 @@ Extrusion
       :param ComponentIndex ci: The index of this profile.
 
       :return: The profile.
+
       :rtype: rhino3dm.Curve
 
    .. py:method:: WallSurface(ci)
@@ -218,6 +242,7 @@ Extrusion
       :param ComponentIndex ci: The index specifying which precise item to retrieve.
 
       :return: The surface.
+
       :rtype: rhino3dm.Surface
 
    .. py:method:: PathLineCurve()
@@ -225,6 +250,7 @@ Extrusion
       Gets the line-like curve that is the conceptual axis of the extrusion.
 
       :return: The path as a line curve.
+
       :rtype: LineCurve
 
    .. py:method:: ProfileIndex(profileParameter)
@@ -236,6 +262,7 @@ Extrusion
       :return: -1 if profileParameter does not correspond to a point on the profile curve. \
          When the profileParameter corresponds to the end of one profile and the \
          beginning of the next profile, the index of the next profile is returned.
+
       :rtype: int
 
    .. py:method:: GetMesh(meshType)
@@ -245,4 +272,5 @@ Extrusion
       :param MeshType meshType: The mesh type.
 
       :return: A mesh.
+
       :rtype: rhino3dm.Mesh

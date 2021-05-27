@@ -64,6 +64,7 @@ Point3dList
       :param float y: The Y coordinate.
       :param float z: The Z coordinate.
 
+
       :rtype: void
 
    .. py:method:: Transform(xform)
@@ -72,11 +73,13 @@ Point3dList
 
       :param Transform xform: Transform to apply.
 
+
       :rtype: void
 
    .. py:method:: SetAllX(x)
 
       Set all the X values for the points to a single value
+
 
       :rtype: void
 
@@ -84,10 +87,12 @@ Point3dList
 
       Set all the Y values for the points to a single value
 
+
       :rtype: void
 
    .. py:method:: SetAllZ(z)
 
       Set all the Z values for the points to a single value
+
 
       :rtype: void

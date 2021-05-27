@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Surface &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Surface &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -264,6 +265,30 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="rhino3dm.Surface.SetDomain">
+<code class="descname">SetDomain</code><span class="sig-paren">(</span><em>direction</em>, <em>domain</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SetDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the domain in a direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>direction</strong> (<em>int</em>) – 0 sets first parameter’s domain, 1 sets second parameter’s domain.</li>
+<li><strong>domain</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – A new domain to be assigned.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if setting succeeded, otherwise false.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.Surface.Degree">
 <code class="descname">Degree</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Degree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the maximum algebraic degree of any span
@@ -319,6 +344,72 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.FrameAt">
+<code class="descname">FrameAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.FrameAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the orient plane on a surface given a U and V parameter.
+This is the simple evaluation call with no error handling.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> (<em>float</em>) – A first parameter.</li>
+<li><strong>v</strong> (<em>float</em>) – A second parameter.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, rhino3dm.Plane)</p>
+<ul class="simple">
+<li>True if this operation succeeded; otherwise false.</li>
+<li>A frame plane that will be computed during this call. </li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, <a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.Domain">
+<code class="descname">Domain</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the domain in a direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter, 1 gets second parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An interval value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval">rhino3dm.Interval</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.GetSpanVector">
+<code class="descname">GetSpanVector</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSpanVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets array of span “knots”.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An array with span vectors; or None on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float[]</td>
 </tr>
 </tbody>
 </table>
@@ -453,6 +544,30 @@ This is the simple evaluation call - it does not support error handling.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhino3dm.Surface.IsoCurve">
+<code class="descname">IsoCurve</code><span class="sig-paren">(</span><em>direction</em>, <em>constantParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsoCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets isoparametric curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>direction</strong> (<em>int</em>) – 0 first parameter varies and second parameter is constant e.g., point on IsoCurve(0,c) at t is srf(t,c) This is a horizontal line from left to right 1 first parameter is constant and second parameter varies e.g., point on IsoCurve(1,c) at t is srf(c,t This is a vertical line from bottom to top.</li>
+<li><strong>constantParameter</strong> (<em>float</em>) – The parameter that was constant on the original surface.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An isoparametric curve or None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.Surface.ToNurbsSurface">
 <code class="descname">ToNurbsSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.ToNurbsSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets a NURBS surface representation of this surface. Default
@@ -564,6 +679,18 @@ tolerance of 0.0 is used.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter">
+<code class="descname">GetSurfaceParameterFromNurbsFormParameter</code><span class="sig-paren">(</span><em>nurbsS</em>, <em>nurbsT</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter">
+<code class="descname">GetNurbsFormParameterFromSurfaceParameter</code><span class="sig-paren">(</span><em>surfaceS</em>, <em>surfaceT</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 </dd></dl>

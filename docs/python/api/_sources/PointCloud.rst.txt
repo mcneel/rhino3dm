@@ -50,17 +50,20 @@ PointCloud
 
       Destroys the color information in this point cloud.
 
+
       :rtype: void
 
    .. py:method:: ClearNormals()
 
       Destroys the normal vector information in this point cloud.
 
+
       :rtype: void
 
    .. py:method:: ClearHiddenFlags()
 
       Destroys the hidden flag information in this point cloud.
+
 
       :rtype: void
 
@@ -69,6 +72,7 @@ PointCloud
       Appends a new PointCloudItem to the end of this point cloud.
 
       :return: The newly appended item.
+
       :rtype: PointCloudItem
 
    .. py:method:: InsertNew(index)
@@ -78,6 +82,7 @@ PointCloud
       :param int index: Index of new item.
 
       :return: The newly inserted item.
+
       :rtype: PointCloudItem
 
    .. py:method:: Merge(other)
@@ -85,6 +90,7 @@ PointCloud
       Copies the point values of another point cloud into this one.
 
       :param PointCloud other: PointCloud to merge with this one.
+
 
       :rtype: void
 
@@ -94,11 +100,13 @@ PointCloud
 
       :param rhino3dm.Point3d point: Point to append.
 
+
       :rtype: void
 
    .. py:method:: Add(point, normal)
 
       Append a new point to the end of the list.
+
 
       :rtype: void
 
@@ -106,11 +114,13 @@ PointCloud
 
       Append a new point to the end of the list.
 
+
       :rtype: void
 
    .. py:method:: Add(point, normal, normal)
 
       Append a new point to the end of the list.
+
 
       :rtype: void
 
@@ -120,11 +130,13 @@ PointCloud
 
       :param list[rhino3dm.Point3d] points: Points to append.
 
+
       :rtype: void
 
    .. py:method:: AddRange(points, normals)
 
       Appends a collection of points to this point cloud.
+
 
       :rtype: void
 
@@ -132,11 +144,13 @@ PointCloud
 
       Appends a collection of points to this point cloud.
 
+
       :rtype: void
 
    .. py:method:: AddRange(points, normals, colors)
 
       Appends a collection of points to this point cloud.
+
 
       :rtype: void
 
@@ -147,11 +161,13 @@ PointCloud
       :param int index: Insertion index.
       :param rhino3dm.Point3d point: Point to append.
 
+
       :rtype: void
 
    .. py:method:: Insert(index, point, normal)
 
       Inserts a new point into the point list.
+
 
       :rtype: void
 
@@ -159,11 +175,13 @@ PointCloud
 
       Inserts a new point into the point list.
 
+
       :rtype: void
 
    .. py:method:: Insert(index, point, normal, color)
 
       Inserts a new point into the point list.
+
 
       :rtype: void
 
@@ -174,6 +192,7 @@ PointCloud
       :param int index: Index at which to insert the new collection.
       :param list[rhino3dm.Point3d] points: Points to append.
 
+
       :rtype: void
 
    .. py:method:: RemoveAt(index)
@@ -182,6 +201,7 @@ PointCloud
 
       :param int index: Index of point to remove.
 
+
       :rtype: void
 
    .. py:method:: GetPoints()
@@ -189,6 +209,7 @@ PointCloud
       Copy all the point coordinates in this point cloud to an array.
 
       :return: An array containing all the points in this point cloud.
+
       :rtype: rhino3dm.Point3d[]
 
    .. py:method:: PointAt(index)
@@ -197,6 +218,7 @@ PointCloud
 
       :param int index: The index.
 
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: GetNormals()
@@ -204,6 +226,7 @@ PointCloud
       Copy all the normal vectors in this point cloud to an array.
 
       :return: An array containing all the normals in this point cloud.
+
       :rtype: rhino3dm.Vector3d[]
 
    .. py:method:: GetColors()
@@ -211,8 +234,15 @@ PointCloud
       Copy all the point colors in this point cloud to an array.
 
       :return: An array containing all the colors in this point cloud.
+
       :rtype: Color[]
 
    .. py:method:: ClosestPoint(testPoint)
 
-      [todo] add documentation
+      Returns index of the closest point in the point cloud to a given test point.
+
+      :param rhino3dm.Point3d testPoint: .
+
+      :return: Index of point in the point cloud on success. -1 on failure.
+
+      :rtype: int

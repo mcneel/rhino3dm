@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>TextureMapping &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>TextureMapping &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -276,7 +277,17 @@
 <dl class="staticmethod">
 <dt id="rhino3dm.TextureMapping.CreateSurfaceParameterMapping">
 <em class="property">static </em><code class="descname">CreateSurfaceParameterMapping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextureMapping.CreateSurfaceParameterMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>[todo] add documentation</p>
+<dd><p>Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">TextureMapping instance or None if failed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping">TextureMapping</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -438,10 +449,15 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Nonzero if evaluation is successful.  When the mapping is a box or capped cylinder mapping, the value indicates which side was evaluated. Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (int, rhino3dm.Point3d)</p>
+<ul class="simple">
+<li>Nonzero if evaluation is successful.  When the mapping is a box or capped cylinder mapping, the value indicates which side was evaluated. Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top </li>
+<li>Texture coordinate (u,v,w) </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(int, <a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a>)</p>
 </td>
 </tr>
 </tbody>

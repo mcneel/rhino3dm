@@ -80,8 +80,28 @@ Arc
 
       rhino3dm.Point3d: Gets the end point of the arc.
 
+   .. py:attribute:: AngleDomain
+
+      rhino3dm.Interval: Gets or sets the angle domain (in Radians) of this arc.
+
+   .. py:attribute:: StartAngle
+
+      float: Gets or sets the start angle (in Radians) for this arc segment.
+
+   .. py:attribute:: EndAngle
+
+      float: Gets or sets the end angle (in Radians) for this arc segment.
+
    .. py:attribute:: AngleRadians
 
+
+   .. py:attribute:: StartAngleDegrees
+
+      float: Gets or sets the start angle (in Radians) for this arc segment.
+
+   .. py:attribute:: EndAngleDegrees
+
+      float: Gets or sets the end angle (in Radians) for this arc segment.
 
    .. py:attribute:: AngleDegrees
 
@@ -94,6 +114,7 @@ Arc
       :param rhino3dm.Interval domain: 0 < domain[1] - domain[0] <= 2.0 * RhinoMath.Pi.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: BoundingBox()
@@ -101,6 +122,7 @@ Arc
       Computes the 3D axis aligned bounding box for this arc.
 
       :return: Bounding box of arc.
+
       :rtype: rhino3dm.BoundingBox
 
    .. py:method:: PointAt(t)
@@ -110,6 +132,7 @@ Arc
       :param float t: Arc parameter to evaluate.
 
       :return: The point at the given parameter.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: TangentAt(t)
@@ -119,7 +142,22 @@ Arc
       :param float t: Parameter of tangent to evaluate.
 
       :return: The tangent at the arc at the given parameter.
+
       :rtype: rhino3dm.Vector3d
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets parameter on the arc closest to a test point.
+
+      :param rhino3dm.Point3d testPoint: Point to get close to.
+
+      :return: Parameter (in radians) of the point on the arc that \
+         is closest to the test point. If testPoint is the center \
+         of the arc, then the starting point of the arc is \
+         (arc.Domain()[0]) returned. If no parameter could be found, \
+         RhinoMath.UnsetValue is returned.
+
+      :rtype: float
 
    .. py:method:: ClosestPoint(testPoint)
 
@@ -130,12 +168,14 @@ Arc
       :return: The point on the arc that is closest to testPoint. If testPoint is \
          the center of the arc, then the starting point of the arc is returned. \
          UnsetPoint on failure.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: Reverse()
 
       Reverses the orientation of the arc. Changes the domain from [a,b]
       to [-b,-a].
+
 
       :rtype: void
 
@@ -147,6 +187,7 @@ Arc
          Note that arcs cannot handle non-euclidean transformations.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: ToNurbsCurve()
@@ -155,4 +196,5 @@ Arc
       This amounts to the same as calling NurbsCurve.CreateFromArc().
 
       :return: A nurbs curve representation of this arc or None if no such representation could be made.
+
       :rtype: rhino3dm.NurbsCurve

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Extrusion &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Extrusion &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -465,9 +466,18 @@ outer profile is closed, then end caps are added as the last two faces of the br
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise false. Setting up=a-b will make the operation fail.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – The start point.</li>
+<li><strong>b</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – The end point.</li>
+<li><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – The up vector.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise false. Setting up=a-b will make the operation fail.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -601,9 +611,17 @@ outer profile is closed, then end caps are added as the last two faces of the br
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The profile.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>profileIndex</strong> (<em>int</em>) – 0 &lt;= profileIndex &lt; ProfileCount The outer profile has index 0.</li>
+<li><strong>s</strong> (<em>float</em>) – 0.0 &lt;= s &lt;= 1.0 A relative parameter controlling which profile is returned. 0 = bottom profile and 1 = top profile.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The profile.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</td>
 </tr>
 </tbody>
 </table>

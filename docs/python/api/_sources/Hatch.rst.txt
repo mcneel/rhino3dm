@@ -34,4 +34,5 @@ Hatch
 
       Scale the hatch's pattern
 
+
       :rtype: void

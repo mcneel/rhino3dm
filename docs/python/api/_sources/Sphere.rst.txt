@@ -48,6 +48,7 @@ Sphere
       :param float radians: An angle in radians for the parallel.
 
       :return: A circle.
+
       :rtype: Circle
 
    .. py:method:: LatitudeDegrees(degrees)
@@ -58,6 +59,7 @@ Sphere
       :param float degrees: An angle in degrees for the meridian.
 
       :return: A circle.
+
       :rtype: Circle
 
    .. py:method:: LongitudeRadians(radians)
@@ -68,6 +70,7 @@ Sphere
       :param float radians: An angle in radians.
 
       :return: A circle.
+
       :rtype: Circle
 
    .. py:method:: LongitureDegrees(degrees)
@@ -82,6 +85,7 @@ Sphere
       :param float latitudeRadians: A number within the interval [-pi/2,pi/2].
 
       :return: A point value.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: NormalAt(longitudeRadians, latitudeRadians)
@@ -92,6 +96,7 @@ Sphere
       :param float latitudeRadians: A number within the interval [-pi/2, pi/2].
 
       :return: A vector.
+
       :rtype: rhino3dm.Vector3d
 
    .. py:method:: ClosestPoint(testPoint)
@@ -101,11 +106,13 @@ Sphere
       :param rhino3dm.Point3d testPoint: Point to project onto Sphere.
 
       :return: Point on sphere surface closest to testPoint.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: ToBrep()
 
       Converts this sphere is it Brep representation
+
 
       :rtype: rhino3dm.Brep
 
@@ -115,6 +122,7 @@ Sphere
       This is synonymous with calling NurbsSurface.CreateFromSphere().
 
       :return: A nurbs surface representation of this sphere or null.
+
       :rtype: NurbsSurface
 
    .. py:method:: Encode()

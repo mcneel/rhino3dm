@@ -20,6 +20,7 @@ FileReference
       :param str fullPath: A full path.
 
       :return: A file reference to the specified path.
+
       :rtype: FileReference
 
    .. py:staticmethod:: CreateFromFullAndRelativePaths(fullPath, relativePath)
@@ -30,4 +31,5 @@ FileReference
       :param str relativePath: A relative path. This parameter can be null.
 
       :return: A file reference to the specified paths.
+
       :rtype: FileReference

@@ -60,6 +60,7 @@ BoundingBox
       :param rhino3dm.Point3d point: Sample point.
 
       :return: The point on or in the box that is closest to the sample point.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: Inflate(amount)
@@ -70,6 +71,7 @@ BoundingBox
 
       :param float amount: Amount (in model units) to inflate this box in all directions.
 
+
       :rtype: void
 
    .. py:method:: Inflate(xAmount, yAmount, zAmount)
@@ -77,6 +79,7 @@ BoundingBox
       Inflates the box with equal amounts in all directions.
       Inflating with negative amounts may result in decreasing boxes.
       Invalid boxes can not be inflated.
+
 
       :rtype: void
 
@@ -87,6 +90,7 @@ BoundingBox
       :param rhino3dm.Point3d point: Point to test.
 
       :return: True if the point is on the inside of or coincident with this bounding box; otherwise false.
+
       :rtype: bool
 
    .. py:method:: IsDegenerate(tolerance)
@@ -101,6 +105,7 @@ BoundingBox
          2 = box is a line (degenerate in two directions). \
          3 = box is a point (degenerate in three directions) \
          4 = box is not valid.
+
       :rtype: int
 
    .. py:method:: Transform(xform)
@@ -112,6 +117,7 @@ BoundingBox
       :param Transform xform: A transform.
 
       :return: True if this operation is successful; otherwise false.
+
       :rtype: bool
 
    .. py:method:: ToBrep()
@@ -119,11 +125,13 @@ BoundingBox
       Constructs a  representation of this bounding box.
 
       :return: If this operation is successful, a Brep representation of this box; otherwise null.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: Union(a, b)
 
       Updates this BoundingBox to represent the union of itself and another box.
+
 
       :rtype: void
 

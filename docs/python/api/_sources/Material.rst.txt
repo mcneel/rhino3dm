@@ -93,15 +93,18 @@ Material
 
       Set material to default settings.
 
+
       :rtype: void
 
    .. py:method:: GetTexture(which)
 
       Get the texture that corresponds with the specified texture type for this material.
 
+
       :rtype: Texture
 
    .. py:method:: GetBitmapTexture()
+
 
 
       :rtype: Texture
@@ -109,9 +112,11 @@ Material
    .. py:method:: SetBitmapTexture(filename)
 
 
+
       :rtype: bool
 
    .. py:method:: SetBitmapTexture(texture)
+
 
 
       :rtype: bool
@@ -121,9 +126,11 @@ Material
       Gets the bump texture of this material.
 
       :return: A texture; or None if no bump texture has been added to this material.
+
       :rtype: Texture
 
    .. py:method:: SetBumpTexture(filename)
+
 
 
       :rtype: bool
@@ -131,9 +138,11 @@ Material
    .. py:method:: SetBumpTexture(texture)
 
 
+
       :rtype: bool
 
    .. py:method:: GetEnvironmentTexture()
+
 
 
       :rtype: Texture
@@ -141,9 +150,11 @@ Material
    .. py:method:: SetEnvironmentTexture(filename)
 
 
+
       :rtype: bool
 
    .. py:method:: SetEnvironmentTexture(texture)
+
 
 
       :rtype: bool
@@ -151,14 +162,17 @@ Material
    .. py:method:: GetTransparencyTexture()
 
 
+
       :rtype: Texture
 
    .. py:method:: SetTransparencyTexture(filename)
 
 
+
       :rtype: bool
 
    .. py:method:: SetTransparencyTexture(texture)
+
 
 
       :rtype: bool

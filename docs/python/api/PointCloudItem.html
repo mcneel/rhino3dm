@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>PointCloudItem &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>PointCloudItem &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -284,19 +285,23 @@
 <dl class="attribute">
 <dt id="rhino3dm.PointCloudItem.Normal">
 <code class="descname">Normal</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Normal" title="Permalink to this definition">¶</a></dt>
-<dd><p>rhino3dm.Vector3d: Gets or sets the normal vector for this point cloud item.</p>
+<dd><p>rhino3dm.Vector3d: Gets or sets the normal vector for this point cloud item.
+If this point cloud item does not have a normal vector,
+Vector3d.Unset is returned.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.PointCloudItem.Color">
 <code class="descname">Color</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Color" title="Permalink to this definition">¶</a></dt>
-<dd><p>Color: Gets or sets the color of this point cloud item.</p>
+<dd><p>Color: Gets or sets the color of this point cloud item.
+If this point cloud item does not have a color, System.Drawing.Color.Black is returned.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.PointCloudItem.Hidden">
 <code class="descname">Hidden</code><a class="headerlink" href="#rhino3dm.PointCloudItem.Hidden" title="Permalink to this definition">¶</a></dt>
-<dd><p>bool: Gets or sets the hidden flag of this point cloud item.</p>
+<dd><p>bool: Gets or sets the hidden flag of this point cloud item.
+If this point cloud item does not have a hidden flag, False is returned.</p>
 </dd></dl>
 
 <dl class="attribute">

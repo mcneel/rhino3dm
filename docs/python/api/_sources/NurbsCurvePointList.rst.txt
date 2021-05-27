@@ -29,6 +29,7 @@ NurbsCurvePointList
       :param float w1: Weight for last control point.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: MakeRational()
@@ -36,6 +37,7 @@ NurbsCurvePointList
       Converts the curve to a Rational NURBS curve. Rational NURBS curves have weighted control points.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: MakeNonRational()
@@ -43,4 +45,5 @@ NurbsCurvePointList
       Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.
 
       :return: True on success, False on failure.
+
       :rtype: bool

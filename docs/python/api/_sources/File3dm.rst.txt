@@ -93,6 +93,7 @@ File3dm
       :param str path: The file to read.
 
       :return: new File3dm on success, None on error.
+
       :rtype: File3dm
 
    .. py:staticmethod:: ReadNotes(path)
@@ -102,6 +103,7 @@ File3dm
       :param str path: The file from which to read the notes.
 
       :return: The 3dm file notes.
+
       :rtype: str
 
    .. py:staticmethod:: ReadArchiveVersion(path)
@@ -111,6 +113,7 @@ File3dm
       :param str path: The file from which to read the archive version.
 
       :return: The 3dm file archive version.
+
       :rtype: int
 
    .. py:staticmethod:: FromByteArray()
@@ -118,6 +121,7 @@ File3dm
       Read a 3dm file from a byte array
 
       :return: New File3dm on success, None on error.
+
       :rtype: File3dm
 
    .. py:method:: Write(path, version)
@@ -133,6 +137,7 @@ File3dm
 
       :return: True if archive is written with no error. \
          False if errors occur.
+
       :rtype: bool
 
    .. py:method:: Encode()

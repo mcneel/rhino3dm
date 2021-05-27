@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GeometryBase &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>GeometryBase &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -368,9 +369,11 @@ angle results in a counter-clockwise rotation about the axis (right hand rule).<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The bounding box of the geometry in world coordinates or BoundingBox.Empty if not bounding box could be found.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>accurate</strong> (<em>bool</em>) – If true, a physically accurate bounding box will be computed. If not, a bounding box estimate will be computed. For some geometry types there is no difference between the estimate and the accurate bounding box. Estimated bounding boxes can be computed much (much) faster than accurate (or “tight”) bounding boxes. Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox">rhino3dm.BoundingBox</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The bounding box of the geometry in world coordinates or BoundingBox.Empty if not bounding box could be found.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox">rhino3dm.BoundingBox</a></td>
 </tr>
 </tbody>
 </table>

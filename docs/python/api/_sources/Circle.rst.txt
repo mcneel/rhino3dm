@@ -52,6 +52,7 @@ Circle
       :param float t: Parameter of point to evaluate.
 
       :return: The point on the circle at the given parameter.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: TangentAt(t)
@@ -62,6 +63,7 @@ Circle
       :param float t: Parameter of tangent to evaluate.
 
       :return: The tangent at the circle at the given parameter.
+
       :rtype: rhino3dm.Vector3d
 
    .. py:method:: DerivativeAt(derivative, t)
@@ -72,6 +74,7 @@ Circle
       :param float t: Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.
 
       :return: The derivative of the circle at the given parameter.
+
       :rtype: rhino3dm.Vector3d
 
    .. py:method:: ClosestPoint(testPoint)
@@ -82,6 +85,7 @@ Circle
 
       :return: The point on the circle that is closest to testPoint or \
          Point3d.Unset on failure.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: Translate(delta)
@@ -91,12 +95,14 @@ Circle
       :param rhino3dm.Vector3d delta: Translation vector.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: Reverse()
 
       Reverse the orientation of the circle. Changes the domain from [a,b]
       to [-b,-a].
+
 
       :rtype: void
 
@@ -106,6 +112,7 @@ Circle
       This amounts to the same as calling NurbsCurve.CreateFromCircle().
 
       :return: A nurbs curve representation of this circle or None if no such representation could be made.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:method:: Encode()

@@ -37,6 +37,7 @@ NurbsCurveKnotList
       Does not change parameterization or locus of curve.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: KnotMultiplicity(index)
@@ -46,6 +47,7 @@ NurbsCurveKnotList
       :param int index: Index of knot to query.
 
       :return: The multiplicity (valence) of the knot.
+
       :rtype: int
 
    .. py:method:: CreateUniformKnots(knotSpacing)
@@ -57,6 +59,7 @@ NurbsCurveKnotList
       :param float knotSpacing: Spacing of subsequent knots.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: CreatePeriodicKnots(knotSpacing)
@@ -68,6 +71,7 @@ NurbsCurveKnotList
       :param float knotSpacing: Spacing of subsequent knots.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: SuperfluousKnot(start)
@@ -79,4 +83,5 @@ NurbsCurveKnotList
       :param bool start: True if the query targets the first knot. Otherwise, the last knot.
 
       :return: A component.
+
       :rtype: float

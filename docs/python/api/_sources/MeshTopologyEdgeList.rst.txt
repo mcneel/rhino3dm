@@ -16,4 +16,5 @@ MeshTopologyEdgeList
       :param int topologyEdgeIndex: The topology edge index.
 
       :return: Line along edge. If input is not valid, an Invalid Line is returned.
+
       :rtype: Line

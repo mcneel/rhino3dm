@@ -12,6 +12,14 @@ Point2f
       :param float x: X component of vector.
       :param float y: Y component of vector.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of the vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of the vector.
+
    .. py:method:: Encode()
 
       [todo] add documentation

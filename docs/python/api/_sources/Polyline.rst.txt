@@ -48,6 +48,7 @@ Polyline
          is less than tolerance, the polyline is considered to be closed.
 
       :return: True if the polyline is closed to within tolerance, False otherwise.
+
       :rtype: bool
 
    .. py:method:: PointAt(t)
@@ -58,6 +59,7 @@ Polyline
       :param float t: Polyline parameter.
 
       :return: The point on the polyline at t.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: TangentAt(t)
@@ -68,6 +70,7 @@ Polyline
       :param float t: Polyline parameter.
 
       :return: The tangent along the polyline at t.
+
       :rtype: rhino3dm.Vector3d
 
    .. py:method:: ClosesPoint(testPoint)
@@ -81,6 +84,7 @@ Polyline
       :param rhino3dm.Point3d testPoint: Point to approximate.
 
       :return: The parameter along the polyline closest to testPoint.
+
       :rtype: float
 
    .. py:method:: ToNurbsCurve()
@@ -88,6 +92,7 @@ Polyline
       Constructs a nurbs curve representation of this polyline.
 
       :return: A Nurbs curve shaped like this polyline or None on failure.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:method:: ToPolylineCurve()
@@ -95,6 +100,7 @@ Polyline
       Constructs a polyline curve representation of this polyline.
 
       :return: A curve shaped like this polyline or None on failure.
+
       :rtype: PolylineCurve
 
    .. py:staticmethod:: CreateInscribedPolygon(circle, sideCount)
@@ -105,6 +111,7 @@ Polyline
       :param int sideCount: The number of sides
 
       :return: A closed polyline if successful, None otherwise.
+
       :rtype: rhino3dm.Polyline
 
    .. py:staticmethod:: CreateCircumscribedPolygon(circle, sideCount)
@@ -115,6 +122,7 @@ Polyline
       :param int sideCount: The number of sides
 
       :return: A closed polyline if successful, None otherwise.
+
       :rtype: rhino3dm.Polyline
 
    .. py:staticmethod:: CreateStarPolygon(circle, radius, cornerCounts)
@@ -127,4 +135,5 @@ Polyline
       :param int cornerCount: The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.
 
       :return: A closed polyline if successful, None otherwise.
+
       :rtype: rhino3dm.Polyline
