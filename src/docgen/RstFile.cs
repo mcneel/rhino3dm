@@ -11,6 +11,7 @@ namespace docgen
     {
         public string Name { get; set; }
         public string Type { get; set; }
+        public bool IsOutParam { get; set; }
         public List<string> Description { get; } = new List<string>();
     }
 
@@ -129,17 +130,15 @@ namespace docgen
                     continue;
                 }
 
-                StringBuilder summary;
-                List<ParameterInfo> parameters;
-                ReturnInfo returnInfo;
-                string s = DocCommentToPythonDoc(rhcommonMethod.Item2, rhcommonMethod.Item1, 2, out summary, out parameters, out returnInfo);
+                string s = DocCommentToPythonDoc(rhcommonMethod.Item2, rhcommonMethod.Item1, 2,
+                    out StringBuilder summary, out List<ParameterInfo> parameters, out ReturnInfo returnInfo);
                 sb.Append(summary.ToString());
-                if( parameters.Count > 0 && parameters.Count == args.Length)
+                if( parameters.Count > 0 && parameters.Count >= args.Length)
                 {
                     sb.AppendLine();
                     foreach (var p in parameters)
                     {
-                        if (p.Description.Count == 0)
+                        if (p.Description.Count == 0 || p.IsOutParam)
                             continue;
                         string type = ToPythonType(p.Type);
                         if (type.IndexOf(' ') < 0)
@@ -156,7 +155,12 @@ namespace docgen
                             if (i == (p.Description.Count - 1))
                                 sb.AppendLine($"         {p.Description[i]}");
                             else
-                                sb.AppendLine($"         {p.Description[i]} \\");
+                            {
+                                if (string.IsNullOrWhiteSpace(p.Description[i]))
+                                    sb.AppendLine($"         \\");
+                                else
+                                    sb.AppendLine($"         {p.Description[i]} \\");
+                            }
                         }
                         if (type.IndexOf(' ') > 0)
                             sb.AppendLine($"      :type {p.Name}: {type}");
@@ -164,23 +168,70 @@ namespace docgen
                 }
 
                 sb.AppendLine();
+
+                bool containsOutParams = false;
+                foreach (var p in parameters)
+                    containsOutParams |= p.IsOutParam;
+
+                string returnTuple = "";
+                if (containsOutParams)
+                {
+                    returnTuple = $"({ToPythonType(returnInfo.Type)}";
+                    foreach (var p in parameters)
+                    {
+                        if(p.IsOutParam)
+                        {
+                            returnTuple += $", {ToPythonType(p.Type)}";
+                        }
+                    }
+                    returnTuple += ")";
+                }
+
                 if (returnInfo.Description.Count > 0)
                 {
-                    sb.Append($"      :return: {returnInfo.Description[0]}");
+                    if (containsOutParams)
+                    {
+                        sb.AppendLine($"      :return: tuple {returnTuple}");
+                        sb.AppendLine();
+                        sb.Append    ($"         - {returnInfo.Description[0]}");
+                    }
+                    else
+                        sb.Append($"      :return: {returnInfo.Description[0]}");
                     if (returnInfo.Description.Count > 1)
                         sb.AppendLine(" \\");
                     else
                         sb.AppendLine();
                     for (int i = 1; i < returnInfo.Description.Count; i++)
                     {
-                        if (i == (returnInfo.Description.Count - 1))
+                        if (i == (returnInfo.Description.Count - 1) && !containsOutParams)
                             sb.AppendLine($"         {returnInfo.Description[i]}");
                         else
-                            sb.AppendLine($"         {returnInfo.Description[i]} \\");
+                        {
+                            if (containsOutParams)
+                                sb.AppendLine($"           {returnInfo.Description[i]} \\");
+                            else
+                                sb.AppendLine($"         {returnInfo.Description[i]} \\");
+                        }
+                    }
+                    foreach(var p in parameters)
+                    {
+                        if (p.IsOutParam)
+                        {
+                            for (int i = 0; i < p.Description.Count; i++)
+                            {
+                                if (0==i)
+                                    sb.AppendLine($"         - {p.Description[i]} \\");
+                                else
+                                    sb.AppendLine($"           {p.Description[i]} \\");
+                            }
+                        }
                     }
                 }
-                sb.AppendLine($"      :rtype: {ToPythonType(returnInfo.Type)}");
-
+                sb.AppendLine();
+                if (!string.IsNullOrWhiteSpace(returnTuple))
+                    sb.AppendLine($"      :rtype: {returnTuple}");
+                else
+                    sb.AppendLine($"      :rtype: {ToPythonType(returnInfo.Type)}");
             }
 
             string path = Path.Combine(rstDirectory.FullName, $"{pythonClass.ClassName}.rst");
@@ -235,16 +286,6 @@ namespace docgen
         static string _T(int amount)
         {
             return "".PadLeft(amount * SpacesPerTab);
-        }
-
-        static bool IsOutParameter(ParameterSyntax parameter)
-        {
-            foreach (var modifier in parameter.Modifiers)
-            {
-                if (modifier.Text == "out")
-                    return true;
-            }
-            return false;
         }
 
 
@@ -303,9 +344,10 @@ namespace docgen
                     {
                         if (param.Identifier.ToString().Equals(parameterName, StringComparison.Ordinal))
                         {
-                            isOutParam = IsOutParameter(param);
-                            paramType = $" ({param.Type})";
+                            isOutParam = MethodDeclarationExtensions.IsOutParameter(param);
+                            paramType = isOutParam ? $"{param.Type}" : $" ({param.Type})";
                             pinfo.Type = param.Type.ToString();
+                            pinfo.IsOutParam = isOutParam;
                         }
                     }
 
@@ -323,13 +365,15 @@ namespace docgen
                         if (!added)
                         {
                             added = true;
-                            sb.AppendLine(_T(indentLevel + 1) + parameterName + paramType + ": " + line.Trim());
+                            if (isOutParam)
+                                sb.AppendLine(_T(indentLevel + 1) + paramType + ": " + line.Trim());
+                            else
+                                sb.AppendLine(_T(indentLevel + 1) + parameterName + paramType + ": " + line.Trim());
                             continue;
                         }
                         sb.AppendLine(_T(indentLevel + 2) + line.Trim());
                     }
-                    if (!isOutParam)
-                        parameters.Add(pinfo);
+                    parameters.Add(pinfo);
                 }
             }
 
@@ -382,7 +426,7 @@ namespace docgen
                     {
                         if (param.Identifier.ToString().Equals(parameterName, StringComparison.Ordinal))
                         {
-                            isOutParam = IsOutParameter(param);
+                            isOutParam = MethodDeclarationExtensions.IsOutParameter(param);
                             paramType = $" ({param.Type})";
                             pinfo.Type = param.Type.ToString();
                         }
