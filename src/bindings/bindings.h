@@ -35,6 +35,7 @@ typedef emscripten::val BND_TUPLE;
 #endif
 
 BND_TUPLE CreateTuple(int count);
+BND_TUPLE NullTuple();
 template<typename T>
 void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 {
