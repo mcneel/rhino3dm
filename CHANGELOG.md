@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.6.0] - Unreleased
+### Added
+- (js, py) Curve.TangentAtStart and TangentAtEnd properties
+- (js, py) Curve.FrameAt, GetCurveParameterFromNurbsFormParameter, and GetNurbsFormParameterFromCurveParameter functions
+
+### Changed
+- Adjusted version number of library to be based on the underlying Rhino version that source is based on
+- Use pybind11 2.6.1 for python compile
 
 ## [0.16.1] - 2021-05-25
 ### Fixed
