@@ -4,3 +4,11 @@ AnnotationBase
 .. py:module:: rhino3dm
 
 .. py:class:: AnnotationBase
+
+   .. py:attribute:: RichText
+
+      str: Text including additional RTF formatting information
+
+   .. py:attribute:: PlainText
+
+      str: Text stripped of RTF formatting information

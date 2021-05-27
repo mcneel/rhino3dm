@@ -63,6 +63,7 @@ Cylinder
 
       :param float linearParameter: Height parameter for circle section.
 
+
       :rtype: Circle
 
    .. py:method:: ToBrep(capBottom, capTop)
@@ -74,6 +75,7 @@ Cylinder
       :param bool capTop: If true, the top of the cylinder will be capped.
 
       :return: A Brep representation of the cylinder or null.
+
       :rtype: rhino3dm.Brep
 
    .. py:method:: ToNurbsSurface()
@@ -82,4 +84,5 @@ Cylinder
       This is synonymous with calling NurbsSurface.CreateFromCylinder().
 
       :return: A Nurbs surface representation of the cylinder or null.
+
       :rtype: NurbsSurface

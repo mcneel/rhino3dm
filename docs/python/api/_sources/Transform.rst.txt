@@ -36,7 +36,7 @@ Transform
 
    .. py:attribute:: IsZeroTransformation
 
-      bool: True if all values are 0 and M33 is 1
+      bool: True if all values are 0, except for M33 which is 1.
 
    .. py:staticmethod:: Identity()
 
@@ -57,6 +57,7 @@ Transform
       :param rhino3dm.Vector3d motion: Translation (motion) vector.
 
       :return: A transform matrix which moves geometry along the motion vector.
+
       :rtype: Transform
 
    .. py:staticmethod:: Translation(x, y, z)
@@ -64,6 +65,7 @@ Transform
       Constructs a new translation (move) transformation.
 
       :return: A transform matrix which moves geometry along the motion vector.
+
       :rtype: Transform
 
    .. py:staticmethod:: Scale(anchor, scaleFactor)
@@ -74,6 +76,7 @@ Transform
       :param float scaleFactor: Scaling factor in all directions.
 
       :return: A transform matrix which scales geometry uniformly around the anchor point.
+
       :rtype: Transform
 
    .. py:staticmethod:: Scale(plane, xScaleFactor, yScaleFactor, zScaleFactor)
@@ -81,13 +84,20 @@ Transform
       Constructs a new uniform scaling transformation with a specified scaling anchor point.
 
       :return: A transform matrix which scales geometry uniformly around the anchor point.
+
       :rtype: Transform
 
    .. py:staticmethod:: Rotation(angleRadians, rotationAxis, rotationCenter)
 
       Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
 
+      :param float sinAngle: Sin of the rotation angle.
+      :param float cosAngle: Cos of the rotation angle.
+      :param rhino3dm.Vector3d rotationAxis: Axis direction of rotation.
+      :param rhino3dm.Point3d rotationCenter: Center point of rotation.
+
       :return: A transformation matrix which rotates geometry around an anchor point.
+
       :rtype: Transform
 
    .. py:staticmethod:: Mirror(pointOnMirrorPlane, normalToMirrorPlane)
@@ -101,6 +111,7 @@ Transform
       :param rhino3dm.Vector3d normalToMirrorPlane: Normal vector to the mirror plane.
 
       :return: A transformation matrix which mirrors geometry in a specified plane.
+
       :rtype: Transform
 
    .. py:staticmethod:: Mirror(mirrorPlane)
@@ -110,7 +121,11 @@ Transform
       Q - (2*(Q-P)oN)*N, where
       P = pointOnMirrorPlane and N = normalToMirrorPlane.
 
+      :param rhino3dm.Point3d pointOnMirrorPlane: Point on the mirror plane.
+      :param rhino3dm.Vector3d normalToMirrorPlane: Normal vector to the mirror plane.
+
       :return: A transformation matrix which mirrors geometry in a specified plane.
+
       :rtype: Transform
 
    .. py:method:: Determinant()
@@ -121,10 +136,15 @@ Transform
 
       Attempts to get the inverse transform of this transform.
 
-      :return: True on success. \
-         If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. \
-         If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
-      :rtype: bool
+
+      :return: tuple (bool, Transform)
+
+         - True on success. \
+           If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. \
+           If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse. \
+         - The inverse transform. This out reference will be assigned during this call. \
+
+      :rtype: (bool, Transform)
 
    .. py:method:: TransformBoundingBox(bbox)
 
@@ -133,16 +153,19 @@ Transform
       points.
 
       :return: A new bounding box.
+
       :rtype: rhino3dm.BoundingBox
 
    .. py:method:: Transpose()
 
       Flip row/column values
 
+
       :rtype: Transform
 
    .. py:method:: ToFloatArray()
 
       Return the matrix as a linear array of 16 float values
+
 
       :rtype: float[]

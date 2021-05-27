@@ -33,12 +33,14 @@ MeshFaceList
 
       Clears the Face list on the mesh.
 
+
       :rtype: void
 
    .. py:method:: Destroy()
 
       Releases all memory allocated to store faces. The list capacity will be 0 after this call.
       Subsequent calls can add new items.
+
 
       :rtype: void
 
@@ -47,6 +49,7 @@ MeshFaceList
       Appends a new mesh face to the end of the mesh face list.
 
       :return: The index of the newly added face.
+
       :rtype: int
 
    .. py:method:: AddFace(vertex1, vertex2, vertex3, vertex4)
@@ -54,6 +57,7 @@ MeshFaceList
       Appends a new mesh face to the end of the mesh face list.
 
       :return: The index of the newly added face.
+
       :rtype: int
 
    .. py:method:: SetFace(index, vertex1, vertex2, vertex3)
@@ -61,6 +65,7 @@ MeshFaceList
       Sets a face at a specific index of the mesh.
 
       :return: True if the operation succeeded, otherwise false.
+
       :rtype: bool
 
    .. py:method:: SetFace(index, vertex1, vertex2, vertex3, vertex4)
@@ -68,6 +73,7 @@ MeshFaceList
       Sets a face at a specific index of the mesh.
 
       :return: True if the operation succeeded, otherwise false.
+
       :rtype: bool
 
    .. py:method:: ConvertQuadsToTriangles()
@@ -75,20 +81,54 @@ MeshFaceList
       Splits all quads along the short diagonal.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: ConvertNonPlanarQuadsToTriangles()
 
       Splits non-planar quads into two triangles based on given parameters.
 
+      :param float planarTolerance: If planarTolerance >= 0, then a quad is split if its vertices \
+         are not coplanar. \
+         If both planarTolerance = Rhino.RhinoMath.UnsetValue and \
+         angleToleranceRadians >= 0.0, then the planarity test is skipped.
+      :param float angleToleranceRadians: If angleToleranceRadians >= 0.0, then a quad is split if the \
+         angle between opposite corner normals is > angleToleranceRadians. \
+         The corner normal is the normal to the triangle formed by two \
+         adjacent edges and the diagonal connecting their endpoints. \
+         A quad has four corner normals. \
+         If both angleToleranceRadians = Rhino.RhinoMath.UnsetValue and planarTolerance >= 0.0, \
+         then the corner normal angle test is skipped.
+      :param int splitMethod: 0 default \
+         Currently divides along the short diagonal. This may be \
+         changed as better methods are found or preferences change. \
+         By passing zero, you let the developers of this code \
+         decide what's best for you over time. \
+         1 divide along the short diagonal \
+         2 divide along the long diagonal \
+         3 minimize resulting area \
+         4 maximize resulting area \
+         5 minimize angle between triangle normals \
+         6 maximize angle between triangle normals
+
       :return: Number of quads that were converted to triangles.
+
       :rtype: int
 
    .. py:method:: ConvertTrianglesToQuads()
 
       Joins adjacent triangles into quads if the resulting quad is 'nice'.
 
+      :param float angleToleranceRadians: Used to compare adjacent triangles' face normals. For two triangles \
+         to be considered, the angle between their face normals has to \
+         be <= angleToleranceRadians. When in doubt use RhinoMath.PI/90.0 (2 degrees).
+      :param float minimumDiagonalLengthRatio: ( <= 1.0) For two triangles to be considered the ratio of the \
+         resulting quad's diagonals \
+         (length of the shortest diagonal)/(length of longest diagonal). \
+         has to be >= minimumDiagonalLengthRatio. When in doubt us .875.
+
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: CullDegenerateFaces()
@@ -99,6 +139,7 @@ MeshFaceList
       vertex indices.
 
       :return: The number of degenerate faces that were removed.
+
       :rtype: int
 
    .. py:method:: IsHidden()
@@ -106,7 +147,10 @@ MeshFaceList
       Gets a value indicating whether a face is hidden.
       A face is hidden if, and only if, at least one of its vertices is hidden.
 
+      :param int faceIndex: A face index.
+
       :return: True if hidden, False if fully visible.
+
       :rtype: bool
 
    .. py:method:: HasNakedEdges()
@@ -114,5 +158,8 @@ MeshFaceList
       Returns True if at least one of the face edges are not topologically
       connected to any other faces.
 
+      :param int faceIndex: A face index.
+
       :return: True if that face makes the mesh open, otherwise false.
+
       :rtype: bool

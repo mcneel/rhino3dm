@@ -26,6 +26,7 @@ PolylineCurve
       :param int index: An index.
 
       :return: A point.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: SetPoint(index, point)
@@ -35,6 +36,7 @@ PolylineCurve
       :param int index: An index.
       :param rhino3dm.Point3d point: A point location to set.
 
+
       :rtype: void
 
    .. py:method:: ToPolyline()
@@ -42,4 +44,5 @@ PolylineCurve
       Returns the underlying Polyline, or points.
 
       :return: The Polyline if successful, None of the curve has no points.
+
       :rtype: rhino3dm.Polyline

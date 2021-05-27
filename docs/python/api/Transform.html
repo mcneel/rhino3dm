@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Transform &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Transform &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -306,7 +307,7 @@ zero. The value xform[3][3] can be anything.</p>
 <dl class="attribute">
 <dt id="rhino3dm.Transform.IsZeroTransformation">
 <code class="descname">IsZeroTransformation</code><a class="headerlink" href="#rhino3dm.Transform.IsZeroTransformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>bool: True if all values are 0 and M33 is 1</p>
+<dd><p>bool: True if all values are 0, except for M33 which is 1.</p>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -409,9 +410,19 @@ zero. The value xform[3][3] can be anything.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transformation matrix which rotates geometry around an anchor point.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sinAngle</strong> (<em>float</em>) – Sin of the rotation angle.</li>
+<li><strong>cosAngle</strong> (<em>float</em>) – Cos of the rotation angle.</li>
+<li><strong>rotationAxis</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Axis direction of rotation.</li>
+<li><strong>rotationCenter</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Center point of rotation.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which rotates geometry around an anchor point.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -455,9 +466,17 @@ P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transformation matrix which mirrors geometry in a specified plane.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</li>
+<li><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which mirrors geometry in a specified plane.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -477,9 +496,13 @@ P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success. If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, Transform)<ul class="simple">
+<li>True on success. If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse. </li>
+<li>The inverse transform. This out reference will be assigned during this call. </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a>)</td>
 </tr>
 </tbody>
 </table>

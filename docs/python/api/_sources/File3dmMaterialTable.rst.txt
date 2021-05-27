@@ -29,6 +29,7 @@ File3dmMaterialTable
       :param int index: The index to search for.
 
       :return: A material, or None if none was found.
+
       :rtype: DocObjects.Material
 
    .. py:method:: FindId(id)

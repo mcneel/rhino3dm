@@ -18,7 +18,11 @@ TextureMapping
 
    .. py:staticmethod:: CreateSurfaceParameterMapping()
 
-      [todo] add documentation
+      Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.
+
+      :return: TextureMapping instance or None if failed.
+
+      :rtype: TextureMapping
 
    .. py:staticmethod:: CreatePlaneMapping(plane, dx, dy, dz)
 
@@ -30,6 +34,7 @@ TextureMapping
       :param rhino3dm.Interval dz: portion of the plane's z axis that is mapped to [0,1] (can be a decreasing interval)
 
       :return: TextureMapping instance if input is valid
+
       :rtype: TextureMapping
 
    .. py:staticmethod:: CreateCylinderMapping(cylinder, capped)
@@ -43,6 +48,7 @@ TextureMapping
       :param bool capped: If true, the cylinder is treated as a finite capped cylinder
 
       :return: TextureMapping instance if input is valid
+
       :rtype: TextureMapping
 
    .. py:staticmethod:: CreateSphereMapping(sphere)
@@ -55,6 +61,7 @@ TextureMapping
          The radial parameter maps (0,r) to texture "w" (0,1).
 
       :return: TextureMapping instance if input is valid
+
       :rtype: TextureMapping
 
    .. py:staticmethod:: CreateBoxMapping(plane, dx, dy, dz, capped)
@@ -75,6 +82,7 @@ TextureMapping
       :param bool capped: If true, the box is treated as a finite capped box.
 
       :return: TextureMapping instance if input is valid
+
       :rtype: TextureMapping
 
    .. py:method:: TryGetMappingCylinder()
@@ -82,6 +90,7 @@ TextureMapping
       Get a cylindrical projection parameters from this texture mapping.
 
       :return: Returns True if a valid cylinder is returned.
+
       :rtype: bool
 
    .. py:method:: TryGetMappingSphere()
@@ -89,6 +98,7 @@ TextureMapping
       Get a spherical projection parameters from this texture mapping.
 
       :return: Returns True if a valid sphere is returned.
+
       :rtype: bool
 
    .. py:method:: ReverseTextureCoordinate(dir)
@@ -111,8 +121,12 @@ TextureMapping
       :param rhino3dm.Vector3d n: If the mapping projection is ray_projection, then this \
          is the vertex unit normal.  Otherwise n is ignored.
 
-      :return: Nonzero if evaluation is successful.  When the mapping is a box or \
-         capped cylinder mapping, the value indicates which side was evaluated. \
-         Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap \
-         Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
-      :rtype: int
+      :return: tuple (int, rhino3dm.Point3d)
+
+         - Nonzero if evaluation is successful.  When the mapping is a box or \
+           capped cylinder mapping, the value indicates which side was evaluated. \
+           Cylinder mapping: 1 = cylinder wall, 2 = bottom cap, 3 = top cap \
+           Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top \
+         - Texture coordinate (u,v,w) \
+
+      :rtype: (int, rhino3dm.Point3d)

@@ -111,6 +111,7 @@ DimensionStyle
 
       Scales all length values by 'scale'
 
+
       :rtype: void
 
    .. py:method:: IsFieldOverridden(field)
@@ -121,11 +122,13 @@ DimensionStyle
 
       Set a field as overridden
 
+
       :rtype: void
 
    .. py:method:: ClearFieldOverride(field)
 
       Set the field as not overridden
+
 
       :rtype: void
 
@@ -133,6 +136,7 @@ DimensionStyle
 
       Sets all the fields in this DimensionStyle to be not overridden
       Does not change any dimstyle_id's or parent_id's
+
 
       :rtype: void
 
@@ -142,4 +146,5 @@ DimensionStyle
 
       :return: True if this is a child of the DimensionStyle with Parent \
          False otherwise.
+
       :rtype: bool

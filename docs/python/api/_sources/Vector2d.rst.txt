@@ -12,6 +12,14 @@ Vector2d
       :param float x: The X (first) component.
       :param float y: The Y (second) component.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of this vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of this vector.
+
    .. py:method:: Encode()
 
       [todo] add documentation

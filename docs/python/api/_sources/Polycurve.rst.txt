@@ -29,6 +29,7 @@ PolyCurve
       :param int index: Index of segment to retrieve.
 
       :return: The segment at the given index or None on failure.
+
       :rtype: rhino3dm.Curve
 
    .. py:method:: RemoveNesting()
@@ -38,6 +39,7 @@ PolyCurve
       locus and parameterization.
 
       :return: True if any nested PolyCurve was found and absorbed, False if no PolyCurve segments could be found.
+
       :rtype: bool
 
    .. py:method:: Explode()
@@ -46,6 +48,7 @@ PolyCurve
       Call  first if you need all individual segments.
 
       :return: An array of polycurve segments.
+
       :rtype: rhino3dm.Curve[]
 
    .. py:method:: Append(line)
@@ -56,6 +59,7 @@ PolyCurve
       :param Line line: Line segment to append.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: Append(arc)
@@ -66,6 +70,7 @@ PolyCurve
       :param Line line: Line segment to append.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: Append(curve)
@@ -76,6 +81,7 @@ PolyCurve
       :param Line line: Line segment to append.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: AppendSegment(curve)
@@ -86,6 +92,7 @@ PolyCurve
       :param rhino3dm.Curve curve: Segment to append.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: SegmentCurveParameter(polycurveParameter)
@@ -96,6 +103,7 @@ PolyCurve
 
       :return: Segment curve evaluation parameter or UnsetValue if the \
          segment curve parameter could not be computed.
+
       :rtype: float
 
    .. py:method:: PolyCurveParameter(segmentIndex, segmentCurveParameter)
@@ -106,6 +114,7 @@ PolyCurve
       :param float segmentCurveParameter: Parameter on segment.
 
       :return: Polycurve evaluation parameter or UnsetValue if the polycurve curve parameter could not be computed.
+
       :rtype: float
 
    .. py:method:: SegmentDomain(segmentIndex)
@@ -116,6 +125,7 @@ PolyCurve
 
       :return: The polycurve sub-domain assigned to a segment curve. \
          Returns Interval.Unset if segment_index < 0 or segment_index >= Count().
+
       :rtype: rhino3dm.Interval
 
    .. py:method:: SegmentIndex(polycurveParameter)
@@ -127,4 +137,5 @@ PolyCurve
       :return: Index of the segment used for evaluation at polycurve_parameter. \
          If polycurve_parameter < Domain.Min(), then 0 is returned. \
          If polycurve_parameter > Domain.Max(), then Count()-1 is returned.
+
       :rtype: int

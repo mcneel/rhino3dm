@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Curve &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Curve &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -309,6 +310,18 @@ or a good estimate if curve spans are not algebraic.</p>
 <dd><p>rhino3dm.Point3d: Evaluates point at the end of the curve.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="rhino3dm.Curve.TangentAtStart">
+<code class="descname">TangentAtStart</code><a class="headerlink" href="#rhino3dm.Curve.TangentAtStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Evaluates the unit tangent vector at the start of the curve.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Curve.TangentAtEnd">
+<code class="descname">TangentAtEnd</code><a class="headerlink" href="#rhino3dm.Curve.TangentAtEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Evaluate unit tangent vector at the end of the curve.</p>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="rhino3dm.Curve.CreateControlPointCurve">
 <em class="property">static </em><code class="descname">CreateControlPointCurve</code><span class="sig-paren">(</span><em>points</em>, <em>degree</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CreateControlPointCurve" title="Permalink to this definition">¶</a></dt>
@@ -396,9 +409,13 @@ represented as a polyline.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if this curve can be represented as a polyline; otherwise, false.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, rhino3dm.Polyline)<ul class="simple">
+<li>True if this curve can be represented as a polyline; otherwise, false.</li>
+<li>If True is returned, then the polyline form is returned here. </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="Polyline.html#rhino3dm.Polyline" title="rhino3dm.Polyline">rhino3dm.Polyline</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -428,9 +445,13 @@ represented as a polyline.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into an arc.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, Arc)<ul class="simple">
+<li>True if the curve could be converted into an arc.</li>
+<li>On success, the Arc will be filled in. </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="Arc.html#rhino3dm.Arc" title="rhino3dm.Arc">Arc</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -460,9 +481,13 @@ represented as a polyline.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into a Circle.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, Circle)<ul class="simple">
+<li>True if the curve could be converted into a Circle.</li>
+<li>On success, the Circle will be filled in. </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -492,9 +517,13 @@ represented as a polyline.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the curve could be converted into an Ellipse.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, Ellipse)<ul class="simple">
+<li>True if the curve could be converted into an Ellipse.</li>
+<li>On success, the Ellipse will be filled in. </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="Ellipse.html#rhino3dm.Ellipse" title="rhino3dm.Ellipse">Ellipse</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -678,6 +707,72 @@ Not all curve types support this operation.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhino3dm.Curve.FrameAt">
+<code class="descname">FrameAt</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.FrameAt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 3d frame at a parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<em>float</em>) – Evaluation parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, rhino3dm.Plane)<ul class="simple">
+<li>True on success, False on failure.</li>
+<li>The frame is returned here. </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.GetCurveParameterFromNurbsFormParameter">
+<code class="descname">GetCurveParameterFromNurbsFormParameter</code><span class="sig-paren">(</span><em>nurbsParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.GetCurveParameterFromNurbsFormParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a NURBS curve parameter to a curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nurbsParameter</strong> (<em>float</em>) – NURBS form parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, float)<ul class="simple">
+<li>True on success, False on failure.</li>
+<li>Curve parameter. </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(bool, float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Curve.GetNurbsFormParameterFromCurveParameter">
+<code class="descname">GetNurbsFormParameterFromCurveParameter</code><span class="sig-paren">(</span><em>curveParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.GetNurbsFormParameterFromCurveParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a curve parameter to a NURBS curve parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>curveParameter</strong> (<em>float</em>) – Curve parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, float)<ul class="simple">
+<li>True on success, False on failure.</li>
+<li>NURBS form parameter. </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(bool, float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhino3dm.Curve.Trim">
 <code class="descname">Trim</code><span class="sig-paren">(</span><em>t0</em>, <em>t1</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.Trim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes portions of the curve outside the specified interval.</p>
@@ -723,6 +818,22 @@ The parameter must be in the interior of the curve’s domain.</p>
 <dl class="method">
 <dt id="rhino3dm.Curve.ToNurbsCurve">
 <code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.ToNurbsCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a NURBS curve representation of this curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">NURBS representation of the curve on success, None on failure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsCurve.html#rhino3dm.NurbsCurve" title="rhino3dm.NurbsCurve">rhino3dm.NurbsCurve</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ToNurbsCurve</code><span class="sig-paren">(</span><em>subdomain</em><span class="sig-paren">)</span></dt>
 <dd><p>Constructs a NURBS curve representation of this curve.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

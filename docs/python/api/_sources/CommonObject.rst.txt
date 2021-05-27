@@ -5,6 +5,10 @@ CommonObject
 
 .. py:class:: CommonObject
 
+   .. py:attribute:: IsValid
+
+      bool: Tests an object to see if it is valid.
+
    .. py:attribute:: UserStringCount
 
 

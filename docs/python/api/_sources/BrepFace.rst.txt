@@ -10,6 +10,7 @@ BrepFace
       Gets the untrimmed surface that is the base of this face.
 
       :return: A surface, or None on error.
+
       :rtype: rhino3dm.Surface
 
    .. py:method:: DuplicateFace(duplicateMeshes)
@@ -19,6 +20,7 @@ BrepFace
       :param bool duplicateMeshes: If true, shading meshes will be copied as well.
 
       :return: A new single-face brep synonymous with the current Face.
+
       :rtype: rhino3dm.Brep
 
    .. py:method:: DuplicateSurface()
@@ -26,6 +28,7 @@ BrepFace
       Gets a copy to the untrimmed surface that this face is based on.
 
       :return: A copy of this face's underlying surface.
+
       :rtype: rhino3dm.Surface
 
    .. py:method:: GetMesh(meshType)
@@ -35,4 +38,5 @@ BrepFace
       :param MeshType meshType: The mesh type.
 
       :return: A mesh.
+
       :rtype: rhino3dm.Mesh

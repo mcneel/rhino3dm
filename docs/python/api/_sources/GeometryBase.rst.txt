@@ -29,6 +29,7 @@ GeometryBase
       :param Transform xform: Transformation to apply to geometry.
 
       :return: True if geometry successfully transformed.
+
       :rtype: bool
 
    .. py:method:: Translate(translationVector)
@@ -38,6 +39,7 @@ GeometryBase
       :param rhino3dm.Vector3d translationVector: A moving vector.
 
       :return: True if geometry successfully translated.
+
       :rtype: bool
 
    .. py:method:: Scale(scaleFactor)
@@ -47,6 +49,7 @@ GeometryBase
       :param float scaleFactor: The uniform scaling factor.
 
       :return: True if geometry successfully scaled.
+
       :rtype: bool
 
    .. py:method:: Rotate(rotationAngle, rotationAxis, rotationCenter)
@@ -59,14 +62,22 @@ GeometryBase
       :param rhino3dm.Point3d rotationCenter: Point on the axis of rotation.
 
       :return: True if geometry successfully rotated.
+
       :rtype: bool
 
    .. py:method:: GetBoundingBox()
 
       Bounding box solver. Gets the world axis aligned bounding box for the geometry.
 
+      :param bool accurate: If true, a physically accurate bounding box will be computed. \
+         If not, a bounding box estimate will be computed. For some geometry types there is no \
+         difference between the estimate and the accurate bounding box. Estimated bounding boxes \
+         can be computed much (much) faster than accurate (or "tight") bounding boxes. \
+         Estimated bounding boxes are always similar to or larger than accurate bounding boxes.
+
       :return: The bounding box of the geometry in world coordinates or BoundingBox.Empty \
          if not bounding box could be found.
+
       :rtype: rhino3dm.BoundingBox
 
    .. py:method:: MakeDeformable()
@@ -76,6 +87,7 @@ GeometryBase
 
       :return: False if object cannot be converted to a deformable object. True if object was \
          already deformable or was converted into a deformable object.
+
       :rtype: bool
 
    .. py:method:: Duplicate()
@@ -83,4 +95,5 @@ GeometryBase
       Constructs a deep (full) copy of this object.
 
       :return: An object of the same type as this, with the same properties and behavior.
+
       :rtype: rhino3dm.GeometryBase

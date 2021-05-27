@@ -29,6 +29,7 @@ File3dmDimStyleTable
       :param int index: The index to search for.
 
       :return: A DimensionStyle object, or None if none was found.
+
       :rtype: DimensionStyle
 
    .. py:method:: FindId(id)

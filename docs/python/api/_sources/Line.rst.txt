@@ -12,6 +12,14 @@ Line
       :param rhino3dm.Point3d from: Start point of line.
       :param rhino3dm.Point3d to: End point of line.
 
+   .. py:attribute:: From
+
+      rhino3dm.Point3d: Start point of line segment.
+
+   .. py:attribute:: To
+
+      rhino3dm.Point3d: End point of line segment.
+
    .. py:attribute:: IsValid
 
       bool: Gets a value indicating whether or not this line is valid.
@@ -42,4 +50,5 @@ Line
       :param float t: Parameter to evaluate line segment at. Line parameters are normalized parameters.
 
       :return: The point at the specified parameter.
+
       :rtype: rhino3dm.Point3d

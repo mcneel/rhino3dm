@@ -12,8 +12,7 @@ Mesh
 
    .. py:attribute:: IsClosed
 
-      bool: Gets a value indicating whether a mesh is considered to be closed (solid).
-      A mesh is considered solid when every mesh edge borders two or more faces.
+      bool: Returns True if every mesh "edge" has two or more faces.
 
    .. py:attribute:: HasCachedTextureCoordinates
 
@@ -59,15 +58,21 @@ Mesh
       Create a mesh from a SubD control net
 
       :return: mesh representing control net on success, None on failure
+
       :rtype: rhino3dm.Mesh
 
    .. py:method:: IsManifold(topologicalTest)
 
-      [todo] add documentation
+      Returns True if every mesh "edge" has at most two faces.
+
+      :return: True if the mesh is manifold, False otherwise.
+
+      :rtype: bool
 
    .. py:method:: ClearTextureData()
 
       Removes all texture coordinate information from this mesh.
+
 
       :rtype: void
 
@@ -75,11 +80,13 @@ Mesh
 
       Removes surface parameters, curvature parameters and surface statistics from the mesh.
 
+
       :rtype: void
 
    .. py:method:: DestroyTopology()
 
       Removes topology data, forcing all topology information to be recomputed.
+
 
       :rtype: void
 
@@ -87,11 +94,13 @@ Mesh
 
       Destroys the mesh vertex access tree.
 
+
       :rtype: void
 
    .. py:method:: DestroyPartition()
 
       Destroys mesh partition.
+
 
       :rtype: void
 
@@ -105,6 +114,7 @@ Mesh
       :param Transform xf: Transform to apply to the texture mapping
       :param bool lazy: Whether to generate lazily (true) or right away (false)
 
+
       :rtype: void
 
    .. py:method:: Compact()
@@ -113,6 +123,7 @@ Mesh
       and shrinks arrays to minimum required size.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: Append(other)
@@ -120,6 +131,7 @@ Mesh
       Appends a copy of another mesh to this one and updates indices of appended mesh parts.
 
       :param rhino3dm.Mesh other: Mesh to append to this one.
+
 
       :rtype: void
 
@@ -131,4 +143,5 @@ Mesh
       subsets of vertices and faces that those rendering engines could handle.
 
       :return: True on success
+
       :rtype: bool

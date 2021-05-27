@@ -19,6 +19,7 @@ SubD
 
       Clear cached information that depends on the location of vertex control points
 
+
       :rtype: void
 
    .. py:method:: UpdateAllTagsAndSectorCoefficients()
@@ -30,6 +31,7 @@ SubD
       in the edited areas need to be updated.
 
       :return: Number of vertices and edges that were changed during the update.
+
       :rtype: uint
 
    .. py:method:: Subdivide(count)
@@ -40,4 +42,5 @@ SubD
       :param int count: Number of times to subdivide (must be greater than 0)
 
       :return: True on success
+
       :rtype: bool

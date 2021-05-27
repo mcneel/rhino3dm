@@ -82,6 +82,7 @@ Layer
          If Guid.Empty, then checks for any viewport settings.
 
       :return: True if the layer has per viewport settings, False otherwise.
+
       :rtype: bool
 
    .. py:method:: DeletePerViewportSettings(viewportId)
@@ -90,6 +91,7 @@ Layer
 
       :param Guid viewportId: If not Guid.Empty, then the settings for that viewport are deleted. \
          If Guid.Empty, then all per viewport settings are deleted.
+
 
       :rtype: void
 
@@ -100,6 +102,7 @@ Layer
       :param Guid viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
 
       :return: The display color.
+
       :rtype: System.Drawing.Color
 
    .. py:method:: SetPerViewportColor(viewportId, color)
@@ -109,6 +112,7 @@ Layer
       :param Guid viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
       :param System.Drawing.Color color: The display color.
 
+
       :rtype: void
 
    .. py:method:: DeletePerViewportColor(viewportId)
@@ -117,6 +121,7 @@ Layer
 
       :param Guid viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. \
          If Guid.Empty, the all per viewport layer color settings will be removed.
+
 
       :rtype: void
 
@@ -129,17 +134,20 @@ Layer
       visibility setting determines what happens when the parent is turned on
       again.
 
+
       :rtype: bool
 
    .. py:method:: SetPersistentVisibility(persistentVisibility)
 
       Set the persistent visibility setting for this layer
 
+
       :rtype: void
 
    .. py:method:: UnsetPersistentVisibility()
 
       Remove any explicit persistent visibility setting from this layer
+
 
       :rtype: void
 
@@ -151,16 +159,19 @@ Layer
       then child layers are also locked. The persistent locking setting
       determines what happens when the parent is unlocked again.
 
+
       :rtype: bool
 
    .. py:method:: SetPersistentLocking(persistentLocking)
 
       Set the persistent locking setting for this layer
 
+
       :rtype: void
 
    .. py:method:: UnsetPersistentLocking()
 
       Remove any explicitly persistent locking settings from this layer
+
 
       :rtype: void

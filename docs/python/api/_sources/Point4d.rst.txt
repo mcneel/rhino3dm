@@ -14,6 +14,22 @@ Point4d
       :param float z: The Z (third) dimension.
       :param float w: The W (fourth) dimension, or weight.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of this point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of this point.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) coordinate of this point.
+
+   .. py:attribute:: W
+
+      float: Gets or sets the W (fourth) coordinate -or weight- of this point.
+
    .. py:method:: Encode()
 
       [todo] add documentation

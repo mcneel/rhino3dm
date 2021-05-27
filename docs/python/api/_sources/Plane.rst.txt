@@ -41,6 +41,22 @@ Plane
       Ax+By+Cz+D=0.
 
 
+   .. py:attribute:: Origin
+
+      rhino3dm.Point3d: Gets or sets the origin point of this plane.
+
+   .. py:attribute:: XAxis
+
+      rhino3dm.Vector3d: Gets or sets the X axis vector of this plane.
+
+   .. py:attribute:: YAxis
+
+      rhino3dm.Vector3d: Gets or sets the Y axis vector of this plane.
+
+   .. py:attribute:: ZAxis
+
+      rhino3dm.Vector3d: Gets or sets the Z axis vector of this plane.
+
    .. py:staticmethod:: WorldXY()
 
       [todo] add documentation

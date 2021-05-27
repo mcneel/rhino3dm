@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MeshFaceList &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>MeshFaceList &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -410,9 +411,18 @@ Subsequent calls can add new items.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of quads that were converted to triangles.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>planarTolerance</strong> (<em>float</em>) – If planarTolerance &gt;= 0, then a quad is split if its vertices are not coplanar. If both planarTolerance = Rhino.RhinoMath.UnsetValue and angleToleranceRadians &gt;= 0.0, then the planarity test is skipped.</li>
+<li><strong>angleToleranceRadians</strong> (<em>float</em>) – If angleToleranceRadians &gt;= 0.0, then a quad is split if the angle between opposite corner normals is &gt; angleToleranceRadians. The corner normal is the normal to the triangle formed by two adjacent edges and the diagonal connecting their endpoints. A quad has four corner normals. If both angleToleranceRadians = Rhino.RhinoMath.UnsetValue and planarTolerance &gt;= 0.0, then the corner normal angle test is skipped.</li>
+<li><strong>splitMethod</strong> (<em>int</em>) – 0 default Currently divides along the short diagonal. This may be changed as better methods are found or preferences change. By passing zero, you let the developers of this code decide what’s best for you over time. 1 divide along the short diagonal 2 divide along the long diagonal 3 minimize resulting area 4 maximize resulting area 5 minimize angle between triangle normals 6 maximize angle between triangle normals</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Number of quads that were converted to triangles.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -426,9 +436,17 @@ Subsequent calls can add new items.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True on success, False on failure.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>angleToleranceRadians</strong> (<em>float</em>) – Used to compare adjacent triangles’ face normals. For two triangles to be considered, the angle between their face normals has to be &lt;= angleToleranceRadians. When in doubt use RhinoMath.PI/90.0 (2 degrees).</li>
+<li><strong>minimumDiagonalLengthRatio</strong> (<em>float</em>) – ( &lt;= 1.0) For two triangles to be considered the ratio of the resulting quad’s diagonals (length of the shortest diagonal)/(length of longest diagonal). has to be &gt;= minimumDiagonalLengthRatio. When in doubt us .875.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -462,9 +480,11 @@ A face is hidden if, and only if, at least one of its vertices is hidden.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if hidden, False if fully visible.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>faceIndex</strong> (<em>int</em>) – A face index.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if hidden, False if fully visible.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>
@@ -479,9 +499,11 @@ connected to any other faces.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if that face makes the mesh open, otherwise false.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>faceIndex</strong> (<em>int</em>) – A face index.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if that face makes the mesh open, otherwise false.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>

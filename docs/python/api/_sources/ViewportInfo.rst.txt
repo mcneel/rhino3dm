@@ -104,6 +104,7 @@ ViewportInfo
       :param bool symmetricFrustum: True if you want the resulting frustum to be symmetric.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: ChangeToPerspectiveProjection(targetDistance, symmetricFrustum, lensLength)
@@ -127,6 +128,7 @@ ViewportInfo
          then this parameter is ignored.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: ChangeToTwoPointPerspectiveProjection(targetDistance, up, lensLength)
@@ -153,6 +155,7 @@ ViewportInfo
          then this parameter is ignored.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: SetCameraLocation(location)
@@ -160,6 +163,7 @@ ViewportInfo
       Sets the camera location (position) point.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: SetCameraDirection(direction)
@@ -169,6 +173,7 @@ ViewportInfo
       :param rhino3dm.Vector3d direction: A new direction.
 
       :return: True if the direction was set; otherwise false.
+
       :rtype: bool
 
    .. py:method:: SetCameraUp(up)
@@ -178,6 +183,7 @@ ViewportInfo
       :param rhino3dm.Vector3d up: A new direction.
 
       :return: True if the direction was set; otherwise false.
+
       :rtype: bool
 
    .. py:method:: SetFrustum(left, right, bottom, top, near, far)
@@ -194,6 +200,7 @@ ViewportInfo
       :param float farDistance: A new far distance value.
 
       :return: True if operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: GetFrustum()
@@ -219,7 +226,15 @@ ViewportInfo
       /                     port_bottom, port_top,
       /                     port_near, port_far );
 
+      :param int left: A left value.
+      :param int right: A left value. (port_left != port_right)
+      :param int bottom: A bottom value.
+      :param int top: A top value. (port_top != port_bottom)
+      :param int near: A near value.
+      :param int far: A far value.
+
       :return: True if input is valid.
+
       :rtype: bool
 
    .. py:method:: GetScreenPort()
@@ -228,6 +243,7 @@ ViewportInfo
       See documentation for SetScreenPort.
 
       :return: The rectangle, or Empty rectangle on error.
+
       :rtype: System.Drawing.Rectangle
 
    .. py:method:: GetXform(sourceCoordinateSystem, destinationCoordinateSystem)
@@ -238,6 +254,7 @@ ViewportInfo
       :param CoordinateSystem destinationSystem: The coordinate system to map into.
 
       :return: The 4x4 transformation matrix (acts on the left).
+
       :rtype: Transform
 
    .. py:method:: Extents(halfViewAngleRadians, worldBbox)
@@ -251,6 +268,7 @@ ViewportInfo
       :param rhino3dm.BoundingBox bbox: A bounding box in 3d world coordinates.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: DollyExtents(bbox, border)
@@ -260,6 +278,7 @@ ViewportInfo
       If the projection is perspective, the camera angle is not changed.
 
       :return: True if successful.
+
       :rtype: bool
 
    .. py:method:: FrustumCenterPoint(targetDistance)
@@ -278,6 +297,7 @@ ViewportInfo
 
       :return: A point on the frustum's central axis.  If the viewport or input \
          is not valid, then ON_3dPoint::UnsetPoint is returned.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: TargetDistance(useFrustumCenterFallback)
@@ -296,4 +316,5 @@ ViewportInfo
          If the target point is on the visible side of the camera, \
          a positive value is returned.  ON_UNSET_VALUE is returned \
          when the input of view is not valid.
+
       :rtype: float

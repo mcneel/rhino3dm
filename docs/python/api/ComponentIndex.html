@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ComponentIndex &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>ComponentIndex &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -261,6 +262,54 @@
 <dt id="rhino3dm.ComponentIndex.ComponentIndex">
 <code class="descname">ComponentIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ComponentIndex.ComponentIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>ComponentIndex constructor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ComponentIndex.ComponentIndexType">
+<code class="descname">ComponentIndexType</code><a class="headerlink" href="#rhino3dm.ComponentIndex.ComponentIndexType" title="Permalink to this definition">¶</a></dt>
+<dd><p>ComponentIndexType: The interpretation of Index depends on the Type value.
+Type             m_index interpretation (0 based indices)
+no_type            used when context makes it clear what array is being index
+brep_vertex        Brep.m_V[] array index
+brep_edge          Brep.m_E[] array index
+brep_face          Brep.m_F[] array index
+brep_trim          Brep.m_T[] array index
+brep_loop          Brep.m_L[] array index
+mesh_vertex        Mesh.m_V[] array index
+meshtop_vertex     MeshTopology.m_topv[] array index
+meshtop_edge       MeshTopology.m_tope[] array index
+mesh_face          Mesh.m_F[] array index
+idef_part          InstanceDefinition.m_object_uuid[] array index
+polycurve_segment  PolyCurve::m_segment[] array index
+dim_linear_point   LinearDimension2::POINT_INDEX
+dim_radial_point   RadialDimension2::POINT_INDEX
+dim_angular_point  AngularDimension2::POINT_INDEX
+dim_ordinate_point OrdinateDimension2::POINT_INDEX
+dim_text_point     TextEntity2 origin point.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.ComponentIndex.Index">
+<code class="descname">Index</code><a class="headerlink" href="#rhino3dm.ComponentIndex.Index" title="Permalink to this definition">¶</a></dt>
+<dd><p>int: The interpretation of m_index depends on the m_type value.
+m_type             m_index interpretation (0 based indices)
+no_type            used when context makes it clear what array is being index
+brep_vertex        Brep.m_V[] array index
+brep_edge          Brep.m_E[] array index
+brep_face          Brep.m_F[] array index
+brep_trim          Brep.m_T[] array index
+brep_loop          Brep.m_L[] array index
+mesh_vertex        Mesh.m_V[] array index
+meshtop_vertex     MeshTopology.m_topv[] array index
+meshtop_edge       MeshTopology.m_tope[] array index
+mesh_face          Mesh.m_F[] array index
+idef_part          InstanceDefinition.m_object_uuid[] array index
+polycurve_segment  PolyCurve::m_segment[] array index
+dim_linear_point   LinearDimension2::POINT_INDEX
+dim_radial_point   RadialDimension2::POINT_INDEX
+dim_angular_point  AngularDimension2::POINT_INDEX
+dim_ordinate_point OrdinateDimension2::POINT_INDEX
+dim_text_point     TextEntity2 origin point.</p>
 </dd></dl>
 
 </dd></dl>

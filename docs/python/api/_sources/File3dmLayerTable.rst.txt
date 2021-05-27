@@ -21,6 +21,18 @@ File3dmLayerTable
 
       [todo] add documentation
 
+   .. py:method:: AddLayer(name, color)
+
+      Easy way to add a layer to the model
+
+      :param str name: new layer name
+      :param System.Drawing.Color color: new layer color
+
+      :return: If layer_name is valid, the layer's index (>=0) is returned. Otherwise, \
+         RhinoMath.UnsetIntIndex is returned.
+
+      :rtype: int
+
    .. py:method:: FindName(name, parentId)
 
       Finds a Layer given its name.
@@ -29,6 +41,7 @@ File3dmLayerTable
       :param Guid parentId: The id of the parent Layer to be searched.
 
       :return: A Layer, or None on error.
+
       :rtype: Layer
 
    .. py:method:: FindIndex(index)
@@ -39,6 +52,7 @@ File3dmLayerTable
       :param int index: The index to search for.
 
       :return: A Layer object, or None if none was found.
+
       :rtype: Layer
 
    .. py:method:: FindId(id)
