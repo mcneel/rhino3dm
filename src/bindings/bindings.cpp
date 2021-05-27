@@ -80,3 +80,13 @@ BND_TUPLE CreateTuple(int count)
   return rc;
 #endif
 }
+
+BND_TUPLE NullTuple()
+{
+#if defined(ON_PYTHON_COMPILE)
+  return pybind11::none();
+#else
+  return emscripten::val::null();
+#endif
+}
+

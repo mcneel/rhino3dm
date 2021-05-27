@@ -128,6 +128,35 @@ CurveOrientation BND_Curve::ClosedCurveOrientation() const
   return CurveOrientation::Undefined;
 }
 
+BND_TUPLE BND_Curve::FrameAt(double t) const
+{
+  ON_Plane plane;
+  bool success = m_curve->FrameAt(t, plane);
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, BND_Plane::FromOnPlane(plane));
+  return rc;
+}
+
+BND_TUPLE BND_Curve::GetCurveParameterFromNurbsFormParameter(double nurbsParameter)
+{
+  double curve_t = 0;
+  bool success = m_curve->GetCurveParameterFromNurbFormParameter(nurbsParameter, &curve_t);
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, curve_t);
+  return rc;
+}
+
+BND_TUPLE BND_Curve::GetNurbsFormParameterFromCurveParameter(double curveParameter)
+{
+  double nurbs_t = 0;
+  bool success = m_curve->GetNurbFormParameterFromCurveParameter(curveParameter, &nurbs_t);
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, nurbs_t);
+  return rc;
+}
 
 BND_Curve* BND_Curve::Trim(double t0, double t1) const
 {
@@ -141,21 +170,19 @@ BND_Curve* BND_Curve::Trim(double t0, double t1) const
   return rc;
 }
 
-#if defined(ON_PYTHON_COMPILE)
-pybind11::object BND_Curve::Split(double t) const
+BND_TUPLE BND_Curve::Split(double t) const
 {
   ON_Curve* left = nullptr;
   ON_Curve* right = nullptr;
   if (m_curve->Split(t, left, right))
   {
-    pybind11::tuple rc(2);
-    rc[0] = BND_CommonObject::CreateWrapper(left, nullptr);
-    rc[1] = BND_CommonObject::CreateWrapper(right, nullptr);
+    BND_TUPLE rc = CreateTuple(2);
+    SetTuple(rc, 0, BND_CommonObject::CreateWrapper(left, nullptr));
+    SetTuple(rc, 1, BND_CommonObject::CreateWrapper(right, nullptr));
     return rc;
   }
-  return pybind11::none();
+  return NullTuple();
 }
-#endif
 
 
 BND_NurbsCurve* BND_Curve::ToNurbsCurve() const
@@ -166,6 +193,14 @@ BND_NurbsCurve* BND_Curve::ToNurbsCurve() const
   return new BND_NurbsCurve(nc, nullptr);
 }
 
+BND_NurbsCurve* BND_Curve::ToNurbsCurve2(BND_Interval subdomain) const
+{
+  ON_Interval _subdomain(subdomain.m_t0, subdomain.m_t1);
+  ON_NurbsCurve* nc = m_curve->NurbsCurve(nullptr, 0, &_subdomain);
+  if (nullptr == nc)
+    return nullptr;
+  return new BND_NurbsCurve(nc, nullptr);
+}
 
 
 #if defined(ON_PYTHON_COMPILE)
@@ -251,10 +286,16 @@ void initCurveBindings(pybind11::module& m)
     .def("SetStartPoint", &BND_Curve::SetStartPoint, py::arg("point"))
     .def("SetEndPoint", &BND_Curve::SetEndPoint, py::arg("point"))
     .def("TangentAt", &BND_Curve::TangentAt, py::arg("t"))
+    .def_property_readonly("TangentAtStart", &BND_Curve::TangentAtStart)
+    .def_property_readonly("TangentAtEnd", &BND_Curve::TangentAtEnd)
     .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
+    .def("FrameAt", &BND_Curve::FrameAt, py::arg("t"))
+    .def("GetCurveParameterFromNurbsFormParameter", &BND_Curve::GetCurveParameterFromNurbsFormParameter, py::arg("nurbsParameter"))
+    .def("GetNurbsFormParameterFromCurveParameter", &BND_Curve::GetNurbsFormParameterFromCurveParameter, py::arg("curveParameter"))
     .def("Trim", &BND_Curve::Trim, py::arg("t0"), py::arg("t1"))
     .def("Split", &BND_Curve::Split, py::arg("t"))
     .def("ToNurbsCurve", &BND_Curve::ToNurbsCurve)
+    .def("ToNurbsCurve", &BND_Curve::ToNurbsCurve2, py::arg("subdomain"))
     ;
 }
 #endif
@@ -289,8 +330,14 @@ void initCurveBindings(void*)
     .function("setStartPoint", &BND_Curve::SetStartPoint)
     .function("setEndPoint", &BND_Curve::SetEndPoint)
     .function("tangentAt", &BND_Curve::TangentAt)
+    .property("tangentAtStart", &BND_Curve::TangentAtStart)
+    .property("tangentAtEnd", &BND_Curve::TangentAtEnd)
     .function("curvatureAt", &BND_Curve::CurvatureAt)
+    .function("frameAt", &BND_Curve::FrameAt)
+    .function("getCurveParameterFromNurbsFormParameter", &BND_Curve::GetCurveParameterFromNurbsFormParameter)
+    .function("getNurbsFormParameterFromCurveParameter", &BND_Curve::GetNurbsFormParameterFromCurveParameter)
     .function("trim", &BND_Curve::Trim, allow_raw_pointers())
+    .function("split", &BND_Curve::Split, allow_raw_pointers())
     .function("toNurbsCurve", &BND_Curve::ToNurbsCurve, allow_raw_pointers())
     ;
 }

@@ -121,24 +121,23 @@ public:
   bool SetStartPoint(ON_3dPoint point) { return m_curve->SetStartPoint(point); }
   bool SetEndPoint(ON_3dPoint point) { return m_curve->SetEndPoint(point); }
   ON_3dVector TangentAt(double t) const { return m_curve->TangentAt(t); }
-  // public Vector3d TangentAtStart {get;}
-  // public Vector3d TangentAtEnd {get;}
-  // public bool FrameAt(double t, out Plane plane)
+  ON_3dVector TangentAtStart() const { return m_curve->TangentAt(m_curve->Domain().Min()); }
+  ON_3dVector TangentAtEnd() const { return m_curve->TangentAt(m_curve->Domain().Max()); }
+  BND_TUPLE FrameAt(double t) const;
   // public Vector3d[] DerivativeAt(double t, int derivativeCount)
   // public Vector3d[] DerivativeAt(double t, int derivativeCount, CurveEvaluationSide side)
   ON_3dVector CurvatureAt(double t) const { return m_curve->CurvatureAt(t); }
   // public bool IsContinuous(Continuity continuityType, double t)
   // public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, out double t)
-  // public bool GetCurveParameterFromNurbsFormParameter(double nurbsParameter, out double curveParameter)
-  // public bool GetNurbsFormParameterFromCurveParameter(double curveParameter, out double nurbsParameter)
+  BND_TUPLE GetCurveParameterFromNurbsFormParameter(double nurbsParameter);
+  BND_TUPLE GetNurbsFormParameterFromCurveParameter(double curveParameter);
   BND_Curve* Trim(double t0, double t1) const;
   // public Curve Trim(Interval domain)
-#if defined(ON_PYTHON_COMPILE)
-  pybind11::object Split(double t) const;
-#endif
+
+  BND_TUPLE Split(double t) const;
   // public Curve[] Split(IEnumerable<double> t)
   // public int HasNurbsForm()
   class BND_NurbsCurve* ToNurbsCurve() const;
-  // public NurbsCurve ToNurbsCurve(Interval subdomain)
+  class BND_NurbsCurve* ToNurbsCurve2(BND_Interval subdomain) const;
   // public Interval SpanDomain(int spanIndex)
 };
