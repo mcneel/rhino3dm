@@ -39,8 +39,11 @@ public:
   //public DimensionStyle.LengthDisplay AlternateDimensionLengthDisplay{ get; set; }
   //public char DecimalSeparator{ get; set; }
   //public Plane Plane{ get; set; }
-  //string GetText(bool rich)
   //public string GetPlainTextWithRunMap(ref int[] map)
+  std::wstring RichText() const;
+  //void SetRichText(const std::wstring& rtf);
+  std::wstring PlainText() const;
+  //void SetPlainText(const std::wstring& text);
   //public string RichText{ get; set; }
   //public string PlainText{ get; set; }
   //public string PlainTextWithFields{ get; }

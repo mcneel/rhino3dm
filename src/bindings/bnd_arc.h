@@ -36,20 +36,25 @@ public:
   ON_3dPoint StartPoint() const { return m_arc.StartPoint(); }
   ON_3dPoint MidPoint() const { return m_arc.MidPoint(); }
   ON_3dPoint EndPoint() const { return m_arc.EndPoint(); }
-  //public Interval AngleDomain{ get; set; }
-  //public double StartAngle{ get; set; }
-  //public double EndAngle{ get; set; }
+  BND_Interval AngleDomain() const;
+  void SetAngleDomain(BND_Interval interval);
+  double StartAngle() const;
+  void SetStartAngle(double t);
+  double EndAngle() const;
+  void SetEndAngle(double t);
   double GetAngleRadians() const { return m_arc.AngleRadians(); }
   void SetAngleRadians(double a) { m_arc.SetAngleRadians(a); }
-  //public double StartAngleDegrees{ get; set; }
-  //public double EndAngleDegrees{ get; set; }
+  double StartAngleDegrees() const;
+  void SetStartAngleDegrees(double t);
+  double EndAngleDegrees() const;
+  void SetEndAngleDegrees(double t);
   double GetAngleDegrees() const { return m_arc.AngleDegrees(); }
   void SetAngleDegrees(double a) { m_arc.SetAngleDegrees(a); }
   bool Trim(const class BND_Interval& domain);
   BND_BoundingBox BoundingBox() const;
   ON_3dPoint PointAt(double t) const { return m_arc.PointAt(t); }
   ON_3dVector TangentAt(double t) const { return m_arc.TangentAt(t); }
-  //public double ClosestParameter(Point3d testPoint)
+  double ClosestParameter(ON_3dPoint testPoint) const;
   ON_3dPoint ClosestPoint(ON_3dPoint testPoint) const { return m_arc.ClosestPointTo(testPoint); }
   void Reverse() { m_arc.Reverse(); }
   bool Transform(const class BND_Transform& xform);

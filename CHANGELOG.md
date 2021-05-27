@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.6.0] - Unreleased
 ### Added
+- (js, py) AnnotationBase.RichText and PlainText properties
+- (js, py) Arc.AngleDomain, StartAngle, EndAngle, StartAngleRadians, EndAngleRadians properties
+- (js, py) Arc.ClosestParameter function
+- (js, py) BezierCurve.ToNurbsCurve and Split function
+- (js, py) Surface.SetDomain, GetSpanVector, IsoCurve, GetSurfaceParameterFromNurbsFormParameter, and GetNurbsFormParameterFromSurfaceParameter functions
 - (js, py) Curve.TangentAtStart and TangentAtEnd properties
 - (js, py) Curve.FrameAt, GetCurveParameterFromNurbsFormParameter, and GetNurbsFormParameterFromCurveParameter functions
 
