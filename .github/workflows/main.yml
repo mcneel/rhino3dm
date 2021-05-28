@@ -3,16 +3,102 @@ on: [push]
 
 jobs:
   build_js:
+    name: Build rhino3dm.js
     runs-on: ubuntu-latest
     container:
       image: emscripten/emsdk:2.0.10
-    name: Building rhino3dm.js
     steps:
-      - run: python3 --version && emcc --version && cmake --version
-      - uses: actions/checkout@v2
-      - run: git submodule update --init
-      - run: python3 src/build_javascript.py
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build js
+        run: python3 src/build_javascript.py
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: src/build/artifacts_js
+  build_py2:
+    name: Build rhino3dm.py 2
+    runs-on: ubuntu-latest
+    container:
+      image: mcneel/rhino3dm-dev:latest
+    steps:
+      - name: info
+        run: python2 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py2
+        run: python2 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /src/rhino3dm
+  build_py3:
+    name: Build rhino3dm.py 3
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8-slim-buster
+    steps:
+      - name: install dependencies
+        run: apt update && apt install -yy git cmake gcc g++
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3
+        run: python3 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /src/rhino3dm
+  build_dotnet:
+    name: Build dotnet
+    runs-on: ubuntu-latest
+    container:
+      image: mcneel/rhino3dm-dev:latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p linux
+      - name: setup
+        run: python3 script/setup.py -p linux -v
+      - name: build dotnet
+        run: python3 script/build.py -p linux -v
+        #todo artifacts
+  build_dotnet_amzn2:
+    name: Build dotnet amzn2
+    runs-on: ubuntu-latest
+    container:
+      image: mcneel/rhino3dm-dev-amzn2:latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p linux
+      - name: setup
+        run: python3 script/setup.py -p linux -v
+      - name: build dotnet
+        run: python3 script/build.py -p linux -v
+        #todo artifacts
+
+      
+
+      
+
+    
