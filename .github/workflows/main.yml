@@ -8,4 +8,4 @@ jobs:
       image: emsdk:2.0.10
     name: Building rhino3dm.js
     steps:
-      - python3 --version && emcc --version && cmake --version
+      - run: python3 --version && emcc --version && cmake --version
