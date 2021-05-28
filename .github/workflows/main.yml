@@ -20,6 +20,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: src/build/artifacts_js
+          name: rhino3dm.js
   build_py2:
     name: Build rhino3dm.py 2
     runs-on: ubuntu-latest
@@ -83,6 +84,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: src/build/linux/dotnet/Rhino3dm.dll
+          name: rhino3dm.net
 
   build_dotnet_amzn2:
     name: Build dotnet amzn2
@@ -106,6 +108,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: src/build/linux/dotnet/Rhino3dm.dll
+          name: name: rhino3dm_amzn2.net
 
         
 
