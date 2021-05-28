@@ -11,10 +11,17 @@ jobs:
         uses: mcneel/rhino3dm@WIP/actions
         with:
           who-to-greet: 'Mona the Octocat'
+          tags: emcc-image
       # Use the output from the `hello` step
       - name: Get the output time
         run: echo "The time was ${{ steps.hello.outputs.time }}"
-      - uses: actions/checkout@v2
-      - run: git submodule update --init
-      - run: python3 --version && emcc --version && cmake --version
-      - run: python3 src/build_javascript.py
+      - uses: addnab/docker-run-action@v3
+        with:
+          image: emcc-image
+          run: |
+            python3 --version
+            emcc --version
+      # - uses: actions/checkout@v2
+      # - run: git submodule update --init
+      # - run: python3 --version && emcc --version && cmake --version
+      # - run: python3 src/build_javascript.py
