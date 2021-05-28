@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: info
         run: python2 --version && cmake --version && git --version
+      - name: install dependencies
+        run: apt-get install python-setuptools
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
@@ -55,8 +57,6 @@ jobs:
   build_dotnet:
     name: Build dotnet
     runs-on: ubuntu-latest
-    container:
-      image: mcneel/rhino3dm-dev:latest
     steps:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
