@@ -27,7 +27,7 @@ jobs:
       image: mcneel/rhino3dm-dev:latest
     steps:
       - name: info
-        run: python2 --version && cmake --version
+        run: python2 --version && cmake --version && git --version
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
@@ -61,7 +61,7 @@ jobs:
       image: mcneel/rhino3dm-dev:latest
     steps:
       - name: info
-        run: python3 --version && cmake --version && dotnet --version
+        run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
