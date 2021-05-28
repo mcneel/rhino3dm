@@ -9,3 +9,5 @@ jobs:
     name: Building rhino3dm.js
     steps:
       - run: python3 --version && emcc --version && cmake --version
+      - run: git submodule update --init
+      - run: python3 src/build_javascript.py
