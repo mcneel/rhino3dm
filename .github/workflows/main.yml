@@ -12,3 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: git submodule update --init
       - run: python3 src/build_javascript.py
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/artifacts_js
