@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: info
-        run: python2 --version && cmake --version && git --version
+        run: python2 --version && cmake --version && git --version && pip show wheel
       - name: install dependencies
         run: |
           sudo apt update && sudo apt install -yy python-setuptools
