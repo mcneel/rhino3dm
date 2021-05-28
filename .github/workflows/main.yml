@@ -8,6 +8,7 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
+        uses: actions/checkout@v2
         uses: ./.github/actions/action
         with:
           who-to-greet: 'Mona the Octocat'
