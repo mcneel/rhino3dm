@@ -25,11 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: info
-        run: python2 --version && cmake --version && git --version && pip show wheel
+        run: python2 --version && cmake --version && git --version
       - name: install dependencies
         run: |
           sudo apt update && sudo apt install -yy python-setuptools
-          python -m pip install wheel
+          python2 -m pip install wheel
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
