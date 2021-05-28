@@ -23,11 +23,7 @@ jobs:
   build_py2:
     name: Build rhino3dm.py 2
     runs-on: ubuntu-latest
-    container:
-      image: mcneel/rhino3dm-dev:latest
     steps:
-      - name: update
-        run: apt update && apt install
       - name: info
         run: python2 --version && cmake --version && git --version
       - name: checkout
