@@ -6,9 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to say hello
     steps:
+      - uses: actions/checkout@v2
       - name: Hello world action step
         id: hello
-        uses: actions/checkout@v2
         uses: ./.github/actions/action
         with:
           who-to-greet: 'Mona the Octocat'
