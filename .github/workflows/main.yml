@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: info
         run: python2 --version && cmake --version && git --version
+      - name: update git
+        run: git update
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
