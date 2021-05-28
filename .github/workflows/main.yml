@@ -2,19 +2,10 @@ name: Docker build
 on: [push]
 
 jobs:
-  hello_world_job:
+  build_js:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    container:
+      image: emsdk:2.0.10
+    name: Building rhino3dm.js
     steps:
-      - name: Hello world action step
-        id: hello
-        uses: mcneel/rhino3dm@WIP/actions
-        with:
-          who-to-greet: 'Mona the Octocat'
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
-      # - uses: actions/checkout@v2
-      # - run: git submodule update --init
-      # - run: python3 --version && emcc --version && cmake --version
-      # - run: python3 src/build_javascript.py
+      - python3 --version && emcc --version && cmake --version
