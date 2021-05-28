@@ -6,10 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to say hello
     steps:
-      - uses: actions/checkout@v2
       - name: Hello world action step
         id: hello
-        uses: ./.github/actions/action
+        uses: mcneel/rhino3dm@WIP/actions
         with:
           who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
