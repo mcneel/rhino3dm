@@ -14,3 +14,5 @@ runs:
   image: 'Dockerfile'
   args:
     - ${{ inputs.who-to-greet }}
+  steps:
+    - run: python3 --version && emcc --version && cmake --version
