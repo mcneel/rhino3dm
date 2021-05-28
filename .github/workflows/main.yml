@@ -24,6 +24,13 @@ jobs:
     name: Build rhino3dm.py 2
     runs-on: ubuntu-latest
     steps:
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '2.x'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
       - name: info
         run: python2 --version && cmake --version && git --version
       - name: install dependencies
