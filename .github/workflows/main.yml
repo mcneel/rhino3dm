@@ -1,4 +1,4 @@
-name: Docker build
+name: build
 on: [push]
 
 jobs:
@@ -30,10 +30,8 @@ jobs:
         run: python2 --version && cmake --version
       - name: checkout
         uses: actions/checkout@v2
-      - name: list dir
-        run: ls
       - name: update submodules
-        run: git submodule update --init
+        run: ls && git submodule update --init
       - name: build py2
         run: python2 setup.py bdist_wheel
       #todo artifacts
@@ -66,10 +64,8 @@ jobs:
         run: python3 --version && cmake --version && dotnet --version
       - name: checkout
         uses: actions/checkout@v2
-      - name: list dir
-        run: ls
       - name: update submodules
-        run: git submodule update --init
+        run: ls && git submodule update --init
       - name: bootstrap
         run: python3 script/bootstrap.py -p linux
       - name: setup
