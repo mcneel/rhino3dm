@@ -27,7 +27,9 @@ jobs:
       - name: info
         run: python2 --version && cmake --version && git --version
       - name: install dependencies
-        run: sudo apt update && sudo apt install -yy python-setuptools && pip install wheel
+        run: |
+          sudo apt update && sudo apt install -yy python-setuptools
+          pip install wheel
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
