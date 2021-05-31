@@ -85,8 +85,6 @@ jobs:
     steps:
       - name: info
         run: python3 --version && cmake --version
-      - name: install dependencies
-        run: python3 -m pip install wheel
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
