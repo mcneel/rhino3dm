@@ -41,6 +41,7 @@ Cone
       This is synonymous with calling NurbsSurface.CreateFromCone().
 
       :return: A Nurbs surface representation of the cone or null.
+
       :rtype: NurbsSurface
 
    .. py:method:: ToBrep(capBottom)
@@ -54,4 +55,5 @@ Cone
       :param bool capBottom: True if the bottom should be filled with a surface. False otherwise.
 
       :return: A brep (polysurface) representation of this cone values.
+
       :rtype: rhino3dm.Brep

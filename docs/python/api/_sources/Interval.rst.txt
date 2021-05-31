@@ -11,3 +11,11 @@ Interval
 
       :param float t0: The first value.
       :param float t1: The second value.
+
+   .. py:attribute:: T0
+
+      float: Gets or sets the lower bound of the Interval.
+
+   .. py:attribute:: T1
+
+      float: Gets or sets the upper bound of the Interval.

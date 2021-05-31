@@ -47,6 +47,7 @@ NurbsCurve
       Gets a non-rational, degree 1 NURBS curve representation of the line.
 
       :return: Curve on success, None on failure.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:staticmethod:: CreateFromArc(arc)
@@ -56,6 +57,7 @@ NurbsCurve
       does not match arc's transcendental parameterization.
 
       :return: Curve on success, None on failure.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:staticmethod:: CreateFromCircle(circle)
@@ -68,6 +70,7 @@ NurbsCurve
       parameter and the transcendental parameter.
 
       :return: Curve on success, None on failure.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:staticmethod:: CreateFromEllipse(ellipse)
@@ -77,6 +80,7 @@ NurbsCurve
       with the transcendental parameterization of the ellipsis.
 
       :return: A NURBS curve representation of this ellipse or None if no such representation could be made.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:staticmethod:: Create(periodic, degree, points)
@@ -89,6 +93,7 @@ NurbsCurve
 
       :return: new NURBS curve on success \
          None on error.
+
       :rtype: rhino3dm.NurbsCurve
 
    .. py:method:: IncreaseDegree(desiredDegree)
@@ -99,6 +104,7 @@ NurbsCurve
          Degrees should be number between and including 1 and 11.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: MakePiecewiseBezier(setEndWeightsToOne)
@@ -110,6 +116,7 @@ NurbsCurve
          last spans are re-parameterized so that the end weights are one.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: Reparameterize(c)
@@ -124,6 +131,7 @@ NurbsCurve
          lambda'(0) = c and lambda'(1) = 1/c.
 
       :return: True if successful.
+
       :rtype: bool
 
    .. py:method:: GrevilleParameter(index)
@@ -133,6 +141,7 @@ NurbsCurve
 
       :param int index: Index of Greville (Edit) point.
 
+
       :rtype: float
 
    .. py:method:: GrevillePoint(index)
@@ -141,5 +150,6 @@ NurbsCurve
       to the control point at the specified index.
 
       :param int index: Index of Greville point.
+
 
       :rtype: rhino3dm.Point3d

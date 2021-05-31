@@ -44,6 +44,7 @@ Brep
 
       Create a brep representation of a mesh
 
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromBox(box)
@@ -53,6 +54,7 @@ Brep
       :param rhino3dm.BoundingBox box: A box to use for creation.
 
       :return: A new brep; or None on failure.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromBox(box)
@@ -62,6 +64,7 @@ Brep
       :param rhino3dm.BoundingBox box: A box to use for creation.
 
       :return: A new brep; or None on failure.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromCylinder(cylinder, capBottom, capTop)
@@ -76,6 +79,7 @@ Brep
          an edge along the cylinder seam, and vertices at the bottom and top ends of this \
          seam edge. The optional bottom/top caps are single faces with one circular edge \
          starting and ending at the bottom/top vertex.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromSphere(sphere)
@@ -85,6 +89,7 @@ Brep
       :param rhino3dm.Sphere sphere: The input sphere provides the orienting plane and radius.
 
       :return: A Brep if successful, None on error.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateQuadSphere(sphere)
@@ -94,6 +99,7 @@ Brep
       :param rhino3dm.Sphere sphere: The input sphere provides the orienting plane and radius.
 
       :return: A Brep if successful, None on error.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromCone(cone, capBottom)
@@ -108,6 +114,7 @@ Brep
       :param bool capBottom: if True the base of the cone should be capped.
 
       :return: A Brep if successful, None on error.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromRevSurface(surface, capStart, capEnd)
@@ -123,6 +130,7 @@ Brep
          added to close of the hole at the end of the revolute.
 
       :return: A Brep if successful, None on error.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateFromSurface(surface)
@@ -134,6 +142,7 @@ Brep
       :param rhino3dm.Surface surface: A surface to convert.
 
       :return: Resulting brep or None on failure.
+
       :rtype: rhino3dm.Brep
 
    .. py:staticmethod:: CreateTrimmedPlane(plane, curve)
@@ -144,10 +153,12 @@ Brep
       :param rhino3dm.Curve curve: A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.
 
       :return: Resulting brep or None on failure.
+
       :rtype: rhino3dm.Brep
 
    .. py:method:: Flip()
 
       Reverses entire brep orientation of all faces.
+
 
       :rtype: void

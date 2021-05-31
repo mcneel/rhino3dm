@@ -1,7 +1,7 @@
 # rhino3dm
 
 [![ci build](https://github.com/mcneel/rhino3dm/actions/workflows/ci_workflow.yml/badge.svg)](https://github.com/mcneel/rhino3dm/actions/workflows/ci_workflow.yml)
-[![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg)](https://discourse.mcneel.com/c/serengeti/rhino3dm)
+[![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg)](https://discourse.mcneel.com/c/rhino-developer/rhino3dm))
 [![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg)](https://pypi.org/project/rhino3dm)
 [![NuGet](https://img.shields.io/nuget/v/Rhino3dmIO.Desktop.svg?style=flat)](https://www.nuget.org/profiles/McNeel)
 [![npm](https://img.shields.io/npm/v/rhino3dm.svg)](https://www.npmjs.com/package/rhino3dm)

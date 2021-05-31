@@ -14,6 +14,9 @@ File3dmSettings
       rhino3dm.Point3d: Gets or sets the model base point that is used when the file is read as an instance definition.
       This point is mapped to the origin in the instance definition.
 
+   .. py:attribute:: EarthAnchorPoint
+
+
    .. py:attribute:: ModelAbsoluteTolerance
 
       float: Gets or sets the model space absolute tolerance.

@@ -130,7 +130,14 @@ namespace docgen
 
                             // only break if the parameter count is a match, otherwise keep searching
                             // and hope for a best match
-                            if (rhcommon.Methods[i].Item1.ParameterList.Parameters.Count == args.Length)
+                            var rhcommonParams = rhcommon.Methods[i].Item1.ParameterList.Parameters;
+                            int rhcommonParamCount = 0;
+                            foreach(var p in rhcommonParams)
+                            {
+                                if (!MethodDeclarationExtensions.IsOutParameter(p))
+                                    rhcommonParamCount++;
+                            }
+                            if (rhcommonParamCount == args.Length)
                                 break;
                         }
                     }
@@ -345,6 +352,11 @@ namespace docgen
                         }
                     }
 
+                    if (method == "linePlane")
+                    {
+                        int bh = 0;
+                    }
+
                     List<string> paramNames = new List<string>();
                     List<string> paramTypes = new List<string>();
                     if (doccomment == null)
@@ -378,7 +390,16 @@ namespace docgen
 
                     string returnType = "void";
                     if (methodDecl != null)
+                    {
                         returnType = ToTypeScriptType(methodDecl.ReturnType.ToString());
+                        bool hasOutParams = false;
+                        foreach(var p in methodDecl.ParameterList.Parameters)
+                        {
+                            hasOutParams |= MethodDeclarationExtensions.IsOutParameter(p);
+                        }
+                        if (hasOutParams)
+                            returnType = "object";
+                    }
 
                     if (isStatic)
                         js.AppendLine($"\t\tstatic {method}({parameters}): {returnType};");
@@ -466,12 +487,16 @@ namespace docgen
           out List<string> paramNames)
         {
             paramNames = new List<string>();
+            List<Tuple<string, string>> outparamDescriptions = new List<Tuple<string, string>>();
             StringBuilder js = new StringBuilder();
             string comment = doccomment.ToString();
             comment = comment.Replace("///", "");
             var doc = new System.Xml.XmlDocument();
             doc.LoadXml("<doc>" + comment + "</doc>");
             var nodes = doc.FirstChild.ChildNodes;
+
+            string returnText = "";
+
             foreach (var node in nodes)
             {
                 var element = node as System.Xml.XmlElement;
@@ -484,24 +509,66 @@ namespace docgen
                 }
                 else if (element.Name.Equals("returns", StringComparison.OrdinalIgnoreCase))
                 {
-                    var returnType = methodDecl.ReturnType;
-
-                    js.AppendLine($"   * @returns {{{ToJavascriptType(returnType.ToString())}}} {elementText}");
+                    returnText = $"{elementText}";
                 }
                 else if (element.Name.Equals("param", StringComparison.OrdinalIgnoreCase))
                 {
-                    string paramType = "";
                     string paramName = element.Attributes["name"].Value;
-                    paramNames.Add(paramName);
+                    ParameterSyntax rhcommonParam = null;
                     for (int j = 0; j < parameters.Parameters.Count; j++)
                     {
                         if (paramName.Equals(parameters.Parameters[j].Identifier.ToString()))
                         {
-                            paramType = parameters.Parameters[j].Type.ToString();
+                            rhcommonParam = parameters.Parameters[j];
                             break;
                         }
                     }
-                    js.AppendLine($"   * @param {{{ToJavascriptType(paramType)}}} {paramName} {elementText}");
+
+                    string paramType = rhcommonParam.Type.ToString();
+
+                    if (MethodDeclarationExtensions.IsOutParameter(rhcommonParam))
+                    {
+                        outparamDescriptions.Add(Tuple.Create(ToJavascriptType(paramType), elementText));
+                    }
+                    else
+                    {
+                        paramNames.Add(paramName);
+                        js.AppendLine($"   * @param {{{ToJavascriptType(paramType)}}} {paramName} {elementText}");
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(returnText))
+            {
+                List<string> returnTypes = new List<string>();
+                returnTypes.Add(ToJavascriptType(methodDecl.ReturnType.ToString()));
+                foreach(var p in methodDecl.ParameterList.Parameters)
+                {
+                    if (MethodDeclarationExtensions.IsOutParameter(p))
+                    {
+                        returnTypes.Add(ToJavascriptType(p.Type.ToString()));
+                    }
+                }
+
+                if(returnTypes.Count == 1)
+                {
+                    js.AppendLine($"   * @returns {{{returnTypes[0]}}} {returnText}");
+                }
+                if(returnTypes.Count > 1)
+                {
+                    js.Append($"   * @returns {{Array}} [{returnTypes[0]}");
+                    for (int i=1; i<returnTypes.Count; i++)
+                    {
+                        js.Append($", {returnTypes[i]}");
+                    }
+                    js.AppendLine("]");
+                    js.AppendLine("   * <ul style='list - style: none;'>");
+                    js.AppendLine($"   * <li> ({returnTypes[0]}) {returnText}");
+                    foreach(var pd in outparamDescriptions)
+                    {
+                        js.AppendLine($"   * <li> ({pd.Item1}) {pd.Item2}");
+                    }
+                    js.AppendLine("   * </ul>");
                 }
             }
             return js.ToString();
@@ -541,6 +608,9 @@ namespace docgen
           ParameterListSyntax parameters,
           out List<string> paramNames, out List<string> paramTypes)
         {
+            List<Tuple<string, string>> outParamDescriptions = new List<Tuple<string, string>>();
+            string returnText = "";
+
             paramNames = new List<string>();
             paramTypes = new List<string>();
             StringBuilder js = new StringBuilder();
@@ -561,27 +631,59 @@ namespace docgen
                 }
                 else if (element.Name.Equals("returns", StringComparison.OrdinalIgnoreCase))
                 {
-                    var returnType = methodDecl.ReturnType;
-
-                    js.AppendLine($"   * @returns {{{ToTypeScriptType(returnType.ToString())}}} {elementText}");
+                    returnText = elementText;
                 }
                 else if (element.Name.Equals("param", StringComparison.OrdinalIgnoreCase))
                 {
-                    string paramType = "";
+                    ParameterSyntax rhcommonParam = null;
                     string paramName = element.Attributes["name"].Value;
-                    paramNames.Add(paramName);
                     for (int j = 0; j < parameters.Parameters.Count; j++)
                     {
                         if (paramName.Equals(parameters.Parameters[j].Identifier.ToString()))
                         {
-                            paramType = parameters.Parameters[j].Type.ToString();
+                            rhcommonParam = parameters.Parameters[j];
                             break;
                         }
                     }
-                    paramTypes.Add(ToTypeScriptType(paramType));
-                    js.AppendLine($"   * @param {{{ToTypeScriptType(paramType)}}} {paramName} {elementText}");
+                    if (MethodDeclarationExtensions.IsOutParameter(rhcommonParam))
+                    {
+                        string paramType = rhcommonParam.Type.ToString();
+                        outParamDescriptions.Add(Tuple.Create(paramType, elementText));
+                    }
+                    else
+                    {
+                        string paramType = rhcommonParam.Type.ToString();
+                        paramNames.Add(paramName);
+                        paramTypes.Add(ToTypeScriptType(paramType));
+                        js.AppendLine($"   * @param {{{ToTypeScriptType(paramType)}}} {paramName} {elementText}");
+                    }
                 }
             }
+
+            if (outParamDescriptions.Count == 0)
+            {
+                var returnType = methodDecl.ReturnType;
+                js.AppendLine($"   * @returns {{{ToTypeScriptType(returnType.ToString())}}} {returnText}");
+            }
+            else
+            {
+                var returnType = methodDecl.ReturnType;
+                js.Append($"   * @returns {{Array}} [{ToTypeScriptType(returnType.ToString())}");
+                for (int i = 0; i < outParamDescriptions.Count; i++)
+                {
+                    string t = ToTypeScriptType(outParamDescriptions[i].Item1);
+                    js.Append($", {t}");
+                }
+                js.AppendLine("]");
+                js.AppendLine($"   * ({ToTypeScriptType(returnType.ToString())}) {returnText}");
+                for (int i = 0; i < outParamDescriptions.Count; i++)
+                {
+                    string t = ToTypeScriptType(outParamDescriptions[i].Item1);
+                    js.AppendLine($"   * ({t}) {outParamDescriptions[i].Item2}");
+                }
+            }
+
+
             return js.ToString();
         }
 

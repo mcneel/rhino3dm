@@ -37,6 +37,7 @@ Box
       :param float z: Unitized parameter (between 0 and 1 is inside the box) along box Z direction.
 
       :return: The point at (x,y,z).
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: ClosestPoint(point)
@@ -46,6 +47,7 @@ Box
       :param rhino3dm.Point3d point: Sample point.
 
       :return: The point on or in the box that is closest to the sample point.
+
       :rtype: rhino3dm.Point3d
 
    .. py:method:: Transform(xform)
@@ -56,4 +58,5 @@ Box
       :param Transform xform: Transformation matrix to apply to this Box.
 
       :return: True if the Box was successfully transformed, False if otherwise.
+
       :rtype: bool

@@ -19,11 +19,11 @@ protected:
 public:
   BND_Surface(ON_Surface* surface, const ON_ModelComponentReference* compref);
   bool IsSolid() const { return m_surface->IsSolid(); }
-  //public virtual bool SetDomain(int direction, Interval domain)
+  bool SetDomain(int direction, BND_Interval domain) { return m_surface->SetDomain(direction, domain.m_t0, domain.m_t1); }
   int Degree(int direction) const { return m_surface->Degree(direction); }
   int SpanCount(int direction) const { return m_surface->SpanCount(direction); }
   BND_Interval Domain(int direction) const { return m_surface->Domain(direction); }
-  //public double[] GetSpanVector(int direction)
+  BND_TUPLE GetSpanVector(int direction);
   //public Surface Reverse(int direction)
   //public Surface Reverse(int direction, bool inPlace)
   //public Surface Transpose()
@@ -44,12 +44,12 @@ public:
   //public bool GetNextDiscontinuity(int direction, Continuity continuityType, double t0, double t1, out double t)
   //public Surface Trim(Interval u, Interval v)
   //public bool Evaluate(double u, double v, int numberDerivatives, out Point3d point, out Vector3d[] derivatives)
-  //public Curve IsoCurve(int direction, double constantParameter)
+  class BND_Curve* IsoCurve(int direction, double constantParameter) const;
   //public Surface[] Split(int direction, double parameter)
   //public Brep ToBrep()
   //public int HasNurbsForm()
-  BND_NurbsSurface* ToNurbsSurfaceDefault() { return std::get<0>(ToNurbsSurface(0.0)); }
-  std::tuple<BND_NurbsSurface*, int> ToNurbsSurface(double tolerance);
+  BND_NurbsSurface* ToNurbsSurfaceDefault() const;
+  BND_TUPLE ToNurbsSurface(double tolerance) const;
   bool IsPlanar(double tolerance = ON_ZERO_TOLERANCE) const { return m_surface->IsPlanar(nullptr, tolerance); }
   //public bool TryGetPlane(out Plane plane)
   //public bool TryGetPlane(out Plane plane, double tolerance)
@@ -66,6 +66,6 @@ public:
   bool IsTorus(double tolerance = ON_ZERO_TOLERANCE) const { return m_surface->IsTorus(nullptr, tolerance); }
   //public bool TryGetTorus(out Torus torus)
   //public bool TryGetTorus(out Torus torus, double tolerance)
-  //public bool GetSurfaceParameterFromNurbsFormParameter(double nurbsS, double nurbsT, out double surfaceS, out double surfaceT)
-  //public bool GetNurbsFormParameterFromSurfaceParameter(double surfaceS, double surfaceT, out double nurbsS, out double nurbsT)
+  BND_TUPLE GetSurfaceParameterFromNurbsFormParameter(double nurbsS, double nurbsT) const;
+  BND_TUPLE GetNurbsFormParameterFromSurfaceParameter(double surfaceS, double surfaceT) const;
 };

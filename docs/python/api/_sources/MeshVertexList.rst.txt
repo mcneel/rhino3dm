@@ -33,12 +33,14 @@ MeshVertexList
 
       Clears the Vertex list on the mesh.
 
+
       :rtype: void
 
    .. py:method:: Destroy()
 
       Releases all memory allocated to store faces. The list capacity will be 0 after this call.
       Subsequent calls can add new items.
+
 
       :rtype: void
 
@@ -51,6 +53,7 @@ MeshVertexList
       :param float z: Z component of new vertex coordinate.
 
       :return: The index of the newly added vertex.
+
       :rtype: int
 
    .. py:method:: IsHidden(vertexIndex)
@@ -60,6 +63,7 @@ MeshVertexList
       :param int vertexIndex: Index of vertex to query.
 
       :return: True if the vertex is hidden, False if it is not.
+
       :rtype: bool
 
    .. py:method:: Hide(vertexIndex)
@@ -67,6 +71,7 @@ MeshVertexList
       Hides the vertex at the given index.
 
       :param int vertexIndex: Index of vertex to hide.
+
 
       :rtype: void
 
@@ -76,17 +81,20 @@ MeshVertexList
 
       :param int vertexIndex: Index of vertex to show.
 
+
       :rtype: void
 
    .. py:method:: HideAll()
 
       Hides all vertices in the mesh.
 
+
       :rtype: void
 
    .. py:method:: ShowAll()
 
       Shows all vertices in the mesh.
+
 
       :rtype: void
 
@@ -95,11 +103,17 @@ MeshVertexList
       Removes all vertices that are currently not used by the Face list.
 
       :return: The number of unused vertices that were removed.
+
       :rtype: int
 
    .. py:method:: CombineIdentical()
 
       Merges identical vertices.
 
+      :param bool ignoreNormals: If true, vertex normals will not be taken into consideration when comparing vertices.
+      :param bool ignoreAdditional: If true, texture coordinates, colors, and principal curvatures \
+         will not be taken into consideration when comparing vertices.
+
       :return: True if the mesh is changed, in which case the mesh will have fewer vertices than before.
+
       :rtype: bool

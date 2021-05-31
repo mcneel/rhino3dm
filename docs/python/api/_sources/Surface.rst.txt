@@ -9,6 +9,17 @@ Surface
 
       bool: Gets a values indicating whether a surface is solid.
 
+   .. py:method:: SetDomain(direction, domain)
+
+      Sets the domain in a direction.
+
+      :param int direction: 0 sets first parameter's domain, 1 sets second parameter's domain.
+      :param rhino3dm.Interval domain: A new domain to be assigned.
+
+      :return: True if setting succeeded, otherwise false.
+
+      :rtype: bool
+
    .. py:method:: Degree(direction)
 
       Returns the maximum algebraic degree of any span
@@ -17,6 +28,7 @@ Surface
       :param int direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
 
       :return: The maximum degree.
+
       :rtype: int
 
    .. py:method:: SpanCount(direction)
@@ -26,6 +38,7 @@ Surface
       :param int direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
 
       :return: The span count.
+
       :rtype: int
 
    .. py:method:: PointAt(u, v)
@@ -36,7 +49,43 @@ Surface
       :param float v: evaluation parameters.
 
       :return: Point3d.Unset on failure.
+
       :rtype: rhino3dm.Point3d
+
+   .. py:method:: FrameAt(u, v)
+
+      Computes the orient plane on a surface given a U and V parameter.
+      This is the simple evaluation call with no error handling.
+
+      :param float u: A first parameter.
+      :param float v: A second parameter.
+
+      :return: tuple (bool, rhino3dm.Plane)
+
+         - True if this operation succeeded; otherwise false.
+         - A frame plane that will be computed during this call. \
+
+      :rtype: (bool, rhino3dm.Plane)
+
+   .. py:method:: Domain(direction)
+
+      Gets the domain in a direction.
+
+      :param int direction: 0 gets first parameter, 1 gets second parameter.
+
+      :return: An interval value.
+
+      :rtype: rhino3dm.Interval
+
+   .. py:method:: GetSpanVector(direction)
+
+      Gets array of span "knots".
+
+      :param int direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :return: An array with span vectors; or None on error.
+
+      :rtype: float[]
 
    .. py:method:: NormalAt(u, v)
 
@@ -47,6 +96,7 @@ Surface
       :param float v: A V parameter.
 
       :return: The normal.
+
       :rtype: rhino3dm.Vector3d
 
    .. py:method:: IsClosed(direction)
@@ -56,6 +106,7 @@ Surface
       :param int direction: 0 = U, 1 = V.
 
       :return: The indicating boolean value.
+
       :rtype: bool
 
    .. py:method:: IsPeriodic(direction)
@@ -65,6 +116,7 @@ Surface
       :param int direction: 0 = U, 1 = V.
 
       :return: The indicating boolean value.
+
       :rtype: bool
 
    .. py:method:: IsSingular(side)
@@ -75,6 +127,7 @@ Surface
          0 = south, 1 = east, 2 = north, 3 = west.
 
       :return: True if this specific side of the surface is singular; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: IsAtSingularity(u, v, exact)
@@ -87,6 +140,7 @@ Surface
          If false, test if close enough to cause numerical problems.
 
       :return: True if surface is singular at (s,t)
+
       :rtype: bool
 
    .. py:method:: IsAtSeam(u, v)
@@ -100,7 +154,25 @@ Surface
          1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) \
          2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) \
          3 if 1 and 2 are true.
+
       :rtype: int
+
+   .. py:method:: IsoCurve(direction, constantParameter)
+
+      Gets isoparametric curve.
+
+      :param int direction: 0 first parameter varies and second parameter is constant \
+         e.g., point on IsoCurve(0,c) at t is srf(t,c) \
+         This is a horizontal line from left to right \
+         \
+         1 first parameter is constant and second parameter varies \
+         e.g., point on IsoCurve(1,c) at t is srf(c,t \
+         This is a vertical line from bottom to top.
+      :param float constantParameter: The parameter that was constant on the original surface.
+
+      :return: An isoparametric curve or None on error.
+
+      :rtype: rhino3dm.Curve
 
    .. py:method:: ToNurbsSurface()
 
@@ -108,6 +180,7 @@ Surface
       tolerance of 0.0 is used.
 
       :return: NurbsSurface on success, None on failure.
+
       :rtype: NurbsSurface
 
    .. py:method:: ToNurbsSurface(tolerance)
@@ -116,6 +189,7 @@ Surface
       tolerance of 0.0 is used.
 
       :return: NurbsSurface on success, None on failure.
+
       :rtype: NurbsSurface
 
    .. py:method:: IsPlanar(tolerance)
@@ -123,6 +197,7 @@ Surface
       Tests a surface to see if it is planar to zero tolerance.
 
       :return: True if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+
       :rtype: bool
 
    .. py:method:: IsSphere(tolerance)
@@ -130,6 +205,7 @@ Surface
       Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.
 
       :return: True if the surface is a portion of a sphere.
+
       :rtype: bool
 
    .. py:method:: IsCylinder(tolerance)
@@ -137,6 +213,7 @@ Surface
       Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.
 
       :return: True if the surface is a portion of a cylinder.
+
       :rtype: bool
 
    .. py:method:: IsCone(tolerance)
@@ -144,6 +221,7 @@ Surface
       Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.
 
       :return: True if the surface is a portion of a cone.
+
       :rtype: bool
 
    .. py:method:: IsTorus(tolerance)
@@ -151,4 +229,13 @@ Surface
       Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.
 
       :return: True if the surface is a portion of a torus.
+
       :rtype: bool
+
+   .. py:method:: GetSurfaceParameterFromNurbsFormParameter(nurbsS, nurbsT)
+
+      [todo] add documentation
+
+   .. py:method:: GetNurbsFormParameterFromSurfaceParameter(surfaceS, surfaceT)
+
+      [todo] add documentation

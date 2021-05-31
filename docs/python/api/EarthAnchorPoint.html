@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>File3dmRdkDocumentData &mdash; rhino3dm 7.6.0 documentation</title>
+  <title>EarthAnchorPoint &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="File3dmSettings" href="File3dmSettings.html" />
-    <link rel="prev" title="File3dmPlugInDataTable" href="File3dmPlugInDataTable.html" /> 
+    <link rel="next" title="Ellipse" href="Ellipse.html" />
+    <link rel="prev" title="DracoCompressionOptions" href="DracoCompressionOptions.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -109,7 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -123,7 +123,7 @@
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
@@ -234,13 +234,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>File3dmRdkDocumentData</li>
+      <li>EarthAnchorPoint</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/File3dmRdkDocumentData.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/EarthAnchorPoint.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -254,14 +254,117 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-rhino3dm">
-<span id="file3dmrdkdocumentdata"></span><h1>File3dmRdkDocumentData<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
+<span id="earthanchorpoint"></span><h1>EarthAnchorPoint<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rhino3dm.File3dmRdkDocumentData">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">File3dmRdkDocumentData</code><a class="headerlink" href="#rhino3dm.File3dmRdkDocumentData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="rhino3dm.File3dmRdkDocumentData.RdkXml">
-<code class="descname">RdkXml</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRdkDocumentData.RdkXml" title="Permalink to this definition">¶</a></dt>
-<dd><p>[todo] add documentation</p>
+<dt id="rhino3dm.EarthAnchorPoint">
+<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">EarthAnchorPoint</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.EarthBasepointLatitude">
+<code class="descname">EarthBasepointLatitude</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLatitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets a point latitude on earth, in degrees.
++90 = north pole, 0 = equator, -90 = south pole.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.EarthBasepointLongitude">
+<code class="descname">EarthBasepointLongitude</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLongitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the point longitude on earth, in degrees.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.EarthBasepointElevation">
+<code class="descname">EarthBasepointElevation</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevation" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the point elevation on earth, in meters.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.EarthBasepointElevationZero">
+<code class="descname">EarthBasepointElevationZero</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevationZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>BasepointZero: Gets or sets a value indicating the zero level convention relating to a location on Earth.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.ModelBasePoint">
+<code class="descname">ModelBasePoint</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelBasePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Point3d: Corresponding model point in model coordinates.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.ModelNorth">
+<code class="descname">ModelNorth</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelNorth" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Earth directions in model coordinates.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.ModelEast">
+<code class="descname">ModelEast</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelEast" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Vector3d: Earth directions in model coordinates.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.Name">
+<code class="descname">Name</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.Name" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets the short form of the identifying information about this location.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.EarthAnchorPoint.Description">
+<code class="descname">Description</code><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.Description" title="Permalink to this definition">¶</a></dt>
+<dd><p>str: Gets or sets the long form of the identifying information about this location.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.EarthAnchorPoint.EarthLocationIsSet">
+<code class="descname">EarthLocationIsSet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthLocationIsSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the earth location is set or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean value, True if set else false</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.EarthAnchorPoint.GetModelCompass">
+<code class="descname">GetModelCompass</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.GetModelCompass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a plane in model coordinates whose X axis points East,
+Y axis points North and Z axis points Up. The origin
+is set to ModelBasepoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A plane value. This might be invalid on error.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.EarthAnchorPoint.GetModelToEarthTransform">
+<code class="descname">GetModelToEarthTransform</code><span class="sig-paren">(</span><em>modelUnitSystem</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.GetModelToEarthTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a transformation from model coordinates to earth coordinates.
+This transformation assumes the model is small enough that
+the curvature of the earth can be ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>modelUnitSystem</strong> (<em>UnitSystem</em>) – The model unit system.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Transform on success. Invalid Transform on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -276,10 +379,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="File3dmSettings.html" class="btn btn-neutral float-right" title="File3dmSettings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Ellipse.html" class="btn btn-neutral float-right" title="Ellipse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="File3dmPlugInDataTable.html" class="btn btn-neutral" title="File3dmPlugInDataTable" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="DracoCompressionOptions.html" class="btn btn-neutral" title="DracoCompressionOptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

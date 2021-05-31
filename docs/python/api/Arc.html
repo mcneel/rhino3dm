@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Arc &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Arc &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -397,9 +398,39 @@ Radius&gt;0 and 0&lt;AngleRadians()&lt;=2*Math.Pi.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="rhino3dm.Arc.AngleDomain">
+<code class="descname">AngleDomain</code><a class="headerlink" href="#rhino3dm.Arc.AngleDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>rhino3dm.Interval: Gets or sets the angle domain (in Radians) of this arc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.StartAngle">
+<code class="descname">StartAngle</code><a class="headerlink" href="#rhino3dm.Arc.StartAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the start angle (in Radians) for this arc segment.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.EndAngle">
+<code class="descname">EndAngle</code><a class="headerlink" href="#rhino3dm.Arc.EndAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the end angle (in Radians) for this arc segment.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="rhino3dm.Arc.AngleRadians">
 <code class="descname">AngleRadians</code><a class="headerlink" href="#rhino3dm.Arc.AngleRadians" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.StartAngleDegrees">
+<code class="descname">StartAngleDegrees</code><a class="headerlink" href="#rhino3dm.Arc.StartAngleDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the start angle (in Radians) for this arc segment.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rhino3dm.Arc.EndAngleDegrees">
+<code class="descname">EndAngleDegrees</code><a class="headerlink" href="#rhino3dm.Arc.EndAngleDegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>float: Gets or sets the end angle (in Radians) for this arc segment.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="rhino3dm.Arc.AngleDegrees">
@@ -472,6 +503,24 @@ Radius&gt;0 and 0&lt;AngleRadians()&lt;=2*Math.Pi.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tangent at the arc at the given parameter.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhino3dm.Arc.ClosestParameter">
+<code class="descname">ClosestParameter</code><span class="sig-paren">(</span><em>testPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.ClosestParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets parameter on the arc closest to a test point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testPoint</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point to get close to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Parameter (in radians) of the point on the arc that is closest to the test point. If testPoint is the center of the arc, then the starting point of the arc is (arc.Domain()[0]) returned. If no parameter could be found, RhinoMath.UnsetValue is returned.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
 </tr>
 </tbody>
 </table>

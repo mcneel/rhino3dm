@@ -35,6 +35,7 @@ Welcome to rhino3dm's documentation!
    DimensionStyle
    DracoCompression
    DracoCompressionOptions
+   EarthAnchorPoint
    Ellipse
    Extrusion
    File3dm

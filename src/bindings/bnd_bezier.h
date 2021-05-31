@@ -24,7 +24,7 @@ public:
   ON_3dPoint PointAt(double t) const { return m_bezcurve.PointAt(t); }
   ON_3dVector TangentAt(double t) const { return m_bezcurve.TangentAt(t); }
   ON_3dVector CurvatureAt(double t) const { return m_bezcurve.CurvatureAt(t); }
-  //class BND_NurbsCurve* ToNurbsCurve() const;
+  class BND_NurbsCurve* ToNurbsCurve() const;
   bool IsRational() const { return m_bezcurve.IsRational(); }
   int ControlVertexCount() const { return m_bezcurve.CVCount(); }
   //public Point2d GetControlVertex2d(int index)
@@ -34,5 +34,5 @@ public:
   bool MakeNonRational() { return m_bezcurve.MakeNonRational(); }
   bool IncreaseDegree(int desiredDegree) { return m_bezcurve.IncreaseDegree(desiredDegree); }
   bool ChangeDimension(int desiredDimension) { return m_bezcurve.ChangeDimension(desiredDimension); }
-  //public bool Split(double t, out BezierCurve left, out BezierCurve right)
+  BND_TUPLE Split(double t);
 };

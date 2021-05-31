@@ -155,6 +155,7 @@ ObjectAttributes
       :param Transform xform: The transformation.
 
       :return: True if successful, False otherwise.
+
       :rtype: bool
 
    .. py:method:: HasDisplayModeOverride(viewportId)
@@ -164,6 +165,7 @@ ObjectAttributes
       :param Guid viewportId: Id of a Rhino Viewport.
 
       :return: True if the object has a display mode override for the viewport; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: DrawColor(doc)
@@ -175,6 +177,7 @@ ObjectAttributes
       Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.
 
       :return: An array of group indices. None might be returned in place of an empty array.
+
       :rtype: int[]
 
    .. py:method:: AddToGroup()
@@ -183,6 +186,9 @@ ObjectAttributes
       group list.
       If the object is already in group, nothing is changed.
 
+      :param int groupIndex: The index that will be added.
+
+
       :rtype: void
 
    .. py:method:: RemoveFromGroup()
@@ -190,10 +196,14 @@ ObjectAttributes
       removes object from the group with specified index.
       If the object is not in the group, nothing is changed.
 
+      :param int groupIndex: The index that will be removed.
+
+
       :rtype: void
 
    .. py:method:: RemoveFromAllGroups()
 
       Removes object from all groups.
+
 
       :rtype: void

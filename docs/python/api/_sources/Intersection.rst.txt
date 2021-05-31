@@ -22,8 +22,14 @@ Intersection
       :param Line line: Line for intersection.
       :param rhino3dm.Plane plane: Plane to intersect.
 
-      :return: True on success, False on failure.
-      :rtype: bool
+      :return: tuple (bool, float)
+
+         - True on success, False on failure.
+         - Parameter on line where intersection occurs. \
+           If the parameter is not within the {0, 1} Interval then the finite segment \
+           does not intersect the plane. \
+
+      :rtype: (bool, float)
 
    .. py:staticmethod:: PlanePlane(planeA, planeB)
 
@@ -33,8 +39,13 @@ Intersection
       :param rhino3dm.Plane planeA: First plane for intersection.
       :param rhino3dm.Plane planeB: Second plane for intersection.
 
-      :return: True on success, False on failure.
-      :rtype: bool
+      :return: tuple (bool, Line)
+
+         - True on success, False on failure.
+         - If this function returns true, \
+           the intersectionLine parameter will return the line where the planes intersect. \
+
+      :rtype: (bool, Line)
 
    .. py:staticmethod:: PlanePlanePlane(planeA, planeB, planeC)
 
@@ -44,9 +55,13 @@ Intersection
       :param rhino3dm.Plane planeB: Second plane for intersection.
       :param rhino3dm.Plane planeC: Third plane for intersection.
 
-      :return: True on success, False on failure. If at least two out of the three planes \
-         are parallel or coincident, failure is assumed.
-      :rtype: bool
+      :return: tuple (bool, rhino3dm.Point3d)
+
+         - True on success, False on failure. If at least two out of the three planes \
+           are parallel or coincident, failure is assumed. \
+         - Point where all three planes converge. \
+
+      :rtype: (bool, rhino3dm.Point3d)
 
    .. py:staticmethod:: PlaneSphere(plane, sphere)
 
@@ -55,9 +70,13 @@ Intersection
       :param rhino3dm.Plane plane: Plane to intersect.
       :param rhino3dm.Sphere sphere: Sphere to intersect.
 
-      :return: If  is returned, the intersectionCircle has a radius of zero and the center point \
-         is the point on the plane closest to the sphere.
-      :rtype: PlaneSphereIntersection
+      :return: tuple (PlaneSphereIntersection, Circle)
+
+         - If  is returned, the intersectionCircle has a radius of zero and the center point \
+           is the point on the plane closest to the sphere. \
+         - Intersection result. \
+
+      :rtype: (PlaneSphereIntersection, Circle)
 
    .. py:staticmethod:: LineCircle(line, circle)
 
@@ -78,8 +97,12 @@ Intersection
       :param rhino3dm.Sphere sphereA: First sphere to intersect.
       :param rhino3dm.Sphere sphereB: Second sphere to intersect.
 
-      :return: The intersection type.
-      :rtype: SphereSphereIntersection
+      :return: tuple (SphereSphereIntersection, Circle)
+
+         - The intersection type.
+         - If intersection is a point, then that point will be the center, radius 0. \
+
+      :rtype: (SphereSphereIntersection, Circle)
 
    .. py:staticmethod:: LineBox(line, box, tolerance)
 
@@ -90,5 +113,9 @@ Intersection
       :param float tolerance: If tolerance > 0.0, then the intersection is performed against a box \
          that has each side moved out by tolerance.
 
-      :return: True if the line intersects the box, False if no intersection occurs.
-      :rtype: bool
+      :return: tuple (bool, rhino3dm.Interval)
+
+         - True if the line intersects the box, False if no intersection occurs.
+         - The chord from line.PointAt(lineParameters.T0) to line.PointAt(lineParameters.T1) is the intersection. \
+
+      :rtype: (bool, rhino3dm.Interval)

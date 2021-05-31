@@ -17,6 +17,18 @@ Point3d
 
       rhino3dm.Point3d: Gets the value of a point at location RhinoMath.UnsetValue,RhinoMath.UnsetValue,RhinoMath.UnsetValue.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of this point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of this point.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) coordinate of this point.
+
    .. py:method:: Encode()
 
       [todo] add documentation
@@ -28,6 +40,7 @@ Point3d
       :param rhino3dm.Point3d other: Other point for distance measurement.
 
       :return: The length of the line between this and the other point; or 0 if any of the points is not valid.
+
       :rtype: float
 
    .. py:method:: Transform(xform)
@@ -36,5 +49,6 @@ Point3d
       result = transformation*point
 
       :param Transform xform: Transformation to apply.
+
 
       :rtype: void

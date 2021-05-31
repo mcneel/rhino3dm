@@ -12,6 +12,21 @@ void BND_AnnotationBase::SetTrackedPointer(ON_Annotation* annotation, const ON_M
   BND_GeometryBase::SetTrackedPointer(annotation, compref);
 }
 
+std::wstring BND_AnnotationBase::RichText() const
+{
+  std::wstring rc;
+  const ON_TextContent* text_content = m_annotation->Text();
+  if (text_content)
+    rc = text_content->PlatformRichTextFromRuns().Array();
+  return rc;
+}
+
+std::wstring BND_AnnotationBase::PlainText() const
+{
+  std::wstring rc(m_annotation->PlainText().Array());
+  return rc;
+}
+
 
 
 BND_TextDot::BND_TextDot(ON_TextDot* dot, const ON_ModelComponentReference* compref)
@@ -36,6 +51,8 @@ namespace py = pybind11;
 void initAnnotationBaseBindings(pybind11::module& m)
 {
   py::class_<BND_AnnotationBase, BND_GeometryBase>(m, "AnnotationBase")
+    .def_property_readonly("RichText", &BND_AnnotationBase::RichText)
+    .def_property_readonly("PlainText", &BND_AnnotationBase::PlainText)
     ;
 
   py::class_<BND_TextDot, BND_GeometryBase>(m, "TextDot")
@@ -55,6 +72,8 @@ using namespace emscripten;
 void initAnnotationBaseBindings(void*)
 {
   class_<BND_AnnotationBase, base<BND_GeometryBase>>("AnnotationBase")
+    .property("richText", &BND_AnnotationBase::RichText)
+    .property("plainText", &BND_AnnotationBase::PlainText)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")

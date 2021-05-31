@@ -1,0 +1,73 @@
+EarthAnchorPoint
+================
+
+.. py:module:: rhino3dm
+
+.. py:class:: EarthAnchorPoint
+
+   .. py:attribute:: EarthBasepointLatitude
+
+      float: Gets or sets a point latitude on earth, in degrees.
+      +90 = north pole, 0 = equator, -90 = south pole.
+
+   .. py:attribute:: EarthBasepointLongitude
+
+      float: Gets or sets the point longitude on earth, in degrees.
+
+   .. py:attribute:: EarthBasepointElevation
+
+      float: Gets or sets the point elevation on earth, in meters.
+
+   .. py:attribute:: EarthBasepointElevationZero
+
+      BasepointZero: Gets or sets a value indicating the zero level convention relating to a location on Earth.
+
+   .. py:attribute:: ModelBasePoint
+
+      rhino3dm.Point3d: Corresponding model point in model coordinates.
+
+   .. py:attribute:: ModelNorth
+
+      rhino3dm.Vector3d: Earth directions in model coordinates.
+
+   .. py:attribute:: ModelEast
+
+      rhino3dm.Vector3d: Earth directions in model coordinates.
+
+   .. py:attribute:: Name
+
+      str: Gets or sets the short form of the identifying information about this location.
+
+   .. py:attribute:: Description
+
+      str: Gets or sets the long form of the identifying information about this location.
+
+   .. py:method:: EarthLocationIsSet()
+
+      Checks if the earth location is set or not.
+
+      :return: Boolean value, True if set else false
+
+      :rtype: bool
+
+   .. py:method:: GetModelCompass()
+
+      Returns a plane in model coordinates whose X axis points East,
+      Y axis points North and Z axis points Up. The origin
+      is set to ModelBasepoint.
+
+      :return: A plane value. This might be invalid on error.
+
+      :rtype: rhino3dm.Plane
+
+   .. py:method:: GetModelToEarthTransform(modelUnitSystem)
+
+      Gets a transformation from model coordinates to earth coordinates.
+      This transformation assumes the model is small enough that
+      the curvature of the earth can be ignored.
+
+      :param UnitSystem modelUnitSystem: The model unit system.
+
+      :return: Transform on success. Invalid Transform on error.
+
+      :rtype: Transform

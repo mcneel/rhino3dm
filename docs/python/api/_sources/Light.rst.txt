@@ -138,6 +138,7 @@ Light
       :param float a1: The new reverse linear attenuation divisor term.
       :param float a2: The new reverse quadratic attenuation divisor term.
 
+
       :rtype: void
 
    .. py:method:: GetAttenuation(d)
@@ -148,4 +149,5 @@ Light
       :param float d: The distance to evaluate.
 
       :return: 0 if a0 + d*a1 + d^2*a2 <= 0.
+
       :rtype: float

@@ -12,6 +12,14 @@ Point2d
       :param float x: The X (first) coordinate.
       :param float y: The Y (second) coordinate.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of the point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of the point.
+
    .. py:method:: Encode()
 
       [todo] add documentation
@@ -23,4 +31,5 @@ Point2d
       :param rhino3dm.Point2d other: Another point.
 
       :return: The length of the line between the two points, or 0 if either point is invalid.
+
       :rtype: float

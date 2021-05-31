@@ -19,6 +19,12 @@ InstanceDefinition
    .. py:attribute:: Id
 
 
+   .. py:attribute:: SourceArchive
+
+
+   .. py:attribute:: UpdateType
+
+
    .. py:method:: GetObjectIds()
 
       [todo] add documentation

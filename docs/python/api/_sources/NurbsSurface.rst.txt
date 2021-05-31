@@ -41,6 +41,7 @@ NurbsSurface
       :param int controlPointCount1: Control point count in V direction.>= order1.
 
       :return: A new NURBS surface, or None on error.
+
       :rtype: NurbsSurface
 
    .. py:staticmethod:: CreateFromCone(cone)
@@ -50,6 +51,7 @@ NurbsSurface
       :param Cone cone: A cone value.
 
       :return: A new NURBS surface, or None on error.
+
       :rtype: NurbsSurface
 
    .. py:staticmethod:: CreateFromSphere(sphere)
@@ -59,6 +61,7 @@ NurbsSurface
       :param rhino3dm.Sphere sphere: A sphere value.
 
       :return: A new NURBS surface, or None on error.
+
       :rtype: NurbsSurface
 
    .. py:staticmethod:: CreateFromCylinder(cylinder)
@@ -68,6 +71,7 @@ NurbsSurface
       :param Cylinder cylinder: A cylinder value.
 
       :return: A new NURBS surface, or None on error.
+
       :rtype: NurbsSurface
 
    .. py:staticmethod:: CreateRuledSurface(curveA, curveB)
@@ -78,6 +82,7 @@ NurbsSurface
       :param rhino3dm.Curve curveB: Second curve.
 
       :return: A ruled surface on success or None on failure.
+
       :rtype: NurbsSurface
 
    .. py:method:: MakeRational()
@@ -85,6 +90,7 @@ NurbsSurface
       Makes this surface rational.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: MakeNonRational()
@@ -92,6 +98,7 @@ NurbsSurface
       Makes this surface non-rational.
 
       :return: True if the operation succeeded; otherwise, false.
+
       :rtype: bool
 
    .. py:method:: IncreaseDegreeU(desiredDegree)
@@ -102,6 +109,7 @@ NurbsSurface
          Degrees should be number between and including 1 and 11.
 
       :return: True on success, False on failure.
+
       :rtype: bool
 
    .. py:method:: IncreaseDegreeV(desiredDegree)
@@ -112,4 +120,5 @@ NurbsSurface
          Degrees should be number between and including 1 and 11.
 
       :return: True on success, False on failure.
+
       :rtype: bool

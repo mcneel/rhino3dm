@@ -24,14 +24,18 @@ PointCloudItem
    .. py:attribute:: Normal
 
       rhino3dm.Vector3d: Gets or sets the normal vector for this point cloud item.
+      If this point cloud item does not have a normal vector,
+      Vector3d.Unset is returned.
 
    .. py:attribute:: Color
 
       Color: Gets or sets the color of this point cloud item.
+      If this point cloud item does not have a color, System.Drawing.Color.Black is returned.
 
    .. py:attribute:: Hidden
 
       bool: Gets or sets the hidden flag of this point cloud item.
+      If this point cloud item does not have a hidden flag, False is returned.
 
    .. py:attribute:: Index
 

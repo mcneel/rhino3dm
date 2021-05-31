@@ -29,6 +29,7 @@ MeshVertexColorList
 
       Clears the vertex color list on the mesh.
 
+
       :rtype: void
 
    .. py:method:: Add(red, green, blue)
@@ -40,4 +41,5 @@ MeshVertexColorList
       :param int blue: Blue component of color, must be in the 0~255 range.
 
       :return: The index of the newly added color.
+
       :rtype: int

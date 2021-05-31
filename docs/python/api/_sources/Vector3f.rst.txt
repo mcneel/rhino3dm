@@ -13,6 +13,18 @@ Vector3f
       :param float y: Y component of vector.
       :param float z: Z component of vector.
 
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of this vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of this vector.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) component of this vector.
+
    .. py:method:: Encode()
 
       [todo] add documentation

@@ -21,4 +21,5 @@ RevSurface
       :param float endAngleRadians: An angle in radians for the end.
 
       :return: A new surface of revolution, or None if any of the inputs is invalid or on error.
+
       :rtype: RevSurface

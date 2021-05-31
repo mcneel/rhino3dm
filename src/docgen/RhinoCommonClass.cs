@@ -7,6 +7,17 @@ namespace docgen
 {
     static class MethodDeclarationExtensions
     {
+        public static bool IsOutParameter(ParameterSyntax parameter)
+        {
+            foreach (var modifier in parameter.Modifiers)
+            {
+                if (modifier.Text == "out")
+                    return true;
+            }
+            return false;
+        }
+
+
         public static bool IsStatic(this MethodDeclarationSyntax method)
         {
             foreach (var modifier in method.Modifiers)
@@ -241,7 +252,7 @@ namespace docgen
                         }
                     }
 
-                    if (refCount == 0 && outCount < 2)
+                    if (refCount == 0)
                     {
                         var docComment = node.GetLeadingTrivia().Select(i => i.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
                         RhinoCommonClass.Get(_visitingClass).Methods.Add(new Tuple<MethodDeclarationSyntax, DocumentationCommentTriviaSyntax>(node, docComment));

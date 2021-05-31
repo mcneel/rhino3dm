@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Intersection &mdash; rhino3dm 0.14.0 documentation</title>
+  <title>Intersection &mdash; rhino3dm 7.6.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.14.0
+                7.6.0
               </div>
             
           
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
@@ -285,10 +286,15 @@ the plane then no intersection is assumed).</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, float)</p>
+<ul class="simple">
+<li>True on success, False on failure.</li>
+<li>Parameter on line where intersection occurs. If the parameter is not within the {0, 1} Interval then the finite segment does not intersect the plane. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, float)</p>
 </td>
 </tr>
 </tbody>
@@ -310,10 +316,15 @@ parallel or coincident, no intersection is assumed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, Line)</p>
+<ul class="simple">
+<li>True on success, False on failure.</li>
+<li>If this function returns true, the intersectionLine parameter will return the line where the planes intersect. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, <a class="reference internal" href="Line.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>)</p>
 </td>
 </tr>
 </tbody>
@@ -335,10 +346,15 @@ parallel or coincident, no intersection is assumed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True on success, False on failure. If at least two out of the three planes are parallel or coincident, failure is assumed.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, rhino3dm.Point3d)</p>
+<ul class="simple">
+<li>True on success, False on failure. If at least two out of the three planes are parallel or coincident, failure is assumed. </li>
+<li>Point where all three planes converge. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, <a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a>)</p>
 </td>
 </tr>
 </tbody>
@@ -359,10 +375,15 @@ parallel or coincident, no intersection is assumed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If  is returned, the intersectionCircle has a radius of zero and the center point is the point on the plane closest to the sphere.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (PlaneSphereIntersection, Circle)</p>
+<ul class="simple">
+<li>If  is returned, the intersectionCircle has a radius of zero and the center point is the point on the plane closest to the sphere. </li>
+<li>Intersection result. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">PlaneSphereIntersection</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(PlaneSphereIntersection, <a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a>)</p>
 </td>
 </tr>
 </tbody>
@@ -401,10 +422,15 @@ parallel or coincident, no intersection is assumed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The intersection type.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (SphereSphereIntersection, Circle)</p>
+<ul class="simple">
+<li>The intersection type.</li>
+<li>If intersection is a point, then that point will be the center, radius 0. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">SphereSphereIntersection</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(SphereSphereIntersection, <a class="reference internal" href="Circle.html#rhino3dm.Circle" title="rhino3dm.Circle">Circle</a>)</p>
 </td>
 </tr>
 </tbody>
@@ -426,10 +452,15 @@ parallel or coincident, no intersection is assumed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the line intersects the box, False if no intersection occurs.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, rhino3dm.Interval)</p>
+<ul class="simple">
+<li>True if the line intersects the box, False if no intersection occurs.</li>
+<li>The chord from line.PointAt(lineParameters.T0) to line.PointAt(lineParameters.T1) is the intersection. </li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, <a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval">rhino3dm.Interval</a>)</p>
 </td>
 </tr>
 </tbody>

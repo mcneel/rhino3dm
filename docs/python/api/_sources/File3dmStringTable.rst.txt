@@ -29,4 +29,8 @@ File3dmStringTable
 
       Removes document strings from the 3dm file.
 
+      :param str section: name of section to delete. If null, all sections will be deleted.
+      :param str entry: name of entry to delete. If null, all entries will be deleted for a given section.
+
+
       :rtype: void
