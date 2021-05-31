@@ -87,7 +87,7 @@ jobs:
       - name: info
         run: python3 --version; cmake --version
       - name: install dependencies
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        run: python3 -m pip install wheel #choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
