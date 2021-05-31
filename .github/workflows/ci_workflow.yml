@@ -51,7 +51,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: /dist
+          path: dist
           name: rhino3dm.py 2
 
   build_py3:
@@ -73,7 +73,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: /dist
+          path: dist
           name: rhino3dm.py 3
 
 # 2021.05.31 macos-11 still in private preview:
@@ -94,7 +94,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: /dist
+          path: dist
           name: rhino3dm.py 3 mac
 
   build_py3_win:
@@ -114,7 +114,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: /dist
+          path: dist
           name: rhino3dm.py 3 win
 
   build_dotnet:
