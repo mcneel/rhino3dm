@@ -161,5 +161,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: src/build/linux/dotnet/Rhino3dm.dll
-          name: rhino3dm_amzn2.net
+          name: rhino3dm.net amzn2
     
