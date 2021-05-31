@@ -65,6 +65,36 @@ jobs:
         run: python3 setup.py bdist_wheel
       #todo artifacts
 
+  build_py3_mac:
+    name: Build rhino3dm.py 3 mac
+    runs-on: macos-11
+    steps:
+      - name: info
+        run: python3 --version && cmake --version
+      - name: install dependencies
+        run: brew install cmake
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3
+        run: python3 setup.py bdist_wheel
+
+  build_py3_win:
+    name: Build rhino3dm.py 3 win
+    runs-on: windows-latest
+    steps:
+      - name: info
+        run: python3 --version; cmake --version
+      - name: install dependencies
+        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3
+        run: python3 setup.py bdist_wheel
+
   build_dotnet:
     name: Build dotnet
     runs-on: ubuntu-latest
