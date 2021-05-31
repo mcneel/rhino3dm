@@ -48,7 +48,11 @@ jobs:
         run: ls && git submodule update --init
       - name: build py2
         run: python2 setup.py bdist_wheel
-      #todo artifacts
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /dist
+          name: rhino3dm.py 2
 
   build_py3:
     name: Build rhino3dm.py 3
@@ -66,9 +70,11 @@ jobs:
         run: git submodule update --init
       - name: build py3
         run: python3 setup.py bdist_wheel
-      - name: list result
-        run: ls
-      #todo artifacts
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /dist
+          name: rhino3dm.py 3
 
 # 2021.05.31 macos-11 still in private preview:
 # https://github.com/actions/virtual-environments/issues/2486
@@ -80,13 +86,18 @@ jobs:
       - name: info
         run: python3 --version && cmake --version
       - name: install dependencies
-        run: brew install cmake
+        run: python3 -m pip install wheel
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
         run: git submodule update --init
       - name: build py3 mac
         run: python3 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /dist
+          name: rhino3dm.py 3 mac
 
   build_py3_win:
     name: Build rhino3dm.py 3 win
@@ -102,8 +113,11 @@ jobs:
         run: git submodule update --init
       - name: build py3 win
         run: python3 setup.py bdist_wheel
-      - name: list result
-        run: ls
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: /dist
+          name: rhino3dm.py 3 win
 
   build_dotnet:
     name: Build dotnet
