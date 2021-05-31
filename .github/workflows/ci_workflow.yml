@@ -1,0 +1,165 @@
+# for a list of available software on the different virtual environments, please see:
+# https://github.com/actions/virtual-environments/tree/main/images
+
+name: ci build
+on: [push, workflow_dispatch]
+
+jobs:
+  build_js:
+    name: Build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:2.0.10
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build js
+        run: python3 src/build_javascript.py
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/artifacts_js
+          name: rhino3dm.js
+
+  build_py2:
+    name: Build rhino3dm.py 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '2.x'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
+      - name: info
+        run: python2 --version && cmake --version && git --version
+      - name: install dependencies
+        run: |
+          sudo apt update && sudo apt install -yy python-setuptools
+          python2 -m pip install wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: build py2
+        run: python2 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py 2
+
+  build_py3:
+    name: Build rhino3dm.py 3
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8-slim-buster
+    steps:
+      - name: install dependencies
+        run: apt update && apt install -yy git cmake gcc g++
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3
+        run: python3 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py 3
+
+# 2021.05.31 macos-11 still in private preview:
+# https://github.com/actions/virtual-environments/issues/2486
+
+  build_py3_mac:
+    name: Build rhino3dm.py 3 mac
+    runs-on: macos-latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3 mac
+        run: python3 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py 3 mac
+
+  build_py3_win:
+    name: Build rhino3dm.py 3 win
+    runs-on: windows-latest
+    steps:
+      - name: info
+        run: python3 --version; cmake --version
+      - name: install dependencies
+        run: python3 -m pip install wheel #choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build py3 win
+        run: python3 setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py 3 win
+
+  build_dotnet:
+    name: Build dotnet
+    runs-on: ubuntu-latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p linux
+      - name: setup
+        run: python3 script/setup.py -p linux -v
+      - name: build dotnet
+        run: python3 script/build.py -p linux -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/linux/dotnet/Rhino3dm.dll
+          name: rhino3dm.net
+
+  build_dotnet_amzn2:
+    name: Build dotnet amzn2
+    runs-on: ubuntu-latest
+    container:
+      image: mcneel/rhino3dm-dev-amzn2:latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p linux
+      - name: setup
+        run: python3 script/setup.py -p linux -v
+      - name: build dotnet
+        run: python3 script/build.py -p linux -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/linux/dotnet/Rhino3dm.dll
+          name: rhino3dm.net amzn2
+    
