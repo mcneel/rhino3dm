@@ -17,8 +17,12 @@ jobs:
         uses: actions/checkout@v2
       - name: update submodules
         run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup
+        run: python3 script/setup.py -p js -o -v
       - name: build js
-        run: python3 src/build_javascript.py
+        run: python3 script/build.py -p js -o -v
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
