@@ -548,7 +548,7 @@ def main():
             did_succeed.append(rv)
 
     delete_cache_file()
-
+    print("Success Array: ", did_succeed)
     sys.exit(0) if all(item == True for (item) in did_succeed) else sys.exit(1)
 
 
