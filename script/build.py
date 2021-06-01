@@ -484,7 +484,6 @@ def build_handler(platform_target):
         print_platform_preamble(platform_full_names.get(platform_target))
         rv = getattr(sys.modules[__name__], 'build_' + platform_target)()
         did_succeed.append(rv)
-        print("Success Array build handler: ", did_succeed)
 
     return all(item == True for (item) in did_succeed)
 
@@ -550,7 +549,7 @@ def main():
             did_succeed.append(rv)
 
     delete_cache_file()
-    print("Success Array: ", did_succeed)
+
     sys.exit(0) if all(item == True for (item) in did_succeed) else sys.exit(1)
 
 
