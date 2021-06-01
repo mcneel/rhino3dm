@@ -466,6 +466,7 @@ def build_js():
 
     if all_items_built:
         print_ok_message("built target rhino3dm succeeded. see: " + artifacts_folder_path)
+        return True
     else:
         print_error_message("failed to build all rhino3dm build artifacts.")
         return False
