@@ -207,7 +207,7 @@ public:
   //    public MeshFace this[int index]
   BND_TUPLE GetFaceVertices(int faceIndex) const;
 //    public BoundingBox GetFaceBoundingBox(int faceIndex)
-//    public Point3d GetFaceCenter(int faceIndex)
+  ON_3dPoint GetFaceCenter(int faceIndex) const;
 //    public int[] AdjacentFaces(int faceIndex)
 //    BND_TUPLE ToIntArray(bool asTriangles) const;
 //    public int[] ToIntArray(bool asTriangles)

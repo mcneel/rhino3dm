@@ -725,6 +725,18 @@ BND_TUPLE BND_MeshFaceList::GetFaceVertices(int faceIndex) const
   return rc;
 }
 
+ON_3dPoint BND_MeshFaceList::GetFaceCenter(int faceIndex) const
+{
+  ON_3dPoint center;
+  ON_MeshFace& face = m_mesh->m_F[faceIndex];
+  if (face.IsQuad())
+    center = 0.25 * (m_mesh->m_V[face.vi[0]] + m_mesh->m_V[face.vi[1]] + m_mesh->m_V[face.vi[2]] + m_mesh->m_V[face.vi[3]]);
+  else
+    center = (1.0 / 3.0) * (m_mesh->m_V[face.vi[0]] + m_mesh->m_V[face.vi[1]] + m_mesh->m_V[face.vi[2]]);
+
+  return center;
+}
+
 BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
@@ -871,6 +883,7 @@ void initMeshBindings(pybind11::module& m)
     .def("__len__", &BND_MeshFaceList::Count)
     .def("__getitem__", &BND_MeshFaceList::GetFace)
     .def("__getitem__", &BND_MeshFaceList::GetFaceVertices)
+    .def("__getitem__", &BND_MeshFaceList::GetFaceCenter)
     .def_property("Count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .def_property_readonly("QuadCount", &BND_MeshFaceList::QuadCount)
     .def_property_readonly("TriangleCount", &BND_MeshFaceList::TriangleCount)
@@ -1014,6 +1027,7 @@ void initMeshBindings(void*)
     .property("count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .function("get", &BND_MeshFaceList::GetFace)
     .function("getFaceVertices", &BND_MeshFaceList::GetFaceVertices)
+    .function("getFaceCenter", &BND_MeshFaceList::GetFaceCenter)
     .property("quadCount", &BND_MeshFaceList::QuadCount)
     .property("triangleCount", &BND_MeshFaceList::TriangleCount)
     .property("capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
