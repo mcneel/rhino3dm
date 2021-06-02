@@ -17,6 +17,19 @@ void BND_Light::SetTrackedPointer(ON_Light* light, const ON_ModelComponentRefere
   BND_GeometryBase::SetTrackedPointer(light, compref);
 }
 
+BND_TUPLE BND_Light:: GetSpotLightRadii() const
+{
+  bool success = false;
+  double inner_radius = 0;
+  double outer_radius = 0;
+  success = m_light.GetSpotLightRadii(inner_radius, outer_radius);
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, inner_radius);
+  SetTuple(rc, 2, outer_radius);
+  return rc;
+}
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -46,6 +59,7 @@ void initLightBindings(pybind11::module& m)
     .def("GetAttenuation", &BND_Light::GetAttenuation, py::arg("d"))
     .def_property("SpotAngleRadians", &BND_Light::GetSpotAngleRadians, &BND_Light::SetSpotAngleRadians)
     .def_property("SpotExponent", &BND_Light::GetSpotExponent, &BND_Light::SetSpotExponent)
+    .def("GetSpotLightRadii", &BND_Light::GetSpotLightRadii)
     .def_property("HotSpot", &BND_Light::GetHotSpot, &BND_Light::SetHotSpot)
     .def_property("Length", &BND_Light::GetLength, &BND_Light::SetLength)
     .def_property("Width", &BND_Light::GetWidth, &BND_Light::SetWidth)
@@ -84,6 +98,7 @@ void initLightBindings(void*)
     .function("getAttenuation", &BND_Light::GetAttenuation)
     .property("spotAngleRadians", &BND_Light::GetSpotAngleRadians, &BND_Light::SetSpotAngleRadians)
     .property("spotExponent", &BND_Light::GetSpotExponent, &BND_Light::SetSpotExponent)
+    .function("getSpotLightRadii", &BND_Light::GetSpotLightRadii)
     .property("hotSpot", &BND_Light::GetHotSpot, &BND_Light::SetHotSpot)
     .property("length", &BND_Light::GetLength, &BND_Light::SetLength)
     .property("width", &BND_Light::GetWidth, &BND_Light::SetWidth)
