@@ -35,8 +35,8 @@ BND_Circle* BND_Sphere::LongitudeDegrees(double degrees) const
 BND_TUPLE BND_Sphere::ClosestParameter(const ON_3dPoint& testPoint) const
 {
   bool success = false;
-  double longitudeRadians = 0;
-  double latitudeRadians = 0;
+  double* longitudeRadians = 0;
+  double* latitudeRadians = 0;
   success = m_sphere.ClosestPointTo(testPoint, longitudeRadians, latitudeRadians);
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
