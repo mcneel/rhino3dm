@@ -24,10 +24,20 @@ void BND_Circle::SetCenter(ON_3dPoint center)
   m_circle.plane.UpdateEquation();
 }
 
-
 ON_3dPoint BND_Circle::PointAt(double t) const
 {
   return m_circle.PointAt(t);
+}
+
+ON_3dPoint BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
+{
+  bool success = false;
+  double t = 0;
+  success = m_circle.ClosestPointTo(testPoint, t);
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, t);
+  return rc;
 }
 
 BND_NurbsCurve* BND_Circle::ToNurbsCurve() const
@@ -75,6 +85,7 @@ void initCircleBindings(pybind11::module& m)
     .def("PointAt", &BND_Circle::PointAt, py::arg("t"))
     .def("TangentAt", &BND_Circle::TangentAt, py::arg("t"))
     .def("DerivativeAt", &BND_Circle::DerivativeAt, py::arg("derivative"), py::arg("t"))
+    .def("ClosestParameter", &BND_Circle::ClosestParameter, py::arg("testPoint"))
     .def("ClosestPoint", &BND_Circle::ClosestPoint, py::arg("testPoint"))
     .def("Translate", &BND_Circle::Translate, py::arg("delta"))
     .def("Reverse", &BND_Circle::Reverse)
@@ -101,6 +112,7 @@ void initCircleBindings(void*)
     .function("pointAt", &BND_Circle::PointAt)
     .function("tangentAt", &BND_Circle::TangentAt)
     .function("derivativeAt", &BND_Circle::DerivativeAt)
+    .function("closestParameter", &BND_Circle::ClosestParameter)
     .function("closestPoint", &BND_Circle::ClosestPoint)
     .function("translate", &BND_Circle::Translate)
     .function("reverse", &BND_Circle::Reverse)

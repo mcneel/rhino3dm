@@ -39,7 +39,7 @@ public:
   ON_3dPoint PointAt(double t) const;
   ON_3dVector TangentAt(double t) const { return m_circle.TangentAt(t); }
   ON_3dVector DerivativeAt(int derivative, double t) const { return m_circle.DerivativeAt(derivative, t); }
-  //public bool ClosestParameter(Point3d testPoint, out double t)
+  BND_TUPLE ClosestParameter(ON_3dPoint testPoint) const;
   ON_3dPoint ClosestPoint(ON_3dPoint testPoint) const { return m_circle.ClosestPointTo(testPoint); }
   //public bool Transform(Transform xform)
   bool Rotate(double sinAngle, double cosAngle, ON_3dVector axis) { return m_circle.Rotate(sinAngle, cosAngle, axis); }
