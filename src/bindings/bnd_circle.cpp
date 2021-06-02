@@ -29,7 +29,7 @@ ON_3dPoint BND_Circle::PointAt(double t) const
   return m_circle.PointAt(t);
 }
 
-ON_3dPoint BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
+BND_TUPLE BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
 {
   bool success = false;
   double t = 0;
