@@ -20,9 +20,9 @@ void BND_Light::SetTrackedPointer(ON_Light* light, const ON_ModelComponentRefere
 BND_TUPLE BND_Light:: GetSpotLightRadii() const
 {
   bool success = false;
-  double inner_radius = 0;
-  double outer_radius = 0;
-  success = m_light.GetSpotLightRadii(inner_radius, outer_radius);
+  double* inner_radius = 0;
+  double* outer_radius = 0;
+  success = m_light->GetSpotLightRadii(inner_radius, outer_radius);
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, inner_radius);
