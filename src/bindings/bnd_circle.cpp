@@ -32,7 +32,7 @@ ON_3dPoint BND_Circle::PointAt(double t) const
 BND_TUPLE BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
 {
   bool success = false;
-  double t = 0;
+  double* t = 0;
   success = m_circle.ClosestPointTo(testPoint, t);
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
