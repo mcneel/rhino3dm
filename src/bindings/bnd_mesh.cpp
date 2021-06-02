@@ -715,6 +715,16 @@ BND_TUPLE BND_MeshFaceList::GetFace(int i) const
   return rc;
 }
 
+BND_TUPLE BND_MeshFaceList::GetFaceVertices(int faceIndex) const
+{
+  ON_MeshFace& face = m_mesh->m_F[faceIndex];
+  BND_TUPLE rc = CreateTuple(5);
+  SetTuple<bool>(rc, 0, true);
+  for (int i = 0; i < 4; i++)
+    SetTuple<ON_3fPoint>(rc, i+1, m_mesh->m_V[ face.vi[i] ]);
+  return rc;
+}
+
 BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
@@ -860,6 +870,7 @@ void initMeshBindings(pybind11::module& m)
   py::class_<BND_MeshFaceList>(m, "MeshFaceList")
     .def("__len__", &BND_MeshFaceList::Count)
     .def("__getitem__", &BND_MeshFaceList::GetFace)
+    .def("__getitem__", &BND_MeshFaceList::GetFaceVertices)
     .def_property("Count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .def_property_readonly("QuadCount", &BND_MeshFaceList::QuadCount)
     .def_property_readonly("TriangleCount", &BND_MeshFaceList::TriangleCount)
@@ -1002,6 +1013,7 @@ void initMeshBindings(void*)
   class_<BND_MeshFaceList>("MeshFaceList")
     .property("count", &BND_MeshFaceList::Count, &BND_MeshFaceList::SetCount)
     .function("get", &BND_MeshFaceList::GetFace)
+    .function("getFaceVertices", &BND_MeshFaceList::GetFaceVertices)
     .property("quadCount", &BND_MeshFaceList::QuadCount)
     .property("triangleCount", &BND_MeshFaceList::TriangleCount)
     .property("capacity", &BND_MeshFaceList::Capacity, &BND_MeshFaceList::SetCapacity)
