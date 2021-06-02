@@ -37,12 +37,7 @@ BND_TUPLE BND_Sphere::ClosestParameter(const ON_3dPoint& testPoint) const
   bool success = false;
   double longitudeRadians = 0;
   double latitudeRadians = 0;
-
-  if(m_sphere != nullptr)
-  {
-    success = m_sphere.ClosestPointTo(testPoint, longitudeRadians, latitudeRadians);
-  }
-  
+  success = m_sphere.ClosestPointTo(testPoint, longitudeRadians, latitudeRadians);
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, longitudeRadians);
