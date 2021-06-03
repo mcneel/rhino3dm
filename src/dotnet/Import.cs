@@ -3,7 +3,7 @@
 // http://msdn.microsoft.com/en-us/library/aa288468(VS.71).aspx
 //
 //
-//this is a test 2
+//this is a test 3
 class Import
 {
 #if RHINO3DM_BUILD
