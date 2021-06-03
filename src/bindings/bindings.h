@@ -45,7 +45,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
   tuple.set(index, value);
 #endif
 }
-//this is a test 3
+//this is a test 4
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"

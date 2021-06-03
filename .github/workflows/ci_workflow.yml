@@ -39,6 +39,14 @@ jobs:
       - name: output
         run: echo "${{ steps.changed-files.outputs.any_changed }}"
 
+  check_changed_bindings:
+    name: Check changed bindings
+    runs-on: ubuntu-latest
+    needs: check_bindings
+    steps:
+      - name: output
+        run: echo "${{ jobs.check_bindings.changed-files.outputs.any_changed }}"
+
   build_js:
     name: Build rhino3dm.js
     needs: check_bindings
