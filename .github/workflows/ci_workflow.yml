@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: list files
         run: ls src/dotnet
       - name: Check Changed files
@@ -19,7 +21,6 @@ jobs:
         id: hanged-files
         with:
           files: src/dotnet
-          fetch-depth: 0
 
   #checks if src/bindings have changed
   check_bindings:
@@ -28,6 +29,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: list files
         run: ls src/bindings
       - name: Check Changed files
@@ -35,7 +38,6 @@ jobs:
         id: changed-files
         with:
           files: src/bindings
-          fetch-depth: 0
 
   build_js:
     name: Build rhino3dm.js
