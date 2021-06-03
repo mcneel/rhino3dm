@@ -14,13 +14,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: list files
-        run: ls src/dotnet
       - name: Check Changed files
         uses: tj-actions/changed-files@v6.3
-        id: hanged-files
+        id: changed-files
         with:
           files: src/dotnet
+      - name: output
+        run: echo "${{ steps.changed-files.outputs.any_changed }}"
 
   #checks if src/bindings have changed
   check_bindings:
@@ -31,13 +31,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: list files
-        run: ls src/bindings
       - name: Check Changed files
         uses: tj-actions/changed-files@v6.3
         id: changed-files
         with:
           files: src/bindings
+      - name: output
+        run: echo "${{ steps.changed-files.outputs.any_changed }}"
 
   build_js:
     name: Build rhino3dm.js
