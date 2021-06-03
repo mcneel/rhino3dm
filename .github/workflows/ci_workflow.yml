@@ -45,7 +45,7 @@ jobs:
     needs: check_bindings
     steps:
       - name: output
-        run: echo "${{ jobs.check_bindings.changed-files.outputs.any_changed }}"
+        run: echo "${{ needs.check_bindings.changed-files.outputs.any_changed }}"
 
   build_js:
     name: Build rhino3dm.js
