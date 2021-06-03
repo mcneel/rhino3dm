@@ -38,6 +38,8 @@ jobs:
           files: src/bindings
       - name: output
         run: echo "${{ steps.changed-files.outputs.any_changed }}"
+    outputs:
+      any-changed: ${{ steps.changed-files.outputs.any_changed }}
 
   check_changed_bindings:
     name: Check changed bindings
@@ -45,7 +47,7 @@ jobs:
     needs: check_bindings
     steps:
       - name: output
-        run: echo "${{ needs.check_bindings.changed-files.outputs.any_changed }}"
+        run: echo "${{ needs.check_bindings.outputs.any_changed }}"
 
   build_js:
     name: Build rhino3dm.js
