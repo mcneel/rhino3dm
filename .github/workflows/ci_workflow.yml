@@ -39,6 +39,8 @@ jobs:
         with:
           files: src/bindings
 
+  #Only run if src files have changed.
+
   build_js:
     name: Build rhino3dm.js
     needs: check_bindings
