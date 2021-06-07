@@ -5,8 +5,46 @@ name: ci build
 on: [push, workflow_dispatch]
 
 jobs:
+  #checks if src/dotnet files have changed
+  check_dotnet:
+    name: Check src/dotnet
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Check Changed files
+        uses: tj-actions/changed-files@v6.3
+        id: changed-files
+        with:
+          files: src/dotnet
+
+  #checks if src/bindings have changed
+  check_bindings:
+    name: Check src/bindings
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Check Changed files
+        uses: tj-actions/changed-files@v6.3
+        id: changed-files
+        with:
+          files: src/bindings
+
+  #Only run if src files have changed.
+
   build_js:
     name: Build rhino3dm.js
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     container:
       image: emscripten/emsdk:2.0.10
@@ -31,6 +69,8 @@ jobs:
 
   build_py2:
     name: Build rhino3dm.py 2
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: setup python
@@ -60,6 +100,8 @@ jobs:
 
   build_py3:
     name: Build rhino3dm.py 3
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     container:
       image: python:3.8-slim-buster
@@ -85,6 +127,8 @@ jobs:
 
   build_py3_mac:
     name: Build rhino3dm.py 3 mac
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: macos-latest
     steps:
       - name: info
@@ -103,6 +147,8 @@ jobs:
 
   build_py3_win:
     name: Build rhino3dm.py 3 win
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: windows-latest
     steps:
       - name: info
@@ -124,6 +170,8 @@ jobs:
   build_dotnet:
     name: Build dotnet
     runs-on: ubuntu-latest
+    needs: check_dotnet
+    if: needs.check_dotnet.outputs.any_changed == 'true'
     steps:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
@@ -146,6 +194,8 @@ jobs:
   build_dotnet_amzn2:
     name: Build dotnet amzn2
     runs-on: ubuntu-latest
+    needs: check_dotnet
+    if: needs.check_dotnet.outputs.any_changed == 'true'
     container:
       image: mcneel/rhino3dm-dev-amzn2:latest
     steps:
