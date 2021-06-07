@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: info
         run: |
-          echo "${{github.event_name}"
+          echo "${{github.event_name}}"
           echo "${{ github.event_name != 'workflow_dispatch' }}"
       - name: checkout
         uses: actions/checkout@v2
