@@ -1545,7 +1545,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmStringTable::GetKeyValue)
     .function("getvalue", &BND_File3dmStringTable::GetValueFromKey)
     .function("set", &BND_File3dmStringTable::SetString)
-    .function("count", &BND_File3dmStringTable::DocumentUserTextCount)
+    .function("documentUserTextCount", &BND_File3dmStringTable::DocumentUserTextCount)
     .function("delete", &BND_File3dmStringTable::Delete)
     ;
 
