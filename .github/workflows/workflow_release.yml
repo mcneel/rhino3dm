@@ -1,0 +1,76 @@
+name: workflow release
+on: [workflow_dispatch]
+jobs:
+
+  build_py_sdist:
+    name: build python sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '3.x'
+      - name: info
+        run: python --version && cmake --version
+      - name: install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build python sdist
+        run: python setup.py sdist
+      - name: check sdist
+        run: |
+          # installs rhino3dm from the source distribution
+          # into a virtualenv and tries to import it
+
+          # set up directory
+          rm -rf test_install
+          mkdir test_install
+          cd test_install
+
+          # create virtualenv
+          python -m venv venv
+          . venv/bin/activate
+          pip install wheel
+
+          # install
+          pip install --verbose ../dist/*.tar.gz
+
+          # test
+          python -c "import rhino3dm; print(rhino3dm.__version__)"
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py sdist
+
+  build_py_all_bdist:
+    name: build all python versions bdist
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [2.7, 3.7, 3.8, 3.9]
+    steps:
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: info
+        run: python --version && cmake --version
+      - name: install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
+        run: python setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}

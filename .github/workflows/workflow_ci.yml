@@ -1,7 +1,7 @@
 # for a list of available software on the different virtual environments, please see:
 # https://github.com/actions/virtual-environments/tree/main/images
 
-name: ci build
+name: workflow ci
 on: [push, pull_request]
 
 jobs:
@@ -67,6 +67,43 @@ jobs:
         with:
           path: src/build/javascript/artifacts_js
           name: rhino3dm.js
+  
+  build_py_all_bdist:
+    name: build all python versions bdist
+    runs-on: ${{ matrix.os }}
+    #needs: check_bindings
+    #if: needs.check_bindings.outputs.any_changed == 'true'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [2.7, 3.8, 3.9]
+        include:
+          - os: macos-latest
+            python-version: 3.9
+          - os: windows-latest
+            python-version: 3.9
+          - os: ubuntu-latest
+            python-version: [2.7, 3.8]
+    steps:
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: info
+        run: python --version && cmake --version
+      - name: install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
+        run: python setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
 
   build_py2:
     name: Build rhino3dm.py 2
@@ -167,85 +204,6 @@ jobs:
         with:
           path: dist
           name: rhino3dm.py 3 win
-
-  build_py_sdist:
-    name: build python sdist
-    runs-on: ubuntu-latest
-    # needs: check_bindings
-    # if: needs.check_bindings.outputs.any_changed == 'true'
-    steps:
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.x'
-      - name: info
-        run: python --version && cmake --version
-      - name: install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: update submodules
-        run: git submodule update --init
-      - name: build python sdist
-        run: python setup.py sdist
-      - name: check sdist
-        run: |
-          # installs rhino3dm from the source distribution
-          # into a virtualenv and tries to import it
-
-          # set up directory
-          rm -rf test_install
-          mkdir test_install
-          cd test_install
-
-          # create virtualenv
-          python -m venv venv
-          . venv/bin/activate
-          pip install wheel
-
-          # install
-          pip install --verbose ../dist/*.tar.gz
-
-          # test
-          python -c "import rhino3dm; print(rhino3dm.__version__)"
-      - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-          name: rhino3dm.py sdist
-      
-
-
-  build_py_all_bdist:
-    name: build all python versions
-    # needs: check_bindings
-    # if: needs.check_bindings.outputs.any_changed == 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [2.7, 3.7, 3.8, 3.9]
-    steps:
-      - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: info
-        run: python --version && cmake --version
-      - name: install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: update submodules
-        run: git submodule update --init
-      - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
-        run: python setup.py bdist_wheel
-      - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
 
   build_dotnet:
     name: Build dotnet
