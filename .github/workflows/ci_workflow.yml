@@ -184,6 +184,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: info
         run: python --version && cmake --version
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build ${{ matrix.python-version }} ${{ matrix.os }}
+        run: python setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
 
   build_dotnet:
     name: Build dotnet
