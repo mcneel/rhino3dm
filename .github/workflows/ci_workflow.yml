@@ -168,6 +168,19 @@ jobs:
           path: dist
           name: rhino3dm.py 3 win
 
+  build_py_all:
+    name: Build all python versions
+    # needs: check_bindings
+    # if: needs.check_bindings.outputs.any_changed == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [2.7, 3.7, 3.8, 3.9, pypy2, pypy3]
+    steps:
+      - name: info
+        run: py -${{ matrix.python-version }} --version && cmake --version
+
   build_dotnet:
     name: Build dotnet
     runs-on: ubuntu-latest
