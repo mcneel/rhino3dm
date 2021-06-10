@@ -1,5 +1,5 @@
 name: workflow release
-on: [workflow_dispatch]
+on: [push, workflow_dispatch]
 jobs:
 
   build_py_sdist:
@@ -74,3 +74,40 @@ jobs:
         with:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
+  build_dotnet_all:
+    name: build all python versions bdist
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: linux
+            artifact-path: src/build/linux/librhino3dm_native.so
+          - os: windows-latest
+            target: windows
+            #TODO: win32
+            artifact-path: src\build\windows\win64\Release\librhino3dm_native.dll
+          - os: macos-latest
+            target: macos
+            artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap dotnet ${{ matrix.os }}
+        run: python3 script/bootstrap.py -p ${{ matrix.target }}
+      - name: setup dotnet ${{ matrix.os }}
+        run: python3 script/setup.py -p ${{ matrix.target }} -v
+      - name: build dotnet ${{ matrix.os }}
+        run: python3 script/build.py -p ${{ matrix.target }} -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.os }}
+
+    
