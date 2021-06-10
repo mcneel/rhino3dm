@@ -75,7 +75,7 @@ jobs:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
   build_dotnet_all:
-    name: build all python versions bdist
+    name: build all dotnet versions
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
