@@ -74,8 +74,8 @@ jobs:
   build_py_all_bdist:
     name: build all python versions bdist
     runs-on: ${{ matrix.os }}
-    #needs: check_bindings
-    #if: needs.check_bindings.outputs.any_changed == 'true'
+    needs: check_bindings
+    if: needs.check_bindings.outputs.any_changed == 'true'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
