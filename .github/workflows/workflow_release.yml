@@ -79,7 +79,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             target: linux
@@ -92,18 +92,22 @@ jobs:
             target: macos
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
     steps:
+      - name: set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
       - name: info
-        run: python3 --version && cmake --version && dotnet --version && git --version
+        run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap dotnet ${{ matrix.os }}
-        run: python3 script/bootstrap.py -p ${{ matrix.target }}
+        run: python script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.os }}
-        run: python3 script/setup.py -p ${{ matrix.target }} -v
+        run: python script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.os }}
-        run: python3 script/build.py -p ${{ matrix.target }} -v
+        run: python script/build.py -p ${{ matrix.target }} -v
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
