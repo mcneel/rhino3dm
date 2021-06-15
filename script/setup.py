@@ -492,7 +492,11 @@ def setup_js():
 
     command = "emcmake cmake " + src_folder
     try:
-        p = subprocess.Popen(split_command(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
+        #p = subprocess.Popen(split_command(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
+        if _platform == "win32" or _platform == "win64":
+            p = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
+        else:
+            p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
     except OSError:
         print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
         return False
