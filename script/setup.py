@@ -82,24 +82,20 @@ def print_ok_message(ok_message):
 
 # ------------------------------------------------ Command Runner ------------------------------------------------------
 
-def split_command (command):
-    posix = True
-    if _platform == "win32" or _platform == "win64":
-       posix = False
-    return shlex.split(command, posix=posix)
-
 def run_command(command, suppress_errors=False):
     print(command)
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
         dev_null = open(os.devnull, 'w')
-        process = subprocess.Popen(split_command(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
-    else:
-        #
         if _platform == "win32" or _platform == "win64":
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=dev_null)
         else:
-            process = subprocess.Popen(split_command(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=popen_shell_mode)
+            process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+    else:
+        if _platform == "win32" or _platform == "win64":
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     while True:
         line = process.stdout.readline()               
