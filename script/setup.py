@@ -89,6 +89,7 @@ def split_command (command):
     return shlex.split(command, posix=posix)
 
 def run_command(command, suppress_errors=False):
+    print(command)
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
     if suppress_errors == True:                
         dev_null = open(os.devnull, 'w')
