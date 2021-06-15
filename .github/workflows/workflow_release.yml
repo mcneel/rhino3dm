@@ -117,21 +117,10 @@ jobs:
 
   build_js:
     name: build rhino3dm.js
-    runs-on: windows-latest
-    #container:
-    #  image: emscripten/emsdk:2.0.10
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:2.0.10
     steps:
-      - name: install dependencies
-        run: |
-          cd ..
-          git clone https://github.com/emscripten-core/emsdk.git
-          cd emsdk
-          git pull
-          .\\emsdk.bat install 2.0.10
-          .\\emsdk.bat activate 2.0.10
-          .\\emsdk.bat install mingw-4.6.2-32bit
-          .\\emsdk.bat activate mingw-4.6.2-32bit
-          cd ../rhino3dm
       - name: info
         run: python3 --version && emcc --version && cmake --version
       - name: checkout
