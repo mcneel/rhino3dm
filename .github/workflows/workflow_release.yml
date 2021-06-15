@@ -127,10 +127,10 @@ jobs:
           git clone https://github.com/emscripten-core/emsdk.git
           cd emsdk
           git pull
-          emsdk install 2.0.10
-          emsdk activate 2.0.10
-          emsdk install mingw-4.6.2-32bit
-          emsdk activate mingw-4.6.2-32bit
+          emsdk.bat install 2.0.10
+          emsdk.bat activate 2.0.10
+          emsdk.bat install mingw-4.6.2-32bit
+          emsdk.bat activate mingw-4.6.2-32bit
           cd ../rhino3dm
       - name: info
         run: python3 --version && emcc --version && cmake --version
