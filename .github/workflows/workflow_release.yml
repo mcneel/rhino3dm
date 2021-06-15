@@ -117,8 +117,6 @@ jobs:
 
   build_js:
     name: build rhino3dm.js
-    needs: check_bindings
-    if: needs.check_bindings.outputs.any_changed == 'true'
     runs-on: windows-latest
     #container:
     #  image: emscripten/emsdk:2.0.10
