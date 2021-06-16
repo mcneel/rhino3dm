@@ -499,14 +499,11 @@ def check_ndk(build_tool):
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
  
-    print('passed ndk root check')
     # we are going to search the root folder for valid ndk versions, so we need to set up
     # a search pattern that is per-platform
     ndk_build_sub_search = ''
     if _platform == "win32":
         ndk_build_sub_search = "\\android-ndk-r??\\ndk-build"
-    if _platform == "darwin":
-        ndk_build_sub_search = "/android-ndk-r??/ndk-build"
     
     versions_found = dict()
     if glob.glob(ndk_root_path + ndk_build_sub_search):
