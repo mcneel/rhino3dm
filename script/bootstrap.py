@@ -513,19 +513,17 @@ def check_ndk(build_tool):
         path_to_search = ndk_root_path
 
         only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        print(only_folders)
         for folder in only_folders:
-            if folder.startswith("android-ndk-r"):
-                version_id = folder.split("android-ndk-")[1]
-                # create a path to source.properites
-                ver_info_file = os.path.join(ndk_root_path, folder, "source.properties")
-                if os.path.exists(ver_info_file):
-                    src_props_file = open(ver_info_file, "r")
-                    for line in src_props_file:
-                        if "Pkg.Revision =" in line:
-                            build_number = line.strip().split('= ')[1]
-                            versions_found[version_id] = build_number
-                    src_props_file.close()
+            version_id = folder
+            # create a path to source.properites
+            ver_info_file = os.path.join(ndk_root_path, folder, "source.properties")
+            if os.path.exists(ver_info_file):
+                src_props_file = open(ver_info_file, "r")
+                for line in src_props_file:
+                    if "Pkg.Revision =" in line:
+                        build_number = line.strip().split('= ')[1]
+                        versions_found[version_id] = build_number
+                src_props_file.close()
 
     print(versions_found)
     if not versions_found:
