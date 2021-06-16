@@ -494,6 +494,7 @@ def check_ndk(build_tool):
         ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk-bundle")
 
     print(ndk_root_path)
+    print(os.environ.get('ANDROID_NDK_ROOT'))
     if not os.path.exists(ndk_root_path):
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
