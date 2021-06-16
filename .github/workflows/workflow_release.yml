@@ -115,6 +115,26 @@ jobs:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
 
+  build_dotnet_device:
+    name: build dotnet device
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        device-os: [android, ios]
+    steps:
+      - name: info
+        run: python --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python script/bootstrap.py -p ${{matrix.device-os}}
+      - name: setup
+        run: python script/setup.py -p ${{matrix.device-os}} -v
+      - name: build dotnet ${{matrix.device-os}}
+        run: python script/build.py -p ${{matrix.device-os}} -v
+
   build_js:
     name: build rhino3dm.js
     runs-on: ubuntu-latest
