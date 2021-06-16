@@ -491,7 +491,7 @@ def check_ndk(build_tool):
         ndk_root_path_spaceless = drive_prefix + '\\' + 'Android\\' + 'ndk\\'
     if _platform == "darwin":
         home = os.path.expanduser("~")
-        ndk_root_path = os.path.join(home, "Library", "Developer", "Xamarin", "android-ndk")
+        ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk", "android-ndk")
 
     if not os.path.exists(ndk_root_path):
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))

@@ -117,7 +117,7 @@ jobs:
 
   build_dotnet_android:
     name: build dotnet android
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - name: info
         run: python3 --version && cmake --version
