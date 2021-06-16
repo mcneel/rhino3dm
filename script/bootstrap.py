@@ -495,7 +495,7 @@ def check_ndk(build_tool):
 
     print(ndk_root_path)
     print(os.environ.get('ANDROID_NDK_ROOT'))
-    if not os.path.exists('/Users/runner/Library/Android/sdk/ndk/21.4.7075529'):
+    if not os.path.exists(ndk_root_path):
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
  
@@ -527,7 +527,7 @@ def check_ndk(build_tool):
                             build_number = line.strip().split('= ')[1]
                             versions_found[version_id] = build_number
                     src_props_file.close()
-
+    print('versions ' + versions_found)
     if not versions_found:
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False       
