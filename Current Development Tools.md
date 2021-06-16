@@ -39,7 +39,7 @@ We are currently using the Android NDK 21.0.6113669 (r21).  Scripts read this:
 
 `ndk_currently_using = 21.0.6113669`
 `ndk_archive_url_macos = https://dl.google.com/android/repository/android-ndk-r21-darwin-x86_64.zip`
-`ndk_install_notes_macos = To install the NDK, decompress the folder, then move it to /Users/~/Library/Developer/Xamarin/android-ndk/.  On macOS Catalina, you will need to remove the Apple Quarantine extended attributes on all fiules in this folder.  This can be done by running xattr -dr com.apple.quarantine {path_to_ndk}.  Next, add the following line to your ~/.bash_profile: export ANDROID_NDK="/Users/~/Library/Developer/Xamarin/android-ndk/android-ndk-r21/"`
+`ndk_install_notes_macos = To install the NDK, decompress the folder, then move it to /Users/~/Library/Developer/Xamarin/android-ndk/.  On macOS Catalina, you will need to remove the Apple Quarantine extended attributes on all files in this folder.  This can be done by running xattr -dr com.apple.quarantine {path_to_ndk}.  Next, add the following line to your ~/.bash_profile: export ANDROID_NDK="/Users/~/Library/Developer/Xamarin/android-ndk/android-ndk-r21/"`
 
 ### Xamarin.Android
 

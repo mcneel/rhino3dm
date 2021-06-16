@@ -75,8 +75,8 @@ jobs:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
   
-  build_dotnet_all:
-    name: build all dotnet versions
+  build_dotnet_os:
+    name: build dotnet linux, macos, windows
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -153,6 +153,11 @@ jobs:
         run: python3 script/setup.py -p ios -v
       - name: build dotnet ios
         run: python3 script/build.py -p ios -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/ios/dotnet/Rhino3dm.iOS.dll
+          name: rhino3dm.net ios
 
   build_js:
     name: build rhino3dm.js
