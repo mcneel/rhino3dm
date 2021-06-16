@@ -115,25 +115,44 @@ jobs:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
 
-  build_dotnet_device:
-    name: build dotnet device
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        device-os: [android, ios]
+  build_dotnet_android:
+    name: build dotnet android
+    runs-on: windows-latest
     steps:
       - name: info
-        run: python --version && cmake --version
+        run: python3 --version && cmake --version
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
         run: git submodule update --init
       - name: bootstrap
-        run: python script/bootstrap.py -p ${{matrix.device-os}}
+        run: python3 script/bootstrap.py -p android
       - name: setup
-        run: python script/setup.py -p ${{matrix.device-os}} -v
-      - name: build dotnet ${{matrix.device-os}}
-        run: python script/build.py -p ${{matrix.device-os}} -v
+        run: python3 script/setup.py -p android -v
+      - name: build dotnet android
+        run: python3 script/build.py -p android -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/android/dotnet/Rhino3dm.Android.dll
+          name: rhino3dm.net android
+  
+  build_dotnet_ios:
+    name: build dotnet ios
+    runs-on: macos-latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p ios
+      - name: setup
+        run: python3 script/setup.py -p ios -v
+      - name: build dotnet ios
+        run: python3 script/build.py -p ios -v
 
   build_js:
     name: build rhino3dm.js
@@ -150,9 +169,9 @@ jobs:
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
       - name: setup
-        run: python3 script/setup.py -p js -o -v
+        run: python3 script/setup.py -p js -v
       - name: build js
-        run: python3 script/build.py -p js -o -v
+        run: python3 script/build.py -p js -v
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
