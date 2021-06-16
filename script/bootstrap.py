@@ -508,13 +508,12 @@ def check_ndk(build_tool):
     versions_found = dict()
     print(ndk_root_path + ndk_build_sub_search)
     if glob.glob(ndk_root_path + ndk_build_sub_search):
-        print('passed glob')
         ndk_build_sub_search = '' 
         has_ndk = True
         path_to_search = ndk_root_path
 
         only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        
+        print(only_folders)
         for folder in only_folders:
             if folder.startswith("android-ndk-r"):
                 version_id = folder.split("android-ndk-")[1]
