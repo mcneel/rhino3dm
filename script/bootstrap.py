@@ -506,7 +506,9 @@ def check_ndk(build_tool):
         ndk_build_sub_search = "\\android-ndk-r??\\ndk-build"
     
     versions_found = dict()
+    print(ndk_root_path + ndk_build_sub_search)
     if glob.glob(ndk_root_path + ndk_build_sub_search):
+        print('passed glob')
         ndk_build_sub_search = '' 
         has_ndk = True
         path_to_search = ndk_root_path
