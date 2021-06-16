@@ -491,7 +491,7 @@ def check_ndk(build_tool):
         ndk_root_path_spaceless = drive_prefix + '\\' + 'Android\\' + 'ndk\\'
     if _platform == "darwin":
         home = os.path.expanduser("~")
-        ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk", "android-ndk")
+        ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk")
 
     print(ndk_root_path)
     if not os.path.exists(ndk_root_path):
