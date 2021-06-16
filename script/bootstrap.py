@@ -491,7 +491,7 @@ def check_ndk(build_tool):
         ndk_root_path_spaceless = drive_prefix + '\\' + 'Android\\' + 'ndk\\'
     if _platform == "darwin":
         home = os.path.expanduser("~")
-        ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk-bundle")
+        ndk_root_path = os.path.join(home, "Library", "Android", "sdk", "ndk")
 
     print(ndk_root_path)
     print(os.environ.get('ANDROID_NDK_ROOT'))
@@ -499,6 +499,7 @@ def check_ndk(build_tool):
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False
  
+    print('passed ndk root check')
     # we are going to search the root folder for valid ndk versions, so we need to set up
     # a search pattern that is per-platform
     ndk_build_sub_search = ''
@@ -527,7 +528,8 @@ def check_ndk(build_tool):
                             build_number = line.strip().split('= ')[1]
                             versions_found[version_id] = build_number
                     src_props_file.close()
-    print('versions ' + versions_found)
+
+    print(versions_found)
     if not versions_found:
         print_error_message(build_tool.name + " not found. " + format_install_instructions(build_tool))
         return False       
