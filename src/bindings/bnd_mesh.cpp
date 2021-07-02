@@ -744,7 +744,7 @@ ON_3dPoint BND_MeshFaceList::GetFaceCenter(int faceIndex) const
 
     return center;
   }
-  return ON_3dPoint::Unset;
+  return ON_3dPoint::UnsetPoint;
 }
 
 BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
