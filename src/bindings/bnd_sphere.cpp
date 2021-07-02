@@ -32,6 +32,19 @@ BND_Circle* BND_Sphere::LongitudeDegrees(double degrees) const
   return new BND_Circle(c);
 }
 
+BND_TUPLE BND_Sphere::ClosestParameter(const ON_3dPoint& testPoint) const
+{
+  bool success = false;
+  double longitudeRadians = 0;
+  double latitudeRadians = 0;
+  success = m_sphere.ClosestPointTo(testPoint, &longitudeRadians, &latitudeRadians);
+  BND_TUPLE rc = CreateTuple(3);
+  SetTuple(rc, 0, success);
+  SetTuple(rc, 1, longitudeRadians);
+  SetTuple(rc, 2, latitudeRadians);
+  return rc;
+}
+
 BND_Brep* BND_Sphere::ToBrep() const
 {
   ON_Brep* brep = ON_BrepSphere(m_sphere);
@@ -122,6 +135,7 @@ void initSphereBindings(pybind11::module& m)
     .def("PointAt", &BND_Sphere::PointAt, py::arg("longitudeRadians"), py::arg("latitudeRadians"))
     .def("NormalAt", &BND_Sphere::NormalAt, py::arg("longitudeRadians"), py::arg("latitudeRadians"))
     .def("ClosestPoint", &BND_Sphere::ClosestPoint, py::arg("testPoint"))
+    .def("ClosestParameter", &BND_Sphere::ClosestParameter, py::arg("testPoint"))
     .def("ToBrep", &BND_Sphere::ToBrep)
     .def("ToNurbsSurface", &BND_Sphere::ToNurbsSurface)
     .def("Encode", &BND_Sphere::Encode)
@@ -150,6 +164,7 @@ void initSphereBindings(void*)
     .function("pointAt", &BND_Sphere::PointAt)
     .function("normalAt", &BND_Sphere::NormalAt)
     .function("closestPoint", &BND_Sphere::ClosestPoint)
+    .function("closestParameter", &BND_Sphere::ClosestParameter)
     .function("toBrep", &BND_Sphere::ToBrep, allow_raw_pointers())
     .function("toNurbsSurface", &BND_Sphere::ToNurbsSurface, allow_raw_pointers())
     .function("encode", &BND_Sphere::Encode)

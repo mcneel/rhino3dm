@@ -205,9 +205,9 @@ public:
   bool SetFace2(int index, int vertex1, int vertex2, int vertex3, int vertex4);
   BND_TUPLE GetFace(int i) const;
   //    public MeshFace this[int index]
-//    public bool GetFaceVertices(int faceIndex, out Point3f a, out Point3f b, out Point3f c, out Point3f d)
+  BND_TUPLE GetFaceVertices(int faceIndex) const;
 //    public BoundingBox GetFaceBoundingBox(int faceIndex)
-//    public Point3d GetFaceCenter(int faceIndex)
+  ON_3dPoint GetFaceCenter(int faceIndex) const;
 //    public int[] AdjacentFaces(int faceIndex)
 //    BND_TUPLE ToIntArray(bool asTriangles) const;
 //    public int[] ToIntArray(bool asTriangles)
@@ -266,7 +266,6 @@ public:
   //    public void Destroy()
 };
 
-
 class BND_MeshTextureCoordinateList
 {
   ON_ModelComponentReference m_component_reference;
@@ -282,7 +281,6 @@ public:
   void SetTextureCoordinate(int i, ON_2fPoint tc) { m_mesh->m_T[i] = tc; }
   int Add(float s, float t);
 };
-
 
 class BND_Mesh : public BND_GeometryBase
 {
