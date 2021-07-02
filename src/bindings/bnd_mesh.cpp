@@ -722,9 +722,9 @@ BND_TUPLE BND_MeshFaceList::GetFaceVertices(int faceIndex) const
   {
     ON_MeshFace& face = m_mesh->m_F[faceIndex];
     BND_TUPLE rc = CreateTuple(5);
-    SetTuple<bool>(rc, 0, true);
+    SetTuple(rc, 0, true);
     for (int i = 0; i < 4; i++)
-      SetTuple<ON_3fPoint>(rc, i+1, m_mesh->m_V[ face.vi[i] ]);
+      SetTuple(rc, i+1, m_mesh->m_V[ face.vi[i] ]);
     return rc;
   }
   return NullTuple();
@@ -744,6 +744,7 @@ ON_3dPoint BND_MeshFaceList::GetFaceCenter(int faceIndex) const
 
     return center;
   }
+  return ON_3dPoint::Unset;
 }
 
 BND_MeshTopologyEdgeList::BND_MeshTopologyEdgeList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
