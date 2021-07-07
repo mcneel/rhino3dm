@@ -114,28 +114,6 @@ jobs:
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
-
-  build_dotnet_android:
-    name: build dotnet android
-    runs-on: macos-latest
-    steps:
-      - name: info
-        run: python3 --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: update submodules
-        run: git submodule update --init
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p android
-      - name: setup
-        run: python3 script/setup.py -p android -v
-      - name: build dotnet android
-        run: python3 script/build.py -p android -v
-      - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: src/build/android/dotnet/Rhino3dm.Android.dll
-          name: rhino3dm.net android
   
   build_dotnet_ios:
     name: build dotnet ios
