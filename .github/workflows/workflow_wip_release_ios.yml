@@ -12,11 +12,11 @@ jobs:
         uses: actions/checkout@v2
       - name: update submodules
         run: git submodule update --init
-      - name: setup-xamarin
-        uses: maxim-lobanov/setup-xamarin@v1
-        with:
-          mono-version: '6.8'
-          xamarin-ios-version: '13.14'
+      #- name: setup-xamarin
+      #  uses: maxim-lobanov/setup-xamarin@v1
+      #  with:
+      #    mono-version: '6.8'
+      #    xamarin-ios-version: '13.14'
       - name: bootstrap
         run: python3 script/bootstrap.py -p ios
       - name: setup
