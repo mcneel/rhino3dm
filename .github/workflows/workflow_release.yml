@@ -114,6 +114,33 @@ jobs:
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
+  
+  build_dotnet_ios:
+    name: build dotnet ios
+    runs-on: macos-latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      #- name: setup-xamarin
+      #  uses: maxim-lobanov/setup-xamarin@v1
+      #  with:
+      #    mono-version: '6.8'
+      #    xamarin-ios-version: '13.14'
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p ios
+      - name: setup
+        run: python3 script/setup.py -p ios -v
+      - name: build dotnet ios
+        run: python3 script/build.py -p ios -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/ios/dotnet/Rhino3dm.iOS.dll
+          name: rhino3dm.net ios
 
   build_js:
     name: build rhino3dm.js
