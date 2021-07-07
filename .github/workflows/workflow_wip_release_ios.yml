@@ -16,7 +16,7 @@ jobs:
         uses: maxim-lobanov/setup-xamarin@v1
         with:
           mono-version: '6.8'
-          xamarin-ios-version: '13'
+          xamarin-ios-version: '13.14'
       - name: bootstrap
         run: python3 script/bootstrap.py -p ios
       - name: setup
