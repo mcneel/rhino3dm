@@ -5,16 +5,13 @@ jobs:
   build_dotnet_android:
     name: build dotnet android
     runs-on: macos-latest
+    env:
+      ANDROID_NDK: /Users/runner/Library/Android/sdk/ndk/android-ndk-21.4.7075529
     steps:
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
           cmake-version: '3.16.2'
-      - name: specify NDK
-        uses: ravinderjangra/android-ndk-toolchain-setup@0.2
-        with:
-          api: '21'
-          force: true
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
