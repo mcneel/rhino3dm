@@ -12,6 +12,8 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
           cmake-version: '3.16.2'
+      - name: Install NDK
+        run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669 --sdk_root=${ANDROID_SDK_ROOT}
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
