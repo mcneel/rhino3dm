@@ -12,6 +12,12 @@ jobs:
         uses: actions/checkout@v2
       - name: update submodules
         run: git submodule update --init
+      - name: setup android ndk
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21
+          add-to-path: true
       - name: bootstrap
         run: python3 script/bootstrap.py -p android
       - name: setup
