@@ -5,15 +5,16 @@ jobs:
   build_dotnet_android:
     name: build dotnet android
     runs-on: macos-latest
-    env:
-      ANDROID_NDK: /Users/runner/Library/Android/sdk/ndk/android-ndk-21.4.7075529
     steps:
-      - name: Setup cmake
+      - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
           cmake-version: '3.16.2'
-      - name: Install NDK
-        run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669 --sdk_root=${ANDROID_SDK_ROOT}
+      - name: setup android ndk
+        uses: maxim-lobanov/setup-android-tools@v1
+        with:
+          packages: ndk;21.0.6113669
+          cache: true
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
