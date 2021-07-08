@@ -6,18 +6,22 @@ jobs:
     name: build dotnet android
     runs-on: macos-latest
     steps:
-      - name: info
-        run: python3 --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: update submodules
-        run: git submodule update --init
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.9
+        with:
+          cmake-version: '3.16.2'
       - name: setup android ndk
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
           ndk-version: r21
           add-to-path: true
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
       - name: bootstrap
         run: python3 script/bootstrap.py -p android
       - name: setup
