@@ -17,7 +17,7 @@ jobs:
           ndk-version: r21
           add-to-path: true
         env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
