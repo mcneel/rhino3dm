@@ -19,7 +19,7 @@ jobs:
         id: check_files
         uses: andstor/file-existence-action@v1
         with:
-          files: "/Users/runner/Library/Android/sdk/ndk/android-ndk-21.0.6113669/build/cmake/android.toolchain.cmake"
+          files: "/Users/runner/Library/Android/sdk/ndk/android-ndk-r21/build/cmake/android.toolchain.cmake"
       - name: File exists
         if: steps.check_files.outputs.files_exists == 'true'
         # Only runs if all of the files exists
