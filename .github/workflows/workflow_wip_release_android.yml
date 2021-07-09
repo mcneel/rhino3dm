@@ -15,15 +15,9 @@ jobs:
         with:
           packages: ndk;21.0.6113669
           cache: true
-      - name: Check file existence
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "/Users/runner/Library/Android/sdk/ndk/android-ndk-r21/build/cmake/android.toolchain.cmake"
-      - name: File exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        # Only runs if all of the files exists
-        run: echo All files exists!
+      - name: list files
+          run: |
+          ls /Users/runner/Library/Android/sdk/ndk/
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
