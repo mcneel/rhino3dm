@@ -15,9 +15,6 @@ jobs:
         with:
           packages: ndk;21.0.6113669
           cache: true
-      - name: list files
-        run: |
-          ls /Users/runner/Library/Android/sdk/ndk/
       - name: info
         run: python3 --version && cmake --version
       - name: checkout

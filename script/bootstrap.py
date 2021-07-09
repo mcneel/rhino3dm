@@ -535,7 +535,10 @@ def check_ndk(build_tool):
     for version_id, build_number in versions_found.items():
         if build_number == build_tool.currently_using:
             running_version = build_number
+            # check which path actually exists
             android_ndk_path = os.path.join(ndk_root_path, "android-ndk-" + version_id, '')
+            if os.path.exists(android_ndk_path) == False:
+                android_ndk_path = os.path.join(ndk_root_path, version_id, '')
     
     # if we don't find a match, get the highest version we can find...
     if not running_version:
