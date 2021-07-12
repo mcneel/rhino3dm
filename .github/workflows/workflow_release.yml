@@ -114,9 +114,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: |
-            src/dotnet/bin/Debug/Rhino3dm.*.nupkg 
-            ${{ matrix.artifact-path }}
+          path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
   
   build_dotnet_ios:
@@ -145,9 +143,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: |
-            Rhino3dm.iOS.*.nupkg
-            src/build/ios/dotnet/Rhino3dm.iOS.dll
+          path: Rhino3dm.iOS.*.nupkg #src/build/ios/dotnet/Rhino3dm.iOS.dll
           name: rhino3dm.net ios
 
   build_dotnet_android:
@@ -180,9 +176,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: |
-            Rhino3dm.Android.*.nupkg
-            src/build/android/dotnet/Rhino3dm.Android.dll
+          path: Rhino3dm.Android.*.nupkg #src/build/android/dotnet/Rhino3dm.Android.dll
           name: rhino3dm.net android
 
   build_js:
