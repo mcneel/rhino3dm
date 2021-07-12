@@ -76,7 +76,7 @@ jobs:
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
   
   build_dotnet_os:
-    name: build dotnet linux, macos, windows
+    name: build dotnet ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -111,10 +111,15 @@ jobs:
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: pack dotnet ${{ matrix.os }}
         run: dotnet pack src/dotnet/Rhino3dm.csproj
-      - name: artifacts
+      - name: artifacts ${{ matrix.os }} nupkg
         uses: actions/upload-artifact@v2
         with:
           path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.os }} nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.os }}
   
   build_dotnet_ios:
@@ -140,10 +145,15 @@ jobs:
         run: python3 script/build.py -p ios -v
       - name: pack dotnet ios
         run: nuget pack src/dotnet/Rhino3dm.iOS.nuspec
-      - name: artifacts
+      - name: artifacts nupkg
         uses: actions/upload-artifact@v2
         with:
           path: Rhino3dm.iOS.*.nupkg #src/build/ios/dotnet/Rhino3dm.iOS.dll
+          name: rhino3dm.net ios nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/ios/dotnet/Rhino3dm.iOS.dll
           name: rhino3dm.net ios
 
   build_dotnet_android:
@@ -173,10 +183,15 @@ jobs:
         run: python3 script/build.py -p android -v
       - name: pack dotnet android
         run: nuget pack src/dotnet/Rhino3dm.Android.nuspec
-      - name: artifacts
+      - name: artifacts nupkg
         uses: actions/upload-artifact@v2
         with:
           path: Rhino3dm.Android.*.nupkg #src/build/android/dotnet/Rhino3dm.Android.dll
+          name: rhino3dm.net android nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/android/dotnet/Rhino3dm.Android.dll
           name: rhino3dm.net android
 
   build_js:
