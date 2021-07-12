@@ -35,7 +35,7 @@ public:
   ON_3dPoint PointAt(double longitudeRadians, double latitudeRadians) const { return m_sphere.PointAt(longitudeRadians, latitudeRadians); }
   ON_3dVector NormalAt(double longitudeRadians, double latitudeRadians) const { return m_sphere.NormalAt(longitudeRadians, latitudeRadians); }
   ON_3dPoint ClosestPoint(const ON_3dPoint& testPoint) const { return m_sphere.ClosestPointTo(testPoint); }
-  //public bool ClosestParameter(Point3d testPoint, out double longitudeRadians, out double latitudeRadians)
+  BND_TUPLE ClosestParameter(const ON_3dPoint& testPoint) const;
   //public bool Rotate(double sinAngle, double cosAngle, Vector3d axisOfRotation)
   //public bool Rotate(double angleRadians, Vector3d axisOfRotation)
   //public bool Rotate(double sinAngle, double cosAngle, Vector3d axisOfRotation, Point3d centerOfRotation)

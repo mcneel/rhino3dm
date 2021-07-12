@@ -49,6 +49,7 @@ static pybind11::dict EncodePoint3d(const ON_3dPoint& pt)
   d["Z"] = pt.z;
   return d;
 }
+
 static pybind11::dict EncodePoint4d(const ON_4dPoint& pt)
 {
   pybind11::dict d;
@@ -122,7 +123,7 @@ void initPointBindings(pybind11::module& m)
     .def(py::self + ON_3dVector())
     .def(py::self * ON_Xform())
     .def("DistanceTo", &ON_3dPoint::DistanceTo, py::arg("other"))
-    .def("Transform", &ON_3dPoint::Transform, py::arg("xform"));
+    .def("Transform", &BND_Point3d::Transform, py::arg("xform"));
 
   py::class_<ON_4dPoint>(m, "Point4d")
     .def(py::init<double, double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("w"))

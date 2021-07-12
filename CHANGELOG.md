@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.7.0] - 2021-07-02
+### Added
+- (js, py) Circle.ClosestParameter, Light.GetSpotLightRadii, MeshFaceList.GetFaceVertices, MeshFaceList.GetFaceCenter, Sphere.ClosestParameter from [@fraguada](https://github.com/fraguada)
+
+### Changed
+- (js) BezierCurve.toNurbsCurve changed ToNurbsCurve to toNurbsCurve to stay consistent with function naming in library
+### Fixed
+- (js) File3dm.strings table was always reporting a count of 0 [@fraguada](https://github.com/fraguada)
+- (py) Point3d.Transform was not callable
+
 ## [7.6.0] - 2021-05-28
 ### Added
 - (js, py) AnnotationBase.RichText and PlainText properties
