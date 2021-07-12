@@ -48,7 +48,7 @@ jobs:
           name: rhino3dm.py sdist
 
   build_py_all_bdist:
-    name: build all python versions bdist
+    name: build python ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
