@@ -109,6 +109,8 @@ jobs:
         run: python script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.os }}
         run: python script/build.py -p ${{ matrix.target }} -v
+      - name: pack dotnet ${{ matrix.os }}
+        run: dotnet pack src\dotnet\Rhino3dm.csproj
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -141,6 +143,39 @@ jobs:
         with:
           path: src/build/ios/dotnet/Rhino3dm.iOS.dll
           name: rhino3dm.net ios
+
+  build_dotnet_android:
+    name: build dotnet android
+    runs-on: macos-latest
+    steps:
+      #- name: setup cmake
+      # uses: jwlawson/actions-setup-cmake@v1.9
+      # with:
+      #   cmake-version: '3.16.2'
+      - name: setup android ndk
+        uses: maxim-lobanov/setup-android-tools@v1
+        with:
+          packages: ndk;21.0.6113669
+          cache: true
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p android
+      - name: setup
+        run: python3 script/setup.py -p android -v
+      - name: build dotnet android
+        run: python3 script/build.py -p android -v
+      - name: pack dotnet android
+        run: nuget pack src/dotnet/Rhino3dm.Android.nuspec
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: Rhino3dm.Android.*.nupkg
+          name: rhino3dm.net android
 
   build_js:
     name: build rhino3dm.js
