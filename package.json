@@ -1,6 +1,6 @@
 {
   "name": "rhino3dm",
-  "version": "7.6.0",
+  "version": "7.7.0",
   "description": "Node.js package based on OpenNURBS with a RhinoCommon style",
   "main": "rhino3dm.js",
   "types": "rhino3dm.d.ts",
