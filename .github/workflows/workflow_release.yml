@@ -110,7 +110,7 @@ jobs:
       - name: build dotnet ${{ matrix.os }}
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: pack dotnet ${{ matrix.os }}
-        run: dotnet pack src\dotnet\Rhino3dm.csproj
+        run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -138,10 +138,12 @@ jobs:
         run: python3 script/setup.py -p ios -v
       - name: build dotnet ios
         run: python3 script/build.py -p ios -v
+      - name: pack dotnet ios
+        run: nuget pack src/dotnet/Rhino3dm.iOS.nuspec
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: src/build/ios/dotnet/Rhino3dm.iOS.dll
+          path: Rhino3dm.iOS.*.nupkg #src/build/ios/dotnet/Rhino3dm.iOS.dll
           name: rhino3dm.net ios
 
   build_dotnet_android:
