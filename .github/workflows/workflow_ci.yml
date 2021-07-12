@@ -38,7 +38,9 @@ jobs:
         uses: tj-actions/changed-files@v6.3
         id: changed-files
         with:
-          files: src/bindings
+          files: |
+            src/bindings
+            src/CMakeLists.txt
 
   #only run if src files have changed.
 

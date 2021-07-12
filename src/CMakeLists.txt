@@ -544,3 +544,16 @@ if(${RHINO3DM_JS})
   install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
   install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
 endif()
+
+# patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
+if(${RHINO3DM_JS})
+  find_program(PATCH patch)
+  if(NOT PATCH)
+      message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
+  endif()
+  add_custom_command(TARGET rhino3dm POST_BUILD
+    COMMENT "Generating ${CMAKE_BINARY_DIR}/rhino3dm.module.js"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
+    COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
+  )
+endif()
