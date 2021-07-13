@@ -48,12 +48,19 @@ jobs:
           name: rhino3dm.py sdist
 
   build_py_all_bdist:
-    name: build python ${{ matrix.os }} bdist
+    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [2.7, 3.7, 3.8, 3.9]
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: windows
+          - os: macos-latest
+            target: macos
     steps:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -73,10 +80,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: dist
-          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.target }}
   
   build_dotnet_os:
-    name: build dotnet ${{ matrix.os }}
+    name: build dotnet ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -115,12 +122,12 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
-          name: rhino3dm.net ${{ matrix.os }} nupkg
+          name: rhino3dm.net ${{ matrix.target }} nupkg
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: ${{ matrix.artifact-path }}
-          name: rhino3dm.net ${{ matrix.os }}
+          name: rhino3dm.net ${{ matrix.target }}
   
   build_dotnet_ios:
     name: build dotnet ios
