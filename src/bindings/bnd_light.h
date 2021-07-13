@@ -58,7 +58,7 @@ public:
   void SetSpotExponent(double se) { m_light->SetSpotExponent(se); }
   double GetHotSpot() const { return m_light->HotSpot(); }
   void SetHotSpot(double hs) { m_light->SetHotSpot(hs); }
-  //public bool GetSpotLightRadii(out double innerRadius, out double outerRadius)
+  BND_TUPLE GetSpotLightRadii() const;
   ON_3dVector GetLength() const { return m_light->Length(); }
   void SetLength(ON_3dVector l) { m_light->SetLength(l); }
   ON_3dVector GetWidth() const { return m_light->Width(); }
