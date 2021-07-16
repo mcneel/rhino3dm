@@ -74,7 +74,7 @@ jobs:
 # https://github.com/actions/virtual-environments/issues/2486
 
   build_py_all_bdist:
-    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
+    name: build python ${{ matrix.target }} bdist
     runs-on: ${{ matrix.os }}
     needs: check_bindings
     if: needs.check_bindings.outputs.any_changed == 'true'
@@ -87,10 +87,8 @@ jobs:
             target: linux
           - os: windows-latest
             target: windows
-            python-version: 3.9
           - os: macos-latest
             target: macos
-            python-version: 3.9
         exclude:
           - os: macos-latest
             python-version: 2.7
