@@ -17,10 +17,10 @@ jobs:
     - name: audit python wheel cp38
       run: auditwheel repair dist/*-cp38-cp38-*.whl
     - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: wheelhouse
-          name: rhino3dm.py cp38 manylinux2014_x86_64
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse
+        name: rhino3dm.py cp38 manylinux2014_x86_64
 
   build_py_manylinux2014_cp39:
     name: build python manylinux2014
@@ -38,7 +38,7 @@ jobs:
     - name: audit python wheel cp39
       run: auditwheel repair dist/*-cp39-cp39-*.whl
     - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: wheelhouse
-          name: rhino3dm.py cp39 manylinux2014_x86_64
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse
+        name: rhino3dm.py cp39 manylinux2014_x86_64
