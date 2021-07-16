@@ -1,0 +1,12 @@
+name: workflow release wip python manylinux
+on: [workflow_dispatch]
+jobs:
+  build_py_manylinux:
+    name: build python manylinux2014
+    runs-on: ubuntu-latest
+    steps:
+    - name: setup manylinux2014
+      uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux2014_x86_64
+      with:
+        python-versions: 'cp38-cp38m cp39-cp39m'
+        pre-build-command: 'python setup.py bdist_wheel'
