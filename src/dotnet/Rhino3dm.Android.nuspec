@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Rhino3dm.Android</id>
-    <version>0.1.0</version>
+    <version>7.7.0</version>
     <title>.NET library based on OpenNURBS with a "RhinoCommon" style</title>
     <authors>Robert McNeel and Associates</authors>
     <owners>mcneel</owners>

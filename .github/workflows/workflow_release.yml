@@ -1,0 +1,226 @@
+name: workflow release
+on: [workflow_dispatch]
+jobs:
+
+  build_py_sdist:
+    name: build python sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '3.x'
+      - name: info
+        run: python --version && cmake --version
+      - name: install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build python sdist
+        run: python setup.py sdist
+      - name: check sdist
+        run: |
+          # installs rhino3dm from the source distribution
+          # into a virtualenv and tries to import it
+
+          # set up directory
+          rm -rf test_install
+          mkdir test_install
+          cd test_install
+
+          # create virtualenv
+          python -m venv venv
+          . venv/bin/activate
+          pip install wheel
+
+          # install
+          pip install --verbose ../dist/*.tar.gz
+
+          # test
+          python -c "import rhino3dm; print(rhino3dm.__version__)"
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py sdist
+
+  build_py_all_bdist:
+    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [2.7, 3.7, 3.8, 3.9]
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: windows
+          - os: macos-latest
+            target: macos
+    steps:
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: info
+        run: python --version && cmake --version
+      - name: install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
+        run: python setup.py bdist_wheel
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.target }}
+  
+  build_dotnet_os:
+    name: build dotnet ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            target: linux
+            artifact-path: src/build/linux/librhino3dm_native.so
+          - os: windows-latest
+            target: windows
+            #TODO: win32
+            artifact-path: src\build\windows\win64\Release\librhino3dm_native.dll
+          - os: macos-latest
+            target: macos
+            artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+    steps:
+      - name: set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: info
+        run: python --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap dotnet ${{ matrix.os }}
+        run: python script/bootstrap.py -p ${{ matrix.target }}
+      - name: setup dotnet ${{ matrix.os }}
+        run: python script/setup.py -p ${{ matrix.target }} -v
+      - name: build dotnet ${{ matrix.os }}
+        run: python script/build.py -p ${{ matrix.target }} -v
+      - name: pack dotnet ${{ matrix.os }}
+        run: dotnet pack src/dotnet/Rhino3dm.csproj
+      - name: artifacts ${{ matrix.os }} nupkg
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.target }} nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.target }}
+  
+  build_dotnet_ios:
+    name: build dotnet ios
+    runs-on: macos-latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      #- name: setup-xamarin
+      #  uses: maxim-lobanov/setup-xamarin@v1
+      #  with:
+      #    mono-version: '6.8'
+      #    xamarin-ios-version: '13.14'
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p ios
+      - name: setup
+        run: python3 script/setup.py -p ios -v
+      - name: build dotnet ios
+        run: python3 script/build.py -p ios -v
+      - name: pack dotnet ios
+        run: nuget pack src/dotnet/Rhino3dm.iOS.nuspec
+      - name: artifacts nupkg
+        uses: actions/upload-artifact@v2
+        with:
+          path: Rhino3dm.iOS.*.nupkg #src/build/ios/dotnet/Rhino3dm.iOS.dll
+          name: rhino3dm.net ios nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/ios/dotnet/Rhino3dm.iOS.dll
+          name: rhino3dm.net ios
+
+  build_dotnet_android:
+    name: build dotnet android
+    runs-on: macos-latest
+    steps:
+      #- name: setup cmake
+      # uses: jwlawson/actions-setup-cmake@v1.9
+      # with:
+      #   cmake-version: '3.16.2'
+      - name: setup android ndk
+        uses: maxim-lobanov/setup-android-tools@v1
+        with:
+          packages: ndk;21.0.6113669
+          cache: true
+      - name: info
+        run: python3 --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p android
+      - name: setup
+        run: python3 script/setup.py -p android -v
+      - name: build dotnet android
+        run: python3 script/build.py -p android -v
+      - name: pack dotnet android
+        run: nuget pack src/dotnet/Rhino3dm.Android.nuspec
+      - name: artifacts nupkg
+        uses: actions/upload-artifact@v2
+        with:
+          path: Rhino3dm.Android.*.nupkg #src/build/android/dotnet/Rhino3dm.Android.dll
+          name: rhino3dm.net android nupkg
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/android/dotnet/Rhino3dm.Android.dll
+          name: rhino3dm.net android
+
+  build_js:
+    name: build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:2.0.10
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup
+        run: python3 script/setup.py -p js -v
+      - name: build js
+        run: python3 script/build.py -p js -v
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/build/javascript/artifacts_js
+          name: rhino3dm.js
