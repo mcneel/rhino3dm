@@ -4,9 +4,15 @@ jobs:
   build_py_manylinux:
     name: build python manylinux2014
     runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
     steps:
-    - name: setup manylinux2014
-      uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux2014_x86_64
-      with:
-        python-versions: 'cp38-cp38m cp39-cp39m'
-        pre-build-command: 'python setup.py bdist_wheel'
+    - name: info
+      run: /opt/python/cp38-cp38/bin/python --version
+    - name: checkout
+        uses: actions/checkout@v2
+    - name: update submodules
+      run: git submodule update --init
+    - name: build python manylinux
+      run: /opt/python/cp38-cp38/bin/python setup.py bdist_wheel
+    - name: audit
+      run: auditwheel repair dist/*-cp38-cp38-*.whl
