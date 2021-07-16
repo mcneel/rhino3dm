@@ -9,7 +9,7 @@ jobs:
     - name: info
       run: /opt/python/cp38-cp38/bin/python --version
     - name: checkout
-        uses: actions/checkout@v2
+      uses: actions/checkout@v2
     - name: update submodules
       run: git submodule update --init
     - name: build python manylinux
