@@ -69,6 +69,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: wheelhouse
+        name: rhino3dm.py ${{ matrix.python-version }} manylinux2014_x86-64
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
