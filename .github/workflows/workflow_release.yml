@@ -47,47 +47,28 @@ jobs:
           path: dist
           name: rhino3dm.py sdist
 
-  build_py_manylinux2014_cp38:
-    name: build python cp38 manylinux2014
+  build_py_manylinux2014:
+    name: build python ${{ matrix.python-version }} manylinux2014
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux2014_x86_64
+    strategy:
+      matrix:
+        python-version: [cp38-cp38, cp39-cp39]
     steps:
     - name: info
-      run: /opt/python/cp38-cp38/bin/python --version
+      run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
       uses: actions/checkout@v2
     - name: update submodules
       run: git submodule update --init
-    - name: build python manylinux cp38
-      run: /opt/python/cp38-cp38/bin/python setup.py bdist_wheel
-    - name: audit python wheel cp38
-      run: auditwheel repair dist/*-cp38-cp38-*.whl
+    - name: build python manylinux
+      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
+    - name: audit python wheel
+      run: auditwheel repair dist/*.whl
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
         path: wheelhouse
-        name: rhino3dm.py cp38 manylinux2014_x86_64
-
-  build_py_manylinux2014_cp39:
-    name: build python cp39 manylinux2014
-    runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
-    steps:
-    - name: info
-      run: /opt/python/cp39-cp39/bin/python --version
-    - name: checkout
-      uses: actions/checkout@v2
-    - name: update submodules
-      run: git submodule update --init
-    - name: build python manylinux cp39
-      run: /opt/python/cp39-cp39/bin/python setup.py bdist_wheel
-    - name: audit python wheel cp39
-      run: auditwheel repair dist/*-cp39-cp39-*.whl
-    - name: artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        path: wheelhouse
-        name: rhino3dm.py cp39 manylinux2014_x86_64
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
