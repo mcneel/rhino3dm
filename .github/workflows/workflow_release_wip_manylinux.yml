@@ -1,5 +1,5 @@
 name: workflow release wip python manylinux
-on: [workflow_dispatch]
+on: [push]
 jobs:
   build_py_manylinux:
     name: build python manylinux2014
