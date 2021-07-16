@@ -87,8 +87,10 @@ jobs:
             target: linux
           - os: windows-latest
             target: windows
+            python-version: 3.9
           - os: macos-latest
             target: macos
+            python-version: 3.9
         exclude:
           - os: macos-latest
             python-version: 2.7
