@@ -196,9 +196,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: setup cmake
-       uses: jwlawson/actions-setup-cmake@v1.9
-       with:
-         cmake-version: '3.16.2'
+        uses: jwlawson/actions-setup-cmake@v1.9
+        with:
+          cmake-version: '3.16.2'
       - name: setup android ndk
         uses: maxim-lobanov/setup-android-tools@v1
         with:
