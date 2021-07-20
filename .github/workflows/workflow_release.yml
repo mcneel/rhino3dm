@@ -1,5 +1,5 @@
 name: workflow release
-on: [workflow_dispatch]
+on: [push, workflow_dispatch]
 jobs:
 
   build_py_sdist:
@@ -161,6 +161,9 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
           cmake-version: '3.16.2'
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '11.4'
       - name: info
         run: python3 --version && cmake --version
       - name: checkout
@@ -199,6 +202,9 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
           cmake-version: '3.16.2'
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '11.4'
       - name: setup android ndk
         uses: maxim-lobanov/setup-android-tools@v1
         with:
