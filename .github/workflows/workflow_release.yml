@@ -216,6 +216,11 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '11.4'
+      - name: setup-xamarin
+        uses: maxim-lobanov/setup-xamarin@v1
+        with:
+          mono-version: '6.8' # specify version in '<major>.<minor>' format
+          xamarin-android-version: '10.1.3' # specify full version; it is not recomended option because your pipeline can be broken suddenly in future
       - name: setup android ndk
         uses: maxim-lobanov/setup-android-tools@v1
         with:
