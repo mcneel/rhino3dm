@@ -204,6 +204,10 @@ jobs:
     name: build dotnet android
     runs-on: macos-latest
     steps:
+      - name: set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.1
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
