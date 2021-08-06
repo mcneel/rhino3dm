@@ -161,7 +161,7 @@ jobs:
   pack_dotnet:
     name: pack dotnet
     needs: build_dotnet_os
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v2
