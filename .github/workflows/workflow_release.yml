@@ -145,13 +145,6 @@ jobs:
         run: python script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.os }}
         run: python script/build.py -p ${{ matrix.target }} -v
-      - name: pack dotnet ${{ matrix.os }}
-        run: dotnet pack src/dotnet/Rhino3dm.csproj
-      - name: artifacts ${{ matrix.os }} nupkg
-        uses: actions/upload-artifact@v2
-        with:
-          path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
-          name: rhino3dm.net ${{ matrix.target }} nupkg
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -166,15 +159,22 @@ jobs:
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v2
         with:
-          path: rhino3dm.net linux
+          path: src/build/linux/librhino3dm_native.so
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v2
         with:
-          name: rhino3dm.net macos
+          path: src/build/macos/Release/librhino3dm_native.dylib
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v2
         with:
-          name: rhino3dm.net windows
+          path: src\build\windows\win64\Release\librhino3dm_native.dll
+      - name: pack dotnet
+        run: dotnet pack src/dotnet/Rhino3dm.csproj
+      - name: artifacts nupkg
+        uses: actions/upload-artifact@v2
+        with:
+          path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
+          name: rhino3dm.net nupkg
   
   build_dotnet_ios:
     name: build dotnet ios
