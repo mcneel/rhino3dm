@@ -156,6 +156,10 @@ jobs:
     needs: build_dotnet_os
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: update submodules
+        run: ls && git submodule update --init
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v2
         with:
