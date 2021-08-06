@@ -157,6 +157,24 @@ jobs:
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
+
+  pack_dotnet:
+    name: pack dotnet
+    needs: build_dotnet_os
+    runs_on: ubuntu-latest
+    steps:
+      - name: download rhino3dm.net linux
+        uses: actions/download-artifact@v2
+        with:
+          path: rhino3dm.net linux
+      - name: download rhino3dm.net macos
+        uses: actions/download-artifact@v2
+        with:
+          name: rhino3dm.net macos
+      - name: download rhino3dm.net macos
+        uses: actions/download-artifact@v2
+        with:
+          name: rhino3dm.net windows
   
   build_dotnet_ios:
     name: build dotnet ios
