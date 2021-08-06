@@ -145,8 +145,6 @@ jobs:
         run: python script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.os }}
         run: python script/build.py -p ${{ matrix.target }} -v
-      - name: list files
-        run: ls src/build -R
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
