@@ -119,7 +119,7 @@ jobs:
           - os: windows-latest
             target: windows
             #TODO: win32
-            artifact-path: src\build\windows\win64\Release\librhino3dm_native.dll
+            artifact-path: src\build\windows\
           - os: macos-latest
             target: macos
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
@@ -145,6 +145,8 @@ jobs:
         run: python script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.os }}
         run: python script/build.py -p ${{ matrix.target }} -v
+      - name: list files
+        run: ls src/build -R
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -159,15 +161,18 @@ jobs:
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v2
         with:
-          path: src/build/linux/librhino3dm_native.so
+          name: rhino3dm.net linux
+          path: src/build/linux/
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v2
         with:
-          path: src/build/macos/Release/librhino3dm_native.dylib
-      - name: download rhino3dm.net macos
+          name: rhino3dm.net macos
+          path: src/build/macos/Release/
+      - name: download rhino3dm.net windows
         uses: actions/download-artifact@v2
         with:
-          path: src\build\windows\win64\Release\librhino3dm_native.dll
+          name: rhino3dm.net windows
+          path: src/build/windows/
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts nupkg
