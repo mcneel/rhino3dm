@@ -118,8 +118,7 @@ jobs:
             artifact-path: src/build/linux/librhino3dm_native.so
           - os: windows-latest
             target: windows
-            #TODO: win32
-            artifact-path: src\build\windows\
+            artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
           - os: macos-latest
             target: macos
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
@@ -156,19 +155,39 @@ jobs:
   pack_dotnet:
     name: pack dotnet
     needs: build_dotnet_os
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
+      - name: set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
         run: ls && git submodule update --init
+      - name: bootstrap dotnet
+        run: python script/bootstrap.py -p windows
+      - name: setup dotnet
+        run: python script/setup.py -p windows -v
+      - name: build dotnet
+        run: dotnet build src/dotnet/Rhino3dm.csproj
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v2
         with:
           name: rhino3dm.net linux
           path: src/build/linux/
+      - name: download rhino3dm.net macos
+        uses: actions/download-artifact@v2
+        with:
+          name: rhino3dm.net macos
+          path: src/build/macos/Release/
+      - name: download rhino3dm.net windows
+        uses: actions/download-artifact@v2
+        with:
+          name: rhino3dm.net windows
+          path: src/build/windows/
       - name: list
-        run: "ls -R src/build/linux/"
+        run: "ls -R src/build/"
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts nupkg
