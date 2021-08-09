@@ -175,7 +175,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: rhino3dm.net linux
-          path: src/build/linux/
+          path: src/build/linux/Release/
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v2
         with:
