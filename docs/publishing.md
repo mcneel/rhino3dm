@@ -19,7 +19,7 @@ See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for 
 
 ## dotnet
 
-1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including a nupkg for rhino3m dotnet. 
+1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including a nupkg for rhino3m dotnet for linux, macos, and windows. 
 2. Download the `rhino3dm.net nupkg` artifact generated from running the `workflow_release` workflow. This will result in a `rhino3dm.net nupkg.zip` downloaded to your computer.
 3. Unzip the `rhino3dm.net nupkg.zip` file. This will result in a new folder named `rhino3dm.net nupkg` that will contain a `Rhino3dm.*.*.*.nupkg` numbered according to the current version.
 4. Open a terminal and direct it to the `rhino3dm.net nupkg` folder created from unzipping the file in step 3.
@@ -29,7 +29,7 @@ See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for 
 dotnet nuget push Rhino3dm.*.*.*.nupkg -k <APIKEY> -s https://api.nuget.org/v3/index.json
 ```
 
-6. If all went wekk you should see something similar in the terminal: 
+6. If all went well you should see something similar in the terminal: 
 
 ```
 Pushing Rhino3dm.7.7.0.nupkg to 'https://www.nuget.org/api/v2/package'...
