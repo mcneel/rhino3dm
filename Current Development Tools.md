@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on April 23, 2020
+Last updated by dan@mcneel.com on August 17, 2021
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -26,10 +26,10 @@ We are currently using the .NET Core SDK 3.1.302.  Scripts read this:
 
 ### Xamarin.iOS
 
-We are currently using Xamarin.iOS 13.14.1.39.  Scripts read this:
+We are currently using Xamarin.iOS 14.14.2.5.  Scripts read this:
 
-`xamios_currently_using = 13.14.1.39`
-`xamios_archive_url = https://dl.xamarin.com/MonoTouch/Mac/xamarin.ios-13.14.1.39.pkg`
+`xamios_currently_using = 14.14.2.5`
+`xamios_archive_url = https://dl.xamarin.com/MonoTouch/Mac/xamarin.ios-14.14.2.5.pkg`
 
 ## Android
 
@@ -94,35 +94,35 @@ We are currently using Python 3.7.1. Scripts read this:
 
 ### CMake
 
-We are currently using CMake 3.16.2. Scripts read this:
+We are currently using CMake 3.21.1. Scripts read this:
 
-`cmake_currently_using = 3.16.2`
-`cmake_archive_url_macos = https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Darwin-x86_64.dmg`
-`cmake_archive_url_windows = https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-win64-x64.msi`
+`cmake_currently_using = 3.21.1`
+`cmake_archive_url_macos = https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-macos-universal.dmg`
+`cmake_archive_url_windows = https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-windows-x86_64.msi`
 `cmake_install_notes_macos = Once the CMake.app is installed, launch it, and follow the directions in Tools > How to Install for Command Line Use`
 `cmake_install_notes_linux = On Ubuntu, you can install CMake using: sudo snap install cmake --classic`
 `cmake_install_notes_windows = When installing, be sure to check the box to add CMake to the system path.`
 
 ### macOS
 
-We are currently using macOS 10.15.3. Scripts read this:
+We are currently using macOS 11.5.2. Scripts read this:
 
-`macos_currently_using = 10.15.3`
+`macos_currently_using = 11.5.2`
 `macos_install_notes = The exact version likely does not matter.  You may not need to update/roll-back macOS if your version is close enough.`
 
 ### Xcode
 
-We are currently using Xcode 11.4. Scripts read this:
+We are currently using Xcode 12.5. Scripts read this:
 
-`xcode_currently_using = 11.4`
+`xcode_currently_using = 12.5`
 `xcode_install_notes = Xcode can be downloaded for free from the macOS App Store or from https://developer.apple.com/download/ (Apple developer ID required for the latter option).`
 
 ### Mono Framework MDK
 
 We are currently using the Mono Framework MDK 6.8.0.123.  Scripts read this:
 
-`mdk_currently_using = 6.8.0.123`
-`mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.8.0.123.macos10.xamarin.universal.pkg`
+`mdk_currently_using = 6.12.0.107`
+`mdk_archive_url = https://dl.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-6.12.0.107.macos10.xamarin.universal.pkg`
 `mdk_install_notes = The Mono.framework does not seem to be installed in the /Library/Frameworks folder or the current version is not set.`
 
 ---
