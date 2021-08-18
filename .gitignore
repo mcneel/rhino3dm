@@ -35,6 +35,9 @@
 # Python cache
 __pycache__/
 
+# temporary certificate files
+*.p12
+
 .vscode
 
 /.vs

@@ -100,6 +100,20 @@ jobs:
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
+      - name: code-sign native libraries
+        env:
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            ./script/codesign-native.sh src/build
+          else
+            echo "$RUNNER_OS not supported for code-signing"
+            exit 0
+          fi
+        shell: bash
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
