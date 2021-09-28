@@ -56,6 +56,57 @@ rhino3dm().then((rhino) => {
 ```
 
 
+### React.js
+
+Similar to plain html, **rhino3dm.js** can be added as a script in `index.js`
+
+```js
+// index.js
+import { StrictMode } from "react";
+import ReactDOM from "react-dom";
+
+import App from "./App";
+
+const rootElement = document.getElementById("root");
+
+const script = document.createElement("script");
+script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@0.12.0/rhino3dm.min.js";
+script.addEventListener("load", () => {
+  ReactDOM.render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+    rootElement
+  );
+});
+document.body.appendChild(script);
+
+```
+
+Once loaded, `rhino3dm` can be referenced in any component with `window.rhino3dm`, keep in mind that the wasm file loads asycnhronously so any any calls to wasm methods need to happen inside `.then()` or using `await`
+
+```js
+// App.js
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+export default function App() {
+  const [sphere, setSphere] = useState(null);
+
+  useEffect(() => {
+    window.rhino3dm().then((Module) => {
+      //creating a sphere using rhino3dm
+      setSphere(new Module.Sphere([1, 2, 3], 16));
+    });
+  }, []);
+
+  return <div className="App">{sphere && <p>{`sphere diameter is: ${sphere.diameter}`}</p>}</div>;
+}
+```
+
+CodeSandbox of above react implementation can be found [here](https://codesandbox.io/s/rhino3dm-react-p3gr7?file=/src/App.js:0-428)
+
+
 ## API Docs
 
 The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
