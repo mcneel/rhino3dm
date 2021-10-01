@@ -1450,6 +1450,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the style of the knot vector.
     /// </summary>
+    /// <since>7.1</since>
     public KnotStyle KnotStyle
     {
       get

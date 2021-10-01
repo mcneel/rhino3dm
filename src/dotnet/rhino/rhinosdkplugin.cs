@@ -1455,6 +1455,11 @@ namespace Rhino.PlugIns
     #endregion
 
     string m_all_users_settings_dir;
+    /// <summary>
+    /// Get the plug-in's "all users" settings directory. 
+    /// This directory will be located in the system's program data folder.
+    /// Note, this does not verify the directory exists.
+    /// </summary>
     /// <since>5.0</since>
     public string SettingsDirectoryAllUsers
     {
@@ -1467,6 +1472,11 @@ namespace Rhino.PlugIns
     }
 
     string m_local_user_settings_dir;
+    /// <summary>
+    /// Get the plug-in's settings directory. This is the directory where the plug-in's persistent settings files are saved. 
+    /// This directory will be located in the user's profile folder.
+    /// Note, this does not verify the directory exists.
+    /// </summary>
     /// <since>5.0</since>
     public string SettingsDirectory
     {
@@ -3791,8 +3801,6 @@ namespace Rhino.PlugIns
 
       return true;
     }
-
-
 
     internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
     private static readonly SaveCusomtomRenderFileCallback g_save_custom_render_file_callback = OnSaveCusomtomRenderFile;

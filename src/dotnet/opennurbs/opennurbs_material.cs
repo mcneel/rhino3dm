@@ -219,12 +219,14 @@ namespace Rhino.DocObjects
       set { UnsafeNativeMethods.ON_Material_PBR_SetOpacityRoughness(m_material.NonConstPointer(), value); }
     }
 
+    /// <since>7.1</since>
     public double Alpha
     {
       get { return UnsafeNativeMethods.ON_Material_PBR_Alpha(m_material.ConstPointer()); }
       set { UnsafeNativeMethods.ON_Material_PBR_SetAlpha(m_material.NonConstPointer(), value); }
     }
 
+    /// <since>7.1</since>
     public bool UseBaseColorTextureAlphaForObjectAlphaTransparencyTexture
     {
       get { return UnsafeNativeMethods.ON_Material_PBR_BaseColorTextureAlphaForObjectAlphaTransparencyTexture(m_material.ConstPointer()); }

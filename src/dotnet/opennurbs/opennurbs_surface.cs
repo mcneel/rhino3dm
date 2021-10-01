@@ -743,6 +743,7 @@ namespace Rhino.Geometry
     /// discontinuous at the ends of their domains.  All closed curves (IsClosed()=true) are
     /// at least C0_locus_continuous at the ends of their domains.
     /// </returns>
+    /// <since>7.4</since>
     [ConstOperation]
     public bool GetNextDiscontinuity(int direction, Continuity continuityType, double t0, double t1,
       double cosAngleTolerance, double curvatureTolerance, out double t)
@@ -793,6 +794,11 @@ namespace Rhino.Geometry
     /// <param name="point">A point. This out parameter will be assigned during this call.</param>
     /// <param name="derivatives">A vector array. This out parameter will be assigned during this call. This can be null.</param>
     /// <returns>true if the operation succeeded; false otherwise.</returns>
+    /// <remarks>
+    /// The partial derivatives will be in the order {Su, Sv} for numberDerivatives = 1, 
+    /// {Su, Sv, Suu, Suv, Svv} for 2, {Su, Sv, Suu, Suv, Svv, Suuu, Suuv, Suvv, Svvv} for 3, 
+    /// and similar for higher counts.
+    /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
     public bool Evaluate(double u, double v, int numberDerivatives, out Point3d point, out Vector3d[] derivatives)

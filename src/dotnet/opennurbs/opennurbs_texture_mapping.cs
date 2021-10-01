@@ -161,6 +161,7 @@ namespace Rhino.Render
     /// runtime setting that is not saved in 3dm files. If m_type is
     /// srfp_mapping, then m_Pxyz and m_Nxyz are ignored.
     /// </summary>
+    /// <since>7.5</since>
     public Transform PrimitiveTransform
     {
       get
@@ -517,6 +518,7 @@ namespace Rhino.Render
 
     /// <summary>Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.</summary>
     /// <returns>TextureMapping instance or null if failed.</returns>
+    /// <since>7.5</since>
     public static TextureMapping CreateSurfaceParameterMapping()
     {
       TextureMapping rc = new TextureMapping();

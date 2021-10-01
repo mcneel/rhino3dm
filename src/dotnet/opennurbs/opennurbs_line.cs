@@ -718,6 +718,7 @@ namespace Rhino.Geometry
     /// <param name="a">First point.</param>
     /// <param name="b">Second point.</param>
     /// <param name="c">Third point.</param>
+    /// <since>7.1</since>
     public Triangle3d(Point3d a, Point3d b, Point3d c)
     {
       m_A = a;
@@ -730,25 +731,30 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the first triangle corner.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d A => m_A;
 
     /// <summary>
     /// Gets the second triangle corner.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d B => m_B;
     /// <summary>
     /// Gets the third triangle corner.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d C => m_C;
 
     /// <summary>
     /// Gets the circumcircle of this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public Circle Circumcircle { get => new Circle(A, B, C); }
 
     /// <summary>
     /// Gets the bounding box of this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public BoundingBox BoundingBox
     {
       get
@@ -760,6 +766,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the angle at the A corner.
     /// </summary>
+    /// <since>7.1</since>
     public double AngleA
     {
       get
@@ -770,6 +777,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the angle at the B corner.
     /// </summary>
+    /// <since>7.1</since>
     public double AngleB
     {
       get
@@ -780,6 +788,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the angle at the C corner.
     /// </summary>
+    /// <since>7.1</since>
     public double AngleC
     {
       get
@@ -791,6 +800,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle edge connecting the A and B corners.
     /// </summary>
+    /// <since>7.1</since>
     public Line AB
     {
       get { return new Line(A, B); }
@@ -798,6 +808,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle edge connecting the B and C corners.
     /// </summary>
+    /// <since>7.1</since>
     public Line BC
     {
       get { return new Line(B, C); }
@@ -805,6 +816,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle edge connecting the C and A corners.
     /// </summary>
+    /// <since>7.1</since>
     public Line CA
     {
       get { return new Line(C, A); }
@@ -813,6 +825,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the median line starting at corner A.
     /// </summary>
+    /// <since>7.1</since>
     public Line MedianA
     {
       get { return new Line(A, 0.5 * B + 0.5 * C); }
@@ -820,6 +833,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the median line starting at corner B.
     /// </summary>
+    /// <since>7.1</since>
     public Line MedianB
     {
       get { return new Line(B, 0.5 * A + 0.5 * C); }
@@ -827,6 +841,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the median line starting at corner C.
     /// </summary>
+    /// <since>7.1</since>
     public Line MedianC
     {
       get { return new Line(C, 0.5 * A + 0.5 * B); }
@@ -835,6 +850,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the altitude line starting at corner A.
     /// </summary>
+    /// <since>7.1</since>
     public Line AltitudeA
     {
       get { return new Line(A, BC.ClosestPoint(A, false)); }
@@ -842,6 +858,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the altitude line starting at corner B.
     /// </summary>
+    /// <since>7.1</since>
     public Line AltitudeB
     {
       get { return new Line(B, CA.ClosestPoint(B, false)); }
@@ -849,6 +866,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the altitude line starting at corner C.
     /// </summary>
+    /// <since>7.1</since>
     public Line AltitudeC
     {
       get { return new Line(C, AB.ClosestPoint(C, false)); }
@@ -895,6 +913,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the perpendicular bisector for edge AB.
     /// </summary>
+    /// <since>7.1</since>
     public Line PerpendicularAB
     {
       get
@@ -907,6 +926,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the perpendicular bisector for edge BC.
     /// </summary>
+    /// <since>7.1</since>
     public Line PerpendicularBC
     {
       get
@@ -919,6 +939,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the perpendicular bisector for edge CA.
     /// </summary>
+    /// <since>7.1</since>
     public Line PerpendicularCA
     {
       get
@@ -932,6 +953,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the perimeter of this triangle. This is the sum of the lenghts of all edges.
     /// </summary>
+    /// <since>7.1</since>
     public double Perimeter
     {
       get
@@ -944,6 +966,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the area inside this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public double Area
     {
       get
@@ -955,6 +978,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle area centroid.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d AreaCenter
     {
       get { return (A + B + C) * (1.0/3.0); }
@@ -962,6 +986,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle orthocenter.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d Orthocenter
     {
       get { return TripleLineIntersect(AltitudeA, AltitudeB, AltitudeC); }
@@ -981,6 +1006,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the triangle circumcenter.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d Circumcenter
     {
       get { return Circumcircle.Center; }
@@ -1025,6 +1051,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Transform this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public Triangle3d Transform(Transform transform)
     {
       var a = A;
@@ -1039,6 +1066,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create a polyline from this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public Polyline ToPolyline()
     {
       return new Polyline(4){ A, B, C, A };
@@ -1046,6 +1074,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create a mesh from this triangle.
     /// </summary>
+    /// <since>7.1</since>
     public Mesh ToMesh()
     {
       var mesh = new Mesh();
@@ -1062,6 +1091,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Replace the A corner.
     /// </summary>
+    /// <since>7.1</since>
     public Triangle3d WithA(Point3d a)
     {
       return new Triangle3d(a, B, C);
@@ -1069,6 +1099,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Replace the B corner.
     /// </summary>
+    /// <since>7.1</since>
     public Triangle3d WithB(Point3d b)
     {
       return new Triangle3d(A, b, C);
@@ -1076,6 +1107,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Replace the C corner.
     /// </summary>
+    /// <since>7.1</since>
     public Triangle3d WithC(Point3d c)
     {
       return new Triangle3d(A, B, c);
@@ -1086,6 +1118,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="coords">Barycentic mass for vertex B and C. A is valued as (1 - B - C).</param>
     /// <returns>Point at barycentric mass.</returns>
+    /// <since>7.1</since>
     public Point3d PointAtBarycentricCoords(Point2d coords)
     {
       return (1.0 - coords.X - coords.Y) * m_A + coords.X * m_B + coords.Y * m_C;
@@ -1098,6 +1131,7 @@ namespace Rhino.Geometry
     /// <param name="signedHeight">A value indicating the height of the intersection in world units,
     /// negative if the point is situated under the triangle.</param>
     /// <returns>The computed barycentric mass values relating to B and C for point.</returns>
+    /// <since>7.1</since>
     public Point2d BarycentricCoordsAt(Point3d point, out double signedHeight)
     {
       Point2d result = new Point2d();
@@ -1117,6 +1151,7 @@ namespace Rhino.Geometry
     /// subsequent unit domain maps to a different edge.
     /// </summary>
     /// <param name="t">Parameter along boundary.</param>
+    /// <since>7.1</since>
     public Point3d PointAlongBoundary(double t)
     {
       t = RhinoMath.Wrap(t, 0, 3);
@@ -1132,6 +1167,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the parameter on the triangle boundary closest to a test point.
     /// </summary>
+    /// <since>7.1</since>
     public double ClosestParameterOnBoundary(Point3d point)
     {
       double ab = RhinoMath.Clamp(AB.ClosestParameter(point), 0, 1);
@@ -1154,6 +1190,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the point on the triangle boundary closest to a test point.
     /// </summary>
+    /// <since>7.1</since>
     public Point3d ClosestPointOnBoundary(Point3d point)
     {
       var ab = AB.ClosestPoint(point, true);
@@ -1176,6 +1213,7 @@ namespace Rhino.Geometry
     /// <param name="u">Parameter along the AB edge.</param>
     /// <param name="v">Parameter along the AC edge.</param>
     /// <returns>Point at parameter.</returns>
+    /// <since>7.1</since>
     public Point3d PointOnInterior(double u, double v)
     {
       var ab = B - A;

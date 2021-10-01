@@ -300,6 +300,7 @@ namespace Rhino.DocObjects
       : base(serialNumber)
     { }
 
+    /// <since>7.5</since>
     public string AssociatedNamedView
     {
       get

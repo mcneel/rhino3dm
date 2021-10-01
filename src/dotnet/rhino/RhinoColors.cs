@@ -1082,6 +1082,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">Target color in RGBA space.</param>
     /// <returns>The LAB equivalent of the RGBA color.</returns>
+    /// <since>7.1</since>
     public static ColorLAB CreateFromRGBA(ColorRGBA rgb)
     {
       return CreateFromXYZ(ColorXYZ.CreateFromRGBA(rgb));
@@ -1271,6 +1272,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="rgb">Target color in RGBA space.</param>
     /// <returns>The LCH equivalent of the RGBA color.</returns>
+    /// <since>7.1</since>
     public static ColorLCH CreateFromRGBA(ColorRGBA rgb)
     {
       return CreateFromLAB(ColorLAB.CreateFromRGBA(rgb));

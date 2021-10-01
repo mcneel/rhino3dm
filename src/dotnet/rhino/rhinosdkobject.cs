@@ -2766,6 +2766,7 @@ namespace Rhino.DocObjects
     /// it is edited.
     /// </summary>
     /// <param name="bCopy"></param>
+    /// <since>7.1</since>
     public void SetCopyHistoryOnReplace(bool bCopy)
     {
       var p_const_this = ConstPointer();
@@ -2779,6 +2780,7 @@ namespace Rhino.DocObjects
     /// true if this object has history and the field is set
     /// false otherwise
     /// </returns>
+    /// <since>7.1</since>
     public bool CopyHistoryOnReplace()
     {
       var p_const_this = ConstPointer();
@@ -2789,6 +2791,7 @@ namespace Rhino.DocObjects
     /// Returns whether this object has a history record
     /// </summary>
     /// <returns></returns>
+    /// <since>7.1</since>
     public bool HasHistoryRecord()
     {
       var p_const_this = ConstPointer();

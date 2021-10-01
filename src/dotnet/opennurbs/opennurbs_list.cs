@@ -2599,6 +2599,7 @@ namespace Rhino.Collections
     /// </summary>
     /// <param name="other"></param>
     /// <returns>True is objects are exaclty equal in value.</returns>
+    /// <since>7.1</since>
     public bool Equals(Point3dList other)
     {
       if (object.ReferenceEquals(other, null)) return false;

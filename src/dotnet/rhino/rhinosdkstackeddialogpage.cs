@@ -434,6 +434,7 @@ namespace Rhino.UI
     /// </summary>
     /// <param name="pageName"></param>
     /// <param name="documentPropertiesPage"></param>
+    /// <since>7.5</since>
     public bool SetActivePageTo(string pageName, bool documentPropertiesPage)
     {
       return RhinoPageHooks.SetActiveOptionsPage(this, pageName, documentPropertiesPage);

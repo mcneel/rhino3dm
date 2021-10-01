@@ -1487,6 +1487,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="line">The line to intersect with the mesh</param>
     /// <returns>An array of points: one for each face that was passed by the faceIds out reference.
     /// Empty if no items are found.</returns>
+    /// <since>7.3</since>
     public static Point3d[] MeshLine(Mesh mesh, Line line)
     {
       return MeshLine_Helper(mesh, line, false, out _, false);

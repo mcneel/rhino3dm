@@ -48,6 +48,7 @@ namespace Rhino.UI
     /// <param name="contextid">Copied context id.</param>
     /// <returns>English name.</returns>
     /// <since>7.0</since>
+    /// <deprecated>7.1</deprecated>
     [Obsolete("Don't copy and paste context IDs", true)]
     public static string STR(string english, int contextid)
     {
@@ -105,6 +106,7 @@ namespace Rhino.UI
     /// <param name="contextid">Copied context id.</param>
     /// <returns>English name.</returns>
     /// <since>7.0</since>
+    /// <deprecated>7.1</deprecated>
     [Obsolete("Don't copy and paste context IDs", true)]
     public static LocalizeStringPair CON(string english, int contextid)
     {
@@ -322,6 +324,7 @@ namespace Rhino.UI
     /// <param name="contextId">The context ID.</param>
     /// <returns>The english string.</returns>
     /// <since>7.0</since>
+    /// <deprecated>7.1</deprecated>
     [Obsolete("Don't copy and paste context IDs", true)]
     public static string LocalizeString(string english, int wrongcontextId, int contextId)
     {
@@ -439,6 +442,7 @@ namespace Rhino.UI
     /// <param name="contextId">The context ID.</param>
     /// <returns>The english string.</returns>
     /// <since>7.0</since>
+    /// <deprecated>7.1</deprecated>
     [Obsolete("Don't copy and paste context IDs", true)]
     public static LocalizeStringPair LocalizeCommandOptionName(string english, int wrongcontextId, int contextId)
     {
