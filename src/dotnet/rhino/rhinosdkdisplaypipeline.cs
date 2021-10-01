@@ -1710,6 +1710,7 @@ namespace Rhino.Display
         IntPtr const_ptr_mesh = mesh.ConstPointer();
         IntPtr cache = mesh.CacheHandle();
         UnsafeNativeMethods.CRhinoDisplayPipeline_DrawMeshWires(m_ptr, const_ptr_mesh, argb, thickness, cache);
+        GC.KeepAlive(mesh);
       }
     }
     /// <summary>
@@ -1723,6 +1724,7 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_mesh = mesh.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawMeshVertices(m_ptr, const_ptr_mesh, argb);
+      GC.KeepAlive(mesh);
     }
 
     bool m_mesh_cache_enabled;
@@ -1821,6 +1823,9 @@ namespace Rhino.Display
       IntPtr const_ptr_material = material==null ? IntPtr.Zero : material.ConstPointer();
       IntPtr cache = mesh.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMesh(m_ptr, const_ptr_mesh, const_ptr_material, cache);
+      GC.KeepAlive(mesh);
+      if (material != null)
+        GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -1838,6 +1843,9 @@ namespace Rhino.Display
         const_ptr_material = material.ConstPointer();
       IntPtr cache = mesh.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMesh2(m_ptr, const_ptr_mesh, const_ptr_material, faceIndices.Length, faceIndices, cache);
+      GC.KeepAlive(mesh);
+      if (material != null)
+        GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -1850,6 +1858,7 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_mesh = mesh.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawMeshFalseColors(m_ptr, const_ptr_mesh, false);
+      GC.KeepAlive(mesh);
     }
 
     /// <summary>
@@ -1866,6 +1875,7 @@ namespace Rhino.Display
         const_ptr_material = material.ConstPointer();
       IntPtr subd_display = subd.SubDDisplay();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedSubD(m_ptr, const_ptr_subd, const_ptr_material, subd_display);
+      GC.KeepAlive(subd);
     }
 
     /// <summary>
@@ -1881,7 +1891,7 @@ namespace Rhino.Display
       IntPtr const_ptr_subd = subd.ConstPointer();
       IntPtr subd_display = subd.SubDDisplay();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires(m_ptr, const_ptr_subd, argb, thickness, subd_display);
-
+      GC.KeepAlive(subd);
     }
 
     /// <summary>
@@ -1898,6 +1908,7 @@ namespace Rhino.Display
         const_ptr_material = material.ConstPointer();
       IntPtr cache = brep.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedBrep(m_ptr, const_ptr_brep, const_ptr_material, cache);
+      GC.KeepAlive(brep);
     }
 
     /// <summary>
@@ -1928,6 +1939,7 @@ namespace Rhino.Display
       IntPtr const_ptr_brep = brep.ConstPointer();
       IntPtr cache = brep.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBrep(m_ptr, const_ptr_brep, argb, wireDensity, cache);
+      GC.KeepAlive(brep);
     }
 
     /// <summary>
@@ -1958,6 +1970,7 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_extrusion = extrusion.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawExtrusion(m_ptr, const_ptr_extrusion, argb, wireDensity);
+      GC.KeepAlive(extrusion);
     }
 
     /// <summary>
@@ -1972,6 +1985,7 @@ namespace Rhino.Display
       IntPtr const_ptr_brep = brep.ConstPointer();
       IntPtr cache = brep.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawZebraPreview(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(brep);
     }
 
     /// <summary>
@@ -1986,6 +2000,7 @@ namespace Rhino.Display
       IntPtr const_ptr_mesh = mesh.ConstPointer();
       IntPtr cache = mesh.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawZebraPreview2(m_ptr, const_ptr_mesh, argb, cache);
+      GC.KeepAlive(mesh);
     }
 
     /// <summary>
@@ -2122,6 +2137,7 @@ namespace Rhino.Display
       IntPtr const_ptr_cloud = cloud.ConstPointer();
       IntPtr ptr_cache = cloud.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPointCloud(m_ptr, const_ptr_cloud, size, color.ToArgb(), ptr_cache);
+      GC.KeepAlive(cloud);
     }
 
     /// <summary>
@@ -2146,6 +2162,7 @@ namespace Rhino.Display
       IntPtr const_ptr_cloud = cloud.ConstPointer();
       IntPtr ptr_cache = cloud.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPointCloud(m_ptr, const_ptr_cloud, size, color.ToArgb(), ptr_cache);
+      GC.KeepAlive(cloud);
     }
 
     /// <since>5.0</since>
@@ -2322,6 +2339,7 @@ namespace Rhino.Display
     /// <param name="to">Line to point.</param>
     /// <param name="color">Color to draw line in.</param>
     /// <param name="thickness">Thickness (in pixels) of line.</param>
+    /// <since>7.1</since>
     public void DrawLineNoClip(Point3d from, Point3d to, System.Drawing.Color color, int thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineNoClip(m_ptr, from, to, color.ToArgb(), thickness);
@@ -2523,6 +2541,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap3(m_ptr, ptr_bitmap, left, top);
+      GC.KeepAlive(bitmap);
     }
 
     /// <summary>
@@ -2597,6 +2616,7 @@ namespace Rhino.Display
       int argb_border = borderColor.ToArgb();
       IntPtr cache_handle = dot.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDot5(ptr_this, const_ptr_dot, argb_fill, argb_text, argb_border, cache_handle);
+      GC.KeepAlive(dot);
     }
 
     /// <since>6.0</since>
@@ -2608,6 +2628,7 @@ namespace Rhino.Display
       int argb_border = boundaryColor.ToArgb();
       IntPtr cache_handle = hatch.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch(ptr_this, const_ptr_hatch, argb_fill, argb_border, cache_handle);
+      GC.KeepAlive(hatch);
     }
 
     /// <summary>
@@ -3217,7 +3238,8 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_rhino_object = rhinoObject.ConstPointer();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawObject(ptr_this, const_ptr_rhino_object); 
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawObject(ptr_this, const_ptr_rhino_object);
+      GC.KeepAlive(rhinoObject);
     }
 
     /// <summary>
@@ -3236,6 +3258,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_rhino_object = rhinoObject.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawObject2(ptr_this, const_ptr_rhino_object, ref xform);
+      GC.KeepAlive(rhinoObject);
     }
 
     /// <since>6.0</since>
@@ -3244,6 +3267,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_annotation = annotation.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawAnnotation(ptr_this, const_ptr_annotation, color.ToArgb());
+      GC.KeepAlive(annotation);
     }
 
     /// <since>6.0</since>
@@ -3433,6 +3457,7 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_curve = curve.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurvatureGraph(m_ptr, const_ptr_curve, argb, 100, 1, 2);
+      GC.KeepAlive(curve);
     }
     /// <summary>
     /// Draw a typical Rhino Curvature Graph.
@@ -3446,6 +3471,7 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_curve = curve.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurvatureGraph(m_ptr, const_ptr_curve, argb, hairScale, 1, 2);
+      GC.KeepAlive(curve);
     }
     /// <summary>
     /// Draw a typical Rhino Curvature Graph.
@@ -3461,6 +3487,7 @@ namespace Rhino.Display
       int argb = color.ToArgb();
       IntPtr const_ptr_curve = curve.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurvatureGraph(m_ptr, const_ptr_curve, argb, hairScale, hairDensity, sampleDensity);
+      GC.KeepAlive(curve);
     }
 
     /// <summary>
@@ -3488,6 +3515,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap(m_ptr, ptr_bitmap, worldLocation, size, blendColor.ToArgb(), sizeInWorldSpace);
+      GC.KeepAlive(bitmap);
     }
 
     /// <since>5.0</since>
@@ -3500,6 +3528,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap2(m_ptr, ptr_bitmap, screenLocation, size, blendColor.ToArgb());
+      GC.KeepAlive(bitmap);
     }
 
     /// <summary>
@@ -3514,12 +3543,14 @@ namespace Rhino.Display
     {
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap4(m_ptr, ptr_bitmap, screenLocation, width, height);
+      GC.KeepAlive(bitmap);
     }
 
     /// <since>5.0</since>
     public void DrawSprites(DisplayBitmap bitmap, DisplayBitmapDrawList items, float size, bool sizeInWorldSpace)
     {
       DrawSprites(bitmap, items, size, Vector3d.Zero, sizeInWorldSpace);
+      GC.KeepAlive(bitmap);
     }
 
     /// <since>5.0</since>
@@ -3530,6 +3561,7 @@ namespace Rhino.Display
       int[] indices = items.Sort(camera_direction);
       IntPtr ptr_bitmap = bitmap.NonConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmaps(m_ptr, ptr_bitmap, items.m_points.Length, items.m_points, items.m_colors_argb.Length, items.m_colors_argb, indices, size, translation, sizeInWorldSpace);
+      GC.KeepAlive(bitmap);
     }
 
     /// <since>5.0</since>
@@ -3555,7 +3587,7 @@ namespace Rhino.Display
         ids[i] = textureId;
 
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawParticles2(m_ptr, ids.Length, ids, particles.m_points.Length, particles.m_points, particles.m_sizes, particles.m_colors_argb, particles.m_display_bitmap_ids, particles.DisplaySizesInWorldUnits);
-
+      GC.KeepAlive(bitmap);
     }
 
     /// <since>5.0</since>
@@ -3567,6 +3599,7 @@ namespace Rhino.Display
         ids[i] = UnsafeNativeMethods.CRhCmnDisplayBitmap_TextureId(m_ptr, bitmaps[i].NonConstPointer());
 
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawParticles2(m_ptr, ids.Length, ids, particles.m_points.Length, particles.m_points, particles.m_sizes, particles.m_colors_argb, particles.m_display_bitmap_ids, particles.DisplaySizesInWorldUnits);
+      GC.KeepAlive(bitmaps);
     }
 
     /// <since>5.10</since>

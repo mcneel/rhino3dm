@@ -549,6 +549,7 @@ namespace Rhino.FileIO
     /// Write to an in-memory byte[]
     /// </summary>
     /// <returns></returns>
+    /// <since>7.1</since>
     public byte[] ToByteArray()
     {
       return ToByteArray(null);
@@ -559,6 +560,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
+    /// <since>7.1</since>
     public byte[] ToByteArray(File3dmWriteOptions options)
     {
       options = options ?? new File3dmWriteOptions();
@@ -3423,6 +3425,7 @@ namespace Rhino.FileIO
     /// </summary>
     /// <param name="subd">the Subd to add</param>
     /// <returns>A unique identifier for the SubD, or <see cref="Guid.Empty"/> on failure</returns>
+    /// <since>7.1</since>
     public Guid AddSubD(SubD subd)
     {
       return AddSubD(subd, null);
@@ -3434,6 +3437,7 @@ namespace Rhino.FileIO
     /// <param name="subd">the Subd to add</param>
     /// <param name="attributes">Attributes to apply</param>
     /// <returns>A unique identifier for the SubD, or <see cref="Guid.Empty"/> on failure</returns>
+    /// <since>7.1</since>
     public Guid AddSubD(SubD subd, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstSubD = subd.ConstPointer();

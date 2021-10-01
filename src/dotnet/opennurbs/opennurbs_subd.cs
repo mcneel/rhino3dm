@@ -530,6 +530,7 @@ namespace Rhino.Geometry
     /// location for the i-th vertex returned by SubVertexIterator vit(this)
     /// </param>
     /// <returns></returns>
+    /// <since>7.1</since>
     public bool InterpolateSurfacePoints(Point3d[] surfacePoints)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -810,6 +811,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="packFaces">Sets the pack faces options.</param>
     /// <param name="vertexProcess">Sets the extraordinary vertex process option.</param>
+    /// <since>7.1</since>
     public SubDToBrepOptions(bool packFaces, ExtraordinaryVertexProcessOption vertexProcess) : this(UnsafeNativeMethods.OnSubDToBrepParameterTypeConsts.Default)
     {
       PackFaces = packFaces;
@@ -1280,6 +1282,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// identifies the type of subdivision vertex
     /// </summary>
+    /// <since>7.5</since>
     public SubDVertexTag Tag
     {
       get
@@ -1340,6 +1343,7 @@ namespace Rhino.Geometry
     /// The SubD surface point
     /// </summary>
     /// <returns></returns>
+    /// <since>7.1</since>
     public Point3d SurfacePoint()
     {
       IntPtr const_vertex_ptr = ConstPointer();

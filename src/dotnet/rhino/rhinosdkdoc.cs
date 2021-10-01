@@ -816,6 +816,7 @@ namespace Rhino
     /// </summary>
     /// <param name="includeHeadless">pass true to include headless docs in the list</param>
     /// <returns></returns>
+    /// <since>7.2</since>
     public static RhinoDoc[] OpenDocuments(bool includeHeadless)
     {
       var list = new List<RhinoDoc>();
@@ -10048,6 +10049,7 @@ namespace Rhino.DocObjects
     /// If true then objects which only have a sub object selected
     /// will be included. This is false by default.
     /// </summary>
+    /// <since>7.3</since>
     public bool SubObjectSelected { get; set; }
 
     /// <summary>

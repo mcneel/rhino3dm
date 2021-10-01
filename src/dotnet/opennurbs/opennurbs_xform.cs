@@ -261,11 +261,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
     /// </summary>
-    /// <param name="sinAngle">Sin of the rotation angle.</param>
-    /// <param name="cosAngle">Cos of the rotation angle.</param>
-    /// <param name="rotationAxis">Axis direction of rotation.</param>
-    /// <param name="rotationCenter">Center point of rotation.</param>
-    /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <param name="sinAngle">Sine of the rotation angle.</param>
+    /// <param name="cosAngle">Cosine of the rotation angle.</param>
+    /// <param name="rotationAxis">3D unit axis of rotation.</param>
+    /// <param name="rotationCenter">3D center of rotation.</param>
+    /// <returns>A rotation transformation matrix.</returns>
     /// <since>5.0</since>
     public static Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
     {
@@ -275,24 +275,24 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a new rotation transformation with specified angle and rotation center.
+    /// Constructs a new rotation transformation with specified angle and rotation center. The axis of rotation is <see cref="Vector3d.ZAxis"/>.
     /// </summary>
-    /// <param name="angleRadians">Angle (in Radians) of the rotation.</param>
-    /// <param name="rotationCenter">Center point of rotation. Rotation axis is vertical.</param>
-    /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <param name="angleRadians">Rotation angle in radians.</param>
+    /// <param name="rotationCenter">3D center of rotation.</param>
+    /// <returns>A rotation transformation matrix.</returns>
     /// <since>5.0</since>
     public static Transform Rotation(double angleRadians, Point3d rotationCenter)
     {
-      return Rotation(angleRadians, new Vector3d(0, 0, 1), rotationCenter);
+      return Rotation(angleRadians, Vector3d.ZAxis, rotationCenter);
     }
 
     /// <summary>
     /// Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
     /// </summary>
-    /// <param name="angleRadians">Angle (in Radians) of the rotation.</param>
-    /// <param name="rotationAxis">Axis direction of rotation operation.</param>
-    /// <param name="rotationCenter">Center point of rotation. Rotation axis is vertical.</param>
-    /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <param name="angleRadians">Rotation angle in radians.</param>
+    /// <param name="rotationAxis">3D unit axis of rotation.</param>
+    /// <param name="rotationCenter">3D center of rotation.</param>
+    /// <returns>A rotation transformation matrix.</returns>
     /// <since>5.0</since>
     public static Transform Rotation(double angleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
@@ -304,8 +304,8 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="startDirection">A start direction.</param>
     /// <param name="endDirection">An end direction.</param>
-    /// <param name="rotationCenter">A rotation center.</param>
-    /// <returns>A transformation matrix which rotates geometry around an anchor point.</returns>
+    /// <param name="rotationCenter">3D center of rotation.</param>
+    /// <returns>A rotation transformation matrix.</returns>
     /// <since>5.0</since>
     public static Transform Rotation(Vector3d startDirection, Vector3d endDirection, Point3d rotationCenter)
     {
@@ -328,17 +328,19 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Constructs a transformation that maps X0 to X1, Y0 to Y1, Z0 to Z1.
+    /// The frames should be right hand orthonormal frames (unit vectors with Z = X x Y).
+    /// The resulting rotation fixes the origin (0,0,0), maps initial X to final X, 
+    /// initial Y to final Y, and initial Z to final Z.
     /// </summary>
-    /// <param name="x0">First "from" vector.</param>
-    /// <param name="y0">Second "from" vector.</param>
-    /// <param name="z0">Third "from" vector.</param>
-    /// <param name="x1">First "to" vector.</param>
-    /// <param name="y1">Second "to" vector.</param>
-    /// <param name="z1">Third "to" vector.</param>
-    /// <returns>A rotation transformation value.</returns>
+    /// <param name="x0">Initial frame X.</param>
+    /// <param name="y0">Initial frame Y.</param>
+    /// <param name="z0">Initial frame Z.</param>
+    /// <param name="x1">Final frame X.</param>
+    /// <param name="y1">Final frame Y.</param>
+    /// <param name="z1">Final frame Z.</param>
+    /// <returns>A rotation transformation matrix.</returns>
     /// <since>5.0</since>
-    public static Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0,
-      Vector3d x1, Vector3d y1, Vector3d z1)
+    public static Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0, Vector3d x1, Vector3d y1, Vector3d z1)
     {
       // F0 changes x0,y0,z0 to world X,Y,Z
       Transform F0 = new Transform();
@@ -552,7 +554,7 @@ namespace Rhino.Geometry
     /// <param name="a">First transformation.</param>
     /// <param name="b">Second transformation.</param>
     /// <returns>A transformation matrix that combines the effect of both input transformations. 
-    /// The resulting Transform gives the same result as though you'd first apply A then B.</returns>
+    /// The resulting Transform gives the same result as though you'd first apply B then A.</returns>
     /// <since>5.0</since>
     public static Transform operator *(Transform a, Transform b)
     {
@@ -585,6 +587,11 @@ namespace Rhino.Geometry
     /// <param name="m">A transformation.</param>
     /// <param name="p">A point.</param>
     /// <returns>The transformed point.</returns>
+    /// <remarks>
+    /// Note well: The right hand column and bottom row have an important effect 
+    /// when transforming a Euclidean point and have no effect when transforming a vector. 
+    /// Be sure you understand the differences between vectors and points when applying a 4x4 transformation.
+    /// </remarks>
     /// <since>5.0</since>
     public static Point3d operator *(Transform m, Point3d p)
     {
@@ -612,6 +619,11 @@ namespace Rhino.Geometry
     /// <param name="m">A transformation.</param>
     /// <param name="v">A vector.</param>
     /// <returns>The transformed vector.</returns>
+    /// <remarks>
+    /// Note well: The right hand column and bottom row have an important effect 
+    /// when transforming a Euclidean point and have no effect when transforming a vector. 
+    /// Be sure you understand the differences between vectors and points when applying a 4x4 transformation.
+    /// </remarks>
     /// <since>5.0</since>
     public static Vector3d operator *(Transform m, Vector3d v)
     {
@@ -1193,7 +1205,7 @@ namespace Rhino.Geometry
     /// <param name="yaw">Angle of rotation, in radians, about the Z axis.</param>
     /// <param name="pitch">Angle of rotation, in radians, about the Y axis.</param>
     /// <param name="roll">Angle of rotation, in radians, about the X axis.</param>
-    /// <returns>If true, then RotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll) 
+    /// <returns>If true, then this = RotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll) 
     /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
     /// If false, then this is not a rotation.
     /// </returns>
@@ -1212,7 +1224,7 @@ namespace Rhino.Geometry
     /// <param name="beta">Angle of rotation, in radians, about the Y axis.</param>
     /// <param name="gamma">Angle of rotation, in radians, about the Z axis.</param>
     /// <returns>
-    /// If true, then RotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma)
+    /// If true, then this = RotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma)
     /// where R_*(angle) is rotation of angle radians about the corresponding *-world coordinate axis.
     /// If false, then this is not a rotation.
     /// </returns>

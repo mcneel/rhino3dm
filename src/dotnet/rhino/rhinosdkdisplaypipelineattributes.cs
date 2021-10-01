@@ -490,6 +490,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets whether objects ought to be drawn using a custom color for back faces.
     /// </summary>
+    /// <since>7.1</since>
     public bool UseCustomObjectColorBackfaces
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BackOverrideObjectColor); }
@@ -499,6 +500,7 @@ namespace Rhino.Display
     /// <summary>
     /// Gets or sets whether objects ought to be drawn using a custom material on backfaces.
     /// </summary>
+    /// <since>7.1</since>
     public bool UseCustomObjectMaterialBackfaces
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial); }

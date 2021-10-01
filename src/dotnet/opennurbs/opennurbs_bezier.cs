@@ -519,6 +519,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Tests an object to see if it is valid.</summary>
+    /// <since>7.1</since>
     public bool IsValid
     {
       get
@@ -529,6 +530,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>Dimension of Bezier</summary>
+    /// <since>7.1</since>
     public int Dimension
     {
       get
@@ -543,6 +545,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curves">list of curves that have the same degree</param>
     /// <returns>new bezier curve if successful</returns>
+    /// <since>7.1</since>
     public static BezierSurface CreateLoftedBezier(IEnumerable<BezierCurve> curves)
     {
       IntPtr ptrSimpleArray = UnsafeNativeMethods.ON_BezierCurve_NewSimpleArray();
@@ -565,6 +568,7 @@ namespace Rhino.Geometry
     /// The bounding box of the geometry in world coordinates or BoundingBox.Empty 
     /// if not bounding box could be found.
     /// </returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public BoundingBox GetBoundingBox(bool accurate)
     {
@@ -579,6 +583,7 @@ namespace Rhino.Geometry
     /// Transformation to apply to geometry.
     /// </param>
     /// <returns>true if geometry successfully transformed.</returns>
+    /// <since>7.1</since>
     public bool Transform(Transform xform)
     {
       if (xform.IsIdentity)
@@ -591,6 +596,7 @@ namespace Rhino.Geometry
     /// <summary>Gets the domain in a direction.</summary>
     /// <param name="direction">0 gets first parameter, 1 gets second parameter.</param>
     /// <returns>An interval value.</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public Interval Domain(int direction)
     {
@@ -609,6 +615,7 @@ namespace Rhino.Geometry
     /// 0 for first parameter's domain, 1 for second parameter's domain.
     /// </param>
     /// <returns>a new reversed surface on success.</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public BezierSurface Reverse(int direction)
     {
@@ -623,6 +630,7 @@ namespace Rhino.Geometry
     /// Transposes surface parameterization (swap U and V)
     /// </summary>
     /// <returns>New transposed surface on success, null on failure.</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public BezierSurface Transpose()
     {
@@ -638,6 +646,7 @@ namespace Rhino.Geometry
     /// <param name="v">evaluation parameters.</param>
     /// <returns>Point (location of surface at the parameter u,v).</returns>
     /// <remarks>No error handling.</remarks>
+    /// <since>7.1</since>
     [ConstOperation]
     public Point3d PointAt(double u, double v)
     {
@@ -651,6 +660,7 @@ namespace Rhino.Geometry
     /// Constructs a NURBS surface representation of this surface.
     /// </summary>
     /// <returns>NURBS representation of the surface on success, null on failure.</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public NurbsSurface ToNurbsSurface()
     {
@@ -663,6 +673,7 @@ namespace Rhino.Geometry
     /// Gets a value indicating whether or not the surface is rational. 
     /// Rational surfaces have control-points with custom weights.
     /// </summary>
+    /// <since>7.1</since>
     public bool IsRational
     {
       get
@@ -678,6 +689,7 @@ namespace Rhino.Geometry
     /// <param name="direction">
     /// 0 for first parameter's domain, 1 for second parameter's domain.
     /// </param>
+    /// <since>7.1</since>
     public int ControlVertexCount(int direction)
     {
         IntPtr constPtrThis = ConstPointer();
@@ -695,6 +707,7 @@ namespace Rhino.Geometry
     /// If the bezier is rational, the euclidean location is returned.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when i or j is out of range</exception>
+    /// <since>7.1</since>
     [ConstOperation]
     public Point2d GetControlVertex2d(int i, int j)
     {
@@ -713,6 +726,7 @@ namespace Rhino.Geometry
     /// If the bezier is rational, the euclidean location is returned.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when i or j is out of range</exception>
+    /// <since>7.1</since>
     [ConstOperation]
     public Point3d GetControlVertex3d(int i, int j)
     {
@@ -740,6 +754,7 @@ namespace Rhino.Geometry
     /// rational, the weight is 1.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <since>7.1</since>
     [ConstOperation]
     public Point4d GetControlVertex4d(int i, int j)
     {
@@ -757,6 +772,7 @@ namespace Rhino.Geometry
 
     /// <summary>Make bezier rational</summary>
     /// <returns>true if successful</returns>
+    /// <since>7.1</since>
     public bool MakeRational()
     {
       IntPtr ptrThis = NonConstPointer();
@@ -765,6 +781,7 @@ namespace Rhino.Geometry
 
     /// <summary>Make bezier non-rational</summary>
     /// <returns>true if successful</returns>
+    /// <since>7.1</since>
     public bool MakeNonRational()
     {
       IntPtr ptrThis = NonConstPointer();
@@ -779,6 +796,7 @@ namespace Rhino.Geometry
     /// <param name="left"></param>
     /// <param name="right"></param>
     /// <returns>true on success</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public bool Split(int direction, double t, out BezierSurface left, out BezierSurface right)
     {

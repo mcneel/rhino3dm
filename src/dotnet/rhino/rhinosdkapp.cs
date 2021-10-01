@@ -490,6 +490,7 @@ namespace Rhino
     }
 
     ///<summary>Gets the ID of Rhino 7</summary>
+    /// <since>7.3</since>
     public static Guid Rhino7Id
     {
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.Rhino7Id); }
@@ -691,6 +692,7 @@ namespace Rhino
     /// RhinoApp.Write(...) calls would be sent to the console when this
     /// is enabled
     /// </summary>
+    /// <since>7.5</since>
     public static bool SendWriteToConsole
     {
       get
@@ -1278,7 +1280,8 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true when Rhino is allowed to access the Internet, false otherwise
+    /// Returns true when Rhino is allowed to access the Internet, false otherwise.
+    /// Note, this does not test if Internet access is available.
     /// </summary>
     /// <since>6.15</since>
     public static bool IsInternetAccessAllowed
@@ -1311,7 +1314,8 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true when Rhino is allowed to access the Internet, false otherwise
+    /// Returns true when Rhino is allowed to access the Internet, false otherwise.
+    /// Note, this does not test if Internet access is available.
     /// </summary>
     /// <since>6.15</since>
     public static int UpdatesAndStatisticsStatus

@@ -688,6 +688,7 @@ namespace Rhino.Geometry
     /// <param name="spanIndex0">Specifies the "u" span</param>
     /// <param name="spanIndex1">Specifies the "v" span</param>
     /// <returns>Bezier surface on success</returns>
+    /// <since>7.1</since>
     [ConstOperation]
     public BezierSurface ConvertSpanToBezier(int spanIndex0, int spanIndex1)
     {
@@ -1816,6 +1817,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Gets the style of the knot vector.
     /// </summary>
+    /// <since>7.1</since>
     public KnotStyle KnotStyle
     {
       get

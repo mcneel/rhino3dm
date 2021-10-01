@@ -1451,7 +1451,6 @@ namespace Rhino.DocObjects
   }
 }
 
-
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {

@@ -905,6 +905,7 @@ namespace Rhino.Geometry
     /// Removes one copy of a point that is equal to the previous or later point, by an absolute tolerance factor.
     /// </summary>
     /// <param name="tolerance"></param>
+    /// <since>7.1</since>
     public void RemoveNearlyEqualSubsequentPoints(double tolerance)
     {
       UnsafeNativeMethods.RHC_Polyline_RemoveNearlyEqualSubsequentPoints(m_items, ref m_size, tolerance);

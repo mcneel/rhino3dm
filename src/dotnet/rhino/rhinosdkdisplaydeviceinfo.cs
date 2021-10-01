@@ -23,24 +23,30 @@ namespace Rhino
     /// <summary>
     /// Name of the device
     /// </summary>
+    /// <since>7.3</since>
     public string Name { get; private set; }
     /// <summary>
     /// Vendor of the device
     /// </summary>
+    /// <since>7.3</since>
     public string Vendor { get; private set; }
+
+#pragma warning disable CS3003 // Type is not CLS-compliant
     /// <summary>
     /// Memory of the device in bytes
     /// </summary>
-#pragma warning disable CS3003 // Type is not CLS-compliant
+    /// <since>7.3</since>
     public ulong Memory { get; private set; }
 #pragma warning restore CS3003 // Type is not CLS-compliant
     /// <summary>
     /// Memory of the device as a human-readable string
     /// </summary>
+    /// <since>7.3</since>
     public string MemoryAsString { get; private set; }
     /// <summary>
     /// The driver date as string formatted year-month-day
     /// </summary>
+    /// <since>7.4</since>
     public string DriverDateAsString { get; private set; }
   }
   /// <summary>
@@ -52,6 +58,7 @@ namespace Rhino
     /// Get a list with the names of all GPUs on this machine.
     /// </summary>
     /// <returns>List of strings</returns>
+    /// <since>7.3</since>
     static public List<string> GpuNames() {
       List<string> names = new List<string>();
       using (var list = new ClassArrayString())
@@ -68,6 +75,7 @@ namespace Rhino
     /// Get a list of GpuDeviceInfo for GPUs found on this machine.
     /// </summary>
     /// <returns>List of GpuDeviceInfo</returns>
+    /// <since>7.3</since>
     static public List<GpuDeviceInfo> GpuDeviceInfos() {
       List<string> gpuNames = GpuNames();
       List<GpuDeviceInfo> gpuDeviceInfos = new List<GpuDeviceInfo>(gpuNames.Count);

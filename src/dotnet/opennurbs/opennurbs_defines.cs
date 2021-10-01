@@ -373,6 +373,7 @@ namespace Rhino
     /// </summary>
     /// <param name="units"></param>
     /// <returns></returns>
+    /// <since>7.1</since>
     public static double MetersPerUnit(UnitSystem units)
     {
       return UnsafeNativeMethods.ONC_MetersPerUnit(units);
@@ -435,6 +436,7 @@ namespace Rhino
     /// <param name="bound1">A first bound.</param>
     /// <param name="bound2">A second bound. This does not necessarily need to be larger or smaller than bound1.</param>
     /// <returns></returns>
+    /// <since>7.1</since>
     public static double Wrap(double value, double bound1, double bound2)
     {
       if (bound2 < bound1)

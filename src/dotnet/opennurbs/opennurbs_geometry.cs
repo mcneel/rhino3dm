@@ -795,6 +795,7 @@ namespace Rhino.Geometry
     /// <param name="one">The first object</param>
     /// <param name="other">The other object</param>
     /// <returns>True if indeed the objects are really the same. False otherwise.</returns>
+    /// <since>7.2</since>
     public static bool GeometryReferenceEquals(GeometryBase one, GeometryBase other)
     {
       if (object.ReferenceEquals(one, other)) return true;

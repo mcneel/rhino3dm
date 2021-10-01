@@ -748,6 +748,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="json"></param>
     /// <returns></returns>
+    /// <since>7.5</since>
     public static CommonObject FromJSON(string json)
     {
       // using the following obscure technique as I don't want to add more
