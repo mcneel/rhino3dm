@@ -221,6 +221,30 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Verifies a Brep is in the form of a solid box.
+    /// </summary>
+    /// <returns>true if the Brep is a solid box, false otherwise.</returns>
+    /// <since>7.10</since>
+    [ConstOperation]
+    public bool IsBox()
+    {
+      return IsBox(RhinoMath.ZeroTolerance);
+    }
+
+    /// <summary>
+    /// Verifies a Brep is in the form of a solid box.
+    /// </summary>
+    /// <param name="tolerance">The tolerance used to determine if faces are planar and to compare face normals.</param>
+    /// <returns>true if the Brep is a solid box, false otherwise.</returns>
+    /// <since>7.10</since>
+    [ConstOperation]
+    public bool IsBox(double tolerance)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoIsBrepBox(ptr_const_this, tolerance);
+    }
+
+    /// <summary>
     /// Change the seam of a closed trimmed surface.
     /// </summary>
     /// <param name="face">A Brep face with a closed underlying surface.</param>
@@ -3223,27 +3247,25 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Finds a point on a Brep that is closest to testPoint.
+    /// Finds a point on the Brep that is closest to testPoint.
     /// The method searches all Brep faces looking for the one closest to testPoint.
     /// When found, if the closest point falls on the inactive region of the face, then 
     /// the method finds the face's edge that is closest to testPoint.
     /// </summary>
-    /// <param name="testPoint">base point to project to surface.</param>
-    /// <param name="closestPoint">location of the closest brep point.</param>
-    /// <param name="ci">Component index of the brep component that contains
-    /// the closest point. Possible types are brep_face, brep_edge or brep_vertex.</param>
-    /// <param name="s">If the ci type is brep_edge, then s is the parameter
-    /// of the closest edge point.</param>
-    /// <param name="t">If the ci type is brep_face, then (s,t) is the parameter
-    /// of the closest edge point.</param>
+    /// <param name="testPoint">Base point to project to surface.</param>
+    /// <param name="closestPoint">Location of the closest Brep point.</param>
+    /// <param name="ci">Component index of the Brep component that contains the closest point. 
+    /// Possible component index types are ComponentIndexType.BrepEdge and ComponentIndexType.BrepFace.</param>
+    /// <param name="s">If ci.ComponentIndexType == ComponentIndexType.BrepEdge, then s is the parameter of the closest edge point.</param>
+    /// <param name="t">If ci.ComponentIndexType == ComponentIndexType.BrepFace, then (s,t) is the parameter of the closest face point.</param>
     /// <param name="maximumDistance">
-    /// If maximumDistance &gt; 0, then only points whose distance
-    /// is &lt;= maximumDistance will be returned. Using a positive
-    /// value of maximumDistance can substantially speed up the search.</param>
-    /// <param name="normal">The normal to the face if ci is a brep_face
-    /// and the tangent to the edge if ci is brep_edge.
+    /// If maximumDistance &gt; 0, then only points whose distance is &lt;= maximumDistance will be returned.
+    /// Using a positive value of maximumDistance can substantially speed up the search.</param>
+    /// <param name="normal">
+    /// If ci.ComponentIndexType == ComponentIndexType.BrepEdge, then this is the tangent to the edge at s.
+    /// If ci.ComponentIndexType == ComponentIndexType.BrepFace, then this is the normal to the face at (s,t).
     /// </param>
-    /// <returns>true if the operation succeeded; otherwise, false.</returns>
+    /// <returns>true if the operation succeeded, false otherwise.</returns>
     /// <since>5.0</since>
     [ConstOperation]
     public bool ClosestPoint(Point3d testPoint,
@@ -5731,6 +5753,26 @@ public bool ShrinkSurfaceToEdge()
     }
 
 #endif
+
+    /// <summary>
+    /// Gets or sets the persistent id of this Brep face. By default, the id is Guid.Zero.
+    /// Note, Rhino does not set this id. Thus, the property is available for use 
+    /// as a way of tracking Brep faces.
+    /// </summary>
+    /// <since>7.7</since>
+    public Guid Id
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_BrepFace_GetFaceId(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_BrepFace_SetFaceId(ptr_this, value);
+      }
+    }
 
     /// <summary>
     /// If per-face color is "Empty", then this face does not have a custom color

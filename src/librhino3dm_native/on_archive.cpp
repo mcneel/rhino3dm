@@ -1245,6 +1245,14 @@ RH_C_FUNCTION void ONX_Model_SetStartSectionComments(ONX_Model* pModel, const RH
   }
 }
 
+RH_C_FUNCTION int ONX_Model_GetArchiveVersion(const ONX_Model* pConstModel)
+{
+  int rc = 0;
+  if (pConstModel)
+    rc = pConstModel->m_3dm_file_version;
+  return rc;
+}
+
 RH_C_FUNCTION void ONX_Model_GetNotes(const ONX_Model* pConstModel, CRhCmnStringHolder* pString, bool* visible, bool* html, int* left, int* top, int* right, int* bottom)
 {
   if( pConstModel && visible && html && left && top && right && bottom )

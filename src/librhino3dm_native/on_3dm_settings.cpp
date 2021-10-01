@@ -1430,6 +1430,20 @@ RH_C_FUNCTION void ON_3dmAnimationProperties_SetLightIndex(ON_3dmAnimationProper
 	}
 }
 
+RH_C_FUNCTION void ON_3dmAnimationProperties_HtmlFileName(const ON_3dmAnimationProperties* pConst, CRhCmnStringHolder* pString)
+{
+	if (pConst && pString)
+		pString->Set(pConst->HtmlFilename());
+}
+
+RH_C_FUNCTION void ON_3dmAnimationProperties_SetHtmlFileName(ON_3dmAnimationProperties* p, const ON_wString* s)
+{
+	if (p && s)
+	{
+		p->SetHtmlFilename(*s);
+	}
+}
+
 RH_C_FUNCTION void ON_3dmAnimationProperties_FolderName(const ON_3dmAnimationProperties* pConst, CRhCmnStringHolder* pString)
 {
 	if (pConst && pString)

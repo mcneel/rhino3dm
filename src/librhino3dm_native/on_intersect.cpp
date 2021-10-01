@@ -623,14 +623,16 @@ RH_C_FUNCTION double ON_Intersect_MeshRay2(const ON_Mesh* pMesh, const ON_3dRay*
   // it is ok if face_indices is null
   if (pMesh && ray)
   {
-    ON_SimpleArray<double>* ts_arr = ts_out ? new ON_SimpleArray<double>() : nullptr;
-    ON_SimpleArray<int>* faceIds_out_arr = faceIds_out ? new ON_SimpleArray<int>() : nullptr;
+    ON_SimpleArray<double>* ts_arr = (ts_out && *ts_out) ? new ON_SimpleArray<double>() : nullptr;
+    ON_SimpleArray<int>* faceIds_out_arr = (faceIds_out && *faceIds_out) ? new ON_SimpleArray<int>() : nullptr;
 
     rc = MX::PublicIntersectionOps::MeshRayIntersect(*pMesh, *ray, faceIds_out_arr, ts_arr, removeHidden, tolerance);
 
     if (ts_out) *ts_out = ts_arr;
     if (faceIds_out) *faceIds_out = faceIds_out_arr;
     if (count_out && (ts_arr || faceIds_out_arr)) *count_out = ts_arr ? ts_arr->Count() : faceIds_out_arr->Count();
+    if (!ts_out) delete ts_arr;
+    if (!faceIds_out) delete faceIds_out_arr;
   }
 
   return rc;

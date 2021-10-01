@@ -105,6 +105,11 @@ namespace Rhino.Collections
     string m_name;
     readonly Dictionary<string, DictionaryItem> m_items = new Dictionary<string, DictionaryItem>();
     DocObjects.Custom.UserData m_parent_userdata;
+    /// <summary>
+    /// Counter that gets updated each time a new item is set or an existing one is updated. Used
+    /// to track changes to the ArchivableDictionary.
+    /// </summary>
+    uint m_change_serial_number = 0;
 
     /// <summary>
     /// Gets or sets the version of this <see cref="ArchivableDictionary"/>.
@@ -124,6 +129,16 @@ namespace Rhino.Collections
     {
       get { return m_name; }
       set { m_name = value; }
+    }
+
+    /// <summary>
+    /// Retrieve current change serial number. This is a number that
+    /// gets increased each time a datum is set or changed.
+    /// </summary>
+    [CLSCompliant(false)]
+    public uint ChangeSerialNumber
+    {
+      get { return m_change_serial_number; }
     }
 
     // I don't think this needs to be public
@@ -1929,6 +1944,7 @@ namespace Rhino.Collections
       if (string.IsNullOrEmpty(key) || val == null || it == ItemType.Undefined)
         return false;
       m_items[key] = new DictionaryItem(it, val);
+      m_change_serial_number++;
       return true;
     }
 
@@ -2137,6 +2153,7 @@ namespace Rhino.Collections
     public ArchivableDictionary Clone()
     {
       ArchivableDictionary clone = new ArchivableDictionary(m_version, m_name);
+      clone.m_change_serial_number = ChangeSerialNumber;
       foreach (KeyValuePair<string, DictionaryItem> item in m_items)
       {
         clone.m_items.Add(item.Key, item.Value.CreateCopy());

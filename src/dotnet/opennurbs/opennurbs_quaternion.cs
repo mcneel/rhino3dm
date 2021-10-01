@@ -372,7 +372,6 @@ namespace Rhino.Geometry
       }
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Returns the length or norm of the quaternion.
     /// </summary>
@@ -385,7 +384,6 @@ namespace Rhino.Geometry
         return UnsafeNativeMethods.ON_Quaternion_Length(ref this);
       }
     }
-#endif
 
     /// <summary>
     /// Gets the result of (a^2 + b^2 + c^2 + d^2).
@@ -399,7 +397,6 @@ namespace Rhino.Geometry
       }
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Computes the distance or norm of the difference between this and another quaternion.
     /// </summary>
@@ -425,7 +422,6 @@ namespace Rhino.Geometry
       Quaternion pq = new Quaternion(q.m_a-p.m_a,q.m_b-p.m_b,q.m_c-p.m_c,q.m_d-p.m_d);
       return pq.Length;
     }
-#endif
 
     /// <summary>
     /// Returns 4x4 real valued matrix form of the quaternion
@@ -453,7 +449,6 @@ namespace Rhino.Geometry
       return rc;
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Scales the quaternion's coordinates so that a*a + b*b + c*c + d*d = 1.
     /// </summary>
@@ -465,7 +460,6 @@ namespace Rhino.Geometry
     {
       return UnsafeNativeMethods.ON_Quaternion_Unitize(ref this);
     }
-#endif
 
     /// <summary>
     /// Sets the quaternion to cos(angle/2), sin(angle/2)*x, sin(angle/2)*y, sin(angle/2)*z
@@ -502,7 +496,6 @@ namespace Rhino.Geometry
       return new Quaternion(Math.Cos(0.5*angle),s*axisOfRotation.m_x,s*axisOfRotation.m_y,s*axisOfRotation.m_z);
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Sets the quaternion to the unit quaternion which rotates
     /// plane0.xaxis to plane1.xaxis, plane0.yaxis to plane1.yaxis,
@@ -570,6 +563,27 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Returns a transformation matrix that performs the rotation defined by the quaternion.
+    /// The transformation returned by this method has the property that xform * V = q.Rotate(V).
+    /// If the quaternion is not unitized, the rotation of its unitized form is returned.
+    /// </summary>
+    /// <param name="xform"></param>
+    /// <returns>true if successful, false otherise.</returns>
+    /// <remarks>
+    /// Do not confuse the result of this method the transformation matrix returned by <see cref="MatrixForm"/>.
+    /// </remarks>
+    /// <since>7.12</since>
+    [ConstOperation]
+    public bool GetRotation(out Transform xform)
+    {
+      xform = new Transform();
+      var rc = UnsafeNativeMethods.ON_Quaternion_GetRotation2(ref this, ref xform);
+      if (!rc)
+        xform = Transform.Unset;
+      return rc;
+    }
+
+    /// <summary>
     /// Rotates a 3d vector. This operation is also called conjugation,
     /// because the result is the same as
     /// (q.Conjugate()*(0,x,y,x)*q/q.LengthSquared).Vector.
@@ -595,7 +609,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_Quaternion_Rotate(ref this, v, ref vout);
       return vout;
     }
-#endif
+
     /// <summary>
     /// The imaginary part of the quaternion
     /// <para>(B,C,D)</para>
@@ -641,6 +655,23 @@ namespace Rhino.Geometry
     public bool IsVector
     {
       get { return (0.0 == m_a && (0.0 != m_b || 0.0 != m_c || 0.0 != m_d)); }
+    }
+
+    /// <summary>
+    /// Returns a string representation of this Quaternion.
+    /// </summary>
+    /// <returns>A textual representation.</returns>
+    /// <since>7.12</since>
+    [ConstOperation]
+    public override string ToString()
+    {
+      System.Text.StringBuilder sb = new System.Text.StringBuilder();
+      IFormatProvider provider = System.Globalization.CultureInfo.InvariantCulture;
+      sb.AppendFormat("A={0},", A.ToString(provider));
+      sb.AppendFormat(" B={0},", B.ToString(provider));
+      sb.AppendFormat(" C={0},", C.ToString(provider));
+      sb.AppendFormat(" D={0}", D.ToString(provider));
+      return sb.ToString();
     }
 
     /// <summary>

@@ -59,6 +59,32 @@ RH_C_FUNCTION ON_Brep* ON_SubD_GetSurfaceBrep(const ON_SubD* pConstSubD, const O
 }
 #endif
 
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateCylinder(
+  const ON_Cylinder* pConstCylinder,
+  unsigned int circumference_face_count,
+  unsigned int height_face_count,
+  ON_SubDEndCapStyle end_cap_style,
+  ON_SubDEdgeTag end_cap_edge_tag,
+  ON_SubDComponentLocation radius_location
+  )
+{
+  ON_SubD* rc = nullptr;
+  if (pConstCylinder)
+  {
+    (const_cast<ON_Cylinder*>(pConstCylinder))->circle.plane.UpdateEquation();
+
+    rc = ON_SubD::CreateCylinder(
+      *pConstCylinder,
+      circumference_face_count,
+      height_face_count,
+      end_cap_style,
+      end_cap_edge_tag,
+      radius_location,
+      nullptr
+    );
+  }
+  return rc;
+}
 
 RH_C_FUNCTION ON_SubD* ON_SubD_CreateFromMesh(const ON_Mesh* meshConstPtr, const ON_SubDFromMeshParameters* toSubDParameters)
 {
@@ -142,6 +168,15 @@ RH_C_FUNCTION ON_SubDEdge* ON_SubD_AddEdge(ON_SubD* pSubD, const ON_SubDEdgeTag 
 
   return edge;
 }
+
+RH_C_FUNCTION void ON_SubD_SetEdgeTags(ON_SubD* pSubD, const ON_SubDEdgeTag tag, const ON_SimpleArray<ON_COMPONENT_INDEX>* componentIndices)
+{
+  if (pSubD && componentIndices)
+  {
+    pSubD->SetEdgeTags(componentIndices->Array(), componentIndices->UnsignedCount(), tag);
+  }
+}
+
 
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
@@ -587,6 +622,17 @@ RH_C_FUNCTION const ON_SubDEdge* ON_SubDVertex_EdgeAt(const ON_SubDVertex* const
   return edge;
 }
 
+RH_C_FUNCTION const ON_SubDFace* ON_SubDVertex_FaceAt(const ON_SubDVertex* constVertexPtr, unsigned int index, unsigned int* componentId)
+{
+  const ON_SubDFace* face = nullptr;
+  if (constVertexPtr)
+    face = constVertexPtr->Face(index);
+
+  if (componentId)
+    *componentId = face ? face->m_id : 0;
+  return face;
+}
+
 RH_C_FUNCTION const ON_SubDVertex* ON_SubDVertex_PreviousOrNext(const ON_SubDVertex* constVertexPtr, bool next, unsigned int* componentId)
 {
   const ON_SubDVertex* vertex = nullptr;
@@ -627,6 +673,14 @@ RH_C_FUNCTION const ON_SubDEdge* ON_SubDEdge_FromId(const ON_SubD* constSubDPtr,
 {
   //note: caller is supposed to check constSubDPtr against nullptr.
   return constSubDPtr->EdgeFromId(index);
+}
+
+RH_C_FUNCTION void ON_SubDEdge_ComponentIndex(const ON_SubDEdge* constEdgePtr, ON_COMPONENT_INDEX* ci)
+{
+  if (constEdgePtr && ci)
+  {
+    *ci = constEdgePtr->ComponentIndex();
+  }
 }
 
 RH_C_FUNCTION int ON_SubDEdge_FaceCount(const ON_SubDEdge* constEdgePtr)
@@ -776,6 +830,14 @@ RH_C_FUNCTION const ON_SubDFace* ON_SubDFace_GetNext(const ON_SubDFace* constFac
   return face;
 }
 
+RH_C_FUNCTION void ON_SubDFace_ComponentIndex(const ON_SubDFace* constFacePtr, ON_COMPONENT_INDEX* ci)
+{
+  if (constFacePtr && ci)
+  {
+    *ci = constFacePtr->ComponentIndex();
+  }
+}
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
 {
@@ -823,6 +885,18 @@ RH_C_FUNCTION ON_NurbsSurface* ON_SubD_CreateSubDFriendlySurface(const ON_Surfac
   if (pConstSurface)
     rc = ON_SubD::CreateSubDFriendlySurface(*pConstSurface, nullptr);
   return rc;
+}
+
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateFromSurface(const ON_Surface* pConstSurface, ON_SubDFromSurfaceParameters::Methods method, bool withCorners)
+{
+  if (pConstSurface)
+  {
+    ON_SubDFromSurfaceParameters p;
+    p.SetMethod(method);
+    p.SetCorners(withCorners);
+    return ON_SubD::CreateFromSurface(*pConstSurface, &p, nullptr);
+  }
+  return nullptr;
 }
 
 #endif

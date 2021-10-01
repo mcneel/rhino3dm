@@ -552,6 +552,28 @@ RH_C_FUNCTION bool ON_Curve_IsContinuous(const ON_Curve* curvePtr, int continuit
   return rc;
 }
 
+RH_C_FUNCTION double ON_Curve_TorsionAt(const ON_Curve* pConstCurve, double t)
+{
+  // 27-Jul-2021 Dale Fugier
+  double tau = ON_UNSET_VALUE;
+  if (pConstCurve)
+  {
+    double v[12] = {};
+    if (pConstCurve->Evaluate(t, 3, 3, v))
+    {
+      tau = 0.0;
+      ON_3dVector d1(&v[3]);
+      ON_3dVector d2(&v[6]);
+      ON_3dVector d3(&v[9]);
+      ON_3dVector b = ON_CrossProduct(d1, d2);
+      double len2 = b * b;
+      if (len2 > 0.0)
+        tau = b * d3 / len2;
+    }
+  }
+  return tau;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Meshing, intersections and mass property calculations are not available in
 // stand alone opennurbs
@@ -775,4 +797,10 @@ RH_C_FUNCTION bool RHC_CreateTextOutlines(
 
 }
 
+RH_C_FUNCTION bool ONC_CombineShortSegments(ON_Curve* ptrCurve, double tolerance)
+{
+  if (ptrCurve)
+    return ON_CombineShortSegments(*ptrCurve, tolerance);
+  return false;
+}
 #endif

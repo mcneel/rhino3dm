@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 
@@ -179,7 +180,7 @@ namespace Rhino.DocObjects
     internal int[] ArgbColors()
     {
       int[] rc = new int[5];
-      rc[0] = m_thick_line_color.ToArgb();
+      rc[0] = ThinLineColor.ToArgb();
       rc[1] = m_thick_line_color.ToArgb();
       rc[2] = m_grid_x_color.ToArgb();
       rc[3] = m_grid_y_color.ToArgb();
@@ -1390,6 +1391,22 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets or sets the current frame during animation record.
+    /// </summary>
+    public int CurrentFrame
+    {
+      set
+      {
+        UnsafeNativeMethods.ON_3dmAnimationProperties_SetCurrentFrame(NonConstPointer(), value);
+      }
+
+      get
+      {
+        return UnsafeNativeMethods.ON_3dmAnimationProperties_CurrentFrame(ConstPointer());
+      }
+    }
+
+    /// <summary>
     /// Gets or sets the object ID of the camera path.
     /// </summary>
     /// <since>6.11</since>
@@ -1753,6 +1770,36 @@ namespace Rhino.DocObjects
         }
       }
     }
+
+    /// <summary>
+    /// Gets or sets the HTML file name.
+    /// </summary>
+    public string HtmlFileName
+    {
+      set
+      {
+        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
+        var p_string = sh.ConstPointer;
+        UnsafeNativeMethods.ON_3dmAnimationProperties_SetHtmlFileName(NonConstPointer(), p_string);
+      }
+
+      get
+      {
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringHolder())
+        {
+          var p_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_3dmAnimationProperties_HtmlFileName(ConstPointer(), p_string);
+          return sh.ToString();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Return HTML file path consisting of FolderName and HtmlFileName.
+    ///
+    /// To change this set FolderName and HtmlFileName.
+    /// </summary>
+    public string HtmlFullPath => Path.ChangeExtension(Path.Combine(FolderName, HtmlFileName), ".html");
 
     /// <summary>
     /// Gets or sets the full path to the saved frames of an animation.

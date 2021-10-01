@@ -1927,4 +1927,59 @@ namespace Rhino.Geometry.Intersect
     /// </summary>
     Overlap = 3
   }
+
+  /// <summary>
+  /// Represents all possible cases of a Arc|Arc intersection event.
+  /// </summary>
+  /// <since>7.12</since>
+  public enum ArcArcIntersection : int
+  {
+    /// <summary>
+    /// Arcs do not intersect.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Arcs touch at a one point.
+    /// </summary>
+    Single = 1,
+
+    /// <summary>
+    /// Arcs intersect at two points.
+    /// </summary>
+    Multiple = 2,
+
+    /// <summary>
+    /// Arcs are cocircular and overlap.
+    /// </summary>
+    Overlap = 3
+  }
+
+  /// <summary>
+  /// Represents all possible cases of a Circle|Circle intersection event.
+  /// </summary>
+  /// <since>7.12</since>
+  public enum CircleCircleIntersection : int
+  {
+    /// <summary>
+    /// Circles do not intersect.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Circles touch at a one point.
+    /// </summary>
+    Single = 1,
+
+    /// <summary>
+    /// Circles intersect at two points.
+    /// </summary>
+    Multiple = 2,
+
+    /// <summary>
+    /// Circles are identical.
+    /// </summary>
+    Overlap = 3
+  }
+
 }
