@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#if !defined(RHINO3DM_BUILD)
-
 RH_C_FUNCTION double ON_Quaternion_Length( const ON_Quaternion* q)
 {
   double rc = 0.0;
@@ -39,6 +37,14 @@ RH_C_FUNCTION bool ON_Quaternion_GetRotation( const ON_Quaternion* q, ON_PLANE_S
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Quaternion_GetRotation2(const ON_Quaternion* pConstQuaternion, ON_Xform* pXform)
+{
+  bool rc = false;
+  if (pConstQuaternion && pXform)
+    rc = pConstQuaternion->GetRotation(*pXform);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Quaternion_Rotate( const ON_Quaternion* q, ON_3DVECTOR_STRUCT vin, ON_3dVector* vout)
 {
   if( q && vout )
@@ -48,4 +54,3 @@ RH_C_FUNCTION void ON_Quaternion_Rotate( const ON_Quaternion* q, ON_3DVECTOR_STR
   }
 }
 
-#endif

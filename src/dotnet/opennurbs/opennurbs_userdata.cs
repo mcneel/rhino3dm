@@ -1,6 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 
 namespace Rhino.DocObjects.Custom
 {
@@ -121,6 +125,21 @@ namespace Rhino.DocObjects.Custom
     }
 
     /// <summary>
+    /// Is called when DataCRC on a user data is called that derives from Custom.UserData.
+    ///
+    /// Note that this doesn't really implement a DataCRC, but rather it'll return the
+    /// current change serial number if the implementing class supports that, or 0 by default.
+    /// 
+    /// Currently ArchivableDictionary supports this where each SetItem call increments the
+    /// change serial number of the instance.
+    /// </summary>
+    /// <returns></returns>
+    internal virtual uint OnGetChangeSerialNumber()
+    {
+      return 0;
+    }
+
+    /// <summary>
     /// Is called when the object is being duplicated.
     /// </summary>
     /// <param name="source">The source data.</param>
@@ -132,6 +151,7 @@ namespace Rhino.DocObjects.Custom
     internal delegate int DuplicateUserDataCallback(int serialNumber, IntPtr pNativeUserData);
     internal delegate IntPtr CreateUserDataCallback(Guid managedTypeId);
     internal delegate void DeleteUserDataCallback(int serialNumber);
+    internal delegate uint ChangeSerialNumberCallback(int serialNumber, uint currentRemainder);
 
     private static TransformUserDataCallback g_on_transform_user_data;
     private static ArchiveUserDataCallback g_on_archive;
@@ -139,6 +159,7 @@ namespace Rhino.DocObjects.Custom
     private static DuplicateUserDataCallback g_on_duplicate;
     private static CreateUserDataCallback g_on_create;
     private static DeleteUserDataCallback g_on_delete;
+    private static ChangeSerialNumberCallback g_on_getchangeserialnumber;
 
     private static void OnTransformUserData(int serialNumber, ref Geometry.Transform xform)
     {
@@ -273,6 +294,27 @@ namespace Rhino.DocObjects.Custom
       }
     }
 
+    /// <summary>
+    /// Get the current change serial number, if supported by the implement class. 0 by defauult
+    /// if a UD is found, otherwise just the currentRemainder as given.
+    /// 
+    /// Note that this builds on the DataCRC method to reuse it in a way for which it wasn't
+    /// designed. Instead an increasing change serial number is returned. Increases happen on
+    /// SetItem in ArchivableDictionary at least.
+    /// </summary>
+    /// <param name="serialNumber"></param>
+    /// <param name="currentRemainder"></param>
+    /// <returns></returns>
+    private static uint OnGetChangeSerialNumber(int serialNumber, uint currentRemainder)
+    {
+      UserData ud = FromSerialNumber(serialNumber);
+      if( ud!=null )
+      {
+        currentRemainder = ud.OnGetChangeSerialNumber();
+      }
+      return currentRemainder;
+    }
+
     static readonly System.Collections.Generic.List<Type> g_types = new System.Collections.Generic.List<Type>();
     internal static void RegisterType(Type t)
     {
@@ -284,7 +326,8 @@ namespace Rhino.DocObjects.Custom
       g_on_duplicate = OnDuplcateUserData;
       g_on_create = OnCreateInstance;
       g_on_delete = OnDelete;
-      UnsafeNativeMethods.CRhCmnUserData_SetCallbacks(g_on_transform_user_data, g_on_archive, g_on_read_write, g_on_duplicate, g_on_create, g_on_delete);
+      g_on_getchangeserialnumber = OnGetChangeSerialNumber;
+      UnsafeNativeMethods.CRhCmnUserData_SetCallbacks(g_on_transform_user_data, g_on_archive, g_on_read_write, g_on_duplicate, g_on_create, g_on_delete, g_on_getchangeserialnumber);
     }
     #region statics
 
@@ -701,6 +744,20 @@ namespace Rhino.DocObjects.Custom
     {
       archive.WriteDictionary(Dictionary);
       return true;
+    }
+
+    /// <summary>
+    /// Get current change serial number.
+    /// </summary>
+    /// <returns>current change serial number</returns>
+    internal override uint OnGetChangeSerialNumber()
+    {
+      uint changeSerialNumber = 0;
+      if(m_dictionary!=null)
+      {
+        changeSerialNumber = m_dictionary.ChangeSerialNumber;
+      }
+      return changeSerialNumber;
     }
   }
 

@@ -163,7 +163,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static AreaMassProperties Compute(Brep brep)
     {
-      return Compute(brep, true, true, true, true);
+      return Compute(brep, true, true, true, true, 1.0e-6, 1.0e-6);
     }
 
     /// <summary>
@@ -179,13 +179,28 @@ namespace Rhino.Geometry
     /// <since>6.3</since>
     public static AreaMassProperties Compute(Brep brep, bool area, bool firstMoments, bool secondMoments, bool productMoments)
     {
+      return Compute(brep, area, firstMoments, secondMoments, productMoments, 1.0e-6, 1.0e-6);
+    }
+
+    /// <summary>
+    /// Compute the AreaMassProperties for a single Brep.
+    /// </summary>
+    /// <param name="brep">Brep to measure.</param>
+    /// <param name="area">true to calculate area.</param>
+    /// <param name="firstMoments">true to calculate area first moments, area, and area centroid.</param>
+    /// <param name="secondMoments">true to calculate area second moments.</param>
+    /// <param name="productMoments">true to calculate area product moments.</param>
+    /// <param name="relativeTolerance">The relative tolerance used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
+    /// <param name="absoluteTolerance">The absolute tolerancwe used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
+    /// <returns>The AreaMassProperties for the given Brep or null on failure.</returns>
+    /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    public static AreaMassProperties Compute(Brep brep, bool area, bool firstMoments, bool secondMoments, bool productMoments, double relativeTolerance, double absoluteTolerance)
+    {
       if (brep == null)
         throw new ArgumentNullException(nameof(brep));
 
       IntPtr pBrep = brep.ConstPointer();
-      const double relative_tolerance = 1.0e-6;
-      const double absolute_tolerance = 1.0e-6;
-      IntPtr rc = UnsafeNativeMethods.ON_Brep_MassProperties(true, pBrep, area, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+      IntPtr rc = UnsafeNativeMethods.ON_Brep_MassProperties(true, pBrep, area, firstMoments, secondMoments, productMoments, relativeTolerance, absoluteTolerance);
       GC.KeepAlive(brep);
       return IntPtr.Zero == rc ? null : new AreaMassProperties(rc, false);
     }
@@ -257,6 +272,7 @@ namespace Rhino.Geometry
       Rhino.Runtime.InteropWrappers.SimpleArrayGeometryPointer array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry);
       IntPtr pConstGeometryArray = array.ConstPointer();
       IntPtr rc = UnsafeNativeMethods.ON_Geometry_AreaMassProperties(pConstGeometryArray, area, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+      GC.KeepAlive(array);
       GC.KeepAlive(geometry);
       return IntPtr.Zero == rc ? null : new AreaMassProperties(rc, false);
     }
@@ -817,7 +833,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static VolumeMassProperties Compute(Brep brep)
     {
-      return Compute(brep, true, true, true, true);
+      return Compute(brep, true, true, true, true, 1.0e-6, 1.0e-6);
     }
 
     /// <summary>
@@ -833,13 +849,28 @@ namespace Rhino.Geometry
     /// <since>6.3</since>
     public static VolumeMassProperties Compute(Brep brep, bool volume, bool firstMoments, bool secondMoments, bool productMoments)
     {
+      return Compute(brep, volume, firstMoments, secondMoments, productMoments, 1.0e-6, 1.0e-6);
+    }
+
+    /// <summary>
+    /// Compute the VolumeMassProperties for a single Brep.
+    /// </summary>
+    /// <param name="brep">Brep to measure.</param>
+    /// <param name="volume">true to calculate volume.</param>
+    /// <param name="firstMoments">true to calculate volume first moments, volume, and volume centroid.</param>
+    /// <param name="secondMoments">true to calculate volume second moments.</param>
+    /// <param name="productMoments">true to calculate volume product moments.</param>
+    /// <param name="relativeTolerance">The relative tolerance used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
+    /// <param name="absoluteTolerance">The absolute tolerancwe used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
+    /// <returns>The VolumeMassProperties for the given Brep or null on failure.</returns>
+    /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    public static VolumeMassProperties Compute(Brep brep, bool volume, bool firstMoments, bool secondMoments, bool productMoments, double relativeTolerance, double absoluteTolerance)
+    {
       if (brep == null)
         throw new ArgumentNullException(nameof(brep));
 
       IntPtr pBrep = brep.ConstPointer();
-      const double relative_tolerance = 1.0e-6;
-      const double absolute_tolerance = 1.0e-6;
-      IntPtr rc = UnsafeNativeMethods.ON_Brep_MassProperties(false, pBrep, volume, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+      IntPtr rc = UnsafeNativeMethods.ON_Brep_MassProperties(false, pBrep, volume, firstMoments, secondMoments, productMoments, relativeTolerance, absoluteTolerance);
       GC.KeepAlive(brep);
       return IntPtr.Zero == rc ? null : new VolumeMassProperties(rc, false);
     }
@@ -911,6 +942,7 @@ namespace Rhino.Geometry
       Rhino.Runtime.InteropWrappers.SimpleArrayGeometryPointer array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry);
       IntPtr pConstGeometryArray = array.ConstPointer();
       IntPtr rc = UnsafeNativeMethods.ON_Geometry_VolumeMassProperties(pConstGeometryArray, volume, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+      GC.KeepAlive(array);
       GC.KeepAlive(geometry);
       return IntPtr.Zero == rc ? null : new VolumeMassProperties(rc, false);
     }
@@ -1497,6 +1529,7 @@ namespace Rhino.Geometry
       Rhino.Runtime.InteropWrappers.SimpleArrayCurvePointer array = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves);
       IntPtr ptr_const_curves = array.ConstPointer();
       IntPtr ptr_mp = UnsafeNativeMethods.ON_Curve_LengthMassProperties2(ptr_const_curves, length, firstMoments, secondMoments, productMoments, rel_tol, abs_tol);
+      GC.KeepAlive(array);
       GC.KeepAlive(curves);
       return ptr_mp == IntPtr.Zero
         ? null

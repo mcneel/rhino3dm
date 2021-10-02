@@ -681,6 +681,19 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <summary>
+    /// Gets the 3dm file archive version.
+    /// </summary>
+    /// <since>7.9</since>
+    public int ArchiveVersion
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ONX_Model_GetArchiveVersion(ptr_const_this);
+      }
+    }
+
     File3dmNotes m_notes;
     /// <summary>
     /// Gets or sets the model notes.

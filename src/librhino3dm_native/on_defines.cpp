@@ -103,5 +103,3 @@ RH_C_FUNCTION unsigned int ON_wString_PlusMinusSymbol()
   return (unsigned int)ON_wString::PlusMinusSymbol;
 }
 
-
-

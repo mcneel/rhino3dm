@@ -845,6 +845,31 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Creates an arc-line-arc blend curve between two curves.
+    /// The output is generally a PolyCurve with three segments: arc, line, arc.
+    /// In some cases, one or more of those segments will be absent because they would have 0 length. 
+    /// If there is only a single segment, the result will either be an ArcCurve or a LineCurve.
+    /// </summary>
+    /// <param name="startPt">Start of the blend curve.</param>
+    /// <param name="startDir">Start direction of the blend curve.</param>
+    /// <param name="endPt">End of the blend curve.</param>
+    /// <param name="endDir">End direction of the arc blend curve.</param>
+    /// <param name="radius">The radius of the arc segments.</param>
+    /// <returns>The blend curve if successful, false otherwise.</returns>
+    /// <remarks>
+    /// The first arc segment will start at startPt, with starting tangent startDir.
+    /// The second arc segment will end at endPt with end tangent endDir.
+    /// The line segment will start from the end of the first arc segment and end at start of the second arc segment, 
+    /// and it will be tangent to both arcs at those points.
+    /// </remarks>
+    /// <since>7.9</since>
+    public static Curve CreateArcLineArcBlend(Point3d startPt, Vector3d startDir, Point3d endPt, Vector3d endDir, double radius)
+    {
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoArcLineArcBlend(startPt, startDir, endPt, endDir, radius);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
     /// Creates a polycurve consisting of two tangent arc segments that connect two points and two directions.
     /// </summary>
     /// <param name="startPt">Start of the arc blend curve.</param>
@@ -888,6 +913,7 @@ namespace Rhino.Geometry
       Runtime.CommonObject.GcProtect(curveA, curveB);
       return GeometryBase.CreateGeometryHelper(pNewCurve, null) as Curve;
     }
+
     /// <summary>
     /// Constructs a mean, or average, curve from two curves.
     /// </summary>
@@ -913,6 +939,7 @@ namespace Rhino.Geometry
     {
       return CreateBlendCurve(curveA, curveB, continuity, 1, 1);
     }
+
     /// <summary>
     /// Create a Blend curve between two existing curves.
     /// </summary>
@@ -2924,6 +2951,24 @@ namespace Rhino.Geometry
       IntPtr ptr = NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoMakeCurveClosed(ptr, tolerance);
     }
+
+    /// <summary>
+    /// Looks for segments that are shorter than tolerance that can be combined.
+    /// For NURBS of degree greater than 1, spans are combined by removing
+    /// knots. Similarly for NURBS segments of polycurves. Otherwise,
+    /// RemoveShortSegments() is called. Does not change the domain, but it will
+    /// change the relative parameterization.
+    /// </summary>
+    /// <param name="tolerance"></param>
+    /// <returns>
+    /// True if short segments were combined or removed. False otherwise.
+    /// </returns>
+    public bool CombineShortSegments(double tolerance)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      bool rc = UnsafeNativeMethods.ONC_CombineShortSegments(ptrThis, tolerance);
+      return rc;
+    }
 #endif
 
     /// <summary>
@@ -3589,6 +3634,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Evaluate the torsion of a curve at a parmeter. Sometimes also called the "second curvature", 
+    /// torsion is the rate of change of a curve's osculating plane.
+    /// </summary>
+    /// <param name="t">The evaluation parameter.</param>
+    /// <returns>The torsion if successful.</returns>
+    /// <remarks>See Barrett O'Neill, Elementary Differential Geometry, page 69.</remarks>
+    /// <since>7.10</since>
+    [ConstOperation]
+    public double TorsionAt(double t)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.ON_Curve_TorsionAt(ptr_const_this, t);
+    }
+
+    /// <summary>
     /// Searches for a derivative, tangent, or curvature discontinuity.
     /// </summary>
     /// <param name="continuityType">Type of continuity to search for.</param>
@@ -3655,6 +3715,7 @@ namespace Rhino.Geometry
     ///  ends of their domains.  All closed curves (IsClosed()=true) are at least C0_locus_continuous at 
     ///  the ends of their domains.
     /// </returns>
+    /// <since>7.4</since>
     [ConstOperation]
     public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, double cosAngleTolerance, double curvatureTolerance, out double t)
     {

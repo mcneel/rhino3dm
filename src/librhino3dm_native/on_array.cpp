@@ -334,11 +334,8 @@ RH_C_FUNCTION ON_SimpleArray<unsigned char>* ON_ByteArray_New(/*ARRAY*/const uns
   ON_SimpleArray<unsigned char>* rc = new ON_SimpleArray<unsigned char>(count);
   if (nullptr == vals)
   {
-    //We have to do this to ensure the array is actually filled.
-    for (int i = 0; i < count; i++)
-    {
-      rc->Append(0);
-    }
+    rc->SetCount(count);
+    rc->MemSet(0);
   }
   else
   {

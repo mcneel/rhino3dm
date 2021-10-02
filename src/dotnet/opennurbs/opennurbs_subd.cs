@@ -68,6 +68,7 @@ namespace Rhino.Geometry
     internal SubD(IntPtr nativePointer, object parent)
       : base(nativePointer, parent, -1)
     {
+      if (null == parent && IntPtr.Zero == nativePointer) return;
       if (null == parent)
       {
         m_ptr_subd_ref = UnsafeNativeMethods.ON_SubDRef_CreateAndAttach(nativePointer);
@@ -315,6 +316,29 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Create a SubD that approximates the surface. If the surface is a SubD
+    /// friendly NURBS surface and withCorners is true, then the SubD and input
+    /// surface will have the same geometry.
+    /// </summary>
+    /// <param name="surface"></param>
+    /// <param name="method">Selects the method used to calculate the SubD.</param>
+    /// <param name="corners">
+    /// If the surface is open, then the corner vertices with be tagged as
+    /// VertexTagCorner. This makes the resulting SubD have sharp corners to
+    /// match the appearance of the input surface.
+    /// </param>
+    /// <returns></returns>
+    public static SubD CreateFromSurface(Surface surface, SubDFromSurfaceMethods method, bool corners)
+    {
+      IntPtr const_ptr_surface = surface.ConstPointer();
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateFromSurface(const_ptr_surface, method, corners);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      GC.KeepAlive(surface);
+      return null;
+    }
+
+    /// <summary>
     /// Makes a new SubD with vertices offset at distance in the direction of the control net vertex normals.
     /// Optionally, based on the value of solidify, adds the input SubD and a ribbon of faces along any naked edges.
     /// </summary>
@@ -435,7 +459,56 @@ namespace Rhino.Geometry
         return new SubD(ptr_subd, null);
       }
     }
+
+    /// <summary>
+    /// Merges adjacent coplanar faces into single faces.
+    /// </summary>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    public bool MergeAllCoplanarFaces(double tolerance)
+    {
+      return MergeAllCoplanarFaces(tolerance, RhinoMath.UnsetValue);
+    }
+
+    /// <summary>
+    /// Merges adjacent coplanar faces into single faces.
+    /// </summary>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, for determining when faces are parallel.
+    /// When in doubt, use the document's ModelAngleToleranceRadians property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMergeAllCoplanarFaces(ptrThis, tolerance, angleTolerance);
+    }
 #endif
+
+    /// <summary>
+    /// Creates a SubD form of a cylinder.
+    /// </summary>
+    /// <param name="cylinder">The defining cylinder.</param>
+    /// <param name="circumferenceFaceCount">Number of faces around the cylinder.</param>
+    /// <param name="heightFaceCount">Number of faces in the top-to-bottom direction.</param>
+    /// <param name="endCapStyle">The end cap style.</param>
+    /// <param name="endCapEdgeTag">The end cap edge tag.</param>
+    /// <param name="radiusLocation">The SubD component location.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <since>7.6</since>
+    [CLSCompliant(false)]
+    public static SubD CreateFromCylinder(Cylinder cylinder, uint circumferenceFaceCount, uint heightFaceCount, SubDEndCapStyle endCapStyle, SubDEdgeTag endCapEdgeTag, SubDComponentLocation radiusLocation)
+    {
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateCylinder(ref cylinder, circumferenceFaceCount, heightFaceCount, endCapStyle, endCapEdgeTag, radiusLocation);
+      return IntPtr.Zero == ptr_subd ? null : new SubD(ptr_subd, null);
+    }
 
     /// <summary>
     /// Clear cached information that depends on the location of vertex control points
@@ -1118,6 +1191,21 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Gets the component index of this face.
+    /// </summary>
+    /// <returns>The component index.</returns>
+    /// <since>7.9</since>
+    [ConstOperation]
+    public ComponentIndex ComponentIndex()
+    {
+      ComponentIndex ci = new ComponentIndex();
+      IntPtr const_face_ptr = ConstPointer();
+      UnsafeNativeMethods.ON_SubDFace_ComponentIndex(const_face_ptr, ref ci);
+      return ci;
+    }
+
+
 #if RHINO_SDK
     /// <summary>
     /// Get the limit surface point location at the center of the face
@@ -1321,6 +1409,29 @@ namespace Rhino.Geometry
         IndexOutOfRangeException("index is greater than or equal to EdgeCount");
 
       throw new NotSupportedException("Edge retrieval failed. This is a RhinoCommon library error.");
+    }
+
+    /// <summary>
+    /// Retrieve a SubDFace from this vertex
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public SubDFace FaceAt(int index)
+    {
+      if (index < 0)
+        throw new IndexOutOfRangeException("index cannot be negative.");
+
+      IntPtr const_ptr_this = ConstPointer();
+      uint faceId = 0;
+      IntPtr const_ptr_face = UnsafeNativeMethods.ON_SubDVertex_FaceAt(const_ptr_this, (uint)index, ref faceId);
+      if (const_ptr_face != IntPtr.Zero)
+        return new SubDFace(ParentSubD, const_ptr_face, faceId);
+
+      // failure if we hit this line
+      if (index >= FaceCount) throw new
+        IndexOutOfRangeException("index is greater than or equal to FaceCount");
+
+      throw new NotSupportedException("Face retrieval failed. This is a RhinoCommon library error.");
     }
 
     /// <summary>
@@ -1700,6 +1811,56 @@ namespace Rhino.Geometry.Collections
       GC.KeepAlive(v0);
       GC.KeepAlive(v1);
       return null;
+    }
+
+    /// <summary>
+    /// Set edge tags for a list of edges. Useful for adding creases to SubDs
+    /// </summary>
+    /// <param name="edgeIndices">list of indices for the edges to set tags on</param>
+    /// <param name="tag">The type of edge tag</param>
+    public void SetEdgeTags(IEnumerable<int> edgeIndices, SubDEdgeTag tag)
+    {
+      if (!SubD.IsSubDEdgeTagDefined(tag))
+        throw new ArgumentOutOfRangeException(nameof(tag));
+
+      IntPtr ptr_subd = m_subd.NonConstPointer();
+
+      using(var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach(var index in edgeIndices)
+        {
+          ciArray.Add(new ComponentIndex(ComponentIndexType.SubdEdge, index));
+        }
+        IntPtr pCiArray = ciArray.NonConstPointer();
+        UnsafeNativeMethods.ON_SubD_SetEdgeTags(ptr_subd, tag, pCiArray);
+      }
+    }
+
+    /// <summary>
+    /// Set edge tags for a list of edges. Useful for adding creases to SubDs
+    /// </summary>
+    /// <param name="edges">list of edges to set a specific tag on</param>
+    /// <param name="tag">The type of edge tag</param>
+    public void SetEdgeTags(IEnumerable<SubDEdge> edges, SubDEdgeTag tag)
+    {
+      if (!SubD.IsSubDEdgeTagDefined(tag))
+        throw new ArgumentOutOfRangeException(nameof(tag));
+
+      IntPtr ptr_subd = m_subd.NonConstPointer();
+
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var edge in edges)
+        {
+          IntPtr constPtrEdge = edge.ConstPointer();
+          var ci = new ComponentIndex();
+          UnsafeNativeMethods.ON_SubDEdge_ComponentIndex(constPtrEdge, ref ci);
+          ciArray.Add(ci);
+        }
+        IntPtr pCiArray = ciArray.NonConstPointer();
+        UnsafeNativeMethods.ON_SubD_SetEdgeTags(ptr_subd, tag, pCiArray);
+      }
+      GC.KeepAlive(edges);
     }
   }
 

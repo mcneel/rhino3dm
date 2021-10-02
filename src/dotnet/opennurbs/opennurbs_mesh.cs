@@ -1447,7 +1447,16 @@ namespace Rhino.Geometry
   public class QuadRemeshParameters
   {
     /// <summary>
+    /// When TargetEdgeLength is greater than 0 TargetQuadCount will be re-computed with
+    /// the target goal of an approximated edge length based on the area of the input mesh
+    /// e.g TargetQuadCount = Input mesh Area * sqr(TargetEdgeLength)
+    /// AdaptiveSize as well as AdaptiveQuadCount will also be ignored;
+    /// </summary>
+    public double TargetEdgeLength { get; set; } = 0;
+
+    /// <summary>
     /// The number of quads to try to achieve in the final re-meshed object
+    /// Note: This value is overridden if TargetEdgeLength > 0
     /// </summary>
     /// <since>7.0</since>
     public int TargetQuadCount { get; set; } = 2000;
@@ -1456,6 +1465,7 @@ namespace Rhino.Geometry
     /// Larger values results in for quad sizes that adjust to match input curvature.
     /// Smaller values results in more uniform quad sizes at the risk of less feature preservation.
     /// Range [0 - 100]
+    /// Note: this value is ignored when TargetEdgeLength > 0
     /// </summary>
     /// <since>7.0</since>
     public double AdaptiveSize { get; set; } = 50;
@@ -1463,6 +1473,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Respect the original Target Quad Count value as much as possible.
     /// True returns more quads than TargetQuadCount depending on amount of high-curvature areas.
+    /// Note: this value is ignored when TargetEdgeLength > 0
     /// </summary>
     /// <since>7.0</since>
     public bool AdaptiveQuadCount { get; set; } = true;
@@ -1472,13 +1483,6 @@ namespace Rhino.Geometry
     /// </summary>
     /// <since>7.0</since>
     public bool DetectHardEdges { get; set; } = true;
-
-    /*
-    /// <summary>
-    ///  When enabled, it will return an edge loop where normals are creased (Un-welded) on the input mesh
-    /// </summary>
-    public bool UseIndexedNormals { get; set; } = true;
-    */
 
     /// <summary>
     /// 0 = Approximate
@@ -3334,6 +3338,37 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Merges adjacent coplanar faces into single faces.
+    /// </summary>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    public bool MergeAllCoplanarFaces(double tolerance)
+    {
+      return MergeAllCoplanarFaces(tolerance, RhinoMath.UnsetValue);
+    }
+
+    /// <summary>
+    /// Merges adjacent coplanar faces into single faces.
+    /// </summary>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, for determining when faces are parallel.
+    /// When in doubt, use the document's ModelAngleToleranceRadians property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMergeAllCoplanarFaces(ptrThis, tolerance, angleTolerance);
+    }
+
+    /// <summary>
     /// Splits up the mesh into its unconnected pieces.
     /// </summary>
     /// <returns>An array containing all the disjoint pieces that make up this Mesh.</returns>
@@ -4548,8 +4583,25 @@ namespace Rhino.Geometry
 
     #endregion
 
-
 #if RHINO_SDK
+
+    /// <summary>
+    /// Populate the vertex colors from a bitmap image.
+    /// </summary>
+    /// <param name="doc">The document associated with this operation for searching purposes.</param>
+    /// <param name="mapping">The texture mapping to be used on the mesh.  Surface parameter mapping is assumed if null - but surface parameters must be available on the mesh.</param>
+    /// <param name="xform">Local mapping transform for the mesh mapping.  Use identity for surface parameter mapping.</param>
+    /// <param name="bitmap">The bitmap to use for the colors.</param>
+    /// <returns></returns>
+    public bool CreateVertexColorsFromBitmap(RhinoDoc doc, TextureMapping mapping, Transform xform, System.Drawing.Bitmap bitmap)
+    {
+      return UnsafeNativeMethods.Rhino_CreateVertexColors(
+        doc.RuntimeSerialNumber, 
+        this.ConstPointer(), 
+        (null!=mapping) ? mapping.ConstPointer() : IntPtr.Zero, 
+        ref xform, 
+        RhinoDib.FromBitmap(bitmap).ConstPointer);
+    }
 
     /// <summary>
     /// Create QuadRemesh from a Brep

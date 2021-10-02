@@ -295,6 +295,19 @@ RH_C_FUNCTION int ON_BrepFace_SurfaceIndex(const ON_BrepFace* pConstBrepFace)
   return rc;
 }
 
+RH_C_FUNCTION ON_UUID ON_BrepFace_GetFaceId(const ON_BrepFace* pConstBrepFace)
+{
+  return (nullptr != pConstBrepFace)
+    ? pConstBrepFace->m_face_uuid
+    : ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_BrepFace_SetFaceId(ON_BrepFace* pBrepFace, ON_UUID uuid)
+{
+  if (nullptr != pBrepFace)
+    pBrepFace->m_face_uuid = uuid;
+}
+
 RH_C_FUNCTION bool ON_BrepFace_GetPerFaceColor(const ON_Brep* pConstBrep, int faceIndex, int* argb)
 {
   if (pConstBrep && faceIndex >= 0 && faceIndex < pConstBrep->m_F.Count() && argb)

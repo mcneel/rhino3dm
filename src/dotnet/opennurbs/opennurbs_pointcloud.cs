@@ -11,6 +11,149 @@ using System.Threading;
 namespace Rhino.Geometry
 {
   /// <summary>
+  /// Permits access to the underlying PointCloud raw data structures in an unsafe way.
+  /// </summary>
+  /// <remarks>This lock object needs to be disposed before using the PointCloud in other calculations and this can 
+  /// be achieved with the using keyword (Using in VB.Net).</remarks>
+  public sealed class PointCloudUnsafeLock : IDisposable
+  {
+    PointCloud m_cloud;
+
+    internal PointCloudUnsafeLock(PointCloud parent, bool writable)
+    {
+      m_cloud = parent;
+      Writable = writable;
+    }
+
+    internal bool Writable { get; set; }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw point array, which uses coordinates
+    /// defined with double precision floating point numbers, or null if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).
+    /// 0 is returned when there is no single precision array.</param>
+    /// <returns>The beginning of the point array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    [CLSCompliant(false)]
+    public unsafe Point3d* PointArray(out int length)
+    {
+      if (m_cloud == null) throw new ObjectDisposedException("The lock was released.");
+
+      IntPtr ptr_cloud = Writable ? m_cloud.NonConstPointer() : m_cloud.ConstPointer();
+      int l = 0;
+      IntPtr ptr_array = UnsafeNativeMethods.ON_PointCloud_PointArray_Pointer(ptr_cloud, ref l);
+
+      if (ptr_array == IntPtr.Zero)
+      {
+        length = 0;
+        return null;
+      }
+      Point3d* result = (Point3d*)ptr_array.ToPointer();
+      length = (null != result) ? l : 0;
+      return result;
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw array of point normals, or null if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).
+    /// 0 is returned when there is no single precision array.</param>
+    /// <returns>The beginning of the vector array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    [CLSCompliant(false)]
+    public unsafe Vector3d* NormalArray(out int length)
+    {
+      if (m_cloud == null) throw new ObjectDisposedException("The lock was released.");
+
+      IntPtr ptr_cloud = Writable ? m_cloud.NonConstPointer() : m_cloud.ConstPointer();
+      int l = 0;
+      IntPtr ptr_array = UnsafeNativeMethods.ON_PointCloud_NormalArray_Pointer(ptr_cloud, ref l);
+
+      if (ptr_array == IntPtr.Zero)
+      {
+        length = 0;
+        return null;
+      }
+      Vector3d* result = (Vector3d*)ptr_array.ToPointer();
+      length = (null != result) ? l : 0;
+      return result;
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw array of colors, which are represented
+    /// as 32-bit integers in ARGB format, or null if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).
+    /// 0 is returned when there is no single precision array.</param>
+    /// <returns>The beginning of the color array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    [CLSCompliant(false)]
+    public unsafe int* ColorArray(out int length)
+    {
+      if (m_cloud == null) throw new ObjectDisposedException("The lock was released.");
+
+      IntPtr ptr_cloud = Writable ? m_cloud.NonConstPointer() : m_cloud.ConstPointer();
+      int l = 0;
+      IntPtr ptr_array = UnsafeNativeMethods.ON_PointCloud_ColorArray_Pointer(ptr_cloud, ref l);
+
+      if (ptr_array == IntPtr.Zero)
+      {
+        length = 0;
+        return null;
+      }
+      int* result = (int*)ptr_array.ToPointer();
+      length = (null != result) ? l : 0;
+      return result;
+    }
+
+    /// <summary>
+    /// Retrieves a pointer to the raw array of point values, or null if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).
+    /// 0 is returned when there is no single precision array.</param>
+    /// <returns>The beginning of the value array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    [CLSCompliant(false)]
+    public unsafe double* ValueArray(out int length)
+    {
+      if (m_cloud == null) throw new ObjectDisposedException("The lock was released.");
+
+      IntPtr ptr_cloud = Writable ? m_cloud.NonConstPointer() : m_cloud.ConstPointer();
+      int l = 0;
+      IntPtr ptr_array = UnsafeNativeMethods.ON_PointCloud_ValueArray_Pointer(ptr_cloud, ref l);
+
+      if (ptr_array == IntPtr.Zero)
+      {
+        length = 0;
+        return null;
+      }
+      double* result = (double*)ptr_array.ToPointer();
+      length = (null != result) ? l : 0;
+      return result;
+    }
+
+    void IDisposable.Dispose()
+    {
+      Release();
+    }
+
+    /// <summary>
+    /// Releases the lock and updates the underlying unmanaged data structures.
+    /// </summary>
+    /// <since>6.0</since>
+    public void Release()
+    {
+      if (!Writable || m_cloud == null) return;
+
+      IntPtr ptr_this = m_cloud.NonConstPointer();
+      UnsafeNativeMethods.ON_PointCloud_UnlockPointCloudData(ptr_this);
+
+      m_cloud = null;
+    }
+  }
+
+  /// <summary>
   /// Represents a single item in a point cloud. A PointCloud item 
   /// always has a location, but it has an optional normal vector and color.
   /// </summary>
@@ -942,6 +1085,73 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.ON_PointCloud_GetClosestPoint(const_ptr_this, testPoint);
     }
+
+    /// <summary>
+    /// Returns a random subsample of a point cloud.
+    /// </summary>
+    /// <param name="numberOfPoints">The number of points the new point cloud should contain.</param>
+    /// <returns>A subsample of this point cloud if success, null otherwise.</returns>
+    /// <since>7.5</since>
+    [ConstOperation]
+    [CLSCompliant(false)]
+    public PointCloud GetRandomSubsample(uint numberOfPoints)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, IntPtr.Zero, 0);
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new PointCloud(ptr, null);
+    }
+
+    /// <summary>
+    /// Returns a random subsample of a point cloud.
+    /// </summary>
+    /// <param name="numberOfPoints">The number of points the new point cloud should contain.</param>
+    /// <param name="cancelToken">The cancellation token.</param>
+    /// <param name="progress">The provider for progress updates.</param>
+    /// <returns>A subsample of this point cloud if success, null otherwise.</returns>
+    /// <since>7.5</since>
+    [ConstOperation]
+    [CLSCompliant(false)]
+    public PointCloud GetRandomSubsample(uint numberOfPoints, CancellationToken cancelToken, IProgress<double> progress)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+
+      Rhino.Runtime.Interop.MarshalProgressAndCancelToken(cancelToken, progress,
+        out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
+
+      IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, ptr_terminator, progress_report_serial_number);
+
+      if (terminator != null) terminator.Dispose();
+      if (reporter != null) reporter.Disable();
+
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new PointCloud(ptr, null);
+    }
+
+    /// <summary>
+    /// Allows the developer to obtain unsafe pointers to the underlying unmanaged data structures of the PointCloud.
+    /// </summary>
+    /// <param name="writable">true if user will need to write onto the structure. false otherwise.</param>
+    /// <returns>A lock that needs to be released.</returns>
+    /// <remarks>The lock implements the IDisposable interface, and one call of its
+    /// <see cref="IDisposable.Dispose()"/> or <see cref="ReleaseUnsafeLock"/> will update the data structure as required.
+    /// This can be achieved with a using statement (Using in Vb.Net).</remarks>
+    public PointCloudUnsafeLock GetUnsafeLock(bool writable)
+    {
+      return new PointCloudUnsafeLock(this, writable);
+    }
+
+    /// <summary>
+    /// Updates the PointCloud data with the information that was stored via the <see cref="PointCloudUnsafeLock"/>.
+    /// </summary>
+    /// <param name="pointCloudData">The data that will be unlocked.</param>
+    public void ReleaseUnsafeLock(PointCloudUnsafeLock pointCloudData)
+    {
+      pointCloudData.Release();
+    }
+
     #endregion
 
     #region IEnumerable<PointCloudItem> Members

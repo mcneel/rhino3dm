@@ -747,7 +747,7 @@ namespace Rhino.Geometry
       get { return GetText(false); }
       set
       {
-        SetRichText(PlainTextToRtf(value), ConstPointerForDimStyle());
+        SetRichText(value, ConstPointerForDimStyle());
         //GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       }
     }

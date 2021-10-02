@@ -742,7 +742,7 @@ namespace Rhino.Runtime
         throw new SerializationException("Unable to read CommonObject from base64 encoded string");
       return obj;
     }
-#if !MOBILE_BUILD
+
     /// <summary>
     /// Create a CommonObject instance from a JSON string
     /// </summary>
@@ -769,7 +769,7 @@ namespace Rhino.Runtime
       }
       return FromJSON(dict);
     }
-#endif
+
     /// <summary>
     /// Create a CommonObject instance from a JSON dictionary
     /// </summary>

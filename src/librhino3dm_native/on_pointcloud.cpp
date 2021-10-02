@@ -180,8 +180,8 @@ RH_C_FUNCTION bool ON_PointCloud_GetBool(const ON_PointCloud* pConstPointCloud, 
 
 RH_C_FUNCTION void ON_PointCloud_DestroyArray(ON_PointCloud* pPointCloud, int which)
 {
-  const int idx_Normals = 0;
-  const int idx_Colors = 1;
+  const int idx_Colors = 0;
+  const int idx_Normals = 1;
   const int idx_Hidden = 2;
   const int idx_Extra = 3;
   if (pPointCloud)
@@ -203,6 +203,62 @@ RH_C_FUNCTION void ON_PointCloud_DestroyArray(ON_PointCloud* pPointCloud, int wh
     default:
       break;
     }
+  }
+}
+
+RH_C_FUNCTION void* ON_PointCloud_PointArray_Pointer(ON_PointCloud* pCloud, int* length)
+{
+  if (pCloud)
+  {
+    void* result = pCloud->m_P.Array();
+    if (length) *length = (result) ? pCloud->PointCount() : 0;
+    return result;
+  }
+  if (*length) length = 0;
+  return nullptr;
+}
+
+RH_C_FUNCTION void* ON_PointCloud_NormalArray_Pointer(ON_PointCloud* pCloud, int* length) 
+{
+  if (pCloud && pCloud->HasPointColors())
+  {
+    void* result = pCloud->m_N.Array();
+    if (length) *length = (result) ? pCloud->m_N.Count() : 0;
+    return result;
+  }
+  if (length) *length = 0;
+  return nullptr;
+}
+
+RH_C_FUNCTION void* ON_PointCloud_ColorArray_Pointer(ON_PointCloud* pCloud, int* length)
+{
+  if (pCloud && pCloud->HasPointColors())
+  {
+    void* result = pCloud->m_C.Array();
+    if (length) *length = (result) ? pCloud->m_C.Count() : 0;
+    return result;
+  }
+  if (length) *length = 0;
+  return nullptr;
+}
+
+RH_C_FUNCTION void* ON_PointCloud_ValueArray_Pointer(ON_PointCloud* pCloud, int* length)
+{
+  if (pCloud && pCloud->HasPointValues())
+  {
+    void* result = pCloud->m_V.Array();
+    if (length) *length = (result) ? pCloud->m_V.Count() : 0;
+    return result;
+  }
+  if (length) *length = 0;
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_PointCloud_UnlockPointCloudData(ON_PointCloud* pCloud)
+{
+  if (pCloud)
+  {
+    pCloud->InvalidateBoundingBox();
   }
 }
 
@@ -317,7 +373,7 @@ RH_C_FUNCTION bool ON_PointCloud_GetExtra(const ON_PointCloud* pConstPointCloud,
 RH_C_FUNCTION bool ON_PointCloud_SetExtra(ON_PointCloud* pPointCloud, int index, double value)
 {
   bool rc = false;
-  if (pPointCloud && index >= 0 && index < pPointCloud->m_V.Count())
+  if (pPointCloud && (index >= 0) && (index < pPointCloud->m_P.Count()))
   {
     ON_PointCloud_FixPointCloud(pPointCloud, false, false, false, true);
     pPointCloud->m_V[index] = value;
@@ -798,6 +854,28 @@ RH_C_FUNCTION int ON_PointCloud_GetClosestPoint(const ON_PointCloud* pConstPoint
     int index = -1;
     if (pConstPointCloud->GetClosestPoint(ON_3dPoint(point.val), &index))
       rc = index;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_PointCloud* ON_PointCloud_RandomSubsample(
+  const ON_PointCloud* pConstPointCloud, 
+  unsigned int points_to_keep,
+  ON_Terminator* pTerminator, 
+  int progress
+)
+{
+  ON_PointCloud* rc = nullptr;
+  if (pConstPointCloud)
+  {
+    CRhCmnProgressReporter progress_reporter(progress);
+    rc = ON_PointCloud::RandomSubsample(
+      pConstPointCloud,
+      points_to_keep,
+      nullptr,
+      progress > 0 ? &progress_reporter : nullptr,
+      pTerminator
+    );
   }
   return rc;
 }

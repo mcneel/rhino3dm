@@ -205,12 +205,15 @@ internal partial class UnsafeNativeMethods
   internal static extern IntPtr CRhinoSkin_New(Rhino.Runtime.Skin.ShowSplashCallback cb, [MarshalAs(UnmanagedType.LPWStr)]string name, IntPtr hicon);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void CRhinoCommand_SetCallbacks(int commandSerialNumber,
+  internal static extern void CRhinoCommand_SetCallbacks(
+    int commandSerialNumber,
     Rhino.Commands.Command.RunCommandCallback cb,
     Rhino.Commands.Command.DoHelpCallback dohelpCb,
     Rhino.Commands.Command.ContextHelpCallback contexthelpCb,
     Rhino.Commands.Command.ReplayHistoryCallback replayhistoryCb,
-    Rhino.Commands.SelCommand.SelFilterCallback selCb);
+    Rhino.Commands.SelCommand.SelFilterCallback selCb,
+    Rhino.Commands.SelCommand.SelSubObjectCallback selSubObjectCb
+    );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoDisplayConduit_SetCallback(uint conduitSerialNumber, int which, Rhino.Display.DisplayPipeline.ConduitCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportcb);
@@ -346,6 +349,9 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetDisplayModeChangedEventCallback(Rhino.Display.DisplayPipeline.DisplayModeChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetOnIDocUserStringChangedCallback(Rhino.RhinoDoc.UserStringChangedCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
@@ -515,6 +521,10 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRdkCmnEventWatcher_SetUndoRedoEventCallback(Rhino.Render.UndoRedo.RdkUndoRedoCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRdkCmnEventWatcher_SetOnAddCustomUISectionsEventCallback(Rhino.Render.AddCustomUISections.RdkAddCustomUISectionsEventCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
+
+
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetUndoRedoEndedEventCallback(Rhino.Render.UndoRedo.RdkUndoRedoEndedCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCb);
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -650,7 +660,8 @@ internal partial class UnsafeNativeMethods
                                                               Rhino.RDK.Delegates.GETINTPROC RunScript,
                                                               Rhino.RDK.Delegates.GETGUIDPROC cid,
                                                               Rhino.RDK.Delegates.ONATTACHEDTOHOLDERPROC onattachedtoholderproc,
-                                                              Rhino.RDK.Delegates.ONDETACHEDFROMHOLDERPROC ondetachedfromholderproc);
+                                                              Rhino.RDK.Delegates.ONDETACHEDFROMHOLDERPROC ondetachedfromholderproc,
+                                                              Rhino.RDK.Delegates.UPDATEVIEWPROC updateviewproc);
 
 
   // UiSection
@@ -754,7 +765,8 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.ADDTEXTURESUMMARYSECTIONPROC AddTextureSummarySection,
     Rhino.RDK.Delegates.SHOWUNPACKEMBEDDEDFILESDIALOGPROC ShowUnpackEmbeddedFilesDialog,
     Rhino.RDK.Delegates.NEWAUTOMATICSECTIONPROC NewAutomaticSection,
-    Rhino.RDK.Delegates.NEWPLAINAUTOMATICHOLDERPROC NewPlainAutomaticHolder
+    Rhino.RDK.Delegates.NEWPLAINAUTOMATICHOLDERPROC NewPlainAutomaticHolder,
+    Rhino.RDK.Delegates.ASKUSERFORCHILDSLOTPROC AskUserForChildSlot
   );
 
   // PostEffect
@@ -1175,7 +1187,8 @@ internal partial class UnsafeNativeMethods
     Rhino.DocObjects.Custom.UserData.ReadWriteUserDataCallback readwriteFunc,
     Rhino.DocObjects.Custom.UserData.DuplicateUserDataCallback duplicateFunc,
     Rhino.DocObjects.Custom.UserData.CreateUserDataCallback createFunc,
-    Rhino.DocObjects.Custom.UserData.DeleteUserDataCallback deleteFunc);
+    Rhino.DocObjects.Custom.UserData.DeleteUserDataCallback deleteFunc,
+    Rhino.DocObjects.Custom.UserData.ChangeSerialNumberCallback changeserialnumberFunc);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   [return: MarshalAs(UnmanagedType.U1)]

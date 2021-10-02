@@ -6,6 +6,7 @@ typedef int (CALLBACK* USERDATAIOPROC)(int serial_number, int writing, ON_Binary
 typedef int (CALLBACK* USERDATADUPLICATEPROC)(int serial_number, ON_UserData* pUserData);
 typedef ON_UserData* (CALLBACK* USERDATACREATEPROC)(ON_UUID id);
 typedef void (CALLBACK* USERDATADELETEPROC)(int serial_number);
+typedef ON__UINT32(CALLBACK* USERDATADATACRCPROC)(int serial_number, ON__UINT32 current_remainder);
 
 class CRhCmnUserData : public ON_UserData
 {
@@ -16,6 +17,8 @@ public:
   static USERDATADUPLICATEPROC m_duplicate;
   static USERDATACREATEPROC m_create;
   static USERDATADELETEPROC m_delete;
+  static USERDATADATACRCPROC m_datacrc;
+
 public:
   CRhCmnUserData(int serial_number, ON_UUID managed_type_id, ON_UUID plugin_id, const wchar_t* description);
   virtual ~CRhCmnUserData();
@@ -28,6 +31,8 @@ public:
   bool Archive() const override; 
   bool Write( ON_BinaryArchive& binary_archive ) const override;
   bool Read( ON_BinaryArchive& binary_archive ) override;
+
+  ON__UINT32 DataCRC(ON__UINT32 current_remainder) const override;
 
   int m_serial_number;
 public:
@@ -52,6 +57,7 @@ USERDATAIOPROC CRhCmnUserData::m_readwrite = nullptr;
 USERDATADUPLICATEPROC CRhCmnUserData::m_duplicate = nullptr;
 USERDATACREATEPROC CRhCmnUserData::m_create = nullptr;
 USERDATADELETEPROC CRhCmnUserData::m_delete = nullptr;
+USERDATADATACRCPROC CRhCmnUserData::m_datacrc = nullptr;
 
 CRhCmnUserData::CRhCmnUserData(int serial_number, ON_UUID managed_type_id, ON_UUID plugin_id, const wchar_t* description)
 {
@@ -127,6 +133,14 @@ bool CRhCmnUserData::Read( ON_BinaryArchive& binary_archive )
   if( m_readwrite )
     rc = m_readwrite(m_serial_number, 0, &binary_archive);
   return rc;
+}
+
+ON__UINT32 CRhCmnUserData::DataCRC(ON__UINT32 current_remainder) const
+{
+  if (m_datacrc)
+    current_remainder = m_datacrc(m_serial_number, current_remainder);
+
+  return current_remainder;
 }
 
 
@@ -391,7 +405,8 @@ RH_C_FUNCTION void CRhCmnUserData_SetCallbacks(USERDATATRANSFORMPROC xform_proc,
                                                USERDATAIOPROC io_proc,
                                                USERDATADUPLICATEPROC duplicate_proc,
                                                USERDATACREATEPROC create_proc,
-                                               USERDATADELETEPROC delete_proc)
+                                               USERDATADELETEPROC delete_proc,
+                                               USERDATADATACRCPROC datacrc_proc)
 {
   CRhCmnUserData::m_transform = xform_proc;
   CRhCmnUserData::m_archive = archive_proc;
@@ -399,6 +414,7 @@ RH_C_FUNCTION void CRhCmnUserData_SetCallbacks(USERDATATRANSFORMPROC xform_proc,
   CRhCmnUserData::m_duplicate = duplicate_proc;
   CRhCmnUserData::m_create = create_proc;
   CRhCmnUserData::m_delete = delete_proc;
+  CRhCmnUserData::m_datacrc = datacrc_proc;
 }
 
 ///////////////////////////////////////////////////////////////////////////
