@@ -232,6 +232,12 @@ enum EarthAnchorPointDouble : int {
   EarthBasepointLatitude = 0,
   EarthBasepointLongitude = 1,
   EarthBasepointElevation = 2,
+  KMLOrientationHeadingAngleRadians = 3,
+  KMLOrientationTiltAngleRadians = 4,
+  KMLOrientationRollAngleRadians = 5,
+  KMLOrientationHeadingAngleDegrees = 6,
+  KMLOrientationTiltAngleDegrees = 7,
+  KMLOrientationRollAngleDegrees = 8,
 };
 
 RH_C_FUNCTION double ON_EarthAnchorPoint_GetDouble(const ON_EarthAnchorPoint* pConstEarthAnchor, enum EarthAnchorPointDouble which)
@@ -245,6 +251,18 @@ RH_C_FUNCTION double ON_EarthAnchorPoint_GetDouble(const ON_EarthAnchorPoint* pC
       rc = pConstEarthAnchor->Longitude();
     else if (EarthAnchorPointDouble::EarthBasepointElevation == which)
       rc = pConstEarthAnchor->ElevationInMeters();
+    else if (EarthAnchorPointDouble::KMLOrientationHeadingAngleRadians == which)
+      rc = pConstEarthAnchor->KMLOrientationHeadingAngleRadians();
+    else if (EarthAnchorPointDouble::KMLOrientationTiltAngleRadians == which)
+      rc = pConstEarthAnchor->KMLOrientationTiltAngleRadians();
+    else if (EarthAnchorPointDouble::KMLOrientationRollAngleRadians == which)
+      rc = pConstEarthAnchor->KMLOrientationRollAngleRadians();
+    else if (EarthAnchorPointDouble::KMLOrientationHeadingAngleDegrees == which)
+      rc = pConstEarthAnchor->KMLOrientationHeadingAngleDegrees();
+    else if (EarthAnchorPointDouble::KMLOrientationTiltAngleDegrees == which)
+      rc = pConstEarthAnchor->KMLOrientationTiltAngleDegrees();
+    else if (EarthAnchorPointDouble::KMLOrientationRollAngleDegrees == which)
+      rc = pConstEarthAnchor->KMLOrientationRollAngleDegrees();
   }
   return rc;
 }

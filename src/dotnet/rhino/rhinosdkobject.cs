@@ -1807,6 +1807,20 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Returns true if the object is a picture frame.
+    /// A picture frame object is an object that displays a texture map in all views.
+    /// </summary>
+    /// <since>7.9</since>
+    public bool IsPictureFrame
+    {
+      get
+      {
+        var ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.CRhinoObject_IsPictureFrame(ptr_const_this);
+      }
+    }
+
+    /// <summary>
     /// Returns true if the object is capable of having a mesh of the specified type
     /// </summary>
     /// <param name="meshType"></param>

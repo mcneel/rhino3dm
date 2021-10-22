@@ -1217,7 +1217,16 @@ namespace Rhino.PlugIns
         if (commandType.IsSubclassOf(typeof(Commands.TransformCommand)))
           ct = 1;
         if (commandType.IsSubclassOf(typeof(Commands.SelCommand)))
+        {
           ct = 2;
+          // 11-Jun-2021 Dale Fugier
+          Type base_type = typeof(Commands.SelCommand);
+          Type t = newCommand.GetType();
+          const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
+          MethodInfo mi = t.GetMethod("SelSubObjectFilter", flags);
+          if (mi.DeclaringType != base_type)
+            ct = 3;
+        }
 
         int sn = UnsafeNativeMethods.CRhinoCommand_New(pPlugIn, id, english_name, local_name, command_style, ct);
         newCommand.m_runtime_serial_number = sn;
@@ -3971,6 +3980,7 @@ namespace Rhino.PlugIns
       CustomSkylightEnvironment   = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomSkylightEnvironment,
       CustomReflectionEnvironment = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomReflectionEnvironment,
       RenderChannels              = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderChannels,
+      LightMaterials              = UnsafeNativeMethods.CRhinoRenderPlugInFeatures.LightMaterials,
     }
 
     static RenderFeature ToRenderFeature(UnsafeNativeMethods.CRhinoRenderPlugInFeatures feature)
@@ -3988,6 +3998,7 @@ namespace Rhino.PlugIns
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.SkyLight:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.CustomDecalProperties:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.LinearWorkflow:
+        case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.LightMaterials:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.Exposure:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.ShadowOnlyGroundPlane:
         case UnsafeNativeMethods.CRhinoRenderPlugInFeatures.RenderBlowup:
@@ -4224,7 +4235,7 @@ namespace Rhino.PlugIns
     private static int OnAllowChooseContent(int serialNumber, IntPtr pConstContent)
     {
       var p = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
-      RenderContent c = RenderContent.FromPointer(pConstContent);
+      RenderContent c = RenderContent.FromPointer(pConstContent, null);
       if (null == p || null == c)
       {
         HostUtils.DebugString("ERROR: Invalid input for OnAllowChooseContent");
@@ -4330,7 +4341,7 @@ namespace Rhino.PlugIns
         return IntPtr.Zero;
       }
 
-      var texture = RenderContent.FromPointer(pTexture) as RenderTexture;
+      var texture = RenderContent.FromPointer(pTexture, null) as RenderTexture;
 
       IntPtr pBitmap = IntPtr.Zero;
       var args = new CreateTexture2dPreviewEventArgs(texture, new Size(x, y));
@@ -5421,7 +5432,9 @@ namespace Rhino.PlugIns
         license_capabilities |= LicenseCapabilities.SupportsZooPerUser;
       if ((filter & (int)LicenseCapabilities.SupportsZooPerCore) == (int)LicenseCapabilities.SupportsZooPerCore)
         license_capabilities |= LicenseCapabilities.SupportsZooPerCore;
-      if (filter > 0xff)
+      if ((filter & (int)LicenseCapabilities.SupportsLicenseDiscovery) == (int)LicenseCapabilities.SupportsLicenseDiscovery)
+        license_capabilities |= LicenseCapabilities.SupportsLicenseDiscovery;
+      if (filter > 0x1FF)
         throw new ArgumentException("Unexpected license capability");
       return license_capabilities;
     }
@@ -5600,6 +5613,8 @@ namespace Rhino.PlugIns
     SupportsZooPerUser = 0x40,
     /// <summary>Supports getting a license from a Zoo server</summary>
     SupportsZooPerCore = 0x80,
+    /// <summary>Supports license discovery API flow</summary>
+    SupportsLicenseDiscovery = 0x100,
   }
 
   /// <summary>

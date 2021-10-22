@@ -517,6 +517,12 @@ namespace Rhino
       get { return UnsafeNativeMethods.CRhinoApp_IsHeadless(); }
     }
 
+    /// <summary>Is Rhino being executed in safe mode</summary>
+    public static bool IsSafeModeEnabled
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_IsSafeModeEnabled(); }
+    }
+
     /// <summary>
     /// Is Rhino currently using custom, user-interface Skin.
     /// </summary>
@@ -876,24 +882,78 @@ namespace Rhino
     /// <since>5.0</since>
     public static void Exit()
     {
-      UnsafeNativeMethods.CRhinoApp_Exit();
+      Exit(true);
     }
 
     /// <summary>
-    /// Exits, or closes Rhino with an option to forcefully exit without option to cancel.
-    /// A prompt to save will appear if necessary when forcefully exiting
+    /// Exits, or forcefully closes Rhino.
+    /// A prompt to allow saving will appear if necessary when forcefully exiting
     /// Works on Windows and MacOS
+    /// <param name ='allowCancel'> true to allow the user to cancel exiting false to force exit</param>
     /// </summary>
-    public static void Exit(bool forceExit)
+    public static void Exit(bool allowCancel)
     {
-      if(forceExit)
-       UnsafeNativeMethods.CRhinoApp_TerminateWithExtremePrejudice();
-      else
-        Exit();
+      UnsafeNativeMethods.CRhinoApp_Exit(allowCancel);
     }
 
     internal static bool InEventWatcher { get; set; }
 
+    ///<summary>Runs a Rhino command script.</summary>
+    ///<param name="documentSerialNumber">[in] Document serial number for the document to run the script for.</param>
+    ///<param name="script">[in] script to run.</param>
+    ///<param name="echo"> [in]
+    /// Controls how the script is echoed in the command output window.
+    /// false = silent - nothing is echoed.
+    /// true = verbatim - the script is echoed literally.
+    ///</param>
+    ///<remarks>
+    /// Rhino acts as if each character in the script string had been typed in the command prompt.
+    /// When RunScript is called from a &quot;script runner&quot; command, it completely runs the
+    /// script before returning. When RunScript is called outside of a command, it returns and the
+    /// script is run. This way menus and buttons can use RunScript to execute complicated functions.
+    ///</remarks>
+    ///<exception cref="System.ApplicationException">
+    /// If RunScript is being called while inside an event watcher.
+    ///</exception>
+    [CLSCompliant(false)]
+    public static bool RunScript(uint documentSerialNumber, string script, bool echo)
+    {
+      if (InEventWatcher)
+      {
+        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to discuss why you need to do this.";
+        throw new ApplicationException(msg);
+      }
+      return UnsafeNativeMethods.CRhinoApp_RunMenuScript_WithDocumentContext(documentSerialNumber, script, "", echo);
+    }
+
+    ///<summary>Runs a Rhino command script.</summary>
+    ///<param name="documentSerialNumber">[in] Document serial number for the document to run the script for.</param>
+    ///<param name="script">[in] script to run.</param>
+    ///<param name="mruDisplayString">[in] String to display in the most recent command list.</param>
+    ///<param name="echo"> [in]
+    /// Controls how the script is echoed in the command output window.
+    /// false = silent - nothing is echoed.
+    /// true = verbatim - the script is echoed literally.
+    ///</param>
+    ///<remarks>
+    /// Rhino acts as if each character in the script string had been typed in the command prompt.
+    /// When RunScript is called from a &quot;script runner&quot; command, it completely runs the
+    /// script before returning. When RunScript is called outside of a command, it returns and the
+    /// script is run. This way menus and buttons can use RunScript to execute complicated functions.
+    ///</remarks>
+    ///<exception cref="System.ApplicationException">
+    /// If RunScript is being called while inside an event watcher.
+    ///</exception>
+    [CLSCompliant(false)]
+    public static bool RunScript(uint documentSerialNumber, string script, string mruDisplayString, bool echo)
+    {
+      if (InEventWatcher)
+      {
+        const string msg = "Do not call RunScript inside of an event watcher.  Contact steve@mcneel.com to discuss why you need to do this.";
+        throw new ApplicationException(msg);
+      }
+      return UnsafeNativeMethods.CRhinoApp_RunMenuScript_WithDocumentContext(documentSerialNumber, script, mruDisplayString, echo);
+    }
     ///<summary>Runs a Rhino command script.</summary>
     ///<param name="script">[in] script to run.</param>
     ///<param name="echo">

@@ -204,6 +204,14 @@ RH_C_FUNCTION bool ON_Xform_IsRotation(const ON_Xform* xf)
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Xform_GetQuaternion(const ON_Xform* pConstXform, ON_Quaternion* pQuaternion)
+{
+  bool rc = false;
+  if (pConstXform && pQuaternion)
+    rc = pConstXform->GetQuaternion(*pQuaternion);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Xform_Affineize(ON_Xform* xf)
 {
   if (xf)
@@ -284,7 +292,13 @@ RH_C_FUNCTION bool ON_Xform_GetEulerZYZ(const ON_Xform* xf, double* alpha, doubl
   return rc;
 }
 
-
+RH_C_FUNCTION unsigned int ON_Xform_GetHashCode(const ON_Xform* xf)
+{
+  unsigned int rc = 0;
+  if (xf)
+    rc = xf->CRC32(0);
+  return rc;
+}
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////

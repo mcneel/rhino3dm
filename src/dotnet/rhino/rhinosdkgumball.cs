@@ -311,6 +311,11 @@ namespace Rhino.UI.Gumball
       return pGumballAppearance;
     }
 
+    internal static void DisposePointer(IntPtr pGumballAppearance)
+    {
+      UnsafeNativeMethods.CRhinoGumballAppearance_Delete(pGumballAppearance);
+    }
+
     #region bools
     /// <summary>
     /// When RelocateEnabled is true, the user can reposition the gumball by
@@ -611,7 +616,7 @@ namespace Rhino.UI.Gumball
     /// Contents of the gumball are copied to the base gumball of this class.
     /// </summary>
     /// <param name="gumball">The gumball source.</param>
-    /// <param name="appearanceSettings">The gumball appearance and behavior settings.</param>
+    /// <param name="appearanceSettings">The gumball appearance and behavior settings. Argument can be null.</param>
     /// <since>5.0</since>
     public void SetBaseGumball(GumballObject gumball, GumballAppearanceSettings appearanceSettings)
     {
@@ -621,6 +626,8 @@ namespace Rhino.UI.Gumball
       if (appearanceSettings != null)
         pAppearanceSettings = appearanceSettings.CreatePointer();
       UnsafeNativeMethods.CRhinoGumballDisplayConduit_SetBaseGumball(pThis, pConstGumball, pAppearanceSettings);
+      if (pAppearanceSettings != IntPtr.Zero)
+        GumballAppearanceSettings.DisposePointer(pAppearanceSettings);
     }
 
     /// <since>5.0</since>

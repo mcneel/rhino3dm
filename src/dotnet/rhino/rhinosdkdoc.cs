@@ -1284,6 +1284,51 @@ namespace Rhino
     /// <since>5.0</since>
     public int DistanceDisplayPrecision => ModelDistanceDisplayPrecision;
 
+    /// <summary>
+    /// Get the custom unit system name and custom unit scale.
+    /// </summary>
+    /// <param name="modelUnits">
+    /// Set true to get values from the document's model unit system.
+    /// Set false to get values from the document's page unit system.
+    /// </param>
+    /// <param name="customUnitName">The custom unit system name.</param>
+    /// <param name="metersPerCustomUnit">The meters per custom unit scale.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.9</since>
+    public bool GetCustomUnitSystem(bool modelUnits, out string customUnitName, out double metersPerCustomUnit)
+    {
+      customUnitName = null;
+      metersPerCustomUnit = RhinoMath.UnsetValue;
+      var rc = false;
+      using (var sh = new StringHolder())
+      {
+        IntPtr ptr_string = sh.NonConstPointer();
+        rc = UnsafeNativeMethods.CRhinoDocProperties_GetCustomUnitSystem(RuntimeSerialNumber, modelUnits, ptr_string, ref metersPerCustomUnit);
+        if (rc)
+          customUnitName = sh.ToString();
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Changes the unit system to custom units and sets the custom unit scale.
+    /// </summary>
+    /// <param name="modelUnits">
+    /// Set true to set values from the document's model unit system.
+    /// Set false to set values from the document's page unit system.
+    /// </param>
+    /// <param name="customUnitName">The custom unit system name.</param>
+    /// <param name="metersPerCustomUnit">The meters per custom unit scale.</param>
+    /// <param name="scale">Set true to scale existing objects.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.9</since>
+    public bool SetCustomUnitSystem(bool modelUnits, string customUnitName, double metersPerCustomUnit, bool scale)
+    {
+      if (string.IsNullOrEmpty(customUnitName))
+        throw new ArgumentNullException(nameof(customUnitName));
+      return UnsafeNativeMethods.CRhinoDocProperties_SetCustomUnitSystem(RuntimeSerialNumber, modelUnits, customUnitName, metersPerCustomUnit, scale);
+    }
+
     #endregion
 
 
@@ -2528,6 +2573,67 @@ namespace Rhino
           }
         }
       }
+    }
+
+    /// <summary>
+    /// This event is raised when document user text strings are changed
+    /// </summary>
+    public class UserStringChangedArgs : EventArgs
+    {
+      internal UserStringChangedArgs(RhinoDoc doc, string key)
+      {
+        Document = doc;
+        Key = key;
+      }
+      /// <summary>
+      /// Document containing the user string
+      /// </summary>
+      public RhinoDoc Document { get; }
+      /// <summary>
+      /// Key for the string being changed
+      /// </summary>
+      public string Key { get; }
+    }
+
+    /// <summary>
+    /// This event is raised when document user text strings are changed
+    /// </summary>
+    public static event EventHandler<UserStringChangedArgs> UserStringChanged
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (_userStringChangedCallback == null)
+          {
+            _userStringChangedCallback = OnUserStringChanged;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnIDocUserStringChangedCallback(_userStringChangedCallback);
+          }
+          _userStringChangedEvent -= value;
+          _userStringChangedEvent += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          _userStringChangedEvent -= value;
+          if (_userStringChangedEvent == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnIDocUserStringChangedCallback(null);
+            _userStringChangedCallback = null;
+          }
+        }
+      }
+    }
+    private static event EventHandler<UserStringChangedArgs> _userStringChangedEvent;
+    internal delegate void UserStringChangedCallback(uint docRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string key);
+    private static UserStringChangedCallback _userStringChangedCallback = null;
+    private static void OnUserStringChanged(uint docRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string key)
+    {
+      var doc = RhinoDoc.FromRuntimeSerialNumber(docRuntimeSerialNumber);
+      if (doc != null)
+        _userStringChangedEvent?.Invoke(doc, new UserStringChangedArgs(doc, key));
     }
 
     private static DocumentIoCallback g_on_begin_open_document;
@@ -6942,11 +7048,20 @@ namespace Rhino.DocObjects.Tables
     public Guid AddSubD(SubD subD, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       if (subD == null) throw new ArgumentNullException(nameof(subD));
-
-      IntPtr p_const_subdref = subD.SubDRefPointer();
+      Guid id = Guid.Empty;
       IntPtr p_const_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      Guid id = UnsafeNativeMethods.CRhinoDoc_AddSubD(m_doc.RuntimeSerialNumber, p_const_subdref, p_const_attributes, pHistory, reference);
+
+      IntPtr p_const_subdref = subD.SubDRefPointer();
+      if (IntPtr.Zero == p_const_subdref)
+      {
+        IntPtr p_const_subd = subD.ConstPointer();
+        id = UnsafeNativeMethods.CRhinoDoc_AddSubD2(m_doc.RuntimeSerialNumber, p_const_subd, p_const_attributes, pHistory, reference);
+      }
+      else
+      {
+        id = UnsafeNativeMethods.CRhinoDoc_AddSubD(m_doc.RuntimeSerialNumber, p_const_subdref, p_const_attributes, pHistory, reference);
+      }
       if (id != Guid.Empty)
       {
         subD.ChangeToConstObject(null);
@@ -8128,6 +8243,40 @@ namespace Rhino.DocObjects.Tables
         GC.ReRegisterForFinalize(newObject);
       }
       return rc;
+    }
+
+    /// <summary>
+    /// Replaces the geometry in one object.
+    /// </summary>
+    /// <param name="objectId">Id of object to be replaced.</param>
+    /// <param name="geometry"></param>
+    /// <param name="ignoreModes"></param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.9</since>
+    public bool Replace(Guid objectId, GeometryBase geometry, bool ignoreModes)
+    {
+      using (var objref = new ObjRef(Document, objectId))
+      {
+        return Replace(objref, geometry, ignoreModes);
+      }
+    }
+
+    /// <summary>
+    /// Replaces the geometry in one object.
+    /// </summary>
+    /// <param name="objref">reference to old object to be replaced. The objref.Object() will be deleted.</param>
+    /// <param name="geometry"></param>
+    /// <param name="ignoreModes"></param>
+    /// <returns>true if successful.</returns>
+    /// <since>7.9</since>
+    public bool Replace(ObjRef objref, GeometryBase geometry, bool ignoreModes)
+    {
+      if (null == objref || null == geometry)
+        return false;
+      IntPtr ptr_const_objref = objref.ConstPointer();
+      IntPtr ptr_const_geometry = geometry.ConstPointer();
+      IntPtr ptr_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObjectEx(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_geometry, ignoreModes);
+      return IntPtr.Zero != ptr_object;
     }
 
     /// <summary>Replaces one object with new point object.</summary>

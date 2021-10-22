@@ -770,6 +770,60 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationHeadingAngleDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationHeadingAngleDegrees); }
+    }
+
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation tilt angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationTiltAngleDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationTiltAngleDegrees); }
+    }
+
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation roll angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationRollAngleDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationRollAngleDegrees); }
+    }
+
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationHeadingAngleRadians
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationHeadingAngleRadians); }
+    }
+
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation tilt angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationTiltAngleRadians
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationTiltAngleRadians); }
+    }
+
+    /// <summary>
+    /// Gets Keyhole Markup Language (KML) orientation roll angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
+    public double KMLOrientationRollAngleRadians
+    {
+      get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationRollAngleRadians); }
+    }
+
     /// <summary>Corresponding model point in model coordinates.</summary>
     /// <since>5.0</since>
     public Point3d ModelBasePoint

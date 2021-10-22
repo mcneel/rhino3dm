@@ -87,7 +87,7 @@ namespace Rhino.Display
       doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "no"));
       doc.XmlResolver = null;
       doc.AppendChild(doc.CreateDocumentType("svg", "-//W3C//DTD SVG 1.1//EN", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd", null));
-      var svgroot = doc.CreateElement("svg");
+      var svgroot = doc.CreateElement("svg", "http://www.w3.org/2000/svg");
 
       int page_width = settings.MediaSize.Width;
       int page_height = settings.MediaSize.Height;
@@ -95,12 +95,11 @@ namespace Rhino.Display
       float x = (float)(page_width / dpi * 72.0);
       float y = (float)(page_height / dpi * 72.0);
 
+      SvgWriter.AppendAttribute(doc, svgroot, "version", "1.1");
       SvgWriter.AppendAttribute(doc, svgroot, "width", $"{x}pt");
       SvgWriter.AppendAttribute(doc, svgroot, "height", $"{y}pt");
       SvgWriter.AppendAttribute(doc, svgroot, "viewBox", string.Format(CultureInfo.InvariantCulture, "0 0 {0} {1}", x, y));
       SvgWriter.AppendAttribute(doc, svgroot, "overflow", "visible");
-      SvgWriter.AppendAttribute(doc, svgroot, "version", "1.1");
-      SvgWriter.AppendAttribute(doc, svgroot, "xmlns", "http://www.w3.org/2000/svg");
       doc.AppendChild(svgroot);
       var svgwriter = new SvgWriter(svgroot, dpi, new Size((int)x,(int)y));
       IntPtr ptr_page = Runtime.Interop.NativeNonConstPointer(settings);
@@ -171,7 +170,7 @@ namespace Rhino.Display
           sb.Append("z");
         }
       }
-      var elem = m_doc.CreateElement("path");
+      var elem = m_doc.CreateElement("path", m_doc.DocumentElement.NamespaceURI);
       var attrib = m_doc.CreateAttribute("d");
       attrib.Value = sb.ToString();
       elem.Attributes.Append(attrib);
@@ -239,7 +238,7 @@ namespace Rhino.Display
     protected override void DrawScreenText(string text, Color textColor, double x, double y, float angle, int horizontalAlignment,
       float heightPoint, Font font)
     {
-      var elem = m_doc.CreateElement("text");
+      var elem = m_doc.CreateElement("text", m_doc.DocumentElement.NamespaceURI);
       AppendAttribute(m_doc, elem, "x", x);
       AppendAttribute(m_doc, elem, "y", y);
       if (Math.Abs(angle) > 0.1)
@@ -260,6 +259,8 @@ namespace Rhino.Display
         AppendAttribute(m_doc, elem, "text-decoration", "underline");
       if (font.Strikeout)
         AppendAttribute(m_doc, elem, "text-decoration", "line-through");
+
+      AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(textColor));
       if (textColor.A < 255)
         AppendAttribute(m_doc, elem, "fill-opacity", textColor.A / 255.0);
       AppendAttribute(m_doc, elem, "font-size", heightPoint);
@@ -309,7 +310,7 @@ namespace Rhino.Display
 
     protected override void DrawCircle(PointF center, float diameter, Color fillColor, float strokeWidth, Color strokeColor)
     {
-      var elem = m_doc.CreateElement("circle");
+      var elem = m_doc.CreateElement("circle", m_doc.DocumentElement.NamespaceURI);
       AppendAttribute(m_doc, elem, "cx", center.X);
       AppendAttribute(m_doc, elem, "cy", center.Y);
       float radius = diameter * 0.5f;
@@ -328,7 +329,7 @@ namespace Rhino.Display
 
     protected override void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius)
     {
-      var elem = m_doc.CreateElement("rect");
+      var elem = m_doc.CreateElement("rect", m_doc.DocumentElement.NamespaceURI);
       AppendAttribute(m_doc, elem, "x", rect.Left);
       AppendAttribute(m_doc, elem, "y", rect.Top);
       AppendAttribute(m_doc, elem, "width", rect.Width);
@@ -351,7 +352,7 @@ namespace Rhino.Display
     }
 
     protected override void DrawGradientHatch(DisplayPipeline pipeline, Hatch hatch, DocObjects.HatchPattern pattern, Color[] gradientColors, float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2,
-      bool linearGradient, Color boundaryColor, double pointScale)
+      bool linearGradient, Color boundaryColor, double pointScale, double effectiveHatchScale)
     {
       //TODO: implement
       //throw new NotImplementedException();
@@ -360,10 +361,10 @@ namespace Rhino.Display
 
 
   /// <summary>
-  /// Used to hold the information required to generate high resolution output
-  /// of a RhinoViewport.  This is used for generating paper prints or image files
+  /// Holds the information required to generate high resolution output of a
+  /// RhinoViewport.  This is used for generating paper prints or image files
   /// </summary>
-  public class ViewCaptureSettings : IDisposable
+  public partial class ViewCaptureSettings : IDisposable
   {
     IntPtr m_ptr_print_info; //CRhinoPrintInfo*
     RhinoViewport _viewport;
@@ -404,6 +405,23 @@ namespace Rhino.Display
       SetLayout(media_size, new Rectangle(0, 0, media_size.Width, media_size.Height));
     }
 
+    /// <summary>
+    /// Create a ViewCaptureSettings based on this instance, but scaled to fit in a different
+    /// sized area. Scaling is also performed on dpi. This is primarily used to for capturing
+    /// images that are shown as print previews
+    /// </summary>
+    /// <returns>
+    /// new ViewCaptureSettings instance on success. Null on failure
+    /// </returns>
+    public ViewCaptureSettings CreatePreviewSettings(System.Drawing.Size size)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr ptrNewSettings = UnsafeNativeMethods.CRhinoPrintInfo_GetPreviewLayout(constPtrThis, size.Width, size.Height);
+      if (ptrNewSettings != IntPtr.Zero)
+        return new ViewCaptureSettings(ptrNewSettings);
+      return null;
+    }
+
     /// <since>6.15</since>
     public void SetViewport(RhinoViewport viewport)
     {
@@ -435,6 +453,21 @@ namespace Rhino.Display
       set
       {
         _doc = value;
+      }
+    }
+
+    /// <summary>
+    /// How the RhinoViewport is mapped to the output rectangle
+    /// </summary>
+    public ViewAreaMapping ViewArea
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoPrintInfo_GetViewArea(m_ptr_print_info);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoPrintInfo_SetViewArea(m_ptr_print_info, value);
       }
     }
 
@@ -525,6 +558,26 @@ namespace Rhino.Display
         UnsafeNativeMethods.CRhinoPrintInfo_PageSize(const_ptr_this, ref width, ref height, ref dpi, ref margin_left, ref margin_top, ref margin_right, ref margin_bottom);
         return new Rectangle(margin_left, margin_top, margin_right - margin_left, margin_bottom - margin_top);
       }
+    }
+
+    /// <summary>
+    /// Minimize cropping so the full drawable area is used
+    /// </summary>
+    public void MaximizePrintableArea()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.CRhinoPrintInfo_MaximizeDrawRect(ptrThis);
+    }
+
+    /// <summary>
+    /// Adjust crop rectangle to match the aspect ratio of the original viewport that these
+    /// settings reference
+    /// </summary>
+    /// <returns>true on success</returns>
+    public bool MatchViewportAspectRatio()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.CRhinoPrintInfo_MatchViewportAspectRatio(ptrThis);
     }
 
     /// <summary>
@@ -898,6 +951,7 @@ namespace Rhino.Display
     /// first point; it doesn't matter what corner of the rectangle this point represents
     /// </param>
     /// <param name="screenPoint2">point representing opposite corner of rectangle from screenPoint1</param>
+    /// <since>7.4</since>
     public void SetWindowRect(Point2d screenPoint1, Point2d screenPoint2)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -915,6 +969,7 @@ namespace Rhino.Display
     /// <param name="worldPoint2">
     /// Second point in world coordinates. This point is projected to screen coordinates
     /// </param>
+    /// <since>7.4</since>
     public void SetWindowRect(Point3d worldPoint1, Point3d worldPoint2)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -979,7 +1034,7 @@ namespace Rhino.Runtime
       int strokeColor, float strokeWidth, int fillColor);
     public delegate void VectorClipPathProc(int count, IntPtr points, int asBeziers);
     public delegate void VectorGradientProc(IntPtr pEngine, IntPtr pHatch, float strokeWidth, IntPtr pHatchPattern, int gradientCount, IntPtr colors,
-      IntPtr stops, IntPtr points, int linearGradient, int boundaryColor);
+      IntPtr stops, IntPtr points, int linearGradient, int boundaryColor, double effectiveHatchScale);
 
     public class Pen
     {
@@ -1581,7 +1636,7 @@ namespace Rhino.Runtime
     }
 
     unsafe void GradientHatch(IntPtr pPipeline, IntPtr pHatch, float strokeWidth, IntPtr pHatchPattern, int gradientCount, IntPtr colors, IntPtr stops,
-      IntPtr points, int linearGradient, int bc)
+      IntPtr points, int linearGradient, int bc, double effectiveHatchScale)
     {
       var dp = new Display.DisplayPipeline(pPipeline);
       Hatch hatch = Rhino.Geometry.GeometryBase.CreateGeometryHelper(pHatch, null) as Hatch;
@@ -1606,7 +1661,7 @@ namespace Rhino.Runtime
       Point3d gradientPoint2 = new Point3d(pts[1]);
       Color boundaryColor = Color.FromArgb(bc);
       double pointScale = ToPoints(1);
-      DrawGradientHatch(dp, hatch, pattern, gradientColors, gradientStops, gradientPoint1, gradientPoint2, linearGradient != 0, boundaryColor, pointScale);
+      DrawGradientHatch(dp, hatch, pattern, gradientColors, gradientStops, gradientPoint1, gradientPoint2, linearGradient != 0, boundaryColor, pointScale, effectiveHatchScale);
 
       hatch.ReleaseNonConstPointer();
       if (pattern != null)
@@ -1623,7 +1678,7 @@ namespace Rhino.Runtime
 
     protected abstract void SetClipPath(PathPoint[] points);
     protected abstract void DrawGradientHatch(Display.DisplayPipeline pipeline, Hatch hatch, Rhino.DocObjects.HatchPattern pattern, Color[] gradientColors,
-      float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2, bool linearGradient, Color boundaryColor, double pointScale);
+      float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2, bool linearGradient, Color boundaryColor, double pointScale, double effectiveHatchScale);
 
     protected void PushClipPath(RectangleF rect)
     {
