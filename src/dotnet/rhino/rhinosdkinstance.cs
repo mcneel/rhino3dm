@@ -489,16 +489,22 @@ namespace Rhino.DocObjects
       }
     }
     /// <summary>
-    /// Controls how much geometry is read when a linked InstanceDefinition is updated.
+    /// This property applies when an instance definition is linked.
+    /// If true, when reading the file that defines the content of the linked instance definition, skip any linked instance definitions found in that file.
+    /// If false, when reading the file that defines the content of the linked instance definition, recursively load linked instance definitions found in that file.
     /// </summary>
-    /// <returns>If this returns true then nested linked InstanceDefinition objects will be skipped otherwise; read everything, included nested linked InstanceDefinition objects</returns>
-    /// <since>5.0</since>
+    /// <since>7.8</since>
     public bool SkipNestedLinkedDefinitions
     {
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return (UnsafeNativeMethods.CRhinoInstanceDefinition_UpdateDepth(const_ptr) != 0);
+        return UnsafeNativeMethods.CRhinoInstanceDefinition_SkipNestedLinkedDefinitions(const_ptr);
+      }
+      set
+      {
+        IntPtr const_ptr = ConstPointer();
+        UnsafeNativeMethods.CRhinoInstanceDefinition_SetSkipNestedLinkedDefinitions(const_ptr, value);
       }
     }
 
@@ -506,18 +512,23 @@ namespace Rhino.DocObjects
     /// Specifies how model components (layers, materials, dimension styles, etc.) 
     /// from linked instance definition files appear in the active model.
     /// </summary>
-    /// <since>5.0</since>
+    /// <since>7.8</since>
     public InstanceDefinitionLayerStyle LayerStyle
     {
       get
       {
         IntPtr const_ptr = ConstPointer();
-        int layer_style = UnsafeNativeMethods.CRhinoInstanceDefinition_LayerStyle(const_ptr);
+        int layer_style = UnsafeNativeMethods.CRhinoInstanceDefinition_LinkedComponentAppearance(const_ptr);
         if (layer_style == (int)InstanceDefinitionLayerStyle.Active)
           return InstanceDefinitionLayerStyle.Active;
         if (layer_style == (int)InstanceDefinitionLayerStyle.Reference)
           return InstanceDefinitionLayerStyle.Reference;
         return InstanceDefinitionLayerStyle.None;
+      }
+      set
+      {
+        IntPtr const_ptr = ConstPointer();
+        UnsafeNativeMethods.CRhinoInstanceDefinition_SetLinkedComponentAppearance(const_ptr, (uint)value);
       }
     }
 

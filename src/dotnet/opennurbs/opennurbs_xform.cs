@@ -1134,6 +1134,18 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// If this transform is a proper rotation, then find the eqivalent quaternion.
+    /// </summary>
+    /// <param name="quaternion">Quaternion that represents this rotation tranformation.</param>
+    /// <returns>true if this transform is a proper rotation, false otherwise.</returns>
+    /// <since>7.12</since>
+    public bool GetQuaternion(out Quaternion quaternion)
+    {
+      quaternion = Quaternion.Zero;
+      return UnsafeNativeMethods.ON_Xform_GetQuaternion(ref this, ref quaternion);
+    }
+
+    /// <summary>
     /// Replaces the last row with (0 0 0 1), discarding any perspective part of this transform
     /// </summary>
     /// <since>6.12</since>
@@ -1303,11 +1315,8 @@ namespace Rhino.Geometry
     [ConstOperation]
     public override int GetHashCode()
     {
-      // MSDN docs recommend XOR'ing the internal values to get a hash code
-      return m_00.GetHashCode() ^ m_01.GetHashCode() ^ m_02.GetHashCode() ^ m_03.GetHashCode() ^
-             m_10.GetHashCode() ^ m_11.GetHashCode() ^ m_12.GetHashCode() ^ m_13.GetHashCode() ^
-             m_20.GetHashCode() ^ m_21.GetHashCode() ^ m_22.GetHashCode() ^ m_23.GetHashCode() ^
-             m_30.GetHashCode() ^ m_31.GetHashCode() ^ m_32.GetHashCode() ^ m_33.GetHashCode();
+      // 2-Aug-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-65150
+      return (int)UnsafeNativeMethods.ON_Xform_GetHashCode(ref this);
     }
 
     /// <summary>
@@ -2289,6 +2298,25 @@ namespace Rhino.Geometry.Morphs
       get
       {
         return (m_space_morph != IntPtr.Zero);
+      }
+    }
+
+    /// <summary>
+    /// Specifies how the normal direction of the base surface is mapped onto the target surface.
+    /// To use the target surface normal, set to <see cref="Vector3d.Unset"/>.
+    /// </summary>
+    /// <since>7.12</since>
+    public Vector3d ConstrainNormal
+    {
+      get
+      {
+        Vector3d rc = Vector3d.Unset;
+        UnsafeNativeMethods.RHC_SporphSpaceMorph_ConstrainNormal(m_space_morph, false, ref rc);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.RHC_SporphSpaceMorph_ConstrainNormal(m_space_morph, true, ref value);
       }
     }
 

@@ -2842,7 +2842,7 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
 }
 #endif
 
-#if !defined(RHINO3DM_BUILD)
+// 4-28-2021 Dale Fugier, this work on Window, with our without Rhino
 #if defined(ON_RUNTIME_WIN)
 RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 {
@@ -2864,8 +2864,8 @@ RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
         // Shell extension that displays thumbnails in Explorer.
         if (props.m_PreviewImage.IsValid())
         {
-          HDC hdc = GetDC(0);
-          rc = CreateDIBitmap(
+          HDC hdc = ::GetDC(0);
+          rc = ::CreateDIBitmap(
             hdc,                                      // handle to DC
             &props.m_PreviewImage.m_bmi->bmiHeader,   // bitmap data
             CBM_INIT,                                 // initialization option
@@ -2873,7 +2873,7 @@ RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
             props.m_PreviewImage.m_bmi,               // color-format data
             DIB_RGB_COLORS                            // color-data usage
           );
-          ReleaseDC(0, hdc);
+          ::ReleaseDC(0, hdc);
         }
       }
     }
@@ -2883,6 +2883,10 @@ RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 }
 #endif // if defined(ON_RUNTIME_WIN)
 
+// 4-28-2021 Dale Fugier, this work on Mac, only with Rhino
+// When librhino3dm_native included the AppKit framework we
+// can revisit this.
+#if !defined(RHINO3DM_BUILD)
 #if defined(ON_RUNTIME_APPLE)
 RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
 {
@@ -2918,8 +2922,9 @@ RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
   NSImage* thumbnailImage = [NSImage imageWithPreviewOfFileAtPath : ns_path ofSize : maxThumbnailSize asIcon : NO];
   return thumbnailImage;
 }
-#endif // if defined(ON_RUNTIME_APPLE)
+#endif // #if defined(ON_RUNTIME_APPLE)
 #endif
+
 
 class CBinaryFileHelper : public ON_BinaryFile
 {

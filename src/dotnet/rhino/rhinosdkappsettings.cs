@@ -10,7 +10,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>snapshot of the values in <see cref="AppearanceSettings"/></summary>
   public class AppearanceSettingsState
   {
-    internal AppearanceSettingsState(){}
+    internal AppearanceSettingsState() { }
 
     /// <summary>
     /// Gets or sets the name of the default font face.
@@ -39,7 +39,7 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Gets or sets the color used to draw locked objects.</summary>
     /// <since>5.0</since>
-    public Color LockedObjectColor{ get; set; }
+    public Color LockedObjectColor { get; set; }
 
     /// <summary>
     /// Gets or sets the color used to draw the stroke of a selection window
@@ -68,46 +68,46 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the color of the world X axis of the world coordinates icon,
     /// appearing usually bottom left in viewports.</summary>
     /// <since>5.0</since>
-    public Color WorldCoordIconXAxisColor{ get; set; }
+    public Color WorldCoordIconXAxisColor { get; set; }
     /// <summary>Gets or sets the color of the world Y axis of the world coordinate icon,
     /// appearing usually bottom left in viewports.</summary>
     /// <since>5.0</since>
-    public Color WorldCoordIconYAxisColor{ get; set; }
+    public Color WorldCoordIconYAxisColor { get; set; }
     /// <summary>Gets or sets the color of the world Z axis of the world coordinate icon,
     /// appearing usually bottom left in viewports.</summary>
     /// <since>5.0</since>
-    public Color WorldCoordIconZAxisColor{ get; set; }
+    public Color WorldCoordIconZAxisColor { get; set; }
 
     /// <summary>Gets or sets the tracking color.</summary>
     /// <since>5.0</since>
-    public Color TrackingColor{ get; set; }
+    public Color TrackingColor { get; set; }
     /// <summary>Gets or sets the feedback color.</summary>
     /// <since>5.0</since>
-    public Color FeedbackColor{ get; set; }
+    public Color FeedbackColor { get; set; }
     /// <summary>Gets or sets the default object color.</summary>
     /// <since>5.0</since>
-    public Color DefaultObjectColor{ get; set; }
+    public Color DefaultObjectColor { get; set; }
     /// <summary>Gets or sets the viewport background color.</summary>
     /// <since>5.0</since>
-    public Color ViewportBackgroundColor{ get; set; }
+    public Color ViewportBackgroundColor { get; set; }
     /// <summary>Gets or sets the frame background color.</summary>
     /// <since>5.0</since>
-    public Color FrameBackgroundColor{ get; set; }
+    public Color FrameBackgroundColor { get; set; }
     /// <summary>Gets or sets the command prompt text color.</summary>
     /// <since>5.0</since>
-    public Color CommandPromptTextColor{ get; set; }
+    public Color CommandPromptTextColor { get; set; }
     /// <summary>Gets or sets the command prompt hypertext color.</summary>
     /// <since>5.0</since>
-    public Color CommandPromptHypertextColor{ get; set; }
+    public Color CommandPromptHypertextColor { get; set; }
     /// <summary>Gets or sets the command prompt background color.</summary>
     /// <since>5.0</since>
-    public Color CommandPromptBackgroundColor{ get; set; }
+    public Color CommandPromptBackgroundColor { get; set; }
     /// <summary>Size of the font used in the command prompt (in points)</summary>
     /// <since>7.0</since>
     public int CommandPromptFontSize { get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
     /// <since>5.0</since>
-    public Color CrosshairColor{ get; set; }
+    public Color CrosshairColor { get; set; }
 
     ///<summary>
     ///CRhinoPageView paper background. A rectangle is drawn into the background
@@ -115,13 +115,13 @@ namespace Rhino.ApplicationSettings
     ///is used to draw the paper blended into the background
     ///</summary>
     /// <since>5.0</since>
-    public Color PageviewPaperColor{ get; set; }
+    public Color PageviewPaperColor { get; set; }
 
     ///<summary>
     ///Gets or sets the color used by the layer manager dialog as the background color for the current layer.
     ///</summary>
     /// <since>5.0</since>
-    public Color CurrentLayerBackgroundColor{ get; set; }
+    public Color CurrentLayerBackgroundColor { get; set; }
 
     ///<summary>Gets or sets the color of objects that are eligible to be edited.</summary>
     /// <since>7.0</since>
@@ -129,16 +129,16 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
-    public bool EchoPromptsToHistoryWindow{ get; set; }
+    public bool EchoPromptsToHistoryWindow { get; set; }
     ///<summary>Gets or sets a value that determines if command names are written to the history window.</summary>
     /// <since>5.0</since>
-    public bool EchoCommandsToHistoryWindow{ get; set; }
+    public bool EchoCommandsToHistoryWindow { get; set; }
     ///<summary>Gets or sets a value that determines if the full path of the document is shown in the Rhino title bar.</summary>
     /// <since>5.0</since>
-    public bool ShowFullPathInTitleBar{ get; set; }
+    public bool ShowFullPathInTitleBar { get; set; }
     ///<summary>Gets or sets a value that determines if cross hairs are visible.</summary>
     /// <since>5.0</since>
-    public bool ShowCrosshairs{ get; set; }
+    public bool ShowCrosshairs { get; set; }
 
     ///<summary>Gets or sets the color of the thin line in the grid.</summary>
     /// <since>5.0</since>
@@ -320,7 +320,7 @@ namespace Rhino.ApplicationSettings
       }
     }
 
-#region Colors
+    #region Colors
     const int idxDefaultLayerColor = 0;
     const int idxSelectedObjectColor = 1;
     //const int idxSelectedReferenceObjectColor = 2;
@@ -348,8 +348,8 @@ namespace Rhino.ApplicationSettings
 
     static Color GetColor(int which, IntPtr pAppearanceSettings)
     {
-      int abgr = UnsafeNativeMethods.RhAppearanceSettings_GetSetColor(which, false, 0, pAppearanceSettings);
-      return Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.RhAppearanceSettings_GetSetColor(which, false, 0, pAppearanceSettings);
+      return Color.FromArgb(argb);
     }
 
     static Color GetColor(int which)
@@ -380,6 +380,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="whichColor"></param>
     /// <param name="compute">if true, a color is computed in some cases</param>
     /// <returns></returns>
+    /// <since>7.1</since>
     public static Color GetPaintColor(PaintColor whichColor, bool compute)
     {
       int argb = UnsafeNativeMethods.RhColors_GetColor(whichColor, compute);
@@ -478,7 +479,7 @@ namespace Rhino.ApplicationSettings
       get { return GetColor(idxDefaultLayerColor); }
       set { SetColor(idxDefaultLayerColor, value); }
     }
-    
+
     ///<summary>
     ///The color used to draw selected objects.
     ///The default is yellow, but this can be customized by the user.
@@ -764,7 +765,7 @@ namespace Rhino.ApplicationSettings
       get { return GetGridColor(idxZAxisColor, IntPtr.Zero); }
       set { SetGridColor(idxZAxisColor, value, IntPtr.Zero); }
     }
-#endregion
+    #endregion
 
     /*
     ///<summary>length of world coordinate sprite axis in pixels.</summary>
@@ -910,7 +911,7 @@ namespace Rhino.ApplicationSettings
     {
       get
       {
-		// ZO-135 - called by the Zoo, and needs some answer.
+        // ZO-135 - called by the Zoo, and needs some answer.
         if (Rhino.Runtime.HostUtils.RunningInRhino)
         {
           uint rc = UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(0, false, 0);
@@ -937,7 +938,7 @@ namespace Rhino.ApplicationSettings
       }
       set
       {
-        UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(1, true, (uint)value); 
+        UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(1, true, (uint)value);
       }
     }
 
@@ -950,7 +951,7 @@ namespace Rhino.ApplicationSettings
     /// <since>6.0</since>
     public static bool InitialMainWindowPosition(out Rectangle bounds)
     {
-      int left=0, top=0, right=0, bottom=0, flags=0;
+      int left = 0, top = 0, right = 0, bottom = 0, flags = 0;
       bool rc = UnsafeNativeMethods.CRhinoDockBarManager_InitialMainFramePosition(ref left, ref top, ref right, ref bottom, ref flags);
       bounds = rc ? Rectangle.FromLTRB(left, top, right, bottom) : Rectangle.Empty;
       return rc;
@@ -979,7 +980,7 @@ namespace Rhino.ApplicationSettings
     {
       int count = UnsafeNativeMethods.CRhinoAppAliasList_Count(IntPtr.Zero);
       string[] rc = new string[count];
-      using(var sh = new StringHolder())
+      using (var sh = new StringHolder())
       {
         IntPtr pString = sh.NonConstPointer();
         for (int i = 0; i < count; i++)
@@ -1055,9 +1056,9 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <returns>The new dictionary.</returns>
     /// <since>5.0</since>
-    public static System.Collections.Generic.Dictionary<string,string> ToDictionary()
+    public static System.Collections.Generic.Dictionary<string, string> ToDictionary()
     {
-      var rc = new System.Collections.Generic.Dictionary<string,string>();
+      var rc = new System.Collections.Generic.Dictionary<string, string>();
       string[] names = GetNames();
       for (int i = 0; i < names.Length; i++)
       {
@@ -1100,7 +1101,7 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public static System.Collections.Generic.Dictionary<string, string> GetDefaults()
     {
-      var rc = new System.Collections.Generic.Dictionary<string,string>();
+      var rc = new System.Collections.Generic.Dictionary<string, string>();
       IntPtr pCommandAliasList = UnsafeNativeMethods.CRhinoAppAliasList_New();
       int count = UnsafeNativeMethods.CRhinoAppAliasList_Count(pCommandAliasList);
       using (var shName = new StringHolder())
@@ -1288,7 +1289,7 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public int ShowEdges { get; set; }
   }
-  
+
   /// <summary>
   /// Contains static methods and properties to modify the visibility of edges in edge-related commands.
   /// </summary>
@@ -1400,7 +1401,7 @@ namespace Rhino.ApplicationSettings
     ///<summary>Saves render and display meshes in autosave file.</summary>
     /// <since>5.0</since>
     public bool AutoSaveMeshes { get; set; }
-    
+
     ///<summary>true for users who consider view changes a document change.</summary>
     /// <since>5.0</since>
     public bool SaveViewChanges { get; set; }
@@ -1479,7 +1480,7 @@ namespace Rhino.ApplicationSettings
       return CreateState(true);
     }
 
-    
+
     const int idxGetRhinoRoamingProfileDataFolder = 0;
     const int idxGetRhinoApplicationDataFolder = 1;
 
@@ -1610,13 +1611,13 @@ namespace Rhino.ApplicationSettings
         using (var sh = new StringHolder())
         {
           IntPtr pStringHolder = sh.NonConstPointer();
-          UnsafeNativeMethods.RhDirectoryManager_WorkingFolder(null,pStringHolder);
+          UnsafeNativeMethods.RhDirectoryManager_WorkingFolder(null, pStringHolder);
           return sh.ToString();
         }
       }
       set
       {
-        UnsafeNativeMethods.RhDirectoryManager_WorkingFolder(value,IntPtr.Zero);
+        UnsafeNativeMethods.RhDirectoryManager_WorkingFolder(value, IntPtr.Zero);
       }
     }
 
@@ -1669,7 +1670,7 @@ namespace Rhino.ApplicationSettings
         // This setting MUST be done on the main application thread in Windows
         if (Runtime.HostUtils.RunningOnWindows)
         {
-          if( RhinoApp.MainWindowHandle() == IntPtr.Zero || RhinoApp.InvokeRequired )
+          if (RhinoApp.MainWindowHandle() == IntPtr.Zero || RhinoApp.InvokeRequired)
             return;
         }
 
@@ -1718,7 +1719,7 @@ namespace Rhino.ApplicationSettings
     {
       get
       {
-        int minutes = UnsafeNativeMethods.CRhinoAppFileSettings_AutosaveInterval(IntPtr.Zero,-1);
+        int minutes = UnsafeNativeMethods.CRhinoAppFileSettings_AutosaveInterval(IntPtr.Zero, -1);
         return System.TimeSpan.FromMinutes(minutes);
       }
       set
@@ -1762,7 +1763,7 @@ namespace Rhino.ApplicationSettings
         IntPtr pStringHolder = sh.NonConstPointer();
         UnsafeNativeMethods.RhFileSettings_AutosaveBeforeCommands(pStringHolder);
         string s = sh.ToString();
-        if( string.IsNullOrEmpty(s) )
+        if (string.IsNullOrEmpty(s))
           return null;
         return s.Split(new char[] { ' ' });
       }
@@ -1978,12 +1979,12 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public static string[] CommandNames()
     {
-      using(var sh = new StringHolder())
+      using (var sh = new StringHolder())
       {
         IntPtr pString = sh.NonConstPointer();
         UnsafeNativeMethods.CRhinoAppDontRepeatCommandSettings_GetDontRepeatList(pString);
         string s = sh.ToString();
-        string[] rc =  s.Split(new char[] { ' ', '\n' });
+        string[] rc = s.Split(new char[] { ' ', '\n' });
         for (int i = 0; i < rc.Length; i++)
         {
           rc[i] = rc[i].Trim();
@@ -2166,7 +2167,7 @@ namespace Rhino.ApplicationSettings
     {
       return CreateState(true);
     }
-    
+
     /// <summary>
     /// Should extrusion objects be created for things like cylinders
     /// </summary>
@@ -2456,7 +2457,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>Tangent OSnap.</summary>
     Tangent = 0x200000,
     /// <summary>Point OSnap.</summary>
-    Point =  0x8000000,
+    Point = 0x8000000,
     //All = 0xFFFFFFFF
   };
 
@@ -2481,102 +2482,102 @@ namespace Rhino.ApplicationSettings
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
-    public bool GridSnap{ get; set; }
+    public bool GridSnap { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s ortho modeling aid.</summary>
     /// <since>5.0</since>
-    public bool Ortho{ get; set; }
+    public bool Ortho { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Planar modeling aid.</summary>
     /// <since>5.0</since>
-    public bool Planar{ get; set; }
+    public bool Planar { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s Project modeling aid.</summary>
     /// <since>5.0</since>
-    public bool ProjectSnapToCPlane{ get; set; }
+    public bool ProjectSnapToCPlane { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s use horizontal dialog modeling aid.</summary>
     /// <since>5.0</since>
-    public bool UseHorizontalDialog{ get; set; }
+    public bool UseHorizontalDialog { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend trim lines.</summary>
     /// <since>5.0</since>
-    public bool ExtendTrimLines{ get; set; }
+    public bool ExtendTrimLines { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s extend to apparent intersections.</summary>
     /// <since>5.0</since>
-    public bool ExtendToApparentIntersection{ get; set; }
+    public bool ExtendToApparentIntersection { get; set; }
 
     ///<summary>true mean Alt+arrow is used for nudging.</summary>
     /// <since>5.0</since>
-    public bool AltPlusArrow{ get; set; }
+    public bool AltPlusArrow { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s display control polygon.</summary>
     /// <since>5.0</since>
-    public bool DisplayControlPolygon{ get; set; }
+    public bool DisplayControlPolygon { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s highlight dialog modeling aid.</summary>
     /// <since>5.0</since>
-    public bool HighlightControlPolygon{ get; set; }
+    public bool HighlightControlPolygon { get; set; }
 
     ///<summary>Gets or sets the enabled state of Rhino&apos;s object snap modeling aid.</summary>
     /// <since>5.0</since>
-    public bool Osnap{ get; set; }
+    public bool Osnap { get; set; }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
     /// <since>5.0</since>
-    public bool SnapToLocked{ get; set; }
+    public bool SnapToLocked { get; set; }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
     /// <since>5.0</since>
-    public bool UniversalConstructionPlaneMode{ get; set; }
+    public bool UniversalConstructionPlaneMode { get; set; }
 
     /// <summary>Gets or sets the base orthogonal angle.</summary>
     /// <since>5.0</since>
-    public double OrthoAngle{ get; set; }
+    public double OrthoAngle { get; set; }
 
     ///<summary>Gets or sets the nudge step amount.</summary>
     /// <since>5.0</since>
-    public double NudgeKeyStep{ get; set; }
+    public double NudgeKeyStep { get; set; }
 
     /// <summary>Gets or sets the Ctrl-key based nudge step amount.</summary>
     /// <since>5.0</since>
-    public double CtrlNudgeKeyStep{ get; set; }
+    public double CtrlNudgeKeyStep { get; set; }
 
     /// <summary>Gets or sets the Shift-key based nudge step amount.</summary>
     /// <since>5.0</since>
-    public double ShiftNudgeKeyStep{ get; set; }
+    public double ShiftNudgeKeyStep { get; set; }
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
-    public int OsnapPickboxRadius{ get; set; }
+    public int OsnapPickboxRadius { get; set; }
 
     ///<summary>0 = world, 1 = cplane, 2 = view, 3 = UVN, -1 = not set.</summary>
     /// <since>5.0</since>
-    public int NudgeMode{ get; set; }
+    public int NudgeMode { get; set; }
 
     /// <summary>Gets or sets the control polygon display density.</summary>
     /// <since>5.0</since>
-    public int ControlPolygonDisplayDensity{ get; set; }
+    public int ControlPolygonDisplayDensity { get; set; }
 
     /// <summary>Gets or sets the OSnap cursor mode.</summary>
     /// <since>5.0</since>
-    public CursorMode OsnapCursorMode{ get; set; }
+    public CursorMode OsnapCursorMode { get; set; }
 
     /// <summary>
     /// Returns or sets Rhino's current object snap mode.
     /// <para>The mode is a bitwise value based on the OsnapModes enumeration.</para>
     /// </summary>
     /// <since>5.0</since>
-    public OsnapModes OsnapModes{ get; set; }
+    public OsnapModes OsnapModes { get; set; }
 
     ///<summary>Gets or sets the radius of the mouse pick box in pixels.</summary>
     /// <since>5.0</since>
-    public int MousePickboxRadius{ get; set; }
+    public int MousePickboxRadius { get; set; }
 
     /// <summary>Gets or sets the point display mode.</summary>
     /// <since>5.0</since>
-    public PointDisplayMode PointDisplay{ get; set; }
+    public PointDisplayMode PointDisplay { get; set; }
   }
 
   /// <summary>
@@ -3057,7 +3058,7 @@ namespace Rhino.ApplicationSettings
     /// <para>When true, maximizing a viewport needs a single click on the viewport title rather than a double-click.</para>
     /// </summary>
     /// <since>5.0</since>
-    public bool SingleClickMaximize{ get; set; }
+    public bool SingleClickMaximize { get; set; }
 
     /// <summary>
     /// Gets or sets the 'linked views' activated setting.
@@ -4110,7 +4111,7 @@ namespace Rhino.ApplicationSettings
     {
       IntPtr pSettings = UnsafeNativeMethods.CRhinoAppCursorToolTipSettings_New(current);
       CursorTooltipSettingsState rc = new CursorTooltipSettingsState();
-      rc.TooltipsEnabled = GetInt(idx_EnableCursorToolTips, pSettings)!=0;
+      rc.TooltipsEnabled = GetInt(idx_EnableCursorToolTips, pSettings) != 0;
       int x = GetInt(idx_xoffset, pSettings);
       int y = GetInt(idx_yoffset, pSettings);
       rc.Offset = new System.Drawing.Point(x, y);
@@ -4291,6 +4292,177 @@ namespace Rhino.ApplicationSettings
     }
   }
 
+
+  /// <summary>
+  /// Represents a snapshot of <see cref="ZebraAnalysisSettings"/>.
+  /// </summary>
+  /// <since>7.8</since>
+  public class ZebraAnalysisSettingsState
+  {
+    internal ZebraAnalysisSettingsState() { }
+
+    /// <summary>
+    /// Set to true for vertical stripes, or false for horizontal stripes.
+    /// </summary>
+    /// <since>7.8</since>
+    public bool VerticalStripes { get; set; } = false;
+
+    /// <summary>
+    /// Get or sets the display of surface isocurves.
+    /// </summary>
+    /// <since>7.8</since>
+    public bool ShowIsoCurves { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the stripe color.
+    /// </summary>
+    /// <since>7.8</since>
+    public System.Drawing.Color StripeColor { get; set; } = System.Drawing.Color.Black;
+
+    /// <summary>
+    /// Gets or sets the stripe thickness, where 0 = thinnest and 6 = thickest.
+    /// </summary>
+    /// <since>7.8</since>
+    public int StripeThickness
+    {
+      get { return m_stripe_thickness; }
+      set { m_stripe_thickness = Rhino.RhinoMath.Clamp(value, 0, 6); }
+    }
+    private int m_stripe_thickness = 3; // 0 = thinnest... 6 = thickest
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify Zebra analysis-related commands.
+  /// </summary>
+  /// <since>7.8</since>
+  public static class ZebraAnalysisSettings
+  {
+    private static ZebraAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_New(current);
+      ZebraAnalysisSettingsState rc = new ZebraAnalysisSettingsState();
+
+      rc.VerticalStripes = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, 0, false);
+      
+      rc.ShowIsoCurves = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, 1, false);
+
+      int abgr = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Color(ptr_settings, 0, false);
+      rc.StripeColor = Rhino.Runtime.Interop.ColorFromWin32(abgr);
+
+      rc.StripeThickness = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Int(ptr_settings, 0, false);
+ 
+      UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>7.8</since>
+    public static ZebraAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>7.8</since>
+    public static ZebraAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>7.8</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>7.8</since>
+    public static void UpdateFromState(ZebraAnalysisSettingsState state)
+    {
+      VerticalStripes = state.VerticalStripes;
+      ShowIsoCurves = state.ShowIsoCurves;
+      StripeColor = state.StripeColor;
+      StripeThickness = state.StripeThickness;
+    }
+
+    /// <summary>
+    /// Set to true for vertical stripes, or false for horizontal stripes.
+    /// </summary>
+    /// <since>7.8</since>
+    public static bool VerticalStripes
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, 0, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, 0, true);
+      }
+    }
+
+    /// <summary>
+    /// Get or sets the display of surface isocurves.
+    /// </summary>
+    /// <since>7.8</since>
+    public static bool ShowIsoCurves
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, 1, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, 1, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the stripe color.
+    /// </summary>
+    /// <since>7.8</since>
+    public static System.Drawing.Color StripeColor
+    {
+      get
+      {
+        int abgr = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Color(IntPtr.Zero, 0, false);
+        return Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      }
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Color(IntPtr.Zero, argb, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the stripe thickness, where 0 = thinnest and 6 = thickest.
+    /// </summary>
+    /// <since>7.8</since>
+    public static int StripeThickness
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Int(IntPtr.Zero, 0, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Int(IntPtr.Zero, value, true);
+      }
+    }
+  }
+
+
   /// <summary>
   /// Represents a snapshot of <see cref="CurvatureAnalysisSettings"/>.
   /// </summary>
@@ -4364,7 +4536,7 @@ namespace Rhino.ApplicationSettings
       CurvatureAnalysisSettingsState rc = new CurvatureAnalysisSettingsState();
 
       Rhino.Geometry.Interval range = Rhino.Geometry.Interval.Unset;
-      int style = (int) CurvatureStyle.Gaussian;
+      int style = (int)CurvatureStyle.Gaussian;
       if (UnsafeNativeMethods.RhCurvatureAnalysisSettings_Interval(ptr_settings, ref range, style, false))
         rc.GaussRange = range;
 
@@ -4435,13 +4607,13 @@ namespace Rhino.ApplicationSettings
     private static Rhino.Geometry.Interval GetRange(CurvatureStyle style)
     {
       Rhino.Geometry.Interval range = Rhino.Geometry.Interval.Unset;
-      UnsafeNativeMethods.RhCurvatureAnalysisSettings_Interval(IntPtr.Zero, ref range, (int) style, false);
+      UnsafeNativeMethods.RhCurvatureAnalysisSettings_Interval(IntPtr.Zero, ref range, (int)style, false);
       return range;
     }
 
     private static void SetRange(CurvatureStyle style, Rhino.Geometry.Interval range)
     {
-      UnsafeNativeMethods.RhCurvatureAnalysisSettings_Interval(IntPtr.Zero, ref range, (int) style, true);
+      UnsafeNativeMethods.RhCurvatureAnalysisSettings_Interval(IntPtr.Zero, ref range, (int)style, true);
     }
 
     /// <summary>
@@ -4513,18 +4685,18 @@ namespace Rhino.ApplicationSettings
     public static bool CalculateCurvatureAutoRange(IEnumerable<Mesh> meshes, ref CurvatureAnalysisSettingsState settings)
     {
       bool rc = false;
-      using(var inmeshes = new SimpleArrayMeshPointer())
+      using (var inmeshes = new SimpleArrayMeshPointer())
       {
-        foreach(Mesh m in meshes)
+        foreach (Mesh m in meshes)
           inmeshes.Add(m, true);
 
         IntPtr ptr_meshes = inmeshes.ConstPointer();
 
         Rhino.Geometry.Interval range = Rhino.Geometry.Interval.Unset;
         rc = UnsafeNativeMethods.RHC_CalculateCurvatureAutoRange(ptr_meshes, (int)settings.Style, ref range);
-        if(rc)
+        if (rc)
         {
-          switch(settings.Style)
+          switch (settings.Style)
           {
             default:
             case CurvatureStyle.Gaussian:
@@ -4764,6 +4936,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// semicolon separated list of paths/urls that the package manager uses for sources
     /// </summary>
+    /// <since>7.1</since>
     public static string Sources
     {
       get

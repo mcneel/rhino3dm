@@ -1,5 +1,7 @@
 // skip for now
+using Rhino.FileIO;
 using Rhino.Runtime.InteropWrappers;
+using System;
 
 #if RHINO_SDK
 
@@ -52,6 +54,27 @@ namespace Rhino
       dib.Dispose();
 
       return ret;
+    }
+
+    /// <summary>
+    /// Inserts bitmap into Rhino's texure manager and returns a FileReference.
+    /// </summary>
+    /// <param name="bitmap">The bitmap which will be referenced by the FileReference.</param>
+    /// <param name="crc">The crc of the bitmap. This should be a unique number which changes if the contents of the bitmap changes.
+    /// NOTE: if a different bitmap is provided using the same crc as a previous bitmap, then the previous bitmap will be overwritten in the texture manager and both previously returned FileReferences will reference the newly provided bitmap.</param>
+    /// <since>7.7</since>
+    [CLSCompliant(false)]
+    public static FileReference BitmapAsTextureFileReference(this System.Drawing.Bitmap bitmap, uint crc)
+    {
+      var dib = RhinoDib.FromBitmap(bitmap);
+
+      IntPtr ptr = UnsafeNativeMethods.CRhinoDib_RhinoGetDibAsTextureFileReference(dib.ConstPointer, crc);
+
+      FileReference file_reference = FileReference.ConstructAndOwnFromConstPtr(ptr);
+
+      dib.Dispose();
+
+      return file_reference;
     }
   }
 }

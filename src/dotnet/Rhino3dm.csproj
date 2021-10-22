@@ -8,14 +8,14 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>7.7.0</Version>
+    <Version>7.11.0</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
     <PackageDescription>rhino3dm is a set of libraries based on the OpenNURBS geometry library with a "RhinoCommon" style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.</PackageDescription>
     <RepositoryUrl>https://github.com/mcneel/rhino3dm</RepositoryUrl>
     <PackageTags>rhino3d</PackageTags>
-    <Copyright>Copyright (c) 1997-2020 Robert McNeel &amp; Associates</Copyright>
+    <Copyright>Copyright (c) 1997-2021 Robert McNeel &amp; Associates</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>

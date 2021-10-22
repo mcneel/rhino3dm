@@ -188,7 +188,6 @@ namespace Rhino
       RuntimeSerialNumber = runtimeSerialNumber;
 
       RhinoApp.Closing += (sender, args) => Dispose();
-      RhinoApp.Idle += (sender, args) => Cleanup();
     }
 
     ~RhinoFileWatcher()
@@ -238,6 +237,11 @@ namespace Rhino
         }
         else
         {
+          if (0 == g_file_system_watchers.Count)
+          {
+            RhinoApp.Idle += RhinoFileWatcher.Cleanup;
+          }
+
           watcher = new RefCountedFileSystemWatcher();
 
           g_file_system_watchers.Add(key, watcher);
@@ -329,8 +333,11 @@ namespace Rhino
 
     //Note that cleanup is done on Idle so that if a watchers is removed and a similar one added immediately afterwards
     //we can still use the same entry in the dictionary if it happens before the cleanup.
-    public void Cleanup()
+    public static void Cleanup(object source, EventArgs args)
     {
+      if (null == g_file_system_watchers)
+        return;
+
       var keysToDelete = new List<string>();
 
       foreach ( var entry in g_file_system_watchers)
@@ -344,6 +351,11 @@ namespace Rhino
       foreach(var key in keysToDelete)
       {
         g_file_system_watchers.Remove(key);
+      }
+
+      if (g_file_system_watchers.Count == 0)
+      {
+        RhinoApp.Idle -= RhinoFileWatcher.Cleanup;
       }
     }
 

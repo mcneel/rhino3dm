@@ -268,7 +268,8 @@ namespace Rhino.Commands
         m_ContextHelp = OnCommandContextHelpUrl;
         m_ReplayHistory = OnReplayHistory;
         m_SelFilter = SelCommand.OnSelFilter;
-        UnsafeNativeMethods.CRhinoCommand_SetCallbacks(0, m_RunCommand, m_DoHelp, m_ContextHelp, m_ReplayHistory, m_SelFilter);
+        m_SubObjectSelFilter = SelCommand.OnSelSubObjectFilter;
+        UnsafeNativeMethods.CRhinoCommand_SetCallbacks(0, m_RunCommand, m_DoHelp, m_ContextHelp, m_ReplayHistory, m_SelFilter, m_SubObjectSelFilter);
         EndCommand += Rhino.Runtime.HostUtils.DeleteObjectsOnMainThread;
       }
     }
@@ -557,6 +558,7 @@ namespace Rhino.Commands
     internal delegate int ReplayHistoryCallback(int command_serial_number, IntPtr pConstRhinoHistoryRecord, IntPtr pObjectPairArray);
     private static ReplayHistoryCallback m_ReplayHistory;
     private static SelCommand.SelFilterCallback m_SelFilter;
+    private static SelCommand.SelSubObjectCallback m_SubObjectSelFilter;
 
     internal delegate void CommandCallback(IntPtr pCommand, int rc, uint docRuntimeSerialNumber);
     private static CommandCallback m_OnBeginCommand;
@@ -878,17 +880,17 @@ namespace Rhino.Commands
     public bool IsPurgeRecord { get { return 86 == m_event_type; } }
   }
 
+
   /// <summary>
-  /// For adding nestable selection commands that work like the native Rhino
-  /// SelCrv command, derive your command from SelCommand and override the
-  /// virtual SelFilter function.
+  /// For adding nestable whole object and subobject selection commands, derive your command from
+  /// SelCommand and override the abstract SelFilter and virtual SelSubObjectFilter functions.
   /// </summary>
   public abstract class SelCommand : Command
   {
     protected override Result RunCommand(RhinoDoc doc, RunMode mode) { return Result.Success; }
 
     /// <summary>
-    /// Override this virtual function and return true if object should be selected.
+    /// Override this abstract function and return true if object should be selected.
     /// </summary>
     /// <param name="rhObj">The object to check regarding selection status.</param>
     /// <returns>true if the object should be selected; false otherwise.</returns>
@@ -908,6 +910,43 @@ namespace Rhino.Commands
         Rhino.Runtime.HostUtils.ExceptionReport(ex);
       }
       return rc;
+    }
+
+    /// <summary>
+    /// To select subobjects, override this virtual function, add component indices of the subobjects that 
+    /// should get selected to indicesToSelect list and return true.
+    /// This is called only if the SelFilter returns false and the whole object does not get selected.
+    /// </summary>
+    /// <param name="rhObj">The object to check regarding selection status.</param>
+    /// <param name="indicesToSelect">The component indices of the subobjects to select.</param>
+    /// <returns>
+    /// true if components added to indicesToSelect should get selected.
+    /// </returns>
+    /// <since>7.9</since>
+    protected virtual bool SelSubObjectFilter(Rhino.DocObjects.RhinoObject rhObj, List<Rhino.Geometry.ComponentIndex> indicesToSelect) { return false; }
+    internal static int OnSelSubObjectFilter(int commandSerialNumber, IntPtr pRhinoObject, IntPtr pComponentIndices)
+    {
+      bool rc = false;
+      try
+      {
+        SelCommand cmd = Command.LookUpBySerialNumber(commandSerialNumber) as SelCommand;
+        if (cmd != null)
+        {
+          List<Rhino.Geometry.ComponentIndex> indicesToSelect = new List<Geometry.ComponentIndex>();
+          rc = cmd.SelSubObjectFilter(Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject), indicesToSelect);
+          for (int i = 0; i < indicesToSelect.Count; i++)
+          {
+            Rhino.Geometry.ComponentIndex ci = indicesToSelect[i];
+            UnsafeNativeMethods.ON_ComponentIndexArray_Add(pComponentIndices, ref ci);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Runtime.HostUtils.DebugString("Exception caught during SelSubObjectFilter");
+        Rhino.Runtime.HostUtils.ExceptionReport(ex);
+      }
+      return rc ? 1 : 0;
     }
 
     const int idxTestLights = 0;
@@ -934,8 +973,9 @@ namespace Rhino.Commands
     }
 
     internal delegate int SelFilterCallback(int command_id, IntPtr pRhinoObject);
-
+    internal delegate int SelSubObjectCallback(int command_id, IntPtr pRhinoObject, IntPtr pComponentIndices);
   }
+
 
   public abstract class TransformCommand : Command
   {
@@ -949,6 +989,7 @@ namespace Rhino.Commands
     {
       IntPtr pList = list.NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoTransformCommand_SelectObjects(Id, prompt, pList);
+      GC.KeepAlive(list);
       return (Result)rc;
     }
 
@@ -971,12 +1012,14 @@ namespace Rhino.Commands
     {
       IntPtr pList = list.NonConstPointer();
       UnsafeNativeMethods.CRhinoTransformCommand_TransformObjects(Id, pList, ref xform, copy, autoHistory);
+      GC.KeepAlive(list);
     }
 
     protected void DuplicateObjects(Rhino.Collections.TransformObjectList list)
     {
       IntPtr pList = list.NonConstPointer();
       UnsafeNativeMethods.CRhinoTransformCommand_DuplicateObjects(Id, pList);
+      GC.KeepAlive(list);
     }
 
     /// <summary>
@@ -988,6 +1031,7 @@ namespace Rhino.Commands
     {
       IntPtr pList = list.NonConstPointer();
       UnsafeNativeMethods.CRhinoTransformCommand_ResetGrips(Id, pList);
+      GC.KeepAlive(list);
     }
 
     //CRhinoView* View() { return m_view; }

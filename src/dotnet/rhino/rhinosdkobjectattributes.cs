@@ -618,6 +618,7 @@ namespace Rhino.DocObjects
     /// the rendering material.</para>
     /// </summary>
     /// <since>5.0</since>
+    /// <seealso cref="RenderMaterial"/>
     public int MaterialIndex
     {
       get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialIndex); }
@@ -632,11 +633,44 @@ namespace Rhino.DocObjects
     /// High quality rendering plug-ins should use m_rendering_attributes.
     /// </summary>
     /// <since>5.0</since>
+    /// <seealso cref="RenderMaterial"/>
     public ObjectMaterialSource MaterialSource
     {
       get { return (ObjectMaterialSource)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialSource); }
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialSource, (int)value); }
     }
+
+
+#if RHINO_SDK
+    /// <summary>
+    /// Sets the render material for the object - higher level function for setting MaterialSource and MaterialIndex
+    /// </summary>
+    public Render.RenderMaterial RenderMaterial
+    {
+      set
+      {
+        if (value.Document == null)
+        {
+          throw new ArgumentException("The material is not attached to a document.");
+        }
+
+        var material = value.SimulatedMaterial(Render.RenderTexture.TextureGeneration.Allow);
+
+        material.RenderMaterialInstanceId = value.Id;
+
+        if (MaterialIndex == -1)
+        {
+          MaterialIndex = value.Document.Materials.Add(material);
+        }
+        else
+        {
+          value.Document.Materials.Modify(material, MaterialIndex, true);
+        }
+
+        MaterialSource = ObjectMaterialSource.MaterialFromObject;
+      }
+    }
+#endif
 
     const int IDX_COLOR = 0;
     const int IDX_PLOT_COLOR = 1;

@@ -196,6 +196,16 @@ namespace Rhino.FileIO
       }
     }
 
+    /// <summary>Source RhinoDoc that is being written</summary>
+    public RhinoDoc RhinoDoc
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        uint sn = UnsafeNativeMethods.CRhinoFileWriteOption_DocumentSerialNumber(const_ptr_this);
+        return RhinoDoc.FromRuntimeSerialNumber(sn);
+      }
+    }
     #endregion
 
     #region disposable
