@@ -63,7 +63,7 @@ jobs:
 
   build_js:
     name: build rhino3dm.js
-    needs: check_bindings
+    needs: [check_bindings, check_workflow]
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' }}
     runs-on: ubuntu-latest
     container:
@@ -93,7 +93,7 @@ jobs:
   build_py_all_bdist:
     name: build python ${{ matrix.target }} bdist
     runs-on: ${{ matrix.os }}
-    needs: check_bindings
+    needs: [check_bindings, check_workflow]
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' }}
     strategy:
       matrix:
@@ -135,7 +135,7 @@ jobs:
   build_dotnet:
     name: build dotnet
     runs-on: ubuntu-latest
-    needs: check_dotnet
+    needs: [check_dotnet, check_workflow]
     if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' }}
     steps:
       - name: info
