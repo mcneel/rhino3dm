@@ -8,7 +8,7 @@ jobs:
 
   #checks if this file has changed
   check_workflow:
-    name: check workflow_release
+    name: check workflow_ci
     runs-on: ubuntu-latest
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
