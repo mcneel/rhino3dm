@@ -54,6 +54,7 @@ jobs:
     strategy:
       matrix:
         python-version: [cp38-cp38, cp39-cp39]
+      fail-fast: false
     steps:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
@@ -85,6 +86,7 @@ jobs:
             target: windows
           - os: macos-11
             target: macos
+      fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -136,6 +138,7 @@ jobs:
           - os: macos-11
             target: macos
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+      fail-fast: false
     steps:
       - name: setup xcode
         if: ${{ matrix.target == 'macos' }}
