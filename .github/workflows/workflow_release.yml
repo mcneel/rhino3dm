@@ -83,7 +83,7 @@ jobs:
             target: linux
           - os: windows-latest
             target: windows
-          - os: macos-latest
+          - os: macos-11
             target: macos
     steps:
       - name: set up python ${{ matrix.python-version }}
@@ -133,7 +133,7 @@ jobs:
           - os: windows-latest
             target: windows
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
-          - os: macos-latest
+          - os: macos-11
             target: macos
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
     steps:
@@ -212,7 +212,7 @@ jobs:
   
   build_dotnet_ios:
     name: build dotnet ios
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
@@ -254,7 +254,7 @@ jobs:
 
   build_dotnet_android:
     name: build dotnet android
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - name: set up python
         uses: actions/setup-python@v2
