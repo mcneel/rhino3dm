@@ -273,13 +273,13 @@ def check_macos(build_tool):
 
     print_check_preamble(build_tool)
 
-    # We used to call platform.mac_ver()[0] to get the version here, which is probably better
-    # ...however, I think doing that requires updating the entire script to Python 3 and using
-    # a newer version of platform, so instead we call sw_vers (this is to support new macOS version numbers.)
-    p = subprocess.Popen(['sw_vers'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    sw_vers_output = p.communicate()
-    
-    running_version = sw_vers_output[0].split('\n')[1].split('\t')[1]
+    running_version = ''
+    if sys.version_info >= (3,):
+        running_version = platform.mac_ver()[0]
+    else:
+        p = subprocess.Popen(['sw_vers'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        sw_vers_output = p.communicate()
+        running_version = sw_vers_output[0].split('\n')[1].split('\t')[1]
 
     print_version_comparison(build_tool, running_version)
 
