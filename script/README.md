@@ -106,7 +106,7 @@ As you can see, targeting the three desktop platforms requires that you run the 
 
 ### bootstrap.py
 
-There many necessary tools to build rhino3dm.  These are listed in the [Current Developer Tools](../Current%20Developer%20Tools.md) in the root folder of this repository.  The _bootstrap.py_ script reads from the _Current Development Tools.md files_ and checks the system to make sure these tools are present.  You can also use this script to download the tools if you do not have them (when available).
+There many necessary tools to build rhino3dm.  These are listed in the [Current Developer Tools](../Current_Developer_Tools.md) in the root folder of this repository.  The _bootstrap.py_ script reads from the _Current Development Tools.md files_ and checks the system to make sure these tools are present.  You can also use this script to download the tools if you do not have them (when available).
 
 You can run the _bootstrap.py_ script like this:
 

@@ -40,7 +40,7 @@ jobs:
         with:
           files: |
             .github/workflows/workflow_ci.yml
-            Current Development Tools.md
+            Current_Development_Tools.md
             script
 
   #checks if src/dotnet files have changed
