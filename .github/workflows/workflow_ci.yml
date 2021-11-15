@@ -119,7 +119,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-11]
         python-version: [2.7, 3.9, 3.10]
-        fail-fast: false
         include:
           - os: ubuntu-latest
             target: linux
@@ -132,6 +131,7 @@ jobs:
             python-version: 2.7
           - os: windows-latest
             python-version: 2.7
+      fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
