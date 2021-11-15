@@ -78,7 +78,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-11]
-        python-version: [2.7, 3.7, 3.8, 3.9]
+        python-version: [2.7, 3.7, 3.8, 3.9, 3.10]
         include:
           - os: ubuntu-latest
             target: linux
@@ -238,8 +238,8 @@ jobs:
       #- name: setup-xamarin
       #  uses: maxim-lobanov/setup-xamarin@v1
       #  with:
-      #    mono-version: '6.8'
-      #    xamarin-ios-version: '13.14'
+      #    mono-version: '6.12'
+      #    xamarin-ios-version: '14.14.2.5'
       - name: bootstrap
         run: python3 script/bootstrap.py -p ios
       - name: setup
