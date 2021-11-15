@@ -111,14 +111,14 @@ jobs:
 # https://github.com/actions/virtual-environments/issues/2486
 
   build_py_all_bdist:
-    name: build python ${{ matrix.target }} bdist
+    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
     runs-on: ${{ matrix.os }}
     needs: [check_bindings, check_workflow, check_build_scripts]
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-11]
-        python-version: [2.7, 3.9]
+        python-version: [2.7, 3.9, '3.10']
         include:
           - os: ubuntu-latest
             target: linux
@@ -131,6 +131,7 @@ jobs:
             python-version: 2.7
           - os: windows-latest
             python-version: 2.7
+      fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
