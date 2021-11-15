@@ -111,7 +111,7 @@ jobs:
 # https://github.com/actions/virtual-environments/issues/2486
 
   build_py_all_bdist:
-    name: build python ${{ matrix.target }} bdist
+    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
     runs-on: ${{ matrix.os }}
     needs: [check_bindings, check_workflow, check_build_scripts]
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' }}
