@@ -109,7 +109,7 @@ void initTextureBindings(void*)
     .value("PBR_ClearcoatBump", ON_Texture::TYPE::pbr_clearcoat_bump_texture)
     ;
 
-  enum_<TextureWrap>(m, "TextureWrap")
+  enum_<TextureWrap>("TextureWrap")
     .value("Repeat", TextureWrap::Repeat)
     .value("Clamp", TextureWrap::Clamp)
     ;
