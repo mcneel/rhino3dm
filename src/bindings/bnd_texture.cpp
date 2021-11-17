@@ -56,10 +56,19 @@ void initTextureBindings(pybind11::module& m)
     .value("PBR_Displacement", ON_Texture::TYPE::pbr_displacement_texture)
     .value("PBR_ClearcoatBump", ON_Texture::TYPE::pbr_clearcoat_bump_texture)
     ;
+  
+  py::enum_<TextureWrap>(m, "TextureWrap")
+    .value("Repeat", TextureWrap::Repeat)
+    .value("Clamp", TextureWrap::Clamp)
+    ;
 
   py::class_<BND_Texture>(m, "Texture")
     .def(py::init<>())
     .def_property("FileName", &BND_Texture::GetFileName, &BND_Texture::SetFileName)
+    .def_property("WrapU", &BND_Texture::WrapU)
+    .def_property("WrapV", &BND_Texture::WrapV)
+    .def_property("WrapW", &BND_Texture::WrapW)
+    .def_property("UvwTransform", &BND_Texture::UvwTransform)
     .def("FileReference", &BND_Texture::GetFileReference)
     ;
 }
@@ -100,9 +109,18 @@ void initTextureBindings(void*)
     .value("PBR_ClearcoatBump", ON_Texture::TYPE::pbr_clearcoat_bump_texture)
     ;
 
+  enum_<TextureWrap>(m, "TextureWrap")
+    .value("Repeat", TextureWrap::Repeat)
+    .value("Clamp", TextureWrap::Clamp)
+    ;
+
   class_<BND_Texture>("Texture")
     .constructor<>()
     .property("fileName", &BND_Texture::GetFileName, &BND_Texture::SetFileName)
+    .property("wrapU", &BND_Texture::WrapU)
+    .property("wrapV", &BND_Texture::WrapV)
+    .property("wrapW", &BND_Texture::WrapW)
+    .property("uvwTransform", &BND_Texture::UvwTransform)
     .function("fileReference", &BND_Texture::GetFileReference, allow_raw_pointers())
     ;
 }
