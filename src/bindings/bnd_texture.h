@@ -2,11 +2,13 @@
 
 #pragma once
 
+/*
 enum class TextureWrap : int
 {
   Repeat = 0,
   Clamp = 1,
 };
+*/
 
 #if defined(ON_PYTHON_COMPILE)
 void initTextureBindings(pybind11::module& m);
@@ -30,9 +32,9 @@ public:
   //public TextureType TextureType
   //public int MappingChannelId
   //public TextureCombineMode TextureCombineMode
-  TextureWrap WrapU() const { return (TextureWrap) (unsigned int) m_texture->m_wrapu; }
-  TextureWrap WrapV() const { return (TextureWrap) (unsigned int) m_texture->m_wrapv; }
-  TextureWrap WrapW() const { return (TextureWrap) (unsigned int) m_texture->m_wrapw; }
+  int WrapU() const { return (unsigned int) m_texture->m_wrapu; }
+  int WrapV() const { return (unsigned int) m_texture->m_wrapv; }
+  int WrapW() const { return (unsigned int) m_texture->m_wrapw; }
   BND_Transform UvwTransform() const { return m_texture->m_uvw; }
   //public void GetAlphaBlendValues(out double constant, out double a0, out double a1, out double a2, out double a3)
   //public void SetAlphaBlendValues(double constant, double a0, double a1, double a2, double a3)

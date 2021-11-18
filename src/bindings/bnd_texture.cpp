@@ -57,9 +57,9 @@ void initTextureBindings(pybind11::module& m)
     .value("PBR_ClearcoatBump", ON_Texture::TYPE::pbr_clearcoat_bump_texture)
     ;
   
-  py::enum_<TextureWrap>(m, "TextureWrap")
-    .value("Repeat", TextureWrap::Repeat)
-    .value("Clamp", TextureWrap::Clamp)
+  py::enum_<ON_Texture::WRAP>(m, "TextureUvwWrapping")
+    .value("Repeat", ON_Texture::WRAP::repeat_wrap)
+    .value("Clamp", ON_Texture::WRAP::clamp_wrap)
     ;
 
   py::class_<BND_Texture>(m, "Texture")
@@ -109,9 +109,9 @@ void initTextureBindings(void*)
     .value("PBR_ClearcoatBump", ON_Texture::TYPE::pbr_clearcoat_bump_texture)
     ;
 
-  enum_<TextureWrap>("TextureWrap")
-    .value("Repeat", TextureWrap::Repeat)
-    .value("Clamp", TextureWrap::Clamp)
+  enum_<ON_Texture::WRAP>("TextureUvwWrapping")
+    .value("Repeat", ON_Texture::WRAP::repeat_wrap)
+    .value("Clamp", ON_Texture::WRAP::clamp_wrap)
     ;
 
   class_<BND_Texture>("Texture")
