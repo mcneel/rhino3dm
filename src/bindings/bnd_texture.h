@@ -2,14 +2,6 @@
 
 #pragma once
 
-/*
-enum class TextureWrap : int
-{
-  Repeat = 0,
-  Clamp = 1,
-};
-*/
-
 #if defined(ON_PYTHON_COMPILE)
 void initTextureBindings(pybind11::module& m);
 #else
