@@ -3,7 +3,7 @@
 [![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml/badge.svg)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml)
 [![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg)](https://discourse.mcneel.com/c/rhino-developer/rhino3dm)
 [![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg)](https://pypi.org/project/rhino3dm)
-[![NuGet](https://img.shields.io/nuget/v/Rhino3dmIO.Desktop.svg?style=flat)](https://www.nuget.org/profiles/McNeel)
+[![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat)](https://www.nuget.org/profiles/McNeel)
 [![npm](https://img.shields.io/npm/v/rhino3dm.svg)](https://www.npmjs.com/package/rhino3dm)
 [![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
 
