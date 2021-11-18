@@ -24,10 +24,10 @@ public:
   //public TextureType TextureType
   //public int MappingChannelId
   //public TextureCombineMode TextureCombineMode
-  //public TextureUvwWrapping WrapU
-  //public TextureUvwWrapping WrapV
-  //public TextureUvwWrapping WrapW
-  //public Transform UvwTransform
+  int WrapU() const { return (unsigned int) m_texture->m_wrapu; }
+  int WrapV() const { return (unsigned int) m_texture->m_wrapv; }
+  int WrapW() const { return (unsigned int) m_texture->m_wrapw; }
+  BND_Transform UvwTransform() const { return m_texture->m_uvw; }
   //public void GetAlphaBlendValues(out double constant, out double a0, out double a1, out double a2, out double a3)
   //public void SetAlphaBlendValues(double constant, double a0, double a1, double a2, double a3)
   //public void SetRGBBlendValues(Color color, double a0, double a1, double a2, double a3)
