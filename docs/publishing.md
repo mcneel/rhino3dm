@@ -5,7 +5,7 @@
 ### Node.js
 
 1. Build rhino3dm.js, rhino3dm.wasm, and rhino3dm.module.js (or get them from the [Github Repo Actions Artifacts](https://github.com/mcneel/rhino3dm/actions) )
-2. Build and run docgen (for type definitions). See `src/docgen/make_javascript_docs.bat`. This will be in the `src/docgen/out/js_tsdef` directory
+2. Build and run docgen (for type definitions). At the time of writing this needs to be done on windows as building docgen results in an exe. Once docgen is built, you can run it from `src/docgen/bin/docgen.exe`. After running docgen, the `rhino3dm.d.ts` file will be in the `src/docgen/out/js_tsdef` directory
 3. Create a new directory and copy in rhino3dm.js, rhino3dm.wasm, rhino3dm.module.js and rhino3dm.d.ts
 4. Copy in RHINO3DM.JS.md from `docs/javascript` and rename to README.md
 6. Update the version number in package.json and copy that in too
