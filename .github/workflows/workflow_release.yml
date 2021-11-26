@@ -231,7 +231,7 @@ jobs:
         with:
           path: wheelhouse
       - name: Display structure of downloaded files
-          run: ls -R
+        run: ls -R
 
   build_dotnet_ios:
     name: build dotnet ios
