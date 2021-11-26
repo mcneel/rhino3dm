@@ -240,6 +240,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: output
+          name: rhino3dm.py all wheels
 
   build_dotnet_ios:
     name: build dotnet ios
