@@ -216,7 +216,23 @@ jobs:
         with:
           path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
-  
+
+  pack_py:
+    name: pack python
+    needs: [build_py_all_bdist, build_py_manylinux2014, build_py_sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download python artifacts dist
+        uses: actions/download-artifact@v2
+        with:
+          path: dist
+      - name: download python artifacts wheelhouse
+        uses: actions/download-artifact@v2
+        with:
+          path: wheelhouse
+      - name: Display structure of downloaded files
+          run: ls -R
+
   build_dotnet_ios:
     name: build dotnet ios
     runs-on: macos-11
