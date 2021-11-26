@@ -223,33 +223,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: download python artifacts dist
-        uses: actions/download-artifact@v2
-        with:
-          path: dist
-      - name: download python artifacts wheelhouse
-        uses: actions/download-artifact@v2
-        with:
-          path: wheelhouse
-      - name: Display structure of downloaded files
-        run: ls -R
-
-  pack_py_select:
-    name: pack python regex
-    needs: [build_py_all_bdist, build_py_manylinux2014, build_py_sdist]
-    runs-on: ubuntu-latest
-    steps:
-      - name: download python artifacts dist
         uses: elonh/download-artifact-regexp@master
         with:
           pattern: .*py.*
           path: dist
-      - name: download python artifacts wheelhouse
-        uses: elonh/download-artifact-regexp@master
-        with:
-          pattern: .*py.*
-          path: wheelhouse
       - name: Display structure of downloaded files
         run: ls -R
+      - name: unzip files
+        run: |
+          mkdir output
+          cd dist
+          unzip '*.zip' -d /output
+          cd ../output
+          ls
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: output
 
   build_dotnet_ios:
     name: build dotnet ios
