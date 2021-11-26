@@ -241,12 +241,12 @@ jobs:
       - name: download python artifacts dist
         uses: elonh/download-artifact-regexp@master
         with:
-          pattern: ^py$
+          pattern: .*py.*
           path: dist
       - name: download python artifacts wheelhouse
         uses: elonh/download-artifact-regexp@master
         with:
-          pattern: ^py$
+          pattern: .*py.*
           path: wheelhouse
       - name: Display structure of downloaded files
         run: ls -R
