@@ -128,6 +128,21 @@ CurveOrientation BND_Curve::ClosedCurveOrientation() const
   return CurveOrientation::Undefined;
 }
 
+CurveOrientation BND_Curve::ClosedCurveOrientation3(BND_Plane plane) const
+{
+  if (m_curve)
+  {
+    ON_Plane pl = plane.ToOnPlane();
+    int rc = ON_ClosedCurveOrientation(*m_curve, pl);
+    if (1 == rc)
+      return CurveOrientation::CounterClockwise;
+    if (-1 == rc)
+      return CurveOrientation::Clockwise;
+  }
+  return CurveOrientation::Undefined;
+}
+
+
 BND_TUPLE BND_Curve::FrameAt(double t) const
 {
   ON_Plane plane;
@@ -135,6 +150,27 @@ BND_TUPLE BND_Curve::FrameAt(double t) const
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Plane::FromOnPlane(plane));
+  return rc;
+}
+
+BND_TUPLE BND_Curve::DerivativeAt(double t, int derivativeCount) const
+{
+  return DerivativeAt2(t, derivativeCount, CurveEvaluationSide::Default);
+}
+
+BND_TUPLE BND_Curve::DerivativeAt2(double t, int derivativeCount, CurveEvaluationSide side) const
+{
+  BND_TUPLE rc = CreateTuple(derivativeCount);
+  ON_SimpleArray<ON_3dPoint> outVectors;
+  outVectors.Reserve(derivativeCount + 1);
+  if (m_curve->Evaluate(t, derivativeCount, 3, &outVectors.Array()->x, (int)side, nullptr))
+  {
+    outVectors.SetCount(derivativeCount + 1);
+    for (int i = 0; i < outVectors.Count(); i++)
+    {
+      SetTuple(rc, i, outVectors[i]);
+    }
+  }
   return rc;
 }
 
@@ -207,6 +243,12 @@ BND_NurbsCurve* BND_Curve::ToNurbsCurve2(BND_Interval subdomain) const
 namespace py = pybind11;
 void initCurveBindings(pybind11::module& m)
 {
+  py::enum_<CurveEvaluationSide>(m, "CurveEvaluationSide")
+    .value("Default", CurveEvaluationSide::Default)
+    .value("Below", CurveEvaluationSide::Below)
+    .value("Above", CurveEvaluationSide::Above)
+    ;
+
   py::enum_<BlendContinuity>(m, "BlendContinuity")
     .value("Position", BlendContinuity::Position)
     .value("Tangency", BlendContinuity::Tangency)
@@ -280,6 +322,7 @@ void initCurveBindings(pybind11::module& m)
     .def("IsClosable", &BND_Curve::IsClosable, py::arg("tolerance"), py::arg("minimumAbsoluteSize")=0, py::arg("minimumRelativeSize")=10)
     .def("Reverse", &BND_Curve::Reverse)
     .def("ClosedCurveOrientation", &BND_Curve::ClosedCurveOrientation)
+    .def("ClosedCurveOrientation", &BND_Curve::ClosedCurveOrientation3, py::arg("plane"))
     .def("PointAt", &BND_Curve::PointAt, py::arg("t"))
     .def_property_readonly("PointAtStart", &BND_Curve::PointAtStart)
     .def_property_readonly("PointAtEnd", &BND_Curve::PointAtEnd)
@@ -290,6 +333,8 @@ void initCurveBindings(pybind11::module& m)
     .def_property_readonly("TangentAtEnd", &BND_Curve::TangentAtEnd)
     .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
     .def("FrameAt", &BND_Curve::FrameAt, py::arg("t"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt, py::arg("t"), py::arg("derivativeCount"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt2, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
     .def("GetCurveParameterFromNurbsFormParameter", &BND_Curve::GetCurveParameterFromNurbsFormParameter, py::arg("nurbsParameter"))
     .def("GetNurbsFormParameterFromCurveParameter", &BND_Curve::GetNurbsFormParameterFromCurveParameter, py::arg("curveParameter"))
     .def("Trim", &BND_Curve::Trim, py::arg("t0"), py::arg("t1"))
