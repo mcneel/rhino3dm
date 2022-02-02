@@ -35,9 +35,9 @@ BND_Transform BND_Transform::Rotation(double angleRadians, ON_3dVector rotationA
 
 BND_Transform BND_Transform::Mirror(ON_3dPoint pointOnMirrorPlane, ON_3dVector normalToMirrorPlane)
 {
-  BND_Transform rc(1);
-  rc.m_xform.Mirror(pointOnMirrorPlane, normalToMirrorPlane);
-  return rc;
+  BND_Transform rcd(1);
+  rcd.m_xform.Mirror(pointOnMirrorPlane, normalToMirrorPlane);
+  return rcd;
 }
 BND_Transform BND_Transform::Mirror2(BND_Plane mirrorPlane)
 {
