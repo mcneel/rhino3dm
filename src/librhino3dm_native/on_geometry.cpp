@@ -47,233 +47,27 @@ RH_C_FUNCTION bool ON_Geometry_Scale( ON_Geometry* ptr, double scale)
   return rc;
 }
 
-// Add a curve to the partial boundingbox result.
-static void ON_Brep_GetTightCurveBoundingBox_Helper( const ON_Curve& crv, ON_BoundingBox& bbox, const ON_Xform* xform, const ON_Xform* xform_inverse )
-{
-  // Get loose boundingbox of curve.
-  ON_BoundingBox tempbox;
-  if( !crv.GetBoundingBox(tempbox, false) )
-    return;
-
-  // Transform the loose box if necessary. 
-  // Note: transforming a box might result in a larger box, 
-  //       it's better to transform the curve, 
-  //       which might actually result in a smaller box.
-  if( xform_inverse )
-  {
-    tempbox.Transform(*xform_inverse); 
-  }
-
-  // If loose boundingbox of curve is inside partial result, return.
-  if( bbox.Includes(tempbox, false) )
-    return;
-
-  // Get tight boundingbox of curve, grow partial result.
-  if( crv.GetTightBoundingBox(tempbox, false, xform) )
-    bbox.Union(tempbox);
-}
-
-#if !defined(RHINO3DM_BUILD)
-// Add the isocurves of a BrepFace to the partial boundingbox result.
-static void ON_Brep_GetTightIsoCurveBoundingBox_Helper( const TL_Brep& tlbrep, const ON_BrepFace& face, ON_BoundingBox& bbox, const ON_Xform* xform, int dir )
-{
-  ON_Interval domain = face.Domain(1 - dir);
-  int degree =         face.Degree(1 - dir);
-  int spancount =      face.SpanCount(1 - dir);
-  int spansamples =    degree * (degree + 1) - 1;
-  if( spansamples < 2 )
-    spansamples = 2;
-
-  // pbox delineates the extremes of the face interior.
-  // We can use it to trivially reject spans and isocurves.
-  ON_BrepLoop* pOuterLoop = face.OuterLoop();
-  if( NULL==pOuterLoop )
-    return;
-
-  const ON_BoundingBox& pbox = pOuterLoop->m_pbox;
-  double t0 = ((dir == 0) ? pbox.Min().y : pbox.Min().x);
-  double t1 = ((dir == 0) ? pbox.Max().y : pbox.Max().x);
-
-  // Get the surface span vector.
-  ON_SimpleArray<double> spanvector(spancount + 1);
-  spanvector.SetCount(spancount + 1);
-  face.GetSpanVector(1 - dir, spanvector.Array());
-
-  // Generate a list of all the sampling parameters.
-  ON_SimpleArray<double> samples(spancount * spansamples);
-  for( int s = 0; s < spancount; s++)
-  {
-    double s0 = spanvector[s];
-    double s1 = spanvector[s+1];
-
-    // Reject span if it does not intersect the pbox.
-    if( s1 < t0 ) { continue; }
-    if( s0 > t1 ) { continue; }
-    
-    ON_Interval span(s0, s1);
-    for( int i = 1; i < spansamples; i++ )
-    {
-      double t = span.ParameterAt((double)i / (double)(spansamples - 1));
-      // Reject iso if it does not intersect the pbox.
-      if( t < t0 )
-        continue;
-      if( t > t1 )
-        break;
-      samples.Append(t);
-    }
-  }
-
-  //Iterate over samples
-  int sample_count = samples.Count();
-  ON_BoundingBox loose_box;
-  ON_SimpleArray<ON_Interval> intervals;
-  ON_NurbsCurve isosubcrv;
-
-  for( int i = 0; i<sample_count; i++)
-  {
-    // Retrieve iso-curve.
-    ON_Curve* isocrv = face.IsoCurve(dir, samples[i]);
-
-    while( isocrv )
-    {
-      // Transform isocurve if necessary, this is better than transforming downstream boundingboxes.
-      if( xform )
-        isocrv->Transform(*xform);
-
-      // Compute loose box.
-      if( !isocrv->GetBoundingBox(loose_box, false))
-        break;
-
-      // Determine whether the loose box is already contained within the partial result.
-      if( bbox.Includes(loose_box, false) ) 
-        break;
-
-      // Solve trimming domains for the iso-curve.
-      intervals.SetCount(0);
-      if( !tlbrep.GetIsoIntervals(face, dir, samples[i], intervals))
-        break;
-
-      // Iterate over trimmed iso-curves.
-      int interval_count = intervals.Count();
-      for( int k=0; k<interval_count; k++ )
-      {
-        //this to mask a bug in Rhino4. GetNurbForm does not destroy the Curve Tree. It does now.
-        isosubcrv.DestroyCurveTree();
-        isocrv->GetNurbForm(isosubcrv, 0.0, &intervals[k]);
-        ON_Brep_GetTightCurveBoundingBox_Helper(isosubcrv, bbox, nullptr, nullptr);
-      }
-      break;
-    }
-
-    if( isocrv )
-    {
-      delete isocrv;
-    }
-  }
-}
-// Add a face to the partial boundingbox result.
-static void ON_Brep_GetTightFaceBoundingBox_Helper( const ON_BrepFace& face, ON_BoundingBox& bbox, const ON_Xform* xform, const ON_Xform* xform_inverse )
-{
-  ON_BoundingBox loose_box;
-
-  // This should ideally test for planarity inside the OuterLoop() pbox only,
-  // but no such function exists in the SDK as far as I can tell.
-  if( face.IsPlanar() )
-    return;
-
-  // Get loose boundingbox of face.
-  if( face.GetBoundingBox(loose_box, false) )
-  {
-    if( xform_inverse ) 
-      loose_box.Transform(*xform_inverse); 
-
-    if( bbox.Includes(loose_box, false) )
-      return;
-  }
-
-  const TL_Brep* tlbrep = TL_Brep::Promote(face.Brep());
-  if( tlbrep )
-  {
-    ON_Brep_GetTightIsoCurveBoundingBox_Helper( *tlbrep, face, bbox, xform, 0);
-    ON_Brep_GetTightIsoCurveBoundingBox_Helper( *tlbrep, face, bbox, xform, 1);
-  }
-}
-static bool ON_Brep_GetTightBoundingBox_Helper( const ON_Brep& brep, ON_BoundingBox& bbox, ON_Xform* xform )
-{
-  ON_Xform xform_inverse;
-  ON_Xform* inverse = nullptr;
-  if( xform )
-  {
-    xform_inverse = xform->Inverse();
-    inverse = &xform_inverse;
-  }
-  // make sure we have an empty/invalid bbox
-  bbox.Destroy();
-
-  // Compute Vertex bounding box.
-  int vertex_count = brep.m_V.Count();
-  if( xform )
-  {
-    ON_3dPointArray vtx(vertex_count);
-    for( int i=0; i<vertex_count; i++ )
-      vtx.Append(brep.m_V[i].point);
-    vtx.GetTightBoundingBox(bbox, false, xform);
-  }
-  else
-  {
-    for( int i=0; i<vertex_count; i++ )
-      bbox.Set(brep.m_V[i].point,true);
-  }
-
-  // Grow partial result with Edge bounding boxes.
-  int edge_count = brep.m_E.Count();
-  for( int i=0; i<edge_count; i++)
-    ON_Brep_GetTightCurveBoundingBox_Helper(brep.m_E[i], bbox, xform, inverse);
-
-  // Grow partial result with Face bounding boxes.
-  int face_count = brep.m_F.Count();
-  for( int i=0; i<face_count; i++)
-    ON_Brep_GetTightFaceBoundingBox_Helper(brep.m_F[i], bbox, xform, inverse);
-
-  return bbox.IsValid();
-}
-#endif
-
 RH_C_FUNCTION bool ON_Geometry_GetTightBoundingBox(const ON_Geometry* ptr, ON_BoundingBox* bbox, ON_Xform* xform, bool useXform)
 {
   bool rc = false;
-  if( ptr && bbox )
+  if (ptr && bbox)
   {
-    if(!useXform || (xform && xform->IsIdentity()))
+    if (!useXform || (xform && xform->IsIdentity()))
       xform = nullptr;
 
-#if !defined(RHINO3DM_BUILD)
+    // 4-Jan-2022 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-66874
+    // Now that there is an official ON_Brep::GetTightBoundingBox method, we should use it.
+    const ON_Surface* pSrf = ON_Surface::Cast(ptr);
+    if (pSrf)
     {
-      // OpenNURBS doesn't have a tight bounding box function for ON_Breps and we
-      // want to make this work in V4, V5 and V6...
-      const ON_Brep* pBrep = ON_Brep::Cast(ptr);
-      if (pBrep)
-      {
-        rc = ON_Brep_GetTightBoundingBox_Helper(*pBrep, *bbox, xform);
-      }
-      else
-      {
-        const ON_Surface* pSrf = ON_Surface::Cast(ptr);
-        if (pSrf)
-        {
-          pBrep = pSrf->BrepForm();
-          if (pBrep)
-          {
-            rc = ON_Brep_GetTightBoundingBox_Helper(*pBrep, *bbox, xform);
-          }
-          delete pBrep;
-        }
-      }
+      ON_Brep brep;
+      if (pSrf->BrepForm(&brep))
+        rc = brep.GetTightBoundingBox(*bbox, false, xform);
     }
-#endif
-    // check rc in case the above function fails
-    if( !rc )
+    else
+    {
       rc = ptr->GetTightBoundingBox(*bbox, false, xform);
+    }
   }
   return rc;
 }

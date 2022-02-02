@@ -343,32 +343,34 @@ RH_C_FUNCTION void ON_ColorStopArray_Append(ON_SimpleArray<ON_ColorStop>* stops,
 RH_C_FUNCTION int ON_Hatch_GetGradientData(const ON_Hatch* pConstHatch, ON_3dPoint* startPoint, ON_3dPoint* endPoint,
   int* gradientType, double* repeat, ON_SimpleArray<ON_ColorStop>* stops)
 {
-#if !defined(RHINO3DM_BUILD)
+  if (nullptr == pConstHatch)
+    return 0;
+
+  ON_3dPoint a, b;
+  pConstHatch->GetGradientEndPoints(a, b);
   if (startPoint)
-    *startPoint = CRhGradientHatch::GetPoint(0, pConstHatch);
+    *startPoint = a;
   if (endPoint)
-    *endPoint = CRhGradientHatch::GetPoint(1, pConstHatch);
+    *endPoint = b;
   if (gradientType)
-    *gradientType = (int)CRhGradientHatch::GetGradientType(pConstHatch);
+    *gradientType = (int)pConstHatch->GetGradientType();
   if (repeat)
-    *repeat = CRhGradientHatch::GetGradientRepeatFactor(pConstHatch);
+    *repeat = pConstHatch->GetGradientRepeat();
   if (stops)
-    *stops = CRhGradientHatch::GetGradientColors(pConstHatch);
+    pConstHatch->GetGradientColors(*stops);
 
   if (stops)
     return stops->Count();
-#endif
   return 0;
 }
 
 RH_C_FUNCTION void ON_Hatch_SetGradientData(ON_Hatch* hatch, ON_3DPOINT_STRUCT startPt, ON_3DPOINT_STRUCT endPt, int gradientType, double repeat, const ON_SimpleArray<ON_ColorStop>* stops)
 {
-#if !defined(RHINO3DM_BUILD)
-  CRhGradientHatch::SetPoint(hatch, true, ON_3dPoint(startPt.val));
-  CRhGradientHatch::SetPoint(hatch, false, ON_3dPoint(endPt.val));
-  CRhGradientHatch::SetGradientType(hatch, (ON_GradientType)gradientType);
-  CRhGradientHatch::SetGradientRepeatFactor(hatch, (float)repeat);
+  if (nullptr == hatch)
+    return;
+  hatch->SetGradientEndPoints(ON_3dPoint(startPt.val), ON_3dPoint(endPt.val));
+  hatch->SetGradientType((ON_GradientType)gradientType);
+  hatch->SetGradientRepeat(repeat);
   if (stops)
-    CRhGradientHatch::SetGradientColors(hatch, *stops);
-#endif
+    hatch->SetGradientColors(*stops);
 }

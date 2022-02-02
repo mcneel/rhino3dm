@@ -607,12 +607,12 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Finds the linetype with a given name.</summary>
-    /// <param name="name">search ignores case.</param>
+    /// <param name="name">The name of the linetype to find. The search ignores case.</param>
     /// <returns>
-    /// >=0 index of the linetype with the given name
-    /// -1  no linetype has the given name.
+    /// If the linetype was found, the linetype index, &gt;=0, is returned.
+    /// If the linetype was not found, -1 is returned.
+    /// Note, the linetype index of -1 denotes the default, or "Continuous" linetype.
     /// </returns>
-    /// <remarks>Suggested new method in place of this: FindName().</remarks>
     /// <since>6.0</since>
     public int Find(string name)
     {
@@ -623,8 +623,9 @@ namespace Rhino.DocObjects.Tables
     /// <param name="id">The ID of the line type to be found.</param>
     /// <param name="ignoreDeletedLinetypes">If true, deleted linetypes are not checked.</param>
     /// <returns>
-    /// Zero or a positive value if the index of the linetype with the given ID is found.
-    /// <para>-1 if no linetype has the given ID.</para>
+    /// If the linetype was found, the linetype index, &gt;=0, is returned.
+    /// If the linetype was not found, -1 is returned.
+    /// Note, the linetype index of -1 denotes the default, or "Continuous" linetype.
     /// </returns>
     /// <since>5.0</since>
     public int Find(Guid id, bool ignoreDeletedLinetypes)
@@ -633,9 +634,9 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>Finds the linetype with a given name.</summary>
-    /// <param name="name">The name.</param>
+    /// <param name="name">he name of the linetype to find.</param>
     /// <returns>
-    /// A linetype, or null if the name does not exist.
+    /// The linetype. If the linetype was not found, then the default, or or "Continuous" linetype is returned.
     /// </returns>
     /// <since>6.0</since>
     public Linetype FindName(string name)

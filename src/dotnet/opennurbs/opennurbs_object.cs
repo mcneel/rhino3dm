@@ -91,6 +91,13 @@ namespace Rhino.Runtime
 #if RHINO_SDK
     internal DocObjects.RhinoObject ParentRhinoObject()
     {
+      // 8th December 2021, John Croudy. Per conversation with Steve Baer, this code
+      // is required to be able to get the object when m__parent is an object reference.
+      if (m__parent is DocObjects.ObjRef objref)
+      {
+        return objref.Object();
+      }
+
       return m__parent as DocObjects.RhinoObject;
     }
 #endif

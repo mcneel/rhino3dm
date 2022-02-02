@@ -1865,6 +1865,21 @@ RH_C_FUNCTION bool ON_Brep_CullUnused(ON_Brep* pBrep, enum BrepCullUnused which)
 // Region topology information is not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 
+RH_C_FUNCTION bool ON_Brep_HasRegionTopology(const ON_Brep* pConstBrep)
+{
+  bool rc = false;
+  if (pConstBrep)
+    rc = pConstBrep->HasRegionTopology();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_Brep_DestroyRegionTopology(ON_Brep* pBrep)
+{
+  if (pBrep)
+    pBrep->DestroyRegionTopology();
+}
+
+
 RH_C_FUNCTION const ON_BrepRegion* ON_Brep_BrepRegion(const ON_Brep* constBrep, int index)
 {
   if (constBrep)

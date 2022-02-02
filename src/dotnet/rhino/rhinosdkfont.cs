@@ -10,9 +10,10 @@ namespace Rhino.DocObjects
   {
     // make constructor public after conversation with Steve on slack #dev channel on March 9th 2020
     /// <since>6.26</since>
-    public FontQuartet(string name, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
+    public FontQuartet(string name, string enName, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
     {
       QuartetName = name;
+      EnglishQuartetName = enName;
       HasRegularFont = supportsRegular;
       HasBoldFont = supportsBold;
       HasItalicFont = supportsItalic;
@@ -20,6 +21,7 @@ namespace Rhino.DocObjects
     }
     /// <since>6.7</since>
     public string QuartetName { get; private set; }
+    public string EnglishQuartetName { get; private set; }
     /// <since>6.7</since>
     public bool HasRegularFont { get; private set; }
     /// <since>6.7</since>
@@ -123,7 +125,7 @@ namespace Rhino.DocObjects
         for (int i = 0; i < quartetCount; i++)
         {
           UnsafeNativeMethods.ON_FontList_GetQuartet(i, pString, ref regular, ref bold, ref italic, ref boldItalic);
-          rc[i] = new FontQuartet(sw.ToString(), regular, bold, italic, boldItalic);
+          rc[i] = new FontQuartet(sw.ToString(), "", regular, bold, italic, boldItalic);
         }
       }
       return rc;

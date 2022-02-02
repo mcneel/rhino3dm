@@ -775,6 +775,24 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_NurbsCurve_Reparameterize(ptr, c);
     }
 
+    /// <summary>
+    /// Appends a NURBS curve to this curve.
+    /// </summary>
+    /// <param name="nurbsCurve">The NURBS curve to append.</param>
+    /// <returns></returns>
+    /// <since>7.13</since>
+    public bool Append(NurbsCurve nurbsCurve)
+    {
+      var rc = false;
+      if (null != nurbsCurve && nurbsCurve.IsValid)
+      {
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr ptr_const_nurb = nurbsCurve.ConstPointer();
+        rc = UnsafeNativeMethods.ON_NurbsCurve_Append(ptr_this, ptr_const_nurb);
+      }
+      return rc;
+    }
+
     #region greville point methods
     /// <summary>
     /// Gets the greville (edit point) parameter that belongs 

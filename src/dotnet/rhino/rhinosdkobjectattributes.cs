@@ -649,7 +649,8 @@ namespace Rhino.DocObjects
     {
       set
       {
-        if (value.Document == null)
+        var doc = value.DocumentOwner;
+        if (doc == null)
         {
           throw new ArgumentException("The material is not attached to a document.");
         }
@@ -660,11 +661,11 @@ namespace Rhino.DocObjects
 
         if (MaterialIndex == -1)
         {
-          MaterialIndex = value.Document.Materials.Add(material);
+          MaterialIndex = doc.Materials.Add(material);
         }
         else
         {
-          value.Document.Materials.Modify(material, MaterialIndex, true);
+          doc.Materials.Modify(material, MaterialIndex, true);
         }
 
         MaterialSource = ObjectMaterialSource.MaterialFromObject;

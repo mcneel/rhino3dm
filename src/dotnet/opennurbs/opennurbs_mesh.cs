@@ -5013,25 +5013,44 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// (Old call maintained for compatibility.)
+    /// </summary>
+    /// <param name="meshToContour">Avoid.</param>
+    /// <param name="contourStart">Avoid.</param>
+    /// <param name="contourEnd">Avoid.</param>
+    /// <param name="interval">Avoid.</param>
+    /// <returns>Avoid.</returns>
+    /// <since>5.0</since>
+    [Obsolete("Prefer the overload that takes a tolerance value.")]
+    public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval)
+    {
+      double tolerance = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoDoc.DefaultModelAbsoluteTolerance;
+      tolerance *= Rhino.Geometry.Intersect.Intersection.MeshIntersectionsTolerancesCoefficient;
+      return CreateContourCurves(meshToContour, contourStart, contourEnd, interval, tolerance);
+    }
+
+    /// <summary>
     /// Constructs contour curves for a mesh, sectioned along a linear axis.
     /// </summary>
     /// <param name="meshToContour">A mesh to contour.</param>
     /// <param name="contourStart">A start point of the contouring axis.</param>
     /// <param name="contourEnd">An end point of the contouring axis.</param>
     /// <param name="interval">An interval distance.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.
+    /// See comments at <see cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/></param>
     /// <returns>An array of curves. This array can be empty.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_makerhinocontours.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_makerhinocontours.cs' lang='cs'/>
     /// <code source='examples\py\ex_makerhinocontours.py' lang='py'/>
     /// </example>
-    /// <since>5.0</since>
-    public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval)
+    /// <since>7.13</since>
+    public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval, double tolerance)
     {
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
       using (var outputcurves = new SimpleArrayCurvePointer())
       {
-        double tolerance = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoDoc.DefaultModelAbsoluteTolerance;
         IntPtr ptr_curves = outputcurves.NonConstPointer();
         int count = UnsafeNativeMethods.RHC_MakeRhinoContours2(const_ptr_mesh, contourStart, contourEnd, interval, ptr_curves, tolerance);
         GC.KeepAlive(meshToContour);
@@ -5040,18 +5059,36 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// (Old call maintained for compatibility.)
+    /// </summary>
+    /// <param name="meshToContour">Avoid.</param>
+    /// <param name="sectionPlane">Avoid.</param>
+    /// <returns>Avoid.</returns>
+    /// <since>5.0</since>
+    [Obsolete("Prefer the option that takes a tolerance value.")]
+    public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane)
+    {
+      double tolerance = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoDoc.DefaultModelAbsoluteTolerance;
+      tolerance *= Rhino.Geometry.Intersect.Intersection.MeshIntersectionsTolerancesCoefficient;
+      return CreateContourCurves(meshToContour, sectionPlane, tolerance);
+    }
+
+    /// <summary>
     /// Constructs contour curves for a mesh, sectioned at a plane.
     /// </summary>
     /// <param name="meshToContour">A mesh to contour.</param>
     /// <param name="sectionPlane">A cutting plane.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.
+    /// See comments at <see cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/></param>
     /// <returns>An array of curves. This array can be empty.</returns>
-    /// <since>5.0</since>
-    public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane)
+    /// <since>7.13</since>
+    /// <seealso cref="Intersect.Intersection.MeshPlane(Mesh, Plane)"/>
+    public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane, double tolerance)
     {
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
       using (var outputcurves = new SimpleArrayCurvePointer())
       {
-        double tolerance = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoDoc.DefaultModelAbsoluteTolerance;
         IntPtr ptr_curves = outputcurves.NonConstPointer();
         int count = UnsafeNativeMethods.RHC_MakeRhinoContours3(const_ptr_mesh, ref sectionPlane, ptr_curves, tolerance);
         GC.KeepAlive(meshToContour);

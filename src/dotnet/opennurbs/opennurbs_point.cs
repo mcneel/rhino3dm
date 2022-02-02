@@ -2745,6 +2745,42 @@ namespace Rhino.Geometry
       get { return UnsafeNativeMethods.ON_2dVector_Length(this); }
     }
 
+    internal static double GetLengthHelper(double dx, double dy)
+    {
+      if (!RhinoMath.IsValidDouble(dx) ||
+          !RhinoMath.IsValidDouble(dy))
+        return 0.0;
+
+      double len;
+      double fx = Math.Abs(dx);
+      double fy = Math.Abs(dy);
+      if (fy >= fx)
+      {
+        len = fx; fx = fy; fy = len;
+      }
+
+      // 15 September 2003 Dale Lear
+      //     For small denormalized doubles (positive but smaller
+      //     than DBL_MIN), some compilers/FPUs set 1.0/fx to +INF.
+      //     Without the ON_DBL_MIN test we end up with
+      //     microscopic vectors that have infinite length!
+      //
+      //     Since this code starts with floats, none of this
+      //     should be necessary, but it doesn't hurt anything.
+      const double ON_DBL_MIN = 2.2250738585072014e-308;
+      if (fx > ON_DBL_MIN)
+      {
+        len = 1.0 / fx;
+        fy *= len;
+        len = fx * Math.Sqrt(1.0 + fy * fy);
+      }
+      else if (fx > 0.0 && RhinoMath.IsValidDouble(fx))
+        len = fx;
+      else
+        len = 0.0;
+      return len;
+    }
+
     #region operators
     /// <summary>
     /// Multiplies a vector by a number, having the effect of scaling it.

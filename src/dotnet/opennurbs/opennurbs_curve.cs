@@ -842,6 +842,70 @@ namespace Rhino.Geometry
       return CreateControlPointCurve(points, 3);
     }
 
+    /// <summary>
+    /// Joins a collection of curve segments together.
+    /// </summary>
+    /// <param name="inputCurves">Curve segments to join.</param>
+    /// <returns>An array of curves which contains.</returns>
+    /// <since>5.0</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves)
+    {
+      return JoinCurves(inputCurves, 0.0, false);
+    }
+    /// <summary>
+    /// Joins a collection of curve segments together.
+    /// </summary>
+    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
+    /// <param name="joinTolerance">Joining tolerance, 
+    /// i.e. the distance between segment end-points that is allowed.</param>
+    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <example>
+    /// <code source='examples\vbnet\ex_dividebylength.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
+    /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
+    /// </example>
+    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
+    /// <since>5.0</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance)
+    {
+      return JoinCurves(inputCurves, joinTolerance, false);
+    }
+    /// <summary>
+    /// Joins a collection of curve segments together.
+    /// </summary>
+    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
+    /// <param name="joinTolerance">Joining tolerance, 
+    /// i.e. the distance between segment end-points that is allowed.</param>
+    /// <param name="preserveDirection">
+    /// <para>If true, curve endpoints will be compared to curve start points.</para>
+    /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
+    /// </param>
+    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
+    /// <since>5.0</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection)
+    {
+      if (null == inputCurves)
+        throw new ArgumentNullException("inputCurves");
+
+      using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(inputCurves))
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr inputPtr = input.ConstPointer();
+        IntPtr outputPtr = output.NonConstPointer();
+
+        // 18-Jan-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-67058
+#if RHINO_SDK
+        bool rc = UnsafeNativeMethods.RHC_RhinoMergeCurves(inputPtr, outputPtr, joinTolerance, preserveDirection);
+#else
+        bool rc = UnsafeNativeMethods.ONC_JoinCurves(inputPtr, outputPtr, joinTolerance, preserveDirection);
+#endif
+
+        GC.KeepAlive(inputCurves);
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
+    }
+
 #if RHINO_SDK
 
     /// <summary>
@@ -1160,69 +1224,6 @@ namespace Rhino.Geometry
       bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurveWithSampling(pConstCurve0, pConstCurve1, numCurves, numSamples, tolerance, outputPtr);
       Runtime.CommonObject.GcProtect(curve0, curve1);
       return rc ? output.ToNonConstArray() : new Curve[0];
-    }
-
-    /// <summary>
-    /// Joins a collection of curve segments together.
-    /// </summary>
-    /// <param name="inputCurves">Curve segments to join.</param>
-    /// <returns>An array of curves which contains.</returns>
-    /// <since>5.0</since>
-    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves)
-    {
-      return JoinCurves(inputCurves, 0.0, false);
-    }
-    /// <summary>
-    /// Joins a collection of curve segments together.
-    /// </summary>
-    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
-    /// <param name="joinTolerance">Joining tolerance, 
-    /// i.e. the distance between segment end-points that is allowed.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
-    /// <example>
-    /// <code source='examples\vbnet\ex_dividebylength.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
-    /// <code source='examples\py\ex_dividebylength.py' lang='py'/>
-    /// </example>
-    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
-    /// <since>5.0</since>
-    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance)
-    {
-      return JoinCurves(inputCurves, joinTolerance, false);
-    }
-    /// <summary>
-    /// Joins a collection of curve segments together.
-    /// </summary>
-    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
-    /// <param name="joinTolerance">Joining tolerance, 
-    /// i.e. the distance between segment end-points that is allowed.</param>
-    /// <param name="preserveDirection">
-    /// <para>If true, curve endpoints will be compared to curve start points.</para>
-    /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
-    /// </param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
-    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
-    /// <since>5.0</since>
-    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection)
-    {
-      // 1 March 2010 S. Baer
-      // JoinCurves calls the unmanaged RhinoMergeCurves function which appears to be a "better"
-      // implementation of ON_JoinCurves. We removed the wrapper for ON_JoinCurves for this reason.
-      if (null == inputCurves)
-        throw new ArgumentNullException("inputCurves");
-
-      using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(inputCurves))
-      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
-      {
-        IntPtr inputPtr = input.ConstPointer();
-        IntPtr outputPtr = output.NonConstPointer();
-
-        bool rc = UnsafeNativeMethods.RHC_RhinoMergeCurves(inputPtr,
-          outputPtr, joinTolerance, preserveDirection);
-
-        GC.KeepAlive(inputCurves);
-        return rc ? output.ToNonConstArray() : new Curve[0];
-      }
     }
 
     /// <summary>
