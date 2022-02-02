@@ -123,6 +123,26 @@ RH_C_FUNCTION int ON_Intersect_SphereSphere(ON_Sphere* sphereA, ON_Sphere* spher
   return rc;
 }
 
+RH_C_FUNCTION int ON_Intersect_ArcArc(const ON_Arc* pArcA, const ON_Arc* pArcB, ON_3dPoint* pPoint1, ON_3dPoint* pPoint2)
+{
+  int rc = 0;
+  if (pArcA && pArcB && pPoint1 && pPoint2)
+    rc = ON_Intersect(*pArcA, *pArcB, *pPoint1, *pPoint2);
+  return rc;
+}
+
+RH_C_FUNCTION int ON_Intersect_CircleCircle(const ON_CIRCLE_STRUCT* pCircleA, const ON_CIRCLE_STRUCT* pCircleB, ON_3dPoint* pPoint1, ON_3dPoint* pPoint2)
+{
+  int rc = 0;
+  if (pCircleA && pCircleB && pPoint1 && pPoint2)
+  {
+    ON_Circle circleA = FromCircleStruct(*pCircleA);
+    ON_Circle circleB = FromCircleStruct(*pCircleB);
+    rc = ON_Intersect(circleA, circleB, *pPoint1, *pPoint2);
+  }
+  return rc;
+}
+
 // return number of points in a certain polyline
 RH_C_FUNCTION int ON_Intersect_MeshPlanes2(ON_SimpleArray<ON_Polyline*>* pPolylines, int i)
 {

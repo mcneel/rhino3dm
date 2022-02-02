@@ -2346,13 +2346,15 @@ namespace Rhino.DocObjects
       }
       set
       {
-        if (Document == null) return;
+        if (Document == null)
+          return;
+
         if (value == null)
         {
           throw new ArgumentNullException();
         }
 
-        if (value.Document == null)
+        if (value.DocumentOwner == null)
         {
           throw new ArgumentException("The material is not attached to a document.");
         }

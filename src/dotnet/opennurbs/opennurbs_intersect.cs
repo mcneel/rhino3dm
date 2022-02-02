@@ -334,6 +334,40 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Intersects two arcs using exact calculations.
+    /// </summary>
+    /// <param name="arcA">First arc to intersect.</param>
+    /// <param name="arcB">Second arc to intersect.</param>
+    /// <param name="intersectionPoint1">First intersection point.</param>
+    /// <param name="intersectionPoint2">Second intersection point.</param>
+    /// <returns>The intersection type.</returns>
+    /// <since>7.12</since>
+    public static ArcArcIntersection ArcArc(Arc arcA, Arc arcB, out Point3d intersectionPoint1, out Point3d intersectionPoint2)
+    {
+      intersectionPoint1 = new Point3d();
+      intersectionPoint2 = new Point3d();
+      int rc = UnsafeNativeMethods.ON_Intersect_ArcArc(ref arcA, ref arcB, ref intersectionPoint1, ref intersectionPoint2);
+      return (ArcArcIntersection)rc;
+    }
+
+    /// <summary>
+    /// Intersects two circles using exact calculations.
+    /// </summary>
+    /// <param name="circleA">First circle to intersect.</param>
+    /// <param name="circleB">Second circle to intersect.</param>
+    /// <param name="intersectionPoint1">First intersection point.</param>
+    /// <param name="intersectionPoint2">Second intersection point.</param>
+    /// <returns>The intersection type.</returns>
+    /// <since>7.12</since>
+    public static CircleCircleIntersection CircleCircle(Circle circleA, Circle circleB, out Point3d intersectionPoint1, out Point3d intersectionPoint2)
+    {
+      intersectionPoint1 = new Point3d();
+      intersectionPoint2 = new Point3d();
+      int rc = UnsafeNativeMethods.ON_Intersect_CircleCircle(ref circleA, ref circleB, ref intersectionPoint1, ref intersectionPoint2);
+      return (CircleCircleIntersection)rc;
+    }
+
+    /// <summary>
     /// Intersects an infinite line and an axis aligned bounding box.
     /// </summary>
     /// <param name="box">BoundingBox to intersect.</param>

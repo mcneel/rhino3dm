@@ -354,6 +354,50 @@ namespace Rhino.Geometry
     {
       return new Point2f(a.m_x / b, a.m_y / b);
     }
+
+    /// <summary>
+    /// Computes the distance between two points.
+    /// </summary>
+    /// <param name="other">Other point for distance measurement.</param>
+    /// <returns>The length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    /// <example>
+    /// <code source='examples\vbnet\ex_intersectcurves.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_intersectcurves.cs' lang='cs'/>
+    /// <code source='examples\py\ex_intersectcurves.py' lang='py'/>
+    /// </example>
+    /// <since>5.0</since>
+    [ConstOperation]
+    public double DistanceTo(Point2f other)
+    {
+      double d = 0.0;
+      if (IsValid && other.IsValid)
+      {
+        double dx = other.m_x - m_x;
+        double dy = other.m_y - m_y;
+        d = Vector2d.GetLengthHelper(dx, dy);
+      }
+      return d;
+    }
+
+    /// <summary>
+    /// Computes the squared distance between two points.
+    /// </summary>
+    /// <param name="other">Other point for distance measurement.</param>
+    /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    [ConstOperation]
+    public double DistanceToSquared(Point2f other)
+    {
+      double d;
+      if (IsValid && other.IsValid)
+      {
+        d = (this - other).SquareLength;
+      }
+      else
+      {
+        d = 0.0;
+      }
+      return d;
+    }
   }
 
   /// <summary>
@@ -560,6 +604,26 @@ namespace Rhino.Geometry
         double dy = other.m_y - m_y;
         double dz = other.m_z - m_z;
         d = Vector3d.GetLengthHelper(dx, dy, dz);
+      }
+      return d;
+    }
+
+    /// <summary>
+    /// Computes the squared distance between two points.
+    /// </summary>
+    /// <param name="other">Other point for distance measurement.</param>
+    /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    [ConstOperation]
+    public double DistanceToSquared(Point3f other)
+    {
+      double d;
+      if (IsValid && other.IsValid)
+      {
+        d = (this - other).SquareLength;
+      }
+      else
+      {
+        d = 0.0;
       }
       return d;
     }

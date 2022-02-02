@@ -172,15 +172,19 @@ RH_C_FUNCTION int CRhinoCommand_New(CRhinoPlugInImpl* pPlugIn, GUID id,
 
 typedef int (CALLBACK* CRHINOCOMMAND_RUNPROC)(int commandSerialNumber, unsigned int docSerialNumber, int mode);
 typedef int (CALLBACK* CRHINOCOMMAND_SELPROC)(int commandSerialNumber, const CRhinoObjectImpl* pConstRhinoObject);
+typedef int (CALLBACK* CRHINOCOMMAND_SELSUBOBJECTPROC)(int commandSerialNumber, const CRhinoObjectImpl* pConstRhinoObject, ON_SimpleArray<ON_COMPONENT_INDEX>* indices);
 typedef void (CALLBACK* CRHINOCOMMAND_DOHELPPROC)(int commandSerialNumber);
 typedef int (CALLBACK* CRHINOCOMMAND_CONTEXTHELPPROC)(int commandSerialNumber, ON_wStringImpl*);
 typedef int (CALLBACK* CRHINOCOMMAND_REPLAYHISTORYPROC)(int commandSerialNumber, const CRhinoHistoryRecordImpl* pConstRhinoHistoryRecord, ON_SimpleArray_CRhinoObjectPairImpl* results);
-RH_C_FUNCTION void CRhinoCommand_SetCallbacks(int commandSerialNumber,
+RH_C_FUNCTION void CRhinoCommand_SetCallbacks(
+  int commandSerialNumber,
   CRHINOCOMMAND_RUNPROC run_func,
   CRHINOCOMMAND_DOHELPPROC dohelp_func,
   CRHINOCOMMAND_CONTEXTHELPPROC contexthelp_func,
   CRHINOCOMMAND_REPLAYHISTORYPROC replayhistory_func,
-  CRHINOCOMMAND_SELPROC sel_func);
+  CRHINOCOMMAND_SELPROC sel_func,
+  CRHINOCOMMAND_SELSUBOBJECTPROC sel_subobject_func
+);
 RH_C_FUNCTION CRhinoSettingsImpl* CRhinoCommand_Settings(int commandSerialNumber);
 
 RH_C_FUNCTION bool CRhinoApp_GetRhinoSchemeRegistryPath(bool fullPath, ON_wStringImpl* wstring);

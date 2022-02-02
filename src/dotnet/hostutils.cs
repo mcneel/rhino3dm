@@ -801,6 +801,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Get/Set additional search paths used by the python interpreter
     /// </summary>
+    /// <since>7.1</since>
     public static string[] SearchPaths
     {
       get
@@ -1057,6 +1058,10 @@ namespace Rhino.Runtime
     /// Returns Operating System Build Number "11763" | "7601" | ... | "Unknown"
     /// </summary>
     string BuildNumber { get; }
+    /// <summary>
+    /// Checks if Operating System is running in a Windows Container
+    /// </summary>
+    bool IsRunningInWindowsContainer { get; }
 
   }
 
@@ -1071,6 +1076,8 @@ namespace Rhino.Runtime
     public string Version => throw new NotImplementedException();
 
     public string BuildNumber => throw new NotImplementedException();
+
+    public bool IsRunningInWindowsContainer => throw new NotImplementedException();
   }
 
   /// <summary>
@@ -1496,93 +1503,25 @@ namespace Rhino.Runtime
       }
     }
 
+    /// <summary>
+    /// Tests if this process is currently executing in a server environment.
+    /// </summary>
+    /// <since>7.8</since>
+    public static bool RunningOnServer => string.Equals(OperatingSystemInstallationType, "server", StringComparison.InvariantCultureIgnoreCase);
+
 #if RHINO_SDK
-    private static bool? m_docker;
     /// <summary>
     /// Tests if this process is currently executing inside a Windows Container.
     /// </summary>
+    /// <since>7.1</since>
     public static bool RunningInWindowsContainer
     {
       get
       {
-        if (!m_docker.HasValue)
-          m_docker = RunningInWindowsContainerHelper();
-        return m_docker.Value;
+        var psl = GetPlatformService<IOperatingSystemInformation>();
+        return psl.IsRunningInWindowsContainer;
       }
     }
-
-    private static bool RunningInWindowsContainerHelper()
-    {
-      if (!RunningOnWindows)
-        return false;
-
-      // Will 2020-10-09 (RH-60784)
-      // there isn't a silver bullet when it comes to detecting whether or not the current process
-      // is running inside a windows container but there are several indicators that we can check;
-      // you'd have to be trying hard and potentially compromising the container's functionality in
-      // order to fool every test
-
-      // these tests shouldn't affect rhino's start time - they're all very quick
-
-      // 1. check for ContainerType registry value
-      try
-      {
-        var key = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control";
-        var containerTypeObj = Microsoft.Win32.Registry.GetValue(key, "ContainerType", null);
-        if (containerTypeObj is int containerType)
-        {
-          // docker container isolation: process (1), hyperv (2)
-          // exit early if ContainerType exists but does not match these known values, e.g. in the
-          // case of Windows Sandbox (4) which would otherwise fail the cexecsvc check
-          return (containerType == 1 || containerType == 2);
-        }
-      }
-      catch { }
-
-      // 2. check if we're running as one of the default base image users (RH-55659)
-      // NOTE: if we need to tighten this up then we can check for the "User Manager" domain too
-      if (string.Equals(Environment.UserName, "ContainerAdministrator") ||
-          string.Equals(Environment.UserName, "ContainerUser"))
-        return true;
-
-      // 3. check for KUBERNETES_SERVICE_HOST environment variable (Kubernetes only)
-      // https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/#environment-variables
-      try
-      {
-        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")))
-          return true;
-      }
-      catch { }
-
-      // 4. check if CExecSvc.exe (Container Execution Agent) is running
-      if (Process.GetProcessesByName("cexecsvc").Length > 0)
-        return true;
-
-      // alt. method, in case the CExecSvc service was stopped for some reason
-      try
-      {
-        if (Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\cexecsvc", false) != null)
-          return true;
-      }
-      catch { }
-
-      // 5. check for Windows Container Base Image license
-      var licfile = "C:\\License.txt";
-      if (System.IO.File.Exists(licfile))
-      {
-        try
-        {
-          var text = System.IO.File.ReadAllText(licfile);
-          if (System.Text.RegularExpressions.Regex.IsMatch(text, "container", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-            return true;
-        }
-        catch { }
-      }
-
-      return false;
-    }
-
-
     /// <summary>
     /// Returns true if the host operating system is in dark mode and Rhino
     /// supports dark mode.
@@ -2489,7 +2428,8 @@ namespace Rhino.Runtime
       // tune up old V5 style fields to force every function to have a ()
       // Skipping ones like "Area" since those always required parentheses
       #region Add () to function names
-      string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes" };
+      string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes", "ObjectName" };
+     
       foreach(var field in oldFields)
       {
         if (!formula.StartsWith(field))
@@ -2710,6 +2650,26 @@ namespace Rhino.Runtime
       var dir = new System.IO.DirectoryInfo(data_dir);
       // use MAJOR.0 for package folder regardless of whether this is an official build or not
       string name = $"{RhinoBuildConstants.MAJOR_VERSION_STRING}.0";
+
+      // use e.g. "7.0-WIP-Developer-Debug-trunk" if Rhino.Options.PackageManager.UseDebugFolder
+      if (RhinoBuildConstants.VERSION_STRING.EndsWith("0")) // developer build only
+      {
+        try
+        {
+          var settings = PersistentSettings.RhinoAppSettings
+                          .GetChild("Options").GetChild("PackageManager");
+          if (settings.GetBool("UseDebugFolder", false))
+          {
+            name = dir.Name;
+          }
+        }
+        catch (KeyNotFoundException)
+        {
+          // thrown the first time this is called (by the assembly resolver) on mac
+          // only happens if UseDebugFolder is *not* set, so let's ignore it      
+        }
+      }
+
       string path = System.IO.Path.Combine(dir.Parent.FullName, "packages", name);
       return path;
     }
@@ -3232,6 +3192,7 @@ namespace Rhino.Runtime
     /// Get the processor count on this hardware. It supports
     /// querying on CPUs with more than 64 processors (Windows).
     /// </summary>
+    /// <since>7.4</since>
     public static int GetSystemProcessorCount()
     {
       if (RunningOnWindows)

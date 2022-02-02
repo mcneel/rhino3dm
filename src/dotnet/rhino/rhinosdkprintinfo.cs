@@ -1042,6 +1042,8 @@ namespace Rhino.Runtime
       public Color Color { get; internal set; }
       /// <since>6.0</since>
       public float Width { get; internal set; }
+
+      public bool Dashed { get; internal set; }
     }
     /// <since>6.0</since>
     public enum PointType
@@ -1221,14 +1223,14 @@ namespace Rhino.Runtime
       }
     }
 
-    void CheckPath(Point2d pt, Color color, float thickness)
+    void CheckPath(Point2d pt, Color color, float thickness, bool dashed)
     {
       if (m_making_closed_path)
         return;
 
       if (m_current_path.Count < 1)
       {
-        m_pen = new Pen { Color = color, Width = thickness };
+        m_pen = new Pen { Color = color, Width = thickness, Dashed = dashed };
         return;
       }
 
@@ -1240,11 +1242,13 @@ namespace Rhino.Runtime
           gap_exists = true;
       }
 
-      bool pen_changed = m_pen.Color != color || Math.Abs(m_pen.Width - thickness) > 0.1;
+      bool pen_changed = m_pen.Color != color || 
+        Math.Abs(m_pen.Width - thickness) > 0.1 ||
+        m_pen.Dashed != dashed;
       if (gap_exists || pen_changed)
       {
         DrawPath();
-        m_pen = new Pen { Color = color, Width = thickness };
+        m_pen = new Pen { Color = color, Width = thickness, Dashed = dashed };
         m_current_path.Clear();
       }
     }
@@ -1265,7 +1269,7 @@ namespace Rhino.Runtime
       }
 
       Point2d list_first_pt = new Point2d(bez_points[0].X, bez_points[0].Y);
-      CheckPath(list_first_pt, color, thickness);
+      CheckPath(list_first_pt, color, thickness, dashed==1);
       AddBezier(bez_points[0], bez_points[1], bez_points[2], bez_points[3]);
     }
 
@@ -1325,7 +1329,7 @@ namespace Rhino.Runtime
             l.To = l.PointAt(biggest_a);
             point_list.Add(new PointF((float)l.To.X, (float)l.To.Y));
             Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
-            CheckPath(list_first_pt, color, thickness);
+            CheckPath(list_first_pt, color, thickness, dashed==1);
             for (int j = 1; j < point_list.Count; j++)
               AddLine(point_list[j - 1], point_list[j]);
 
@@ -1376,7 +1380,7 @@ namespace Rhino.Runtime
       if (point_list.Count > 1)
       {
         Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
-        CheckPath(list_first_pt, color, thickness);
+        CheckPath(list_first_pt, color, thickness, dashed==1);
 
         for (int j = 1; j < point_list.Count; j++)
           AddLine(point_list[j - 1], point_list[j]);

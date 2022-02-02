@@ -3233,6 +3233,10 @@ namespace Rhino.Display
       return System.Drawing.Rectangle.Empty;
     }
 
+    /// <summary>
+    /// Draws a <see cref="DocObjects.RhinoObject">RhinoObject</see>.
+    /// </summary>
+    /// <param name="rhinoObject">The Rhino object.</param>
     /// <since>5.0</since>
     public void DrawObject(DocObjects.RhinoObject rhinoObject)
     {
@@ -3259,6 +3263,33 @@ namespace Rhino.Display
       IntPtr const_ptr_rhino_object = rhinoObject.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawObject2(ptr_this, const_ptr_rhino_object, ref xform);
       GC.KeepAlive(rhinoObject);
+    }
+
+    /// <summary>
+    /// Draws an <see cref="DocObjects.InstanceDefinition">InstanceDefinition</see>.
+    /// </summary>
+    /// <param name="instanceDefinition">The instance definition.</param>
+    /// <since>7.15</since>
+    public void DrawInstanceDefinition(DocObjects.InstanceDefinition instanceDefinition)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_idef = instanceDefinition.ConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInstanceDefinition(ptr_this, const_ptr_idef);
+      GC.KeepAlive(instanceDefinition);
+    }
+
+    /// <summary>
+    /// Draws an <see cref="DocObjects.InstanceDefinition">InstanceDefinition</see>.
+    /// </summary>
+    /// <param name="instanceDefinition">The instance definition.</param>
+    /// <param name="xform">The transformation.</param>
+    /// <since>7.15</since>
+    public void DrawInstanceDefinition(DocObjects.InstanceDefinition instanceDefinition, Transform xform)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_idef = instanceDefinition.ConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInstanceDefinition2(ptr_this, const_ptr_idef, ref xform);
+      GC.KeepAlive(instanceDefinition);
     }
 
     /// <since>6.0</since>

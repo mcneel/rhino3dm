@@ -100,7 +100,23 @@ namespace Rhino.Display
     public DisplayBitmap(System.Drawing.Bitmap bitmap)
     {
       IntPtr hbmp = bitmap.GetHbitmap();
-      m_ptr_display_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(hbmp);
+      m_ptr_display_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(null, hbmp);
+    }
+
+    /// <summary>
+    /// Creates a DisplayBitmap either from a path, or a bitmap.
+    /// If the path is null, a random tag name will be used.
+    /// If the bitmap is null, the bitmap will be loaded from the path.
+    /// If both are null, the object is invalid.
+    /// if both are valid objects, the bitmap will be used and it will be added to Rhino's bitmap
+    /// cache with the path supplied.  In other words, this is a way to add a bitmap from memory
+    /// directly into Rhino's memory cache.
+    /// </summary>
+    /// <param name="path">If null, use a temporary tag name.  If non-null, use that path in Rhino's bitmap cache.  Note, this version does not support URLs.</param>
+    /// <param name="bitmap">If null, load the bitmap from the supplied path.  If non-null, creates the bitmap from the data supplied.</param>
+    public DisplayBitmap(string path, System.Drawing.Bitmap bitmap)
+    {
+      m_ptr_display_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(path, bitmap.GetHbitmap());
     }
 
     private DisplayBitmap(IntPtr pBmp)
@@ -136,7 +152,7 @@ namespace Rhino.Display
         }
       }
 
-      IntPtr ptr_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New2(path);
+      IntPtr ptr_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(path, IntPtr.Zero);
       if (IntPtr.Zero == ptr_bmp)
         return null;
       return new DisplayBitmap(ptr_bmp);

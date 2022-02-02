@@ -2964,6 +2964,30 @@ namespace Rhino.Geometry
     */
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Returns true if the Brep has region topology information, false otherwise.
+    /// </summary>
+    /// <since>7.13</since>
+    public bool HasRegionTopology
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Brep_HasRegionTopology(const_ptr_this);
+      }
+    }
+
+    /// <summary>
+    /// Destroys a Brep's region topology information.
+    /// </summary>
+    /// <since>7.13</since>
+    public void DestroyRegionTopology()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Brep_DestroyRegionTopology(ptr_this);
+    }
+
     /// <summary>
     /// Gets an array containing all regions in this brep.
     /// </summary>

@@ -256,6 +256,44 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
 
+    /// <summary>
+    /// Joins an enumeration of SubDs to form as few as possible resulting SubDs.
+    /// There may be more than one SubD in the result array.
+    /// </summary>
+    /// <param name="subdsToJoin">An enumeration of SubDs to join.</param>
+    /// <param name="tolerance">The join tolerance.</param>
+    /// <param name="joinedEdgesAreCreases">
+    /// If true, merged boundary edges will be creases.
+    /// If false, merged boundary edges will be smooth.
+    /// </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// All of the input SubDs are copied and added to the result array in one form or another.
+    /// </remarks>
+    /// <since>7.14</since>
+    public static SubD[] JoinSubDs(IEnumerable<SubD> subdsToJoin, double tolerance, bool joinedEdgesAreCreases)
+    {
+      if (null == subdsToJoin)
+        return null;
+
+      using (var input = new SimpleArraySubDPointer())
+      using (var output = new SimpleArraySubDPointer())
+      {
+        foreach (SubD subd in subdsToJoin)
+          input.Add(subd, true);
+
+        IntPtr ptr_input = input.NonConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+
+        SubD[] rc = null;
+        if (UnsafeNativeMethods.RHC_RhinoJoinSubDs(ptr_input, tolerance, joinedEdgesAreCreases, ptr_output) > 0)
+        {
+          rc = output.ToNonConstArray();
+        }
+        GC.KeepAlive(subdsToJoin);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// Create a Brep based on this SubD geometry.

@@ -169,10 +169,17 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public System.Drawing.Color AsSystemColor()
     {
-      return System.Drawing.Color.FromArgb((int)(m_a * 255.0f),
-                                           (int)(m_r * 255.0f),
-                                           (int)(m_g * 255.0f),
-                                           (int)(m_b * 255.0f));
+      int a = (int)(m_a * 255.0f);
+      int r = (int)(m_r * 255.0f);
+      int g = (int)(m_g * 255.0f);
+      int b = (int)(m_b * 255.0f);
+
+      if ((0 <= a && a <= 255) && (0 <= r && r <= 255) && (0 <= g && g <= 255) && (0 <= b && b <= 255))
+      {
+        return System.Drawing.Color.FromArgb(a, r, g, b);
+      }
+
+      return new System.Drawing.Color();
     }
   }
 }

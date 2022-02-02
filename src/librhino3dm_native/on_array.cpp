@@ -712,6 +712,40 @@ RH_C_FUNCTION void ON_2dexArray_Delete(ON_SimpleArray<ON_2dex>* p)
 
 //////////////////
 
+RH_C_FUNCTION ON_SimpleArray<ON_SubD*>* ON_SubDArray_New()
+{
+  return new ON_SimpleArray<ON_SubD*>();
+}
+
+RH_C_FUNCTION void ON_SubDArray_Delete(ON_SimpleArray<ON_SubD*>* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+RH_C_FUNCTION int ON_SubDArray_Count(const ON_SimpleArray<ON_SubD*>* pConstArray)
+{
+  int rc = 0;
+  if (pConstArray)
+    rc = pConstArray->Count();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_SubDArray_Append(ON_SimpleArray<ON_SubD*>* pArray, ON_SubD* pSubD)
+{
+  if (pArray && pSubD)
+    pArray->Append(pSubD);
+}
+
+RH_C_FUNCTION ON_SubD* ON_SubDArray_Get(const ON_SimpleArray<ON_SubD*>* pConstArray, int index)
+{
+  ON_SubD* rc = nullptr;
+  if (pConstArray && index >= 0 && index < pConstArray->Count())
+    rc = (*pConstArray)[index];
+  return rc;
+}
+
+//////////////////
 
 RH_C_FUNCTION ON_SimpleArray<ON_Brep*>* ON_BrepArray_New()
 {

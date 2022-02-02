@@ -1064,6 +1064,27 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Modifies the instance definition name, description, and url.
+    /// Does not change instance definition ID or geometry.
+    /// </summary>
+    /// <param name="idef">The instance definition to be modified.</param>
+    /// <param name="newName">The new name.</param>
+    /// <param name="newDescription">The new description string.</param>
+    /// <param name="newUrl">The new URL or hyperlink.</param>
+    /// <param name="newUrlTag">The new description of the URL or hyperlink.</param>
+    /// <param name="quiet">
+    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// </param>
+    /// <returns>
+    /// true if successful.
+    /// </returns>
+    /// <since>7.16</since>
+    public bool Modify(InstanceDefinition idef, string newName, string newDescription, string newUrl, string newUrlTag, bool quiet)
+    {
+      return Modify(idef.Index, newName, newDescription, newUrl, newUrlTag, quiet);
+    }
+
+    /// <summary>
     /// Modifies the instance definition name and description.
     /// Does not change instance definition ID or geometry.
     /// </summary>
@@ -1085,6 +1106,27 @@ namespace Rhino.DocObjects.Tables
     public bool Modify(int idefIndex, string newName, string newDescription, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex, newName, newDescription, quiet);
+    }
+
+    /// <summary>
+    /// Modifies the instance definition name, description, and url.
+    /// Does not change instance definition ID or geometry.
+    /// </summary>
+    /// <param name="idefIndex">The index of the instance definition to be modified.</param>
+    /// <param name="newName">The new name.</param>
+    /// <param name="newDescription">The new description string.</param>
+    /// <param name="newUrl">The new URL or hyperlink.</param>
+    /// <param name="newUrlTag">The new description of the URL or hyperlink.</param>
+    /// <param name="quiet">
+    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// </param>
+    /// <returns>
+    /// true if successful.
+    /// </returns>
+    /// <since>7.16</since>
+    public bool Modify(int idefIndex, string newName, string newDescription, string newUrl, string newUrlTag, bool quiet)
+    {
+      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinition2(m_doc.RuntimeSerialNumber, idefIndex, newName, newDescription, newUrl, newUrlTag, quiet);
     }
 
     /// <summary>

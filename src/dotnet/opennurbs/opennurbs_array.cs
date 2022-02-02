@@ -2148,6 +2148,122 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
   /// <summary>
+  /// Wrapper for a C++ ON_SimpleArray&lt;ON_SubD*&gt; or ON_SimpleArray&lt;constant ON_SubD*&gt;
+  /// If you are not writing C++ code then this class is not for you.
+  /// </summary>
+  public class SimpleArraySubDPointer : IDisposable
+  {
+    IntPtr m_ptr; // ON_SimpleArray<ON_SubD*>*
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>7.14</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>7.14</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArraySubDPointer"/> instance.
+    /// </summary>
+    /// <since>7.14</since>
+    public SimpleArraySubDPointer()
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDArray_New();
+    }
+
+    /// <summary>
+    /// Gets the amount of subds in this array.
+    /// </summary>
+    /// <since>7.14</since>
+    public int Count
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int count = UnsafeNativeMethods.ON_SubDArray_Count(ptr);
+        return count;
+      }
+    }
+
+    /// <summary>
+    /// Adds a subd to the list.
+    /// </summary>
+    /// <param name="subd">A subd to add.</param>
+    /// <param name="asConst">Whether this subd should be treated as non-modifiable.</param>
+    /// <since>7.14</since>
+    public void Add(Geometry.SubD subd, bool asConst)
+    {
+      if (null != subd)
+      {
+        IntPtr pSubD = subd.ConstPointer();
+        if (!asConst)
+          pSubD = subd.NonConstPointer();
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_SubDArray_Append(ptr, pSubD);
+      }
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArraySubDPointer()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.14</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="disposing"></param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubDArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>7.14</since>
+    public Geometry.SubD[] ToNonConstArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new Geometry.SubD[0]; //MSDN guidelines prefer empty arrays
+      IntPtr ptr = ConstPointer();
+      SubD[] rc = new SubD[count];
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr pSubD = UnsafeNativeMethods.ON_SubDArray_Get(ptr, i);
+        if (IntPtr.Zero != pSubD)
+          rc[i] = new SubD(pSubD, null);
+      }
+      return rc;
+    }
+  }
+
+  /// <summary>
   /// Wrapper for a C++ ON_SimpleArray&lt;ON_Brep*&gt; or ON_SimpleArray&lt;constant ON_Brep*&gt;
   /// If you are not writing C++ code then this class is not for you.
   /// </summary>
