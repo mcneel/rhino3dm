@@ -44,8 +44,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: dist
-          name: rhino3dm.py sdist
+          path: dist/*.whl
 
   build_py_manylinux2014:
     name: build python ${{ matrix.python-version }} manylinux2014
@@ -69,8 +68,7 @@ jobs:
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
-        path: wheelhouse
-        name: rhino3dm.py ${{ matrix.python-version }} manylinux2014_x86-64
+        path: wheelhouse/*.whl
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
@@ -119,8 +117,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: dist
-          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.target }}
+          path: dist/*.whl
   
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
