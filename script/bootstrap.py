@@ -296,15 +296,17 @@ def check_git(build_tool):
         return False
 
     if sys.version_info[0] < 3:
-        version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
-        running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
+        running_version = p.communicate()[0].splitlines()[0].split('git version ', 1)[1]
+        #version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
+        #running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
     else:
         running_version, err = p.communicate()
         if err:
             print_warning_message(err)
             return False
-        version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
-        running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
+        running_version = running_version.decode('utf-8').splitlines()[0].split('git version ', 1)[1]
+        #version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
+        #running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
         
     if _platform == "win32":
         running_version = running_version.split(".windows")[0]

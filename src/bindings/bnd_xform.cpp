@@ -47,6 +47,13 @@ BND_Transform BND_Transform::Mirror2(BND_Plane mirrorPlane)
   return rc;
 }
 
+BND_Transform BND_Transform::Multiply(BND_Transform a, BND_Transform b)
+{
+  ON_Xform rc = a.m_xform * b.m_xform;
+  return BND_Transform(rc);
+}
+
+
 
 BND_Transform* BND_Transform::TryGetInverse() const
 {
@@ -105,6 +112,7 @@ void initXformBindings(pybind11::module& m)
     .def_static("Rotation", &BND_Transform::Rotation, py::arg("angleRadians"), py::arg("rotationAxis"), py::arg("rotationCenter"))
     .def_static("Mirror", &BND_Transform::Mirror, py::arg("pointOnMirrorPlane"), py::arg("normalToMirrorPlane"))
     .def_static("Mirror", &BND_Transform::Mirror2, py::arg("mirrorPlane"))
+    .def_static("Multiply", &BND_Transform::Multiply, py::arg("a"), py::arg("b"))
     .def_property_readonly("IsIdentity", &BND_Transform::IsIdentity)
     .def_property_readonly("IsValid", &BND_Transform::IsValid)
     .def_property_readonly("IsZero", &BND_Transform::IsZero)
@@ -115,6 +123,22 @@ void initXformBindings(pybind11::module& m)
     .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox, py::arg("bbox"))
     .def("Transpose", &BND_Transform::Transpose)
     .def("ToFloatArray", &BND_Transform::ToFloatArray)
+    .def_property("M00", &BND_Transform::GetM00, &BND_Transform::SetM00)
+    .def_property("M01", &BND_Transform::GetM01, &BND_Transform::SetM01)
+    .def_property("M02", &BND_Transform::GetM02, &BND_Transform::SetM02)
+    .def_property("M03", &BND_Transform::GetM03, &BND_Transform::SetM03)
+    .def_property("M10", &BND_Transform::GetM10, &BND_Transform::SetM10)
+    .def_property("M11", &BND_Transform::GetM11, &BND_Transform::SetM11)
+    .def_property("M12", &BND_Transform::GetM12, &BND_Transform::SetM12)
+    .def_property("M13", &BND_Transform::GetM13, &BND_Transform::SetM13)
+    .def_property("M20", &BND_Transform::GetM20, &BND_Transform::SetM20)
+    .def_property("M21", &BND_Transform::GetM21, &BND_Transform::SetM21)
+    .def_property("M22", &BND_Transform::GetM22, &BND_Transform::SetM22)
+    .def_property("M23", &BND_Transform::GetM23, &BND_Transform::SetM23)
+    .def_property("M30", &BND_Transform::GetM30, &BND_Transform::SetM30)
+    .def_property("M31", &BND_Transform::GetM31, &BND_Transform::SetM31)
+    .def_property("M32", &BND_Transform::GetM32, &BND_Transform::SetM32)
+    .def_property("M33", &BND_Transform::GetM33, &BND_Transform::SetM33)
     ;
 }
 #endif
@@ -133,6 +157,7 @@ void initXformBindings(void*)
     .class_function("translation", &BND_Transform::Translation)
     .class_function("scale", &BND_Transform::Scale)
     .class_function("rotation", &BND_Transform::Rotation)
+    .class_function("multiply", &BND_Transform::Multiply)
     .property("isIdentity", &BND_Transform::IsIdentity)
     .property("isValid", &BND_Transform::IsValid)
     .property("isZero", &BND_Transform::IsZero)
@@ -143,6 +168,22 @@ void initXformBindings(void*)
     .function("transformBoundingBox", &BND_Transform::TransformBoundingBox, allow_raw_pointers())
     .function("transpose", &BND_Transform::Transpose)
     .function("toFloatArray", &BND_Transform::ToFloatArray)
+    .property("m00", &BND_Transform::GetM00, &BND_Transform::SetM00)
+    .property("m01", &BND_Transform::GetM01, &BND_Transform::SetM01)
+    .property("m02", &BND_Transform::GetM02, &BND_Transform::SetM02)
+    .property("m03", &BND_Transform::GetM03, &BND_Transform::SetM03)
+    .property("m10", &BND_Transform::GetM10, &BND_Transform::SetM10)
+    .property("m11", &BND_Transform::GetM11, &BND_Transform::SetM11)
+    .property("m12", &BND_Transform::GetM12, &BND_Transform::SetM12)
+    .property("m13", &BND_Transform::GetM13, &BND_Transform::SetM13)
+    .property("m20", &BND_Transform::GetM20, &BND_Transform::SetM20)
+    .property("m21", &BND_Transform::GetM21, &BND_Transform::SetM21)
+    .property("m22", &BND_Transform::GetM22, &BND_Transform::SetM22)
+    .property("m23", &BND_Transform::GetM23, &BND_Transform::SetM23)
+    .property("m30", &BND_Transform::GetM30, &BND_Transform::SetM30)
+    .property("m31", &BND_Transform::GetM31, &BND_Transform::SetM31)
+    .property("m32", &BND_Transform::GetM32, &BND_Transform::SetM32)
+    .property("m33", &BND_Transform::GetM33, &BND_Transform::SetM33)
     ;
 }
 #endif

@@ -74,6 +74,119 @@ static pybind11::dict EncodeVector3d(const ON_3dVector& v)
   d["Z"] = v.z;
   return d;
 }
+
+static int ON_3dVectorIsParallelTo(const ON_3dVector& a, const ON_3dVector& b)
+{
+  return a.IsParallelTo(b);
+}
+static int ON_3dVectorIsParallelTo2(const ON_3dVector& a, const ON_3dVector& b, double tol)
+{
+  return a.IsParallelTo(b, tol);
+}
+
+static double ON_3dVectorVectorAngle(ON_3dVector a, ON_3dVector b)
+{
+  if (!a.Unitize() || !b.Unitize())
+    return ON_UNSET_VALUE;
+  
+  //compute dot product
+  double dot = a.x * b.x + a.y * b.y + a.z * b.z;
+  // remove any "noise"
+  if (dot > 1.0) dot = 1.0;
+  if (dot < -1.0) dot = -1.0;
+  double radians = acos(dot);
+  return radians;
+}
+
+static double ON_3dVectorVectorAngle2(ON_3dVector a, ON_3dVector b, const BND_Plane& bndPlane)
+{
+  ON_Plane plane = bndPlane.ToOnPlane();
+  { // Project vectors onto plane.
+    ON_3dPoint pA = plane.Origin() + a;
+    ON_3dPoint pB = plane.Origin() + b;
+
+    pA = plane.ClosestPointTo(pA);
+    pB = plane.ClosestPointTo(pB);
+
+    a = pA - plane.Origin();
+    b = pB - plane.Origin();
+  }
+
+  // Abort on invalid cases.
+  if (!a.Unitize()) { return ON_UNSET_VALUE; }
+  if (!b.Unitize()) { return ON_UNSET_VALUE; }
+
+  double dot = a * b;
+  { // Limit dot product to valid range.
+    if (dot >= 1.0)
+    {
+      dot = 1.0;
+    }
+    else if (dot < -1.0)
+    {
+      dot = -1.0;
+    }
+  }
+
+  double angle = acos(dot);
+  { // Special case (anti)parallel vectors.
+    if (fabs(angle) < 1e-64) { return 0.0; }
+    if (fabs(angle - ON_PI) < 1e-64) { return ON_PI; }
+  }
+
+  ON_3dVector cross = ON_3dVector::CrossProduct(a, b);
+  if (plane.zaxis.IsParallelTo(cross) == +1)
+    return angle;
+  return 2.0 * ON_PI - angle;
+}
+
+static double ON_3dVectorVectorAngle3(ON_3dVector v1, ON_3dVector v2, ON_3dVector vNormal)
+{
+  if ((fabs(v1.x - v2.x) < 1e-64) && (fabs(v1.y - v2.y) < 1e-64) && (fabs(v1.z - v2.z) < 1e-64))
+    return 0.0;
+
+  double dNumerator = v1 * v2;
+  double dDenominator = v1.Length() * v2.Length();
+
+  ON_3dVector vCross = ON_3dVector::CrossProduct(v1, v2);
+  vCross.Unitize();
+
+  if ((fabs(vCross.x - 0.0) < 1e-64) && (fabs(vCross.y - 0.0) < 1e-64) && (fabs(vCross.z - 0.0) < 1e-64))
+  {
+    if ((fabs(dNumerator - 1.0) < 1e-64))
+      return 0.0;
+    else
+      if ((fabs(dNumerator + 1.0) < 1e-64))
+        return ON_PI;
+  }
+
+  double dDivision = dNumerator / dDenominator;
+
+  if (dDivision > 1.0)
+    dDivision = 1.0;
+  else
+    if (dDivision < -1.0)
+      dDivision = -1.0;
+
+  if ((fabs(dDivision + 1.0) < 1e-64))
+    return ON_PI;
+
+  double dAngle = acos(dDivision);
+
+  // Check if vCross is parallel or anti parallel to normal vector.
+  // If anti parallel Angle = 360 - Angle
+
+  vNormal.Unitize();
+
+  double dDot = vCross * vNormal;
+
+  if ((fabs(dDot + 1.0) < 1e-64))
+    dAngle = (ON_PI * 2.0) - dAngle;
+
+  return dAngle;
+}
+
+
 static pybind11::dict EncodePoint2f(const ON_2fPoint& pt)
 {
   pybind11::dict d;
@@ -142,6 +255,11 @@ void initPointBindings(pybind11::module& m)
   py::class_<ON_3dVector>(m, "Vector3d")
     .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def("Encode", &EncodeVector3d)
+    .def("IsParallelTo", &ON_3dVectorIsParallelTo, py::arg("other"))
+    .def("IsParallelTo", &ON_3dVectorIsParallelTo2, py::arg("other"), py::arg("angleTolerance"))
+    .def_static("VectorAngle", &ON_3dVectorVectorAngle, py::arg("a"), py::arg("b"))
+    .def_static("VectorAngle", &ON_3dVectorVectorAngle2, py::arg("a"), py::arg("b"), py::arg("plane"))
+    .def_static("VectorAngle", &ON_3dVectorVectorAngle3, py::arg("v1"), py::arg("v2"), py::arg("vNormal"))
     .def_readwrite("X", &ON_3dVector::x)
     .def_readwrite("Y", &ON_3dVector::y)
     .def_readwrite("Z", &ON_3dVector::z);

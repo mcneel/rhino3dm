@@ -58,6 +58,13 @@ enum class CurveExtensionStyle : int
   Smooth = 2,
 };
 
+enum class CurveEvaluationSide : int
+{
+  Default = 0,
+  Below = -1,
+  Above = +1
+};
+
 
 #if defined(ON_PYTHON_COMPILE)
 void initCurveBindings(pybind11::module& m);
@@ -111,7 +118,7 @@ public:
   bool IsClosable(double tolerance, double minimumAbsoluteSize, double minimumRelativeSize) const { return m_curve->IsClosable(tolerance, minimumAbsoluteSize, minimumRelativeSize); }
   CurveOrientation ClosedCurveOrientation() const;
   // public CurveOrientation ClosedCurveOrientation(Vector3d upDirection)
-  // public CurveOrientation ClosedCurveOrientation(Plane plane)
+  CurveOrientation ClosedCurveOrientation3(BND_Plane plane) const;
   // public CurveOrientation ClosedCurveOrientation(Transform xform)
   bool Reverse() { return m_curve->Reverse(); }
   ON_3dPoint PointAt(double t) const { return m_curve->PointAt(t); }
@@ -124,8 +131,8 @@ public:
   ON_3dVector TangentAtStart() const { return m_curve->TangentAt(m_curve->Domain().Min()); }
   ON_3dVector TangentAtEnd() const { return m_curve->TangentAt(m_curve->Domain().Max()); }
   BND_TUPLE FrameAt(double t) const;
-  // public Vector3d[] DerivativeAt(double t, int derivativeCount)
-  // public Vector3d[] DerivativeAt(double t, int derivativeCount, CurveEvaluationSide side)
+  BND_TUPLE DerivativeAt(double t, int derivativeCount) const;
+  BND_TUPLE DerivativeAt2(double t, int derivativeCount, CurveEvaluationSide side) const;
   ON_3dVector CurvatureAt(double t) const { return m_curve->CurvatureAt(t); }
   // public bool IsContinuous(Continuity continuityType, double t)
   // public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, out double t)
