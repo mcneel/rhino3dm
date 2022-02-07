@@ -45,7 +45,7 @@ public:
   //public static BND_Transform operator *(Transform a, Transform b)
   //public static Point3d operator *(Transform m, Point3d p)
   //public static Vector3d operator *(Transform m, Vector3d v)
-  //public static BND_Transform Multiply(Transform a, Transform b)
+  static BND_Transform Multiply(BND_Transform a, BND_Transform b);
   bool IsIdentity() const { return m_xform.IsIdentity(); }
   bool IsValid() const { return m_xform.IsValid(); }
   bool IsZero() const { return m_xform.IsZero(); }
@@ -60,4 +60,37 @@ public:
   BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
   BND_TUPLE ToFloatArray(bool rowDominant) const;
+
+  double GetM00() const { return m_xform.m_xform[0][0]; }
+  double GetM01() const { return m_xform.m_xform[0][1]; }
+  double GetM02() const { return m_xform.m_xform[0][2]; }
+  double GetM03() const { return m_xform.m_xform[0][3]; }
+  double GetM10() const { return m_xform.m_xform[1][0]; }
+  double GetM11() const { return m_xform.m_xform[1][1]; }
+  double GetM12() const { return m_xform.m_xform[1][2]; }
+  double GetM13() const { return m_xform.m_xform[1][3]; }
+  double GetM20() const { return m_xform.m_xform[2][0]; }
+  double GetM21() const { return m_xform.m_xform[2][1]; }
+  double GetM22() const { return m_xform.m_xform[2][2]; }
+  double GetM23() const { return m_xform.m_xform[2][3]; }
+  double GetM30() const { return m_xform.m_xform[3][0]; }
+  double GetM31() const { return m_xform.m_xform[3][1]; }
+  double GetM32() const { return m_xform.m_xform[3][2]; }
+  double GetM33() const { return m_xform.m_xform[3][3]; }
+  void SetM00(double d) { m_xform.m_xform[0][0] = d; }
+  void SetM01(double d) { m_xform.m_xform[0][1] = d; }
+  void SetM02(double d) { m_xform.m_xform[0][2] = d; }
+  void SetM03(double d) { m_xform.m_xform[0][3] = d; }
+  void SetM10(double d) { m_xform.m_xform[1][0] = d; }
+  void SetM11(double d) { m_xform.m_xform[1][1] = d; }
+  void SetM12(double d) { m_xform.m_xform[1][2] = d; }
+  void SetM13(double d) { m_xform.m_xform[1][3] = d; }
+  void SetM20(double d) { m_xform.m_xform[2][0] = d; }
+  void SetM21(double d) { m_xform.m_xform[2][1] = d; }
+  void SetM22(double d) { m_xform.m_xform[2][2] = d; }
+  void SetM23(double d) { m_xform.m_xform[2][3] = d; }
+  void SetM30(double d) { m_xform.m_xform[3][0] = d; }
+  void SetM31(double d) { m_xform.m_xform[3][1] = d; }
+  void SetM32(double d) { m_xform.m_xform[3][2] = d; }
+  void SetM33(double d) { m_xform.m_xform[3][3] = d; }
 };
