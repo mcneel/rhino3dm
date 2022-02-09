@@ -71,9 +71,9 @@ jobs:
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
     - name: artifact name
-        run: |
-          export file=$(ls dist/*.whl| head -1)
-          echo "::set-env name=file::$file"
+      run: |
+        export file=$(ls dist/*.whl| head -1)
+        echo "::set-env name=file::$file"
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
