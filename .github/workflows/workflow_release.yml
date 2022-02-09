@@ -41,10 +41,15 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
+      - name: artifact name
+        run: |
+          export file=$(ls dist/*.whl| head -1)
+          echo "::set-env name=file::$file"
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: dist/*.whl
+          name: $file
 
   build_py_manylinux2014:
     name: build python ${{ matrix.python-version }} manylinux2014
@@ -65,10 +70,15 @@ jobs:
       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
+    - name: artifact name
+        run: |
+          export file=$(ls dist/*.whl| head -1)
+          echo "::set-env name=file::$file"
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
         path: wheelhouse/*.whl
+        name: $file
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
@@ -114,10 +124,15 @@ jobs:
             exit 0
           fi
         shell: bash
+      - name: artifact name
+        run: |
+          export file=$(ls dist/*.whl| head -1)
+          echo "::set-env name=file::$file"
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: dist/*.whl
+          name: $file
   
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
