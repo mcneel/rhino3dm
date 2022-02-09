@@ -42,14 +42,13 @@ jobs:
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
       - name: artifact name
-        run: |
-          export file=$(ls dist/*.whl| head -1)
-          echo "::set-env name=file::$file"
+        id: artifactname
+        run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: dist/*.whl
-          name: $file
+          name: ${{ steps.artifactname.outputs.file }}
 
   build_py_manylinux2014:
     name: build python ${{ matrix.python-version }} manylinux2014
@@ -71,14 +70,13 @@ jobs:
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
     - name: artifact name
-      run: |
-        export file=$(ls dist/*.whl| head -1)
-        echo "::set-env name=file::$file"
+      id: artifactname
+      run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
         path: wheelhouse/*.whl
-        name: $file
+        name: ${{ steps.artifactname.outputs.file }}
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
@@ -125,14 +123,13 @@ jobs:
           fi
         shell: bash
       - name: artifact name
-        run: |
-          export file=$(ls dist/*.whl| head -1)
-          echo "::set-env name=file::$file"
+        id: artifactname
+        run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           path: dist/*.whl
-          name: $file
+          name: ${{ steps.artifactname.outputs.file }}
   
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
