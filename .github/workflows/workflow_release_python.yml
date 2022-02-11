@@ -136,7 +136,7 @@ jobs:
         id: artifactname
         run: |
           cd dist
-          echo "::set-output name=file::$(ls *.whl| head -1)
+          echo "::set-output name=file::$(ls *.whl| head -1)"
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
