@@ -42,7 +42,7 @@ jobs:
       - name: download python artifacts dist
         uses: elonh/download-artifact-regexp@master
         with:
-          pattern: .*py.*
+          pattern: .*whl(:|$).*
           path: dist
       - name: Display structure of downloaded files
         run: ls -R
