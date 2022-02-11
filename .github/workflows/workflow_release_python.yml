@@ -145,7 +145,7 @@ jobs:
 
   pack_py:
     name: pack python
-    needs: [build_py_manylinux2014]
+    needs: [build_py_manylinux2014, build_py_all_bdist, build_py_sdist]
     runs-on: ubuntu-latest
     steps:
       - name: download python artifacts dist
