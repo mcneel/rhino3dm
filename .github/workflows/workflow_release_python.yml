@@ -25,7 +25,7 @@ jobs:
       run: ls -R
     - name: artifact name
       id: artifactname
-      run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
+      run: echo "::set-output name=file::$(ls wheelhouse/*.whl| head -1)
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
