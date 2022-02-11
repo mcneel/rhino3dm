@@ -134,6 +134,7 @@ jobs:
         run: ls -R
       - name: artifact name
         id: artifactname
+        shell: bash
         run: |
           cd dist
           echo "::set-output name=file::$(ls *.whl| head -1)"
