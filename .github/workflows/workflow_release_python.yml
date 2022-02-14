@@ -104,7 +104,7 @@ jobs:
           find dist -type f -print0 | xargs -0 mv -t output
           cd output
           ls
-          mmv ";*.whl" "#1#2.zip"
+          find . -name "*.whl" -exec sh -c 'mv "$1" "${1%.whl}.zip"' _ {} \;
           unzip -l *.zip
           ls -R
       - name: artifacts
