@@ -162,7 +162,8 @@ jobs:
           find dist -type f -print0 | xargs -0 mv -t output
           cd output
           ls
-          unzip '*.whl'
+          rename whl zip *.whl
+          unzip -l *.zip
           ls -R
       - name: artifacts
         uses: actions/upload-artifact@v2
