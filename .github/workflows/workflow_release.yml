@@ -41,13 +41,17 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
+      - name: list files
+        run: ls -R
       - name: artifact name
         id: artifactname
-        run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
+        run: |
+          cd dist
+          echo "::set-output name=file::$(ls *.tar.gz| head -1)"
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: dist/*.whl
+          path: dist
           name: ${{ steps.artifactname.outputs.file }}
 
   build_py_manylinux2014:
@@ -69,9 +73,13 @@ jobs:
       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
+    - name: list files
+      run: ls -R
     - name: artifact name
       id: artifactname
-      run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
+      run: |
+        cd wheelhouse
+        echo "::set-output name=file::$(ls *.whl| head -1)"
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -122,13 +130,18 @@ jobs:
             exit 0
           fi
         shell: bash
+      - name: list files
+        run: ls -R
       - name: artifact name
         id: artifactname
-        run: echo "::set-output name=file::$(ls dist/*.whl| head -1)
+        shell: bash
+        run: |
+          cd dist
+          echo "::set-output name=file::$(ls *.whl| head -1)"
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: dist/*.whl
+          path: dist
           name: ${{ steps.artifactname.outputs.file }}
   
   build_dotnet_os:
@@ -228,13 +241,13 @@ jobs:
 
   pack_py:
     name: pack python
-    needs: [build_py_all_bdist, build_py_manylinux2014, build_py_sdist]
+    needs: [build_py_manylinux2014, build_py_sdist, build_py_all_bdist]
     runs-on: ubuntu-latest
     steps:
       - name: download python artifacts dist
         uses: elonh/download-artifact-regexp@master
         with:
-          pattern: .*py.*
+          pattern: ^.*\.(whl|tar.gz)$ #.*whl(:|$).* 
           path: dist
       - name: Display structure of downloaded files
         run: ls -R
