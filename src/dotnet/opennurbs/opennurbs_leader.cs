@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 
@@ -39,6 +40,16 @@ namespace Rhino.Geometry
   [Serializable]
   public class Leader : AnnotationBase
   {
+    /// <summary>
+    /// Protected serialization constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected Leader(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+
     /// <summary>
     /// internal constructor
     /// </summary>
