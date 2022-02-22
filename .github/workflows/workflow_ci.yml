@@ -4,6 +4,9 @@
 name: workflow ci
 on: [push, pull_request]
 
+env:
+  RETENTION_DAYS: 15
+
 jobs:
 
   #checks if this file has changed
@@ -106,6 +109,7 @@ jobs:
         with:
           path: src/build/javascript/artifacts_js
           name: rhino3dm.js
+          retention-days: $RETENTION_DAYS
 
 # 2021.05.31 macos-11 still in private preview:
 # https://github.com/actions/virtual-environments/issues/2486
@@ -152,6 +156,7 @@ jobs:
         with:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
+          retention-days: $RETENTION_DAYS
 
   build_dotnet:
     name: build dotnet
@@ -176,3 +181,4 @@ jobs:
         with:
           path: src/build/linux/dotnet/Rhino3dm.dll
           name: rhino3dm.net
+          retention-days: $RETENTION_DAYS
