@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.14.0] - unreleased
 ### Added
+- (js, py) Added Circle.Plane and Circle.BoundingBox properties; Circle.IsInPlane and Circle.Transform functions
 - (py) Added Curve.ClosedCurveOrientation overload supporting an input plane. Added Curve.DerivativeAt
 - (py) Added Vector3d.IsParallelTo and VectorAngle functions
 - (py) Added Transform.Multiply as well as access properties to all values in the transform
