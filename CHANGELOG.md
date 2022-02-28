@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (py) Added Vector3d.IsParallelTo and VectorAngle functions
 - (py) Added Transform.Multiply as well as access properties to all values in the transform
 - (.net) Add Curve.JoinCurves, Ellipse.Center, Ellipse.FocalDistance, ArcArc and CircleCircle intersections, NurbsCurve.Append
+- (js, py) Added ModelComponent.DataCRC, ModelComponent.IsSystemComponent, ModelComponent.ClearId
 
 ## [7.11.0] - 2021-10-21
 ### Added
