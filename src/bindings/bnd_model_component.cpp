@@ -27,7 +27,10 @@ namespace py = pybind11;
 void initModelComponentBindings(pybind11::module& m)
 {
   py::class_<BND_ModelComponent, BND_CommonObject>(m, "ModelComponent")
+    .def("DataCRC", &BND_ModelComponent::DataCRC, py::arg("currentRemainder"))
+    .def_property_readonly("IsSystemComponent", &BND_ModelComponent::IsSystemComponent)
     .def_property("Id", &BND_ModelComponent::GetId, &BND_ModelComponent::SetId)
+    .def("ClearId", &BND_ModelComponent::ClearId)
     ;
 }
 #endif
@@ -38,7 +41,10 @@ using namespace emscripten;
 void initModelComponentBindings(void*)
 {
   class_<BND_ModelComponent, base<BND_CommonObject>>("ModelComponent")
+    .function("dataCRC", &BND_ModelComponent::DataCRC)
+    .property("isSystemComponent", &BND_ModelComponent::IsSystemComponent)
     .property("id", &BND_ModelComponent::GetId, &BND_ModelComponent::SetId)
+    .function("clearId", &BND_ModelComponent::ClearId)
     ;
 }
 #endif
