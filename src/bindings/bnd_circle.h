@@ -29,19 +29,20 @@ public:
   void SetRadius(double r) { m_circle.radius = r; }
   double Diameter() const { return m_circle.radius * 2; }
   void SetDiameter(double d) { m_circle.radius = d * 0.5; }
-  //public Plane Plane
+  BND_Plane Plane() const;
+  void SetPlane(BND_Plane& plane);
   ON_3dPoint Center() const { return m_circle.Center(); }
   void SetCenter(ON_3dPoint center);
   ON_3dVector Normal() const { return m_circle.Normal(); }
   double Circumference() const { return m_circle.Circumference(); }
-  //public BoundingBox BoundingBox
-  //public bool IsInPlane(Plane plane, double tolerance)
+  BND_BoundingBox BoundingBox() const;
+  bool IsInPlane(BND_Plane plane, double tolerance) const;
   ON_3dPoint PointAt(double t) const;
   ON_3dVector TangentAt(double t) const { return m_circle.TangentAt(t); }
   ON_3dVector DerivativeAt(int derivative, double t) const { return m_circle.DerivativeAt(derivative, t); }
   BND_TUPLE ClosestParameter(ON_3dPoint testPoint) const;
   ON_3dPoint ClosestPoint(ON_3dPoint testPoint) const { return m_circle.ClosestPointTo(testPoint); }
-  //public bool Transform(Transform xform)
+  bool Transform(BND_Transform xform);
   bool Rotate(double sinAngle, double cosAngle, ON_3dVector axis) { return m_circle.Rotate(sinAngle, cosAngle, axis); }
   bool Rotate(double sinAngle, double cosAngle, ON_3dVector axis, ON_3dPoint point) { return m_circle.Rotate(sinAngle, cosAngle, axis, point); }
   bool Rotate(double angle, ON_3dVector axis) { return m_circle.Rotate(angle, axis); }
