@@ -121,19 +121,19 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-11]
+        os: [ubuntu-latest, windows-2019, macos-11]
         python-version: [2.7, 3.9, '3.10']
         include:
           - os: ubuntu-latest
             target: linux
-          - os: windows-latest
+          - os: windows-2019
             target: windows
           - os: macos-11
             target: macos
         exclude:
           - os: macos-11
             python-version: 2.7
-          - os: windows-latest
+          - os: windows-2019
             python-version: 2.7
       fail-fast: false
     steps:
