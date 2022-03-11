@@ -29,13 +29,13 @@ public:
   void SetProjectionToParallel(bool parallel);
   void SetProjectionToPerspective(bool perspective);
 
-  bool ChangeToParallelProjection( bool bSymmetricFrustum );
-  bool ChangeToPerspectiveProjection( double target_distance, bool bSymmetricFrustum, double lens_length);
-  bool ChangeToTwoPointPerspectiveProjection( double target_distance, ON_3dVector up, double lens_length);
+  bool ChangeToParallelProjection(bool bSymmetricFrustum);
+  bool ChangeToPerspectiveProjection(double target_distance, bool bSymmetricFrustum, double lens_length);
+  bool ChangeToTwoPointPerspectiveProjection(double target_distance, ON_3dVector up, double lens_length);
 
-  bool SetCameraLocation( const ON_3dPoint& );
-  bool SetCameraDirection( const ON_3dVector& );
-  bool SetCameraUp( const ON_3dVector& );
+  bool SetCameraLocation(const ON_3dPoint&);
+  bool SetCameraDirection(const ON_3dVector&);
+  bool SetCameraUp(const ON_3dVector&);
 
   ON_3dPoint CameraLocation() const;
   ON_3dVector CameraDirection() const;
@@ -45,7 +45,7 @@ public:
   ON_3dVector CameraY() const; // unit up vector
   ON_3dVector CameraZ() const; // unit vector in -CameraDirection
 
-  bool SetFrustum(double left,double right,double bottom,double top,double near_dist,double far_dist);
+  bool SetFrustum(double left, double right, double bottom, double top, double near_dist, double far_dist);
 
 #if defined(ON_PYTHON_COMPILE)
   BND_DICT GetFrustum() const;
@@ -70,7 +70,8 @@ public:
   bool Extents(double halfViewAngleRadians, const class BND_BoundingBox& worldBbox);
   bool DollyExtents(const class BND_BoundingBox& bbox, double border);
   ON_3dPoint FrustumCenterPoint(double targetDistance) const { return m_viewport->FrustumCenterPoint(targetDistance); }
-  //    public Point3d TargetPoint {get;set;}
+  ON_3dPoint GetTargetPoint() const { return m_viewport->TargetPoint(); }
+  void SetTargetPoint(ON_3dPoint pt) { m_viewport->SetTargetPoint(pt); }
   double TargetDistance(bool useFrustumCenterFallback) const { return m_viewport->TargetDistance(useFrustumCenterFallback); }
   // public double PerspectiveMinNearOverFar {get;set}
   //     public double PerspectiveMinNearDist {get;set}
