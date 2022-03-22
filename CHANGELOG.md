@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated opennurbs source to be based on Rhino 7.15 version
 
-## [7.14.1] - 2022-03-01
+## [7.14.2] - 2022-03-22
 ### Added
 - (js, py) Added Circle.Plane and Circle.BoundingBox properties; Circle.IsInPlane and Circle.Transform functions
 - (py) Added Curve.ClosedCurveOrientation overload supporting an input plane. Added Curve.DerivativeAt
@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (py) Added Transform.Multiply as well as access properties to all values in the transform
 - (.net) Add Curve.JoinCurves, Ellipse.Center, Ellipse.FocalDistance, ArcArc and CircleCircle intersections, NurbsCurve.Append
 - (js, py) Added ModelComponent.DataCRC, ModelComponent.IsSystemComponent, ModelComponent.ClearId
+- (py) Apple Silicon builds possible
 
 ### Changed
 - Updated opennurbs source to be based on Rhino 7.14 version
