@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.15.0] - unreleased
 ### Added
-- (js, py) Added ViewportInfo.TaretPoint
+- (js, py) Added ViewportInfo.TargetPoint
 
 ### Changed
 - Updated opennurbs source to be based on Rhino 7.15 version
