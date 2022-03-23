@@ -195,6 +195,28 @@ void BND_BrepFace::SetTrackedPointer(ON_BrepFace* brepface, const ON_ModelCompon
   BND_SurfaceProxy::SetTrackedPointer(brepface, compref);
 }
 
+BND_Brep* BND_BrepFace::CreateExtrusion(const class BND_Curve* pathCurve, bool cap) const
+{
+  BND_Brep* rc = nullptr;
+  const ON_Brep* pConstBrep = m_brepface->Brep();
+  const ON_Curve* pConstCurve = pathCurve ? pathCurve->m_curve : nullptr;
+  if (pConstBrep && pConstCurve)
+  {
+    ON_Brep* pNewBrep = ON_Brep::New(*pConstBrep);
+    if (pNewBrep)
+    {
+      pNewBrep->DestroyMesh(ON::any_mesh);
+      int result = ON_BrepExtrudeFace(*pNewBrep, m_brepface->m_face_index, *pConstCurve, cap);
+      // 0 == failure, 1 or 2 == success
+      if (0 == result)
+        delete pNewBrep;
+      else
+        rc = new BND_Brep(pNewBrep, nullptr);
+    }
+  }
+  return rc;
+}
+
 BND_Brep* BND_BrepFace::DuplicateFace(bool duplicateMeshes)
 {
   const ON_Brep* parentBrep = m_brepface->Brep();
@@ -282,6 +304,7 @@ void initBrepBindings(pybind11::module& m)
 
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
     .def("UnderlyingSurface", &BND_BrepFace::UnderlyingSurface)
+    .def("CreateExtrusion", &BND_BrepFace::CreateExtrusion, py::arg("pathCurve"), py::arg("cap"))
     .def("DuplicateFace", &BND_BrepFace::DuplicateFace, py::arg("duplicateMeshes"))
     .def("DuplicateSurface", &BND_BrepFace::DuplicateSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
@@ -335,6 +358,7 @@ void initBrepBindings(void*)
 
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
     .function("underlyingSurface", &BND_BrepFace::UnderlyingSurface, allow_raw_pointers())
+    .function("createExtrusion", &BND_BrepFace::CreateExtrusion, allow_raw_pointers())
     .function("duplicateFace", &BND_BrepFace::DuplicateFace, allow_raw_pointers())
     .function("duplicateSurface", &BND_BrepFace::DuplicateSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())

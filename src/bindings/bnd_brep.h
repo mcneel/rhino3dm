@@ -132,7 +132,7 @@ public:
   //int SurfaceIndex
   //Collections.BrepLoopList Loops
   //BrepLoop OuterLoop
-  //Brep CreateExtrusion(Curve pathCurve, bool cap)
+  class BND_Brep* CreateExtrusion(const class BND_Curve* pathCurve, bool cap) const;
   //bool ShrinkFace(ShrinkDisableSide disableSide)
   //override bool SetDomain(int direction, Interval domain)
   class BND_Brep* DuplicateFace(bool duplicateMeshes);

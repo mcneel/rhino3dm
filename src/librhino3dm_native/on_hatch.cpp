@@ -97,6 +97,34 @@ RH_C_FUNCTION void ON_HatchPattern_SetFillType(ON_HatchPattern* pHatchPattern, i
   }
 }
 
+RH_C_FUNCTION ON_Hatch* ON_Hatch_HatchFromBrep(const ON_Brep* constPtrBrep, int faceIndex, int patternIndex, double rotation, double scale, ON_3DPOINT_STRUCT basePt)
+{
+  const ON_3dPoint* point = (const ON_3dPoint*)&basePt;
+  ON_Hatch* rc = ON_Hatch::HatchFromBrep(nullptr, constPtrBrep, faceIndex, patternIndex, rotation, scale, *point);
+  return rc;
+}
+
+RH_C_FUNCTION ON_Hatch* ON_Hatch_CreateFromLoops(ON_PLANE_STRUCT ps, const ON_Curve* outerLoop, const ON_SimpleArray<const ON_Curve*>* innerLoops, int patternIndex, double rotation, double scale)
+{
+  if (nullptr == outerLoop)
+    return nullptr;
+  ON_Plane plane = FromPlaneStruct(ps);
+
+  ON_Hatch* rc = new ON_Hatch();
+  ON_SimpleArray<const ON_Curve*> loops;
+  loops.Append(outerLoop);
+  if (innerLoops)
+  {
+    loops.Append(innerLoops->Count(), innerLoops->Array());
+  }
+  if (!rc->Create(plane, loops, patternIndex, rotation, scale))
+  {
+    delete rc;
+    rc = nullptr;
+  }
+  return rc;  
+}
+
 RH_C_FUNCTION int ON_Hatch_PatternIndex(const ON_Hatch* pConstHatch)
 {
   int rc = -1;

@@ -36,6 +36,58 @@ namespace Rhino.Geometry
       return new Hatch(IntPtr.Zero, null);
     }
 
+    /// <summary>
+    /// Create a hatch from a planar face of a Brep
+    /// </summary>
+    /// <param name="brep"></param>
+    /// <param name="brepFaceIndex"></param>
+    /// <param name="hatchPatternIndex"></param>
+    /// <param name="rotationRadians"></param>
+    /// <param name="scale"></param>
+    /// <param name="basePoint"></param>
+    /// <returns></returns>
+    public static Hatch CreateFromBrep(Brep brep, int brepFaceIndex, int hatchPatternIndex, double rotationRadians, double scale, Point3d basePoint)
+    {
+      if (brep == null) throw new ArgumentNullException("brep");
+      IntPtr constPtrBrep = brep.ConstPointer();
+      IntPtr ptrHatch = UnsafeNativeMethods.ON_Hatch_HatchFromBrep(constPtrBrep, brepFaceIndex, hatchPatternIndex, rotationRadians, scale, basePoint);
+      GC.KeepAlive(brep);
+      return CreateGeometryHelper(ptrHatch, null) as Hatch;
+    }
+
+    /// <summary>
+    /// Create a hatch with a given set of outer and inner loops
+    /// </summary>
+    /// <param name="hatchPlane"></param>
+    /// <param name="outerLoop">2d closed curve representing outer boundary of hatch</param>
+    /// <param name="innerLoops">2d closed curves for inner boundaries</param>
+    /// <param name="hatchPatternIndex"></param>
+    /// <param name="rotationRadians"></param>
+    /// <param name="scale"></param>
+    /// <returns></returns>
+    public static Hatch Create(Plane hatchPlane, Curve outerLoop, IEnumerable<Curve> innerLoops, int hatchPatternIndex, double rotationRadians, double scale)
+    {
+      if (outerLoop == null) throw new ArgumentNullException("outerLoop");
+
+      IntPtr constPtrOuterloop = outerLoop.ConstPointer();
+      IntPtr ptrInnerLoops = System.IntPtr.Zero;
+      Runtime.InteropWrappers.SimpleArrayCurvePointer innerSimpleArray = null;
+      if (innerLoops != null)
+      {
+        innerSimpleArray = new Runtime.InteropWrappers.SimpleArrayCurvePointer(innerLoops);
+        ptrInnerLoops = innerSimpleArray.ConstPointer();
+      }
+
+      IntPtr ptrHatch = UnsafeNativeMethods.ON_Hatch_CreateFromLoops(hatchPlane, constPtrOuterloop, ptrInnerLoops, hatchPatternIndex, rotationRadians, scale);
+
+      if (innerSimpleArray != null)
+        innerSimpleArray.Dispose();
+      GC.KeepAlive(outerLoop);
+      GC.KeepAlive(innerLoops);
+
+      return CreateGeometryHelper(ptrHatch, null) as Hatch;
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Constructs an array of <see cref="Hatch">hatches</see> from a set of curves.
