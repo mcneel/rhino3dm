@@ -60,7 +60,8 @@ __pycache__/
 /src/rhino3dm.egg-info
 /build
 /dist
-/.idea
+*/.idea
+*/cmake-build-debug
 /tests/example_3dm_files_20181010
 /docbuilders/docgen/bin
 /docbuilders/docgen/obj
