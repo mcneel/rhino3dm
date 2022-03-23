@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [7.15.0] - 2022-03-23
 ### Added
 - (js, py) Added ViewportInfo.TargetPoint
+- (js, py) Added BrepFace.CreateExtrusion
+- (.net) Added two new Hatch creation routines (CreateFromBrep and Create). The Create version takes curve loop inputs to create the hatch.
 
 ### Changed
 - Updated opennurbs source to be based on Rhino 7.15 version

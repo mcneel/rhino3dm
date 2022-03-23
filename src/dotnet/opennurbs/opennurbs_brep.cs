@@ -3090,20 +3090,20 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Duplicate naked edges of this Brep
+    /// Duplicate naked edges of this Brep.
     /// </summary>
-    /// <param name="outer"></param>
-    /// <param name="inner"></param>
-    /// <returns></returns>
+    /// <param name="nakedOuter">Return naked edges that are part of an outer loop.</param>
+    /// <param name="nakedInner">Return naked edges that are part of an inner loop.</param>
+    /// <returns>Array of edge curves on success.</returns>
     /// <since>5.7</since>
     [ConstOperation]
-    public Curve[] DuplicateNakedEdgeCurves(bool outer, bool inner)
+    public Curve[] DuplicateNakedEdgeCurves(bool nakedOuter, bool nakedInner)
     {
       IntPtr const_ptr_this = ConstPointer();
       using (var output = new SimpleArrayCurvePointer())
       {
         IntPtr output_curves_ptr = output.NonConstPointer();
-        UnsafeNativeMethods.ON_Brep_DuplicateEdgeCurves(const_ptr_this, output_curves_ptr, true, outer, inner);
+        UnsafeNativeMethods.ON_Brep_DuplicateEdgeCurves(const_ptr_this, output_curves_ptr, true, nakedOuter, nakedInner);
         return output.ToNonConstArray();
       }
     }
