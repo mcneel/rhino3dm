@@ -183,6 +183,8 @@ BND_ONXModel::BND_ONXModel()
 }
 
 BND_ONXModel::BND_ONXModel(ONX_Model* m)
+  :
+  m_Skylight(&m->Skylight())
 {
   m_model.reset(m);
 }
@@ -1475,6 +1477,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_property_readonly("EmbeddedFiles", &BND_ONXModel::EmbeddedFiles)
+    .def_property_readonly("Skylight", &BND_ONXModel::Skylight)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1638,6 +1641,7 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("embeddedFiles", &BND_ONXModel::EmbeddedFiles)
+    .function("skylight", &BND_ONXModel::Skylight)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)

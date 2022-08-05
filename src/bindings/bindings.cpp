@@ -27,6 +27,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initLayerBindings(m);
   initMaterialBindings(m);
   initEmbeddedFileBindings(m);
+  initSkylightBindings(m);
   initTextureBindings(m);
   initTextureMappingBindings(m);
   initPointBindings(m);

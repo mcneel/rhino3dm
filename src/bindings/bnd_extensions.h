@@ -304,6 +304,7 @@ public:
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
   BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
+  BND_File3dmSkylight& Skylight() { return m_Skylight; }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
@@ -312,8 +313,12 @@ public:
   std::string GetEmbeddedFileAsBase64(std::wstring path);
   std::string GetEmbeddedFileAsBase64Strict(std::wstring path, bool strict);
   std::wstring RdkXml() const;
+
 public:
   static bool ReadTest(std::wstring filepath);
+
+private:
+  BND_File3dmSkylight m_Skylight;
 };
 
 class BND_File3dmWriteOptions
