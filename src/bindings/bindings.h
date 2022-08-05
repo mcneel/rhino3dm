@@ -101,6 +101,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"
 #include "bnd_group.h"
+#include "bnd_embedded_file.h"
 #include "bnd_extensions.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"

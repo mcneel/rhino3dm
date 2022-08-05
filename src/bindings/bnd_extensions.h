@@ -226,6 +226,18 @@ public:
   BND_TUPLE GetKeyValue(int i) const;
 };
 
+class BND_File3dmEmbeddedFileTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmEmbeddedFileTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::EmbeddedFile); }
+  void Add(const class BND_File3dmEmbeddedFile& ef);
+  class BND_File3dmEmbeddedFile* FindIndex(int index);
+  class BND_File3dmEmbeddedFile* IterIndex(int index); // helper function for iterator
+  class BND_File3dmEmbeddedFile* FindId(BND_UUID id);
+};
+
 class BND_ONXModel
 {
 public:
@@ -291,6 +303,8 @@ public:
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
+  BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
+
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)
