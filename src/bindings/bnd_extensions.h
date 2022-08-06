@@ -305,6 +305,7 @@ public:
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
   BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
   BND_File3dmSkylight& Skylight() { return m_Skylight; }
+  BND_File3dmGroundPlane& GroundPlane() { return m_GroundPlane; }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
@@ -319,6 +320,7 @@ public:
 
 private:
   BND_File3dmSkylight m_Skylight;
+  BND_File3dmGroundPlane m_GroundPlane;
 };
 
 class BND_File3dmWriteOptions
