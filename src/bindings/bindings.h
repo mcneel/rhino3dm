@@ -104,6 +104,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_embedded_file.h"
 #include "bnd_skylight.h"
 #include "bnd_ground_plane.h"
+#include "bnd_safe_frame.h"
 #include "bnd_extensions.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"
