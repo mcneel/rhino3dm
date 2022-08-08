@@ -223,6 +223,11 @@ void initDefines(pybind11::module& m)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
     ;
+
+  py::enum_<ON_Dithering::Methods>(m, "DitheringMethods")
+    .value("SimpleNoise", ON_Dithering::Methods::SimpleNoise)
+    .value("FloydSteinberg", ON_Dithering::Methods::FloydSteinberg)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
