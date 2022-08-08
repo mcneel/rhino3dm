@@ -238,6 +238,17 @@ public:
   class BND_File3dmEmbeddedFile* FindId(BND_UUID id);
 };
 
+class BND_File3dmPostEffectTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmPostEffectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::PostEffect); }
+  class BND_File3dmPostEffect* FindIndex(int index);
+  class BND_File3dmPostEffect* IterIndex(int index); // helper function for iterator
+  class BND_File3dmPostEffect* FindId(BND_UUID id);
+};
+
 class BND_ONXModel
 {
 public:
@@ -312,7 +323,7 @@ public:
   BND_File3dmLinearWorkflow& LinearWorkflow() { return m_LinearWorkflow; }
   BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
   BND_File3dmSun& Sun() { return m_Sun; }
-
+  BND_File3dmPostEffectTable PostEffects() { return BND_File3dmPostEffectTable(m_model); }
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)

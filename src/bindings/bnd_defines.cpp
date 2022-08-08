@@ -233,6 +233,12 @@ void initDefines(pybind11::module& m)
     .value("Automatic", ON_RenderChannels::Modes::Automatic)
     .value("Custom", ON_RenderChannels::Modes::Custom)
     ;
+
+  py::enum_<ON_PostEffect::Types>(m, "PostEffectTypes")
+    .value("Early", ON_PostEffect::Types::Early)
+    .value("ToneMapping", ON_PostEffect::Types::ToneMapping)
+    .value("Late", ON_PostEffect::Types::Late)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)

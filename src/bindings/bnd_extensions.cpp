@@ -1116,6 +1116,34 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::PostEffect, index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
+  if (nullptr != model_pep)
+    return new BND_File3dmPostEffect(model_pep, &compref);
+
+  return nullptr;
+}
+
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindId(BND_UUID id)
+{
+  const ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::PostEffect, _id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
+  if (nullptr != model_pep)
+    return new BND_File3dmPostEffect(model_pep, &compref);
+
+  return nullptr;
+}
+
 #if defined(ON_WASM_COMPILE)
 BND_ONXModel* BND_ONXModel::WasmFromByteArray(std::string sbuffer)
 {
@@ -1454,6 +1482,19 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*> >(m, "__PostEffectIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*> &it) -> PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>::next)
+    ;
+
+  py::class_<BND_File3dmPostEffectTable>(m, "File3dmPostEffectTable")
+    .def("__len__", &BND_File3dmPostEffectTable::Count)
+    .def("__getitem__", &BND_File3dmPostEffectTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>(s.cast<BND_File3dmPostEffectTable &>(), s); })
+    .def("FindIndex", &BND_File3dmPostEffectTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmPostEffectTable::FindId, py::arg("id"))
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
@@ -1492,6 +1533,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("LinearWorkflow", &BND_ONXModel::LinearWorkflow)
     .def_property_readonly("RenderChannels", &BND_ONXModel::RenderChannels)
     .def_property_readonly("Sun", &BND_ONXModel::Sun)
+    .def_property_readonly("PostEffects", &BND_ONXModel::PostEffects)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
