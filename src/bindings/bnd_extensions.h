@@ -311,6 +311,7 @@ public:
   BND_File3dmDithering& Dithering() { return m_Dithering; }
   BND_File3dmLinearWorkflow& LinearWorkflow() { return m_LinearWorkflow; }
   BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
+  BND_File3dmSun& Sun() { return m_Sun; }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
@@ -331,6 +332,7 @@ private:
   BND_File3dmDithering m_Dithering;
   BND_File3dmLinearWorkflow m_LinearWorkflow;
   BND_File3dmRenderChannels m_RenderChannels;
+  BND_File3dmSun m_Sun;
 };
 
 class BND_File3dmWriteOptions
