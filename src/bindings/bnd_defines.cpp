@@ -228,6 +228,11 @@ void initDefines(pybind11::module& m)
     .value("SimpleNoise", ON_Dithering::Methods::SimpleNoise)
     .value("FloydSteinberg", ON_Dithering::Methods::FloydSteinberg)
     ;
+
+  py::enum_<ON_RenderChannels::Modes>(m, "RenderChannelsModes")
+    .value("Automatic", ON_RenderChannels::Modes::Automatic)
+    .value("Custom", ON_RenderChannels::Modes::Custom)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)

@@ -310,6 +310,7 @@ public:
   BND_File3dmCurrentEnvironment& CurrentEnvironment() { return m_CurrentEnvironment; }
   BND_File3dmDithering& Dithering() { return m_Dithering; }
   BND_File3dmLinearWorkflow& LinearWorkflow() { return m_LinearWorkflow; }
+  BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
@@ -329,6 +330,7 @@ private:
   BND_File3dmCurrentEnvironment m_CurrentEnvironment;
   BND_File3dmDithering m_Dithering;
   BND_File3dmLinearWorkflow m_LinearWorkflow;
+  BND_File3dmRenderChannels m_RenderChannels;
 };
 
 class BND_File3dmWriteOptions
