@@ -3,7 +3,6 @@
 
 BND_File3dmGroundPlane::BND_File3dmGroundPlane()
 {
-  // Not used but the Python templates won't compile without it.
 }
 
 BND_File3dmGroundPlane::BND_File3dmGroundPlane(ON_GroundPlane* gp)

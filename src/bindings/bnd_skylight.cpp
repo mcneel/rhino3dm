@@ -3,7 +3,6 @@
 
 BND_File3dmSkylight::BND_File3dmSkylight()
 {
-  // Not used but the Python templates won't compile without it.
 }
 
 BND_File3dmSkylight::BND_File3dmSkylight(ON_Skylight* sl)

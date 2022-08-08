@@ -3,7 +3,6 @@
 
 BND_File3dmSafeFrame::BND_File3dmSafeFrame()
 {
-  // Not used but the Python templates won't compile without it.
 }
 
 BND_File3dmSafeFrame::BND_File3dmSafeFrame(ON_SafeFrame* sf)
