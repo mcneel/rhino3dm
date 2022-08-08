@@ -107,6 +107,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_safe_frame.h"
 #include "bnd_current_environment.h"
 #include "bnd_dithering.h"
+#include "bnd_linear_workflow.h"
 #include "bnd_extensions.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"

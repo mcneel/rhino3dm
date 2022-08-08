@@ -188,7 +188,8 @@ BND_ONXModel::BND_ONXModel(ONX_Model* m)
   m_GroundPlane(&m->GroundPlane()),
   m_SafeFrame(&m->SafeFrame()),
   m_CurrentEnvironment(&m->CurrentEnvironment()),
-  m_Dithering(&m->Dithering())
+  m_Dithering(&m->Dithering()),
+  m_LinearWorkflow(&m->LinearWorkflow())
 {
   m_model.reset(m);
 }
@@ -1486,6 +1487,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("SafeFrame", &BND_ONXModel::SafeFrame)
     .def_property_readonly("CurrentEnvironment", &BND_ONXModel::CurrentEnvironment)
     .def_property_readonly("Dithering", &BND_ONXModel::Dithering)
+    .def_property_readonly("LinearWorkflow", &BND_ONXModel::LinearWorkflow)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1654,6 +1656,7 @@ void initExtensionsBindings(void*)
     .function("safeFrame", &BND_ONXModel::SafeFrame)
     .function("currentEnvironment", &BND_ONXModel::CurrentEnvironment)
     .function("dithering", &BND_ONXModel::Dithering)
+    .function("linearWorkflow", &BND_ONXModel::LinearWorkflow)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)
