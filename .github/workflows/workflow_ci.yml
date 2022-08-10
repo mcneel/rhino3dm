@@ -54,13 +54,13 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: safe directory
-        run: git config --global --add safe.directory /github/workspace
+        run: git config --global --add safe.directory "*"
       - name: checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v6.3
+        uses: tj-actions/changed-files@v25
         id: changed-files
         with:
           files: src/dotnet
@@ -73,13 +73,13 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: safe directory
-        run: git config --global --add safe.directory /github/workspace
+        run: git config --global --add safe.directory "*"
       - name: checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v6.3
+        uses: tj-actions/changed-files@v25
         id: changed-files
         with:
           files: |
