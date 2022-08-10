@@ -53,8 +53,6 @@ jobs:
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
-      - name: safe directory
-        run: git config --global --add safe.directory /github/workspace
       - name: checkout
         uses: actions/checkout@v2
         with:
@@ -72,8 +70,6 @@ jobs:
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
-      - name: safe directory
-        run: git config --global --add safe.directory /github/workspace
       - name: checkout
         uses: actions/checkout@v2
         with:
