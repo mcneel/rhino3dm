@@ -66,7 +66,9 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
+    - name: safe directory
+      run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
       run: git submodule update --init
     - name: build python manylinux
