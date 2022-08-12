@@ -1094,7 +1094,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindIndex(int index)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
   if (nullptr != model_ef)
-    return new BND_File3dmEmbeddedFile(model_ef, &compref);
+    return new BND_File3dmEmbeddedFile(model_ef, &compref); // I don't understand the ownership around this object.
 
   return nullptr;
 }
@@ -1111,7 +1111,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
   if (nullptr != model_ef)
-    return new BND_File3dmEmbeddedFile(model_ef, &compref);
+    return new BND_File3dmEmbeddedFile(model_ef, &compref); // I don't understand the ownership around this object.
 
   return nullptr;
 }
@@ -1122,7 +1122,7 @@ BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindIndex(int index)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
   if (nullptr != model_pep)
-    return new BND_File3dmPostEffect(model_pep, &compref);
+    return new BND_File3dmPostEffect(model_pep, &compref); // I don't understand the ownership around this object.
 
   return nullptr;
 }
@@ -1139,9 +1139,43 @@ BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindId(BND_UUID id)
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
   if (nullptr != model_pep)
-    return new BND_File3dmPostEffect(model_pep, &compref);
+    return new BND_File3dmPostEffect(model_pep, &compref); // I don't understand the ownership around this object.
 
   return nullptr;
+}
+
+int BND_File3dmDecalTable::Count() const
+{
+	auto it = m_model->GetDecalIterator(nullptr);
+
+	int count = 0;
+	ON_Decal* decal = 0;
+	while (nullptr != (decal = it.Next()))
+	{
+		count++;
+	}
+
+	return count;
+}
+
+BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
+{
+	auto it = m_model->GetDecalIterator(nullptr);
+
+	int count = 0;
+	ON_Decal* decal = 0;
+	while (nullptr != (decal = it.Next()))
+	{
+		if (index == count++)
+			return new BND_File3dmDecal(decal); // I don't understand the ownership around this object.
+	}
+
+	return nullptr;
+}
+
+BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
+{
+  return FindIndex(index);
 }
 
 #if defined(ON_WASM_COMPILE)
@@ -1495,6 +1529,18 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmPostEffectTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*> >(m, "__DecalIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*> &it) -> PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*>::next)
+    ;
+
+  py::class_<BND_File3dmDecalTable>(m, "File3dmDecalTable")
+    .def("__len__", &BND_File3dmDecalTable::Count)
+    .def("__getitem__", &BND_File3dmDecalTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*>(s.cast<BND_File3dmDecalTable&>(), s); })
+    .def("FindIndex", &BND_File3dmDecalTable::FindIndex, py::arg("index"))
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
@@ -1534,6 +1580,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("RenderChannels", &BND_ONXModel::RenderChannels)
     .def_property_readonly("Sun", &BND_ONXModel::Sun)
     .def_property_readonly("PostEffects", &BND_ONXModel::PostEffects)
+    .def_property_readonly("Decals", &BND_ONXModel::Decals)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1673,6 +1720,19 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
+    .function("count", &BND_File3dmPostEffectTable::Count)
+    .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
+    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
+    ;
+
+  class_<BND_File3dmDecalTable>(m, "File3dmDecalTable")
+    .function("count", &BND_File3dmDecalTable::Count)
+    .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
+    .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .function("destroy", &BND_ONXModel::Destroy)
@@ -1705,6 +1765,8 @@ void initExtensionsBindings(void*)
     .function("linearWorkflow", &BND_ONXModel::LinearWorkflow)
     .function("renderChannels", &BND_ONXModel::RenderChannels)
     .function("sun", &BND_ONXModel::Sun)
+    .function("postEffects", &BND_ONXModel::PostEffects)
+    .function("decals", &BND_ONXModel::Decals)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)

@@ -249,6 +249,18 @@ public:
   class BND_File3dmPostEffect* FindId(BND_UUID id);
 };
 
+class BND_File3dmDecalTable
+{
+private:
+  std::shared_ptr<ONX_Model> m_model;
+
+public:
+  BND_File3dmDecalTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const;
+  class BND_File3dmDecal* FindIndex(int index);
+  class BND_File3dmDecal* IterIndex(int index); // helper function for iterator
+};
+
 class BND_ONXModel
 {
 public:
@@ -324,6 +336,7 @@ public:
   BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
   BND_File3dmSun& Sun() { return m_Sun; }
   BND_File3dmPostEffectTable PostEffects() { return BND_File3dmPostEffectTable(m_model); }
+  BND_File3dmDecalTable Decals() { return BND_File3dmDecalTable(m_model); }
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)

@@ -239,6 +239,21 @@ void initDefines(pybind11::module& m)
     .value("ToneMapping", ON_PostEffect::Types::ToneMapping)
     .value("Late", ON_PostEffect::Types::Late)
     ;
+
+  py::enum_<ON_Decal::Mappings>(m, "DecalMappings")
+    .value("None", ON_Decal::Mappings::None)
+    .value("Planar", ON_Decal::Mappings::Planar)
+    .value("Cylindrical", ON_Decal::Mappings::Cylindrical)
+    .value("Spherical", ON_Decal::Mappings::Spherical)
+    .value("UV", ON_Decal::Mappings::UV)
+    ;
+
+  py::enum_<ON_Decal::Projections>(m, "DecalProjections")
+    .value("None", ON_Decal::Projections::None)
+    .value("Forward", ON_Decal::Projections::Forward)
+    .value("Backward", ON_Decal::Projections::Backward)
+    .value("Both", ON_Decal::Projections::Both)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
