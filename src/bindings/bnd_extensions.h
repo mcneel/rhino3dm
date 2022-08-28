@@ -102,6 +102,28 @@ public:
   class BND_Material* FromAttributes(const class BND_3dmObjectAttributes* attributes);
 };
 
+class BND_File3dmLinetypeTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmLinetypeTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::LinePattern); }
+  void Add(const class BND_Linetype& linetype);
+  void Delete(BND_UUID id);
+  class BND_Linetype* FindIndex(int index);
+  class BND_Linetype* IterIndex(int index); // helper function for iterator
+  class BND_Linetype* FindId(BND_UUID id);
+  class BND_Linetype* FindName(std::wstring name);
+  class BND_Linetype* FromAttributes(const BND_3dmObjectAttributes*);
+  class BND_Linetype* FromLayerIndex(int index);
+  class BND_Linetype* GetCurrent();
+  void SetCurrent(BND_Linetype* linetype);
+  ON::object_linetype_source GetCurrentSource() { return m_model->m_settings.m_current_linetype_source; }
+  void SetCurrentSource(ON::object_linetype_source source) { m_model->m_settings.m_current_linetype_source = source; }
+  double GetScale() const { return m_model->m_settings.m_linetype_display_scale; }
+  void SetScale(double scale) { m_model->m_settings.m_linetype_display_scale = scale; }
+};
+
 class BND_File3dmBitmapTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -279,7 +301,7 @@ public:
 
   BND_ONXModel_ObjectTable Objects() { return BND_ONXModel_ObjectTable(m_model); }
   BND_File3dmMaterialTable Materials() { return BND_File3dmMaterialTable(m_model); }
-  //public File3dmLinetypeTable AllLinetypes
+  BND_File3dmLinetypeTable Linetypes() { return BND_File3dmLinetypeTable(m_model); }
   BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
   BND_File3dmGroupTable AllGroups() { return BND_File3dmGroupTable(m_model); }
