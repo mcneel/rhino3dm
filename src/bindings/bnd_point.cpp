@@ -16,6 +16,16 @@ BND_Interval::BND_Interval(double t0, double t1)
   m_t1 = t1;
 }
 
+bool BND_Interval::operator==(const BND_Interval& other) const
+{
+  return m_t0 == other.m_t0 && m_t1 == other.m_t1;
+}
+
+bool BND_Interval::operator!=(const BND_Interval& other) const
+{
+  return m_t0 != other.m_t0 || m_t1 != other.m_t1;
+}
+
 ON_3dPoint BND_Point3d::Transform(const ON_3dPoint& pt, const BND_Transform& transform)
 {
   ON_3dPoint rc = transform.m_xform * pt;
@@ -222,6 +232,8 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("X", &ON_2dPoint::x)
     .def_readwrite("Y", &ON_2dPoint::y)
     .def(py::self + py::self)
+    .def(py::self == py::self)
+    .def(py::self != py::self)
     .def("DistanceTo", &ON_2dPoint::DistanceTo, py::arg("other"));
 
   py::class_<ON_3dPoint>(m, "Point3d")
@@ -235,6 +247,8 @@ void initPointBindings(pybind11::module& m)
     .def(py::self * double())
     .def(py::self + ON_3dVector())
     .def(py::self * ON_Xform())
+    .def(py::self == py::self)
+    .def(py::self != py::self)
     .def("DistanceTo", &ON_3dPoint::DistanceTo, py::arg("other"))
     .def("Transform", &BND_Point3d::Transform, py::arg("xform"));
 
@@ -244,13 +258,17 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("X", &ON_4dPoint::x)
     .def_readwrite("Y", &ON_4dPoint::y)
     .def_readwrite("Z", &ON_4dPoint::z)
-    .def_readwrite("W", &ON_4dPoint::w);
+    .def_readwrite("W", &ON_4dPoint::w)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
   py::class_<ON_2dVector>(m, "Vector2d")
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodeVector2d)
     .def_readwrite("X", &ON_2dVector::x)
-    .def_readwrite("Y", &ON_2dVector::y);
+    .def_readwrite("Y", &ON_2dVector::y)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
   py::class_<ON_3dVector>(m, "Vector3d")
     .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
@@ -262,21 +280,27 @@ void initPointBindings(pybind11::module& m)
     .def_static("VectorAngle", &ON_3dVectorVectorAngle3, py::arg("v1"), py::arg("v2"), py::arg("vNormal"))
     .def_readwrite("X", &ON_3dVector::x)
     .def_readwrite("Y", &ON_3dVector::y)
-    .def_readwrite("Z", &ON_3dVector::z);
-    
+    .def_readwrite("Z", &ON_3dVector::z)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
+
   py::class_<ON_3fVector>(m, "Vector3f")
     .def(py::init<float, float, float>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def("Encode", &EncodeVector3f)
     .def_readwrite("X", &ON_3fVector::x)
     .def_readwrite("Y", &ON_3fVector::y)
-    .def_readwrite("Z", &ON_3fVector::z);
+    .def_readwrite("Z", &ON_3fVector::z)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
   py::class_<ON_2fPoint>(m, "Point2f")
     .def(py::init<float, float>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodePoint2f)
     .def_readwrite("X", &ON_2fPoint::x)
     .def_readwrite("Y", &ON_2fPoint::y)
-    .def(py::self + py::self);
+    .def(py::self + py::self)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
   py::class_<ON_3fPoint>(m, "Point3f")
     .def(py::init<float, float, float>(), py::arg("x"), py::arg("y"), py::arg("z"))
@@ -284,12 +308,16 @@ void initPointBindings(pybind11::module& m)
     .def_readwrite("X", &ON_3fPoint::x)
     .def_readwrite("Y", &ON_3fPoint::y)
     .def_readwrite("Z", &ON_3fPoint::z)
-    .def(py::self + py::self);
+    .def(py::self + py::self)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
   py::class_<BND_Interval>(m, "Interval")
     .def(py::init<double, double>(), py::arg("t0"), py::arg("t1"))
     .def_readwrite("T0", &BND_Interval::m_t0)
-    .def_readwrite("T1", &BND_Interval::m_t1);
+    .def_readwrite("T1", &BND_Interval::m_t1)
+    .def(py::self == py::self)
+    .def(py::self != py::self);
 
 }
 #else

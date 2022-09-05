@@ -16,6 +16,8 @@ public:
   BND_Interval(double t0, double t1);
   double m_t0;
   double m_t1;
+  bool operator==(const BND_Interval& other) const;
+  bool operator!=(const BND_Interval& other) const;
 };
 
 class BND_Point3d
