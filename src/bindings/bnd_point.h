@@ -1,5 +1,8 @@
 #include "bindings.h"
 
+#include <sstream>
+#include <string>
+
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
