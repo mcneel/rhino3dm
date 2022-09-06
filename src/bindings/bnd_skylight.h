@@ -28,7 +28,7 @@ public:
   void SetCustomEnvironmentOn(bool v) const { m_skylight->SetCustomEnvironmentOn(v); }
 
   ON_UUID GetCustomEnvironment(void) const { return m_skylight->CustomEnvironment(); }
-  void SetCustomEnvironment(UUID v) const { m_skylight->SetCustomEnvironment(v); }
+  void SetCustomEnvironment(ON_UUID v) const { m_skylight->SetCustomEnvironment(v); }
 
   double GetShadowIntensity(void) const { return m_skylight->ShadowIntensity(); }
   void SetShadowIntensity(double v) const { m_skylight->SetShadowIntensity(v); }
