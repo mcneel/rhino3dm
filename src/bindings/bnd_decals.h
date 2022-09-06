@@ -22,8 +22,6 @@ public:
   BND_File3dmDecal(const BND_File3dmDecal& other);
   BND_File3dmDecal(ON_Decal* decal);
 
-  BND_UUID ModelComponentId(void) const { return ON_UUID_to_Binding(m_decal->ModelComponentId()); }
-
   BND_UUID TextureInstanceId(void) const { return ON_UUID_to_Binding(m_decal->TextureInstanceId()); }
   void SetTextureInstanceId(BND_UUID v) const { m_decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
 
@@ -77,4 +75,18 @@ public:
 
   double BoundsMaxV(void) const;
   void SetBoundsMaxV(double v) const;
+};
+
+class BND_File3dmDecalTable
+{
+private:
+  ON_3dmObjectAttributes* m_attr = nullptr;
+
+public:
+  BND_File3dmDecalTable() { }
+  BND_File3dmDecalTable(ON_3dmObjectAttributes* a);
+
+  int Count() const;
+  class BND_File3dmDecal* FindIndex(int index);
+  class BND_File3dmDecal* IterIndex(int index); // helper function for iterator
 };

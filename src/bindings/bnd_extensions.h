@@ -11,8 +11,8 @@ void initExtensionsBindings(void* m);
 class BND_FileObject
 {
 public:
-  BND_GeometryBase* m_geometry = nullptr;
-  BND_3dmObjectAttributes* m_attributes = nullptr;
+  class BND_GeometryBase* m_geometry = nullptr;
+  class BND_3dmObjectAttributes* m_attributes = nullptr;
 
   BND_GeometryBase* GetGeometry() { return m_geometry; };
   BND_3dmObjectAttributes* GetAttributes() { return m_attributes; }
@@ -131,13 +131,13 @@ public:
 
 class BND_File3dmGroupTable
 {
-	std::shared_ptr<ONX_Model> m_model;
+  std::shared_ptr<ONX_Model> m_model;
 public:
-	BND_File3dmGroupTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
-	int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Group); }
-	void Add(const class BND_Group& group);
-	class BND_Group* FindIndex(int index);
-	class BND_Group* IterIndex(int index); // helper function for iterator
+  BND_File3dmGroupTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Group); }
+  void Add(const class BND_Group& group);
+  class BND_Group* FindIndex(int index);
+  class BND_Group* IterIndex(int index); // helper function for iterator
   class BND_Group* FindName(std::wstring name);
   BND_TUPLE GroupMembers(int groupIndex);
 };
@@ -226,41 +226,6 @@ public:
   BND_TUPLE GetKeyValue(int i) const;
 };
 
-class BND_File3dmEmbeddedFileTable
-{
-  std::shared_ptr<ONX_Model> m_model;
-public:
-  BND_File3dmEmbeddedFileTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
-  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::EmbeddedFile); }
-  void Add(const class BND_File3dmEmbeddedFile& ef);
-  class BND_File3dmEmbeddedFile* FindIndex(int index);
-  class BND_File3dmEmbeddedFile* IterIndex(int index); // helper function for iterator
-  class BND_File3dmEmbeddedFile* FindId(BND_UUID id);
-};
-
-class BND_File3dmPostEffectTable
-{
-  std::shared_ptr<ONX_Model> m_model;
-public:
-  BND_File3dmPostEffectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
-  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::PostEffect); }
-  class BND_File3dmPostEffect* FindIndex(int index);
-  class BND_File3dmPostEffect* IterIndex(int index); // helper function for iterator
-  class BND_File3dmPostEffect* FindId(BND_UUID id);
-};
-
-class BND_File3dmDecalTable
-{
-private:
-  std::shared_ptr<ONX_Model> m_model;
-
-public:
-  BND_File3dmDecalTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
-  int Count() const;
-  class BND_File3dmDecal* FindIndex(int index);
-  class BND_File3dmDecal* IterIndex(int index); // helper function for iterator
-};
-
 class BND_ONXModel
 {
 public:
@@ -330,13 +295,13 @@ public:
   BND_File3dmSkylight& Skylight() { return m_Skylight; }
   BND_File3dmGroundPlane& GroundPlane() { return m_GroundPlane; }
   BND_File3dmSafeFrame& SafeFrame() { return m_SafeFrame; }
-  BND_File3dmCurrentEnvironment& CurrentEnvironment() { return m_CurrentEnvironment; }
   BND_File3dmDithering& Dithering() { return m_Dithering; }
   BND_File3dmLinearWorkflow& LinearWorkflow() { return m_LinearWorkflow; }
   BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
   BND_File3dmSun& Sun() { return m_Sun; }
   BND_File3dmPostEffectTable PostEffects() { return BND_File3dmPostEffectTable(m_model); }
-  BND_File3dmDecalTable Decals() { return BND_File3dmDecalTable(m_model); }
+  BND_File3dmRenderEnvironments& RenderEnvironments() { return m_RenderEnvironments; }
+
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)
@@ -349,14 +314,16 @@ public:
   static bool ReadTest(std::wstring filepath);
 
 private:
+  BND_File3dmSun m_Sun;
   BND_File3dmSkylight m_Skylight;
   BND_File3dmGroundPlane m_GroundPlane;
   BND_File3dmSafeFrame m_SafeFrame;
-  BND_File3dmCurrentEnvironment m_CurrentEnvironment;
   BND_File3dmDithering m_Dithering;
   BND_File3dmLinearWorkflow m_LinearWorkflow;
   BND_File3dmRenderChannels m_RenderChannels;
-  BND_File3dmSun m_Sun;
+//  BND_File3dmRenderMaterials m_RenderMaterials;
+  BND_File3dmRenderEnvironments m_RenderEnvironments;
+//  BND_File3dmRenderTextures m_RenderTextures;
 };
 
 class BND_File3dmWriteOptions

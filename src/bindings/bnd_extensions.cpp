@@ -184,14 +184,14 @@ BND_ONXModel::BND_ONXModel()
 
 BND_ONXModel::BND_ONXModel(ONX_Model* m)
   :
+  m_Sun(&m->Sun()),
   m_Skylight(&m->Skylight()),
   m_GroundPlane(&m->GroundPlane()),
   m_SafeFrame(&m->SafeFrame()),
-  m_CurrentEnvironment(&m->CurrentEnvironment()),
   m_Dithering(&m->Dithering()),
   m_LinearWorkflow(&m->LinearWorkflow()),
   m_RenderChannels(&m->RenderChannels()),
-  m_Sun(&m->Sun())
+  m_RenderEnvironments(m)
 {
   m_model.reset(m);
 }
@@ -1081,10 +1081,9 @@ void BND_File3dmStringTable::Delete(std::wstring key)
 
 void BND_File3dmEmbeddedFileTable::Add(const BND_File3dmEmbeddedFile& ef)
 {
-  const auto* onef = ef.m_embedded_file;
-  if (nullptr != onef)
+  if (nullptr != ef.m_embedded_file)
   {
-    m_model->AddModelComponent(*onef);
+    m_model->AddModelComponent(*ef.m_embedded_file);
   }
 }
 
@@ -1144,38 +1143,45 @@ BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
+{
+  m_attr = a;
+}
+
 int BND_File3dmDecalTable::Count() const
 {
-	auto it = m_model->GetDecalIterator(nullptr);
+  if (nullptr == m_attr)
+    return 0;
 
-	int count = 0;
-	ON_Decal* decal = 0;
-	while (nullptr != (decal = it.Next()))
-	{
-		count++;
-	}
-
-	return count;
+  return m_attr->GetDecalArray().Count();
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
 {
-	auto it = m_model->GetDecalIterator(nullptr);
+  if (nullptr == m_attr)
+    return nullptr;
 
-	int count = 0;
-	ON_Decal* decal = 0;
-	while (nullptr != (decal = it.Next()))
-	{
-		if (index == count++)
-			return new BND_File3dmDecal(decal); // I don't understand the ownership around this object.
-	}
+  const auto& decals = m_attr->GetDecalArray();
 
-	return nullptr;
+  if ((index < 0) || (index >= decals.Count()))
+    return nullptr;
+
+  return new BND_File3dmDecal(decals[index]); // I don't understand the ownership around this object.
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
 {
   return FindIndex(index);
+}
+
+BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr)
+  :
+  m_displacement(attr),
+  m_edge_softening(attr),
+  m_thickening(attr),
+  m_curve_piping(attr),
+  m_shutlining(attr)
+{
 }
 
 #if defined(ON_WASM_COMPILE)
@@ -1414,7 +1420,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmBitmapTable::FindId, py::arg("id"))
     ;
 
-
   py::class_<PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> >(m, "__LayerIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*> &it) -> PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>::next)
@@ -1541,6 +1546,33 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindIndex", &BND_File3dmDecalTable::FindIndex, py::arg("index"))
     ;
 
+  py::class_<BND_File3dmMeshModifiers>(m, "File3dmMeshModifiers")
+    .def_property_readonly("Displacement", &BND_File3dmMeshModifiers::Displacement)
+    .def_property_readonly("EdgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening)
+    .def_property_readonly("Thickening", &BND_File3dmMeshModifiers::Thickening)
+    .def_property_readonly("CurvePiping", &BND_File3dmMeshModifiers::CurvePiping)
+    .def_property_readonly("Shutlining", &BND_File3dmMeshModifiers::Shutlining)
+    .def("CreateDisplacement", &BND_File3dmMeshModifiers::CreateDisplacement)
+    .def("CreateEdgeSoftening", &BND_File3dmMeshModifiers::CreateEdgeSoftening)
+    .def("CreateThickening ", &BND_File3dmMeshModifiers::CreateThickening)
+    .def("CreateCurvePiping", &BND_File3dmMeshModifiers::CreateCurvePiping)
+    .def("CreateShutlining ", &BND_File3dmMeshModifiers::CreateShutlining)
+    ;
+
+  py::class_<PyBNDIterator<BND_File3dmShutliningCurveTable&, BND_File3dmShutliningCurve*> >(m, "__ShutliningCurveIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmShutliningCurveTable&, BND_File3dmShutliningCurve*> &it) -> PyBNDIterator<BND_File3dmShutliningCurveTable&, BND_File3dmShutliningCurve*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmShutliningCurveTable&, BND_File3dmShutliningCurve*>::next)
+    ;
+
+  py::class_<BND_File3dmShutliningCurveTable>(m, "File3dmShutliningCurveTable")
+    .def("__len__", &BND_File3dmShutliningCurveTable::Count)
+    .def("__getitem__", &BND_File3dmShutliningCurveTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmShutliningCurveTable&, BND_File3dmShutliningCurve*>(s.cast<BND_File3dmShutliningCurveTable&>(), s); })
+    .def("Add", &BND_File3dmShutliningCurveTable::Add)
+    .def("FindIndex", &BND_File3dmShutliningCurveTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmShutliningCurveTable::FindId, py::arg("id"))
+    ;
+
   py::class_<BND_ONXModel>(m, "File3dm")
     .def(py::init<>())
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
@@ -1574,13 +1606,16 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Skylight", &BND_ONXModel::Skylight)
     .def_property_readonly("GroundPlane", &BND_ONXModel::GroundPlane)
     .def_property_readonly("SafeFrame", &BND_ONXModel::SafeFrame)
-    .def_property_readonly("CurrentEnvironment", &BND_ONXModel::CurrentEnvironment)
+
+//    .def_property_readonly("RenderMaterials", &BND_ONXModel::RenderMaterials)
+    .def_property_readonly("RenderEnvironments", &BND_ONXModel::RenderEnvironments)
+//    .def_property_readonly("RenderTextures", &BND_ONXModel::RenderTextures)
+
     .def_property_readonly("Dithering", &BND_ONXModel::Dithering)
     .def_property_readonly("LinearWorkflow", &BND_ONXModel::LinearWorkflow)
     .def_property_readonly("RenderChannels", &BND_ONXModel::RenderChannels)
     .def_property_readonly("Sun", &BND_ONXModel::Sun)
     .def_property_readonly("PostEffects", &BND_ONXModel::PostEffects)
-    .def_property_readonly("Decals", &BND_ONXModel::Decals)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1713,6 +1748,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmEmbeddedFileTable>("File3dmEmbeddedFileTable")
+    .constructor<>()
     .function("count", &BND_File3dmEmbeddedFileTable::Count)
     .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmEmbeddedFileTable::Add)
@@ -1721,16 +1757,41 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
+    .constructor<>()
     .function("count", &BND_File3dmPostEffectTable::Count)
     .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
     .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
     ;
 
-  class_<BND_File3dmDecalTable>(m, "File3dmDecalTable")
+  class_<BND_ONXModel>("File3dmDecalTable")
+    .constructor<>()
     .function("count", &BND_File3dmDecalTable::Count)
     .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
     .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
+    ;
+
+  class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
+    .constructor<>()
+    .property("Displacement", &BND_File3dmMeshModifiers::Displacement)
+    .property("EdgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening)
+    .property("Thickening", &BND_File3dmMeshModifiers::Thickening)
+    .property("CurvePiping", &BND_File3dmMeshModifiers::CurvePiping)
+    .property("Shutlining", &BND_File3dmMeshModifiers::Shutlining)
+    .function("CreateDisplacement", &BND_File3dmMeshModifiers::CreateDisplacement)
+    .function("CreateEdgeSoftening", &BND_File3dmMeshModifiers::CreateEdgeSoftening)
+    .function("CreateThickening ", &BND_File3dmMeshModifiers::CreateThickening)
+    .function("CreateCurvePiping", &BND_File3dmMeshModifiers::CreateCurvePiping)
+    .function("CreateShutlining ", &BND_File3dmMeshModifiers::CreateShutlining)
+    ;
+
+  class_<BND_File3dmShutliningCurveTable>("File3dmShutliningCurveTable")
+    .constructor<>()
+    .function("count", &BND_File3dmShutliningCurveTable::Count)
+    .function("get", &BND_File3dmShutliningCurveTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmShutliningCurveTable::Add)
+    .function("findIndex", &BND_File3dmShutliningCurveTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmShutliningCurveTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_ONXModel>("File3dm")
@@ -1760,13 +1821,11 @@ void initExtensionsBindings(void*)
     .function("skylight", &BND_ONXModel::Skylight)
     .function("groundPlane", &BND_ONXModel::GroundPlane)
     .function("safeFrame", &BND_ONXModel::SafeFrame)
-    .function("currentEnvironment", &BND_ONXModel::CurrentEnvironment)
     .function("dithering", &BND_ONXModel::Dithering)
     .function("linearWorkflow", &BND_ONXModel::LinearWorkflow)
     .function("renderChannels", &BND_ONXModel::RenderChannels)
     .function("sun", &BND_ONXModel::Sun)
     .function("postEffects", &BND_ONXModel::PostEffects)
-    .function("decals", &BND_ONXModel::Decals)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)

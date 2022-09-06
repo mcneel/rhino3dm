@@ -29,3 +29,17 @@ public:
   std::wstring GetParameter(const wchar_t* n) const { return static_cast<const wchar_t*>(m_post_effect->GetParameter(n).AsString()); }
   bool SetParameter(const wchar_t* n, const std::wstring& v) { return m_post_effect->SetParameter(n, v.c_str()); }
 };
+
+class BND_File3dmPostEffectTable
+{
+private:
+  std::shared_ptr<ONX_Model> m_model;
+
+public:
+  BND_File3dmPostEffectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::PostEffect); }
+  class BND_File3dmPostEffect* FindIndex(int index);
+  class BND_File3dmPostEffect* IterIndex(int index); // helper function for iterator
+  class BND_File3dmPostEffect* FindId(BND_UUID id);
+};

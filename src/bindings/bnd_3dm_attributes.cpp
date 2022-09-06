@@ -6,6 +6,9 @@ BND_3dmObjectAttributes::BND_3dmObjectAttributes()
 }
 
 BND_3dmObjectAttributes::BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
+  :
+  m_decals(attrs),
+  m_mesh_modifiers(attrs)
 {
   SetTrackedPointer(attrs, compref);
 }
@@ -139,6 +142,8 @@ void init3dmAttributesBindings(pybind11::module& m)
     .def_property("ViewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
     .def_property("ActiveSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
     .def_property_readonly("GroupCount", &BND_3dmObjectAttributes::GroupCount)
+    .def_property_readonly("Decals", &BND_3dmObjectAttributes::Decals)
+    .def_property_readonly("MeshModifiers", &BND_3dmObjectAttributes::MeshModifiers)
     .def("GetGroupList", &BND_3dmObjectAttributes::GetGroupList)
     .def("AddToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .def("RemoveFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
@@ -181,6 +186,8 @@ void init3dmAttributesBindings(void*)
     .property("viewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
     .property("activeSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
     .property("groupCount", &BND_3dmObjectAttributes::GroupCount)
+    .property("Decals", &BND_3dmObjectAttributes::Decals)
+    .property("MeshModifiers", &BND_3dmObjectAttributes::MeshModifiers)
     .function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
     .function("addToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .function("removeFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)

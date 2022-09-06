@@ -29,3 +29,18 @@ public:
   bool Write(const std::wstring& f) const { return m_embedded_file->SaveToFile(f.c_str()); }
   bool Clear(void) const { return m_embedded_file->Clear(); }
 };
+
+class BND_File3dmEmbeddedFileTable
+{
+private:
+  std::shared_ptr<ONX_Model> m_model;
+
+public:
+  BND_File3dmEmbeddedFileTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::EmbeddedFile); }
+  void Add(const BND_File3dmEmbeddedFile& ef);
+  BND_File3dmEmbeddedFile* FindIndex(int index);
+  BND_File3dmEmbeddedFile* IterIndex(int index); // helper function for iterator
+  BND_File3dmEmbeddedFile* FindId(BND_UUID id);
+};
