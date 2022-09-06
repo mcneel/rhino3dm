@@ -148,13 +148,13 @@ protected:
   virtual void CreateNew(void) override;
 };
 
-class BND_File3dmShutliningCurve
+class BND_File3dmShutLiningCurve
 {
 private:
-  ON_Shutlining::Curve* m_c = nullptr;
+  ON_ShutLining::Curve* m_c = nullptr;
 
 public:
-  BND_File3dmShutliningCurve(ON_Shutlining::Curve* c=nullptr) : m_c(c) { }
+  BND_File3dmShutLiningCurve(ON_ShutLining::Curve* c=nullptr) : m_c(c) { }
 
   double Radius(void)  const { return (nullptr != m_c) ? m_c->Radius()  : 0.0;   }
   int    Profile(void) const { return (nullptr != m_c) ? m_c->Profile() : 0;     }
@@ -171,28 +171,28 @@ public:
   void SetId(const BND_UUID& v) const { if (nullptr != m_c) m_c->SetId(Binding_to_ON_UUID(v)); }
 };
 
-class BND_File3dmShutliningCurveTable
+class BND_File3dmShutLiningCurveTable
 {
 private:
-  ON_Shutlining* m_sl = nullptr;
+  ON_ShutLining* m_sl = nullptr;
 
 public:
-  BND_File3dmShutliningCurveTable(ON_Shutlining* sl=nullptr) : m_sl(sl) { }
+  BND_File3dmShutLiningCurveTable(ON_ShutLining* sl=nullptr) : m_sl(sl) { }
 
   int Count() const;
   void Add(BND_UUID id);
-  BND_File3dmShutliningCurve* FindIndex(int index);
-  BND_File3dmShutliningCurve* IterIndex(int index); // helper function for iterator
-  BND_File3dmShutliningCurve* FindId(BND_UUID id);
+  BND_File3dmShutLiningCurve* FindIndex(int index);
+  BND_File3dmShutLiningCurve* IterIndex(int index); // helper function for iterator
+  BND_File3dmShutLiningCurve* FindId(BND_UUID id);
 };
 
-class BND_File3dmShutlining : public BND_File3dmMeshModifier
+class BND_File3dmShutLining : public BND_File3dmMeshModifier
 {
 private:
-  ON_Shutlining* m_sl = nullptr;
+  ON_ShutLining* m_sl = nullptr;
 
 public:
-  BND_File3dmShutlining(ON_3dmObjectAttributes* attr=nullptr);
+  BND_File3dmShutLining(ON_3dmObjectAttributes* attr=nullptr);
 
   bool On(void)          const { return (nullptr != m_sl) ? m_sl->On()          : false; }
   bool Faceted(void)     const { return (nullptr != m_sl) ? m_sl->Faceted()     : false; }
@@ -204,7 +204,7 @@ public:
   void SetAutoUpdate(bool v)  const { if (nullptr != m_sl) m_sl->SetAutoUpdate(v); }
   void SetForceUpdate(bool v) const { if (nullptr != m_sl) m_sl->SetForceUpdate(v); }
 
-  BND_File3dmShutliningCurveTable Curves() { return BND_File3dmShutliningCurveTable(m_sl); }
+  BND_File3dmShutLiningCurveTable Curves() { return BND_File3dmShutLiningCurveTable(m_sl); }
 
   void DeleteAllCurves(void) const { if (nullptr != m_sl) m_sl->DeleteAllCurves(); }
 
@@ -219,7 +219,7 @@ private:
   BND_File3dmEdgeSoftening m_edge_softening;
   BND_File3dmThickening    m_thickening;
   BND_File3dmCurvePiping   m_curve_piping;
-  BND_File3dmShutlining    m_shutlining;
+  BND_File3dmShutLining    m_shutlining;
 
 public:
   BND_File3dmMeshModifiers() { }
@@ -229,11 +229,11 @@ public:
   BND_File3dmEdgeSoftening* EdgeSoftening() { return m_edge_softening.Exists() ? &m_edge_softening : nullptr; }
   BND_File3dmThickening*    Thickening()    { return m_thickening    .Exists() ? &m_thickening     : nullptr; }
   BND_File3dmCurvePiping*   CurvePiping()   { return m_curve_piping  .Exists() ? &m_curve_piping   : nullptr; }
-  BND_File3dmShutlining*    Shutlining()    { return m_shutlining    .Exists() ? &m_shutlining     : nullptr; }
+  BND_File3dmShutLining*    ShutLining()    { return m_shutlining    .Exists() ? &m_shutlining     : nullptr; }
 
   BND_File3dmDisplacement&  CreateDisplacement()  { m_displacement  .EnsureExists(); return m_displacement; }
   BND_File3dmEdgeSoftening& CreateEdgeSoftening() { m_edge_softening.EnsureExists(); return m_edge_softening; }
   BND_File3dmThickening&    CreateThickening()    { m_thickening    .EnsureExists(); return m_thickening; }
   BND_File3dmCurvePiping&   CreateCurvePiping()   { m_curve_piping  .EnsureExists(); return m_curve_piping; }
-  BND_File3dmShutlining&    CreateShutlining()    { m_shutlining    .EnsureExists(); return m_shutlining; }
+  BND_File3dmShutLining&    CreateShutLining()    { m_shutlining    .EnsureExists(); return m_shutlining; }
 };

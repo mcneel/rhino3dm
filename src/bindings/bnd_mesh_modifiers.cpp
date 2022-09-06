@@ -73,25 +73,25 @@ void BND_File3dmCurvePiping::CreateNew(void)
   }
 }
 
-BND_File3dmShutlining::BND_File3dmShutlining(ON_3dmObjectAttributes* attr)
+BND_File3dmShutLining::BND_File3dmShutLining(ON_3dmObjectAttributes* attr)
   :
   BND_File3dmMeshModifier(attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_sl = m_attr->MeshModifiers().Shutlining();
+    m_mm = m_sl = m_attr->MeshModifiers().ShutLining();
   }
 }
 
-void BND_File3dmShutlining::CreateNew(void)
+void BND_File3dmShutLining::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_sl = m_attr->MeshModifiers().Shutlining(true);
+    m_mm = m_sl = m_attr->MeshModifiers().ShutLining(true);
   }
 }
 
-int BND_File3dmShutliningCurveTable::Count() const
+int BND_File3dmShutLiningCurveTable::Count() const
 {
   int count = 0;
 
@@ -104,7 +104,7 @@ int BND_File3dmShutliningCurveTable::Count() const
   return count;
 }
 
-void BND_File3dmShutliningCurveTable::Add(BND_UUID id)
+void BND_File3dmShutLiningCurveTable::Add(BND_UUID id)
 {
   if (nullptr != m_sl)
   {
@@ -113,7 +113,7 @@ void BND_File3dmShutliningCurveTable::Add(BND_UUID id)
   }
 }
 
-BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::FindIndex(int index)
+BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::FindIndex(int index)
 {
   if (nullptr == m_sl)
     return nullptr;
@@ -125,7 +125,7 @@ BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::FindIndex(int index
   {
     if (count == index)
     {
-      return new BND_File3dmShutliningCurve(c);
+      return new BND_File3dmShutLiningCurve(c);
     }
 
     count++;
@@ -134,12 +134,12 @@ BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::FindIndex(int index
   return nullptr;
 }
 
-BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::IterIndex(int index)
+BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::IterIndex(int index)
 {
   return FindIndex(index);
 }
 
-BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::FindId(BND_UUID id)
+BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::FindId(BND_UUID id)
 {
   if (nullptr == m_sl)
     return nullptr;
@@ -149,7 +149,7 @@ BND_File3dmShutliningCurve* BND_File3dmShutliningCurveTable::FindId(BND_UUID id)
   {
     if (c->Id() == Binding_to_ON_UUID(id))
     {
-      return new BND_File3dmShutliningCurve(c); // I don't understand the ownership around this object.
+      return new BND_File3dmShutLiningCurve(c); // I don't understand the ownership around this object.
     }
   }
 
@@ -214,27 +214,27 @@ void initMeshModifierBindings(pybind11::module& m)
     .def_property("CapType", &BND_File3dmCurvePiping::CapType, &BND_File3dmCurvePiping::SetCapType)
     ;
 
-  py::class_<BND_File3dmShutliningCurve>(m, "ShutliningCurve")
+  py::class_<BND_File3dmShutLiningCurve>(m, "ShutLiningCurve")
     .def(py::init<>())
-    .def(py::init<const BND_File3dmShutliningCurve&>(), py::arg("other"))
-    .def_property("Id", &BND_File3dmShutliningCurve::Id, &BND_File3dmShutliningCurve::SetId)
-    .def_property("Radius", &BND_File3dmShutliningCurve::Radius, &BND_File3dmShutliningCurve::SetRadius)
-    .def_property("Profile", &BND_File3dmShutliningCurve::Profile, &BND_File3dmShutliningCurve::SetProfile)
-    .def_property("Enabled", &BND_File3dmShutliningCurve::Enabled, &BND_File3dmShutliningCurve::SetEnabled)
-    .def_property("Pull", &BND_File3dmShutliningCurve::Pull, &BND_File3dmShutliningCurve::SetPull)
-    .def_property("IsBump", &BND_File3dmShutliningCurve::IsBump, &BND_File3dmShutliningCurve::SetIsBump)
+    .def(py::init<const BND_File3dmShutLiningCurve&>(), py::arg("other"))
+    .def_property("Id", &BND_File3dmShutLiningCurve::Id, &BND_File3dmShutLiningCurve::SetId)
+    .def_property("Radius", &BND_File3dmShutLiningCurve::Radius, &BND_File3dmShutLiningCurve::SetRadius)
+    .def_property("Profile", &BND_File3dmShutLiningCurve::Profile, &BND_File3dmShutLiningCurve::SetProfile)
+    .def_property("Enabled", &BND_File3dmShutLiningCurve::Enabled, &BND_File3dmShutLiningCurve::SetEnabled)
+    .def_property("Pull", &BND_File3dmShutLiningCurve::Pull, &BND_File3dmShutLiningCurve::SetPull)
+    .def_property("IsBump", &BND_File3dmShutLiningCurve::IsBump, &BND_File3dmShutLiningCurve::SetIsBump)
     ;
 
-  py::class_<BND_File3dmShutlining>(m, "Shutlining")
+  py::class_<BND_File3dmShutLining>(m, "ShutLining")
     .def(py::init<>())
-    .def(py::init<const BND_File3dmShutlining&>(), py::arg("other"))
-    .def_property("On", &BND_File3dmShutlining::On, &BND_File3dmShutlining::SetOn)
-    .def_property("Faceted", &BND_File3dmShutlining::Faceted, &BND_File3dmShutlining::SetFaceted)
-    .def_property("AutoUpdate", &BND_File3dmShutlining::AutoUpdate, &BND_File3dmShutlining::SetAutoUpdate)
-    .def_property("ForceUpdate", &BND_File3dmShutlining::ForceUpdate, &BND_File3dmShutlining::SetForceUpdate)
-    .def_property("ForceUpdate", &BND_File3dmShutlining::ForceUpdate, &BND_File3dmShutlining::SetForceUpdate)
-    .def_property_readonly("Curves", &BND_File3dmShutlining::Curves)
-    .def("DeleteAllCurves", &BND_File3dmShutlining::DeleteAllCurves)
+    .def(py::init<const BND_File3dmShutLining&>(), py::arg("other"))
+    .def_property("On", &BND_File3dmShutLining::On, &BND_File3dmShutLining::SetOn)
+    .def_property("Faceted", &BND_File3dmShutLining::Faceted, &BND_File3dmShutLining::SetFaceted)
+    .def_property("AutoUpdate", &BND_File3dmShutLining::AutoUpdate, &BND_File3dmShutLining::SetAutoUpdate)
+    .def_property("ForceUpdate", &BND_File3dmShutLining::ForceUpdate, &BND_File3dmShutLining::SetForceUpdate)
+    .def_property("ForceUpdate", &BND_File3dmShutLining::ForceUpdate, &BND_File3dmShutLining::SetForceUpdate)
+    .def_property_readonly("Curves", &BND_File3dmShutLining::Curves)
+    .def("DeleteAllCurves", &BND_File3dmShutLining::DeleteAllCurves)
     ;
 }
 #endif
@@ -296,26 +296,26 @@ void initMeshModifierBindings(void*)
     .property("capType", &BND_File3dmCurvePiping::CapType, &BND_File3dmCurvePiping::SetCapType)
     ;
 
-  class_<BND_File3dmShutliningCurve>(m, "ShutliningCurve")
+  class_<BND_File3dmShutLiningCurve>(m, "ShutLiningCurve")
     .constructor<>()
-    .constructor<const BND_File3dmShutliningCurve&>()
-    .property("Id", &BND_File3dmShutliningCurve::Id, &BND_File3dmShutliningCurve::SetId)
-    .property("Radius", &BND_File3dmShutliningCurve::Radius, &BND_File3dmShutliningCurve::SetRadius)
-    .property("Profile", &BND_File3dmShutliningCurve::Profile, &BND_File3dmShutliningCurve::SetProfile)
-    .property("Enabled", &BND_File3dmShutliningCurve::Enabled, &BND_File3dmShutliningCurve::SetEnabled)
-    .property("Pull", &BND_File3dmShutliningCurve::Pull, &BND_File3dmShutliningCurve::SetPull)
-    .property("IsBump", &BND_File3dmShutliningCurve::IsBump, &BND_File3dmShutliningCurve::SetIsBump)
+    .constructor<const BND_File3dmShutLiningCurve&>()
+    .property("Id", &BND_File3dmShutLiningCurve::Id, &BND_File3dmShutLiningCurve::SetId)
+    .property("Radius", &BND_File3dmShutLiningCurve::Radius, &BND_File3dmShutLiningCurve::SetRadius)
+    .property("Profile", &BND_File3dmShutLiningCurve::Profile, &BND_File3dmShutLiningCurve::SetProfile)
+    .property("Enabled", &BND_File3dmShutLiningCurve::Enabled, &BND_File3dmShutLiningCurve::SetEnabled)
+    .property("Pull", &BND_File3dmShutLiningCurve::Pull, &BND_File3dmShutLiningCurve::SetPull)
+    .property("IsBump", &BND_File3dmShutLiningCurve::IsBump, &BND_File3dmShutLiningCurve::SetIsBump)
     ;
 
-  class_<BND_File3dmShutlining>("Shutlining")
+  class_<BND_File3dmShutLining>("ShutLining")
     .constructor<>()
-    .constructor<const BND_File3dmShutlining&>()
-    .property("On", &BND_File3dmShutlining::On, &BND_File3dmShutlining::SetOn)
-    .property("Faceted", &BND_File3dmShutlining::Faceted, &BND_File3dmShutlining::SetFaceted)
-    .property("AutoUpdate", &BND_File3dmShutlining::AutoUpdate, &BND_File3dmShutlining::SetAutoUpdate)
-    .property("ForceUpdate", &BND_File3dmShutlining::ForceUpdate, &BND_File3dmShutlining::SetForceUpdate)
-    .property("Curves", &BND_File3dmShutlining::Curves)
-    .function("DeleteAllCurves", &BND_File3dmShutlining::DeleteAllCurves)
+    .constructor<const BND_File3dmShutLining&>()
+    .property("On", &BND_File3dmShutLining::On, &BND_File3dmShutLining::SetOn)
+    .property("Faceted", &BND_File3dmShutLining::Faceted, &BND_File3dmShutLining::SetFaceted)
+    .property("AutoUpdate", &BND_File3dmShutLining::AutoUpdate, &BND_File3dmShutLining::SetAutoUpdate)
+    .property("ForceUpdate", &BND_File3dmShutLining::ForceUpdate, &BND_File3dmShutLining::SetForceUpdate)
+    .property("Curves", &BND_File3dmShutLining::Curves)
+    .function("DeleteAllCurves", &BND_File3dmShutLining::DeleteAllCurves)
     ;
 }
 #endif
