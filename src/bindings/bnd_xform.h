@@ -28,18 +28,18 @@ public:
   //static BND_Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
   //static BND_Transform Rotation(double angleRadians, Point3d rotationCenter)
   static BND_Transform Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter);
-  //static BND_Transform Rotation(Vector3d startDirection, Vector3d endDirection, Point3d rotationCenter)
+  static BND_Transform RotationFromTwoVectors(ON_3dVector startDirection, ON_3dVector endDirection, ON_3dPoint rotationCenter);
   //static BND_Transform Rotation(Vector3d x0, Vector3d y0, Vector3d z0,
   //  Vector3d x1, Vector3d y1, Vector3d z1)
   static BND_Transform Mirror(ON_3dPoint pointOnMirrorPlane, ON_3dVector normalToMirrorPlane);
   static BND_Transform Mirror2(BND_Plane mirrorPlane);
   //static BND_Transform ChangeBasis(BND_Plane plane0, BND_Plane plane1);
-  //public static BND_Transform PlaneToPlane(Plane plane0, Plane plane1)
+  static BND_Transform PlaneToPlane(BND_Plane plane0, BND_Plane plane1);
   //public static BND_Transform ChangeBasis(Vector3d initialBasisX, Vector3d initialBasisY, Vector3d initialBasisZ,
   //  Vector3d finalBasisX, Vector3d finalBasisY, Vector3d finalBasisZ)
   //public static BND_Transform PlanarProjection(Plane plane)
   //public static BND_Transform ProjectAlong(Plane plane, Vector3d direction)
-  //public static BND_Transform Shear(Plane plane, Vector3d x, Vector3d y, Vector3d z)
+  static BND_Transform Shear(BND_Plane plane, ON_3dVector x, ON_3dVector y, ON_3dVector z);
   //public static bool operator ==(Transform a, Transform b)
   //public static bool operator !=(Transform a, Transform b)
   //public static BND_Transform operator *(Transform a, Transform b)

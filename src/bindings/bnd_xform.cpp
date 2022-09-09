@@ -33,6 +33,13 @@ BND_Transform BND_Transform::Rotation(double angleRadians, ON_3dVector rotationA
   return rc;
 }
 
+BND_Transform BND_Transform::RotationFromTwoVectors(ON_3dVector startDirection, ON_3dVector endDirection, ON_3dPoint rotationCenter)
+{
+  BND_Transform rc(1);
+  rc.m_xform.Rotation(startDirection, endDirection, rotationCenter);
+  return rc;
+}
+
 BND_Transform BND_Transform::Mirror(ON_3dPoint pointOnMirrorPlane, ON_3dVector normalToMirrorPlane)
 {
   BND_Transform rc(1);
@@ -45,6 +52,18 @@ BND_Transform BND_Transform::Mirror2(BND_Plane mirrorPlane)
   BND_Transform rc(1);
   rc.m_xform.Mirror(pl.Origin(), pl.zaxis);
   return rc;
+}
+
+BND_Transform BND_Transform::PlaneToPlane(BND_Plane plane0, BND_Plane plane1)
+{
+  BND_Transform rc(1);
+  rc.m_xform.Rotation(plane0.ToOnPlane(), plane1.ToOnPlane());
+  return rc;
+}
+
+BND_Transform BND_Transform::Shear(BND_Plane plane, ON_3dVector x, ON_3dVector y, ON_3dVector z)
+{
+  return BND_Transform(ON_Xform::ShearTransformation(plane.ToOnPlane(), x, y, z));
 }
 
 BND_Transform BND_Transform::Multiply(BND_Transform a, BND_Transform b)
@@ -110,8 +129,11 @@ void initXformBindings(pybind11::module& m)
     .def_static("Scale", &BND_Transform::Scale, py::arg("anchor"), py::arg("scaleFactor"))
     .def_static("Scale", &BND_Transform::Scale2, py::arg("plane"), py::arg("xScaleFactor"), py::arg("yScaleFactor"), py::arg("zScaleFactor"))
     .def_static("Rotation", &BND_Transform::Rotation, py::arg("angleRadians"), py::arg("rotationAxis"), py::arg("rotationCenter"))
+    .def_static("Rotation", &BND_Transform::RotationFromTwoVectors, py::arg("startDirection"), py::arg("endDirection"), py::arg("rotationCenter"))
     .def_static("Mirror", &BND_Transform::Mirror, py::arg("pointOnMirrorPlane"), py::arg("normalToMirrorPlane"))
     .def_static("Mirror", &BND_Transform::Mirror2, py::arg("mirrorPlane"))
+    .def_static("PlaneToPlane", &BND_Transform::PlaneToPlane, py::arg("plane0"), py::arg("plane1"))
+    .def_static("Shear", &BND_Transform::Shear, py::arg("plane"), py::arg("x"), py::arg("y"), py::arg("z"))
     .def_static("Multiply", &BND_Transform::Multiply, py::arg("a"), py::arg("b"))
     .def_property_readonly("IsIdentity", &BND_Transform::IsIdentity)
     .def_property_readonly("IsValid", &BND_Transform::IsValid)
