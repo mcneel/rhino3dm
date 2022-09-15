@@ -3,45 +3,10 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-typedef pybind11::tuple BND_LinetypeSegment;
 void initLinetypeBindings(pybind11::module& m);
 #else
-typedef emscripten::val BND_LinetypeSegment;
 void initLinetypeBindings(void* m);
 #endif
-
-BND_LinetypeSegment ON_LinetypeSegment_to_Binding(const ON_LinetypeSegment& segment);
-ON_LinetypeSegment Binding_to_ON_LinetypeSegment(const BND_LinetypeSegment& segment);
-
-#if defined(ON_PYTHON_COMPILE)
-class BND_LinetypeSegmentIterator
-{
-  ON_Linetype* m_linetype = nullptr;
-  int m_index = 0;
-public:
-  BND_LinetypeSegmentIterator(ON_Linetype* linetype) : m_linetype(linetype) {}
-  BND_LinetypeSegmentIterator iter() { return BND_LinetypeSegmentIterator(m_linetype); }
-  BND_LinetypeSegment next();
-};
-#endif
-
-class BND_LinetypeSegmentList
-{
-  ON_Linetype* m_linetype = nullptr;
-public:
-  BND_LinetypeSegmentList() : m_linetype(new ON_Linetype()) {}
-  BND_LinetypeSegmentList(ON_Linetype* linetype) : m_linetype(linetype) {}
-
-  int Count() const { return m_linetype->SegmentCount(); }
-  BND_LinetypeSegment Get(int index) const { return ON_LinetypeSegment_to_Binding(m_linetype->Segment(index)); }
-  int Append(BND_LinetypeSegment segment) { return m_linetype->AppendSegment(Binding_to_ON_LinetypeSegment(segment)); }
-  bool Set(int index, BND_LinetypeSegment segment) { return m_linetype->SetSegment(index, Binding_to_ON_LinetypeSegment(segment)); }
-  bool Remove(int index) { return m_linetype->RemoveSegment(index); }
-  bool Clear() { return m_linetype->ClearPattern(); }
-  BND_LinetypeSegmentIterator Iterator() { return BND_LinetypeSegmentIterator(m_linetype); }
-
-  friend class BND_Linetype;
-};
 
 class BND_Linetype : public BND_ModelComponent
 {
@@ -58,8 +23,12 @@ public:
   void SetName(const std::wstring& name) { m_linetype->SetName(name.c_str()); }
   int GetIndex() const { return m_linetype->Index(); }
   double PatternLength() const { return m_linetype->PatternLength(); }
-  BND_LinetypeSegmentList GetSegments() const { return BND_LinetypeSegmentList(m_linetype); }
-  bool SetSegments(BND_LinetypeSegmentList segments) { return m_linetype->SetSegments(segments.m_linetype->Segments()); }
+  int SegmentCount() const { return m_linetype->SegmentCount(); }
+  BND_TUPLE GetSegment(int index) const;
+  bool SetSegment(int index, double length, bool isSolid);
+  int AppendSegment(double length, bool isSolid);
+  bool RemoveSegment(int index) { return m_linetype->RemoveSegment(index); }
+  bool ClearPattern() { return m_linetype->ClearPattern(); }
 
 #if defined(ON_PYTHON_COMPILE)
   static BND_Linetype* Border(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Border); }

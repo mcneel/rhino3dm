@@ -1,42 +1,6 @@
 #include "bindings.h"
 
 
-#if defined(ON_PYTHON_COMPILE)
-
-BND_LinetypeSegment ON_LinetypeSegment_to_Binding(const ON_LinetypeSegment& segment)
-{
-  return pybind11::make_tuple(segment.m_length, segment.m_seg_type);
-}
-
-ON_LinetypeSegment Binding_to_ON_LinetypeSegment(const BND_LinetypeSegment& segment)
-{
-  double length = segment[0].cast<double>();
-  ON_LinetypeSegment::eSegType type = segment[1].cast<ON_LinetypeSegment::eSegType>();
-  return ON_LinetypeSegment(length, type);
-}
-
-#endif
-
-#if defined(ON_WASM_COMPILE)
-
-BND_LinetypeSegment ON_LinetypeSegment_to_Binding(const ON_LinetypeSegment& segment)
-{
-  emscripten::val v(emscripten::val::object());
-  v.set("length", emscripten::val(segment.m_length));
-  v.set("type", emscripten::val(segment.m_seg_type));
-  return v;
-}
-
-ON_LinetypeSegment Binding_to_ON_LinetypeSegment(const BND_LinetypeSegment& segment)
-{
-  double length = segment["length"].as<double>();
-  ON_LinetypeSegment::eSegType type = segment["type"].as<ON_LinetypeSegment::eSegType>();
-  return ON_LinetypeSegment(length, type);
-}
-
-#endif
-
-
 BND_Linetype::BND_Linetype()
 {
   SetTrackedPointer(new ON_Linetype(), nullptr);
@@ -58,49 +22,46 @@ void BND_Linetype::SetTrackedPointer(ON_Linetype* linetype, const ON_ModelCompon
   BND_ModelComponent::SetTrackedPointer(linetype, compref);
 }
 
+BND_TUPLE BND_Linetype::GetSegment(int index) const
+{
+  ON_LinetypeSegment segment = m_linetype->Segment(index);
+  BND_TUPLE rc = CreateTuple(2);
+  SetTuple(rc, 0, segment.m_length);
+  SetTuple(rc, 1, segment.m_seg_type == ON_LinetypeSegment::eSegType::stLine);
+  return rc;
+}
+
+bool BND_Linetype::SetSegment(int index, double length, bool isSolid)
+{
+  ON_LinetypeSegment::eSegType type = isSolid ? ON_LinetypeSegment::eSegType::stLine : ON_LinetypeSegment::eSegType::stSpace;
+  ON_LinetypeSegment segment(length, type);
+  return m_linetype->SetSegment(index, segment);
+}
+
+int BND_Linetype::AppendSegment(double length, bool isSolid)
+{
+  ON_LinetypeSegment::eSegType type = isSolid ? ON_LinetypeSegment::eSegType::stLine : ON_LinetypeSegment::eSegType::stSpace;
+  ON_LinetypeSegment segment(length, type);
+  return m_linetype->AppendSegment(segment);
+}
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 
-BND_LinetypeSegment BND_LinetypeSegmentIterator::next()
-{
-  if (m_index >= m_linetype->SegmentCount())
-  {
-    throw py::stop_iteration();
-  }
-  return ON_LinetypeSegment_to_Binding(m_linetype->Segment(m_index++));
-}
-
 void initLinetypeBindings(pybind11::module& m)
 {
-  py::enum_<ON_LinetypeSegment::eSegType>(m, "LinetypeSegmentType")
-    .value("Unset", ON_LinetypeSegment::eSegType::Unset)
-    .value("Line", ON_LinetypeSegment::eSegType::stLine)
-    .value("Space", ON_LinetypeSegment::eSegType::stSpace)
-    ;
-
-  py::class_<BND_LinetypeSegmentIterator>(m, "__LinetypeSegmentIterator")
-    .def("__iter__", &BND_LinetypeSegmentIterator::iter)
-    .def("__next__", &BND_LinetypeSegmentIterator::next)
-    ;
-
-  py::class_<BND_LinetypeSegmentList>(m, "LinetypeSegmentList")
-    .def(py::init<>())
-    .def("__len__", &BND_LinetypeSegmentList::Count)
-    .def("__getitem__", &BND_LinetypeSegmentList::Get)
-    .def("__setitem__", &BND_LinetypeSegmentList::Set)
-    .def("__delitem__", &BND_LinetypeSegmentList::Remove)
-    .def("__iter__", &BND_LinetypeSegmentList::Iterator)
-    .def("Append", &BND_LinetypeSegmentList::Append, py::arg("segment"))
-    .def("Clear", &BND_LinetypeSegmentList::Clear)
-    ;
-
   py::class_<BND_Linetype, BND_ModelComponent>(m, "Linetype")
     .def(py::init<>())
     .def_property("Name", &BND_Linetype::GetName, &BND_Linetype::SetName)
     .def_property_readonly("Index", &BND_Linetype::GetIndex)
     .def_property_readonly("PatternLength", &BND_Linetype::PatternLength)
-    .def_property("Segments", &BND_Linetype::GetSegments, &BND_Linetype::SetSegments)
+    .def_property_readonly("SegmentCount", &BND_Linetype::SegmentCount)
+    .def("GetSegment", &BND_Linetype::GetSegment, py::arg("index"))
+    .def("SetSegment", &BND_Linetype::SetSegment, py::arg("index"), py::arg("length"), py::arg("isSolid"))
+    .def("AppendSegment", &BND_Linetype::AppendSegment, py::arg("length"), py::arg("isSolid"))
+    .def("RemoveSegment", &BND_Linetype::RemoveSegment, py::arg("index"))
+    .def("ClearPattern", &BND_Linetype::ClearPattern)
     .def_property_readonly_static("Border", &BND_Linetype::Border)
     .def_property_readonly_static("ByLayer", &BND_Linetype::ByLayer)
     .def_property_readonly_static("ByParent", &BND_Linetype::ByParent)
@@ -119,22 +80,17 @@ using namespace emscripten;
 
 void initLinetypeBindings(void*)
 {
-  class_<BND_LinetypeSegmentList>("LinetypeSegmentList")
-    .constructor<>()
-    .property("count", &BND_LinetypeSegmentList::Count)
-    .function("get", &BND_LinetypeSegmentList::Get)
-    .function("set", &BND_LinetypeSegmentList::Set)
-    .function("append", &BND_LinetypeSegmentList::Append)
-    .function("remove", &BND_LinetypeSegmentList::Remove)
-    .function("clear", &BND_LinetypeSegmentList::Clear)
-    ;
-
   class_<BND_Linetype, base<BND_ModelComponent>>("Linetype")
     .constructor<>()
     .property("name", &BND_Linetype::GetName, &BND_Linetype::SetName)
     .property("index", &BND_Linetype::GetIndex)
     .property("patternLength", &BND_Linetype::PatternLength)
-    .property("segments", &BND_Linetype::GetSegments, &BND_Linetype::SetSegments)
+    .property("segmentCount", &BND_Linetype::SegmentCount)
+    .function("getSegment", &BND_Linetype::GetSegment)
+    .function("setSegment", &BND_Linetype::SetSegment)
+    .function("appendSegment", &BND_Linetype::AppendSegment)
+    .function("removeSegment", &BND_Linetype::RemoveSegment)
+    .function("clearPattern", &BND_Linetype::ClearPattern)
     .class_property("border", &BND_Linetype::Border)
     .class_property("byLayer", &BND_Linetype::ByLayer)
     .class_property("byParent", &BND_Linetype::ByParent)
