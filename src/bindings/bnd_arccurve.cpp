@@ -42,11 +42,6 @@ BND_Arc* BND_ArcCurve::GetArc() const
   return new BND_Arc(m_arccurve->m_arc);
 }
 
-void BND_ArcCurve::SetArc(BND_Arc* arc)
-{
-  m_arccurve->m_arc = arc->m_arc;
-}
-
 void BND_ArcCurve::SetTrackedPointer(ON_ArcCurve* arccurve, const ON_ModelComponentReference* compref)
 {
   m_arccurve = arccurve;
@@ -65,7 +60,7 @@ void initArcCurveBindings(pybind11::module& m)
     .def(py::init<const BND_Arc, double, double>(), py::arg("arc"), py::arg("t0"), py::arg("t1"))
     .def(py::init<const BND_Circle&>(), py::arg("circle"))
     .def(py::init<const BND_Circle&, double, double>(), py::arg("circle"), py::arg("t0"), py::arg("t1"))
-    .def_property("Arc", &BND_ArcCurve::GetArc, &BND_ArcCurve::SetArc)
+    .def_property_readonly("Arc", &BND_ArcCurve::GetArc)
     .def_property_readonly("IsCompleteCircle", &BND_ArcCurve::IsCompleteCircle)
     .def_property_readonly("Radius", &BND_ArcCurve::GetRadius)
     .def_property_readonly("AngleRadians", &BND_ArcCurve::AngleRadians)
