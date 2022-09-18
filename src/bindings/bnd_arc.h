@@ -24,13 +24,15 @@ public:
   BND_Arc(ON_3dPoint pointA, ON_3dVector tangentA, ON_3dPoint pointB);
   bool IsValid() const { return m_arc.IsValid(); }
   bool IsCircle() const { return m_arc.IsCircle(); }
-  //public Plane Plane{ get; set }
+  BND_Plane GetPlane() const { return BND_Plane::FromOnPlane(m_arc.plane); }
+  void SetPlane(BND_Plane& plane) { m_arc.plane = plane.ToOnPlane(); }
   double GetRadius() const { return m_arc.radius; }
   void SetRadius(double r) { m_arc.radius = r; }
   double GetDiameter() const { return 2 * GetRadius(); }
   void SetDiameter(double d) { SetRadius(d*0.5); }
   ON_3dPoint GetCenter() const { return m_arc.Center(); }
   void SetCenter(ON_3dPoint pt);
+  ON_3dVector Normal() const { return m_arc.Normal(); }
   double Circumference() const { return m_arc.Circumference(); }
   double Length() const { return m_arc.Length(); }
   ON_3dPoint StartPoint() const { return m_arc.StartPoint(); }
