@@ -327,7 +327,7 @@ void initBrepBindings(pybind11::module& m)
 
   py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
     .def(py::init<>())
-    .def_static("CreateFromMesh", &BND_Brep::CreateFromMesh, py::arg("mesh"), py::arg("trimedTriangles"))
+    .def_static("CreateFromMesh", &BND_Brep::CreateFromMesh, py::arg("mesh"), py::arg("trimmedTriangles"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox, py::arg("box"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox2, py::arg("box"))
     .def_static("CreateFromCylinder", &BND_Brep::CreateFromCylinder, py::arg("cylinder"), py::arg("capBottom"), py::arg("capTop"))
