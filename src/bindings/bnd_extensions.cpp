@@ -794,6 +794,27 @@ void BND_File3dmGroupTable::Add(const BND_Group& group)
   m_model->AddModelComponent(*l);
 }
 
+bool BND_File3dmGroupTable::Delete(const BND_Group& group)
+{
+  ON_UUID _id = Binding_to_ON_UUID(group.GetId());
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(ON_ModelComponent::Type::Group, _id);
+  return !compref.IsEmpty();
+}
+
+bool BND_File3dmGroupTable::DeleteId(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(ON_ModelComponent::Type::Group, _id);
+  return !compref.IsEmpty();
+}
+
+bool BND_File3dmGroupTable::DeleteIndex(int index)
+{
+  ON_ComponentManifestItem item = m_model->Manifest().ItemFromIndex(ON_ModelComponent::Type::Group, index);
+  if (!item.IsValid()) return false;
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(ON_ModelComponent::Type::Group, item.Id());
+  return !compref.IsEmpty();
+}
 
 BND_Group* BND_File3dmGroupTable::IterIndex(int index)
 {
@@ -1334,6 +1355,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__getitem__", &BND_File3dmGroupTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
     .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
+    .def("Delete", &BND_File3dmGroupTable::Delete, py::arg("group"))
+    .def("Delete", &BND_File3dmGroupTable::DeleteIndex, py::arg("index"))
+    .def("Delete", &BND_File3dmGroupTable::DeleteId, py::arg("id")) // This overload must come last because ON_UUID is a pybind11::object and accepts anything given to it
     .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
     .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
     .def("GroupMembers", &BND_File3dmGroupTable::GroupMembers, py::arg("groupIndex"))

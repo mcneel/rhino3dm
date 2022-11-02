@@ -136,6 +136,9 @@ public:
 	BND_File3dmGroupTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
 	int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Group); }
 	void Add(const class BND_Group& group);
+  bool Delete(const class BND_Group& group);
+  bool DeleteId(BND_UUID id);
+  bool DeleteIndex(int index);
 	class BND_Group* FindIndex(int index);
 	class BND_Group* IterIndex(int index); // helper function for iterator
   class BND_Group* FindName(std::wstring name);
