@@ -135,11 +135,16 @@ void initXformBindings(pybind11::module& m)
     .def_static("PlaneToPlane", &BND_Transform::PlaneToPlane, py::arg("plane0"), py::arg("plane1"))
     .def_static("Shear", &BND_Transform::Shear, py::arg("plane"), py::arg("x"), py::arg("y"), py::arg("z"))
     .def_static("Multiply", &BND_Transform::Multiply, py::arg("a"), py::arg("b"))
+    .def_property_readonly("IsAffine", &BND_Transform::IsAffine)
     .def_property_readonly("IsIdentity", &BND_Transform::IsIdentity)
+    .def_property_readonly("IsLinear", &BND_Transform::IsLinear)
+    .def_property_readonly("IsRotation", &BND_Transform::IsRotation)
     .def_property_readonly("IsValid", &BND_Transform::IsValid)
     .def_property_readonly("IsZero", &BND_Transform::IsZero)
     .def_property_readonly("IsZero4x4", &BND_Transform::IsZero4x4)
     .def_property_readonly("IsZeroTransformation", &BND_Transform::IsZeroTransformation)
+    .def_property_readonly("RigidType", &BND_Transform::RigidType)
+    .def_property_readonly("SimilarityType", &BND_Transform::SimilarityType)
     .def("Determinant", &BND_Transform::Determinant)
     .def("TryGetInverse", &BND_Transform::TryGetInverse)
     .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox, py::arg("bbox"))
@@ -161,6 +166,18 @@ void initXformBindings(pybind11::module& m)
     .def_property("M31", &BND_Transform::GetM31, &BND_Transform::SetM31)
     .def_property("M32", &BND_Transform::GetM32, &BND_Transform::SetM32)
     .def_property("M33", &BND_Transform::GetM33, &BND_Transform::SetM33)
+    ;
+
+  py::enum_<TransformSimilarityType>(m, "TransformSimilarityType")
+    .value("OrientationReversing", TransformSimilarityType::OrientationReversing)
+    .value("NotSimilarity", TransformSimilarityType::NotSimilarity)
+    .value("OrientationPreserving", TransformSimilarityType::OrientationPreserving)
+    ;
+
+  py::enum_<TransformRigidType>(m, "TransformRigidType")
+    .value("RigidReversing", TransformRigidType::RigidReversing)
+    .value("NotRigid", TransformRigidType::NotRigid)
+    .value("Rigid", TransformRigidType::Rigid)
     ;
 }
 #endif

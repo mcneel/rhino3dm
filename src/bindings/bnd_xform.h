@@ -9,6 +9,19 @@ void initXformBindings(void* m);
 #endif
 
 
+enum class TransformSimilarityType : int
+{
+  OrientationReversing = -1,
+  NotSimilarity = 0,
+  OrientationPreserving = 1
+};
+
+enum class TransformRigidType : int
+{
+  RigidReversing = -1,
+  NotRigid = 0,
+  Rigid = 1
+};
 
 class BND_Transform
 {
@@ -46,12 +59,16 @@ public:
   //public static Point3d operator *(Transform m, Point3d p)
   //public static Vector3d operator *(Transform m, Vector3d v)
   static BND_Transform Multiply(BND_Transform a, BND_Transform b);
+  bool IsAffine() const { return m_xform.IsAffine(); }
   bool IsIdentity() const { return m_xform.IsIdentity(); }
+  bool IsLinear() const { return m_xform.IsLinear(); }
+  bool IsRotation() const { return m_xform.IsRotation(); }
   bool IsValid() const { return m_xform.IsValid(); }
   bool IsZero() const { return m_xform.IsZero(); }
   bool IsZero4x4() const { return m_xform.IsZero4x4(); }
   bool IsZeroTransformation() const { return m_xform.IsZeroTransformation(); }
-  //public TransformSimilarityType SimilarityType
+  TransformRigidType RigidType() const { return static_cast<TransformRigidType>(m_xform.IsRigid()); }
+  TransformSimilarityType SimilarityType() const { return static_cast<TransformSimilarityType>(m_xform.IsSimilarity()); }
   double Determinant() const { return m_xform.Determinant(); }
   BND_BoundingBox TransformBoundingBox(const BND_BoundingBox& bbox) const;
   //public Point3d[] TransformList(System.Collections.Generic.IEnumerable<Point3d> points)
