@@ -1,6 +1,6 @@
 # rhino3dm
 
-[![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml/badge.svg)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml)
+[![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml)
 [![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg)](https://discourse.mcneel.com/c/rhino-developer/rhino3dm)
 [![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg)](https://pypi.org/project/rhino3dm)
 [![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat)](https://www.nuget.org/profiles/McNeel)

@@ -106,7 +106,7 @@ public:
   // ImageSize
   int GetShadowMapLevel() const { return m_render_settings->m_shadowmap_style; }
   void SetShadowMapLevel(int i) { m_render_settings->m_shadowmap_style = i; }
-  // BackgroundStyls
+  // BackgroundStyles
   std::wstring GetNamedView() const { return std::wstring(m_render_settings->NamedView().Array()); }
   void SetNamedView(const std::wstring& s) { m_render_settings->SetNamedView(s.c_str()); }
   std::wstring GetSnapShot() const { return std::wstring(m_render_settings->Snapshot().Array()); }
