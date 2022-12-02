@@ -64,10 +64,10 @@ def create_cpp_project(bitness, compile):
 
     os.chdir(build_dir)
     if os.name == 'nt':  # windows build
-        arch = ""
+        arch = "Win32"
         if bitness == 64:
-            arch = " Win64"
-        args = '-G "Visual Studio 15 2017{0}"'.format(arch)
+            arch = "x64"
+        args = '-G "Visual Studio 17 2022" -A {0}'.format(arch)
         system('cmake ' + args + ' ../../librhino3dm_native')
         if bitness == 64:
             for line in fileinput.input("librhino3dm_native.vcxproj", inplace=1):
