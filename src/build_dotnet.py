@@ -21,29 +21,37 @@ def methodgen(dotnetcore):
     dir_cs = os.getcwd() + '/dotnet'
     path_replace = '../lib/opennurbs'
     args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
-
     if dotnetcore:
+        # [Alain] I'm not sure why the files need to be copied to a separate (build) directory to compile. I'm commenting out the whole block for now.
         # staging and compilation occurs in the build directory
-        build_dir = "build/methodgen"
-        if not os.path.exists(build_dir):
-            if(not os.path.exists("build")):
-                os.mkdir("build")
-            os.mkdir(build_dir)
-        src_files = os.listdir('./methodgen')
-        for file_name in src_files:
-            if file_name.endswith('.cs'):
-                full_path = os.path.join('./methodgen', file_name)
-                if os.path.isfile(full_path):
-                    shutil.copy(full_path, build_dir)
-            if file_name.endswith('.core'):
-                full_path = os.path.join('./methodgen', file_name)
-                if os.path.isfile(full_path):
-                    shutil.copy(full_path, build_dir + '/methodgen.csproj')
-        # compile methodgen
-        system('dotnet build ' + './' + build_dir)
-        # execute methodgen
-        system('dotnet run --project ' + build_dir + '/methodgen.csproj ' + args)
+        #build_dir = "build/methodgen"
+        #if not os.path.exists(build_dir):
+        #    if(not os.path.exists("build")):
+        #        os.mkdir("build")
+        #    os.mkdir(build_dir)
+        #src_files = os.listdir('./methodgen')
+        #for file_name in src_files:
+        #    if file_name.endswith('.cs'):
+        #        full_path = os.path.join('./methodgen', file_name)
+        #        if os.path.isfile(full_path):
+        #            shutil.copy(full_path, build_dir)
+        #    if file_name.endswith('.core'):
+        #        full_path = os.path.join('./methodgen', file_name)
+        #        if os.path.isfile(full_path):
+        #            shutil.copy(full_path, build_dir + '/methodgen.csproj')
+        ## compile methodgen
+        #print('dotnet build ' + './' + build_dir + '/)
+        #system('dotnet build ' + './' + build_dir)
+        ## execute methodgen
+        #system('dotnet run --project ' + build_dir + '/methodgen.csproj ' + args)
+        system('dotnet build ./methodgen/methodgen.sln')
+        app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
+        system(app + args)
     else:
+        # [Alain] I'm not sure why the next line is neccessary since this solution doesn't have any nuget packages but the 
+        # build fails without it. Kind of strange to run a dotnet command if I'm not building with dotencore
+        system('dotnet restore ./methodgen/methodgen.sln')
+
         # compile methodgen
         system('msbuild ./methodgen')
         # execute methodgen for Rhino3dm
@@ -83,11 +91,11 @@ def create_cpp_project(bitness, compile):
 
 
 def compilerhino3dm(dotnetcore):
+    system("dotnet restore ./dotnet/Rhino3dm.sln")
+    conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
     if dotnetcore:
-        conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-        system('dotnet build ./dotnet/Rhino3dm.core.csproj {}'.format(conf))
+        system('dotnet build ./dotnet/Rhino3dm.csproj {}'.format(conf))
     else:
-        conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
         system('msbuild ./dotnet/Rhino3dm.csproj {}'.format(conf))
 
 
