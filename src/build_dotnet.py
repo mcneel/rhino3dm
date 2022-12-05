@@ -50,10 +50,10 @@ def methodgen(dotnetcore):
     else:
         # [Alain] I'm not sure why the next line is neccessary since this solution doesn't have any nuget packages but the 
         # build fails without it. Kind of strange to run a dotnet command if I'm not building with dotencore
-        system('dotnet restore ./methodgen/methodgen.sln')
+        #system('dotnet restore ./methodgen/methodgen.sln')
 
         # compile methodgen
-        system('msbuild ./methodgen')
+        system('msbuild /restore ./methodgen')
         # execute methodgen for Rhino3dm
         app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
         if os.name == 'nt':  # windows build
@@ -91,12 +91,12 @@ def create_cpp_project(bitness, compile):
 
 
 def compilerhino3dm(dotnetcore):
-    system("dotnet restore ./dotnet/Rhino3dm.sln")
     conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
     if dotnetcore:
+        system("dotnet restore ./dotnet/Rhino3dm.sln")
         system('dotnet build ./dotnet/Rhino3dm.csproj {}'.format(conf))
     else:
-        system('msbuild ./dotnet/Rhino3dm.csproj {}'.format(conf))
+        system('msbuild /restore ./dotnet/Rhino3dm.csproj {}'.format(conf))
 
 
 if __name__ == '__main__':
