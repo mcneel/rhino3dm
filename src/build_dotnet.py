@@ -48,10 +48,6 @@ def methodgen(dotnetcore):
         app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
         system(app + args)
     else:
-        # [Alain] I'm not sure why the next line is neccessary since this solution doesn't have any nuget packages but the 
-        # build fails without it. Kind of strange to run a dotnet command if I'm not building with dotencore
-        #system('dotnet restore ./methodgen/methodgen.sln')
-
         # compile methodgen
         system('msbuild /restore ./methodgen')
         # execute methodgen for Rhino3dm
