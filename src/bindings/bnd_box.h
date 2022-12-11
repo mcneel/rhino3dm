@@ -48,5 +48,4 @@ public:
   //class BND_Brep* ToBrep() const;
   //class BND_Extrusion* ToExtrusion() const;
   //bool EpsilonEquals(Box other, double epsilon)
-
 };
