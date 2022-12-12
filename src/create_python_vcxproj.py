@@ -5,7 +5,6 @@ libraries, use the buildall_py_win batch file one directory up or run
 python setup.py bdist_wheel one directory up
 """
 import os, platform, sys, glob, struct
-import distutils.util
 from shutil import copyfile, copytree, rmtree, copy
 import fileinput
 
@@ -25,7 +24,7 @@ def createproject():
     """ compile for the platform we are running on """
     os.chdir(build_dir)
     if windows_build:
-        command = 'cmake -G "Visual Studio 16" -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" ../..'.format("win32" if bitness==32 else "x64", sys.executable)
+        command = 'cmake -G "Visual Studio 17 2022" -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" ../..'.format("Win32" if bitness==32 else "x64", sys.executable)
         os.system(command)
         if bitness==64:
             for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
