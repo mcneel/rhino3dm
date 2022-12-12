@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.0.0] - Unreleased
+### Added
+- Updated rhino3dm to be based on the Rhino 8 version of OpenNURBS
+
 ## [7.15.0] - 2022-03-23
 ### Added
 - (js, py) Added ViewportInfo.TargetPoint
