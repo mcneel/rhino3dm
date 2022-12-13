@@ -27,6 +27,23 @@ namespace Rhino.Geometry
       return new SumSurface(pSumSurface, null);
     }
 
+    /// <summary>
+    /// Constructs a new sum surface by extruding a curve in a specified direction.
+    /// </summary>
+    /// <param name="curve">The curve used as extrusion profile.</param>
+    /// <param name="extrusionDirection">The extrusion vector (must be non-zero).</param>
+    /// <returns>A new sum surface on success; null on failure.</returns>
+    /// <since>7.18</since>
+    public static SumSurface Create(Curve curve, Vector3d extrusionDirection)
+    {
+      IntPtr pConstCurve = curve.ConstPointer();
+      IntPtr pSumSurface = UnsafeNativeMethods.ON_SumSurface_Create2(pConstCurve, extrusionDirection);
+      if (IntPtr.Zero == pSumSurface)
+        return null;
+      GC.KeepAlive(curve);
+      return new SumSurface(pSumSurface, null);
+    }
+
     internal SumSurface(IntPtr ptr, object parent)
       : base(ptr, parent)
     { }

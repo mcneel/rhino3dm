@@ -149,6 +149,20 @@ namespace Rhino.Input.Custom
       }
     }
 
+    public bool UseActiveLayerLinetypeForCurves
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetCircle_UseLayerLinetype(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetUseLayerLinetype(ptr_this, value);
+      }
+    }
+
     /// <summary> Perform the 'get' operation. </summary>
     /// <param name="circle"></param>
     /// <returns></returns>
@@ -158,6 +172,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       circle = Geometry.Circle.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCircle(ref circle, ptr_this);
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-67575
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

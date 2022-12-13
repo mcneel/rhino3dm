@@ -47,6 +47,39 @@ void ON_Object_Delete( ON_Object* pObject )
     delete pObject;
 }
 
+struct release_deleter
+{
+  void operator()(ON_Object* ptr) 
+  { 
+    if (_delete) 
+      ON_Object_Delete(ptr); 
+  }
+
+  bool _delete = true;
+};
+
+RH_C_FUNCTION std::shared_ptr<ON_Object>* ON_Object_NewSharedPointer(ON_Object* pObject)
+{
+  return new std::shared_ptr<ON_Object>(pObject, release_deleter());
+}
+
+RH_C_FUNCTION void ON_Object_DeleteSharedPointer(std::shared_ptr<ON_Object>* pSP)
+{
+#if defined(NDEBUG)
+  if (RhInShutDown())
+    return;
+#endif
+  delete pSP;
+}
+
+RH_C_FUNCTION ON_Object* ON_Object_SharedPointer_Get(std::shared_ptr<ON_Object>* pSP)
+{
+  return pSP ? pSP->get() : nullptr;
+}
+
+
+
+
 RH_C_FUNCTION int ON_Object_IsCorrupt(
   const ON_Object* pObject,
   int bRepair,

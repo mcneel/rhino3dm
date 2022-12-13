@@ -1436,54 +1436,45 @@ namespace Rhino.DocObjects
     {
       get
       {
-        double w = 0.0;
-        double h = 0.0;
-        IntPtr const_ptr_this = ConstPointer();
-        UnsafeNativeMethods.ON_Viewport_GetViewScale(const_ptr_this, ref w, ref h);
-        return new System.Drawing.SizeF((float)w, (float)h);
+        double[] scale = GetViewScale();
+        return new System.Drawing.SizeF((float)scale[0], (float)scale[1]);
       }
       set
       {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.ON_Viewport_SetViewScale(ptr_this, (double)value.Width, (double)value.Height);
-      }
-    }
-    
-    /* Don't wrap until someone asks for this.
-    /// <summary>
-    /// Gets the m_clip_mod transformation.
-    /// </summary>
-    public Rhino.Geometry.Transform ClipModTransform
-    {
-      get
-      {
-        Rhino.Geometry.Transform matrix = new Rhino.Geometry.Transform();
-        UnsafeNativeMethods.ON_Viewport_ClipModXform(ConstPointer(), ref matrix);
-        return matrix;
+        SetViewScale((double)value.Width, (double)value.Height, 1.0);
       }
     }
 
     /// <summary>
-    /// Gets the m_clip_mod inverse transformation.
+    /// Set scaling applied for this viewport projection. For reflected
+    /// projections, call with values 1,1,-1
     /// </summary>
-    public Rhino.Geometry.Transform ClipModInverseTransform
+    /// <param name="scaleX"></param>
+    /// <param name="scaleY"></param>
+    /// <param name="scaleZ"></param>
+    /// <since>8.0</since>
+    public void SetViewScale(double scaleX, double scaleY, double scaleZ)
     {
-      get
-      {
-        Rhino.Geometry.Transform matrix = new Rhino.Geometry.Transform();
-        UnsafeNativeMethods.ON_Viewport_ClipModInverseXform(ConstPointer(), ref matrix);
-        return matrix;
-      }
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_Viewport_SetViewScale(ptrThis, scaleX, scaleY, scaleZ);
     }
 
-    public bool IsClipModTransformIdentity
+    /// <summary>
+    /// Get scaling applied to this viewport projection. Reflected ceiling projections
+    /// will return the values 1,1,-1
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public double[] GetViewScale()
     {
-      get
-      {
-        return 1==UnsafeNativeMethods.ON_Viewport_ClipModXformIsIdentity(ConstPointer());
-      }
+      double scaleX = 1.0;
+      double scaleY = 1.0;
+      double scaleZ = 1.0;
+      IntPtr constPtrThis = ConstPointer();
+      UnsafeNativeMethods.ON_Viewport_GetViewScale(constPtrThis, ref scaleX, ref scaleY, ref scaleZ);
+      return new double[] { scaleX, scaleY, scaleZ };
     }
-    */
+
 
     /// <summary>
     /// Return a point on the central axis of the view frustum.

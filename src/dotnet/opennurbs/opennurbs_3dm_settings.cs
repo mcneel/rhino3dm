@@ -621,6 +621,23 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// How a view will interact with clipping planes
+    /// </summary>
+    public DocObjects.ViewSectionBehavior SectionBehavior
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return (ViewSectionBehavior)UnsafeNativeMethods.ON_3dmView_GetSectionBehavior(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetSectionBehavior(ptrThis, (int)value);
+      }
+    }
+
     ViewportInfo m_viewport;
 
     /// <summary>
@@ -1447,6 +1464,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the current frame during animation record.
     /// </summary>
+    /// <since>7.12</since>
     public int CurrentFrame
     {
       set
@@ -1828,6 +1846,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets the HTML file name.
     /// </summary>
+    /// <since>7.12</since>
     public string HtmlFileName
     {
       set
@@ -1853,6 +1872,7 @@ namespace Rhino.DocObjects
     ///
     /// To change this set FolderName and HtmlFileName.
     /// </summary>
+    /// <since>7.12</since>
     public string HtmlFullPath => Path.ChangeExtension(Path.Combine(FolderName, HtmlFileName), ".html");
 
     /// <summary>

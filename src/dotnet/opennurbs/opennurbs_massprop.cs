@@ -194,6 +194,7 @@ namespace Rhino.Geometry
     /// <param name="absoluteTolerance">The absolute tolerancwe used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
     /// <returns>The AreaMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>7.10</since>
     public static AreaMassProperties Compute(Brep brep, bool area, bool firstMoments, bool secondMoments, bool productMoments, double relativeTolerance, double absoluteTolerance)
     {
       if (brep == null)
@@ -864,6 +865,7 @@ namespace Rhino.Geometry
     /// <param name="absoluteTolerance">The absolute tolerancwe used for the calculation. In overloads of this function where tolerances are not specified, 1.0e-6 is used.</param>
     /// <returns>The VolumeMassProperties for the given Brep or null on failure.</returns>
     /// <exception cref="System.ArgumentNullException">When brep is null.</exception>
+    /// <since>7.10</since>
     public static VolumeMassProperties Compute(Brep brep, bool volume, bool firstMoments, bool secondMoments, bool productMoments, double relativeTolerance, double absoluteTolerance)
     {
       if (brep == null)

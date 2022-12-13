@@ -270,7 +270,7 @@ namespace Rhino.Geometry
     /// <param name="info">Serialization data.</param>
     /// <param name="context">Serialization stream.</param>
     protected Surface(SerializationInfo info, StreamingContext context)
-      : base (info, context)
+      : base(info, context)
     {
     }
     #endregion
@@ -410,7 +410,7 @@ namespace Rhino.Geometry
       if (!inPlace)
         return Reverse(direction);
       IntPtr ptr_this = NonConstPointer();
-      if( UnsafeNativeMethods.ON_Surface_Reverse2(ptr_this, direction) )
+      if (UnsafeNativeMethods.ON_Surface_Reverse2(ptr_this, direction))
         return this;
       return null;
     }
@@ -1995,5 +1995,154 @@ namespace Rhino.Geometry
       nurbsT = 0;
       return UnsafeNativeMethods.ON_Surface_TranslateParameter(ptr, surfaceS, surfaceT, ref nurbsS, ref nurbsT, false);
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Splits the surface into two and refits the split edge
+    /// </summary>
+    /// <param name="curve">The curve used to split the surface. It must be a simple division, from one edge of the parametric space
+    /// to the opposite edge.</param>
+    /// <param name="trimProjectionDir">Vector for projection, or zero vector for no projection</param>
+    /// <param name="tolerance">3d tolerance for projection, splitting, fitting...</param>
+    /// <param name="Knots"></param>
+    /// <param name="bMeetCurve"></param>
+    /// <param name="divideIntoSections">If true, the surface is divided at each knot</param>
+    /// <param name="srfLower">Surfaces below trim curve in srf's (u,v) domain</param>
+    /// <param name="srfUpper">Surfaces below trim curve in srf's (u,v) domain</param>
+    /// <param name="edgeCurve">Curves (# = nSections) fit to trim curve with srf's u/v parameter</param>
+    /// <param name="trimCurveOnSurface">the actual trim curve as it is projected on or pulled to the surface</param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public int RefitSplit(Curve curve, Vector3d trimProjectionDir, double tolerance, IEnumerable<double> Knots,
+      bool bMeetCurve, bool divideIntoSections, List<Surface> srfLower, List<Surface> srfUpper, List<Curve> edgeCurve, 
+      ref Curve trimCurveOnSurface)
+    {
+      using (var simpleKnots = new SimpleArrayDouble(Knots))
+      using (var outputLower = new SimpleArraySurfacePointer())
+      using (var outputUpper = new SimpleArraySurfacePointer())
+      using (var outputEdge = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_outputLower = outputLower.NonConstPointer();
+        IntPtr ptr_outputUpper = outputUpper.NonConstPointer();
+        IntPtr ptr_edgeCurves = outputEdge.NonConstPointer();
+        IntPtr ptr_trimCurveOnSurface = IntPtr.Zero;
+        trimCurveOnSurface = null;
+
+        double FitMeasurement = double.NaN;
+        int nSections = UnsafeNativeMethods.RHC_RhinoSplitRefitSurface(this.ConstPointer(), curve.ConstPointer(), trimProjectionDir,
+          bMeetCurve, simpleKnots.ConstPointer(), tolerance, divideIntoSections,
+          ptr_outputLower, ptr_outputUpper, ptr_edgeCurves, ref ptr_trimCurveOnSurface,  ref FitMeasurement);
+        if (nSections > 0)
+        {
+          srfLower.AddRange(outputLower.ToNonConstArray());
+          srfUpper.AddRange(outputUpper.ToNonConstArray());
+          edgeCurve.AddRange(outputEdge.ToNonConstArray());
+          if (ptr_trimCurveOnSurface != IntPtr.Zero)
+            trimCurveOnSurface = GeometryBase.CreateGeometryHelper(ptr_trimCurveOnSurface, null) as Curve;
+        }
+        GC.KeepAlive(curve);
+        return nSections;
+      }
+    }
+
+    /// <summary>
+    /// This routine accepts a 3-d trim curve (trimCrv3d).
+    /// The trim curve is assumed to run from one surface edge to the opposite edge;
+    /// this is referred to as a "simple" trim curve, roughly parallel to one of the
+    /// srf directions (either u or v).  We refer to that parameter as the "trim parameter".
+    ///
+    /// The routine splits the surface via the trim curve, and then refits either side
+    /// ("upper" = "above the trim", and "lower" = "below the trim") as a set of
+    /// untrimmed Nurbs surfaces.  The idea is to retain, as much as possible, the 
+    /// Nurbs structure of srf, especially in the trim parameter.
+    /// </summary>
+    /// <param name="trimCurve3d">curve that will trim from one edge to the opposite</param>
+    /// <param name="trimProjectionDir">Vector for projection, or zero vector for no projection</param>
+    /// <param name="tolerance">3d tolerance for projection, splitting, fitting...</param>
+    /// <param name="knotAdditionMode">0: no, don't add any
+    /// 1: Yes, add nKnots knots, spaced regularly over the entire surface
+    /// 2: Yes, add nKnots knots, spaced regularly PER EXISTING SPAN
+    /// 3: Yes, add nKnots knots, as provided in the array Knots</param>
+    /// <param name="numInsertKnots">FOr TrimParamKnots != 3, the number of knots to add</param>
+    /// <param name="Knots">For TrimParamKnots=3, the custom knots to add</param>
+    /// <param name="sectionMode">0: no sections, just output one "upper" and one "lower" surface
+    /// 1: Yes, divide into sections at each of the input surface's existing knots
+    /// 2: Yes, divide into sections at each of the "nKnot" added knot values
+    /// 3: Yes, divide into sections at ALL knot values (i.e. both 1 and 2)</param>
+    /// <param name="numNonTrimSpans">number of spans in the non-trim parameter</param>
+    /// <param name="meetCurve">Drag the refit surfaces out to meet the original trim curve</param>
+    /// <param name="oneSided">Inputting an "active" point means you only want one side of the "split" to be refit -
+    /// In other words, you want a "trim refit".  Results will be returned in "srfLower"</param>
+    /// <param name="PtActive">Active point</param>
+    /// <param name="outputSurface">if true, output fit surfaces: srfLower and, if !bActivePt, srfUpper</param>
+    /// <param name="outputCurve">if true, output fit curve:  crvEdge</param>
+    /// <param name="numSections"></param>
+    /// <param name="lowerSurface">Surfaces (# = nSections) below trim curve in srf's (u,v) domain</param>
+    /// <param name="upperSurface">Surfaces (# = nSections) above trim curve in srf's (u,v) domain</param>
+    /// <param name="edgeCurve">Curves (# = nSections) fit to trim curve with srf's u/v parameter</param>
+    /// <param name="FitMeasurement">Calculated based on trimParamSections</param>
+    /// <param name="trimCurveOnSurface">the actual trim curve as it is projected on or pulled to the surface</param>
+    /// <returns>true for zuccess, false for failure</returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public bool RefitSimplySplitSurface(Curve trimCurve3d, Vector3d trimProjectionDir, double tolerance, RefitTrimKnotMode knotAdditionMode,
+      int numInsertKnots, IEnumerable<double> Knots, RefitTrimSectionMode sectionMode, int numNonTrimSpans, bool meetCurve,
+      bool oneSided, Point3d PtActive, bool outputSurface, bool outputCurve, ref int numSections,
+      List<Surface> lowerSurface, List<Surface> upperSurface, List<Curve> edgeCurve, ref double FitMeasurement, ref Curve trimCurveOnSurface)
+    {
+      using (var simpleKnots = new SimpleArrayDouble(Knots))
+      using (var outputLower = new SimpleArraySurfacePointer())
+      using (var outputUpper = new SimpleArraySurfacePointer())
+      using (var outputEdge = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_outputLower = outputLower.NonConstPointer();
+        IntPtr ptr_outputUpper = outputUpper.NonConstPointer();
+        IntPtr ptr_outputEdge = outputEdge.NonConstPointer();
+        IntPtr ptr_trimCurveOnSurface = IntPtr.Zero;
+        trimCurveOnSurface = null;
+
+        bool rc = UnsafeNativeMethods.RHC_RhRefitSimplySplitSurface(this.ConstPointer(), trimCurve3d.ConstPointer(), trimProjectionDir,
+          tolerance, knotAdditionMode, numInsertKnots, simpleKnots.ConstPointer(), sectionMode,
+          numNonTrimSpans, meetCurve, oneSided, PtActive, outputSurface, outputCurve, ref numSections, ptr_outputLower, ptr_outputUpper,
+          ptr_outputEdge, ref ptr_trimCurveOnSurface, ref FitMeasurement);
+
+        if (rc)
+        {
+          lowerSurface.AddRange(outputLower.ToNonConstArray());
+          upperSurface.AddRange(outputUpper.ToNonConstArray());
+          edgeCurve.AddRange(outputEdge.ToNonConstArray());
+          if (ptr_trimCurveOnSurface != IntPtr.Zero)
+            trimCurveOnSurface = GeometryBase.CreateGeometryHelper(ptr_trimCurveOnSurface, null) as Curve;
+        }
+        GC.KeepAlive(trimCurve3d);
+        return rc;
+      }
+    }
+
+    Curve[] FitCurveToSurface(Curve trimCurve3d, Vector3d trimProjectionDir, double tolerance,
+      IEnumerable<double> Knots, bool bezierSections, int numNonTrimSpans, bool meetCurve,
+      bool oneSided, Point3d PtActive, bool outputSurface, bool outputCurve, ref int numSections,
+      ref Curve trimCurveOnSurface)
+    {
+      using (SimpleArrayCurvePointer FitCurvesArray = new SimpleArrayCurvePointer())
+      using (var simpleKnots = new SimpleArrayDouble(Knots))
+      {
+        IntPtr trimCurvePtr = IntPtr.Zero;
+        trimCurveOnSurface = null;
+        double fit = double.NaN;
+        int nSections = UnsafeNativeMethods.RHC_RhFitCurveToSurface2(this.ConstPointer(), trimCurve3d.ConstPointer(), trimProjectionDir, simpleKnots.ConstPointer(),
+          tolerance, bezierSections, FitCurvesArray.NonConstPointer(), ref fit, ref trimCurvePtr);
+
+        if (trimCurvePtr != IntPtr.Zero)
+          trimCurveOnSurface = GeometryBase.CreateGeometryHelper(trimCurvePtr, null) as Curve;
+        if (nSections == 0) return new Curve[0];
+
+        // Output Curves
+        Curve[] FitCurves = FitCurvesArray.ToNonConstArray();
+        return FitCurves;
+      }
+    }
+#endif
   }
 }

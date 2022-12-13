@@ -747,15 +747,583 @@ namespace Rhino.Geometry
     PackedScaledNormalized = 2,
   }
 
+  /// <summary>
+  /// A collection of parameters that are passed to functions that calculate a various representations of SubD objects.
+  /// </summary>
+  /// <since>7.18</since>
+  [Serializable]
+  public class SubDDisplayParameters : IDisposable, ISerializable
+  {
+    IntPtr m_ptr;
+    internal IntPtr ConstPointer() { return m_ptr; }
+    internal IntPtr NonConstPointer() { return m_ptr; }
+
+    internal SubDDisplayParameters(IntPtr pMeshingParameters)
+    {
+      m_ptr = pMeshingParameters;
+    }
+
+    /// <summary>
+    /// Initializes a new instance with default values.
+    /// </summary>
+    /// <since>7.18</since>
+    public SubDDisplayParameters()
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_New();
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SubDDisplayParameters()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.18</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubDDisplayParameters_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Density enumeration
+    /// </summary>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public enum Density : uint
+    {
+      /// <summary>
+      /// Indicates the SubD display mesh density has not be set.
+      /// </summary>
+      UnsetDensity = 0,
+
+      ///<summary>
+      /// The minimum SubD display density that can be se in Rhino user interface is ExtraCoarseDensity (1).
+      ///</summary>
+      MinimumUserInterfaceDensity = 1,
+
+      /// <summary>
+      /// The maximum SubD display density that can be se in Rhino user interface is ExtraFineDensity (5).
+      /// </summary>
+      MaximumUserInterfaceDensity = 5,
+
+      ///<summary>
+      /// SubD display density values &lt;= MinimumAdaptiveDensity will never be adaptively reduced.
+      /// SubD display density values &gt; MinimumAdaptiveDensity may be adaptively reduced to a value &gt;= MinimumAdaptiveDensity.
+      ///</summary>
+      MinimumAdaptiveDensity = 1,
+
+      /// <summary>
+      /// Each SubD quad will generate 1 display mesh quads in a 1x1 grid.
+      /// This density can only be used with SubDs where every face is a quad.
+      /// User interface code never returns this density. 
+      /// </summary>
+      MinimumDensity = 0,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 4 display mesh quads in a 2x2 grid and each SubD N-gon will generate N display mesh quads.
+      /// Adaptive reductions do not apply to this density.
+      /// This is the minimum SubD display density.
+      /// </summary>
+      ExtraCoarseDensity = 1,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 16 display mesh quads in a 4x4 grid and each SubD N-gon will generate N*4 display mesh quads.
+      /// Adaptive reductions do not apply to this density.
+      /// </summary>
+      CoarseDensity = 2,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 64 display mesh quads in an 8x8 grid and each SubD N-gon will generate N*8 display mesh quads.
+      /// When a SubD has more than 8000 faces, adaptive MediumDensity is reduced to CoarseDensity.
+      /// </summary>
+      MediumDensity = 3,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 256 display mesh quads in a 16x16 grid and each SubD N-gon will generate N*16 display mesh quads.
+      /// When a SubD has more than 2000 faces, adaptive FineDensity is reduced to adaptive MediumDensity.
+      /// </summary>
+      FineDensity = 4,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 256 display mesh quads in a 16x16 grid and each SubD N-gon will generate N*16 display mesh quads.
+      /// When a SubD has more than 2000 faces, adaptive DefaultDensity is reduced to adaptive MediumDensity.
+      /// This is the default value for creating mesh approximations of SubD surface.  
+      /// When treadted as an adaptive setting, it produces acceptable results for most SubDs.
+      /// </summary>
+      DefaultDensity = 4,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 1024 display mesh quads in a 32x32 grid and each SubD N-gon will generate N*32 display mesh quads.
+      /// When a SubD has more than 500 faces, adaptive ExtraFineDensity is reduced to adaptive FineDensity.
+      /// </summary>
+      ExtraFineDensity = 5,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 4096 display mesh quads in a 64x64 grid and each SubD N-gon will generate N*64 display mesh quads.
+      /// SubDDisplayParameters.AdaptiveDensity() determines if the subd display density is 
+      /// treated adaptively or absolutely.
+      /// This value creates ridiculously dense display meshes and should generally be avoided. 
+      /// No Rhino user interface will create this value.
+      ///</summary>
+      MaximumDensity = 6,
+    }
+
+    /// <summary>
+    /// Limits display density to a value useful in user interface code. 
+    /// </summary>
+    /// <param name="displayDensity"></param>
+    /// <returns>The clamped value.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint ClampDisplayDensity(uint displayDensity)
+    {
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_ClampDisplayDensity(displayDensity);
+    }
+
+    /// <summary>
+    /// When the SubD display density is adaptive (default), AdaptiveMeshQuadMaximum
+    /// specifies the approximate number of display mesh quads to permit before
+    /// reducing the SubD display mesh density. 
+    /// </summary>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AdaptiveDisplayMeshQuadMaximum
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_AdaptiveDisplayMeshQuadMaximum();
+      }
+    }
+
+    /// <summary>
+    /// Get an empty SubDDisplayParameters.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Empty()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Empty();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for an extra course limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.ExtraCoarseDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters ExtraCoarse()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_ExtraCoarse();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a course limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.CoarseDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Coarse()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Coarse();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a medium limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.MediumDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Medium()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Medium();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a fine limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.FineDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Fine()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Fine();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    ///  Parameters for an extra fine limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.ExtraFineDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters ExtraFine()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_ExtraFine();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    ///  Parameters for the default limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.DefaultDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Default()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Default();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Gets the absolute SubD display density for SubD with subdFaceCount faces.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <param name="subDFaceCount">Number of SubD faces.</param>
+    /// <returns>
+    /// The absolute SubD display density is &lt;= adaptiveSubDDisplayDensity and &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// </returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AbsoluteDisplayDensityFromSubDFaceCount(uint adaptiveSubDDisplayDensity, uint subDFaceCount)
+    {
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(adaptiveSubDDisplayDensity, subDFaceCount);
+    }
+
+    /// <summary>
+    /// Gets absolute SubD display density for subd.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <param name="subd">
+    /// In the cases when the SubD in question is not available, like user interface code that applies in general 
+    /// and to unknown SubDs, pass SubD.Empty.
+    /// </param>
+    /// <returns>
+    /// The absolute SubD display density is &lt;= adaptiveSubDDisplayDensity and &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// </returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AbsoluteDisplayDensityFromSubD(uint adaptiveSubDDisplayDensity, SubD subd)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      IntPtr ptr_const_subd = subd.ConstPointer();
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(adaptiveSubDDisplayDensity, ptr_const_subd);
+    }
+
+    /// <summary>
+    /// In most applications, the caller sets the mesh density and leaves the other parameters set to the default values.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity. When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// Values &lt; SubDDisplayParameters.Density.MinimumAdaptiveDensity are treated as SubDDisplayParameters.Density.MinimumAdaptiveDensity.
+    /// All other invalid input values are treated as SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static SubDDisplayParameters CreateFromDisplayDensity(uint adaptiveSubDDisplayDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromDisplayDensity(adaptiveSubDDisplayDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Use of absolute display density is strongly discouraged. 
+    /// SubDs can have a single face or millions of faces.
+    /// Adaptive display meshing produces more desirable results in almost all cases.
+    /// </summary>
+    /// <param name="absoluteSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static SubDDisplayParameters CreateFromAbsoluteDisplayDensity(uint absoluteSubDDisplayDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromAbsoluteDisplayDensity(absoluteSubDDisplayDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// This function creates SubDDisplayParameters from a user interface "slider" like Rhino's simple mesh controls.
+    /// </summary>
+    /// <param name="normalizedMeshDensity">A double between 0.0 and 1.0.</param>
+    /// <returns>A valid ON_SubDDisplayParameters with the specified subd display density.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters CreateFromMeshDensity(double normalizedMeshDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromMeshDensity(normalizedMeshDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// True if the SubD display density setting is adaptive and approximate display
+    /// mesh quad count is capped at SubDDisplayParameters::AdaptiveDisplayMeshQuadMaximum.
+    /// </summary>
+    /// <since>7.18</since>
+    public bool DisplayDensityIsAdaptive
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensityIsAdaptive(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// True if the SubD display density setting is absolute.
+    /// </summary>
+    /// <since>7.18</since>
+    public bool DisplayDensityIsAbsolute
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensityIsAbsolute(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// Gets the absolute display density to use when creating display meshes for SubD.
+    /// When adaptive reduction is enabled, subd.Faces.Count is used to determine
+    /// the appropriate display density.
+    /// </summary>
+    /// <param name="subd">The SubD object.</param>
+    /// <returns>The display density.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public uint DisplayDensity(SubD subd)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      IntPtr ptr_const_subd = subd.ConstPointer();
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensity(m_ptr, ptr_const_subd);
+    }
+
+    /// <summary>
+    /// Set an adaptive SubD display density that caps display mesh quad count at SubDDisplayParameters.AdaptiveDisplayMeshQuadMaximum.
+    /// </summary>
+    /// <param name="adaptiveDisplayDensity">
+    /// adaptiveDisplayDensity &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// Values &lt;= SubDDisplayParameters.Density.MinimumAdaptiveDensity will never be adaptively reduced during display mesh creation.
+    /// </param>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public void SetAdaptiveDisplayDensity(uint adaptiveDisplayDensity)
+    {
+      UnsafeNativeMethods.ON_SubDDisplayParameters_SetAdaptiveDisplayDensity(m_ptr, adaptiveDisplayDensity);
+    }
+
+    /// <summary>
+    /// In almast all cases, you are better off using SetAdaptiveDisplayDensity().
+    /// </summary>
+    /// <param name="absoluteDisplayDensity">absoluteDisplayDensity &lt;= SubDDisplayParameters.Density.MaximumDensity.</param>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public void SetAbsoluteDisplayDensity(uint absoluteDisplayDensity)
+    {
+      UnsafeNativeMethods.ON_SubDDisplayParameters_SetAbsoluteDisplayDensity(m_ptr, absoluteDisplayDensity);
+    }
+
+    /// <summary>
+    /// The MeshLocation property determines if the mesh is on the SubD's control net or the SubD's surface.
+    /// </summary>
+    /// <since>7.18</since>
+    public SubDComponentLocation MeshLocation
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_MeshLocation(m_ptr);
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_SubDDisplayParameters_SetMeshLocation(m_ptr, value);
+      }
+    }
+    #region ISerializable code
+
+    /// <inheritdoc/>
+    /// <since>8.0</since>
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      info.AddValue(nameof(DisplayDensityIsAbsolute), DisplayDensityIsAbsolute, typeof(bool));
+      info.AddValue(nameof(DisplayDensity), DisplayDensity(SubD.Empty), typeof(uint));
+    }
+
+
+    /// <summary>
+    /// Called by BinaryFormatter.Deserialize to create a new MeshParamaters
+    /// object.
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="context"></param>
+    /// <since>8.0</since>
+    public SubDDisplayParameters(SerializationInfo info, StreamingContext context)
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_New();
+      var absolute = info.GetBool(nameof(DisplayDensityIsAbsolute), DisplayDensityIsAbsolute);
+      var density = info.GetUnsignedInt(nameof(DisplayDensity), DisplayDensity(SubD.Empty));
+      if (absolute)
+        SetAbsoluteDisplayDensity(density);
+      else
+        SetAdaptiveDisplayDensity(density);
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public string ToEncodedString() => SerializableExtensions.ToEncodedString(this);
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static SubDDisplayParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<SubDDisplayParameters>(value);
+
+    #endregion ISerializable code
+  }
+
+  /// <summary>
+  /// Call used to extend SerializationInfo and encode/decode serialized string
+  /// </summary>
+  static class SerializableExtensions
+  {
+    public static bool GetBool(this SerializationInfo info, string key, bool defaultValue)
+    {
+      if (info.GetValue(key, typeof(bool)) is bool b)
+        return b;
+      return defaultValue;
+    }
+
+    public static uint GetUnsignedInt(this SerializationInfo info, string key, uint defaultValue)
+    {
+      if (info.GetValue(key, typeof(uint)) is uint i)
+        return i;
+      return defaultValue;
+    }
+
+    public static int GetInt(this SerializationInfo info, string key, int defaultValue)
+    {
+      if (info.GetValue(key, typeof(int)) is int i)
+        return i;
+      return defaultValue;
+    }
+
+    public static double GetDouble(this SerializationInfo info, string key, double defaultValue)
+    {
+      if (info.GetValue(key, typeof(double)) is double d)
+        return d;
+      return defaultValue;
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public static string ToEncodedString(ISerializable objectToEncode)
+    {
+      using (var stream = new System.IO.MemoryStream())
+      {
+        var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+        formatter.Serialize(stream, objectToEncode);
+        return Convert.ToBase64String(stream.ToArray());
+      }
+    }
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static T FromEncodedString<T>(string value) where T : class
+    {
+      try
+      {
+        if (string.IsNullOrWhiteSpace(value))
+          return null;
+        using (var stream = new System.IO.MemoryStream(Convert.FromBase64String(value)))
+        {
+          var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+          var result = formatter.Deserialize(stream) as MeshingParameters;
+          return result as T;
+        }
+      }
+      catch
+      {
+        return null;
+      }
+    }
+  }
 
   /// <summary>
   /// Represents settings used for creating a mesh representation of a brep or surface.
   /// </summary>
-  public class MeshingParameters : IDisposable
+  [Serializable]
+  public class MeshingParameters : IDisposable, ISerializable, IEquatable<MeshingParameters>
   {
     IntPtr m_ptr; // This class is never const
     internal IntPtr ConstPointer() { return m_ptr; }
     internal IntPtr NonConstPointer() { return m_ptr; }
+
 
     /// <summary>
     /// Initializes a new instance with default values.
@@ -765,6 +1333,17 @@ namespace Rhino.Geometry
     public MeshingParameters()
     {
       m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+    }
+
+    /// <summary>
+    /// Initializes a new instance copying values from source.
+    /// <para>Initial values are same as <see cref="Default"/>.</para>
+    /// </summary>
+    /// <since>8.0</since>
+    public MeshingParameters(MeshingParameters source)
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+      CopyFrom(source);
     }
 
     /// <summary>
@@ -808,6 +1387,96 @@ namespace Rhino.Geometry
     {
       Dispose(false);
     }
+
+    #region ISerializable code
+
+    /// <inheritdoc/>
+    /// <since>8.0</since>
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      info.AddValue(nameof(ClosedObjectPostProcess), ClosedObjectPostProcess, typeof(bool));
+      info.AddValue(nameof(ComputeCurvature), ComputeCurvature, typeof(bool));
+      info.AddValue(nameof(DoublePrecision), DoublePrecision, typeof(bool));
+      info.AddValue(nameof(GridAmplification), GridAmplification, typeof(double));
+      info.AddValue(nameof(GridAngle), GridAngle, typeof(double));
+      info.AddValue(nameof(GridAspectRatio), GridAspectRatio, typeof(double));
+      info.AddValue(nameof(GridMaxCount), GridMaxCount, typeof(int));
+      info.AddValue(nameof(GridMinCount), GridMinCount, typeof(int));
+      info.AddValue(nameof(JaggedSeams), JaggedSeams, typeof(bool));
+      info.AddValue(nameof(MaximumEdgeLength), MaximumEdgeLength, typeof(double));
+      info.AddValue(nameof(MinimumEdgeLength), MinimumEdgeLength, typeof(double));
+      info.AddValue(nameof(MinimumTolerance), MinimumTolerance, typeof(double));
+      info.AddValue(nameof(RefineAngle), RefineAngle, typeof(double));
+      info.AddValue(nameof(RefineAngleInDegrees), RefineAngleInDegrees, typeof(double));
+      info.AddValue(nameof(RefineGrid), RefineGrid, typeof(bool));
+      info.AddValue(nameof(RelativeTolerance), RelativeTolerance, typeof(double));
+      info.AddValue(nameof(SimplePlanes), SimplePlanes, typeof(bool));
+      info.AddValue(nameof(TextureRange), TextureRange, typeof(int));
+      info.AddValue(nameof(Tolerance), Tolerance, typeof(double));
+      using (var subd = SubDDisplayParameters())
+        info.AddValue(nameof(SubDDisplayParameters), subd.ToEncodedString(), typeof(string));
+    }
+
+
+    /// <summary>
+    /// Called by BinaryFormatter.Deserialize to create a new MeshParamaters
+    /// object.
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="context"></param>
+    /// <since>8.0</since>
+    public MeshingParameters(SerializationInfo info, StreamingContext context)
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+      ClosedObjectPostProcess = info.GetBool(nameof(ClosedObjectPostProcess), ClosedObjectPostProcess);
+      ComputeCurvature = info.GetBool(nameof(ComputeCurvature), ComputeCurvature);
+      DoublePrecision = info.GetBool(nameof(DoublePrecision), DoublePrecision);
+      GridAmplification = info.GetDouble(nameof(GridAmplification), GridAmplification);
+      GridAngle = info.GetDouble(nameof(GridAngle), GridAngle);
+      GridAspectRatio = info.GetDouble(nameof(GridAspectRatio), GridAspectRatio);
+      GridMaxCount = info.GetInt(nameof(GridMaxCount), GridMaxCount);
+      GridMinCount = info.GetInt(nameof(GridMinCount), GridMinCount);
+      JaggedSeams = info.GetBool(nameof(JaggedSeams), JaggedSeams);
+      MaximumEdgeLength = info.GetDouble(nameof(MaximumEdgeLength), MaximumEdgeLength);
+      MinimumEdgeLength = info.GetDouble(nameof(MinimumEdgeLength), MinimumEdgeLength);
+      MinimumTolerance = info.GetDouble(nameof(MinimumTolerance), MinimumTolerance);
+      RefineAngle = info.GetDouble(nameof(RefineAngle), RefineAngle);
+      RefineAngleInDegrees = info.GetDouble(nameof(RefineAngleInDegrees), RefineAngleInDegrees);
+      RefineGrid = info.GetBool(nameof(RefineGrid), RefineGrid);
+      RelativeTolerance = info.GetDouble(nameof(RelativeTolerance), RelativeTolerance);
+      SimplePlanes = info.GetBool(nameof(SimplePlanes), SimplePlanes);
+      TextureRange = (MeshingParameterTextureRange)info.GetInt(nameof(TextureRange), (int)TextureRange);
+      Tolerance = info.GetDouble(nameof(Tolerance), Tolerance);
+      using (var subd = Geometry.SubDDisplayParameters.FromEncodedString(info.GetString(nameof(SubDDisplayParameters))))
+      {
+        if (subd != null)
+          SetSubDDisplayParameters(subd);
+      }
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public string ToEncodedString() => SerializableExtensions.ToEncodedString(this);
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static MeshingParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<MeshingParameters>(value);
+
+    #endregion ISerializable code
 
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
@@ -1078,6 +1747,17 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not the mesh should have
+    /// double precision vertices in addition to the floats.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool DoublePrecision
+    {
+      get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.DoublePrecision); }
+      set { SetBool(UnsafeNativeMethods.MeshParametersBoolConst.DoublePrecision, value); }
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether or not planar areas are allowed 
     /// to be meshed in a simplified manner.
     /// </summary>
@@ -1243,7 +1923,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the mesh parameter refine angle.
+    /// Gets or sets the mesh parameter refine angle in radians.
     /// </summary>
     /// <since>5.0</since>
     public double RefineAngle
@@ -1252,8 +1932,134 @@ namespace Rhino.Geometry
       set { SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngle, value); }
     }
 
+    /// <summary>
+    /// Gets or sets the mesh parameter refine angle in degrees.
+    /// </summary>
+    /// <since>8.0</since>
+    public double RefineAngleInDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngleInDegrees); }
+      set { SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngleInDegrees, value); }
+    }
 
     #endregion
+
+    /// <summary>
+    /// Gets the SubD display parameters.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public SubDDisplayParameters SubDDisplayParameters()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_MeshParameters_SubDDisplayParameters(m_ptr);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Sets the SubD display parameters.
+    /// </summary>
+    /// <param name="subDDisplayParameters">The SubD display parameters.</param>
+    /// <since>7.18</since>
+    public void SetSubDDisplayParameters(SubDDisplayParameters subDDisplayParameters)
+    {
+      if (null == subDDisplayParameters)
+        throw new ArgumentNullException(nameof(subDDisplayParameters));
+      IntPtr ptr_const_params = subDDisplayParameters.ConstPointer();
+      UnsafeNativeMethods.ON_MeshParameters_SetSubDDisplayParameters(m_ptr, ptr_const_params);
+    }
+
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="other">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public bool Equals(MeshingParameters other)
+    {
+      IntPtr const_ptr_this = this.ConstPointer();
+      IntPtr const_ptr_other = this.ConstPointer();
+      return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
+    }
+
+    /// <summary>
+    /// Call this method to compare this paramaters with another
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public int Compare(MeshingParameters other)
+    {
+      return UnsafeNativeMethods.ON_MeshParameters_OperatorCompare(ConstPointer(), other?.ConstPointer() ?? IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="obj">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public override bool Equals(Object obj)
+    {
+      if (obj == null)
+        return false;
+
+      MeshingParameters mpObj = obj as MeshingParameters;
+      if (mpObj == null)
+        return false;
+      else
+        return Equals(mpObj);
+    }
+
+    /// <summary>
+    /// Call this method to copy MeshingParameters from another instance.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <since>8.0</since>
+    public void CopyFrom(MeshingParameters source)
+    {
+      if (source != null)
+        UnsafeNativeMethods.ON_MeshParameters_OperatorEqual(source.ConstPointer(), NonConstPointer());
+    }
+
+    /// <summary>
+    /// Computes a hash number that represents the current MeshingParameters.
+    /// </summary>
+    /// <returns>A hash code for MeshingParameters.</returns>    
+    public override int GetHashCode()
+    {
+      // MSDN docs recommend XOR'ing the internal values to get a hash code
+      return RelativeTolerance.GetHashCode() ^ MaximumEdgeLength.GetHashCode() ^ MinimumEdgeLength.GetHashCode() ^ MinimumTolerance.GetHashCode();
+    }
+
+    /// <summary>
+    /// Determines whether the two MeshingParameters have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if all of components of the two MeshingParameters are equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator ==(MeshingParameters mp1, MeshingParameters mp2)
+    {
+      if (((object)mp1) == null || ((object)mp2) == null)
+        return Equals(mp1, mp2);
+
+      return mp1.Equals(mp2);
+    }
+
+    /// <summary>
+    /// Determines whether the two MeshingParameters do not have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if any components of the two MeshingParameters are not equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator !=(MeshingParameters mp1, MeshingParameters mp2)
+    {
+      if (((object)mp1) == null || ((object)mp2) == null)
+        return !Object.Equals(mp1, mp2);
+
+      return !(mp1.Equals(mp2));
+    }
   }
 
   /// <summary>
@@ -1452,6 +2258,7 @@ namespace Rhino.Geometry
     /// e.g TargetQuadCount = Input mesh Area * sqr(TargetEdgeLength)
     /// AdaptiveSize as well as AdaptiveQuadCount will also be ignored;
     /// </summary>
+    /// <since>7.8</since>
     public double TargetEdgeLength { get; set; } = 0;
 
     /// <summary>
@@ -1581,15 +2388,17 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a sub-mesh, that contains a filtered list of faces.
     /// </summary>
-    /// <param name="original">The mesh to copy. This item can be null, and in this case an empty mesh is returned.</param>
-    /// <param name="inclusion">A series of true and false values, that determine if each face is used in the new mesh.
+    /// <param name="original">The mesh to copy. If null, null is returned.</param>
+    /// <param name="inclusion">A series of true and false values, that determine if each face is used in the new mesh. 
+    /// If null or empty, a non-filtered copy of the original mesh is returned.
     /// <para>If the amount does not match the length of the face list, the pattern is repeated. If it exceeds the amount
-    /// of faces in the mesh face list, the pattern is truncated. This items can be null or empty, and the mesh will simply be duplicated.</para>
+    /// of faces in the mesh face list, the pattern is truncated.</para>
     /// </param>
+    /// <returns>A copy of the original mesh with its faces filtered, or null on failure.</returns>
     /// <since>7.0</since>
     public static Mesh CreateFromFilteredFaceList(Mesh original, IEnumerable<bool> inclusion)
     {
-      if (original == null) { return new Mesh(); }
+      if (original == null) { return null; }
       if (inclusion == null) { return original.DuplicateMesh(); }
 
       IntPtr original_int_ptr = original.ConstPointer();
@@ -2078,6 +2887,24 @@ namespace Rhino.Geometry
       return null;
     }
 
+    /// <summary>
+    /// Calculate a mesh representation of a surface's control net.
+    /// </summary>
+    /// <param name="surface">The surface.</param>
+    /// <returns>Mesh representing the surface control net on success, null on failure</returns>
+    /// <since>7.18</since>
+    public static Mesh CreateFromSurfaceControlNet(Surface surface)
+    {
+      if (null == surface)
+        throw new ArgumentNullException(nameof(surface));
+      IntPtr ptr_const_surface = surface.ConstPointer();
+      IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_ControlPolygonMesh(ptr_const_surface);
+      if (IntPtr.Zero != ptr_mesh)
+        return new Mesh(ptr_mesh, null);
+      GC.KeepAlive(surface);
+      return null;
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Construct a mesh patch from a variety of input geometry.
@@ -2383,13 +3210,19 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a new extrusion from a curve.
+    /// Constructs a mesh from an extruded curve.
     /// </summary>
     /// <param name="curve">A curve to extrude.</param>
     /// <param name="direction">The direction of extrusion.</param>
     /// <param name="parameters">The parameters of meshing.</param>
     /// <param name="boundingBox">The bounding box controls the length of the extrusion.</param>
     /// <returns>A new mesh, or null on failure.</returns>
+    /// <remarks>
+    /// This method is designed to be used when projecting curves onto a mesh. In general,
+    /// a better solution is to use extrude the curve into a surface using <see cref="Surface.CreateExtrusion"/>,
+    /// and then create a mesh from the surface using <see cref="CreateFromSurface(Surface)"/>. The <see cref="Extrusion"/> and
+    /// <see cref="SumSurface"/> classes can also be used to create extrusions.
+    /// </remarks>
     /// <since>7.0</since>
     public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters,
       BoundingBox boundingBox)
@@ -3221,6 +4054,48 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Creates a single mesh face from the given input. The new mesh will be apppended to this mesh.
+    /// </summary>
+    /// <param name="components">An enumeration of component indexes from this mesh.
+    /// This can be one following combinations:
+    /// 1 vertex (MeshVertex or MeshTopologyVertex) and 1 edge (MeshTopologyEdge), 
+    /// 2 edges (MeshTopologyEdge), 
+    /// or 3 vertices (MeshVertex or MeshTopologyVertex).
+    /// </param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool PatchSingleFace(IEnumerable<ComponentIndex> components)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      ComponentIndex[] arr_components = components.ToArray();
+      return UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace(ptr_this, arr_components.Length, arr_components);
+    }
+
+    /// <summary>
+    /// Creates a single mesh face from the given input.
+    /// </summary>
+    /// <param name="mesh">The input mesh.</param>
+    /// <param name="components">An enumeration of component indexes from the input mesh.
+    /// This can be one following combinations:
+    /// 1 vertex (MeshVertex or MeshTopologyVertex) and 1 edge (MeshTopologyEdge), 
+    /// 2 edges (MeshTopologyEdge), 
+    /// or 3 vertices (MeshVertex or MeshTopologyVertex).
+    /// </param>
+    /// <returns>A new mesh if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public static Mesh CreateFromPatchSingleFace(Mesh mesh, IEnumerable<ComponentIndex> components)
+    {
+      if (null == mesh)
+        throw new ArgumentNullException(nameof(mesh));
+      IntPtr ptr_const_this = mesh.ConstPointer();
+      ComponentIndex[] arr_components = components.ToArray();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace2(ptr_const_this, arr_components.Length, arr_components);
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new Mesh(ptr, null);
+    }
+
+    /// <summary>
     /// Removes mesh normals and reconstructs the face and vertex normals based
     /// on the orientation of the faces.
     /// </summary>
@@ -3345,6 +4220,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAbsoluteTolerance property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance)
     {
       return MergeAllCoplanarFaces(tolerance, RhinoMath.UnsetValue);
@@ -3362,6 +4238,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAngleToleranceRadians property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -4593,6 +5470,7 @@ namespace Rhino.Geometry
     /// <param name="xform">Local mapping transform for the mesh mapping.  Use identity for surface parameter mapping.</param>
     /// <param name="bitmap">The bitmap to use for the colors.</param>
     /// <returns></returns>
+    /// <since>7.10</since>
     public bool CreateVertexColorsFromBitmap(RhinoDoc doc, TextureMapping mapping, Transform xform, System.Drawing.Bitmap bitmap)
     {
       return UnsafeNativeMethods.Rhino_CreateVertexColors(
@@ -5021,6 +5899,7 @@ namespace Rhino.Geometry
     /// <param name="interval">Avoid.</param>
     /// <returns>Avoid.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.13</deprecated>
     [Obsolete("Prefer the overload that takes a tolerance value.")]
     public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval)
     {
@@ -5065,6 +5944,7 @@ namespace Rhino.Geometry
     /// <param name="sectionPlane">Avoid.</param>
     /// <returns>Avoid.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.13</deprecated>
     [Obsolete("Prefer the option that takes a tolerance value.")]
     public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane)
     {
@@ -5086,6 +5966,8 @@ namespace Rhino.Geometry
     /// <seealso cref="Intersect.Intersection.MeshPlane(Mesh, Plane)"/>
     public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane, double tolerance)
     {
+      if (meshToContour == null) throw new ArgumentNullException(nameof(meshToContour));
+
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
       using (var outputcurves = new SimpleArrayCurvePointer())
       {
@@ -5120,7 +6002,7 @@ namespace Rhino.Geometry
       return Intersect.Intersection.MeshMesh_Helper(
         list, tolerance, true, false, out perforations,
         overlapsPolylines, out overlapsPolylinesResult,
-        overlapsMesh, out overlapsMeshResult, textLog, cancel, progress);
+        overlapsMesh, out overlapsMeshResult, false, out int[] _, textLog, cancel, progress);
     }
 
 #endif
@@ -7674,6 +8556,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="edgeIndex">The common topological edge index.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.6</since>
     public bool MergeAdjacentFaces(int edgeIndex)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();

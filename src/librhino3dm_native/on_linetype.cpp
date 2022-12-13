@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
-RH_C_FUNCTION ON_Linetype* ON_Linetype_New()
+RH_C_FUNCTION ON_Linetype* ON_Linetype_New(const ON_Linetype* pConstLinetype)
 {
+  if (pConstLinetype)
+    return new ON_Linetype(*pConstLinetype);
   return new ON_Linetype();
 }
 
@@ -26,16 +28,30 @@ RH_C_FUNCTION void ON_Linetype_SetLinetypeName(ON_Linetype* pLinetype, const RHM
   }
 }
 
-RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, int which)
+enum LinetypeInteger : int
 {
-  const int idxSegmentCount = 1;
+  ltiSegmentCount = 0,
+  ltiLinetypeIndex = 1,
+  ltiLineCap = 2,
+  ltiLineJoin = 3
+};
+
+
+RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, enum LinetypeInteger which)
+{
   int rc = -1;
   if( pLinetype )
   {
     switch(which)
     {
-    case idxSegmentCount:
+    case ltiSegmentCount:
       rc = pLinetype->SegmentCount();
+      break;
+    case ltiLineCap:
+      rc = (int)pLinetype->LineCapStyle();
+      break;
+    case ltiLineJoin:
+      rc = (int)pLinetype->LineJoinStyle();
       break;
     default:
       break;
@@ -44,15 +60,20 @@ RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, int which)
   return rc;
 }
 
-RH_C_FUNCTION void ON_Linetype_SetInt(ON_Linetype* pLinetype, int which, int val)
+RH_C_FUNCTION void ON_Linetype_SetInt(ON_Linetype* pLinetype, enum LinetypeInteger which, int val)
 {
-  const int idxLinetypeIndex = 0;
   if( pLinetype )
   {
     switch(which)
     {
-    case idxLinetypeIndex:
+    case ltiLinetypeIndex:
       pLinetype->SetIndex(val);
+      break;
+    case ltiLineCap:
+      pLinetype->SetLineCapStyle(ON::LineCapStyleFromUnsigned(val));
+      break;
+    case ltiLineJoin:
+      pLinetype->SetLineJoinStyle(ON::LineJoinStyleFromUnsigned(val));
       break;
     default:
       break;
@@ -114,9 +135,18 @@ RH_C_FUNCTION void ON_Linetype_GetSegment(const ON_Linetype* pConstLinetype, int
 
 RH_C_FUNCTION bool ON_Linetype_SetSegments(ON_Linetype* pLinetype, int segment_count, /*ARRAY*/const double* pSegmentLengths)
 {
-  // https://mcneel.myjetbrains.com/youtrack/issue/RH-47148
+  if (nullptr == pLinetype)
+    return false;
+
   bool rc = false;
-  if (pLinetype && segment_count > 0 && pSegmentLengths)
+  if (segment_count < 2)
+  {
+    ON_SimpleArray<ON_LinetypeSegment> empty;
+    rc = pLinetype->SetSegments(empty);
+    pLinetype->AppendSegment(ON_LinetypeSegment::OneMillimeterLine);
+  }
+
+  if (segment_count > 0 && pSegmentLengths)
   {
     ON_SimpleArray<double> segment_lengths(segment_count);
     segment_lengths.Append(segment_count, pSegmentLengths);
@@ -132,8 +162,58 @@ RH_C_FUNCTION bool ON_Linetype_SetSegments(ON_Linetype* pLinetype, int segment_c
     }
 
     rc = pLinetype->SetSegments(segments);
-    if (rc)
-      rc = pLinetype->IsValid();
   }
+
+  if (rc)
+    rc = pLinetype->IsValid();
   return rc;
+}
+
+RH_C_FUNCTION double ON_Linetype_GetWidth(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->Width() : 0;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetWidth(ON_Linetype* linetype, double width)
+{
+  if (linetype)
+    linetype->SetWidth(width);
+}
+
+RH_C_FUNCTION ON::LengthUnitSystem ON_Linetype_GetWidthUnits(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->WidthUnits() : ON::LengthUnitSystem::None;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetWidthUnits(ON_Linetype* linetype, ON::LengthUnitSystem units)
+{
+  if (linetype)
+    linetype->SetWidthUnits(units);
+}
+
+RH_C_FUNCTION void ON_Linetype_GetTaperPoints(const ON_Linetype* linetype, ON_SimpleArray<ON_2dPoint>* points)
+{
+  if (linetype && points)
+  {
+    const ON_SimpleArray<ON_2dPoint>* ltpts = linetype->TaperPoints();
+    if (ltpts)
+      *points = *ltpts;
+  }
+}
+
+RH_C_FUNCTION void ON_Linetype_SetTaper(ON_Linetype* linetype, double startwidth, ON_2DPOINT_STRUCT pt, double endWidth)
+{
+  if (linetype)
+  {
+    ON_2dPoint taperPoint(pt.val);
+    if (taperPoint.IsValid())
+      linetype->SetTaper(startwidth, taperPoint, endWidth);
+    else
+      linetype->SetTaper(startwidth, endWidth);
+  }
+}
+RH_C_FUNCTION void ON_Linetype_RemoveTaper(ON_Linetype* linetype)
+{
+  if (linetype)
+    linetype->RemoveTaper();
 }

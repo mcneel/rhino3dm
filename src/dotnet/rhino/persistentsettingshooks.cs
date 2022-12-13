@@ -56,6 +56,9 @@ namespace Rhino
                                                                 GetGuidHook,
                                                                 GetPoint3DHook
                                                                );
+      // This is used to turn on WIP features for McNeel testing only.
+      Runtime.HostUtils.RegisterNamedCallback("RhinoApp.IsLoggedInAsMcNeelUser", (s, e) => e.Set("result", RhinoApp.IsLoggedInAsMcNeelUser));
+      Runtime.HostUtils.RegisterNamedCallback("RhinoApp.AreMcNeelOnlyFeaturesEnabled", (s, e) => e.Set("result", RhinoApp.AreMcNeelOnlyFeaturesEnabled));
     }
 
     // Get a specific PersistentSettings reference to attach to 
@@ -96,7 +99,10 @@ namespace Rhino
     {
       PlugInSettings plug_in_settings;
       if (pointerId == 0)
-        g_dictionary.TryGetValue(plugInId, out plug_in_settings);
+      {
+        lock (g_dictionary_lock)
+          g_dictionary.TryGetValue(plugInId, out plug_in_settings);
+      }
       else
       {
         lock (g_plug_in_settings_read_lock)
@@ -114,9 +120,12 @@ namespace Rhino
     }
     static internal PlugInSettings GetPlugInSettings(Guid plugInId)
     {
-      PlugInSettings plug_in_settings;
-      g_dictionary.TryGetValue(plugInId, out plug_in_settings);
-      return plug_in_settings;
+      lock (g_dictionary_lock)
+      {
+        PlugInSettings plug_in_settings;
+        g_dictionary.TryGetValue(plugInId, out plug_in_settings);
+        return plug_in_settings;
+      }
     }
     internal delegate uint GetChildPersistentSettingsPointerProc(uint parentPointerId, IntPtr stringPointerChildName);
     static internal GetChildPersistentSettingsPointerProc GetChildPersistentSettingsHook = GetChildPersistentSettingsFunc;
@@ -206,8 +215,11 @@ namespace Rhino
           return found_id;
         }
         PlugInSettings plug_in_settings;
-        if (!g_dictionary.TryGetValue(plugInId, out plug_in_settings))
-          return 0;
+        lock (g_dictionary_lock)
+        {
+          if (!g_dictionary.TryGetValue(plugInId, out plug_in_settings))
+            return 0;
+        }
         var settings = plug_in_settings.CommandSettings(command_name);
         if (settings == null)
           return 0;
@@ -288,8 +300,11 @@ namespace Rhino
     {
       if (plugInId == Guid.Empty) return 0;
       PlugInSettings plug_in_settings;
-      if (g_dictionary.TryGetValue(plugInId, out plug_in_settings))
-        return 1;
+      lock (g_dictionary_lock)
+      {
+        if (g_dictionary.TryGetValue(plugInId, out plug_in_settings))
+          return 1;
+      }
       // 10 June 2020 John Morse
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-58733
       // Get the plug-in settings from the PersistentSettings system, it will
@@ -303,7 +318,8 @@ namespace Rhino
       var settings = Rhino.PersistentSettings.FromPlugInId(plugInId);
       // The settings parent is the plug-in settings we are looking for
       plug_in_settings = settings.Parent;
-      g_dictionary.Add(plugInId, plug_in_settings);
+      lock (g_dictionary_lock)
+        g_dictionary.Add(plugInId, plug_in_settings);
       return 1;
     }
     #endregion Create plug-in settings hook
@@ -1016,9 +1032,12 @@ namespace Rhino
     /// <returns></returns>
     private static PlugInSettings PlugInSettings(Guid plugInId)
     {
-      PlugInSettings plug_in_settings;
-      g_dictionary.TryGetValue(plugInId, out plug_in_settings);
-      return plug_in_settings;
+      lock (g_dictionary_lock)
+      {
+        PlugInSettings plug_in_settings;
+        g_dictionary.TryGetValue(plugInId, out plug_in_settings);
+        return plug_in_settings;
+      }
     }
 
     /// <summary>
@@ -1042,6 +1061,7 @@ namespace Rhino
     /// the first time CRhinoPlugIn::Settings() is called.
     /// </summary>
     static private readonly Dictionary<Guid, PlugInSettings> g_dictionary = new Dictionary<Guid, PlugInSettings>();
+    static private readonly object g_dictionary_lock = new object();
     /// <summary>
     /// Dictionary of PersistentSettings references associated with unmanaged
     /// objects.  Unmanaged object destructor's are responsible for calling the

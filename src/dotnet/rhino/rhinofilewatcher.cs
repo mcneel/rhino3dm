@@ -242,6 +242,12 @@ namespace Rhino
             RhinoApp.Idle += RhinoFileWatcher.Cleanup;
           }
 
+          if (Runtime.HostUtils.RunningOnOSX && g_file_system_watchers.Count > 512)
+          {
+            //Limit file watchers to 512 because OSX really can't handle any more.
+            return false;
+          }
+
           watcher = new RefCountedFileSystemWatcher();
 
           g_file_system_watchers.Add(key, watcher);

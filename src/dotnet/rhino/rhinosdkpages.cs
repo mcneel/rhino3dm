@@ -175,23 +175,34 @@ namespace Rhino.UI
     private static RhinoPageIntDelegate g_show_delegate;
     private static void RhinoPageShowHook(IntPtr constPointer, Guid runtimeId, int value)
     {
-      if (value < 1 && Runtime.HostUtils.RunningOnOSX)
+      try
       {
-        // Don't hide the view when running on Mac, if you do and it is in a floating
-        // controller that gets hidden when the Rhino Window is deactivated the view
-        // will hide but then it will never get shown again.
-        return;
+        if (value < 1 && Runtime.HostUtils.RunningOnOSX)
+        {
+          // Don't hide the view when running on Mac, if you do and it is in a floating
+          // controller that gets hidden when the Rhino Window is deactivated the view
+          // will hide but then it will never get shown again.
+          return;
+        }
+        // From Windows service provider
+        var instance = GetPageInstance(runtimeId);
+        var page = instance?.PageObject;
+        var page_control = (page as StackedDialogPage)?.PageControl ?? (page as ObjectPropertiesPage)?.PageControl;
+        var type = page_control?.GetType();
+        var prop = type?.GetProperty("Visible");
+        prop?.SetValue(page_control, value > 0);
+        // Redraw the control when showing
+        if (value > 0)
+          instance?.Redraw(page_control);
       }
-			// From Windows service provider
-      var instance = GetPageInstance(runtimeId);
-      var page = instance?.PageObject;
-      var page_control = (page as StackedDialogPage)?.PageControl ?? (page as ObjectPropertiesPage)?.PageControl;
-      var type = page_control?.GetType();
-      var prop = type?.GetProperty("Visible");
-      prop?.SetValue(page_control, value > 0);
-      // Redraw the control when showing
-      if (value > 0)
-        instance?.Redraw(page_control);
+      catch (Exception exception)
+      {
+        for (var e = exception; e != null; e = e.InnerException)
+        {
+          RhinoApp.WriteLine(e.Message);
+          RhinoApp.WriteLine(e.StackTrace);
+        }
+      }
     }
 
     private static RhinoPageIntReturnsIntDelegate g_activated_delegate;
@@ -212,7 +223,7 @@ namespace Rhino.UI
       }
       catch(Exception ex)
       {
-        Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        Runtime.HostUtils.ExceptionReport(ex);
       }
       return 0;
     }

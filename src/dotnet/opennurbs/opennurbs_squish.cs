@@ -50,6 +50,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the default Squishing parameters
     /// </summary>
+    /// <since>7.9</since>
     public static SquishParameters Default
     {
       get
@@ -62,6 +63,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -106,6 +108,7 @@ namespace Rhino.Geometry
     /// topology and coincident vertices will remain coincident.
     /// Otherwise coincident vertices are free to move apart.
     /// </summary>
+    /// <since>7.9</since>
     public bool PreserveTopology
     {
       get 
@@ -126,6 +129,7 @@ namespace Rhino.Geometry
     /// to the squished mesh and 2d points and curves on the 
     /// squished mesh can be mapped back to the 3d mesh.
     /// </summary>
+    /// <since>7.9</since>
     public bool SaveMapping
     {
       get
@@ -154,6 +158,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Spring constant for stretched boundary edges
     /// </summary>
+    /// <since>7.9</since>
     public double BoundaryStretchConstant
     {
       get
@@ -171,6 +176,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Spring constant for compressed boundary edges times the rest length
     /// </summary>
+    /// <since>7.9</since>
     public double BoundaryCompressConstant
     {
       get
@@ -188,6 +194,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Spring constant for stretched boundary edges times the rest length
     /// </summary>
+    /// <since>7.9</since>
     public double InteriorStretchConstant
     {
       get
@@ -205,6 +212,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Spring constant for compressed interior edges times the rest length
     /// </summary>
+    /// <since>7.9</since>
     public double InteriorCompressConstant
     {
       get
@@ -253,6 +261,7 @@ namespace Rhino.Geometry
     ///     -0.5: cap on compression, (2d length) >= 0.5*(3d length)
     ///     -1.0: no compression, (2d length) >= 1.0*(3d length)
     /// </summary>
+    /// <since>7.9</since>
     public double AbsoluteLimit
     {
       get
@@ -274,6 +283,7 @@ namespace Rhino.Geometry
     ///   PhysicalStress: (scale dependent) the "spring" constant is 
     ///     proportional to 1/L.    
     /// </summary>
+    /// <since>7.9</since>
     public SquishFlatteningAlgorithm Algorithm
     {
       get
@@ -303,6 +313,7 @@ namespace Rhino.Geometry
     ///    0.0: no preference between compression and stretching
     ///    1.0: strongest bias in favor of stretching
     /// </param>
+    /// <since>7.9</since>
     public void SetSpringConstants(double boundaryBias, double deformationBias)
     {
       IntPtr ptr = ConstPointer();
@@ -331,6 +342,7 @@ namespace Rhino.Geometry
     /// Otherwise, boundaryBias and deformationBias are set to 0.0
     /// and false is returned.
     /// </returns>
+    /// <since>7.9</since>
     public bool GetSpringConstants(out double boundaryBias, out double deformationBias)
     {
       IntPtr ptr = ConstPointer();
@@ -346,6 +358,7 @@ namespace Rhino.Geometry
     /// <param name="boundaryCompressConstant"></param>
     /// <param name="interiorStretchConstant"></param>
     /// <param name="interiorCompressConstant"></param>
+    /// <since>7.9</since>
     public void SetDeformation(SquishDeformation deformation, bool bPreserveBoundary,
       double boundaryStretchConstant, double boundaryCompressConstant,
       double interiorStretchConstant, double interiorCompressConstant)
@@ -370,6 +383,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// constructs a squisher with default parameters
     /// </summary>
+    /// <since>7.9</since>
     public Squisher()
     {
       m_ptr = UnsafeNativeMethods.ON_Squisher_New();
@@ -389,6 +403,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.9</since>
     public void Dispose()
     {
       Dispose(true);
@@ -415,6 +430,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="geometry"></param>
     /// <returns></returns>
+    /// <since>7.9</since>
     public static bool Is2dPatternSquished(GeometryBase geometry)
     {
       if (null != geometry && UnsafeNativeMethods.ON_Check_2dPatternIsSquished(geometry.ConstPointer()))
@@ -435,6 +451,7 @@ namespace Rhino.Geometry
     /// <param name="squished_marks_out">The squished marks. If a mark fails to squish, it will have a
     /// null entry in the list.</param>
     /// <returns>A flattened mesh</returns>
+    /// <since>7.9</since>
     public Mesh SquishMesh(SquishParameters sp, Mesh mesh3d, IEnumerable<GeometryBase> marks, List<GeometryBase> squished_marks_out)
     {
       if (null == mesh3d) return null;
@@ -470,6 +487,7 @@ namespace Rhino.Geometry
     /// <param name="sp">The parameters for the squish operation</param>
     /// <param name="mesh3d">The mesh to squish</param>
     /// <returns>A flattened mesh</returns>
+    /// <since>7.9</since>
     public Mesh SquishMesh(SquishParameters sp, Mesh mesh3d)
     {
       if (null == mesh3d) return null;
@@ -490,6 +508,7 @@ namespace Rhino.Geometry
     /// <param name="squished_marks_out">A list of the squished marks, with null entires for marks
     /// that fail to squish. Can be null.</param>
     /// <returns>A brep representing the flattened surface</returns>
+    /// <since>7.9</since>
     public Brep SquishSurface(SquishParameters sp, Surface surface, IEnumerable<GeometryBase> marks, List<GeometryBase> squished_marks_out)
     {
       IntPtr ptr_this = ConstPointer();
@@ -525,6 +544,7 @@ namespace Rhino.Geometry
     /// <param name="sp">The parameters for the squish operation</param>
     /// <param name="surface">The surface to be squished</param>
     /// <returns>A brep representing the flattened surface</returns>
+    /// <since>7.9</since>
     public Brep SquishSurface(SquishParameters sp, Surface surface)
     {
       IntPtr ptr_this = ConstPointer();
@@ -543,6 +563,7 @@ namespace Rhino.Geometry
     /// <param name="point">The point to squish</param>
     /// <param name="squishedPoint">The squished point</param>
     /// <returns>true if successful</returns>
+    /// <since>7.9</since>
     public bool SquishPoint(Point3d point, out Point3d squishedPoint)
     {
       squishedPoint = new Point3d();
@@ -555,6 +576,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curve">The curve to squish</param>
     /// <returns>The squished curve</returns>
+    /// <since>7.9</since>
     public PolylineCurve SquishCurve(Curve curve)
     {
       if (null == curve) return null;
@@ -570,6 +592,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="textDot">The text dot to squish</param>
     /// <returns>The resulting textDot</returns>
+    /// <since>7.9</since>
     public TextDot SquishTextDot(TextDot textDot)
     {
       if (null == textDot) return null;
@@ -597,6 +620,7 @@ namespace Rhino.Geometry
     /// Get the 2d mesh that results from the squish operation
     /// </summary>
     /// <returns>Returns the squished 2d mesh</returns>
+    /// <since>7.9</since>
     public Mesh Get2dMesh()
     {
       IntPtr ptr_this = ConstPointer();
@@ -608,6 +632,7 @@ namespace Rhino.Geometry
     /// Get the 3d mesh that was used for squish operation
     /// </summary>
     /// <returns>Returns the squished 2d mesh</returns>
+    /// <since>7.9</since>
     public Mesh Get3dMesh()
     {
       IntPtr ptr_this = ConstPointer();
@@ -617,13 +642,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the edges of the mesh which correspond to the edges of the same indices resulting from GetMesh3dEdges
+    /// Gets lines at the position of the mesh edges and diagonals that were constrained during the squish, in the 2d mesh.
+    /// The line at any index here corresponds to the same line in GetLengthConstrained3dLines.
     /// </summary>
-    /// <returns>And array of lines representing the mesh edges</returns>
-    public Line[] GetMesh2dEdges()
+    /// <returns>An array of lines representing the length constraints</returns>
+    /// <since>8.0</since>
+    public Line[] GetLengthConstrained2dLines()
     {
       IntPtr ptr_this = ConstPointer();
-      IntPtr ptr_edges = UnsafeNativeMethods.ON_Squisher_GetMesh2dEdges(ptr_this);
+      IntPtr ptr_edges = UnsafeNativeMethods.ON_Squisher_GetLengthConstrained2dLines(ptr_this);
       if (null == ptr_edges) return null;
       int count = UnsafeNativeMethods.ON_LineArray_Count(ptr_edges);
       if (count <= 0) return null;
@@ -633,19 +660,59 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the edges of the mesh which correspond to the edges of the same indices resulting from GetMesh2dEdges
+    /// Gets lines at the position of the mesh edges and diagonals that were constrained during the squish, in the 2d mesh.
+    /// The line at any index here corresponds to the same line in GetLengthConstrained3dLines.
     /// </summary>
-    /// <returns>And array of lines representing the mesh edges</returns>
-    public Line[] GetMesh3dEdges()
+    /// <returns>An array of lines representing the length constraints</returns>
+    /// <since>7.9</since>
+    /// <deprecated>8.0</deprecated>
+    /// <remarks>Renamed to GetLengthConstrained2dLines.</remarks>
+    public Line[] GetMesh2dEdges() { return GetLengthConstrained2dLines(); }
+
+    /// <summary>
+    /// Gets lines at the position of the mesh edges and diagonals that were constrained during the squish, in the 3d mesh.
+    /// The line at any index here corresponds to the same line in GetLengthConstrained2dLines.
+    /// </summary>
+    /// <returns>An array of lines representing the length constraints</returns>
+    /// <since>8.0</since>
+    public Line[] GetLengthConstrained3dLines()
     {
       IntPtr ptr_this = ConstPointer();
-      IntPtr ptr_edges = UnsafeNativeMethods.ON_Squisher_GetMesh3dEdges(ptr_this);
+      IntPtr ptr_edges = UnsafeNativeMethods.ON_Squisher_GetLengthConstrained3dLines(ptr_this);
       if (null == ptr_edges) return null;
       int count = UnsafeNativeMethods.ON_LineArray_Count(ptr_edges);
       if (count <= 0) return null;
       Line[] edges = new Line[count];
       UnsafeNativeMethods.ON_LineArray_CopyValues(ptr_edges, edges);
       return edges;
+    }
+
+    /// <summary>
+    /// Gets lines at the position of the mesh edges and diagonals that were constrained during the squish, in the 3d mesh.
+    /// The line at any index here corresponds to the same line in GetLengthConstrained2dLines.
+    /// </summary>
+    /// <returns>An array of lines representing the length constraints</returns>
+    /// <since>7.9</since>
+    /// <deprecated>8.0</deprecated>
+    /// <remarks>Renamed to GetLengthConstrained3dLines.</remarks>
+    public Line[] GetMesh3dEdges() { return GetLengthConstrained3dLines(); }
+
+    /// <summary>
+    /// Gets mesh vertex indices for the triangular faces that were constrained during the squish.
+    /// Indices can be used in both the 2d and 3d mesh vertices arrays.
+    /// </summary>
+    /// <returns>An array of mesh faces</returns>
+    /// <since>8.0</since>
+    public MeshFace[] GetAreaConstrainedTrianglesIndices()
+    {
+      IntPtr ptr_this = ConstPointer();
+      IntPtr ptr_faces = UnsafeNativeMethods.ON_Squisher_GetAreaConstrainedTrianglesIndices(ptr_this);
+      if (null == ptr_faces) return null;
+      int count = UnsafeNativeMethods.ON_MeshFaceArray_Count(ptr_faces);
+      if (count <= 0) return null;
+      MeshFace[] faces = new MeshFace[count];
+      UnsafeNativeMethods.ON_MeshFaceArray_CopyValues(ptr_faces, faces);
+      return faces;
     }
 
     /// <summary>
@@ -655,6 +722,7 @@ namespace Rhino.Geometry
     /// <param name="marks">The input 2D geometry</param>
     /// <returns>An enumeratd list of squished marks. Individual marks that fail to squish
     /// are null in this list. Returns null on complete failure.</returns>
+    /// <since>7.9</since>
     public static IEnumerable<GeometryBase> SquishBack2dMarks(GeometryBase squishedGeometry,
       IEnumerable<GeometryBase> marks)
     {

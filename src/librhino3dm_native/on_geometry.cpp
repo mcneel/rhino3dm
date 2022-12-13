@@ -8,6 +8,15 @@ int ON_Geometry_Dimension(const ON_Geometry* constGeometry)
   return rc;
 }
 
+RH_C_FUNCTION unsigned int ON_Geometry_DataCRC(const ON_Geometry* pGeometry, unsigned int currentRemainder)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-68961
+  unsigned int rc = 0;
+  if (pGeometry)
+    rc = pGeometry->DataCRC(currentRemainder);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Geometry_BoundingBox( const ON_Geometry* ptr, ON_BoundingBox* bbox )
 {
   if( ptr && bbox )

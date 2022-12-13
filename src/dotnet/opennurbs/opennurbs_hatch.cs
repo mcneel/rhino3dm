@@ -46,6 +46,7 @@ namespace Rhino.Geometry
     /// <param name="scale"></param>
     /// <param name="basePoint"></param>
     /// <returns></returns>
+    /// <since>7.18</since>
     public static Hatch CreateFromBrep(Brep brep, int brepFaceIndex, int hatchPatternIndex, double rotationRadians, double scale, Point3d basePoint)
     {
       if (brep == null) throw new ArgumentNullException("brep");
@@ -65,6 +66,7 @@ namespace Rhino.Geometry
     /// <param name="rotationRadians"></param>
     /// <param name="scale"></param>
     /// <returns></returns>
+    /// <since>7.18</since>
     public static Hatch Create(Plane hatchPlane, Curve outerLoop, IEnumerable<Curve> innerLoops, int hatchPatternIndex, double rotationRadians, double scale)
     {
       if (outerLoop == null) throw new ArgumentNullException("outerLoop");

@@ -254,6 +254,19 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Get a new, empty SubD object.
+    /// </summary>
+    /// <since>7.18</since>
+    public static SubD Empty
+    {
+      get
+      {
+        IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_Empty();
+        return new SubD(ptr_subd, null);
+      }
+    }
+
 #if RHINO_SDK
 
     /// <summary>
@@ -268,7 +281,9 @@ namespace Rhino.Geometry
     /// </param>
     /// <returns></returns>
     /// <remarks>
-    /// All of the input SubDs are copied and added to the result array in one form or another.
+    /// NOTE: All of the input SubDs are copied and added to the result array in one form or another.
+    /// NOTE: Symmetry information is removed from newly joined SubDs.See also comments in
+    /// SubD.JoinSubDs with the bPreserveSymmetry parameter.
     /// </remarks>
     /// <since>7.14</since>
     public static SubD[] JoinSubDs(IEnumerable<SubD> subdsToJoin, double tolerance, bool joinedEdgesAreCreases)
@@ -287,6 +302,49 @@ namespace Rhino.Geometry
 
         SubD[] rc = null;
         if (UnsafeNativeMethods.RHC_RhinoJoinSubDs(ptr_input, tolerance, joinedEdgesAreCreases, ptr_output) > 0)
+        {
+          rc = output.ToNonConstArray();
+        }
+        GC.KeepAlive(subdsToJoin);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Joins an enumeration of SubDs to form as few as possible resulting SubDs.
+    /// There may be more than one SubD in the result array.
+    /// </summary>
+    /// <param name="subdsToJoin">An enumeration of SubDs to join.</param>
+    /// <param name="tolerance">The join tolerance.</param>
+    /// <param name="joinedEdgesAreCreases">
+    /// If true, merged boundary edges will be creases.
+    /// If false, merged boundary edges will be smooth.
+    /// </param>
+    /// <param name="preserveSymmetry">
+    /// If true, and if all inputs share the same symmetry, the output will also be symmetrical wrt. that symmetry.
+    /// If false, or true but no common symmetry exists, symmetry information is removed from all newly joined SubDs.
+    /// </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// NOTE: All of the input SubDs are copied and added to the result array in one form or another.
+    /// </remarks>
+    /// <since>7.16</since>
+    public static SubD[] JoinSubDs(IEnumerable<SubD> subdsToJoin, double tolerance, bool joinedEdgesAreCreases, bool preserveSymmetry)
+    {
+      if (null == subdsToJoin)
+        return null;
+
+      using (var input = new SimpleArraySubDPointer())
+      using (var output = new SimpleArraySubDPointer())
+      {
+        foreach (SubD subd in subdsToJoin)
+          input.Add(subd, true);
+
+        IntPtr ptr_input = input.NonConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+
+        SubD[] rc = null;
+        if (UnsafeNativeMethods.RHC_RhinoJoinSubDs2(ptr_input, tolerance, joinedEdgesAreCreases, preserveSymmetry, ptr_output) > 0)
         {
           rc = output.ToNonConstArray();
         }
@@ -366,6 +424,7 @@ namespace Rhino.Geometry
     /// match the appearance of the input surface.
     /// </param>
     /// <returns></returns>
+    /// <since>7.9</since>
     public static SubD CreateFromSurface(Surface surface, SubDFromSurfaceMethods method, bool corners)
     {
       IntPtr const_ptr_surface = surface.ConstPointer();
@@ -374,6 +433,19 @@ namespace Rhino.Geometry
         return new SubD(ptr_subd, null);
       GC.KeepAlive(surface);
       return null;
+    }
+
+    /// <summary>
+    /// Resets the SubD to the default face packing if adding creases or deleting faces breaks the quad grids.
+    /// It does not change the topology or geometry of the SubD. SubD face packs always stop at creases.
+    /// </summary>
+    /// <returns>The number of face packs.</returns>
+    /// <since>7.23</since>
+    [CLSCompliant(false)]
+    public uint PackFaces()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_SubD_PackFaces(ptr_this);
     }
 
     /// <summary>
@@ -506,6 +578,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAbsoluteTolerance property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance)
     {
       return MergeAllCoplanarFaces(tolerance, RhinoMath.UnsetValue);
@@ -523,6 +596,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAngleToleranceRadians property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -1454,6 +1528,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
+    /// <since>7.7</since>
     public SubDFace FaceAt(int index)
     {
       if (index < 0)
@@ -1856,6 +1931,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="edgeIndices">list of indices for the edges to set tags on</param>
     /// <param name="tag">The type of edge tag</param>
+    /// <since>7.7</since>
     public void SetEdgeTags(IEnumerable<int> edgeIndices, SubDEdgeTag tag)
     {
       if (!SubD.IsSubDEdgeTagDefined(tag))
@@ -1879,6 +1955,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="edges">list of edges to set a specific tag on</param>
     /// <param name="tag">The type of edge tag</param>
+    /// <since>7.7</since>
     public void SetEdgeTags(IEnumerable<SubDEdge> edges, SubDEdgeTag tag)
     {
       if (!SubD.IsSubDEdgeTagDefined(tag))

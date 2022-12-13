@@ -11,6 +11,7 @@ namespace Rhino.ApplicationSettings
     private const int idxUpdateEnabled = 1;
     private const int idxObjectLockingEnabled = 2;
     private const int idxBrokenRecordWarningEnabled = 3;
+    private const int idxRecordNextCommand = 4;
 
     /// <summary>
     /// When history recording is enabled, new objects keep a record of how they
@@ -26,6 +27,22 @@ namespace Rhino.ApplicationSettings
       set
       {
         UnsafeNativeMethods.CRhinoHistoryManager_SetBool(idxRecordingEnabled, value);
+      }
+    }
+
+    /// <summary>
+    /// Enable history recording until the end of the next command
+    /// </summary>
+    /// <since>5.0</since>
+    public static bool RecordNextCommand
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoHistoryManager_GetBool(idxRecordNextCommand);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoHistoryManager_SetBool(idxRecordNextCommand, value);
       }
     }
 

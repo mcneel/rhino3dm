@@ -332,18 +332,20 @@ namespace Rhino.Geometry
     /// Gets or sets whether to draw a frame around a text mask
     /// </summary>
     /// <since>7.0</since>
+    [Obsolete("Do not use setter as the MaskFrame is an enum. Use MaskFrame property instead")]
     public bool DrawTextFrame
     {
-      get { return MaskFrame == DimensionStyle.MaskFrame.RectFrame; }
+      get { return MaskFrame != DimensionStyle.MaskFrame.NoFrame; }
       set
       {
-        if (value != (MaskFrame == DimensionStyle.MaskFrame.RectFrame))
-        {
-          if (value)
-            MaskFrame = DimensionStyle.MaskFrame.RectFrame;
-          else
-            MaskFrame = DimensionStyle.MaskFrame.NoFrame;
-        }
+        var current = MaskFrame;
+        if (false == value && DimensionStyle.MaskFrame.NoFrame == current)
+          return;
+
+        if (true == value && DimensionStyle.MaskFrame.NoFrame != current)
+          return;
+
+        MaskFrame = value ? DimensionStyle.MaskFrame.RectFrame : DimensionStyle.MaskFrame.NoFrame;
       }
     }
 
@@ -518,7 +520,7 @@ namespace Rhino.Geometry
     /// <summary> Obsolete; use Font property instead </summary>
     /// <since>6.1</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [Obsolete("Use Font property instead")]
+    [Obsolete("Use Font property instead. Ex: textEntity.Font = Rhino.DocObjects.Font.FromQuartetProperties(\"Arial\", false, false);")]
     public int FontIndex
     {
       // 8 Jan 2018 (S. Baer) RH-42907
@@ -1086,9 +1088,7 @@ namespace Rhino.Geometry
     /// <since>6.10</since>
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      BoundingBox bbox = BoundingBox.Empty;
-
-      bbox = InternalGetBoundingBox();
+      BoundingBox bbox = InternalGetBoundingBox();
       bbox.Transform(xform);
       return bbox;
     }
@@ -1098,15 +1098,7 @@ namespace Rhino.Geometry
       BoundingBox bbox = BoundingBox.Empty;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr parent_dimstyle = ConstParentDimStylePointer();
-      DimensionStyle dimstyle = null;
-      if (parent_dimstyle == IntPtr.Zero)
-      {
-        dimstyle = DimensionStyle;
-        if (dimstyle != null)
-          parent_dimstyle = dimstyle.ConstPointer();
-      }
       BoundingBox b = UnsafeNativeMethods.ON_Annotation_GetAnnotationBoundingBox(const_ptr_this, parent_dimstyle, ref bbox) ? bbox : BoundingBox.Empty;
-      GC.KeepAlive(dimstyle);
       GC.KeepAlive(this);  // Added because of RH-60715
       return b;
     }

@@ -546,6 +546,268 @@ namespace Rhino.Display
       return UnsafeNativeMethods.CRhinoView_IsMouseCaptured(m_runtime_serial_number, bIncludeMovement);
     }
 
+    /// <summary>
+    /// Shows a temporary popup message in the lower right corner of the view
+    /// </summary>
+    /// <param name="message">The message to be shown</param>
+    /// <returns>The runtime serial number of the view toast</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public uint ShowToast(string message)
+    {
+      return ViewToast.Show(this, message);
+    }
+
+    /// <summary>
+    /// Shows a temporary popup message in the lower right corner of the view
+    /// </summary>
+    /// <param name="message">The message to be shown</param>
+    /// <param name="textHeight">The height of the message</param>
+    /// <returns>The runtime serial number of the view toast</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public uint ShowToast(string message, int textHeight)
+    {
+      return ViewToast.Show(this, message, textHeight);
+    }
+
+    /// <summary>
+    /// Shows a temporary popup message in the lower right corner of the view
+    /// </summary>
+    /// <param name="message">The message to be shown</param>
+    /// <param name="textHeight">The height of the message</param>
+    /// <param name="location">The location of the message</param>
+    /// <returns>The runtime serial number of the view toast</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public uint ShowToast(string message, int textHeight, System.Drawing.PointF location)
+    {
+      return ViewToast.Show(this, message, textHeight, location);
+    }
+
+    internal static void FireShowToast(object sender, Rhino.Runtime.NamedParametersEventArgs args)
+    {
+      if (args.TryGetUnsignedInt("sn", out uint sn))
+      {
+        var view = RhinoView.FromRuntimeSerialNumber(sn);
+        if (view != null)
+        {
+          if (args.TryGetString("message", out string message))
+          {
+            view.ShowToast(message);
+          }
+        }
+      }
+    }
+
+
+    class ViewToast
+    {
+      static ViewToast _toaster;
+      static uint _runtimeSerialNumberCounter = 0;
+
+      public static uint Show(RhinoView view, string message)
+      {
+        if (_toaster != null)
+          _toaster.Stop();
+
+        _toaster = new ViewToast()
+        {
+          Message = message,
+          StartAnimationSpan = new TimeSpan(0, 0, 0, 0, 300),
+          Duration = new TimeSpan(0, 0, 0, 0, 1500),
+          EndAnimation = new TimeSpan(0, 0, 0, 0, 1000)
+        };
+        _toaster.Start(view.Document, view);
+        return _toaster.RuntimeSerialNumber;
+      }
+
+      public static uint Show(RhinoView view, string message, int textHeight)
+      {
+        if (_toaster != null)
+          _toaster.Stop();
+
+        _toaster = new ViewToast()
+        {
+          Message = message,
+          StartAnimationSpan = new TimeSpan(0, 0, 0, 0, 300),
+          Duration = new TimeSpan(0, 0, 0, 0, 2500),
+          EndAnimation = new TimeSpan(0, 0, 0, 0, 1000),
+          TextHeight = textHeight
+        };
+        _toaster.Start(view.Document, view);
+        return _toaster.RuntimeSerialNumber;
+      }
+
+      public static uint Show(RhinoView view, string message, int textHeight, System.Drawing.PointF location)
+      {
+        if (_toaster != null)
+          _toaster.Stop();
+
+        _toaster = new ViewToast()
+        {
+          Message = message,
+          StartAnimationSpan = new TimeSpan(0, 0, 0, 0, 300),
+          Duration = new TimeSpan(0, 0, 0, 0, 2500),
+          EndAnimation = new TimeSpan(0, 0, 0, 0, 1000),
+          TextHeight = textHeight,
+          Location = location
+        };
+        _toaster.Start(view.Document, view);
+        return _toaster.RuntimeSerialNumber;
+      }
+
+
+      public string Message { get; set; }
+      public TimeSpan StartAnimationSpan { get; set; }
+      public TimeSpan Duration { get; set; }
+      public TimeSpan EndAnimation { get; set; }
+
+
+      /// <summary>
+      /// The height of the message text 
+      /// </summary>
+      public int TextHeight
+      {
+        get => m_text_height;
+        set
+        {
+           m_text_height = value;
+           _messageSize = System.Drawing.Size.Empty;
+        }
+      }
+
+      /// <summary>
+      /// The Location of the message
+      /// </summary>
+      public System.Drawing.PointF Location
+      {
+        get => m_location;
+        set
+        {
+           m_location = value;
+        }
+      }
+
+      public readonly uint RuntimeSerialNumber = _runtimeSerialNumberCounter++;
+
+      DateTime _startTime;
+      System.Timers.Timer _timer = new System.Timers.Timer();
+      RhinoDoc _doc;
+      Guid _viewId;
+      System.Drawing.Size _messageSize = System.Drawing.Size.Empty;
+      System.Drawing.Color _strokeColor;
+      System.Drawing.Color _fillColor;
+      private int m_text_height = 18;
+      private System.Drawing.PointF m_location = System.Drawing.PointF.Empty;
+
+      public void Start(RhinoDoc doc, RhinoView view)
+      {
+        _doc = doc;
+        _viewId = view.MainViewport.Id;
+        DisplayPipeline.DrawOverlay += DrawOverlay;
+        _strokeColor = Rhino.ApplicationSettings.AppearanceSettings.SelectionWindowStrokeColor;
+        _fillColor = Rhino.ApplicationSettings.AppearanceSettings.SelectionWindowFillColor;
+        if (_fillColor.A < 100)
+          _fillColor = System.Drawing.Color.FromArgb(100, _fillColor);
+
+        _startTime = DateTime.Now;
+        _timer.Interval = 1.0 / 60.0; // 60fps
+        _timer.Elapsed += TimerElapsed;
+        _timer.Start();
+      }
+
+      private void TimerElapsed(object sender, EventArgs e)
+      {
+        var span = DateTime.Now - _startTime;
+        if (span.TotalSeconds > StartAnimationSpan.TotalSeconds + Duration.TotalSeconds + EndAnimation.TotalSeconds)
+        {
+          Stop();
+        }
+        _doc.Views.ActiveView?.Redraw();
+      }
+
+      public void Stop()
+      {
+        if (_timer != null)
+        {
+          _timer.Stop();
+          DisplayPipeline.DrawOverlay -= DrawOverlay;
+          _timer.Dispose();
+          _timer = null;
+          _doc.Views.Redraw();
+        }
+      }
+
+      void DrawOverlay(object sender, DrawEventArgs e)
+      {
+        if (e.Viewport.Id != _viewId)
+          return;
+
+        if (_messageSize.IsEmpty)
+        {
+          var rect = e.Display.Measure2dText(Message, Rhino.Geometry.Point2d.Origin, true, 0.0, TextHeight, "Arial");
+          _messageSize = new System.Drawing.Size(Math.Abs(rect.Width) + 16, Math.Abs(rect.Height) + 12);
+        }
+
+        // If there is a HUD in the view, then show the toast message
+        // on top of the HUD.
+        float hud_offset = 0.0f;
+
+        if(e.Viewport.ParentView?.RealtimeDisplayMode?.HudShow() ?? false)
+        {
+          // These are the HUD height values: const int  nonscaled_StatusBarHeight = 11; x * fPipelineDpi * 1.1 * HudScaling);
+          hud_offset = 11 * e.Viewport.ParentView.DisplayPipeline.DpiScale * 1.1f * 1.33f;
+        }
+
+        var viewportRectangle = e.Viewport.Bounds;
+        const float offset = 6.0f;
+        float centerX = viewportRectangle.Right - _messageSize.Width * 0.5f - offset;
+        float centerY = viewportRectangle.Bottom - _messageSize.Height * 0.5f - offset - hud_offset;
+
+        // If a location is specified for the message, then use the location
+        if(Location != System.Drawing.PointF.Empty)
+        {
+          centerX = Location.X + _messageSize.Width * 0.5f + offset;
+          centerY = Location.Y + _messageSize.Height * 0.5f - offset - hud_offset;
+        }
+
+        var fill = _fillColor;
+        var stroke = _strokeColor;
+        var span = DateTime.Now - _startTime;
+        bool draw = false;
+        if (span.TotalSeconds < StartAnimationSpan.TotalSeconds)
+        {
+          float centerYStart = viewportRectangle.Bottom + _messageSize.Height * 0.5f + hud_offset;
+          double percent = span.TotalSeconds / StartAnimationSpan.TotalSeconds;
+          centerY = (float)(centerYStart + (centerY - centerYStart) * percent);
+          draw = true;
+        }
+        if (!draw && span.TotalSeconds < (StartAnimationSpan.TotalSeconds + Duration.TotalSeconds))
+        {
+          draw = true;
+        }
+        if (!draw && span.TotalSeconds < (StartAnimationSpan.TotalSeconds + Duration.TotalSeconds + EndAnimation.TotalSeconds))
+        {
+          double percent = (span.TotalSeconds - StartAnimationSpan.TotalSeconds - Duration.TotalSeconds) / EndAnimation.TotalSeconds;
+          fill = System.Drawing.Color.FromArgb((int)(_fillColor.A * (1.0 - percent)), _fillColor);
+          stroke = System.Drawing.Color.FromArgb((int)(_strokeColor.A * (1.0 - percent)), _strokeColor);
+          draw = true;
+        }
+
+        if (draw)
+        {
+          e.Display.DrawRoundedRectangle(new System.Drawing.PointF(centerX, centerY), _messageSize.Width, _messageSize.Height,
+            4.0f, stroke, 1.0f, fill);
+          e.Display.Draw2dText(Message, stroke, new Rhino.Geometry.Point2d(centerX, centerY), true, TextHeight, "Arial");
+        }
+        else
+        {
+          Stop();
+        }
+      }
+    }
+
     #region events
     internal delegate void ViewCallback(IntPtr pView);
     private static ViewCallback g_on_create_view;

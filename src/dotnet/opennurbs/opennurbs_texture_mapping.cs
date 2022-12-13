@@ -37,10 +37,11 @@ namespace Rhino.Render
     /// <summary>Mapping primitive is a brep.</summary>
     BrepMappingPrimitive = UnsafeNativeMethods.TextureMappingType.BrepMappingPrimitive,
 
-    /// <summary>
-    /// OCS mapping type (WCS/WCS Box with object frame).
-    /// </summary>
-    OcsMapping = UnsafeNativeMethods.TextureMappingType.OcsMapping
+    /// <summary>OCS mapping type (WCS/WCS Box with object frame).</summary>
+    OcsMapping = UnsafeNativeMethods.TextureMappingType.OcsMapping,
+
+    /// <summary>Some sort of false color mapping used to set per vertex colors</summary>
+    FalseColors = UnsafeNativeMethods.TextureMappingType.FalseColors
   }
 
   /// <summary>
@@ -91,6 +92,8 @@ namespace Rhino.Render
             return TextureMappingType.BrepMappingPrimitive;
           case UnsafeNativeMethods.TextureMappingType.OcsMapping:
             return TextureMappingType.OcsMapping;
+          case UnsafeNativeMethods.TextureMappingType.FalseColors:
+            return TextureMappingType.FalseColors;
         }
         throw new Exception("Unknown TextureMappingType");
       }
@@ -543,6 +546,8 @@ namespace Rhino.Render
       return CreatePlaneMapping(plane, dx, dy, dz, false);
     }
 
+    
+
     /// <summary>Create a planar projection texture mapping</summary>
     /// <param name="plane">A plane to use for mapping.</param>
     /// <param name="dx">portion of the plane's x axis that is mapped to [0,1] (can be a decreasing interval)</param>
@@ -556,6 +561,25 @@ namespace Rhino.Render
       TextureMapping rc = new TextureMapping();
       IntPtr pMapping = rc.NonConstPointer();
       if (!UnsafeNativeMethods.ON_TextureMapping_SetPlaneMapping(pMapping, ref plane, dx, dy, dz, capped))
+      {
+        rc.Dispose();
+        rc = null;
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Create a Ocs texture mapping.  Note that OCS mappings must be placed on mapping channel ON_ObjectRenderingAttributes::OCSMappingChannelId()
+    /// otherwise they will not work.
+    /// </summary>
+    /// <param name="plane">A plane to use for mapping.</param>
+    /// <returns></returns>
+    /// <since>7.17</since>
+    public static TextureMapping CreateOcsMapping(Plane plane)
+    {
+      TextureMapping rc = new TextureMapping();
+      IntPtr pMapping = rc.NonConstPointer();
+      if (!UnsafeNativeMethods.ON_TextureMapping_SetOcsMapping(pMapping, ref plane))
       {
         rc.Dispose();
         rc = null;

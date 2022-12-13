@@ -247,6 +247,36 @@ namespace Rhino.DocObjects
 #endif
 
     /// <summary>
+    /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.InstanceDefinition;
+
+    /// <summary>
+    /// Returns true if this instance definition is deleted. Deleted object are not saved to a file archive.
+    /// </summary>
+    /// <example>
+    /// <code source='examples\vbnet\ex_renameblock.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
+    /// <code source='examples\py\ex_renameblock.py' lang='py'/>
+    /// </example>
+    /// <since>5.0</since>
+    public override bool IsDeleted => base.IsDeleted;
+
+    /// <summary>
+    /// An object from a work session reference model is reference a
+    /// reference object and cannot be modified.  An object is a reference
+    /// object if, and only if, it is on a reference layer.
+    /// </summary>
+    /// <example>
+    /// <code source='examples\vbnet\ex_renameblock.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
+    /// <code source='examples\py\ex_renameblock.py' lang='py'/>
+    /// </example>
+    /// <since>5.0</since>
+    public override bool IsReference => base.IsReference;
+
+    /// <summary>
     /// Number of objects this definition uses. This counts the objects that are used to define the geometry.
     /// This does NOT count the number of references to this instance definition.
     /// </summary>
@@ -455,26 +485,6 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// An object from a work session reference model is reference a
-    /// reference object and cannot be modified.  An object is a reference
-    /// object if, and only if, it is on a reference layer.
-    /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_renameblock.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
-    /// <code source='examples\py\ex_renameblock.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
-    public bool IsReference
-    {
-      get
-      {
-        IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.CRhinoInstanceDefinition_IsReference(const_ptr);
-      }
-    }
-
-    /// <summary>
     /// True if this instance definition is from a linked file.
     /// It will be saved only if it is referenced by an instance reference object that is in the active geometry list and is being saved.
     /// Note that there can be multiple linked instance definitions with references to tenuous instance definitions.
@@ -533,24 +543,6 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns true if this instance definition is deleted. Deleted object are not saved to a file archive.
-    /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_renameblock.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_renameblock.cs' lang='cs'/>
-    /// <code source='examples\py\ex_renameblock.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
-    public bool IsDeleted
-    {
-      get
-      {
-        IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.CRhinoInstanceDefinition_IsDeleted(const_ptr);
-      }
-    }
-
-    /// <summary>
     /// Gets the unit system of the instance definition. If the instance definition was
     /// imported from another 3dm file, the unit system may differ from that of the document.
     /// </summary>
@@ -594,13 +586,6 @@ namespace Rhino.DocObjects
     public string SourceArchive
     {
       get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.SourceArchive); }
-    }
-
-    /// <summary>
-    /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType { get { return ModelComponentType.InstanceDefinition; }
     }
 
     /// <summary>

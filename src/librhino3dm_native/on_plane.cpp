@@ -13,8 +13,6 @@ ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps)
   return plane;
 }
 
-
-
 RH_C_FUNCTION bool ON_Plane_CreateFromNormal(ON_PLANE_STRUCT* p, ON_3DPOINT_STRUCT origin, ON_3DVECTOR_STRUCT normal)
 {
   bool rc = false;
@@ -24,6 +22,21 @@ RH_C_FUNCTION bool ON_Plane_CreateFromNormal(ON_PLANE_STRUCT* p, ON_3DPOINT_STRU
     const ON_3dVector* _normal = (const ON_3dVector*)&normal;
     ON_Plane temp;
     rc = temp.CreateFromNormal(*_origin, *_normal);
+    CopyToPlaneStruct(*p, temp);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Plane_CreateFromNormalYup(ON_PLANE_STRUCT* p, ON_3DPOINT_STRUCT origin, ON_3DVECTOR_STRUCT normal, ON_3DVECTOR_STRUCT y)
+{
+  bool rc = false;
+  if (p)
+  {
+    const ON_3dPoint* _origin = (const ON_3dPoint*)&origin;
+    const ON_3dVector* _normal = (const ON_3dVector*)&normal;
+    const ON_3dVector* _y = (const ON_3dVector*)&y;
+    ON_Plane temp;
+    rc = temp.CreateFromNormalYup(*_origin, *_normal, *_y);
     CopyToPlaneStruct(*p, temp);
   }
   return rc;

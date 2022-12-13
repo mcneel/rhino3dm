@@ -36,10 +36,6 @@
 #include "../../../rhino4/SDK/inc/RhinoSdkUiFile.h"
 #endif
 
-// gh_private_sdk.h is where all of the "private" TL and Rhino functions are declared
-// This lets us figure out exactly which private classes/functions are being used by
-// grasshopper
-#include "gh_private_sdk.h"
 #else
 
 // NOTE: THIS NEEDS TO BE CHANGED WHEN WE RELEASE A PUBLIC BUILD

@@ -4030,6 +4030,8 @@ namespace Rhino
         {
           // C++ Plug-in
           PersistentSettingsHooks.InvokeSetingsSaved(plugInId, isWriting, dirty);
+          if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) != 0)
+            RhinoApp.OnSettingsSaved(isWriting, dirty);
         }
         else
         {
@@ -4240,9 +4242,14 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Computes full path to settings file to read or write.
+    /// Get the current Rhino scheme name as a valid file path name without any
+    /// spaces
     /// </summary>
-    private string SettingsFileName(bool localSettings, bool windowPositions)
+    /// <returns>
+    /// Returns the current Rhino scheme name as a valid file path name without
+    /// any spaces
+    /// </returns>
+    internal static string GetRhinoSchemeRegistryPath()
     {
       // Parse the scheme name
       string scheme;
@@ -4258,6 +4265,16 @@ namespace Rhino
           scheme = Path.GetInvalidFileNameChars().Aggregate(scheme, (current, c) => current.Replace(c, replace_char));
         scheme = scheme.Replace(' ', replace_char).Replace(':', replace_char);
       }
+      return scheme;
+    }
+
+    /// <summary>
+    /// Computes full path to settings file to read or write.
+    /// </summary>
+    private string SettingsFileName(bool localSettings, bool windowPositions)
+    {
+      // Parse the scheme name
+      string scheme = GetRhinoSchemeRegistryPath();
       var file_name = windowPositions ? "window_positions" : "settings";
       if (!string.IsNullOrEmpty(scheme))
         file_name = file_name + "-" + scheme;

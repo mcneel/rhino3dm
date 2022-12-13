@@ -28,10 +28,13 @@ enum ObjectAttrsInteger : int
   oaiWireDensity = 11,
   oaiSpace = 12,
   oaiGroupCount = 13,
-  oaiDisplayOrder = 14
+  oaiDisplayOrder = 14,
+  oaiClipParticipationSource = 15,
+  oaiSectionAttributesSource = 16,
+  oaiSectionHatchIndex = 17,
+  oaiSectionFillRule = 18,
 };
 
-// I think that sooner or later, these functions should be moved into core opennurbs.dll
 RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr, enum ObjectAttrsInteger which, bool set, int setValue )
 {
   int rc = setValue;
@@ -77,7 +80,13 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiWireDensity:
         // 28-Feb-2012 Dale Fugier, -1 is acceptable
         // ptr->m_wire_density = set_value<0?0:set_value;
-        ptr->m_wire_density = setValue<-1 ? -1 : setValue;
+        // 8-Dec-2022 Dale Fugier, RH-71846
+        // 12 Dec 2022 S. Baer - remove use of rhino specific macro
+        if (setValue < -255)
+          setValue = -255;
+        if (setValue > 255)
+          setValue = 255;
+        ptr->m_wire_density = setValue;
         break;
       case oaiSpace:
         ptr->m_space = ON::ActiveSpace(setValue);
@@ -87,6 +96,18 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
         break;
       case oaiDisplayOrder:
         ptr->m_display_order = setValue;
+        break;
+      case oaiClipParticipationSource:
+        ptr->SetClipParticipationSource(ON::ClipParticipationSourceFromUnsigned(setValue));
+        break;
+      case oaiSectionAttributesSource:
+        ptr->SetSectionAttributesSource(ON::SectionAttributesSourceFromUnsigned(setValue));
+        break;
+      case oaiSectionHatchIndex:
+        ptr->SetSectionHatchIndex(setValue);
+        break;
+      case oaiSectionFillRule:
+        ptr->SetSectionFillRule(ON::SectionFillRuleFromUnsigned(setValue));
         break;
       }
     }
@@ -139,6 +160,18 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiDisplayOrder:
         rc = ptr->m_display_order;
         break;
+      case oaiClipParticipationSource:
+        rc = (int)ptr->ClipParticipationSource();
+        break;
+      case oaiSectionAttributesSource:
+        rc = (int)ptr->SectionAttributesSource();
+        break;
+      case oaiSectionHatchIndex:
+        rc = ptr->SectionHatchIndex();
+        break;
+      case oaiSectionFillRule:
+        rc = (int)ptr->SectionFillRule();
+        break;
       }
     }
   }
@@ -150,13 +183,17 @@ enum ObjectAttrsBool : int
   oabIsInstanceDefinitionObject = 0,
   oabIsVisible = 1,
   oabCastsShadows = 2,
-  oabReceivesShadows = 3
+  oabReceivesShadows = 3,
+  oabClipParticipationForAll = 4,
+  oabClipParticipationForNone = 5,
+  oabHatchBoundaryVisible = 6,
 };
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Transform(ON_3dmObjectAttributes* ptr, ON_Xform* xform)
 {
-  return (ptr && xform && ptr->Transform(*xform));
+  return (ptr && xform && ptr->Transform(nullptr, *xform));
 }
+
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr, enum ObjectAttrsBool which, bool set, bool setValue)
 {
@@ -179,6 +216,12 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
       case oabReceivesShadows:
         ptr->m_rendering_attributes.m_bReceivesShadows = setValue;
         break;
+      case oabHatchBoundaryVisible:
+        ptr->SetHatchBoundaryVisible(setValue);
+        break;
+      case oabClipParticipationForAll:
+      case oabClipParticipationForNone:
+        break; // do nothing
       }
     }
     else
@@ -196,6 +239,22 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
         break;
       case oabReceivesShadows:
         rc = ptr->m_rendering_attributes.m_bReceivesShadows;
+        break;
+      case oabClipParticipationForAll:
+      case oabClipParticipationForNone:
+        {
+          bool forall = false;
+          bool fornone = false;
+          ON_UuidList uuidlist;
+          ptr->GetClipParticipation(forall, fornone, uuidlist);
+          if (oabClipParticipationForAll == which)
+            rc = forall;
+          else
+            rc = fornone;
+        }
+        break;
+      case oabHatchBoundaryVisible:
+        rc = ptr->HatchBoundaryVisible();
         break;
       }
     }
@@ -255,6 +314,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
 {
   const int idxColor = 0;
   const int idxPlotColor = 1;
+  const int idxHatchBackgroundFill = 2;
 
   int rc = setValue;
   if (pAttributes)
@@ -266,6 +326,8 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
         pAttributes->m_color = color;
       else if (idxPlotColor == which)
         pAttributes->m_plot_color = color;
+      else if (idxHatchBackgroundFill == which)
+        pAttributes->SetHatchBackgrounFillColor(color);
     }
     else
     {
@@ -274,21 +336,64 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
         color = pAttributes->m_color;
       else if (idxPlotColor == which)
         color = pAttributes->m_plot_color;
+      else if (idxHatchBackgroundFill == which)
+        color = pAttributes->HatchBackgroundFillColor();
       rc = (int)ABGR_to_ARGB((unsigned int)color);
     }
   }
   return rc;
 }
 
-RH_C_FUNCTION double ON_3dmObjectAttributes_PlotWeight(ON_3dmObjectAttributes* pAttributes, bool set, double setValue)
+enum ObjectAttrsDouble : int
+{
+  oadPlotWeight = 0,
+  oadSectionHatchScale = 1,
+  oadSectionHatchRotation = 2,
+  oadLinetypePatternScale = 3,
+};
+
+
+RH_C_FUNCTION double ON_3dmObjectAttributes_GetSetDouble(ON_3dmObjectAttributes* pAttributes, enum ObjectAttrsDouble which, bool set, double setValue)
 {
   double rc = setValue;
   if(pAttributes)
   {
-    if( set )
-      pAttributes->m_plot_weight_mm = setValue;
+    if (set)
+    {
+      switch (which)
+      {
+      case oadPlotWeight:
+        pAttributes->m_plot_weight_mm = setValue;
+        break;
+      case oadSectionHatchScale:
+        pAttributes->SetSectionHatchScale(setValue);
+        break;
+      case oadSectionHatchRotation:
+        pAttributes->SetSectionHatchRotation(setValue);
+        break;
+      case oadLinetypePatternScale:
+        pAttributes->SetLinetypePatternScale(setValue);
+        break;
+      }
+    }
     else
-      rc = pAttributes->m_plot_weight_mm;
+    {
+      switch (which)
+      {
+      case oadPlotWeight:
+        rc = pAttributes->m_plot_weight_mm;
+        break;
+      case oadSectionHatchScale:
+        rc = pAttributes->SectionHatchScale();
+        break;
+      case oadSectionHatchRotation:
+        rc = pAttributes->SectionHatchRotation();
+        break;
+      case oadLinetypePatternScale:
+        rc = pAttributes->LinetypePatternScale();
+        break;
+      }
+    }
   }
   return rc;
 }
@@ -681,6 +786,119 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ON_3dmOb
     {
       pObjectAttributes->DeleteCustomRenderMeshParameters();
     }
+  }
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetClipParticipation(ON_3dmObjectAttributes* pObjectAttributes, bool forAll, bool forNone, const ON_SimpleArray<ON_UUID>* pIds)
+{
+  if (pObjectAttributes)
+  {
+    if (forAll)
+    {
+      pObjectAttributes->SetClipParticipationForAll();
+    }
+    else if (forNone)
+    {
+      pObjectAttributes->SetClipParticipationForNone();
+    }
+    else if (pIds)
+    {
+      pObjectAttributes->SetClipParticipationList(pIds->Array(), pIds->Count());
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_ClipParticipationList(const ON_3dmObjectAttributes* pConstAttr, ON_SimpleArray<ON_UUID>* uuids)
+{
+  if (pConstAttr && uuids)
+  {
+    bool forall = true;
+    bool fornone = true;
+    ON_UuidList uuidlist;
+    pConstAttr->GetClipParticipation(forall, fornone, uuidlist);
+    uuidlist.GetUuids(*uuids);
+  }
+}
+
+RH_C_FUNCTION int ON_3dmObjectAttributes_DecalCount(const ON_3dmObjectAttributes* attr)
+{
+  if (nullptr == attr)
+    return 0;
+
+  return attr->GetDecalArray().Count();
+}
+
+RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_DecalAt(const ON_3dmObjectAttributes* attr, int index)
+{
+  if (nullptr == attr)
+    return nullptr;
+
+  const auto& decals = attr->GetDecalArray();
+  if ((index < 0) || (index >= decals.Count()))
+    return nullptr;
+
+  return decals[index];
+}
+
+RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_AddDecal(ON_3dmObjectAttributes* attr)
+{
+  if (nullptr == attr)
+    return nullptr;
+
+  return attr->AddDecal();
+}
+
+RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_AddDecalWithCreateParams(ON_3dmObjectAttributes* attr, const ON_Decal* create_params)
+{
+  if (nullptr == create_params)
+    return 0;
+
+  auto* decal = ON_3dmObjectAttributes_AddDecal(attr);
+  if (nullptr == decal)
+    return 0;
+
+  *decal = *create_params;
+
+  return decal;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveDecal(ON_3dmObjectAttributes* attr, ON_Decal* decal)
+{
+  if ((nullptr == attr) || (nullptr == decal))
+    return false;
+
+  return attr->DeleteDecal(*decal);
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveAllDecals(ON_3dmObjectAttributes* attr)
+{
+  if (nullptr == attr)
+    return false;
+
+  attr->DeleteAllDecals();
+
+  return true;
+}
+
+RH_C_FUNCTION ON_Linetype* ON_3dmObjectAttributes_GetCustomLinetype(const ON_3dmObjectAttributes* attr)
+{
+  if (attr)
+  {
+    const ON_Linetype* linetype = attr->CustomLinetype();
+    if (linetype)
+      return new ON_Linetype(*linetype);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomLinetype(ON_3dmObjectAttributes* attr, const ON_Linetype* linetype)
+{
+  if (attr)
+  {
+    if (attr)
+      attr->SetCustomLinetype(*linetype);
+    else
+      attr->RemoveCustomLinetype();
   }
 }
 

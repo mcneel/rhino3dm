@@ -556,16 +556,16 @@ RH_C_FUNCTION bool ON_Viewport_DollyFrustum(ON_Viewport* pVP, double dollyDistan
 	return false;
 }
 
-RH_C_FUNCTION void ON_Viewport_GetViewScale(const ON_Viewport* pConstViewport, double* w, double* h)
+RH_C_FUNCTION void ON_Viewport_GetViewScale(const ON_Viewport* pConstViewport, double* x, double* y, double* z)
 {
-	if (pConstViewport && w && h)
-		pConstViewport->GetViewScale(w,h);
+	if (pConstViewport)
+		pConstViewport->GetViewScale(x, y, z);
 }
 
-RH_C_FUNCTION void ON_Viewport_SetViewScale(ON_Viewport* pVP, double w, double h)
+RH_C_FUNCTION void ON_Viewport_SetViewScale(ON_Viewport* pVP, double x, double y, double z)
 {
 	if (pVP)
-		pVP->SetViewScale(w,h);
+		pVP->SetViewScale(x, y, z);
 }
 
 RH_C_FUNCTION void ON_Viewport_ClipModXform(const ON_Viewport* pConstViewport, ON_Xform* matrix)

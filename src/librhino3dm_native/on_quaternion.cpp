@@ -54,3 +54,55 @@ RH_C_FUNCTION void ON_Quaternion_Rotate( const ON_Quaternion* q, ON_3DVECTOR_STR
   }
 }
 
+RH_C_FUNCTION void ON_Quaternion_Slerp(const ON_Quaternion* a, const ON_Quaternion* b, double t, ON_Quaternion* q)
+{
+  if (a && b && q)
+  {
+    *q = ON_Quaternion::Slerp(*a, *b, t);
+  }
+}
+
+RH_C_FUNCTION void ON_Quaternion_Lerp(const ON_Quaternion* a, const ON_Quaternion* b, double t, ON_Quaternion* q)
+{
+  if (a && b && q)
+  {
+    *q = (1 - t) * (*a) + t * (*b);
+    q->Unitize();
+  }
+}
+
+RH_C_FUNCTION void ON_Quaternion_RotateTowards(const ON_Quaternion* a, const ON_Quaternion* b, double maxRadians, ON_Quaternion* q)
+{
+  if (a && b && q)
+  {
+    *q = ON_Quaternion::RotateTowards(*a, *b, maxRadians);
+  }
+}
+
+RH_C_FUNCTION void ON_Quaternion_RotationZYX(double yaw, double pitch, double roll, ON_Quaternion* q)
+{
+  if (q)
+    *q = ON_Quaternion::RotationZYX(yaw, pitch, roll);
+}
+
+RH_C_FUNCTION void ON_Quaternion_RotationZYZ(double alpha, double beta, double gamma, ON_Quaternion* q)
+{
+  if (q)
+    *q = ON_Quaternion::RotationZYZ(alpha, beta, gamma);
+}
+
+RH_C_FUNCTION bool ON_Quaternion_GetYawPitchRoll(const ON_Quaternion* q, double* yaw, double* pitch, double* roll)
+{
+  bool rc = false;
+  if (q && yaw && pitch && roll)
+    rc = q->GetYawPitchRoll(*yaw, *pitch, *roll);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Quaternion_GetEulerZYZ(const ON_Quaternion* q, double* alpha, double* beta, double* gamma)
+{
+  bool rc = false;
+  if (q && alpha && beta && gamma)
+    rc = q->GetEulerZYZ(*alpha, *beta, *gamma);
+  return rc;
+}

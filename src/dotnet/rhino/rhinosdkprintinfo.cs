@@ -103,9 +103,33 @@ namespace Rhino.Display
       doc.AppendChild(svgroot);
       var svgwriter = new SvgWriter(svgroot, dpi, new Size((int)x,(int)y));
       IntPtr ptr_page = Runtime.Interop.NativeNonConstPointer(settings);
+
+      svgwriter.BeforeDraw();
       svgwriter.Draw(ptr_page, settings.Document);
+      svgwriter.AfterDraw();
       GC.KeepAlive(settings);
       return doc;
+    }
+
+    /// <summary>
+    /// Send a list of view capture settings to a printer. Each setting
+    /// represents a single page.
+    /// </summary>
+    /// <param name="printerName"></param>
+    /// <param name="settings"></param>
+    /// <returns>true on success</returns>
+    public static bool SendToPrinter(string printerName, ViewCaptureSettings[] settings)
+    {
+      IntPtr pPrintInfoArray = UnsafeNativeMethods.CRhinoPrintInfoArray_New();
+      foreach(var setting in settings)
+      {
+        IntPtr ptrSetting = setting.ConstPointer();
+        UnsafeNativeMethods.CRhinoPrintInfoArray_AddItem(pPrintInfoArray, ptrSetting);
+      }
+      bool success = UnsafeNativeMethods.CRhinoPrintInfo_Print(printerName, pPrintInfoArray);
+      UnsafeNativeMethods.CRhinoPrintInfoArray_Delete(pPrintInfoArray);
+      GC.KeepAlive(settings);
+      return success;
     }
   }
 
@@ -122,6 +146,17 @@ namespace Rhino.Display
       element.Attributes.Append(attr);
     }
 
+    static bool IsValidPattern(float[] pattern)
+    {
+      if (pattern == null || pattern.Length < 2)
+        return false;
+
+      if (pattern[0] == 0 || pattern[1] == 0)
+        return false;
+
+      return true;
+    }
+
     readonly System.Xml.XmlElement m_root_node;
     readonly System.Xml.XmlDocument m_doc;
     //System.Xml.XmlElement m_def_node = null;
@@ -134,11 +169,72 @@ namespace Rhino.Display
       m_doc = node.OwnerDocument;
     }
 
+    public void BeforeDraw()
+    {
+      DisplayPipeline.PreDrawObject += DisplayPipeline_PreDrawObject;
+      DisplayPipeline.PostDrawObject += DisplayPipeline_PostDrawObject;
+    }
+    public void AfterDraw()
+    {
+      DisplayPipeline.PreDrawObject -= DisplayPipeline_PreDrawObject;
+      DisplayPipeline.PostDrawObject -= DisplayPipeline_PostDrawObject;
+    }
+
+    void DisplayPipeline_PreDrawObject(object sender, DrawObjectEventArgs e)
+    {
+      var rhinoObject = e.RhinoObject;
+      if (rhinoObject != null)
+      {
+        var layer = e.RhinoDoc.Layers.FindIndex(rhinoObject.Attributes.LayerIndex);
+        if (layer!=null)
+          _currentLayer = layer.FullPath;
+      }
+    }
+    void DisplayPipeline_PostDrawObject(object sender, DrawObjectEventArgs e)
+    {
+      Flush();
+      _currentLayer = null;
+    }
+
+    string _currentLayer = null;
+    Dictionary<string, System.Xml.XmlElement> _groupElements = new Dictionary<string, System.Xml.XmlElement>();
+
+    System.Xml.XmlElement GetParentNode(string layerName)
+    {
+      var rc = m_root_node;
+      if (!string.IsNullOrEmpty(layerName))
+      {
+        System.Xml.XmlElement parentNode = null;
+        if (!_groupElements.TryGetValue(layerName, out parentNode))
+        {
+          parentNode = m_doc.CreateElement("g", m_doc.DocumentElement.NamespaceURI);
+          var idAttrib = m_doc.CreateAttribute("id");
+          idAttrib.Value = layerName.Replace(' ', '_'); // whitespace is not allowed for id attr
+          parentNode.Attributes.Append(idAttrib);
+          _groupElements.Add(layerName, parentNode);
+
+          int index = layerName.LastIndexOf("::");
+          if(index > 0)
+          {
+            string parentLayerName = layerName.Substring(0, index);
+            var immediateParent = GetParentNode(parentLayerName);
+            immediateParent.AppendChild(parentNode);
+          }
+          else
+          {
+            m_root_node.AppendChild(parentNode);
+          }
+        }
+        rc = parentNode;
+      }
+      return rc;
+    }
     
     private void DrawPathHelper(PathPoint[] points, Pen pen, Color brushColor, System.Xml.XmlElement clippath)
     {
       if (null == points || points.Length < 2)
         return;
+
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < points.Length; i++)
       {
@@ -163,6 +259,18 @@ namespace Rhino.Display
         else if (pt == PointType.Line)
         {
           var text = string.Format(CultureInfo.InvariantCulture, "L{0},{1}", points[i].Location.X, points[i].Location.Y);
+          sb.Append(text);
+        }
+        else if (pt == PointType.Arc)
+        {
+          PointF center = points[i++].Location;
+          float radius = points[i].Location.X;
+          float angle = points[i++].Location.Y;
+          PointF end = points[i].Location;
+          int greaterThan180 = Math.Abs(angle) > 180 ? 1 : 0;
+          int clockwise = angle > 0 ? 1 : 0;
+          // M startpt.x startpt.y a radius radius 0 greater_than_180 clockwise endpt.x endpt.y
+          var text = string.Format(CultureInfo.InvariantCulture, "A{0},{0} 0 {1} {2} {3},{4}", radius, greaterThan180, clockwise, end.X, end.Y);
           sb.Append(text);
         }
         else if (pt == PointType.Close)
@@ -196,6 +304,53 @@ namespace Rhino.Display
           attrib.Value = (pen.Color.A / 255.0).ToString(CultureInfo.InvariantCulture);
           elem.Attributes.Append(attrib);
         }
+
+        if (pen != null && pen.Width > 0)
+        {
+          attrib = m_doc.CreateAttribute("stroke-linecap");
+          switch(pen.Cap)
+          {
+            case DocObjects.LineCapStyle.Flat:
+              attrib.Value = "butt";
+              break;
+            case DocObjects.LineCapStyle.Square:
+              attrib.Value = "square";
+              break;
+            default:
+              attrib.Value = "round";
+              break;
+          }
+          elem.Attributes.Append(attrib);
+
+          attrib = m_doc.CreateAttribute("stroke-linejoin");
+          switch(pen.Join)
+          {
+            case DocObjects.LineJoinStyle.Miter:
+              attrib.Value = "miter";
+              break;
+            case DocObjects.LineJoinStyle.Bevel:
+              attrib.Value = "bevel";
+              break;
+            default:
+              attrib.Value = "round";
+              break;
+          }
+          elem.Attributes.Append(attrib);
+
+          if (IsValidPattern(pen.Pattern))
+          {
+            attrib = m_doc.CreateAttribute("stroke-dasharray");
+            StringBuilder pattern = new StringBuilder();
+            for(int i=0; i<pen.Pattern.Length; i++)
+            {
+              if (i > 0)
+                pattern.Append(" ");
+              pattern.Append(pen.Pattern[i]);
+            }
+            attrib.Value = pattern.ToString();
+            elem.Attributes.Append(attrib);
+          }
+        }
         //Trav Feb-21-21 Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-62804
         if (brushColor == Color.Empty)
         {
@@ -212,11 +367,16 @@ namespace Rhino.Display
           AppendAttribute(m_doc, elem, "fill-opacity", brushColor.A / 255.0);
         }
 
-        m_root_node.AppendChild(elem);
+        var parentNode = GetParentNode(_currentLayer);
+        parentNode.AppendChild(elem);
       }
     }
-    protected override void DrawPath(PathPoint[] points, Pen pen, Color brushColor)
+    protected override void DrawPath(PathPoint[] points, Pen pen, bool linearGradient, ColorStop[] stops, Point2d[] gradientPoints, double pointScale)
     {
+      // TODO: Add gradient support for SVG
+      Color brushColor = System.Drawing.Color.Empty;
+      if (stops != null && stops.Length > 0)
+        brushColor = stops[0].Color;
       DrawPathHelper(points, pen, brushColor, null);
     }
 
@@ -308,23 +468,40 @@ namespace Rhino.Display
       m_root_node.AppendChild(elem);
     }
 
-    protected override void DrawCircle(PointF center, float diameter, Color fillColor, float strokeWidth, Color strokeColor)
+    protected override void DrawCircle(PointF center, float diameter, Color fillColor, Pen stroke)
     {
       var elem = m_doc.CreateElement("circle", m_doc.DocumentElement.NamespaceURI);
       AppendAttribute(m_doc, elem, "cx", center.X);
       AppendAttribute(m_doc, elem, "cy", center.Y);
       float radius = diameter * 0.5f;
       AppendAttribute(m_doc, elem, "r", radius);
-      AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(strokeColor));
-      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth);
-      if (strokeColor.A < 255)
-        AppendAttribute(m_doc, elem, "stroke-opacity", strokeColor.A / 255.0);
-      if (fillColor != Color.Empty)
+      AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(stroke.Color));
+      AppendAttribute(m_doc, elem, "stroke-width", stroke.Width);
+      if (stroke.Color.A < 255)
+        AppendAttribute(m_doc, elem, "stroke-opacity", stroke.Color.A / 255.0);
+      if (fillColor.A == 0)
+      {
+        AppendAttribute(m_doc, elem, "fill", "none");
+      }
+      else
       {
         AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
         AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
       }
-      m_root_node.AppendChild(elem);
+      if (IsValidPattern(stroke.Pattern))
+      {
+        StringBuilder pattern = new StringBuilder();
+        for (int i = 0; i < stroke.Pattern.Length; i++)
+        {
+          if (i > 0)
+            pattern.Append(" ");
+          pattern.Append(stroke.Pattern[i]);
+        }
+        AppendAttribute(m_doc, elem, "stroke-dasharray", pattern.ToString());
+      }
+
+      var node = GetParentNode(_currentLayer);
+      node.AppendChild(elem);
     }
 
     protected override void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius)
@@ -356,6 +533,11 @@ namespace Rhino.Display
     {
       //TODO: implement
       //throw new NotImplementedException();
+    }
+
+    protected override bool SupportsArc()
+    {
+      return true;
     }
   }
 
@@ -413,6 +595,7 @@ namespace Rhino.Display
     /// <returns>
     /// new ViewCaptureSettings instance on success. Null on failure
     /// </returns>
+    /// <since>7.9</since>
     public ViewCaptureSettings CreatePreviewSettings(System.Drawing.Size size)
     {
       IntPtr constPtrThis = ConstPointer();
@@ -426,10 +609,38 @@ namespace Rhino.Display
     public void SetViewport(RhinoViewport viewport)
     {
       if (_viewport != null)
+      {
         _viewport.Dispose();
-      _viewport = new RhinoViewport(viewport);
-      IntPtr const_rhino_viewport = _viewport.ConstPointer();
-      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(m_ptr_print_info, const_rhino_viewport);
+        _viewport = null;
+      }
+
+      IntPtr ptrRhinoViewport = viewport!=null ? viewport.ConstPointer() : IntPtr.Zero;
+      if (ptrRhinoViewport != IntPtr.Zero)
+      {
+        var view = viewport.ParentView;
+        if (view == null)
+        {
+          _viewport = new RhinoViewport(viewport);
+          ptrRhinoViewport = _viewport.ConstPointer();
+        }
+      }
+
+      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(m_ptr_print_info, ptrRhinoViewport);
+    }
+
+    /// <summary>
+    /// Get RhinoViewport that this view capture settings is targetting
+    /// </summary>
+    /// <returns></returns>
+    public RhinoViewport GetViewport()
+    {
+      if (_viewport != null)
+        return _viewport;
+
+      IntPtr constPtrThis = ConstPointer();
+      Guid viewportId = UnsafeNativeMethods.CRhinoPrintInfo_GetViewportId(constPtrThis);
+      var viewport = RhinoViewport.FromId(viewportId);
+      return viewport;
     }
 
     internal ViewCaptureSettings(IntPtr ptrPrintInfo)
@@ -459,6 +670,7 @@ namespace Rhino.Display
     /// <summary>
     /// How the RhinoViewport is mapped to the output rectangle
     /// </summary>
+    /// <since>7.7</since>
     public ViewAreaMapping ViewArea
     {
       get
@@ -490,6 +702,7 @@ namespace Rhino.Display
     /// lengths as defined. If false, the linetypes are not scaled and the
     /// current pattern lengths as seen on the screen as used.
     /// </summary>
+    /// <since>7.6</since>
     public bool MatchLinetypePatternDefinition
     {
       get
@@ -563,6 +776,7 @@ namespace Rhino.Display
     /// <summary>
     /// Minimize cropping so the full drawable area is used
     /// </summary>
+    /// <since>7.9</since>
     public void MaximizePrintableArea()
     {
       IntPtr ptrThis = NonConstPointer();
@@ -574,6 +788,7 @@ namespace Rhino.Display
     /// settings reference
     /// </summary>
     /// <returns>true on success</returns>
+    /// <since>7.9</since>
     public bool MatchViewportAspectRatio()
     {
       IntPtr ptrThis = NonConstPointer();
@@ -840,6 +1055,7 @@ namespace Rhino.Display
     /// <summary>
     /// Text drawn at the top of the output
     /// </summary>
+    /// <since>7.6</since>
     public string HeaderText
     {
       get
@@ -862,6 +1078,7 @@ namespace Rhino.Display
     /// <summary>
     /// Text drawn at the bottom of the output
     /// </summary>
+    /// <since>7.6</since>
     public string FooterText
     {
       get
@@ -977,7 +1194,7 @@ namespace Rhino.Display
     }
 
 
-    #region IDisposable implementation
+#region IDisposable implementation
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>
     /// <since>6.0</since>
     public void Dispose()
@@ -1009,33 +1226,39 @@ namespace Rhino.Display
         GC.SuppressFinalize(this);
     }
 
-    #endregion
+#endregion
   }
 }
 
 namespace Rhino.Runtime
 {
   /// <summary>
-  /// Callback system used by SVG and PDF exporter to generate documents
+  /// Callback system used by SVG and PDF exporter to generate documents. Not intended
+  /// for general SDK usage
   /// </summary>
   public abstract class ViewCaptureWriter
   {
     public delegate void SetClipRectProc(ref int left, ref int top, ref int right, ref int bottom);
     public delegate void FillProc(int topl, int bottoml, int topr, int bottomr);
-    public delegate void VectorPolylineProc(int argb, float thickness, int dashed, int count, IntPtr points);
+    public delegate void VectorPolylineProc(int argb, float thickness, int dashed, int capStyle, int joinStyle, int count, IntPtr points);
     public delegate void VectorArcProc(int argb, float thickness, int dashed, ref Arc arc);
     public delegate void VectorStringProc(IntPtr constPtrString, int argbTextColor, double x, double y, float angle, int alignment, float heightPixels, IntPtr constPtrFont);
     public delegate void VectorFillPolygonProc(int argb, int count, IntPtr points);
-    public delegate void VectorPathProc(int begin, int argb);
+    public delegate void VectorPathProc(int begin, IntPtr brush, IntPtr screenLine, IntPtr stops);
     public delegate void VectorPointProc(int style, float screenX, float screenY, int fillArgb, int strokeArgb,
       float diameterPixels, float innerDiameterPixels, float strokeWidthPixels, float rotationRadians);
     public delegate void VectorBitmapProc(IntPtr hBmp, double m11, double m12, double m21, double m22, double dx, double dy);
     public delegate void VectorRoundedRectProc(float centerX, float centerY, float pixelWidth, float pixelHeight, float cornerRadius,
       int strokeColor, float strokeWidth, int fillColor);
-    public delegate void VectorClipPathProc(int count, IntPtr points, int asBeziers);
+    public delegate void VectorClipPathProc(IntPtr loops, int asBeziers);
     public delegate void VectorGradientProc(IntPtr pEngine, IntPtr pHatch, float strokeWidth, IntPtr pHatchPattern, int gradientCount, IntPtr colors,
       IntPtr stops, IntPtr points, int linearGradient, int boundaryColor, double effectiveHatchScale);
+    internal delegate void VectorPolylineV8Proc(IntPtr pDisplayPen, IntPtr points, int pointCount, IntPtr customPattern, int customPatternCount);
+    internal delegate void VectorCircleV8Proc(IntPtr pDisplayPen, float centerX, float centerY, float radius);
+    internal delegate void VectorBeziersV8Proc(IntPtr pDisplayPen, IntPtr beziersSimpleArray);
+    internal delegate void VectorArcV8Proc(IntPtr pDisplayPen, ref Arc arc);
 
+    // this should eventually be replaced by the DisplayPen class
     public class Pen
     {
       /// <since>6.0</since>
@@ -1043,15 +1266,57 @@ namespace Rhino.Runtime
       /// <since>6.0</since>
       public float Width { get; internal set; }
 
-      public bool Dashed { get; internal set; }
+      /// <since>8.0</since>
+      public DocObjects.LineCapStyle Cap { get; internal set; }
+      /// <since>8.0</since>
+      public DocObjects.LineJoinStyle Join { get; internal set; }
+      /// <since>8.0</since>
+      public float[] Pattern { get; internal set; }
     }
+
+    // this should eventually be replaced by a DisplayBrush class
+    class ViewCaptureBrush
+    {
+      unsafe public static ViewCaptureBrush FromNative(IntPtr ptrDisplayBrush, IntPtr ptrLine, IntPtr ptrStops)
+      {
+        ViewCaptureBrush brush = new ViewCaptureBrush();
+        brush.IsLinearGradient = UnsafeNativeMethods.CRhinoDisplayBrush_IsLinearGradient(ptrDisplayBrush);
+        int stopCount = UnsafeNativeMethods.ON_ColorStopArray_Count(ptrStops);
+        Display.ColorStop[] stops = new Display.ColorStop[stopCount];
+        for (int i=0; i<stopCount; i++)
+        {
+          int argb = 0;
+          double t = 0;
+          UnsafeNativeMethods.ON_ColorStopArray_Get(ptrStops, i, ref argb, ref t);
+          stops[i].Color = System.Drawing.Color.FromArgb(argb);
+          stops[i].Position = t;
+        }
+        brush.Stops = stops;
+
+        if (ptrLine != IntPtr.Zero)
+        {
+          Line* line = (Line*)ptrLine.ToPointer();
+          brush.Point1 = new Point2d(line->From.X, line->From.Y);
+          brush.Point2 = new Point2d(line->To.X, line->To.Y);
+        }
+
+        return brush;
+      }
+
+      public bool IsLinearGradient { get; set; }
+      public Display.ColorStop[] Stops { get; set; }
+      public Point2d Point1 { get; set; } = Point2d.Unset;
+      public Point2d Point2 { get; set; } = Point2d.Unset;
+    }
+
     /// <since>6.0</since>
     public enum PointType
     {
       Move,
       Line,
       CubicBezier,
-      Close
+      Close,
+      Arc
     }
     public struct PathPoint
     {
@@ -1064,7 +1329,7 @@ namespace Rhino.Runtime
     readonly double m_dpi;
     bool m_making_closed_path;
     Pen m_pen;
-    Color m_brush_color = Color.Empty;
+    ViewCaptureBrush m_brush;
     List<PathPoint> m_current_path = new List<PathPoint>();
     Size m_page_size;
 
@@ -1089,8 +1354,12 @@ namespace Rhino.Runtime
       handles.Add(GCHandle.Alloc(fill));
       VectorPolylineProc draw_polyline = DrawPolyline;
       handles.Add(GCHandle.Alloc(draw_polyline));
-      VectorArcProc draw_arc = DrawArc;
-      handles.Add(GCHandle.Alloc(draw_arc));
+      VectorArcV8Proc draw_arc = null;
+      if (SupportsArc())
+      {
+        draw_arc = DrawArcV8;
+        handles.Add(GCHandle.Alloc(draw_arc));
+      }
       VectorStringProc draw_string = DrawScreenText;
       handles.Add(GCHandle.Alloc(draw_string));
       VectorPolylineProc draw_bez = DrawBezier;
@@ -1109,6 +1378,12 @@ namespace Rhino.Runtime
       handles.Add(GCHandle.Alloc(clippath_proc));
       VectorGradientProc gradient_proc = GradientHatch;
       handles.Add(GCHandle.Alloc(gradient_proc));
+      VectorPolylineV8Proc polylineV8_proc = DrawPolylineV8;
+      handles.Add(GCHandle.Alloc(polylineV8_proc));
+      VectorCircleV8Proc circleV8_proc = DrawCircleV8;
+      handles.Add(GCHandle.Alloc(circleV8_proc));
+      VectorBeziersV8Proc beziersV8_proc = DrawBeziersV8;
+      handles.Add(GCHandle.Alloc(beziersV8_proc));
 
       if (doc == null)
         doc = RhinoDoc.ActiveDoc;
@@ -1118,7 +1393,8 @@ namespace Rhino.Runtime
         docSerialNumber = doc.RuntimeSerialNumber;
 
       UnsafeNativeMethods.CRhinoPrintInfo_VectorCapture(constPtrPrintInfo, setcliprect, fill, draw_polyline, draw_arc, draw_string, draw_bez,
-        fill_poly, path_proc, point_proc, bitmap_proc, rounded_rect_proc, clippath_proc, gradient_proc, docSerialNumber);
+        fill_poly, path_proc, point_proc, bitmap_proc, rounded_rect_proc, clippath_proc, gradient_proc, docSerialNumber, 
+        polylineV8_proc, circleV8_proc, beziersV8_proc);
 
       if (m_current_path.Count>1)
         DrawPath();
@@ -1218,19 +1494,33 @@ namespace Rhino.Runtime
               start = new Point2d(path[i].Location.X, path[i].Location.Y);
           }
         }
-        DrawPath(path, m_pen, m_brush_color);
+
+        if (m_brush==null)
+          DrawPath(path, m_pen, true, null, null, 1);
+        else
+          DrawPath(path, m_pen, m_brush.IsLinearGradient, m_brush.Stops, new Point2d[] { m_brush.Point1, m_brush.Point2 }, ToPoints(1));
+
         m_current_path.Clear();
       }
     }
+    
 
-    void CheckPath(Point2d pt, Color color, float thickness, bool dashed)
+    void CheckPath(Point2d pt, Color color, float thickness, Rhino.DocObjects.LineCapStyle capStyle, Rhino.DocObjects.LineJoinStyle joinStyle, bool dashed)
     {
-      if (m_making_closed_path)
+      var pen = new Pen { Color = color, Width = thickness, Cap = capStyle, Join = joinStyle };
+      if (dashed)
+        pen.Pattern = new float[]{1.0f,1.0f};
+      CheckPath(pt, pen);
+    }
+
+    void CheckPath(Point2d pt, ViewCaptureWriter.Pen pen)
+    {
+      if (m_making_closed_path || pen==null)
         return;
 
       if (m_current_path.Count < 1)
       {
-        m_pen = new Pen { Color = color, Width = thickness, Dashed = dashed };
+        m_pen = pen;
         return;
       }
 
@@ -1242,24 +1532,29 @@ namespace Rhino.Runtime
           gap_exists = true;
       }
 
-      bool pen_changed = m_pen.Color != color || 
-        Math.Abs(m_pen.Width - thickness) > 0.1 ||
-        m_pen.Dashed != dashed;
+      bool pen_changed = m_pen.Color != pen.Color ||
+        Math.Abs(m_pen.Width - pen.Width) > 0.1 ||
+        m_pen.Cap != pen.Cap ||
+        m_pen.Join != pen.Join ||
+        !Array.Equals(m_pen.Pattern, pen.Pattern);
+
       if (gap_exists || pen_changed)
       {
         DrawPath();
-        m_pen = new Pen { Color = color, Width = thickness, Dashed = dashed };
+        m_pen = pen;
         m_current_path.Clear();
       }
     }
 
-    unsafe void DrawBezier(int argb, float thickness, int dashed, int count, IntPtr points)
+    unsafe void DrawBezier(int argb, float thickness, int dashed, int capStyle, int joinStyle, int count, IntPtr points)
     {
       if (count != 4)
         return;
 
       var color = Color.FromArgb(argb);
       thickness = (float)ToPoints(thickness);
+      Rhino.DocObjects.LineCapStyle cap = (Rhino.DocObjects.LineCapStyle)capStyle;
+      Rhino.DocObjects.LineJoinStyle join = (Rhino.DocObjects.LineJoinStyle)joinStyle;
       PointF[] bez_points = new PointF[4];
       Point2d* pts = (Point2d*)points.ToPointer();
       for (int i = 0; i < 4; i++)
@@ -1269,27 +1564,62 @@ namespace Rhino.Runtime
       }
 
       Point2d list_first_pt = new Point2d(bez_points[0].X, bez_points[0].Y);
-      CheckPath(list_first_pt, color, thickness, dashed==1);
+      CheckPath(list_first_pt, color, thickness, cap, join, dashed==1);
       AddBezier(bez_points[0], bez_points[1], bez_points[2], bez_points[3]);
     }
 
-    unsafe void DrawPolyline(int argb, float thickness, int dashed, int count, IntPtr points)
+    unsafe ViewCaptureWriter.Pen PenFromRhinoDisplayPenPointer(IntPtr ptrPen, IntPtr customPattern, int customPatternCount)
     {
-      if (count < 2)
+      var rhinoDisplayPen = Rhino.Display.DisplayPen.FromNativeCRhinoDisplayPen(ptrPen);
+      if (null == rhinoDisplayPen)
+        return null;
+
+      var pen = new ViewCaptureWriter.Pen();
+      pen.Cap = rhinoDisplayPen.CapStyle;
+      pen.Join = rhinoDisplayPen.JoinStyle;
+      pen.Color = rhinoDisplayPen.Color;
+      pen.Width = (float)ToPoints(rhinoDisplayPen.Thickness);
+      if (IntPtr.Zero != customPattern && customPatternCount > 1)
+      {
+        float* customPatternItems = (float*)customPattern.ToPointer();
+        float[] items = new float[customPatternCount];
+        for (int i = 0; i < items.Length; i++)
+          items[i] = customPatternItems[i];
+        pen.Pattern = items;
+      }
+      else
+      {
+        pen.Pattern = rhinoDisplayPen.PatternAsArray();
+      }
+      if (pen.Pattern != null)
+      {
+        float[] pattern = pen.Pattern;
+        for (int i = 0; i < pattern.Length; i++)
+        {
+          pattern[i] = (float)ToPoints(pattern[i]);
+        }
+        pen.Pattern = pattern;
+      }
+      return pen;
+    }
+
+    unsafe void DrawPolylineV8(IntPtr ptrPen, IntPtr points, int count, IntPtr customPattern, int customPatternCount)
+    {
+      var pen = PenFromRhinoDisplayPenPointer(ptrPen, customPattern, customPatternCount);
+
+      if (null == pen || IntPtr.Zero == points || count < 2)
         return;
 
-      var color = Color.FromArgb(argb);
-      thickness = (float)ToPoints(thickness);
       var point_list = new List<PointF>(count);
 
       var size = m_page_size;
-      Point2d* pt = (Point2d*)points.ToPointer();
+      Point2f* pt = (Point2f*)points.ToPointer();
 
       // 5 Feb 2021 S. Baer (RH-62125)
       // Skip really short lines
       if (2 == count)
       {
-        Vector2d v = pt[1] - pt[0];
+        Vector2f v = pt[1] - pt[0];
         if (v.SquareLength < 0.6)
           return;
       }
@@ -1299,7 +1629,7 @@ namespace Rhino.Runtime
         double x = ToPoints(pt[i].X);
         double y = ToPoints(pt[i].Y);
         // only clip when NOT making a closed loop path
-        if ( !m_making_closed_path && (x < 0 || x > size.Width || y < 0 || y > size.Height))
+        if (!m_making_closed_path && (x < 0 || x > size.Width || y < 0 || y > size.Height))
         {
           if (point_list.Count > 0)
           {
@@ -1329,7 +1659,7 @@ namespace Rhino.Runtime
             l.To = l.PointAt(biggest_a);
             point_list.Add(new PointF((float)l.To.X, (float)l.To.Y));
             Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
-            CheckPath(list_first_pt, color, thickness, dashed==1);
+            CheckPath(list_first_pt, pen);
             for (int j = 1; j < point_list.Count; j++)
               AddLine(point_list[j - 1], point_list[j]);
 
@@ -1380,7 +1710,210 @@ namespace Rhino.Runtime
       if (point_list.Count > 1)
       {
         Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
-        CheckPath(list_first_pt, color, thickness, dashed==1);
+        CheckPath(list_first_pt, pen);
+
+        for (int j = 1; j < point_list.Count; j++)
+          AddLine(point_list[j - 1], point_list[j]);
+      }
+    }
+
+    void DrawCircleV8(IntPtr ptrPen, float centerX, float centerY, float radius)
+    {
+      var pen = PenFromRhinoDisplayPenPointer(ptrPen, IntPtr.Zero, 0);
+      centerX = (float)ToPoints(centerX);
+      centerY = (float)ToPoints(centerY);
+      radius = (float)ToPoints(radius);
+      DrawCircle(new PointF(centerX, centerY), radius * 2.0f, Color.Empty, pen);
+    }
+
+
+    void DrawArcV8(IntPtr ptrPen, ref Arc arc)
+    {
+      var pen = PenFromRhinoDisplayPenPointer(ptrPen, IntPtr.Zero, 0);
+      
+      if (pen!=null)
+      {
+        bool pen_changed = m_pen==null ||
+          m_pen.Color != pen.Color ||
+          Math.Abs(m_pen.Width - pen.Width) > 0.1 ||
+          m_pen.Cap != pen.Cap ||
+          m_pen.Join != pen.Join ||
+          !Array.Equals(m_pen.Pattern, pen.Pattern);
+
+        if (pen_changed)
+        {
+          Flush();
+          m_pen = pen;
+        }  
+      }
+
+      int previous = m_current_path.Count - 1;
+      if (previous >= 0 && m_current_path[previous].PointType == PointType.Move)
+      {
+        m_current_path.RemoveAt(previous);
+        previous = m_current_path.Count - 1;
+      }
+      if (previous < 0 || m_current_path[previous].PointType == PointType.Close)
+      {
+        Flush();
+        var start = arc.StartPoint;
+        PointF a = new PointF((float)ToPoints(start.X), (float)ToPoints(start.Y));
+        m_current_path.Add(new PathPoint { Location = a, PointType = PointType.Move });
+        m_pen = pen;
+      }
+
+      var center = arc.Center;
+      PointF b = new PointF((float)ToPoints(center.X), (float)ToPoints(center.Y));
+      m_current_path.Add(new PathPoint { Location = b, PointType = PointType.Arc });
+
+      float radius = (float)ToPoints(arc.Radius);
+      float angle = (float)arc.AngleDegrees;
+      if (arc.Plane.Normal.Z < -0.5)
+        angle = -angle;
+      PointF c = new PointF(radius, angle);
+      m_current_path.Add(new PathPoint { Location = c, PointType = PointType.Arc });
+
+      var end = arc.EndPoint;
+      PointF d = new PointF((float)ToPoints(end.X), (float)ToPoints(end.Y));
+      m_current_path.Add(new PathPoint { Location = d, PointType = PointType.Arc });
+    }
+
+    void DrawBeziersV8(IntPtr ptrPen, IntPtr ptrBeziersSimpleArray)
+    {
+      //Flush();
+      var pen = PenFromRhinoDisplayPenPointer(ptrPen, IntPtr.Zero, 0);
+      int bezCount = UnsafeNativeMethods.ON_SimpleArray_BezierCurveCount(ptrBeziersSimpleArray);
+      Point2f[] bezPoints = new Point2f[4 * bezCount];
+      bool pointsCollected = UnsafeNativeMethods.ON_SimpleArray_CubicBezPoints(ptrBeziersSimpleArray, bezPoints, bezPoints.Length);
+      if (pointsCollected)
+      {
+        m_pen = pen;
+        PointF[] pts = new PointF[4];
+        for(int i=0; i<bezCount; i++)
+        {
+          for(int j=0; j<4; j++)
+          {
+            Point2f bez = bezPoints[i * 4 + j];
+            float x = (float)ToPoints(bez.X);
+            float y = (float)ToPoints(bez.Y);
+            pts[j] = new PointF(x, y);
+          }
+          AddBezier(pts[0], pts[1], pts[2], pts[3]);
+        }
+      }
+      //Flush();
+    }
+
+    unsafe void DrawPolyline(int argb, float thickness, int dashed, int capStyle, int joinStyle, int count, IntPtr points)
+    {
+      if (count < 2)
+        return;
+
+      var color = Color.FromArgb(argb);
+      thickness = (float)ToPoints(thickness);
+      Rhino.DocObjects.LineCapStyle cap = (Rhino.DocObjects.LineCapStyle)capStyle;
+      Rhino.DocObjects.LineJoinStyle join = (Rhino.DocObjects.LineJoinStyle)joinStyle;
+      var point_list = new List<PointF>(count);
+
+      var size = m_page_size;
+      Point2d* pt = (Point2d*)points.ToPointer();
+
+      // 5 Feb 2021 S. Baer (RH-62125)
+      // Skip really short lines
+      if (2 == count)
+      {
+        Vector2d v = pt[1] - pt[0];
+        if (v.SquareLength < 0.6)
+          return;
+      }
+
+      for (int i = 0; i < count; i++)
+      {
+        double x = ToPoints(pt[i].X);
+        double y = ToPoints(pt[i].Y);
+        // only clip when NOT making a closed loop path
+        if ( !m_making_closed_path && (x < 0 || x > size.Width || y < 0 || y > size.Height))
+        {
+          if (point_list.Count > 0)
+          {
+            var last_point = point_list[point_list.Count - 1];
+            Line l = new Line(last_point.X, last_point.Y, 0, x, y, 0);
+            double biggest_a = 0;
+            double a, b;
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, 0, 0, size.Width, 0, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              biggest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, 0, 0, 0, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a > biggest_a)
+                biggest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(size.Width, 0, 0, size.Width, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a > biggest_a)
+                biggest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, size.Height, 0, size.Width, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a > biggest_a)
+                biggest_a = a;
+            }
+            l.To = l.PointAt(biggest_a);
+            point_list.Add(new PointF((float)l.To.X, (float)l.To.Y));
+            Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
+            CheckPath(list_first_pt, color, thickness, cap, join, dashed==1);
+            for (int j = 1; j < point_list.Count; j++)
+              AddLine(point_list[j - 1], point_list[j]);
+
+            point_list.Clear();
+            continue;
+          }
+
+          // look at next point
+          if (i < count - 1)
+          {
+            double x2 = ToPoints(pt[i + 1].X);
+            double y2 = ToPoints(pt[i + 1].Y);
+
+            Line l = new Line(x, y, 0, x2, y2, 0);
+            double smallest_a = 100;
+            double a, b;
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, 0, 0, size.Width, 0, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              smallest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, 0, 0, 0, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a < smallest_a)
+                smallest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(size.Width, 0, 0, size.Width, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a < smallest_a)
+                smallest_a = a;
+            }
+            if (Geometry.Intersect.Intersection.LineLine(l, new Line(0, size.Height, 0, size.Width, size.Height, 0), out a, out b) && a > 0 && a < 1 && b > 0 && b < 1)
+            {
+              if (a < smallest_a)
+                smallest_a = a;
+            }
+            if (smallest_a >= 0 && smallest_a <= 1)
+            {
+              var location = l.PointAt(smallest_a);
+              point_list.Add(new PointF((float)location.X, (float)location.Y));
+            }
+          }
+        }
+        else
+          point_list.Add(new PointF((float)x, (float)y));
+      }
+
+
+      if (point_list.Count > 1)
+      {
+        Point2d list_first_pt = new Point2d(point_list[0].X, point_list[0].Y);
+        CheckPath(list_first_pt, color, thickness, cap, join, dashed==1);
 
         for (int j = 1; j < point_list.Count; j++)
           AddLine(point_list[j - 1], point_list[j]);
@@ -1410,6 +1943,18 @@ namespace Rhino.Runtime
         m_current_path.RemoveAt(previous);
         previous = m_current_path.Count - 1;
       }
+
+      if (previous >= 0 && !m_making_closed_path)
+      {
+        float deltaX = a.X - m_current_path[previous].Location.X;
+        float deltaY = a.Y - m_current_path[previous].Location.Y;
+        if (Math.Abs(deltaX) > 0.5 || Math.Abs(deltaY) > 0.5)
+        {
+          Flush();
+          previous = -1;
+        }
+      }
+
       if (previous < 0 || m_current_path[previous].PointType == PointType.Close)
       {
         m_current_path.Add(new PathPoint { Location = a, PointType = PointType.Move });
@@ -1442,39 +1987,6 @@ namespace Rhino.Runtime
         m_current_path.Add(pt);
     }
 
-    void DrawArc(int argb, float thickness, int dashed, ref Arc arc)
-    {
-      /*
-      if (m_graphics == null)
-        return;
-
-      var color = PdfSharp.Drawing.XColor.FromArgb(argb);
-      thickness = (float)(ToPoints(thickness));
-
-      Point2d pt = new Point2d(arc.StartPoint.X, arc.StartPoint.Y);
-      CheckPath(pt, color, thickness);
-
-      m_last_point = new Point2d(arc.EndPoint.X, arc.EndPoint.Y);
-      var plane_x = arc.Plane.XAxis;
-      plane_x.Z = 0;
-      double angle_rad = Vector3d.VectorAngle(plane_x, Vector3d.XAxis);
-      double angle_deg = RhinoMath.ToDegrees(angle_rad);
-      double sweepangle = RhinoMath.ToDegrees(arc.Angle);
-      if (arc.Plane.XAxis.Y < 0)
-        angle_deg = 360 - angle_deg;
-
-      if (arc.Plane.ZAxis.Z < 0)
-        sweepangle *= -1;
-      //return;// angle_deg -= sweepangle;
-
-      double x = ToPoints(arc.Center.X - arc.Radius);
-      double y = ToPoints(arc.Center.Y - arc.Radius);
-      double width = ToPoints(arc.Radius * 2);
-      double height = ToPoints(arc.Radius * 2);
-      m_path.AddArc(x, y, width, height, angle_deg, sweepangle);
-      */
-    }
-
     unsafe void FillPolygon(int argb, int count, IntPtr points)
     {
       if (count < 2)
@@ -1491,7 +2003,7 @@ namespace Rhino.Runtime
       FillPolygon(polygon_points, color);
     }
 
-    void Path(int begin, int argb)
+    void Path(int begin, IntPtr ptrDisplayBrush, IntPtr screenLine, IntPtr stops)
     {
       if (begin != 0)
       {
@@ -1506,15 +2018,16 @@ namespace Rhino.Runtime
           m_pen = null;
         }
         m_making_closed_path = true;
-        m_brush_color = Color.Empty;
+        m_brush = null;
       }
       else
       {
-        m_brush_color = Color.FromArgb(argb);
+        m_brush = ViewCaptureBrush.FromNative(ptrDisplayBrush, screenLine, stops);
+
         DrawPath();
         m_making_closed_path = false;
         m_pen = null;
-        m_brush_color = Color.Empty;
+        m_brush = null;
       }
     }
 
@@ -1536,7 +2049,7 @@ namespace Rhino.Runtime
       {
         if (pointstyle == Display.PointStyle.RoundSimple)
           stroke_width_points = 0;
-        DrawCircle(center, diameter_points, fill_color, stroke_width_points, stroke_color);
+        DrawCircle(center, diameter_points, fill_color, new Pen {Color=stroke_color, Width=stroke_width_points });
       }
       else
       {
@@ -1605,33 +2118,41 @@ namespace Rhino.Runtime
     }
 
     Stack<PathPoint[]> m_clippath_stack = new Stack<PathPoint[]>();
-    unsafe void ClipPath(int count, IntPtr points, int asBezier)
+    unsafe void ClipPath(IntPtr loops, int asBezier)
     {
       DrawPath();
-      if(count>0 && points != IntPtr.Zero)
+
+      int loopCount = UnsafeNativeMethods.ON_ClassArraySimpleArrayPoint2d_Count(loops);
+      if (loopCount > 0)
       {
         m_making_closed_path = true;
-        if (0==asBezier)
+        List<PathPoint> pathPoints = new List<PathPoint>();
+        for(int loop=0; loop < loopCount; loop++)
         {
-          DrawPolyline(0, 0, 0, count, points);
-
-        }
-        else
-        {
-          Point2d* pts = (Point2d*)points.ToPointer();
-          for( int i=0; i<count; i+=4 )
+          int pointCount = UnsafeNativeMethods.ON_ClassArraySimpleArrayPoint2d_PointCount(loops, loop);
+          IntPtr points = UnsafeNativeMethods.ON_ClassArraySimpleArrayPoint2d_Points(loops, loop);
+          if (0==asBezier)
           {
-            PointF a = new PointF((float)pts[i].X, (float)pts[i].Y);
-            PointF b = new PointF((float)pts[i+1].X, (float)pts[i+1].Y);
-            PointF c = new PointF((float)pts[i+2].X, (float)pts[i+2].Y);
-            PointF d = new PointF((float)pts[i+3].X, (float)pts[i+3].Y);
-            AddBezier(a, b, c, d);
+            DrawPolyline(0, 0, 0, 0, 0, pointCount, points);
           }
+          else
+          {
+            Point2d* pts = (Point2d*)points.ToPointer();
+            for (int i = 0; i < pointCount; i += 4)
+            {
+              PointF a = new PointF((float)pts[i].X, (float)pts[i].Y);
+              PointF b = new PointF((float)pts[i + 1].X, (float)pts[i + 1].Y);
+              PointF c = new PointF((float)pts[i + 2].X, (float)pts[i + 2].Y);
+              PointF d = new PointF((float)pts[i + 3].X, (float)pts[i + 3].Y);
+              AddBezier(a, b, c, d);
+            }
+          }
+          var path = m_current_path.ToArray();
+          m_current_path.Clear();
+          pathPoints.AddRange(path);
         }
         m_making_closed_path = false;
-        var path = m_current_path.ToArray();
-        m_current_path.Clear();
-        PushClipPath(path);
+        PushClipPath(pathPoints.ToArray());
       }
       else
       {
@@ -1673,8 +2194,9 @@ namespace Rhino.Runtime
     }
 
 
-    protected abstract void DrawPath(PathPoint[] points, Pen pen, Color brushColor);
-    protected abstract void DrawCircle(PointF center, float diameter, Color fillColor, float strokeWidth, Color strokeColor);
+    protected abstract void DrawPath(PathPoint[] points, Pen pen, bool linearGradient, Display.ColorStop[] stops, Point2d[] gradientPoints, double pointScale);
+    protected abstract void DrawCircle(PointF center, float diameter, Color fillColor, Pen stroke);
+    protected virtual bool SupportsArc() { return false; } // remove one our PDF library supports arc paths
     protected abstract void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius);
     protected abstract void DrawBitmap(Bitmap bitmap, double m11, double m12, double m21, double m22, double dx, double dy);
     protected abstract void DrawScreenText(string text, Color textColor, double x, double y, float angle, int horizontalAlignment, float heightPoints, DocObjects.Font font);

@@ -62,7 +62,9 @@ enum LayerInt : int
 {
   idxLinetypeIndex = 0,
   idxRenderMaterialIndex = 1,
-  idxIgesLevel = 3
+  idxIgesLevel = 3,
+  idxSectionHatchIndex = 4,
+  idxSectionFillRule = 5
 };
 
 RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
@@ -80,6 +82,12 @@ RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
       break;
     case idxIgesLevel:
       rc = pLayer->IgesLevel();
+      break;
+    case idxSectionHatchIndex:
+      rc = pLayer->SectionHatchIndex();
+      break;
+    case idxSectionFillRule:
+      rc = (int)pLayer->SectionFillRule();
       break;
     }
   }
@@ -101,6 +109,12 @@ RH_C_FUNCTION void ON_Layer_SetInt(ON_Layer* pLayer, enum LayerInt which, int va
     case idxIgesLevel:
       pLayer->SetIgesLevel(val);
       break;
+    case idxSectionHatchIndex:
+      pLayer->SetSectionHatchIndex(val);
+      break;
+    case idxSectionFillRule:
+      pLayer->SetSectionFillRule(ON::SectionFillRuleFromUnsigned(val));
+      break;
     }
   }
 }
@@ -111,39 +125,105 @@ enum LayerBool : int
   idxIsLocked = 1,
   idxIsExpanded = 2,
   idxPersistentVisibility = 3,
-  idxPersistentLocking = 4
+  idxPersistentLocking = 4,
+  idxClipParticipationForAll = 5,
+  idxClipParticipationForNone = 6,
+  idxModelIsVisible = 7,
+  idxModelPersistentVisibility = 8
 };
 
 RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, bool set, bool val)
 {
   bool rc = val;
-  if( pLayer )
+  if (pLayer)
   {
-    if( set )
+    if (set)
     {
-      if( idxIsVisible==which )
+      if (idxIsVisible == which)
         pLayer->SetVisible(val);
-      else if( idxIsLocked==which )
+      else if (idxIsLocked == which)
         pLayer->SetLocked(val);
-      else if( idxIsExpanded==which )
+      else if (idxIsExpanded == which)
         pLayer->m_bExpanded = val;
-      else if( idxPersistentVisibility==which )
+      else if (idxPersistentVisibility == which)
         pLayer->SetPersistentVisibility(val);
-      else if( idxPersistentLocking==which )
+      else if (idxPersistentLocking == which)
         pLayer->SetPersistentLocking(val);
+      else if (idxModelIsVisible == which)
+        pLayer->SetModelVisible(val);
+      else if (idxModelPersistentVisibility == which)
+        pLayer->SetModelPersistentVisibility(val);
     }
-    else 
+    else
     {
-      if( idxIsVisible==which )
+      if (idxIsVisible == which)
         rc = pLayer->IsVisible();
-      else if( idxIsLocked==which )
+      else if (idxIsLocked == which)
         rc = pLayer->IsLocked();
-      else if( idxIsExpanded==which )
+      else if (idxIsExpanded == which)
         rc = pLayer->m_bExpanded;
-      else if( idxPersistentVisibility==which )
+      else if (idxPersistentVisibility == which)
         rc = pLayer->PersistentVisibility();
-      else if( idxPersistentLocking==which )
+      else if (idxPersistentLocking == which)
         rc = pLayer->PersistentLocking();
+      else if (idxClipParticipationForAll == which || idxClipParticipationForNone == which)
+      {
+        bool forall = false;
+        bool fornone = false;
+        ON_UuidList uuidlist;
+        pLayer->GetClipParticipation(forall, fornone, uuidlist);
+        if (idxClipParticipationForAll == which)
+          rc = forall;
+        else
+          rc = fornone;
+      }
+      else if (idxModelIsVisible == which)
+        rc = pLayer->ModelIsVisible();
+      else if (idxModelPersistentVisibility == which)
+        rc = pLayer->ModelPersistentVisibility();
+    }
+  }
+  return rc;
+}
+
+enum LayerDouble : int
+{
+  ldSectionHatchScale = 0,
+  ldSectionHatchRotation = 1,
+};
+
+RH_C_FUNCTION double ON_Layer_GetSetDouble(ON_Layer* pLayer, enum LayerDouble which, bool set, double val)
+{
+  double rc = val;
+  if (pLayer)
+  {
+    if (set)
+    {
+      switch (which)
+      {
+      case ldSectionHatchScale:
+        pLayer->SetSectionHatchScale(val);
+        break;
+      case ldSectionHatchRotation:
+        pLayer->SetSectionHatchRotation(val);
+        break;
+      default:
+        break;
+      }
+    }
+    else
+    {
+      switch (which)
+      {
+      case ldSectionHatchScale:
+        rc = pLayer->SectionHatchScale();
+        break;
+      case ldSectionHatchRotation:
+        rc = pLayer->SectionHatchRotation();
+        break;
+      default:
+        break;
+      }
     }
   }
   return rc;
@@ -307,5 +387,70 @@ RH_C_FUNCTION void ON_Layer_SetPerViewportVisibility(ON_Layer* pLayer, ON_UUID v
       pLayer->SetPerViewportVisible(viewportId, visible);
     else
       pLayer->SetPerViewportPersistentVisibility(viewportId, visible);
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_SetClipParticipation(ON_Layer* pLayer, bool forAll, bool forNone, const ON_SimpleArray<ON_UUID>* pIds)
+{
+  if (pLayer)
+  {
+    if (forAll)
+    {
+      pLayer->SetClipParticipationForAll();
+    }
+    else if (forNone)
+    {
+      pLayer->SetClipParticipationForNone();
+    }
+    else if (pIds)
+    {
+      pLayer->SetClipParticipationList(pIds->Array(), pIds->Count());
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_ClipParticipationList(const ON_Layer* pConstLayer, ON_SimpleArray<ON_UUID>* uuids)
+{
+  if (pConstLayer && uuids)
+  {
+    bool forall = true;
+    bool fornone = true;
+    ON_UuidList uuidlist;
+    pConstLayer->GetClipParticipation(forall, fornone, uuidlist);
+    uuidlist.GetUuids(*uuids);
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_UnsetModelPersistentVisibility(ON_Layer* pLayer)
+{
+  if (pLayer)
+    pLayer->UnsetModelPersistentVisibility();
+}
+
+RH_C_FUNCTION void ON_Layer_DeleteModelVisible(ON_Layer* pLayer)
+{
+  if (pLayer)
+    pLayer->DeleteModelVisible();
+}
+
+RH_C_FUNCTION ON_Linetype* ON_Layer_GetCustomLinetype(const ON_Layer* pLayer)
+{
+  if (pLayer)
+  {
+    const ON_Linetype* linetype = pLayer->CustomLinetype();
+    if (linetype)
+      return new ON_Linetype(*linetype);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_Layer_SetCustomLinetype(ON_Layer* pLayer, const ON_Linetype* linetype)
+{
+  if (pLayer)
+  {
+    if (linetype)
+      pLayer->SetCustomLinetype(*linetype);
+    else
+      pLayer->RemoveCustomLinetype();
   }
 }

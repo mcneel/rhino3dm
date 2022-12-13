@@ -81,6 +81,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       line = Geometry.Line.Unset;
       int rc = UnsafeNativeMethods.RHC_RhinoGetLine2(ptr_this, ref line, IntPtr.Zero);
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-67575
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 

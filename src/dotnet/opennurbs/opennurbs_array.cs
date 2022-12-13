@@ -126,6 +126,19 @@ namespace Rhino.Runtime.InteropWrappers
     {
       return GetString(m_ptr);
     }
+
+    /// <summary>
+    /// Marshals unmanaged ON_wString to a managed .NET string and never returns null.
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public string ToStringSafe()
+    {
+      var p = GetString(m_ptr);
+      if (p != null) return p; 
+      return "";
+    }
+
     /// <summary>
     /// Gets managed string from unmanaged ON_wString pointer.
     /// </summary>
@@ -349,8 +362,89 @@ namespace Rhino.Runtime.InteropWrappers
     }
   }
 
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;IntPtr&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class SimpleArrayIntPtr : IDisposable
+  {
+    internal IntPtr m_ptr; // ON_SimpleArray<IntPtr>
 
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    public IntPtr ConstPointer() { return m_ptr; }
 
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayIntPtr"/> class.
+    /// </summary>
+    public SimpleArrayIntPtr()
+    {
+      m_ptr = UnsafeNativeMethods.ON_IntPtrArray_New();
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_IntPtrArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of elements in this array.
+    /// </summary>
+    public int Count
+    {
+      get { return UnsafeNativeMethods.ON_IntPtrArray_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    public IntPtr[] ToArray()
+    {
+      var list = new List<IntPtr>();
+
+      int count = Count;
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr p = UnsafeNativeMethods.ON_IntPtrArray_Item(m_ptr, i);
+        if (p != IntPtr.Zero)
+        {
+          list.Add(p);
+        }
+      }
+
+      return list.ToArray();
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayIntPtr()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+  }
 
   /// <summary>
   /// Wrapper for ON_SimpleArray&lt;unsigned char&gt;. If you are not writing C++ code
@@ -504,7 +598,148 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
 
+  /// <summary>
+  /// Wrapper for std::vector&lt;unsigned char&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class StdVectorByte : IDisposable
+  {
+    //This should be private eventually and have everything call either ConstPointer or NonConstPointer
+    internal IntPtr m_ptr; // std::vector<unsigned char>
 
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this vector.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this vector.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> class.
+    /// </summary>
+    public StdVectorByte()
+    {
+      m_ptr = UnsafeNativeMethods.ON_ByteVector_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> class.
+    /// <param name="initialSize">Initial size of the array - all values are set to zero.</param>
+    /// 
+    /// </summary>
+    [CLSCompliant(false)]
+    public StdVectorByte(ulong initialSize)
+    {
+      m_ptr = UnsafeNativeMethods.ON_ByteVector_New(null, initialSize);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayByte"/> with the contents of another SimpleArrayByte.
+    /// </summary>
+    public StdVectorByte(StdVectorByte other)
+    {
+      if (other == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteVector_New(null, 0);
+      }
+      else
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteVector_CopyNew(other.ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Copies the contents of a <see cref="StdVectorByte"/> into another StdVectorByte.
+    /// </summary>
+    public void CopyTo(StdVectorByte other)
+    {
+      if (other != null)
+      {
+        UnsafeNativeMethods.ON_ByteVector_CopyTo(ConstPointer(), other.NonConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorByte"/> class
+    /// </summary>
+    /// <param name="values">initial set of integers to add to the array</param>
+    public StdVectorByte(IEnumerable<byte> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_ByteVector_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<byte>(values);
+        byte[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_ByteVector_New(array_values, (ulong)list_values.Count);
+      }
+    }
+
+    /// <summary>
+    /// Gets the amount of elements in this array.
+    /// </summary>
+    [CLSCompliant(false)]
+    public ulong Count
+    {
+      get { return UnsafeNativeMethods.ON_ByteVector_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Return the raw data.
+    /// </summary>
+    public IntPtr Memory()
+    {
+      return UnsafeNativeMethods.ON_ByteVector_Memory(m_ptr);
+    }
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    public byte[] ToArray()
+    {
+      var count = Count;
+      if (count < 1)
+        return new byte[0];
+      byte[] rc = new byte[count];
+      UnsafeNativeMethods.ON_ByteVector_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~StdVectorByte()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_ByteVector_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
 
 
   /// <summary>
@@ -658,6 +893,158 @@ namespace Rhino.Runtime.InteropWrappers
       }
     }
   }
+
+
+
+
+
+
+
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;float&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class StdVectorFloat : IDisposable
+  {
+    //This should be private eventually and have everything call either ConstPointer or NonConstPointer
+    internal IntPtr m_ptr; // std::vector<float>
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorFloat"/> class.
+    /// </summary>
+    public StdVectorFloat()
+    {
+      m_ptr = UnsafeNativeMethods.ON_FloatVector_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorFloat"/> class.
+    /// <param name="initialSize">Initial size of the array - all values are set to zero.</param>
+    /// 
+    /// </summary>
+    [CLSCompliant(false)]
+    public StdVectorFloat(ulong initialSize)
+    {
+      m_ptr = UnsafeNativeMethods.ON_FloatVector_New(null, initialSize);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorFloat"/> with the contents of another SimpleArrayFloat.
+    /// </summary>
+    public StdVectorFloat(StdVectorFloat other)
+    {
+      if (other == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatVector_New(null, 0);
+      }
+      else
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatVector_CopyNew(other.ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Copies the contents of a <see cref="StdVectorFloat"/> into another SimpleArrayFloat.
+    /// </summary>
+    public void CopyTo(StdVectorFloat other)
+    {
+      if (other != null)
+      {
+        UnsafeNativeMethods.ON_FloatVector_CopyTo(ConstPointer(), other.NonConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayFloat"/> class
+    /// </summary>
+    /// <param name="values">initial set of integers to add to the array</param>
+    public StdVectorFloat(IEnumerable<float> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_FloatVector_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<float>(values);
+        float[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_FloatVector_New(array_values, (ulong)list_values.Count);
+      }
+    }
+
+    /// <summary>
+    /// Gets the amount of elements in this array.
+    /// </summary>
+    [CLSCompliant(false)]
+    public ulong Count
+    {
+      get { return UnsafeNativeMethods.ON_FloatVector_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Return the raw data.
+    /// </summary>
+    public IntPtr Memory()
+    {
+      return UnsafeNativeMethods.ON_FloatVector_Memory(m_ptr);
+    }
+
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged array.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    public float[] ToArray()
+    {
+      var count = Count;
+      if (count < 1)
+        return new float[0];
+      float[] rc = new float[count];
+      UnsafeNativeMethods.ON_FloatVector_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~StdVectorFloat()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_FloatVector_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
+
+
 
 
 
@@ -1221,6 +1608,22 @@ namespace Rhino.Runtime.InteropWrappers
       m_ptr = UnsafeNativeMethods.ON_3dPointArray_New(0);
     }
 
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayPoint3d"/> instance from a set of points
+    /// </summary>
+    /// <param name="pts"></param>
+    /// <since>7.18</since>
+    public SimpleArrayPoint3d(IEnumerable<Point3d> pts)
+    {
+      int count = pts.Count();
+      m_ptr = UnsafeNativeMethods.ON_3dPointArray_New(count);
+      foreach (var p in pts)
+      {
+        Point3d pt = p;
+        UnsafeNativeMethods.ON_3dPointArray_Append(m_ptr, ref pt);
+      }
+    }
+
     // not used and internal class, so comment out
     //public SimpleArrayPoint3d(int initialCapacity)
     //{
@@ -1239,6 +1642,17 @@ namespace Rhino.Runtime.InteropWrappers
         int count = UnsafeNativeMethods.ON_3dPointArray_Count(ptr);
         return count;
       }
+    }
+
+    /// <summary>
+    /// Adds a point to the list
+    /// </summary>
+    /// <param name="pt"></param>
+    /// <since>8.0</since>
+    public void Add(Point3d pt)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_3dPointArray_Append(ptr, ref pt);
     }
 
     /// <summary>
@@ -2147,6 +2561,243 @@ namespace Rhino.Runtime.InteropWrappers
 #endif
   }
 
+
+
+  /// <summary>
+  /// Represents a wrapper to an unmanaged array of mesh pointers.
+  /// <para>Wrapper for a C++ ON_SimpleArray of ON_Mesh* or constant ON_Mesh*. If you are not
+  /// writing C++ code then this class is not for you.</para>
+  /// </summary>
+  public class StdVectorOfSharedPtrToMesh : IDisposable
+  {
+    internal bool DontDelete { get; set; }
+    IntPtr m_ptr; // std::vector<std::shared_ptr<ON_Mesh>>*
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorOfSharedPtrToMesh"/> instance.
+    /// </summary>
+    /// <since>5.0</since>
+    public StdVectorOfSharedPtrToMesh()
+    {
+      m_ptr = UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_New();
+    }
+
+    internal StdVectorOfSharedPtrToMesh(IntPtr ptr)
+    {
+      m_ptr = ptr;
+      DontDelete = true;
+    }
+
+    /// <summary>
+    /// Gets the amount of meshes in this array.
+    /// </summary>
+    /// <since>5.0</since>
+    public int Count
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int count = UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_size(ptr);
+        return count;
+      }
+    }
+
+    /// <summary>
+    /// Adds a mesh to the list.
+    /// </summary>
+    /// <param name="mesh">A mesh to add.</param>
+    /// <param name="asConst">Whether this mesh should be treated as non-modifiable.</param>
+    /// <since>5.0</since>
+    public void Add(Geometry.Mesh mesh, bool asConst)
+    {
+      if (null != mesh)
+      {
+        IntPtr pMesh = mesh.ConstPointer();
+        if (!asConst)
+          pMesh = mesh.NonConstPointer();
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_push_back(ptr, pMesh);
+      }
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~StdVectorOfSharedPtrToMesh()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>5.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="disposing"></param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        if (!DontDelete) UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_erase(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
+    public Geometry.Mesh[] ToNonConstArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new Geometry.Mesh[0];
+      IntPtr ptr = ConstPointer();
+      Mesh[] rc = new Mesh[count];
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr pMesh = UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_GetRawMeshPtr(ptr, i);
+        if (IntPtr.Zero != pMesh)
+          rc[i] = new Mesh(pMesh, null);
+      }
+      return rc;
+    }
+
+#if RHINO_SDK
+    internal Geometry.Mesh[] ToConstArray(Rhino.DocObjects.RhinoObject parent)
+    {
+      int count = Count;
+      if (count < 1)
+        return new Geometry.Mesh[0];
+      IntPtr ptr = ConstPointer();
+
+      Mesh[] rc = new Mesh[count];
+      for (int i = 0; i < rc.Length; i++)
+      {
+        IntPtr pMesh = UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_GetRawMeshPtr(ptr, i);
+        Rhino.DocObjects.ObjRef objref = new DocObjects.ObjRef(parent, pMesh);
+        rc[i] = objref.Mesh();
+      }
+      return rc;
+    }
+#endif
+  }
+  
+  /// <summary>
+  /// Wrapper for ON_SimpleArray&lt;ON_MeshFace&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class SimpleArrayMeshFace : IDisposable
+  {
+    IntPtr m_ptr; // ON_SimpleArray<ON_MeshFace>
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>8.0</since>
+    public IntPtr ConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>8.0</since>
+    public IntPtr NonConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayMeshFace"/> instance.
+    /// </summary>
+    /// <since>8.0</since>
+    public SimpleArrayMeshFace()
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshFaceArray_New();
+    }
+
+    /// <summary>
+    /// Gets the amount of mesh faces in this array.
+    /// </summary>
+    /// <since>8.0</since>
+    public int Count
+    {
+      get { return UnsafeNativeMethods.ON_MeshFaceArray_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>8.0</since>
+    public MeshFace[] ToArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new MeshFace[0];
+      MeshFace[] rc = new MeshFace[count];
+      UnsafeNativeMethods.ON_MeshFaceArray_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayMeshFace()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_MeshFaceArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
+
+
+
   /// <summary>
   /// Wrapper for a C++ ON_SimpleArray&lt;ON_SubD*&gt; or ON_SimpleArray&lt;constant ON_SubD*&gt;
   /// If you are not writing C++ code then this class is not for you.
@@ -2815,6 +3466,7 @@ namespace Rhino.Runtime.InteropWrappers
   public sealed class ClassArrayObjRef : IDisposable
   {
     IntPtr m_ptr; // ON_ClassArray<CRhinoObjRef>*
+    bool bDelete = true;
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -2837,6 +3489,18 @@ namespace Rhino.Runtime.InteropWrappers
     public ClassArrayObjRef()
     {
       m_ptr = UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_New();
+    }
+
+    /// <summary>
+    /// Construct from a pointer
+    /// </summary>
+    /// <param name="ptr"></param>
+    /// <param name="deleteOnDispose"></param>
+    /// <since>8.0</since>
+    public ClassArrayObjRef(IntPtr ptr, bool deleteOnDispose = true)
+    {
+      m_ptr = ptr;
+      bDelete = deleteOnDispose;
     }
 
     /// <summary>
@@ -2903,7 +3567,10 @@ namespace Rhino.Runtime.InteropWrappers
     {
       if (IntPtr.Zero != m_ptr)
       {
-        UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_Delete(m_ptr);
+        if (bDelete)
+        {
+          UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_Delete(m_ptr);
+        }
         m_ptr = IntPtr.Zero;
       }
     }
@@ -3476,4 +4143,91 @@ namespace Rhino.Runtime.InteropWrappers
   }
 
 #endif
+
+  /// <summary>
+  /// Wrapper for a C++ ON_SimpleArray of ON_HatchLine*.
+  /// If you are not writing C++ code, then you can ignore this class.
+  /// </summary>
+  /// <since>8.0</since>
+  public class SimpleArrayHatchLinePointer : IDisposable
+  {
+    IntPtr m_ptr; // ON_SimpleArray<ON_HatchLine*>*
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>8.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>8.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayHatchLinePointer"/> instance.
+    /// </summary>
+    /// <since>8.0</since>
+    public SimpleArrayHatchLinePointer()
+    {
+      m_ptr = UnsafeNativeMethods.ON_HatchLineArray_New();
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayHatchLinePointer"/> instance, from a set of input hatch lines.
+    /// </summary>
+    /// <param name="hatchLines">A list, an array or any collection of curves that implements the enumerable interface.</param>
+    /// <since>8.0</since>
+    public SimpleArrayHatchLinePointer(System.Collections.Generic.IEnumerable<Rhino.DocObjects.HatchLine> hatchLines)
+    {
+      m_ptr = UnsafeNativeMethods.ON_HatchLineArray_New();
+      foreach (Rhino.DocObjects.HatchLine line in hatchLines)
+      {
+        if (null != line)
+        {
+          IntPtr ptr_line = line.ConstPointer();
+          UnsafeNativeMethods.ON_HatchLineArray_Append(m_ptr, ptr_line);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayHatchLinePointer()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_HatchLineArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+
 }

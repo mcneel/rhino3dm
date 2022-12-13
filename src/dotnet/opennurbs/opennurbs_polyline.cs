@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Rhino.Collections;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 
@@ -909,6 +910,37 @@ namespace Rhino.Geometry
     public void RemoveNearlyEqualSubsequentPoints(double tolerance)
     {
       UnsafeNativeMethods.RHC_Polyline_RemoveNearlyEqualSubsequentPoints(m_items, ref m_size, tolerance);
+    }
+
+    /// <summary>
+    /// Creates polylines by joining lines.
+    /// </summary>
+    /// <param name="lines">An array, a list or any enumerable of lines.</param>
+    /// <param name="tolerance">The threshold distance for joining lines.</param>
+    /// <param name="splitAtIntersections">If true, splits lines at intersections.</param>
+    /// <since>8.0</since>
+    public static Polyline[] CreateByJoiningLines(IEnumerable<Line> lines, double tolerance, bool splitAtIntersections)
+    {
+      var lines_arr = RhinoListHelpers.GetConstArray<Line>(lines, out int count);
+
+      int created_count = default;
+      IntPtr pPolys = UnsafeNativeMethods.RHC_Polyline_CreateByJoiningLines(lines_arr, count, tolerance, splitAtIntersections, ref created_count);
+
+      Polyline[] rc = new Polyline[created_count];
+      for (int i = 0; i < created_count; i++)
+      {
+        int point_count = UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_itemI_count(pPolys, i);
+        Polyline pl = new Polyline(point_count);
+        if (point_count > 0)
+        {
+          pl.m_size = point_count;
+          UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_memcpy_del(pPolys, i, point_count, pl.m_items);
+        }
+        rc[i] = pl;
+      }
+      UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_delete(pPolys);
+
+      return rc;
     }
 #endif
 

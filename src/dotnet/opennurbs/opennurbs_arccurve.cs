@@ -209,8 +209,13 @@ namespace Rhino.Geometry
       return m_pCurveDisplay;
     }
 
-    internal sealed override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness)
+    internal sealed override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness, DisplayPen pen)
     {
+      if (pen!= null)
+      {
+        base.Draw(pipeline, color, thickness, pen);
+        return;
+      }
       IntPtr pDisplayPipeline = pipeline.NonConstPointer();
       int argb = color.ToArgb();
       IntPtr pCurveDisplay = CurveDisplay();
