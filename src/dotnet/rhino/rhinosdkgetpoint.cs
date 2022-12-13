@@ -970,6 +970,10 @@ namespace Rhino.Input.Custom
 
       m_active_gp = old;
 
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-67575
+      GC.KeepAlive(m_active_gp);
+      GC.KeepAlive(this);
+
       return (GetResult)rc;
     }
 
@@ -1049,6 +1053,22 @@ namespace Rhino.Input.Custom
         int rc = UnsafeNativeMethods.CRhinoGetPoint_SnapEventMode(ptr_this);
         return (Rhino.ApplicationSettings.OsnapModes)rc;
       }
+    }
+
+    /// <summary>
+    /// If the user is typing a number, but hasn't pressed Enter, 
+    /// true is returned, along with the number the user typed.
+    /// </summary>
+    /// <param name="number">The number typed by the user.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.23</since>
+    public bool NumberPreview(out double number)
+    {
+      double d = RhinoMath.UnsetValue;
+      IntPtr ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_NumberPreview(ptr_this, ref d);
+      number = d;
+      return rc;
     }
 
     /// <summary>

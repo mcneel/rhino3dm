@@ -5,8 +5,8 @@ RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_mesh.h")
 RH_C_FUNCTION ON_Mesh* ON_Mesh_New(const ON_Mesh* pOther)
 {
   RHCHECK_LICENSE
-  if (pOther)
-    return new ON_Mesh(*pOther);
+    if (pOther)
+      return new ON_Mesh(*pOther);
   return new ON_Mesh();
 }
 
@@ -95,7 +95,7 @@ RH_C_FUNCTION bool ON_Mesh_SetVertexWithNormal(ON_Mesh* pMesh, int vertexIndex, 
             return false;
 
           const ON_MeshFace& face = pMesh->m_F[faceIndex];
-          int k, kct = face.IsQuad()?3:2;
+          int k, kct = face.IsQuad() ? 3 : 2;
           for (k = 0; kct > k; k++)
           {
             if (face.vi[k] == vertexIndex)
@@ -262,7 +262,7 @@ RH_C_FUNCTION bool ON_MeshFace_Repair(int* v0, int* v1, int* v2, int* v3, int co
   face.vi[1] = *v1;
   face.vi[2] = *v2;
   face.vi[3] = *v3;
-  
+
   bool rc = face.Repair(count, vertexes);
   if (rc)
   {
@@ -343,7 +343,7 @@ RH_C_FUNCTION bool ON_Mesh_SetColor(ON_Mesh* pMesh, int index, int argb)
 RH_C_FUNCTION bool ON_Mesh_SetNormals(ON_Mesh* ptr, int count, /*ARRAY*/const ON_3fVector* normals, bool append)
 {
   bool rc = false;
-  if (ptr && count>0 && normals)
+  if (ptr && count > 0 && normals)
   {
     int startIndex = 0;
     if (append)
@@ -351,7 +351,7 @@ RH_C_FUNCTION bool ON_Mesh_SetNormals(ON_Mesh* ptr, int count, /*ARRAY*/const ON
 
     ptr->m_N.SetCapacity(startIndex + count);
     ON_3fVector* dest = ptr->m_N.Array() + startIndex;
-    ::memcpy(dest, normals, count*sizeof(ON_3fVector));
+    ::memcpy(dest, normals, count * sizeof(ON_3fVector));
     ptr->m_N.SetCount(startIndex + count);
 
     rc = true;
@@ -372,7 +372,7 @@ RH_C_FUNCTION bool ON_Mesh_SetTextureCoordinates(ON_Mesh* pMesh, int count, /*AR
 
     pMesh->m_T.SetCapacity(startIndex + count);
     ON_2fPoint* dest = pMesh->m_T.Array() + startIndex;
-    ::memcpy(dest, tcs, count*sizeof(ON_2fPoint));
+    ::memcpy(dest, tcs, count * sizeof(ON_2fPoint));
     pMesh->m_T.SetCount(startIndex + count);
 
     rc = true;
@@ -449,7 +449,7 @@ RH_C_FUNCTION bool ON_Mesh_SetVertexColors(ON_Mesh* pMesh, int count, /*ARRAY*/c
 
     pMesh->m_C.SetCapacity(startIndex + count);
     ON_Color* dest = pMesh->m_C.Array() + startIndex;
-    ::memcpy(dest, list, count*sizeof(unsigned int));
+    ::memcpy(dest, list, count * sizeof(unsigned int));
     pMesh->m_C.SetCount(startIndex + count);
     memset(&(pMesh->m_Ctag), 0, sizeof(pMesh->m_Ctag));
     rc = true;
@@ -541,7 +541,7 @@ RH_C_FUNCTION void ON_Mesh_SetInt(ON_Mesh* pMesh, enum MeshIntConst which, int v
         pMesh->DoublePrecisionVertices().SetCount(value);
       }
     }
-      break;
+    break;
     case micFaceCount:
       pMesh->m_F.Reserve(value);
       pMesh->m_F.SetCount(value);
@@ -573,7 +573,7 @@ RH_C_FUNCTION void ON_Mesh_SetInt(ON_Mesh* pMesh, enum MeshIntConst which, int v
       if (hasDoublePrecisionVerts)
         pMesh->DoublePrecisionVertices().SetCapacity(value);
     }
-      break;
+    break;
     case micFaceCapacity:
       pMesh->m_F.SetCapacity(value);
       break;
@@ -784,7 +784,7 @@ RH_C_FUNCTION unsigned int ON_Mesh_ConvertNonPlanarQuadsToTriangles(ON_Mesh* ptr
   // https://mcneel.myjetbrains.com/youtrack/issue/RH-28247
   bool bDeleteNgonsContainingSplitQuads = true;
 
-  return ptr->ConvertNonPlanarQuadsToTriangles(planarTolerance, angleToleranceRadians, splitMethod,bDeleteNgonsContainingSplitQuads);
+  return ptr->ConvertNonPlanarQuadsToTriangles(planarTolerance, angleToleranceRadians, splitMethod, bDeleteNgonsContainingSplitQuads);
 }
 
 RH_C_FUNCTION bool ON_Mesh_NonConstBoolOp(ON_Mesh* ptr, enum MeshNonConstBoolConst which)
@@ -1375,12 +1375,12 @@ RH_C_FUNCTION int ON_Mesh_GetConnectedVertices(const ON_Mesh* pMesh, ON_SimpleAr
   for (int i = 0; i < arr.Count(); i++)
   {
     const ON_2dex& dex2 = arr[i];
-    if (dex2.i == vertex_index) 
+    if (dex2.i == vertex_index)
       vertex_indices->Append(dex2.j);
-    else 
+    else
       vertex_indices->Append(dex2.i);
   }
-  
+
   return rc;
 }
 
@@ -1397,7 +1397,7 @@ RH_C_FUNCTION double ON_Mesh_Volume(const ON_Mesh* pConstMesh)
 
 RH_C_FUNCTION bool ON_Mesh_GetEdgeList(const ON_Mesh* pConstMesh, /*ARRAY*/int* ngonInteriors, int count)
 {
-  if (nullptr == pConstMesh || nullptr==ngonInteriors)
+  if (nullptr == pConstMesh || nullptr == ngonInteriors)
     return false;
 
   ON_SimpleArray<ON_2dex> edge_list;
@@ -1461,7 +1461,7 @@ RH_C_FUNCTION void ON_MeshTopologyEdge_TopfList2(const ON_Mesh* pConstMesh, int 
       const ON_MeshTopologyEdge& edge = top.m_tope[edgeindex];
       if (count == edge.m_topf_count)
       {
-        memcpy(faces, edge.m_topfi, count*sizeof(int));
+        memcpy(faces, edge.m_topfi, count * sizeof(int));
         if (directionsMatch)
         {
           for (int i = 0; i < count; i++)
@@ -1554,6 +1554,160 @@ RH_C_FUNCTION bool ON_MeshTopology_TopItemIsHidden(const ON_Mesh* pConstMesh, en
   return rc;
 }
 
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_New()
+{
+  return new ON_SubDDisplayParameters();
+}
+
+RH_C_FUNCTION void ON_SubDDisplayParameters_Delete(ON_SubDDisplayParameters* pParameters)
+{
+  if (pParameters)
+    delete pParameters;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_ClampDisplayDensity(unsigned int display_density)
+{
+  if (display_density < ON_SubDDisplayParameters::MinimumUserInterfaceDensity)
+    display_density = ON_SubDDisplayParameters::MinimumUserInterfaceDensity;
+  if (display_density > ON_SubDDisplayParameters::MaximumUserInterfaceDensity)
+    display_density = ON_SubDDisplayParameters::MaximumUserInterfaceDensity;
+  return display_density;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AdaptiveDisplayMeshQuadMaximum()
+{
+  return ON_SubDDisplayParameters::AdaptiveDisplayMeshQuadMaximum;
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Empty()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Empty);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_ExtraCoarse()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::ExtraCoarse);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Coarse()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Coarse);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Medium()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Medium);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Fine()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Fine);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_ExtraFine()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::ExtraFine);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Default()
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Default);
+}
+
+RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(unsigned int adaptive_subd_display_density, unsigned int subd_face_count)
+{
+  return ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubDFaceCount(adaptive_subd_display_density, subd_face_count);
+}
+
+RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(unsigned int adaptive_subd_display_density, const ON_SubD* pConstSubD)
+{
+  unsigned int rc = 0;
+  if (pConstSubD)
+    rc = ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubD(adaptive_subd_display_density, *pConstSubD);
+  return rc;
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_CreateFromDisplayDensity(unsigned int adaptive_subd_display_density)
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::CreateFromDisplayDensity(adaptive_subd_display_density));
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_CreateFromAbsoluteDisplayDensity(unsigned int absolute_subd_display_density)
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::CreateFromAbsoluteDisplayDensity(absolute_subd_display_density));
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_CreateFromMeshDensity(double normalized_mesh_density)
+{
+  return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::CreateFromMeshDensity(normalized_mesh_density));
+}
+
+RH_C_FUNCTION bool ON_SubDDisplayParameters_DisplayDensityIsAdaptive(const ON_SubDDisplayParameters* pConstParameters)
+{
+  bool rc = false;
+  if (pConstParameters)
+    rc = pConstParameters->DisplayDensityIsAdaptive();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SubDDisplayParameters_DisplayDensityIsAbsolute(const ON_SubDDisplayParameters* pConstParameters)
+{
+  bool rc = false;
+  if (pConstParameters)
+    rc = pConstParameters->DisplayDensityIsAbsolute();
+  return rc;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_DisplayDensity(const ON_SubDDisplayParameters* pConstParameters, const ON_SubD* pConstSubD)
+{
+  unsigned int rc = 0;
+  if (pConstParameters && pConstSubD)
+    rc = pConstParameters->DisplayDensity(*pConstSubD);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_SubDDisplayParameters_SetAdaptiveDisplayDensity(ON_SubDDisplayParameters* pParameters, unsigned int adaptive_display_density)
+{
+  if (pParameters)
+    pParameters->SetAdaptiveDisplayDensity(adaptive_display_density);
+}
+
+RH_C_FUNCTION void ON_SubDDisplayParameters_SetAbsoluteDisplayDensity(ON_SubDDisplayParameters* pParameters, unsigned int absolute_display_density)
+{
+  if (pParameters)
+    pParameters->SetAbsoluteDisplayDensity(absolute_display_density);
+}
+
+RH_C_FUNCTION ON_SubDComponentLocation ON_SubDDisplayParameters_MeshLocation(const ON_SubDDisplayParameters* pConstParameters)
+{
+  ON_SubDComponentLocation rc = ON_SubDComponentLocation::Unset;
+  if (pConstParameters)
+    rc = pConstParameters->MeshLocation();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_SubDDisplayParameters_SetMeshLocation(ON_SubDDisplayParameters* pParameters, ON_SubDComponentLocation mesh_location)
+{
+  if (pParameters)
+    pParameters->SetMeshLocation(mesh_location);
+}
+
+RH_C_FUNCTION ON_SubDDisplayParameters* ON_MeshParameters_SubDDisplayParameters(const ON_MeshParameters* pConstMeshParameters)
+{
+  ON_SubDDisplayParameters* rc = nullptr;
+  if (pConstMeshParameters)
+    rc = new ON_SubDDisplayParameters(pConstMeshParameters->SubDDisplayParameters());
+  return rc;
+}
+
+RH_C_FUNCTION void ON_MeshParameters_SetSubDDisplayParameters(ON_MeshParameters* pMeshParameters, const ON_SubDDisplayParameters* pConstSubDParameters)
+{
+  if (pMeshParameters && pConstSubDParameters)
+    pMeshParameters->SetSubDDisplayParameters(*pConstSubDParameters);
+}
+
+
 RH_C_FUNCTION ON_MeshParameters* ON_MeshParameters_New()
 {
   return new ON_MeshParameters();
@@ -1612,7 +1766,8 @@ enum MeshParametersBoolConst : int
   mpbcRefineGrid = 1,
   mpbcSimplePlanes = 2,
   mpbcComputeCurvature = 3,
-  mpbcClosedObjectPostProcess = 4
+  mpbcClosedObjectPostProcess = 4,
+  mpbcDoublePrecision
 };
 
 RH_C_FUNCTION bool ON_MeshParameters_GetBool(const ON_MeshParameters* pConstMeshParameters, enum MeshParametersBoolConst which)
@@ -1636,6 +1791,9 @@ RH_C_FUNCTION bool ON_MeshParameters_GetBool(const ON_MeshParameters* pConstMesh
       break;
     case mpbcClosedObjectPostProcess:
       rc = pConstMeshParameters->ClosedObjectPostProcess();
+      break;
+    case mpbcDoublePrecision:
+      rc = pConstMeshParameters->DoublePrecision();
       break;
     default:
       break;
@@ -1665,6 +1823,9 @@ RH_C_FUNCTION void ON_MeshParameters_SetBool(ON_MeshParameters* pMeshParameters,
     case mpbcClosedObjectPostProcess:
       pMeshParameters->SetClosedObjectPostProcess(val);
       break;
+    case mpbcDoublePrecision:
+      pMeshParameters->SetDoublePrecision(val);
+      break;
     default:
       break;
     }
@@ -1681,7 +1842,8 @@ enum MeshParametersDoubleConst : int
   mpdcRelativeTolerance = 5,
   mpdcMinimumEdgeLength = 6,
   mpdcMaximumEdgeLength = 7,
-  mpdcRefineAngle = 8
+  mpdcRefineAngle = 8,
+  mpdcRefineAngleInDegrees = 9
 };
 
 RH_C_FUNCTION double ON_MeshParameters_GetDouble(const ON_MeshParameters* pConstMeshParameters, enum MeshParametersDoubleConst which)
@@ -1718,6 +1880,9 @@ RH_C_FUNCTION double ON_MeshParameters_GetDouble(const ON_MeshParameters* pConst
     case mpdcRefineAngle: //8
       rc = pConstMeshParameters->RefineAngleRadians();
       break;
+    case mpdcRefineAngleInDegrees: //9
+      rc = pConstMeshParameters->RefineAngleDegrees();
+      break;
     default:
       break;
     }
@@ -1750,13 +1915,16 @@ RH_C_FUNCTION void ON_MeshParameters_SetDouble(ON_MeshParameters* pMeshParameter
       pMeshParameters->SetRelativeTolerance(val);
       break;
     case mpdcMinimumEdgeLength: //6
-      pMeshParameters->SetMinimumEdgeLength( val);
+      pMeshParameters->SetMinimumEdgeLength(val);
       break;
     case mpdcMaximumEdgeLength: //7
       pMeshParameters->SetMaximumEdgeLength(val);
       break;
     case mpdcRefineAngle: //8
       pMeshParameters->SetRefineAngleRadians(val);
+      break;
+    case mpdcRefineAngleInDegrees: //9
+      pMeshParameters->SetRefineAngleDegrees(val);
       break;
     default:
       break;
@@ -1954,7 +2122,7 @@ RH_C_FUNCTION int ON_MeshTopologyVertex_Count(const ON_Mesh* pConstMesh, int top
 
 RH_C_FUNCTION void ON_MeshTopologyVertex_GetIndices(const ON_Mesh* pConstMesh, int topologyVertexIndex, int count, /*ARRAY*/int* rc)
 {
-  if (pConstMesh && topologyVertexIndex >= 0 && count>0 && rc)
+  if (pConstMesh && topologyVertexIndex >= 0 && count > 0 && rc)
   {
     const ON_MeshTopology& top = pConstMesh->Topology();
     if (topologyVertexIndex < top.TopVertexCount())
@@ -1962,7 +2130,7 @@ RH_C_FUNCTION void ON_MeshTopologyVertex_GetIndices(const ON_Mesh* pConstMesh, i
       if (top.m_topv[topologyVertexIndex].m_v_count == count)
       {
         const int* source = top.m_topv[topologyVertexIndex].m_vi;
-        memcpy(rc, source, count*sizeof(int));
+        memcpy(rc, source, count * sizeof(int));
       }
     }
   }
@@ -1970,7 +2138,7 @@ RH_C_FUNCTION void ON_MeshTopologyVertex_GetIndices(const ON_Mesh* pConstMesh, i
 
 RH_C_FUNCTION void ON_MeshTopologyVertex_ConnectedVertices(const ON_Mesh* pConstMesh, int topologyVertexIndex, int count, /*ARRAY*/int* rc)
 {
-  if (pConstMesh && topologyVertexIndex >= 0 && count>0 && rc)
+  if (pConstMesh && topologyVertexIndex >= 0 && count > 0 && rc)
   {
     const ON_MeshTopology& top = pConstMesh->Topology();
     if (topologyVertexIndex < top.TopVertexCount())
@@ -1994,7 +2162,7 @@ RH_C_FUNCTION void ON_MeshTopologyVertex_ConnectedVertices(const ON_Mesh* pConst
 
 RH_C_FUNCTION void ON_MeshTopologyVertex_ConnectedEdges(const ON_Mesh* pConstMesh, int topologyVertexIndex, int count, /*ARRAY*/int* rc)
 {
-  if (pConstMesh && topologyVertexIndex >= 0 && count>0 && rc)
+  if (pConstMesh && topologyVertexIndex >= 0 && count > 0 && rc)
   {
     const ON_MeshTopology& top = pConstMesh->Topology();
     if (topologyVertexIndex < top.TopVertexCount())
@@ -2422,6 +2590,7 @@ RH_C_FUNCTION bool ON_Mesh_MeshNormalAt(const ON_Mesh* pConstMesh, int faceIndex
       n->x = t0 * p0.x + t1 * p1.x + t2 * p2.x;
       n->y = t0 * p0.y + t1 * p1.y + t2 * p2.y;
       n->z = t0 * p0.z + t1 * p1.z + t2 * p2.z;
+      n->Unitize();
 
       rc = true;
     }
@@ -2635,13 +2804,13 @@ RH_C_FUNCTION int ON_Mesh_ThicknessProperties(ON_SimpleArray<ON_Mesh*>* pMeshes,
                 measurements[rc].meshIndex = k;
                 break;
               }
- 
+
             measurements[rc].vertexIndex = point.m_mesh_vertex_index;
             measurements[rc].thickness = point.m_distance;
             measurements[rc].point0.val[0] = point.m_vertex_point.x; // David R: I'm not comfortable with pointers and dereferencing, so I'm copying the doubles one at a time.
             measurements[rc].point0.val[1] = point.m_vertex_point.y;
             measurements[rc].point0.val[2] = point.m_vertex_point.z;
-            measurements[rc].point1.val[0] = point.m_closest_point.x; 
+            measurements[rc].point1.val[0] = point.m_closest_point.x;
             measurements[rc].point1.val[1] = point.m_closest_point.y;
             measurements[rc].point1.val[2] = point.m_closest_point.z;
             rc++;
@@ -2707,6 +2876,7 @@ enum TextureMappingType : int
   tmtSrfMappingPrimitive = 7, // m_mapping_primitive is an ON_Surface
   tmtBrepMappingPrimitive = 8, // m_mapping_primitive is an ON_Brep
   tmtOcsMapping = 9,
+  tmtFalseColors = 10
 };
 
 RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_TextureMapping* pTextureMapping)
@@ -2734,6 +2904,8 @@ RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_Textu
     return tmtBrepMappingPrimitive;
   case ON_TextureMapping::TYPE::ocs_mapping:
     return tmtOcsMapping;
+  case ON_TextureMapping::TYPE::false_colors:
+    return tmtFalseColors;
   }
   // Unknown type, add support for it to the list above
   return tmtNoMapping;
@@ -2852,6 +3024,17 @@ RH_C_FUNCTION bool ON_TextureMapping_SetPlaneMapping(ON_TextureMapping* pTexture
   return rc;
 }
 
+RH_C_FUNCTION bool ON_TextureMapping_SetOcsMapping(ON_TextureMapping* pTextureMapping, const ON_PLANE_STRUCT* plane)
+{
+  bool rc = false;
+  if (pTextureMapping && plane)
+  {
+    ON_Plane _plane = FromPlaneStruct(*plane);
+    rc = pTextureMapping->SetOcsMapping(_plane);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_TextureMapping_SetCylinderMapping(ON_TextureMapping* pTextureMapping, ON_Cylinder* pCylinder, bool capped)
 {
   bool rc = false;
@@ -2894,7 +3077,7 @@ RH_C_FUNCTION bool ON_TextureMapping_SetMeshMappingPrimitive(ON_TextureMapping* 
   if (pTextureMapping && mesh)
   {
     pTextureMapping->SetCustomMappingPrimitive(new ON_Mesh(*mesh));
-		pTextureMapping->m_type = ON_TextureMapping::TYPE::mesh_mapping_primitive;
+    pTextureMapping->m_type = ON_TextureMapping::TYPE::mesh_mapping_primitive;
     rc = true;
   }
   return rc;
@@ -2956,7 +3139,7 @@ RH_C_FUNCTION  bool ON_TextureMapping_ObjectHasMapping(const CRhinoObject* pRhin
 
   for (int i = 0; i < pRhinoObject->Attributes().m_rendering_attributes.m_mappings.Count(); i++)
   {
-    const ON_MappingRef *pRef = pRhinoObject->Attributes().m_rendering_attributes.m_mappings.At(i);
+    const ON_MappingRef* pRef = pRhinoObject->Attributes().m_rendering_attributes.m_mappings.At(i);
     if (pRef->m_mapping_channels.Count())
       return true;
   }
@@ -3276,6 +3459,19 @@ RH_C_FUNCTION bool ON_Mesh_GetMeshPart(const ON_Mesh* pConstMesh, int which, int
   return rc;
 }
 
+RH_C_FUNCTION ON_Mesh* ON_Mesh_ControlPolygonMesh(const ON_Surface* pConstSurface)
+{
+  ON_Mesh* rc = nullptr;
+  if (pConstSurface)
+  {
+    ON_NurbsSurface s;
+    if (pConstSurface->GetNurbForm(s))
+      rc = ON_ControlPolygonMesh(s, true, nullptr);
+  }
+  return rc;
+}
+
+
 //////////////////////////////////////////////////////////////////
 //
 // ON_Mesh n-gon interface
@@ -3303,7 +3499,7 @@ RH_C_FUNCTION int ON_MeshNgon_Compare(
 
 RH_C_FUNCTION int ON_MeshNgon_BoundaryVertexCount(
   const ON_MeshNgon* ngon
-  )
+)
 {
   return ngon ? ngon->m_Vcount : 0;
 }
@@ -3339,7 +3535,7 @@ RH_C_FUNCTION int ON_MeshNgon_Orientation(const ON_Mesh* constMesh, unsigned int
 
 RH_C_FUNCTION void ON_MeshNgon_ReverseOuterBoundary(ON_Mesh* mesh, unsigned int ngonIdx)
 {
-  ON_MeshNgon* ngon = (mesh && ngonIdx<mesh->m_Ngon.UnsignedCount()) ? mesh->m_Ngon[ngonIdx] : nullptr;
+  ON_MeshNgon* ngon = (mesh && ngonIdx < mesh->m_Ngon.UnsignedCount()) ? mesh->m_Ngon[ngonIdx] : nullptr;
   if (ngon)
     ngon->ReverseOuterBoundary();
 }
@@ -3363,7 +3559,7 @@ RH_C_FUNCTION int ON_MeshNgon_HashCode(
 
 RH_C_FUNCTION int ON_MeshNgon_FaceCount(
   const ON_MeshNgon* ngon
-  )
+)
 {
   return ngon ? ngon->m_Fcount : 0;
 }
@@ -3371,7 +3567,7 @@ RH_C_FUNCTION int ON_MeshNgon_FaceCount(
 RH_C_FUNCTION int ON_MeshNgon_MeshFaceIndex(
   const ON_MeshNgon* ngon,
   int ngon_fi_index
-  )
+)
 {
   return (ngon && ngon_fi_index >= 0 && ngon_fi_index < (int)ngon->m_Fcount)
     ? ngon->m_fi[ngon_fi_index]
@@ -3385,14 +3581,14 @@ RH_C_FUNCTION int ON_MeshNgon_MeshFaceIndex(
 
 RH_C_FUNCTION int ON_Mesh_NgonCount(
   const ON_Mesh* mesh
-  )
+)
 {
   return mesh ? mesh->NgonCount() : 0;
 }
 
 RH_C_FUNCTION unsigned int ON_Mesh_NgonUnsignedCount(
   const ON_Mesh* mesh
-  )
+)
 {
   return mesh ? mesh->NgonUnsignedCount() : 0;
 }
@@ -3405,7 +3601,7 @@ RH_C_FUNCTION const ON_MeshNgon* ON_Mesh_Ngon(
   return mesh_ngon;
 }
 
-RH_C_FUNCTION int ON_Mesh_AddNgon( ON_Mesh* mesh,
+RH_C_FUNCTION int ON_Mesh_AddNgon(ON_Mesh* mesh,
   unsigned int vCount, /*ARRAY*/const unsigned int* vArray,
   unsigned int fCount, /*ARRAY*/const unsigned int* fArray)
 {
@@ -3439,7 +3635,7 @@ RH_C_FUNCTION void ON_Mesh_RemoveNgon(
     mesh->RemoveNgon(ngon_index);
 }
 
-RH_C_FUNCTION bool ON_Mesh_ModifyNgon( ON_Mesh* pMesh, int ngonIndex,
+RH_C_FUNCTION bool ON_Mesh_ModifyNgon(ON_Mesh* pMesh, int ngonIndex,
   unsigned int vCount, /*ARRAY*/unsigned int* vArray,
   unsigned int fCount, /*ARRAY*/unsigned int* fArray)
 {
@@ -3470,7 +3666,7 @@ RH_C_FUNCTION int ON_Mesh_NgonIndexFromFaceIndex(
   return (pConstMesh ? pConstMesh->NgonIndexFromFaceIndex(mesh_face_index) : -1);
 }
 
-RH_C_FUNCTION void ON_Mesh_GetNgonBoundingBoxFromNgon( const ON_Mesh* constMesh, ON_BoundingBox* bbox,
+RH_C_FUNCTION void ON_Mesh_GetNgonBoundingBoxFromNgon(const ON_Mesh* constMesh, ON_BoundingBox* bbox,
   unsigned int vCount, /*ARRAY*/unsigned int* vArray,
   unsigned int fCount, /*ARRAY*/unsigned int* fArray)
 {
@@ -3525,7 +3721,7 @@ RH_C_FUNCTION int ON_Mesh_RemoveNgons(
   ON_Mesh* mesh,
   int ngon_index_count,
   /*ARRAY*/const int* ngon_index_list
-  )
+)
 {
   return (mesh ? mesh->RemoveNgons(ngon_index_count, (const unsigned int*)ngon_index_list) : 0);
 }
@@ -3536,7 +3732,7 @@ RH_C_FUNCTION int ON_Mesh_AddPlanarNgons(
   int minimum_ngon_vertex_count,
   int minimum_ngon_face_count,
   bool allowHoles
-  )
+)
 {
   // Returns number of n-gons added to the mesh
   if (0 == mesh)
@@ -3548,7 +3744,7 @@ RH_C_FUNCTION int ON_Mesh_AddPlanarNgons(
     minimum_ngon_vertex_count > 0 ? ((unsigned int)minimum_ngon_vertex_count) : 0U,
     minimum_ngon_face_count > 0 ? ((unsigned int)minimum_ngon_face_count) : 0U,
     allowHoles
-    );
+  );
 }
 
 RH_C_FUNCTION int ON_Mesh_GetNgonBoundary(
@@ -3556,7 +3752,7 @@ RH_C_FUNCTION int ON_Mesh_GetNgonBoundary(
   int ngon_fi_count,
   /*ARRAY*/const int* ngon_fi,
   ON_SimpleArray<int>* ngon_vi
-  )
+)
 {
   // Returns number of vertex indices in ngon_vi
   if (0 == mesh || 0 == ngon_vi)
@@ -3566,7 +3762,7 @@ RH_C_FUNCTION int ON_Mesh_GetNgonBoundary(
     (ngon_fi_count > 0 ? ((unsigned int)ngon_fi_count) : 0U),
     (const unsigned int*)ngon_fi,
     *((ON_SimpleArray<unsigned int> *)ngon_vi)
-    );
+  );
 }
 
 RH_C_FUNCTION void ON_MeshNgon_Counts(const ON_MeshNgon* constNgon, unsigned int* vCount, unsigned int* fCount)
@@ -3592,7 +3788,7 @@ RH_C_FUNCTION void ON_MeshNgon_CopyArrays(const ON_MeshNgon* constNgon, /*ARRAY*
 RH_C_FUNCTION int ON_MeshNgon_GetBoundaryVertexIndexList(
   const ON_MeshNgon* ngon,
   ON_SimpleArray<int>* ngon_boundary_vi
-  )
+)
 {
   if (0 == ngon_boundary_vi)
     return 0;
@@ -3602,14 +3798,14 @@ RH_C_FUNCTION int ON_MeshNgon_GetBoundaryVertexIndexList(
   ngon_boundary_vi->Reserve(ngon->m_Vcount);
   ngon_boundary_vi->SetCount(ngon->m_Vcount);
   int* dst = ngon_boundary_vi->Array();
-  memcpy(dst, ngon->m_vi, ngon->m_Vcount*sizeof(dst[0]));
+  memcpy(dst, ngon->m_vi, ngon->m_Vcount * sizeof(dst[0]));
   return ngon_boundary_vi->Count();
 }
 
 RH_C_FUNCTION int ON_MeshNgon_GetFaceIndexList(
   const ON_MeshNgon* ngon,
   ON_SimpleArray<int>* ngon_fi
-  )
+)
 {
   if (0 == ngon_fi)
     return 0;
@@ -3619,7 +3815,7 @@ RH_C_FUNCTION int ON_MeshNgon_GetFaceIndexList(
   ngon_fi->Reserve(ngon->m_Fcount);
   ngon_fi->SetCount(ngon->m_Fcount);
   int* dst = ngon_fi->Array();
-  memcpy(dst, ngon->m_fi, ngon->m_Fcount*sizeof(dst[0]));
+  memcpy(dst, ngon->m_fi, ngon->m_Fcount * sizeof(dst[0]));
   return ngon_fi->Count();
 }
 
@@ -3801,4 +3997,32 @@ RH_C_FUNCTION void ON_Mesh_GetVertexColorsAsArgb(const ON_Mesh* constMesh, int c
       colors[i] = ABGR_to_ARGB(color);
     }
   }
+}
+
+RH_C_FUNCTION int ON_MeshParameters_OperatorCompare(const ON_MeshParameters* pointer1, const ON_MeshParameters* pointer2)
+{
+  int rc = -1;
+  if (pointer1 && pointer2)
+    rc = ON_MeshParameters::Compare(*pointer1, *pointer2);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_MeshParameters_OperatorEqualEqual(const ON_MeshParameters* pointer1, const ON_MeshParameters* pointer2)
+{
+  if (pointer1 && pointer2)
+  {
+    // TODO ON_MeshParameters::== uses ON_MeshParameters::Compare and that
+    // doesn't do what I need in a comparison so I'm calling 
+    // ON_MeshParameters::CompareGeometrySettings directly but I'm not
+    // confident that it's the right thing to do.
+    //return ON_MeshParameters::CompareGeometrySettings(*pointer1, *pointer2);
+    return (*pointer1 == *pointer2);
+  }
+  return (pointer1 == nullptr && pointer2 == nullptr);
+}
+
+RH_C_FUNCTION void ON_MeshParameters_OperatorEqual(const ON_MeshParameters* source, ON_MeshParameters* destination)
+{
+  if (source && destination)
+    *destination = *source;
 }

@@ -1374,16 +1374,18 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Return the matrix as a linear array of 16 float values
+    /// Return the matrix as a linear array of 16 float values.
     /// </summary>
-    /// <param name="rowDominant"></param>
-    /// <returns></returns>
+    /// <param name="rowDominant">
+    /// If true, returns { M00, M01, M02...}.
+    /// If false, returns { M00, M10, M20...}.
+    /// </param>
+    /// <returns>An array of 16 floats.</returns>
     /// <since>5.9</since>
     [ConstOperation]
     public float[] ToFloatArray(bool rowDominant)
     {
       var rc = new float[16];
-
       if (rowDominant)
       {
         rc[0] = (float)m_00; rc[1] = (float)m_01; rc[2] = (float)m_02; rc[3] = (float)m_03;
@@ -1398,7 +1400,36 @@ namespace Rhino.Geometry
         rc[8] = (float)m_02; rc[9] = (float)m_12; rc[10] = (float)m_22; rc[11] = (float)m_32;
         rc[12] = (float)m_03; rc[13] = (float)m_13; rc[14] = (float)m_23; rc[15] = (float)m_33;
       }
+      return rc;
+    }
 
+    /// <summary>
+    /// Return the matrix as a linear array of 16 double values.
+    /// </summary>
+    /// <param name="rowDominant">
+    /// If true, returns { M00, M01, M02...}.
+    /// If false, returns { M00, M10, M20...}.
+    /// </param>
+    /// <returns>An array of 16 doubles.</returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public double[] ToDoubleArray(bool rowDominant)
+    {
+      var rc = new double[16];
+      if (rowDominant)
+      {
+        rc[0] = m_00; rc[1] = m_01; rc[2] = m_02; rc[3] = m_03;
+        rc[4] = m_10; rc[5] = m_11; rc[6] = m_12; rc[7] = m_13;
+        rc[8] = m_20; rc[9] = m_21; rc[10] = m_22; rc[11] = m_23;
+        rc[12] = m_30; rc[13] = m_31; rc[14] = m_32; rc[15] = m_33;
+      }
+      else
+      {
+        rc[0] = m_00; rc[1] = m_10; rc[2] = m_20; rc[3] = m_30;
+        rc[4] = m_01; rc[5] = m_11; rc[6] = m_21; rc[7] = m_31;
+        rc[8] = m_02; rc[9] = m_12; rc[10] = m_22; rc[11] = m_32;
+        rc[12] = m_03; rc[13] = m_13; rc[14] = m_23; rc[15] = m_33;
+      }
       return rc;
     }
 
@@ -1432,15 +1463,8 @@ namespace Rhino.Geometry
     [ConstOperation]
     public int CompareTo(Transform other)
     {
-      for (int i = 3; i >= 0; i--)
-      {
-        for (int j = 3; j >= 0; j--)
-        {
-          if (this[i, j] < other[i, j]) return -1;
-          if (this[i, j] < other[i, j]) return 1;
-        }
-      }
-      return 0;
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-70328
+      return UnsafeNativeMethods.ON_Xform_Compare(ref this, ref other);
     }
   }
 

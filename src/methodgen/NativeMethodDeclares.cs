@@ -837,13 +837,10 @@ using Rhino.Runtime.InteropWrappers;
           if (s.Equals("ON_3dRay"))
             return "ref Ray3d";
 
-          if (s.Equals("ON_MeshFace"))
-            return "ref MeshFace";
-
           if (s.Equals("ON_X_EVENT"))
             return "ref CurveIntersect";
 
-          if (s.Equals("AR_MeshFace") || s.Equals("MeshFace"))
+          if (s.Equals("ON_MeshFace") || s.Equals("AR_MeshFace") || s.Equals("MeshFace"))
           {
             if (isArray)
             {
@@ -996,6 +993,12 @@ using Rhino.Runtime.InteropWrappers;
 
         if (s_type.Equals("ON__UINT64"))
           return "ulong";
+
+        if (s_type.Equals("ON__INT32"))
+          return "int";
+
+        if (s_type.Equals("ON__UINT32"))
+          return "uint";
 
         if (s_type.Equals("COleDateTime"))
           return "DateTime";

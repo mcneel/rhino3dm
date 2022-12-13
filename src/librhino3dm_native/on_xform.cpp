@@ -204,6 +204,14 @@ RH_C_FUNCTION bool ON_Xform_IsRotation(const ON_Xform* xf)
   return rc;
 }
 
+RH_C_FUNCTION int ON_Xform_Compare(const ON_Xform* pConstXform0, const ON_Xform* pConstXform1)
+{
+  int rc = 0;
+  if (pConstXform0 && pConstXform1)
+    rc = pConstXform0->Compare(*pConstXform1);
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Xform_GetQuaternion(const ON_Xform* pConstXform, ON_Quaternion* pQuaternion)
 {
   bool rc = false;

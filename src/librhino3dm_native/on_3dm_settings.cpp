@@ -218,6 +218,21 @@ RH_C_FUNCTION bool ON_3dmView_WallpaperGetGrayScale(const ON_3dmView* pView)
   return false;
 }
 
+RH_C_FUNCTION void ON_3dmView_SetSectionBehavior(ON_3dmView* pView, int behavior)
+{
+  if (pView)
+  {
+    pView->SetSectionBehavior(ON::ViewSectionBehaviorFromUnsigned((unsigned char)behavior));
+  }
+}
+
+RH_C_FUNCTION int ON_3dmView_GetSectionBehavior(const ON_3dmView* pConstView)
+{
+  if (pConstView)
+    return (int)pConstView->SectionBehavior();
+  return 0;
+}
+
 RH_C_FUNCTION ON_EarthAnchorPoint* ON_EarthAnchorPoint_New()
 {
   return new ON_EarthAnchorPoint();

@@ -796,30 +796,40 @@ namespace Rhino.DocObjects
 #endif
       base.OnSwitchToNonConst();
     }
-    #region properties
-    const int IDX_IS_DELETED = 0;
-    const int IDX_IS_REFERENCE = 1;
-    //const int idxIsModified = 2;
-    const int IDX_IS_DEFAULT_MATERIAL = 3;
 
-#if RHINO_SDK
+    #region properties
+
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.RenderMaterial"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.RenderMaterial;
+
     /// <summary>
     /// Deleted materials are kept in the runtime material table so that undo
     /// will work with materials.  Call IsDeleted to determine to determine if
     /// a material is deleted.
     /// </summary>
     /// <since>5.0</since>
-    public bool IsDeleted
-    {
-      get
-      {
-        if (!IsDocumentControlled)
-          return false;
-        var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoMaterial_GetBool(ptr_const_this, IDX_IS_DELETED);
-      }
-    }
-#endif
+    public override bool IsDeleted => base.IsDeleted;
+
+    /// <summary>
+    /// Rhino allows multiple files to be viewed simultaneously. Materials in the
+    /// document are "normal" or "reference". Reference materials are not saved.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsReference => base.IsReference;
+
+    // IsModified appears to have never been implemented in core Rhino
+    //public bool IsModified
+    //{
+    //  get { return UnsafeNativeMethods.CRhinoMaterial_GetBool(m_doc.RuntimeSerialNumber, m_index, idxIsModified); }
+    //}
+
+    const int IDX_IS_DELETED = 0;
+    const int IDX_IS_REFERENCE = 1;
+    //const int idxIsModified = 2;
+    const int IDX_IS_DEFAULT_MATERIAL = 3;
 
     /// <summary>
     /// The Id of the RenderPlugIn that is associated with this material.
@@ -838,30 +848,6 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_Material_SetPlugInId(ptr_this, value);
       }
     }
-
-#if RHINO_SDK
-    /// <summary>
-    /// Rhino allows multiple files to be viewed simultaneously. Materials in the
-    /// document are "normal" or "reference". Reference materials are not saved.
-    /// </summary>
-    /// <since>5.0</since>
-    public bool IsReference
-    {
-      get
-      {
-        if (!IsDocumentControlled)
-          return false;
-        var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoMaterial_GetBool(ptr_const_this, IDX_IS_REFERENCE);
-      }
-    }
-
-    // IsModified appears to have never been implemented in core Rhino
-    //public bool IsModified
-    //{
-    //  get { return UnsafeNativeMethods.CRhinoMaterial_GetBool(m_doc.RuntimeSerialNumber, m_index, idxIsModified); }
-    //}
-#endif
 
     /// <summary>
     /// By default Rhino layers and objects are assigned the default rendering material.
@@ -886,14 +872,9 @@ namespace Rhino.DocObjects
     /// 
     /// </summary>
     /// <since>5.6</since>
-    public int MaterialIndex
-    {
-      get
-      {
-        var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Material_Index(ptr_const_this);
-      }
-    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    //[Obsolete("Use the Index property.")]
+    public int MaterialIndex => Index;
 
 #if RHINO_SDK
     /// <summary>
@@ -949,15 +930,6 @@ namespace Rhino.DocObjects
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Material_SetName(ptr_this, value);
       }
-    }
-
-    /// <summary>
-    /// Returns <see cref="ModelComponentType.RenderMaterial"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get { return ModelComponentType.RenderMaterial; }
     }
 
     const int IDX_SHINE = 0;

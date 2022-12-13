@@ -864,7 +864,22 @@ RH_C_FUNCTION unsigned char* ON_WriteBufferArchive_Buffer(const ON_Write3dmBuffe
   return rc;
 }
 
+RH_C_FUNCTION ON_BinaryArchiveBuffer* ON_BinaryArchiveBuffer_NewSwapArchive()
+{
+  ON_BinaryArchiveBuffer* pBinaryArchive = new ON_BinaryArchiveBuffer(ON::archive_mode::readwrite, new ON_Buffer());
+  pBinaryArchive->SetArchive3dmVersion(ON_BinaryArchive::CurrentArchiveVersion());
 
+  return pBinaryArchive;
+}
+
+RH_C_FUNCTION void ON_BinaryArchiveBuffer_DeleteSwapArchive(ON_BinaryArchiveBuffer* pBinaryArchive)
+{
+  if (pBinaryArchive)
+  {
+    delete pBinaryArchive->Buffer();
+    delete pBinaryArchive;
+  }
+}
 
 /////////////////////////////////
 // move to on_extensions.cpp
@@ -886,7 +901,7 @@ RH_C_FUNCTION void ONX_Model_ReadNotes(const RHMONO_STRING* path, CRhCmnStringHo
       ON_BinaryFile file( ON::archive_mode::read3dm, fp);
       int version = 0;
       ON_String comments;
-      BOOL rc = file.Read3dmStartSection( &version, comments );
+      bool rc = file.Read3dmStartSection( &version, comments );
       if(rc)
       {
         ON_3dmProperties prop;
@@ -924,6 +939,22 @@ RH_C_FUNCTION int ONX_Model_ReadArchiveVersion(const RHMONO_STRING* path)
   }
   
   return 0;
+}
+
+RH_C_FUNCTION bool ONX_Model_AddEmbeddedFile(ONX_Model* model, const RHMONO_STRING* filename)
+{
+  if ((nullptr == model) || (nullptr == filename))
+    return false;
+
+  INPUTSTRINGCOERCE(_filename, filename);
+
+  ON_EmbeddedFile ef;
+  if (!ef.LoadFromFile(_filename))
+    return false;
+
+  model->AddModelComponent(ef);
+
+  return true;
 }
 
 RH_C_FUNCTION ON_3dmRevisionHistory* ONX_Model_ReadRevisionHistory(const RHMONO_STRING* path, CRhCmnStringHolder* pStringCreated, CRhCmnStringHolder* pStringLastEdited, int* revision)
@@ -1002,7 +1033,7 @@ RH_C_FUNCTION void ONX_Model_ReadApplicationDetails(const RHMONO_STRING* path, C
       ON_BinaryFile file( ON::archive_mode::read3dm, fp);
       int version = 0;
       ON_String comments;
-      BOOL rc = file.Read3dmStartSection( &version, comments );
+      bool rc = file.Read3dmStartSection( &version, comments );
       if(rc)
       {
         ON_3dmProperties prop;
@@ -1719,8 +1750,8 @@ RH_C_FUNCTION int ONX_Model_File3dmInstanceDefinitionTable_Add(
           // Transform if needed
           if (pXform)
           {
+            atts.Transform(pGeom, *pXform);
             pGeom->Transform(*pXform);
-            atts.Transform(*pXform);
           }
 
           ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(pModel, pGeom, &atts);

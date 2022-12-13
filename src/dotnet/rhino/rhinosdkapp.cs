@@ -518,6 +518,7 @@ namespace Rhino
     }
 
     /// <summary>Is Rhino being executed in safe mode</summary>
+    /// <since>7.9</since>
     public static bool IsSafeModeEnabled
     {
       get { return UnsafeNativeMethods.CRhinoApp_IsSafeModeEnabled(); }
@@ -729,6 +730,18 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Gets the nested command count.
+    /// </summary>
+    /// <since>8.0</since>
+    public static int InCommand
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoApp_InCommand();
+      }
+    }
+
+    /// <summary>
     /// Print a string to the Visual Studio Output window, if a debugger is attached.
     ///
     /// Note that the developer needs to add a newline manually if the next output should
@@ -915,6 +928,7 @@ namespace Rhino
     ///<exception cref="System.ApplicationException">
     /// If RunScript is being called while inside an event watcher.
     ///</exception>
+    /// <since>7.12</since>
     [CLSCompliant(false)]
     public static bool RunScript(uint documentSerialNumber, string script, bool echo)
     {
@@ -944,6 +958,7 @@ namespace Rhino
     ///<exception cref="System.ApplicationException">
     /// If RunScript is being called while inside an event watcher.
     ///</exception>
+    /// <since>7.12</since>
     [CLSCompliant(false)]
     public static bool RunScript(uint documentSerialNumber, string script, string mruDisplayString, bool echo)
     {
@@ -1467,6 +1482,40 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Call this method to determine if the current user is logged in using a
+    /// @mcneel.com email. Use this to turn on features for internal McNeel 
+    /// users for testing.
+    /// </summary>
+    internal static bool IsLoggedInAsMcNeelUser
+    {
+      get
+      {
+        if (_loggedInAsMcNeelUser == null)
+        {
+          var name = LoggedInUserName ?? string.Empty;
+          _loggedInAsMcNeelUser = name.ToLower().Contains("@mcneel.com");
+        }
+        return _loggedInAsMcNeelUser.Value;
+      }
+    }
+    private static bool? _loggedInAsMcNeelUser;
+
+    /// <summary>
+    /// Call this method to see if logged in with McNeel email address and if
+    /// the Rhino.Options.Advanced.EnableMcNeelOnlyFeatures flag is set
+    /// </summary>
+    internal static bool AreMcNeelOnlyFeaturesEnabled
+    {
+      get
+      {
+        if (_areMcNeelOnlyFeaturesEnabled == null)
+          _areMcNeelOnlyFeaturesEnabled = PersistentSettings.RhinoAppSettings.AddChild("Options").AddChild("Advanced").GetBool("EnableMcNeelOnlyFeatures", IsLoggedInAsMcNeelUser);
+        return _areMcNeelOnlyFeaturesEnabled.Value;
+      }
+    }
+    private static bool? _areMcNeelOnlyFeaturesEnabled;
+
+    /// <summary>
     /// Returns the logged in user's avatar picture. 
     /// Returns a default avatar if the user does not have an avatar or if the avatar could not be fetched.
     /// </summary>
@@ -1785,6 +1834,17 @@ namespace Rhino
       }
     }
     private static EventHandler m_idle_occured;
+
+    internal static void OnSettingsSaved(bool writing, bool dirty)
+    {
+      if (SettingsSaved == null)
+        return;
+      var manager = PersistentSettingsManager.Create(CurrentRhinoId);
+      var old_settings = PersistentSettingsManager.Create(CurrentRhinoId).InternalPlugInSettings.Duplicate(false);
+      var e = new PersistentSettingsSavedEventArgs(writing, old_settings);
+      SettingsSaved(manager.InternalPlugInSettings, e);
+    }
+    internal static event EventHandler<PersistentSettingsSavedEventArgs> SettingsSaved;
 
     /// <summary>
     /// Occurs when the application finishes processing and is about to enter the idle state

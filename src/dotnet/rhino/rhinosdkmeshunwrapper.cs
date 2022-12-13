@@ -16,6 +16,7 @@ namespace Rhino.Geometry
     /// Creates a mesh unwrapper for a single mesh
     /// </summary>
     /// <param name="mesh">Mesh to unwrap</param>
+    /// <since>7.14</since>
     public MeshUnwrapper(Mesh mesh)
     {
       m_ptr = UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_New(mesh.ConstPointer());
@@ -25,6 +26,7 @@ namespace Rhino.Geometry
     /// Creates a mesh unwrapper for a set of meshes
     /// </summary>
     /// <param name="meshes">Meshes to unwrap</param>
+    /// <since>7.14</since>
     public MeshUnwrapper(IEnumerable<Mesh> meshes)
     {
       using (var meshArray = new SimpleArrayMeshPointer())
@@ -45,6 +47,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Dispose of this object and any unmanaged memory associated with it.
     /// </summary>
+    /// <since>7.14</since>
     public void Dispose()
     {
       Dispose(true);
@@ -61,6 +64,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Symmetry plane. Unwrapper tries to keep unwrap result symmetric to this plane.
     /// </summary>
+    /// <since>7.14</since>
     public Plane SymmetryPlane
     {
       set
@@ -74,6 +78,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="method">Unwrap method to be used</param>
     /// <returns>True on success</returns>
+    /// <since>7.14</since>
     public bool Unwrap(MeshUnwrapMethod method)
     {
       return UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_Unwrap(m_ptr, method);

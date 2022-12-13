@@ -2090,6 +2090,38 @@ namespace Rhino.Geometry
     }
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Local minimization for point on a curve with tangent perpendicular to N.
+    /// </summary>
+    /// <param name="N">
+    /// This vector and the curve tangent define a plane. In this plane, there is a vector V perpendicular to the tangent.
+    /// </param>
+    /// <param name="subDomain">
+    /// Subdomain of of curve to evaluate. This must not be empty.
+    /// </param>
+    /// <param name="seed">
+    /// A seed parameter, which must be included in the subdomain.
+    /// </param>
+    /// <param name="curveParameter">The parameter on the curve if successful, <see cref="RhinoMath.UnsetValue">RhinoMath.UnsetValue</see> if unsuccessful.</param>
+    /// <param name="angleError">
+    /// The measure, in radians, of the angle between N and V. The angle will be zero when the result is an inflection.
+    /// </param>
+    /// <returns>true if the minimization succeeds, regardless of angle_error, false if unsuccessful.
+    /// </returns>
+    /// <remarks>
+    /// The algorithm minimizes the square of the dot product of N with the curve tangent.
+    /// It is possible that the result will not be close to zero.
+    /// </remarks>
+    /// <since>8.0</since>
+    public bool FindLocalInflection(Vector3d N, Interval subDomain, double seed, out double curveParameter, out double angleError)
+    {
+      curveParameter = RhinoMath.UnsetValue;
+      angleError = RhinoMath.UnsetValue;
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoFindLocalInflection(ptr_const_this, N, subDomain, seed, ref curveParameter, ref angleError);
+    }
+
     /// <summary>
     /// Duplicates curve segments. 
     /// Explodes polylines, polycurves and G1 discontinuous NURBS curves.
@@ -2292,12 +2324,25 @@ namespace Rhino.Geometry
 #if RHINO_SDK
     internal IntPtr m_pCurveDisplay = IntPtr.Zero;
 
-    internal virtual void Draw(Display.DisplayPipeline pipeline, System.Drawing.Color color, int thickness)
+    internal virtual void Draw(Display.DisplayPipeline pipeline, System.Drawing.Color color, int thickness, Display.DisplayPen pen)
     {
       IntPtr pDisplayPipeline = pipeline.NonConstPointer();
-      IntPtr ptr = ConstPointer();
-      int argb = color.ToArgb();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurve(pDisplayPipeline, ptr, argb, thickness);
+      IntPtr constPtrThis = ConstPointer();
+      if (pen != null)
+      {
+        int argb = pen.Color.ToArgb();
+        var pattern = pen.PatternAsArray();
+        var taper = pen.TaperAsArray();
+        float taperPosition = taper.Length > 0 ? taper[0].X : -1;
+        float taperThickness = taper.Length > 0 ? taper[0].Y : 1;
+        UnsafeNativeMethods.ON_Curve_Draw(constPtrThis, pDisplayPipeline, argb, pen.Thickness, pattern.Length, pattern, pen.PatternBySegment,
+          pen.PatternOffset, pen.PatternLengthInWorldUnits, pen.CapStyle, pen.JoinStyle, taperPosition, taperThickness, CacheHandle());
+      }
+      else
+      {
+        int argb = color.ToArgb();
+        UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurve(pDisplayPipeline, constPtrThis, argb, thickness);
+      }
     }
 #endif
     #endregion
@@ -2964,6 +3009,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// True if short segments were combined or removed. False otherwise.
     /// </returns>
+    /// <since>7.8</since>
     public bool CombineShortSegments(double tolerance)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -3326,7 +3372,6 @@ namespace Rhino.Geometry
       GC.KeepAlive(curve);
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
-
 #endif
 
     #region evaluators
@@ -5604,17 +5649,151 @@ namespace Rhino.Geometry
       Brep b = Brep.CreateFromSurface(surface);
       return OffsetOnSurface(b.Faces[0], distance, fittingTolerance);
     }
+  
     /// <summary>
-    /// Offset a curve on a surface. This curve must lie on the surface.
-    /// <para>This overload allows to specify a surface point at which the offset will pass.</para>
+    /// Creates a surface between two surfaces, with a fixed rail curve on the first surface.
     /// </summary>
-    /// <param name="surface">A surface on which to offset.</param>
-    /// <param name="throughPoint">2d point on the brep face to offset through.</param>
-    /// <param name="fittingTolerance">A fitting tolerance.</param>
-    /// <returns>Offset curves on success, or null on failure.</returns>
-    /// <exception cref="ArgumentNullException">If surface is null.</exception>
-    /// <since>5.0</since>
+    /// <param name="faceWithCurve">The first face on which the curve exists</param>
+    /// <param name="secondFace">The second face</param>
+    /// <param name="u1">A parameter in the u direction of the second face at the side you want to keep after filleting.</param>
+    /// <param name="v1">A parameter in the v direction of the second face at the side you want to keep after filleting.</param>
+    /// <param name="railDegree">Desired fillet degree (3 or 5) in the u-direction, along the rails</param>
+    /// <param name="arcDegree">esired fillet degree (2, 3, 4, or 5) in the v-direction, along the fillet arcs.If 2, then the surface is rational in v</param>
+    /// <param name="arcSliders">Array of 2 sliders to shape the fillet in the arc direction, used for arcDegree = 3, 4, or 5; input { 0.0, 0.0 } to ignore
+    /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
+    /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
+    /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
+    /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+    /// <param name="split_type">The split type</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="out_fillets">The results of the fillet calculation.</param>
+    /// <param name="out_breps0">The trim or split results of the Brep owned by faceWithCurve.</param>
+    /// <param name="out_breps1">The trim or split results of the Brep owned by pFace1.</param>
+    /// <param name="fitResults">array of doubles indicating fitting results:
+    /// [0] max 3d point deviation along surface 0
+    /// [1] max 3d point deviation along surface 1
+    /// [2] max angle deviation along surface 0 (in degrees)
+    /// [3] max angle deviation along surface 1 (in degrees)
+    /// [4] max angle deviation between Bézier surfaces(in degrees)
+    /// [5] max curvature difference between Bézier surfaces</param>
+    /// <returns> true if successful, false otherwise.</returns>
+    /// <remarks>The trim or split input Breps are in OutBreps0, and OutBreps1. If the input faces are
+    /// from the same Brep, nothing will be added to OutBreps1.If you specified a split type
+    /// of RhinoFilletSurfaceSplitType::Nothing, then nothing will be added to either OutBreps0
+    /// or OutBreps1.</remarks>
+    /// <since>8.0</since>
     [ConstOperation]
+    public bool FilletSurfaceToRail(BrepFace faceWithCurve, BrepFace secondFace,
+      double u1, double v1,
+      int railDegree,
+      int arcDegree,
+      IEnumerable<double> arcSliders,
+      int numBezierSrfs,
+      bool extend,
+      FilletSurfaceSplitType split_type,
+      double tolerance,
+      List<Brep> out_fillets,
+      List<Brep> out_breps0,
+      List<Brep> out_breps1,
+      out double[] fitResults
+    )
+    {
+      bool rc = false;
+      SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble();
+      if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+      {
+        fitResults = null;
+        return false;
+      }
+      SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
+      using (var outputFillets = new SimpleArraySurfacePointer())
+      using (var outputBreps0 = new SimpleArraySurfacePointer())
+      using (var outputBreps1 = new SimpleArraySurfacePointer())
+      {
+        IntPtr ptr_outputFillets = outputFillets.NonConstPointer();
+        IntPtr ptr_outputBreps0 = outputBreps0.NonConstPointer();
+        IntPtr ptr_outputBreps1 = outputBreps1.NonConstPointer();
+        rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceToRail(faceWithCurve.ConstPointer(), this.ConstPointer(), 
+          secondFace.ConstPointer(), u1, v1, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
+          numBezierSrfs, extend, split_type, tolerance, ptr_outputFillets, ptr_outputBreps0, ptr_outputBreps1, arr_fitResults.NonConstPointer());
+        fitResults = (rc) ? arr_fitResults.ToArray() : null;
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Creates a constant-radius fillet surface between a surface and the curve.
+    /// </summary>
+    /// <param name="face">the face being filleted.</param>
+    /// <param name="t">A parameter on the curve, indicating region of fillet.</param>
+    /// <param name="u">A parameter in the u direction of the face indicating which side of the curve to fillet.</param>
+    /// <param name="v">A parameter in the v direction of the face indicating which side of the curve to fillet.</param>
+    /// <param name="radius">The radius of the constant-radius fillet desired. NOTE: using arcSliders will change the shape of the arcs themselves</param>
+    /// <param name="alignToCurve">Does the user want the fillet to align to the curve?
+    /// 0 - No, ignore the curve's b-spline structure
+    /// 1 - Yes, match the curves's degree, spans, CVs as much as possible
+    /// 2 - Same as 1, but iterate to fit to tolerance
+    /// Note that a value of 1 or 2 will cause nBezierSrfs to be ignored</param>
+    /// <param name="railDegree">Desired fillet degree (3 or 5) in the u-direction, along the curve</param>
+    /// <param name="arcDegree">Desired fillet degree (2, 3, 4, or 5) in the v-direction, along the fillet arcs.If 2, then the surface is rational in v</param>
+    /// <param name="arcSliders">Array of 2 sliders to shape the fillet in the arc direction, used for arcDegree = 3, 4, or 5; input { 0.0, 0.0 } to ignore
+    /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
+    /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
+    /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="out_fillets">he results of the fillet calculation.</param>
+    /// <param name="fitResults">array of doubles indicating fitting results:
+    /// [0] max 3d point deviation along curve
+    /// [1] max 3d point deviation along face
+    /// [2] max angle deviation along face(in degrees)
+    /// [3] max angle deviation between Bézier surfaces(in degrees)
+    /// [4] max curvature difference between Bézier surfaces</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool FilletSurfaceToCurve(
+      BrepFace face,
+      double t,
+      double u, double v,
+      double radius,
+      int alignToCurve,
+      int railDegree,
+      int arcDegree,
+      IEnumerable<double> arcSliders,
+      int numBezierSrfs,
+      double tolerance,
+      List<Brep> out_fillets,
+      out double[] fitResults
+    )
+    {
+      bool rc = false;
+      SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble();
+      if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+      {
+        fitResults = null;
+        return false;
+      }
+      SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
+      using (var outputFillets = new SimpleArraySurfacePointer())
+      using (var outputBreps0 = new SimpleArraySurfacePointer())
+      using (var outputBreps1 = new SimpleArraySurfacePointer())
+      {
+        rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurve(face.ConstPointer(), this.ConstPointer(), t, u, v, radius, alignToCurve, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
+          numBezierSrfs, tolerance, outputFillets.ConstPointer(), arr_fitResults.NonConstPointer());
+        fitResults = (rc) ? arr_fitResults.ToArray() : null;
+      }
+      return rc;
+  }
+  /// <summary>
+  /// Offset a curve on a surface. This curve must lie on the surface.
+  /// <para>This overload allows to specify a surface point at which the offset will pass.</para>
+  /// </summary>
+  /// <param name="surface">A surface on which to offset.</param>
+  /// <param name="throughPoint">2d point on the brep face to offset through.</param>
+  /// <param name="fittingTolerance">A fitting tolerance.</param>
+  /// <returns>Offset curves on success, or null on failure.</returns>
+  /// <exception cref="ArgumentNullException">If surface is null.</exception>
+  /// <since>5.0</since>
+  [ConstOperation]
     public Curve[] OffsetOnSurface(Surface surface, Point2d throughPoint, double fittingTolerance)
     {
       if (surface == null)

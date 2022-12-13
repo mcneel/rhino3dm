@@ -646,6 +646,29 @@ RH_C_FUNCTION ON_SumSurface* ON_SumSurface_Create(const ON_Curve* pConstCurveA, 
   return rc;
 }
 
+RH_C_FUNCTION ON_SumSurface* ON_SumSurface_Create2(const ON_Curve* pConstCurve, ON_3DVECTOR_STRUCT extrusion_vector)
+{
+  ON_SumSurface* rc = nullptr;
+  if (pConstCurve)
+  {
+    const ON_3dVector* dir = (const ON_3dVector*)(&extrusion_vector);
+    if (!dir->IsZero())
+    {
+      rc = ON_SumSurface::New();
+      if (rc)
+      {
+        if (!rc->Create(*pConstCurve, *dir))
+        {
+          delete rc;
+          rc = nullptr;
+        }
+      }
+    }
+  }
+  return rc;
+}
+
+
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 

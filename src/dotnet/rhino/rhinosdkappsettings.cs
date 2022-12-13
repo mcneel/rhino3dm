@@ -4,6 +4,7 @@ using System.Drawing;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Geometry;
 using System.Collections.Generic;
+using static Rhino.ApplicationSettings.CurvatureAnalysisSettings;
 
 namespace Rhino.ApplicationSettings
 {
@@ -105,6 +106,14 @@ namespace Rhino.ApplicationSettings
     /// <summary>Size of the font used in the command prompt (in points)</summary>
     /// <since>7.0</since>
     public int CommandPromptFontSize { get; set; }
+
+    /// <summary>Name of the font used in the command prompt</summary>
+    /// <since>8.0</since>
+    public string CommandPromptFontName { get; set; }
+
+    /// <summary>Get/Set position and visibility of the command prompt</summary>
+    /// <since>8.0</since>
+    public CommandPromptPosition CommandPromptPosition { get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
     /// <since>5.0</since>
     public Color CrosshairColor { get; set; }
@@ -133,12 +142,62 @@ namespace Rhino.ApplicationSettings
     ///<summary>Gets or sets a value that determines if command names are written to the history window.</summary>
     /// <since>5.0</since>
     public bool EchoCommandsToHistoryWindow { get; set; }
+
+    /// <summary>
+    /// Shows or hides title bar.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowTitleBar { get; set; }
+
     ///<summary>Gets or sets a value that determines if the full path of the document is shown in the Rhino title bar.</summary>
     /// <since>5.0</since>
     public bool ShowFullPathInTitleBar { get; set; }
     ///<summary>Gets or sets a value that determines if cross hairs are visible.</summary>
     /// <since>5.0</since>
     public bool ShowCrosshairs { get; set; }
+
+    /// <summary>
+    /// Display the drop shadow of layouts
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowLayoutDropShadow { get; set; }
+
+    /// <summary>
+    /// Get/Set menu visibility
+    /// </summary>
+    /// <since>8.0</since>
+    public bool MenuVisible { get; set; }
+
+    /// <summary>
+    /// Get/Set status bar visibility
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowStatusBar { get; set; }
+
+
+    /// <summary>
+    /// Get/Set viewport title visibility
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowViewportTitles { get; set; }
+
+    /// <summary>
+    /// Display viewport tabs at start
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ViewportTabsVisibleAtStart { get; set; }
+
+    /// <summary>
+    /// Set the arrow icon shaft size.
+    /// </summary>
+    /// <since>8.0</since>
+    public int DirectionArrowIconShaftSize { get; set; }
+
+    /// <summary>
+    /// Set the arrow icon head size.
+    /// </summary>
+    /// <since>8.0</since>
+    public int DirectionArrowIconHeadSize { get; set; }
 
     ///<summary>Gets or sets the color of the thin line in the grid.</summary>
     /// <since>5.0</since>
@@ -179,16 +238,13 @@ namespace Rhino.ApplicationSettings
   /// </summary>
   public static class AppearanceSettings
   {
-    static AppearanceSettingsState CreateState(bool current)
+    static AppearanceSettingsState CreateState(bool current) => CreateState(current, Runtime.HostUtils.RunningInDarkMode);
+
+    static AppearanceSettingsState CreateState(bool current, bool darkMode)
     {
-      IntPtr pAppearanceSettings = UnsafeNativeMethods.CRhinoAppAppearanceSettings_New(current);
+      IntPtr pAppearanceSettings = UnsafeNativeMethods.CRhinoAppAppearanceSettings_New(current, darkMode);
       AppearanceSettingsState rc = new AppearanceSettingsState();
-      using (var sh = new StringHolder())
-      {
-        IntPtr pString = sh.NonConstPointer();
-        UnsafeNativeMethods.CRhinoAppearanceSettings_DefaultFontFaceNameGet(pString);
-        rc.DefaultFontFaceName = sh.ToString();
-      }
+      rc.DefaultFontFaceName = DefaultFontFaceName;
       rc.DefaultLayerColor = GetColor(idxDefaultLayerColor, pAppearanceSettings);
       rc.SelectedObjectColor = GetColor(idxSelectedObjectColor, pAppearanceSettings);
       rc.LockedObjectColor = GetColor(idxLockedObjectColor, pAppearanceSettings);
@@ -208,6 +264,13 @@ namespace Rhino.ApplicationSettings
       rc.CommandPromptHypertextColor = GetColor(idxCommandPromptHypertextColor, pAppearanceSettings);
       rc.CommandPromptBackgroundColor = GetColor(idxCommandPromptBackgroundColor, pAppearanceSettings);
       rc.CommandPromptFontSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptFontSize, pAppearanceSettings);
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.CRhinoAppearanceSettings_CommandPromptFontFaceNameGet(pString);
+        rc.CommandPromptFontName =  sh.ToString();
+      }
+
       rc.CrosshairColor = GetColor(idxCrosshairColor, pAppearanceSettings);
       rc.PageviewPaperColor = GetColor(idxPageviewPaperColor, pAppearanceSettings);
       rc.CurrentLayerBackgroundColor = GetColor(idxCurrentLayerBackgroundColor, pAppearanceSettings);
@@ -216,6 +279,18 @@ namespace Rhino.ApplicationSettings
       rc.EchoCommandsToHistoryWindow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoCommandsToHistoryWindow, pAppearanceSettings);
       rc.ShowFullPathInTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxFullPathInTitleBar, pAppearanceSettings);
       rc.ShowCrosshairs = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsVisible, pAppearanceSettings);
+      rc.ShowLayoutDropShadow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowLayoutDropShadow, pAppearanceSettings);
+      rc.DirectionArrowIconShaftSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconShaftSize, pAppearanceSettings);
+      rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
+      rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
+      rc.MenuVisible = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxMenuVisible, pAppearanceSettings);
+      rc.CommandPromptPosition = (CommandPromptPosition)UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptPosition, pAppearanceSettings);
+      rc.ShowStatusBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowStatusBar, pAppearanceSettings);
+      rc.ShowViewportTitles =UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTitles, pAppearanceSettings);
+      rc.ShowTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowTitleBar, pAppearanceSettings);
+      rc.ViewportTabsVisibleAtStart = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTabs, pAppearanceSettings);
+
+
       UnsafeNativeMethods.CRhinoAppAppearanceSettings_Delete(pAppearanceSettings);
 
       // also add grid settings
@@ -229,6 +304,15 @@ namespace Rhino.ApplicationSettings
       UnsafeNativeMethods.CRhinoAppGridSettings_Delete(pGridSettings);
 
       return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <returns>An instance of a class that represents all the default settings joined together.</returns>
+    public static AppearanceSettingsState GetDefaultState(bool darkMode)
+    {
+      return CreateState(false, darkMode);
     }
 
     /// <summary>
@@ -285,6 +369,7 @@ namespace Rhino.ApplicationSettings
       FrameBackgroundColor = state.FrameBackgroundColor;
       CommandPromptBackgroundColor = state.CommandPromptBackgroundColor;
       CommandPromptFontSize = state.CommandPromptFontSize;
+      UnsafeNativeMethods.CRhinoAppearanceSettings_CommandPromptFontFaceNameSet(state.CommandPromptFontName, state.CommandPromptFontSize);
       CommandPromptHypertextColor = state.CommandPromptHypertextColor;
       CommandPromptTextColor = state.CommandPromptTextColor;
       CrosshairColor = state.CrosshairColor;
@@ -295,6 +380,15 @@ namespace Rhino.ApplicationSettings
       EchoPromptsToHistoryWindow = state.EchoPromptsToHistoryWindow;
       ShowFullPathInTitleBar = state.ShowFullPathInTitleBar;
       ShowCrosshairs = state.ShowCrosshairs;
+      ShowLayoutDropShadow = state.ShowLayoutDropShadow;
+      DirectionArrowIconShaftSize = state.DirectionArrowIconShaftSize;
+      DirectionArrowIconHeadSize = state.DirectionArrowIconHeadSize;
+      MenuVisible = state.MenuVisible;
+      CommandPromptPosition = state.CommandPromptPosition;
+      ShowStatusBar = state.ShowStatusBar;
+      ShowViewportTitles = state.ShowViewportTitles;
+      ShowTitleBar = state.ShowTitleBar;
+      ViewportTabsVisibleAtStart = state.ViewportTabsVisibleAtStart;
 
       GridThickLineColor = state.GridThickLineColor;
       GridThinLineColor = state.GridThinLineColor;
@@ -400,8 +494,26 @@ namespace Rhino.ApplicationSettings
       return Color.FromArgb(argb);
     }
 
+
     /// <summary>
-    /// Sets the logical paint color association to a spacific .Net library color, without forced UI update.
+    /// Get a default paint color for Rhino. The current paint color may
+    /// be different than the default
+    /// </summary>
+    /// <param name="whichColor">The color to retrieve</param>
+    /// <param name="darkMode">
+    /// If true gets the default dark mode color otherwise return the default
+    /// light mode color
+    /// </param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static Color DefaultPaintColor(PaintColor whichColor, bool darkMode)
+    {
+      int argb = UnsafeNativeMethods.RhColors_GetDefaultDarkOrLightColor(whichColor, darkMode);
+      return Color.FromArgb(argb);
+    }
+
+    /// <summary>
+    /// Sets the logical paint color association to a specific .Net library color, without forced UI update.
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
@@ -412,7 +524,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Sets the logical paint color association to a spacific .Net library color.
+    /// Sets the logical paint color association to a specific .Net library color.
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
@@ -432,6 +544,21 @@ namespace Rhino.ApplicationSettings
     public static bool UsePaintColors
     {
       get { return true; }
+    }
+
+
+
+    /// <summary>
+    /// Get a default widget color for Rhino. The current widget color may
+    /// be different than the default
+    /// </summary>
+    /// <param name="whichColor">The color to retrieve</param>
+    /// <returns>A .Net library color.</returns>
+    /// <since>8.0</since>
+    public static Color DefaultWidgetColor(WidgetColor whichColor)
+    {
+      int abgr = UnsafeNativeMethods.RhColors_GetDefaultWidgetColor(whichColor);
+      return Runtime.Interop.ColorFromWin32(abgr);
     }
 
     /// <summary>
@@ -775,11 +902,6 @@ namespace Rhino.ApplicationSettings
     ///<summary>true to move axis letters as sprite rotates.</summary>
     public static property bool WorldCoordIconMoveLabels{ bool get(); void set(bool); }
 
-    ///<summary>length of direction arrow shaft icon in pixels.</summary>
-    public static property int DirectionArrowIconShaftSize{ int get(); void set(int); }
-    ///<summary>length of direction arrowhead icon in pixels.</summary>
-    public static property int DirectionArrowIconHeadSize{ int get(); void set(int); }
-
     ///<summary>
     ///3d "flag" text (like the Dot command) can either be depth 
     ///tested or shown on top. true means on top.
@@ -795,6 +917,30 @@ namespace Rhino.ApplicationSettings
 
     const int idxCommandPromptPosition = 0;
     const int idxCommandPromptFontSize = 1;
+    internal const int idxStatusbarInfoPaneMode = 2;
+    internal const int idxDirectionArrowIconShaftSize = 3;
+    internal const int idxDirectionArrowIconHeadSize = 4;
+
+
+    ///<summary>
+    ///length of direction arrow shaft icon in pixels.
+    ///</summary>
+    /// <since>8.0</since>
+    public static int DirectionArrowIconShaftSize 
+    {
+      get => UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconShaftSize, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetInt(idxDirectionArrowIconShaftSize, value);
+    }
+
+    ///<summary>
+    ///length of direction arrowhead icon in pixels.
+    ///</summary>
+    /// <since>8.0</since>
+    public static int DirectionArrowIconHeadSize
+    {
+      get => UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetInt(idxDirectionArrowIconHeadSize, value);
+    }
 
     /// <summary>
     /// Gets or sets the command prompt position.
@@ -836,6 +982,10 @@ namespace Rhino.ApplicationSettings
     const int idxShowSideBar = 5;
     const int idxShowOsnapBar = 6;
     const int idxShowStatusBar = 7;
+    const int idxShowLayoutDropShadow = 8;
+    const int idxShowViewportTitles = 9;
+    const int idxShowTitleBar = 10;
+    const int idxShowViewportTabs = 11;
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -893,6 +1043,26 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowStatusBar, value); }
     }
 
+    /// <summary>
+    /// Shows or hides viewport titles.
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowViewportTitles
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTitles, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowViewportTitles, value); }
+    }
+
+    /// <summary>
+    /// Shows or hides title bar.
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowTitleBar
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowTitleBar, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowTitleBar, value); }
+    }
+
     /*
     public static property bool ViewportTitleVisible{ bool get(); void set(bool); }
     public static property bool MainWindowTitleVisible{ bool get(); void set(bool); }
@@ -903,6 +1073,26 @@ namespace Rhino.ApplicationSettings
     {
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxMenuVisible, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxMenuVisible, value); }
+    }
+
+    /// <summary>
+    /// Display the drop shadow of layouts
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowLayoutDropShadow
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowLayoutDropShadow, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowLayoutDropShadow, value); }
+    }
+
+    /// <summary>
+    /// Display viewport tabs at start
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ViewportTabsVisibleAtStart
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTabs, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowViewportTabs, value); }
     }
 
     ///<summary>Gets or sets the language identifier.</summary>
@@ -2532,6 +2722,18 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public bool UniversalConstructionPlaneMode { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public bool AutoAlignCPlane { get; set; }
+
+    /// <summary>
+    /// //0 = object, 1 = world, 2 = view
+    /// </summary>
+    /// <since>8.0</since>
+    public int AutoCPlaneAlignment { get; set; }
+
     /// <summary>Gets or sets the base orthogonal angle.</summary>
     /// <since>5.0</since>
     public double OrthoAngle { get; set; }
@@ -2578,6 +2780,12 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the point display mode.</summary>
     /// <since>5.0</since>
     public PointDisplayMode PointDisplay { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the gumball extrudes closed curves as closed extrusions
+    /// </summary>
+    /// <since>8.0</since>
+    public bool GumballExtrudeClosed {  get; set; }
   }
 
   /// <summary>
@@ -2613,6 +2821,9 @@ namespace Rhino.ApplicationSettings
       rc.OsnapModes = (OsnapModes)GetInt(idxOSnapModes, pSettings);
       rc.MousePickboxRadius = GetInt(idxMousePickboxRadius, pSettings);
       rc.PointDisplay = (PointDisplayMode)GetInt(idxPointDisplay, pSettings);
+      rc.AutoAlignCPlane = GetBool(idxAutoAlignCPlane, pSettings);
+      rc.AutoCPlaneAlignment = GetInt(idxAutoCPlaneAlignment, pSettings);
+      rc.GumballExtrudeClosed = GetBool(idxGumballExtrudeClosed, pSettings);
 
       UnsafeNativeMethods.CRhinoAppModelAidSettings_Delete(pSettings);
       return rc;
@@ -2669,6 +2880,9 @@ namespace Rhino.ApplicationSettings
       OsnapModes = state.OsnapModes;
       MousePickboxRadius = state.MousePickboxRadius;
       PointDisplay = state.PointDisplay;
+      AutoAlignCPlane = state.AutoAlignCPlane;
+      AutoCPlaneAlignment = state.AutoCPlaneAlignment;
+      GumballExtrudeClosed = state.GumballExtrudeClosed;
     }
 
     static bool GetBool(int which, IntPtr pSettings)
@@ -2692,6 +2906,11 @@ namespace Rhino.ApplicationSettings
     const int idxUniversalConstructionPlaneMode = 12;
     const int idxShowAutoGumball = 13;
     const int idxSnappyGumball = 14;
+    const int idxSnapToOccluded = 15;
+    const int idxSnapToFiltered = 16;
+    const int idxOnlySnapToSelected = 17;
+    const int idxAutoAlignCPlane = 18;
+    const int idxGumballExtrudeClosed = 19;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -2803,12 +3022,72 @@ namespace Rhino.ApplicationSettings
       set { SetBool(idxSnapToLocked, value); }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool SnapToOccluded
+    {
+      get { return GetBool(idxSnapToOccluded); }
+      set { SetBool(idxSnapToOccluded, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool SnapToFiltered
+    {
+      get { return GetBool(idxSnapToFiltered); }
+      set { SetBool(idxSnapToFiltered, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool OnlySnapToSelected
+    {
+      get { return GetBool(idxOnlySnapToSelected); }
+      set { SetBool(idxOnlySnapToSelected, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets whether the gumball extrudes closed curves as closed extrusions
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool GumballExtrudeClosed
+    {
+      get { return GetBool(idxGumballExtrudeClosed); }
+      set { SetBool(idxGumballExtrudeClosed, value); }
+    }
+
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
     /// <since>5.0</since>
     public static bool UniversalConstructionPlaneMode
     {
       get { return GetBool(idxUniversalConstructionPlaneMode); }
       set { SetBool(idxUniversalConstructionPlaneMode, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool AutoAlignCPlane
+    {
+      get => GetBool(idxAutoAlignCPlane);
+      set => SetBool(idxAutoAlignCPlane, value);
+    }
+
+    /// <summary>
+    /// //0 = object, 1 = world, 2 = view
+    /// </summary>
+    /// <since>8.0</since>
+    public static int AutoCPlaneAlignment
+    {
+      get => GetInt(idxAutoCPlaneAlignment);
+      set => SetInt(idxAutoCPlaneAlignment, value);
     }
 
     static double GetDouble(int which, IntPtr pSettings) { return UnsafeNativeMethods.RhModelAidSettings_GetSetDouble(which, false, 0, pSettings); }
@@ -2861,6 +3140,7 @@ namespace Rhino.ApplicationSettings
     const int idxOSnapModes = 4;
     const int idxMousePickboxRadius = 5;
     const int idxPointDisplay = 6;
+    const int idxAutoCPlaneAlignment = 7;
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
@@ -3804,6 +4084,24 @@ namespace Rhino.ApplicationSettings
     {
       UnsafeNativeMethods.CRhinoAppShortcutKeys_SetMacro((int)key, macro);
     }
+
+    /// <summary>
+    /// Get the macro label associated with a given keyboard shortcut
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static string GetLabel(ShortcutKey key)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr ptr_string = sh.NonConstPointer();
+        UnsafeNativeMethods.CRhinoAppShortcutKeys_Label((int)key, ptr_string);
+        return sh.ToString();
+      }
+    }
+
+    //CRhinoAppShortcutKeys_Label
   }
 
   /// <summary>
@@ -4464,6 +4762,196 @@ namespace Rhino.ApplicationSettings
 
 
   /// <summary>
+  /// Represents a snapshot of <see cref="CurvatureGraphSettings"/>.
+  /// </summary>
+  public class CurvatureGraphSettingsState
+  {
+    internal CurvatureGraphSettingsState() { }
+
+    /// <summary>
+    /// Gets or sets the curve hair color.
+    /// </summary>
+    /// <since>8.0</since>
+    public Color CurveHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface U hair color.
+    /// </summary>
+    /// <since>8.0</since>
+    public Color SurfaceUHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface V hair color.
+    /// </summary>
+    /// <since>8.0</since>
+    public Color SurfaceVHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the whether to show surface U hairs
+    /// </summary>
+    /// <since>8.0</since>
+    public bool SrfUHair { get; set; }
+
+    /// <summary>
+    /// Gets or sets the whether to show surface V hairs
+    /// </summary>
+    /// <since>8.0</since>
+    public bool SrfVHair { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hair scale.
+    /// </summary>
+    /// <since>8.0</since>
+    public int HairScale { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hair density.
+    /// </summary>
+    /// <since>8.0</since>
+    public int HairDensity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the sample density.
+    /// </summary>
+    /// <since>8.0</since>
+    public int SampleDensity { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify curvature graph commands.
+  /// </summary>
+  public static class CurvatureGraphSettings
+  {
+    private static CurvatureGraphSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoCurvatureGraphSettings_New(current);
+      CurvatureGraphSettingsState rc = new CurvatureGraphSettingsState();
+
+      int color = 0;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 0, false))
+        rc.CurveHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
+
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 1, false))
+        rc.SurfaceUHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
+
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 2, false))
+        rc.SurfaceVHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
+
+      bool bValue = false;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(ptr_settings, ref bValue, 0, false))
+        rc.SrfUHair = bValue;
+
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(ptr_settings, ref bValue, 1, false))
+        rc.SrfVHair = bValue;
+
+      int iValue = 0;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 0, false))
+        rc.HairScale = iValue;
+
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 1, false))
+        rc.HairDensity = iValue;
+
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 2, false))
+        rc.SampleDensity = iValue;
+
+      UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>8.0</since>
+    public static CurvatureGraphSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>8.0</since>
+    public static CurvatureGraphSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>8.0</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>8.0</since>
+    public static void UpdateFromState(CurvatureGraphSettingsState state)
+    {
+      CurveHairColor = state.CurveHairColor;
+      SurfaceUHairColor = state.SurfaceUHairColor;
+      SurfaceVHairColor = state.SurfaceVHairColor;
+      SrfUHair = state.SrfUHair;
+      SrfVHair = state.SrfVHair;
+      HairScale = state.HairScale;
+      HairDensity = state.HairDensity;
+      SampleDensity = state.SampleDensity;
+    }
+
+    /// <summary>
+    /// Gets or sets the curve hair color;
+    /// </summary>
+    /// <since>8.0</since>
+    public static Color CurveHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface U hair color;
+    /// </summary>
+    /// <since>8.0</since>
+    public static Color SurfaceUHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface V hair color;
+    /// </summary>
+    /// <since>8.0</since>
+    public static Color SurfaceVHairColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface U hairs are on;
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool SrfUHair { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surface V hairs are on;
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool SrfVHair { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hair scale;
+    /// </summary>
+    /// <since>8.0</since>
+    public static int HairScale { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hair density;
+    /// </summary>
+    /// <since>8.0</since>
+    public static int HairDensity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the sampling density;
+    /// </summary>
+    /// <since>8.0</since>
+    public static int SampleDensity { get; set; }
+  }
+
+  /// <summary>
   /// Represents a snapshot of <see cref="CurvatureAnalysisSettings"/>.
   /// </summary>
   public class CurvatureAnalysisSettingsState
@@ -4951,6 +5439,304 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppSettings_SetPackageManagerSources(value); }
     }
   }
+
+  /// <summary>
+  /// Represents a snapshot of <see cref="ConstraintsSettings"/>.
+  /// </summary>
+  public class ConstraintsSettingsState
+  {
+
+    /// <summary>
+    /// Enables or disables constraint icons being drawn in the viewport
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowViewportIcons { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size of the constraint icons being drawn in the viewport
+    /// </summary>
+    /// <since>8.0</since>
+    public double ViewportIconSize { get; set; }
+
+    /// <summary>
+    /// Enables or disables drawing a halo around constrained curves
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowHaloOnConstrainedCurves {  get; set; }
+
+    /// <summary>
+    /// Gets or sets the color of the halo drawn around constrained curves
+    /// </summary>
+    /// <since>8.0</since>
+    public Color ConstraintsColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the color of failure when solving a constraints system
+    /// </summary>
+    /// <since>8.0</since>
+    public Color ConstraintsFailureColor {  get; set; }
+
+    /// <summary>
+    /// Enables or disables constraint view icons being drawn horizontal to the view.
+    /// If not drawn horizontal to the view icons are drawn the construction plane of the constraint.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ShowViewportIconsHorizontalToView {  get; set; }
+
+    /// <summary>
+    /// Gets or sets whether or not to automatically create coincident constraints
+    /// </summary>
+    /// <since>8.0</since>
+    public bool AutomaticallyCreateCoincidentConstraints { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether or not to automatically create vertical and horizontal constraints
+    /// </summary>
+    /// <since>8.0</since>
+    public bool AutomaticallyCreateVerticalHorizontalConstraints { get; set; }
+
+    /// <summary>
+    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
+    /// is automatically created in radians.
+    /// </summary>
+    /// <since>8.0</since>
+    public double AutomaticVerticalHorizontalAngleToleranceRadians { get; set; }
+
+  }
+
+
+  /// <summary>
+  /// Settings for constraints such as display options for view icons and halo color.
+  /// </summary>
+  /// <since>8.0</since>
+  public static class ConstraintsSettings
+  {
+    private static ConstraintsSettingsState CreateState(bool current)
+    {
+      IntPtr ptr = UnsafeNativeMethods.CRhinoAppConstraintsSettings_New(current);
+
+      ConstraintsSettingsState rc = new ConstraintsSettingsState();
+
+      rc.ShowViewportIcons = GetBool(ptr, BoolValue.ShowViewportIcons);
+      rc.ViewportIconSize = GetDouble(ptr, DoubleValue.ViewportIconSize);
+      rc.ShowHaloOnConstrainedCurves = GetBool(ptr, BoolValue.ShowHaloOnConstrainedCurves);
+      rc.ConstraintsColor = GetColor(ptr, ColorValue.ConstraintsColor);
+      rc.ConstraintsFailureColor = GetColor(ptr, ColorValue.ConstraintsFailureColor);
+      rc.ShowViewportIconsHorizontalToView = GetBool(ptr, BoolValue.ShowViewportIconsHorizontalToView);
+      rc.AutomaticallyCreateCoincidentConstraints = GetBool(ptr, BoolValue.AutomaticCoincidentConstraints);
+      rc.AutomaticallyCreateVerticalHorizontalConstraints = GetBool(ptr, BoolValue.AutomaticVerticalHorizontalConstraints);
+      rc.AutomaticVerticalHorizontalAngleToleranceRadians = GetDouble(ptr, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians);
+
+      UnsafeNativeMethods.CRhinoAppConstraintsSettings_Delete(ptr);
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <returns></returns>
+    public static ConstraintsSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <returns></returns>
+    public static ConstraintsSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    public static void UpdateFromState(ConstraintsSettingsState state)
+    {
+      if(state != null)
+      {
+        ShowViewportIcons = state.ShowViewportIcons;
+        ViewportIconSize = state.ViewportIconSize;
+        ShowHaloOnConstrainedCurves = state.ShowHaloOnConstrainedCurves;
+        ConstraintsColor = state.ConstraintsColor;
+        ConstraintsFailureColor = state.ConstraintsFailureColor;
+        ShowViewportIconsHorizontalToView = state.ShowViewportIconsHorizontalToView;
+        AutomaticallyCreateCoincidentConstraints = state.AutomaticallyCreateCoincidentConstraints;
+        AutomaticallyCreateVerticalHorizontalConstraints = state.AutomaticallyCreateVerticalHorizontalConstraints;
+        AutomaticVerticalHorizontalAngleToleranceRadians = state.AutomaticVerticalHorizontalAngleToleranceRadians;
+      }
+    }
+
+    private enum BoolValue : int
+    {
+      ShowViewportIcons = 0,
+      ShowHaloOnConstrainedCurves = 1,
+      ShowViewportIconsHorizontalToView = 2,
+      AutomaticCoincidentConstraints = 3,
+      AutomaticVerticalHorizontalConstraints = 4,
+    }
+
+    static bool GetBool(IntPtr constraintsSettings, BoolValue which)
+    {
+      return UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetBool(constraintsSettings, (int)which);
+    }
+
+    static void SetBool(IntPtr constraintsSettings, BoolValue which, bool value)
+    {
+      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetBool(constraintsSettings, (int)which, value);
+    }
+
+    private enum DoubleValue : int
+    {
+      ViewportIconSize = 0,
+      AutomaticVerticalHorizontalConstraintsAngleToleranceRadians = 1,
+      AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees = 2,
+    }
+
+    static double GetDouble(IntPtr constraintsSettings, DoubleValue which)
+    {
+      return UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetDouble(constraintsSettings, (int)which);
+    }
+
+    static void SetDouble(IntPtr constraintsSettings, DoubleValue which, double value)
+    {
+      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetDouble(constraintsSettings, (int)which, value);
+    }
+
+    private enum ColorValue : int
+    {
+      ConstraintsColor = 0,
+      ConstraintsFailureColor = 1,
+    }
+
+    static Color GetColor(IntPtr constraintsSettings, ColorValue which)
+    {
+      int rc = UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetColor(constraintsSettings, (int)which);
+      return Color.FromArgb(rc);
+    }
+
+    static void SetColor(IntPtr constraintsSettings, ColorValue which, Color value)
+    {
+      int argb = value.ToArgb();
+      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetColor(constraintsSettings, (int)which, argb);
+    }
+
+    /// <summary>
+    /// Enables or disables constraint icons being drawn in the viewport
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowViewportIcons
+    {
+      get => GetBool(IntPtr.Zero, BoolValue.ShowViewportIcons);
+      set => SetBool(IntPtr.Zero, BoolValue.ShowViewportIcons, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the size of the constraint icons being drawn in the viewport
+    /// </summary>
+    /// <since>8.0</since>
+    public static double ViewportIconSize
+    {
+      get => GetDouble(IntPtr.Zero, DoubleValue.ViewportIconSize);
+      set => SetDouble(IntPtr.Zero, DoubleValue.ViewportIconSize, value);
+    }
+
+    /// <summary>
+    /// Enables or disables constraint view icons being drawn horizontal to the view.
+    /// If not drawn horizontal to the view icons are drawn the construction plane of the constraint.
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowViewportIconsHorizontalToView
+    {
+      get => GetBool(IntPtr.Zero, BoolValue.ShowViewportIconsHorizontalToView);
+      set => SetBool(IntPtr.Zero, BoolValue.ShowViewportIconsHorizontalToView, value);
+    }
+
+    /// <summary>
+    /// Enables or disables drawing a halo around constrained curves
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool ShowHaloOnConstrainedCurves
+    {
+      get => GetBool(IntPtr.Zero, BoolValue.ShowHaloOnConstrainedCurves);
+      set => SetBool(IntPtr.Zero, BoolValue.ShowHaloOnConstrainedCurves, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the color of the constrained curves halo, previews, etc
+    /// </summary>
+    /// <since>8.0</since>
+    public static Color ConstraintsColor
+    {
+      get => GetColor(IntPtr.Zero, ColorValue.ConstraintsColor);
+      set => SetColor(IntPtr.Zero, ColorValue.ConstraintsColor, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the color of failure when solving a constraints system
+    /// </summary>
+    /// <since>8.0</since>
+    public static Color ConstraintsFailureColor
+    {
+      get => GetColor(IntPtr.Zero, ColorValue.ConstraintsFailureColor);
+      set => SetColor(IntPtr.Zero, ColorValue.ConstraintsFailureColor, value);
+    }
+
+    /// <summary>
+    /// Gets or sets whether or not to automatically create coincident constraints
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool AutomaticallyCreateCoincidentConstraints
+    {
+      get => GetBool(IntPtr.Zero, BoolValue.AutomaticCoincidentConstraints);
+      set => SetBool(IntPtr.Zero, BoolValue.AutomaticCoincidentConstraints, value);
+    }
+
+    /// <summary>
+    /// Gets or sets whether or not to automatically create vertical and horizontal constraints
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool AutomaticallyCreateVerticalHorizontalConstraints
+    {
+      get => GetBool(IntPtr.Zero, BoolValue.AutomaticVerticalHorizontalConstraints);
+      set => SetBool(IntPtr.Zero, BoolValue.AutomaticVerticalHorizontalConstraints, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
+    /// is automatically created in radians.
+    /// </summary>
+    /// <since>8.0</since>
+    public static double AutomaticVerticalHorizontalAngleToleranceRadians
+    {
+      get => GetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians);
+      set => SetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
+    /// is automatically created in degrees.
+    /// </summary>
+    /// <since>8.0</since>
+    public static double AutomaticVerticalHorizontalAngleToleranceDegrees
+    {
+      get => GetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees);
+      set => SetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees, value);
+    }
+
+  }
+
 }
 
 #endif

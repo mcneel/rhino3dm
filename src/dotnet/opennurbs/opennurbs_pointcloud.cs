@@ -35,6 +35,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the point array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe Point3d* PointArray(out int length)
     {
@@ -61,6 +62,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the vector array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe Vector3d* NormalArray(out int length)
     {
@@ -88,6 +90,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the color array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe int* ColorArray(out int length)
     {
@@ -114,6 +117,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the value array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe double* ValueArray(out int length)
     {
@@ -1138,6 +1142,7 @@ namespace Rhino.Geometry
     /// <remarks>The lock implements the IDisposable interface, and one call of its
     /// <see cref="IDisposable.Dispose()"/> or <see cref="ReleaseUnsafeLock"/> will update the data structure as required.
     /// This can be achieved with a using statement (Using in Vb.Net).</remarks>
+    /// <since>7.9</since>
     public PointCloudUnsafeLock GetUnsafeLock(bool writable)
     {
       return new PointCloudUnsafeLock(this, writable);
@@ -1147,6 +1152,7 @@ namespace Rhino.Geometry
     /// Updates the PointCloud data with the information that was stored via the <see cref="PointCloudUnsafeLock"/>.
     /// </summary>
     /// <param name="pointCloudData">The data that will be unlocked.</param>
+    /// <since>7.9</since>
     public void ReleaseUnsafeLock(PointCloudUnsafeLock pointCloudData)
     {
       pointCloudData.Release();

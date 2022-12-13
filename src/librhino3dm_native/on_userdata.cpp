@@ -121,7 +121,7 @@ bool CRhCmnUserData::Archive() const
 
 bool CRhCmnUserData::Write( ON_BinaryArchive& binary_archive ) const
 {
-  BOOL rc = FALSE;
+  int rc = FALSE;
   if( m_readwrite )
     rc = m_readwrite(m_serial_number, 1, &binary_archive);
   return rc;
@@ -129,7 +129,7 @@ bool CRhCmnUserData::Write( ON_BinaryArchive& binary_archive ) const
 
 bool CRhCmnUserData::Read( ON_BinaryArchive& binary_archive )
 {
-  BOOL rc = FALSE;
+  int rc = FALSE;
   if( m_readwrite )
     rc = m_readwrite(m_serial_number, 0, &binary_archive);
   return rc;

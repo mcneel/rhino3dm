@@ -135,6 +135,7 @@ namespace Rhino.Collections
     /// Retrieve current change serial number. This is a number that
     /// gets increased each time a datum is set or changed.
     /// </summary>
+    /// <since>7.8</since>
     [CLSCompliant(false)]
     public uint ChangeSerialNumber
     {
@@ -2303,6 +2304,11 @@ namespace Rhino.FileIO
     internal void ClearPointer()
     {
       m_ptr = IntPtr.Zero;
+    }
+
+    internal IntPtr NonConstPointer()
+    {
+      return m_ptr;
     }
 
     bool m_write_error_occured;

@@ -86,6 +86,11 @@ RH_C_FUNCTION ON_SubD* ON_SubD_CreateCylinder(
   return rc;
 }
 
+RH_C_FUNCTION ON_SubD* ON_SubD_Empty()
+{
+  return new ON_SubD(ON_SubD::Empty);
+}
+
 RH_C_FUNCTION ON_SubD* ON_SubD_CreateFromMesh(const ON_Mesh* meshConstPtr, const ON_SubDFromMeshParameters* toSubDParameters)
 {
   RHCHECK_LICENSE
@@ -897,6 +902,27 @@ RH_C_FUNCTION ON_SubD* ON_SubD_CreateFromSurface(const ON_Surface* pConstSurface
     return ON_SubD::CreateFromSurface(*pConstSurface, &p, nullptr);
   }
   return nullptr;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_PackFaces(ON_SubD* subd)
+{
+  unsigned int rc = 0;
+  if (subd)
+  {
+    bool bSetColors = true;
+    ON_SubDFaceIterator fit = subd->FaceIterator();
+    for (const ON_SubDFace* f = fit.FirstFace(); nullptr != f; f = fit.NextFace())
+    {
+      if (f->PerFaceColor() == ON_Color::RandomColor(f->PackId()))
+        continue;
+      bSetColors = false;
+      break;
+    }
+    rc = subd->PackFaces();
+    if (bSetColors)
+      subd->SetPerFaceColorsFromPackId();
+  }
+  return rc;
 }
 
 #endif

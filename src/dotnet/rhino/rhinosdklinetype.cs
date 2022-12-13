@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.FileIO;
+using Rhino.Geometry;
 
 namespace Rhino.DocObjects
 {
@@ -26,7 +27,7 @@ namespace Rhino.DocObjects
     public Linetype() : base()
     {
       // Creates a new non-document control ON_Linetype
-      IntPtr pLinetype = UnsafeNativeMethods.ON_Linetype_New();
+      IntPtr pLinetype = UnsafeNativeMethods.ON_Linetype_New(IntPtr.Zero);
       ConstructNonConstObject(pLinetype);
     }
 
@@ -109,6 +110,26 @@ namespace Rhino.DocObjects
     }
 
     #region properties
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.LinePattern"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.LinePattern;
+
+    /// <summary>
+    /// Gets a value indicating whether this linetype has been deleted and is 
+    /// currently in the Undo buffer.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsDeleted => base.IsDeleted;
+
+    /// <summary>
+    /// Gets a value indicting whether this linetype is a referenced linetype. 
+    /// Referenced linetypes are part of referenced documents.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsReference => base.IsReference;
+
     /// <summary>The name of this linetype.</summary>
     /// <since>5.0</since>
     public override string Name
@@ -132,10 +153,12 @@ namespace Rhino.DocObjects
 
     /// <summary>The index of this linetype.</summary>
     /// <since>5.0</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    //[Obsolete("Use the Index property.")]
     public int LinetypeIndex
     {
-      get { return base.Index; }
-      set { base.Index = value; }
+      get { return Index; }
+      set { Index = value; }
     }
 
     /// <summary>Total length of one repeat of the pattern.</summary>
@@ -153,56 +176,7 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public int SegmentCount
     {
-      get { return GetInt(idxSegmentCount); }
-    }
-
-    /// <summary>
-    /// Returns <see cref="ModelComponentType.LinePattern"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get { return ModelComponentType.LinePattern; }
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether this linetype has been deleted and is 
-    /// currently in the Undo buffer.
-    /// </summary>
-    /// <since>5.0</since>
-    public bool IsDeleted
-    {
-      get
-      {
-#if RHINO_SDK
-        if (null == m_doc)
-          return false;
-        int index = LinetypeIndex;
-        return UnsafeNativeMethods.CRhinoLinetype_IsDeleted(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
-      }
-    }
-
-    /// <summary>
-    /// Gets a value indicting whether this linetype is a referenced linetype. 
-    /// Referenced linetypes are part of referenced documents.
-    /// </summary>
-    /// <since>5.0</since>
-    public bool IsReference
-    {
-      get
-      {
-#if RHINO_SDK
-        if (null == m_doc)
-          return false;
-        int index = LinetypeIndex;
-        return UnsafeNativeMethods.CRhinoLinetype_IsReference(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
-      }
+      get { return GetInt(UnsafeNativeMethods.LinetypeInteger.SegmentCount); }
     }
 
     /// <summary>
@@ -217,7 +191,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
         if (null == m_doc)
           return false;
-        int index = LinetypeIndex;
+        int index = Index;
         return UnsafeNativeMethods.CRhinoLinetype_IsModified(m_doc.RuntimeSerialNumber, index);
 #else
         return false;
@@ -225,13 +199,112 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Defines how the ends of open curves should be drawn
+    /// </summary>
+    /// <since>8.0</since>
+    public Rhino.DocObjects.LineCapStyle LineCapStyle
+    {
+      get { return (Rhino.DocObjects.LineCapStyle)GetInt(UnsafeNativeMethods.LinetypeInteger.LineCap); }
+      set { SetInt(UnsafeNativeMethods.LinetypeInteger.LineCap, (int)value); }
+    }
+
+    /// <summary>
+    /// Defines how the corners of curves should be drawn
+    /// </summary>
+    /// <since>8.0</since>
+    public Rhino.DocObjects.LineJoinStyle LineJoinStyle
+    {
+      get { return (Rhino.DocObjects.LineJoinStyle)GetInt(UnsafeNativeMethods.LinetypeInteger.LineJoin); }
+      set { SetInt(UnsafeNativeMethods.LinetypeInteger.LineJoin, (int)value); }
+    }
+
+    /// <summary> Base width for this linetype </summary>
+    public double Width
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_GetWidth(ptr);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetWidth(ptr, value);
+      }
+    }
+
+    /// <summary>
+    /// Unit system that widths are defined in. UnitSystem.None is default
+    /// and means that the width is defined in pixels.
+    /// </summary>
+    public UnitSystem WidthUnits
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_GetWidthUnits(ptr);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetWidthUnits(ptr, value);
+      }
+    }
+
+    /// <summary>
+    /// Taper points are positions/width combinations along the length of a curve
+    /// </summary>
+    /// <returns></returns>
+    public Point2d[] GetTaperPoints()
+    {
+      using (var pointArray = new Rhino.Runtime.InteropWrappers.SimpleArrayPoint2d())
+      {
+        IntPtr ptr = ConstPointer();
+        IntPtr ptArrayPtr = pointArray.NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_GetTaperPoints(ptr, ptArrayPtr);
+        return pointArray.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Set taper to a simple start width / end width
+    /// </summary>
+    /// <param name="startWidth"></param>
+    /// <param name="endWidth"></param>
+    public void SetTaper(double startWidth, double endWidth)
+    {
+      SetTaper(startWidth, Point2d.Unset, endWidth);
+    }
+
+    /// <summary>
+    /// Set taper for this linetype width a single internal taper point
+    /// </summary>
+    /// <param name="startWidth"></param>
+    /// <param name="taperPoint"></param>
+    /// <param name="endWidth"></param>
+    public void SetTaper(double startWidth, Point2d taperPoint, double endWidth) 
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Linetype_SetTaper(ptr_this, startWidth, taperPoint, endWidth);
+    }
+
+    /// <summary>
+    /// Remove taper information for stroke
+    /// </summary>
+    public void RemoveTaper()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Linetype_RemoveTaper(ptr_this);
+    }
+
     const int idxSegmentCount = 1;
-    int GetInt(int which)
+    int GetInt(UnsafeNativeMethods.LinetypeInteger which)
     {
       IntPtr pConstLinetype = ConstPointer();
       return UnsafeNativeMethods.ON_Linetype_GetInt(pConstLinetype, which);
     }
-    void SetInt(int which, int val)
+    void SetInt(UnsafeNativeMethods.LinetypeInteger which, int val)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_Linetype_SetInt(ptr, which, val);
@@ -248,7 +321,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
         if (null == m_doc)
           return false;
-        int index = LinetypeIndex;
+        int index = Index;
         return UnsafeNativeMethods.CRhinoLinetype_IsDefaultLinetype(m_doc.RuntimeSerialNumber, index);
 #else
         return false;
@@ -302,9 +375,14 @@ namespace Rhino.DocObjects
     /// <since>6.8</since>
     public bool SetSegments(IEnumerable<double> segments)
     {
+      IntPtr ptr_this = NonConstPointer();
+      if (segments==null)
+      {
+        double[] empty = new double[0];
+        return UnsafeNativeMethods.ON_Linetype_SetSegments(ptr_this, 0, empty);
+      }
       var segment_list = new List<double>(segments);
       double[] segment_array = segment_list.ToArray();
-      IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.ON_Linetype_SetSegments(ptr_this, segment_array.Length, segment_array);
     }
 
@@ -416,6 +494,119 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {
+  /// <summary>
+  /// LinetypeTable event types
+  /// <since>8.0</since>
+  /// </summary>
+  public enum LinetypeTableEventType
+  {
+    /// <summary>
+    /// A linetype was added.
+    /// </summary>
+    Added = 0,
+    /// <summary>
+    /// A linetype was deleted.
+    /// </summary>
+    Deleted = 1,
+    /// <summary>
+    /// A linetype was undeleted.
+    /// </summary>
+    Undeleted = 2,
+    /// <summary>
+    /// A linetype was modified.
+    /// </summary>
+    Modified = 3,
+    /// <summary>
+    /// The linetype table was sorted.
+    /// </summary>
+    Sorted = 4,
+    /// <summary>
+    /// The current linetype has changed.
+    /// </summary>
+    Current = 5
+  }
+
+  /// <summary>
+  /// LinetypeTable event arguments
+  /// <since>8.0</since>
+  /// </summary>
+  public class LinetypeTableEventArgs : EventArgs
+  {
+    readonly private uint m_doc_sn;
+    readonly private LinetypeTableEventType m_event_type;
+    readonly private int m_linetype_index;
+    readonly private IntPtr m_ptr_old_linetype;
+
+    internal LinetypeTableEventArgs(uint docSerialNumber, int eventType, int index, IntPtr pConstOldLinetype)
+    {
+      m_doc_sn = docSerialNumber;
+      m_event_type = (LinetypeTableEventType)eventType;
+      m_linetype_index = index;
+      m_ptr_old_linetype = pConstOldLinetype;
+    }
+
+    /// <summary>
+    /// The document in which the event occurred.
+    /// </summary>
+    /// <since>8.0</since>
+    public RhinoDoc Document
+    {
+      get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
+    }
+    private RhinoDoc m_doc;
+
+    /// <summary>
+    /// The event type.
+    /// </summary>
+    /// <since>8.0</since>
+    public LinetypeTableEventType EventType
+    {
+      get { return m_event_type; }
+    }
+
+    /// <summary>
+    /// Index of the linetype.
+    /// </summary>
+    /// <since>8.0</since>
+    public int LinetypeIndex
+    {
+      get { return m_linetype_index; }
+    }
+
+    /// <summary>
+    /// The new state.
+    /// </summary>
+    /// <since>8.0</since>
+    public Linetype NewState
+    {
+      get { return m_new_linetype ?? (m_new_linetype = new Linetype(LinetypeIndex, Document)); }
+    }
+    private Linetype m_new_linetype;
+
+    /// <summary>
+    /// The old state.
+    /// </summary>
+    /// <since>8.0</since>
+    public Linetype OldState
+    {
+      get
+      {
+        if (m_old_linetype == null && m_ptr_old_linetype != IntPtr.Zero)
+        {
+          // 14 July 2022 - S. Baer
+          // m_ptr_old_linetype is const and is deleted when this EventWatcher event
+          // completes. Make a copy when OldState is accessed so we don't end up
+          // with a double delete in the LineType finalizer.
+          IntPtr pLineType = UnsafeNativeMethods.ON_Linetype_New(m_ptr_old_linetype);
+          m_old_linetype = new Linetype(pLineType);
+        }
+        return m_old_linetype;
+      }
+    }
+    private Linetype m_old_linetype;
+  }
+
+
   public sealed class LinetypeTable :
     RhinoDocCommonTable<Linetype>, ICollection<Linetype>
   {

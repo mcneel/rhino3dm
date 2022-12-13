@@ -1863,7 +1863,8 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToMesh(m_parent.m_pObjectPairArray, m_index, pConstMesh, pConstAttributes);
     }
 
-    internal bool UpdateToSubD(Geometry.SubD subD, DocObjects.ObjectAttributes attributes)
+    /// <since>7.18</since>
+    public bool UpdateToSubD(Geometry.SubD subD, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstSubD = subD.ConstPointer();

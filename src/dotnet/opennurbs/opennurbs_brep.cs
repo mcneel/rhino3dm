@@ -397,20 +397,67 @@ namespace Rhino.Geometry
       return Brep.CreateFromSweep(rail0, rail1, shapes, rail0.IsClosed && rail1.IsClosed, 0.01);
     }
 
+    /// <summary>
+    /// Takes a surface and a set of all 3D curves that define a single trimmed surface,
+    /// and splits the surface with the curves, keeping the piece that uses all of the curves.
+    /// </summary>
+    /// <param name="surface">The surface.</param>
+    /// <param name="curves">The curves.</param>
+    /// <param name="useEdgeCurves">
+    /// The 2D trimming curves are made by pulling back the 3D curves using the fitting tolerance.  
+    /// If useEdgeCurves is true, the input 3D curves will be used as the edge curves in the result. 
+    /// Otherwise, the edges will come from pushing up the 2D pullbacks.
+    /// </param>
+    /// <param name="tolerance">
+    /// The fitting tolerance. 
+    /// When in doubt, use the document's model absolute tolerance.
+    /// </param>
+    /// <returns>
+    /// The resulting Breps is successful, otherwise an empty array.
+    /// Note, you may want to join the results into a single Brep.
+    /// </returns>
+    /// <remarks>
+    /// This function is useful when importing non-3dm files with questionable geometry.
+    /// It is also a good way to quickly create a trimmed surface that has multiple inner boundaries without having to call split or trim and then select all of the pieces to throw away.
+    /// If the surface is closed, an attempt will be made to move seams so that they avoid the curves. 
+    /// If that cannot be done, the result may have more than one face.
+    /// If the surface is closed in both directions, it is possible that the split will result in two faces that use all of the input curves.
+    /// In this case all curves must be oriented counter-clockwise, with respect to the surface normal, around the desired result.
+    /// The surface may be extended if it is not large enough to contain the curves.
+    /// Noisy singularities will be repaired when possible.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>8.0</since>
+    public static Brep[] CutUpSurface(Surface surface, IEnumerable<Curve> curves, bool useEdgeCurves, double tolerance)
+    {
+      if (null == surface)
+        throw new ArgumentNullException(nameof(surface));
+
+      using (var brepArray = new SimpleArrayBrepPointer())
+      using (var curveArray = new SimpleArrayCurvePointer(curves))
+      {
+        IntPtr ptr_surface = surface.ConstPointer();
+        IntPtr ptr_curves = curveArray.ConstPointer();
+        IntPtr ptr_breps = brepArray.NonConstPointer();
+        bool rc = UnsafeNativeMethods.TLC_CutUpSurfaceMulti(ptr_surface, ptr_curves, useEdgeCurves, tolerance, ptr_breps);
+        return rc ? brepArray.ToNonConstArray() : new Brep[0];
+      }
+    }
+
 #endif
 
-    /// <summary>
-    /// Create a brep representation of a mesh
-    /// </summary>
-    /// <param name="mesh"></param>
-    /// <param name="trimmedTriangles">
-    /// if true, triangles in the mesh will be represented by trimmed planes in
-    /// the brep. If false, triangles in the mesh will be represented by
-    /// untrimmed singular bilinear NURBS surfaces in the brep.
-    /// </param>
-    /// <returns></returns>
-    /// <since>5.1</since>
-    public static Brep CreateFromMesh(Mesh mesh, bool trimmedTriangles)
+      /// <summary>
+      /// Create a brep representation of a mesh
+      /// </summary>
+      /// <param name="mesh"></param>
+      /// <param name="trimmedTriangles">
+      /// if true, triangles in the mesh will be represented by trimmed planes in
+      /// the brep. If false, triangles in the mesh will be represented by
+      /// untrimmed singular bilinear NURBS surfaces in the brep.
+      /// </param>
+      /// <returns></returns>
+      /// <since>5.1</since>
+      public static Brep CreateFromMesh(Mesh mesh, bool trimmedTriangles)
     {
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       IntPtr ptr_newbrep = UnsafeNativeMethods.ONC_BrepFromMesh(ptr_const_mesh, trimmedTriangles);
@@ -1528,12 +1575,64 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr_shapes = shapearray.ConstPointer();
         IntPtr ptr_breps = rc.NonConstPointer();
-        UnsafeNativeMethods.RHC_Rhino2RailSweep2(const_ptr_rail1, const_ptr_rail2, const_ptr_shapes, start, end, closed, tolerance, (int)rebuild, rebuildPointCount, refitTolerance, preserveHeight, ptr_breps);
+        UnsafeNativeMethods.RHC_Rhino2RailSweep2(const_ptr_rail1, const_ptr_rail2, const_ptr_shapes, start, end, closed, tolerance, (int)rebuild, rebuildPointCount, refitTolerance, preserveHeight, ptr_breps, true);
         Runtime.CommonObject.GcProtect(rail1, rail2);
         GC.KeepAlive(shapes);
         return rc.ToNonConstArray();
       }
     }
+
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines the surface edges.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along</param>
+    /// <param name="rail2">Rail to sweep shapes along</param>
+    /// <param name="shapes">Shape curves</param>
+    /// <param name="start">Optional starting point of sweep. Use Point3d.Unset if you do not want to include a start point.</param>
+    /// <param name="end">Optional ending point of sweep. Use Point3d.Unset if you do not want to include an end point.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
+    /// <param name="rebuild">The rebuild style.</param>
+    /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
+    /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0</param>
+    /// <param name="preserveHeight">Removes the association between the height scaling from the width scaling</param>
+    /// <param name="autoAdjust">
+    /// Set to true to have shape curves adjusted, sorted, and matched automatically.
+    /// This will produce results comparable to Rhino's Sweep2 command.
+    /// Set to false to not have shape curves adjusted, sorted, and matched automatically.
+    /// </param>
+    /// <returns>Array of Brep sweep results</returns>
+    /// <since>7.19</since>
+    public static Brep[] CreateFromSweep(
+      Curve rail1,
+      Curve rail2,
+      IEnumerable<Curve> shapes,
+      Point3d start,
+      Point3d end,
+      bool closed,
+      double tolerance,
+      SweepRebuild rebuild,
+      int rebuildPointCount,
+      double refitTolerance,
+      bool preserveHeight,
+      bool autoAdjust
+      )
+    {
+      IntPtr const_ptr_rail1 = rail1.ConstPointer();
+      IntPtr const_ptr_rail2 = rail2.ConstPointer();
+      using (var shapearray = new SimpleArrayCurvePointer(shapes))
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_shapes = shapearray.ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.RHC_Rhino2RailSweep2(const_ptr_rail1, const_ptr_rail2, const_ptr_shapes, start, end, closed, tolerance, (int)rebuild, rebuildPointCount, refitTolerance, preserveHeight, ptr_breps, autoAdjust);
+        Runtime.CommonObject.GcProtect(rail1, rail2);
+        GC.KeepAlive(shapes);
+        return rc.ToNonConstArray();
+      }
+    }
+
 
     /// <summary>
     /// Makes a 2 rail sweep. Like CreateFromSweep but the result is split where parameterization along a rail changes abruptly.
@@ -3107,6 +3206,23 @@ namespace Rhino.Geometry
         return output.ToNonConstArray();
       }
     }
+
+    /// <summary>
+    /// If this Brep has two or more connected components, then duplicates of the connected components are returned.
+    /// </summary>
+    /// <returns>An array of connected components, or an empty array.</returns>
+    /// <since>7.18</since>
+    public Brep[] GetConnectedComponents()
+    {
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.ON_Brep_GetConnectedComponents(const_ptr_this, ptr_breps);
+        return rc.ToNonConstArray();
+      }
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Constructs all the Wireframe curves for this Brep.
@@ -3564,6 +3680,47 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoMergeCoplanarFaces(ptr_this, tolerance, angleTolerance);
+    }
+
+    /// <summary>
+    /// Merges coplanar faces adjacent to Brep face into a single face.
+    /// </summary>
+    /// <param name="faceIndex">The index of the Brep face to search.</param>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, for determining when faces are parallel.
+    /// When in doubt, use the document's ModelAngleToleranceRadians property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.19</since>
+    public bool MergeCoplanarFaces(int faceIndex, double tolerance, double angleTolerance)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMergeCoplanarFaces2(ptr_this, faceIndex, tolerance, angleTolerance);
+    }
+
+    /// <summary>
+    /// Merges two coplanar, adjacent Brep faces into a single face.
+    /// </summary>
+    /// <param name="faceIndex0">The index of the first Brep face.</param>
+    /// <param name="faceIndex1">The index of the second Brep face.</param>
+    /// <param name="tolerance">
+    /// Tolerance for determining when edges are adjacent.
+    /// When in doubt, use the document's ModelAbsoluteTolerance property.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, for determining when faces are parallel.
+    /// When in doubt, use the document's ModelAngleToleranceRadians property.
+    /// </param>
+    /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.19</since>
+    public bool MergeCoplanarFaces(int faceIndex0, int faceIndex1, double tolerance, double angleTolerance)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMergeCoplanarFaces3(ptr_this, faceIndex0, faceIndex1, tolerance, angleTolerance);
     }
 
     /// <summary>
@@ -4335,7 +4492,45 @@ namespace Rhino.Geometry
     /// <since>5.4</since>
     public int VertexIndex { get; }
 
+    /// <summary>
+    /// Accuracy of vertex point, either &gt;=0.0 or <see cref="RhinoMath.UnsetValue"/>.
+    /// A value of <see cref="RhinoMath.UnsetValue"/> indicates that the tolerance should be computed.
+    /// A value of 0.0 indicates that the distance from the vertex to any applicable
+    /// edge or trim end is &lt;= <see cref="RhinoMath.ZeroTolerance"/>.
+    /// If an edge begins or ends at this vertex, then the distance from the vertex's
+    /// 3d point to the appropriate end of the edge's 3d curve must be &lt;= this tolerance.
+    /// If a trim begins or ends at this vertex, then the distance from the vertex's
+    /// 3d point to the 3d point on the surface obtained by evaluating the surface at
+    /// the appropriate end of the trimming curve must be  &lt;= this tolerance.
+    /// </summary>
+    public double Tolerance
+    {
+      get
+      {
+        IntPtr ptr_const_brep = Brep.ConstPointer();
+        return UnsafeNativeMethods.ON_BrepVertex_Tolerance(ptr_const_brep, VertexIndex);
+      }
+    }
+
     #endregion
+
+#if RHINO_SDK
+    /// <summary>
+    /// If this vertex is part of a brep created by SubD.ProxyBrep(), 
+    /// then the subd component id of the corresponding SubD vertex is returned.
+    /// Otherwise 0 is returned.
+    /// </summary>
+    /// <since>7.19</since>
+    [CLSCompliant(false)]
+    public uint ProxyBrepSubDVertexId
+    {
+      get
+      {
+        IntPtr ptr_const_brep = Brep.ConstPointer();
+        return UnsafeNativeMethods.ON_BrepVertex_ProxyBrepSubDVertexId(ptr_const_brep, VertexIndex);
+      }
+    }
+#endif
 
     #region methods
     /// <summary>
@@ -4466,6 +4661,22 @@ namespace Rhino.Geometry
     public int EdgeIndex { get; }
 
 #if RHINO_SDK
+    /// <summary>
+    /// If this edge is part of a brep created by SubD.ProxyBrep(), 
+    /// then the subd component id of the corresponding SubD edge is returned.
+    /// Otherwise 0 is returned.
+    /// </summary>
+    /// <since>7.19</since>
+    [CLSCompliant(false)]
+    public uint ProxyBrepSubDEdgeId
+    {
+      get
+      {
+        IntPtr ptr_const_brep = Brep.ConstPointer();
+        return UnsafeNativeMethods.ON_BrepEdge_ProxyBrepSubDEdgeId(ptr_const_brep, EdgeIndex);
+      }
+    }
+
     /// <summary>
     /// Determine the concavity of this edge at a specific parameter.
     /// </summary>
@@ -5456,11 +5667,11 @@ namespace Rhino.Geometry
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="edge"></param>
-    /// <param name="knots"></param>
-    /// <param name="tolerance"></param>
-    /// <param name="bSections"></param>
-    /// <param name="fitQuality"></param>
+    /// <param name="edge">The edge to fit</param>
+    /// <param name="knots">The custonm knot vector to use, or an empty vector to use the existing knots</param>
+    /// <param name="tolerance"> 3d tolerance for projection, splitting, fitting</param>
+    /// <param name="bSections">If true, the surface is divided into sections at all knots</param>
+    /// <param name="fitQuality">3-d fit to trim curve (projected)</param>
     /// <returns></returns>
     /// <since>7.0</since>
     public Surface[] RefitTrim(BrepEdge edge, IEnumerable<double> knots, double tolerance, bool bSections, ref double fitQuality)
@@ -5478,15 +5689,15 @@ namespace Rhino.Geometry
       }
     }
 
-/// <summary>
-/// Shrinks the underlying untrimmed surface of this Brep face right to the trimming boundaries.
-/// Note, shrinking the trimmed surface can sometimes cause problems later since having
-/// the edges so close to the trimming boundaries can cause commands that use the surface
-/// edges as input to fail.
-/// </summary>
-/// <returns>true on success, false on failure.</returns>
-/// <since>6.16</since>
-public bool ShrinkSurfaceToEdge()
+    /// <summary>
+    /// Shrinks the underlying untrimmed surface of this Brep face right to the trimming boundaries.
+    /// Note, shrinking the trimmed surface can sometimes cause problems later since having
+    /// the edges so close to the trimming boundaries can cause commands that use the surface
+    /// edges as input to fail.
+    /// </summary>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>6.16</since>
+    public bool ShrinkSurfaceToEdge()
     {
       IntPtr ptr_brep = m_brep.NonConstPointer();
       return UnsafeNativeMethods.RHC_RhinoBrepShrinkSurfaceToEdge(ptr_brep, FaceIndex);
@@ -5776,6 +5987,77 @@ public bool ShrinkSurfaceToEdge()
       return UnsafeNativeMethods.ON_Brep_RebuildEdges(ptr_brep, FaceIndex, tolerance, rebuildSharedEdges, rebuildVertices);
     }
 
+    /// <summary>
+    /// Used by SubD functions that create breps to transmit the subd face SubDFace.PackId value 
+    /// to the brep face or faces generated from the subd face.
+    /// Unless you are an expert and doing something very carefully and very fancy, to not call this function.
+    /// </summary>
+    /// <param name="packId">The pack id.</param>
+    /// <since>7.19</since>
+    [CLSCompliant(false)]
+    public void SetPackId(uint packId)
+    {
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      UnsafeNativeMethods.ON_BrepFace_SetPackIdForExperts(ptr_brep, FaceIndex, packId);
+    }
+
+    /// <summary>
+    /// Sets BrepFace.PackId to 0.
+    /// </summary>
+    /// <since>7.19</since>
+    public void ClearPackId()
+    {
+      IntPtr ptr_brep = m_brep.NonConstPointer();
+      UnsafeNativeMethods.ON_BrepFace_ClearPackId(ptr_brep, FaceIndex);
+    }
+
+    /// <summary>
+    /// 0 if the pack it is unset, or &gt;0 if the set pack id.
+    /// </summary>
+    /// <remarks>
+    /// PackId values assigned to brep faces are inheritied from the PackId values
+    /// assigned to subd faces when a subd is converted into a brep.
+    /// These faces are "trivially trimmed" which means the boundary of the face
+    /// is identical to the boundary of the underlying surface.
+    /// There are two types of face packs in a subd, quad grid packs and singleton packs.
+    /// A subd quad grid pack is a set of subd quads that form a rectangular grid.
+    /// A subd singleton pack is a single face, quad or n-gon, that is not part of
+    /// a quad grid pack.
+    /// There are three types of face packs in a brep created from a subd,
+    /// grid packs, star packs and singleton packs.
+    /// A brep "grid pack" comes from a rectangular grid of subd quads. A grid pack of brep faces can
+    /// be converted into a single larger trivially trimmed brep face.
+    /// A brep "star pack" of brep faces comes from a singel subd n-gon (n = 3, 5 or more). The star pack
+    /// will have n faces with a star center vertex and shared edges radiating from the star center.
+    /// A brep "singleton" pack comes from a single subd quad that could not be grouped into a larger
+    /// subd quad grid pack.
+    /// </remarks>
+    /// <since>7.19</since>
+    [CLSCompliant(false)]
+    public uint PackId
+    {
+      get
+      {
+        IntPtr ptr_const_this = m_brep.ConstPointer();
+        return UnsafeNativeMethods.ON_BrepFace_PackId(ptr_const_this, FaceIndex);
+      }
+    }
+
+    /// <summary>
+    /// If this face is part of a brep created by SubD.ProxyBrep(), then
+    /// the subd component id of the corresponding SubD face is returned.
+    /// Otherwise 0 is returned.
+    /// </summary>
+    /// <since>7.19</since>
+    [CLSCompliant(false)]
+    public uint ProxyBrepSubDFaceId
+    {
+      get
+      {
+        IntPtr ptr_const_this = m_brep.ConstPointer();
+        return UnsafeNativeMethods.ON_BrepFace_ProxyBrepSubDFaceId(ptr_const_this, FaceIndex);
+      }
+    }
 #endif
 
     /// <summary>
@@ -5829,7 +6111,107 @@ public bool ShrinkSurfaceToEdge()
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_BrepFace_ClearMaterialChannelIndex(ptr_this);
     }
-    #endregion
+
+#if RHINO_SDK
+    /// <summary>
+    /// Creates a surface between two surfaces, with a fixed rail curve on the first surface.
+    /// </summary>
+    /// <param name="curveOnFace">A curve on this face</param>
+    /// <param name="secondFace">The second face</param>
+    /// <param name="u1">A parameter in the u direction of the second face at the side you want to keep after filleting.</param>
+    /// <param name="v1">A parameter in the v direction of the second face at the side you want to keep after filleting.</param>
+    /// <param name="railDegree">Desired fillet degree (3 or 5) in the u-direction, along the rails</param>
+    /// <param name="arcDegree">esired fillet degree (2, 3, 4, or 5) in the v-direction, along the fillet arcs.If 2, then the surface is rational in v</param>
+    /// <param name="arcSliders">Array of 2 sliders to shape the fillet in the arc direction, used for arcDegree = 3, 4, or 5; input { 0.0, 0.0 } to ignore
+    /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
+    /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
+    /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
+    /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+    /// <param name="split_type">The split type</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="out_fillets">The results of the fillet calculation.</param>
+    /// <param name="out_breps0">The trim or split results of the Brep owned by faceWithCurve.</param>
+    /// <param name="out_breps1">The trim or split results of the Brep owned by pFace1.</param>
+    /// <param name="fitResults">array of doubles indicating fitting results:
+    /// [0] max 3d point deviation along surface 0
+    /// [1] max 3d point deviation along surface 1
+    /// [2] max angle deviation along surface 0 (in degrees)
+    /// [3] max angle deviation along surface 1 (in degrees)
+    /// [4] max angle deviation between Bézier surfaces(in degrees)
+    /// [5] max curvature difference between Bézier surfaces</param>
+    /// <returns> true if successful, false otherwise.</returns>
+    /// <remarks>The trim or split input Breps are in OutBreps0, and OutBreps1. If the input faces are
+    /// from the same Brep, nothing will be added to OutBreps1.If you specified a split type
+    /// of RhinoFilletSurfaceSplitType::Nothing, then nothing will be added to either OutBreps0
+    /// or OutBreps1.</remarks>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public bool FilletSurfaceToRail(Curve curveOnFace, BrepFace secondFace,
+      double u1, double v1,
+      int railDegree,
+      int arcDegree,
+      IEnumerable<double> arcSliders,
+      int numBezierSrfs,
+      bool extend,
+      FilletSurfaceSplitType split_type,
+      double tolerance,
+      List<Brep> out_fillets,
+      List<Brep> out_breps0,
+      List<Brep> out_breps1,
+      out double[] fitResults
+    )
+    {
+      return curveOnFace.FilletSurfaceToRail(this, secondFace, u1, v1, railDegree, arcDegree, arcSliders, numBezierSrfs,
+          extend, split_type, tolerance, out_fillets, out_breps0, out_breps1, out fitResults);
+    }
+    /// <summary>
+    /// Creates a constant-radius fillet surface between a surface and the curve.
+    /// </summary>
+    /// <param name="curve">the curve to which this face is being filleted.</param>
+    /// <param name="t">A parameter on the curve, indicating region of fillet.</param>
+    /// <param name="u">A parameter in the u direction of the face indicating which side of the curve to fillet.</param>
+    /// <param name="v">A parameter in the v direction of the face indicating which side of the curve to fillet.</param>
+    /// <param name="radius">The radius of the constant-radius fillet desired. NOTE: using arcSliders will change the shape of the arcs themselves</param>
+    /// <param name="alignToCurve">Does the user want the fillet to align to the curve?
+    /// 0 - No, ignore the curve's b-spline structure
+    /// 1 - Yes, match the curves's degree, spans, CVs as much as possible
+    /// 2 - Same as 1, but iterate to fit to tolerance
+    /// Note that a value of 1 or 2 will cause nBezierSrfs to be ignored</param>
+    /// <param name="railDegree">Desired fillet degree (3 or 5) in the u-direction, along the curve</param>
+    /// <param name="arcDegree">Desired fillet degree (2, 3, 4, or 5) in the v-direction, along the fillet arcs.If 2, then the surface is rational in v</param>
+    /// <param name="arcSliders">Array of 2 sliders to shape the fillet in the arc direction, used for arcDegree = 3, 4, or 5; input { 0.0, 0.0 } to ignore
+    /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
+    /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
+    /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="out_fillets">he results of the fillet calculation.</param>
+    /// <param name="fitResults">array of doubles indicating fitting results:
+    /// [0] max 3d point deviation along curve
+    /// [1] max 3d point deviation along face
+    /// [2] max angle deviation along face(in degrees)
+    /// [3] max angle deviation between Bézier surfaces(in degrees)
+    /// [4] max curvature difference between Bézier surfaces</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool FilletSurfaceToCurve(
+      Curve curve,
+      double t,
+      double u, double v,
+      double radius,
+      int alignToCurve,
+      int railDegree,
+      int arcDegree,
+      IEnumerable<double> arcSliders,
+      int numBezierSrfs,
+      double tolerance,
+      List<Brep> out_fillets,
+      out double[] fitResults
+    )
+    {
+      return curve.FilletSurfaceToCurve(this, t, u, v, radius, alignToCurve, railDegree, arcDegree, arcSliders, 
+        numBezierSrfs, tolerance, out_fillets, out fitResults);
+    }
+#endif
+#endregion
   }
 
 
@@ -6024,8 +6406,10 @@ public bool ShrinkSurfaceToEdge()
     readonly Extrusion m_extrusion;
     readonly MeshType m_meshtype;
 #if RHINO_SDK
+#pragma warning disable 0618
     Render.RenderPrimitive m_primitive;
     Render.RenderPrimitiveList m_parent_list;
+#pragma warning restore 0618
     readonly int m_index;
 #endif
 
@@ -6040,6 +6424,7 @@ public bool ShrinkSurfaceToEdge()
       m_meshtype = meshType;
     }
 #if RHINO_SDK
+#pragma warning disable 0618
     public MeshHolder(Render.RenderPrimitiveList parentList, int index)
     {
       m_parent_list = parentList;
@@ -6051,6 +6436,7 @@ public bool ShrinkSurfaceToEdge()
     {
       m_primitive = primitive;
     }
+#pragma warning restore 0618
 #endif
 
     public void ReleaseMesh()

@@ -45,14 +45,3 @@ RH_C_FUNCTION void ON_LineCurve_GetSetLine(ON_LineCurve* pCurve, bool set, ON_Li
       *line = pCurve->m_line;
   }
 }
-
-#if !defined(RHINO3DM_BUILD)
-RH_C_FUNCTION void ON_LineCurve_Draw(const ON_LineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
-{
-  if( pCrv && pDisplayPipeline )
-  {
-    int abgr = ARGB_to_ABGR(argb);
-    pDisplayPipeline->DrawLine( pCrv->m_line.from, pCrv->m_line.to, abgr, thickness );
-  }
-}
-#endif

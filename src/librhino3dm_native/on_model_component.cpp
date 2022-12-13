@@ -267,8 +267,24 @@ RH_C_FUNCTION bool ON_ModelComponent_GetDeletedName(const ON_ModelComponent* con
   {
     const ON_wString str = constModelComponentPtr->DeletedName();
     pStringHolder->Set(str);
-    rc = true;;
+    rc = true;
   }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_ModelComponent_IsDeleted(const ON_ModelComponent* constModelComponentPtr)
+{
+  bool rc = false;
+  if (nullptr != constModelComponentPtr)
+    rc = constModelComponentPtr->IsDeleted();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_ModelComponent_IsReference(const ON_ModelComponent* constModelComponentPtr)
+{
+  bool rc = false;
+  if (nullptr != constModelComponentPtr)
+    rc = constModelComponentPtr->IsReferenceComponent();
   return rc;
 }
 
@@ -296,3 +312,8 @@ RH_C_FUNCTION unsigned int ON_ModelComponent_InstanceDefinitionModelSerialNumber
   return rc;
 }
 
+RH_C_FUNCTION void ON_ModelComponent_NamePathSeparator(CRhCmnStringHolder* pStringHolder)
+{
+  if (pStringHolder)
+    pStringHolder->Set(ON_ModelComponent::NamePathSeparator);
+}

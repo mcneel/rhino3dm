@@ -82,6 +82,39 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// true if the component is deleted.
+    /// Deleted components are kept by the document for undo purposes.
+    /// </summary>
+    /// <since>8.0</since>
+    public virtual bool IsDeleted
+    {
+      get
+      {
+        if (!IsDocumentControlled) 
+          return false;
+
+        var const_ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_ModelComponent_IsDeleted(const_ptr);
+      }
+    }
+
+    /// <summary>
+    /// Gets a value indicting whether this component is a referenced component. 
+    /// Referenced components are part of referenced documents.
+    /// </summary>
+    /// <since>8.0</since>
+    public virtual bool IsReference
+    {
+      get
+      {
+        if (!IsDocumentControlled)
+          return false;
+
+        var const_ptr = ConstPointer();
+        return UnsafeNativeMethods.ON_ModelComponent_IsReference(const_ptr);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the ID of the current instance.
@@ -388,6 +421,25 @@ namespace Rhino.DocObjects
           UnsafeNativeMethods.ON_ModelComponent_GetDeletedName(const_ptr, non_const_ptr_string);
           return sh.ToString();
         }
+      }
+    }
+
+    /// <summary>
+    /// Returns the string "::". This is the string Rhino uses in layer full path names to separate the names of individual layers.
+    /// </summary>
+    /// <since>8.0</since>
+    public static string NamePathSeparator { get; } = InternalNamePathSeparator;
+
+    static string InternalNamePathSeparator
+    {
+      get
+      {
+         using (var sh = new Runtime.InteropWrappers.StringHolder())
+         {
+          var non_const_ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_ModelComponent_NamePathSeparator(non_const_ptr_string);
+          return sh.ToString();
+         }
       }
     }
 

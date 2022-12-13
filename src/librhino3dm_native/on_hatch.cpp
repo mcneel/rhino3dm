@@ -345,6 +345,13 @@ RH_C_FUNCTION void ON_ColorStopArray_Delete(ON_SimpleArray<ON_ColorStop>* stops)
     delete stops;
 }
 
+RH_C_FUNCTION int ON_ColorStopArray_Count(const ON_SimpleArray<ON_ColorStop>* stops)
+{
+  if (stops)
+    return stops->Count();
+  return 0;
+}
+
 RH_C_FUNCTION void ON_ColorStopArray_Get(const ON_SimpleArray<ON_ColorStop>* stops, int index, int* argb, double* t)
 {
   if (stops && argb && t)
@@ -401,4 +408,155 @@ RH_C_FUNCTION void ON_Hatch_SetGradientData(ON_Hatch* hatch, ON_3DPOINT_STRUCT s
   hatch->SetGradientRepeat(repeat);
   if (stops)
     hatch->SetGradientColors(*stops);
+}
+
+/////////////////////////////////////////////////////////////////
+
+
+RH_C_FUNCTION int ON_HatchPattern_HatchLineCount(const ON_HatchPattern* pHatchPattern)
+{
+  int rc = 0;
+  if (pHatchPattern)
+    rc = pHatchPattern->HatchLineCount();
+  return rc;
+}
+
+RH_C_FUNCTION int ON_HatchPattern_AddHatchLine(ON_HatchPattern* pHatchPattern, const ON_HatchLine* pHatchLine)
+{
+  int rc = 0;
+  if (pHatchPattern && pHatchLine)
+    rc = pHatchPattern->AddHatchLine(*pHatchLine);
+  return rc;
+}
+
+RH_C_FUNCTION ON_HatchLine* ON_HatchPattern_HatchLine(const ON_HatchPattern* pHatchPattern, int hatchLineIndex)
+{
+  ON_HatchLine* rc = nullptr;
+  if (pHatchPattern)
+  {
+    // Make a copy
+    const ON_HatchLine* pConst = pHatchPattern->HatchLine(hatchLineIndex);
+    if (pConst)
+      rc = new ON_HatchLine(*pConst);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_HatchPattern_RemoveHatchLine(ON_HatchPattern* pHatchPattern, int hatchLineIndex)
+{
+  bool rc = false;
+  if (pHatchPattern)
+    rc = pHatchPattern->RemoveHatchLine(hatchLineIndex);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_HatchPattern_RemoveAllHatchLines(ON_HatchPattern* pHatchPattern)
+{
+  if (pHatchPattern)
+    pHatchPattern->RemoveAllHatchLines();
+}
+
+RH_C_FUNCTION int ON_HatchPattern_SetHatchLines(ON_HatchPattern* pHatchPattern, const ON_SimpleArray<ON_HatchLine*>* pHatchLines)
+{
+  int rc = 0;
+  if (pHatchPattern && pHatchLines)
+  {
+    ON_ClassArray<ON_HatchLine> hatch_lines(pHatchLines->Count());
+    for (int i = 0; i < pHatchLines->Count(); i++)
+    {
+      ON_HatchLine* pLine = (*pHatchLines)[i];
+      if (pLine)
+        hatch_lines.Append(*pLine);
+    }
+    rc = pHatchPattern->SetHatchLines(hatch_lines.Count(), hatch_lines.Array());
+  }
+  return rc;
+}
+
+/////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION ON_HatchLine* ON_HatchLine_New(const ON_HatchLine* pHatchLine)
+{
+  if (pHatchLine)
+    return new ON_HatchLine(*pHatchLine);
+  return new ON_HatchLine();
+}
+
+RH_C_FUNCTION void ON_HatchLine_Delete(ON_HatchLine* pHatchLine)
+{
+  if (nullptr != pHatchLine)
+    delete pHatchLine;
+}
+
+RH_C_FUNCTION void ON_HatchLine_GetSetAngle(ON_HatchLine* pHatchLine, double* pAngle, bool set)
+{
+  if (pHatchLine && pAngle)
+  {
+    if (set)
+      pHatchLine->SetAngleRadians(*pAngle);
+    else
+      *pAngle = pHatchLine->AngleRadians();
+  }
+}
+
+RH_C_FUNCTION void ON_HatchLine_GetSetBasePoint(ON_HatchLine* pHatchLine, ON_2dPoint* pPoint, bool set)
+{
+  if (pHatchLine && pPoint)
+  {
+    if (set)
+      pHatchLine->SetBase(*pPoint);
+    else
+      *pPoint = pHatchLine->Base();
+  }
+}
+
+RH_C_FUNCTION void ON_HatchLine_GetSetOffset(ON_HatchLine* pHatchLine, ON_2dVector* pVector, bool set)
+{
+  if (pHatchLine && pVector)
+  {
+    if (set)
+      pHatchLine->SetOffset(*pVector);
+    else
+      *pVector = pHatchLine->Offset();
+  }
+}
+
+RH_C_FUNCTION int ON_HatchLine_DashCount(const ON_HatchLine* pHatchLine)
+{
+  int rc = 0;
+  if (pHatchLine)
+    rc = pHatchLine->DashCount();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_HatchLine_Dash(const ON_HatchLine* pHatchLine, int dash_index)
+{
+  double rc = 0.0;
+  if (pHatchLine)
+    rc = pHatchLine->Dash(dash_index);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_HatchLine_AppendDash(ON_HatchLine* pHatchLine, double dash)
+{
+  if (pHatchLine)
+    pHatchLine->AppendDash(dash);
+}
+
+RH_C_FUNCTION void ON_HatchLine_SetDashes(ON_HatchLine* pHatchLine, int count, /*ARRAY*/const double* pDashes)
+{
+  if (pHatchLine && count > 0 && pDashes)
+  {
+    ON_SimpleArray<double> dashes(count);
+    dashes.Append(count, pDashes);
+    pHatchLine->SetDashes(dashes);
+  }
+}
+
+RH_C_FUNCTION double ON_HatchLine_GetPatternLength(const ON_HatchLine* pHatchLine)
+{
+  double rc = 0.0;
+  if (pHatchLine)
+    rc = pHatchLine->GetPatternLength();
+  return rc;
 }

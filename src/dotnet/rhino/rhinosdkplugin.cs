@@ -15,6 +15,7 @@ using Rhino.UI.Controls;
 using Rhino.Render;
 using System.Reflection;
 using Rhino.Render.PostEffects;
+using Rhino.Render.CustomRenderMeshes;
 
 namespace Rhino.PlugIns
 {
@@ -636,6 +637,27 @@ namespace Rhino.PlugIns
       get { return PlugInLoadTime.WhenNeeded; }
     }
 
+    internal delegate bool UnknownUserDataCallback(uint doc_serial, Guid plugin_id);
+    private static readonly UnknownUserDataCallback g_unknown_userdata_callback = OnUnknownUserData;
+    private static bool OnUnknownUserData(uint doc_serial, Guid plugin_id)
+    {
+      var doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
+
+      try
+      {
+        var args = new UnknownUserDataEventArgs(doc, plugin_id);
+
+        UnknownUserData?.Invoke(null, args);
+      }
+
+      catch (Exception exception)
+      {
+        Runtime.HostUtils.ExceptionReport(exception);
+      }
+
+      return true;
+    }
+
     protected PlugIn()
     {
       if (!m_bOkToConstruct)
@@ -677,8 +699,40 @@ namespace Rhino.PlugIns
           );
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks3(m_OnAddPagesToOptions, m_OnAddPagesToObjectProperties, g_plug_in_proc);
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks4(m_ResetMessageBoxes);
+
+        UnsafeNativeMethods.CRhinoPlugIn_SetUnknownUserDataCallback(g_unknown_userdata_callback);
       }
     }
+
+    /// <summary>
+    /// Event argument passed to the <see cref="Rhino.PlugIns.PlugIn.UnknownUserData"/> event.
+    /// </summary>
+    public class UnknownUserDataEventArgs : EventArgs
+    {
+      internal UnknownUserDataEventArgs(RhinoDoc doc, Guid pluginId)
+      {
+        Document = doc;
+        PlugInId = pluginId;
+      }
+
+      /// <since>7.17</since>
+      public RhinoDoc Document
+      {
+        get;
+      }
+
+      /// <since>7.17</since>
+      public Guid PlugInId
+      {
+        get;
+      }
+    }
+
+    /// <summary>
+    /// This event is raised when a 3dm file is loaded with unknown user data, and the plug-in to handle it could not be loaded.
+    /// </summary>
+    /// <since>7.17</since>
+    public static event EventHandler<UnknownUserDataEventArgs> UnknownUserData;
 
     #region virtual function callbacks
     internal delegate int OnLoadDelegate(int pluginSerialNumber);
@@ -760,10 +814,12 @@ namespace Rhino.PlugIns
           // their probably protected code.
           RenderContent.RegisterContent(p);
           PostEffect.RegisterPostEffect(p);
+          //CustomRenderMeshProvider.RegisterProviders(p);
+          Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RegisterProviders(p);
           Rhino.Render.UICommands.UICommand.RegisterUICommand(p);
           RealtimeDisplayMode.RegisterDisplayModes(p);
           LightManagerSupport.RegisterLightManager(p);
-
+          ObjectManager.ObjectManager.RegisterExtensions(p);
 
           // after calling the OnLoad function, check to see if we should be creating
           // an RDK plug-in. This is the typical spot where C++ plug-ins perform their
@@ -2113,19 +2169,29 @@ namespace Rhino.PlugIns
 
       }
 
-    // attempt to load the assembly
-    // This plugin may be a standard C++ plug-in that uses .NET.
-    // If the plug-in does not reference this RhinoCommon, assume it is not plugin
+      // attempt to load the assembly
+      // This plugin may be a standard C++ plug-in that uses .NET.
+      // If the plug-in does not reference this RhinoCommon, assume it is not plugin
 
-    // 07 Dec. 2007 S. Baer
-    // Loading a plug-in a second time will throw an exception in ReflectionOnlyLoadFrom
-    // We used to just return plugin_not_dotnet when this exception was thrown. This caused
-    // the standard plug-in manager code to attempt to read the plug-in, and get completely
-    // messed up (usually by displaying a "Rhino Version not Specified message"
-    System.Reflection.Assembly reflect_assembly;
+      // 07 Dec. 2007 S. Baer
+      // Loading a plug-in a second time will throw an exception in ReflectionOnlyLoadFrom
+      // We used to just return plugin_not_dotnet when this exception was thrown. This caused
+      // the standard plug-in manager code to attempt to read the plug-in, and get completely
+      // messed up (usually by displaying a "Rhino Version not Specified message"
+      System.Reflection.Assembly reflect_assembly;
       try
       {
-        reflect_assembly = System.Reflection.Assembly.ReflectionOnlyLoadFrom( path );
+        if (HostUtils.RunningInNetCore)
+        {
+          // ensure it's actually a .NET assembly before trying to load it
+          AssemblyName.GetAssemblyName(path);
+          // .NET Core runtime does not support reflection only loading of assemblies
+          reflect_assembly = Assembly.LoadFrom(path);
+        }
+        else
+        {
+          reflect_assembly = Assembly.ReflectionOnlyLoadFrom(path);
+        }
       }
       catch(FileLoadException e)
       {
@@ -2490,12 +2556,14 @@ namespace Rhino.PlugIns
         HostUtils.DebugString ($"RhinoCommon.dll not found: {rhino_common_path}");
         throw new FileNotFoundException ("RhinoCommon.dll not found");
       }
+      
+      string compat_exe = Runtime.HostUtils.RunningOnOSX ? "Compat.dll" : "Compat.exe";
 
       // get path to compat (should be next to RhinoCommon.dll)
-      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Compat.exe");
+      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), compat_exe);
       if (!File.Exists (compat_path)) {
-        HostUtils.DebugString ($"Compat.exe not found: {compat_path}");
-        throw new FileNotFoundException ("Compat.exe not found");
+        HostUtils.DebugString ($"{compat_exe} not found: {compat_path}");
+        throw new FileNotFoundException ($"{compat_exe} not found");
       }
 
       HostUtils.DebugString(path);
@@ -2523,13 +2591,9 @@ namespace Rhino.PlugIns
         // on Mac
         DirectoryInfo di = new DirectoryInfo(compat_path);
         di = di.Parent;
-        string mono_path = Path.Combine(di.FullName, "Frameworks/Mono64Rhino.framework/Versions/Current/Resources/bin/mono");
-        if( !File.Exists(mono_path))
-        {
-          di = di.Parent;
-          mono_path = Path.Combine(di.FullName, "Frameworks/Mono64Rhino.framework/Versions/Current/Resources/bin/mono");
-        }
-        proc.StartInfo.FileName = mono_path;
+        var arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86_64";
+        string dotnet_path = Path.Combine(di.FullName, "dotnet", arch, "dotnet");
+        proc.StartInfo.FileName = dotnet_path;
         proc.StartInfo.Arguments = $"\"{compat_path}\" " + proc.StartInfo.Arguments;
       }
 
@@ -3783,6 +3847,9 @@ namespace Rhino.PlugIns
       }
     }
 
+    
+    
+
     internal delegate bool PlugInIconCallback(int serialNumber, int width, int height, IntPtr dibOut);
     private static readonly PlugInIconCallback g_plugin_icon_callback = PlugInIcon;
     private static bool PlugInIcon(int serialNumber, int width, int height, IntPtr dibOut)
@@ -4438,7 +4505,12 @@ namespace Rhino.PlugIns
     private static int OnDecalProperties(int serialNumber, IntPtr pXmlSection, int bInitialize)
     {
       var p = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
-      
+
+      // JohnC: 1. This never gets called. There is no icon in the Decal UI for it.
+      //        2. The code below seems to be wrong. pXmlSection!=IntPtr.Zero polarity is backwards.
+      //
+      // This seems to indicate that this code has never been tested. Am I confused? [JOHN-DECAL-FIX]
+
       if (null == p || pXmlSection!=IntPtr.Zero)
       {
         HostUtils.DebugString("ERROR: Invalid input for OnDecalProperties");
@@ -5644,6 +5716,13 @@ namespace Rhino.PlugIns
       return unix_start + unix_timespan;
     }
 
+    DateTime? Int64ToNullableDate(Int64 unixDate)
+    {
+      if (unixDate == 0)
+        return null;
+      return Int64ToDate(unixDate);
+    }
+
     private string GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields field)
     {
       using (var holder = new StringHolder())
@@ -5738,6 +5817,12 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <since>6.0</since>
     public DateTime Expiration => Int64ToDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.Exp));
+
+    /// <summary>
+    /// The date when the license in the cloud zoo entity will expire, if any
+    /// </summary>
+    /// <since>7.25</since>
+    public DateTime? RenewableUntil => Int64ToNullableDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.RenewableUntil));
 
     ~LicenseLease()
     {

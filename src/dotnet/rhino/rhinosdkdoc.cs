@@ -15,6 +15,7 @@ using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects.Tables;
 using Rhino.FileIO;
 using System.Diagnostics;
+using Rhino.Render.CustomRenderMeshes;
 
 namespace Rhino.Commands
 {
@@ -380,10 +381,11 @@ namespace Rhino
       if (ActiveDoc == null)
         return false;
 
-      IntPtr const_ptr_options = options.ConstPointer();
+      IntPtr const_ptr_options = options.ConstPointer(true);
       return UnsafeNativeMethods.RHC_RhinoReadFile(ActiveDoc.RuntimeSerialNumber, path, const_ptr_options);
     }
-#endregion
+
+    #endregion
 
     /// <since>7.0</since>
     public bool IsHeadless => UnsafeNativeMethods.CRhinoDoc_IsHeadless(RuntimeSerialNumber) != 0;
@@ -498,6 +500,19 @@ namespace Rhino
     /// <since>7.0</since>
     public bool Import(string filePath)
     {
+      return Import(filePath, null);
+    }
+
+    /// <summary>
+    /// Import geometry into a RhinoDoc from a file. This can be any file format
+    /// that Rhino can import
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    /// <exception cref="System.IO.FileNotFoundException"></exception>
+    public bool Import(string filePath, ArchivableDictionary options)
+    {
       // This line checks filePath is a valid path, well formated, not too long...
       var fileInfo = new System.IO.FileInfo(filePath);
 
@@ -506,7 +521,7 @@ namespace Rhino
 
       using
       (
-        var options = new FileReadOptions()
+        var readOptions = new FileReadOptions()
         {
           ImportMode = true,
           BatchMode = true,
@@ -515,11 +530,14 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        if (options!=null)
+        {
+          readOptions.OptionsDictionary.AddContentsFrom(options);
+        }
+        IntPtr const_ptr_options = readOptions.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoReadFile(RuntimeSerialNumber, filePath, const_ptr_options);
       }
     }
-
     /// <summary>
     /// Save doc to disk using the document's Path
     /// </summary>
@@ -541,7 +559,7 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        IntPtr const_ptr_options = options.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
       }
     }
@@ -568,7 +586,7 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        IntPtr const_ptr_options = options.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
       }
     }
@@ -611,7 +629,7 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        IntPtr const_ptr_options = options.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, file3dmPath, const_ptr_options);
       }
     }
@@ -654,7 +672,7 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        IntPtr const_ptr_options = options.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, file3dmTemplatePath, const_ptr_options);
       }
     }
@@ -668,12 +686,27 @@ namespace Rhino
     /// <since>7.0</since>
     public bool Export(string filePath)
     {
+      ArchivableDictionary dict = null;
+      return Export(filePath, dict);
+    }
+
+    /// <summary>
+    /// Export the entire document to a file. All file formats that Rhino can export to
+    /// are supported by this function.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="options">
+    /// Options to help define how data should be exported.
+    /// </param>
+    /// <returns>true on success</returns>
+    public bool Export(string filePath, ArchivableDictionary options)
+    {
       // This line checks filePath is a valid path, well formated, not too long...
       new System.IO.FileInfo(filePath);
 
       using
       (
-        var options = new FileWriteOptions()
+        var fileWriteOptions = new FileWriteOptions()
         {
           UpdateDocumentPath = false,
           SuppressAllInput = true,
@@ -682,7 +715,11 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        if (options != null)
+        {
+          fileWriteOptions.OptionsDictionary.AddContentsFrom(options);
+        }
+        IntPtr const_ptr_options = fileWriteOptions.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, filePath, const_ptr_options);
       }
     }
@@ -696,12 +733,27 @@ namespace Rhino
     /// <since>7.0</since>
     public bool ExportSelected(string filePath)
     {
+      ArchivableDictionary dict = null;
+      return ExportSelected(filePath, dict);
+    }
+
+    /// <summary>
+    /// Export selected geometry to a file. All file formats that Rhino can export
+    /// to are supported by this function.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="options">
+    /// Options to help define how data should be exported.
+    /// </param>
+    /// <returns>true on success</returns>
+    public bool ExportSelected(string filePath, ArchivableDictionary options)
+    {
       // This line checks filePath is a valid path, well formated, not too long...
       new System.IO.FileInfo(filePath);
 
       using
       (
-        var options = new FileWriteOptions()
+        var fileWriteOptions = new FileWriteOptions()
         {
           UpdateDocumentPath = false,
           SuppressAllInput = true,
@@ -710,11 +762,15 @@ namespace Rhino
         }
       )
       {
-        IntPtr const_ptr_options = options.ConstPointer();
+        if (options!=null)
+        {
+          fileWriteOptions.OptionsDictionary.AddContentsFrom(options);
+        }
+
+        IntPtr const_ptr_options = fileWriteOptions.ConstPointer(true);
         return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, filePath, const_ptr_options);
       }
     }
-
     //public bool ExportWithOrigin(string filePath, Point3d Origin)
 
     /// <summary>
@@ -734,7 +790,7 @@ namespace Rhino
     /// <since>5.0</since>
     public bool WriteFile(string path, FileWriteOptions options)
     {
-      IntPtr const_ptr_options = options.ConstPointer();
+      IntPtr const_ptr_options = options.ConstPointer(true);
       return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, path, const_ptr_options);
     }
 
@@ -748,7 +804,7 @@ namespace Rhino
     /// <since>6.5</since>
     public bool Write3dmFile(string path, FileWriteOptions options)
     {
-      IntPtr const_ptr_options = options.ConstPointer();
+      IntPtr const_ptr_options = options.ConstPointer(true);
       return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, path, const_ptr_options);
     }
     #endregion
@@ -1059,6 +1115,18 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Get the ID of the active command.
+    /// </summary>
+    /// <since>8.0</since>
+    public Guid ActiveCommandId
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDoc_ActiveCommandId(RuntimeSerialNumber);
+      }
+    }
+
+    /// <summary>
     /// Returns the active plane of Rhino's auto-gumball widget.
     /// Note, when calling from a Rhino command, make sure the command 
     /// class has the Rhino.Commands.Style.Transparent command style attribute.
@@ -1331,6 +1399,47 @@ namespace Rhino
 
     #endregion
 
+    /// <summary>
+    /// Call this method to get string representing the specified value using
+    /// the documents display coordinate system and display precision.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="appendUnitSystemName"></param>
+    /// <param name="abbreviate"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public string FormatNumber(double value, bool appendUnitSystemName, bool abbreviate)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoFormatNumberUseDocSettingsEx(RuntimeSerialNumber, value, appendUnitSystemName, abbreviate, pString);
+        return sh.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Call this method to get string representing the specified value using
+    /// the documents display coordinate system and display precision.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public string FormatNumber(double value)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoFormatNumberUseDocSettings(RuntimeSerialNumber, value, pString);
+        return sh.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Get the space associated with the active view for this document
+    /// </summary>
+    /// <since>8.0</since>
+    public ActiveSpace ActiveSpace => (ActiveSpace)UnsafeNativeMethods.RHC_GetActiveSpce(RuntimeSerialNumber);
 
     /// <summary>
     /// Current read-only mode for this document.
@@ -1772,6 +1881,8 @@ namespace Rhino
     /// </param>
     /// <returns></returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("This version is obsolete because - uses the old school custom render meshes.  Prefer CustomRenderMeshes")]
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, null, forceTriangleMeshes, quietly);
@@ -1790,6 +1901,8 @@ namespace Rhino
     /// </param>
     /// <returns></returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete ("This version is obsolete because - uses the old school custom render meshes.  Prefer RenderMeshes")]
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, viewport, forceTriangleMeshes, quietly);
@@ -1811,10 +1924,139 @@ namespace Rhino
     /// </param>
     /// <returns></returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("This version is obsolete because - uses the old school custom render meshes.  Prefer RenderPrimitives")]
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(Guid plugInId, DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly) 
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, plugInId, viewport, forceTriangleMeshes, quietly);
     }
+
+    /// <summary>
+    /// Returns true if the document has a set of custom render primitves - ie, CustomRenderMeshes will return non-null.
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered.</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <returns>Returns true if the object will has a set of custom render primitves</returns>
+    /// /// <seealso cref="RenderMeshes"/>
+    /// <since>8.0</since>
+    public bool HasCustomRenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
+    {
+      uint f = (uint)flags;
+
+      var guids = new SimpleArrayGuid();
+
+      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_NonObjectIds(guids.NonConstPointer());
+
+      var a = guids.ToArray();
+
+      bool ret = false;
+
+      foreach (var id in a)
+      {
+        ret = UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_HasCustomMeshes((int)mt, vp.ConstPointer(), RuntimeSerialNumber, id, ref f, plugin.NonConstPointer(), attrs.ConstPointer());
+        if (ret)
+          break;
+      }
+
+      flags = (RenderMeshProvider.Flags)f;
+
+      return ret;
+    }
+
+
+    /// <summary>
+    /// Returns a set of non-object custom render primitives for this document.
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <returns> Returns a set of custom render primitives for this object</returns>
+    /// <seealso cref="HasCustomRenderMeshes"/>
+    /// <since>8.0</since>
+    public RenderMeshes[] RenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
+    {
+      var outList = new List<RenderMeshes>();
+
+      var guids = new SimpleArrayGuid();
+
+      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_NonObjectIds(guids.NonConstPointer());
+
+      var a = guids.ToArray();
+
+      uint f = (uint)flags;
+
+      foreach (var id in a)
+      {
+        var primitives = new RenderMeshes(this, id, Guid.Empty, 0);
+
+        UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp.ConstPointer(), RuntimeSerialNumber, id, ref f, plugin.NonConstPointer(), attrs.ConstPointer(), IntPtr.Zero);
+
+        if (0 != primitives.InstanceCount)
+        {
+          outList.Add(primitives);
+        }
+      }
+      
+      
+      flags = (RenderMeshProvider.Flags)f;
+
+      return outList.ToArray();
+    }
+
+    /// <summary>
+    /// Returns the bounding box of custom render primitves for this object .
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <param name="boundingBox">The requested bounding box</param>
+    /// <returns>True if the process was a success</returns>
+    /// <since>8.0</since>
+    public bool CustomRenderMeshesBoundingBox(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
+    {
+      boundingBox = BoundingBox.Unset;
+
+      var guids = new SimpleArrayGuid();
+
+      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_NonObjectIds(guids.NonConstPointer());
+
+      var a = guids.ToArray();
+
+      uint f = (uint)flags;
+
+      foreach (var id in a)
+      {
+
+        var min = new Point3d();
+        var max = new Point3d();
+
+        UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_BoundingBox(ref min, ref max, (int)mt, vp.ConstPointer(), RuntimeSerialNumber, id, ref f, plugin.NonConstPointer(), attrs.ConstPointer(), IntPtr.Zero);
+
+        var bb = new BoundingBox(min, max);
+
+        if (boundingBox.IsValid)
+        {
+          boundingBox.Union(bb);
+        }
+        else
+        {
+          boundingBox = bb;
+        }
+      }
+
+      flags = (RenderMeshProvider.Flags)f;
+
+      return boundingBox.IsValid;
+    }
+
+
 
     private GroundPlane m_ground_plane;
     /// <summary>Gets the ground plane of this document.</summary>
@@ -1854,6 +2096,15 @@ namespace Rhino
     /// Returns true if currently in a GetPoint.Get(), GetObject.GetObjects(), or GetString.Get()
     /// </summary>
     internal bool InGetPoint => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGetPoint);
+
+    /// <summary>
+    /// Returns true if currently in a GetPoint.Get(), GetObject.GetObjects(), or GetString.Get()
+    /// </summary>
+    internal bool InGetPointWithBasePoint(out Point3d basePoint)
+    {
+      basePoint = Point3d.Unset;
+      return UnsafeNativeMethods.CRhinoDoc_InGetPoint(RuntimeSerialNumber, ref basePoint);
+    }
 
     /// <summary>
     /// Returns true if currently in a GetPoint.Get(), GetObject.GetObjects(), or GetString.Get()
@@ -2192,6 +2443,26 @@ namespace Rhino
       return File3dm.ReadPreviewImage (path);
     }
 
+    /// <summary>
+    /// Selects a collection of contents in any editors they appear in.
+    /// </summary>
+    /// <param name="collection">A collection of RenderContents to select</param>
+    /// <param name="append">Append to current selection</param>
+    /// <since>7.20</since>
+    public void SelectRenderContentInEditor(Rhino.Render.RenderContentCollection collection, bool append)
+    {
+      SimpleArrayGuid guids = new SimpleArrayGuid();
+
+      foreach(Rhino.Render.RenderContent content in collection)
+      {
+        guids.Append(content.Id);
+      }
+
+      var pointer_to_id_list = guids.ConstPointer();
+      UnsafeNativeMethods.RdkSelectContentsInEditor(RuntimeSerialNumber, pointer_to_id_list, append);
+    }
+
+    #pragma warning disable 0618
 
     /// <summary>
     /// Determines if custom render meshes will be built for this document (i.e. - GH meshes).
@@ -2205,6 +2476,8 @@ namespace Rhino
     /// Returns true if custom render mesh(es) will get built for this document.
     /// </returns>
     /// <since>6.9</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2227,6 +2500,8 @@ namespace Rhino
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
     /// <since>6.9</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2261,6 +2536,8 @@ namespace Rhino
     /// returns false on error.
     /// </returns>
     /// <since>6.9</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -2282,17 +2559,26 @@ namespace Rhino
 
       return false;
     }
+#pragma warning restore 0618
 
     /// <summary>
     /// Returns true if Rhino is currently running a command.
     /// </summary>
     /// <since>7.0</since>
-    public bool IsCommandRunning
+    public bool IsCommandRunning => UnsafeNativeMethods.CRhinoDoc_InCommand(RuntimeSerialNumber, false) > 0;
+
+    /// <summary>
+    /// This is a low level tool to determine if Rhino is currently running a command.
+    /// </summary>
+    /// <param name="bIgnoreScriptRunnerCommands">
+    /// If true, script running commands, like "ReadCommandFile" and the 
+    /// RhinoScript plug-ins "RunScript" command, are not counted.
+    /// </param>
+    /// <returns>Number of active commands.</returns>
+    /// <since>8.0</since>
+    public int InCommand(bool bIgnoreScriptRunnerCommands)
     {
-      get
-      {
-        return UnsafeNativeMethods.CRhinoDoc_InCommand(RuntimeSerialNumber, false) > 0;
-      }
+      return UnsafeNativeMethods.CRhinoDoc_InCommand(RuntimeSerialNumber, bIgnoreScriptRunnerCommands);
     }
 
 #region events
@@ -2350,6 +2636,24 @@ namespace Rhino
         try
         {
           m_document_properties_changed(null, new DocumentEventArgs(docSerialNumber));
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
+
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-68860
+    internal delegate void UnitsChangedWithScalingCallback(uint docSerialNumber, double scale);
+    private static UnitsChangedWithScalingCallback g_on_units_changed_with_scaling_callback;
+    private static void OnUnitChangedWithScaling(uint docSerialNumber, double scale)
+    {
+      if (m_units_changed_with_scaling != null)
+      {
+        try
+        {
+          m_units_changed_with_scaling(null, new UnitsChangedWithScalingEventArgs(docSerialNumber, scale));
         }
         catch (Exception ex)
         {
@@ -2575,6 +2879,45 @@ namespace Rhino
       }
     }
 
+    internal static EventHandler<UnitsChangedWithScalingEventArgs> m_units_changed_with_scaling;
+    /// <summary>
+    /// Called when a change in the model units results in a scaling operation on all of the objects in the document.
+    /// This call is made before any of the objects are scaled.  
+    /// A call to RhinoDoc.DocumentPropertiesChanged follows.
+    /// </summary>
+    /// <since>7.20</since>
+    public static event EventHandler<UnitsChangedWithScalingEventArgs> UnitsChangedWithScaling
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (m_units_changed_with_scaling == null)
+          {
+            g_on_units_changed_with_scaling_callback = OnUnitChangedWithScaling;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetUnitsChangedWithScaling(g_on_units_changed_with_scaling_callback, Runtime.HostUtils.m_ew_report);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_units_changed_with_scaling -= value;
+          m_units_changed_with_scaling += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_units_changed_with_scaling -= value;
+          if (m_units_changed_with_scaling == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetUnitsChangedWithScaling(null, Runtime.HostUtils.m_ew_report);
+            g_on_units_changed_with_scaling_callback = null;
+          }
+        }
+      }
+
+    }
+
     /// <summary>
     /// This event is raised when document user text strings are changed
     /// </summary>
@@ -2588,10 +2931,12 @@ namespace Rhino
       /// <summary>
       /// Document containing the user string
       /// </summary>
+      /// <since>7.7</since>
       public RhinoDoc Document { get; }
       /// <summary>
       /// Key for the string being changed
       /// </summary>
+      /// <since>7.7</since>
       public string Key { get; }
     }
 
@@ -3444,6 +3789,63 @@ namespace Rhino
         }
       }
     }
+
+
+    #region Linetype table event
+    private static RhinoTableCallback g_on_linetype_table_event_callback;
+    private static void OnLinetypeTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
+    {
+      if (m_linetype_table_event != null)
+      {
+        try
+        {
+          var args = new LinetypeTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
+          m_linetype_table_event(null, args);
+        }
+        catch (Exception ex)
+        {
+          Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+    }
+    internal static EventHandler<LinetypeTableEventArgs> m_linetype_table_event;
+
+    /// <summary>
+    /// Called when any modification happens to a document's linetype table.
+    /// </summary>
+    /// <since>8.0</since>
+    public static event EventHandler<LinetypeTableEventArgs> LinetypeTableEvent
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (m_linetype_table_event == null)
+          {
+            g_on_linetype_table_event_callback = OnLinetypeTableEvent;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetLinetypeTableEventCallback(g_on_linetype_table_event_callback, Runtime.HostUtils.m_ew_report);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_linetype_table_event -= value;
+          m_linetype_table_event += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_linetype_table_event -= value;
+          if (m_linetype_table_event == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetDimStyleTableEventCallback(null, Runtime.HostUtils.m_ew_report);
+            g_on_linetype_table_event_callback = null;
+          }
+        }
+      }
+    }
+    #endregion
+
 
     #region Dimension style table event
     private static RhinoTableCallback g_on_dim_style_table_event_callback;
@@ -4298,6 +4700,42 @@ namespace Rhino
     {
       get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber)); }
     }
+  }
+
+  /// <summary>
+  /// Provides information about UnitsChangedWithScaling events.
+  /// </summary>
+  /// <since>7.20</since>
+  public class UnitsChangedWithScalingEventArgs : EventArgs
+  {
+    private RhinoDoc m_doc;
+    internal UnitsChangedWithScalingEventArgs(uint docSerialNumber, double scale)
+    {
+      DocumentSerialNumber = docSerialNumber;
+      Scale = scale;
+    }
+
+    /// <summary>
+    /// Gets the uniques document serial number for this event.
+    /// </summary>
+    /// <since>7.20</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber { get; }
+
+    /// <summary>
+    /// Gets the document for this event. This field might be null.
+    /// </summary>
+    /// <since>7.20</since>
+    public RhinoDoc Document
+    {
+      get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber)); }
+    }
+
+    /// <summary>
+    /// The scale factor.
+    /// </summary>
+    /// <since>7.20</since>
+    public double Scale { get; }
   }
 
   /// <summary>
@@ -8092,7 +8530,6 @@ namespace Rhino.DocObjects.Tables
       objref.Dispose();
       return rc;
     }
-
     /// <summary>
     /// Modifies an object's render material assignment, this will set the
     /// objects material source to ObjectMaterialSource.MaterialFromObject.
@@ -9669,7 +10106,7 @@ namespace Rhino.DocObjects.Tables
         throw new ArgumentNullException(nameof(type));
 
       int index = default(int);
-      IntPtr ptr_comp = UnsafeNativeMethods.CRhinoDoc_LookupModelComponent(m_doc.RuntimeSerialNumber, id, ref type, ref index);
+      IntPtr ptr_comp = UnsafeNativeMethods.CRhinoDoc_LookupModelObject(m_doc.RuntimeSerialNumber, id, ref type, ref index);
 
       if (ptr_comp == IntPtr.Zero) return null;
 

@@ -146,6 +146,29 @@ RH_C_FUNCTION void ON_HiddenLineDrawing_IncludeHiddenCurves(ON_HiddenLineDrawing
     pHiddenLineDrawing->IncludeHiddenCurves(bInclude);
 }
 
+RH_C_FUNCTION void ON_HiddenLineDrawing_EnableOccludingSection(ON_HiddenLineDrawing* pHiddenLineDrawing, bool bEnable)
+{
+  if (pHiddenLineDrawing)
+    pHiddenLineDrawing->EnableOccludingSection(bEnable);
+}
+
+RH_C_FUNCTION bool ON_HiddenLineDrawing_EnableSelectiveClipping(ON_HiddenLineDrawing* pHiddenLineDrawing,
+  int obj_ind, const ON_SimpleArray<unsigned int>* active_clip_ids )
+{
+  bool rc = false;
+  ON_SimpleArray< ON__UINT_PTR> Arr2(active_clip_ids->Count());
+  for (int i = 0; i < active_clip_ids->Count(); i++) 
+    Arr2.Append((*active_clip_ids)[i]);
+  if (pHiddenLineDrawing && obj_ind>=0 && obj_ind< pHiddenLineDrawing->m_object.Count() && active_clip_ids)
+  {
+    const ON_HLD_Object* cobj = pHiddenLineDrawing->m_object[obj_ind];
+    ON_HLD_Object*  obj = const_cast<ON_HLD_Object*>(cobj);
+    rc = pHiddenLineDrawing->EnableSelectiveClipping(*obj, Arr2);
+  }
+  return rc;
+}
+
+
 RH_C_FUNCTION void ON_HiddenLineDrawing_SetContext(ON_HiddenLineDrawing* pHiddenLineDrawing, const ON_HiddenLineDrawing* pConstSource)
 {
   if(pHiddenLineDrawing && pConstSource)
@@ -326,6 +349,24 @@ RH_C_FUNCTION unsigned int ON_HLD_Object_GetExtra(const ON_HiddenLineDrawing* co
     const ON_HLD_Object* hld_object = constHiddenLineDrawing->m_object[index];
     if (nullptr != hld_object)
       rc = (unsigned int)hld_object->m_obj_id;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_HLD_Object_EnableOccludingSection(ON_HLD_Object* pHiddenLineObject, bool bEnable)
+{
+  if (pHiddenLineObject)
+    pHiddenLineObject->EnableOccludingSection(bEnable);
+}
+
+
+
+RH_C_FUNCTION bool ON_HLD_Object_OccludingSectionOption(const ON_HLD_Object* pHiddenLineObject )
+{
+  bool rc = false;
+  if (pHiddenLineObject)
+  {
+     rc = pHiddenLineObject->OccludingSectionOption();
   }
   return rc;
 }
@@ -764,6 +805,5 @@ RH_C_FUNCTION int ON_HiddenLineDrawing_PointCount(ON_HiddenLineDrawing* pHiddenL
   }
   return 0;
 }
-
 
 #endif

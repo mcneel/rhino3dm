@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq.Expressions;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.FileIO;
+using Rhino.Collections;
 
 namespace Rhino.DocObjects
 {
@@ -16,6 +17,262 @@ namespace Rhino.DocObjects
     Lines = 1,
     Gradient = 2
   }
+
+  /// <summary>
+  /// Hatch lines are used by hatch pattern to specify
+  /// the dashes and offset patterns of the lines.
+  /// </summary>
+  /// <remarks>
+  /// Each line has the following information:
+  /// Angle is the direction of the line counter-clockwise from the x-axis.
+  /// The first line origin is at the base point.
+  /// Each line repetition is offset from the previous line.
+  /// Offset.X is parallel to the line and Offset.Y is perpendicular to the line.
+  /// The base and offset values are rotated by the line's angle to 
+  /// produce a location in the hatch pattern's coordinate system.
+  /// There can be gaps and dashes specified for drawing the line.
+  /// If there are no dashes, the line is solid.
+  /// Negative length dashes are gaps.
+  /// Positive length dashes are drawn as line segments.
+  /// </remarks>
+  /// <since>8.0</since>
+  public class HatchLine : IDisposable
+  {
+    /// <summary>
+    /// Construts a new hatch line.
+    /// </summary>
+    /// <since>8.0</since>
+    public HatchLine()
+    {
+      m_ptr = UnsafeNativeMethods.ON_HatchLine_New(IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Construts a new hatch line.
+    /// </summary>
+    /// <param name="hatchLine">The hatch line to copy.</param>
+    /// <since>8.0</since>
+    public HatchLine(HatchLine hatchLine)
+    {
+      if (null == hatchLine)
+        m_ptr = UnsafeNativeMethods.ON_HatchLine_New(IntPtr.Zero);
+      else
+      {
+        IntPtr pConstLine = hatchLine.ConstPointer();
+        m_ptr = UnsafeNativeMethods.ON_HatchLine_New(pConstLine);
+      }
+    }
+
+    #region Properties
+
+    /// <summary>
+    /// Gets and sets the angle, in radians, of the hatch line.
+    /// The angle is measured counter-clockwise from the x-axis.
+    /// </summary>
+    /// <since>8.0</since>
+    public double Angle
+    {
+      get
+      {
+        double angle = 0.0;
+        IntPtr pConstThis = ConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetAngle(pConstThis, ref angle, false);
+        return angle;
+      }
+      set
+      {
+        double angle = value;
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetAngle(pThis, ref angle, true);
+      }
+    }
+
+    /// <summary>
+    /// Get and sets this line's 2d base point.
+    /// </summary>
+    /// <since>8.0</since>
+    public Rhino.Geometry.Point2d BasePoint
+    {
+      get
+      {
+        Rhino.Geometry.Point2d basePoint = new Rhino.Geometry.Point2d();
+        IntPtr pConstThis = ConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetBasePoint(pConstThis, ref basePoint, false);
+        return basePoint;
+      }
+      set
+      {
+        Rhino.Geometry.Point2d basePoint = value;
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetBasePoint(pThis, ref basePoint, true);
+      }
+    }
+
+    /// <summary>
+    /// Get and sets this line's 2d offset for line repetitions.
+    /// Offset.X is shift parallel to line.
+    /// Offset.Y is spacing perpendicular to line.
+    /// </summary>
+    /// <since>8.0</since>
+    public Rhino.Geometry.Vector2d Offset
+    {
+      get
+      {
+        Rhino.Geometry.Vector2d offset = new Rhino.Geometry.Vector2d();
+        IntPtr pConstThis = ConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetOffset(pConstThis, ref offset, false);
+        return offset;
+      }
+      set
+      {
+        Rhino.Geometry.Vector2d offset = value;
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_GetSetOffset(pThis, ref offset, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of dashes + gaps in this line.
+    /// </summary>
+    /// <since>8.0</since>
+    public int DashCount
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchLine_DashCount(pConstThis);
+      }
+    }
+
+    /// <summary>
+    /// Gets all of the dashes.
+    /// </summary>
+    /// <since>8.0</since>
+    public IEnumerable<double> GetDashes
+    {
+      get
+      {
+        int count = DashCount;
+        for (int i = 0; i < count; i++)
+        {
+          yield return DashAt(i);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Get the total length of a pattern repeat.
+    /// </summary>
+    /// <since>8.0</since>
+    public double PatternLength
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchLine_GetPatternLength(pConstThis);
+      }
+    }
+
+    #endregion // Properties
+
+    #region Methods
+
+    /// <summary>
+    /// Get the dash length at the specified index.
+    /// </summary>
+    /// <param name="dashIndex">Index of the dash to get.</param>
+    /// <returns>The length of the dash. or gap if negative.</returns>
+    /// <since>8.0</since>
+    public double DashAt(int dashIndex)
+    {
+      IntPtr pConstThis = ConstPointer();
+      return UnsafeNativeMethods.ON_HatchLine_Dash(pConstThis, dashIndex);
+    }
+
+    /// <summary>
+    /// Add a dash to the pattern.
+    /// </summary>
+    /// <param name="dash">Length to append, &lt; 0 for a gap.</param>
+    /// <since>8.0</since>
+    public void AppendDash(double dash)
+    {
+      IntPtr pThis = NonConstPointer();
+      UnsafeNativeMethods.ON_HatchLine_AppendDash(pThis, dash);
+    }
+
+    /// <summary>
+    /// Sets a new dash array.
+    /// </summary>
+    /// <param name="dashes">The dash enumeration.</param>
+    /// <since>8.0</since>
+    public void SetDashes(IEnumerable<double> dashes)
+    {
+      List<double> list = new List<double>(dashes);
+      int count = list.Count;
+      if (count > 0)
+      {
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchLine_SetDashes(pThis, count, list.ToArray());
+      }
+    }
+
+    #endregion // Methods
+
+    #region Housekeeping
+
+    /// <summary>
+    /// ON_HatchLine*
+    /// </summary>
+    private IntPtr m_ptr;
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this object.
+    /// </summary>
+    internal IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this object.
+    /// </summary>
+    internal IntPtr NonConstPointer() { return m_ptr; }
+
+    internal HatchLine(IntPtr ptr)
+    {
+      m_ptr = ptr;
+    }
+
+    /// <summary>
+    /// Passively releases the unmanaged object.
+    /// </summary>
+    ~HatchLine()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively releases the unmanaged object.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases the unmanaged object.
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_HatchLine_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    #endregion // Housekeeping
+  }
+
 
   [Serializable]
   public sealed class HatchPattern : ModelComponent
@@ -65,7 +322,7 @@ namespace Rhino.DocObjects
 
     // serialization constructor
     private HatchPattern(SerializationInfo info, StreamingContext context)
-      : base (info, context)
+      : base(info, context)
     {
     }
     #endregion
@@ -112,7 +369,7 @@ namespace Rhino.DocObjects
       }
 #endif
       Rhino.FileIO.File3dm parent_file = m__parent as Rhino.FileIO.File3dm;
-      if (parent_file!=null)
+      if (parent_file != null)
       {
         IntPtr pModel = parent_file.NonConstPointer();
         return UnsafeNativeMethods.ONX_Model_GetModelComponentPointer(pModel, m_id);
@@ -142,9 +399,13 @@ namespace Rhino.DocObjects
     }
 
     #region properties
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.HatchPattern"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.HatchPattern;
+
 #if RHINO_SDK
-    const int idxIsDeleted = 0;
-    const int idxIsReference = 1;
 
     /// <summary>
     /// Deleted hatch patterns are kept in the runtime hatch pattern table so that undo
@@ -152,32 +413,14 @@ namespace Rhino.DocObjects
     /// a hatch pattern is deleted.
     /// </summary>
     /// <since>5.0</since>
-    public bool IsDeleted
-    {
-      get
-      {
-        if (!IsDocumentControlled)
-          return false;
-        IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoHatchPattern_GetBool(pConstThis, idxIsDeleted);
-      }
-    }
+    public override bool IsDeleted => base.IsDeleted;
 
     /// <summary>
     /// Rhino allows multiple files to be viewed simultaneously. Hatch patterns in the
     /// document are "normal" or "reference". Reference hatch patterns are not saved.
     /// </summary>
     /// <since>5.0</since>
-    public bool IsReference
-    {
-      get
-      {
-        if (!IsDocumentControlled)
-          return false;
-        IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoHatchPattern_GetBool(pConstThis, idxIsReference);
-      }
-    }
+    public override bool IsReference => base.IsReference;
 
     /// <summary>
     /// Creates preview line segments of the hatch pattern.
@@ -203,18 +446,6 @@ namespace Rhino.DocObjects
 #endif
 
     /// <summary>
-    /// Returns <see cref="ModelComponentType.HatchPattern"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get
-      {
-        return ModelComponentType.HatchPattern;
-      }
-    }
-
-    /// <summary>
     /// Index in the hatch pattern table for this pattern. -1 if not in the table.
     /// </summary>
     /// <since>5.0</since>
@@ -232,6 +463,9 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Gets and sets a short description of the pattern.
+    /// </summary>
     /// <since>5.0</since>
     public string Description
     {
@@ -254,6 +488,9 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Gets the pattern's fill type.
+    /// </summary>
     /// <since>5.0</since>
     public HatchPatternFillType FillType
     {
@@ -268,6 +505,107 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_HatchPattern_SetFillType(pThis, (int)value);
       }
     }
+
+    /////////////////////////////////////////////////////////////////
+    // Interface functions for line hatches
+
+    /// <summary>
+    /// Get the number of HatchLines in the pattern.
+    /// </summary>
+    /// <since>8.0</since>
+    public int HatchLineCount
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchPattern_HatchLineCount(pConstThis);
+      }
+    }
+
+    /// <summary>
+    /// Add a HatchLine to the pattern.
+    /// </summary>
+    /// <param name="hatchLine">The hatch line to add.</param>
+    /// <returns>The index of newly added hatch line, or -1 on failure.</returns>
+    /// <since>8.0</since>
+    public int AddHatchLine(HatchLine hatchLine)
+    {
+      IntPtr pThis = NonConstPointer();
+      IntPtr pConstHatchLine = hatchLine.ConstPointer();
+      return UnsafeNativeMethods.ON_HatchPattern_AddHatchLine(pThis, pConstHatchLine);
+    }
+
+    /// <summary>
+    /// Gets a HatchLine at an index.
+    /// </summary>
+    /// <param name="hatchLineIndex">The index of the hatch line.</param>
+    /// <returns>The hatch line, or null on failure.</returns>
+    /// <since>8.0</since>
+    public HatchLine HatchLineAt(int hatchLineIndex)
+    {
+      IntPtr pConstThis = ConstPointer();
+      IntPtr pHatchLine = UnsafeNativeMethods.ON_HatchPattern_HatchLine(pConstThis, hatchLineIndex);
+      if (IntPtr.Zero != pHatchLine)
+        return new HatchLine(pHatchLine);
+      return null;
+    }
+
+    /// <summary>
+    /// Remove a hatch line from the pattern.
+    /// </summary>
+    /// <param name="hatchLineIndex">The index of the hatch line to remove.</param>
+    /// <returns>True if successful, false if index is out of range.</returns>
+    /// <since>8.0</since>
+    public bool RemoveHatchLine(int hatchLineIndex)
+    {
+      IntPtr pThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_HatchPattern_RemoveHatchLine(pThis, hatchLineIndex);
+    }
+
+    /// <summary>
+    /// Remove all of the hatch line from the pattern.
+    /// </summary>
+    /// <since>8.0</since>
+    public void RemoveAllHatchLines()
+    {
+      IntPtr pThis = NonConstPointer();
+      UnsafeNativeMethods.ON_HatchPattern_RemoveAllHatchLines(pThis);
+    }
+
+    /// <summary>
+    /// Gets all the hatch lines.
+    /// </summary>
+    /// <since>8.0</since>
+    public IEnumerable<HatchLine> HatchLines
+    {
+      get
+      {
+        int count = HatchLineCount;
+        for (int i = 0; i < count; i++)
+        {
+          yield return HatchLineAt(i);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Set all of the hatch lines at once. Existing hatch lines are deleted.
+    /// </summary>
+    /// <param name="hatchLines">An enumeration of hatch lines.</param>
+    /// <returns>The number of hatch lines added.</returns>
+    /// <since>8.0</since>
+    public int SetHatchLines(IEnumerable<HatchLine> hatchLines)
+    {
+      using (SimpleArrayHatchLinePointer hatchLinePointers = new SimpleArrayHatchLinePointer(hatchLines))
+      {
+        IntPtr pHatchLines = hatchLinePointers.ConstPointer();
+        IntPtr pThis = NonConstPointer();
+        return UnsafeNativeMethods.ON_HatchPattern_SetHatchLines(pThis, pHatchLines);
+      }
+    }
+
+    //
+    /////////////////////////////////////////////////////////////////
 
     public static class Defaults
     {
@@ -520,6 +858,21 @@ namespace Rhino.DocObjects.Tables
     }
 
     #region enumerator
+
+    /// <summary>
+    /// Modify hatch pattern settings.
+    /// </summary>
+    /// <param name="hatchPattern">Definition of new hatch pattern. The information in the hatch pattern is copied.</param>
+    /// <param name="hatchPatternIndex">Zero based index of the hatch pattern to modify.</param>
+    /// <param name="quiet">If true, information message boxes pop up when illegal changes are attempted.</param>
+    /// <returns>True if successful, or false if hatchPatternIndex is out of range.</returns>
+    /// <since>8.0</since>
+    public bool Modify(HatchPattern hatchPattern, int hatchPatternIndex, bool quiet)
+    {
+      if (null == hatchPattern) return false;
+      IntPtr ptr_const_pattern = hatchPattern.ConstPointer();
+      return UnsafeNativeMethods.CRhinoHatchPatternTable_Modify(m_doc.RuntimeSerialNumber, ptr_const_pattern, hatchPatternIndex, quiet);
+    }
 
     /// <summary>
     /// Deletes a hatch pattern from the table.

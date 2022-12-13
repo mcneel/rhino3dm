@@ -22,6 +22,24 @@ namespace Rhino
       void DestroyNativeWindow(object host, object nativeObject, bool disposeOfNativeObject);
       /// <since>6.1</since>
       void SetF1Hook(object nativeObject, EventHandler hook);
+      /// <since>8.0</since>
+      bool CreateDockBar(object options);
+      /// <since>8.0</since>
+      bool StartDraggingDockBar(Guid barId, System.Drawing.Point mouseDownPoint, System.Drawing.Point screenStartPoint);
+      /// <since>8.0</since>
+      bool ResizeFloating(Guid barId, System.Drawing.Size size);
+      /// <since>8.0</since>
+      bool ToggleDocking(Guid barId);
+      /// <since>8.0</since>
+      bool ShowDockBar(Guid barId, bool show);
+      /// <since>8.0</since>
+      bool DockBarIdInUse(Guid barId);
+      /// <since>8.0</since>
+      bool DockBarIsVisible(Guid barId);
+      /// <since>8.0</since>
+      bool Float(Guid barId, System.Drawing.Point point);
+      /// <since>8.0</since>
+      bool UnhookDeleteAndDestroyDockBar(Guid id);
     }
 
     /// <summary>
@@ -45,6 +63,51 @@ namespace Rhino
       {
         throw new NotImplementedException();
       }
+
+      public bool CreateDockBar(object options)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool StartDraggingDockBar(Guid barId, System.Drawing.Point mouseDownPoint, System.Drawing.Point screenStartPoint)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool ResizeFloating(Guid barId, System.Drawing.Size size)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool ToggleDocking(Guid barId)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool ShowDockBar(Guid barId, bool show)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool DockBarIdInUse(Guid barId)
+      {
+        throw new NotImplementedException();
+      }
+      
+      public bool DockBarIsVisible(Guid barId)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool Float(Guid barId, System.Drawing.Point point)
+      {
+        throw new NotImplementedException();
+      }
+      
+      public bool UnhookDeleteAndDestroyDockBar(Guid id)
+      {
+        throw new NotImplementedException();
+      }
     }
 
     /// <summary>
@@ -53,70 +116,146 @@ namespace Rhino
     public static class PanelIds
     {
       /// <summary>
-      /// Rhino material browser
+      /// Rhino Materials panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid Materials { get { return new Guid("{ 0x6df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
-      /// Rhino environment panel
+      /// Rhino Environment panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid Environment { get { return new Guid("{ 0x7df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
-      /// Rhino texture panel
+      /// Rhino Texture panel.
       /// </summary>
       /// <since>5.3</since>
       public static Guid Texture { get { return new Guid("{0x8df2a957, 0xf12d, 0x42ea, { 0x9f, 0xa6, 0x95, 0xd7, 0x92, 0x0c, 0x1b, 0x76 } }"); } }
       /// <summary>
-      /// Rhino light manager panel
+      /// Rhino Lights panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid LightManager { get { return new Guid("{ 0x86777b3d, 0x3d68, 0x4965, { 0x84, 0xf8, 0x9e, 0x1, 0x9c, 0x40, 0x24, 0x33 } }"); } }
       /// <summary>
-      /// Rhino sun panel
+      /// Rhino Sun panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid Sun { get { return new Guid("{ 0x1012681e, 0xd276, 0x49d3, { 0x9c, 0xd9, 0x7d, 0xe9, 0x2d, 0xc2, 0x40, 0x4a } }"); } }
       /// <summary>
-      /// Rhino ground plane panel
+      /// Rhino Ground Plane panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid GroundPlane { get { return new Guid("{ 0x987b1930, 0xecde, 0x4e62, { 0x82, 0x82, 0x97, 0xab, 0x4a, 0xd3, 0x25, 0xfe } }"); } }
       /// <summary>
-      /// Rhino Layer panel
+      /// Rhino Layer panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid Layers { get { return new Guid("{ 0x3610bf83, 0x47d, 0x4f7f, { 0x93, 0xfd, 0x16, 0x3e, 0xa3, 0x5, 0xb4, 0x93 } }"); } }
       /// <summary>
-      /// Rhino object properties panel
+      /// Rhino Object Properties panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid ObjectProperties { get { return new Guid("{ 0x34ffb674, 0xc504, 0x49d9, { 0x9f, 0xcd, 0x99, 0xcc, 0x81, 0x1d, 0xcd, 0xa2 } }"); } }
-      // Rhino Display properties panel
+      /// <summary>
+      /// Rhino Display Properties panel.
+      /// </summary>
       /// <since>5.0</since>
       public static Guid Display { get { return new Guid("{ 0xb68e9e9f, 0xc79c, 0x473c, { 0xa7, 0xef, 0x84, 0x6a, 0x11, 0xdc, 0x4e, 0x7b } }"); } }
       /// <summary>
-      /// Rhino context sensitive help panel.
+      /// Rhino Context-Sensitive Help panel.
       /// </summary>
       /// <since>5.0</since>
       public static Guid ContextHelp { get { return new Guid("{ 0xf8fb4f9, 0xc213, 0x4a6e, { 0x8e, 0x79, 0xb, 0xec, 0xe0, 0x2d, 0xf8, 0x2a } }"); } }
       /// <summary>
-      /// Rhino notes panel
+      /// Rhino Notes panel.
       /// </summary>
       /// <since>5.9</since>
       public static Guid Notes { get { return new Guid("{ 0x1d55d702, 0x28c, 0x4aab, { 0x99, 0xcc, 0xac, 0xfd, 0xd4, 0x41, 0xfe, 0x5f } }"); } }
       /// <summary>
-      /// Rhino rendering properties panel
+      /// Rhino Rendering Properties panel.
       /// </summary>
       /// <since>6.0</since>
       public static Guid Rendering { get { return new Guid("{ 0xd9ac0269, 0x811b, 0x47d1, { 0xaa, 0x33, 0x77, 0x79, 0x86, 0xb1, 0x37, 0x15 } }"); } }
       /// <summary>
-      /// Rhino render properties panel
+      /// Rhino Render Properties panel.
       /// </summary>
       /// <since>5.9</since>
       public static Guid Libraries { get { return new Guid("{ 0xb70a4973, 0x99ca, 0x40c0, { 0xb2, 0xb2, 0xf0, 0x34, 0x17, 0xa5, 0xff, 0x1d } }"); } }
+      /// <summary>
+      /// Rhino BoxEdit panel.
+      /// </summary>
+      /// <since>7.20</since>
+      public static Guid BoxEdit { get { return new Guid("14F035DC-C7E5-4EA5-BFAF-891CADF90BD0"); } }
+
+      /// <summary>
+      /// Command control bar Id, for internal use only, don't want to provide
+      /// way for plug-in's to hide the command control bar. This is used by
+      /// the dock site restoration code in Rhino.UI to ensure the command prompt
+      /// is visible when Rhino starts.
+      /// </summary>
+      internal static Guid Command { get; } = new Guid("1d3d1785-2332-428b-a838-b2fe39ec50f4");
+      internal static Guid MacCommandPrompt { get; } = new Guid("303293C9-AAD0-4419-994D-6765718A58ED");
+      internal static Guid CommandPrompt => Rhino.Runtime.HostUtils.RunningOnOSX ? MacCommandPrompt : Command;
+      internal static Guid ObjectSnap { get; } = new Guid("d3c4a392-88de-4c4f-88a4-ba5636ef7f38");
+      internal static Guid SelectionFilter { get; } = new Guid("918191ca-1105-43f9-a34a-dda4276883c1");
     }
 
+    /// <summary>
+    /// Panel style modifiers, only used by the new panel system implemented
+    /// in Rhino 8.0. This will be used by the IPanelStyles interface when
+    /// implemented.
+    /// </summary>
+    [Flags]
+    internal enum PanelStyles : int
+    {
+      /// <summary>
+      /// 
+      /// </summary>
+      UseDefaults = 0,
+      /// <summary>
+      /// Do not display a tab when the panel is the only item in a container
+      /// and the container is docked.
+      /// </summary>
+      HideSingleTabWhenDocked = 1,
+      /// <summary>
+      /// Suppress the text displayed in the gripper control when this is the
+      /// only tab in a container and the container is docked on the left or
+      /// right side.
+      /// </summary>
+      HideGripperTextWhenDockedOnSide = 2,
+      /// <summary>
+      /// Suppress the text displayed in the gripper control when this is the
+      /// only tab in a container and the container is docked on the top or
+      /// bottom.
+      /// </summary>
+      HideGripperTextWhenDockedOnTopOrBottom = 4,
+      /// <summary>
+      /// Apply all of the style flags
+      /// </summary>
+      All = 0xFFFFFFF
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    internal sealed class RhinoPanelStyle : Attribute
+    {
+      /// <summary>
+      /// Gets a value indicating whether to auto initialize the handler, false to defer this to the widget author
+      /// </summary>
+      /// <value><c>true</c> if initialize; otherwise, <c>false</c>.</value>
+      public PanelStyles PanelStyle { get; private set; }
+
+      /// <summary>
+      /// </summary>
+      /// <param name="style">If set to <c>true</c> initialize the widget automatically, otherwise <c>false</c>.</param>
+      public RhinoPanelStyle(PanelStyles style)
+      {
+        PanelStyle = style;
+      }
+    }
+
+    /// <summary>
+    /// Implement this interface when you want to be notified of when a panel
+    /// is shown, hidden or closed.
+    /// </summary>
     [CLSCompliant(false)]
     public interface IPanel
     {
@@ -157,6 +296,14 @@ namespace Rhino
           return (g_service_implementation ?? (g_service_implementation = new NotImplementedPanelsService()));
         }
       }
+
+      /// <summary>
+      /// For internal use, call this method to see if a dock bar Id is
+      /// currently being used by any Rhino dock bar.
+      /// Rhino
+      /// </summary>
+      /// <since>8.0</since>
+      public static bool DockBarIdInUse(Guid dockBarId) => Service.DockBarIdInUse(dockBarId);
 
       /// <summary>
       /// Check to see if reason is equal to any of the hide events 
@@ -238,13 +385,64 @@ namespace Rhino
       /// window on Mac.
       /// </param>
       /// <param name="icon">
-      /// Currently only used in Windows, use a 32bit depth icon in order to
-      /// get proper transparency.
+      /// The panel icon.  On Windows the panel may be displayed using the icon,
+      /// caption or both.  On Mac the icon will be used and the caption will be
+      /// the tool-tip.
       /// </param>
       /// <since>5.0</since>
       public static void RegisterPanel(PlugIns.PlugIn plugin, Type panelType, string caption, System.Drawing.Icon icon)
       {
         RegisterPanel(plugin, panelType, caption, icon, PanelType.PerDoc);
+      }
+
+      /// <summary>
+      /// You typically register your panel class in your plug-in's OnLoad
+      /// function.  This will register your custom call with Rhino, Rhino will
+      /// create an instance of your class the first time your panel is created
+      /// and embed this instance of your class in a panel container.
+      /// </summary>
+      /// <param name="plugIn">
+      /// Plug-in this panel is associated with
+      /// </param>
+      /// <param name="type">
+      /// Class type to construct when a panel is shown.  If your class is
+      /// derived from Eto.Forms.Control it will work on both the Mac and
+      /// Windows version of Rhino.  In addition Windows Rhino will support any
+      /// class types that implement the IWin32Window interface or that are
+      /// derived from System.Windows.FrameworkElement.  Mac Rhino will also
+      /// support classes that are derived from NsView.  In addition to the
+      /// type requirements the class must have a public constructor with no
+      /// parameters or a constructor with a single uint that represents the 
+      /// document serial number and have a GuidAttribute applied with a
+      /// unique Id.  n Windows there is only one panel created which gets
+      /// recycled for each new document.  On the Mac a panel will be created
+      /// for each open document and destroyed when the document closes.  In
+      /// certain situations in Mac Rhino a a panel may get created and
+      /// destroyed multiple times when opening/closing a panel while editing a
+      /// document.
+      /// </param>
+      /// <param name="caption">
+      /// Displays in the panel tab on Windows or at the top of the modeless
+      /// window on Mac.
+      /// </param>
+      /// <param name="iconAssembly">
+      /// Assembly conataining the iconResourceId, if null it is assumed the
+      /// iconResourceId is a starndard Rhino resource and the Rhino.UI assembly
+      /// will be used.
+      /// assembly will be used 
+      /// </param>
+      /// <param name="iconResourceId">
+      /// The resource Id string used to load the panel icon from teh iconAssembly.
+      /// On Windows the panel may be displayed using the icon, caption or both.
+      /// On Mac the icon will be used and the caption will be the tool-tip.
+      /// </param>
+      /// <param name="panelType">
+      /// See <see cref="PanelType"/>
+      /// </param>
+      /// <since>8.0</since>
+      public static void RegisterPanel(PlugIns.PlugIn plugIn, Type type, string caption, System.Reflection.Assembly iconAssembly, string iconResourceId, PanelType panelType)
+      {
+        PanelSystem.Register(plugIn, type, caption, iconAssembly, iconResourceId, panelType);
       }
 
       /// <summary>
@@ -264,6 +462,22 @@ namespace Rhino
       }
 
       /// <summary>
+      /// Gets the panel icon size in pixels.
+      /// </summary>
+      /// <value>The size of the panel icon in pixels.</value>
+      /// <since>8.0</since>
+      public static System.Drawing.Size IconSizeInPixels
+      {
+        get
+        {
+          var width = 0;
+          var height = 0;
+          UnsafeNativeMethods.IRhinoPropertiesPanelPage_ImageSize(ref width, ref height, true);
+          return new System.Drawing.Size(width, height);
+        }
+      }
+
+      /// <summary>
       /// Gets the panel icon size in pixels with DPI scaling applied.
       /// </summary>
       /// <value>IconSize times DPI scale</value>
@@ -278,6 +492,18 @@ namespace Rhino
           return new System.Drawing.Size(width, height);
         }
       }
+
+      /// <summary>
+      /// Update the icon used for a panel tab.
+      /// </summary>
+      /// <param name="panelType"></param>
+      /// <param name="fullPathToResource">Full path to the new icon resource</param>
+      /// <since>6.0</since>
+      public static void ChangePanelIcon(Type panelType, string fullPathToResource)
+      {
+        PanelSystem.ChangePanelIcon(panelType, fullPathToResource);
+      }
+
       /// <summary>
       /// Update the icon used for a panel tab.
       /// </summary>
@@ -642,7 +868,7 @@ namespace Rhino
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
         // interfaces
-        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab(RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0, panelId, true, makeSelectedPanel);
+        RHC_RhinoUiOpenCloseDockbarTab(null, panelId, true, makeSelectedPanel);
       }
       /// <summary>
       /// Open the specified panel in its current or default location and if it
@@ -716,6 +942,13 @@ namespace Rhino
       /// <since>6.0</since>
       public static Guid OpenPanel(Guid dockBarId, Guid panelId, bool makeSelectedPanel)
       {
+        var args = new Runtime.NamedParametersEventArgs();
+        args.Set("dockBarId", dockBarId);
+        args.Set("factoryId", panelId);
+        args.Set("makeSelectedTab", makeSelectedPanel);
+        Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.OpenTabOnDockBar", args);
+        if (args.TryGetBool("handled", out bool handled) && handled)
+          return args.TryGetGuid("dockBarId", out Guid barId) ? barId : Guid.Empty;
         // This won't be necessary Mac Rhino is ported to use the generic panel
         // interfaces
         return UnsafeNativeMethods.CRhinoTabbedDockBarDialog_OpenTabOnDockBar(RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0, dockBarId, panelId, makeSelectedPanel);
@@ -900,6 +1133,19 @@ namespace Rhino
       {
         return (panelType == null ? Guid.Empty : PanelDockBar(panelType.GUID));
       }
+
+      private static void RHC_RhinoUiOpenCloseDockbarTab(RhinoDoc doc, Guid tabId, bool open, bool makeSelectedTab)
+      {
+        var args = new Runtime.NamedParametersEventArgs();
+        args.Set("documentSerialNumber", (doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0u);
+        args.Set("factoryId", tabId);
+        args.Set("open", open);
+        args.Set("makeSelectedTab", makeSelectedTab);
+        Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.RhinoUiOpenCloseDockbarTab", args);
+        if (args.TryGetBool("handled", out bool handled) && handled)
+          return;
+        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab((doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0, tabId, open, makeSelectedTab);
+      }
       /// <summary>
       /// Will close or hide the specified panel type, in Windows Rhino, if it
       /// is the only visible tab the tab dock bar will be closed as well.  In
@@ -916,7 +1162,7 @@ namespace Rhino
       {
         // This won't be necessary Mac Rhino is ported to use the generic panel
         // interfaces
-        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab((doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0, panelId, false, false);
+        RHC_RhinoUiOpenCloseDockbarTab(doc, panelId, false, false);
       }
       /// <summary>
       /// Will close or hide the specified panel type, in Windows Rhino, if it

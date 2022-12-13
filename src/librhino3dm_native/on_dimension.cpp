@@ -329,6 +329,8 @@ RH_C_FUNCTION ON_DimAngular* ON_V6_DimAngular_Create(
   ON_3dPoint* pt1 = (ON_3dPoint*)&defpt1struct;
   ON_3dPoint* pt2 = (ON_3dPoint*)&defpt2struct;
   ON_3dPoint* dimlinept = (ON_3dPoint*)&dimlineptstruct;
+  if (ON_UuidIsNil(style_id))
+    style_id = ON_DimStyle::Default.Id();
   if (!dimangular->Create(style_id, plane, *horizontal, *centerpt, *pt1, *pt2, *dimlinept))
   {
     delete dimangular;
@@ -369,6 +371,10 @@ RH_C_FUNCTION ON_DimAngular* ON_V6_DimAngular_Create2(
   ON_3DPOINT_STRUCT dimlineptstruct
 )
 {
+  // 16-Nov-2022 Dale Fugier
+  // This functions is flawed. It is meant to be a wrapper for the ON_DimAngular::Create
+  // override that takes 8 parameters. But the author omitted the horizontal vector
+  // argument. So the 3rd parameter, which is a point, is used as a vector.
   ON_DimAngular* rc = new ON_DimAngular();
   ON_Plane plane = FromPlaneStruct(planestruct);
   ON_3dPoint* extpt1 = (ON_3dPoint*)&extpt1struct;
@@ -376,7 +382,40 @@ RH_C_FUNCTION ON_DimAngular* ON_V6_DimAngular_Create2(
   ON_3dPoint* dirpt1 = (ON_3dPoint*)&dirpt1struct;
   ON_3dPoint* dirpt2 = (ON_3dPoint*)&dirpt2struct;
   ON_3dPoint* dimlinept = (ON_3dPoint*)&dimlineptstruct;
+  if (ON_UuidIsNil(style_id))
+    style_id = ON_DimStyle::Default.Id();
   if (!rc->Create(style_id, plane, *extpt1, *extpt2, *dirpt1, *dirpt2, *dimlinept))
+  {
+    delete rc;
+    rc = nullptr;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_DimAngular* ON_V6_DimAngular_Create2Fixed(
+  ON_UUID style_id,
+  ON_PLANE_STRUCT planestruct,
+  ON_3DVECTOR_STRUCT horizstruct,
+  ON_3DPOINT_STRUCT extpt1struct,
+  ON_3DPOINT_STRUCT extpt2struct,
+  ON_3DPOINT_STRUCT dirpt1struct,
+  ON_3DPOINT_STRUCT dirpt2struct,
+  ON_3DPOINT_STRUCT dimlineptstruct
+)
+{
+  // 16-Nov-2022 Dale Fugier
+  // This is a fixed for the flawed ON_V6_DimAngular_Create2 (above)
+  ON_DimAngular* rc = new ON_DimAngular();
+  ON_Plane plane = FromPlaneStruct(planestruct);
+  ON_3dVector* horizontal = (ON_3dVector*)&horizstruct;
+  ON_3dPoint* extpt1 = (ON_3dPoint*)&extpt1struct;
+  ON_3dPoint* extpt2 = (ON_3dPoint*)&extpt2struct;
+  ON_3dPoint* dirpt1 = (ON_3dPoint*)&dirpt1struct;
+  ON_3dPoint* dirpt2 = (ON_3dPoint*)&dirpt2struct;
+  ON_3dPoint* dimlinept = (ON_3dPoint*)&dimlineptstruct;
+  if (ON_UuidIsNil(style_id))
+    style_id = ON_DimStyle::Default.Id();
+  if (!rc->Create(style_id, plane, *horizontal, *extpt1, *extpt2, *dirpt1, *dirpt2, *dimlinept))
   {
     delete rc;
     rc = nullptr;
@@ -404,6 +443,34 @@ RH_C_FUNCTION bool ON_V6_DimAngular_AdjustFromPoints2(
     ON_3dPoint* dirpt2 = (ON_3dPoint*)&dirpt2struct;
     ON_3dPoint* dimlinept = (ON_3dPoint*)&dimlineptstruct;
     rc = dimptr->AdjustFromPoints(plane, *extpt1, *extpt2, *dirpt1, *dirpt2, *dimlinept);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_DimAngular* ON_V6_DimAngular_Create3(
+  const ON_DimStyle* constDimStyle,
+  const ON_Line* line1,
+  ON_3DPOINT_STRUCT point_on_line1_struct,
+  const ON_Line* line2,
+  ON_3DPOINT_STRUCT point_on_line2_struct,
+  ON_3DPOINT_STRUCT point_on_angular_dimension_arc_struct,
+  bool bSetExtensionPoints
+)
+{
+  ON_DimAngular* rc = nullptr;
+  if (line1 && line2)
+  {
+    rc = new ON_DimAngular();
+    ON_3dPoint* point_on_line1 = (ON_3dPoint*)&point_on_line1_struct;
+    ON_3dPoint* point_on_line2 = (ON_3dPoint*)&point_on_line2_struct;
+    ON_3dPoint* point_on_angular_dimension_arc = (ON_3dPoint*)&point_on_angular_dimension_arc_struct;
+    if (nullptr == constDimStyle)
+      constDimStyle = &ON_DimStyle::Default;
+    if (!rc->Create(constDimStyle, *line1, *point_on_line1, *line2, *point_on_line2, *point_on_angular_dimension_arc, bSetExtensionPoints))
+    {
+      delete rc;
+      rc = nullptr;
+    }
   }
   return rc;
 }
@@ -694,6 +761,20 @@ RH_C_FUNCTION ON_DimOrdinate* ON_V6_DimOrdinate_Create(
   return rc;
 }
 
+RH_C_FUNCTION ON_DimOrdinate::MeasuredDirection ON_V6_DimOrdinate_GetMeasuredDirection(const ON_DimOrdinate* dimptr)
+{
+  ON_DimOrdinate::MeasuredDirection rc = ON_DimOrdinate::MeasuredDirection::Unset;
+  if (dimptr)
+    rc = dimptr->GetMeasuredDirection();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_V6_DimOrdinate_SetMeasuredDirection(ON_DimOrdinate* dimptr, ON_DimOrdinate::MeasuredDirection direction)
+{
+  if (dimptr)
+    dimptr->SetMeasuredDirection(direction);
+}
+
 RH_C_FUNCTION bool ON_V6_DimOrdinate_AdjustFromPoints(
   ON_DimOrdinate* dimptr,
   ON_PLANE_STRUCT planestruct,
@@ -837,10 +918,64 @@ RH_C_FUNCTION ON_Centermark* ON_V6_Centermark_Create(
   ON_Centermark* rc = new ON_Centermark();
   ON_Plane plane = FromPlaneStruct(planestruct);
   ON_3dPoint* centerpt = (ON_3dPoint*)&centerptstruct;
+  if (ON_UuidIsNil(style_id))
+    style_id = ON_DimStyle::Default.Id();
   if( !rc->Create(style_id, plane, *centerpt, radius) )
   {
     delete rc;
     rc = nullptr;
+  }
+  return rc;
+}
+
+static bool TryGetCenterPoint(const ON_Curve* curve, double curve_t, ON_3dPoint& centerpoint_out)
+{
+  ON_3dPoint C(ON_3dPoint::Origin);
+  ON_3dPoint P;
+  ON_3dVector T, K;
+  if (curve->EvCurvature(curve_t, P, T, K))
+  {
+    double k = K.Length();
+    if (k > ON_SQRT_EPSILON && T.Unitize())
+    {
+      double radius = 1.0 / k;
+      K.Unitize();
+      K = K * radius;
+      C = P + K;
+    }
+    centerpoint_out = C;
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION ON_Centermark* ON_V6_Centermark_Create2(
+  ON_UUID style_id,
+  ON_PLANE_STRUCT planestruct,
+  const ON_Curve* pConstCurve,
+  double curveParameter
+)
+{
+  ON_Centermark* rc = nullptr;
+  ON_3dPoint center_pt;
+  if (pConstCurve && TryGetCenterPoint(pConstCurve, curveParameter, center_pt))
+  {
+    ON_Plane plane = FromPlaneStruct(planestruct);
+    plane.SetOrigin(center_pt);
+
+    ON_3dPoint pt = pConstCurve->PointAt(curveParameter);
+    pt = plane.ClosestPointTo(pt);
+    double radius = center_pt.DistanceTo(pt);
+
+    if (ON_UuidIsNil(style_id))
+      style_id = ON_DimStyle::Default.Id();
+
+    rc = new ON_Centermark();
+    if (!rc->Create(style_id, plane, center_pt, radius))
+    {
+      delete rc;
+      rc = nullptr;
+    }
   }
   return rc;
 }
@@ -878,7 +1013,7 @@ RH_C_FUNCTION bool ON_V6_Centermark_GetDisplayLines(
 
 RH_C_FUNCTION double ON_V6_Centermark_Radius(const ON_Centermark* dimptr)
 {
-  double radius = 1.0;
+  double radius = ON_UNSET_VALUE;
   if (dimptr)
     radius = dimptr->Radius();
   return radius;

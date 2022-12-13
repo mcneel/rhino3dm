@@ -647,7 +647,7 @@ namespace Rhino.DocObjects.SnapShots
 
     }
 
-        internal static GETBOOLOBJECTPROC supportsobject_proc = SupportsObject;
+    internal static GETBOOLOBJECTPROC supportsobject_proc = SupportsObject;
     private static int SupportsObject(int serial, uint obj_serial)
     {
       var client = FromSerialNumber(serial);

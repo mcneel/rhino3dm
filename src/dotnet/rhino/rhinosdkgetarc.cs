@@ -131,6 +131,21 @@ namespace Rhino.Input.Custom
       }
     }
 
+    public bool UseActiveLayerLinetypeForCurves
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.UseLayerLinetype);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetArc_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.UseLayerLinetype, value);
+      }
+    }
+
+
     /// <summary> Perform the 'get' operation. </summary>
     /// <param name="arc"></param>
     /// <returns></returns>

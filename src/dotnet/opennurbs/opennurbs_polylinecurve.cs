@@ -96,8 +96,13 @@ namespace Rhino.Geometry
     }
 
 #if RHINO_SDK
-    internal override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness)
+    internal override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness, DisplayPen pen)
     {
+      if (pen != null)
+      {
+        base.Draw(pipeline, color, thickness, pen);
+        return;
+      }
       IntPtr ptr = ConstPointer();
       IntPtr pDisplayPipeline = pipeline.NonConstPointer();
       int argb = color.ToArgb();
@@ -173,6 +178,17 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PolylineCurve_GetSetParameter(ptr, index, ref parameter, true);
+    }
+
+    /// <summary>
+    /// Sets the polyline curve to use arc length parameterization for higher quality geometry.
+    /// </summary>
+    /// <param name="tolerance">Minimum distance tolerance.</param>
+    /// <since>8.0</since>
+    public void SetArcLengthParameterization(double tolerance)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_PolylineCurve_SetArcLengthParameterization(ptr, tolerance);
     }
 
     /// <summary>

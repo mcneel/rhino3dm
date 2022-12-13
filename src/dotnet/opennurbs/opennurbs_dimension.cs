@@ -80,7 +80,7 @@ namespace Rhino.Geometry
     {
       get
       {
-        using(var sw = new StringWrapper())
+        using (var sw = new StringWrapper())
         {
           IntPtr ptr_string = sw.NonConstPointer;
           IntPtr const_ptr_this = ConstPointer();
@@ -166,7 +166,7 @@ namespace Rhino.Geometry
     public ForceArrow ForceArrowPosition
     {
       get { return ForceArrow.Auto; }
-      set {}
+      set { }
     }
 
     /// <since>6.0</since>
@@ -174,7 +174,7 @@ namespace Rhino.Geometry
     public ForceText ForceTextPosition
     {
       get { return ForceText.Auto; }
-      set {}
+      set { }
     }
 
     #region properties originating from dim style that can be overridden
@@ -1056,7 +1056,7 @@ namespace Rhino.Geometry
         AltZeroSuppression = DimensionStyle.ZeroSuppression.None;
       GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
     }
-      #endregion properties originating from dim style that can be overridden
+    #endregion properties originating from dim style that can be overridden
   }
 }
 
@@ -1210,9 +1210,9 @@ namespace Rhino.Geometry
     /// <returns>true = success</returns>
     /// <since>6.0</since>
     [ConstOperation]
-    public bool Get3dPoints( out Point3d extensionLine1End, out Point3d extensionLine2End,
+    public bool Get3dPoints(out Point3d extensionLine1End, out Point3d extensionLine2End,
       out Point3d arrowhead1End, out Point3d arrowhead2End,
-      out Point3d dimlinepoint, out Point3d textpoint )
+      out Point3d dimlinepoint, out Point3d textpoint)
     {
       extensionLine1End = new Point3d();
       extensionLine2End = new Point3d();
@@ -1380,6 +1380,9 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <summary>
+    /// Constructs an angular dimension.
+    /// </summary>
     /// <since>6.0</since>
     public AngularDimension()
     {
@@ -1388,7 +1391,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Create an angular dimension from a given arc
+    /// Protected constructor used in serialization. 
+    /// </summary>
+    protected AngularDimension(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+
+    /// <summary>
+    /// Constructs an angular dimension from a given arc.
     /// </summary>
     /// <param name="arc">The start and end points of the arc are the start and endpoints of the dimension</param>
     /// <param name="offset">How far to offset the dimension location from the arc</param>
@@ -1399,46 +1410,183 @@ namespace Rhino.Geometry
       ConstructNonConstObject(ptr_this);
     }
 
-    /// <summary> Protected constructor used in serialization. </summary>
-    protected AngularDimension(SerializationInfo info, StreamingContext context)
-      : base(info, context)
+    /// <summary>
+    /// Constructs an angular dimension with extension lines starting at plane origin (arc center).
+    /// </summary>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="horizontal">Horizontal reference direction.</param>
+    /// <param name="centerpoint">Dimension center point.</param>
+    /// <param name="defpoint1">Point on first extension line.</param>
+    /// <param name="defpoint2">Point on second extension line.</param>
+    /// <param name="dimlinepoint">Point on dimension arc.</param>
+    /// <since>8.0</since>
+    public AngularDimension(
+      Plane plane,
+      Vector3d horizontal,
+      Point3d centerpoint,
+      Point3d defpoint1,
+      Point3d defpoint2,
+      Point3d dimlinepoint
+      )
     {
+      IntPtr ptr_this = UnsafeNativeMethods.ON_V6_DimAngular_Create(
+        Guid.Empty,
+        plane,
+        horizontal,
+        centerpoint,
+        defpoint1,
+        defpoint2,
+        dimlinepoint
+        );
+
+      if (ptr_this == IntPtr.Zero)
+        ptr_this = UnsafeNativeMethods.ON_DimAngular_New(); // fallback
+      ConstructNonConstObject(ptr_this);
     }
 
     /// <summary>
-    /// Initialize Dimension parameters
+    /// Constructs an angular dimension from parameters.
     /// </summary>
-    /// <param name="dimStyle">Dimension's DimensionStyle</param>
-    /// <param name="plane">Dimension's Plane</param>
-    /// <param name="horizontal">Horizontal reference direction</param>
-    /// <param name="centerpoint">Dimension center point</param>
-    /// <param name="defpoint1">First definition point</param>
-    /// <param name="defpoint2">Second definition point</param>
-    /// <param name="dimlinepoint">Point on dimension line</param>
-    /// <returns></returns>
-    /// <since>6.0</since>
-    public static AngularDimension Create( DimensionStyle dimStyle, Plane plane,
-      Vector3d horizontal, Point3d centerpoint, Point3d defpoint1, 
-      Point3d defpoint2, Point3d dimlinepoint )
+    /// <param name="plane">The dimension's plane.</param>
+    /// <param name="horizontal">The horizontal direction.</param>
+    /// <param name="extpoint1">Start of first extension line.</param>
+    /// <param name="extpoint2">start of second extension line.</param>
+    /// <param name="dirpoint1">point on first extension vector.</param>
+    /// <param name="dirpoint2">Spoint on second extension vector.</param>
+    /// <param name="dimlinepoint">point on dimension line.</param>
+    public AngularDimension(
+      Plane plane,
+      Vector3d horizontal,
+      Point3d extpoint1,
+      Point3d extpoint2,
+      Point3d dirpoint1,
+      Point3d dirpoint2,
+      Point3d dimlinepoint
+      )
     {
+      IntPtr ptr_this = UnsafeNativeMethods.ON_V6_DimAngular_Create2Fixed(
+        Guid.Empty,
+        plane,
+        horizontal,
+        extpoint1,
+        extpoint2,
+        dirpoint1,
+        dirpoint2,
+        dimlinepoint
+        );
+
+      if (ptr_this == IntPtr.Zero)
+        ptr_this = UnsafeNativeMethods.ON_DimAngular_New(); // fallback
+      ConstructNonConstObject(ptr_this);
+    }
+
+    /// <summary>
+    /// Constructs an angular dimension between the lines.
+    /// 
+    /// If the lines intersect in a single point, that point is used as the center
+    /// of the angular dimension arc.In this case, there are eight possible angles
+    /// to dimension.The pointOnAngularDimensionArc and pointOnLine parameters
+    /// are used to select the correct angle to dimension. If a pointOnLine parameter
+    /// is not set, the corresponding line's midpoint is used.
+    /// 
+    /// If the lines are colinear, the point on the line closest to
+    /// pointOnAngularDimensionArc is the center of the angular dimension arc.
+    /// </summary>
+    /// <param name="line1">The first line.</param>
+    /// <param name="pointOnLine1">
+    /// If specified, indicates which semi-infinite portion of line1 to dimension.
+    /// Otherwise the midpoint of line1 as a segment is used.
+    /// When in doubt, use Point3d.Unset.
+    /// </param>
+    /// <param name="line2">The second line.</param>
+    /// If specified, indicates which semi-infinite portion of line2 to dimension.
+    /// Otherwise the midpoint of line2 as a segment is used.
+    /// When in doubt, use Point3d.Unset.
+    /// <param name="pointOnLine2">
+    /// </param>
+    /// <param name="pointOnAngularDimensionArc">
+    /// A point on the interior of the angular dimension arc. 
+    /// </param>
+    /// <param name="bSetExtensionPoints">
+    /// If bSetExtensionPoints is true, and a pointOnLine parameter is valid, 
+    /// that point is used as the extension point. 
+    /// Otherwise the angular dimension arc endpoint is used.
+    /// </param>
+    /// <since>8.0</since>
+    public AngularDimension(
+      Line line1,
+      Point3d pointOnLine1,
+      Line line2,
+      Point3d pointOnLine2,
+      Point3d pointOnAngularDimensionArc,
+      bool bSetExtensionPoints
+      )
+    {
+      IntPtr ptr_this = UnsafeNativeMethods.ON_V6_DimAngular_Create3(
+        IntPtr.Zero,
+        ref line1,
+        pointOnLine1,
+        ref line2,
+        pointOnLine2,
+        pointOnAngularDimensionArc,
+        bSetExtensionPoints
+        );
+
+      if (ptr_this == IntPtr.Zero)
+        ptr_this = UnsafeNativeMethods.ON_DimAngular_New(); // fallback
+      ConstructNonConstObject(ptr_this);
+    }
+
+    /// <summary>
+    /// Creates an angular dimension with extension lines starting at plane origin (arc center).
+    /// </summary>
+    /// <param name="dimStyle">Dimension's dimension style</param>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="horizontal">Horizontal reference direction.</param>
+    /// <param name="centerpoint">Dimension center point.</param>
+    /// <param name="defpoint1">Point on first extension line.</param>
+    /// <param name="defpoint2">Point on second extension line.</param>
+    /// <param name="dimlinepoint">Point on dimension arc.</param>
+    /// <returns>The angular dimension if successful, null otherwise.</returns>
+    /// <since>6.0</since>
+    public static AngularDimension Create(
+      DimensionStyle dimStyle,
+      Plane plane,
+      Vector3d horizontal,
+      Point3d centerpoint,
+      Point3d defpoint1,
+      Point3d defpoint2,
+      Point3d dimlinepoint
+    )
+    {
+      if (null == dimStyle)
+        throw new ArgumentNullException(nameof(dimStyle));
+
       IntPtr ptr_dim = UnsafeNativeMethods.ON_V6_DimAngular_Create(
-        dimStyle.Id, plane, horizontal, centerpoint, defpoint1, defpoint2, dimlinepoint);
+        dimStyle.Id, 
+        plane, 
+        horizontal, 
+        centerpoint, 
+        defpoint1, 
+        defpoint2, 
+        dimlinepoint
+        );
+
       if (IntPtr.Zero == ptr_dim)
         return null;
-      var rc = new AngularDimension(ptr_dim, null);
-      rc.ParentDimensionStyle = dimStyle;
-      return rc;
+
+      return new AngularDimension(ptr_dim, null) { ParentDimensionStyle = dimStyle };
     }
 
     /// <summary>
-    /// Update Dimension geometry from point locations
+    /// Updates dimension geometry from point locations.
     /// </summary>
     /// <param name="plane">Dimension's plane</param>
     /// <param name="centerpoint">Dimension's center point</param>
-    /// <param name="defpoint1">First definition point</param>
-    /// <param name="defpoint2">Second definition point</param>
-    /// <param name="dimlinepoint">Point on dimension line</param>
-    /// <returns></returns>
+    /// <param name="defpoint1">Point on first extension line.</param>
+    /// <param name="defpoint2">Point on second extension line.</param>
+    /// <param name="dimlinepoint">Point on dimension arc.</param>
+    /// <returns>True if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
@@ -1458,18 +1606,7 @@ namespace Rhino.Geometry
         );
     }
 
-    /// <summary>
-    /// Initialize Dimension parameters
-    /// </summary>
-    /// <param name="styleId">Dimension's AnnotationStyle</param>
-    /// <param name="plane">Dimension's plane</param>
-    /// <param name="extpoint1">First dimension point</param>
-    /// <param name="extpoint2">Second definition point</param>
-    /// <param name="dirpoint1">First direction point</param>
-    /// <param name="dirpoint2">Second direction point</param>
-    /// <param name="dimlinepoint">Point on dimension line</param>
-    /// <returns></returns>
-    /// <since>6.0</since>
+    [Obsolete("Use an override that accepts a DimStyle")]
     public static AngularDimension Create(
       Guid styleId,
       Plane plane,
@@ -1480,6 +1617,9 @@ namespace Rhino.Geometry
       Point3d dimlinepoint
       )
     {
+      // 16-Nov-2022 Dale Fugier.
+      // This function is flawed, as it is missing a horizontal vector parameter.
+      // Thus, the wrapper function ends up calling the incorrect openNURBS function.
       IntPtr ptr_dim = UnsafeNativeMethods.ON_V6_DimAngular_Create2(
         styleId, plane, extpoint1, extpoint2, dirpoint1, dirpoint2, dimlinepoint);
       if (IntPtr.Zero == ptr_dim)
@@ -1488,15 +1628,58 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Update Dimension geometry from point locations
+    /// Creates an angular dimension from parameters.
+    /// </summary>
+    /// <param name="dimStyle">The dimension style.</param>
+    /// <param name="plane">The dimension's plane.</param>
+    /// <param name="horizontal">The horizontal direction.</param>
+    /// <param name="extpoint1">Start of first extension line.</param>
+    /// <param name="extpoint2">start of second extension line.</param>
+    /// <param name="dirpoint1">point on first extension vector.</param>
+    /// <param name="dirpoint2">Spoint on second extension vector.</param>
+    /// <param name="dimlinepoint">point on dimension line.</param>
+    /// <returns></returns>
+    public static AngularDimension Create(
+      DimensionStyle dimStyle,
+      Plane plane,
+      Vector3d horizontal,
+      Point3d extpoint1,
+      Point3d extpoint2,
+      Point3d dirpoint1,
+      Point3d dirpoint2,
+      Point3d dimlinepoint
+      )
+    {
+      if (null == dimStyle)
+        throw new ArgumentNullException(nameof(dimStyle));
+
+      IntPtr ptr_dim = UnsafeNativeMethods.ON_V6_DimAngular_Create2Fixed(
+        dimStyle.Id, 
+        plane, 
+        horizontal,
+        extpoint1, 
+        extpoint2, 
+        dirpoint1, 
+        dirpoint2, 
+        dimlinepoint
+        );
+
+      if (IntPtr.Zero == ptr_dim)
+        return null;
+
+      return new AngularDimension(ptr_dim, null) { ParentDimensionStyle = dimStyle };
+    }
+
+    /// <summary>
+    /// Update angular dimension from point locations.
     /// </summary>
     /// <param name="plane">Dimension's plane</param>
-    /// <param name="extpoint1">First dimension point</param>
-    /// <param name="extpoint2">Second definition point</param>
-    /// <param name="dirpoint1">First direction point</param>
-    /// <param name="dirpoint2">Second direction point</param>
-    /// <param name="dimlinepoint">Point on dimension line</param>
-    /// <returns></returns>
+    /// <param name="extpoint1">Start of first extension line.</param>
+    /// <param name="extpoint2">start of second extension line.</param>
+    /// <param name="dirpoint1">point on first extension vector.</param>
+    /// <param name="dirpoint2">Spoint on second extension vector.</param>
+    /// <param name="dimlinepoint">point on dimension line.</param>
+    /// <returns>True if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public bool AdjustFromPoints(
       Plane plane,
@@ -1516,6 +1699,71 @@ namespace Rhino.Geometry
         dirpoint2,
         dimlinepoint
         );
+    }
+
+    /// <summary>
+    /// The angle between the lines is dimensioned.
+    /// 
+    /// If the lines intersect in a single point, that point is used as the center
+    /// of the angular dimension arc.In this case, there are eight possible angles
+    /// to dimension.The pointOnAngularDimensionArc and pointOnLine parameters
+    /// are used to select the correct angle to dimension. If a pointOnLine parameter
+    /// is not set, the corresponding line's midpoint is used.
+    /// 
+    /// If the lines are colinear, the point on the line closest to
+    /// pointOnAngularDimensionArc is the center of the angular dimension arc.
+    /// </summary>
+    /// <param name="dimStyle">Dimension style.</param>
+    /// <param name="line1">The first line.</param>
+    /// <param name="pointOnLine1">
+    /// If specified, indicates which semi-infinite portion of line1 to dimension.
+    /// Otherwise the midpoint of line1 as a segment is used.
+    /// When in doubt, use Point3d.Unset.
+    /// </param>
+    /// <param name="line2">The second line.</param>
+    /// If specified, indicates which semi-infinite portion of line2 to dimension.
+    /// Otherwise the midpoint of line2 as a segment is used.
+    /// When in doubt, use Point3d.Unset.
+    /// <param name="pointOnLine2">
+    /// </param>
+    /// <param name="pointOnAngularDimensionArc">
+    /// A point on the interior of the angular dimension arc. 
+    /// </param>
+    /// <param name="bSetExtensionPoints">
+    /// If bSetExtensionPoints is true, and a pointOnLine parameter is valid, 
+    /// that point is used as the extension point. 
+    /// Otherwise the angular dimension arc endpoint is used.
+    /// </param>
+    /// <returns>The angular dimension if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public static AngularDimension Create(
+      DimensionStyle dimStyle,
+      Line line1,
+      Point3d pointOnLine1,
+      Line line2,
+      Point3d pointOnLine2,
+      Point3d pointOnAngularDimensionArc,
+      bool bSetExtensionPoints
+      )
+    {
+      if (null == dimStyle)
+        throw new ArgumentNullException(nameof(dimStyle));
+
+      IntPtr ptr_const_dimstyle = dimStyle.ConstPointer();
+      IntPtr ptr_dim = UnsafeNativeMethods.ON_V6_DimAngular_Create3(
+        ptr_const_dimstyle,
+        ref line1,
+        pointOnLine1,
+        ref line2,
+        pointOnLine2,
+        pointOnAngularDimensionArc,
+        bSetExtensionPoints
+        );
+
+      if (IntPtr.Zero == ptr_dim)
+        return null;
+
+      return new AngularDimension(ptr_dim, null) { ParentDimensionStyle = dimStyle };
     }
 
     /// <summary>
@@ -1666,7 +1914,7 @@ namespace Rhino.Geometry
       }
     }
 
-#region properties originating from dim style that can be overridden
+    #region properties originating from dim style that can be overridden
     /// <since>6.0</since>
     public DimensionStyle.AngleDisplayFormat AngleFormat
     {
@@ -1746,7 +1994,7 @@ namespace Rhino.Geometry
         GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
       }
     }
-#endregion properties originating from dim style that can be overridden
+    #endregion properties originating from dim style that can be overridden
   }
 
   /// <summary> 
@@ -1760,10 +2008,30 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <summary>
+    /// Constructs a radial dimension.
+    /// </summary>
     /// <since>6.0</since>
     public RadialDimension()
     {
       var ptr = UnsafeNativeMethods.ON_DimRadial_New();
+      ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>
+    /// Constructs a radial dimension from parameters.
+    /// </summary>
+    /// <param name="dimtype">AnnotationType.Diameter or AnnotationType.Radius</param>
+    /// <param name="plane">Dimension's plane</param>
+    /// <param name="centerpoint">Dimension's center point</param>
+    /// <param name="radiuspoint">Point on dimension radius</param>
+    /// <param name="dimlinepoint">Point on dimension line</param>
+    /// <since>8.0</since>
+    public RadialDimension(AnnotationType dimtype, Plane plane, Point3d centerpoint, Point3d radiuspoint, Point3d dimlinepoint)
+    {
+      var ptr = UnsafeNativeMethods.ON_DimRadial_New();
+      UnsafeNativeMethods.ON_V6_DimRadial_SetDimensionType(ptr, dimtype);
+      UnsafeNativeMethods.ON_V6_DimRadial_AdjustFromPoints(ptr, plane, centerpoint, radiuspoint, dimlinepoint);
       ConstructNonConstObject(ptr);
     }
 
@@ -1797,8 +2065,8 @@ namespace Rhino.Geometry
     /// <param name="dimlinepoint">Point on dimension line</param>
     /// <returns></returns>
     /// <since>6.0</since>
-    public static RadialDimension Create( DimensionStyle dimStyle, AnnotationType dimtype,
-      Plane plane, Point3d centerpoint, Point3d radiuspoint, Point3d dimlinepoint )
+    public static RadialDimension Create(DimensionStyle dimStyle, AnnotationType dimtype,
+      Plane plane, Point3d centerpoint, Point3d radiuspoint, Point3d dimlinepoint)
     {
       IntPtr ptr_dim = UnsafeNativeMethods.ON_V6_DimRadial_Create(
         dimtype, dimStyle.Id, plane, centerpoint, radiuspoint, dimlinepoint);
@@ -1956,7 +2224,7 @@ namespace Rhino.Geometry
       }
     }
 
-#region properties originating from dim style that can be overridden
+    #region properties originating from dim style that can be overridden
 
     /// <summary>
     /// Gets or sets the horizontal alignment of the radial dimension's text
@@ -1968,7 +2236,7 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        TextHorizontalAlignment rc  = UnsafeNativeMethods.ON_V6_Annotation_LeaderTextHorizontalAlignment(thisptr, styleptr);
+        TextHorizontalAlignment rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderTextHorizontalAlignment(thisptr, styleptr);
         GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
         return rc;
       }
@@ -2008,7 +2276,7 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        double rc =  UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowSize(thisptr, styleptr);
+        double rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowSize(thisptr, styleptr);
         GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
         return rc;
       }
@@ -2061,7 +2329,7 @@ namespace Rhino.Geometry
       }
     }
 
-#endregion properties originating from dim style that can be overridden
+    #endregion properties originating from dim style that can be overridden
 
     /// <since>6.0</since>
     public override TextOrientation TextOrientation
@@ -2147,10 +2415,36 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Constructs an ordinate dimension from parameters.
+    /// </summary>
+    /// <param name="plane">Dimension's plane</param>
+    /// <param name="direction">MeasuredDirection.XAxis or MeasuredDirection.YAxis</param>
+    /// <param name="basepoint">Dimension's base point</param>
+    /// <param name="defpoint">Dimension's definition point</param>
+    /// <param name="leaderpoint">Point at tail of leader</param>
+    /// <param name="kinkoffset1">Distance to first jog</param>
+    /// <param name="kinkoffset2">Distance to second jog</param>
+    /// <since>8.0</since>
+    public OrdinateDimension(
+      Plane plane,
+      MeasuredDirection direction,
+      Point3d basepoint,
+      Point3d defpoint,
+      Point3d leaderpoint,
+      double kinkoffset1,
+      double kinkoffset2
+      )
+    {
+      var ptr = UnsafeNativeMethods.ON_DimOrdinate_New();
+      ConstructNonConstObject(ptr);
+      AdjustFromPoints(plane, direction, basepoint, defpoint, leaderpoint, kinkoffset1, kinkoffset2);
+    }
+
+    /// <summary>
     /// Initialize Dimension parameters
     /// </summary>
     /// <param name="dimStyle">Dimension's AnnotationStyle</param>
-    /// <param name="plane">Dimension;s plane</param>
+    /// <param name="plane">Dimension's plane</param>
     /// <param name="direction">MeasuredDirection.XAxis or MeasuredDirection.YAxis</param>
     /// <param name="basepoint">Dimension's base point</param>
     /// <param name="defpoint">Dimension's definition point</param>
@@ -2159,7 +2453,7 @@ namespace Rhino.Geometry
     /// <param name="kinkoffset2">Distance to second jog</param>
     /// <returns></returns>
     /// <since>6.0</since>
-    public static OrdinateDimension Create( DimensionStyle dimStyle, Plane plane,
+    public static OrdinateDimension Create(DimensionStyle dimStyle, Plane plane,
       MeasuredDirection direction, Point3d basepoint, Point3d defpoint,
       Point3d leaderpoint, double kinkoffset1, double kinkoffset2)
     {
@@ -2288,6 +2582,16 @@ namespace Rhino.Geometry
       set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset2(NonConstPointer(), value); }
     }
 
+    /// <summary>
+    /// Gets or sets the measured direction.
+    /// </summary>
+    /// <since>8.0</since>
+    public MeasuredDirection Direction
+    {
+      get { return UnsafeNativeMethods.ON_V6_DimOrdinate_GetMeasuredDirection(ConstPointer()); }
+      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetMeasuredDirection(NonConstPointer(), value); }
+    }
+
     /// <since>6.0</since>
     [ConstOperation]
     public bool GetTextRectangle(out Point3d[] corners)
@@ -2335,7 +2639,7 @@ namespace Rhino.Geometry
     }
   }
 
-  /// <summary> Represents a center mark </summary>
+  ///<summary>Represents a center mark dimension.</summary>
   [Serializable]
   public class Centermark : Dimension
   {
@@ -2343,6 +2647,9 @@ namespace Rhino.Geometry
     {
     }
 
+    /// <summary>
+    /// Constructs a new center mark dimension.
+    /// </summary>
     /// <since>6.0</since>
     public Centermark()
     {
@@ -2350,45 +2657,115 @@ namespace Rhino.Geometry
       ConstructNonConstObject(ptr);
     }
 
-    /// <summary> Protected constructor used in serialization. </summary>
+    /// <summary>
+    /// Protected constructor used in serialization.
+    /// </summary>
     protected Centermark(SerializationInfo info, StreamingContext context)
-      : base (info, context)
+      : base(info, context)
     {
     }
 
-    /// <summary> Create a new center mark </summary>
-    /// <param name="dimStyle">Dimension's AnnotationStyle</param>
-    /// <param name="plane">Dimension's plane</param>
-    /// <param name="centerpoint">Dimension's center point</param>
-    /// <param name="radius">Center mark's radius</param>
-    /// <returns></returns>
+    /// <summary>
+    /// Constructs a new center mark dimension.
+    /// </summary>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="centerPoint">Dimension's center point.</param>
+    /// <param name="radius">Center mark's radius.</param>
+    /// <since>8.0</since>
+    public Centermark(Plane plane, Point3d centerPoint, double radius)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_V6_Centermark_Create(Guid.Empty, plane, centerPoint, radius);
+      if (IntPtr.Zero == ptr)
+        ptr = UnsafeNativeMethods.ON_Centermark_New();
+      ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>
+    /// Constructs a new center mark dimension.
+    /// </summary>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="curve">Curve used to determine the center mark's radius.</param>
+    /// <param name="curveParameter">Parameter on curve used to determine the center mark's radius.</param>
+    /// <since>8.0</since>
+    public Centermark(Plane plane, Curve curve, double curveParameter)
+    {
+      IntPtr ptr = IntPtr.Zero;
+      if (null != curve)
+      {
+        IntPtr ptr_const_curve = curve.ConstPointer();
+        ptr = UnsafeNativeMethods.ON_V6_Centermark_Create2(Guid.Empty, plane, ptr_const_curve, curveParameter);
+      }
+      if (IntPtr.Zero == ptr)
+        ptr = UnsafeNativeMethods.ON_Centermark_New();
+      ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>Creates a new center mark dimension.</summary>
+    /// <param name="dimStyle">Dimension's dimension style.</param>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="centerPoint">Dimension's center point.</param>
+    /// <param name="radius">Center mark's radius.</param>
+    /// <returns>A new center mark if successful, null otherwise.</returns>
     /// <since>6.0</since>
-    public static Centermark Create(DimensionStyle dimStyle, Plane plane, Point3d centerpoint, double radius )
+    public static Centermark Create(DimensionStyle dimStyle, Plane plane, Point3d centerPoint, double radius)
     {
       Guid style_id = dimStyle.Id;
-      IntPtr ptr_centermark = UnsafeNativeMethods.ON_V6_Centermark_Create(
-        style_id, plane, centerpoint, radius );
-      if (IntPtr.Zero == ptr_centermark)
-        return null;
-      var rc = new Centermark(ptr_centermark, null);
-      rc.ParentDimensionStyle = dimStyle;
-      return rc;
-    }
-    // not used yet; no need to export
-    /*
-    /// <summary>
-    /// Update Dimension geometry from point locations
-    /// </summary>
-    /// <param name="plane">Dimension's plane</param>
-    /// <param name="centerpoint">Dimension's centerpoint</param>
-    /// <returns></returns>
-    public bool AdjustFromPoints(Plane plane, Point3d centerpoint)
-    {
-      IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_V6_Centermark_AdjustFromPoints(ptr_this,
-        plane, centerpoint );
+      IntPtr ptr = UnsafeNativeMethods.ON_V6_Centermark_Create(style_id, plane, centerPoint, radius);
+      return IntPtr.Zero == ptr ? null : new Centermark(ptr, null) { ParentDimensionStyle = dimStyle };
     }
 
+    /// <summary>
+    /// <summary>Creates a new center mark dimension.</summary>
+    /// </summary>
+    /// <param name="dimStyle">Dimension's dimension style.</param>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="curve">Curve used to determine the center mark's radius.</param>
+    /// <param name="curveParameter">Parameter on curve used to determine the center mark's radius.</param>
+    /// <returns>A new center mark if successful, null otherwise.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>8.0</since>
+    public static Centermark Create(DimensionStyle dimStyle, Plane plane, Curve curve, double curveParameter)
+    {
+      if (null == curve)
+        throw new ArgumentNullException(nameof(curve));
+      Guid style_id = dimStyle.Id;
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.ON_V6_Centermark_Create2(style_id, plane, ptr_const_curve, curveParameter);
+      return IntPtr.Zero == ptr ? null : new Centermark(ptr, null) { ParentDimensionStyle = dimStyle };
+    }
+
+    /// <summary>
+    /// Update dimension geometry from point locations.
+    /// </summary>
+    /// <param name="plane">Dimension's plane.</param>
+    /// <param name="centerPoint">Dimension's center point.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool AdjustFromPoints(Plane plane, Point3d centerPoint)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_V6_Centermark_AdjustFromPoints(ptr_this, plane, centerPoint);
+    }
+
+    /// <summary>
+    /// Gets or sets the center mark's radius.
+    /// </summary>
+    /// <since>8.0</since>
+    public double Radius
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_V6_Centermark_Radius(ptr_const_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_V6_Centermark_SetRadius(ptr_this, value);
+      }
+    }
+
+    /*
     public bool GetDisplayLines(DimensionStyle style, double scale, out IEnumerable<Line> lines)
     {
       Line[] linearray = new Line[6];
