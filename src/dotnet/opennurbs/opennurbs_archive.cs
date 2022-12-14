@@ -265,6 +265,51 @@ namespace Rhino.Collections
       UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
     }
 
+    internal static IntPtr ToInternalDictionary(ArchivableDictionary dictionary)
+    {
+      // Create a temporary memory buffer for writing the contents of an
+      // ON_ArchivableDictionary into and then read the buffer with .NET to
+      // create the RhinoCommon ArchivableDictionary
+      IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
+      try
+      {
+        FileIO.BinaryArchiveWriter archive = new FileIO.BinaryArchiveWriter(internal_archive);
+        if (dictionary.Write(archive))
+        {
+          UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
+
+          IntPtr internal_dictionary = UnsafeNativeMethods.ON_ArchivableDictionary_New();
+          if(UnsafeNativeMethods.ON_ArchivableDictionary_Read(internal_dictionary, internal_archive))
+            return internal_dictionary;
+        }
+      }
+      finally 
+      { 
+        UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+      }
+
+      return IntPtr.Zero;
+    }
+
+    internal static ArchivableDictionary FromInternalDictionary(IntPtr dictionary)
+    {
+      IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
+      try
+      {
+        if (UnsafeNativeMethods.ON_ArchivableDictionary_Write(dictionary, internal_archive))
+        {
+          UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
+          FileIO.BinaryArchiveReader archive = new FileIO.BinaryArchiveReader(internal_archive);
+          return Read(archive);
+        }
+      }
+      finally
+      {
+        UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+      }
+
+      return default;
+    }
 
     /// <summary>
     /// If this dictionary is part of user-data (or is a UserDictionary), then
