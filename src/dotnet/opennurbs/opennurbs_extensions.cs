@@ -114,6 +114,17 @@ namespace Rhino.FileIO
     File3dmViewTable m_named_view_table;
     File3dmStringTable m_string_table;
     File3dmNamedConstructionPlanes m_named_cplanes;
+    File3dmEmbeddedFiles m_embedded_files;
+    File3dmRenderMaterials m_render_materials;
+    File3dmRenderEnvironments m_render_environments;
+    File3dmRenderTextures m_render_textures;
+    File3dmGroundPlane m_ground_plane;
+    File3dmSafeFrame m_safe_frame;
+    File3dmSkylight m_skylight;
+    File3dmDithering m_dithering;
+    File3dmRenderChannels m_render_channels;
+    File3dmLinearWorkflow m_linear_workflow;
+    File3dmSun m_sun;
 
     internal IntPtr ConstPointer()
     {
@@ -1112,6 +1123,105 @@ namespace Rhino.FileIO
     public File3dmStringTable Strings
     {
       get { return m_string_table ?? (m_string_table = new File3dmStringTable(this)); }
+    }
+
+    /// <summary>
+    /// The embedded files in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmEmbeddedFiles EmbeddedFiles
+    {
+      get { return m_embedded_files ?? (m_embedded_files = new File3dmEmbeddedFiles(this)); }
+    }
+
+    /// <summary>
+    /// The render materials in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderMaterials RenderMaterials
+    {
+      get { return m_render_materials ?? (m_render_materials = new File3dmRenderMaterials(this)); }
+    }
+
+    /// <summary>
+    /// The render environments in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderEnvironments RenderEnvironments
+    {
+      get { return m_render_environments ?? (m_render_environments = new File3dmRenderEnvironments(this)); }
+    }
+
+    /// <summary>
+    /// The render textures in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderTextures RenderTextures
+    {
+      get { return m_render_textures ?? (m_render_textures = new File3dmRenderTextures(this)); }
+    }
+
+    /// <summary>
+    /// The ground plane in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmGroundPlane GroundPlane
+    {
+      get { return m_ground_plane ?? (m_ground_plane = new File3dmGroundPlane(this)); }
+    }
+
+    /// <summary>
+    /// The safe frame in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmSafeFrame SafeFrame
+    {
+      get { return m_safe_frame ?? (m_safe_frame = new File3dmSafeFrame(this)); }
+    }
+
+    /// <summary>
+    /// The skylight in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmSkylight Skylight
+    {
+      get { return m_skylight ?? (m_skylight = new File3dmSkylight(this)); }
+    }
+
+    /// <summary>
+    /// The dithering in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmDithering Dithering
+    {
+      get { return m_dithering ?? (m_dithering = new File3dmDithering(this)); }
+    }
+
+    /// <summary>
+    /// The render channels in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderChannels RenderChannels
+    {
+      get { return m_render_channels ?? (m_render_channels = new File3dmRenderChannels(this)); }
+    }
+
+    /// <summary>
+    /// The linear workflow in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmLinearWorkflow LinearWorkflow
+    {
+      get { return m_linear_workflow ?? (m_linear_workflow = new File3dmLinearWorkflow(this)); }
+    }
+
+    /// <summary>
+    /// The sun in this file.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmSun Sun
+    {
+      get { return m_sun ?? (m_sun = new File3dmSun(this)); }
     }
 
 #region diagnostic dumps
@@ -2316,57 +2426,74 @@ namespace Rhino.FileIO
     {
       switch (type)
       {
-        case ModelComponentType.Unset:
-        case ModelComponentType.Mixed:
-          throw new NotImplementedException("ModelComponentType must be a concrete type.");
+      case ModelComponentType.Unset:
+      case ModelComponentType.Mixed:
+        throw new NotImplementedException("ModelComponentType must be a concrete type.");
 
-        case ModelComponentType.Image:
-          return new BitmapEntry(index, parent);
+      case ModelComponentType.Image:
+        return new BitmapEntry(index, parent);
 
-        case ModelComponentType.TextureMapping:
-          goto default;
+      case ModelComponentType.RenderMaterial:
+        return new Material(id, parent);
 
-        case ModelComponentType.RenderMaterial:
-          return new Material(id, parent);
+      case ModelComponentType.LinePattern:
+        return new Linetype(id, parent);
 
-        case ModelComponentType.LinePattern:
-          return new Linetype(id, parent);
+      case ModelComponentType.Layer:
+        return new Layer(id, parent);
 
-        case ModelComponentType.Layer:
-          return new Layer(id, parent);
+      case ModelComponentType.Group:
+        return new Group(id, parent);
 
-        case ModelComponentType.Group:
-          return new Group(id, parent);
+      //case ModelComponentType.TextStyle:
+      //  return new TextStyle(id, parent);
 
-        //case ModelComponentType.TextStyle:
-        //  return new TextStyle(id, parent);
+      case ModelComponentType.DimStyle:
+        return new DimensionStyle(id, parent);
 
-        case ModelComponentType.DimStyle:
-          return new DimensionStyle(id, parent);
+      case ModelComponentType.RenderLight:
+        return new File3dmObject(id, parent);
 
-        case ModelComponentType.RenderLight:
-          return new File3dmObject(id, parent);
+      case ModelComponentType.HatchPattern:
+        return new HatchPattern(id, parent);
 
-        case ModelComponentType.HatchPattern:
-          return new HatchPattern(id, parent);
+      case ModelComponentType.InstanceDefinition:
+        return new InstanceDefinitionGeometry(id, parent);
 
-        case ModelComponentType.InstanceDefinition:
-          return new InstanceDefinitionGeometry(id, parent);
+      case ModelComponentType.ModelGeometry:
+        return new File3dmObject(id, parent);
 
-        case ModelComponentType.ModelGeometry:
-          return new File3dmObject(id, parent);
+      case ModelComponentType.EmbeddedFile:
+        return new File3dmEmbeddedFile(id, parent);
 
-        case ModelComponentType.HistoryRecord:
-          goto default; //not yet ON_ModelComponent derived
+      case ModelComponentType.RenderContent:
+        return NewFile3dmRenderContent(parent, id);
 
-        default:
-          throw new NotImplementedException(
-            string.Format(
-              "Tell giulio@mcneel.com if you need access to this ModelComponentType: {0}.",
-              type.ToString()
-              )
-            );
+      case ModelComponentType.PostEffect:
+        return new File3dmPostEffect(parent, id);
+
+      case ModelComponentType.TextureMapping:
+      case ModelComponentType.HistoryRecord: // Not yet ON_ModelComponent derived
+        // Continues to default...
+      default:
+        throw new NotImplementedException(
+          string.Format("Tell giulio@mcneel.com if you need access to this ModelComponentType: {0}.",
+            type.ToString()));
       }
+    }
+
+    internal static File3dmRenderContent NewFile3dmRenderContent(File3dm parent, Guid id)
+    {
+      IntPtr model = parent.ConstPointer();
+
+      switch (UnsafeNativeMethods.ONX_Model_GetFile3dmRenderContentKind(model, id))
+      {
+      case 0: return new File3dmRenderMaterial(id, parent);
+      case 1: return new File3dmRenderEnvironment(id, parent);
+      case 2: return new File3dmRenderTexture(id, parent);
+      }
+
+      return null;
     }
 
     internal override IntPtr GetConstOnComponentManifestPtr()
@@ -2532,6 +2659,46 @@ namespace Rhino.FileIO
       IntPtr parent = m_parent.NonConstPointer();
       if (!UnsafeNativeMethods.ONX_Model_AddModelComponent(parent, ptr_item))
         throw new NotSupportedException("Addition of model component failed.");
+    }
+
+    /// <summary>
+    /// Duplicates the object, then adds a copy of the object to the document.
+    /// </summary>
+    /// <param name="item">The item to duplicate and add.</param>
+    /// <param name="attributes">The attributes to link with geometry.</param>
+    /// <since>6.0</since>
+    public Guid Add(GeometryBase item, ObjectAttributes attributes)
+    {
+      switch(item.ObjectType)
+      {
+        case ObjectType.Annotation:
+          if (item is AngularDimension ad) return AddAngularDimension(ad, attributes);
+          else if (item is LinearDimension ld) return AddLinearDimension(ld, attributes);
+          break;
+        case ObjectType.Brep:
+          return AddBrep((Brep)item, attributes);
+        case ObjectType.Curve:
+          return AddCurve((Curve)item, attributes);
+        case ObjectType.Extrusion:
+          return AddExtrusion((Extrusion)item, attributes);
+        case ObjectType.Hatch:
+          return AddHatch((Hatch)item, attributes);
+        case ObjectType.InstanceReference:
+          return AddInstanceObject((InstanceReferenceGeometry)item, attributes);
+        case ObjectType.Mesh:
+          return AddMesh((Mesh)item, attributes);
+        case ObjectType.Point:
+          return AddPoint(((Point)item).Location, attributes);
+        case ObjectType.PointSet:
+          return AddPointCloud((PointCloud)item, attributes);
+        case ObjectType.SubD:
+          return AddSubD((SubD)item, attributes);
+        case ObjectType.Surface:
+          return AddSurface((Surface)item, attributes);
+        case ObjectType.TextDot:
+          return AddTextDot((TextDot)item, attributes);
+      }
+      throw new NotSupportedException($"Addition of model component not supported for type: {item.GetType().FullName}");
     }
 
     /// <summary>
@@ -3783,6 +3950,7 @@ namespace Rhino.FileIO
     /// If layer_name is valid, the layer's index (>=0) is returned. Otherwise,
     /// RhinoMath.UnsetIntIndex is returned.
     /// </returns>
+    /// <since>7.6</since>
     public int AddLayer(string name, System.Drawing.Color color)
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
@@ -4856,6 +5024,6 @@ namespace Rhino.FileIO
       IntPtr ptr_parent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_DocumentUserString_Delete(ptr_parent, key);
     }
-
   }
+
 }
