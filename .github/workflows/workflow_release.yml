@@ -169,11 +169,11 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '12.5'
-      - name: setup msbuild
+      - name: setup dotnet
         if: ${{ matrix.target == 'windows'}}
-        uses: microsoft/setup-msbuild@v1.1
+        uses: actions/setup-dotnet@v3
         with:
-          vs-version: '[16.4,16.5)'
+          dotnet-version: '7.0.x'
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
