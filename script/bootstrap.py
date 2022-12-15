@@ -613,7 +613,8 @@ def check_msbuild(build_tool):
         if os.path.exists(visual_studio_path):
             versions_found = []
             vs_ver_subsearch = "\\20??\\Professional"
-            if glob.glob(visual_studio_path + vs_ver_subsearch):
+            vs_ver_subsearch_ent = "\\20??\\Enterprise"
+            if glob.glob(visual_studio_path + vs_ver_subsearch) or glob.glob(visual_studio_path + vs_ver_subsearch_ent):
                 path_to_search = visual_studio_path
                 only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
         
