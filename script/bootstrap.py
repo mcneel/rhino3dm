@@ -660,6 +660,7 @@ def check_msbuild(build_tool):
                         versions_found[version_id] = folder
 
             if versions_found:
+                print(versions_found)
                 sorted_versions_found = sorted(versions_found, key=split_by_numbers)
                 if sorted_versions_found:
                     version_id = sorted_versions_found[-1]
