@@ -602,7 +602,7 @@ def check_msbuild(build_tool):
 
     # prepare to do some searching
     drive_prefix = os.path.splitdrive(sys.executable)[0]
-    program_files = os.environ.get("PROGRAMFILES")
+    program_files = os.environ.get("PROGRAMFILES(X86)")
 
     running_version = ''
     msbuild_path = ''
