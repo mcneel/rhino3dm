@@ -602,7 +602,7 @@ def check_msbuild(build_tool):
 
     # prepare to do some searching
     drive_prefix = os.path.splitdrive(sys.executable)[0]
-    program_files = os.environ.get("PROGRAMFILES")
+    program_files = os.environ.get("PROGRAMFILES(X86)")
 
     running_version = ''
     msbuild_path = ''
@@ -622,12 +622,12 @@ def check_msbuild(build_tool):
                         versions_found.append(folder)
 
             if versions_found:
-                #debug
-                print(versions_found)
                 latest_version = str(max(versions_found))
                 path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
                     msbuild_path = path_to_search
+            #debug
+            print(versions_found)
 
     #Check if msbuild is in the path
     if not msbuild_path:
