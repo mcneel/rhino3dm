@@ -183,7 +183,7 @@ jobs:
         with:
           python-version: 3.x
       - name: info
-        run: python --version && cmake --version && dotnet --version && git --version && msbuild --version
+        run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v2
       - name: update submodules
