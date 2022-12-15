@@ -624,6 +624,7 @@ def check_msbuild(build_tool):
                 path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
                     msbuild_path = path_to_search
+                    print(msbuild_path)
 
     #Check if msbuild is in the path
     if not msbuild_path:
