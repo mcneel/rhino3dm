@@ -612,23 +612,30 @@ def check_msbuild(build_tool):
         visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
         if os.path.exists(visual_studio_path):
             versions_found = []
-            vs_ver_subsearch = "\\20??\\Professional"
-            vs_ver_subsearch_ent = "\\20??\\Enterprise"
-            if glob.glob(visual_studio_path + vs_ver_subsearch) or glob.glob(visual_studio_path + vs_ver_subsearch_ent):
+            vs_ver_subsearch = "\\20??\\*"
+            if glob.glob(visual_studio_path + vs_ver_subsearch):
                 path_to_search = visual_studio_path
                 only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        
+
                 for folder in only_folders:
                     if folder.startswith("20"):
                         versions_found.append(folder)
 
             if versions_found:
                 latest_version = str(max(versions_found))
-                path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
+                vs_path_version = os.path.join(visual_studio_path, latest_version)
+                vs_editions = os.listdir(vs_path_version)
+                vs_edition = vs_editions[0]
+                if len(vs_editions) > 1:
+                    if "Enterprise" in vs_editions:
+                        vs_edition = "Enterprise"
+                    elif "Professional" in vs_editions:
+                        vs_edition = "Professional"
+                    elif "Community" in vs_editions:
+                        vs_edition = "Community"
+                path_to_search = os.path.join(vs_path_version, vs_edition, "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
                     msbuild_path = path_to_search
-            #debug
-            print(versions_found)
 
     #Check if msbuild is in the path
     if not msbuild_path:
@@ -695,7 +702,6 @@ def check_msbuild(build_tool):
         return False
 
     print_version_comparison(build_tool, running_version)
-    print(msbuild_path)
     return msbuild_path
 
 
