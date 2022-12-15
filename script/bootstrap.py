@@ -622,6 +622,8 @@ def check_msbuild(build_tool):
                         versions_found.append(folder)
 
             if versions_found:
+                #debug
+                print(versions_found)
                 latest_version = str(max(versions_found))
                 path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
@@ -660,6 +662,7 @@ def check_msbuild(build_tool):
                         versions_found[version_id] = folder
 
             if versions_found:
+                #debug
                 print(versions_found)
                 sorted_versions_found = sorted(versions_found, key=split_by_numbers)
                 if sorted_versions_found:
