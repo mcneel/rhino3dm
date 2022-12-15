@@ -308,6 +308,8 @@ def check_git(build_tool):
         #version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
         #running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
         
+    if _platform == "darwin":
+        running_version = running_version.split()[0]
     if _platform == "win32":
         running_version = running_version.split(".windows")[0]
 
@@ -624,7 +626,6 @@ def check_msbuild(build_tool):
                 path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
                     msbuild_path = path_to_search
-                    print(msbuild_path)
 
     #Check if msbuild is in the path
     if not msbuild_path:
@@ -689,6 +690,7 @@ def check_msbuild(build_tool):
         return False
 
     print_version_comparison(build_tool, running_version)
+    print(msbuild_path)
     return msbuild_path
 
 
