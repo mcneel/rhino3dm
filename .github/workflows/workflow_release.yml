@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-11]
-        python-version: [2.7, 3.7, 3.8, 3.9, '3.10']
+        python-version: [3.7, 3.8, 3.9, '3.10']
         include:
           - os: ubuntu-latest
             target: linux
@@ -169,6 +169,11 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '12.5'
+      - name: setup msbuild
+        if: ${{ matrix.target == 'windows'}}
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          vs-version: '16.5'
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.9
         with:
