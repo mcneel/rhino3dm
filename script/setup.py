@@ -207,7 +207,7 @@ def build_methodgen():
             msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
             path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
         
-        command = msbuild_path + ' ' + path_to_methodgen_csproj +' /p:Configuration=Release'
+        command = msbuild_path + ' ' + path_to_methodgen_csproj +' /t:restore,build /p:RestorePackagesConfig=true /p:Configuration=Release'
         run_command(command)
 
         # Check to see if the MethodGen.exe was written...
