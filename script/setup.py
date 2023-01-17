@@ -182,7 +182,7 @@ def build_methodgen():
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
 
     # On Linux, we compile methodgen with dotnet core SDK
-    if _platform == "linux" or _platform == "linux2":
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
         methodgen_src_path = os.path.abspath(os.path.join(src_folder, 'methodgen'))
         src_files = os.listdir(methodgen_src_path)
@@ -198,7 +198,7 @@ def build_methodgen():
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
-        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp3.1", "methodgen.dll")
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "net6.0","methodgen.dll")
     else:
         msbuild_path = 'msbuild'
         # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
@@ -208,8 +208,9 @@ def build_methodgen():
             path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
         
         command = msbuild_path + ' ' + path_to_methodgen_csproj +' /t:restore,build /p:RestorePackagesConfig=true /p:Configuration=Release'
+        print(command)
         run_command(command)
-
+        
         # Check to see if the MethodGen.exe was written...
         item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
         
@@ -237,14 +238,14 @@ def run_methodgen():
     item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
 
     # On Linux, we execute methodgen with dotnet core SDK
-    if _platform == "linux" or _platform == "linux2":
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
         path_to_methodgen_executable = os.path.join(methodgen_build_dir, "methodgen.csproj")
         if not os.path.exists(path_to_methodgen_executable):
             print_error_message(path_to_methodgen_executable + " not found.")
             return False
         
-        command = 'dotnet run --no-build -p '
+        command = 'dotnet run --no-build --project '
     else:
         path_to_methodgen_executable = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
         # On Windows, we need to flip the path separators to appease run_command()
@@ -264,6 +265,8 @@ def run_methodgen():
         os.remove(item_to_check)
 
     command = command + path_to_methodgen_executable + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
+    print("--------------------")
+    print(command)
     run_command(command)
 
     # Check to see if methodgen succeeded
@@ -394,6 +397,7 @@ def setup_macos():
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
     
+    print(command)
     # methogen
     build_methodgen()
     run_methodgen()
