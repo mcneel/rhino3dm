@@ -15,17 +15,17 @@ jobs:
       #  with:
       #    dotnet-version: '7.0.x'
       - name: setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.9
+        uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
           cmake-version: '3.21.1'
       - name: set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: 3.7.x
       - name: info
         run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap dotnet macos
@@ -37,7 +37,7 @@ jobs:
       - name: list
         run: "ls -R src/build/macos"
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: src/build/macos/Release/librhino3dm_native.dylib
           name: rhino3dm.net macos

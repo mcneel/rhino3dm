@@ -208,7 +208,7 @@ def build_methodgen():
             path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
         
         command = msbuild_path + ' ' + path_to_methodgen_csproj +' /t:restore,build /p:RestorePackagesConfig=true /p:Configuration=Release'
-        print(command)
+        #print(command)
         run_command(command)
         
         # Check to see if the MethodGen.exe was written...
@@ -265,8 +265,8 @@ def run_methodgen():
         os.remove(item_to_check)
 
     command = command + path_to_methodgen_executable + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
-    print("--------------------")
-    print(command)
+    #print("--------------------")
+    #print(command)
     run_command(command)
 
     # Check to see if methodgen succeeded
@@ -397,7 +397,7 @@ def setup_macos():
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
     
-    print(command)
+    #print(command)
     # methogen
     build_methodgen()
     run_methodgen()
