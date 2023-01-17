@@ -31,13 +31,13 @@ jobs:
       #  with:
       #    dotnet-version: '7.0.x'
       - name: setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.9
+        uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
           cmake-version: '3.21.1'
       - name: set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
-          python-version: 3.x
+          python-version: 3.7.x
       - name: info
         run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
@@ -53,7 +53,7 @@ jobs:
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
