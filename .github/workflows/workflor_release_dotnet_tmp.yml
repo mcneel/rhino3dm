@@ -41,14 +41,14 @@ jobs:
       - name: info
         run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
-      - name: bootstrap dotnet ${{ matrix.os }}
+      - name: bootstrap dotnet ${{ matrix.target }}
         run: python script/bootstrap.py -p ${{ matrix.target }}
-      - name: setup dotnet ${{ matrix.os }}
+      - name: setup dotnet ${{ matrix.target }}
         run: python script/setup.py -p ${{ matrix.target }} -v
-      - name: build dotnet ${{ matrix.os }}
+      - name: build dotnet ${{ matrix.target }}
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"

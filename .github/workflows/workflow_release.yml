@@ -7,16 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.x'
+          python-version: '3.7.x'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: build python sdist
@@ -49,7 +49,7 @@ jobs:
           cd dist
           echo "::set-output name=file::$(ls *.tar.gz| head -1)"
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
@@ -66,7 +66,7 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.3.0
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
@@ -83,7 +83,7 @@ jobs:
         cd wheelhouse
         echo "::set-output name=file::$(ls *.whl| head -1)"
     - name: artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.2
       with:
         path: wheelhouse/*.whl
         name: ${{ steps.artifactname.outputs.file }}
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -113,7 +113,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
@@ -141,7 +141,7 @@ jobs:
           cd dist
           echo "::set-output name=file::$(ls *.whl| head -1)"
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
@@ -169,35 +169,35 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '12.5'
-      - name: setup dotnet
-        if: ${{ matrix.target == 'windows'}}
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.x'
+      #- name: setup dotnet
+      #  if: ${{ matrix.target == 'macos'}}
+      #  uses: actions/setup-dotnet@v3
+      #  with:
+      #    dotnet-version: '7.0.x'
       - name: setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.9
+        uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
           cmake-version: '3.21.1'
       - name: set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
-          python-version: 3.x
+          python-version: 3.7.x
       - name: info
         run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
-      - name: bootstrap dotnet ${{ matrix.os }}
+      - name: bootstrap dotnet ${{ matrix.target }}
         run: python script/bootstrap.py -p ${{ matrix.target }}
-      - name: setup dotnet ${{ matrix.os }}
+      - name: setup dotnet ${{ matrix.target }}
         run: python script/setup.py -p ${{ matrix.target }} -v
-      - name: build dotnet ${{ matrix.os }}
+      - name: build dotnet ${{ matrix.target }}
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
@@ -205,14 +205,18 @@ jobs:
   pack_dotnet:
     name: pack dotnet
     needs: build_dotnet_os
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
-          python-version: 3.x
+          python-version: 3.7.x
+      - name: setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: '3.21.1'
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap dotnet
@@ -222,17 +226,17 @@ jobs:
       - name: build dotnet
         run: dotnet build src/dotnet/Rhino3dm.csproj
       - name: download rhino3dm.net linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net linux
           path: src/build/linux/Release/
       - name: download rhino3dm.net macos
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net macos
           path: src/build/macos/Release/
       - name: download rhino3dm.net windows
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net windows
           path: src/build/windows/
@@ -241,7 +245,7 @@ jobs:
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts nupkg
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
@@ -265,7 +269,7 @@ jobs:
           cd output
           ls
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: output
           name: rhino3dm.py all wheels
@@ -317,7 +321,7 @@ jobs:
   #   runs-on: macos-11
   #   steps:
   #     - name: set up python
-  #       uses: actions/setup-python@v2
+  #       uses: actions/setup-python@v4.5.0
   #       with:
   #         python-version: 3.7.1
   #     - name: setup cmake
@@ -372,7 +376,7 @@ jobs:
       - name: info
         run: python3 --version && emcc --version && cmake --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: bootstrap
@@ -382,7 +386,7 @@ jobs:
       - name: build js
         run: python3 script/build.py -p js -v
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: src/build/javascript/artifacts_js
           name: rhino3dm.js
