@@ -1,4 +1,4 @@
-name: workflow release tmp
+name: workflow release dotnet tmp
 on: [workflow_dispatch]
 jobs:
 
