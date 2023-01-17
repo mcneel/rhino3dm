@@ -1,4 +1,4 @@
-name: workflow release
+name: workflow release tmp
 on: [workflow_dispatch]
 jobs:
 
