@@ -47,7 +47,7 @@ jobs:
         id: artifactname
         run: |
           cd dist
-          echo "{file}={$(ls *.whl| head -1)}" >> $GITHUB_OUTPUT
+          echo "name=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
@@ -81,7 +81,7 @@ jobs:
       id: artifactname
       run: |
         cd wheelhouse
-        echo "{file}={$(ls *.whl| head -1)}" >> $GITHUB_OUTPUT
+        echo "name=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
     - name: artifacts
       uses: actions/upload-artifact@v3.1.2
       with:
@@ -139,7 +139,7 @@ jobs:
         shell: bash
         run: |
           cd dist
-          echo "{file}={$(ls *.whl| head -1)}" >> $GITHUB_OUTPUT
+          echo "name=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
