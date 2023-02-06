@@ -218,7 +218,7 @@ void initDefines(pybind11::module& m)
     .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
-  py::enum_<ON::EarthCoordinateSystem>(m, "BasePointZero")
+  py::enum_<ON::EarthCoordinateSystem>(m, "BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
@@ -474,7 +474,7 @@ void initDefines(void*)
     .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
-  enum_<ON::EarthCoordinateSystem>("BasePointZero")
+  enum_<ON::EarthCoordinateSystem>("BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
