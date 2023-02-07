@@ -477,7 +477,12 @@ namespace docgen
                 return type.Replace("System.Collections.Generic.IEnumerable<", "").Replace(">", "[]");
             if (type.Contains("IEnumerable"))
                 return type.Replace("IEnumerable<", "").Replace(">", "[]");
-            
+            if (type.Contains("byte[]"))
+                return "Uint8Array";
+            if (type.Contains("double[]"))
+                return "number[]";
+
+            //Console.WriteLine(type);
             return type;
         }
 
