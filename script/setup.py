@@ -492,11 +492,31 @@ def setup_js():
     if not overwrite_check(item_to_check):
         return False
     
-    os.chdir(target_path)
-
-    command = "emcmake cmake " + src_folder
+    # setup draco static lib makefiles
+    draco_path = check_or_create_path(os.path.join(target_path, "draco_wasm"))
+    os.chdir(draco_path)
     try:
-        #p = subprocess.Popen(split_command(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
+        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco")
+        environment = os.environ
+        emcmake_path = shutil.which("emcmake")
+        emscripten_path = emcmake_path[:-len("emcmake")]
+        environment["EMSCRIPTEN"] = emscripten_path
+        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode, env=environment)
+        output, err = p.communicate()
+        output = output.decode('utf-8')
+        err = err.decode('utf-8')
+        if output:
+            if verbose: print(output)
+        elif err:
+            print_error_message(err)
+    except OSError:
+        print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
+        return False
+
+
+    os.chdir(target_path)
+    try:
+        command = "emcmake cmake " + src_folder
         if _platform == "win32" or _platform == "win64":
             p = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
         else:
