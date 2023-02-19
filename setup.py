@@ -82,16 +82,17 @@ class CMakeBuild(build_ext):
             os.makedirs(draco_static_dir)
 
         current_dir = os.getcwd()
-        windows_build = os.name == 'nt'
 
-        os.chdir(draco_static_dir)
-        system("cmake {}".format(ext.sourcedir+"/src/lib/draco"))
-        system("make")
-
-        os.chdir(build_temp_dir)
-
-        if windows_build:
+        if os.name == 'nt':  # windows
             bitness = 8 * struct.calcsize("P")
+
+            os.chdir(draco_static_dir)
+            command = 'cmake -A {} "{}"'.format("win32" if bitness == 32 else "x64",
+                                                ext.sourcedir+"/src/lib/draco")
+            system(command)
+            system("cmake --build . --config Release")
+
+            os.chdir(build_temp_dir)
             command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
                                                                                    sys.executable,
                                                                                    ext.sourcedir+"/src")
@@ -103,8 +104,13 @@ class CMakeBuild(build_ext):
                     print(line.replace("WIN32;", "WIN64;"))
             system("cmake --build . --config Release --target _rhino3dm")
         else:
+            os.chdir(draco_static_dir)
+            system("cmake {}".format(ext.sourcedir+"/src/lib/draco"))
+            system("cmake --build .")
+
+            os.chdir(build_temp_dir)
             system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-            system("make")
+            system("cmake --build .")
 
         os.chdir(current_dir)
         if not os.path.exists(self.build_lib + "/rhino3dm"):

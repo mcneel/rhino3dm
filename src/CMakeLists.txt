@@ -92,7 +92,11 @@ if (${RHINO3DM_PY})
   endif()
 
   add_subdirectory(lib/draco)
-  target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
+  if (MSVC)
+    target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/Release/draco.lib)
+  else()
+    target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
+  endif()
 endif()
 
 
