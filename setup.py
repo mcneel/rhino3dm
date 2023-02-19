@@ -135,8 +135,8 @@ CPython package based on OpenNURBS with a RhinoCommon style
 Project Homepage at: https://github.com/mcneel/rhino3dm
 
 ### Supported platforms
-* Python 2.7, 3.7, 3.8, 3.9, 3.10 - Windows (32 and 64 bit)
-* Python 2.7, 3.7, 3.8, 3.9, 3.10 - OSX (installed through homebrew)
+* Python 3.7, 3.8, 3.9, 3.10 - Windows (32 and 64 bit)
+* Python 3.7, 3.8, 3.9, 3.10 - OSX (installed through homebrew)
 * Linux and other python versions are supported through source distributions\
 
 
