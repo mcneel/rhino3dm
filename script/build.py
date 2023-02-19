@@ -436,6 +436,11 @@ def build_js():
     if not overwrite_check(item_to_check):
         return False
 
+    # build draco_wasm static lib
+    draco_path = os.path.join(target_path, "draco_wasm")
+    os.chdir(draco_path)
+    run_command("emmake make", True)
+
     os.chdir(target_path)
 
     if overwrite:

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.0.0] - Unreleased
 ### Added
 - Updated rhino3dm to be based on the Rhino 8 version of OpenNURBS
+- (py) Linux version now includes draco support
+
+### Changed
+- (js, py) Use draco 1.5.4 
 
 ## [7.15.0] - 2022-03-23
 ### Added
