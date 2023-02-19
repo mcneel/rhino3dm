@@ -53,8 +53,7 @@ add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})
-  # these shouldn't be necessary in the future as we adjust opennurbs to be
-  # emscripten aware
+  # temporary until we adjust opennurbs to be emscripten aware
   add_definitions(-DON_32BIT_RUNTIME)
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
