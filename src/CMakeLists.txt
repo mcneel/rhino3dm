@@ -1,29 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(rhino3dm)
 
-# 24 Jan 2020 S. Baer
-# When I added draco to this project we ended up in a situation where both
-# EMSCRIPTEN and PYTHON_EXECUTABLE were defined which is what we were keying
-# off of to figure out what type of project we should be building. Adding
-# some local cmake varaibles to work around this issue. It seems like we can
-# figure out something cleaner to use in the future as a command line arg
-set(RHINO3DM_JS "NO")
-set(RHINO3DM_PY "NO")
+set (CMAKE_CXX_STANDARD 14)
+
 if (EMSCRIPTEN)
   set(RHINO3DM_JS "YES")
 else()
   set(RHINO3DM_PY "YES")
 endif()
-
-# 24 Jan 2020 S. Baer
-# I am having problems with compiling draco support into Python2 on Linux.
-# Removing support for draco on that build until we figure out what we are
-# doing wrong
-set(INCLUDE_DRACO "YES")
-if (${RHINO3DM_PY} AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-  set(INCLUDE_DRACO "NO")
-endif()
-
 
 if (${RHINO3DM_JS})
   message("Web Assembly Compile")
@@ -31,13 +15,11 @@ endif()
 
 if (${RHINO3DM_PY})
   message("Python Compile")
- add_subdirectory(lib/pybind11)
+  add_subdirectory(lib/pybind11)
 endif()
 
 # Add draco add_library
-if (${INCLUDE_DRACO})
-  include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
-endif()
+include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
 
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
 file(GLOB zlib_SRC "lib/opennurbs/zlib/*.h" "lib/opennurbs/zlib/*.c")
@@ -55,8 +37,6 @@ file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.c" "lib/opennurbs/android_uu
 file(GLOB uuid_SRC "lib/opennurbs/android_uuid/*.h" "lib/opennurbs/android_uuid/*.c")
 file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.skip" "lib/opennurbs/android_uuid/gen_uuid_nt.c")
 
-set (CMAKE_CXX_STANDARD 14)
-
 if(${RHINO3DM_JS})
   # we will eventually want the following warnging flags on both compiles
   # for now, just WASM
@@ -64,8 +44,6 @@ if(${RHINO3DM_JS})
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --bind")
 endif()
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-
 
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DON_COMPILING_OPENNURBS)
@@ -73,22 +51,16 @@ add_definitions(-DOPENNURBS_FREETYPE_INC_)
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
+add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})
   # these shouldn't be necessary in the future as we adjust opennurbs to be
   # emscripten aware
   add_definitions(-DON_32BIT_RUNTIME)
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
-endif()
-if (${INCLUDE_DRACO})
-  add_definitions(-DON_INCLUDE_DRACO)
-endif()
 
-if(${RHINO3DM_JS})
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
-endif()
 
-if(${RHINO3DM_JS})
   add_subdirectory(lib/draco)
   add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${uuid_SRC})
   target_link_libraries( rhino3dm ${PROJECT_SOURCE_DIR}/build/javascript/draco_wasm/libdraco.a)
@@ -96,7 +68,6 @@ endif()
 
 if (${RHINO3DM_PY})
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set (CMAKE_CXX_STANDARD 17)
     add_definitions(-DON_RUNTIME_LINUX)
     add_definitions(-DON_CLANG_CONSTRUCTOR_BUG)
     pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
@@ -119,10 +90,9 @@ if (${RHINO3DM_PY})
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
   endif()
-  if(${INCLUDE_DRACO})
-    add_subdirectory(lib/draco)
-    target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
-  endif()
+
+  add_subdirectory(lib/draco)
+  target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
 endif()
 
 
