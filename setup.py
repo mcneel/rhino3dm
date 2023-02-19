@@ -76,11 +76,19 @@ class CMakeBuild(build_ext):
             self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+        build_temp_dir = os.path.abspath(self.build_temp)
+        draco_static_dir = os.path.join(build_temp_dir, "draco_static")
+        if not os.path.exists(draco_static_dir):
+            os.makedirs(draco_static_dir)
 
         current_dir = os.getcwd()
-        os.chdir(self.build_temp)
-
         windows_build = os.name == 'nt'
+
+        os.chdir(draco_static_dir)
+        system("cmake {}".format(ext.sourcedir+"/src/lib/draco"))
+        system("make")
+
+        os.chdir(build_temp_dir)
 
         if windows_build:
             bitness = 8 * struct.calcsize("P")
