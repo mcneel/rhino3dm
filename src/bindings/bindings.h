@@ -1,6 +1,6 @@
 #pragma once
 
-// we don't need to export RH_C_FUNCTION in these libraries
+// no need to export RH_C_FUNCTION in these libraries
 #define RH_C_FUNCTION
 
 #if defined(__EMSCRIPTEN__)
