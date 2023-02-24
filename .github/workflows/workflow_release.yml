@@ -371,7 +371,7 @@ jobs:
     name: build rhino3dm.js
     runs-on: ubuntu-latest
     container:
-      image: emscripten/emsdk:2.0.10
+      image: emscripten/emsdk:3.1.30
     steps:
       - name: info
         run: python3 --version && emcc --version && cmake --version
