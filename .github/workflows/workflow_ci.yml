@@ -98,7 +98,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: safe dir
-        run: git config --system --add safe.directory *
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: git submodule update --init
       - name: bootstrap
