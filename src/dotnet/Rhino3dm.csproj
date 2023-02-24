@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45;net48;net7.0</TargetFrameworks>
     <DefineConstants>$(DefineConstants);RHINO3DM_BUILD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">$(DefineConstants);DOTNETCORE</DefineConstants>
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>7.15.0</Version>
+    <Version>8.0.0</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>

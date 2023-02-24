@@ -7,7 +7,7 @@ There are several places where version numbers should be updated:
 - [JavaScript] package.json, line 3
 - [.NET] src/dotnet/Rhino3dm.csproj, line 11
 - [Python]
-  - setup.py, line 113
+  - setup.py, line 127
   - src/rhino3dm/\_\_init\_\_.py, line 7
 - src/version.txt, line 1
 
