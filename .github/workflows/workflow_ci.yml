@@ -97,6 +97,8 @@ jobs:
         run: python3 --version && emcc --version && cmake --version
       - name: checkout
         uses: actions/checkout@v2
+      - name: safe dir
+        run: git config --system --add safe.directory *
       - name: update submodules
         run: git submodule update --init
       - name: bootstrap
