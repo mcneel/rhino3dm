@@ -357,7 +357,7 @@ namespace Rhino.DocObjects
     public FontStyle Style => UnsafeNativeMethods.ON_Font_Style(m_managed_font);
     /// <since>6.0</since>
     public FontWeight Weight => UnsafeNativeMethods.ON_Font_Weight(m_managed_font);
-    // <since>8.0</since>
+    /// <since>8.0</since>
     public FontStretch Stretch => UnsafeNativeMethods.ON_Font_Stretch(m_managed_font);
     /// <since>6.0</since>
     public double PointSize => UnsafeNativeMethods.ON_Font_PointSize(m_managed_font);

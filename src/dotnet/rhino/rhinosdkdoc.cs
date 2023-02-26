@@ -455,7 +455,7 @@ namespace Rhino
     /// <since>7.0</since>
     public static RhinoDoc CreateHeadless(string file3dmTemplatePath)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       if (!string.IsNullOrWhiteSpace(file3dmTemplatePath))
       {
         var info = new System.IO.FileInfo(file3dmTemplatePath);
@@ -478,7 +478,7 @@ namespace Rhino
     /// <since>7.0</since>
     public static RhinoDoc OpenHeadless(string file3dmPath)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       if (file3dmPath != null)
       {
         var info = new System.IO.FileInfo(file3dmPath);
@@ -511,9 +511,10 @@ namespace Rhino
     /// <param name="options"></param>
     /// <returns></returns>
     /// <exception cref="System.IO.FileNotFoundException"></exception>
+    /// <since>8.0</since>
     public bool Import(string filePath, ArchivableDictionary options)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       var fileInfo = new System.IO.FileInfo(filePath);
 
       if (!fileInfo.Exists)
@@ -611,7 +612,7 @@ namespace Rhino
     /// <since>7.0</since>
     public bool SaveAs(string file3dmPath, int version)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       var info = new System.IO.FileInfo(file3dmPath);
 
       if (string.Compare(info.Extension, ".3DM", true) != 0)
@@ -654,7 +655,7 @@ namespace Rhino
     /// <since>7.0</since>
     public bool SaveAsTemplate(string file3dmTemplatePath, int version)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       var info = new System.IO.FileInfo(file3dmTemplatePath);
 
       if (string.Compare(info.Extension, ".3DM", true) != 0)
@@ -699,9 +700,10 @@ namespace Rhino
     /// Options to help define how data should be exported.
     /// </param>
     /// <returns>true on success</returns>
+    /// <since>8.0</since>
     public bool Export(string filePath, ArchivableDictionary options)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       new System.IO.FileInfo(filePath);
 
       using
@@ -746,9 +748,10 @@ namespace Rhino
     /// Options to help define how data should be exported.
     /// </param>
     /// <returns>true on success</returns>
+    /// <since>8.0</since>
     public bool ExportSelected(string filePath, ArchivableDictionary options)
     {
-      // This line checks filePath is a valid path, well formated, not too long...
+      // This line checks filePath is a valid path, well formatted, not too long...
       new System.IO.FileInfo(filePath);
 
       using
@@ -1932,14 +1935,14 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true if the document has a set of custom render primitves - ie, CustomRenderMeshes will return non-null.
+    /// Returns true if the document has a set of custom render primitives - ie, CustomRenderMeshes will return non-null.
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered.</param>
     /// <param name="flags">See MeshProvider.Flags</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
-    /// <returns>Returns true if the object will has a set of custom render primitves</returns>
+    /// <returns>Returns true if the object will has a set of custom render primitives</returns>
     /// /// <seealso cref="RenderMeshes"/>
     /// <since>8.0</since>
     public bool HasCustomRenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
@@ -2009,7 +2012,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns the bounding box of custom render primitves for this object .
+    /// Returns the bounding box of custom render primitives for this object .
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>
@@ -5400,6 +5403,29 @@ namespace Rhino.DocObjects.Tables
       return views.ToArray();
     }
 
+    /// <summary>
+    /// Gets an array of all the views.
+    /// </summary>
+    /// <param name="filter">View types to include</param>
+    /// <returns>An array of Rhino views. This array can be empty, but not null.</returns>
+    /// <since>8.0</since>
+    public RhinoView[] GetViewList(Rhino.DocObjects.Tables.ViewTypeFilter filter)
+    {
+      int count = UnsafeNativeMethods.CRhinoDoc_ViewListBuildFilter(Document.RuntimeSerialNumber, filter);
+      if (count < 1)
+        return new RhinoView[0];
+      var views = new List<RhinoView>(count);
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr ptr_view = UnsafeNativeMethods.CRhinoDoc_ViewListGet(Document.RuntimeSerialNumber, i);
+        RhinoView view = RhinoView.FromIntPtr(ptr_view);
+        if (view != null)
+          views.Add(view);
+      }
+      UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, false, false); // calling with false empties the static list used by ViewListGet
+      return views.ToArray();
+    }
+
     /// <since>5.0</since>
     public RhinoView[] GetStandardRhinoViews()
     {
@@ -5418,7 +5444,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public RhinoPageView[] GetPageViews()
     {
-      var views = GetViewList(false, true);
+      var views = GetViewList(ViewTypeFilter.Page);
       if (null == views || views.Length < 1)
         return new RhinoPageView[0];
       var pages = new RhinoPageView[views.Length];
@@ -6237,60 +6263,29 @@ namespace Rhino.DocObjects.Tables
           if (index < 0) return Guid.Empty;
           obj_id = Document.Lights[index].Id;
           break;
+
         case ObjectType.Annotation:
-          var rd = geometry as RadialDimension;
-          if (rd != null)
+          switch (geometry)
           {
-            obj_id = AddRadialDimension(rd, attributes, history, reference);
-            break;
+            case TextEntity te:         obj_id = AddText(te, attributes, history, reference); break;
+            case Leader le:             obj_id = AddLeader(le, attributes, history, reference); break;
+            case Centermark cm:         obj_id = AddCentermark(cm, attributes, history, reference); break;
+            case AngularDimension ad:   obj_id = AddAngularDimension(ad, attributes, history, reference); break;
+            case LinearDimension ld:    obj_id = AddLinearDimension(ld, attributes, history, reference); break;
+            case RadialDimension rd:    obj_id = AddRadialDimension(rd, attributes, history, reference); break;
+            case OrdinateDimension od:  obj_id = AddOrdinateDimension(od, attributes, history, reference); break;
+            default: throw new NotImplementedException("Add currently does not support this annotation type.");
           }
-          var rt = geometry as TextEntity;
-          if (rt != null)
-          {
-            obj_id = AddText(rt, attributes, history, reference);
-            break;
-          }
-          var rl = geometry as Leader;
-          if (rl != null)
-          {
-            obj_id = AddLeader(rl, attributes, history, reference);
-            break;
-          }
-          var dl = geometry as LinearDimension;
-          if (dl != null)
-          {
-            obj_id = AddLinearDimension(dl, attributes, history, reference);
-            break;
-          }
-          var da = geometry as AngularDimension;
-          if (da != null)
-          {
-            obj_id = AddAngularDimension(da, attributes, history, reference);
-            break;
-          }
-          var dr = geometry as RadialDimension;
-          if (dr != null)
-          {
-            obj_id = AddRadialDimension(dr, attributes, history, reference);
-            break;
-          }
-          var dx = geometry as OrdinateDimension;
-          if (dx != null)
-          {
-            obj_id = AddOrdinateDimension(dx, attributes, history, reference);
-            break;
-          }
-          var cm = geometry as Centermark;
-          if (cm != null)
-          {
-            obj_id = AddCentermark(cm, attributes, history, reference);
-            break;
-          }
-          throw new NotImplementedException("Add currently does not support this annotation type.");
+          break;
+          
         case ObjectType.InstanceDefinition:
           throw new NotImplementedException("Add currently does not support instance definition types.");
         case ObjectType.InstanceReference:
-          throw new NotImplementedException("Add currently does not support instance reference types.");
+          var iref = (InstanceReferenceGeometry) geometry;
+          var idef = Document.InstanceDefinitions.FindId(iref.ParentIdefId);
+          if (idef is null) return Guid.Empty;
+          obj_id = AddInstanceObject(idef.Index, iref.Xform, attributes, history, reference);
+          break;
         case ObjectType.TextDot:
           obj_id = AddTextDot((TextDot)geometry, attributes, history, reference);
           break;
@@ -9825,8 +9820,8 @@ namespace Rhino.DocObjects.Tables
     //        transformation history is recorded.  This will be
     //        adequate for simple transformation commands like
     //        rotate, move, scale, and so on that do not have
-    //        auxillary input objects.  For fancier commands,
-    //        that have an auxillary object, like the spine
+    //        auxiliary input objects.  For fancier commands,
+    //        that have an auxiliary object, like the spine
     //        curve in ArrayAlongCrv, set bAddTransformHistory
     //        to false. 
     //  Returns:
@@ -9862,8 +9857,8 @@ namespace Rhino.DocObjects.Tables
     //        transformation history is recorded.  This will be
     //        adequate for simple transformation commands like
     //        rotate, move, scale, and so on that do not have
-    //        auxillary input objects.  For fancier commands,
-    //        that have an auxillary object, like the spine
+    //        auxiliary input objects.  For fancier commands,
+    //        that have an auxiliary object, like the spine
     //        curve in ArrayAlongCrv, set bAddTransformHistory
     //        to false. 
     //  Returns:
@@ -10105,12 +10100,12 @@ namespace Rhino.DocObjects.Tables
       if (!Enum.IsDefined(typeof(ModelComponentType), type))
         throw new ArgumentNullException(nameof(type));
 
-      int index = default(int);
-      IntPtr ptr_comp = UnsafeNativeMethods.CRhinoDoc_LookupModelObject(m_doc.RuntimeSerialNumber, id, ref type, ref index);
+      int index = RhinoMath.UnsetIntIndex; 
+      IntPtr ptr_comp = UnsafeNativeMethods.CRhinoDoc_LookupDocumentObject(m_doc.RuntimeSerialNumber, id, ref type, ref index);
 
       if (ptr_comp == IntPtr.Zero) return null;
 
-      return Instantiate(m_doc, type, id, index, ptr_comp);
+      return Instantiate(m_doc, type, index, ptr_comp);
     }
 
     public override ModelComponent FindIndex(int index, ModelComponentType type)
@@ -10125,7 +10120,7 @@ namespace Rhino.DocObjects.Tables
 
       if (ptr_comp == IntPtr.Zero) return null;
 
-      return Instantiate(m_doc, type, id, index, ptr_comp);
+      return Instantiate(m_doc, type, index, ptr_comp);
     }
 
     public override ModelComponent FindName(string name, ModelComponentType type, Guid parent)
@@ -10142,7 +10137,7 @@ namespace Rhino.DocObjects.Tables
 
       if (ptr_comp == IntPtr.Zero) return null;
 
-      return Instantiate(m_doc, type, id, index, ptr_comp);
+      return Instantiate(m_doc, type, index, ptr_comp);
     }
 
     public override ModelComponent FindNameHash(NameHash nameHash, ModelComponentType type)
@@ -10166,10 +10161,10 @@ namespace Rhino.DocObjects.Tables
 
       if (ptr_comp == IntPtr.Zero) return null;
 
-      return Instantiate(m_doc, type, id, index, ptr_comp);
+      return Instantiate(m_doc, type, index, ptr_comp);
     }
 
-    internal static ModelComponent Instantiate(RhinoDoc doc, ModelComponentType type, Guid id, int index, IntPtr ptr)
+    internal static ModelComponent Instantiate(RhinoDoc doc, ModelComponentType type, int index, IntPtr ptr)
     {
       switch (type)
       {
@@ -10239,7 +10234,7 @@ namespace Rhino.DocObjects.Tables
 
       while (current_ptr != IntPtr.Zero)
       {
-        var instance = Instantiate(m_doc, type, current_id, current_index, current_ptr);
+        var instance = Instantiate(m_doc, type, current_index, current_ptr);
         yield return instance;
         current_ptr = UnsafeNativeMethods.CRhinoManifestIterator_FirstNextItem(m_doc.RuntimeSerialNumber, type, ref current_id, ref current_index);
       }
@@ -10716,7 +10711,7 @@ namespace Rhino.DocObjects
     public bool SelectedObjectsFilter { get; set; }
 
     /// <summary>
-    /// The default object enumerator settings ignore the visiblity state of objects.
+    /// The default object enumerator settings ignore the visibility state of objects.
     /// If you want the iterator to limit itself to visible objects, then set this property to true.
     /// </summary>
     /// <since>5.0</since>

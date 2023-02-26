@@ -17,6 +17,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylight enabled state.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_Skylight_GetOn(_parent.ConstPointer()); }
@@ -26,6 +27,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylight custom environment state.
     /// </summary>
+    /// <since>8.0</since>
     public bool CustomEnvironmentOn
     {
       get { return UnsafeNativeMethods.ON_Skylight_GetCustomEnvironmentOn(_parent.ConstPointer()); }
@@ -35,6 +37,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylight custom environment instance id.
     /// </summary>
+    /// <since>8.0</since>
     public Guid CustomEnvironment
     {
       get { return UnsafeNativeMethods.ON_Skylight_GetCustomEnvironment(_parent.ConstPointer()); }
@@ -44,6 +47,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylight shadow intensity. This is unused at present.
     /// </summary>
+    /// <since>8.0</since>
     public double ShadowIntensity
     {
       get { return UnsafeNativeMethods.ON_Skylight_GetShadowIntensity(_parent.ConstPointer()); }

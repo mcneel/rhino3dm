@@ -374,17 +374,20 @@ namespace Rhino.Runtime.InteropWrappers
     /// Gets the constant (immutable) pointer of this array.
     /// </summary>
     /// <returns>The constant pointer.</returns>
+    /// <since>8.0</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
     /// <returns>The non-constant pointer.</returns>
+    /// <since>8.0</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayIntPtr"/> class.
     /// </summary>
+    /// <since>8.0</since>
     public SimpleArrayIntPtr()
     {
       m_ptr = UnsafeNativeMethods.ON_IntPtrArray_New();
@@ -402,6 +405,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the number of elements in this array.
     /// </summary>
+    /// <since>8.0</since>
     public int Count
     {
       get { return UnsafeNativeMethods.ON_IntPtrArray_Count(m_ptr); }
@@ -411,6 +415,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>8.0</since>
     public IntPtr[] ToArray()
     {
       var list = new List<IntPtr>();
@@ -439,6 +444,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>8.0</since>
     public void Dispose()
     {
       InternalDispose();
@@ -611,17 +617,20 @@ namespace Rhino.Runtime.InteropWrappers
     /// Gets the constant (immutable) pointer of this vector.
     /// </summary>
     /// <returns>The constant pointer.</returns>
+    /// <since>7.26</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Gets the non-constant pointer (for modification) of this vector.
     /// </summary>
     /// <returns>The non-constant pointer.</returns>
+    /// <since>7.26</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayByte"/> class.
     /// </summary>
+    /// <since>7.26</since>
     public StdVectorByte()
     {
       m_ptr = UnsafeNativeMethods.ON_ByteVector_New(null, 0);
@@ -641,6 +650,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="SimpleArrayByte"/> with the contents of another SimpleArrayByte.
     /// </summary>
+    /// <since>7.26</since>
     public StdVectorByte(StdVectorByte other)
     {
       if (other == null)
@@ -656,6 +666,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Copies the contents of a <see cref="StdVectorByte"/> into another StdVectorByte.
     /// </summary>
+    /// <since>7.26</since>
     public void CopyTo(StdVectorByte other)
     {
       if (other != null)
@@ -668,6 +679,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new <see cref="StdVectorByte"/> class
     /// </summary>
     /// <param name="values">initial set of integers to add to the array</param>
+    /// <since>7.26</since>
     public StdVectorByte(IEnumerable<byte> values)
     {
       if (values == null)
@@ -685,6 +697,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>7.26</since>
     [CLSCompliant(false)]
     public ulong Count
     {
@@ -694,6 +707,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Return the raw data.
     /// </summary>
+    /// <since>7.26</since>
     public IntPtr Memory()
     {
       return UnsafeNativeMethods.ON_ByteVector_Memory(m_ptr);
@@ -703,6 +717,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>7.26</since>
     public byte[] ToArray()
     {
       var count = Count;
@@ -913,17 +928,20 @@ namespace Rhino.Runtime.InteropWrappers
     /// Gets the constant (immutable) pointer of this array.
     /// </summary>
     /// <returns>The constant pointer.</returns>
+    /// <since>7.26</since>
     public IntPtr ConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Gets the non-constant pointer (for modification) of this array.
     /// </summary>
     /// <returns>The non-constant pointer.</returns>
+    /// <since>7.26</since>
     public IntPtr NonConstPointer() { return m_ptr; }
 
     /// <summary>
     /// Initializes a new <see cref="StdVectorFloat"/> class.
     /// </summary>
+    /// <since>7.26</since>
     public StdVectorFloat()
     {
       m_ptr = UnsafeNativeMethods.ON_FloatVector_New(null, 0);
@@ -943,6 +961,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Initializes a new <see cref="StdVectorFloat"/> with the contents of another SimpleArrayFloat.
     /// </summary>
+    /// <since>7.26</since>
     public StdVectorFloat(StdVectorFloat other)
     {
       if (other == null)
@@ -958,6 +977,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Copies the contents of a <see cref="StdVectorFloat"/> into another SimpleArrayFloat.
     /// </summary>
+    /// <since>7.26</since>
     public void CopyTo(StdVectorFloat other)
     {
       if (other != null)
@@ -970,6 +990,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Initializes a new <see cref="SimpleArrayFloat"/> class
     /// </summary>
     /// <param name="values">initial set of integers to add to the array</param>
+    /// <since>7.26</since>
     public StdVectorFloat(IEnumerable<float> values)
     {
       if (values == null)
@@ -987,6 +1008,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Gets the amount of elements in this array.
     /// </summary>
+    /// <since>7.26</since>
     [CLSCompliant(false)]
     public ulong Count
     {
@@ -996,6 +1018,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Return the raw data.
     /// </summary>
+    /// <since>7.26</since>
     public IntPtr Memory()
     {
       return UnsafeNativeMethods.ON_FloatVector_Memory(m_ptr);
@@ -1006,6 +1029,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// Returns the managed counterpart of the unmanaged array.
     /// </summary>
     /// <returns>The managed array.</returns>
+    /// <since>7.26</since>
     public float[] ToArray()
     {
       var count = Count;
@@ -1027,6 +1051,7 @@ namespace Rhino.Runtime.InteropWrappers
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
+    /// <since>7.26</since>
     public void Dispose()
     {
       InternalDispose();

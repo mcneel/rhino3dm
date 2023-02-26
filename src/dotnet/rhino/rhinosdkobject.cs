@@ -932,7 +932,7 @@ namespace Rhino.DocObjects
       set
       {
         // make sure this object is still valid - ConstPointer will throw a DocumentCollectedException
-        // if the object is no longer in existance
+        // if the object is no longer in existence
         ConstPointer();
         if (m_edited_attributes == value || Document == null)
           return;
@@ -1809,7 +1809,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets a localized short descriptive name of the object, along with it's open/closed status.
     /// </summary>
-    /// <param name="prepend">true if "open" or "closed" shoud be prepended to the descriptive name.</param>
+    /// <param name="prepend">true if "open" or "closed" should be prepended to the descriptive name.</param>
     /// <param name="plural">true if the descriptive name should in plural.</param>
     /// <param name="status">The open/closed status, where: 0 = undefined, 1 = open, 2 = closed.</param>
     /// <returns>A string with the short localized descriptive name.</returns>
@@ -2005,6 +2005,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.0</since>
     [Flags]
     public enum ObjectFrameFlags
     {
@@ -2170,14 +2171,14 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns true if the object will has a set of custom render primitves - ie, CustomRenderMeshes will return non-null.
+    /// Returns true if the object will has a set of custom render primitives - ie, CustomRenderMeshes will return non-null.
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered.</param>
     /// <param name="flags">See MeshProvider.Flags</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
-    /// <returns>Returns true if the object will has a set of custom render primitves</returns>
+    /// <returns>Returns true if the object will has a set of custom render primitives</returns>
     /// /// <seealso cref="RenderMeshes"/>
     /// <since>8.0</since>
     public bool HasCustomRenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
@@ -2238,7 +2239,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns the bounding box of custom render primitves for this object .
+    /// Returns the bounding box of custom render primitives for this object .
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>

@@ -573,7 +573,7 @@ namespace Rhino.Collections
           break;
         case ItemType.Font: //29
           {
-#if !MOBILE_BUILD && !DOTNETCORE
+#if RHINO_SDK
             System.Drawing.Font val = archive.ReadFont();
             rc = Set(key, val);
 #endif
@@ -841,7 +841,7 @@ namespace Rhino.Collections
           archive.WriteSizeF((System.Drawing.SizeF)val);
           break;
         case ItemType.Font: // 29
-#if !MOBILE_BUILD && !DOTNETCORE
+#if RHINO_SDK
           archive.WriteFont((System.Drawing.Font)val);
 #endif
           break;
@@ -1793,7 +1793,7 @@ namespace Rhino.Collections
     /// <since>5.0</since>
     public bool Set(string key, System.Drawing.SizeF val) { return SetItem(key, ItemType.SizeF, val); }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if RHINO_SDK
     /// <summary>
     /// Sets a <see cref="System.Drawing.Font"/>.
     /// </summary>
@@ -2290,7 +2290,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets the enumerator of this dictionary.
     /// </summary>
-    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as System.Object.</returns>
     /// <since>5.0</since>
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
     {
@@ -2305,7 +2305,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets the enumerator of this dictionary.
     /// </summary>
-    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as System.Object.</returns>
     /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
@@ -2913,7 +2913,7 @@ namespace Rhino.FileIO
     }
 
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if RHINO_SDK
     /// <summary>
     /// Writes a <see cref="System.Drawing.Font"/> value to the archive.
     /// </summary>
@@ -3946,7 +3946,7 @@ namespace Rhino.FileIO
       return new System.Drawing.SizeF(xy[0], xy[1]);
     }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if RHINO_SDK
     /// <summary>
     /// Reads a <see cref="System.Drawing.Font"/> from the archive.
     /// </summary>
@@ -4356,7 +4356,7 @@ namespace Rhino.FileIO
     }
 
 
-    #region dictionary support
+#region dictionary support
     internal bool BeginReadDictionary( out Guid dictionaryId, out uint version, out string name )
     {
       dictionaryId = Guid.Empty;
@@ -4397,7 +4397,7 @@ namespace Rhino.FileIO
       return UnsafeNativeMethods.ON_BinaryArchive_EndReadDictionaryEntry(m_ptr);
     }
 
-    #endregion
+#endregion
   }
 
   /// <since>5.1</since>

@@ -310,6 +310,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the factory settings of the application.
     /// </summary>
     /// <returns>An instance of a class that represents all the default settings joined together.</returns>
+    /// <since>8.0</since>
     public static AppearanceSettingsState GetDefaultState(bool darkMode)
     {
       return CreateState(false, darkMode);
@@ -574,7 +575,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Sets the logical widget color association to a spacific .Net library color, without forced UI update.
+    /// Sets the logical widget color association to a specific .Net library color, without forced UI update.
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
@@ -585,7 +586,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Sets the logical widget color association to a spacific .Net library color.
+    /// Sets the logical widget color association to a specific .Net library color.
     /// </summary>
     /// <param name="whichColor">A logical color association.</param>
     /// <param name="c">A .Net library color.</param>
@@ -2734,6 +2735,12 @@ namespace Rhino.ApplicationSettings
     /// <since>8.0</since>
     public int AutoCPlaneAlignment { get; set; }
 
+    /// <summary>
+    /// Gets or set whether the auto cplane will stay even after deselection
+    /// </summary>
+    /// <since>8.0</since>
+    public bool StickyAutoCPlane { get; set; }
+
     /// <summary>Gets or sets the base orthogonal angle.</summary>
     /// <since>5.0</since>
     public double OrthoAngle { get; set; }
@@ -2782,10 +2789,10 @@ namespace Rhino.ApplicationSettings
     public PointDisplayMode PointDisplay { get; set; }
 
     /// <summary>
-    /// Gets or sets whether the gumball extrudes closed curves as closed extrusions
+    /// Gets or sets whether Ortho will snap to the CPlane Z axis
     /// </summary>
     /// <since>8.0</since>
-    public bool GumballExtrudeClosed {  get; set; }
+    public bool OrthoUseZ { get; set; }
   }
 
   /// <summary>
@@ -2823,7 +2830,8 @@ namespace Rhino.ApplicationSettings
       rc.PointDisplay = (PointDisplayMode)GetInt(idxPointDisplay, pSettings);
       rc.AutoAlignCPlane = GetBool(idxAutoAlignCPlane, pSettings);
       rc.AutoCPlaneAlignment = GetInt(idxAutoCPlaneAlignment, pSettings);
-      rc.GumballExtrudeClosed = GetBool(idxGumballExtrudeClosed, pSettings);
+      rc.StickyAutoCPlane = GetBool(idxStickyAutoCPlane, pSettings);
+      rc.OrthoUseZ = GetBool(idxOrthoUseZ, pSettings);
 
       UnsafeNativeMethods.CRhinoAppModelAidSettings_Delete(pSettings);
       return rc;
@@ -2882,7 +2890,8 @@ namespace Rhino.ApplicationSettings
       PointDisplay = state.PointDisplay;
       AutoAlignCPlane = state.AutoAlignCPlane;
       AutoCPlaneAlignment = state.AutoCPlaneAlignment;
-      GumballExtrudeClosed = state.GumballExtrudeClosed;
+      StickyAutoCPlane = state.StickyAutoCPlane;
+      OrthoUseZ = state.OrthoUseZ;
     }
 
     static bool GetBool(int which, IntPtr pSettings)
@@ -2910,7 +2919,8 @@ namespace Rhino.ApplicationSettings
     const int idxSnapToFiltered = 16;
     const int idxOnlySnapToSelected = 17;
     const int idxAutoAlignCPlane = 18;
-    const int idxGumballExtrudeClosed = 19;
+    const int idxOrthoUseZ = 19;
+    const int idxStickyAutoCPlane = 20;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3053,13 +3063,13 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or sets whether the gumball extrudes closed curves as closed extrusions
+    /// Gets or sets whether Ortho will snap to the CPlane Z axis
     /// </summary>
     /// <since>8.0</since>
-    public static bool GumballExtrudeClosed
+    public static bool OrthoUseZ
     {
-      get { return GetBool(idxGumballExtrudeClosed); }
-      set { SetBool(idxGumballExtrudeClosed, value); }
+      get => GetBool(idxOrthoUseZ);
+      set => SetBool(idxOrthoUseZ, value);
     }
 
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
@@ -3088,6 +3098,16 @@ namespace Rhino.ApplicationSettings
     {
       get => GetInt(idxAutoCPlaneAlignment);
       set => SetInt(idxAutoCPlaneAlignment, value);
+    }
+
+    /// <summary>
+    /// Gets or set whether the auto cplane will stay even after deselection
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool StickyAutoCPlane
+    {
+      get => GetBool(idxStickyAutoCPlane);
+      set => SetBool(idxStickyAutoCPlane, value);
     }
 
     static double GetDouble(int which, IntPtr pSettings) { return UnsafeNativeMethods.RhModelAidSettings_GetSetDouble(which, false, 0, pSettings); }
@@ -3141,6 +3161,7 @@ namespace Rhino.ApplicationSettings
     const int idxMousePickboxRadius = 5;
     const int idxPointDisplay = 6;
     const int idxAutoCPlaneAlignment = 7;
+    const int idxDragStrength = 8;
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
@@ -3253,6 +3274,20 @@ namespace Rhino.ApplicationSettings
       {
         SetBool(idxSnappyGumball, value);
       }
+    }
+
+    /// <summary>
+    /// Gets or  the amount of drag strength for Gumball and for dragging objects, including control points.
+    /// Valid values range between 1 and 100.
+    /// </summary>
+    /// <remarks>
+    /// This value is not persistent.
+    /// </remarks>
+    /// <since>8.0</since>
+    public static int DragStrength
+    {
+      get => GetInt(idxDragStrength);
+      set => SetInt(idxDragStrength, value);
     }
   }
 
@@ -5536,6 +5571,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the factory settings of the application.
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public static ConstraintsSettingsState GetDefaultState()
     {
       return CreateState(false);
@@ -5545,6 +5581,7 @@ namespace Rhino.ApplicationSettings
     /// Gets the current settings of the application.
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public static ConstraintsSettingsState GetCurrentState()
     {
       return CreateState(true);
@@ -5553,6 +5590,7 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Commits the default settings as the current settings.
     /// </summary>
+    /// <since>8.0</since>
     public static void RestoreDefaults()
     {
       UpdateFromState(GetDefaultState());
@@ -5562,6 +5600,7 @@ namespace Rhino.ApplicationSettings
     /// Sets all settings to a particular defined joined state.
     /// </summary>
     /// <param name="state">The particular state.</param>
+    /// <since>8.0</since>
     public static void UpdateFromState(ConstraintsSettingsState state)
     {
       if(state != null)

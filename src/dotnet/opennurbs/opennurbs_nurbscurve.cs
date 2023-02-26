@@ -271,6 +271,7 @@ namespace Rhino.Geometry
     /// <param name="tanSlider">a number between zero and one which moves the tangent control point toward the mid control point of an equivalent quadratic rational arc</param>
     /// <param name="midSlider">a number between zero and one which moves the mid control points toward the mid control point of an equivalent quadratic rational arc</param>
     /// <returns>The approximated arc.</returns>
+    /// <since>8.0</since>
     public static NurbsCurve CreateNonRationalArcBezier(int degree, Point3d center, Point3d start, Point3d end, double radius,
       double tanSlider, double midSlider)
     {
@@ -1281,7 +1282,7 @@ namespace Rhino.Geometry
       get
       {
         // Note, the constructor for Point3d will properly convert a
-        // homogenous 4-D point to a Euclidean 3-D point.
+        // homogeneous 4-D point to a Euclidean 3-D point.
         return new Point3d(m_vertex);
       }
       set

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Rhino.Runtime.InteropWrappers;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
+using Rhino.Display;
 
 namespace Rhino.Geometry
 {
@@ -185,7 +186,7 @@ namespace Rhino.Geometry
     Outside,
 
     /// <summary>
-    /// Point is coincident with the curve and therefor neither inside not outside.
+    /// Point is coincident with the curve and therefore neither inside not outside.
     /// </summary>
     Coincident
   }
@@ -1074,10 +1075,10 @@ namespace Rhino.Geometry
     /// Changes a curve end to meet a specified curve with a specified continuity.
     /// </summary>
     /// <param name="curve0">The open curve to change.</param>
-    /// <param name="reverse0">Reverse the directon of the curve to change before matching.</param>
+    /// <param name="reverse0">Reverse the direction of the curve to change before matching.</param>
     /// <param name="continuity">The continuity at the curve end.</param>
     /// <param name="curve1">The open curve to match.</param>
-    /// <param name="reverse1">Reverse the directon of the curve to match before matching.</param>
+    /// <param name="reverse1">Reverse the direction of the curve to match before matching.</param>
     /// <param name="preserve">Prevent modification of the curvature at the end opposite the match for curves with fewer than six control points.</param>
     /// <param name="average">Adjust both curves to match each other.</param>
     /// <returns>The results of the curve matching, if successful, otherwise an empty array.</returns>
@@ -2244,7 +2245,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Returns true if the curve is a cubic, non-rational, uniform NURBS curve that is either periodic or has natural end conditions.
-    /// Othewise, false is returned.
+    /// Otherwise, false is returned.
     /// </summary>
     /// <remarks>
     /// A "natural" spline has zero 2nd derivatives (and hence zero curvature) at the start and end.
@@ -2330,13 +2331,10 @@ namespace Rhino.Geometry
       IntPtr constPtrThis = ConstPointer();
       if (pen != null)
       {
+        IntPtr ptrPen = pen.ToNativePointer();
         int argb = pen.Color.ToArgb();
-        var pattern = pen.PatternAsArray();
-        var taper = pen.TaperAsArray();
-        float taperPosition = taper.Length > 0 ? taper[0].X : -1;
-        float taperThickness = taper.Length > 0 ? taper[0].Y : 1;
-        UnsafeNativeMethods.ON_Curve_Draw(constPtrThis, pDisplayPipeline, argb, pen.Thickness, pattern.Length, pattern, pen.PatternBySegment,
-          pen.PatternOffset, pen.PatternLengthInWorldUnits, pen.CapStyle, pen.JoinStyle, taperPosition, taperThickness, CacheHandle());
+        UnsafeNativeMethods.ON_Curve_Draw(constPtrThis, pDisplayPipeline, argb, ptrPen, CacheHandle());
+        DisplayPen.DeleteNativePointer(ptrPen);
       }
       else
       {
@@ -3680,7 +3678,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Evaluate the torsion of a curve at a parmeter. Sometimes also called the "second curvature", 
+    /// Evaluate the torsion of a curve at a parameter. Sometimes also called the "second curvature", 
     /// torsion is the rate of change of a curve's osculating plane.
     /// </summary>
     /// <param name="t">The evaluation parameter.</param>

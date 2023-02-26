@@ -149,6 +149,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>8.0</since>
     public bool UseActiveLayerLinetypeForCurves
     {
       get

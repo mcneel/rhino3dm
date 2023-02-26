@@ -40,6 +40,8 @@ namespace Rhino
       bool Float(Guid barId, System.Drawing.Point point);
       /// <since>8.0</since>
       bool UnhookDeleteAndDestroyDockBar(Guid id);
+      /// <since>8.0</since>
+      void FactoryResetSettings();
     }
 
     /// <summary>
@@ -105,6 +107,11 @@ namespace Rhino
       }
       
       public bool UnhookDeleteAndDestroyDockBar(Guid id)
+      {
+        throw new NotImplementedException();
+      }
+
+      public void FactoryResetSettings()
       {
         throw new NotImplementedException();
       }
@@ -432,7 +439,7 @@ namespace Rhino
       /// assembly will be used 
       /// </param>
       /// <param name="iconResourceId">
-      /// The resource Id string used to load the panel icon from teh iconAssembly.
+      /// The resource Id string used to load the panel icon from the iconAssembly.
       /// On Windows the panel may be displayed using the icon, caption or both.
       /// On Mac the icon will be used and the caption will be the tool-tip.
       /// </param>
@@ -1097,7 +1104,7 @@ namespace Rhino
         }
       }
       /// <summary>
-      /// Will always return Guid.Emty in Mac Rhino.  In Windows Rhino it will
+      /// Will always return Guid.Empty in Mac Rhino.  In Windows Rhino it will
       /// look for the dock bar which contains the specified panel class Id and
       /// return the dock bar Id.
       /// </summary>
@@ -1116,7 +1123,7 @@ namespace Rhino
         return ids != null && ids.Length > 0 ? ids[0] : Guid.Empty;
       }
       /// <summary>
-      /// Will always return Guid.Emty in Mac Rhino.  In Windows Rhino it will
+      /// Will always return Guid.Empty in Mac Rhino.  In Windows Rhino it will
       /// look for the dock bar which contains the specified panel class Id and
       /// return the dock bar Id.
       /// </summary>

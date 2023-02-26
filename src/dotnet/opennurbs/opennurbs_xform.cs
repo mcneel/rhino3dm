@@ -1134,9 +1134,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// If this transform is a proper rotation, then find the eqivalent quaternion.
+    /// If this transform is a proper rotation, then find the equivalent quaternion.
     /// </summary>
-    /// <param name="quaternion">Quaternion that represents this rotation tranformation.</param>
+    /// <param name="quaternion">Quaternion that represents this rotation transformation.</param>
     /// <returns>true if this transform is a proper rotation, false otherwise.</returns>
     /// <since>7.12</since>
     public bool GetQuaternion(out Quaternion quaternion)

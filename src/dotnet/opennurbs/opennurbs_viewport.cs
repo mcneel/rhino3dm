@@ -961,6 +961,40 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the corners of the frame plane rectangle at specified depth.
+    /// 4 points are returned in the order of bottom left, bottom right,
+    /// top left, top right.
+    /// </summary>
+    /// <param name="depth">Distance from camera location.</param>
+    /// <returns>
+    /// Four corner points on success.
+    /// Empty array if viewport is not valid.
+    /// </returns>
+    /// <since>8.0</since>
+    public Point3d[] GetFramePlaneCorners(double depth)
+    {
+      if (!IsValidCamera || !IsValidFrustum)
+        return new Point3d[0];
+
+      var plane = new Plane(CameraLocation - CameraZ * depth, CameraX, CameraY);
+      var s = IsPerspectiveProjection ? depth / FrustumNear : 1.0;
+
+      var scale = GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      var width = new Interval(FrustumLeft, FrustumRight);
+      var height = new Interval(FrustumBottom, FrustumTop);
+      return new Point3d[]
+      {
+        plane.PointAt(s * x * width.T0, s * y * height.T0),
+        plane.PointAt(s * x * width.T1, s * y * height.T0),
+        plane.PointAt(s * x * width.T0, s * y * height.T1),
+        plane.PointAt(s * x * width.T1, s * y * height.T1),
+      };
+    }
+
+    /// <summary>
     /// Location of viewport in pixels.
     /// These are provided so you can set the port you are using
     /// and get the appropriate transformations to and from

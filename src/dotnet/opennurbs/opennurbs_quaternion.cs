@@ -568,7 +568,7 @@ namespace Rhino.Geometry
     /// If the quaternion is not unitized, the rotation of its unitized form is returned.
     /// </summary>
     /// <param name="xform"></param>
-    /// <returns>true if successful, false otherise.</returns>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <remarks>
     /// Do not confuse the result of this method the transformation matrix returned by <see cref="MatrixForm"/>.
     /// </remarks>

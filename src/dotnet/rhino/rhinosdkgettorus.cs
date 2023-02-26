@@ -186,7 +186,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// The minumum number of faces in the vertical direction.
+    /// The minimum number of faces in the vertical direction.
     /// </summary>
     /// <since>7.0</since>
     public int VerticalDirectionMinimumCount
@@ -222,7 +222,7 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// The minumum number of faces in the around direction.
+    /// The minimum number of faces in the around direction.
     /// </summary>
     /// <since>7.0</since>
     public int AroundDirectionMinimumCount

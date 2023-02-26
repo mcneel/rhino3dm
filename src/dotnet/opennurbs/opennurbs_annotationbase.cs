@@ -80,8 +80,8 @@ namespace Rhino.Geometry
     {
       get
       {
-        IntPtr const_ptr_dimstyle = ConstPointerForDimStyle();
-        bool b =UnsafeNativeMethods.ON_DimStyle_HasFieldOverrides(const_ptr_dimstyle);
+        IntPtr const_ptr = ConstPointer();
+        bool b = UnsafeNativeMethods.ON_V6_Annotation_HasOverrideDimstyle(const_ptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
         return b;
       }
@@ -96,8 +96,8 @@ namespace Rhino.Geometry
     [ConstOperation]
     public bool IsPropertyOverridden(DimensionStyle.Field field)
     {
-      IntPtr const_ptr_dimstyle = ConstPointerForDimStyle();
-      bool b = UnsafeNativeMethods.ON_DimStyle_IsFieldOverride(const_ptr_dimstyle, field);
+      IntPtr const_ptr = ConstPointer();
+      bool b = UnsafeNativeMethods.ON_V6_Annotation_FieldIsOverridden(const_ptr, field);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return b;
     }
@@ -117,7 +117,12 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns></returns>
     /// <since>6.0</since>
-    public bool ClearPropertyOverrides() => ClearOverrideDimStyle();
+    public bool ClearPropertyOverrides()
+    {
+      var ptr_this = NonConstPointer();
+      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
+      return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
+    }
 
     /// <summary>
     /// Return the proper dimension style from which to get properties
@@ -136,7 +141,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_parentdimsytyle = parentDimStyle != null ? parentDimStyle.ConstPointer() : IntPtr.Zero;
       // TODO: We should look at the pointer returned from ON_Annotation_DimensionStyle and make a light copy
       // when it is the same as parentDimStyle's. This is the typical case. I'm leaving this alone for the
-      // moment to minimze change.
+      // moment to minimize change.
       IntPtr ptr_new_dimstyle =
         UnsafeNativeMethods.ON_V6_Annotation_DimensionStyle(const_ptr_this, const_ptr_parentdimsytyle);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
@@ -180,18 +185,6 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Clear the override DimensionStyle for this annotation object, reverting
-    /// to using the parent style for all properties
-    /// </summary>
-    /// <returns></returns>
-    private bool ClearOverrideDimStyle()
-    {
-      var ptr_this = NonConstPointer();
-      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
-      return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
-    }
-
-    /// <summary>
     /// The parent dimension style associated with this annotation
     /// </summary>
     /// <since>6.0</since>
@@ -208,11 +201,12 @@ namespace Rhino.Geometry
       }
       set
       {
-        DimensionStyleId = value.Id;
         if (value.IsDocumentControlled)
           m_parent_dimstyle = value.InternalLightCopy();
         else
           m_parent_dimstyle = value;
+
+        DimensionStyleId = value.Id;
       }
     }
 

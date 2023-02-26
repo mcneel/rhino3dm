@@ -118,6 +118,7 @@ namespace Rhino.Display
     /// <param name="printerName"></param>
     /// <param name="settings"></param>
     /// <returns>true on success</returns>
+    /// <since>8.0</since>
     public static bool SendToPrinter(string printerName, ViewCaptureSettings[] settings)
     {
       IntPtr pPrintInfoArray = UnsafeNativeMethods.CRhinoPrintInfoArray_New();
@@ -554,12 +555,21 @@ namespace Rhino.Display
     internal IntPtr ConstPointer() { return m_ptr_print_info; }
     internal IntPtr NonConstPointer() { return m_ptr_print_info; }
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
     /// <since>6.0</since>
     public ViewCaptureSettings()
     {
       m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
     }
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="sourceView">The Rhino view to capture or print.</param>
+    /// <param name="mediaSize">The size of the output media.</param>
+    /// <param name="dpi">Capture "density" in dots per inch.</param>
     /// <since>6.0</since>
     public ViewCaptureSettings(RhinoView sourceView, Size mediaSize, double dpi)
     {
@@ -570,6 +580,11 @@ namespace Rhino.Display
       SetLayout(mediaSize, new Rectangle(0, 0, mediaSize.Width, mediaSize.Height));
     }
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="sourcePageView">The Rhino page view to capture or print.</param>
+    /// <param name="dpi">Capture "density" in dots per inch.</param>
     /// <since>6.0</since>
     public ViewCaptureSettings(RhinoPageView sourcePageView, double dpi)
     {
@@ -629,9 +644,10 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Get RhinoViewport that this view capture settings is targetting
+    /// Get RhinoViewport that this view capture settings is targeting
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public RhinoViewport GetViewport()
     {
       if (_viewport != null)
@@ -738,7 +754,7 @@ namespace Rhino.Display
       }
     }
 
-    /// <summary> Capture "density" in dots per inch </summary>
+    /// <summary>Capture "density" in dots per inch.</summary>
     /// <since>6.0</since>
     public double Resolution
     {
@@ -987,9 +1003,9 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// scaling factor to apply to object print widths (typically 1.0). This is
+    /// Scaling factor to apply to object print widths (typically 1.0). This is
     /// helpful when printing something at 1/2 scale and having all of the curves
-    /// print 1/2 as thick
+    /// print 1/2 as thick.
     /// </summary>
     /// <since>6.15</since>
     public double WireThicknessScale
@@ -999,7 +1015,7 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// size of point objects in millimeters
+    /// Size of point objects in millimeters.
     /// if scale &lt;= 0 the size is minimized so points are always drawn as small as possible
     /// </summary>
     /// <since>6.15</since>
@@ -1010,7 +1026,7 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// arrowhead size in millimeters
+    /// Arrowhead size in millimeters.
     /// </summary>
     /// <since>6.15</since>
     public double ArrowheadSizeMillimeters
@@ -1020,7 +1036,17 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Line thickness used to print objects with no defined thickness (in mm)
+    /// Font point size use for printing text dots. The default value is 10.0.
+    /// </summary>
+    /// <since>7.27</since>
+    public double TextDotPointSize
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.TextDotPointSize); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.TextDotPointSize, value); }
+    }
+
+    /// <summary>
+    /// Line thickness, in millimeters, used to print objects with no defined thickness.
     /// </summary>
     /// <since>6.15</since>
     public double DefaultPrintWidthMillimeters

@@ -616,7 +616,8 @@ namespace Rhino.Runtime
       var builder = new StringBuilder();
       try
       {
-        var rules = Directory.GetAccessControl(directoryName, AccessControlSections.Access)?.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+        var di = new DirectoryInfo(directoryName);
+        var rules = di.GetAccessControl(AccessControlSections.Access)?.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
         if (rules == null)
           return "Directory.GetAccessControl returned null";
         builder.AppendLine($"Access rights for {directoryName}");
@@ -3141,7 +3142,12 @@ namespace Rhino
       }
       SetDefault(key, defaultValue);
       SetValueToDefaultIfEmpy(key, setting => setting.SetColor(false, defaultValue, GetValidator<Color>(key), false));
-      return GetColor(key);
+      // Won't be in PLIST on Mac if current value is equal to the default value so
+      // calling GetColor will throw an exception when the color is not found. This
+      // should just return the default color in that case.
+      if (TryGetColor(key, out rc))
+        return rc;
+      return defaultValue;
     }
 
     /// <since>6.0</since>
@@ -4060,7 +4066,7 @@ namespace Rhino
         else if (!g_changed_settings.Contains(this))
           g_changed_settings.Add(this);
         // If running on Mac OS-X then there will only be a single instance of 
-        // Rhino running and file watchers wont be working so manually raise the
+        // Rhino running and file watchers won't be working so manually raise the
         // settings changed event
         if (Runtime.HostUtils.RunningOnOSX)
         {
@@ -4212,7 +4218,7 @@ namespace Rhino
           {
             item.WriteSettings(false);
             // If running on Mac OS-X then there will only be a single instance of 
-            // Rhino running and file watchers wont be working so manually raise the
+            // Rhino running and file watchers won't be working so manually raise the
             // settings changed event
             if (PersistentSettings.Service.RaiseChangedEventAfterWriting)
               InvokeSettingsSaved(item.m_plugin_id, true);
@@ -4522,7 +4528,7 @@ namespace Rhino
         }
         else // Use service to read XML into a stream then parse the XML
         {
-          // Get stream from service provider, the stream should cointain the XML to parse
+          // Get stream from service provider, the stream should contain the XML to parse
           stream = PersistentSettings.Service.ReadSettings(settings_file_name);
           if (stream == null)
             return false; // File not found or error reading the file
@@ -4908,9 +4914,21 @@ namespace Rhino
         DeleteSettingsFile(true, true);
         return true;
       }
-      if (!windowPositions)
+      if (windowPositions)
       {
-        var resetting_dont_write = (m_plugin_settings != null && m_plugin_settings.ResettingDontWrite);
+        var resetting_dont_write = (m_windows_position_settings?.ResettingDontWrite ?? false)
+          || (m_plugin_settings?.ResettingDontWrite ?? false)
+          || (/*UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(PlugInId) != 0 &&*/  UnsafeNativeMethods.CRhCommandsCallbacks_ResetWindowPositions())
+          || UnsafeNativeMethods.CRhCommandsCallbacks_ResetSettings();
+        if (resetting_dont_write)
+        {
+          DeleteSettingsFile(localSettings, true);
+          return true;
+        }
+      }
+      else
+      {
+        var resetting_dont_write = (m_plugin_settings != null && m_plugin_settings.ResettingDontWrite) || UnsafeNativeMethods.CRhCommandsCallbacks_ResetSettings();
         ClearChangedSinceSavedFlag();
         if (resetting_dont_write || !ContainsModifiedValues())
         {
@@ -4959,13 +4977,13 @@ namespace Rhino
         // can tell when settings change and notify Rhino or the plug-in of 
         // the change.
         PersistentSettings settings = null;
-        if (windowPositions) // Window postions - if it contains modified values
+        if (windowPositions) // Window positions - if it contains modified values
           settings = (m_windows_position_settings?.ContainsModifiedValues (null) ?? false) ? m_windows_position_settings : null;
         else // plug-in settings - if the plug-in settings contains modified values
           settings = ContainsModifiedValues () ? m_plugin_settings : null;
         // Write settings to a memory stream then flush to temp_file
-        // Pass null command settings dictionary for window postions, only the
-        // plug-in settings should countain a commands section
+        // Pass null command settings dictionary for window positions, only the
+        // plug-in settings should contain a commands section
         return ToStream(settings, windowPositions ? null : m_command_settings_dict);
       }
       catch (Exception ex)

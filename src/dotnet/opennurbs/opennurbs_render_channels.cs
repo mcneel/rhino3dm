@@ -18,6 +18,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the mode.
     /// </summary>
+    /// <since>8.0</since>
     public enum Modes
     {
       /// <summary>
@@ -34,6 +35,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the mode.
     /// </summary>
+    /// <since>8.0</since>
     public Modes Mode
     {
       get => (Modes)UnsafeNativeMethods.ON_RenderChannels_GetMode(_parent.ConstPointer());
@@ -43,6 +45,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets the custom list of channel ids.
     /// </summary>
+    /// <since>8.0</since>
     public Guid[] CustomList
     {
       get

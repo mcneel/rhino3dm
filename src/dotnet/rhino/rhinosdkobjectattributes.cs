@@ -488,6 +488,7 @@ namespace Rhino.DocObjects
       set { SetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible, value); }
     }
 
+    /// <since>8.0</since>
     public Linetype GetCustomLinetype()
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -497,6 +498,7 @@ namespace Rhino.DocObjects
       return new Linetype(ptr_linetype);
     }
 
+    /// <since>8.0</since>
     public void SetCustomLinetype(Linetype linetype)
     {
       if (linetype == null)
@@ -510,6 +512,7 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, const_ptr_linetype);
     }
 
+    /// <since>8.0</since>
     public void RemoveCustomLinetype()
     {
       IntPtr ptr_this = NonConstPointer();
@@ -960,8 +963,59 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    [Flags]
+    public enum ObjectFrameFlags
+    {
+      /// <summary>
+      /// Never returns unset plane.  Will always calculate the plane even if nothing is stored.
+      /// </summary>
+      Standard = 0,
+      /// <summary>
+      /// By default, the plane is orientation and rotation only.  But scale transforms are stored if you need them.
+      /// </summary>
+      IncludeScaleTransforms = 1,
+      /// <summary>
+      /// The object frame may be stored unset by default.  If this is the case, and you want to know if it really is unset, this will tell you.
+      /// </summary>
+      ReturnUnset = 2
+    }
+
+    /// <since>8.0</since>
+    public Plane ObjectFrame()
+    {
+      var xform = new Transform();
+      if (UnsafeNativeMethods.ON_3dmObjectAttributes_ObjectFrame(ConstPointer(), ref xform))
+      {
+        var plane = Plane.WorldXY;
+        plane.Transform(xform);
+        return plane;
+      }
+
+      return Plane.Unset;
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Transform xform)
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetObjectFrame(NonConstPointer(), ref xform);
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Plane plane)
+    {
+      var xform = Geometry.Transform.ChangeBasis(plane, Plane.WorldXY);
+      SetObjectFrame(xform);
+    }
+
+
+
+    /// <summary>
     /// Get an object that provides access to mesh modifiers when the attributes is for a File3dmObject.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmMeshModifiers File3dmMeshModifiers
     {
       get { return m_file3dm_mesh_modifiers ?? (m_file3dm_mesh_modifiers = new File3dmMeshModifiers(this)); }
@@ -1020,17 +1074,29 @@ namespace Rhino.DocObjects
 
 
 #if RHINO_SDK
+    /// <summary>
+    /// Gets an object's draw color, which is based on the object's color source
+    /// </summary>
+    /// <param name="document">The object's documnt.</param>
+    /// <returns>The draw color.</returns>
     /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document)
     {
       return DrawColor(document, Guid.Empty);
     }
+
+    /// <summary>
+    /// Gets an object's draw color, which is based on the object's color source
+    /// </summary>
+    /// <param name="document">The object's documnt.</param>
+    /// <param name="viewportId">The id of the viewport.</param>
+    /// <returns>The draw color.</returns>
     /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      int abgr = UnsafeNativeMethods.CRhinoObjectAttributes_DrawColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.CRhinoObjectAttributes_DrawColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
     /// <since>5.6</since>
@@ -1042,8 +1108,8 @@ namespace Rhino.DocObjects
     public System.Drawing.Color ComputedPlotColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      int abgr = UnsafeNativeMethods.CRhinoObjectAttributes_PlotColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.CRhinoObjectAttributes_PlotColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
     /// <since>5.6</since>

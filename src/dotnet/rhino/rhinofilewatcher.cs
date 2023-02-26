@@ -175,7 +175,7 @@ namespace Rhino
 
   /// <summary>
   /// RhinoFileWatcher is basically a way of registering for the real events that FileSystemWatcher
-  /// raises.  There is not a one-to-one correspondance between RhinoFileWatchers and FileSystemWatchers anymore
+  /// raises.  There is not a one-to-one correspondence between RhinoFileWatchers and FileSystemWatchers anymore
   /// - the idea is that we try to create as few FileSystemWatchers as possible to service the RhinoFileWatchers.
   /// This way, clients can create as many RhinoFileWatchers as needed without causing tons of system objects to be
   /// created - which is very expensive - at least on the Mac.  It also simplifies client code.

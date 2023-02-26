@@ -17,6 +17,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Linear workflow active state for textures.
     /// </summary>
+    /// <since>8.0</since>
     public bool PreProcessTextures
     {
       get => UnsafeNativeMethods.ON_LinearWorkflow_GetPreProcessTextures(_parent.ConstPointer());
@@ -26,6 +27,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Linear workflow active state for individual colors.
     /// </summary>
+    /// <since>8.0</since>
     public bool PreProcessColors
     {
       get => UnsafeNativeMethods.ON_LinearWorkflow_GetPreProcessColors(_parent.ConstPointer());
@@ -35,6 +37,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Pre-process gamma for input textures and colors.
     /// </summary>
+    /// <since>8.0</since>
     public float PreProcessGamma
     {
       get => UnsafeNativeMethods.ON_LinearWorkflow_GetPreProcessGamma(_parent.ConstPointer());
@@ -44,6 +47,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Post-process gamma enabled state.
     /// </summary>
+    /// <since>8.0</since>
     public bool PostProcessGammaOn
     {
       get => UnsafeNativeMethods.ON_LinearWorkflow_GetPostProcessGammaOn(_parent.ConstPointer());
@@ -54,6 +58,7 @@ namespace Rhino.FileIO
     /// Post-process gamma for frame buffer. This is not the value applied;
     /// it's the value that appears in the UI.
     /// </summary>
+    /// <since>8.0</since>
     public float PostProcessGamma
     {
       get => UnsafeNativeMethods.ON_LinearWorkflow_GetPostProcessGamma(_parent.ConstPointer());

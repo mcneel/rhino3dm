@@ -184,7 +184,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Creates a NURBS surface from a plane and additonal parameters.
+    /// Creates a NURBS surface from a plane and additional parameters.
     /// </summary>
     /// <param name="plane">The plane.</param>
     /// <param name="uInterval">The interval describing the extends of the output surface in the U direction.</param>

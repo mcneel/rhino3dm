@@ -1722,7 +1722,7 @@ namespace Rhino.FileIO
   /// <typeparam name="T">A model component.</typeparam>
   public abstract class CommonComponentTable<T> :
     ICommonComponentTable<T>,
-    IList<T>, IReadOnlyList<T> //we implement IList<T> so that we can use this as a base for all File3dm tables that used to retun IList<T>s.
+    IList<T>, IReadOnlyList<T> //we implement IList<T> so that we can use this as a base for all File3dm tables that used to return IList<T>s.
     where T : ModelComponent
   {
     internal ManifestTable m_manifest;
@@ -2112,7 +2112,7 @@ namespace Rhino.FileIO
       get
       {
         IntPtr manifest_const_ptr = GetConstOnComponentManifestPtr();
-        return (int)UnsafeNativeMethods.ONX_ON_ComponentManifest_ActiveComponentCount_ItemCount(manifest_const_ptr, ModelComponentType.Unset);
+        return (int)UnsafeNativeMethods.ON_ComponentManifest_ActiveAndDeletedComponentCount(manifest_const_ptr, ModelComponentType.Unset);
       }
     }
 
@@ -2125,7 +2125,7 @@ namespace Rhino.FileIO
       get
       {
         IntPtr manifest_const_ptr = GetConstOnComponentManifestPtr();
-        return (long)UnsafeNativeMethods.ONX_ON_ComponentManifest_ActiveComponentCount_ItemCount(manifest_const_ptr, ModelComponentType.Unset);
+        return (long)UnsafeNativeMethods.ON_ComponentManifest_ActiveAndDeletedComponentCount(manifest_const_ptr, ModelComponentType.Unset);
       }
     }
 
@@ -2148,10 +2148,10 @@ namespace Rhino.FileIO
     public int ActiveObjectCount(ModelComponentType type)
     {
       if (!Enum.IsDefined(typeof(ModelComponentType), type))
-        throw new ArgumentOutOfRangeException("type");
+        throw new ArgumentOutOfRangeException(nameof(type));
 
       IntPtr manifest_const_ptr = GetConstOnComponentManifestPtr();
-      return (int)UnsafeNativeMethods.ONX_ON_ComponentManifest_ActiveComponentCount_ItemCount(manifest_const_ptr, type);
+      return (int)UnsafeNativeMethods.ON_ComponentManifest_ActiveAndDeletedComponentCount(manifest_const_ptr, type);
     }
 
     /// <since>6.0</since>
@@ -2256,14 +2256,10 @@ namespace Rhino.FileIO
     /// <since>6.0</since>
     public virtual IEnumerator<ModelComponent> GetEnumerator()
     {
-      foreach (ModelComponentType type in Enum.GetValues(typeof(ModelComponentType)))
+      for(ModelComponentType type = ModelComponentType.Unset + 1; type < ModelComponentType.NumOf; type++)
       {
-        if (type != ModelComponentType.Unset && 
-          type != ModelComponentType.Mixed)
-        {
-          var enumer = GetEnumerator(type);
-          while (enumer.MoveNext()) yield return enumer.Current;
-        }
+        var enumer = GetEnumerator(type);
+        while (enumer.MoveNext()) yield return enumer.Current;
       }
     }
 

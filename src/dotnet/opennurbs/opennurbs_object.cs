@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Runtime
@@ -137,7 +138,7 @@ namespace Rhino.Runtime
         // m_ptr points ot an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 paramter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
         if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
@@ -182,7 +183,7 @@ namespace Rhino.Runtime
         // m_ptr points ot an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 paramter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
         if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
@@ -583,7 +584,7 @@ namespace Rhino.Runtime
 
     /// <summary>
     /// Dictionary of custom information attached to this class. The dictionary is actually user
-    /// data provided as an easy to use sharable set of information.
+    /// data provided as an easy to use shareable set of information.
     /// </summary>
     /// <since>5.0</since>
     public Collections.ArchivableDictionary UserDictionary
@@ -896,19 +897,23 @@ namespace Rhino.Runtime
     static CommonObject CreateCommonObjectHelper(IntPtr pObject)
     {
       var geometry = Geometry.GeometryBase.CreateGeometryHelper(pObject, null);
-      if (geometry == null)
-      {
-        const uint LAYER = 0x40; // Not sure why this was not added to the DocObjects.ObjectType enum
-                                 // will just use the low level OpenNURBS value for now.
-        uint objectType = UnsafeNativeMethods.ON_Object_ObjectType(pObject);
-        if (objectType == LAYER)
-        {
-          return new Rhino.DocObjects.Layer(pObject, false);
-        }
-      }
+      if (null != geometry)
+        return geometry;
+
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-66667
+      var classType = UnsafeNativeMethods.ON_Object_ClassType(pObject);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_Layer)
+        return new Rhino.DocObjects.Layer(pObject, false);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_Material)
+        return new Rhino.DocObjects.Material(pObject);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_3dmObjectAttributes)
+        return new ObjectAttributes(pObject);
 
       // TODO: handle other cases where this pointer is not specifically ON_Geometry
-      return geometry;
+      return null;
     }
     #endregion
   }

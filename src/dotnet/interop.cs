@@ -7,6 +7,22 @@ namespace Rhino.Runtime
   /// </summary>
   public static class Interop
   {
+    /// <summary>
+    /// Convert to internal color format used in Rhino
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns></returns>
+    internal static int ColorToABGR(System.Drawing.Color c)
+    {
+      uint argb = (uint)c.ToArgb();
+      // ON_Color defines alpha=0 as opaque where System.Drawing.Color defines alpha=255 as opaque
+      // This function is for converting from System.Drawing.Color to ON_Color
+      uint alpha = (argb & 0xff000000) >> 24;
+      alpha = (255 - alpha);
+      uint abgr = (alpha) << 24 | (argb & 0x000000ff) << 16 | (argb & 0x0000ff00) | (argb & 0x00ff0000) >> 16;
+      return (int)abgr;
+    }
+
     //eventually this could go away if we just do all of the abgr->argb conversions in C++
     internal static System.Drawing.Color ColorFromWin32(int abgr)
     {
@@ -246,7 +262,7 @@ namespace Rhino.Runtime
     {
       IntPtr rc = IntPtr.Zero;
       if (options != null)
-        rc = options.ConstPointer();
+        rc = options.ConstPointer(true);
       return rc;
     }
 
@@ -261,7 +277,7 @@ namespace Rhino.Runtime
     {
       IntPtr rc = IntPtr.Zero;
       if (options != null)
-        rc = options.ConstPointer();
+        rc = options.ConstPointer(true);
       return rc;
     }
 
@@ -556,6 +572,22 @@ namespace Rhino.Runtime
 
 #if RHINO_SDK
     /// <summary>
+    /// Create a command line option for a native pointer. Do not hold onto this class as it does not control
+    /// the lifetime of the underlying pointer
+    /// </summary>
+    /// <param name="ptrCommandLineOption"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static Rhino.Input.Custom.CommandLineOption CommandLineOptionFromNativePointer(IntPtr ptrCommandLineOption)
+    {
+      if (ptrCommandLineOption == IntPtr.Zero)
+        return null;
+      var rc = new Rhino.Input.Custom.CommandLineOption();
+      rc.m_ptr = ptrCommandLineOption;
+      return rc;
+    }
+
+    /// <summary>
     /// Convert a Rhino.Display.Viewport to an RMA.Rhino.IRhinoViewport.
     /// </summary>
     /// <param name="source">A RhinoCommon viewport.</param>
@@ -734,6 +766,12 @@ namespace Rhino.Runtime.InteropWrappers
       m_auto_delete = true;
     }
 
+    public RhinoDib(int width, int height, int colorDepth, IntPtr bits, bool flip)
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoDib_NewFromBits(width, height, colorDepth, bits, flip);
+      m_auto_delete = true;
+    }
+
     /// <summary>
     /// Gets the const pointer (const CRhinoDib*).
     /// </summary>
@@ -804,7 +842,7 @@ namespace Rhino.Runtime.InteropWrappers
         var bits = data.Scan0.ToPointer();
         var pointer = new IntPtr(bits);
         // Call unmanaged code to copy the bits
-        UnsafeNativeMethods.CRhinoDib_CopyToBitSystemBitmap(const_ptr_this, pointer, data.Stride, 4);
+        UnsafeNativeMethods.CRhinoDib_CopyToBitSystemBitmap(const_ptr_this, pointer, data.Stride, 4, false);
       }
       rc.UnlockBits(data);
       return rc;

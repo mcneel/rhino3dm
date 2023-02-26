@@ -277,7 +277,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// The flattening agorithm to use:
+    /// The flattening algorithm to use:
     ///   Geometric: (scale independent)the "spring" constant is
     ///     proportional to 1/L^2 and the result is independent of scale.
     ///   PhysicalStress: (scale dependent) the "spring" constant is 
@@ -505,7 +505,7 @@ namespace Rhino.Geometry
     /// <param name="sp">The parameters for the squish operation</param>
     /// <param name="surface">The surface to be squished</param>
     /// <param name="marks">Point, PountCloud, TextDot, and Curve objects to squish. Can be null.</param>
-    /// <param name="squished_marks_out">A list of the squished marks, with null entires for marks
+    /// <param name="squished_marks_out">A list of the squished marks, with null entries for marks
     /// that fail to squish. Can be null.</param>
     /// <returns>A brep representing the flattened surface</returns>
     /// <since>7.9</since>

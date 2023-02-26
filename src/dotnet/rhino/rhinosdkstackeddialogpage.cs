@@ -13,9 +13,6 @@ namespace Rhino.UI
   {
     object StyleEtoControls(object eto_control);
 
-    void StyleEtoDialog(object eto_dialog);
-
-    void StyleEtoContextMenu(object eto_context_menu);
   }
 
   /// <summary>

@@ -322,7 +322,7 @@ namespace Rhino.PlugIns
       Assembly assembly;
       try
       {
-        assembly = Assembly.LoadFrom(path);
+        assembly = HostUtils.LoadAssemblyFrom(path);
       }
       catch
       {
@@ -459,12 +459,14 @@ namespace Rhino.PlugIns
 
 
     /// <since>6.0</since>
-    public static PersistentSettings GetPluginSettings(Guid plugInId, bool load)
+    public static PersistentSettings GetPluginSettings(Guid plugInId, bool load) => GetPluginSettings(plugInId, true, load);
+
+    internal static PersistentSettings GetPluginSettings(Guid plugInId, bool plugInSettings, bool load)
     {
       if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) > 0)
       {
         var plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(RhinoApp.CurrentRhinoId);
-        return (plug_in_settings == null ? null : plug_in_settings.PluginSettings);
+        return plugInSettings ? plug_in_settings?.PluginSettings : plug_in_settings?.WindowPositionSettings;
       }
       if (!load && !UnsafeNativeMethods.CRhinoPlugInManager_IsLoaded(plugInId))
         return null;
@@ -475,7 +477,7 @@ namespace Rhino.PlugIns
       {
         // Managed plug-in
         var plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
-        return (plug_in_settings == null ? null : plug_in_settings.PluginSettings);
+        return plugInSettings ? plug_in_settings?.PluginSettings : plug_in_settings?.WindowPositionSettings;
       }
       else
       {
@@ -490,14 +492,14 @@ namespace Rhino.PlugIns
           // Unmanaged plug-in
           var unmanaged_plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
           if (unmanaged_plug_in_settings != null)
-            return unmanaged_plug_in_settings.PluginSettings;
+            return plugInSettings ? unmanaged_plug_in_settings.PluginSettings : unmanaged_plug_in_settings.WindowPositionSettings;
         }
       }
 
 
       if (!load)
         return null;
-      return (LoadPlugIn(plugInId) ? GetPluginSettings(plugInId, false) : null);
+      return (LoadPlugIn(plugInId) ? GetPluginSettings(plugInId, plugInSettings, false) : null);
     }
 
     /// <since>6.0</since>
@@ -2167,6 +2169,9 @@ namespace Rhino.PlugIns
           }
         }
 
+        // On windows we check this in native code, so only check here on mac for now.
+        if (!HostUtils.IsManagedDll(path))
+          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
       }
 
       // attempt to load the assembly
@@ -2181,17 +2186,14 @@ namespace Rhino.PlugIns
       System.Reflection.Assembly reflect_assembly;
       try
       {
-        if (HostUtils.RunningInNetCore)
-        {
+#if NETFRAMEWORK
+          reflect_assembly = Assembly.ReflectionOnlyLoadFrom(path);
+#else
           // ensure it's actually a .NET assembly before trying to load it
           AssemblyName.GetAssemblyName(path);
           // .NET Core runtime does not support reflection only loading of assemblies
-          reflect_assembly = Assembly.LoadFrom(path);
-        }
-        else
-        {
-          reflect_assembly = Assembly.ReflectionOnlyLoadFrom(path);
-        }
+          reflect_assembly = HostUtils.LoadAssemblyFrom(path);
+#endif
       }
       catch(FileLoadException e)
       {
@@ -2327,21 +2329,20 @@ namespace Rhino.PlugIns
         if(ironpython_referenced)
         {
           // force load the IronPython that ships with Rhino so we don't accidentally get one from the GAC
-          string ipy_dir = Path.GetDirectoryName(typeof(PlugIn).Assembly.Location);
-          ipy_dir = Path.Combine(ipy_dir, "Plug-ins", "IronPython");
+          var ipy_dir = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Plug-ins", "IronPython");
           try
           {
             string forceload_path = Path.Combine(ipy_dir, "IronPython.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
             forceload_path = Path.Combine(ipy_dir, "Microsoft.Dynamic.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
             forceload_path = Path.Combine(ipy_dir, "Microsoft.Scripting.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
           }
           catch (Exception) { } // this shouldn't happen, but is probably acceptable
         }
 
-        var plugin_assembly = System.Reflection.Assembly.LoadFrom(path);
+        var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
         
         if(displayDebugInfo)
           RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
@@ -2458,7 +2459,7 @@ namespace Rhino.PlugIns
       }
 
       // get md5
-      // I consider an md5 hash to give a "good enough" 1-to-1 indentifier for
+      // I consider an md5 hash to give a "good enough" 1-to-1 identifier for
       // a given file. This way I'm not worrying about plug-in names or
       // versions which is in the spirit of using Compat in the first place!
       string hash = ComputeMd5Hash(path);
@@ -2550,7 +2551,7 @@ namespace Rhino.PlugIns
 
     private static bool RunCompat(string path)
     {
-      // get path to rhinocommon
+      // get path to rhinocommon.  This may be under netcore\ when running in .NET 7.
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
       if (!File.Exists (rhino_common_path)) {
         HostUtils.DebugString ($"RhinoCommon.dll not found: {rhino_common_path}");
@@ -2559,8 +2560,8 @@ namespace Rhino.PlugIns
       
       string compat_exe = Runtime.HostUtils.RunningOnOSX ? "Compat.dll" : "Compat.exe";
 
-      // get path to compat (should be next to RhinoCommon.dll)
-      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), compat_exe);
+      // get path to compat (should be in main Rhino assembly directory)
+      string compat_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, compat_exe);
       if (!File.Exists (compat_path)) {
         HostUtils.DebugString ($"{compat_exe} not found: {compat_path}");
         throw new FileNotFoundException ($"{compat_exe} not found");
@@ -2568,7 +2569,7 @@ namespace Rhino.PlugIns
 
       HostUtils.DebugString(path);
 
-      string rhino_dotnet_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Rhino_DotNet.dll");
+      string rhino_dotnet_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
       if (!File.Exists(rhino_dotnet_path)) rhino_dotnet_path = null;
       // shell execute compat
       Process proc = new Process
@@ -2655,7 +2656,7 @@ namespace Rhino.PlugIns
       if (bReferencesOK) return false;
 
       // if we find any classes with the following prefixes, odds are the assembly references the rhino c++ sdk
-      // we can't check for compatiblity with the c++ sdk so the plug-in fails the compatibility check
+      // we can't check for compatibility with the c++ sdk so the plug-in fails the compatibility check
       var prefixes = new string[] { "CRhino", "ON_" };
 
       foreach (string line in output.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
@@ -2765,8 +2766,8 @@ namespace Rhino.PlugIns
     {
       if( HostUtils.RunningOnWindows )
       {
-        string rh_dn_path = typeof(PlugIn).Assembly.Location.Replace("RhinoCommon", "Rhino_DotNet");
-        return System.Reflection.Assembly.LoadFrom(rh_dn_path);
+        string rh_dn_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
+        return HostUtils.LoadAssemblyFrom(rh_dn_path);
       }
       return null;
     }
@@ -5210,7 +5211,7 @@ namespace Rhino.PlugIns
 
       // 26 Jan 2012 - S. Baer (RR 97943)
       // We were able to get this function to thrown exceptions with a bogus license file, but
-      // don't quite understand exactly where the problem was occuring.  Adding a ExceptionReport
+      // don't quite understand exactly where the problem was occurring.  Adding a ExceptionReport
       // to this function in order to try and log the exception before Rhino goes down in a blaze
       // of glory
       try

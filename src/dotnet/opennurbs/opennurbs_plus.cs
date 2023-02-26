@@ -192,11 +192,11 @@ namespace Rhino.Geometry
     /// Barycentric quad coordinates for the point on the mesh
     /// face mesh.Faces[FaceIndex].  If the face is a triangle
     /// disregard T[3] (it should be set to 0.0). If the face is
-    /// a quad and is split between vertexes 0 and 2, then T[3]
+    /// a quad and is split between vertices 0 and 2, then T[3]
     /// will be 0.0 when point is on the triangle defined by vi[0],
     /// vi[1], vi[2], and T[1] will be 0.0 when point is on the
     /// triangle defined by vi[0], vi[2], vi[3]. If the face is a
-    /// quad and is split between vertexes 1 and 3, then T[2] will
+    /// quad and is split between vertices 1 and 3, then T[2] will
     /// be 0.0 when point is on the triangle defined by vi[0],
     /// vi[1], vi[3], and m_t[0] will be 0.0 when point is on the
     /// triangle defined by vi[1], vi[2], vi[3].

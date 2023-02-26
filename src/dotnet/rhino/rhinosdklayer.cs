@@ -785,34 +785,6 @@ namespace Rhino.DocObjects
       set { SetBool(UnsafeNativeMethods.LayerBool.IsLocked, value); }
     }
 
-    public Linetype GetCustomLinetype()
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      IntPtr ptr_linetype = UnsafeNativeMethods.ON_Layer_GetCustomLinetype(const_ptr_this);
-      if (ptr_linetype == IntPtr.Zero)
-        return null;
-      return new Linetype(ptr_linetype);
-    }
-
-    public void SetCustomLinetype(Linetype linetype)
-    {
-      if (linetype == null)
-      {
-        RemoveCustomLinetype();
-        return;
-      }
-
-      IntPtr ptr_this = NonConstPointer();
-      IntPtr const_ptr_linetype = linetype.ConstPointer();
-      UnsafeNativeMethods.ON_Layer_SetCustomLinetype(ptr_this, const_ptr_linetype);
-    }
-
-    public void RemoveCustomLinetype()
-    {
-      IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.ON_Layer_SetCustomLinetype(ptr_this, IntPtr.Zero);
-    }
-
     /// <summary>
     /// The global persistent visibility setting is used for layers whose visibility can
     /// be changed by a "parent" object. A common case is when a layer is a
@@ -1157,6 +1129,7 @@ namespace Rhino.DocObjects
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>8.0</deprecated>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use ModelComponent.IsValidComponentName")]
     public static bool IsValidName(string name) => ModelComponent.IsValidComponentName(name);

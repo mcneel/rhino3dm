@@ -51,7 +51,7 @@ namespace Rhino.DocObjects.SnapShots
     /// <since>6.0</since>
     public SnapShotsClient()
     {
-      // create new generic controll, serial_number as parameter
+      // create new generic control, serial_number as parameter
       SerialNumber = ShapShotsClientList.serial_number;
       m_cpp = UnsafeNativeMethods.CRdkCmnSnapShotClient_New(SerialNumber);
       ShapShotsClientList.serial_number++;

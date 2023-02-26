@@ -280,7 +280,9 @@ namespace Rhino.ObjectManager
 
     public abstract Guid Id { get; }
 
-    public abstract string Name { get; }
+    public abstract string EnglishName { get; }
+
+    public abstract string LocalizedName { get; }
 
     public abstract ObjectManagerNode[] ChildNodes(ObjectManagerNode node);
 
@@ -321,16 +323,32 @@ namespace Rhino.ObjectManager
       return ext.Id;
     }
 
-    public delegate void ExtensionNameDelegate(int serial, IntPtr pOut);
+    public delegate void ExtensionEnglishNameDelegate(int serial, IntPtr pOut);
 
-    private static ExtensionNameDelegate DelegateExtensionName = OnExtensionName;
-    private static void OnExtensionName(int sn, IntPtr pOut)
+    private static ExtensionEnglishNameDelegate DelegateExtensionEnglishName = OnExtensionEnglishName;
+    private static void OnExtensionEnglishName(int sn, IntPtr pOut)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
       if (null == ext)
         return;
 
-      var name = ext.Name;
+      var name = ext.EnglishName;
+      if (name == null)
+        return;
+
+      UnsafeNativeMethods.ON_wString_Set(pOut, name);
+    }
+
+    public delegate void ExtensionLocalizedNameDelegate(int serial, IntPtr pOut);
+
+    private static ExtensionLocalizedNameDelegate DelegateExtensionLocalizedName = OnExtensionLocalizedName;
+    private static void OnExtensionLocalizedName(int sn, IntPtr pOut)
+    {
+      var ext = ObjectManagerExtension.FromSerialNumber(sn);
+      if (null == ext)
+        return;
+
+      var name = ext.LocalizedName;
       if (name == null)
         return;
 
@@ -383,12 +401,12 @@ namespace Rhino.ObjectManager
     {
       if (bInitialize)
       {
-        UnsafeNativeMethods.RhCmnObjectManagerExtension_SetCallbacks(DelegatePlugInId, DelegateExtensionId, DelegateExtensionName,
-          DelegateExtensionNodeFromArchive, DelegateExtensionChildNodes);
+        UnsafeNativeMethods.RhCmnObjectManagerExtension_SetCallbacks(DelegatePlugInId, DelegateExtensionId, DelegateExtensionEnglishName,
+          DelegateExtensionLocalizedName, DelegateExtensionNodeFromArchive, DelegateExtensionChildNodes);
       }
       else
       {
-        UnsafeNativeMethods.RhCmnObjectManagerExtension_SetCallbacks(null, null, null, null, null);
+        UnsafeNativeMethods.RhCmnObjectManagerExtension_SetCallbacks(null, null, null, null, null, null);
       }
     }
   }
@@ -411,7 +429,7 @@ namespace Rhino.ObjectManager
       get { return UnsafeNativeMethods.RhinoObjectManager_Extension_Id(CppPointer); }
     }
 
-    public override string Name
+    public override string EnglishName
     {
       get
       {
@@ -419,7 +437,21 @@ namespace Rhino.ObjectManager
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
         var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Extension_Name(CppPointer, p_string);
+        UnsafeNativeMethods.RhinoObjectManager_Extension_EnglishName(CppPointer, p_string);
+
+        return sh.ToString();
+      }
+    }
+
+    public override string LocalizedName
+    {
+      get
+      {
+        string name = "";
+        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
+        var p_string = sh.ConstPointer;
+
+        UnsafeNativeMethods.RhinoObjectManager_Extension_LocalizedName(CppPointer, p_string);
 
         return sh.ToString();
       }
@@ -575,6 +607,7 @@ namespace Rhino.ObjectManager
   {
     public static Guid Rename => UnsafeNativeMethods.RhinoObjectManagerNode_GetCommandId(UnsafeNativeMethods.ObjectManager_Node_CommandIds.CommandRename);
     public static Guid Delete => UnsafeNativeMethods.RhinoObjectManagerNode_GetCommandId(UnsafeNativeMethods.ObjectManager_Node_CommandIds.CommandDelete);
+    public static Guid Select => UnsafeNativeMethods.RhinoObjectManagerNode_GetCommandId(UnsafeNativeMethods.ObjectManager_Node_CommandIds.CommandSelect);
   }
 
   internal class ObjectManagerNodeCommandEnumerator : IEnumerable<ObjectManagerNodeCommand>, IDisposable
@@ -705,7 +738,9 @@ namespace Rhino.ObjectManager
 
     public abstract Guid TypeId { get; }
 
-    public abstract string Name { get; }
+    public abstract string EnglishName { get; }
+
+    public abstract string LocalizedName { get; }
 
     public abstract string Id { get; }
 
@@ -731,7 +766,7 @@ namespace Rhino.ObjectManager
 
     public abstract Bitmap Image(Size sz, ObjectManagerImageUsage usage);
 
-    public abstract Bitmap Preview(Size sz, Display.DefinedViewportProjection viewportProjection, Guid displayMode);
+    public abstract Bitmap Preview(Size sz);
 
     public abstract string ToolTip { get; }
 
@@ -788,16 +823,32 @@ namespace Rhino.ObjectManager
       return node.TypeId;
     }
 
-    public delegate void NodeNameDelegate(int serial, IntPtr pOut);
+    public delegate void NodeEnglishNameDelegate(int serial, IntPtr pOut);
 
-    private static NodeNameDelegate DelegateNodeName = OnNodeName;
-    private static void OnNodeName(int sn, IntPtr pOut)
+    private static NodeEnglishNameDelegate DelegateNodeEnglishName = OnNodeEnglishName;
+    private static void OnNodeEnglishName(int sn, IntPtr pOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
       if (null == node)
         return;
 
-      var name = node.Name;
+      var name = node.EnglishName;
+      if (name == null)
+        return;
+
+      UnsafeNativeMethods.ON_wString_Set(pOut, name);
+    }
+
+    public delegate void NodeLocalizedNameDelegate(int serial, IntPtr pOut);
+
+    private static NodeLocalizedNameDelegate DelegateNodeLocalizedName = OnNodeLocalizedName;
+    private static void OnNodeLocalizedName(int sn, IntPtr pOut)
+    {
+      var node = ObjectManagerNode.FromSerialNumber(sn);
+      if (null == node)
+        return;
+
+      var name = node.LocalizedName;
       if (name == null)
         return;
 
@@ -857,40 +908,16 @@ namespace Rhino.ObjectManager
       return 1;
     }
 
-    public delegate int NodePreviewDelegate(int serial, int width, int height, int iViewProjection, Guid idDisplayMode, IntPtr pDibOut);
+    public delegate int NodePreviewDelegate(int serial, int width, int height, IntPtr pDibOut);
 
     private static NodePreviewDelegate DelegateNodePreview = OnNodePreview;
-    private static int OnNodePreview(int sn, int width, int height, int iViewProjection, Guid idDisplayMode, IntPtr pDibOut)
+    private static int OnNodePreview(int sn, int width, int height, IntPtr pDibOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
       if (null == node)
         return 0;
 
-      var vp = Display.DefinedViewportProjection.Perspective;
-
-      switch (iViewProjection)
-      {
-      case 0:
-        vp = Display.DefinedViewportProjection.Top;
-        break;
-      case 1:
-        vp = Display.DefinedViewportProjection.Bottom;
-        break;
-      case 2:
-        vp = Display.DefinedViewportProjection.Left;
-        break;
-      case 3:
-        vp = Display.DefinedViewportProjection.Right;
-        break;
-      case 4:
-        vp = Display.DefinedViewportProjection.Front;
-        break;
-      case 5:
-        vp = Display.DefinedViewportProjection.Back;
-        break;
-      }
-
-      var bmp = node.Preview(new Size(width, height), vp, idDisplayMode);
+      var bmp = node.Preview(new Size(width, height));
       if (null == bmp)
         return 0;
 
@@ -1216,8 +1243,8 @@ namespace Rhino.ObjectManager
     {
       if (bInitialize)
       {
-        UnsafeNativeMethods.RhCmnObjectManagerNode_SetCallbacks(DelegateNodeTypeId,
-          DelegateNodeName, DelegateNodeId, DelegateParentNode, DelegateChildrenNode, DelegateNodeImage, DelegateNodeProperties,
+        UnsafeNativeMethods.RhCmnObjectManagerNode_SetCallbacks(DelegateNodeTypeId, DelegateNodeEnglishName,
+          DelegateNodeLocalizedName, DelegateNodeId, DelegateParentNode, DelegateChildrenNode, DelegateNodeImage, DelegateNodeProperties,
           DelegateNodeBeginChange, DelegateNodeEndChange, DelegateNodeCommands, DelegateNodeCommandsForNodes, DelegateNodePreview,
           DelegateNodeWriteToBuffer, DelegateNodeIsDragable, DelegateNodeSupportsDropTarget, DelegateNodeDrop, DelegateNodeAddUiSections,
           DelegateNodeGetParameter, DelegateNodeSetParameter, DelegateNodeIsEqual, DelegateNodeHighlightInView, DelegateNodeIsSelected,
@@ -1226,7 +1253,7 @@ namespace Rhino.ObjectManager
       else
       {
         UnsafeNativeMethods.RhCmnObjectManagerNode_SetCallbacks(null, null, null, null, null, null, null, null, null, null, null, null,
-          null, null, null, null, null, null, null, null, null, null, null);
+          null, null, null, null, null, null, null, null, null, null, null, null);
       }
     }
   }
@@ -1245,7 +1272,7 @@ namespace Rhino.ObjectManager
       get { return UnsafeNativeMethods.RhinoObjectManager_Node_TypeId(CppPointer); }
     }
 
-    public override string Name
+    public override string EnglishName
     {
       get
       {
@@ -1253,7 +1280,21 @@ namespace Rhino.ObjectManager
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
         var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Name(CppPointer, p_string);
+        UnsafeNativeMethods.RhinoObjectManager_Node_EnglishName(CppPointer, p_string);
+
+        return sh.ToString();
+      }
+    }
+
+    public override string LocalizedName
+    {
+      get
+      {
+        string name = "";
+        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
+        var p_string = sh.ConstPointer;
+
+        UnsafeNativeMethods.RhinoObjectManager_Node_LocalizedName(CppPointer, p_string);
 
         return sh.ToString();
       }
@@ -1291,33 +1332,9 @@ namespace Rhino.ObjectManager
       return UnsafeNativeMethods.RhinoObjectManager_Node_IsEqual(CppPointer, node.CppPointer);
     }
 
-    public override Bitmap Preview(Size sz, Display.DefinedViewportProjection viewportProjection, Guid displayMode)
+    public override Bitmap Preview(Size sz)
     {
-      int vp = 6;
-
-      switch (viewportProjection)
-      {
-      case Display.DefinedViewportProjection.Top:
-        vp = 0;
-        break;
-      case Display.DefinedViewportProjection.Bottom:
-        vp = 1;
-        break;
-      case Display.DefinedViewportProjection.Left:
-        vp = 2;
-        break;
-      case Display.DefinedViewportProjection.Right:
-        vp = 3;
-        break;
-      case Display.DefinedViewportProjection.Front:
-        vp = 4;
-        break;
-      case Display.DefinedViewportProjection.Back:
-        vp = 5;
-        break;
-      }
-
-      IntPtr pDib = UnsafeNativeMethods.RhinoObjectManager_Node_Preview(CppPointer, sz.Width, sz.Height, vp, displayMode);
+      IntPtr pDib = UnsafeNativeMethods.RhinoObjectManager_Node_Preview(CppPointer, sz.Width, sz.Height);
       if (pDib == IntPtr.Zero)
         return null;
 
@@ -1866,7 +1883,9 @@ namespace Rhino.ObjectManager
 
     public abstract Guid Id { get; }
 
-    public abstract string Name { get; }
+    public abstract string EnglishName { get; }
+
+    public abstract string LocalizedName { get; }
 
     public abstract bool State { get; }
 
@@ -1911,16 +1930,32 @@ namespace Rhino.ObjectManager
       return command.Id;
     }
 
-    public delegate void NodeCommandNameDelegate(int serial, IntPtr pOut);
+    public delegate void NodeCommandEnglishNameDelegate(int serial, IntPtr pOut);
 
-    private static NodeCommandNameDelegate DelegateNodeCommandName = OnNodeCommandName;
-    private static void OnNodeCommandName(int sn, IntPtr pOut)
+    private static NodeCommandEnglishNameDelegate DelegateNodeCommandEnglishName = OnNodeCommandEnglishName;
+    private static void OnNodeCommandEnglishName(int sn, IntPtr pOut)
     {
       var property = ObjectManagerNodeCommand.FromSerialNumber(sn);
       if (null == property)
         return;
 
-      var name = property.Name;
+      var name = property.EnglishName;
+      if (name == null)
+        return;
+
+      UnsafeNativeMethods.ON_wString_Set(pOut, name);
+    }
+
+    public delegate void NodeCommandLocalizedNameDelegate(int serial, IntPtr pOut);
+
+    private static NodeCommandLocalizedNameDelegate DelegateNodeCommandLocalizedName = OnNodeCommandLocalizedName;
+    private static void OnNodeCommandLocalizedName(int sn, IntPtr pOut)
+    {
+      var property = ObjectManagerNodeCommand.FromSerialNumber(sn);
+      if (null == property)
+        return;
+
+      var name = property.LocalizedName;
       if (name == null)
         return;
 
@@ -2067,14 +2102,15 @@ namespace Rhino.ObjectManager
     {
       if (bInitialize)
       {
-        UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(DelegateNodeCommandId, DelegateNodeCommandName,
-          DelegateNodeCommandImage, DelegateNodeCommandState, DelegateNodeCommandIsCheckbox, DelegateNodeCommandIsSeparator,
-          DelegateNodeCommandExecute, DelegateNodeCommandIsDefault, DelegateNodeCommandIsEnabled, DelegateNodeCommandIsRadioButton,
-          DelegateNodeCommandSupportsMultipleSelection);
+        UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(DelegateNodeCommandId, DelegateNodeCommandEnglishName,
+          DelegateNodeCommandLocalizedName, DelegateNodeCommandImage, DelegateNodeCommandState, DelegateNodeCommandIsCheckbox,
+          DelegateNodeCommandIsSeparator, DelegateNodeCommandExecute, DelegateNodeCommandIsDefault, DelegateNodeCommandIsEnabled,
+          DelegateNodeCommandIsRadioButton, DelegateNodeCommandSupportsMultipleSelection);
       }
       else
       {
-        UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(null, null, null, null, null, null, null, null, null, null, null);
+        UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(null, null, null, null, null, null, null, null, null,
+          null, null, null);
       }
     }
   }
@@ -2093,7 +2129,7 @@ namespace Rhino.ObjectManager
       get { return UnsafeNativeMethods.RhinoObjectManager_Node_Command_Id(CppPointer); }
     }
 
-    public override string Name
+    public override string EnglishName
     {
       get
       {
@@ -2101,7 +2137,21 @@ namespace Rhino.ObjectManager
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
         var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Command_Name(CppPointer, p_string);
+        UnsafeNativeMethods.RhinoObjectManager_Node_Command_EnglishName(CppPointer, p_string);
+
+        return sh.ToString();
+      }
+    }
+
+    public override string LocalizedName
+    {
+      get
+      {
+        string name = "";
+        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
+        var p_string = sh.ConstPointer;
+
+        UnsafeNativeMethods.RhinoObjectManager_Node_Command_LocalizedName(CppPointer, p_string);
 
         return sh.ToString();
       }

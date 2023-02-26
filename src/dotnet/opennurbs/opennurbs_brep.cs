@@ -215,7 +215,7 @@ namespace Rhino.Geometry
       IntPtr ptr = geometry.ConstPointer();
       IntPtr ptr_newbrep = UnsafeNativeMethods.ON_Geometry_BrepForm(ptr);
       GC.KeepAlive(geometry);
-      return IntPtr.Zero == ptr ? null : new Brep(ptr_newbrep, null);
+      return IntPtr.Zero == ptr_newbrep ? null : new Brep(ptr_newbrep, null);
     }
 
 #if RHINO_SDK
@@ -2311,7 +2311,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// CreatePlanarUnion
     /// </summary>
-    /// <param name="breps">The planar regions on which to preform the union operation.</param>
+    /// <param name="breps">The planar regions on which to perform the union operation.</param>
     /// <param name="plane">The plane in which all the input breps lie</param>
     /// <param name="tolerance">Tolerance to use for union operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
@@ -4503,6 +4503,7 @@ namespace Rhino.Geometry
     /// 3d point to the 3d point on the surface obtained by evaluating the surface at
     /// the appropriate end of the trimming curve must be  &lt;= this tolerance.
     /// </summary>
+    /// <since>7.26</since>
     public double Tolerance
     {
       get
@@ -6192,6 +6193,7 @@ namespace Rhino.Geometry
     /// [3] max angle deviation between Bézier surfaces(in degrees)
     /// [4] max curvature difference between Bézier surfaces</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
     public bool FilletSurfaceToCurve(
       Curve curve,
       double t,

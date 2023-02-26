@@ -137,6 +137,23 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Distance that the clipping has an effect
+    /// </summary>
+    public double PlaneDistance
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDistance(pConstThis);
+      }
+      set
+      {
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDistance(pThis, value);
+      }
+    }
+
+    /// <summary>
     /// Returns the ids of RhinoViewport objects that are clipped by this clipping plane.
     /// </summary>
     /// <returns>The ids of RhinoViewport objects.</returns>

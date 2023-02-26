@@ -1264,7 +1264,7 @@ namespace Rhino.Geometry
 
     #region properties
     /// <summary>
-    /// Returns true if the surface is a non-rational, uniform, natural or periodic, cubic NURBS surface. Otherwise, false is returend.
+    /// Returns true if the surface is a non-rational, uniform, natural or periodic, cubic NURBS surface. Otherwise, false is returned.
     /// </summary>
     /// <since>7.0</since>
     public bool IsSubDFriendly
@@ -2011,12 +2011,13 @@ namespace Rhino.Geometry
     /// <param name="srfUpper">Surfaces below trim curve in srf's (u,v) domain</param>
     /// <param name="edgeCurve">Curves (# = nSections) fit to trim curve with srf's u/v parameter</param>
     /// <param name="trimCurveOnSurface">the actual trim curve as it is projected on or pulled to the surface</param>
+    /// <param name="splitCurve">the actual fit curve the split the surface</param>
     /// <returns></returns>
     /// <since>8.0</since>
     [ConstOperation]
     public int RefitSplit(Curve curve, Vector3d trimProjectionDir, double tolerance, IEnumerable<double> Knots,
       bool bMeetCurve, bool divideIntoSections, List<Surface> srfLower, List<Surface> srfUpper, List<Curve> edgeCurve, 
-      ref Curve trimCurveOnSurface)
+      ref Curve trimCurveOnSurface, ref Curve splitCurve)
     {
       using (var simpleKnots = new SimpleArrayDouble(Knots))
       using (var outputLower = new SimpleArraySurfacePointer())
@@ -2027,12 +2028,13 @@ namespace Rhino.Geometry
         IntPtr ptr_outputUpper = outputUpper.NonConstPointer();
         IntPtr ptr_edgeCurves = outputEdge.NonConstPointer();
         IntPtr ptr_trimCurveOnSurface = IntPtr.Zero;
+        IntPtr ptr_splitCurve = IntPtr.Zero;
         trimCurveOnSurface = null;
 
         double FitMeasurement = double.NaN;
         int nSections = UnsafeNativeMethods.RHC_RhinoSplitRefitSurface(this.ConstPointer(), curve.ConstPointer(), trimProjectionDir,
           bMeetCurve, simpleKnots.ConstPointer(), tolerance, divideIntoSections,
-          ptr_outputLower, ptr_outputUpper, ptr_edgeCurves, ref ptr_trimCurveOnSurface,  ref FitMeasurement);
+          ptr_outputLower, ptr_outputUpper, ptr_edgeCurves, ref ptr_trimCurveOnSurface, ref ptr_splitCurve, ref FitMeasurement);
         if (nSections > 0)
         {
           srfLower.AddRange(outputLower.ToNonConstArray());
@@ -2040,6 +2042,8 @@ namespace Rhino.Geometry
           edgeCurve.AddRange(outputEdge.ToNonConstArray());
           if (ptr_trimCurveOnSurface != IntPtr.Zero)
             trimCurveOnSurface = GeometryBase.CreateGeometryHelper(ptr_trimCurveOnSurface, null) as Curve;
+          if (ptr_splitCurve != IntPtr.Zero)
+            splitCurve = GeometryBase.CreateGeometryHelper(ptr_splitCurve, null) as Curve;
         }
         GC.KeepAlive(curve);
         return nSections;
@@ -2083,13 +2087,14 @@ namespace Rhino.Geometry
     /// <param name="edgeCurve">Curves (# = nSections) fit to trim curve with srf's u/v parameter</param>
     /// <param name="FitMeasurement">Calculated based on trimParamSections</param>
     /// <param name="trimCurveOnSurface">the actual trim curve as it is projected on or pulled to the surface</param>
+    /// <param name="splitCurve">the actual fit curve the split the surface</param>
     /// <returns>true for zuccess, false for failure</returns>
     /// <since>8.0</since>
     [ConstOperation]
     public bool RefitSimplySplitSurface(Curve trimCurve3d, Vector3d trimProjectionDir, double tolerance, RefitTrimKnotMode knotAdditionMode,
       int numInsertKnots, IEnumerable<double> Knots, RefitTrimSectionMode sectionMode, int numNonTrimSpans, bool meetCurve,
       bool oneSided, Point3d PtActive, bool outputSurface, bool outputCurve, ref int numSections,
-      List<Surface> lowerSurface, List<Surface> upperSurface, List<Curve> edgeCurve, ref double FitMeasurement, ref Curve trimCurveOnSurface)
+      List<Surface> lowerSurface, List<Surface> upperSurface, List<Curve> edgeCurve, ref double FitMeasurement, ref Curve trimCurveOnSurface, ref Curve splitCurve)
     {
       using (var simpleKnots = new SimpleArrayDouble(Knots))
       using (var outputLower = new SimpleArraySurfacePointer())
@@ -2100,12 +2105,13 @@ namespace Rhino.Geometry
         IntPtr ptr_outputUpper = outputUpper.NonConstPointer();
         IntPtr ptr_outputEdge = outputEdge.NonConstPointer();
         IntPtr ptr_trimCurveOnSurface = IntPtr.Zero;
+        IntPtr ptr_splitCurve = IntPtr.Zero;
         trimCurveOnSurface = null;
 
         bool rc = UnsafeNativeMethods.RHC_RhRefitSimplySplitSurface(this.ConstPointer(), trimCurve3d.ConstPointer(), trimProjectionDir,
           tolerance, knotAdditionMode, numInsertKnots, simpleKnots.ConstPointer(), sectionMode,
           numNonTrimSpans, meetCurve, oneSided, PtActive, outputSurface, outputCurve, ref numSections, ptr_outputLower, ptr_outputUpper,
-          ptr_outputEdge, ref ptr_trimCurveOnSurface, ref FitMeasurement);
+          ptr_outputEdge, ref ptr_trimCurveOnSurface, ref ptr_splitCurve, ref FitMeasurement);
 
         if (rc)
         {
@@ -2114,28 +2120,42 @@ namespace Rhino.Geometry
           edgeCurve.AddRange(outputEdge.ToNonConstArray());
           if (ptr_trimCurveOnSurface != IntPtr.Zero)
             trimCurveOnSurface = GeometryBase.CreateGeometryHelper(ptr_trimCurveOnSurface, null) as Curve;
+          if (ptr_splitCurve != IntPtr.Zero)
+            splitCurve = GeometryBase.CreateGeometryHelper(ptr_splitCurve, null) as Curve;
         }
         GC.KeepAlive(trimCurve3d);
         return rc;
       }
     }
-
-    Curve[] FitCurveToSurface(Curve trimCurve3d, Vector3d trimProjectionDir, double tolerance,
-      IEnumerable<double> Knots, bool bezierSections, int numNonTrimSpans, bool meetCurve,
-      bool oneSided, Point3d PtActive, bool outputSurface, bool outputCurve, ref int numSections,
-      ref Curve trimCurveOnSurface)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="trimCurve3d">curve that will trim from one edge to the opposite</param>
+    /// <param name="trimProjectionDir">Vector for projection, or zero vector for no projection</param>
+    /// <param name="tolerance">3d tolerance for projection, splitting, fitting...</param>
+    /// <param name="Knots">For TrimParamKnots=3, the custom knots to add</param>
+    /// <param name="divideIntoSections">If true, the surface is divided at each knot</param>
+    /// <param name="trimCurveOnSurface">the actual trim curve as it is projected on or pulled to the surface</param>
+    /// <param name="splitCurve">the actual fit curve the split the surface</param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public Curve[] FitCurveToSurface(Curve trimCurve3d, Vector3d trimProjectionDir, double tolerance,
+      IEnumerable<double> Knots, bool divideIntoSections, ref Curve trimCurveOnSurface, ref Curve splitCurve)
     {
       using (SimpleArrayCurvePointer FitCurvesArray = new SimpleArrayCurvePointer())
       using (var simpleKnots = new SimpleArrayDouble(Knots))
       {
         IntPtr trimCurvePtr = IntPtr.Zero;
+        IntPtr ptr_splitCurve = IntPtr.Zero;
         trimCurveOnSurface = null;
         double fit = double.NaN;
         int nSections = UnsafeNativeMethods.RHC_RhFitCurveToSurface2(this.ConstPointer(), trimCurve3d.ConstPointer(), trimProjectionDir, simpleKnots.ConstPointer(),
-          tolerance, bezierSections, FitCurvesArray.NonConstPointer(), ref fit, ref trimCurvePtr);
+          tolerance, divideIntoSections, FitCurvesArray.NonConstPointer(), ref fit, ref trimCurvePtr, ref ptr_splitCurve);
 
         if (trimCurvePtr != IntPtr.Zero)
           trimCurveOnSurface = GeometryBase.CreateGeometryHelper(trimCurvePtr, null) as Curve;
+        if (ptr_splitCurve != IntPtr.Zero)
+          splitCurve = GeometryBase.CreateGeometryHelper(ptr_splitCurve, null) as Curve;
         if (nSections == 0) return new Curve[0];
 
         // Output Curves

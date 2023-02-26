@@ -397,7 +397,7 @@ namespace Rhino.DocObjects
       /// Returns an array of all group names.
       /// </summary>
       /// <param name="ignoreDeletedGroups">Ignore any groups that were deleted.</param>
-      /// <returns>An array if group names if succesful, null if there are no groups.</returns>
+      /// <returns>An array if group names if successful, null if there are no groups.</returns>
       /// <since>5.0</since>
       public string[] GroupNames(bool ignoreDeletedGroups)
       {
@@ -472,7 +472,7 @@ namespace Rhino.DocObjects
       /// Returns the number of objects that are members of a group.
       /// </summary>
       /// <param name="groupIndex">The index of the group.</param>
-      /// <returns>The nnumber of objects that are members of the group.</returns>
+      /// <returns>The number of objects that are members of the group.</returns>
       /// <since>5.0</since>
       public int GroupObjectCount(int groupIndex)
       {

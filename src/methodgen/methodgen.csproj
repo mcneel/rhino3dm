@@ -6,11 +6,14 @@
     <AssemblyName>MethodGen</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(OSX))">
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(Windows))">
     <TargetFramework>net48</TargetFramework>
     <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
     <OutputPath Condition="$(Configuration) == 'Release'">..\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(Linux))">
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 </Project>
