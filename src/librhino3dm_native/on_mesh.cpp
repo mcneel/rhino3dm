@@ -183,6 +183,11 @@ RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_CachedTextureCoordinates(ON_M
   return value;
 }
 
+RH_C_FUNCTION void ON_Mesh_InvalidateCachedTextureCoordinates(ON_Mesh* pMesh, bool bOnlyInvalidateCachedSurfaceParameterMapping)
+{
+  pMesh->InvalidateCachedTextureCoordinates(bOnlyInvalidateCachedSurfaceParameterMapping);
+}
+
 RH_C_FUNCTION int ON_TextureCoordinates_GetDimension(const ON_TextureCoordinates* pointer)
 
 {
@@ -1382,6 +1387,15 @@ RH_C_FUNCTION int ON_Mesh_GetConnectedVertices(const ON_Mesh* pMesh, ON_SimpleAr
   }
 
   return rc;
+}
+
+RH_C_FUNCTION bool ON_Mesh_SetSurfaceParametersFromTextureCoordinates(ON_Mesh* pMesh)
+{
+  if (pMesh)
+  {
+    return pMesh->SetSurfaceParamtersFromTextureCoodinates();
+  }
+  return false;
 }
 
 #if !defined(RHINO3DM_BUILD)

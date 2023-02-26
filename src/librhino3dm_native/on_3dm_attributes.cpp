@@ -895,10 +895,29 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomLinetype(ON_3dmObjectAttribut
 {
   if (attr)
   {
-    if (attr)
+    if (linetype)
       attr->SetCustomLinetype(*linetype);
     else
       attr->RemoveCustomLinetype();
+  }
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_ObjectFrame(ON_3dmObjectAttributes* const_ptr, ON_Xform* xform)
+{
+  if (const_ptr && xform)
+  {
+    const auto plane = const_ptr->ObjectFrame(ON_COMPONENT_INDEX::WholeObject);
+    xform->ChangeBasis(plane, ON_Plane::World_xy);
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetObjectFrame(ON_3dmObjectAttributes* ptr, const ON_Xform* pXform)
+{
+  if (ptr && pXform)
+  {
+    ptr->SetObjectFrame(ON_COMPONENT_INDEX::WholeObject, *pXform);
   }
 }
 

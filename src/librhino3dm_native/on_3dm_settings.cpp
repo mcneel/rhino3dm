@@ -233,6 +233,16 @@ RH_C_FUNCTION int ON_3dmView_GetSectionBehavior(const ON_3dmView* pConstView)
   return 0;
 }
 
+RH_C_FUNCTION ON_UUID ON_3dmView_NamedViewId(const ON_3dmView* pView)
+{
+  if (pView)
+  {
+    return pView->m_named_view_id;
+  }
+
+  return ON_nil_uuid;
+}
+
 RH_C_FUNCTION ON_EarthAnchorPoint* ON_EarthAnchorPoint_New()
 {
   return new ON_EarthAnchorPoint();
@@ -640,6 +650,20 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetColor(ON_3dmRenderSettings* pRenderSe
       break;
     }
   }
+}
+
+RH_C_FUNCTION ON_UUID ON_3dmRenderSettings_GetPresets(ON_3dmRenderSettings* pSettings)
+{
+  ON_UUID uuid = ON_nil_uuid;
+  if(nullptr != pSettings)
+    uuid = pSettings->CurrentRenderingPreset();
+  return uuid;
+}
+
+RH_C_FUNCTION void ON_3dmRenderSettings_SetPresets(ON_3dmRenderSettings* pSettings, const ON_UUID uuid)
+{
+  if(nullptr != pSettings)
+    pSettings->SetCurrentRenderingPreset(uuid);
 }
 
 RH_C_FUNCTION ON::LengthUnitSystem ON_3dmRenderSettings_GetUnitSystem(ON_3dmRenderSettings* pSettings)
