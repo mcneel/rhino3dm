@@ -384,7 +384,7 @@ namespace Rhino.Input.Custom
 
   Description:
     If GetGripFrameTransform() returns true, then grips should be
-    transformed by moving them in the translation retuned by
+    transformed by moving them in the translation returned by
     GetGripTranslation().  If GetGripFrameTransform() returns false,
     then grips should be transformed by m_xform.
   bool HasGripFrameTransform() const;

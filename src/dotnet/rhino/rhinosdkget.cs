@@ -963,6 +963,7 @@ namespace Rhino.Input
       return GetPolygon(false, ref numberSides, ref inscribed, out polyline);
     }
 
+    /// <since>8.0</since>
     public static Result GetPolygon(bool useActiveLayerLinetype, ref int numberSides, ref bool inscribed, out Polyline polyline)
     {
       polyline = null;
@@ -2411,6 +2412,7 @@ namespace Rhino.Input.Custom
   /// <summary>
   /// Behavior for a command line option
   /// </summary>
+  /// <since>8.0</since>
   public enum CommandLineOptionType
   {
     Simple = 0,
@@ -2470,6 +2472,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// The type of this command line option
     /// </summary>
+    /// <since>8.0</since>
     public CommandLineOptionType OptionType
     {
       get
@@ -2550,6 +2553,7 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="english">return the English or local versions of the list options</param>
     /// <returns></returns>
+    /// <since>8.0</since>
     public string[] ListOptions(bool english)
     {
       using (var stringList = new ClassArrayString())
@@ -2566,6 +2570,7 @@ namespace Rhino.Input.Custom
     /// <param name="english"></param>
     /// <param name="offValue"></param>
     /// <param name="onValue"></param>
+    /// <since>8.0</since>
     public void ToggleValues(bool english, out string offValue, out string onValue)
     {
       offValue = "";
@@ -2581,6 +2586,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>8.0</since>
     public bool? CurrentToggleValue
     {
       get
@@ -2594,6 +2600,7 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <since>8.0</since>
     public double CurrentNumericValue
     {
       get

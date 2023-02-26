@@ -13,6 +13,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public NurbsMultiMatcher(NurbsSurface input_srf, IEnumerable<Curve> target_curves)
     {
       using (var crvArray = new SimpleArrayCurvePointer(target_curves))
@@ -32,6 +33,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Dispose of this object and any unmanaged memory associated with it.
     /// </summary>
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -48,6 +50,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool DelayedSolve
     {
       get
@@ -62,6 +65,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public InteriorMovementOption InteriorMovement
     {
       get
@@ -76,6 +80,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public FreeEdgeMovementOption FreeEdgeMovement
     {
       get
@@ -90,6 +95,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public IndexPair SpanCount
     {
       get
@@ -106,6 +112,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public NurbsSurface LastResultSurface
     {
       get
@@ -118,6 +125,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public double LastTolerance
     {
       get
@@ -128,6 +136,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public String LastMessage
     {
       get
@@ -142,6 +151,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public NurbsSurface BestResultSurface
     {
       get
@@ -154,6 +164,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public double BestTolerance
     {
       get
@@ -165,6 +176,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public int ResultsMaxCount
     {
       get
@@ -181,6 +193,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool SaveIntermediateResults
     {
       get
@@ -195,6 +208,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool InsertKnot(int dir, double knot_value, int knot_multiplicity)
     {
       if (dir < 0) return false;
@@ -203,6 +217,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool IncreaseDegree(int dir, int degree)
     {
       if (dir < 0) return false;
@@ -211,6 +226,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool MatchStructureOneSide(int side)
     {
       if (side < 0) return false;
@@ -219,6 +235,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool MatchStructureBothSidesOneDir(int dir)
     {
       if (dir < 0) return false;
@@ -227,6 +244,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool MatchStructureAllSides()
     {
       return UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureAllSides(m_ptr);
@@ -234,6 +252,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool RefineSrf(double tolerance)
     {
       return UnsafeNativeMethods.RHC_TlMultiMatchSrf_RefineSrf(m_ptr, tolerance);
@@ -241,6 +260,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public int AddConstraint(NurbsCurve target_curve, EdgeContinuityOption continuity)
     {
       return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
@@ -248,21 +268,42 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
-    public int AddConstraintSide(NurbsCurve target_curve, int side, EdgeContinuityOption continuity)
+    /// <since>8.0</since>
+    public int AddConstraintSide(int side, NurbsCurve target_curve, EdgeContinuityOption continuity)
     {
       if (side < 0) return -1;
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraintSide(m_ptr, target_curve.NonConstPointer(), (uint)side, (uint)continuity);
+      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraintSide(m_ptr, (uint)side, target_curve.NonConstPointer(), (uint)continuity);
     }
 
     /// <summary>
     /// </summary>
-    public int RemoveConstraint(NurbsCurve target_curve, EdgeContinuityOption continuity)
+    /// <since>8.0</since>
+    public int EditConstraint(NurbsCurve target_curve, EdgeContinuityOption continuity)
+    {
+      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <since>8.0</since>
+    public int EditConstraintSide(int side, NurbsCurve target_curve, EdgeContinuityOption continuity)
+    {
+      if (side < 0) return -1;
+      IntPtr target_curve_ptr = target_curve == null ? IntPtr.Zero : target_curve.NonConstPointer();
+      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraintSide(m_ptr, (uint)side, target_curve_ptr, (uint)continuity);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <since>8.0</since>
+    public int RemoveConstraint(NurbsCurve target_curve)
     {
       return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromCurve(m_ptr, target_curve.NonConstPointer());
     }
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public int RemoveConstraintSide(int side)
     {
       if (side < 0) return -1;
@@ -271,6 +312,15 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
+    public int EditInitialSurface(NurbsSurface new_surface)
+    {
+      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditInitialSurface(m_ptr, new_surface.NonConstPointer());
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <since>8.0</since>
     public bool Solve()
     {
       return UnsafeNativeMethods.RHC_TlMultiMatchSrf_Solve(m_ptr);
@@ -278,6 +328,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// </summary>
+    /// <since>8.0</since>
     public bool SolveOrderedEdges()
     {
       return UnsafeNativeMethods.RHC_TlMultiMatchSrf_SolveOrderedEdges(m_ptr);

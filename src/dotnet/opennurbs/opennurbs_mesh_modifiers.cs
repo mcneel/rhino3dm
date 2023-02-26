@@ -19,6 +19,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the displacement feature is enabled or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetOn(m_attr.ConstPointer()); }
@@ -28,6 +29,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies which texture is used for computing the displacement amount.
     /// </summary>
+    /// <since>8.0</since>
     public Guid TextureId
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetTextureId(m_attr.ConstPointer()); }
@@ -37,6 +39,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies which texture mapping channel is used for the displacement texture.
     /// </summary>
+    /// <since>8.0</since>
     public int MappingChannel
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMappingChannel(m_attr.ConstPointer()); }
@@ -46,6 +49,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the amount of displacement for the black color in the texture.
     /// </summary>
+    /// <since>8.0</since>
     public double BlackPoint
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetBlackPoint(m_attr.ConstPointer()); }
@@ -55,6 +59,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the amount of displacement for the white color in the texture.
     /// </summary>
+    /// <since>8.0</since>
     public double WhitePoint
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetWhitePoint(m_attr.ConstPointer()); }
@@ -65,6 +70,7 @@ namespace Rhino.FileIO
     /// Specifies how densely the object is initially subdivided.
     /// The lower the value, the higher the resolution of the displaced mesh.
     /// </summary>
+    /// <since>8.0</since>
     public int InitialQuality
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetInitialQuality(m_attr.ConstPointer()); }
@@ -74,6 +80,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to perform a mesh reduction as a post process to simplify the result of displacement.
     /// </summary>
+    /// <since>8.0</since>
     public bool FinalMaxFacesOn
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(m_attr.ConstPointer()); }
@@ -83,6 +90,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies how many faces the reduction post process should target.
     /// </summary>
+    /// <since>8.0</since>
     public int FinalMaxFaces
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFaces(m_attr.ConstPointer()); }
@@ -92,6 +100,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether or not to perform a fairing step. Fairing straightens rough feature edges.
     /// </summary>
+    /// <since>8.0</since>
     public bool FairingOn
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairingOn(m_attr.ConstPointer()); }
@@ -101,6 +110,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the number of steps for the fairing process. Fairing straightens rough feature edges.
     /// </summary>
+    /// <since>8.0</since>
     public int Fairing
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairing(m_attr.ConstPointer()); }
@@ -110,6 +120,7 @@ namespace Rhino.FileIO
     /// <summary>
     ///  Specifies the maximum angle between face normals of adjacent faces that will get welded together.
     /// </summary>
+    /// <since>8.0</since>
     public double PostWeldAngle
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetPostWeldAngle(m_attr.ConstPointer()); }
@@ -119,6 +130,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies in megabytes how much memory can be allocated for use by the displacement mesh.
     /// </summary>
+    /// <since>8.0</since>
     public int MeshMemoryLimit
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMeshMemoryLimit(m_attr.ConstPointer()); }
@@ -128,6 +140,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the number of refinement passes
     /// </summary>
+    /// <since>8.0</since>
     public int RefineSteps
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSteps(m_attr.ConstPointer()); }
@@ -140,6 +153,7 @@ namespace Rhino.FileIO
     /// Specify 0.99 to make even slight contrasts on the displacement texture cause edges to be split.
     /// Specifying 0.01 only splits edges where heavy contrast exists.
     /// </summary>
+    /// <since>8.0</since>
     public double RefineSensitivity
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSensitivity(m_attr.ConstPointer()); }
@@ -149,6 +163,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Formula to use to calculate sweep resolution from initial quality.
     /// </summary>
+    /// <since>8.0</since>
     public enum SweepResolutionFormulas
     {
       /// <summary>
@@ -164,6 +179,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies which formula is used to calculate sweep resolution from initial quality.
     /// </summary>
+    /// <since>8.0</since>
     public SweepResolutionFormulas SweepResolutionFormula
     {
       get { return (SweepResolutionFormulas)UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSweepResolutionFormula(m_attr.ConstPointer()); }
@@ -175,6 +191,7 @@ namespace Rhino.FileIO
     /// for polysurface/SubD faces. Sub-items are identified by the face index that they apply to.
     /// <return>An array of the face indexes of each sub-item on the displacement.</return>
     /// </summary>
+    /// <since>8.0</since>
     public int[] GetSubItemFaceIndexes()
     {
       using (var list = new SimpleArrayInt())
@@ -193,6 +210,7 @@ namespace Rhino.FileIO
     /// <param>black_point is the override for File3dmDisplacement.BlackPoint.</param>
     /// <param>white_point is the override for File3dmDisplacement.WhitePoint.</param>
     /// </summary>
+    /// <since>8.0</since>
     public bool AddSubItem(int face_index, bool on, Guid texture, int mapping_channel, double black_point, double white_point)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_AddSubItem(m_attr.ConstPointer(),
@@ -203,6 +221,7 @@ namespace Rhino.FileIO
     /// Deletes a sub-item by its face index.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void DeleteSubItem(int face_index)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_DeleteSubItem(m_attr.ConstPointer(), face_index);
@@ -211,6 +230,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Deletes all the sub-items from the displacement.
     /// </summary>
+    /// <since>8.0</since>
     public void DeleteAllSubItems()
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_DeleteAllSubItems(m_attr.ConstPointer());
@@ -220,6 +240,7 @@ namespace Rhino.FileIO
     /// Gets the override for displacement 'on'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public bool SubItemOn(int face_index)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemOn(m_attr.ConstPointer(), face_index);
@@ -229,6 +250,7 @@ namespace Rhino.FileIO
     /// Sets the override for displacement 'on'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void SetSubItemOn(int face_index, bool on)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemOn(m_attr.NonConstPointer(), face_index, on);
@@ -238,6 +260,7 @@ namespace Rhino.FileIO
     /// Gets the override for displacement 'texture'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public Guid SubItemTexture(int face_index)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemTexture(m_attr.ConstPointer(), face_index);
@@ -247,6 +270,7 @@ namespace Rhino.FileIO
     /// Sets the override for displacement 'texture'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void SetSubItemTexture(int face_index, Guid texture_id)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemTexture(m_attr.NonConstPointer(), face_index, texture_id);
@@ -256,6 +280,7 @@ namespace Rhino.FileIO
     /// Gets the override for displacement 'mapping channel'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public int SubItemMappingChannel(int face_index)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemMappingChannel(m_attr.ConstPointer(), face_index);
@@ -265,6 +290,7 @@ namespace Rhino.FileIO
     /// Sets the override for displacement 'mapping channel'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void SetSubItemMappingChannel(int face_index, int chan)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemMappingChannel(m_attr.NonConstPointer(), face_index, chan);
@@ -274,6 +300,7 @@ namespace Rhino.FileIO
     /// Gets the override for displacement 'black-point'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public double SubItemBlackPoint(int face_index)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemBlackPoint(m_attr.ConstPointer(), face_index);
@@ -283,6 +310,7 @@ namespace Rhino.FileIO
     /// Sets the override for displacement 'black-point'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void SetSubItemBlackPoint(int face_index, double black_point)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemBlackPoint(m_attr.NonConstPointer(), face_index, black_point);
@@ -292,6 +320,7 @@ namespace Rhino.FileIO
     /// Gets the override for displacement 'white-point'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public double SubItemWhitePoint(int face_index)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemWhitePoint(m_attr.ConstPointer(), face_index);
@@ -301,6 +330,7 @@ namespace Rhino.FileIO
     /// Sets the override for displacement 'white-point'.
     /// <param>face_index is the index of the face on the polysurface/SubD.</param>
     /// </summary>
+    /// <since>8.0</since>
     public void SetSubItemWhitePoint(int face_index, double white_point)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemWhitePoint(m_attr.NonConstPointer(), face_index, white_point);
@@ -322,6 +352,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether edge softening is enabled or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetOn(m_attr.ConstPointer()); }
@@ -331,6 +362,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// The softening radius.
     /// </summary>
+    /// <since>8.0</since>
     public double Softening
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetSoftening(m_attr.ConstPointer()); }
@@ -340,6 +372,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to chamfer the edges.
     /// </summary>
+    /// <since>8.0</since>
     public bool Chamfer
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetChamfer(m_attr.ConstPointer()); }
@@ -349,6 +382,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the edges are faceted.
     /// </summary>
+    /// <since>8.0</since>
     public bool Faceted
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetFaceted(m_attr.ConstPointer()); }
@@ -359,6 +393,7 @@ namespace Rhino.FileIO
     /// Threshold angle (in degrees) which controls whether an edge is softened or not.
     /// The angle refers to the angles between the adjacent faces of an edge.
     /// </summary>
+    /// <since>8.0</since>
     public double EdgeAngleThreshold
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetEdgeAngleThreshold(m_attr.ConstPointer()); }
@@ -368,6 +403,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to soften edges despite too large a radius.
     /// </summary>
+    /// <since>8.0</since>
     public bool ForceSoftening
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetForceSoftening(m_attr.ConstPointer()); }
@@ -390,6 +426,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the feature is enabled or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOn(m_attr.ConstPointer()); }
@@ -399,6 +436,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies how thick meshes will be made.
     /// </summary>
+    /// <since>8.0</since>
     public double Distance
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetDistance(m_attr.ConstPointer()); }
@@ -408,6 +446,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to make open meshes solid by adding walls when thickening.
     /// </summary>
+    /// <since>8.0</since>
     public bool Solid
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetSolid(m_attr.ConstPointer()); }
@@ -417,6 +456,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to only offset the original surface.
     /// </summary>
+    /// <since>8.0</since>
     public bool OffsetOnly
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOffsetOnly(m_attr.ConstPointer()); }
@@ -426,6 +466,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether to thicken to both sides of the surface.
     /// </summary>
+    /// <since>8.0</since>
     public bool BothSides
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetBothSides(m_attr.ConstPointer()); }
@@ -448,6 +489,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether curve piping is enabled or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetOn(m_attr.ConstPointer()); }
@@ -457,6 +499,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the radius of the pipe (minimum value 0.0001).
     /// </summary>
+    /// <since>8.0</since>
     public double Radius
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetRadius(m_attr.ConstPointer()); }
@@ -466,6 +509,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the number of segments in the pipe (minimum value 2).
     /// </summary>
+    /// <since>8.0</since>
     public int Segments
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetSegments(m_attr.ConstPointer()); }
@@ -475,6 +519,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the pipe is faceted or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool Faceted
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetFaceted(m_attr.ConstPointer()); }
@@ -484,6 +529,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the accuracy of the pipe in the range 0 to 100.
     /// </summary>
+    /// <since>8.0</since>
     public int Accuracy
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetAccuracy(m_attr.ConstPointer()); }
@@ -493,6 +539,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Defines how the pipe is capped at the ends.
     /// </summary>
+    /// <since>8.0</since>
     public enum CapTypes
     {
       /// <summary>
@@ -516,6 +563,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the cap type to use.
     /// </summary>
+    /// <since>8.0</since>
     public CapTypes CapType
     {
       get { return (CapTypes)UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetCapType(m_attr.ConstPointer()); }
@@ -538,6 +586,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether shut-lining is enabled or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetOn(m_attr.ConstPointer()); }
@@ -547,6 +596,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the shut-lining is faceted or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool Faceted
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetFaceted(m_attr.ConstPointer()); }
@@ -556,6 +606,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether the shut-lining automatically updates or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool AutoUpdate
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetAutoUpdate(m_attr.ConstPointer()); }
@@ -565,6 +616,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies whether updating is forced or not.
     /// </summary>
+    /// <since>8.0</since>
     public bool ForceUpdate
     {
       get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetForceUpdate(m_attr.ConstPointer()); }
@@ -575,6 +627,7 @@ namespace Rhino.FileIO
     /// Gets all the curves on the shut-lining. Each curve is identified by a Guid.
     /// If there are no curves present, the array will be empty.
     /// </summary>
+    /// <since>8.0</since>
     public Guid[] GetCurves()
     {
       using (var list = new SimpleArrayGuid())
@@ -589,6 +642,7 @@ namespace Rhino.FileIO
     /// After adding a curve, you should set the id to that of a curve in the model
     /// that will be used to calculate the shut-lining.
     /// </summary>
+    /// <since>8.0</since>
     public Guid AddCurve()
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_AddCurve(m_attr.NonConstPointer());
@@ -597,6 +651,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Deletes all the curves from the shut-lining.
     /// </summary>
+    /// <since>8.0</since>
     public void DeleteAllCurves()
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_DeleteAllCurves(m_attr.NonConstPointer());
@@ -605,6 +660,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Return whether shut-line is created for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public bool CurveEnabled(Guid curve_id)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveEnabled(m_attr.ConstPointer(), curve_id);
@@ -613,6 +669,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Sets whether shut-line is created for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public void SetCurveEnabled(Guid curve_id, bool enabled)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveEnabled(m_attr.NonConstPointer(), curve_id, enabled);
@@ -621,6 +678,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the radius of the pipe used to create the shut-line for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public double CurveRadius(Guid curve_id)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveRadius(m_attr.ConstPointer(), curve_id);
@@ -629,6 +687,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Sets the radius of the pipe used to create the shut-line for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public void SetCurveRadius(Guid curve_id, double radius)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveRadius(m_attr.NonConstPointer(), curve_id, radius);
@@ -637,6 +696,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns the profile of the shut-line for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public int CurveProfile(Guid curve_id)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveProfile(m_attr.ConstPointer(), curve_id);
@@ -645,6 +705,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Sets the profile of the shut-line for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public void SetCurveProfile(Guid curve_id, int profile)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveProfile(m_attr.NonConstPointer(), curve_id, profile);
@@ -653,6 +714,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns whether the given curve is pulled to the surface before creating the shut-line.
     /// </summary>
+    /// <since>8.0</since>
     public bool CurvePull(Guid curve_id)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurvePull(m_attr.ConstPointer(), curve_id);
@@ -661,6 +723,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Sets whether the given curve is pulled to the surface before creating the shut-line.
     /// </summary>
+    /// <since>8.0</since>
     public void SetCurvePull(Guid curve_id, bool pull)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurvePull(m_attr.NonConstPointer(), curve_id, pull);
@@ -669,6 +732,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns whether to create a bump instead of a dent for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public bool CurveIsBump(Guid curve_id)
     {
       return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveIsBump(m_attr.ConstPointer(), curve_id);
@@ -677,6 +741,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Sets whether to create a bump instead of a dent for the given curve.
     /// </summary>
+    /// <since>8.0</since>
     public void SetCurveIsBump(Guid curve_id, bool b)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveIsBump(m_attr.NonConstPointer(), curve_id, b);
@@ -704,6 +769,7 @@ namespace Rhino.FileIO
     /// Returns an object that provides access to displacement information.
     /// If no displacement information is present, the method returns null.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmDisplacement Displacement
     {
       get
@@ -719,6 +785,7 @@ namespace Rhino.FileIO
     /// Returns an object that provides access to edge softening information.
     /// If no edge softening information is present, the method returns null.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmEdgeSoftening EdgeSoftening 
     {
       get
@@ -734,6 +801,7 @@ namespace Rhino.FileIO
     /// Returns an object that provides access to thickening information.
     /// If no thickening information is present, the method returns null.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmThickening Thickening
     {
       get
@@ -749,6 +817,7 @@ namespace Rhino.FileIO
     /// Returns an object that provides access to curve piping information.
     /// If no curve piping information is present, the method returns null.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmCurvePiping CurvePiping
     {
       get
@@ -764,6 +833,7 @@ namespace Rhino.FileIO
     /// Returns an object that provides access to shut-lining information.
     /// If no shutlining information is present, the method returns null.
     /// </summary>
+    /// <since>8.0</since>
     public File3dmShutLining ShutLining
     {
       get

@@ -502,7 +502,7 @@ namespace Rhino.Geometry
     /// <param name="addCorners">With open curves, adds creased vertices to the SubD at both ends of the first and last curves.</param>
     /// <param name="roadlikeFrame">
     /// Determines how sweep frame rotations are calculated.
-    /// If false (Freeform), frame are propogated based on a refrence direction taken from the rail curve curvature direction.
+    /// If false (Freeform), frame are propagated based on a reference direction taken from the rail curve curvature direction.
     /// If true (Roadlike), frame rotations are calculated based on a vector supplied in "roadlikeNormal" and the world coordinate system.
     /// </param>
     /// <param name="roadlikeNormal">

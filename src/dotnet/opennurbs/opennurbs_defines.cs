@@ -863,7 +863,11 @@ namespace Rhino
       /// <summary>3d modeling or "world" space.</summary>
       ModelSpace = 1,
       /// <summary>page/layout/paper/printing space.</summary>
-      PageSpace = 2
+      PageSpace = 2,
+      /// <summary>UV Editor space.</summary>
+      UVEditorSpace = 3,
+      /// <summary>Block Editor space.</summary>
+      BlockEditorSpace = 4
     }
 
     /// <summary>

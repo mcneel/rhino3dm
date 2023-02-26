@@ -728,7 +728,7 @@ namespace Rhino.DocObjects
       m_doc = doc;
     }
 #endif
-    private Material(IntPtr pMaterial)
+    internal Material(IntPtr pMaterial)
     {
       ConstructNonConstObject(pMaterial);
     }

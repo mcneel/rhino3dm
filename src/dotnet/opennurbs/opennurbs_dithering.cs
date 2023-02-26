@@ -17,6 +17,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Specifies the dithering method.
     /// </summary>
+    /// <since>8.0</since>
     public enum Methods
     {
       /// <summary>
@@ -33,6 +34,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Dithering state, on or off.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get => UnsafeNativeMethods.ON_Dithering_GetOn(_parent.ConstPointer());
@@ -42,6 +44,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Dithering method.
     /// </summary>
+    /// <since>8.0</since>
     public Methods Method
     {
       get => (Methods)UnsafeNativeMethods.ON_Dithering_GetMethod(_parent.ConstPointer());

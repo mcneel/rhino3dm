@@ -2585,10 +2585,10 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// Overrides the dafault object equality to compare lists by value.
+    /// Overrides the default object equality to compare lists by value.
     /// </summary>
     /// <param name="obj"></param>
-    /// <returns>True is objects are exaclty equal in value.</returns>
+    /// <returns>True is objects are exactly equal in value.</returns>
     public override bool Equals(object obj)
     {
       return base.Equals(obj as Point3dList);
@@ -2598,7 +2598,7 @@ namespace Rhino.Collections
     /// Determines if the point lists are exactly equal.
     /// </summary>
     /// <param name="other"></param>
-    /// <returns>True is objects are exaclty equal in value.</returns>
+    /// <returns>True is objects are exactly equal in value.</returns>
     /// <since>7.1</since>
     public bool Equals(Point3dList other)
     {

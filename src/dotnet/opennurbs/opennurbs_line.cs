@@ -951,7 +951,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the perimeter of this triangle. This is the sum of the lenghts of all edges.
+    /// Gets the perimeter of this triangle. This is the sum of the lengths of all edges.
     /// </summary>
     /// <since>7.1</since>
     public double Perimeter
@@ -1116,7 +1116,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets a point within this triangle using barycentric coordinates.
     /// </summary>
-    /// <param name="coords">Barycentic mass for vertex B and C. A is valued as (1 - B - C).</param>
+    /// <param name="coords">Barycentric mass for vertex B and C. A is valued as (1 - B - C).</param>
     /// <returns>Point at barycentric mass.</returns>
     /// <since>7.1</since>
     public Point3d PointAtBarycentricCoords(Point2d coords)

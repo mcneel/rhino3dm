@@ -50,15 +50,18 @@ namespace Rhino.FileIO
     private readonly File3dm _file3dm;
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public File3dmRenderMaterials(File3dm f) { _file3dm = f; }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public IEnumerator<File3dmRenderMaterial> GetEnumerator()
     {
       return new File3dmRenderContentEnumerator<File3dmRenderMaterial>(_file3dm);
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
   }
 
@@ -68,11 +71,13 @@ namespace Rhino.FileIO
     private readonly File3dm _file3dm;
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public File3dmRenderEnvironments(File3dm f) { _file3dm = f; }
 
     /// <summary>
     /// Background rendering environment.
     ///</summary>
+    /// <since>8.0</since>
     public Guid BackgroundId
     {
       get => UnsafeNativeMethods.ONX_Model_GetBackgroundRenderEnvironment(_file3dm.ConstPointer());
@@ -82,6 +87,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylighting rendering environment override state.
     ///</summary>
+    /// <since>8.0</since>
     public bool SkylightingOverride
     {
       get => UnsafeNativeMethods.ONX_Model_GetSkylightingRenderEnvironmentOverride(_file3dm.ConstPointer());
@@ -91,6 +97,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Skylighting rendering environment.
     ///</summary>
+    /// <since>8.0</since>
     public Guid SkylightingId
     {
       get => UnsafeNativeMethods.ONX_Model_GetSkylightingRenderEnvironment(_file3dm.ConstPointer());
@@ -100,6 +107,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Reflection / refraction rendering environment override state.
     ///</summary>
+    /// <since>8.0</since>
     public bool ReflectionOverride
     {
       get => UnsafeNativeMethods.ONX_Model_GetReflectionRenderEnvironmentOverride(_file3dm.ConstPointer());
@@ -109,6 +117,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Reflection / refraction rendering environment.
     ///</summary>
+    /// <since>8.0</since>
     public Guid ReflectionId
     {
       get => UnsafeNativeMethods.ONX_Model_GetReflectionRenderEnvironment(_file3dm.ConstPointer());
@@ -116,12 +125,14 @@ namespace Rhino.FileIO
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public IEnumerator<File3dmRenderEnvironment> GetEnumerator()
     {
       return new File3dmRenderContentEnumerator<File3dmRenderEnvironment>(_file3dm);
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
   }
 
@@ -131,15 +142,18 @@ namespace Rhino.FileIO
     private readonly File3dm _file3dm;
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public File3dmRenderTextures(File3dm f) { _file3dm = f; }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public IEnumerator<File3dmRenderTexture> GetEnumerator()
     {
       return new File3dmRenderContentEnumerator<File3dmRenderTexture>(_file3dm);
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
   }
 
@@ -176,6 +190,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>the kind of render content as a string.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string Kind
     {
       get
@@ -207,26 +222,31 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The unique id of the content type.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Guid TypeId => UnsafeNativeMethods.ON_RenderContent_TypeId(ConstPointer());
 
     /// <summary>
     /// <return>The content's render-engine id.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Guid RenderEngineId => UnsafeNativeMethods.ON_RenderContent_RenderEngineId(ConstPointer());
 
     /// <summary>
     /// <return>The content's plug-in id.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Guid PlugInId => UnsafeNativeMethods.ON_RenderContent_PlugInId(ConstPointer());
 
     /// <summary>
     /// <return>The content's group id.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Guid GroupId => UnsafeNativeMethods.ON_RenderContent_GroupId(ConstPointer());
 
     /// <summary>
     /// <return>The content's notes.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string Notes
     {
       get
@@ -242,6 +262,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The content's tags.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string Tags
     {
       get
@@ -257,16 +278,19 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>True if the content is hidden.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool Hidden => UnsafeNativeMethods.ON_RenderContent_Hidden(ConstPointer());
 
     /// <summary>
     /// <return>True if the content is a reference content.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool Reference => UnsafeNativeMethods.ON_RenderContent_Reference(ConstPointer());
 
     /// <summary>
     /// <return>True if the content is automatically deleted when not in use.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool AutoDelete => UnsafeNativeMethods.ON_RenderContent_AutoDelete(ConstPointer());
 
 #if RHINO_SDK
@@ -274,6 +298,7 @@ namespace Rhino.FileIO
     /// Gets a named parameter.
     /// <return>The parameter value or null if not found.</return>
     /// </summary>
+    /// <since>8.0</since>
     [CLSCompliant(false)]
     public IConvertible GetParameter(string param)
     {
@@ -288,6 +313,7 @@ namespace Rhino.FileIO
     /// Sets a named parameter.
     /// <return>True if the parameter was set, else false.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool SetParameter(string param, object value)
     {
       using (var v = new Rhino.Render.Variant(value))
@@ -300,6 +326,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The parent File3dm of the entire hierarchy.</return>
     /// </summary>
+    /// <since>8.0</since>
     public File3dm File3dmParent
     {
       get
@@ -321,6 +348,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The parent content or null if this is the top level object.</return>
     /// </summary>
+    /// <since>8.0</since>
     public File3dmRenderContent Parent
     {
       get
@@ -337,6 +365,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The top-level parent content. Returns this if this is the top-level item.</return>
     /// </summary>
+    /// <since>8.0</since>
     public File3dmRenderContent TopLevel
     {
       get
@@ -369,6 +398,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary/>
+    /// <since>8.0</since>
     public IEnumerable<File3dmRenderContent> Children
     {
       get
@@ -392,16 +422,19 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>True if this is a top-level render content (i.e., has no parent; is not a child).</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool IsTopLevel => UnsafeNativeMethods.ON_RenderContent_IsTopLevel(ConstPointer());
 
     /// <summary>
     /// <return>True if this is a child of another render content (i.e., has a parent; is not top-level).</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool IsChild => UnsafeNativeMethods.ON_RenderContent_IsChild(ConstPointer());
 
     /// <summary>
     /// <return>The render content's child slot name.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string ChildSlotName
     {
       get
@@ -417,6 +450,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>True if a particular child slot is 'on'.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool ChildSlotOn(string child_slot_name)
     {
       return UnsafeNativeMethods.ON_RenderContent_ChildSlotOn(ConstPointer(), child_slot_name);
@@ -426,6 +460,7 @@ namespace Rhino.FileIO
     /// Deletes any existing child with the specified child slot name.
     /// <return>True if successful, else false.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool DeleteChild(string child_slot_name)
     {
       return UnsafeNativeMethods.ON_RenderContent_DeleteChild(ConstPointer(), child_slot_name);
@@ -434,6 +469,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The child with the specified child slot name, or null if no such child exists.</return>
     /// </summary>
+    /// <since>8.0</since>
     public File3dmRenderContent FindChild(string child_slot_name)
     {
      var child_id = UnsafeNativeMethods.ON_RenderContent_FindChild(ConstPointer(), child_slot_name);
@@ -443,6 +479,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets the render content's state as an XML string.
     /// </summary>
+    /// <since>8.0</since>
     public string XML(bool recursive)
     {
       using (var sw = new StringWrapper())
@@ -498,6 +535,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Get a simulated material that approximates this material's appearance.
     /// </summary>
+    /// <since>8.0</since>
     public Material SimulatedMaterial()
     {
       var m = new Material();
@@ -526,6 +564,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Get a simulated environment that approximates this environment's appearance.
     /// </summary>
+    /// <since>8.0</since>
     public SimEnvironment SimulatedEnvironment()
     {
       var e = new SimEnvironment();
@@ -554,6 +593,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Get a simulated texture that approximates this texture's appearance.
     /// </summary>
+    /// <since>8.0</since>
     public Texture SimulatedTexture()
     {
       var t = new Texture();

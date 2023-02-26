@@ -220,6 +220,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary> Base width for this linetype </summary>
+    /// <since>8.0</since>
     public double Width
     {
       get
@@ -238,6 +239,7 @@ namespace Rhino.DocObjects
     /// Unit system that widths are defined in. UnitSystem.None is default
     /// and means that the width is defined in pixels.
     /// </summary>
+    /// <since>8.0</since>
     public UnitSystem WidthUnits
     {
       get
@@ -256,6 +258,7 @@ namespace Rhino.DocObjects
     /// Taper points are positions/width combinations along the length of a curve
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public Point2d[] GetTaperPoints()
     {
       using (var pointArray = new Rhino.Runtime.InteropWrappers.SimpleArrayPoint2d())
@@ -272,6 +275,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="startWidth"></param>
     /// <param name="endWidth"></param>
+    /// <since>8.0</since>
     public void SetTaper(double startWidth, double endWidth)
     {
       SetTaper(startWidth, Point2d.Unset, endWidth);
@@ -283,6 +287,7 @@ namespace Rhino.DocObjects
     /// <param name="startWidth"></param>
     /// <param name="taperPoint"></param>
     /// <param name="endWidth"></param>
+    /// <since>8.0</since>
     public void SetTaper(double startWidth, Point2d taperPoint, double endWidth) 
     {
       IntPtr ptr_this = NonConstPointer();
@@ -292,6 +297,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Remove taper information for stroke
     /// </summary>
+    /// <since>8.0</since>
     public void RemoveTaper()
     {
       IntPtr ptr_this = NonConstPointer();

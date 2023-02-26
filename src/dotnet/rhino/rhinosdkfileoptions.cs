@@ -191,7 +191,7 @@ namespace Rhino.FileIO
 
     /// <summary>
     /// For use on Apple frameworks only.
-    /// Retrns the final destination file name.
+    /// Returns the final destination file name.
     /// </summary>
     /// <since>6.3</since>
     public string DestinationFileName

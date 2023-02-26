@@ -981,6 +981,26 @@ namespace Rhino.Geometry
       }
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Returns a ShrinkWrap mesh from this point cloud object.
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public Mesh ShrinkWrap(ShrinkWrapParameters parameters)
+    {
+      var plugin_id = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
+      var obj = Rhino.RhinoApp.GetPlugInObject(plugin_id);
+      if (!(obj is IShrinkWrapService sw))
+        return null;
+
+      var mesh = sw.ShrinkWrap(this, parameters);
+
+      return mesh;
+    }
+#endif
+
     /// <summary>
     /// Copy all the point coordinates in this point cloud to an array.
     /// </summary>
@@ -1158,9 +1178,9 @@ namespace Rhino.Geometry
       pointCloudData.Release();
     }
 
-    #endregion
+#endregion
 
-    #region IEnumerable<PointCloudItem> Members
+#region IEnumerable<PointCloudItem> Members
 
     private class PointCloudPoints : IReadOnlyList<Point3d>, IList<Point3d>
     {
@@ -1256,19 +1276,19 @@ namespace Rhino.Geometry
     }
     private class PointCloudItemEnumerator : IEnumerator<PointCloudItem>
     {
-      #region members
+#region members
       private readonly PointCloud m_owner;
       int position = -1;
-      #endregion
+#endregion
 
-      #region constructor
+#region constructor
       public PointCloudItemEnumerator(PointCloud cloud_points)
       {
         m_owner = cloud_points;
       }
-      #endregion
+#endregion
 
-      #region enumeration logic
+#region enumeration logic
       public bool MoveNext()
       {
         position++;
@@ -1307,9 +1327,9 @@ namespace Rhino.Geometry
           }
         }
       }
-      #endregion
+#endregion
 
-      #region IDisposable logic
+#region IDisposable logic
       private bool m_disposed; // = false; <- initialized by runtime
       public void Dispose()
       {
@@ -1317,9 +1337,9 @@ namespace Rhino.Geometry
         m_disposed = true;
         GC.SuppressFinalize(this);
       }
-      #endregion
+#endregion
     }
-    #endregion
+#endregion
   }
 }
 

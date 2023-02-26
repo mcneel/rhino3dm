@@ -16,6 +16,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Safe frame enabled state.
     /// </summary>
+    /// <since>8.0</since>
     public bool On
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetOn(_parent.ConstPointer()); }
@@ -25,6 +26,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// If safe frame is only displayed in perspective views.
     /// </summary>
+    /// <since>8.0</since>
     public bool PerspectiveOnly
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetPerspectiveOnly(_parent.ConstPointer()); }
@@ -34,6 +36,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// 4x3 field grid state.
     /// </summary>
+    /// <since>8.0</since>
     public bool FieldGridOn
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetFieldGridOn(_parent.ConstPointer()); }
@@ -43,6 +46,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Action frame state.
     /// </summary>
+    /// <since>8.0</since>
     public bool ActionFrameOn
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetActionFrameOn(_parent.ConstPointer()); }
@@ -52,6 +56,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// If action frame X and Y scales are linked.
     /// </summary>
+    /// <since>8.0</since>
     public bool ActionFrameLinked
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetActionFrameLinked(_parent.ConstPointer()); }
@@ -61,6 +66,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Action frame X scale.
     /// </summary>
+    /// <since>8.0</since>
     public double ActionFrameXScale
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetActionFrameXScale(_parent.ConstPointer()); }
@@ -70,6 +76,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Action frame Y scale.
     /// </summary>
+    /// <since>8.0</since>
     public double ActionFrameYScale
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetActionFrameYScale(_parent.ConstPointer()); }
@@ -79,6 +86,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Title frame state.
     /// </summary>
+    /// <since>8.0</since>
     public bool TitleFrameOn
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetTitleFrameOn(_parent.ConstPointer()); }
@@ -88,6 +96,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// If title frame X and Y scales are linked.
     /// </summary>
+    /// <since>8.0</since>
     public bool TitleFrameLinked
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetTitleFrameLinked(_parent.ConstPointer()); }
@@ -97,6 +106,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Title frame X scale.
     /// </summary>
+    /// <since>8.0</since>
     public double TitleFrameXScale
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetTitleFrameXScale(_parent.ConstPointer()); }
@@ -106,6 +116,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Title frame Y scale.
     /// </summary>
+    /// <since>8.0</since>
     public double TitleFrameYScale
     {
       get { return UnsafeNativeMethods.ON_SafeFrame_GetTitleFrameYScale(_parent.ConstPointer()); }

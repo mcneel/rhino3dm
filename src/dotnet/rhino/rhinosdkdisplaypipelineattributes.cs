@@ -306,6 +306,22 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClippingPlanes); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClippingPlanes, value); }
     }
+
+    /// <summary>Show fills where clipping planes clip solid objects</summary>
+    /// <since>8.0</since>
+    public bool ShowClipIntersectionSurfaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionSurfaces); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionSurfaces, value); }
+    }
+
+    /// <summary>Show edges and hatches where clipping planes clip objects</summary>
+    /// <since>8.0</since>
+    public bool ShowClipIntersectionEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionEdges, value); }
+    }
     #endregion
 
     #region View specific attributes...
@@ -600,7 +616,7 @@ namespace Rhino.Display
     #region Both surface and mesh specific attributes...
     //bool m_bUseDefaultShading;
 
-    /// <summary>Draw shaded meshes and surfaces. Set to false to use Flat Shading.</summary>
+    /// <summary>Draw shaded meshes and surfaces</summary>
     /// <since>5.1</since>
     public bool ShadingEnabled
     {
@@ -690,7 +706,6 @@ namespace Rhino.Display
     }
     //int m_nEdgeThickness;
     //int m_nEdgeColorUsage;
-    //int m_nNakedEdgeOverride;
     //int m_nNakedEdgeColorUsage;
     //int m_nNakedEdgeThickness;
     //int m_nEdgeColorReduction;

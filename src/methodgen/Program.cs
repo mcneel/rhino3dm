@@ -25,11 +25,11 @@ namespace MethodGen
     {
       bool rhino3dm_build = false;
       bool rhinocommon_build = false;
+      bool force_write = false;
       string dir_cpp;
       string dir_cs;
-      string opennurbsPathReplacement = "";
 
-      if (1 == args.Length && string.Equals(args[0], "rhino3dm", StringComparison.InvariantCultureIgnoreCase))
+      if (1 == args.Length && string.Equals(args[0], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
       {
         rhino3dm_build = true;
         // find directories for rhcommon_c and RhinoCommon
@@ -39,16 +39,14 @@ namespace MethodGen
       {
         dir_cpp = args[0];
         dir_cs = args[1];
-        if (args.Length > 2)
-          opennurbsPathReplacement = args[2];
-        if (args.Length > 3)
-        {
-          if (string.Equals(args[3], "rhino3dm", StringComparison.InvariantCultureIgnoreCase))
-            rhino3dm_build = true;
-        }
+        if (args.Length >= 3)
+          force_write = string.Equals(args[2], "--force-write=true", StringComparison.OrdinalIgnoreCase);
       }
       else
       {
+        if (1 == args.Length)
+          force_write = string.Equals(args[0], "--force-write=true", StringComparison.OrdinalIgnoreCase);
+          
         // See if there is a configuration file sitting in the same directory
         string location = System.Reflection.Assembly.GetExecutingAssembly().Location;
         string path = System.IO.Path.GetDirectoryName(location);
@@ -69,7 +67,14 @@ namespace MethodGen
         }
         else
         {
-          rhinocommon_build = true;
+          if (path.Contains("rhino3dm"))
+          {
+            rhino3dm_build = true;
+          }
+          else
+          {
+            rhinocommon_build = true;
+          }
           // find directories for rhcommon_c and RhinoCommon
           GetProjectDirectories(out dir_cpp, out dir_cs, false);
         }
@@ -85,10 +90,12 @@ namespace MethodGen
         var color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("ERROR: Unable to locate project directories");
+        Console.WriteLine($"  dir_cpp: {dir_cpp}");
+        Console.WriteLine($"  dir_cs: {dir_cs}");
         Console.ForegroundColor = color;
-        Console.WriteLine("Press any key to exit");
-        Console.Read();
-        return 0;
+        // Console.WriteLine("Press any key to exit");
+        // Console.Read();
+        return -1;
       }
 
       var cmd = new CommandlineParser(args);
@@ -104,19 +111,19 @@ namespace MethodGen
       {
         if (rhino3dm_build && (System.IO.Path.GetFileName(file).StartsWith("rh_") || System.IO.Path.GetFileName(file).StartsWith("tl_")))
           continue;
-        nmd.BuildDeclarations(file, rhino3dm_build, opennurbsPathReplacement);
+        nmd.BuildDeclarations(file, rhino3dm_build);
       }
       // get all of the .h files
       files = System.IO.Directory.GetFiles(dir_cpp, "*.h");
       foreach (var file in files)
-        nmd.BuildDeclarations(file, rhino3dm_build, opennurbsPathReplacement);
+        nmd.BuildDeclarations(file, rhino3dm_build);
 
       string output_file_methods = System.IO.Path.Combine(dir_cs, "AutoNativeMethods.cs");
-      nmd.Write(output_file_methods, "lib");
+      nmd.Write(output_file_methods, "lib", force_write);
 
       string output_file_enums = System.IO.Path.Combine(dir_cs, "AutoNativeEnums.cs");
 
-      nmd.WriteEnums(output_file_enums);
+      nmd.WriteEnums(output_file_enums, force_write);
 
       if (rhinocommon_build)
       {
@@ -131,18 +138,18 @@ namespace MethodGen
         // get all of the .cpp files
         files = System.IO.Directory.GetFiles(dir_cpp, "*.cpp");
         foreach (var file in files)
-          nmd.BuildDeclarations(file, false, "");
+          nmd.BuildDeclarations(file, false);
         // get all of the .h files
         files = System.IO.Directory.GetFiles(dir_cpp, "*.h");
         foreach (var file in files)
-          nmd.BuildDeclarations(file, false, "");
+          nmd.BuildDeclarations(file, false);
 
         output_file_methods = System.IO.Path.Combine(dir_cs, "AutoNativeMethodsRdk.cs");
-        nmd.Write(output_file_methods, "librdk");
+        nmd.Write(output_file_methods, "librdk", force_write);
 
         output_file_enums = System.IO.Path.Combine(dir_cs, "AutoNativeEnumsRdk.cs");
 
-        nmd.WriteEnums(output_file_enums);
+        nmd.WriteEnums(output_file_enums, force_write);
       }
 
       return 0;
@@ -174,6 +181,27 @@ namespace MethodGen
         dir_info = dir_info.Parent;
 				if (dir_info == null)
 					break;
+      }
+      if(!rc)
+      {
+        dir_info = new System.IO.DirectoryInfo(path);
+        while (true)
+        {
+          if (string.Compare(dir_info.Name, "src", true) == 0)
+          {
+            c = System.IO.Path.Combine(dir_info.FullName, "librhino3dm_native");
+            dotnet = System.IO.Path.Combine(dir_info.FullName, "dotnet");
+            if (System.IO.Directory.Exists(c) && System.IO.Directory.Exists(dotnet))
+            {
+              rc = true;
+              break;
+            }
+          }
+          // get parent directory
+          dir_info = dir_info.Parent;
+          if (dir_info == null)
+            break;
+        }
       }
 
       if (!rc)

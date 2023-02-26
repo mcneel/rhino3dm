@@ -645,7 +645,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to world coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -668,7 +668,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -691,7 +691,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1328,7 +1328,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to world coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1351,7 +1351,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1374,7 +1374,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1906,7 +1906,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to world coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to world coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1929,7 +1929,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the eigenvalues and eigenvectors of the moments matrix with repect to centroid coordinates.
+    /// Calculates the eigenvalues and eigenvectors of the moments matrix with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>
@@ -1952,7 +1952,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the principal moments of inertia and principal axes with repect to centroid coordinates.
+    /// Calculates the principal moments of inertia and principal axes with respect to centroid coordinates.
     /// </summary>
     /// <param name="x">Principal moment.</param>
     /// <param name="xaxis">Principal axis for x.</param>

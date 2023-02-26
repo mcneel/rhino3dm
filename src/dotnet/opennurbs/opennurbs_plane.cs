@@ -517,6 +517,41 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Test if this plane is co-planar with a another plane.
+    /// </summary>
+    /// <param name="plane">The plane to test.</param>
+    /// <returns>True if this plane is co-planar with the test plane, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool IsCoplanar(Plane plane)
+    {
+      return IsCoplanar(plane, RhinoMath.ZeroTolerance);
+    }
+
+    /// <summary>
+    /// Test if this plane is co-planar with a another plane.
+    /// </summary>
+    /// <param name="plane">The plane to test.</param>
+    /// <param name="tolerance">Testing tolerance.</param>
+    /// <returns>True if this plane is co-planar with the test plane, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool IsCoplanar(Plane plane, double tolerance)
+    {
+      if (!IsValid || !plane.IsValid)
+        return false;
+
+      if (tolerance < RhinoMath.ZeroTolerance)
+        tolerance = RhinoMath.ZeroTolerance;
+
+      var eq0 = GetPlaneEquation();
+      var eq1 = plane.GetPlaneEquation();
+
+      return Math.Abs(eq0[0] - eq1[0]) < tolerance &&
+             Math.Abs(eq0[1] - eq1[1]) < tolerance &&
+             Math.Abs(eq0[2] - eq1[2]) < tolerance &&
+             Math.Abs(eq0[3] - eq1[3]) < tolerance;
+    }
+
+    /// <summary>
     /// Evaluate a point on the plane.
     /// </summary>
     /// <param name="u">evaluation parameter.</param>

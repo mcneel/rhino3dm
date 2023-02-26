@@ -1454,6 +1454,7 @@ namespace Rhino.Geometry
     /// <param name="dirpoint1">point on first extension vector.</param>
     /// <param name="dirpoint2">Spoint on second extension vector.</param>
     /// <param name="dimlinepoint">point on dimension line.</param>
+    /// <since>8.0</since>
     public AngularDimension(
       Plane plane,
       Vector3d horizontal,
@@ -1606,6 +1607,7 @@ namespace Rhino.Geometry
         );
     }
 
+    /// <deprecated>8.0</deprecated>
     [Obsolete("Use an override that accepts a DimStyle")]
     public static AngularDimension Create(
       Guid styleId,
@@ -1639,6 +1641,7 @@ namespace Rhino.Geometry
     /// <param name="dirpoint2">Spoint on second extension vector.</param>
     /// <param name="dimlinepoint">point on dimension line.</param>
     /// <returns></returns>
+    /// <since>8.0</since>
     public static AngularDimension Create(
       DimensionStyle dimStyle,
       Plane plane,

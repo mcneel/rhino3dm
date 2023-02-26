@@ -26,6 +26,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>The types of a post effect.</summary>
+    /// <since>8.0</since>
     public enum Types
     {
       /// <summary>Unset type</summary>
@@ -41,6 +42,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>the type of the post effect.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Types Type
     {
       get => (Types)UnsafeNativeMethods.ON_PostEffect_Type(ConstPointer());
@@ -49,6 +51,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The localized name of the post effect.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string LocalName
     {
       get
@@ -66,6 +69,7 @@ namespace Rhino.FileIO
     /// this is equivalent to 'shown'. For tone-mapping post effects, this is equivalent
     /// to 'selected'.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool Visible => UnsafeNativeMethods.ON_PostEffect_Visible(ConstPointer());
 
     /// <summary>
@@ -73,6 +77,7 @@ namespace Rhino.FileIO
     /// this is equivalent to 'shown' and 'on'. For tone-mapping post effects, this is equivalent
     /// to 'selected'.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool Active => UnsafeNativeMethods.ON_PostEffect_Active(ConstPointer());
 
 #if RHINO_SDK
@@ -80,6 +85,7 @@ namespace Rhino.FileIO
     /// Get a named parameter.
     /// <return>The parameter value or null if not found.</return>
     /// </summary>
+    /// <since>8.0</since>
     [CLSCompliant(false)]
     public IConvertible GetParameter(string param)
     {
@@ -94,6 +100,7 @@ namespace Rhino.FileIO
     /// Sets a named parameter.
     /// <return>True if the parameter was set, else false.</return>
     /// </summary>
+    /// <since>8.0</since>
     public bool SetParameter(string param, object value)
     {
       using (var v = new Rhino.Render.Variant(value))
@@ -106,6 +113,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// <return>The parent File3dm of the entire hierarchy.</return>
     /// </summary>
+    /// <since>8.0</since>
     public File3dm File3dmParent
     {
       get
@@ -122,6 +130,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.PostEffect"/>.
     /// </summary>
+    /// <since>8.0</since>
     public override ModelComponentType ComponentType
     {
       get { return ModelComponentType.PostEffect; }

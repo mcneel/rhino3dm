@@ -77,7 +77,7 @@ namespace Rhino.UI
       var attr = type.GetCustomAttributes(typeof(System.Runtime.InteropServices.GuidAttribute), false);
       if (attr.Length != 1)
         throw new ArgumentException(@"type must have a GuidAttribute", "type");
-      // Add the panel type, wont do anything if the type was previously registered
+      // Add the panel type, won't do anything if the type was previously registered
       Add(plugInId, type, caption, icon, iconAssembly, iconResourceId, panelType);
     }
 

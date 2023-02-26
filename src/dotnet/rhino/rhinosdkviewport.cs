@@ -1127,7 +1127,7 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Get Scale trasform applied to the viewport
+    /// Get Scale transform applied to the viewport
     /// </summary>
     /// <returns></returns>
     /// <since>8.0</since>
@@ -1916,6 +1916,8 @@ namespace Rhino.Display
   {
     StandardModelingViewport = 0,
     PageViewMainViewport = 1,
-    DetailViewport = 2
+    DetailViewport = 2,
+    UVEditorViewport = 3,
+    BlockEditorViewport = 4
   }
 }

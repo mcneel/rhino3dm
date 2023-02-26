@@ -55,15 +55,18 @@ namespace Rhino.FileIO
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public File3dmEmbeddedFiles(File3dm f) { _file3dm = f; }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public IEnumerator<File3dmEmbeddedFile> GetEnumerator()
     {
       return new File3dmEmbeddedFileEnumerator(_file3dm);
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
   }
 
@@ -73,6 +76,7 @@ namespace Rhino.FileIO
     readonly Guid m_id = Guid.Empty;
 
     /// <summary/>
+    /// <since>8.0</since>
     public File3dmEmbeddedFile()
     {
       IntPtr pEF = UnsafeNativeMethods.ON_EmbeddedFile_New();
@@ -90,6 +94,7 @@ namespace Rhino.FileIO
     /// local file depending on the way the embedded file was loaded. For example, if it was loaded from an
     /// archive, the filename could be that of a file on a different computer.</return>
     /// </summary>
+    /// <since>8.0</since>
     public string Filename
     {
       get
@@ -106,6 +111,7 @@ namespace Rhino.FileIO
     /// Saves the contents of the embedded file to a local file.
     /// Returns true if successful, else false.
     /// </summary>
+    /// <since>8.0</since>
     public bool SaveToFile(string filename)
     {
       if (!UnsafeNativeMethods.ON_EmbeddedFile_SaveToFile(NonConstPointer(), filename))
@@ -117,6 +123,7 @@ namespace Rhino.FileIO
     /// <summary>
     /// Returns <see cref="ModelComponentType.EmbeddedFile"/>.
     /// </summary>
+    /// <since>8.0</since>
     public override ModelComponentType ComponentType
     {
       get { return ModelComponentType.EmbeddedFile; }

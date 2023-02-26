@@ -41,7 +41,7 @@ namespace Rhino.FileIO
 
     private FileReference(IntPtr constPtr)
     {
-      if (constPtr == null) throw new ApplicationException("FileRefernce pointer is null.");
+      if (constPtr == IntPtr.Zero) throw new ApplicationException("FileReference pointer is null.");
 
       m_const_ptr = constPtr;
     }
@@ -392,7 +392,7 @@ namespace Rhino.FileIO
       internal NameHashUnmanagedHandle(NameHash hash)
       {
         // NOTE WELL:
-        //   Through the Pinvoke hoo haa, this ends up calling ON_NameHash::Internal_CreateForDotNetInterface()
+        //   Through the Pinvoke hoo has, this ends up calling ON_NameHash::Internal_CreateForDotNetInterface()
         //   It is critical that the three parameters are byte-by-byte identical to
         //   information copied from a valid instance of a C++ ON_NameHash object.
         //   Otherwise, it is nearly certain an invalid ON_NameHash will be created

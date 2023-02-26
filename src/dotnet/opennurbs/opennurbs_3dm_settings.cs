@@ -462,6 +462,19 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Returns a unique id if this is a named view otherwise an empty Guid.
+    /// </summary>
+    /// <since>7.28</since>
+    public Guid NamedViewId
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_3dmView_NamedViewId(const_ptr_this);
+      }
+    }
+
+    /// <summary>
     /// Get filename for wallpaper set to this view, if any.
     /// </summary>
     /// <since>6.0</since>
@@ -624,6 +637,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// How a view will interact with clipping planes
     /// </summary>
+    /// <since>8.0</since>
     public DocObjects.ViewSectionBehavior SectionBehavior
     {
       get
@@ -2389,6 +2403,25 @@ namespace Rhino.Render
         return new RenderChannels();
       }
     }
+
+    /// <summary>
+    /// Get or set the Render Preset
+    /// </summary>
+    /// <since>8.0</since>
+    public Guid RenderPresets
+    {
+      get
+      {
+        var pointer = ConstPointer();
+        return UnsafeNativeMethods.ON_3dmRenderSettings_GetPresets(pointer);
+      }
+      set
+      {
+        var pointer = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmRenderSettings_SetPresets(pointer, value);
+        Commit();
+      }
+    }
 #endif
     /// <summary>
     /// Get or set the given named view
@@ -2782,7 +2815,7 @@ namespace Rhino.FileIO
   //   @untitled table
   //   0       boundary + "knot" wires 
   //   1       boundary + "knot" wires + 1 interior wire if no interior "knots"
-  //   N>=2    boundry + "knot" wires + (N-1) interior wires
+  //   N>=2    boundary + "knot" wires + (N-1) interior wires
   int m_current_wire_density;
 
   ON_3dmRenderSettings m_RenderSettings;

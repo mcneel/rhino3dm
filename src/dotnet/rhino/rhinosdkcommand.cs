@@ -864,18 +864,25 @@ namespace Rhino.Commands
       get { return m_serial_number; }
     }
 
+    /// <since>8.0</since>
+    public bool IsBeforeBeginRecording { get { return 7 == m_event_type; } }
     /// <since>5.0</since>
     public bool IsBeginRecording { get { return 1 == m_event_type; } }
+    /// <since>8.0</since>
+    public bool IsBeforeEndRecording { get { return 8 == m_event_type; } }
     /// <since>5.0</since>
     public bool IsEndRecording { get { return 2 == m_event_type; } }
+
     /// <since>5.0</since>
     public bool IsBeginUndo { get { return 3 == m_event_type; } }
     /// <since>5.0</since>
     public bool IsEndUndo { get { return 4 == m_event_type; } }
+
     /// <since>5.0</since>
     public bool IsBeginRedo { get { return 5 == m_event_type; } }
     /// <since>5.0</since>
     public bool IsEndRedo { get { return 6 == m_event_type; } }
+
     /// <since>5.0</since>
     public bool IsPurgeRecord { get { return 86 == m_event_type; } }
   }

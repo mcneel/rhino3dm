@@ -21,41 +21,9 @@ def methodgen(dotnetcore):
     dir_cs = os.getcwd() + '/dotnet'
     path_replace = '../lib/opennurbs'
     args = ' "{0}" "{1}" "{2}"'.format(dir_cpp, dir_cs, path_replace)
-    if dotnetcore:
-        # [Alain] I'm not sure why the files need to be copied to a separate (build) directory to compile. I'm commenting out the whole block for now.
-        # staging and compilation occurs in the build directory
-        #build_dir = "build/methodgen"
-        #if not os.path.exists(build_dir):
-        #    if(not os.path.exists("build")):
-        #        os.mkdir("build")
-        #    os.mkdir(build_dir)
-        #src_files = os.listdir('./methodgen')
-        #for file_name in src_files:
-        #    if file_name.endswith('.cs'):
-        #        full_path = os.path.join('./methodgen', file_name)
-        #        if os.path.isfile(full_path):
-        #            shutil.copy(full_path, build_dir)
-        #    if file_name.endswith('.core'):
-        #        full_path = os.path.join('./methodgen', file_name)
-        #        if os.path.isfile(full_path):
-        #            shutil.copy(full_path, build_dir + '/methodgen.csproj')
-        ## compile methodgen
-        #print('dotnet build ' + './' + build_dir + '/)
-        #system('dotnet build ' + './' + build_dir)
-        ## execute methodgen
-        #system('dotnet run --project ' + build_dir + '/methodgen.csproj ' + args)
-        system('dotnet build ./methodgen/methodgen.sln')
-        app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
-        system(app + args)
-    else:
-        # compile methodgen
-        system('msbuild /restore ./methodgen')
-        # execute methodgen for Rhino3dm
-        app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
-        if os.name == 'nt':  # windows build
-            system(app + args)
-        else:
-            system('mono ' + app + args)
+    system('dotnet build ./methodgen/methodgen.sln')
+    app = os.getcwd() + '/methodgen/bin/Debug/methodgen.exe'
+    system(app + args)
 
 
 def create_cpp_project(bitness, compile):
@@ -88,11 +56,8 @@ def create_cpp_project(bitness, compile):
 
 def compilerhino3dm(dotnetcore):
     conf = '/p:Configuration=Release;OutDir="../build/dotnet"'
-    if dotnetcore:
-        system("dotnet restore ./dotnet/Rhino3dm.sln")
-        system('dotnet build ./dotnet/Rhino3dm.csproj {}'.format(conf))
-    else:
-        system('msbuild /restore ./dotnet/Rhino3dm.csproj {}'.format(conf))
+    system("dotnet restore ./dotnet/Rhino3dm.sln")
+    system('dotnet build ./dotnet/Rhino3dm.csproj {}'.format(conf))
 
 
 if __name__ == '__main__':

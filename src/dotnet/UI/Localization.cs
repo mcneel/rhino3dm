@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 #if RHINO_SDK
 using Rhino.Runtime.InteropWrappers;
@@ -553,6 +554,23 @@ namespace Rhino.UI
       g_language_id = id;
       return true;
     }
+
+#if RHINO_SDK
+    /// <since>8.0</since>
+    public static bool GetLanguages(out SimpleArrayInt ids, out ClassArrayString names)
+    {
+      ids = new SimpleArrayInt();
+      names = new ClassArrayString();
+
+      var ids_ptr_list = ids.NonConstPointer();
+      var names_ptr_list = names.NonConstPointer();
+
+      if (0 < UnsafeNativeMethods.CRhinoApp_GetInstalledLanguages(ids_ptr_list, names_ptr_list))
+        return true;
+
+      return false;
+    }
+#endif
   }
 
   /// <summary>Pair of strings used for localization.</summary>

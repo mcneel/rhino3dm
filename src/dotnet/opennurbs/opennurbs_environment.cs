@@ -11,6 +11,7 @@ namespace Rhino.DocObjects
     /// The available background projections.
     /// </summary>
     /// 
+    /// <since>8.0</since>
     public enum BackgroundProjections : int
     {
       /// <summary>Planar.</summary>
@@ -38,6 +39,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Initializes a new environment.
     /// </summary>
+    /// <since>8.0</since>
     public SimEnvironment()
     {
       var ptr = UnsafeNativeMethods.ON_Environment_New();
@@ -47,6 +49,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// <return>The background color.</return>
     /// </summary>
+    /// <since>8.0</since>
     public System.Drawing.Color BackgroundColor
     {
       get
@@ -59,6 +62,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// <return>The background image texture.</return>
     /// </summary>
+    /// <since>8.0</since>
     public Texture BackgroundImage
     {
       get
@@ -72,6 +76,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// <return>The background projection.</return>
     /// </summary>
+    /// <since>8.0</since>
     public BackgroundProjections BackgroundProjection
     {
       get

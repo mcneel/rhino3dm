@@ -3,6 +3,7 @@
 using System;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.UI;
 
 namespace Rhino.Display
 {
@@ -73,6 +74,7 @@ namespace Rhino.Display
     /// <param name="patternScale">scale to be applied to linetype dash pattern. Typically this is 1</param>
     /// <param name="color"></param>
     /// <returns></returns>
+    /// <since>8.0</since>
     public static DisplayPen FromLinetype(Linetype linetype, System.Drawing.Color color, double patternScale)
     {
       if (linetype == null)
@@ -85,21 +87,6 @@ namespace Rhino.Display
       return rc;
     }
 
-    /// <summary>
-    /// Create a display pen that matches the linetype used by the current layer in a document
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <returns></returns>
-    public static DisplayPen FromCurrentLayer(Rhino.RhinoDoc doc)
-    {
-      var layer = doc.Layers.CurrentLayer;
-      var linetype = layer.GetCustomLinetype();
-      if (null == linetype)
-      {
-        linetype = doc.Linetypes[layer.LinetypeIndex];
-      }
-      return FromLinetype(linetype, layer.Color, 1.0);
-    }
     /// <summary>
     /// Color applied to stroke
     /// </summary>
@@ -115,6 +102,7 @@ namespace Rhino.Display
     /// <summary>
     /// Coordinate system for the pen's thickness
     /// </summary>
+    /// <since>8.0</since>
     public DocObjects.CoordinateSystem ThicknessSpace { get; set; } = DocObjects.CoordinateSystem.Screen;
 
     /// <summary>
@@ -208,6 +196,7 @@ namespace Rhino.Display
     /// <param name="startThickness"></param>
     /// <param name="endThickness"></param>
     /// <param name="taperPoint"></param>
+    /// <since>8.0</since>
     public void SetTaper(float startThickness, float endThickness, Point2f taperPoint)
     {
       Thickness = startThickness;
@@ -221,6 +210,7 @@ namespace Rhino.Display
     /// Rhino currently only supports either no taper or a single taper. An array is
     /// used here in case Rhino supports multiple taper values in the future.
     /// </summary>
+    /// <since>8.0</since>
     public Point2f[] TaperAsArray()
     {
       if (_taperThickness<0 && _endThickness<0)
@@ -1696,6 +1686,7 @@ namespace Rhino.Display
     /// size as the screen port. This allows geometry draw functions to act
     /// like they are working with typical 2d graphics APIs on a window
     /// </summary>
+    /// <since>8.0</since>
     public void Push2dProjection()
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Push2dProjection(m_ptr);
@@ -1704,6 +1695,7 @@ namespace Rhino.Display
     /// <summary>
     /// Pop a view projection off this pipelines projection stack
     /// </summary>
+    /// <since>8.0</since>
     public void PopProjection()
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_PopProjection(m_ptr);
@@ -1769,6 +1761,7 @@ namespace Rhino.Display
     /// the depth buffer for engines that support depth buffered drawing.
     /// </summary>
     /// <param name="color">the color to fill the frame buffer with</param>
+    /// <since>8.0</since>
     public void ClearFrameBuffer(System.Drawing.Color color)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_ClearFrameBuffer(m_ptr, color.ToArgb());
@@ -3796,11 +3789,13 @@ namespace Rhino.Display
       curve.Draw(this, pen.Color, (int)pen.Thickness, pen);
     }
 
+    /// <since>8.0</since>
     public void DrawLine(Line line, DisplayPen pen)
     {
       DrawLines(new Line[] { line }, pen);
     }
 
+    /// <since>8.0</since>
     public void DrawLines(Line[] lines, DisplayPen pen)
     {
       IntPtr ptrPen = pen.ToNativePointer();
@@ -4001,6 +3996,18 @@ namespace Rhino.Display
     public DisplayMaterial SetupDisplayMaterial(RhinoDoc doc, RhinoObject rhinoObject)
     {
       return SetupDisplayMaterial(doc, rhinoObject, null, Transform.Unset);
+    }
+
+    /// <since>8.0</since>
+    public DisplayMaterial SetupDisplayMaterial(System.Drawing.Color color)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      DisplayMaterial material = new DisplayMaterial();
+      IntPtr ptr_material = material.NonConstPointer();
+      if (UnsafeNativeMethods.CDisplayPipeline_SetupDisplayMaterialByColor(ptr_this, ptr_material, color.ToArgb()))
+        return material;
+      material.Dispose();
+      return null;
     }
 
     /// <summary>

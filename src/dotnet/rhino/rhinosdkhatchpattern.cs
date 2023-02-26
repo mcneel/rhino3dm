@@ -772,7 +772,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Finds the hatch pattern with a given name. Search ignores case.
     /// </summary>
-    /// <param name="name">The name of the hatch patter to be found.</param>
+    /// <param name="name">The name of the hatch pattern to be found.</param>
     /// <param name="ignoreDeleted">true means don't search deleted hatch patterns.</param>
     /// <returns>Index of the hatch pattern with the given name. -1 if no hatch pattern found.</returns>
     /// <example>
@@ -792,7 +792,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Finds the hatch pattern with a given name. Search ignores case.
     /// </summary>
-    /// <param name="name">The name of the hatch patter to be found.</param>
+    /// <param name="name">The name of the hatch pattern to be found.</param>
     /// <returns>Hatch pattern with the given name. Null if no hatch pattern found.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_hatchcurve.vb' lang='vbnet'/>
@@ -833,7 +833,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="pattern">
     /// definition of new hatch pattern. The information in pattern is copied.
-    /// If patern.Name is empty the a unique name of the form "HatchPattern 01"
+    /// If pattern.Name is empty the a unique name of the form "HatchPattern 01"
     /// will be automatically created.
     /// </param>
     /// <returns>

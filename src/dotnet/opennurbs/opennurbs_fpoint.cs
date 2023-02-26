@@ -484,7 +484,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
@@ -892,7 +892,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
@@ -1273,7 +1273,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>

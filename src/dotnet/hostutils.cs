@@ -8,10 +8,16 @@ using Rhino.Runtime.InteropWrappers;
 using System.Net.NetworkInformation;
 using Rhino.DocObjects;
 using System.Diagnostics;
+using System.IO;
+#if NET
+using System.Runtime.Loader;
+#endif
 
 #if RHINO_SDK
 using Rhino.PlugIns;
 using System.Management;
+using System.Reflection.Metadata;
+using System.Reflection;
 #endif
 
 namespace Rhino.Runtime
@@ -167,7 +173,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Try to get a string value for a given key name
+    /// Try to get a string array for a given key name
     /// </summary>
     /// <param name="name"></param>
     /// <param name="value"></param>
@@ -196,6 +202,103 @@ namespace Rhino.Runtime
           list.Add(s);
         var pointer = list.NonConstPointer();
         UnsafeNativeMethods.CRhParameterDictionary_SetStringList(m_pNamedParams, name, pointer);
+      }
+    }
+
+    /// <summary>
+    /// Try to get an array of ObjRef instances for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetObjRefs(string name, out ObjRef[] value)
+    {
+      using (var obj_refs = new ClassArrayObjRef())
+      {
+        var pointer = obj_refs.ConstPointer();
+        var success = UnsafeNativeMethods.CRhParameterDictionary_GetObjRefList(m_pNamedParams, name, pointer);
+        value = obj_refs.ToNonConstArray() ?? new ObjRef[0];
+        return success;
+      }
+    }
+
+    /// <summary> Set a list of ObjRef instances as a value for a given key name </summary>
+    /// <param name="name"></param>
+    /// <param name="values"></param>
+    /// <since>8.0</since>
+    public void Set(string name, IEnumerable<ObjRef> values)
+    {
+      using (var obj_refs = new ClassArrayObjRef())
+      {
+        if (values != null)
+          foreach (var item in values)
+            obj_refs.Add(item);
+        var pointer = obj_refs.ConstPointer();
+        UnsafeNativeMethods.CRhParameterDictionary_SetObjRefList(m_pNamedParams, name, pointer);
+      }
+    }
+
+
+    /// <summary>
+    /// Try to get a uint array value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public bool TryGetUints(string name, out uint[] value)
+    {
+      var pointer = UnsafeNativeMethods.ON_UIntArray_New();
+      var count = 0;
+      var success = UnsafeNativeMethods.CRhParameterDictionary_GetUintList(m_pNamedParams, name, pointer, ref count);
+      value = new uint[Math.Max(0, count)];
+      if (count > 0)
+        UnsafeNativeMethods.ON_UIntArray_CopyValues(pointer, value);
+      UnsafeNativeMethods.ON_UIntArray_Delete(pointer);
+      return success;
+    }
+
+    /// <summary> Set a list of uint as a value for a given key name </summary>
+    /// <param name="name"></param>
+    /// <param name="values"></param>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public void Set(string name, IEnumerable<uint> values)
+    {
+      var array = values?.ToArray() ?? new uint[0];
+      UnsafeNativeMethods.CRhParameterDictionary_SetUIntList(m_pNamedParams, name, array, array.Length);
+    }
+
+    /// <summary>
+    /// Try to get a UUID array value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetGuids(string name, out Guid[] value)
+    {
+      using (var list = new SimpleArrayGuid())
+      {
+        var pointer = list.NonConstPointer();
+        bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetGuidList(m_pNamedParams, name, pointer);
+        value = list.ToArray();
+        return rc;
+      }
+    }
+
+    /// <summary> Set a list of UUIDs as a value for a given key name </summary>
+    /// <param name="name"></param>
+    /// <param name="guidList"></param>
+    /// <since>7.0</since>
+    public void Set(string name, IEnumerable<Guid> guidList)
+    {
+      using (var list = new SimpleArrayGuid(guidList))
+      {
+        var pointer = list.NonConstPointer();
+        UnsafeNativeMethods.CRhParameterDictionary_SetGuidList(m_pNamedParams, name, pointer);
       }
     }
 
@@ -298,6 +401,38 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Try to get a Point value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetPoint2i(string name, out Point value)
+    {
+      value = Point.Empty;
+      var x = value.X;
+      var y = value.Y;
+      if (UnsafeNativeMethods.CRhParameterDictionary_GetPoint2i(m_pNamedParams, name, ref x, ref y))
+      {
+        value.X = x;
+        value.Y = y;
+        return true;
+      }
+      return false;
+    }
+
+    /// <summary>
+    /// Set a Point value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Point value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetPoint2i(m_pNamedParams, name, value.X, value.Y);
+    }
+
+    /// <summary>
     /// Try to get a Point3d value for a given key name
     /// </summary>
     /// <param name="name"></param>
@@ -374,6 +509,30 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Try to get a Color value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetGuid(string name, out Guid value)
+    {
+      value = Guid.Empty;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetUuid(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set a Color value for a given key name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>7.0</since>
+    public void Set(string name, Guid value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetUuid(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
     /// Try to get a viewport for a given key name
     /// </summary>
     /// <param name="name"></param>
@@ -440,9 +599,46 @@ namespace Rhino.Runtime
     /// <param name="value"></param>
     /// <returns></returns>
     /// <since>7.0</since>
+    public bool TryGetWindowImageHandle(string name, out IntPtr value)
+    {
+      value = UnsafeNativeMethods.CRhParameterDictionary_GetImageHandle(m_pNamedParams, name);
+      return value != IntPtr.Zero;
+    }
+
+    /// <summary>
+    /// Set a HWND on Windows or NSView* on Mac
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>7.0</since>
+    public void SetWindowImageHandle(string name, IntPtr value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetImageHandle(m_pNamedParams, name, value);
+    }
+
+    /// <summary>
+    /// Gets a HWND on Windows or NSVIew* on Mac
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
     public bool TryGetWindowHandle(string name, out IntPtr value)
     {
       value = UnsafeNativeMethods.CRhParameterDictionary_GetWindowHandle(m_pNamedParams, name);
+      return value != IntPtr.Zero;
+    }
+
+    /// <summary>
+    /// Gets a HWND on Windows or NSVIew* on Mac
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>7.0</since>
+    public bool TryGetUnmangedPointer(string name, out IntPtr value)
+    {
+      value = UnsafeNativeMethods.CRhParameterDictionary_GetUnmangedPointer(m_pNamedParams, name);
       return value != IntPtr.Zero;
     }
 
@@ -542,6 +738,130 @@ namespace Rhino.Runtime
         IntPtr ptr_object_array = rhobjs.NonConstPointer();
         UnsafeNativeMethods.CRhParameterDictionary_SetHatchObjects(m_pNamedParams, name, ptr_object_array);
       }
+    }
+
+    /// <summary>
+    /// Get a line for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetLine(string name, out Rhino.Geometry.Line value)
+    {
+      value = Rhino.Geometry.Line.Unset;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetLine(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set a line for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Rhino.Geometry.Line value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetLine(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Get a arc for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetArc(string name, out Rhino.Geometry.Arc value)
+    {
+      value = Rhino.Geometry.Arc.Unset;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetArc(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Set an arc for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Rhino.Geometry.Arc value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetArc(m_pNamedParams, name, ref value);
+    }
+
+    /// <summary>
+    /// Get a plane for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="plane"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetPlane(string name, out Rhino.Geometry.Plane plane)
+    {
+      plane = Rhino.Geometry.Plane.Unset;
+      return UnsafeNativeMethods.CRhParameterDictionary_GetPlane(m_pNamedParams, name, ref plane);
+    }
+
+    /// <summary>
+    /// Set a plane for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="plane"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Rhino.Geometry.Plane plane)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetPlane(m_pNamedParams, name, ref plane);
+    }
+
+    /// <summary>
+    /// Gets a point array for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="pts"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetPoints(string name, out Rhino.Geometry.Point3d[] pts)
+    {
+      SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d();
+      bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
+      pts = simplePoint3dArray.ToArray();
+      return rc;
+    }
+
+    /// <summary>
+    /// Set a point array for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="pts"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Rhino.Geometry.Point3d[] pts)
+    {
+      SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d(pts);
+      UnsafeNativeMethods.CRhParameterDictionary_SetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
+    }
+
+    /// <summary>
+    /// Get an MeshingParameters for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool TryGetMeshParameters(string name, out Geometry.MeshingParameters value)
+    {
+      value = new Geometry.MeshingParameters();
+      var pointer = value.NonConstPointer();
+      return UnsafeNativeMethods.CRhParameterDictionary_GetMeshParams(m_pNamedParams, name, pointer);
+    }
+
+    /// <summary>
+    /// Set an MeshingParameters for the specified key
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <since>8.0</since>
+    public void Set(string name, Geometry.MeshingParameters value)
+    {
+      UnsafeNativeMethods.CRhParameterDictionary_SetMeshParams(m_pNamedParams, name, value.ConstPointer());
     }
   }
 
@@ -1086,6 +1406,123 @@ namespace Rhino.Runtime
   public static class HostUtils
   {
 #if RHINO_SDK
+    /// <summary>
+    /// Calls Assembly.LoadFrom in .NET 4.8. May call a different routine under .NET 7
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static System.Reflection.Assembly LoadAssemblyFrom(string path)
+    {
+#if NETFRAMEWORK
+      return System.Reflection.Assembly.LoadFrom(path);
+#else
+      string fullPath = Path.GetFullPath(path);
+      
+      if (!s_loadFromHandlerSet)
+      {
+          lock (s_loadFromAssemblyList)
+          {
+              if (!s_loadFromHandlerSet)
+              {
+                  AppDomain.CurrentDomain.AssemblyResolve += LoadFromResolveHandler;
+                  s_loadFromHandlerSet = true;
+              }
+          }
+      }
+
+      // Add the path to the LoadFrom path list which we will consult
+      // before handling the resolves in our handler.
+      lock (s_loadFromAssemblyList)
+      {
+          if (!s_loadFromAssemblyList.Contains(fullPath))
+          {
+              s_loadFromAssemblyList.Add(fullPath);
+          }
+      }
+
+      // Curtis:
+      // Load in the same context as Rhino vs. always the Default context.
+      // this should be the default context when running Rhino normally,
+      // however this will be a separate context when running Rhino.Inside on Mac.
+      return RhinoLoadContext.LoadFromAssemblyPath(fullPath);
+#endif
+    }
+    
+    /// <summary>
+    /// Gets the Rhino system managed assembly directory.
+    /// </summary>
+    /// <since>8.0</since>
+    public static string RhinoAssemblyDirectory
+    {
+      get
+      {
+        var location = Path.GetDirectoryName(typeof(HostUtils).Assembly.Location);
+
+        if (RunningInNetCore && RunningOnWindows)
+        {
+          // On Windows we're in netcore, get the parent directory of this assembly.
+          location = Path.GetDirectoryName(location);
+        }
+
+        return location;
+      }
+    }
+    
+#if NET
+    // Modified from https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Reflection/Assembly.cs
+
+    private static readonly List<string> s_loadFromAssemblyList = new List<string>();
+    private static bool s_loadFromHandlerSet;
+    private static AssemblyLoadContext s_RhinoLoadContext;
+    private static AssemblyLoadContext RhinoLoadContext => s_RhinoLoadContext ?? (s_RhinoLoadContext = AssemblyLoadContext.GetLoadContext(typeof(HostUtils).Assembly));
+
+    private static Assembly LoadFromResolveHandler(object sender, ResolveEventArgs args)
+    {
+      Assembly requestingAssembly = args.RequestingAssembly;
+      if (requestingAssembly == null)
+        return null;
+        
+      // Requesting assembly for LoadFrom is always loaded in defaultContext - proceed only if that
+      // is the case.
+      if (RhinoLoadContext != AssemblyLoadContext.GetLoadContext(requestingAssembly))
+        return null;
+
+      // Get the path where requesting assembly lives and check if it is in the list
+      // of assemblies for which LoadFrom was invoked.
+      string requestorPath = requestingAssembly.Location;
+      if (string.IsNullOrEmpty(requestorPath))
+        return null;
+
+      requestorPath = Path.GetFullPath(requestorPath);
+
+      lock (s_loadFromAssemblyList)
+      {
+        // If the requestor assembly was not loaded using LoadFrom, exit.
+        if (!s_loadFromAssemblyList.Contains(requestorPath))
+        {
+          return null;
+        }
+      }
+
+      // Requestor assembly was loaded using loadFrom, so look for its dependencies
+      // in the same folder as it.
+      // Form the name of the assembly using the path of the assembly that requested its load.
+      AssemblyName requestedAssemblyName = new AssemblyName(args.Name!);
+
+      // Skip resources
+      if (requestedAssemblyName.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
+        return null;
+
+      string requestedAssemblyPath = Path.Combine(Path.GetDirectoryName(requestorPath)!, requestedAssemblyName.Name + ".dll");
+      if (!File.Exists(requestedAssemblyPath))
+        return null;
+        
+      // Load the dependency via LoadFrom so that it goes through the same path of being in the LoadFrom list.
+      return LoadAssemblyFrom(requestedAssemblyPath);
+    }
+#endif
+
     static System.Collections.Concurrent.ConcurrentBag<IDisposable> g_objectsToDisposeOnMainThread = new System.Collections.Concurrent.ConcurrentBag<IDisposable>();
     internal static void DeleteObjectsOnMainThread(object sender, Rhino.Commands.CommandEventArgs e)
     {
@@ -1229,7 +1666,22 @@ namespace Rhino.Runtime
       }
     }
 
-
+#if RHINO_SDK
+    /// <summary>
+    /// Get list of printers available on this system
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static string[] GetPrinterNames()
+    {
+      using(var names = new InteropWrappers.ClassArrayString())
+      {
+        IntPtr ptrNames = names.NonConstPointer();
+        UnsafeNativeMethods.RHC_GetPrinterNames(ptrNames);
+        return names.ToArray();
+      }
+    }
+#endif
 
     static Dictionary<string, IPlatformServiceLocator> g_platform_locator = new Dictionary<string, IPlatformServiceLocator>();
 
@@ -1251,10 +1703,8 @@ namespace Rhino.Runtime
         g_platform_locator[assemblyPath] = new DoNothingLocator();
 #if RHINO_SDK
         var service_type = typeof(IPlatformServiceLocator);
-        var path_to_rhinocommon = service_type.Assembly.Location;
-        var path = System.IO.Path.GetDirectoryName(path_to_rhinocommon);
-        path = System.IO.Path.Combine(path, assemblyPath);
-        var platform_assembly = System.Reflection.Assembly.LoadFrom(path);
+        var path = System.IO.Path.Combine(RhinoAssemblyDirectory, assemblyPath);
+        var platform_assembly = LoadAssemblyFrom(path);
 
         if (typeFullName == null)
         {
@@ -1318,6 +1768,17 @@ namespace Rhino.Runtime
         _namedCallbackFunctionPointer = Marshal.GetFunctionPointerForDelegate(g_named_callback);
       }
       UnsafeNativeMethods.RHC_RhRegisterNamedCallbackProc(name, _namedCallbackFunctionPointer);
+    }
+
+    /// <summary>
+    /// Remove a named callback from the dictionary of callbacks
+    /// </summary>
+    /// <param name="name"></param>
+    /// <since>7.18</since>
+    public static void RemoveNamedCallback(string name)
+    {
+      if (!string.IsNullOrEmpty(name))
+        _namedCallbacks.Remove(name);
     }
 
     /// <summary>
@@ -1423,7 +1884,11 @@ namespace Rhino.Runtime
       string pathToAdd = null;
       foreach(var dir in directories)
       {
-        if(dir.Contains("Grasshopper"))
+        // 26.1.2022 Joshua Kennedy RH-67135
+        // The ConnectionsUI plugin was failing to load because
+        // it couldn't find KangarooSolver.dll. It looks like it was looking in
+        // the GH 2 directories and not GH 1. This should force it to be just GH 1.
+        if (dir.Contains("Grasshopper") && !dir.Contains("Grasshopper2"))
         {
           var path = System.IO.Path.Combine(dir, "Components");
           if( System.IO.Directory.Exists(path))
@@ -1440,7 +1905,7 @@ namespace Rhino.Runtime
 
       // include all auto-install directories (that aren't already included)
       // grasshopper will prune the folders that it doesn't care about
-      foreach (var dir in GetActivePlugInVersionFolders(true))
+      foreach (var dir in GetActivePlugInVersionFolders())
       {
         if (!directories.Contains(dir.FullName))
         {
@@ -1503,13 +1968,25 @@ namespace Rhino.Runtime
       }
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Returns true when Rhino build is Beta or WIP, false otherwise
+    /// </summary>
+    /// <since>7.22</since>
+    public static bool IsPreRelease
+    {
+      get
+      {
+        return Rhino.RhinoBuildConstants.PRE_RELEASE;
+      }
+    }
+
     /// <summary>
     /// Tests if this process is currently executing in a server environment.
     /// </summary>
     /// <since>7.8</since>
     public static bool RunningOnServer => string.Equals(OperatingSystemInstallationType, "server", StringComparison.InvariantCultureIgnoreCase);
 
-#if RHINO_SDK
     /// <summary>
     /// Tests if this process is currently executing inside a Windows Container.
     /// </summary>
@@ -1747,6 +2224,152 @@ namespace Rhino.Runtime
     {
       get { return Type.GetType("Mono.Runtime") != null; }
     }
+
+#if RHINO_SDK
+    static bool? m_running_in_net_framework;
+
+    /// <summary>
+    /// Tests if this process is currently executing under the .NET Framework runtime.
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool RunningInNetFramework
+    {
+      get
+      {
+        if (m_running_in_net_framework == null)
+        {
+          m_running_in_net_framework = RunningOnWindows && RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
+        }
+        return m_running_in_net_framework.Value;
+      }
+    }
+
+    static bool? m_running_in_net_core;
+
+    /// <summary>
+    /// Tests if this process is currently executing under the .NET Core runtime.
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool RunningInNetCore
+    {
+      get
+      {
+        if (m_running_in_net_core == null)
+        {
+          m_running_in_net_core = Environment.Version.Major >= 5 || RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
+        }
+        return m_running_in_net_core.Value;
+      }
+    }
+
+    static IEnumerable<string> m_system_reference_assemblies;
+
+    /// <summary>
+    /// Gets the system reference assemblies to use when compiling code dynamically with Roslyn.
+    /// Includes RhinoCommon, Rhino.UI, and Eto.
+    /// </summary>
+    /// <remarks>
+    /// Note that this list of assemblies is not guaranteed to be loadable and should only be used when compiling
+    /// code dynamically.
+    /// </remarks>
+    /// <returns>An enumeration of paths to each of the rhino system assemblies to be used for compilation</returns>
+    /// <since>8.0</since>
+    public static IEnumerable<string> GetSystemReferenceAssemblies()
+    {
+      if (m_system_reference_assemblies == null)
+      {
+        // eliminate any duplicates and store the results so we don't have to figure this out each time
+        m_system_reference_assemblies = GetSystemReferenceAssembliesInternal().Distinct().ToList().AsReadOnly();
+      }
+      return m_system_reference_assemblies;
+    }
+
+    static IEnumerable<string> GetSystemReferenceAssembliesInternal()
+    {
+      if (RunningInNetCore)
+      {
+        // Use all .NET Core runtime assemblies
+        // Curtis: Should we use reference assemblies instead?
+        var mscorlibLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
+        foreach (var file in Directory.GetFiles(mscorlibLocation, "*.dll"))
+        {
+          var fileName = Path.GetFileName(file);
+          if (fileName.IndexOf(".Native.", StringComparison.OrdinalIgnoreCase) != -1)
+            continue;
+
+          if (fileName.StartsWith("System.", StringComparison.OrdinalIgnoreCase))
+            yield return file;
+          else if (fileName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
+            yield return file;
+          else switch (fileName.ToLowerInvariant())
+          {
+            case "mscorlib.dll":
+            case "windowsbase.dll":
+            case "netstandard.dll":
+              yield return file;
+              break;
+          }
+        }
+      }
+      else
+      {
+        yield return typeof(System.Object).Assembly.Location; // mscorlib.dll
+        yield return typeof(System.Uri).Assembly.Location; // System.dll
+        yield return typeof(System.Xml.Formatting).Assembly.Location; // System.Xml.dll
+        yield return typeof(System.Xml.Linq.XText).Assembly.Location; // System.Xml.Linq.dll
+        yield return typeof(System.Linq.IQueryable).Assembly.Location; // System.Core.dll
+        yield return typeof(System.Data.ConflictOption).Assembly.Location; // System.Data.dll
+        yield return typeof(System.Net.AuthenticationManager).Assembly.Location; // System.Net.dll (System.dll) ??????
+        yield return typeof(System.Net.Http.HttpClient).Assembly.Location; // System.Net.Http.dll
+        yield return typeof(System.ServiceModel.BasicHttpBinding).Assembly.Location; // System.ServiceModel.dll
+
+        yield return typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).Assembly.Location; // Microsoft.CSharp.dll
+        yield return typeof(Microsoft.VisualBasic.AppWinStyle).Assembly.Location; // Microsoft.VisualBasic.dll
+
+        yield return typeof(System.Dynamic.DynamicObject).Assembly.Location; // System.Core.dll
+        yield return typeof(System.Numerics.Complex).Assembly.Location; // System.Numerics.dll
+        yield return typeof(System.Collections.Immutable.ImmutableArray).Assembly.Location; // System.Collections.Immutable.dll
+
+        // add .NET Standard facade assemblies
+        foreach (var file in GetFacadeAssemblies())
+          yield return file;
+      }
+
+      // Common assemblies 
+      yield return typeof(System.Windows.Forms.Appearance).Assembly.Location; // System.Windows.Forms.dll
+      yield return typeof(System.Drawing.Bitmap).Assembly.Location; // System.Drawing.dll (net48) / System.Drawing.Common.dll (net6+)
+
+      // Rhino-specific assemblies
+      yield return typeof(RhinoApp).Assembly.Location; // RhinoCommon.dll
+      yield return System.Reflection.Assembly.Load("Eto").Location; // Eto.dll
+      yield return System.Reflection.Assembly.Load("Rhino.UI").Location; // Rhino.UI.dll
+    }
+
+    static IEnumerable<string> GetFacadeAssemblies()
+    {
+#if !MONO_BUILD && NETFRAMEWORK
+      string folder;
+      foreach (var refasm in Microsoft.Build.Utilities.ToolLocationHelper.GetPathToReferenceAssemblies(".NETFramework", "4.8", string.Empty))
+      {
+        folder = Path.Combine(refasm, "Facades");
+
+        if (Directory.Exists(folder))
+        {
+          return Directory.EnumerateFiles(folder, "*.dll");
+        }
+      }
+      // Hard-coded fallback just in case..
+      folder = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\Facades";
+
+      if (Directory.Exists(folder))
+      {
+        return Directory.EnumerateFiles(folder, "*.dll");
+      }
+#endif
+      return Enumerable.Empty<string>();
+    }
+#endif
+
 
     static int m_running_in_rhino_state; //0=unknown, 1=false, 2=true
     /// <summary>
@@ -2378,36 +3001,28 @@ namespace Rhino.Runtime
 
 
 
-      //This should reflect a string list of the enum TextFieldType in TextFieldViewModel.cs
-      //v7 functions are case sensitive and probably should not have to be for the user.
-      //Let's try to automatically repair function casing on what ever has been typed by the user.
-      //Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-57756
+      //v7 requires proper casing of functions. Repair the casing of older files to ensure compatibility. 
       #region Repair Function Casing
       var function_name_list = new List<string>()
       {
         "Area",
-        "BlockAttributeText",
-        "BlockInstanceCount",
-        "BlockInstanceName",
         "CurveLength",
         "Date",
         "DateModified",
-        "DetailScale",
         "DocumentText",
         "FileName",
         "LayerName",
-        "LayoutUserText",
         "ModelUnits",
         "Notes",
         "NumPages",
         "ObjectLayer",
         "ObjectName",
+        "ObjectPage",
         "PageName",
         "PageNumber",
         "PageHeight",
         "PageWidth",
         "PaperName",
-        "PointCoordinate",
         "UserText",
         "Volume"
       };
@@ -2521,6 +3136,15 @@ namespace Rhino.Runtime
               }
 
               var annotation = rhinoObject as Rhino.DocObjects.AnnotationObjectBase;
+              
+              //Look for block instances with BlockAttributesText and try to fish out an annotation base to get dimension style from
+              //NOTE this only supports 1 dimension style per block. 
+              if (rhinoObject is InstanceObject block) 
+              {
+                annotation = block.InstanceDefinition.GetObjects().FirstOrDefault(c=>c.ObjectType == ObjectType.Annotation) as AnnotationObjectBase;
+              }
+              
+
               // Basic CurveLength expression
               if (annotation != null && formula.StartsWith("CurveLength", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
@@ -2674,27 +3298,16 @@ namespace Rhino.Runtime
       return path;
     }
 
-    static bool LocalMachineListWins
-    {
-      get { return true; }
-    }
-
-
     static void BuildRegisteredPlugInList()
     {
       try
       {
-        // set order of precedence (current user = true, local machine = false)
-        bool[] dir_flags = LocalMachineListWins ? new bool[] { true, false } : new bool[] { false, true };
-        foreach (bool dir_flag in dir_flags)
+        foreach (var active_version_directory in GetActivePlugInVersionFolders())
         {
-          foreach (var active_version_directory in GetActivePlugInVersionFolders(dir_flag))
+          var rhps = active_version_directory.GetFiles("*.rhp", System.IO.SearchOption.TopDirectoryOnly);
+          foreach (var rhp in rhps)
           {
-            var rhps = active_version_directory.GetFiles("*.rhp", System.IO.SearchOption.TopDirectoryOnly);
-            foreach(var rhp in rhps)
-            {
-              UnsafeNativeMethods.CRhinoPlugInManager_InstallPlugIn(rhp.FullName, true);
-            }
+            UnsafeNativeMethods.CRhinoPlugInManager_InstallPlugIn(rhp.FullName, true);
           }
         }
       }
@@ -2703,6 +3316,52 @@ namespace Rhino.Runtime
         ExceptionReport(ex);
       }
     }
+
+    /// <summary>
+    /// Recurses through the auto install plug-in folders and returns the directories containing "active" versions of plug-ins.
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks>If the same package is installed in both the user and machine locations, the newest directory wins.</remarks>
+    /// <since>7.17</since>
+    public static IEnumerable<System.IO.DirectoryInfo> GetActivePlugInVersionFolders()
+    {
+      var userDirs = GetActivePlugInVersionFolders(true).ToList();
+      var machineDirs = GetActivePlugInVersionFolders(false).ToList();
+
+      var bCount = machineDirs.Count;
+
+      foreach (var userDir in userDirs)
+      {
+        var pick = true;
+        for (int j = 0; j < bCount; j++)
+        {
+          var machineDir = machineDirs[j];
+          // if package names (parent dir) don't match, skip to the next one
+          if (!userDir.Parent.Name.Equals(machineDir.Parent.Name, StringComparison.OrdinalIgnoreCase))
+            continue;
+          // if package exists in both locations, pick the version dir with the most recent creation time
+          if (userDir.CreationTime < machineDir.CreationTime)
+            pick = false;
+          else
+          {
+            machineDirs.RemoveAt(j);
+            bCount--;
+          }
+          break;
+        }
+        if (pick)
+          yield return userDir;
+      }
+
+      foreach (var machineDir in machineDirs)
+        yield return machineDir;
+    }
+
+    /// <summary>
+    /// list of package names that should never be passed to rhino
+    /// i.e. removed from package server to be shipped with rhino
+    /// </summary>
+    private static string[] _package_folder_blocklist = new string[] { "sectiontools" };
 
     /// <summary>
     /// Recurses through the auto install plug-in folders and returns the directories containing "active" versions of plug-ins.
@@ -2720,6 +3379,9 @@ namespace Rhino.Runtime
       var child_directories = install_directory.GetDirectories();
       foreach (var child_directory in child_directories)
       {
+        // skip blocked packages
+        if (_package_folder_blocklist.Any(x => string.Equals(x, child_directory.Name, StringComparison.OrdinalIgnoreCase)))
+          continue;
         // find and read manifest file
         string manifest_path = System.IO.Path.Combine(child_directory.FullName, "manifest.txt");
         if (!System.IO.File.Exists(manifest_path))
@@ -2748,15 +3410,32 @@ namespace Rhino.Runtime
               str_path = files[0];
           }
         }
-        var reflect_assembly = System.Reflection.Assembly.ReflectionOnlyLoadFrom(str_path);
-        object[] idAttr = reflect_assembly.GetCustomAttributes(typeof(GuidAttribute), false);
-        GuidAttribute id = (GuidAttribute)(idAttr[0]);
-        return new Guid(id.Value);
+        return GetGuidAttributeValue(str_path);
       }
       catch (Exception)
       {
         return Guid.Empty;
       }
+    }
+
+    private static Guid GetGuidAttributeValue(string str_path)
+    {
+#if NETFRAMEWORK
+      var reflect_assembly = System.Reflection.Assembly.ReflectionOnlyLoadFrom(str_path);
+      object[] idAttr = reflect_assembly.GetCustomAttributes(typeof(GuidAttribute), false);
+      GuidAttribute idAttribute = (GuidAttribute)(idAttr[0]);
+      return new Guid(idAttribute.Value);
+#else
+      using (var fileStream = File.OpenRead(str_path))
+      {
+        using (var portableExecutableReader = new System.Reflection.PortableExecutable.PEReader(fileStream))
+        {
+          var reader = portableExecutableReader.GetMetadataReader();
+          var assembly = reader.GetAssemblyDefinition();
+          return assembly.GetGuid(reader) ?? Guid.Empty;
+        }
+      }
+#endif
     }
 
     static int LoadPlugInHelper(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo)
@@ -2779,7 +3458,7 @@ namespace Rhino.Runtime
       // attempt to load the assembly
       try
       {
-        var assembly = System.Reflection.Assembly.LoadFrom( str_path );
+        var assembly = LoadAssemblyFrom( str_path );
         // look for a class derived from Rhino.Runtime.Skin
         var internal_types = assembly.GetExportedTypes();
         var skin_type = typeof(Skin);
@@ -2852,6 +3531,7 @@ namespace Rhino.Runtime
       m_rhinocommoninitialized = true;
 
       m_uiThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+#if RHINO_SDK
       // Initialize exception handling
       AppDomain.CurrentDomain.UnhandledException += UnhandledDomainException;
 
@@ -2868,9 +3548,9 @@ namespace Rhino.Runtime
         Rhino.DocObjects.Custom.UserData.RegisterType(t);
       }
 
-#if RHINO_SDK
       RegisterNamedCallback("ThrowNotLicensedException", NotLicensedException.ThrowNotLicensedException);
       RegisterNamedCallback("FireLicenseStateChangedEvent", RhinoApp.FireLicenseStateChangedEvent);
+      RegisterNamedCallback("RhinoView.ShowToast", Rhino.Display.RhinoView.FireShowToast);
 
       DebugString("Initializing RhinoCommon");
       UnsafeNativeMethods.RHC_SetGetNowProc(m_getnow_callback, m_getformattedtime_callback);
@@ -2918,7 +3598,11 @@ namespace Rhino.Runtime
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
       Rhino.UI.Controls.FactoryBase.Register();
 
-      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(Rhino.Render.InternalUtilities.OnDownloadFileProc, Rhino.Render.InternalUtilities.OnUrlResponseProc);
+      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(Rhino.Render.InternalUtilities.OnDownloadFileProc, Rhino.Render.InternalUtilities.OnUrlResponseProc,
+        Rhino.Render.InternalUtilities.OnBitmapFromSvgProc);
+
+      Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(true);
+      Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(true);
     }
 
     /// <summary>
@@ -2928,7 +3612,7 @@ namespace Rhino.Runtime
     /// <since>6.0</since>
     public static void ShutDownRhinoCommon_RDK()
     {
-      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null);
+      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null, null);
 
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
@@ -2938,6 +3622,9 @@ namespace Rhino.Runtime
       Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
+
+      Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(false);
+      Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(false);
     }
 #endif
 
@@ -3248,6 +3935,11 @@ namespace Rhino.Runtime
     /// <since>5.0</since>
     public static void SetInShutDown()
     {
+      //Added by Andy - to make sure that the GC doesn't start deleting stuff that
+      //is actually owned by plug-ins or other DLLs that will soon not be around.
+      GC.Collect();
+      GC.WaitForPendingFinalizers();
+
       // 26 June 2018 S. Baer (RH-46531)
       // Don't report exceptions after Rhino starts shutting down. It typically
       // just clutters the desktop with RhinoDotNetCrash.txt files

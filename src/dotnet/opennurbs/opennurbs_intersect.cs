@@ -1099,7 +1099,7 @@ namespace Rhino.Geometry.Intersect
     [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
-      /*if (UseNewMeshIntersections) //temporarely remove new behavior
+      /*if (UseNewMeshIntersections) //temporarily remove new behavior
       {
         const double fixed_tolerance = RhinoMath.SqrtEpsilon * 10;
         var arr = new[] { meshA, meshB };
@@ -1162,7 +1162,7 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Mofify an internal debug mechanism. Talk to Giulio regarding this.
+    /// Modify an internal debug mechanism. Talk to Giulio regarding this.
     /// </summary>
     internal static bool GetSet_MX_DebugOptions(int which, bool get, bool new_value)
     {

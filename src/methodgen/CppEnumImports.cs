@@ -84,6 +84,15 @@ namespace MethodGen
       var composite = Path.Combine(absolute_folder, relative_cpp_definition_file);
       composite = Path.GetFullPath(composite);
 
+      if (!File.Exists(composite) && absolute_folder.Contains("librhino3dm_native"))
+      {
+        DirectoryInfo di = new DirectoryInfo(absolute_folder);
+        di = di.Parent;
+        string opennurbs = Path.Combine(di.FullName, "lib", "opennurbs");
+        string filename = Path.GetFileName(relative_cpp_definition_file);
+        composite = Path.Combine(opennurbs, filename);
+      }
+
       if (!File.Exists(composite))
       {
         throw new FileNotFoundException(

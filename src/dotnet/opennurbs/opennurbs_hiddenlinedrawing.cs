@@ -318,6 +318,7 @@ namespace Rhino.Geometry
 
     private HiddenLineDrawingParameters m_parameters;
     private List<GeometryBase> m_list_for_gc_protection = new List<GeometryBase>();
+    private const uint UserClipBase = 10;
     #endregion
 
     internal IntPtr ConstPointer() { return m_ptr; }
@@ -359,13 +360,17 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_HiddenLineDrawing_SetViewport(ptr_hld, const_ptr_viewport);
 
       uint clip_count = 0;
-      Dictionary<Vector3d, uint> clip_dict = new Dictionary<Vector3d, uint>();
-      for( int i=0; i<parameters.ClippingPlanes.Count; i++)
+      Dictionary<Plane, uint> clip_dict = new Dictionary<Plane, uint>();
+      // Value field of clip_dict is the clip_id stored in TL_HiddenLineDrawingImpl::m_Clip_Id.
+      // This number uniquly identifies the clippingplane.  The Frustum clipping planes have clip_id
+      // values 0,2,3,4,5.  User clipping planes have clip_ids starting at UserClipBase=10.
+      for ( int i=0; i<parameters.ClippingPlanes.Count; i++)
       {
         var plane = parameters.ClippingPlanes[i];
-        if(UnsafeNativeMethods.ON_HiddenLineDrawing_AddClippingPlane(ptr_hld, ref plane, clip_count))
+        if(UnsafeNativeMethods.ON_HiddenLineDrawing_AddClippingPlane(ptr_hld, ref plane, 10 + clip_count))
         {
-          clip_dict.Add(plane.Normal, clip_count);
+
+          clip_dict.Add(plane, UserClipBase + clip_count);
           clip_count++;
         }
       }
@@ -383,18 +388,19 @@ namespace Rhino.Geometry
       {
         int obji = rc.AddObject(parameters.Geometry[i], parameters.Transforms[i], i);
         if( obji>=0)
-          rc.Objects[obji].OccludingSections = parameters.OccludingSections[i];
+          UnsafeNativeMethods.ON_HiddenLineDrawing_EnableObjOccludingSection(ptr_hld, obji, parameters.OccludingSections[i]);
+          //rc.Objects[obji].OccludingSections = parameters.OccludingSections[i];  // this doesn't work!!
         if(parameters.SelectiveClipping[i])
         {
           List<uint> clip_ids= new List<uint>();
           foreach (Plane p in parameters.PerObjectClippingPlanes[i])
           {
-            if (clip_dict.ContainsKey(p.Normal))
-              clip_ids.Add(clip_dict[p.Normal]);
+            if (clip_dict.ContainsKey(p))
+              clip_ids.Add(clip_dict[p]);
             else
             {
-              clip_ids.Add(clip_count);
-              clip_dict.Add(p.Normal, clip_count++);
+              clip_ids.Add(UserClipBase + clip_count);
+              clip_dict.Add(p, clip_count++);
             }
           }
           using (var array_clipid = new SimpleArrayUint(clip_ids))
@@ -579,6 +585,20 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_HiddenLineDrawing_Flatten(ptr_this);
     }
 
+    /// <summary>
+    /// /// <summary>
+    /// Join consecutive visible curves from a single FullCurve
+    /// </summary>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// </summary>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public void RejoinCompatibleVisible()
+    {
+      var ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HiddenLineDrawing_RejoinCompatibleVisible(ptr_this);
+    }
+
     /// <summary> Returns the ViewportInfo used by the hidden line drawing.</summary>
     /// <returns>The ViewportInfo</returns>
     /// <since>6.0</since>
@@ -641,7 +661,8 @@ namespace Rhino.Geometry
     #region properties
 
     /// <summary>
-    /// Objects has occluding sections.
+    /// Objects in this drawing could have occluding sections.  
+    /// Objects must added with the occluding section  option set as desired.
     /// </summary>
     /// <since>8.0</since>
     /// 
@@ -1579,7 +1600,7 @@ namespace Rhino.Geometry.Collections
 namespace Rhino.Geometry.HiddenLineDrawingProposal
 {
   /// <summary>
-  /// Enumerates the different types of HiddenLineDrawingCurve visiblity
+  /// Enumerates the different types of HiddenLineDrawingCurve visibility
   /// </summary>
   enum SegmentVisibility
   {
