@@ -82,8 +82,8 @@ RH_C_FUNCTION bool ON_V6_Annotation_ClearOverrideDimstyle(ON_Annotation* ptrAnno
 {
   if (ptrAnnotation)
   {
-    ON_DimStyle* dimstyle = nullptr;
-    return ptrAnnotation->SetOverrideDimensionStyle(dimstyle);
+    ptrAnnotation->ClearOverrideDimensionStyle();
+    return true;
   }
   return false;
 }

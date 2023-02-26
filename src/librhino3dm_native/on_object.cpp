@@ -108,6 +108,46 @@ RH_C_FUNCTION unsigned int ON_Object_ObjectType( ON_Object* pObject )
   return rc;
 }
 
+enum OnClassTypeConsts : int
+{
+  idxInvalid = -1,
+  idxON_Object = 0,
+  idxON_3dmObjectAttributes = 1,
+  idxON_Group = 2,
+  idxON_HatchPattern = 3,
+  idxON_InstanceDefinition = 4,
+  idxON_Material = 5,
+  idxON_Layer = 6,
+  idxON_Light = 7,
+  idxON_Linetype = 8
+};
+
+// https://mcneel.myjetbrains.com/youtrack/issue/RH-66667
+
+RH_C_FUNCTION OnClassTypeConsts ON_Object_ClassType(ON_Object* pObject)
+{
+  if (pObject)
+  {
+    if (ON_3dmObjectAttributes::Cast(pObject))
+      return OnClassTypeConsts::idxON_3dmObjectAttributes; // 1
+    if (ON_Group::Cast(pObject))
+      return OnClassTypeConsts::idxON_Group; // 2
+    if (ON_HatchPattern::Cast(pObject))
+      return OnClassTypeConsts::idxON_HatchPattern; // 3
+    if (ON_InstanceDefinition::Cast(pObject))
+      return OnClassTypeConsts::idxON_InstanceDefinition; // 4
+    if (ON_Material::Cast(pObject))
+      return OnClassTypeConsts::idxON_Material; // 5
+    if (ON_Layer::Cast(pObject))
+      return OnClassTypeConsts::idxON_Layer; // 6
+    if (ON_Light::Cast(pObject))
+      return OnClassTypeConsts::idxON_Light; // 7
+    if (ON_Linetype::Cast(pObject))
+      return OnClassTypeConsts::idxON_Linetype; // 8
+    return OnClassTypeConsts::idxON_Object;  // 0
+  }
+  return OnClassTypeConsts::idxInvalid; // -1
+}
 
 RH_C_FUNCTION bool ON_Object_IsValid(const ON_Object* pConstObject, CRhCmnStringHolder* pStringHolder)
 {

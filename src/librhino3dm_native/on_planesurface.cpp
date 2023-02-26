@@ -78,3 +78,16 @@ RH_C_FUNCTION bool ON_ClippingPlaneSurface_RemoveClipViewport(ON_ClippingPlaneSu
   }
   return rc;
 }
+
+RH_C_FUNCTION double ON_ClippingPlaneSurface_GetDistance(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
+{
+  if (pConstClippingPlaneSurface)
+    return pConstClippingPlaneSurface->m_clipping_plane.Distance();
+  return ON_DBL_MAX;
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDistance(ON_ClippingPlaneSurface* pClippingPlaneSurface, double distance)
+{
+  if (pClippingPlaneSurface)
+    pClippingPlaneSurface->m_clipping_plane.SetDistance(distance);
+}

@@ -433,24 +433,3 @@ RH_C_FUNCTION void ON_Layer_DeleteModelVisible(ON_Layer* pLayer)
     pLayer->DeleteModelVisible();
 }
 
-RH_C_FUNCTION ON_Linetype* ON_Layer_GetCustomLinetype(const ON_Layer* pLayer)
-{
-  if (pLayer)
-  {
-    const ON_Linetype* linetype = pLayer->CustomLinetype();
-    if (linetype)
-      return new ON_Linetype(*linetype);
-  }
-  return nullptr;
-}
-
-RH_C_FUNCTION void ON_Layer_SetCustomLinetype(ON_Layer* pLayer, const ON_Linetype* linetype)
-{
-  if (pLayer)
-  {
-    if (linetype)
-      pLayer->SetCustomLinetype(*linetype);
-    else
-      pLayer->RemoveCustomLinetype();
-  }
-}

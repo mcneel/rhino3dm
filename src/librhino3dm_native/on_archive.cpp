@@ -2096,7 +2096,7 @@ RH_C_FUNCTION bool ONX_Model_RemoveModelComponent_Id(
 }
 
 //includes deleted objects
-RH_C_FUNCTION unsigned int ONX_ON_ComponentManifest_ActiveComponentCount_ItemCount(const ON_ComponentManifest* manifest, ON_ModelComponent::Type type)
+RH_C_FUNCTION unsigned int ON_ComponentManifest_ActiveAndDeletedComponentCount(const ON_ComponentManifest* manifest, ON_ModelComponent::Type type)
 {
   unsigned int rc = 0;
   if (manifest)

@@ -156,31 +156,13 @@ RH_C_FUNCTION void CurveDisplay_Delete(CRhCmnCurveDisplay* pCurveDisplay)
 }
 
 RH_C_FUNCTION void ON_Curve_Draw(const ON_Curve* pConstCurve, CRhinoDisplayPipeline* pPipeline,
-  int argb, float thickness, int patternCount, /*ARRAY*/const float* pattern, bool patternBySegment,
-  float patternOffset, bool patternLengthsInWorld, ON::LineCapStyle capStyle, ON::LineJoinStyle joinStyle,
-  float taperPosition, float taperThickness, CRhinoCacheHandle* cacheHandle)
+  int argb, CRhinoDisplayPen* pen, CRhinoCacheHandle* cacheHandle)
 {
   CRhinoDisplayEngine* engine = pPipeline ? pPipeline->Engine() : nullptr;
-  if (pConstCurve && engine)
+  if (pConstCurve && engine && pen)
   {
     ON_Color color = ARGB_to_ABGR(argb);
-    CRhinoDisplayPen pen(color, thickness);
-    pen.SetCapStyle(capStyle);
-    pen.SetJoinStyle(joinStyle);
-    if (pattern && patternCount>1)
-    {
-      for (int i = 0; i < patternCount; i++)
-        pen.SetPattern(i, pattern[i]);
-    }
-    pen.SetPatternBySegment(patternBySegment);
-    pen.SetPatternOffset(patternOffset);
-    pen.SetPatternLengthsInWorldUnits(patternLengthsInWorld);
-    if (taperPosition >= 0)
-    {
-      pen.SetTaperPosition(taperPosition);
-      pen.SetTaperThickness(taperThickness);
-    }
-    engine->DrawCurve(*pConstCurve, pen, cacheHandle);
+    engine->DrawCurve(*pConstCurve, *pen, cacheHandle);
   }
 }
 
