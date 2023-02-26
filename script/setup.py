@@ -187,14 +187,10 @@ def build_methodgen():
         methodgen_src_path = os.path.abspath(os.path.join(src_folder, 'methodgen'))
         src_files = os.listdir(methodgen_src_path)
         for file_name in src_files:
-            if file_name.endswith('.cs'):
+            if file_name.endswith('.cs') or file_name.endswith('csproj'):
                 full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
                 if os.path.isfile(full_path):
                     shutil.copy(full_path, methodgen_build_dir)
-            if file_name.endswith('.core'):
-                full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
-                if os.path.isfile(full_path):
-                    shutil.copy(full_path, methodgen_build_dir + '/methodgen.csproj')
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
