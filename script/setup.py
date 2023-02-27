@@ -181,7 +181,7 @@ def build_methodgen():
 
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
 
-    # On Linux, we compile methodgen with dotnet core SDK
+    # On Linux and macOS, we compile methodgen with dotnet core SDK
     if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
         methodgen_src_path = os.path.abspath(os.path.join(src_folder, 'methodgen'))
@@ -194,7 +194,7 @@ def build_methodgen():
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
-        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "net6.0","methodgen.dll")
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "methodgen.dll")
     else:
         msbuild_path = 'msbuild'
         # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
