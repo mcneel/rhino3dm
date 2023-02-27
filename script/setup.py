@@ -194,7 +194,7 @@ def build_methodgen():
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
-        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "methodgen.dll")
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "MethodGen.dll")
     else:
         msbuild_path = 'msbuild'
         # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
