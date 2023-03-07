@@ -178,6 +178,11 @@ BND_BrepFaceList::BND_BrepFaceList(ON_Brep* brep, const ON_ModelComponentReferen
 
 BND_BrepFace* BND_BrepFaceList::GetFace(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_BrepFace* face = m_brep->Face(i);
   if (nullptr == face)
     return nullptr;
@@ -268,6 +273,11 @@ BND_BrepSurfaceList::BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentR
 
 BND_Surface* BND_BrepSurfaceList::GetSurface(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_Surface* surface = nullptr;
   if (i >= 0 && i < m_brep->m_S.Count())
   {
@@ -286,6 +296,11 @@ BND_BrepEdgeList::BND_BrepEdgeList(ON_Brep* brep, const ON_ModelComponentReferen
 
 BND_BrepEdge* BND_BrepEdgeList::GetEdge(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_BrepEdge* edge = m_brep->Edge(i);
   if (nullptr == edge)
     return nullptr;

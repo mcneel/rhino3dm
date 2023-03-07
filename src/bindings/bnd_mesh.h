@@ -239,17 +239,8 @@ public:
   BND_MeshVertexColorList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
   int Count() const { return m_mesh->m_C.Count(); }
   void SetCount(int c) { m_mesh->m_C.SetCount(c); }
-  BND_Color GetColor(int i) const { return ON_Color_to_Binding(m_mesh->m_C[i]); }
-  void SetColor(int index, BND_Color color) {
-    // if index == count, then we are appending
-    if (index >= 0)
-    {
-      if (index < m_mesh->m_C.Count())
-        m_mesh->m_C[index] = Binding_to_ON_Color(color);
-      else if (index == m_mesh->m_C.Count())
-        m_mesh->m_C.Append(Binding_to_ON_Color(color));
-    }
-  }
+  BND_Color GetColor(int i) const;
+  void SetColor(int index, BND_Color color);
   //    public int[] ToARGBArray()
   void Clear() { m_mesh->m_C.SetCount(0); }
   int Add(int red, int green, int blue) {
@@ -277,8 +268,8 @@ public:
   ON_2fPoint* end();
 
   int Count() const { return m_mesh->m_T.Count(); }
-  ON_2fPoint GetTextureCoordinate(int i) const { return m_mesh->m_T[i]; }
-  void SetTextureCoordinate(int i, ON_2fPoint tc) { m_mesh->m_T[i] = tc; }
+  ON_2fPoint GetTextureCoordinate(int i) const;
+  void SetTextureCoordinate(int i, ON_2fPoint tc);
   int Add(float s, float t);
 };
 
