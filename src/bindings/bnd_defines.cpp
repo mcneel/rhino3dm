@@ -13,7 +13,8 @@ enum class LoftType : int
   Uniform = 5
 };
 
-bool transformLine(ON_Line& line, const BND_Transform& xform) {
+static bool TransformLine(ON_Line& line, const BND_Transform& xform)
+{
   return line.Transform(xform.m_xform);
 }
 
@@ -69,7 +70,7 @@ void initDefines(pybind11::module& m)
     .def_property_readonly("Direction", &ON_Line::Direction)
     .def_property_readonly("UnitTangent", &ON_Line::Tangent)
     .def("PointAt", &ON_Line::PointAt, py::arg("t"))
-    .def("Transform", &transformLine, py::arg("xform"))
+    .def("Transform", &TransformLine, py::arg("xform"))
     ;
 
   py::enum_<LoftType>(m, "LoftType")
