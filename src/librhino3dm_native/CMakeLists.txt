@@ -55,6 +55,8 @@ if(MACOS_BUILD)
   # [dan@mcneel.com]: For now, we're dumping all this into the same target.  Once we get 
   # a good handle on CMake, these should be compiled as separate CMake targets and linked accordingly.
   add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+  #set_xcode_property(librhino3dm_native ARCHS "ARCHS_STANDARD")
+  set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 endif()
 
 if(IOS)
