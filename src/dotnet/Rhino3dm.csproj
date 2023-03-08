@@ -15,7 +15,7 @@
     <PackageDescription>rhino3dm is a set of libraries based on the OpenNURBS geometry library with a "RhinoCommon" style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.</PackageDescription>
     <RepositoryUrl>https://github.com/mcneel/rhino3dm</RepositoryUrl>
     <PackageTags>rhino3d</PackageTags>
-    <Copyright>Copyright (c) 1997-2021 Robert McNeel &amp; Associates</Copyright>
+    <Copyright>Copyright (c) 1997-2023 Robert McNeel &amp; Associates</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
     <Title>Rhino3dm</Title>
