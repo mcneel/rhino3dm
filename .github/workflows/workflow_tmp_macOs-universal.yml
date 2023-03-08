@@ -1,0 +1,52 @@
+name: workflow release
+on: [workflow_dispatch]
+jobs:
+  build_dotnet_os:
+    name: build dotnet ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-11]
+        include:
+          - os: macos-11
+            target: macos
+            artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+      fail-fast: false
+    steps:
+      - name: setup xcode
+        if: ${{ matrix.target == 'macos' }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '12.5'
+      #- name: setup dotnet
+      #  if: ${{ matrix.target == 'macos'}}
+      #  uses: actions/setup-dotnet@v3
+      #  with:
+      #    dotnet-version: '7.0.x'
+      - name: setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: '3.21.1'
+      - name: set up python
+        uses: actions/setup-python@v4.5.0
+        with:
+          python-version: 3.7.x
+      - name: info
+        run: python --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v3.3.0
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap dotnet ${{ matrix.target }}
+        run: python script/bootstrap.py -p ${{ matrix.target }}
+      - name: setup dotnet ${{ matrix.target }}
+        run: python script/setup.py -p ${{ matrix.target }} -v
+      - name: build dotnet ${{ matrix.target }}
+        run: python script/build.py -p ${{ matrix.target }} -v
+      - name: list
+        run: "ls -R src/build/${{ matrix.target }}"
+      - name: artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          path: ${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.target }}

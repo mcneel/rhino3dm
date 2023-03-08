@@ -283,7 +283,7 @@ def build_macos():
         return False
 
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
-              ' -arch arm64 x86_64 -configuration Release clean build'
+              ' -arch arm64 -arch x86_64 -configuration Release clean build'
     run_command(command)
 
     if not build_did_succeed(item_to_check):                
