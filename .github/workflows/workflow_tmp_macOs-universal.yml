@@ -53,7 +53,7 @@ jobs:
           MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            ./script/codesign-native.sh src/build
+            ./script/codesign-native.sh src/build/macos/Release
           else
             echo "$RUNNER_OS not supported for code-signing"
             exit 0
