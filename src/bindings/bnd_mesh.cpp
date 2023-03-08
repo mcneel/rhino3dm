@@ -482,11 +482,19 @@ void BND_MeshVertexList::SetCount(int value)
 
 ON_3fPoint BND_MeshVertexList::GetVertex(int i) const
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i<0 || i>=4)
+    throw pybind11::index_error();
+#endif
   return m_mesh->m_V[i];
 }
 
 void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= 4)
+    throw pybind11::index_error();
+#endif
   m_mesh->m_V[i] = pt;
 }
 
@@ -708,6 +716,11 @@ bool BND_MeshFaceList::HasNakedEdges(int index)
 
 BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_F.Count())
+    throw pybind11::index_error();
+#endif
+
   ON_MeshFace& face = m_mesh->m_F[i];
   BND_TUPLE rc = CreateTuple(4);
   for (int i = 0; i < 4; i++)
@@ -778,6 +791,32 @@ BND_MeshVertexColorList::BND_MeshVertexColorList(ON_Mesh* mesh, const ON_ModelCo
   m_mesh = mesh;
 }
 
+BND_Color BND_MeshVertexColorList::GetColor(int index) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= m_mesh->m_C.Count())
+    throw pybind11::index_error();
+#endif
+  return ON_Color_to_Binding(m_mesh->m_C[index]);
+}
+
+void BND_MeshVertexColorList::SetColor(int index, BND_Color color)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= m_mesh->m_C.Count())
+    throw pybind11::index_error();
+#endif
+
+  // if index == count, then we are appending
+  if (index >= 0)
+  {
+    if (index < m_mesh->m_C.Count())
+      m_mesh->m_C[index] = Binding_to_ON_Color(color);
+    else if (index == m_mesh->m_C.Count())
+      m_mesh->m_C.Append(Binding_to_ON_Color(color));
+  }
+}
+
 
 ON_3fVector* BND_MeshNormalList::begin()
 {
@@ -798,11 +837,20 @@ int BND_MeshNormalList::Count() const
 
 ON_3fVector BND_MeshNormalList::GetNormal(int i) const
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_N.Count())
+    throw pybind11::index_error();
+#endif
+
   return m_mesh->m_N[i];
 }
 
 void BND_MeshNormalList::SetNormal(int i, ON_3fVector v)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_N.Count())
+    throw pybind11::index_error();
+#endif
   m_mesh->m_N[i] = v;
 }
 
@@ -811,6 +859,25 @@ BND_MeshTextureCoordinateList::BND_MeshTextureCoordinateList(ON_Mesh* mesh, cons
   m_component_reference = compref;
   m_mesh = mesh;
 }
+
+ON_2fPoint BND_MeshTextureCoordinateList::GetTextureCoordinate(int i) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i<0 || i >= m_mesh->m_T.Count())
+    throw pybind11::index_error();
+#endif
+  return m_mesh->m_T[i];
+}
+
+void BND_MeshTextureCoordinateList::SetTextureCoordinate(int i, ON_2fPoint tc)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_T.Count())
+    throw pybind11::index_error();
+#endif
+  m_mesh->m_T[i] = tc;
+}
+
 
 ON_2fPoint* BND_MeshTextureCoordinateList::begin()
 {

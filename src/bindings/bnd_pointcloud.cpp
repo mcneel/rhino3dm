@@ -121,6 +121,11 @@ void BND_PointCloud::SetTrackedPointer(ON_PointCloud* pointcloud, const ON_Model
 
 BND_PointCloudItem BND_PointCloud::GetItem(int index)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= m_pointcloud->PointCount())
+    throw pybind11::index_error();
+#endif
+
   return BND_PointCloudItem(index, m_pointcloud, m_component_ref);
 }
 
