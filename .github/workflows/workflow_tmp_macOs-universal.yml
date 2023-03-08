@@ -1,4 +1,4 @@
-name: workflow release
+name: workflow temp macOS universal
 on: [workflow_dispatch]
 jobs:
   build_dotnet_os:
