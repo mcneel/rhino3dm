@@ -45,6 +45,20 @@ jobs:
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
+      - name: code-sign native libraries
+        env:
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            ./script/codesign-native.sh src/build
+          else
+            echo "$RUNNER_OS not supported for code-signing"
+            exit 0
+          fi
+        shell: bash
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:

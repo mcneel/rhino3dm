@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated rhino3dm to be based on the Rhino 8 version of OpenNURBS
 - (py) Linux version now includes draco support
 - (py) Added Line.Transform
+- (.net) Added macOS arm64 (Apple Silicon) builds
 
 ### Changed
 - (js, py) Use draco 1.5.4 
