@@ -24,7 +24,7 @@ fi
 for ITEM_TO_SIGN in $ITEMS_TO_SIGN;
 do
 	echo "Signing '${ITEM_TO_SIGN}'"
-	/usr/bin/codesign --force --verbose -s "${IDENTITY_ID}" --timestamp "${ITEM_TO_SIGN}"
+	/usr/bin/codesign --force --verbose --verbose --verbose --verbose -s "${IDENTITY_ID}" --timestamp "${ITEM_TO_SIGN}"
 	RESULT=$?
 	if [[ $RESULT != 0 ]] ; then
     echo "Failed to sign '${ITEM_TO_SIGN}'."
