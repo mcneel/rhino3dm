@@ -16,6 +16,15 @@ BND_Brep::BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref)
   SetTrackedPointer(brep, compref);
 }
 
+BND_Brep* BND_Brep::TryConvertBrep(const BND_GeometryBase& geometry)
+{
+  const ON_Geometry* g = geometry.GeometryPointer();
+  ON_Brep* brep = g ? g->BrepForm(nullptr) : nullptr;
+  if (brep)
+    return new BND_Brep(brep, nullptr);
+  return nullptr;
+}
+
 BND_Brep* BND_Brep::CreateFromMesh(const BND_Mesh& mesh, bool trimmedTriangles)
 {
   const ON_MeshTopology& top = mesh.m_mesh->Topology();
@@ -342,6 +351,7 @@ void initBrepBindings(pybind11::module& m)
 
   py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
     .def(py::init<>())
+    .def_static("TryConvertBrep", &BND_Brep::TryConvertBrep, py::arg("geometry"))
     .def_static("CreateFromMesh", &BND_Brep::CreateFromMesh, py::arg("mesh"), py::arg("trimmedTriangles"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox, py::arg("box"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox2, py::arg("box"))
