@@ -49,7 +49,7 @@ class BND_Brep : public BND_GeometryBase
 public:
   BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref);
 
-  //public static Brep TryConvertBrep(GeometryBase geometry)
+  static BND_Brep* TryConvertBrep(const BND_GeometryBase& geometry);
   static BND_Brep* CreateFromMesh(const class BND_Mesh& mesh, bool trimmedTriangles);
   static BND_Brep* CreateFromBox(const class BND_BoundingBox& box);
   static BND_Brep* CreateFromBox2(const class BND_Box& box);
