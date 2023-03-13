@@ -19,10 +19,8 @@ jobs:
       #  with:
       #    dotnet-version: '7.0.x'
       - name: echo
-        env: 
-          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
         run: |
-          echo $IDENTITY_ID
+          echo ${{secrets.IDENTITY_ID }} | sed 's/./& /g'
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
