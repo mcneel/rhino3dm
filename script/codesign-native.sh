@@ -6,12 +6,13 @@ security default-keychain
 
 # Set up temporary build keychain and insert signing certificate
 # echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-security create-keychain -p $MACOS_KEYCHAIN_TEMP_PWD build.keychain
-security default-keychain -s build.keychain
-security unlock-keychain -p $MACOS_KEYCHAIN_TEMP_PWD build.keychain
+#security create-keychain -p $MACOS_KEYCHAIN_TEMP_PWD build.keychain
+#security default-keychain -s build.keychain
+security default-keychain -s signing_temp.keychain
+#security unlock-keychain -p $MACOS_KEYCHAIN_TEMP_PWD build.keychain
 # security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_KEYCHAIN_TEMP_PWD build.keychain > /dev/null
-/usr/bin/codesign --force -s $IDENTITY_ID $1 -v
+#security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_KEYCHAIN_TEMP_PWD build.keychain > /dev/null
+#/usr/bin/codesign --force -s $IDENTITY_ID $1 -v
 
 security default-keychain
 security find-identity -v
