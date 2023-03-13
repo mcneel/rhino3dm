@@ -12,6 +12,8 @@ FOLDER_TO_SEARCH="$1"
 # /usr/bin/codesign --force -s $IDENTITY_ID $1 -v
 # security find-identity -p codesigning -v
 
+echo $IDENTITY_ID
+
 
 ITEMS_TO_SIGN=()
 if [ -d "$FOLDER_TO_SEARCH" ] ; then

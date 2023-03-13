@@ -19,8 +19,10 @@ jobs:
       #  with:
       #    dotnet-version: '7.0.x'
       - name: echo
+        env: 
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
         run: |
-          echo ${{ secrets.IDENTITY_ID }}
+          echo $IDENTITY_ID
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
@@ -55,7 +57,6 @@ jobs:
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
         run: |
-          echo ${{ secrets.IDENTITY_ID }}
           if [ "$RUNNER_OS" == "macOS" ]; then
             ./script/codesign-native.sh src/build/macos/Release
           else
