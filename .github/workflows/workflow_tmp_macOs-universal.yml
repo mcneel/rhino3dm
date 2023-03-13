@@ -18,9 +18,6 @@ jobs:
       #  uses: actions/setup-dotnet@v3
       #  with:
       #    dotnet-version: '7.0.x'
-      - name: echo
-        run: |
-          echo ${{secrets.IDENTITY_ID }} | sed 's/./& /g'
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
@@ -43,11 +40,11 @@ jobs:
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
-      #- name: Import Code-Signing Certificates
-      #  uses: Apple-Actions/import-codesign-certs@v1
-      #  with:
-      #    p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-      #    p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      - name: Import Code-Signing Certificates
+        uses: Apple-Actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: code-sign native libraries
         env:
           IDENTITY_ID: ${{ secrets.IDENTITY_ID }}

@@ -10,10 +10,7 @@ FOLDER_TO_SEARCH="$1"
 # security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
 # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_KEYCHAIN_TEMP_PWD build.keychain > /dev/null
 # /usr/bin/codesign --force -s $IDENTITY_ID $1 -v
-# security find-identity -p codesigning -v
-
-echo $IDENTITY_ID
-
+security find-identity -p -v
 
 ITEMS_TO_SIGN=()
 if [ -d "$FOLDER_TO_SEARCH" ] ; then
