@@ -15,7 +15,7 @@ security default-keychain -s signing_temp.keychain
 #/usr/bin/codesign --force -s $IDENTITY_ID $1 -v
 
 security default-keychain
-security find-identity -v
+security find-identity
 
 ITEMS_TO_SIGN=()
 if [ -d "$FOLDER_TO_SEARCH" ] ; then
