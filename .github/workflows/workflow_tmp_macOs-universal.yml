@@ -18,6 +18,9 @@ jobs:
       #  uses: actions/setup-dotnet@v3
       #  with:
       #    dotnet-version: '7.0.x'
+      - name: echo
+        run: |
+          echo ${{ secrets.IDENTITY_ID }}
       - name: setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
