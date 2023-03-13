@@ -50,6 +50,10 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      - name: check identity
+        shell: bash
+        run: |
+          security find-identity -p codesigning -v
       - name: code-sign native libraries
         env:
           IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
