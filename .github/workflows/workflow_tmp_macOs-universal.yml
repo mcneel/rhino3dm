@@ -42,7 +42,7 @@ jobs:
       - name: build dotnet ${{ matrix.target }}
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
-        run: "ls -R src/build/${{ matrix.target }}"
+        run: "ls -R src/build/${{ matrix.target }}/Release"
       #- name: Import Code-Signing Certificates
       # uses: Apple-Actions/import-codesign-certs@v1
       #  with:
