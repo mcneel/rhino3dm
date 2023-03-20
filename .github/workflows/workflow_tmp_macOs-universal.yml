@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            ./script/notarize-native.sh src/build/macos/Release librhino3dm_native.dylib
+            ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
           else
             echo "$RUNNER_OS not supported for notarizing"
             exit 0
