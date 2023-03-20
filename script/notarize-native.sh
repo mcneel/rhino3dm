@@ -1,5 +1,3 @@
-
-
 FILE_TO_NOTARIZE="$1"
 ZIP_PATH=FILE_TO_NOTARIZE + ".zip"
 
