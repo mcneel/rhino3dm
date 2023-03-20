@@ -62,6 +62,20 @@ jobs:
             exit 0
           fi
         shell: bash
+      - name: notarize native library
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACDEV_PW: ${{ secrets.MACDEV_PW }}
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            ./script/notarize-native.sh src/build/macos/Release librhino3dm_native.dylib
+          else
+            echo "$RUNNER_OS not supported for notarizing"
+            exit 0
+          fi
+
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
