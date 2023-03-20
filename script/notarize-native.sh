@@ -16,10 +16,10 @@ if test $notarizeStatus -ne 0; then
 fi
 
 # staple for offline validation
-/usr/bin/stapler staple "${ZIP_PATH}"
-stapleStatus=$?
+#/usr/bin/stapler staple "${FILE_TO_NOTARIZE}"
+#stapleStatus=$?
 
-if test $stapleStatus -ne 0; then
-    echo "FAILED: failed to staple (see log for details)."
-    exit 1
-fi
+#if test $stapleStatus -ne 0; then
+#    echo "FAILED: failed to staple (see log for details)."
+#    exit 1
+#fi
