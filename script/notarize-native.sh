@@ -18,10 +18,10 @@ fi
 #chmod -R 755 "${FILE_TO_NOTARIZE}"
 
 # staple for offline validation
-#xcrun stapler staple "${FILE_TO_NOTARIZE}"
-#stapleStatus=$?
+xcrun stapler staple "${FILE_TO_NOTARIZE}" -v
+stapleStatus=$?
 
-#if test $stapleStatus -ne 0; then
-#    echo "FAILED: failed to staple (see log for details)."
-#    exit 1
-#fi
+if test $stapleStatus -ne 0; then
+    echo "FAILED: failed to staple (see log for details)."
+    exit 1
+fi
