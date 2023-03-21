@@ -45,6 +45,14 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
+    <None Include="..\build\macos\Release\librhino3dm_native.dylib">
+      <PackagePath>runtimes\osx-arm64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
   <ItemGroup Condition="exists('..\build\linux\Release\librhino3dm_native.so')">
     <None Include="..\build\linux\Release\librhino3dm_native.so">
       <PackagePath>runtimes\linux-x64\native</PackagePath>
