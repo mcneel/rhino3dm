@@ -15,8 +15,10 @@ if test $notarizeStatus -ne 0; then
     exit 1
 fi
 
+chmod -R 755 "${FILE_TO_NOTARIZE}"
+
 # staple for offline validation
-/usr/bin/stapler staple "${FILE_TO_NOTARIZE}"
+xcrun stapler staple "${FILE_TO_NOTARIZE}"
 stapleStatus=$?
 
 if test $stapleStatus -ne 0; then
