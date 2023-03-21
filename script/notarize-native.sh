@@ -18,7 +18,7 @@ fi
 #chmod -R 755 "${FILE_TO_NOTARIZE}"
 
 # staple for offline validation
-xcrun stapler staple "${FILE_TO_NOTARIZE}" -v
+xcrun stapler staple "${FILE_TO_NOTARIZE}" --verbose
 stapleStatus=$?
 
 if test $stapleStatus -ne 0; then
