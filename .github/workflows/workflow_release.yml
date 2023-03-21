@@ -164,11 +164,6 @@ jobs:
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
       fail-fast: false
     steps:
-      - name: setup xcode
-        if: ${{ matrix.target == 'macos' }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '12.5'
       #- name: setup dotnet
       #  if: ${{ matrix.target == 'macos'}}
       #  uses: actions/setup-dotnet@v3
@@ -196,6 +191,23 @@ jobs:
         run: python script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
+      - name: code-sign native libraries
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
+        shell: bash
+        run: ./script/codesign-native.sh src/build/macos/Release
+      - name: notarize native library
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACDEV_PW: ${{ secrets.MACDEV_PW }}
+        shell: bash
+        run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
