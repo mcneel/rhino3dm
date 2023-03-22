@@ -300,16 +300,16 @@ jobs:
           path: dist
       - name: Display structure of downloaded files
         run: ls -R
-      - name: unzip files
-        run: |
-          mkdir output
-          find dist -type f -print0 | xargs -0 mv -t output
-          cd output
-          ls
+      #- name: unzip files
+      #  run: |
+      #    mkdir output
+      #    find dist -type f -print0 | xargs -0 mv -t output
+      #    cd output
+      #    ls
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
-          path: output
+          path: dist
           name: rhino3dm.py all wheels
 
   # build_dotnet_ios:
