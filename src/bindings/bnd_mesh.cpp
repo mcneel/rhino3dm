@@ -483,7 +483,7 @@ void BND_MeshVertexList::SetCount(int value)
 ON_3fPoint BND_MeshVertexList::GetVertex(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (i<0 || i>=4)
+  if (i<0 || i>=m_mesh->m_V.Count())
     throw pybind11::index_error();
 #endif
   return m_mesh->m_V[i];
@@ -492,7 +492,7 @@ ON_3fPoint BND_MeshVertexList::GetVertex(int i) const
 void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (i < 0 || i >= 4)
+  if (i < 0 || i >= m_mesh->m_V.Count())
     throw pybind11::index_error();
 #endif
   m_mesh->m_V[i] = pt;
