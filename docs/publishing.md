@@ -70,21 +70,9 @@ See https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#publish-w
 Python packages can be uploaded to the corresponding `pypi.org` project: https://pypi.org/project/rhino3dm.
 
 1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including all Python packages.
-2. Download the artifact `rhino3dm.py all wheels.zip`.
-3. Extract the contents of `rhino3dm.py all wheels.zip` to a folder called `dist`.
-4. cd into dist and run this zsh script to rezip the whl files
-```zsh
-for i in *.whl; do                          
-    fldr=`basename -s .whl $i`
-    mkdir -p $fldr
-    tar xvzf $i -C $fldr
-    mv $i $i.bak
-    zip -r $i $fldr/*
-done
-```
-5. Remove all of the files and folders that __do not__ have a `.whl` extension.
-6. Remove all whl that have a `linux_x86_64` platform. Twine does not allow this platform tag to be uploaded.
-7. From the `dist` parent folder, upload all Python packages with `twine`
+2. Download all of the `.whl` and `*.tar.gz` (source distribution) artifacts to a folder called `dist`.. Do not download any .whl that includes `linux_x86_64`
+3. Extract all of the `.zip` files and delete them. You should be left with many `.whl` files and one `.tar.gz` file.
+4. From the `dist` parent folder, upload all Python packages with `twine`
 
 ```bash
 python3 -m twine upload dist/*

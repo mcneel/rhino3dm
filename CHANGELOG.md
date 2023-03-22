@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - (js, py) Use draco 1.5.4
-- (js) Fixed some issues in typescript binding generation
+- (js) Fixed some issues in typescript binding generationcd sel
 
 ## [7.15.0] - 2022-03-23
 ### Added
