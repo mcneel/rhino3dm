@@ -449,17 +449,6 @@ BND_MeshVertexList::BND_MeshVertexList(ON_Mesh* mesh, const ON_ModelComponentRef
   m_mesh = mesh;
 }
 
-ON_3fPoint* BND_MeshVertexList::begin()
-{
-  return m_mesh->m_V.At(0);
-}
-ON_3fPoint* BND_MeshVertexList::end()
-{
-  int count = m_mesh->m_V.Count();
-  if( 0==count )
-    return nullptr;
-  return m_mesh->m_V.At(count-1);
-}
 
 BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
 {
@@ -818,18 +807,6 @@ void BND_MeshVertexColorList::SetColor(int index, BND_Color color)
 }
 
 
-ON_3fVector* BND_MeshNormalList::begin()
-{
-  return m_mesh->m_N.At(0);
-}
-ON_3fVector* BND_MeshNormalList::end()
-{
-  int count = m_mesh->m_N.Count();
-  if (0 == count)
-    return nullptr;
-  return m_mesh->m_N.At(count - 1);
-}
-
 int BND_MeshNormalList::Count() const
 {
   return m_mesh->m_N.Count();
@@ -879,18 +856,6 @@ void BND_MeshTextureCoordinateList::SetTextureCoordinate(int i, ON_2fPoint tc)
 }
 
 
-ON_2fPoint* BND_MeshTextureCoordinateList::begin()
-{
-  return m_mesh->m_T.At(0);
-}
-ON_2fPoint* BND_MeshTextureCoordinateList::end()
-{
-  int count = m_mesh->m_T.Count();
-  if (0 == count)
-    return nullptr;
-  return m_mesh->m_T.At(count - 1);
-}
-
 int BND_MeshTextureCoordinateList::Add(float s, float t)
 {
   m_mesh->SetTextureCoord(m_mesh->m_T.Count(), s, t);
@@ -936,8 +901,6 @@ void initMeshBindings(pybind11::module& m)
     .def("SetCount", &BND_MeshVertexList::SetCount)
     .def("__getitem__", &BND_MeshVertexList::GetVertex)
     .def("__setitem__", &BND_MeshVertexList::SetVertex)
-    .def("__iter__", [](BND_MeshVertexList &s) { return py::make_iterator(s.begin(), s.end()); },
-      py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
     .def_property("UseDoublePrecisionVertices", &BND_MeshVertexList::UseDoublePrecisionVertices, &BND_MeshVertexList::SetUseDoublePrecisionVertices)
     .def("Clear", &BND_MeshVertexList::Clear)
     .def("Destroy", &BND_MeshVertexList::Destroy)
@@ -983,9 +946,6 @@ void initMeshBindings(pybind11::module& m)
     .def("__len__", &BND_MeshNormalList::Count)
     .def("__getitem__", &BND_MeshNormalList::GetNormal)
     .def("__setitem__", &BND_MeshNormalList::SetNormal)
-    .def("__iter__", [](BND_MeshNormalList &s) { return py::make_iterator(s.begin(),
-        s.end()); },
-         py::keep_alive<0, 1>())
     .def("Clear", &BND_MeshNormalList::Clear)
     .def("Destroy", &BND_MeshNormalList::Destroy)
     .def("Add", &BND_MeshNormalList::Add, py::arg("x"), py::arg("y"), py::arg("z"))
@@ -1008,10 +968,7 @@ void initMeshBindings(pybind11::module& m)
     .def("__len__", &BND_MeshTextureCoordinateList::Count)
     .def("__getitem__", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
     .def("__setitem__", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
-    .def("__add__", &BND_MeshTextureCoordinateList::Add)
-    .def("__iter__", [](BND_MeshTextureCoordinateList &s) { return py::make_iterator(s.begin(), s.end()); },
-      py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
-    ;
+    .def("__add__", &BND_MeshTextureCoordinateList::Add);
 
   py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
     .def(py::init<>())
