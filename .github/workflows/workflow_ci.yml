@@ -18,7 +18,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
         with:
           fetch-depth: 0
       - name: check changed files
@@ -35,7 +35,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
         with:
           fetch-depth: 0
       - name: check changed files
@@ -55,7 +55,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
         with:
           fetch-depth: 0
       - name: check changed files
@@ -72,7 +72,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
         with:
           fetch-depth: 0
       - name: check changed files
@@ -171,7 +171,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
@@ -192,7 +192,7 @@ jobs:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap
