@@ -10,6 +10,7 @@ env:
 jobs:
   build_js:
     name: build rhino3dm.js
+    runs-on: ubuntu-latest
     container:
       image: emscripten/emsdk:3.1.30
     steps:
