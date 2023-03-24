@@ -34,6 +34,5 @@ jobs:
           ./docgen
           cd ../../
           ls -R
-          cp out/js_tsdef/rhino3dm.d.ts ../build/javascript/artifacts_js
-          ls
+          cp ./out/js_tsdef/rhino3dm.d.ts ../build/javascript/artifacts_js
           
