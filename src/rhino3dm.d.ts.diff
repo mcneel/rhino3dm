@@ -1,0 +1,62 @@
+--- rhino3dm_wrong.d.ts	2023-03-24 21:20:28.000000000 +0100
++++ rhino3dm.d.ts	2023-03-13 10:28:38.000000000 +0100
+@@ -3180,8 +3180,13 @@
+ 		 * @returns {Mesh} mesh representing control net on success, null on failure
+ 		 */
+ 		static createFromSubDControlNet(): Mesh;
+-		/** ... */
+-		static toThreejsJSONMerged(): void;
++		/**
++		 * @description Cretes a Three.js bufferGeometry from an array of Rhino meshes.
++		 * @param {Mesh[]} meshes The array of Rhino meshes.
++		 * @param {boolean} rotateYUp Whether or not to orient the result to Y up.
++		 * @returns {object} A Three.js bufferGeometry.
++		 */
++		static toThreejsJSONMerged(meshes: Mesh[], rotateYUp: boolean ): object;
+ 		/**
+ 		 * @description Returns true if every mesh "edge" has at most two faces.
+ 		 * @returns {boolean} true if the mesh is manifold, false otherwise.
+@@ -3253,12 +3258,23 @@
+ 		 * @returns {boolean} true on success
+ 		 */
+ 		createPartitions(): boolean;
+-		/** ... */
+-		toThreejsJSON(): void;
+-		/** ... */
+-		toThreejsJSON(): void;
+-		/** ... */
+-		static createFromThreejsJSON(): void;
++		/**
++		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
++		 * @returns {object} A Three.js bufferGeometry.
++		 */
++		toThreejsJSON(): object;
++		/**
++		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
++		 * @param {boolean} rotateToYUp Rotate the result to Y up.
++		 * @returns {object} A Three.js bufferGeometry.
++		 */
++		toThreejsJSON(rotateToYUp: boolean): object;
++		/**
++		 * @description Creates a Rhino mesh from a Three.js buffer geometry. 
++		 * @param {object} object A js object in the form of { data: bufferGeometry }
++		 * @returns {Mesh}
++		 */
++		static createFromThreejsJSON( object: object ): Mesh;
+ 	}
+ 
+ 	class MeshFaceList {
+@@ -4506,8 +4522,11 @@
+ 		 * @returns {number} Index of point in the point cloud on success. -1 on failure.
+ 		 */
+ 		closestPoint(testPoint:number[]): number;
+-		/** ... */
+-		toThreejsJSON(): void;
++		/**
++		 * @description Converts a Rhino point cloud to a Three.js bufferGeometry
++		 * @returns {object} A Three.js bufferGeometry.
++		 */
++		toThreejsJSON(): object;
+ 	}
+ 
+ 	class PointCloudItem {
