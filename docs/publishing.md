@@ -15,25 +15,52 @@ There are several places where version numbers should be updated:
 
 ### Node.js
 
-1. Build rhino3dm.js, rhino3dm.wasm, and rhino3dm.module.js (or get them from the [Github Repo Actions Artifacts](https://github.com/mcneel/rhino3dm/actions) )
-2. Build and run docgen (for type definitions):
-  
-  - `cd src/docgen`
-  - `dotnet build`
-  - `cd bin/Debug/net5`
-  - `./docgen`
-
-4. After running docgen, the `rhino3dm.d.ts` file will be in the `src/docgen/out/js_tsdef` directory
-3. Create a new directory and copy in rhino3dm.js, rhino3dm.wasm, rhino3dm.module.js and rhino3dm.d.ts
-4. Copy in RHINO3DM.JS.md from `docs/javascript` and rename to README.md
-6. Update the version number in package.json and copy that in too
-7. From inside the new directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
+1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including the js version.
+2. Download and extract the `rhino3dm.js` artifact. (see note 3)
+3. cd into the directory you've just extracted
+4. From inside this directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
 
 See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for more info.
 
 #### Notes:
 1. After creating a user on npm.org, ask Will to add you to the mcneel team!
 2. If publishing a pre-release, e.g. `0.4.0-dev`, use `npm publish --tag next` ([source](https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420))
+3. As of 2023.03.24, the d.ts file will not include the correct signature for several javascript specific methods, namely:
+    - `static toThreejsJSONMerged(): void;`
+    ```typescript
+         /**
+		 * @description Cretes a Three.js bufferGeometry from an array of Rhino meshes.
+		 * @param {Mesh[]} meshes The array of Rhino meshes.
+		 * @param {boolean} rotateYUp Whether or not to orient the result to Y up.
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
+		static toThreejsJSONMerged(meshes: Mesh[], rotateYUp: boolean ): object;
+    ```
+    
+    - `toThreejsJSON(): void;`
+    ```typescript
+         /**
+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
+		toThreejsJSON(): object;
+
+		 /**
+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
+		 * @param {boolean} rotateToYUp Rotate the result to Y up.
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
+		toThreejsJSON(rotateToYUp: boolean): object;
+    ```
+    - `static createFromThreejsJSON(): void;`
+    ```typescript
+		 /**
+		 * @description Creates a Rhino mesh from a Three.js buffer geometry. 
+		 * @param {object} object A js object in the form of { data: bufferGeometry }
+		 * @returns {Mesh}
+		 */
+		static createFromThreejsJSON( object: object ): Mesh;
+    ```
 
 ## dotnet
 
