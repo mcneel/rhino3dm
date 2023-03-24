@@ -42,14 +42,18 @@ jobs:
           action: uglifyjs
           filename: rhino3dm.module.js
           output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
       - name: docgen
         shell: bash
         run: |
           dotnet build src/docgen
           cd src/docgen/bin/Debug
           ./docgen
-          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
           cd ../../../../
+          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
       - name: copy files
         shell: bash
         run: |
