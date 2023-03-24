@@ -32,6 +32,7 @@ jobs:
           dotnet build src/docgen
           cd src/docgen/bin/Debug
           ./docgen
+          cd ../../../../
           cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
           ls
-          cd ../../../../
+          
