@@ -22,10 +22,14 @@ jobs:
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: git submodule update --init
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
       - name: docgen
         shell: bash
         run: |
-          msbuild src/docgen
+          dotnet build src/docgen
           cd src/docgen/bin/Debug
           ./docgen
           cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
