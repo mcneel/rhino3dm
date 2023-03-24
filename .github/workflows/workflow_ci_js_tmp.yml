@@ -42,6 +42,19 @@ jobs:
           action: uglifyjs
           filename: rhino3dm.module.js
           output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
+      - name: docgen
+        shell: bash
+        run: |
+          dotnet build src/docgen
+          cd src/docgen/bin/Debug
+          ./docgen
+          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
+          cd ../../../../
+      - name: copy files
+        shell: bash
+        run: |
+          cp package.json src/build/javascript/artifacts_js
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:

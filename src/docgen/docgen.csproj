@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>net60</TargetFramework>
+    <TargetFramework>net70</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -9,6 +9,10 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="conf.py" />
     <EmbeddedResource Include="..\version.txt">
