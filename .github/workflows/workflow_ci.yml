@@ -163,7 +163,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -177,7 +177,7 @@ jobs:
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
@@ -202,7 +202,7 @@ jobs:
       - name: build dotnet
         run: python3 script/build.py -p linux -v
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: src/build/linux/dotnet/Rhino3dm.dll
           name: rhino3dm.net
