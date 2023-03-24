@@ -29,13 +29,13 @@ jobs:
       - name: build js
         run: python3 script/build.py -p js -o -v
       - name: minify
-        uses: actions/webpreprocessor@v1.13
+        uses: tinpotnick/webpreprocessor@v1.13
         with:
           dir: src/build/javascript/artifacts_js
           action: uglifyjs
           filename: rhino3dm.js
       - name: minify module
-        uses: actions/webpreprocessor@v1.13
+        uses: tinpotnick/webpreprocessor@v1.13
         with:
           dir: src/build/javascript/artifacts_js
           action: uglifyjs
