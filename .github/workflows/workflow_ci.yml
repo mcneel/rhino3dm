@@ -112,13 +112,13 @@ jobs:
           action: uglifyjs
           filename: rhino3dm.js
           output: src/build/javascript/artifacts_js/rhino3dm.min.js
-      - name: minify module
-        uses: tinpotnick/webpreprocessor@v1.13
-        with:
-          dir: src/build/javascript/artifacts_js
-          action: uglifyjs
-          filename: rhino3dm.module.js
-          output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
+      #- name: minify module
+      #  uses: tinpotnick/webpreprocessor@v1.13
+      #  with:
+      #    dir: src/build/javascript/artifacts_js
+      #    action: uglifyjs
+      #    filename: rhino3dm.module.js
+      #    output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
@@ -182,7 +182,6 @@ jobs:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
           retention-days: ${{ env.RETENTION_DAYS }}
-          
 
   build_dotnet:
     name: build dotnet
