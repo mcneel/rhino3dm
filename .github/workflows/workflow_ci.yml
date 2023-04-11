@@ -210,6 +210,8 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
-          path: src/build/linux/dotnet/Rhino3dm.dll
+          path: |
+            src/build/linux/dotnet/Rhino3dm.dll
+            src/build/linux/librhino3dm_native.so
           name: rhino3dm.net
           retention-days: ${{ env.RETENTION_DAYS }}
