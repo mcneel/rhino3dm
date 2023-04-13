@@ -195,6 +195,8 @@ jobs:
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v3.3.0
+      - name: safe directory
+        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap
