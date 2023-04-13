@@ -191,10 +191,6 @@ jobs:
     needs: [check_dotnet, check_workflow, check_build_scripts]
     if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     steps:
-      - name: install dotnet 7
-        uses: actions/setup-dotnet@v3.0.3
-        with:
-          dotnet-version: '7.0.x'
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
