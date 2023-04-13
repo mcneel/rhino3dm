@@ -190,11 +190,11 @@ jobs:
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap dotnet ${{ matrix.target }}
-        run: python script/bootstrap.py -p ${{ matrix.target }}
+        run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
-        run: python script/setup.py -p ${{ matrix.target }} -v
+        run: python3 script/setup.py -p ${{ matrix.target }} -v
       - name: build dotnet ${{ matrix.target }}
-        run: python script/build.py -p ${{ matrix.target }} -v
+        run: python3 script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
       - name: code-sign native libraries
