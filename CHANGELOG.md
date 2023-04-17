@@ -4,10 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.0.1-beta] - unreleased
+## [8.0.1-beta.1] - 2023-04-17
 ### Added
-- js
-  - ci and release builds include minified js and d.ts
+- (.net) linux-arm64 native lib
+
+### fixed
+- (.net) linux-amd64 now loads in amazonlinux
+
+
+## [8.0.1-beta] - 2023-03-22
+### Added
+- (js) ci and release builds include minified js and d.ts
 
 ## [8.0.0-beta] - 2023-03-22
 ### Added
