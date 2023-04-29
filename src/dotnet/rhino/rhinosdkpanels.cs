@@ -32,22 +32,7 @@ namespace Rhino.UI
   /// </summary>
   static class PanelSystem
   {
-    internal static bool UsingNewTabPanelSystem
-    {
-      get
-      {
-        if (_useNewTabPanels == null)
-        {
-          using (var args = new NamedParametersEventArgs())
-          {
-            HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.TabPanels.TabPanelSettings.UseNewTabPanels", args);
-            _useNewTabPanels = args.TryGetBool("result", out bool value) && value;
-          }
-        }
-        return _useNewTabPanels.Value;
-      }
-    }
-    private static bool? _useNewTabPanels = null;
+    internal static bool UsingNewTabPanelSystem => true;
 
     private static void RegisterPanel(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
     {

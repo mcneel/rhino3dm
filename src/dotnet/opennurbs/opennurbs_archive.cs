@@ -573,7 +573,7 @@ namespace Rhino.Collections
           break;
         case ItemType.Font: //29
           {
-#if RHINO_SDK
+#if !RHINO3DM_BUILD && !DOTNETCORE
             System.Drawing.Font val = archive.ReadFont();
             rc = Set(key, val);
 #endif
@@ -841,7 +841,7 @@ namespace Rhino.Collections
           archive.WriteSizeF((System.Drawing.SizeF)val);
           break;
         case ItemType.Font: // 29
-#if RHINO_SDK
+#if !RHINO3DM_BUILD && !DOTNETCORE
           archive.WriteFont((System.Drawing.Font)val);
 #endif
           break;
@@ -1793,7 +1793,7 @@ namespace Rhino.Collections
     /// <since>5.0</since>
     public bool Set(string key, System.Drawing.SizeF val) { return SetItem(key, ItemType.SizeF, val); }
 
-#if RHINO_SDK
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Sets a <see cref="System.Drawing.Font"/>.
     /// </summary>
@@ -2913,7 +2913,7 @@ namespace Rhino.FileIO
     }
 
 
-#if RHINO_SDK
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Writes a <see cref="System.Drawing.Font"/> value to the archive.
     /// </summary>
@@ -3946,7 +3946,7 @@ namespace Rhino.FileIO
       return new System.Drawing.SizeF(xy[0], xy[1]);
     }
 
-#if RHINO_SDK
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Reads a <see cref="System.Drawing.Font"/> from the archive.
     /// </summary>
@@ -4356,7 +4356,7 @@ namespace Rhino.FileIO
     }
 
 
-#region dictionary support
+    #region dictionary support
     internal bool BeginReadDictionary( out Guid dictionaryId, out uint version, out string name )
     {
       dictionaryId = Guid.Empty;
@@ -4397,7 +4397,7 @@ namespace Rhino.FileIO
       return UnsafeNativeMethods.ON_BinaryArchive_EndReadDictionaryEntry(m_ptr);
     }
 
-#endregion
+    #endregion
   }
 
   /// <since>5.1</since>

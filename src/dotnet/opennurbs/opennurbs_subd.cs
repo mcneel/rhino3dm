@@ -691,8 +691,17 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Apply the Catmull-Clark subdivision algorithm and save the results in
-    /// this SubD
+    /// Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
+    /// </summary>
+    /// <returns>true on success</returns>
+    /// <since>8.0</since>
+    public bool Subdivide()
+    {
+      return Subdivide(1);
+    }
+
+    /// <summary>
+    /// Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
     /// </summary>
     /// <param name="count">Number of times to subdivide (must be greater than 0)</param>
     /// <returns>true on success</returns>
@@ -703,6 +712,24 @@ namespace Rhino.Geometry
         return false;
       IntPtr ptrSubD = NonConstPointer();
       return UnsafeNativeMethods.ON_SubD_GlobalSubdivide(ptrSubD, (uint)count);
+    }
+
+    /// <summary>
+    /// Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
+    /// </summary>
+    /// <param name="faceIndices">Indices of the faces to subdivide.</param>
+    /// <returns>true on success</returns>
+    /// <since>8.0</since>
+    public bool Subdivide(IEnumerable<int> faceIndices)
+    {
+      IntPtr ptr_subd = NonConstPointer();
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var index in faceIndices)
+          ciArray.Add(new ComponentIndex(ComponentIndexType.SubdFace, index));
+        IntPtr pCiArray = ciArray.NonConstPointer();
+        return UnsafeNativeMethods.ON_SubD_LocalSubdivide(ptr_subd, pCiArray);
+      }
     }
 
 #if RHINO_SDK
@@ -1333,6 +1360,37 @@ namespace Rhino.Geometry
         return res;
       }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public Plane SurfaceCenterFrame
+    {
+      get
+      {
+        Plane plane = Plane.Unset;
+        IntPtr const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterFrame(const_face_ptr, ref plane);
+        return plane;
+      }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    public Plane ControlNetCenterFrame
+    {
+      get
+      {
+        Plane plane = Plane.Unset;
+        IntPtr const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_ControlNetCenterFrame(const_face_ptr, ref plane);
+        return plane;
+      }
+    }
+
 #endif
     #endregion
 

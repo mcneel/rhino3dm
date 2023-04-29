@@ -338,7 +338,7 @@ namespace Rhino.Runtime
         m_rhinoCommonPath = HostUtils.RhinoAssemblyDirectory;
       }
 
-#region IComparer<string> Members
+      #region IComparer<string> Members
       public int Compare(string x, string y)
       {
         int rc;
@@ -442,7 +442,7 @@ namespace Rhino.Runtime
         if (yIndex < 0) yIndex = int.MaxValue;
         return xIndex.CompareTo(yIndex);
       }
-#endregion
+      #endregion
     }
 
 #region Additional Resolver Locations

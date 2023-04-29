@@ -111,9 +111,6 @@ namespace Rhino.ApplicationSettings
     /// <since>8.0</since>
     public string CommandPromptFontName { get; set; }
 
-    /// <summary>Get/Set position and visibility of the command prompt</summary>
-    /// <since>8.0</since>
-    public CommandPromptPosition CommandPromptPosition { get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
     /// <since>5.0</since>
     public Color CrosshairColor { get; set; }
@@ -284,7 +281,6 @@ namespace Rhino.ApplicationSettings
       rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
       rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
       rc.MenuVisible = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxMenuVisible, pAppearanceSettings);
-      rc.CommandPromptPosition = (CommandPromptPosition)UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptPosition, pAppearanceSettings);
       rc.ShowStatusBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowStatusBar, pAppearanceSettings);
       rc.ShowViewportTitles =UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTitles, pAppearanceSettings);
       rc.ShowTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowTitleBar, pAppearanceSettings);
@@ -385,7 +381,6 @@ namespace Rhino.ApplicationSettings
       DirectionArrowIconShaftSize = state.DirectionArrowIconShaftSize;
       DirectionArrowIconHeadSize = state.DirectionArrowIconHeadSize;
       MenuVisible = state.MenuVisible;
-      CommandPromptPosition = state.CommandPromptPosition;
       ShowStatusBar = state.ShowStatusBar;
       ShowViewportTitles = state.ShowViewportTitles;
       ShowTitleBar = state.ShowTitleBar;
@@ -458,15 +453,18 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
+    /// FOR INTERNAL USE ONLY
+    /// Rhino.UI.ThemeSettings sets this to map colors to new theme colors
+    /// </summary>
+    internal static Func<PaintColor, Color?> GetPaintColorHook;
+
+    /// <summary>
     /// Gets the color that is currently associated with a paint color.
     /// </summary>
     /// <param name="whichColor">A color association.</param>
     /// <returns>A .Net library color.</returns>
     /// <since>5.0</since>
-    public static Color GetPaintColor(PaintColor whichColor)
-    {
-      return GetPaintColor(whichColor, true);
-    }
+    public static Color GetPaintColor(PaintColor whichColor) => GetPaintColor(whichColor, true);
 
     /// <summary>
     /// Gat a paint color. This overload provides a compute option for cases where colors
@@ -478,6 +476,12 @@ namespace Rhino.ApplicationSettings
     /// <since>7.1</since>
     public static Color GetPaintColor(PaintColor whichColor, bool compute)
     {
+      // If theme hook is set and handles the paint color request
+      var color = GetPaintColorHook == null ? null : GetPaintColorHook(whichColor);
+      if (color != null)
+        return color.Value;
+      // Theme hook not set or did not handle the paint color request so get
+      // the value from the core application settings
       int argb = UnsafeNativeMethods.RhColors_GetColor(whichColor, compute);
       return Color.FromArgb(argb);
     }
@@ -2921,6 +2925,7 @@ namespace Rhino.ApplicationSettings
     const int idxAutoAlignCPlane = 18;
     const int idxOrthoUseZ = 19;
     const int idxStickyAutoCPlane = 20;
+    const int idxGumballExtrudeMergeFaces = 21;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3161,7 +3166,6 @@ namespace Rhino.ApplicationSettings
     const int idxMousePickboxRadius = 5;
     const int idxPointDisplay = 6;
     const int idxAutoCPlaneAlignment = 7;
-    const int idxDragStrength = 8;
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
@@ -3277,17 +3281,14 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or  the amount of drag strength for Gumball and for dragging objects, including control points.
-    /// Valid values range between 1 and 100.
+    /// When ExtrudeMergeFaces is true the gumball will attempt to merge
+    /// faces if possible after extruding a face
     /// </summary>
-    /// <remarks>
-    /// This value is not persistent.
-    /// </remarks>
     /// <since>8.0</since>
-    public static int DragStrength
+    public static bool GumballExtrudeMergeFaces
     {
-      get => GetInt(idxDragStrength);
-      set => SetInt(idxDragStrength, value);
+      get => GetBool(idxGumballExtrudeMergeFaces);
+      set => SetBool(idxGumballExtrudeMergeFaces, value);
     }
   }
 

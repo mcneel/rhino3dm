@@ -1078,18 +1078,6 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Layer_GetSetBool(ptr_this, which, true, val);
       InternalCommitChanges();
     }
-
-    double GetDouble(UnsafeNativeMethods.LayerDouble which)
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_GetSetDouble(const_ptr_this, which, false, 0);
-    }
-    void SetDouble(UnsafeNativeMethods.LayerDouble which, double val)
-    {
-      IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.ON_Layer_GetSetDouble(ptr_this, which, true, val);
-      InternalCommitChanges();
-    }
     #endregion
 
     /// <summary>
@@ -1275,6 +1263,16 @@ namespace Rhino.DocObjects
 #endif
 
     /// <summary>
+    /// Gets and sets the initial per viewport visibility of this layer in newly created detail views.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool PerViewportIsVisibleInNewDetails
+    {
+      get => GetBool(UnsafeNativeMethods.LayerBool.PerViewportIsVisibleInNewDetails);
+      set => SetBool(UnsafeNativeMethods.LayerBool.PerViewportIsVisibleInNewDetails, value);
+    }
+
+    /// <summary>
     /// Layer set to participate with all clipping planes
     /// </summary>
     /// <since>8.0</since>
@@ -1361,55 +1359,39 @@ namespace Rhino.DocObjects
       }
     }
 
-    /// <summary>
-    /// Rule to use for determining if a section on an object should have a fill/hatch
-    /// </summary>
+    ///<summary>
+    /// Get an optional custom section style associated with these attributes.
+    ///</summary>
     /// <since>8.0</since>
-    public ObjectSectionFillRule SectionFillRule
+    public SectionStyle GetCustomSectionStyle()
     {
-      get
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_Layer_GetCustomSectionStyle(const_ptr_this);
+      if (ptr_sectionstyle == IntPtr.Zero)
+        return null;
+      return new SectionStyle(ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void SetCustomSectionStyle(SectionStyle sectionStyle)
+    {
+      if (sectionStyle == null)
       {
-        ObjectSectionFillRule rc = (ObjectSectionFillRule)GetInt(UnsafeNativeMethods.LayerInt.SectionFillRule);
-        return rc;
+        RemoveCustomSectionStyle();
+        return;
       }
-      set { SetInt(UnsafeNativeMethods.LayerInt.SectionFillRule, (int)value); }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
     }
 
-    /// <summary>
-    /// Hatch pattern index for hatch to use when drawing a closed section
-    /// Default is RhinoMath.UnsetIntIndex which means don't draw a hatch
-    /// </summary>
     /// <since>8.0</since>
-    public int SectionHatchIndex
+    public void RemoveCustomSectionStyle()
     {
-      get
-      {
-        int rc = GetInt(UnsafeNativeMethods.LayerInt.SectionHatchIndex);
-        return rc;
-      }
-      set { SetInt(UnsafeNativeMethods.LayerInt.SectionHatchIndex, value); }
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
     }
-
-    /// <summary>
-    /// Scale applied to the hatch pattern for a section
-    /// </summary>
-    /// <since>8.0</since>
-    public double SectionHatchScale
-    {
-      get { return GetDouble(UnsafeNativeMethods.LayerDouble.SectionHatchScale); }
-      set { SetDouble(UnsafeNativeMethods.LayerDouble.SectionHatchScale, value); }
-    }
-
-    /// <summary>
-    /// Rotation angle in radians applied to hatch pattern for a section.
-    /// </summary>
-    /// <since>8.0</since>
-    public double SectionHatchRotationRadians
-    {
-      get { return GetDouble(UnsafeNativeMethods.LayerDouble.SectionHatchRotation); }
-      set { SetDouble(UnsafeNativeMethods.LayerDouble.SectionHatchRotation, value); }
-    }
-
     #endregion
 
     #region user strings

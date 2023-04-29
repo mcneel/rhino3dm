@@ -1,66 +1,125 @@
 
 #include "stdafx.h"
 
-RH_C_FUNCTION bool ON_Skylight_GetOn(const ONX_Model* ptrModel)
-{
-  if (nullptr == ptrModel)
-    return false;
+ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
+const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
 
-  return ptrModel->m_settings.m_RenderSettings.Skylight().On();
+RH_C_FUNCTION const ON_Skylight* ON_3dmRenderSettings_GetSkylight(const ON_3dmRenderSettings* rs)
+{
+  if (nullptr == rs)
+    return nullptr;
+
+  return &rs->Skylight();
 }
 
-RH_C_FUNCTION void ON_Skylight_SetOn(ONX_Model* ptrModel, bool b)
+RH_C_FUNCTION ON_Skylight* ON_3dmRenderSettings_BeginChange_ON_Skylight(const ON_3dmRenderSettings* rs)
 {
-  if (nullptr != ptrModel)
+  return &ON_3dmRenderSettings_BeginChange(rs).Skylight();
+}
+
+RH_C_FUNCTION const ON_Skylight* ON_Skylight_FromDocSerial(unsigned int rhino_doc_sn)
+{
+  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
+  if (nullptr == rs)
+    return nullptr;
+
+  return &rs->Skylight();
+}
+
+RH_C_FUNCTION const ON_Skylight* ON_Skylight_FromONX_Model(ONX_Model* ptrModel)
+{
+  if (nullptr == ptrModel)
+    return nullptr;
+
+  return &ptrModel->m_settings.m_RenderSettings.Skylight();
+}
+
+RH_C_FUNCTION bool ON_Skylight_GetOn(ON_Skylight* p)
+{
+  if (p)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetOn(b);
+    return p->On();
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_Skylight_SetOn(ON_Skylight* p, bool v)
+{
+  if (p)
+  {
+    p->SetOn(v);
   }
 }
 
-RH_C_FUNCTION bool ON_Skylight_GetCustomEnvironmentOn(const ONX_Model* ptrModel)
+RH_C_FUNCTION double ON_Skylight_GetShadowIntensity(ON_Skylight* p)
 {
-  if (nullptr == ptrModel)
-    return false;
-
-  return ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironmentOn();
+  // 14th April 2021 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-63734
+  // ShadowIntensity is an unused red herring.
+  if (p)
+  {
+    return p->ShadowIntensity();
+  }
+  return 1.0;
 }
 
-RH_C_FUNCTION void ON_Skylight_SetCustomEnvironmentOn(ONX_Model* ptrModel, bool b)
+RH_C_FUNCTION void ON_Skylight_SetShadowIntensity(ON_Skylight* p, double v)
 {
-  if (nullptr != ptrModel)
+  // 14th April 2021 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-63734
+  // ShadowIntensity is an unused red herring.
+  if (p)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironmentOn(b);
+    p->SetShadowIntensity(v);
   }
 }
 
-RH_C_FUNCTION ON_UUID ON_Skylight_GetCustomEnvironment(const ONX_Model* ptrModel)
+RH_C_FUNCTION bool ON_Skylight_GetEnvironmentOverride(ON_Skylight* p)
 {
-  if (nullptr == ptrModel)
-    return ON_nil_uuid;
-
-  return ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironment();
+  if (p)
+  {
+    return p->EnvironmentOverride();
+  }
+  return false;
 }
 
-RH_C_FUNCTION void ON_Skylight_SetCustomEnvironment(ONX_Model* ptrModel, ON_UUID uuid)
+RH_C_FUNCTION void ON_Skylight_SetEnvironmentOverride(ON_Skylight* p, bool v)
 {
-  if (nullptr != ptrModel)
+  if (p)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironment(uuid);
+    p->SetEnvironmentOverride(v);
   }
 }
 
-RH_C_FUNCTION double ON_Skylight_GetShadowIntensity(const ONX_Model* ptrModel)
+RH_C_FUNCTION ON_UUID ON_Skylight_GetEnvironmentId(ON_Skylight* p)
 {
-  if (nullptr == ptrModel)
-    return 0.0;
-
-  return ptrModel->m_settings.m_RenderSettings.Skylight().ShadowIntensity();
+  if (p)
+  {
+    return p->EnvironmentId();
+  }
+  return ON_nil_uuid;
 }
 
-RH_C_FUNCTION void ON_Skylight_SetShadowIntensity(ONX_Model* ptrModel, double d)
+RH_C_FUNCTION void ON_Skylight_SetEnvironmentId(ON_Skylight* p, ON_UUID v)
 {
-  if (nullptr != ptrModel)
+  if (p)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetShadowIntensity(d);
+    p->SetEnvironmentId(v);
+  }
+}
+
+RH_C_FUNCTION ON_Skylight* ON_Skylight_New()
+{
+  return new ON_Skylight;
+}
+
+RH_C_FUNCTION void ON_Skylight_Delete(ON_Skylight* p)
+{
+  delete p;
+}
+
+RH_C_FUNCTION void ON_Skylight_CopyFrom(ON_Skylight* target, const ON_Skylight* source)
+{
+  if ((nullptr != target) && (nullptr != source))
+  {
+    *target = *source;
   }
 }

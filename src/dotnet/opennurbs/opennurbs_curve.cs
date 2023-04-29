@@ -1929,7 +1929,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes the maximum and minimum distances between two different curves.
+    /// Calculates the minimum and maximum distances between two curves.
+    /// This function is useful for computing curve deviation.
+    /// If you are not computing curve deviation, use <seealso cref="ClosestPoints(Curve, out Point3d, out Point3d)"/>.
     /// </summary>
     /// <param name="curveA">A curve.</param>
     /// <param name="curveB">Another curve.</param>

@@ -797,9 +797,13 @@ namespace Rhino.Display
 
         if (draw)
         {
+          e.Display.PushDepthTesting(false);
+          e.Display.PushDepthWriting(false);
           e.Display.DrawRoundedRectangle(new System.Drawing.PointF(centerX, centerY), _messageSize.Width, _messageSize.Height,
             4.0f, stroke, 1.0f, fill);
           e.Display.Draw2dText(Message, stroke, new Rhino.Geometry.Point2d(centerX, centerY), true, TextHeight, "Arial");
+          e.Display.PopDepthTesting();
+          e.Display.PopDepthWriting();
         }
         else
         {

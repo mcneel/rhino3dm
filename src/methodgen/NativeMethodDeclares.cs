@@ -362,6 +362,11 @@ using Rhino.Runtime.InteropWrappers;
           CppSharedEnums.RH_C_SHARED_ENUM_PARSE_FILE + " declaration is invalid: the string is invalid or empty.");
 
         string import_literal = macro.Substring(start_macro, end_macro - start_macro + 1);
+        int librhino3dmIndex = cppFileName.IndexOf("librhino3dm_native");
+        if (librhino3dmIndex > 0)
+        {
+          import_literal = import_literal.Replace("../../opennurbs", "lib/opennurbs");
+        }
 
         cppEnumImportsToCollect.Add(cppFileName, import_literal);
       }

@@ -31,6 +31,13 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(pLinetype);
     }
 
+    public Linetype(Linetype other) : base()
+    {
+      IntPtr pOther = other.ConstPointer();
+      IntPtr pLinetype = UnsafeNativeMethods.ON_Linetype_New(pOther);
+      ConstructNonConstObject(pLinetype);
+    }
+
 #if RHINO_SDK
     internal Linetype(int index, Rhino.RhinoDoc doc) : base()
     {
@@ -317,24 +324,24 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Determines if this linetype is a default Rhino linetype.
+    /// Returns true if the pattern is locked and cannot be modified.
     /// </summary>
-    /// <value><c>true</c> if this linetype is a default linetype; otherwise, <c>false</c>.</value>
-    bool IsDefaultLinetype
+    /// <since>8.0</since>
+    public bool IsPatternLocked
     {
       get
       {
-#if RHINO_SDK
+#if RHINO3DM_BUILD
+        return false;
+#else
         if (null == m_doc)
           return false;
-        int index = Index;
-        return UnsafeNativeMethods.CRhinoLinetype_IsDefaultLinetype(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
+        return UnsafeNativeMethods.CRhinoLinetypeTable_PatternIsLocked(m_doc.RuntimeSerialNumber, Index);
 #endif
       }
     }
-    #endregion
+
+#endregion
 
     #region methods
     /// <summary>
@@ -784,7 +791,23 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public int LoadDefaultLinetypes()
     {
-      return UnsafeNativeMethods.CRhinoLinetypeTable_InitDefaultLinetypes(m_doc.RuntimeSerialNumber);
+      return LoadDefaultLinetypes(false);
+    }
+
+    /// <summary>
+    /// Fills in the linetype table with any default linetypes not already included.
+    /// </summary>
+    /// <param name="ignoreDeleted">Ignore default linetypes that have been deleted.</param>
+    /// <remarks>
+    /// New documents only contain the continuous linetype. Other default linetypes
+    /// are added, on demand, when the user needs them. Calling this function ensures
+    /// that the linetype table is populated with the default linetypes.
+    /// </remarks>
+    /// <returns>The number of default linetypes added to the linetype table.</returns>
+    /// <since>8.0</since>
+    public int LoadDefaultLinetypes(bool ignoreDeleted)
+    {
+      return UnsafeNativeMethods.CRhinoLinetypeTable_InitDefaultLinetypes(m_doc.RuntimeSerialNumber, ignoreDeleted);
     }
 
     /// <summary>Obsolete. Use the other overload.</summary>

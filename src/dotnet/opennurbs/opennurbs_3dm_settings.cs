@@ -1,6 +1,10 @@
+
 using System;
 using System.IO;
 using Rhino.Geometry;
+#if !RHINO3DM_BUILD
+using Rhino.Render.PostEffects;
+#endif
 using Rhino.Runtime.InteropWrappers;
 
 // Most of these should not need to be wrapped. Some of their
@@ -365,8 +369,8 @@ namespace Rhino.DocObjects
     {
       if (m_ptr != IntPtr.Zero)
         return m_ptr;
-      FileIO.File3dm parent_file = m_parent as FileIO.File3dm;
-      if (parent_file != null)
+
+      if (m_parent is FileIO.File3dm parent_file)
       {
         IntPtr ptr_const_parent_file = parent_file.ConstPointer();
         return UnsafeNativeMethods.ONX_Model_ViewPointer(ptr_const_parent_file, m_id, m_ptr, m_named_view_table);
@@ -374,8 +378,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
       if (m_index >= 0)
       {
-        RhinoDoc doc = m_parent as RhinoDoc;
-        if (doc != null)
+        if (m_parent is RhinoDoc doc)
           return UnsafeNativeMethods.CRhinoDocProperties_GetNamedView(doc.RuntimeSerialNumber, m_index);
       }
 #endif
@@ -384,8 +387,7 @@ namespace Rhino.DocObjects
 
     internal IntPtr NonConstPointer()
     {
-      FileIO.File3dm parent_file = m_parent as FileIO.File3dm;
-      if (parent_file != null)
+      if (m_parent is FileIO.File3dm parent_file)
       {
         IntPtr ptr_const_parent_file = parent_file.ConstPointer();
         return UnsafeNativeMethods.ONX_Model_ViewPointer(ptr_const_parent_file, m_id, m_ptr, m_named_view_table);
@@ -1126,7 +1128,7 @@ namespace Rhino.DocObjects
   public class AnimationProperties : IDisposable
   {
     IntPtr m_ptr = IntPtr.Zero; // ON_3dmAnimationProperties*
-    bool m_delete = true;
+    readonly bool m_delete = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimationProperties"/> class.
@@ -1982,6 +1984,12 @@ namespace Rhino.Render
   /// <summary> Contains settings used in rendering. </summary>
   public class RenderSettings : Runtime.CommonObject
   {
+    // Only one of the following 3 members is used in any given situation.
+#if RHINO_SDK
+    private readonly RhinoDoc m_doc;           // Only used in the document case.
+#endif
+    private readonly FileIO.File3dm m_file3dm; // Only used in the File3dm case.
+
     //New for V6, rendering source (render directly from a NamedView or Snapshot)
     //https://mcneel.myjetbrains.com/youtrack/issue/RH-39593
     /// <summary>
@@ -2010,7 +2018,7 @@ namespace Rhino.Render
     };
 
     /// <summary> Initialize new instance of the RenderSettings class. </summary>
-    /// <param name="source">If not null, settings are copied from source</param>
+    /// <param name="source">If not null, settings are copied from source.</param>
     /// <since>6.0</since>
     public RenderSettings(RenderSettings source)
     {
@@ -2019,7 +2027,7 @@ namespace Rhino.Render
       ConstructNonConstObject(ptr_this);
     }
 
-    /// <summary> Initialize a new instance of the RenderSettings class. </summary>
+    /// <summary> Initialize a new instance of the RenderSettings class.</summary>
     /// <since>5.0</since>
     public RenderSettings()
     {
@@ -2028,20 +2036,30 @@ namespace Rhino.Render
     }
 
 #if RHINO_SDK
-    readonly RhinoDoc m_doc;
     internal RenderSettings(RhinoDoc doc)
     {
       m_doc = doc;
       ConstructConstObject(m_doc, -1);
     }
 #endif
-    readonly IntPtr m_temp_ptr;
-    internal RenderSettings(IntPtr settingsPtr)
+
+    internal RenderSettings(FileIO.File3dm f)
     {
-      m_temp_ptr = settingsPtr;
+      m_file3dm = f;
+      ConstructConstObject(m_file3dm, -1);
     }
 
-    internal override IntPtr _InternalGetConstPointer()
+    internal RenderSettings(IntPtr nativePtr, bool do_not_delete=false)
+    {
+      ConstructNonConstObject(nativePtr);
+
+      if (do_not_delete)
+      {
+        DoNotDestructOnDispose();
+      }
+    }
+
+    internal override IntPtr _InternalGetConstPointer() // Returns pointer to ON_3dmRenderSettings.
     {
 #if RHINO_SDK
       if (m_doc != null)
@@ -2049,7 +2067,13 @@ namespace Rhino.Render
         return UnsafeNativeMethods.ON_3dmRenderSettings_ConstPointer(m_doc.RuntimeSerialNumber);
       }
 #endif
-      return m_temp_ptr;
+      if (m_file3dm != null)
+      {
+        var ptrModel = m_file3dm.ConstPointer();
+        return UnsafeNativeMethods.ON_3dmRenderSettings_ConstPointer_ONX_Model(ptrModel);
+      }
+
+      return NonConstPointer();
     }
 
     internal override IntPtr _InternalDuplicate(out bool applymempressure)
@@ -2061,20 +2085,29 @@ namespace Rhino.Render
 
     void Commit()
     {
-#if RHINO_SDK
-      // If this class is not associated with a doc or it is already const then bail
-      bool is_const = !IsNonConst;
-      if (m_doc == null || is_const)
+      // If this class is already const then bail.
+      if (!IsNonConst)
         return;
-      // This class is associated with a doc so commit the settings change
-      m_doc.RenderSettings = this;
-      // Delete the current settings pointer, the next time it is
-      // accessed by NonConstPointer() or ConstPointer() it will
-      // make a copy of the documents render settings
-      IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.ON_Object_Delete(ptr_this);
-      ChangeToConstObject(m_doc);
+
+#if RHINO_SDK
+      if (m_doc != null)
+      {
+        // This class is associated with a document so commit the settings change.
+        m_doc.RenderSettings = this;
+
+        // Delete the current settings pointer. The next time it's accessed by NonConstPointer() or
+        // ConstPointer() it will make a copy of the document's render settings.
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Object_Delete(ptr_this);
+        ChangeToConstObject(m_doc);
+      }
 #endif
+      if (m_file3dm != null)
+      {
+        // This class is associated with a file3dm so commit the settings change.
+        IntPtr ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_3dmRenderSettings_ONX_Model_Commit(ptr_this, m_file3dm.NonConstPointer());
+      }
     }
 
     System.Drawing.Color GetColor(UnsafeNativeMethods.RenderSettingColor which)
@@ -2083,6 +2116,7 @@ namespace Rhino.Render
       int argb = UnsafeNativeMethods.ON_3dmRenderSettings_GetColor(ptr_const_this, which);
       return System.Drawing.Color.FromArgb(argb);
     }
+
     void SetColor(UnsafeNativeMethods.RenderSettingColor which, System.Drawing.Color c)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2361,68 +2395,324 @@ namespace Rhino.Render
       set { SetInt(UnsafeNativeMethods.RenderSettingInt.BackgroundStyle, (int)value); }
     }
 
-#if RHINO_SDK
+#if !RHINO3DM_BUILD
     /// <summary>
-    /// Get the document linear workflow interface
+    /// If this object is associated with a document, this gets the document linear workflow.
+    /// If this object is associated with a File3dm, this gets the File3dm's linear workflow.
+    /// Otherwise it gets a 'free-floating' linear workflow object.
     /// </summary>
     /// <since>6.0</since>
     public LinearWorkflow LinearWorkflow
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
-          return new LinearWorkflow(m_doc.RuntimeSerialNumber);
-        return new LinearWorkflow();
+          return new LinearWorkflow(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new LinearWorkflow(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetLinearWorkflow(cpp);
+        return new LinearWorkflow(native_ptr);
       }
     }
 
     /// <summary>
-    /// Get the document dithering interface
+    /// If this object is associated with a document, this gets the document dithering.
+    /// If this object is associated with a File3dm, this gets the File3dm's dithering.
+    /// Otherwise it gets a 'free-floating' dithering object.
     /// </summary>
     /// <since>6.0</since>
     public Dithering Dithering
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
-          return new Dithering(m_doc.RuntimeSerialNumber);
-        return new Dithering();
+          return new Dithering(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new Dithering(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetDithering(cpp);
+        return new Dithering(native_ptr);
       }
     }
 
     /// <summary>
-    /// Get the document render channels interface
+    /// If this object is associated with a document, this gets the document render channels.
+    /// Otherwise it gets a 'free-floating' render channels object.
     /// </summary>
     /// <since>7.0</since>
     public RenderChannels RenderChannels
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
-          return new RenderChannels(m_doc.RuntimeSerialNumber);
-        return new RenderChannels();
+          return new RenderChannels(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new RenderChannels(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderChannels(cpp);
+        return new RenderChannels(native_ptr);
       }
     }
 
     /// <summary>
-    /// Get or set the Render Preset
+    /// If this object is associated with a document, this gets the document ground plane.
+    /// If this object is associated with a File3dm, this gets the File3dm's ground plane.
+    /// Otherwise it gets a 'free-floating' ground plane object.
     /// </summary>
     /// <since>8.0</since>
-    public Guid RenderPresets
+    public GroundPlane GroundPlane
+    {
+      get
+      {
+#if RHINO_SDK
+        if (m_doc != null)
+          return new GroundPlane(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new GroundPlane(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetGroundPlane(cpp);
+        return new GroundPlane(native_ptr);
+      }
+    }
+
+    /// <summary>
+    /// If this object is associated with a document, this gets the document safe-frame.
+    /// If this object is associated with a File3dm, this gets the File3dm's safe-frame.
+    /// Otherwise it gets a 'free-floating' safe-frame object.
+    /// </summary>
+    /// <since>8.0</since>
+    public SafeFrame SafeFrame
+    {
+      get
+      {
+#if RHINO_SDK
+        if (m_doc != null)
+          return new SafeFrame(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new SafeFrame(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSafeFrame(cpp);
+        return new SafeFrame(native_ptr);
+      }
+    }
+
+    /// <summary>
+    /// If this object is associated with a document, this gets the document skylight.
+    /// If this object is associated with a File3dm, this gets the File3dm's skylight.
+    /// Otherwise it gets a 'free-floating' skylight object.
+    /// </summary>
+    /// <since>8.0</since>
+    public Skylight Skylight
+    {
+      get
+      {
+#if RHINO_SDK
+        if (m_doc != null)
+          return new Skylight(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new Skylight(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSkylight(cpp);
+        return new Skylight(native_ptr);
+      }
+    }
+
+    /// <summary>
+    /// If this object is associated with a document, this gets the document sun.
+    /// If this object is associated with a File3dm, this gets the File3dm's sun.
+    /// Otherwise it gets a 'free-floating' sun object.
+    /// </summary>
+    /// <since>8.0</since>
+    public Sun Sun
+    {
+      get
+      {
+#if RHINO_SDK
+        if (m_doc != null)
+          return new Sun(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new Sun(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSun(cpp);
+        return new Sun(native_ptr);
+      }
+    }
+#endif
+
+    /// <summary>
+    /// The usage of a render environment.
+    /// </summary>
+    public enum EnvironmentUsage // Matches ON_3dmRenderSettings::EnvironmentUsage
+    {
+      /// <summary>
+      /// Specifies the 360 background environment.
+      /// </summary>
+      Background,
+
+      /// <summary>
+      /// Specifies the custom reflective environment. Also used for refraction.
+      /// </summary>
+      Reflection,
+
+      /// <summary>
+      /// Specifies the custom skylighting environment.
+      /// </summary>
+      Skylighting,
+    };
+
+    /// <summary>
+    /// The purpose a render environment is being used for.
+    /// </summary>
+    public enum EnvironmentPurpose // Matches ON_3dmRenderSettings::EnvironmentPurpose
+    {
+      /// <summary>
+      /// Used to directly get and set the environment instance id.
+      /// </summary>
+      Standard,
+
+      /// <summary>
+      /// Used to get the environment instance id to be used for actual rendering.
+      /// </summary>
+      ForRendering,
+    };
+
+    /// <summary>
+    /// For usage background, this checks if the background style is set to 'Environment'.
+    /// For reflection and skylighting, it checks if the relevant custom override is enabled. 
+    /// </summary>
+    /// <since>8.0</since>
+    public bool RenderEnvironmentOverride(EnvironmentUsage usage)
+    {
+      var rs = ConstPointer();
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironmentOverride(rs, (int)usage);
+    }
+
+    /// <summary>
+    /// Set the given environment override on/off. Only works for usage Reflection and Skylighting.
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetRenderEnvironmentOverride(EnvironmentUsage usage, bool on)
+    {
+      var rs = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmRenderSettings_SetRenderEnvironmentOverride(rs, (int)usage, on);
+      Commit();
+    }
+
+    /// <summary>
+    /// Get the id of the render environment for a particular usage.
+    /// If usage is Background and the background mode is set to 'Solid Color' or 'Gradient'
+    /// (i.e., not 'Environment'), then Guid.Empty will be returned.
+    /// </summary>
+    /// <since>8.0</since>
+    public Guid RenderEnvironmentId(EnvironmentUsage usage, EnvironmentPurpose purpose)
+    {
+      var rs = ConstPointer();
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironment(rs, (int)usage, (int)purpose);
+    }
+
+    /// <summary>
+    /// Set the id of the render environment for a particular usage.
+    /// Passing Guid.Empty for usage Skylighting or Reflection will turn the override for that usage off.
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetRenderEnvironmentId(EnvironmentUsage usage, Guid guid)
+    {
+      var rs = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmRenderSettings_SetRenderEnvironment(rs, (int)usage, ref guid);
+      Commit();
+    }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Get the render environment for a particular usage. Only works if this render settings is in a document.
+    /// If usage is Background and the background mode is set to 'Solid Color' or 'Gradient'
+    /// (i.e., not 'Environment'), then null will be returned.
+    /// </summary>
+    /// <since>8.0</since>
+    public RenderEnvironment RenderEnvironment(EnvironmentUsage usage, EnvironmentPurpose purpose)
+    {
+      if (m_doc == null)
+        return null;
+
+      var id = RenderEnvironmentId(usage, purpose);
+      return m_doc.RenderEnvironments.Find(id);
+    }
+
+    /// <summary>
+    /// Set the render environment for a particular usage.
+    /// Passing null for usage Skylighting or Reflection will turn the override for that usage off.
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetRenderEnvironment(EnvironmentUsage usage, RenderEnvironment env)
+    {
+      if (m_doc != null)
+      {
+        var guid = (env != null) ? env.Id : Guid.Empty;
+        SetRenderEnvironmentId(usage, guid); // Does Commit().
+      }
+    }
+
+    /// <summary>
+    /// If this object is associated with a document, this gets the document post effect data collection.
+    /// If this object is associated with a File3dm, this gets the File3dm's post effect data collection.
+    /// Otherwise it gets a 'free-floating' post effect data collection object.
+    /// </summary>
+    /// <since>8.0</since>
+    public PostEffectCollection PostEffects
+    {
+      get
+      {
+#if RHINO_SDK
+        if (m_doc != null)
+          return new PostEffectCollection(m_doc);
+#endif
+        if (m_file3dm != null)
+          return new PostEffectCollection(m_file3dm);
+
+        var cpp = ConstPointer();
+        var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(cpp);
+        return new PostEffectCollection(native_ptr);
+      }
+    }
+#endif
+
+    /// <summary>
+    /// Get or set the current Render Preset.
+    /// </summary>
+    /// <since>8.0</since>
+    public Guid CurrentRenderPreset
     {
       get
       {
         var pointer = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmRenderSettings_GetPresets(pointer);
+        return UnsafeNativeMethods.ON_3dmRenderSettings_GetCurrentRenderPreset(pointer);
       }
       set
       {
         var pointer = NonConstPointer();
-        UnsafeNativeMethods.ON_3dmRenderSettings_SetPresets(pointer, value);
+        UnsafeNativeMethods.ON_3dmRenderSettings_SetCurrentRenderPreset(pointer, value);
         Commit();
       }
     }
-#endif
+
     /// <summary>
     /// Get or set the given named view
     /// </summary>
@@ -2553,7 +2843,7 @@ namespace Rhino.Display
     WallpaperImage = 1,
     /// <summary>Two color top/bottom color gradient.</summary>
     Gradient = 2,
-    /// <summary>Using a special environment.</summary>
+    /// <summary>Using a Render Environment.</summary>
     Environment = 3
   }
 
@@ -2772,66 +3062,85 @@ namespace Rhino.FileIO
       }
     }
 
-    /*
-  // settings used for automatically created rendering meshes
-  ON_MeshParameters m_RenderMeshSettings;
+    private Rhino.Render.RenderSettings m_rs;
 
-  // saved custom settings
-  ON_MeshParameters m_CustomRenderMeshSettings;
+    /// <summary>
+    /// Gets or sets the render settings.
+    /// </summary>
+    /// <since>8.0</since>
+    public Rhino.Render.RenderSettings RenderSettings
+    {
+      get
+      {
+        if (m_rs == null)
+        {
+          m_rs = new Rhino.Render.RenderSettings(m_parent);
+        }
 
-  // settings used for automatically created analysis meshes
-  ON_MeshParameters m_AnalysisMeshSettings;
+        return m_rs;
+      }
+    }
 
-  // settings used when annotation objects are created
-  ON_3dmAnnotationSettings m_AnnotationSettings;
+#if UNUSED
+    // settings used for automatically created rendering meshes
+    ON_MeshParameters m_RenderMeshSettings;
 
-  ON_ClassArray<ON_3dmConstructionPlane> m_named_cplanes;
-  ON_ClassArray<ON_3dmView>              m_named_views;
-  ON_ClassArray<ON_3dmView>              m_views; // current viewports
-  ON_UUID m_active_view_id; // id of "active" viewport              
+    // saved custom settings
+    ON_MeshParameters m_CustomRenderMeshSettings;
 
-  // These fields determine what layer, material, color, line style, and
-  // wire density are used for new objects.
-  int m_current_layer_index;
+    // settings used for automatically created analysis meshes
+    ON_MeshParameters m_AnalysisMeshSettings;
 
-  int m_current_material_index;
-  ON::object_material_source m_current_material_source;
+    // settings used when annotation objects are created
+    ON_3dmAnnotationSettings m_AnnotationSettings;
+
+    ON_ClassArray<ON_3dmConstructionPlane> m_named_cplanes;
+    ON_ClassArray<ON_3dmView>              m_named_views;
+    ON_ClassArray<ON_3dmView>              m_views; // current viewports
+    ON_UUID m_active_view_id; // id of "active" viewport              
+
+    // These fields determine what layer, material, color, line style, and
+    // wire density are used for new objects.
+    int m_current_layer_index;
+
+    int m_current_material_index;
+    ON::object_material_source m_current_material_source;
   
-  ON_Color m_current_color;
-  ON::object_color_source m_current_color_source;
+    ON_Color m_current_color;
+    ON::object_color_source m_current_color_source;
 
-  ON_Color m_current_plot_color;
-  ON::plot_color_source m_current_plot_color_source;
+    ON_Color m_current_plot_color;
+    ON::plot_color_source m_current_plot_color_source;
 
-  int m_current_linetype_index;
-  ON::object_linetype_source m_current_linetype_source;
+    int m_current_linetype_index;
+    ON::object_linetype_source m_current_linetype_source;
 
-  int m_current_font_index;
+    int m_current_font_index;
 
-  int m_current_dimstyle_index;
+    int m_current_dimstyle_index;
  
-  // Surface wireframe density
-  //
-  //   @untitled table
-  //   0       boundary + "knot" wires 
-  //   1       boundary + "knot" wires + 1 interior wire if no interior "knots"
-  //   N>=2    boundary + "knot" wires + (N-1) interior wires
-  int m_current_wire_density;
+    // Surface wireframe density
+    //
+    //   @untitled table
+    //   0       boundary + "knot" wires 
+    //   1       boundary + "knot" wires + 1 interior wire if no interior "knots"
+    //   N>=2    boundry + "knot" wires + (N-1) interior wires
+    int m_current_wire_density;
 
-  ON_3dmRenderSettings m_RenderSettings;
+    ON_3dmRenderSettings m_RenderSettings;
 
-  // default settings for construction plane grids
-  ON_3dmConstructionPlaneGridDefaults m_GridDefaults;
+    // default settings for construction plane grids
+    ON_3dmConstructionPlaneGridDefaults m_GridDefaults;
 
-  // World scale factor to apply to non-solid linetypes
-  // for model display.  For plotting, the linetype settings
-  // are used without scaling.
-  double m_linetype_display_scale;
+    // World scale factor to apply to non-solid linetypes
+    // for model display.  For plotting, the linetype settings
+    // are used without scaling.
+    double m_linetype_display_scale;
 
-  // Plugins that were loaded when the file was saved.
-  ON_ClassArray<ON_PlugInRef> m_plugin_list;
+    // Plugins that were loaded when the file was saved.
+    ON_ClassArray<ON_PlugInRef> m_plugin_list;
 
-  ON_3dmIOSettings m_IO_settings;
-     */
+    ON_3dmIOSettings m_IO_settings;
+#endif
   }
 }

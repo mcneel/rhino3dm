@@ -63,8 +63,6 @@ enum LayerInt : int
   idxLinetypeIndex = 0,
   idxRenderMaterialIndex = 1,
   idxIgesLevel = 3,
-  idxSectionHatchIndex = 4,
-  idxSectionFillRule = 5
 };
 
 RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
@@ -82,12 +80,6 @@ RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
       break;
     case idxIgesLevel:
       rc = pLayer->IgesLevel();
-      break;
-    case idxSectionHatchIndex:
-      rc = pLayer->SectionHatchIndex();
-      break;
-    case idxSectionFillRule:
-      rc = (int)pLayer->SectionFillRule();
       break;
     }
   }
@@ -109,12 +101,6 @@ RH_C_FUNCTION void ON_Layer_SetInt(ON_Layer* pLayer, enum LayerInt which, int va
     case idxIgesLevel:
       pLayer->SetIgesLevel(val);
       break;
-    case idxSectionHatchIndex:
-      pLayer->SetSectionHatchIndex(val);
-      break;
-    case idxSectionFillRule:
-      pLayer->SetSectionFillRule(ON::SectionFillRuleFromUnsigned(val));
-      break;
     }
   }
 }
@@ -129,7 +115,8 @@ enum LayerBool : int
   idxClipParticipationForAll = 5,
   idxClipParticipationForNone = 6,
   idxModelIsVisible = 7,
-  idxModelPersistentVisibility = 8
+  idxModelPersistentVisibility = 8,
+  idxPerViewportIsVisibleInNewDetails = 9
 };
 
 RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, bool set, bool val)
@@ -153,6 +140,8 @@ RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, b
         pLayer->SetModelVisible(val);
       else if (idxModelPersistentVisibility == which)
         pLayer->SetModelPersistentVisibility(val);
+      else if (idxPerViewportIsVisibleInNewDetails == which)
+        pLayer->SetPerViewportIsVisibleInNewDetails(val);
     }
     else
     {
@@ -181,53 +170,13 @@ RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, b
         rc = pLayer->ModelIsVisible();
       else if (idxModelPersistentVisibility == which)
         rc = pLayer->ModelPersistentVisibility();
+      else if (idxPerViewportIsVisibleInNewDetails == which)
+        rc = pLayer->PerViewportIsVisibleInNewDetails();
     }
   }
   return rc;
 }
 
-enum LayerDouble : int
-{
-  ldSectionHatchScale = 0,
-  ldSectionHatchRotation = 1,
-};
-
-RH_C_FUNCTION double ON_Layer_GetSetDouble(ON_Layer* pLayer, enum LayerDouble which, bool set, double val)
-{
-  double rc = val;
-  if (pLayer)
-  {
-    if (set)
-    {
-      switch (which)
-      {
-      case ldSectionHatchScale:
-        pLayer->SetSectionHatchScale(val);
-        break;
-      case ldSectionHatchRotation:
-        pLayer->SetSectionHatchRotation(val);
-        break;
-      default:
-        break;
-      }
-    }
-    else
-    {
-      switch (which)
-      {
-      case ldSectionHatchScale:
-        rc = pLayer->SectionHatchScale();
-        break;
-      case ldSectionHatchRotation:
-        rc = pLayer->SectionHatchRotation();
-        break;
-      default:
-        break;
-      }
-    }
-  }
-  return rc;
-}
 
 RH_C_FUNCTION void ON_Layer_UnsetPersistentVisibility(ON_Layer* pLayer)
 {
@@ -433,3 +382,24 @@ RH_C_FUNCTION void ON_Layer_DeleteModelVisible(ON_Layer* pLayer)
     pLayer->DeleteModelVisible();
 }
 
+RH_C_FUNCTION ON_SectionStyle* ON_Layer_GetCustomSectionStyle(const ON_Layer* layer)
+{
+  if (layer)
+  {
+    const ON_SectionStyle* sectionstyle = layer->CustomSectionStyle();
+    if (sectionstyle)
+      return new ON_SectionStyle(*sectionstyle);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_Layer_SetCustomSectionStyle(ON_Layer* layer, const ON_SectionStyle* sectionstyle)
+{
+  if (layer)
+  {
+    if (sectionstyle)
+      layer->SetCustomSectionStyle(*sectionstyle);
+    else
+      layer->RemoveCustomSectionStyle();
+  }
+}

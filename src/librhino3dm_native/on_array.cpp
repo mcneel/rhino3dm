@@ -801,6 +801,83 @@ RH_C_FUNCTION void ON_UUIDArray_Delete(ON_SimpleArray<ON_UUID>* p)
     delete p;
 }
 
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION std::vector<ON_UUID>* ON_UUIDVector_New(/*ARRAY*/const ON_UUID* vals, ON__UINT64 count)
+{
+  if (count < 1)
+  {
+    return new std::vector<ON_UUID>();
+  }
+
+  auto rc = new std::vector<ON_UUID>(count, ON_nil_uuid);
+  if (nullptr != vals)
+  {
+    for (ON__UINT64 i = 0; i < count; i++)
+    {
+      (*rc)[i] = *(vals + i);
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_UUIDVector_CopyValues(const std::vector<ON_UUID>* ptr, /*ARRAY*/ON_UUID* vals)
+{
+  if (ptr && vals)
+  {
+    auto count = ptr->size();
+    if (count > 0)
+    {
+      const ON_UUID* source = &(*ptr)[0];
+      ::memcpy(vals, source, count * sizeof(ON_UUID));
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_UUIDVector_Append(std::vector<ON_UUID>* ptr, const ON_UUID uuid)
+{
+  if (ptr)
+    ptr->push_back(uuid);
+}
+
+RH_C_FUNCTION ON__UINT64 ON_UUIDVector_Count(const std::vector<ON_UUID>* ptr)
+{
+  ON__UINT64 rc = 0;
+  if (ptr)
+    rc = ptr->size();
+  return rc;
+}
+
+RH_C_FUNCTION ON_UUID ON_UUIDVector_Get(std::vector<ON_UUID>* ptr, ON__UINT64 index)
+{
+  if (ptr && index >= 0 && index < ptr->size())
+  {
+    return (*ptr)[index];
+  }
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_UUIDVector_Delete(std::vector<ON_UUID>* p)
+{
+  if (p)
+    delete p;
+}
+
+
+
+
+
+
+
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION ON_SimpleArray<ON_UUID*>* ON_UUIDPtrArray_New()

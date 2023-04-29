@@ -41,6 +41,18 @@ namespace Rhino.DocObjects
     {
       return UnsafeNativeMethods.CRhinoLight_InternalCommitChanges;
     }
+
+    public override int Index
+    {
+      get
+      {
+        return LightGeometry.LightIndex;
+      }
+      set
+      {
+        LightGeometry.LightIndex = value;
+      }
+    }
   }
 }
 
@@ -154,7 +166,7 @@ namespace Rhino.DocObjects.Tables
       get
       {
         Runtime.HostUtils.CheckForRdk(true, true);
-        return new Render.Skylight(m_doc.RuntimeSerialNumber);
+        return new Render.Skylight(m_doc);
       }
     }
 
