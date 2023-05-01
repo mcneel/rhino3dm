@@ -17,6 +17,8 @@ ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(std::tuple<int, int> index
   ON_4dPoint pt;
   m_surface->GetCV(std::get<0>(index), std::get<1>(index), pt);
   return pt;
+
+
 }
 
 void BND_NurbsSurfacePointList::SetControlPoint(std::tuple<int, int> index, ON_4dPoint point)
@@ -270,7 +272,7 @@ void initNurbsSurfaceBindings(void*)
     .property("orderV", &BND_NurbsSurface::OrderV)
     .function("knotsU", &BND_NurbsSurface::KnotsU)
     .function("knotsV", &BND_NurbsSurface::KnotsV)
-    .function("points", &BND_NurbsSurface::Points)
+    .function("points", &BND_NurbsSurface::Points, allow_raw_pointers())
     ;
 }
 #endif
