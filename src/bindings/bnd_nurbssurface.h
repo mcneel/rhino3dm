@@ -15,7 +15,7 @@ class BND_NurbsSurfacePointList
   ON_NurbsSurface* m_surface = nullptr;
   int m_direction;
 public:
-  BND_NurbsSurfacePointList(ON_NurbsSurface* nurbscurve, const ON_ModelComponentReference& compref);
+  BND_NurbsSurfacePointList(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference& compref);
   ON_NurbsSurface* GetSurface() { return m_surface; }
   int GetCVDims() { return m_surface->m_is_rat ? m_surface->m_dim + 1 : m_surface->m_dim; }
   int CountU() const { return m_surface->CVCount(0); }
@@ -44,7 +44,7 @@ class BND_NurbsSurfaceKnotList
   ON_NurbsSurface* m_surface = nullptr;
   int m_direction;
 public:
-  BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbscurve, int direction, const ON_ModelComponentReference& compref);
+  BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbssurface, int direction, const ON_ModelComponentReference& compref);
   std::vector<double> ToList();
   ON_NurbsSurface* GetSurface() { return m_surface; }
   int GetDirection() { return m_direction; }
