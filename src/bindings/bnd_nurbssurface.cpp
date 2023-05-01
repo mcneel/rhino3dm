@@ -268,9 +268,9 @@ void initNurbsSurfaceBindings(void*)
     .function("increaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV)
     .property("orderU", &BND_NurbsSurface::OrderU)
     .property("orderV", &BND_NurbsSurface::OrderV)
-    //.property("knotsU", &BND_NurbsSurface::KnotsU)
-    //.property("knotsV", &BND_NurbsSurface::KnotsV)
-    //.property("points", &BND_NurbsSurface::Points)
+    .function("knotsU", &BND_NurbsSurface::KnotsU)
+    .function("knotsV", &BND_NurbsSurface::KnotsV)
+    .function("points", &BND_NurbsSurface::Points)
     ;
 }
 #endif
