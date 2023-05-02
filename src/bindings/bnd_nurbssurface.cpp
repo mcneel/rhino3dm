@@ -7,28 +7,28 @@ BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, c
   m_surface = surface;
 }
 
-ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(std::tuple<int, int> index) const
+ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(int u, int v) const
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
-      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+  if (u >= CountU() || v >= CountV() ||
+      u < 0 || v < 0)
     throw pybind11::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
-  m_surface->GetCV(std::get<0>(index), std::get<1>(index), pt);
+  m_surface->GetCV(u, v, pt);
   return pt;
 
 
 }
 
-void BND_NurbsSurfacePointList::SetControlPoint(std::tuple<int, int> index, ON_4dPoint point)
+void BND_NurbsSurfacePointList::SetControlPoint(int u, int v, ON_4dPoint point)
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
-      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+  if (u >= CountU() || v >= CountV() ||
+     u < 0 || v < 0)
     throw pybind11::index_error("list index out of range");
 #endif
-  m_surface->SetCV(std::get<0>(index), std::get<1>(index), point);
+  m_surface->SetCV(u, v, point);
 }
 
 BND_NurbsSurfaceKnotList::BND_NurbsSurfaceKnotList(ON_NurbsSurface* surface, int direction, const ON_ModelComponentReference& compref)
