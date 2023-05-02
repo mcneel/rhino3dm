@@ -21,12 +21,13 @@ public:
   int CountU() const { return m_surface->CVCount(0); }
   int CountV() const { return m_surface->CVCount(1); }
   int Count() const { return CountU() * CountV(); }
-  ON_4dPoint GetControlPoint(int u, int v) const;
-  //public bool GetPoint(int index, out Point3d point)
+  ON_4dPoint GetControlPoint1(std::tuple<int, int> index) const;
+  ON_4dPoint GetControlPoint2(int u, int v) const;
+  void SetControlPoint1(std::tuple<int, int> index, ON_4dPoint point);
+  void SetControlPoint2(int u, int v, ON_4dPoint point);
   ON_3dPoint GetPoint(int u, int v) const;
   //public bool GetPoint(int index, out Point4d point)
   //same as GetControlPoint ON_4dPoint GetPoint2(int u, int v) const;
-  void SetControlPoint(int u, int v, ON_4dPoint point);
   //class BND_Polyline* ControlPolygon() const;
   bool MakeRational() { return m_surface->MakeRational(); }
   bool MakeNonRational() { return m_surface->MakeNonRational(); }
