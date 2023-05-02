@@ -17,8 +17,18 @@ ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(int u, int v) const
   ON_4dPoint pt;
   m_surface->GetCV(u, v, pt);
   return pt;
+}
 
-
+ON_3dPoint BND_NurbsSurfacePointList::GetPoint(int u, int v) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (u >= CountU() || v >= CountV() ||
+      u < 0 || v < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  ON_3dPoint pt;
+  m_surface->GetCV(u, v, pt);
+  return pt;
 }
 
 void BND_NurbsSurfacePointList::SetControlPoint(int u, int v, ON_4dPoint point)
@@ -252,6 +262,7 @@ void initNurbsSurfaceBindings(void*)
     .property("countU", &BND_NurbsSurfacePointList::CountU)
     .property("countV", &BND_NurbsSurfacePointList::CountV)
     .function("get", &BND_NurbsSurfacePointList::GetControlPoint)
+    .function("getPoint", &BND_NurbsSurfacePointList::GetPoint)
     .function("set", &BND_NurbsSurfacePointList::SetControlPoint)
     .function("makeRational", &BND_NurbsSurfacePointList::MakeRational)
     .function("makeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
