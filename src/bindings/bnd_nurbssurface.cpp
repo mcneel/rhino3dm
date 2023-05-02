@@ -199,6 +199,8 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
     .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
     .def("__getitem__", &BND_NurbsSurfacePointList::GetControlPoint)
+    .def("GetPoint", &BND_NurbsSurfacePointList::GetPoint, py::arg("u"), py::arg("v") )
+    .def("GetControlPoint", &BND_NurbsSurfacePointList::GetControlPoint, py::arg("u"), py::arg("v") )
     .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint)
     .def_buffer([](BND_NurbsSurfacePointList& pl) -> py::buffer_info
     {
