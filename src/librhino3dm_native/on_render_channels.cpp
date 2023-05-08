@@ -1,87 +1,39 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_RenderChannels* ON_3dmRenderSettings_GetRenderChannels(const ON_3dmRenderSettings* rs)
+static ON_RenderChannels::Modes Mode(int m)
 {
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
+  return ON_RenderChannels::Modes(m);
 }
 
-RH_C_FUNCTION ON_RenderChannels* ON_3dmRenderSettings_BeginChange_ON_RenderChannels(const ON_3dmRenderSettings* rs)
-{
-  return &ON_3dmRenderSettings_BeginChange(rs).RenderChannels();
-}
-
-RH_C_FUNCTION const ON_RenderChannels* ON_RenderChannels_FromDocSerial(unsigned int rhino_doc_sn)
-{
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
-}
-
-RH_C_FUNCTION const ON_RenderChannels* ON_RenderChannels_FromONX_Model(ONX_Model* ptrModel)
+RH_C_FUNCTION int ON_RenderChannels_GetMode(const ONX_Model* ptrModel)
 {
   if (nullptr == ptrModel)
-    return nullptr;
+    return -1;
 
-  return &ptrModel->m_settings.m_RenderSettings.RenderChannels();
+  return int(ptrModel->m_settings.m_RenderSettings.RenderChannels().Mode());
 }
 
-RH_C_FUNCTION int ON_RenderChannels_Mode(const ON_RenderChannels* p)
+RH_C_FUNCTION void ON_RenderChannels_SetMode(ONX_Model* ptrModel, int m)
 {
-  if (nullptr != p)
+  if (nullptr != ptrModel)
   {
-    return int(p->Mode());
-  }
-
-  return int(ON_RenderChannels::Modes::Automatic);
-}
-
-RH_C_FUNCTION void ON_RenderChannels_SetMode(ON_RenderChannels* p, int m)
-{
-  if (nullptr != p)
-  {
-    p->SetMode(ON_RenderChannels::Modes(m));
+    ptrModel->m_settings.m_RenderSettings.RenderChannels().SetMode(Mode(m));
   }
 }
 
-RH_C_FUNCTION void ON_RenderChannels_GetCustomList(const ON_RenderChannels* p, ON_SimpleArray<UUID>* paChan)
+RH_C_FUNCTION void ON_RenderChannels_GetCustomList(const ONX_Model* ptrModel, ON_SimpleArray<ON_UUID>* list)
 {
-  if ((nullptr != p) && (nullptr != paChan))
+  if ((nullptr != ptrModel) && (nullptr != list))
   {
-    p->GetCustomList(*paChan);
+    ptrModel->m_settings.m_RenderSettings.RenderChannels().GetCustomList(*list);
   }
 }
 
-RH_C_FUNCTION void ON_RenderChannels_SetCustomList(ON_RenderChannels* p, const ON_SimpleArray<UUID>* paChan)
+RH_C_FUNCTION void ON_RenderChannels_SetCustomList(ONX_Model* ptrModel, const ON_SimpleArray<ON_UUID>* list)
 {
-  if ((nullptr != p) && (nullptr != paChan))
+  if ((nullptr != ptrModel) && (nullptr != list))
   {
-    p->SetCustomList(*paChan);
-  }
-}
-
-RH_C_FUNCTION ON_RenderChannels* ON_RenderChannels_New()
-{
-  return new ON_RenderChannels;
-}
-
-RH_C_FUNCTION void ON_RenderChannels_Delete(ON_Skylight* p)
-{
-  delete p;
-}
-
-RH_C_FUNCTION void ON_RenderChannels_CopyFrom(ON_Skylight* target, const ON_Skylight* source)
-{
-  if ((nullptr != target) && (nullptr != source))
-  {
-    *target = *source;
+    ptrModel->m_settings.m_RenderSettings.RenderChannels().SetCustomList(*list);
   }
 }
