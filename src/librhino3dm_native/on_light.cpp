@@ -23,13 +23,16 @@ RH_C_FUNCTION int ON_Light_GetInt(const ON_Light* pConstLight, int which)
 {
   const int idxLightStyle = 0;
   const int idxCoordinateSystem = 1;
+  const int idxLightIndex = 2;
   int rc = 0;
   if( pConstLight )
   {
-    if( idxLightStyle==which )
+    if (idxLightStyle == which)
       rc = (int)(pConstLight->Style());
-    else if(idxCoordinateSystem==which)
+    else if (idxCoordinateSystem == which)
       rc = (int)(pConstLight->CoordinateSystem());
+    else if (idxLightIndex == which)
+      rc = (int)(pConstLight->LightIndex());
   }
   return rc;
 }
@@ -37,10 +40,14 @@ RH_C_FUNCTION int ON_Light_GetInt(const ON_Light* pConstLight, int which)
 RH_C_FUNCTION void ON_Light_SetInt(ON_Light* pLight, int which, int val)
 {
   const int idxLightStyle = 0;
+  const int idxCoordinateSystem = 1;
+  const int idxLightIndex = 2;
   if( pLight )
   {
     if( idxLightStyle==which )
       pLight->SetStyle(ON::LightStyle(val));
+    if (idxLightIndex == which)
+      pLight->SetLightIndex(val);
   }
 }
 

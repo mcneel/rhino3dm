@@ -14,6 +14,19 @@ RH_C_FUNCTION double ONC_UnitScale(ON::LengthUnitSystem usFrom, ON::LengthUnitSy
   return ON::UnitScale(usFrom, usTo);
 }
 
+RH_C_FUNCTION double ONC_UnitScale2(ON::LengthUnitSystem usFrom, double mpuFrom, ON::LengthUnitSystem usTo, double mpuTo)
+{
+  ON_UnitSystem us_from(usFrom);
+  if (us_from.UnitSystem()  == ON::LengthUnitSystem::CustomUnits)
+    us_from.SetCustomUnitSystem(L"from", mpuFrom);
+
+  ON_UnitSystem us_to(usTo);
+  if (us_to.UnitSystem() == ON::LengthUnitSystem::CustomUnits)
+    us_to.SetCustomUnitSystem(L"to", mpuTo);
+
+  return ON::UnitScale(us_from, us_to);
+}
+
 RH_C_FUNCTION double ONC_MetersPerUnit(ON::LengthUnitSystem us)
 {
   ON_UnitSystem unitSystem(us);
