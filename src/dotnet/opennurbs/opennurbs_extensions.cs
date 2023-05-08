@@ -2466,9 +2466,6 @@ namespace Rhino.FileIO
       case ModelComponentType.RenderContent:
         return NewFile3dmRenderContent(parent, id);
 
-      case ModelComponentType.PostEffect:
-        return new File3dmPostEffect(parent, id);
-
       case ModelComponentType.TextureMapping:
       case ModelComponentType.HistoryRecord: // Not yet ON_ModelComponent derived
         // Continues to default...
