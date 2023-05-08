@@ -142,6 +142,7 @@ namespace Rhino.Geometry
 
     const int idxLightStyle = 0;
     const int idxCoordinateSystem = 1;
+    const int idxLightIndex = 2;
     int GetInt(int which)
     {
       IntPtr pConstThis = ConstPointer();
@@ -161,6 +162,15 @@ namespace Rhino.Geometry
     {
       get { return (LightStyle)GetInt(idxLightStyle); }
       set { SetInt(idxLightStyle, (int)value); }
+    }
+
+    /// <summary>
+    /// Calls ON_Light::LightIndex etc
+    /// </summary>
+    internal int LightIndex
+    {
+      get { return GetInt(idxLightIndex); }
+      set {  SetInt(idxLightIndex, value); }
     }
 
     /// <summary>
@@ -236,7 +246,7 @@ namespace Rhino.Geometry
       {
         Runtime.HostUtils.CheckForRdk(true, true);
         var pointer = ConstPointer();
-        return (UnsafeNativeMethods.RdkRhCmn_RhRdkIsSunLight(pointer) != 0);
+        return (UnsafeNativeMethods.RhRdk_ON_Light_IsSunLight(pointer) != 0);
       }
     }
 #endif

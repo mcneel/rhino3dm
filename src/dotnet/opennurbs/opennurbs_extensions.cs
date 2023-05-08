@@ -118,13 +118,6 @@ namespace Rhino.FileIO
     File3dmRenderMaterials m_render_materials;
     File3dmRenderEnvironments m_render_environments;
     File3dmRenderTextures m_render_textures;
-    File3dmGroundPlane m_ground_plane;
-    File3dmSafeFrame m_safe_frame;
-    File3dmSkylight m_skylight;
-    File3dmDithering m_dithering;
-    File3dmRenderChannels m_render_channels;
-    File3dmLinearWorkflow m_linear_workflow;
-    File3dmSun m_sun;
 
     internal IntPtr ConstPointer()
     {
@@ -1160,69 +1153,6 @@ namespace Rhino.FileIO
     public File3dmRenderTextures RenderTextures
     {
       get { return m_render_textures ?? (m_render_textures = new File3dmRenderTextures(this)); }
-    }
-
-    /// <summary>
-    /// The ground plane in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmGroundPlane GroundPlane
-    {
-      get { return m_ground_plane ?? (m_ground_plane = new File3dmGroundPlane(this)); }
-    }
-
-    /// <summary>
-    /// The safe frame in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmSafeFrame SafeFrame
-    {
-      get { return m_safe_frame ?? (m_safe_frame = new File3dmSafeFrame(this)); }
-    }
-
-    /// <summary>
-    /// The skylight in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmSkylight Skylight
-    {
-      get { return m_skylight ?? (m_skylight = new File3dmSkylight(this)); }
-    }
-
-    /// <summary>
-    /// The dithering in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmDithering Dithering
-    {
-      get { return m_dithering ?? (m_dithering = new File3dmDithering(this)); }
-    }
-
-    /// <summary>
-    /// The render channels in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmRenderChannels RenderChannels
-    {
-      get { return m_render_channels ?? (m_render_channels = new File3dmRenderChannels(this)); }
-    }
-
-    /// <summary>
-    /// The linear workflow in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmLinearWorkflow LinearWorkflow
-    {
-      get { return m_linear_workflow ?? (m_linear_workflow = new File3dmLinearWorkflow(this)); }
-    }
-
-    /// <summary>
-    /// The sun in this file.
-    /// </summary>
-    /// <since>8.0</since>
-    public File3dmSun Sun
-    {
-      get { return m_sun ?? (m_sun = new File3dmSun(this)); }
     }
 
 #region diagnostic dumps
