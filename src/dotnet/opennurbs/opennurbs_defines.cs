@@ -358,7 +358,9 @@ namespace Rhino
       return rc;
     }
 
-    /// <summary>Computes the scale factor for changing the measurements unit systems.</summary>
+    /// <summary> 
+    /// Computes the scale factor for changing the measurements unit systems.
+    /// </summary>
     /// <param name="from">The system to convert from.</param>
     /// <param name="to">The system to convert measurements into.</param>
     /// <returns>A scale multiplier.</returns>
@@ -366,6 +368,20 @@ namespace Rhino
     public static double UnitScale(UnitSystem from, UnitSystem to)
     {
       return UnsafeNativeMethods.ONC_UnitScale(from, to);
+    }
+
+    /// <summary>
+    /// Computes the scale factor for changing the measurements unit systems.
+    /// </summary>
+    /// <param name="from">The system to convert from.</param>
+    /// <param name="fromMetersPerUnit">For custom units, specify the meters per unit.</param>
+    /// <param name="to">The system to convert measurements into.</param>
+    /// <param name="toMetersPerUnit">For custom units, specify the meters per unit.</param>
+    /// <returns>A scale multiplier.</returns>
+    /// <since>8.0</since>
+    public static double UnitScale(UnitSystem from, double fromMetersPerUnit, UnitSystem to, double toMetersPerUnit)
+    {
+      return UnsafeNativeMethods.ONC_UnitScale2(from, fromMetersPerUnit, to, toMetersPerUnit);
     }
 
     /// <summary>

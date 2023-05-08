@@ -133,9 +133,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public override ModelComponentType ComponentType
     {
-      get { return ModelComponentType.PostEffect; }
+      get { return ModelComponentType.ObsoleteValue; }
     }
-
+    
     /// <summary/>
     internal override IntPtr _InternalGetConstPointer()
     {

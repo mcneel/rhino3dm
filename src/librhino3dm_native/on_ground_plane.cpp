@@ -136,15 +136,15 @@ RH_C_FUNCTION bool ON_GroundPlane_GetTextureRepeatLocked(const ONX_Model* ptrMod
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.GroundPlane().TextureRepeatLocked();
+  return false;// ptrModel->m_settings.m_RenderSettings.GroundPlane().TextureRepeatLocked();
 }
 
 RH_C_FUNCTION void ON_GroundPlane_SetTextureRepeatLocked(ONX_Model* ptrModel, bool b)
 {
-  if (nullptr != ptrModel)
-  {
-    ptrModel->m_settings.m_RenderSettings.GroundPlane().SetTextureRepeatLocked(b);
-  }
+  //if (nullptr != ptrModel)
+  //{
+  //  ptrModel->m_settings.m_RenderSettings.GroundPlane().SetTextureRepeatLocked(b);
+  //}
 }
 
 RH_C_FUNCTION bool ON_GroundPlane_GetTextureSize(const ONX_Model* ptrModel, ON_2dVector* vec)

@@ -1172,9 +1172,19 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Instructs Rhino to print way way too much information regarding intersections.
     /// </summary>
-    internal static bool PrintMeshIntersectionErrors
+    internal static bool PrintMoreMeshIntersectionInfo
     {
-      get; set;
+      get { return GetSet_MX_DebugOptions(2, true, default); }
+      set { GetSet_MX_DebugOptions(2, false, value); }
+    }
+
+    /// <summary>
+    /// Silence any error, do not print to command line, do not report progress, no cancellation possibility, no command interactions
+    /// </summary>
+    internal static bool MeshIntersectionExecutionSilence
+    {
+      get { return GetSet_MX_DebugOptions(0, true, default); }
+      set { GetSet_MX_DebugOptions(0, false, value); }
     }
 
     private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "MeshIntersections.RequestedDiminishTolerancesCoefficient";

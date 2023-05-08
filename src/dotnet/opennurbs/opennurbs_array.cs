@@ -2586,6 +2586,139 @@ namespace Rhino.Runtime.InteropWrappers
 #endif
   }
 
+  /// <summary>
+  /// Wrapper for std::vector&lt;ON_UUID&gt;. If you are not writing C++ code
+  /// then this class is not for you.
+  /// </summary>
+  public class StdVectorGuid : IDisposable
+  {
+    internal bool DontDelete { get; set; }
+    internal IntPtr m_ptr; // std::vector<ON_UUID>
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this vector.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>5.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this vector.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>5.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorGuid"/> class.
+    /// </summary>
+    /// <since>5.0</since>
+    public StdVectorGuid()
+    {
+      m_ptr = UnsafeNativeMethods.ON_UUIDVector_New(null, 0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="StdVectorGuid"/> class
+    /// </summary>
+    /// <param name="values">initial set of Guids to add to the array</param>
+    /// <since>7.0</since>
+    public StdVectorGuid(IEnumerable<Guid> values)
+    {
+      if (values == null)
+      {
+        m_ptr = UnsafeNativeMethods.ON_UUIDVector_New(null, 0);
+      }
+      else
+      {
+        var list_values = new List<Guid>(values);
+        Guid[] array_values = list_values.ToArray();
+        m_ptr = UnsafeNativeMethods.ON_UUIDVector_New(array_values, (ulong)list_values.Count);
+      }
+    }
+
+    /// <summary>
+    /// Get the Guid at index
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    [CLSCompliant(false)]
+    public Guid this[ulong index]
+    {
+      get { return UnsafeNativeMethods.ON_UUIDVector_Get(m_ptr, index); }
+    }
+
+    /// <summary>
+    /// Appends a new <see cref="Guid"/> at the end of this vector.
+    /// </summary>
+    /// <since>6.0</since>
+    public void Append(Guid uuid)
+    {
+      var non_const_ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_UUIDVector_Append(non_const_ptr, uuid);
+    }
+
+    // Create a StdVectorGuid from a pointer owned elsewhere. Need
+    // to ensure that pointer isn't deleted on Disposal of this vector
+    internal StdVectorGuid(IntPtr ptr)
+    {
+      m_ptr = ptr;
+      DontDelete = true;
+    }
+
+    /// <summary>
+    /// Gets the amount of elements in this vector.
+    /// </summary>
+    /// <since>5.0</since>
+    [CLSCompliant(false)]
+    public ulong Count
+    {
+      get { return UnsafeNativeMethods.ON_UUIDVector_Count(m_ptr); }
+    }
+
+    /// <summary>
+    /// Returns the managed counterpart of the unmanaged vector.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>5.0</since>
+    public Guid[] ToArray()
+    {
+      var count = Count;
+      if (count == 0)
+        return new Guid[0];
+
+      Guid[] rc = new Guid[count];
+      UnsafeNativeMethods.ON_UUIDVector_CopyValues(m_ptr, rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~StdVectorGuid()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>5.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        if (!DontDelete) UnsafeNativeMethods.ON_UUIDVector_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
 
 
   /// <summary>

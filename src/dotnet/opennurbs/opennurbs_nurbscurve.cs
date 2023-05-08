@@ -247,6 +247,22 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Creates a parabola from three points.
+    /// </summary>
+    /// <param name="startPoint">The start point.</param>
+    /// <param name="innerPoint">A point on the curve.</param>
+    /// <param name="endPoint">The end point</param>
+    /// <returns>A 2 degree NURBS curve if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public static NurbsCurve CreateParabolaFromPoints(Point3d startPoint, Point3d innerPoint, Point3d endPoint)
+    {
+      IntPtr ptr_nurbs_curve = UnsafeNativeMethods.RHC_RhinoCreateParabolaFromPoints(startPoint, innerPoint, endPoint);
+      if (ptr_nurbs_curve == IntPtr.Zero)
+        return null;
+      return CreateGeometryHelper(ptr_nurbs_curve, null) as NurbsCurve;
+    }
+
+    /// <summary>
     /// Create a uniform non-rational cubic NURBS approximation of an arc.
     /// </summary>
     /// <param name="arc"></param>

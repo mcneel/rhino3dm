@@ -23,17 +23,26 @@
 
 #endif //(_WIN32) && !(RHINO3DM_BUILD)
 
-#if defined (__APPLE__) && !defined(RHINO3DM_BUILD)
-#define RHINO_SDK_MFC
-#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
-#include "../../../rhino4/AfxMac.h"
-#include "../../../rhino4/MacOS/MacHelpers.h"
-#endif
 
 #if !defined(RHINO3DM_BUILD)
 
 #if defined(_WIN32)
 #include "../../../rhino4/SDK/inc/RhinoSdkUiFile.h"
+#endif
+
+#if defined (__linux__) || defined(__ANDROID__) || defined(ANDROID)
+#define RHINO_SDK_MFC
+#define OPENNURBS_PLUS
+#define ON_RUNTIME_LINUX
+#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
+#include "../../../rhino4/AfxLinux.h"
+#endif
+
+#if defined (__APPLE__)
+#define RHINO_SDK_MFC
+#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
+#include "../../../rhino4/AfxMac.h"
+#include "../../../rhino4/MacOS/MacHelpers.h"
 #endif
 
 #else

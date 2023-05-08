@@ -64,7 +64,7 @@ RH_C_FUNCTION bool ON_Sun_GetVector(const ONX_Model* ptrModel, ON_3dVector* vec)
   if ((nullptr == ptrModel) || (nullptr == vec))
     return false;
 
-  *vec = ptrModel->m_settings.m_RenderSettings.Sun().Vector();
+  //*vec = ptrModel->m_settings.m_RenderSettings.Sun().Vector();
 
   return true;
 }
@@ -195,7 +195,7 @@ RH_C_FUNCTION void ON_Sun_SetVector(ONX_Model* ptrModel, const ON_3dVector* vec)
 {
   if ((nullptr != ptrModel) && (nullptr != vec))
   {
-    ptrModel->m_settings.m_RenderSettings.Sun().SetVector(*vec);
+    //ptrModel->m_settings.m_RenderSettings.Sun().SetVector(*vec);
   }
 }
 

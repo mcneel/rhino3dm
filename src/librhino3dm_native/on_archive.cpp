@@ -2438,10 +2438,10 @@ RH_C_FUNCTION void ONX_Model_SetRevision(ONX_Model* pModel, int rev)
 
 RH_C_FUNCTION ON_3dmSettings* ONX_Model_3dmSettingsPointer(ONX_Model* pModel)
 {
-  ON_3dmSettings* rc = nullptr;
-  if( pModel )
-    rc = &(pModel->m_settings);
-  return rc;
+  if (nullptr == pModel)
+    return nullptr;
+
+  return &pModel->m_settings;
 }
 
 RH_C_FUNCTION ON_3dmView* ONX_Model_ViewPointer(ONX_Model* pModel, ON_UUID id, const ON_3dmView* pConstView, bool named_view_table)

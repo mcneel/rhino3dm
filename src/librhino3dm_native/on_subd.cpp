@@ -116,9 +116,40 @@ RH_C_FUNCTION bool ON_SubD_GlobalSubdivide(ON_SubD* subd, unsigned int level)
 {
   bool rc = false;
   if (subd && level > 0)
+  {
+    const unsigned int old_face_count = subd->FaceCount();
     rc = subd->GlobalSubdivide(level);
+    if (rc && old_face_count < subd->FaceCount())
+    {
+      subd->ClearLowerSubdivisionLevels(subd->ActiveLevelIndex());
+#if !defined(RHINO3DM_BUILD)
+      if (subd->Symmetry().IsSet())
+        subd->ClearEvaluationCache();
+#endif
+    }
+  }
   return rc;
 }
+
+RH_C_FUNCTION bool ON_SubD_LocalSubdivide(ON_SubD* subd, const ON_SimpleArray<ON_COMPONENT_INDEX>* componentIndices)
+{
+  bool rc = false;
+  if (subd && componentIndices)
+  {
+    const unsigned int old_face_count = subd->FaceCount();
+    rc = subd->LocalSubdivide(*componentIndices);
+    if (rc && old_face_count < subd->FaceCount())
+    {
+      subd->ClearLowerSubdivisionLevels(subd->ActiveLevelIndex());
+#if !defined(RHINO3DM_BUILD)
+      if (subd->Symmetry().IsSet())
+        subd->ClearEvaluationCache();
+#endif
+    }
+  }
+  return rc;
+}
+
 
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ON_SubD_InterpolateSurfacePoints(ON_SubD* subd, int count, /*ARRAY*/const ON_3dPoint* points)
@@ -844,11 +875,28 @@ RH_C_FUNCTION void ON_SubDFace_ComponentIndex(const ON_SubDFace* constFacePtr, O
 }
 
 #if !defined(RHINO3DM_BUILD)
+
 RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
 {
   if (constFace && pPointOut)
   {
     *pPointOut = constFace->SurfaceCenterPoint();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_SurfaceCenterFrame(const ON_SubDFace* constFace, ON_PLANE_STRUCT* pPlaneOut)
+{
+  if (constFace && pPlaneOut)
+  {
+    CopyToPlaneStruct(*pPlaneOut, constFace->SurfaceCenterFrame());
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_ControlNetCenterFrame(const ON_SubDFace* constFace, ON_PLANE_STRUCT* pPlaneOut)
+{
+  if (constFace && pPlaneOut)
+  {
+    CopyToPlaneStruct(*pPlaneOut, constFace->ControlNetCenterFrame());
   }
 }
 
