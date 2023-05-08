@@ -1,5 +1,6 @@
 using System;
 
+#if RHINO_SDK
 namespace Rhino.Runtime
 {
   /// <summary>
@@ -51,3 +52,4 @@ namespace Rhino.Runtime
     }
   }
 }
+#endif
