@@ -2008,6 +2008,19 @@ namespace Rhino.Input.Custom
         }
         return values[index];
     }
+
+    /// <summary>
+    /// Sets a command line option value to print "Varies" instead of the regular value. 
+    /// </summary>
+    /// <param name="optionIndex">The option index.</param>
+    /// <param name="varies">True to print "Varies", false to print the option's current value.</param>
+    /// <since>8.0</since>
+    public void SetOptionVaries(int optionIndex, bool varies)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoGet_SetOptionVaries(ptr_this, optionIndex, varies);
+    }
+
     /// <summary>Clear all command options.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_arraybydistance.vb' lang='vbnet'/>

@@ -395,53 +395,38 @@ namespace Rhino.DocObjects
       }
     }
 
-    /// <summary>
-    /// Rule to use for determining if a section on an object should have a fill/hatch
-    /// </summary>
+    ///<summary>
+    /// Get an optional custom section style associated with these attributes.
+    ///</summary>
     /// <since>8.0</since>
-    public ObjectSectionFillRule SectionFillRule
+    public SectionStyle GetCustomSectionStyle()
     {
-      get
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_3dmObjectAttributes_GetCustomSectionStyle(const_ptr_this);
+      if (ptr_sectionstyle == IntPtr.Zero)
+        return null;
+      return new SectionStyle(ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void SetCustomSectionStyle(SectionStyle sectionStyle)
+    {
+      if (sectionStyle == null)
       {
-        int rc = GetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionFillRule);
-        return (ObjectSectionFillRule)rc;
+        RemoveCustomSectionStyle();
+        return;
       }
-      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionFillRule, (int)value); }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
     }
 
-    /// <summary>
-    /// Hatch pattern index for hatch to use when drawing a closed section
-    /// Default is RhinoMath.UnsetIntIndex which means don't draw a hatch
-    /// </summary>
     /// <since>8.0</since>
-    public int SectionHatchIndex
+    public void RemoveCustomSectionStyle()
     {
-      get
-      {
-        int rc = GetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionHatchIndex);
-        return rc;
-      }
-      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionHatchIndex, value); }
-    }
-
-    /// <summary>
-    /// Scale applied to the hatch pattern for a section
-    /// </summary>
-    /// <since>8.0</since>
-    public double SectionHatchScale
-    {
-      get { return GetDouble(UnsafeNativeMethods.ObjectAttrsDouble.SectionHatchScale); }
-      set { SetDouble(UnsafeNativeMethods.ObjectAttrsDouble.SectionHatchScale, value); }
-    }
-
-    /// <summary>
-    /// Rotation angle in radians applied to hatch pattern for a section.
-    /// </summary>
-    /// <since>8.0</since>
-    public double SectionHatchRotationRadians
-    {
-      get { return GetDouble(UnsafeNativeMethods.ObjectAttrsDouble.SectionHatchRotation); }
-      set { SetDouble(UnsafeNativeMethods.ObjectAttrsDouble.SectionHatchRotation, value); }
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
     }
 
     /// <summary>
@@ -488,6 +473,10 @@ namespace Rhino.DocObjects
       set { SetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible, value); }
     }
 
+    ///<summary>
+    /// Get an optional custom linetype associated with these attributes. If null,
+    /// then the attributes use the linetype index to determine it's linetype
+    ///</summary>
     /// <since>8.0</since>
     public Linetype GetCustomLinetype()
     {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Rhino.Geometry;
+using Rhino.Runtime;
 
 namespace Rhino
 {
@@ -13,6 +14,7 @@ namespace Rhino
     /// </summary>
     internal static void SetHooks()
     {
+      AdvancedSettings.Initialize();
       UnsafeNativeMethods.CRhCmnPersistentSettingHooks_SetHooks(CreateHook,
                                                                 SaveHook,
                                                                 FlushSavedHook,
@@ -54,7 +56,8 @@ namespace Rhino
                                                                 GetStringListHook,
                                                                 GetStringDictionaryHook,
                                                                 GetGuidHook,
-                                                                GetPoint3DHook
+                                                                GetPoint3DHook,
+                                                                DarkModeHook
                                                                );
       // This is used to turn on WIP features for McNeel testing only.
       Runtime.HostUtils.RegisterNamedCallback("RhinoApp.IsLoggedInAsMcNeelUser", (s, e) => e.Set("result", RhinoApp.IsLoggedInAsMcNeelUser));
@@ -959,6 +962,9 @@ namespace Rhino
         return 0;
       }
     }
+
+    internal delegate bool DarkModeDelegate(bool value, bool set);
+    internal static DarkModeDelegate DarkModeHook = AdvancedSettings.SetGetDarkModeHook;
 
     internal delegate int GetPoint3DDelegate(uint pointerId, IntPtr keyString, ref Point3d value, bool useDefault, ref Point3d defaultValue, IntPtr legacyKeyList, int count);
     internal static GetPoint3DDelegate GetPoint3DHook = GetPoint3D;

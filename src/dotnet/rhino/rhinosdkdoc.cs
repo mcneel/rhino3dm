@@ -1865,12 +1865,14 @@ namespace Rhino
     /// Access to the current environment for various uses
     /// </summary>
     /// <since>6.0</since>
+    [Obsolete("Please use Rhino.Render.RenderSettings methods")]
     public ICurrentEnvironment CurrentEnvironment => new CurrentEnvironmentImpl(RuntimeSerialNumber);
 
     /// <summary>
     /// Access to the post effects
     /// </summary>
     /// <since>7.0</since>
+    [Obsolete("Please use Rhino.Render.RenderSettings methods")]
     public IPostEffects PostEffects => new PostEffectsImpl(RuntimeSerialNumber);
 
     /// <summary>
@@ -2059,12 +2061,13 @@ namespace Rhino
       return boundingBox.IsValid;
     }
 
-
-
     private GroundPlane m_ground_plane;
+
     /// <summary>Gets the ground plane of this document.</summary>
     /// <exception cref="Rhino.Runtime.RdkNotLoadedException">If the RDK is not loaded.</exception>
     /// <since>5.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public GroundPlane GroundPlane
     {
       get
@@ -3796,6 +3799,7 @@ namespace Rhino
 
     #region Linetype table event
     private static RhinoTableCallback g_on_linetype_table_event_callback;
+    private static GCHandle g_linetype_callback_gchandle;
     private static void OnLinetypeTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       if (m_linetype_table_event != null)
@@ -3826,6 +3830,8 @@ namespace Rhino
           if (m_linetype_table_event == null)
           {
             g_on_linetype_table_event_callback = OnLinetypeTableEvent;
+            g_linetype_callback_gchandle = GCHandle.Alloc(g_on_linetype_table_event_callback);
+
             UnsafeNativeMethods.CRhinoEventWatcher_SetLinetypeTableEventCallback(g_on_linetype_table_event_callback, Runtime.HostUtils.m_ew_report);
           }
           // ReSharper disable once DelegateSubtraction - okay for single value
@@ -3843,6 +3849,10 @@ namespace Rhino
           {
             UnsafeNativeMethods.CRhinoEventWatcher_SetDimStyleTableEventCallback(null, Runtime.HostUtils.m_ew_report);
             g_on_linetype_table_event_callback = null;
+            if (g_linetype_callback_gchandle.IsAllocated)
+            {
+              g_linetype_callback_gchandle.Free();
+            }
           }
         }
       }

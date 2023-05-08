@@ -1,10 +1,6 @@
 #pragma once
 
-#if defined(CMAKE_BUILD)
-#pragma comment(lib, "Shlwapi.lib")
-#endif
-
-#if !defined(__APPLE__) && !defined(__ANDROID__) && !defined(CMAKE_BUILD)
+#if !defined(__APPLE__) && !defined(__ANDROID__)
 
 #if defined(RHINO3DM_BUILD)
 

@@ -1,3 +1,4 @@
+
 using System;
 using System.IO;
 using Rhino.Geometry;
@@ -365,8 +366,8 @@ namespace Rhino.DocObjects
     {
       if (m_ptr != IntPtr.Zero)
         return m_ptr;
-      FileIO.File3dm parent_file = m_parent as FileIO.File3dm;
-      if (parent_file != null)
+
+      if (m_parent is FileIO.File3dm parent_file)
       {
         IntPtr ptr_const_parent_file = parent_file.ConstPointer();
         return UnsafeNativeMethods.ONX_Model_ViewPointer(ptr_const_parent_file, m_id, m_ptr, m_named_view_table);
@@ -374,8 +375,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
       if (m_index >= 0)
       {
-        RhinoDoc doc = m_parent as RhinoDoc;
-        if (doc != null)
+        if (m_parent is RhinoDoc doc)
           return UnsafeNativeMethods.CRhinoDocProperties_GetNamedView(doc.RuntimeSerialNumber, m_index);
       }
 #endif
@@ -384,8 +384,7 @@ namespace Rhino.DocObjects
 
     internal IntPtr NonConstPointer()
     {
-      FileIO.File3dm parent_file = m_parent as FileIO.File3dm;
-      if (parent_file != null)
+      if (m_parent is FileIO.File3dm parent_file)
       {
         IntPtr ptr_const_parent_file = parent_file.ConstPointer();
         return UnsafeNativeMethods.ONX_Model_ViewPointer(ptr_const_parent_file, m_id, m_ptr, m_named_view_table);
@@ -1126,7 +1125,7 @@ namespace Rhino.DocObjects
   public class AnimationProperties : IDisposable
   {
     IntPtr m_ptr = IntPtr.Zero; // ON_3dmAnimationProperties*
-    bool m_delete = true;
+    readonly bool m_delete = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimationProperties"/> class.
@@ -2010,7 +2009,7 @@ namespace Rhino.Render
     };
 
     /// <summary> Initialize new instance of the RenderSettings class. </summary>
-    /// <param name="source">If not null, settings are copied from source</param>
+    /// <param name="source">If not null, settings are copied from source.</param>
     /// <since>6.0</since>
     public RenderSettings(RenderSettings source)
     {
@@ -2019,7 +2018,7 @@ namespace Rhino.Render
       ConstructNonConstObject(ptr_this);
     }
 
-    /// <summary> Initialize a new instance of the RenderSettings class. </summary>
+    /// <summary> Initialize a new instance of the RenderSettings class.</summary>
     /// <since>5.0</since>
     public RenderSettings()
     {
@@ -2083,6 +2082,7 @@ namespace Rhino.Render
       int argb = UnsafeNativeMethods.ON_3dmRenderSettings_GetColor(ptr_const_this, which);
       return System.Drawing.Color.FromArgb(argb);
     }
+
     void SetColor(UnsafeNativeMethods.RenderSettingColor which, System.Drawing.Color c)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -2363,7 +2363,9 @@ namespace Rhino.Render
 
 #if RHINO_SDK
     /// <summary>
-    /// Get the document linear workflow interface
+    /// If this object is associated with a document, this gets the document linear workflow.
+    /// If this object is associated with a File3dm, this gets the File3dm's linear workflow.
+    /// Otherwise it gets a 'free-floating' linear workflow object.
     /// </summary>
     /// <since>6.0</since>
     public LinearWorkflow LinearWorkflow
@@ -2377,7 +2379,9 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Get the document dithering interface
+    /// If this object is associated with a document, this gets the document dithering.
+    /// If this object is associated with a File3dm, this gets the File3dm's dithering.
+    /// Otherwise it gets a 'free-floating' dithering object.
     /// </summary>
     /// <since>6.0</since>
     public Dithering Dithering
@@ -2391,7 +2395,8 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Get the document render channels interface
+    /// If this object is associated with a document, this gets the document render channels.
+    /// Otherwise it gets a 'free-floating' render channels object.
     /// </summary>
     /// <since>7.0</since>
     public RenderChannels RenderChannels
@@ -2405,7 +2410,7 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Get or set the Render Preset
+    /// Get or set the current Render Preset.
     /// </summary>
     /// <since>8.0</since>
     public Guid RenderPresets
@@ -2553,7 +2558,7 @@ namespace Rhino.Display
     WallpaperImage = 1,
     /// <summary>Two color top/bottom color gradient.</summary>
     Gradient = 2,
-    /// <summary>Using a special environment.</summary>
+    /// <summary>Using a Render Environment.</summary>
     Environment = 3
   }
 
@@ -2771,67 +2776,5 @@ namespace Rhino.FileIO
         UnsafeNativeMethods.ON_3dmSettings_GetSetUnitSystem(ptr_this, false, true, set_val);
       }
     }
-
-    /*
-  // settings used for automatically created rendering meshes
-  ON_MeshParameters m_RenderMeshSettings;
-
-  // saved custom settings
-  ON_MeshParameters m_CustomRenderMeshSettings;
-
-  // settings used for automatically created analysis meshes
-  ON_MeshParameters m_AnalysisMeshSettings;
-
-  // settings used when annotation objects are created
-  ON_3dmAnnotationSettings m_AnnotationSettings;
-
-  ON_ClassArray<ON_3dmConstructionPlane> m_named_cplanes;
-  ON_ClassArray<ON_3dmView>              m_named_views;
-  ON_ClassArray<ON_3dmView>              m_views; // current viewports
-  ON_UUID m_active_view_id; // id of "active" viewport              
-
-  // These fields determine what layer, material, color, line style, and
-  // wire density are used for new objects.
-  int m_current_layer_index;
-
-  int m_current_material_index;
-  ON::object_material_source m_current_material_source;
-  
-  ON_Color m_current_color;
-  ON::object_color_source m_current_color_source;
-
-  ON_Color m_current_plot_color;
-  ON::plot_color_source m_current_plot_color_source;
-
-  int m_current_linetype_index;
-  ON::object_linetype_source m_current_linetype_source;
-
-  int m_current_font_index;
-
-  int m_current_dimstyle_index;
- 
-  // Surface wireframe density
-  //
-  //   @untitled table
-  //   0       boundary + "knot" wires 
-  //   1       boundary + "knot" wires + 1 interior wire if no interior "knots"
-  //   N>=2    boundary + "knot" wires + (N-1) interior wires
-  int m_current_wire_density;
-
-  ON_3dmRenderSettings m_RenderSettings;
-
-  // default settings for construction plane grids
-  ON_3dmConstructionPlaneGridDefaults m_GridDefaults;
-
-  // World scale factor to apply to non-solid linetypes
-  // for model display.  For plotting, the linetype settings
-  // are used without scaling.
-  double m_linetype_display_scale;
-
-  // Plugins that were loaded when the file was saved.
-  ON_ClassArray<ON_PlugInRef> m_plugin_list;
-
-  ON_3dmIOSettings m_IO_settings;
-     */
   }
 }

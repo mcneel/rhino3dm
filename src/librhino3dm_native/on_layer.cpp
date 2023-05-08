@@ -63,8 +63,6 @@ enum LayerInt : int
   idxLinetypeIndex = 0,
   idxRenderMaterialIndex = 1,
   idxIgesLevel = 3,
-  idxSectionHatchIndex = 4,
-  idxSectionFillRule = 5
 };
 
 RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
@@ -179,17 +177,6 @@ RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, b
   return rc;
 }
 
-enum LayerDouble : int
-{
-  ldSectionHatchScale = 0,
-  ldSectionHatchRotation = 1,
-};
-
-RH_C_FUNCTION double ON_Layer_GetSetDouble(ON_Layer* pLayer, enum LayerDouble which, bool set, double val)
-{
-  double rc = val;
-  return rc;
-}
 
 RH_C_FUNCTION void ON_Layer_UnsetPersistentVisibility(ON_Layer* pLayer)
 {
