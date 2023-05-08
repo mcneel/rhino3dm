@@ -74,56 +74,6 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public File3dmRenderEnvironments(File3dm f) { _file3dm = f; }
 
-    /// <summary>
-    /// Background rendering environment.
-    ///</summary>
-    /// <since>8.0</since>
-    public Guid BackgroundId
-    {
-      get => UnsafeNativeMethods.ONX_Model_GetBackgroundRenderEnvironment(_file3dm.ConstPointer());
-      set => UnsafeNativeMethods.ONX_Model_SetBackgroundRenderEnvironment(_file3dm.NonConstPointer(), value);
-    }
-
-    /// <summary>
-    /// Skylighting rendering environment override state.
-    ///</summary>
-    /// <since>8.0</since>
-    public bool SkylightingOverride
-    {
-      get => UnsafeNativeMethods.ONX_Model_GetSkylightingRenderEnvironmentOverride(_file3dm.ConstPointer());
-      set => UnsafeNativeMethods.ONX_Model_SetSkylightingRenderEnvironmentOverride(_file3dm.NonConstPointer(), value);
-    }
-
-    /// <summary>
-    /// Skylighting rendering environment.
-    ///</summary>
-    /// <since>8.0</since>
-    public Guid SkylightingId
-    {
-      get => UnsafeNativeMethods.ONX_Model_GetSkylightingRenderEnvironment(_file3dm.ConstPointer());
-      set => UnsafeNativeMethods.ONX_Model_SetSkylightingRenderEnvironment(_file3dm.NonConstPointer(), value);
-    }
-
-    /// <summary>
-    /// Reflection / refraction rendering environment override state.
-    ///</summary>
-    /// <since>8.0</since>
-    public bool ReflectionOverride
-    {
-      get => UnsafeNativeMethods.ONX_Model_GetReflectionRenderEnvironmentOverride(_file3dm.ConstPointer());
-      set => UnsafeNativeMethods.ONX_Model_SetReflectionRenderEnvironmentOverride(_file3dm.NonConstPointer(), value);
-    }
-
-    /// <summary>
-    /// Reflection / refraction rendering environment.
-    ///</summary>
-    /// <since>8.0</since>
-    public Guid ReflectionId
-    {
-      get => UnsafeNativeMethods.ONX_Model_GetReflectionRenderEnvironment(_file3dm.ConstPointer());
-      set => UnsafeNativeMethods.ONX_Model_SetReflectionRenderEnvironment(_file3dm.NonConstPointer(), value);
-    }
-
     /// <summary></summary>
     /// <since>8.0</since>
     public IEnumerator<File3dmRenderEnvironment> GetEnumerator()
@@ -318,6 +268,8 @@ namespace Rhino.FileIO
     {
       using (var v = new Rhino.Render.Variant(value))
       {
+        // I have to use ConstPointer here. It's a hack to prevent a copy being made. If a copy is
+        // made, the changes get written to the copy and subsequently lost.
         return UnsafeNativeMethods.ON_RenderContent_SetParameter(ConstPointer(), param, v.ConstPointer());
       }
     }
