@@ -31,8 +31,6 @@ enum ObjectAttrsInteger : int
   oaiDisplayOrder = 14,
   oaiClipParticipationSource = 15,
   oaiSectionAttributesSource = 16,
-  oaiSectionHatchIndex = 17,
-  oaiSectionFillRule = 18,
 };
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr, enum ObjectAttrsInteger which, bool set, int setValue )
@@ -335,9 +333,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
 enum ObjectAttrsDouble : int
 {
   oadPlotWeight = 0,
-  oadSectionHatchScale = 1,
-  oadSectionHatchRotation = 2,
-  oadLinetypePatternScale = 3,
+  oadLinetypePatternScale = 1,
 };
 
 
