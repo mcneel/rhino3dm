@@ -3,7 +3,6 @@
 #if !defined(__APPLE__) && !defined(__ANDROID__)
 
 #if defined(RHINO3DM_BUILD)
-
 #pragma message( " --- linking required Win libs" )
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Gdi32.lib")
@@ -12,6 +11,8 @@
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "Ole32.lib")
 #pragma comment(lib, "Shell32.lib")
+
+#if !defined(ON_CMAKE_BUILD)
 
 #if !defined(ON_MSC_SOLUTION_DIR)
 // ON_MSC_SOLUTION_DIR must have a trailing slash
@@ -65,6 +66,7 @@
 #endif // WIN64 else WIN32
 
 #endif //  !defined(ON_MSC_LIB_DIR)
+#endif //  !defined(ON_CMAKE_BUILD)
 
 #else
 
