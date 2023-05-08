@@ -883,6 +883,7 @@ namespace Rhino.FileIO
 #endif
 
     File3dmSettings m_settings;
+
     /// <summary>
     /// Settings include tolerance, and unit system, and defaults used
     /// for creating views and objects.

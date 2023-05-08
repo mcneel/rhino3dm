@@ -116,7 +116,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_Object_Duplicate(const_pointer);
     }
 
-#region IList<Point3d> implementation
+    #region IList<Point3d> implementation
     /// <since>5.10</since>
     void ICollection<Point3d>.Add(Point3d item)
     {
@@ -297,7 +297,7 @@ namespace Rhino.Render
       }
     }
 
-#endregion IList<Point3d> implementation
+    #endregion IList<Point3d> implementation
   }
 
   /// <summary>
@@ -430,7 +430,7 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 128)]
   public struct MeshCheckParameters
   {
-#region members
+    #region members
     private byte m_bAbbreviatedVersion;
     private byte m_bCheckForDegenerateFaces;
     private int m_totalDegenerateFaceCt;
@@ -461,7 +461,7 @@ namespace Rhino.Geometry
     private int m_totalReserved1Ct;
     private byte m_bCheckForReserved2;
     private int m_totalReserved2Ct;
-#endregion
+    #endregion
 
     /// <summary>
     /// Gets the default mesh check parameters.
@@ -506,7 +506,7 @@ namespace Rhino.Geometry
       return mcp;
     }
 
-#region properties
+    #region properties
     /// <summary>
     /// If true, then look for triangles and quads that have zero area and quads
     /// where one sub triangle has zero area.
@@ -710,7 +710,7 @@ namespace Rhino.Geometry
       set { m_bCheckForReserved2 = Convert.ToByte(value); }
     }
     private int CheckForReserved2Count => m_totalReserved2Ct;
-#endregion
+    #endregion
   }
 
 #endif
@@ -1183,7 +1183,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_SubDDisplayParameters_SetMeshLocation(m_ptr, value);
       }
     }
-#region ISerializable code
+    #region ISerializable code
 
     /// <inheritdoc/>
     /// <since>8.0</since>
@@ -1234,7 +1234,7 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public static SubDDisplayParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<SubDDisplayParameters>(value);
 
-#endregion ISerializable code
+    #endregion ISerializable code
   }
 
   /// <summary>
@@ -1400,7 +1400,7 @@ namespace Rhino.Geometry
       Dispose(false);
     }
 
-#region ISerializable code
+    #region ISerializable code
 
     /// <inheritdoc/>
     /// <since>8.0</since>
@@ -1488,7 +1488,7 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public static MeshingParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<MeshingParameters>(value);
 
-#endregion ISerializable code
+    #endregion ISerializable code
 
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
@@ -1517,7 +1517,7 @@ namespace Rhino.Geometry
       }
     }
 
-#region constants
+    #region constants
 #if RHINO_SDK
     /// <summary>
     /// Gets the MeshingParameters that are currently set for a document.
@@ -1694,9 +1694,9 @@ namespace Rhino.Geometry
       }
     }
 
-#endregion
+    #endregion
 
-#region properties
+    #region properties
 
     /// <summary>
     /// Gets or sets how and if textures will be packed.
@@ -1954,7 +1954,7 @@ namespace Rhino.Geometry
       set { SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngleInDegrees, value); }
     }
 
-#endregion
+    #endregion
 
     /// <summary>
     /// Gets the SubD display parameters.
@@ -1989,7 +1989,7 @@ namespace Rhino.Geometry
     public bool Equals(MeshingParameters other)
     {
       IntPtr const_ptr_this = this.ConstPointer();
-      IntPtr const_ptr_other = this.ConstPointer();
+      IntPtr const_ptr_other = other.ConstPointer();
       return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
     }
 
@@ -2123,15 +2123,15 @@ namespace Rhino.Geometry
   [StructLayout(LayoutKind.Sequential)]
   public struct MeshThicknessMeasurement
   {
-#region fields
+    #region fields
     private readonly int _meshIndex;
     private readonly int _vertexIndex;
     private readonly double _thickness;
     private readonly Point3d _point0;
     private readonly Point3d _point1;
-#endregion
+    #endregion
 
-#region constructor
+    #region constructor
     /// <summary>
     /// Create a new thickness measurement.
     /// </summary>
@@ -2149,9 +2149,9 @@ namespace Rhino.Geometry
       _point0 = point;
       _point1 = oppositePoint;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets the index of the mesh associated with this thickness measurement.
     /// </summary>
@@ -2192,7 +2192,7 @@ namespace Rhino.Geometry
     {
       get { return _point1; }
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -2386,7 +2386,7 @@ namespace Rhino.Geometry
   [Serializable]
   public partial class Mesh : GeometryBase
   {
-#region static mesh creation
+    #region static mesh creation
 #if RHINO_SDK
 
     /// <summary>
@@ -3408,9 +3408,9 @@ namespace Rhino.Geometry
     }
 
 #endif
-#endregion
+    #endregion
 
-#region constructors
+    #region constructors
     /// <summary>Initializes a new empty mesh.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_addmesh.vb' lang='vbnet'/>
@@ -3532,9 +3532,9 @@ namespace Rhino.Geometry
     {
       return new Mesh(IntPtr.Zero, null);
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
 #if RHINO_SDK
     /// <summary>
     /// Gets the number of disjoint (topologically unconnected) pieces in this mesh.
@@ -3654,7 +3654,7 @@ namespace Rhino.Geometry
       }
     }
 
-#region fake list access
+    #region fake list access
     private Collections.MeshVertexList m_vertices;
     /// <summary>
     /// Gets access to the vertices set of this mesh.
@@ -3861,10 +3861,10 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroyPartition(ptr_this);
     }
-#endregion
-#endregion properties
+    #endregion
+    #endregion properties
 
-#region methods
+    #region methods
     /// <summary>
     /// If the mesh has SurfaceParameters, the surface is evaluated at
     /// these parameters and the mesh geometry is updated.
@@ -4099,8 +4099,26 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public bool Smooth(double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
+      return Smooth(smoothFactor, 1, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+    }
+
+    /// <summary>
+    /// Smooths a mesh by averaging the positions of mesh vertices in a specified region.
+    /// </summary>
+    /// <param name="smoothFactor">The smoothing factor, which controls how much vertices move towards the average of the neighboring vertices.</param>
+    /// <param name="numSteps">The number of smoothing iterations.</param>
+    /// <param name="bXSmooth">When true vertices move in X axis direction.</param>
+    /// <param name="bYSmooth">When true vertices move in Y axis direction.</param>
+    /// <param name="bZSmooth">When true vertices move in Z axis direction.</param>
+    /// <param name="bFixBoundaries">When true vertices along naked edges will not be modified.</param>
+    /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
+    /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Smooth(double smoothFactor, int numSteps, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
+    {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+      return UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
     }
 
     /// <summary>
@@ -4118,11 +4136,30 @@ namespace Rhino.Geometry
     /// <since>6.8</since>
     public bool Smooth(IEnumerable<int> vertexIndices, double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
+      return Smooth(vertexIndices, smoothFactor, 1, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+    }
+
+    /// <summary>
+    /// Smooths part of a mesh by averaging the positions of mesh vertices in a specified region.
+    /// </summary>
+    /// <param name="vertexIndices">The mesh vertex indices that specify the part of the mesh to smooth.</param>
+    /// <param name="smoothFactor">The smoothing factor, which controls how much vertices move towards the average of the neighboring vertices.</param>
+    /// <param name="numSteps">The number of smoothing iterations.</param>
+    /// <param name="bXSmooth">When true vertices move in X axis direction.</param>
+    /// <param name="bYSmooth">When true vertices move in Y axis direction.</param>
+    /// <param name="bZSmooth">When true vertices move in Z axis direction.</param>
+    /// <param name="bFixBoundaries">When true vertices along naked edges will not be modified.</param>
+    /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
+    /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Smooth(IEnumerable<int> vertexIndices, double smoothFactor, int numSteps, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
+    {
       IntPtr ptr_this = NonConstPointer();
       using (var indices = new SimpleArrayInt(vertexIndices))
       {
         IntPtr ptr_indices = indices.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
       }
     }
 
@@ -4238,6 +4275,35 @@ namespace Rhino.Geometry
       if (IntPtr.Zero == ptr)
         return null;
       return new Mesh(ptr, null);
+    }
+
+    /// <summary>
+    /// Subdivides the faces of the mesh.
+    /// </summary>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Subdivide()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMeshSubdivide(ptr_this);
+    }
+
+    /// <summary>
+    /// Subdivides specific faces of the mesh.
+    /// </summary>
+    /// <param name="faceIndices">Indices of the faces to subdivide.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Subdivide(IEnumerable<int> faceIndices)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var index in faceIndices)
+          ciArray.Add(new ComponentIndex(ComponentIndexType.MeshFace, index));
+        IntPtr pCiArray = ciArray.NonConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoMeshSubdivideFaces(ptr_this, pCiArray);
+      }
     }
 
     /// <summary>
@@ -5347,7 +5413,7 @@ namespace Rhino.Geometry
       return new Mesh(new_mesh, null);
     }
 #endif
-#endregion
+    #endregion
 
     internal bool IndexOpBool(UnsafeNativeMethods.MeshIndexOpBoolConst which, int index)
     {
@@ -5385,7 +5451,7 @@ namespace Rhino.Geometry
     //}
 
 
-#region topological methods
+    #region topological methods
     /// <summary>
     /// Returns an array of Boolean values equal in length to the number of vertices in this
     /// mesh. Each value corresponds to a mesh vertex and is set to true if the vertex is
@@ -5447,7 +5513,7 @@ namespace Rhino.Geometry
     //  return UnsafeNativeMethods.ON_Mesh_CombineCoincidentVertices(ptr, tolerance, cosineNormalAngle);
     //}
 
-#endregion
+    #endregion
 
     /// <summary>
     /// In ancient times (or modern smart phone times), some rendering engines
@@ -5497,7 +5563,7 @@ namespace Rhino.Geometry
       return null;
     }
 
-#region full mesh ngon+faces enumerator access
+    #region full mesh ngon+faces enumerator access
 
     /// <summary>
     /// Retrieves a complete enumerable, i.e., one that provides an iterator over every face that is present,
@@ -5603,7 +5669,7 @@ namespace Rhino.Geometry
       }
     }
 
-#endregion
+    #endregion
 
 #if RHINO_SDK
 
@@ -6422,14 +6488,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh vertices.
     /// </summary>
@@ -6531,9 +6597,9 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the Vertex list on the mesh.
     /// </summary>
@@ -6809,9 +6875,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.ShowAll);
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Removes all vertices that are currently not used by the Face list.
     /// </summary>
@@ -7241,9 +7307,9 @@ namespace Rhino.Geometry.Collections
       CullUnused();
       return true;
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
 
     int IList<Point3f>.IndexOf(Point3f item)
     {
@@ -7381,7 +7447,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -7393,14 +7459,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshTopologyVertexList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh topology vertices.
     /// </summary>
@@ -7442,9 +7508,9 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_SetTopologyVertex(ptr_mesh, index, value);
       }
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Gets the topology vertex index for an existing mesh vertex in the mesh's
     /// VertexList.
@@ -7666,9 +7732,9 @@ namespace Rhino.Geometry.Collections
       return rc;
     }
 
-#endregion
+    #endregion
 
-#region IList<Point3f>, IList and related implementations
+    #region IList<Point3f>, IList and related implementations
 
     int IList<Point3f>.IndexOf(Point3f item)
     {
@@ -7803,7 +7869,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -7813,14 +7879,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshTopologyEdgeList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets the amount of edges in this list.
     /// </summary>
@@ -7833,7 +7899,7 @@ namespace Rhino.Geometry.Collections
         return UnsafeNativeMethods.ON_Mesh_GetInt(ptr, UnsafeNativeMethods.MeshIntConst.MeshTopologyEdgeCount);
       }
     }
-#endregion
+    #endregion
 
     /// <summary>Gets the two topology vertices for a given topology edge.</summary>
     /// <param name="topologyEdgeIndex">An index of a topology edge.</param>
@@ -8091,14 +8157,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexNormalList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh vertex normals.
     /// </summary>
@@ -8175,9 +8241,9 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, value, false);
       }
     }
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the vertex normal collection on the mesh.
     /// </summary>
@@ -8336,9 +8402,9 @@ namespace Rhino.Geometry.Collections
     {
       return SetNormalsHelper(normals, false);
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Copies all vertex normals to a linear array of float in x,y,z order
     /// </summary>
@@ -8396,9 +8462,9 @@ namespace Rhino.Geometry.Collections
     {
       m_mesh.Flip(true, false, false);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
     int IList<Vector3f>.IndexOf(Vector3f item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -8534,7 +8600,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -8544,14 +8610,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshFaceList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh faces. When getting this can includes invalid faces.
     /// </summary>
@@ -8644,10 +8710,10 @@ namespace Rhino.Geometry.Collections
         }
       }
     }
-#endregion
+    #endregion
 
-#region methods
-#region face access
+    #region methods
+    #region face access
     /// <summary>
     /// Clears the Face list on the mesh.
     /// </summary>
@@ -9044,7 +9110,7 @@ namespace Rhino.Geometry.Collections
       return rc;
     }
 
-#endregion
+    #endregion
 
     /// <summary>
     /// Removes a collection of faces from the mesh without affecting the remaining geometry.
@@ -9404,9 +9470,9 @@ namespace Rhino.Geometry.Collections
     }
 
 #endif
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
 
     int IList<MeshFace>.IndexOf(MeshFace item)
     {
@@ -9546,7 +9612,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
 
@@ -9558,14 +9624,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshNgonList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh ngons.
     /// </summary>
@@ -9603,10 +9669,10 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region methods
-#region ngon access
+    #region methods
+    #region ngon access
     /// <summary>
     /// Clears the Ngon list on the mesh.
     /// </summary>
@@ -9948,7 +10014,7 @@ namespace Rhino.Geometry.Collections
       return center;
     }
 
-#endregion
+    #endregion
 
     /// <summary>
     /// Remove one or more ngons from the mesh.
@@ -10035,9 +10101,9 @@ namespace Rhino.Geometry.Collections
       return UnsafeNativeMethods.ON_MeshNgon_IsValid(ptr_const_mesh, index, ptr_textlog);
     }
 
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
 
     int IList<MeshNgon>.IndexOf(MeshNgon item)
     {
@@ -10177,7 +10243,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
 
@@ -10188,14 +10254,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshFaceNormalList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh face normals.
     /// </summary>
@@ -10266,10 +10332,10 @@ namespace Rhino.Geometry.Collections
         }
       }
     }
-#endregion
+    #endregion
 
-#region methods
-#region face access
+    #region methods
+    #region face access
     /// <summary>
     /// Clears the Face Normal list on the mesh.
     /// </summary>
@@ -10389,7 +10455,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       return UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, normal, true);
     }
-#endregion
+    #endregion
 
     /// <summary>
     /// Unitizes all the existing face normals.
@@ -10412,9 +10478,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeFaceNormals);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
     int IList<Vector3f>.IndexOf(Vector3f item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -10544,7 +10610,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -10554,14 +10620,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexColorList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of mesh colors.
     /// </summary>
@@ -10645,9 +10711,9 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_SetMappingTag(ptr_mesh, 0, value.Id, (int)value.MappingType, value.MappingCRC, ref xf);
       }
     }
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Return colors as an array of integers with packed ARGB values
     /// </summary>
@@ -10775,9 +10841,9 @@ namespace Rhino.Geometry.Collections
         }
       }
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     private bool SetColorsHelper(Color[] colors, bool append)
     {
       if (colors == null) { return false; }
@@ -10848,9 +10914,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Point3f>, IList and related implementations
     int IList<Color>.IndexOf(Color item)
     {
       return IndexOfHelper(item);
@@ -11012,7 +11078,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -11022,14 +11088,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshTextureCoordinateList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of texture coordinates.
     /// </summary>
@@ -11105,9 +11171,9 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the Texture Coordinate list on the mesh.
     /// </summary>
@@ -11275,9 +11341,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Scales the texture coordinates so the texture domains are [0,1] 
     /// and eliminate any texture rotations.
@@ -11342,9 +11408,9 @@ namespace Rhino.Geometry.Collections
       }
       return rc;
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point2f>, IList and related implementations
+    #region IResizableList<Point2f>, IList and related implementations
     int IList<Point2f>.IndexOf(Point2f item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -11481,7 +11547,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -11491,14 +11557,14 @@ namespace Rhino.Geometry.Collections
   {
     private readonly Mesh m_mesh;
 
-#region constructors
+    #region constructors
     internal MeshVertexStatusList(Mesh ownerMesh)
     {
       m_mesh = ownerMesh;
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Gets or sets the number of hidden vertices. For this to be a valid part of a mesh, this count should be the same as the one of mesh vertices.
     /// </summary>
@@ -11586,9 +11652,9 @@ namespace Rhino.Geometry.Collections
       }
     }
 
-#endregion
+    #endregion
 
-#region access
+    #region access
     /// <summary>
     /// Clears the hidden vertex list on the mesh. This results in a fully visible mesh.
     /// </summary>
@@ -11636,9 +11702,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity, 0);
     }
-#endregion
+    #endregion
 
-#region IResizableList<Point2f>, IList and related implementations
+    #region IResizableList<Point2f>, IList and related implementations
     int IList<bool>.IndexOf(bool item)
     {
       return GenericIListImplementation.IndexOf(this, item);
@@ -11795,7 +11861,7 @@ namespace Rhino.Geometry.Collections
     {
       return GetEnumerator();
     }
-#endregion
+    #endregion
   }
 }
 
@@ -12223,14 +12289,14 @@ namespace Rhino.Geometry
   [Serializable]
   public struct MeshFace : IEquatable<MeshFace>, IComparable<MeshFace>, IComparable
   {
-#region members
+    #region members
     internal int m_a;
     internal int m_b;
     internal int m_c;
     internal int m_d;
-#endregion
+    #endregion
 
-#region constructors
+    #region constructors
     /// <summary>
     /// Constructs a new triangular Mesh face.
     /// </summary>
@@ -12269,9 +12335,9 @@ namespace Rhino.Geometry
     {
       get { return new MeshFace(int.MinValue, int.MinValue, int.MinValue); }
     }
-#endregion
+    #endregion
 
-#region properties
+    #region properties
     /// <summary>
     /// Internal property that figures out the debugger display for mesh Faces.
     /// </summary>
@@ -12560,9 +12626,9 @@ namespace Rhino.Geometry
     /// </summary>
     /// <since>5.0</since>
     public bool IsQuad { get { return m_c != m_d; } }
-#endregion
+    #endregion
 
-#region methods
+    #region methods
     /// <summary>
     /// Sets all the corners for this face as a triangle.
     /// </summary>
@@ -12719,7 +12785,7 @@ namespace Rhino.Geometry
 
       return CompareTo((MeshFace)obj);
     }
-#endregion
+    #endregion
   }
 
   /// <summary>
@@ -12775,7 +12841,7 @@ namespace Rhino.Geometry
       get { return new MeshNgon(IntPtr.Zero); }
     }
 
-#region properties
+    #region properties
     /// <summary>
     /// Internal property that figures out the debugger display for mesh Faces.
     /// </summary>
@@ -12845,9 +12911,9 @@ namespace Rhino.Geometry
       return m_fi.ToArray();
     }
 
-#endregion
+    #endregion
 
-#region methods
+    #region methods
 
     /// <summary>
     /// Set the ngon vertex and face index lists.
@@ -12991,7 +13057,7 @@ namespace Rhino.Geometry
 
       return CompareTo((MeshNgon)obj);
     }
-#endregion
+    #endregion
   }
 
 #if RHINO_SDK

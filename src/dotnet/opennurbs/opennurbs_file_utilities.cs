@@ -391,12 +391,12 @@ namespace Rhino.FileIO
     {
       internal NameHashUnmanagedHandle(NameHash hash)
       {
-        // NOTE WELL:
-        //   Through the Pinvoke hoo has, this ends up calling ON_NameHash::Internal_CreateForDotNetInterface()
-        //   It is critical that the three parameters are byte-by-byte identical to
-        //   information copied from a valid instance of a C++ ON_NameHash object.
-        //   Otherwise, it is nearly certain an invalid ON_NameHash will be created
-        //   and it will not be able to provide the expected services.
+        // This calls ON_NameHash::Internal_CreateForDotNetInterface() through
+        // pInvoke. It is critical that the three parameters are byte-by-byte
+        // identical to information copied from a valid instance of a C++
+        // ON_NameHash object. Otherwise, it is nearly certain an invalid
+        // ON_NameHash will be created and it will not be able to provide the
+        // expected services.
         UnsafePointer = UnsafeNativeMethods.ON_NameHash_Create(
           hash.m_sha1_hash,
           hash.m_flags,
