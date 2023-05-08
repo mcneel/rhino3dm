@@ -314,14 +314,14 @@ RH_C_FUNCTION ON_UUID ONX_Model_GetBackgroundRenderEnvironment(const ONX_Model* 
   if (nullptr == ptrModel)
     return ON_nil_uuid;
 
-  return ptrModel->m_settings.m_RenderSettings.BackgroundRenderEnvironment();
+  return ON_nil_uuid;// ptrModel->m_settings.m_RenderSettings.BackgroundRenderEnvironment();
 }
 
 RH_C_FUNCTION void ONX_Model_SetBackgroundRenderEnvironment(ONX_Model* ptrModel, ON_UUID uuid)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.SetBackgroundRenderEnvironment(uuid);
+    //ptrModel->m_settings.m_RenderSettings.SetBackgroundRenderEnvironment(uuid);
   }
 }
 
@@ -330,14 +330,14 @@ RH_C_FUNCTION bool ONX_Model_GetSkylightingRenderEnvironmentOverride(const ONX_M
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.SkylightingRenderEnvironmentOverride();
+  return false;// ptrModel->m_settings.m_RenderSettings.SkylightingRenderEnvironmentOverride();
 }
 
 RH_C_FUNCTION void ONX_Model_SetSkylightingRenderEnvironmentOverride(ONX_Model* ptrModel, bool b)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.SetSkylightingRenderEnvironmentOverride(b);
+    //ptrModel->m_settings.m_RenderSettings.SetSkylightingRenderEnvironmentOverride(b);
   }
 }
 
@@ -346,14 +346,14 @@ RH_C_FUNCTION ON_UUID ONX_Model_GetSkylightingRenderEnvironment(const ONX_Model*
   if (nullptr == ptrModel)
     return ON_nil_uuid;
 
-  return ptrModel->m_settings.m_RenderSettings.SkylightingRenderEnvironment();
+  return ON_nil_uuid;// ptrModel->m_settings.m_RenderSettings.SkylightingRenderEnvironment();
 }
 
 RH_C_FUNCTION void ONX_Model_SetSkylightingRenderEnvironment(ONX_Model* ptrModel, ON_UUID uuid)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.SetSkylightingRenderEnvironment(uuid);
+    //ptrModel->m_settings.m_RenderSettings.SetSkylightingRenderEnvironment(uuid);
   }
 }
 
@@ -362,14 +362,14 @@ RH_C_FUNCTION bool ONX_Model_GetReflectionRenderEnvironmentOverride(const ONX_Mo
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.ReflectionRenderEnvironmentOverride();
+  return false;// ptrModel->m_settings.m_RenderSettings.ReflectionRenderEnvironmentOverride();
 }
 
 RH_C_FUNCTION void ONX_Model_SetReflectionRenderEnvironmentOverride(ONX_Model* ptrModel, bool b)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.SetReflectionRenderEnvironmentOverride(b);
+    //ptrModel->m_settings.m_RenderSettings.SetReflectionRenderEnvironmentOverride(b);
   }
 }
 
@@ -378,13 +378,13 @@ RH_C_FUNCTION ON_UUID ONX_Model_GetReflectionRenderEnvironment(const ONX_Model* 
   if (nullptr == ptrModel)
     return ON_nil_uuid;
 
-  return ptrModel->m_settings.m_RenderSettings.ReflectionRenderEnvironment();
+  return ON_nil_uuid;// ptrModel->m_settings.m_RenderSettings.ReflectionRenderEnvironment();
 }
 
 RH_C_FUNCTION void ONX_Model_SetReflectionRenderEnvironment(ONX_Model* ptrModel, ON_UUID uuid)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.SetReflectionRenderEnvironment(uuid);
+    //ptrModel->m_settings.m_RenderSettings.SetReflectionRenderEnvironment(uuid);
   }
 }

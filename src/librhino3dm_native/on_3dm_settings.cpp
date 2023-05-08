@@ -568,7 +568,6 @@ RH_C_FUNCTION void ON_3dmSettings_GetSnapshot(const ON_3dmRenderSettings* pRende
 	}
 }
 
-
 RH_C_FUNCTION void ON_3dmSettings_SetSpecificViewport(ON_3dmRenderSettings* pRenderSettings, const ON_wString* pName)
 {
 	if (pRenderSettings && pName)
@@ -594,16 +593,17 @@ RH_C_FUNCTION ON_3dmRenderSettings* ON_3dmRenderSettings_New(const ON_3dmRenderS
 
 RH_C_FUNCTION const ON_3dmRenderSettings* ON_3dmRenderSettings_ConstPointer(unsigned int docSerialNumber)
 {
-  const ON_3dmRenderSettings* rc = nullptr;
-#if !defined(RHINO3DM_BUILD)
-  CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(docSerialNumber);
-  if( pDoc )
-    rc = &(pDoc->Properties().RenderSettings());
+#if !defined RHINO3DM_BUILD
+  auto* pDoc = CRhinoDoc::FromRuntimeSerialNumber(docSerialNumber);
+  if (nullptr != pDoc)
+    return &pDoc->Properties().RenderSettings();
 #endif
-  return rc;
+
+  return nullptr;
 }
 
-enum RenderSettingColor : int {
+enum RenderSettingColor : int
+{
   AmbientLight = 0,
   BackgroundColorTop = 1,
   BackgroundColorBottom = 2,
@@ -654,22 +654,24 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetColor(ON_3dmRenderSettings* pRenderSe
 
 RH_C_FUNCTION ON_UUID ON_3dmRenderSettings_GetPresets(ON_3dmRenderSettings* pSettings)
 {
-  ON_UUID uuid = ON_nil_uuid;
-  if(nullptr != pSettings)
-    uuid = pSettings->CurrentRenderingPreset();
-  return uuid;
+  if (nullptr != pSettings)
+    return pSettings->CurrentRenderPreset();
+
+  return ON_nil_uuid;
 }
 
 RH_C_FUNCTION void ON_3dmRenderSettings_SetPresets(ON_3dmRenderSettings* pSettings, const ON_UUID uuid)
 {
-  if(nullptr != pSettings)
-    pSettings->SetCurrentRenderingPreset(uuid);
+  if (nullptr != pSettings)
+  {
+    pSettings->SetCurrentRenderPreset(uuid);
+  }
 }
 
 RH_C_FUNCTION ON::LengthUnitSystem ON_3dmRenderSettings_GetUnitSystem(ON_3dmRenderSettings* pSettings)
 {
   ON::LengthUnitSystem us = ON::LengthUnitSystem::None;
-  if(nullptr != pSettings)
+  if (nullptr != pSettings)
     us = pSettings->m_image_us;
   return us;
 }

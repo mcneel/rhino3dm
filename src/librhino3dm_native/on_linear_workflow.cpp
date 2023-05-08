@@ -6,14 +6,14 @@ RH_C_FUNCTION bool ON_LinearWorkflow_GetPreProcessTextures(const ONX_Model* ptrM
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.LinearWorkflow().PreProcessTextures();
+  return false;// ptrModel->m_settings.m_RenderSettings.LinearWorkflow().PreProcessTextures();
 }
 
 RH_C_FUNCTION void ON_LinearWorkflow_SetPreProcessTextures(ONX_Model* ptrModel, bool b)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.LinearWorkflow().SetPreProcessTextures(b);
+    //ptrModel->m_settings.m_RenderSettings.LinearWorkflow().SetPreProcessTextures(b);
   }
 }
 
@@ -22,14 +22,14 @@ RH_C_FUNCTION bool ON_LinearWorkflow_GetPreProcessColors(const ONX_Model* ptrMod
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.LinearWorkflow().PreProcessColors();
+  return false;// ptrModel->m_settings.m_RenderSettings.LinearWorkflow().PreProcessColors();
 }
 
 RH_C_FUNCTION void ON_LinearWorkflow_SetPreProcessColors(ONX_Model* ptrModel, bool b)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.LinearWorkflow().SetPreProcessColors(b);
+    //ptrModel->m_settings.m_RenderSettings.LinearWorkflow().SetPreProcessColors(b);
   }
 }
 

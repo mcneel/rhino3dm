@@ -22,14 +22,14 @@ RH_C_FUNCTION bool ON_Skylight_GetCustomEnvironmentOn(const ONX_Model* ptrModel)
   if (nullptr == ptrModel)
     return false;
 
-  return ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironmentOn();
+  return false;// ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironmentOn();
 }
 
 RH_C_FUNCTION void ON_Skylight_SetCustomEnvironmentOn(ONX_Model* ptrModel, bool b)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironmentOn(b);
+    //ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironmentOn(b);
   }
 }
 
@@ -38,14 +38,14 @@ RH_C_FUNCTION ON_UUID ON_Skylight_GetCustomEnvironment(const ONX_Model* ptrModel
   if (nullptr == ptrModel)
     return ON_nil_uuid;
 
-  return ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironment();
+  return ON_nil_uuid;// ptrModel->m_settings.m_RenderSettings.Skylight().CustomEnvironment();
 }
 
 RH_C_FUNCTION void ON_Skylight_SetCustomEnvironment(ONX_Model* ptrModel, ON_UUID uuid)
 {
   if (nullptr != ptrModel)
   {
-    ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironment(uuid);
+    //ptrModel->m_settings.m_RenderSettings.Skylight().SetCustomEnvironment(uuid);
   }
 }
 

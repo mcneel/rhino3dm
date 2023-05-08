@@ -103,12 +103,6 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiSectionAttributesSource:
         ptr->SetSectionAttributesSource(ON::SectionAttributesSourceFromUnsigned(setValue));
         break;
-      case oaiSectionHatchIndex:
-        ptr->SetSectionHatchIndex(setValue);
-        break;
-      case oaiSectionFillRule:
-        ptr->SetSectionFillRule(ON::SectionFillRuleFromUnsigned(setValue));
-        break;
       }
     }
     else
@@ -165,12 +159,6 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
         break;
       case oaiSectionAttributesSource:
         rc = (int)ptr->SectionAttributesSource();
-        break;
-      case oaiSectionHatchIndex:
-        rc = ptr->SectionHatchIndex();
-        break;
-      case oaiSectionFillRule:
-        rc = (int)ptr->SectionFillRule();
         break;
       }
     }
@@ -365,12 +353,6 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_GetSetDouble(ON_3dmObjectAttributes*
       case oadPlotWeight:
         pAttributes->m_plot_weight_mm = setValue;
         break;
-      case oadSectionHatchScale:
-        pAttributes->SetSectionHatchScale(setValue);
-        break;
-      case oadSectionHatchRotation:
-        pAttributes->SetSectionHatchRotation(setValue);
-        break;
       case oadLinetypePatternScale:
         pAttributes->SetLinetypePatternScale(setValue);
         break;
@@ -382,12 +364,6 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_GetSetDouble(ON_3dmObjectAttributes*
       {
       case oadPlotWeight:
         rc = pAttributes->m_plot_weight_mm;
-        break;
-      case oadSectionHatchScale:
-        rc = pAttributes->SectionHatchScale();
-        break;
-      case oadSectionHatchRotation:
-        rc = pAttributes->SectionHatchRotation();
         break;
       case oadLinetypePatternScale:
         rc = pAttributes->LinetypePatternScale();
@@ -899,6 +875,28 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomLinetype(ON_3dmObjectAttribut
       attr->SetCustomLinetype(*linetype);
     else
       attr->RemoveCustomLinetype();
+  }
+}
+
+RH_C_FUNCTION ON_SectionStyle* ON_3dmObjectAttributes_GetCustomSectionStyle(const ON_3dmObjectAttributes* attr)
+{
+  if (attr)
+  {
+    const ON_SectionStyle* sectionstyle = attr->CustomSectionStyle();
+    if (sectionstyle)
+      return new ON_SectionStyle(*sectionstyle);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomSectionStyle(ON_3dmObjectAttributes* attr, const ON_SectionStyle* sectionstyle)
+{
+  if (attr)
+  {
+    if (sectionstyle)
+      attr->SetCustomSectionStyle(*sectionstyle);
+    else
+      attr->RemoveCustomSectionStyle();
   }
 }
 

@@ -3,19 +3,19 @@
 
 static const ON_PostEffect* FindPostEffectFromId(ONX_Model& model, const ON_UUID& id)
 {
-  ONX_ModelComponentIterator it(model, ON_ModelComponent::Type::PostEffect);
-  auto* component = it.FirstComponent();
-  while (nullptr != component)
-  {
-    const auto* pep = dynamic_cast<const ON_PostEffect*>(component);
-    if (nullptr != pep)
-    {
-      if (pep->Id() == id)
-        return pep;
-    }
+  //ONX_ModelComponentIterator it(model, ON_ModelComponent::Type::PostEffect);
+  //auto* component = it.FirstComponent();
+  //while (nullptr != component)
+  //{
+  //  const auto* pep = dynamic_cast<const ON_PostEffect*>(component);
+  //  if (nullptr != pep)
+  //  {
+  //    if (pep->Id() == id)
+  //      return pep;
+  //  }
 
-    component = it.NextComponent();
-  }
+  //  component = it.NextComponent();
+  //}
 
   return nullptr;
 }
@@ -49,7 +49,7 @@ RH_C_FUNCTION bool ON_PostEffect_Visible(ON_PostEffect* pep)
   if (nullptr == pep)
     return false;
 
-  return pep->IsVisible();
+  return false;// pep->IsVisible();
 }
 
 RH_C_FUNCTION bool ON_PostEffect_Active(ON_PostEffect* pep)
@@ -57,5 +57,5 @@ RH_C_FUNCTION bool ON_PostEffect_Active(ON_PostEffect* pep)
   if (nullptr == pep)
     return false;
 
-  return pep->IsActive();
+  return false;// pep->IsActive();
 }
