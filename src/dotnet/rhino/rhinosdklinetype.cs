@@ -331,13 +331,17 @@ namespace Rhino.DocObjects
     {
       get
       {
+#if RHINO_SDK
         if (null == m_doc)
           return false;
         return UnsafeNativeMethods.CRhinoLinetypeTable_PatternIsLocked(m_doc.RuntimeSerialNumber, Index);
+#else
+        return false;
+#endif
       }
     }
 
-    #endregion
+#endregion
 
     #region methods
     /// <summary>
