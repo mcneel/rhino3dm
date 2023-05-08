@@ -16,6 +16,8 @@ using Rhino.Render;
 using System.Reflection;
 using Rhino.Render.PostEffects;
 using Rhino.Render.CustomRenderMeshes;
+using System.Linq;
+using System.Text;
 
 namespace Rhino.PlugIns
 {
@@ -2440,8 +2442,16 @@ namespace Rhino.PlugIns
       // I just want to make sure that a single Directory.Delete call can
       // eliminate our current caching scheme so we can start over in the future.
 
-      string cache_directory = Path.Combine(Rhino.ApplicationSettings.FileSettings.GetDataFolder(true), "compat_cache");
-      if( !g_rhcommon_hash_checked )
+      string cache_directory = Rhino.ApplicationSettings.FileSettings.GetDataFolder(true);
+
+      // store different cache results for each runtime
+      // this prevents Rhino from re-checking when switching between runtimes.
+      if (HostUtils.RunningInNetCore)
+        cache_directory = Path.Combine(cache_directory, "compat_cache_netcore");
+      else
+        cache_directory = Path.Combine(cache_directory, "compat_cache");
+
+      if ( !g_rhcommon_hash_checked )
       {
         // rebuild this directory if it has been constructed for a different
         // version of RhinoCommon
@@ -2493,13 +2503,13 @@ namespace Rhino.PlugIns
       var start = DateTime.Now;
 
       // run compat on rhp and all dlls in same dir (in parallel)
-      var task = System.Threading.Tasks.Task.Run<bool>(() => RunCompat(path));
-      var tasks = new System.Threading.Tasks.Task<bool>[dlls.Length + 1];
+      var task = System.Threading.Tasks.Task.Run(() => RunCompat(path));
+      var tasks = new System.Threading.Tasks.Task<CompatResult>[dlls.Length + 1];
       tasks[0] = task;
       for (int i = 0; i < dlls.Length; i++)
       {
         var dll_path = dlls[i];
-        tasks[i + 1] = System.Threading.Tasks.Task.Run<bool>(() => RunCompat(dll_path));
+        tasks[i + 1] = System.Threading.Tasks.Task.Run(() => RunCompat(dll_path));
       }
 
       var incomplete_tasks = new List<System.Threading.Tasks.Task>(tasks);
@@ -2528,16 +2538,31 @@ namespace Rhino.PlugIns
 
       // fail if one or more of the dlls failed
       bool result = true;
+      var output = new StringBuilder();
       foreach (var t in tasks)
       {
-        if (!t.Result)
+        if (!t.Result.Success)
         {
           result = false;
+          output.AppendLine(t.Result.Output);
+          output.AppendLine();
           break;
         }
       }
 
-      RhinoApp.WriteLine("Compatibility test {0} in {1:0.00}s", result ? "succeeded" : "failed", time.TotalSeconds);
+      RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} {(result ? "succeeded" : "failed")} in {time.TotalSeconds:0.00}s");
+
+      if (!result)
+      {
+        var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
+        if (!Directory.Exists(outputDir))
+          Directory.CreateDirectory(outputDir);
+
+        var outputFile = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path) + ".txt");
+
+        File.WriteAllText(outputFile, output.ToString());
+        RhinoApp.WriteLine($"  Details written to {outputFile}");
+      }
 
       // cache result
       try
@@ -2549,7 +2574,13 @@ namespace Rhino.PlugIns
       return result;
     }
 
-    private static bool RunCompat(string path)
+    struct CompatResult
+    {
+      public bool Success;
+      public string Output;
+    }
+
+    private static CompatResult RunCompat(string path)
     {
       // get path to rhinocommon.  This may be under netcore\ when running in .NET 7.
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -2560,8 +2591,8 @@ namespace Rhino.PlugIns
       
       string compat_exe = Runtime.HostUtils.RunningOnOSX ? "Compat.dll" : "Compat.exe";
 
-      // get path to compat (should be in main Rhino assembly directory)
-      string compat_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, compat_exe);
+      // get path to compat that's next to the RhinoCommon we're using
+      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), compat_exe);
       if (!File.Exists (compat_path)) {
         HostUtils.DebugString ($"{compat_exe} not found: {compat_path}");
         throw new FileNotFoundException ($"{compat_exe} not found");
@@ -2571,13 +2602,28 @@ namespace Rhino.PlugIns
 
       string rhino_dotnet_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
       if (!File.Exists(rhino_dotnet_path)) rhino_dotnet_path = null;
+
+      var arguments = new List<string>();
+
+      // Curtis: Use quiet mode as the output of this needs to be human readable
+      arguments.Add("-q");
+
+      if (HostUtils.RunningInNetCore)
+        arguments.Add("--check-system-assemblies");
+
+      arguments.Add($"\"{path}\"");
+      arguments.Add($"\"{rhino_common_path}\"");
+
+      if (!string.IsNullOrEmpty(rhino_dotnet_path))
+        arguments.Add($"\"{rhino_dotnet_path}\"");
+
       // shell execute compat
       Process proc = new Process
       {
         StartInfo = new ProcessStartInfo
         {
           FileName = compat_path,
-          Arguments = $"\"{path}\" \"{rhino_common_path}\"",
+          Arguments = string.Join(" ", arguments),
           UseShellExecute = false,
           RedirectStandardOutput = true, // required for parsing output
           CreateNoWindow = true,
@@ -2598,76 +2644,38 @@ namespace Rhino.PlugIns
         proc.StartInfo.Arguments = $"\"{compat_path}\" " + proc.StartInfo.Arguments;
       }
 
-      if (!string.IsNullOrEmpty(rhino_dotnet_path))
-        proc.StartInfo.Arguments = $"--debug \"{path}\" \"{rhino_common_path}\" \"{rhino_dotnet_path}\"";
+      // read error stream asynchronously
+      var sbError = new StringBuilder();
+      proc.ErrorDataReceived += (sender, e) => sbError.Append(e.Data);
 
       proc.Start();
 
+      // reading only one stream synchronously to avoid deadlocks
+      // See https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?redirectedfrom=MSDN&view=net-7.0#remarks
+      proc.BeginErrorReadLine();
       string output = proc.StandardOutput.ReadToEnd();
-      string errout = proc.StandardError.ReadToEnd ();
+
       proc.WaitForExit();
 
       //HostUtils.DebugString ($"Compat output: {output}");
 
-      if ((proc.ExitCode == 110) // don't fail if dll is not dotnet (native)
-          || (proc.ExitCode == 128)) // don't fail for no assembly name (possibly obfuscated)
-          return true;
+      if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
+        || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
+        || proc.ExitCode == 114 // don't fail if there's only warnings 
+        )
+          return new CompatResult { Success = true, Output = output };
 
+      // write error stream if needed
+      var errout = sbError.ToString();
       if (!string.IsNullOrWhiteSpace(errout))
         HostUtils.DebugString("ERROR: " + errout);
 
-      if (proc.ExitCode == 112)
+      if (proc.ExitCode == 112 )
         System.Diagnostics.Debug.Write(output);
-      bool result = (proc.ExitCode == 0) && !CheckForRhinoSdkClasses(output);
-      
-      // TODO: throw if compat errored (check exit code)
 
-      return result;
-    }
+      bool result = proc.ExitCode == 0;
 
-    private static bool CheckForRhinoSdkClasses(string output)
-    {
-      // if plug-in assembly is not mixed-mode, then we don't need to check it
-      var mixed_mode_regex = new Regex(@"^Mixed-mode\? True\s?$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-      bool mixed_mode = mixed_mode_regex.IsMatch(output);
-      if (!mixed_mode)
-        return false;
-
-      // wfcook RH-60405 14-Sep-2020: If plugin version >= 6 we don't need to check because we 
-      // haven't broken the sdk.
-      bool bReferencesOK = true;
-      var RhinoCommonRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*RhinoCommon.*Version=)[0-9](?=\.)");
-      Match RhinoCommonMatch = RhinoCommonRegex.Match(output);
-      if (RhinoCommonMatch.Success)
-      {
-        int version;
-        if (int.TryParse(RhinoCommonMatch.Value, out version) && (version < 6)) bReferencesOK = false;
-      }
-      if (bReferencesOK)
-      {
-        var RhinoDotNetRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*Rhino_DotNet.*Version=)[0-9](?=\.)");
-        Match RhinoDotNetMatch = RhinoDotNetRegex.Match(output);
-        if (RhinoDotNetMatch.Success)
-        {
-          int version;
-          if (int.TryParse(RhinoDotNetMatch.Value, out version) && (version < 6)) bReferencesOK = false;
-        }
-      }
-      if (bReferencesOK) return false;
-
-      // if we find any classes with the following prefixes, odds are the assembly references the rhino c++ sdk
-      // we can't check for compatibility with the c++ sdk so the plug-in fails the compatibility check
-      var prefixes = new string[] { "CRhino", "ON_" };
-
-      foreach (string line in output.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
-      {
-        foreach (var p in prefixes)
-        {
-          if (line.TrimStart().StartsWith(p))
-            return true;
-        }
-      }
-      return false;
+      return new CompatResult { Success = result, Output = output };
     }
 
     static void ExtractPlugInAttributes(System.Reflection.Assembly assembly, IntPtr pluginInfo)

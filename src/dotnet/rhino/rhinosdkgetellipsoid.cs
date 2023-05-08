@@ -5,8 +5,9 @@ using System;
 namespace Rhino.Input.Custom
 {
   /// <summary>
-  /// Class provides user interface to define a truncated cone.
+  /// Class provides user interface to define an ellipsoid.
   /// </summary>
+  /// <since>7.0</since>
   public class GetEllipsoid : IDisposable
   {
     IntPtr m_ptr_argsrhinogetellipse;
@@ -117,9 +118,9 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
-    /// Prompt for the getting of a ellipsoid.
+    /// Prompt for the getting of an ellipsoid.
     /// </summary>
-    /// <param name="ellipsoid">The truncated cone in NURB form.</param>
+    /// <param name="ellipsoid">The ellipsoid in NURB form.</param>
     /// <returns>The result of the getting operation.</returns>
     /// <since>7.0</since>
     public Commands.Result Get(out Geometry.NurbsSurface ellipsoid)

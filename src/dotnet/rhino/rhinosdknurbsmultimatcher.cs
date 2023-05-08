@@ -81,6 +81,21 @@ namespace Rhino.Geometry
     /// <summary>
     /// </summary>
     /// <since>8.0</since>
+    public double InteriorStiffness
+    {
+      get
+      {
+        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetInteriorStiffness(m_ptr);
+      }
+      set
+      {
+        UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetInteriorStiffness(m_ptr, value);
+      }
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <since>8.0</since>
     public FreeEdgeMovementOption FreeEdgeMovement
     {
       get

@@ -2995,7 +2995,17 @@ namespace Rhino.DocObjects
       var p_const_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoObject_HasHistoryRecord(p_const_this);
     }
+    /// <summary>
+    /// Sets a history record on the 
+    /// </summary>
+    /// <param name="history">The history record to set for the object</param>
+    /// <returns>true if successful</returns>
+    public bool SetHistory(HistoryRecord history)
+    {
+      var p_this = NonConstPointer();
 
+      return UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
+    }
     internal bool IsCustom
     {
       get

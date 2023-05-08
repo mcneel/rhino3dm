@@ -1335,6 +1335,24 @@ namespace Rhino
       return false;
     }
 
+    public bool TryGetColor(bool isDefault, out Color? value)
+    {
+      var success = TryGetColor(GetValue(isDefault), out value);
+      RuntimeType = typeof(Color?);
+      return success;
+    }
+
+    public static bool TryGetColor(string str, out Color? value)
+    {
+      if (TryGetColor(str, out Color color))
+      {
+        value = color;
+        return true;
+      }
+      value = null;
+      return false;
+    }
+
     public bool TryGetPoint3d(bool isDefault, out Point3d value)
     {
       var success = TryGetPoint3d(GetValue(isDefault), out value);
@@ -1683,6 +1701,26 @@ namespace Rhino
       value.R.ToString(SettingValue.ParseNumberFormat),
       value.G.ToString(SettingValue.ParseNumberFormat),
       value.B.ToString(SettingValue.ParseNumberFormat));
+
+    public void SetColor(bool isDefault, Color? value, EventHandler<PersistentSettingsEventArgs<Color?>> validator,
+      bool setChangedFlag)
+    {
+      if (validator != null)
+      {
+        Color? old_value = null;
+        TryGetColor(isDefault, out old_value);
+        var a = new PersistentSettingsEventArgs<Color?>(old_value, value);
+        validator(this, a);
+        if (a.Cancel)
+          return;
+        value = a.NewValue;
+      }
+      RuntimeType = typeof(Color?);
+      if (value == null || value.Value.IsEmpty)
+        SetValue(isDefault, null, setChangedFlag);
+      else
+        SetValue(isDefault, ColorToString(value.Value), setChangedFlag);
+    }
 
     public void SetColor(bool isDefault, Color value, EventHandler<PersistentSettingsEventArgs<Color>> validator,
       bool setChangedFlag)
@@ -3116,6 +3154,20 @@ namespace Rhino
       return false;
     }
 
+    public bool TryGetColor(string key, out Color? value)
+    {
+      return TryGetColor(key, out value, null);
+    }
+
+    public bool TryGetColor(string key, out Color? value, IEnumerable<string> legacyKeyList)
+    {
+      var sv = TryGetSettingsValue(typeof(Color?), key, legacyKeyList);
+      if (sv != null)
+        return sv.TryGetColor(false, out value);
+      value = null;
+      return false;
+    }
+
     /// <since>5.0</since>
     public Color GetColor(string key)
     {
@@ -3147,6 +3199,28 @@ namespace Rhino
       // should just return the default color in that case.
       if (TryGetColor(key, out rc))
         return rc;
+      return defaultValue;
+    }
+
+    public Color? GetColor(string key, Color? defaultValue)
+    {
+      return GetColor(key, defaultValue, null);
+    }
+
+    public Color? GetColor(string key, Color? defaultValue, IEnumerable<string> legacyKeyList)
+    {
+      if (TryGetColor(key, out Color? color, legacyKeyList))
+      {
+        m_settings[key].SetColor(true, defaultValue, GetValidator<Color?>(key), false);
+        return color;
+      }
+      SetDefault(key, defaultValue);
+      SetValueToDefaultIfEmpy(key, setting => setting.SetColor(false, defaultValue, GetValidator<Color?>(key), false));
+      // Won't be in PLIST on Mac if current value is equal to the default value so
+      // calling GetColor will throw an exception when the color is not found. This
+      // should just return the default color in that case.
+      if (TryGetColor(key, out Color? c, null))
+        return c;
       return defaultValue;
     }
 
@@ -3677,6 +3751,11 @@ namespace Rhino
       GetValue(key, typeof(Color)).SetColor(false, value, GetValidator<Color>(key), true);
     }
 
+    public void SetColor(string key, Color? value)
+    {
+      GetValue(key, typeof(Color?)).SetColor(false, value, GetValidator<Color?>(key), true);
+    }
+
     /// <since>5.0</since>
     public void SetPoint3d(string key, Point3d value)
     {
@@ -3758,6 +3837,11 @@ namespace Rhino
     public void SetDefault(string key, Color value)
     {
       GetValue(key, typeof(Color)).SetColor(true, value, GetValidator<Color>(key), true);
+    }
+
+    public void SetDefault(string key, Color? value)
+    {
+      GetValue(key, typeof(Color?)).SetColor(true, value, GetValidator<Color?>(key), true);
     }
 
     /// <since>5.0</since>

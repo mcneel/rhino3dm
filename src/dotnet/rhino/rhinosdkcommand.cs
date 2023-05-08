@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Rhino.Runtime.InteropWrappers;
+using System.Diagnostics.Eventing.Reader;
 
 #if RHINO_SDK
 namespace Rhino.Commands
@@ -1441,6 +1442,64 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Create an empty history result and add it to the end of the Results array.
+    /// Note that you should call Results again if you need them as the old Results
+    /// array will be out of sync with this class.
+    /// </summary>
+    /// <returns></returns>
+    public ReplayHistoryResult AppendHistoryResult()
+    {
+      int index = UnsafeNativeMethods.CRhinoObjectPairArray_Append(m_pObjectPairArray);
+      if (index < 0)
+        return null;
+
+      var rc = new ReplayHistoryResult(this, index);
+      var oldResults = m_results;
+      m_results = null;
+      if (oldResults != null && index == oldResults.Length)
+      {
+        int count = index + 1;
+        m_results = new ReplayHistoryResult[count];
+        for (int i=0; i < (count-1); i++)
+        {
+          m_results[i] = oldResults[i];
+        }
+        m_results[count - 1] = rc;
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Update the Results array with a different set of values. Null entries in the newResults
+    /// will result in empty ReplayHistoryResult elements
+    /// </summary>
+    /// <param name="newResults"></param>
+    public void UpdateResultArray(IEnumerable<ReplayHistoryResult> newResults)
+    {
+      if (newResults == null)
+      {
+        UnsafeNativeMethods.CRhinoObjectPairArray_UpdateElements(m_pObjectPairArray, null, 0);
+        m_results = null;
+        return;
+      }
+
+      List<int> updateIndices = new List<int>();
+      foreach(var result in newResults)
+      {
+        if (result == null)
+        {
+          updateIndices.Add(-1);
+          continue;
+        }
+        updateIndices.Add(result.m_index);
+      }
+
+      int[] indices = updateIndices.ToArray();
+      UnsafeNativeMethods.CRhinoObjectPairArray_UpdateElements(m_pObjectPairArray, indices, indices.Length);
+      m_results = null;
+    }
+
     /// <since>5.0</since>
     public bool TryGetBool(int id, out bool value)
     {
@@ -1469,6 +1528,18 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetPoint3d(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    public bool TryGetGuids(int id, out Guid[] values)
+    {
+      values = new Guid[] { };
+      using (var array = new SimpleArrayGuid())
+      {
+        IntPtr ptr_array = array.NonConstPointer();
+        bool rc = UnsafeNativeMethods.CRhinoHistoryRecord_GetUuids(m_pConstRhinoHistoryRecord, id, ptr_array);
+        if (rc)
+          values = array.ToArray();
+        return rc;
+      }
+    }
     /// <since>5.0</since>
     public bool TryGetVector3d(int id, out Geometry.Vector3d value)
     {
@@ -1660,7 +1731,7 @@ namespace Rhino.DocObjects
   public class ReplayHistoryResult
   {
     readonly ReplayHistoryData m_parent;
-    readonly int m_index;
+    internal int m_index;
     internal ReplayHistoryResult(ReplayHistoryData parent, int index)
     {
       m_parent = parent;
