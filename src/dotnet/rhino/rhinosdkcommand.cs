@@ -4,7 +4,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Rhino.Runtime.InteropWrappers;
-using System.Diagnostics.Eventing.Reader;
 
 #if RHINO_SDK
 namespace Rhino.Commands
