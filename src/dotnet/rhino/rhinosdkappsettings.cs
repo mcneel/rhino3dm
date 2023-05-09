@@ -4433,6 +4433,12 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>5.0</since>
     public bool AutoSuppress { get; set; }
+
+    /// <summary>
+    /// Turns on/off gumball tooltips
+    /// </summary>
+    /// <since>8.0</since>
+    public bool EnableGumballToolTips { get; set; }
   }
 
   /// <summary>
@@ -4459,6 +4465,7 @@ namespace Rhino.ApplicationSettings
       rc.RelativePointPane = GetInt(idx_bRelativePointPane, pSettings) != 0;
       rc.CommandPromptPane = GetInt(idx_bCommandPromptPane, pSettings) != 0;
       rc.AutoSuppress = GetInt(idx_bAutoSuppress, pSettings) != 0;
+      rc.EnableGumballToolTips = GetInt(idx_bEnableGumballTooltips, pSettings) != 0;
       UnsafeNativeMethods.CRhinoAppCursorToolTipSettings_Delete(pSettings);
       return rc;
     }
@@ -4604,6 +4611,16 @@ namespace Rhino.ApplicationSettings
       set { SetInt(idx_bAutoSuppress, value ? 1 : 0, IntPtr.Zero); }
     }
 
+    /// <summary>
+    /// Turns on/off gumball tooltips
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool EnableGumballToolTips
+    {
+      get => GetInt(idx_bEnableGumballTooltips, IntPtr.Zero) != 0;
+      set => SetInt(idx_bEnableGumballTooltips, value ? 1 : 0, IntPtr.Zero);
+    }
+
     const int idx_EnableCursorToolTips = 0;
     const int idx_xoffset = 1;
     const int idx_yoffset = 2;
@@ -4615,6 +4632,7 @@ namespace Rhino.ApplicationSettings
     const int idx_bRelativePointPane = 8;
     const int idx_bCommandPromptPane = 9;
     const int idx_bAutoSuppress = 10;
+    const int idx_bEnableGumballTooltips = 11;
 
     static int GetInt(int which, IntPtr pCursorTooltipSettings)
     {
