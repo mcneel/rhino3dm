@@ -27,7 +27,7 @@ RH_C_FUNCTION void ON_RenderChannels_SetMode(ON_RenderChannels* p, int m)
   }
 }
 
-RH_C_FUNCTION void ON_RenderChannels_GetCustomList(const ON_RenderChannels* p, ON_SimpleArray<UUID>* paChan)
+RH_C_FUNCTION void ON_RenderChannels_GetCustomList(const ON_RenderChannels* p, ON_SimpleArray<ON_UUID>* paChan)
 {
   if ((nullptr != p) && (nullptr != paChan))
   {
@@ -35,7 +35,7 @@ RH_C_FUNCTION void ON_RenderChannels_GetCustomList(const ON_RenderChannels* p, O
   }
 }
 
-RH_C_FUNCTION void ON_RenderChannels_SetCustomList(ON_RenderChannels* p, const ON_SimpleArray<UUID>* paChan)
+RH_C_FUNCTION void ON_RenderChannels_SetCustomList(ON_RenderChannels* p, const ON_SimpleArray<ON_UUID>* paChan)
 {
   if ((nullptr != p) && (nullptr != paChan))
   {
@@ -48,12 +48,12 @@ RH_C_FUNCTION ON_RenderChannels* ON_RenderChannels_New()
   return new ON_RenderChannels;
 }
 
-RH_C_FUNCTION void ON_RenderChannels_Delete(ON_Skylight* p)
+RH_C_FUNCTION void ON_RenderChannels_Delete(ON_RenderChannels* p)
 {
   delete p;
 }
 
-RH_C_FUNCTION void ON_RenderChannels_CopyFrom(ON_Skylight* target, const ON_Skylight* source)
+RH_C_FUNCTION void ON_RenderChannels_CopyFrom(ON_RenderChannels* target, const ON_RenderChannels* source)
 {
   if ((nullptr != target) && (nullptr != source))
   {
