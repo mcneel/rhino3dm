@@ -1,30 +1,5 @@
-
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_RenderChannels* ON_3dmRenderSettings_GetRenderChannels(const ON_3dmRenderSettings* rs)
-{
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
-}
-
-RH_C_FUNCTION ON_RenderChannels* ON_3dmRenderSettings_BeginChange_ON_RenderChannels(const ON_3dmRenderSettings* rs)
-{
-  return &ON_3dmRenderSettings_BeginChange(rs).RenderChannels();
-}
-
-RH_C_FUNCTION const ON_RenderChannels* ON_RenderChannels_FromDocSerial(unsigned int rhino_doc_sn)
-{
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
-}
 
 RH_C_FUNCTION const ON_RenderChannels* ON_RenderChannels_FromONX_Model(ONX_Model* ptrModel)
 {
