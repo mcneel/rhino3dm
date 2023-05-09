@@ -664,6 +664,16 @@ namespace Rhino.Geometry
       }
       return false;
     }
+    /// <summary>
+    /// Check to see if the fillet is properly initialized. If it is not, then the selected curves, surfaces, and/or radius must
+    /// be adjusted in some way before creating the fillet
+    /// </summary>
+    /// <returns></returns>
+    public bool IsInitialized()
+    {
+      return UnsafeNativeMethods.RhIsSurfaceFilletInitialized(m_ptr);
+    }
+
   }
 
   /// <summary>

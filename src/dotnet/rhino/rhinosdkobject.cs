@@ -3111,6 +3111,20 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the document that owns this object reference.
+    /// </summary>
+    /// <since>8.0</since>
+    public RhinoDoc Document
+    {
+      get
+      {
+        var const_ptr = ConstPointer();
+        var sn = UnsafeNativeMethods.CRhinoObjRef_DocumentRuntimeSerailNumber(const_ptr);
+        return RhinoDoc.FromRuntimeSerialNumber(sn);
+      }
+    }
+
+    /// <summary>
     /// Copy constructor
     /// </summary>
     /// <param name="other"></param>
