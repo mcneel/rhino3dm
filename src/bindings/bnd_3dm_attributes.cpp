@@ -19,9 +19,9 @@ void BND_3dmObjectAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, c
   BND_CommonObject::SetTrackedPointer(attrs, compref);
 }
 
-bool BND_3dmObjectAttributes::Transform(const class BND_Transform& transform)
+bool BND_3dmObjectAttributes::Transform(const BND_Transform& transform)
 {
-  return m_attributes->Transform(transform.m_xform);
+  return m_attributes->Transform(nullptr, transform.m_xform);
 }
 
 bool BND_3dmObjectAttributes::HasDisplayModeOverride(BND_UUID viewportId) const
@@ -83,7 +83,7 @@ BND_Color BND_3dmObjectAttributes::GetDrawColor(class BND_ONXModel* pDoc) const
   {
     if (model)
     {
-      ON_ModelComponentReference compref = model->RenderMaterialFromIndex(m_attributes->m_material_index);
+      ON_ModelComponentReference compref = model->MaterialFromIndex(m_attributes->m_material_index);
       const ON_ModelComponent* model_component = compref.ModelComponent();
       const ON_Material* material = ON_Material::Cast(model_component);
       if (material)

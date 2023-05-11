@@ -1,26 +1,49 @@
 
 #include "bindings.h"
 
-BND_File3dmPostEffect::BND_File3dmPostEffect()
+void BND_File3dmPostEffectTable::Add(const BND_File3dmPostEffect& pep)
 {
-  SetTrackedPointer(new ON_PostEffect, nullptr);
+  ON_PostEffectParams params;
+
+  const auto id = Binding_to_ON_UUID(pep.Id());
+  const ON_wString name = pep.LocalName().c_str();
+
+  _peps->AddPostEffect(pep.Type(), id, name, params, pep.Listable(), pep.On(), pep.Shown());
 }
 
-BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep)
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindIndex(int index)
 {
-  SetTrackedPointer(new ON_PostEffect(*pep.m_post_effect), nullptr);
+  ON_SimpleArray<ON_PostEffect*> a;
+  _peps->GetPostEffects(a);
+
+  if ((index < 0) || (index >= a.Count()))
+    return nullptr;
+
+  return new BND_File3dmPostEffect(a[index]);
 }
 
-BND_File3dmPostEffect::BND_File3dmPostEffect(ON_PostEffect* pep, const ON_ModelComponentReference* compref)
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::IterIndex(int index)
 {
-  SetTrackedPointer(pep, compref);
+  return FindIndex(index);
 }
 
-void BND_File3dmPostEffect::SetTrackedPointer(ON_PostEffect* pep, const ON_ModelComponentReference* compref)
+BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindId(BND_UUID id)
 {
-  m_post_effect = pep;
+  const ON_UUID pep_id = Binding_to_ON_UUID(id);
 
-  BND_ModelComponent::SetTrackedPointer(pep, compref);
+  auto* pep = _peps->PostEffectFromId(pep_id);
+  if (nullptr == pep)
+    return nullptr;
+
+  return new BND_File3dmPostEffect(pep);
+}
+
+int BND_File3dmPostEffectTable::Count() const
+{
+  ON_SimpleArray<const ON_PostEffect*> a;
+  _peps->GetPostEffects(a);
+
+  return a.Count();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -32,10 +55,12 @@ void initPostEffectBindings(pybind11::module& m)
   py::class_<BND_File3dmPostEffect>(m, "PostEffect")
     .def(py::init<>())
     .def(py::init<const BND_File3dmPostEffect&>(), py::arg("other"))
+    .def_property_readonly("Id", &BND_File3dmPostEffect::Id)
     .def_property_readonly("Type", &BND_File3dmPostEffect::Type)
     .def_property_readonly("LocalName", &BND_File3dmPostEffect::LocalName)
-    .def_property_readonly("IsVisible", &BND_File3dmPostEffect::IsVisible)
-    .def_property_readonly("IsActive", &BND_File3dmPostEffect::IsActive)
+    .def_property_readonly("Listable", &BND_File3dmPostEffect::Listable)
+    .def_property("On", &BND_File3dmPostEffect::On, &BND_File3dmPostEffect::SetOn)
+    .def_property("Shown", &BND_File3dmPostEffect::Shown, &BND_File3dmPostEffect::SetShown)
     .def("GetParameter", &BND_File3dmPostEffect::GetParameter)
     .def("SetParameter", &BND_File3dmPostEffect::SetParameter)
     ;

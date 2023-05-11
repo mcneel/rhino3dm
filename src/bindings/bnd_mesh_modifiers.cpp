@@ -156,6 +156,16 @@ BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::FindId(BND_UUID id)
   return nullptr;
 }
 
+BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr)
+  :
+  m_displacement(attr),
+  m_edge_softening(attr),
+  m_thickening(attr),
+  m_curve_piping(attr),
+  m_shutlining(attr)
+{
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -319,4 +329,3 @@ void initMeshModifierBindings(void*)
     ;
 }
 #endif
- 

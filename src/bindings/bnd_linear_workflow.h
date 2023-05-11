@@ -1,7 +1,7 @@
 
-#include "bindings.h"
-
 #pragma once
+
+#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
 void initLinearWorkflowBindings(pybind11::module& m);
@@ -11,28 +11,31 @@ void initLinearWorkflowBindings(void* m);
 
 class BND_File3dmLinearWorkflow
 {
-public:
-  ON_LinearWorkflow* m_linear_workflow = nullptr;
-
-protected:
-  void SetTrackedPointer(ON_LinearWorkflow* lw) { m_linear_workflow = lw; }
+private:
+  ON_LinearWorkflow* _lw = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmLinearWorkflow();
-  BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw);
+  BND_File3dmLinearWorkflow() { _lw = new ON_LinearWorkflow; _owned = true; }
+  BND_File3dmLinearWorkflow(const BND_File3dmLinearWorkflow& lw) { _lw = new ON_LinearWorkflow(*lw._lw); _owned = true; }
+  BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw) : _lw(lw) { }
+  ~BND_File3dmLinearWorkflow() { if (_owned) delete _lw; }
 
-  bool GetPreProcessTextures(void) const { return m_linear_workflow->PreProcessTextures(); }
-  void SetPreProcessTextures(bool v) { m_linear_workflow->SetPreProcessTextures(v); }
+  bool GetPreProcessTexturesOn(void) const { return _lw->PreProcessTexturesOn(); }
+  void SetPreProcessTexturesOn(bool v) { _lw->SetPreProcessTexturesOn(v); }
 
-  bool GetPreProcessColors(void) const { return m_linear_workflow->PreProcessColors(); }
-  void SetPreProcessColors(bool v) { m_linear_workflow->SetPreProcessColors(v); }
+  bool GetPreProcessColorsOn(void) const { return _lw->PreProcessColorsOn(); }
+  void SetPreProcessColorsOn(bool v) { _lw->SetPreProcessColorsOn(v); }
 
-  float GetPreProcessGamma(void) const { return m_linear_workflow->PreProcessGamma(); }
-  void SetPreProcessGamma(float v) { m_linear_workflow->SetPreProcessGamma(v); }
+  float GetPreProcessGamma(void) const { return _lw->PreProcessGamma(); }
+  void SetPreProcessGamma(float v) { _lw->SetPreProcessGamma(v); }
 
-  float GetPostProcessGamma(void) const { return m_linear_workflow->PostProcessGamma(); }
-  void SetPostProcessGamma(float v) { m_linear_workflow->SetPostProcessGamma(v); }
+  bool GetPreProcessGammaOn(void) const { return _lw->PreProcessGammaOn(); }
+  void SetPreProcessGammaOn(bool v) { _lw->SetPreProcessGammaOn(v); }
 
-  bool GetPostProcessGammaOn(void) const { return m_linear_workflow->PostProcessGammaOn(); }
-  void SetPostProcessGammaOn(bool v) { m_linear_workflow->SetPostProcessGammaOn(v); }
+  float GetPostProcessGamma(void) const { return _lw->PostProcessGamma(); }
+  void SetPostProcessGamma(float v) { _lw->SetPostProcessGamma(v); }
+
+  bool GetPostProcessGammaOn(void) const { return _lw->PostProcessGammaOn(); }
+  void SetPostProcessGammaOn(bool v) { _lw->SetPostProcessGammaOn(v); }
 };

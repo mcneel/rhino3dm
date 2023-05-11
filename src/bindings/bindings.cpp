@@ -32,6 +32,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initSafeFrameBindings(m);
   initDitheringBindings(m);
   initLinearWorkflowBindings(m);
+  initRenderEnvironmentsBindings(m);
   initRenderChannelsBindings(m);
   initSunBindings(m);
   initPostEffectBindings(m);

@@ -1,7 +1,7 @@
 
-#include "bindings.h"
-
 #pragma once
+
+#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
 void initRenderChannelsBindings(pybind11::module& m);
@@ -11,38 +11,20 @@ void initRenderChannelsBindings(void* m);
 
 class BND_File3dmRenderChannels
 {
-public:
-  ON_RenderChannels* m_render_channels = nullptr;
+private:
+  ON_RenderChannels* _rch = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmRenderChannels() { }
-  BND_File3dmRenderChannels(ON_RenderChannels* rch) : m_render_channels(rch) { }
+  BND_File3dmRenderChannels() { _rch = new ON_RenderChannels; _owned = true; }
+  BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch) { _rch = new ON_RenderChannels(*rch._rch); _owned = true; }
+  BND_File3dmRenderChannels(ON_RenderChannels* rch) : _rch(rch) { }
+  ~BND_File3dmRenderChannels() { if (_owned) delete _rch; }
 
-  ON_RenderChannels::Modes GetMode(void) const { return m_render_channels->Mode(); }
-  void SetMode(ON_RenderChannels::Modes v) { m_render_channels->SetMode(v); }
+public:
+  ON_RenderChannels::Modes GetMode(void) const { return _rch->Mode(); }
+  void SetMode(ON_RenderChannels::Modes v) { _rch->SetMode(v); }
 
   BND_TUPLE GetCustomList(void) const;
   void SetCustomList(BND_TUPLE v);
-};
-
-// This will go in bnd_render_content.h once I pop the stash and get back to the render content stuff.
-class BND_File3dmRenderEnvironments
-{
-public:
-  ONX_Model* m_model = nullptr;
-
-public:
-  BND_File3dmRenderEnvironments() { }
-  BND_File3dmRenderEnvironments(ONX_Model* m) : m_model(m) { }
-
-  BND_UUID GetBackgroundId(void) const;
-  void SetBackgroundId(const BND_UUID& id) const;
-  bool GetSkylightingOverride(void) const;
-  void SetSkylightingOverride(bool on) const;
-  BND_UUID GetSkylightingId(void) const;
-  void SetSkylightingId(const BND_UUID& id) const;
-  bool GetReflectionOverride(void) const;
-  void SetReflectionOverride(bool on) const;
-  BND_UUID GetReflectionId(void) const;
-  void SetReflectionId(const BND_UUID& id) const;
 };

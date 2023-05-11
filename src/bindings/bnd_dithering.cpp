@@ -1,17 +1,6 @@
 
 #include "bindings.h"
 
-BND_File3dmDithering::BND_File3dmDithering()
-{
-}
-
-BND_File3dmDithering::BND_File3dmDithering(ON_Dithering* dit)
-{
-  SetTrackedPointer(dit);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDitheringBindings(pybind11::module& m)

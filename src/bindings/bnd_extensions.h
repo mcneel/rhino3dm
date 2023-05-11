@@ -1,3 +1,4 @@
+
 #include "bindings.h"
 
 #pragma once
@@ -292,15 +293,6 @@ public:
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
   BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
-  BND_File3dmSkylight& Skylight() { return m_Skylight; }
-  BND_File3dmGroundPlane& GroundPlane() { return m_GroundPlane; }
-  BND_File3dmSafeFrame& SafeFrame() { return m_SafeFrame; }
-  BND_File3dmDithering& Dithering() { return m_Dithering; }
-  BND_File3dmLinearWorkflow& LinearWorkflow() { return m_LinearWorkflow; }
-  BND_File3dmRenderChannels& RenderChannels() { return m_RenderChannels; }
-  BND_File3dmSun& Sun() { return m_Sun; }
-  BND_File3dmPostEffectTable PostEffects() { return BND_File3dmPostEffectTable(m_model); }
-  BND_File3dmRenderEnvironments& RenderEnvironments() { return m_RenderEnvironments; }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
@@ -312,18 +304,6 @@ public:
 
 public:
   static bool ReadTest(std::wstring filepath);
-
-private:
-  BND_File3dmSun m_Sun;
-  BND_File3dmSkylight m_Skylight;
-  BND_File3dmGroundPlane m_GroundPlane;
-  BND_File3dmSafeFrame m_SafeFrame;
-  BND_File3dmDithering m_Dithering;
-  BND_File3dmLinearWorkflow m_LinearWorkflow;
-  BND_File3dmRenderChannels m_RenderChannels;
-//  BND_File3dmRenderMaterials m_RenderMaterials;
-  BND_File3dmRenderEnvironments m_RenderEnvironments;
-//  BND_File3dmRenderTextures m_RenderTextures;
 };
 
 class BND_File3dmWriteOptions

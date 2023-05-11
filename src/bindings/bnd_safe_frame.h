@@ -1,7 +1,7 @@
 
-#include "bindings.h"
-
 #pragma once
+
+#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
 void initSafeFrameBindings(pybind11::module& m);
@@ -11,49 +11,49 @@ void initSafeFrameBindings(void* m);
 
 class BND_File3dmSafeFrame
 {
-public:
-  ON_SafeFrame* m_safe_frame = nullptr;
-
-protected:
-  void SetTrackedPointer(ON_SafeFrame* sf) { m_safe_frame = sf; }
+private:
+  ON_SafeFrame* _sf = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmSafeFrame();
-  BND_File3dmSafeFrame(ON_SafeFrame* sf);
+  BND_File3dmSafeFrame() { _sf = new ON_SafeFrame; _owned = true; }
+  BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf) { _sf = new ON_SafeFrame(*sf._sf); _owned = true; }
+  BND_File3dmSafeFrame(ON_SafeFrame* sf) : _sf(sf) { }
+  ~BND_File3dmSafeFrame() { if (_owned) delete _sf; }
 
-  bool GetOn(void) const { return m_safe_frame->On(); }
-  void SetOn(bool v) const { m_safe_frame->SetOn(v); }
+  bool GetOn(void) const { return _sf->On(); }
+  void SetOn(bool v) const { _sf->SetOn(v); }
 
-  bool GetPerspectiveOnly(void) const { return m_safe_frame->PerspectiveOnly(); }
-  void SetPerspectiveOnly(bool b) const { m_safe_frame->SetPerspectiveOnly(b); }
+  bool GetPerspectiveOnly(void) const { return _sf->PerspectiveOnly(); }
+  void SetPerspectiveOnly(bool b) const { _sf->SetPerspectiveOnly(b); }
 
-  bool GetFieldGridOn(void) const { return m_safe_frame->FieldGridOn(); }
-  void SetFieldGridOn(bool b) const { m_safe_frame->SetFieldGridOn(b); }
+  bool GetFieldGridOn(void) const { return _sf->FieldGridOn(); }
+  void SetFieldGridOn(bool b) const { _sf->SetFieldGridOn(b); }
 
-  bool GetLiveFrameOn(void) const { return m_safe_frame->LiveFrameOn(); }
-  void SetLiveFrameOn(bool b) const { m_safe_frame->SetLiveFrameOn(b); }
+  bool GetLiveFrameOn(void) const { return _sf->LiveFrameOn(); }
+  void SetLiveFrameOn(bool b) const { _sf->SetLiveFrameOn(b); }
 
-  bool GetActionFrameOn(void) const { return m_safe_frame->ActionFrameOn(); }
-  void SetActionFrameOn(bool b) const { m_safe_frame->SetActionFrameOn(b); }
+  bool GetActionFrameOn(void) const { return _sf->ActionFrameOn(); }
+  void SetActionFrameOn(bool b) const { _sf->SetActionFrameOn(b); }
 
-  bool GetActionFrameLinked(void) const { return m_safe_frame->ActionFrameLinked(); }
-  void SetActionFrameLinked(bool b) const { m_safe_frame->SetActionFrameLinked(b); }
+  bool GetActionFrameLinked(void) const { return _sf->ActionFrameLinked(); }
+  void SetActionFrameLinked(bool b) const { _sf->SetActionFrameLinked(b); }
 
-  double GetActionFrameXScale(void) const { return m_safe_frame->ActionFrameXScale(); }
-  void SetActionFrameXScale(double d) const { m_safe_frame->SetActionFrameXScale(d); }
+  double GetActionFrameXScale(void) const { return _sf->ActionFrameXScale(); }
+  void SetActionFrameXScale(double d) const { _sf->SetActionFrameXScale(d); }
 
-  double GetActionFrameYScale(void) const { return m_safe_frame->ActionFrameYScale(); }
-  void SetActionFrameYScale(double d) const { m_safe_frame->SetActionFrameYScale(d); }
+  double GetActionFrameYScale(void) const { return _sf->ActionFrameYScale(); }
+  void SetActionFrameYScale(double d) const { _sf->SetActionFrameYScale(d); }
 
-  bool GetTitleFrameOn(void) const { return m_safe_frame->TitleFrameOn(); }
-  void SetTitleFrameOn(bool b) const { m_safe_frame->SetTitleFrameOn(b); }
+  bool GetTitleFrameOn(void) const { return _sf->TitleFrameOn(); }
+  void SetTitleFrameOn(bool b) const { _sf->SetTitleFrameOn(b); }
 
-  bool GetTitleFrameLinked(void) const { return m_safe_frame->TitleFrameLinked(); }
-  void SetTitleFrameLinked(bool b) const { m_safe_frame->SetTitleFrameLinked(b); }
+  bool GetTitleFrameLinked(void) const { return _sf->TitleFrameLinked(); }
+  void SetTitleFrameLinked(bool b) const { _sf->SetTitleFrameLinked(b); }
 
-  double GetTitleFrameXScale(void) const { return m_safe_frame->TitleFrameXScale(); }
-  void SetTitleFrameXScale(double d) const { m_safe_frame->SetTitleFrameXScale(d); }
+  double GetTitleFrameXScale(void) const { return _sf->TitleFrameXScale(); }
+  void SetTitleFrameXScale(double d) const { _sf->SetTitleFrameXScale(d); }
 
-  double GetTitleFrameYScale(void) const { return m_safe_frame->TitleFrameYScale(); }
-  void SetTitleFrameYScale(double d) const { m_safe_frame->SetTitleFrameYScale(d); }
+  double GetTitleFrameYScale(void) const { return _sf->TitleFrameYScale(); }
+  void SetTitleFrameYScale(double d) const { _sf->SetTitleFrameYScale(d); }
 };

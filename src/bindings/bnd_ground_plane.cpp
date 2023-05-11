@@ -1,17 +1,6 @@
 
 #include "bindings.h"
 
-BND_File3dmGroundPlane::BND_File3dmGroundPlane()
-{
-}
-
-BND_File3dmGroundPlane::BND_File3dmGroundPlane(ON_GroundPlane* gp)
-{
-  SetTrackedPointer(gp);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initGroundPlaneBindings(pybind11::module& m)
@@ -27,7 +16,7 @@ void initGroundPlaneBindings(pybind11::module& m)
     .def_property("MaterialInstanceId", &BND_File3dmGroundPlane::GetMaterialInstanceId, &BND_File3dmGroundPlane::SetMaterialInstanceId)
     .def_property("TextureOffset", &BND_File3dmGroundPlane::GetTextureOffset, &BND_File3dmGroundPlane::SetTextureOffset)
     .def_property("TextureOffsetLocked", &BND_File3dmGroundPlane::GetTextureOffsetLocked, &BND_File3dmGroundPlane::SetTextureOffsetLocked)
-    .def_property("TextureRepeatLocked", &BND_File3dmGroundPlane::GetTextureRepeatLocked, &BND_File3dmGroundPlane::SetTextureRepeatLocked)
+    .def_property("TextureSizeLocked", &BND_File3dmGroundPlane::GetTextureSizeLocked, &BND_File3dmGroundPlane::SetTextureSizeLocked)
     .def_property("TextureSize", &BND_File3dmGroundPlane::GetTextureSize, &BND_File3dmGroundPlane::SetTextureSize)
     .def_property("TextureRotation", &BND_File3dmGroundPlane::GetTextureRotation, &BND_File3dmGroundPlane::SetTextureRotation)
     ;

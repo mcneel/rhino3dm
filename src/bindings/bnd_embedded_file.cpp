@@ -8,7 +8,7 @@ BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile()
 
 BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile(const BND_File3dmEmbeddedFile& ef)
 {
-  SetTrackedPointer(new ON_EmbeddedFile(*ef.m_embedded_file), nullptr);
+  SetTrackedPointer(new ON_EmbeddedFile(*ef._ef), nullptr);
 }
 
 BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref)
@@ -30,7 +30,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
 
 void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref)
 {
-  m_embedded_file = ef;
+  _ef = ef;
 
   BND_ModelComponent::SetTrackedPointer(ef, compref);
 }

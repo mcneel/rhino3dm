@@ -12,7 +12,7 @@ void initEmbeddedFileBindings(void* m);
 class BND_File3dmEmbeddedFile : public BND_ModelComponent
 {
 public:
-  ON_EmbeddedFile* m_embedded_file = nullptr;
+  ON_EmbeddedFile* _ef = nullptr;
 
 protected:
   void SetTrackedPointer(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref);
@@ -24,10 +24,10 @@ public:
 
   static BND_File3dmEmbeddedFile* Read(const std::wstring& f);
 
-  std::wstring GetFilename(void) const { return std::wstring(static_cast<const wchar_t*>(m_embedded_file->Filename())); }
-  size_t GetLength(void) const { return m_embedded_file->Length(); }
-  bool Write(const std::wstring& f) const { return m_embedded_file->SaveToFile(f.c_str()); }
-  bool Clear(void) const { return m_embedded_file->Clear(); }
+  std::wstring GetFilename(void) const { return std::wstring(static_cast<const wchar_t*>(_ef->Filename())); }
+  size_t GetLength(void) const { return _ef->Length(); }
+  bool Write(const std::wstring& f) const { return _ef->SaveToFile(f.c_str()); }
+  bool Clear(void) const { return _ef->Clear(); }
 };
 
 class BND_File3dmEmbeddedFileTable

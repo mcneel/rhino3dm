@@ -1,7 +1,7 @@
 
-#include "bindings.h"
-
 #pragma once
+
+#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
 void initDitheringBindings(pybind11::module& m);
@@ -11,19 +11,19 @@ void initDitheringBindings(void* m);
 
 class BND_File3dmDithering
 {
-public:
-  ON_Dithering* m_dithering = nullptr;
-
-protected:
-  void SetTrackedPointer(ON_Dithering* dit) { m_dithering = dit; }
+private:
+  ON_Dithering* _dit = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmDithering();
-  BND_File3dmDithering(ON_Dithering* dit);
+  BND_File3dmDithering() { _dit = new ON_Dithering; _owned = true; }
+  BND_File3dmDithering(const BND_File3dmDithering& dit) { _dit = new ON_Dithering(*dit._dit); _owned = true; }
+  BND_File3dmDithering(ON_Dithering* dit) : _dit(dit) { }
+  ~BND_File3dmDithering() { if (_owned) delete _dit; }
 
-  bool GetOn(void) const { return m_dithering->On(); }
-  void SetOn(bool v) const { m_dithering->SetOn(v); }
+  bool GetOn(void) const { return _dit->On(); }
+  void SetOn(bool v) const { _dit->SetOn(v); }
 
-  ON_Dithering::Methods GetMethod(void) const { return m_dithering->Method(); }
-  void SetMethod(ON_Dithering::Methods v) const { m_dithering->SetMethod(v); }
+  ON_Dithering::Methods GetMethod(void) const { return _dit->Method(); }
+  void SetMethod(ON_Dithering::Methods v) const { _dit->SetMethod(v); }
 };

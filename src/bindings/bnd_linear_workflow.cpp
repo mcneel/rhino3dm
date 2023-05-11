@@ -1,17 +1,6 @@
 
 #include "bindings.h"
 
-BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow()
-{
-}
-
-BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw)
-{
-  SetTrackedPointer(lw);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initLinearWorkflowBindings(pybind11::module& m)
@@ -19,9 +8,10 @@ void initLinearWorkflowBindings(pybind11::module& m)
   py::class_<BND_File3dmLinearWorkflow>(m, "LinearWorkflow")
     .def(py::init<>())
     .def(py::init<const BND_File3dmLinearWorkflow&>(), py::arg("other"))
-    .def_property("PreProcessTextures", &BND_File3dmLinearWorkflow::GetPreProcessTextures, &BND_File3dmLinearWorkflow::SetPreProcessTextures)
-    .def_property("PreProcessColors", &BND_File3dmLinearWorkflow::GetPreProcessColors, &BND_File3dmLinearWorkflow::SetPreProcessColors)
+    .def_property("PreProcessTexturesOn", &BND_File3dmLinearWorkflow::GetPreProcessTexturesOn, &BND_File3dmLinearWorkflow::SetPreProcessTexturesOn)
+    .def_property("PreProcessColorsOn", &BND_File3dmLinearWorkflow::GetPreProcessColorsOn, &BND_File3dmLinearWorkflow::SetPreProcessColorsOn)
     .def_property("PreProcessGamma", &BND_File3dmLinearWorkflow::GetPreProcessGamma, &BND_File3dmLinearWorkflow::SetPreProcessGamma)
+    .def_property("PreProcessGammaOn", &BND_File3dmLinearWorkflow::GetPreProcessGammaOn, &BND_File3dmLinearWorkflow::SetPreProcessGammaOn)
     .def_property("PostProcessGamma", &BND_File3dmLinearWorkflow::GetPostProcessGamma, &BND_File3dmLinearWorkflow::SetPostProcessGamma)
     .def_property("PostProcessGammaOn", &BND_File3dmLinearWorkflow::GetPostProcessGammaOn, &BND_File3dmLinearWorkflow::SetPostProcessGammaOn)
    ;
@@ -36,9 +26,10 @@ void initLinearWorkflowBindings(void*)
   class_<BND_File3dmLinearWorkflow>("LinearWorkflow")
     .constructor<>()
     .constructor<const BND_File3dmLinearWorkflow&>()
-    .property("PreProcessTextures", &BND_File3dmLinearWorkflow::GetPreProcessTextures, &BND_File3dmLinearWorkflow::SetPreProcessTextures)
-    .property("PreProcessColors", &BND_File3dmLinearWorkflow::GetPreProcessColors, &BND_File3dmLinearWorkflow::SetPreProcessColors)
+    .property("PreProcessTexturesOn", &BND_File3dmLinearWorkflow::GetPreProcessTexturesOn, &BND_File3dmLinearWorkflow::SetPreProcessTexturesOn)
+    .property("PreProcessColorsOn", &BND_File3dmLinearWorkflow::GetPreProcessColorsOn, &BND_File3dmLinearWorkflow::SetPreProcessColorsOn)
     .property("PreProcessGamma", &BND_File3dmLinearWorkflow::GetPreProcessGamma, &BND_File3dmLinearWorkflow::SetPreProcessGamma)
+    .property("PreProcessGammaOn", &BND_File3dmLinearWorkflow::GetPreProcessGammaOn, &BND_File3dmLinearWorkflow::SetPreProcessGammaOn)
     .property("PostProcessGamma", &BND_File3dmLinearWorkflow::GetPostProcessGamma, &BND_File3dmLinearWorkflow::SetPostProcessGamma)
     .property("PostProcessGammaOn", &BND_File3dmLinearWorkflow::GetPostProcessGammaOn, &BND_File3dmLinearWorkflow::SetPostProcessGammaOn)
     ;

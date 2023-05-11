@@ -1,17 +1,6 @@
 
 #include "bindings.h"
 
-BND_File3dmSafeFrame::BND_File3dmSafeFrame()
-{
-}
-
-BND_File3dmSafeFrame::BND_File3dmSafeFrame(ON_SafeFrame* sf)
-{
-  SetTrackedPointer(sf);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initSafeFrameBindings(pybind11::module& m)

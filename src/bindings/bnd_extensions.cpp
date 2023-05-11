@@ -183,15 +183,6 @@ BND_ONXModel::BND_ONXModel()
 }
 
 BND_ONXModel::BND_ONXModel(ONX_Model* m)
-  :
-  m_Sun(&m->Sun()),
-  m_Skylight(&m->Skylight()),
-  m_GroundPlane(&m->GroundPlane()),
-  m_SafeFrame(&m->SafeFrame()),
-  m_Dithering(&m->Dithering()),
-  m_LinearWorkflow(&m->LinearWorkflow()),
-  m_RenderChannels(&m->RenderChannels()),
-  m_RenderEnvironments(m)
 {
   m_model.reset(m);
 }
@@ -680,7 +671,7 @@ BND_Material* BND_File3dmMaterialTable::IterIndex(int index)
 
 BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
 {
-  ON_ModelComponentReference compref = m_model->RenderMaterialFromIndex(index);
+  ON_ModelComponentReference compref = m_model->MaterialFromIndex(index);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
   if (modelmaterial)
@@ -691,7 +682,7 @@ BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
 BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->RenderMaterialFromId(_id);
+  ON_ModelComponentReference compref = m_model->MaterialFromId(_id);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
   if (modelmaterial)
@@ -703,7 +694,7 @@ BND_Material* BND_File3dmMaterialTable::FromAttributes(const BND_3dmObjectAttrib
 {
   if (nullptr == attributes)
     return nullptr;
-  ON_ModelComponentReference compref = m_model->RenderMaterialFromAttributes(*attributes->m_attributes);
+  ON_ModelComponentReference compref = m_model->MaterialFromAttributes(*attributes->m_attributes);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
   if (modelmaterial)
@@ -719,7 +710,7 @@ void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
 
 BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
 {
-  ON_ModelComponentReference compref = m_model->RenderMaterialFromIndex(index);
+  ON_ModelComponentReference compref = m_model->MaterialFromIndex(index);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
   if (modelbitmap)
@@ -735,7 +726,7 @@ BND_Bitmap* BND_File3dmBitmapTable::IterIndex(int index)
 BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->RenderMaterialFromId(_id);
+  ON_ModelComponentReference compref = m_model->MaterialFromId(_id);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
   if (modelbitmap)
@@ -1081,9 +1072,9 @@ void BND_File3dmStringTable::Delete(std::wstring key)
 
 void BND_File3dmEmbeddedFileTable::Add(const BND_File3dmEmbeddedFile& ef)
 {
-  if (nullptr != ef.m_embedded_file)
+  if (nullptr != ef._ef)
   {
-    m_model->AddModelComponent(*ef.m_embedded_file);
+    m_model->AddModelComponent(*ef._ef);
   }
 }
 
@@ -1113,75 +1104,6 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
     return new BND_File3dmEmbeddedFile(model_ef, &compref); // I don't understand the ownership around this object.
 
   return nullptr;
-}
-
-BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindIndex(int index)
-{
-  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::PostEffect, index);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
-  if (nullptr != model_pep)
-    return new BND_File3dmPostEffect(model_pep, &compref); // I don't understand the ownership around this object.
-
-  return nullptr;
-}
-
-BND_File3dmPostEffect* BND_File3dmPostEffectTable::IterIndex(int index)
-{
-  return FindIndex(index);
-}
-
-BND_File3dmPostEffect* BND_File3dmPostEffectTable::FindId(BND_UUID id)
-{
-  const ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::PostEffect, _id);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_PostEffect* model_pep = const_cast<ON_PostEffect*>(ON_PostEffect::Cast(model_component));
-  if (nullptr != model_pep)
-    return new BND_File3dmPostEffect(model_pep, &compref); // I don't understand the ownership around this object.
-
-  return nullptr;
-}
-
-BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
-{
-  m_attr = a;
-}
-
-int BND_File3dmDecalTable::Count() const
-{
-  if (nullptr == m_attr)
-    return 0;
-
-  return m_attr->GetDecalArray().Count();
-}
-
-BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
-{
-  if (nullptr == m_attr)
-    return nullptr;
-
-  const auto& decals = m_attr->GetDecalArray();
-
-  if ((index < 0) || (index >= decals.Count()))
-    return nullptr;
-
-  return new BND_File3dmDecal(decals[index]); // I don't understand the ownership around this object.
-}
-
-BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
-{
-  return FindIndex(index);
-}
-
-BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr)
-  :
-  m_displacement(attr),
-  m_edge_softening(attr),
-  m_thickening(attr),
-  m_curve_piping(attr),
-  m_shutlining(attr)
-{
 }
 
 #if defined(ON_WASM_COMPILE)
@@ -1527,6 +1449,8 @@ void initExtensionsBindings(pybind11::module& m)
     ;
 
   py::class_<BND_File3dmPostEffectTable>(m, "File3dmPostEffectTable")
+    .def(py::init<>())
+    .def(py::init<const BND_File3dmPostEffectTable&>(), py::arg("other"))
     .def("__len__", &BND_File3dmPostEffectTable::Count)
     .def("__getitem__", &BND_File3dmPostEffectTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>(s.cast<BND_File3dmPostEffectTable &>(), s); })
@@ -1540,6 +1464,8 @@ void initExtensionsBindings(pybind11::module& m)
     ;
 
   py::class_<BND_File3dmDecalTable>(m, "File3dmDecalTable")
+    .def(py::init<>())
+    .def(py::init<const BND_File3dmDecalTable&>(), py::arg("other"))
     .def("__len__", &BND_File3dmDecalTable::Count)
     .def("__getitem__", &BND_File3dmDecalTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*>(s.cast<BND_File3dmDecalTable&>(), s); })
@@ -1603,19 +1529,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_property_readonly("EmbeddedFiles", &BND_ONXModel::EmbeddedFiles)
-    .def_property_readonly("Skylight", &BND_ONXModel::Skylight)
-    .def_property_readonly("GroundPlane", &BND_ONXModel::GroundPlane)
-    .def_property_readonly("SafeFrame", &BND_ONXModel::SafeFrame)
-
-//    .def_property_readonly("RenderMaterials", &BND_ONXModel::RenderMaterials)
-    .def_property_readonly("RenderEnvironments", &BND_ONXModel::RenderEnvironments)
-//    .def_property_readonly("RenderTextures", &BND_ONXModel::RenderTextures)
-
-    .def_property_readonly("Dithering", &BND_ONXModel::Dithering)
-    .def_property_readonly("LinearWorkflow", &BND_ONXModel::LinearWorkflow)
-    .def_property_readonly("RenderChannels", &BND_ONXModel::RenderChannels)
-    .def_property_readonly("Sun", &BND_ONXModel::Sun)
-    .def_property_readonly("PostEffects", &BND_ONXModel::PostEffects)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1818,14 +1731,6 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("embeddedFiles", &BND_ONXModel::EmbeddedFiles)
-    .function("skylight", &BND_ONXModel::Skylight)
-    .function("groundPlane", &BND_ONXModel::GroundPlane)
-    .function("safeFrame", &BND_ONXModel::SafeFrame)
-    .function("dithering", &BND_ONXModel::Dithering)
-    .function("linearWorkflow", &BND_ONXModel::LinearWorkflow)
-    .function("renderChannels", &BND_ONXModel::RenderChannels)
-    .function("sun", &BND_ONXModel::Sun)
-    .function("postEffects", &BND_ONXModel::PostEffects)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)

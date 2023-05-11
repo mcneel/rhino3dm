@@ -1,74 +1,65 @@
 
 #include "bindings.h"
 
-BND_File3dmSun::BND_File3dmSun()
-{
-}
-
-BND_File3dmSun::BND_File3dmSun(ON_Sun* sun)
-{
-  SetTrackedPointer(sun);
-}
-
 int BND_File3dmSun::GetYear(void) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
+  _sun->LocalDateTime(y, m, d, h);
   return y;
 }
 
 void BND_File3dmSun::SetYear(int v) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
-  m_sun->SetLocalDateTime(v, m, d, h);
+  _sun->LocalDateTime(y, m, d, h);
+  _sun->SetLocalDateTime(v, m, d, h);
 }
 
 int BND_File3dmSun::GetMonth(void) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
+  _sun->LocalDateTime(y, m, d, h);
   return m;
 }
 
 void BND_File3dmSun::SetMonth(int v) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
-  m_sun->SetLocalDateTime(y, v, d, h);
+  _sun->LocalDateTime(y, m, d, h);
+  _sun->SetLocalDateTime(y, v, d, h);
 }
 
 int BND_File3dmSun::GetDay(void) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
+  _sun->LocalDateTime(y, m, d, h);
   return d;
 }
 
 void BND_File3dmSun::SetDay(int v) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
-  m_sun->SetLocalDateTime(y, m, v, h);
+  _sun->LocalDateTime(y, m, d, h);
+  _sun->SetLocalDateTime(y, m, v, h);
 }
 
 double BND_File3dmSun::GetHours(void) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
+  _sun->LocalDateTime(y, m, d, h);
   return h;
 }
 
 void BND_File3dmSun::SetHours(double v) const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
-  m_sun->LocalDateTime(y, m, d, h);
-  m_sun->SetLocalDateTime(y, m, d, v);
+  _sun->LocalDateTime(y, m, d, h);
+  _sun->SetLocalDateTime(y, m, d, v);
 }
 
 BND_Light BND_File3dmSun::GetLight(void) const
 {
-  auto* light = new ON_Light(m_sun->Light());
+  auto* light = new ON_Light(_sun->Light());
   return BND_Light(light, nullptr);
 }
 
@@ -95,12 +86,12 @@ void initSunBindings(pybind11::module& m)
     .def(py::init<const BND_File3dmSun&>(), py::arg("other"))
     .def_property_readonly("MinYear", &BND_File3dmSun::GetMinYear)
     .def_property_readonly("MaxYear", &BND_File3dmSun::GetMaxYear)
+    .def_property_readonly("Vector", &BND_File3dmSun::GetVector)
     .def_property("EnableAllowed", &BND_File3dmSun::GetEnableAllowed, &BND_File3dmSun::SetEnableAllowed)
     .def_property("EnableOn", &BND_File3dmSun::GetEnableOn, &BND_File3dmSun::SetEnableOn)
     .def_property("ManualControlAllowed", &BND_File3dmSun::GetManualControlAllowed, &BND_File3dmSun::SetManualControlAllowed)
     .def_property("ManualControlOn", &BND_File3dmSun::GetManualControlOn, &BND_File3dmSun::SetManualControlOn)
     .def_property("North", &BND_File3dmSun::GetNorth, &BND_File3dmSun::SetNorth)
-    .def_property("Vector", &BND_File3dmSun::GetVector, &BND_File3dmSun::SetVector)
     .def_property("Azimuth", &BND_File3dmSun::GetAzimuth, &BND_File3dmSun::SetAzimuth)
     .def_property("Altitude", &BND_File3dmSun::GetAltitude, &BND_File3dmSun::SetAltitude)
     .def_property("Latitude", &BND_File3dmSun::GetLatitude, &BND_File3dmSun::SetLatitude)
@@ -131,12 +122,12 @@ void initSunBindings(void*)
     .constructor<const BND_File3dmSun&>()
     .property("minYear", &BND_File3dmSun::&BND_File3dmSun::GetMinYear)
     .property("maxYear", &BND_File3dmSun::&BND_File3dmSun::GetMaxYear)
+    .property("vector", &BND_File3dmSun::GetVector)
     .property("enableAllowed", &BND_File3dmSun::GetEnableAllowed, &BND_File3dmSun::SetEnableAllowed)
     .property("enableOn", &BND_File3dmSun::GetEnableOn, &BND_File3dmSun::SetEnableOn)
     .property("manualControlAllowed", &BND_File3dmSun::GetManualControlAllowed, &BND_File3dmSun::SetManualControlAllowed)
     .property("manualControlOn", &BND_File3dmSun::GetManualControlOn, &BND_File3dmSun::SetManualControlOn)
     .property("north", &BND_File3dmSun::GetNorth, &BND_File3dmSun::SetNorth)
-    .property("vector", &BND_File3dmSun::GetVector, &BND_File3dmSun::SetVector)
     .property("azimuth", &BND_File3dmSun::GetAzimuth, &BND_File3dmSun::SetAzimuth)
     .property("altitude", &BND_File3dmSun::GetAltitude, &BND_File3dmSun::SetAltitude)
     .property("latitude", &BND_File3dmSun::GetLatitude, &BND_File3dmSun::SetLatitude)

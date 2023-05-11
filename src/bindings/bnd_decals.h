@@ -12,45 +12,44 @@ void initDecalBindings(void* m);
 class BND_File3dmDecal
 {
 public:
-  ON_Decal* m_decal = nullptr;
-
-protected:
-  void SetTrackedPointer(ON_Decal* decal);
+  ON_Decal* _decal = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmDecal();
-  BND_File3dmDecal(const BND_File3dmDecal& other);
-  BND_File3dmDecal(ON_Decal* decal);
+  BND_File3dmDecal() { _decal = new ON_Decal; _owned = true; }
+  BND_File3dmDecal(const BND_File3dmDecal& d) { _decal = new ON_Decal(*d._decal); _owned = true; }
+  BND_File3dmDecal(ON_Decal* d) : _decal(d) { }
+  ~BND_File3dmDecal() { if (_owned) delete _decal; }
 
-  BND_UUID TextureInstanceId(void) const { return ON_UUID_to_Binding(m_decal->TextureInstanceId()); }
-  void SetTextureInstanceId(BND_UUID v) const { m_decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
+  BND_UUID TextureInstanceId(void) const { return ON_UUID_to_Binding(_decal->TextureInstanceId()); }
+  void SetTextureInstanceId(BND_UUID v) const { _decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
 
-  ON_Decal::Mappings Mapping(void) const { return m_decal->Mapping(); }
-  void SetMapping(ON_Decal::Mappings m) const { m_decal->SetMapping(m); }
+  ON_Decal::Mappings Mapping(void) const { return _decal->Mapping(); }
+  void SetMapping(ON_Decal::Mappings m) const { _decal->SetMapping(m); }
 
-  ON_Decal::Projections Projection(void) const { return m_decal->Projection(); }
-  void SetProjection(ON_Decal::Projections p) const { m_decal->SetProjection(p); }
+  ON_Decal::Projections Projection(void) const { return _decal->Projection(); }
+  void SetProjection(ON_Decal::Projections p) const { _decal->SetProjection(p); }
 
-  bool MapToInside(void) const { return m_decal->MapToInside(); }
-  void SetMapToInside(bool v) const { m_decal->SetMapToInside(v); }
+  bool MapToInside(void) const { return _decal->MapToInside(); }
+  void SetMapToInside(bool v) const { _decal->SetMapToInside(v); }
 
-  double Transparency(void) const { return m_decal->Transparency(); }
-  void SetTransparency(double v) const { m_decal->SetTransparency(v); }
+  double Transparency(void) const { return _decal->Transparency(); }
+  void SetTransparency(double v) const { _decal->SetTransparency(v); }
 
-  ON_3dPoint Origin(void) const { return m_decal->Origin(); }
-  void SetOrigin(ON_3dPoint v) const { m_decal->SetOrigin(v); }
+  ON_3dPoint Origin(void) const { return _decal->Origin(); }
+  void SetOrigin(ON_3dPoint v) const { _decal->SetOrigin(v); }
 
-  ON_3dVector VectorUp(void) const { return m_decal->VectorUp(); }
-  void SetVectorUp(ON_3dVector v) const { m_decal->SetVectorUp(v); }
+  ON_3dVector VectorUp(void) const { return _decal->VectorUp(); }
+  void SetVectorUp(ON_3dVector v) const { _decal->SetVectorUp(v); }
 
-  ON_3dVector VectorAcross(void) const { return m_decal->VectorAcross(); }
-  void SetVectorAcross(ON_3dVector v) const { m_decal->SetVectorAcross(v); }
+  ON_3dVector VectorAcross(void) const { return _decal->VectorAcross(); }
+  void SetVectorAcross(ON_3dVector v) const { _decal->SetVectorAcross(v); }
 
-  double Height(void) const { return m_decal->Height(); }
-  void SetHeight(double v) const { m_decal->SetHeight(v); }
+  double Height(void) const { return _decal->Height(); }
+  void SetHeight(double v) const { _decal->SetHeight(v); }
 
-  double Radius(void) const { return m_decal->Radius(); }
-  void SetRadius(double v) const { m_decal->SetRadius(v); }
+  double Radius(void) const { return _decal->Radius(); }
+  void SetRadius(double v) const { _decal->SetRadius(v); }
 
   double HorzSweepStart(void) const;
   void SetHorzSweepStart(double v) const;
@@ -80,11 +79,14 @@ public:
 class BND_File3dmDecalTable
 {
 private:
-  ON_3dmObjectAttributes* m_attr = nullptr;
+  ON_3dmObjectAttributes* _attr = nullptr;
+  bool _owned = false;
 
 public:
-  BND_File3dmDecalTable() { }
+  BND_File3dmDecalTable() { _attr = new ON_3dmObjectAttributes; _owned = true; }
+  BND_File3dmDecalTable(const BND_File3dmDecalTable& d) { _attr = new ON_3dmObjectAttributes(*d._attr); _owned = true; }
   BND_File3dmDecalTable(ON_3dmObjectAttributes* a);
+  ~BND_File3dmDecalTable() { if (_owned) delete _attr; }
 
   int Count() const;
   class BND_File3dmDecal* FindIndex(int index);

@@ -1,128 +1,139 @@
 
 #include "bindings.h"
 
-BND_File3dmDecal::BND_File3dmDecal()
-{
-  SetTrackedPointer(new ON_Decal);
-}
-
-BND_File3dmDecal::BND_File3dmDecal(const BND_File3dmDecal& decal)
-{
-  SetTrackedPointer(new ON_Decal(*decal.m_decal));
-}
-
-BND_File3dmDecal::BND_File3dmDecal(ON_Decal* decal)
-{
-  SetTrackedPointer(decal);
-}
-
-void BND_File3dmDecal::SetTrackedPointer(ON_Decal* decal)
-{
-  m_decal = decal;
-}
-
 double BND_File3dmDecal::HorzSweepStart(void) const
 {
   double sta = 0.0, end = 0.0;
-  m_decal->GetHorzSweep(sta, end);
+  _decal->GetHorzSweep(sta, end);
   return sta;
 }
 
 double BND_File3dmDecal::HorzSweepEnd(void) const
 {
   double sta = 0.0, end = 0.0;
-  m_decal->GetHorzSweep(sta, end);
+  _decal->GetHorzSweep(sta, end);
   return end;
 }
 
 double BND_File3dmDecal::VertSweepStart(void) const
 {
   double sta = 0.0, end = 0.0;
-  m_decal->GetVertSweep(sta, end);
+  _decal->GetVertSweep(sta, end);
   return sta;
 }
 
 double BND_File3dmDecal::VertSweepEnd(void) const
 {
   double sta = 0.0, end = 0.0;
-  m_decal->GetVertSweep(sta, end);
+  _decal->GetVertSweep(sta, end);
   return end;
 }
 
 double BND_File3dmDecal::BoundsMinU(void) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return min_u;
 }
 
 double BND_File3dmDecal::BoundsMinV(void) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return min_v;
 }
 
 double BND_File3dmDecal::BoundsMaxU(void) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return max_u;
 }
 
 double BND_File3dmDecal::BoundsMaxV(void) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return max_v;
 }
 
 void BND_File3dmDecal::SetHorzSweepStart(double v) const
 {
-  m_decal->SetHorzSweep(v, HorzSweepEnd());
+  _decal->SetHorzSweep(v, HorzSweepEnd());
 }
 
 void BND_File3dmDecal::SetHorzSweepEnd(double v) const
 {
-  m_decal->SetHorzSweep(HorzSweepStart(), v);
+  _decal->SetHorzSweep(HorzSweepStart(), v);
 }
 
 void BND_File3dmDecal::SetVertSweepStart(double v) const
 {
-  m_decal->SetVertSweep(v, VertSweepEnd());
+  _decal->SetVertSweep(v, VertSweepEnd());
 }
 
 void BND_File3dmDecal::SetVertSweepEnd(double v) const
 {
-  m_decal->SetVertSweep(VertSweepStart(), v);
+  _decal->SetVertSweep(VertSweepStart(), v);
 }
 
 void BND_File3dmDecal::SetBoundsMinU(double v) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
-  m_decal->SetUVBounds(v, min_v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
+  _decal->SetUVBounds(v, min_v, max_u, max_v);
 }
 
 void BND_File3dmDecal::SetBoundsMinV(double v) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
-  m_decal->SetUVBounds(min_u, v, max_u, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
+  _decal->SetUVBounds(min_u, v, max_u, max_v);
 }
 
 void BND_File3dmDecal::SetBoundsMaxU(double v) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
-  m_decal->SetUVBounds(min_u, min_v, v, max_v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
+  _decal->SetUVBounds(min_u, min_v, v, max_v);
 }
 
 void BND_File3dmDecal::SetBoundsMaxV(double v) const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-  m_decal->UVBounds(min_u, min_v, max_u, max_v);
-  m_decal->SetUVBounds(min_u, min_v, max_u, v);
+  _decal->GetUVBounds(min_u, min_v, max_u, max_v);
+  _decal->SetUVBounds(min_u, min_v, max_u, v);
+}
+
+BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
+{
+  _attr = a;
+}
+
+int BND_File3dmDecalTable::Count() const
+{
+  if (nullptr == _attr)
+    return 0;
+
+  return _attr->GetDecalArray().Count();
+}
+
+BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
+{
+  if (nullptr == _attr)
+    return nullptr;
+
+  const auto& decals = _attr->GetDecalArray();
+
+  if ((index < 0) || (index >= decals.Count()))
+    return nullptr;
+
+  return new BND_File3dmDecal(decals[index]); // I don't understand the ownership around this object.
+}
+
+BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
+{
+  return FindIndex(index);
 }
 
 //////////////////////////////////////////////////////////////////////////////
