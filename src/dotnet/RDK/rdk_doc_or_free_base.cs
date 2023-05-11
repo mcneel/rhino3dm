@@ -113,8 +113,8 @@ namespace Rhino.Render
     internal abstract IntPtr CppFromDocSerial(uint sn);
 #if RHINO_SDK
     internal abstract IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs);
-#endif
     internal abstract bool   EndChangeImpl(IntPtr non_const_pt, uint rhino_doc_sn);
+#endif
 
     internal override IntPtr CppPointer
     {
@@ -160,7 +160,6 @@ namespace Rhino.Render
 
       Debug.Assert(IntPtr.Zero != m_cpp_non_const_ptr);
     }
-#endif
 
     /// <summary>
     /// See BeginChange
@@ -181,6 +180,7 @@ namespace Rhino.Render
 
       return false;
     }
+#endif
 
     internal bool CanChange
     {
