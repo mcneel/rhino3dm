@@ -1,0 +1,79 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetTester", "DotNetTester.csproj", "{9295B1DA-AC43-45AF-949B-1D6905859F32}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhino3dm", "..\..\src\dotnet\Rhino3dm.csproj", "{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "librhino3dm_native", "..\..\src\build\librhino3dm_native_64\librhino3dm_native.vcxproj", "{D3B345B2-50F7-3773-A042-B0F17153C485}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		MinSizeRel|Any CPU = MinSizeRel|Any CPU
+		MinSizeRel|x64 = MinSizeRel|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		RelWithDebInfo|Any CPU = RelWithDebInfo|Any CPU
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Debug|x64.Build.0 = Debug|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.MinSizeRel|x64.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.MinSizeRel|x64.Build.0 = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Release|x64.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.Release|x64.Build.0 = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{9295B1DA-AC43-45AF-949B-1D6905859F32}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Debug|x64.Build.0 = Debug|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.MinSizeRel|x64.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.MinSizeRel|x64.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Release|x64.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.Release|x64.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{5E72A56E-BAAB-49FA-B4AD-C25D8F5A0877}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Debug|Any CPU.Build.0 = Debug|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Debug|x64.ActiveCfg = Debug|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Debug|x64.Build.0 = Debug|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.MinSizeRel|Any CPU.ActiveCfg = MinSizeRel|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.MinSizeRel|Any CPU.Build.0 = MinSizeRel|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Release|Any CPU.ActiveCfg = Release|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Release|Any CPU.Build.0 = Release|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Release|x64.ActiveCfg = Release|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.Release|x64.Build.0 = Release|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.RelWithDebInfo|Any CPU.ActiveCfg = RelWithDebInfo|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.RelWithDebInfo|Any CPU.Build.0 = RelWithDebInfo|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{D3B345B2-50F7-3773-A042-B0F17153C485}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6BEDEDE2-FD9C-4E0C-9B4F-410E07033226}
+	EndGlobalSection
+EndGlobal
