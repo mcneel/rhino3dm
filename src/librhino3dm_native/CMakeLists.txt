@@ -42,6 +42,7 @@ add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
 add_definitions(-DRHINO3DM_BUILD)
 add_definitions(-DCMAKE_BUILD)
+add_definitions(-DON_CMAKE_BUILD)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set (CMAKE_CXX_STANDARD 17)

@@ -3557,6 +3557,11 @@ namespace Rhino.Runtime
       UnsafeNativeMethods.RHC_SetPythonEvaluateCallback(m_evaluate_callback);
       UnsafeNativeMethods.RHC_SetTextFieldEvalCallback(m_eval_textfield_callback);
       UnsafeNativeMethods.CRhinoCommonPlugInLoader_SetCallbacks(m_loadplugin_callback, m_loadskin_callback, m_buildplugin_list, m_getassembly_id);
+      // 3 March 2023 John Morse
+      // Initialize the settings system hooks early in the process to allow the
+      // unmanaged settings system to work.
+      PersistentSettingsHooks.SetHooks();
+
       InitializeZooClient();
 
       UnsafeNativeMethods.RHC_SetRdkInitializationCallbacks(m_rdk_initialize_callback, m_rdk_shutdown_callback);
@@ -3566,7 +3571,6 @@ namespace Rhino.Runtime
       // in the future by uncommmenting the next line
       //UnsafeNativeMethods.RHC_SetSendLogMessageToCloudProc(m_send_log_message_to_cloud_callback);
 
-      PersistentSettingsHooks.SetHooks();
       FileIO.FilePdf.SetHooks();
       UI.Localization.SetHooks();
       RhinoFileEventWatcherHooks.SetHooks();

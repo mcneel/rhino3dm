@@ -2995,7 +2995,17 @@ namespace Rhino.DocObjects
       var p_const_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoObject_HasHistoryRecord(p_const_this);
     }
+    /// <summary>
+    /// Sets a history record on the 
+    /// </summary>
+    /// <param name="history">The history record to set for the object</param>
+    /// <returns>true if successful</returns>
+    public bool SetHistory(HistoryRecord history)
+    {
+      var p_this = NonConstPointer();
 
+      return UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
+    }
     internal bool IsCustom
     {
       get
@@ -3098,6 +3108,20 @@ namespace Rhino.DocObjects
     internal ObjRef()
     {
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_New();
+    }
+
+    /// <summary>
+    /// Gets the document that owns this object reference.
+    /// </summary>
+    /// <since>8.0</since>
+    public RhinoDoc Document
+    {
+      get
+      {
+        var const_ptr = ConstPointer();
+        var sn = UnsafeNativeMethods.CRhinoObjRef_DocumentRuntimeSerailNumber(const_ptr);
+        return RhinoDoc.FromRuntimeSerialNumber(sn);
+      }
     }
 
     /// <summary>

@@ -139,17 +139,34 @@ namespace Rhino.Geometry
     /// <summary>
     /// Distance that the clipping has an effect
     /// </summary>
-    public double PlaneDistance
+    public double PlaneDepth
     {
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDistance(pConstThis);
+        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepth(pConstThis);
       }
       set
       {
         IntPtr pThis = NonConstPointer();
-        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDistance(pThis, value);
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDepth(pThis, value);
+      }
+    }
+
+    /// <summary>
+    /// Determines if the PlaneDepth value should be used
+    /// </summary>
+    public bool PlaneDepthEnabled
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepthEnabled(pConstThis);
+      }
+      set
+      {
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDepthEnabled(pThis, value);
       }
     }
 

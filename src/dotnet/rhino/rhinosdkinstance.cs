@@ -223,6 +223,18 @@ namespace Rhino.DocObjects
       }
       UnsafeNativeMethods.CRhinoInstanceObjectPieceArray_Delete(ptr_piece_list);
     }
+
+    /// <summary>
+    /// Get a RhinoObject in this block
+    /// </summary>
+    /// <param name="ci"></param>
+    /// <returns></returns>
+    public RhinoObject SubObjectFromComponentIndex(ComponentIndex ci)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr const_ptr_object = UnsafeNativeMethods.CRhinoInstanceObject_SubObjectFromComponentIndex(const_ptr_this, ci);
+      return RhinoObject.CreateRhinoObjectHelper(const_ptr_object);
+    }
   }
 
   /// <summary>

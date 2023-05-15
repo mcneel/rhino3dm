@@ -88,6 +88,8 @@ jobs:
   build_js:
     name: build rhino3dm.js
     runs-on: ubuntu-latest
+    needs: [check_bindings, check_workflow, check_build_scripts]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     container:
       image: emscripten/emsdk:3.1.30
     needs: [check_bindings, check_workflow, check_build_scripts]

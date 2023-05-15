@@ -2,6 +2,7 @@ using System;
 using Rhino.Geometry;
 using System.Runtime.InteropServices;
 using Rhino.Display;
+using static Rhino.UI.Localization;
 
 // 19 Dec. 2010 S. Baer
 // Giulio saw a significant performance increase by marking this class with the
@@ -542,7 +543,8 @@ internal partial class UnsafeNativeMethods
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_OnDelete_Callback delete_func,
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_HasCustomRenderMeshes_Callback hasmeshes_func,
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_RenderMeshes_Callback meshes_func,
-    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_NonObjectIds_Callback nonobjectids_func
+    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_NonObjectIds_Callback nonobjectids_func,
+    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_Progress_Callback progress_func
     );
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -655,14 +657,14 @@ internal partial class UnsafeNativeMethods
   internal static extern void Rdk_SetRenderContentGetUiHashCallback(Rhino.Render.RenderContent.RenderContentUiHashCallback callbackFunc);
 
   //Rhino.Render.UI.UserInterfaceSection is obsolete
-#pragma warning disable 0612
+#pragma warning disable 618
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void Rdk_ContentUiSectionSetCallbacks(Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback deleteThisCallback,
-                                                               Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback displayDataCallback,
-                                                               Rhino.Render.UI.UserInterfaceSection.SerialNumberBoolCallback onExpandCallback,
-                                                               Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback isHiddenCallback
-                                                              );
-#pragma warning restore 0612
+  internal static extern void Rdk_ContentUiSectionSetCallbacks(
+                  Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback deleteThisCallback,
+                  Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback displayDataCallback,
+                  Rhino.Render.UI.UserInterfaceSection.SerialNumberBoolCallback onExpandCallback,
+                  Rhino.Render.UI.UserInterfaceSection.SerialNumberCallback isHiddenCallback);
+#pragma warning restore 618
 
   // UiSection
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
@@ -1070,8 +1072,7 @@ internal partial class UnsafeNativeMethods
     Rhino.Render.RealtimeDisplayMode.HudMaxPassesChanged hudMaxPassesChanged,
     Rhino.Render.RealtimeDisplayMode.HudAllowEditMaxPassesCallback hudAllowEditMaxPasses,
     Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudPostEffectsOnButtonPressed,
-    Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudPostEffectsOffnButtonPressed,
-    Rhino.Render.RealtimeDisplayMode.HudShowToast hudShowToast
+    Rhino.Render.RealtimeDisplayMode.HudButtonPressed hudPostEffectsOffnButtonPressed
     );
   // << RenderedDisplayMode
 
@@ -1283,7 +1284,8 @@ internal partial class UnsafeNativeMethods
                                                                     Rhino.PersistentSettingsHooks.GetStringListDelegate getStringListDelegate,
                                                                     Rhino.PersistentSettingsHooks.GetStringDictionaryDelegate getStringDictionaryDelegate,
                                                                     Rhino.PersistentSettingsHooks.GetGuidDelegate getGuidDelegate,
-                                                                    Rhino.PersistentSettingsHooks.GetPoint3DDelegate getPoint3DDelegate
+                                                                    Rhino.PersistentSettingsHooks.GetPoint3DDelegate getPoint3DDelegate,
+                                                                    Rhino.PersistentSettingsHooks.DarkModeDelegate darkModeDelegate
                                                                    );
 
   #region rh_menu.cpp

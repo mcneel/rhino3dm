@@ -79,15 +79,28 @@ RH_C_FUNCTION bool ON_ClippingPlaneSurface_RemoveClipViewport(ON_ClippingPlaneSu
   return rc;
 }
 
-RH_C_FUNCTION double ON_ClippingPlaneSurface_GetDistance(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
+RH_C_FUNCTION double ON_ClippingPlaneSurface_GetDepth(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
 {
   if (pConstClippingPlaneSurface)
-    return pConstClippingPlaneSurface->m_clipping_plane.Distance();
-  return ON_DBL_MAX;
+    return pConstClippingPlaneSurface->m_clipping_plane.Depth();
+  return 0;
 }
 
-RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDistance(ON_ClippingPlaneSurface* pClippingPlaneSurface, double distance)
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDepthEnabled(ON_ClippingPlaneSurface* pClippingPlaneSurface, bool on)
 {
   if (pClippingPlaneSurface)
-    pClippingPlaneSurface->m_clipping_plane.SetDistance(distance);
+    pClippingPlaneSurface->m_clipping_plane.SetDepthEnabled(on);
+}
+
+RH_C_FUNCTION bool ON_ClippingPlaneSurface_GetDepthEnabled(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
+{
+  if (pConstClippingPlaneSurface)
+    return pConstClippingPlaneSurface->m_clipping_plane.DepthEnabled();
+  return false;
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDepth(ON_ClippingPlaneSurface* pClippingPlaneSurface, double depth)
+{
+  if (pClippingPlaneSurface)
+    pClippingPlaneSurface->m_clipping_plane.SetDepth(depth);
 }

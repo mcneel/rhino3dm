@@ -111,9 +111,6 @@ namespace Rhino.ApplicationSettings
     /// <since>8.0</since>
     public string CommandPromptFontName { get; set; }
 
-    /// <summary>Get/Set position and visibility of the command prompt</summary>
-    /// <since>8.0</since>
-    public CommandPromptPosition CommandPromptPosition { get; set; }
     /// <summary>Gets or sets the crosshair color.</summary>
     /// <since>5.0</since>
     public Color CrosshairColor { get; set; }
@@ -284,7 +281,6 @@ namespace Rhino.ApplicationSettings
       rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
       rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
       rc.MenuVisible = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxMenuVisible, pAppearanceSettings);
-      rc.CommandPromptPosition = (CommandPromptPosition)UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxCommandPromptPosition, pAppearanceSettings);
       rc.ShowStatusBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowStatusBar, pAppearanceSettings);
       rc.ShowViewportTitles =UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowViewportTitles, pAppearanceSettings);
       rc.ShowTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowTitleBar, pAppearanceSettings);
@@ -385,7 +381,6 @@ namespace Rhino.ApplicationSettings
       DirectionArrowIconShaftSize = state.DirectionArrowIconShaftSize;
       DirectionArrowIconHeadSize = state.DirectionArrowIconHeadSize;
       MenuVisible = state.MenuVisible;
-      CommandPromptPosition = state.CommandPromptPosition;
       ShowStatusBar = state.ShowStatusBar;
       ShowViewportTitles = state.ShowViewportTitles;
       ShowTitleBar = state.ShowTitleBar;
@@ -458,15 +453,18 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
+    /// FOR INTERNAL USE ONLY
+    /// Rhino.UI.ThemeSettings sets this to map colors to new theme colors
+    /// </summary>
+    internal static Func<PaintColor, Color?> GetPaintColorHook;
+
+    /// <summary>
     /// Gets the color that is currently associated with a paint color.
     /// </summary>
     /// <param name="whichColor">A color association.</param>
     /// <returns>A .Net library color.</returns>
     /// <since>5.0</since>
-    public static Color GetPaintColor(PaintColor whichColor)
-    {
-      return GetPaintColor(whichColor, true);
-    }
+    public static Color GetPaintColor(PaintColor whichColor) => GetPaintColor(whichColor, true);
 
     /// <summary>
     /// Gat a paint color. This overload provides a compute option for cases where colors
@@ -478,6 +476,12 @@ namespace Rhino.ApplicationSettings
     /// <since>7.1</since>
     public static Color GetPaintColor(PaintColor whichColor, bool compute)
     {
+      // If theme hook is set and handles the paint color request
+      var color = GetPaintColorHook == null ? null : GetPaintColorHook(whichColor);
+      if (color != null)
+        return color.Value;
+      // Theme hook not set or did not handle the paint color request so get
+      // the value from the core application settings
       int argb = UnsafeNativeMethods.RhColors_GetColor(whichColor, compute);
       return Color.FromArgb(argb);
     }
@@ -2921,6 +2925,7 @@ namespace Rhino.ApplicationSettings
     const int idxAutoAlignCPlane = 18;
     const int idxOrthoUseZ = 19;
     const int idxStickyAutoCPlane = 20;
+    const int idxGumballExtrudeMergeFaces = 21;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3161,7 +3166,6 @@ namespace Rhino.ApplicationSettings
     const int idxMousePickboxRadius = 5;
     const int idxPointDisplay = 6;
     const int idxAutoCPlaneAlignment = 7;
-    const int idxDragStrength = 8;
 
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
@@ -3277,17 +3281,14 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or  the amount of drag strength for Gumball and for dragging objects, including control points.
-    /// Valid values range between 1 and 100.
+    /// When ExtrudeMergeFaces is true the gumball will attempt to merge
+    /// faces if possible after extruding a face
     /// </summary>
-    /// <remarks>
-    /// This value is not persistent.
-    /// </remarks>
     /// <since>8.0</since>
-    public static int DragStrength
+    public static bool GumballExtrudeMergeFaces
     {
-      get => GetInt(idxDragStrength);
-      set => SetInt(idxDragStrength, value);
+      get => GetBool(idxGumballExtrudeMergeFaces);
+      set => SetBool(idxGumballExtrudeMergeFaces, value);
     }
   }
 
@@ -4432,6 +4433,12 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>5.0</since>
     public bool AutoSuppress { get; set; }
+
+    /// <summary>
+    /// Turns on/off gumball tooltips
+    /// </summary>
+    /// <since>8.0</since>
+    public bool EnableGumballToolTips { get; set; }
   }
 
   /// <summary>
@@ -4458,6 +4465,7 @@ namespace Rhino.ApplicationSettings
       rc.RelativePointPane = GetInt(idx_bRelativePointPane, pSettings) != 0;
       rc.CommandPromptPane = GetInt(idx_bCommandPromptPane, pSettings) != 0;
       rc.AutoSuppress = GetInt(idx_bAutoSuppress, pSettings) != 0;
+      rc.EnableGumballToolTips = GetInt(idx_bEnableGumballTooltips, pSettings) != 0;
       UnsafeNativeMethods.CRhinoAppCursorToolTipSettings_Delete(pSettings);
       return rc;
     }
@@ -4603,6 +4611,16 @@ namespace Rhino.ApplicationSettings
       set { SetInt(idx_bAutoSuppress, value ? 1 : 0, IntPtr.Zero); }
     }
 
+    /// <summary>
+    /// Turns on/off gumball tooltips
+    /// </summary>
+    /// <since>8.0</since>
+    public static bool EnableGumballToolTips
+    {
+      get => GetInt(idx_bEnableGumballTooltips, IntPtr.Zero) != 0;
+      set => SetInt(idx_bEnableGumballTooltips, value ? 1 : 0, IntPtr.Zero);
+    }
+
     const int idx_EnableCursorToolTips = 0;
     const int idx_xoffset = 1;
     const int idx_yoffset = 2;
@@ -4614,6 +4632,7 @@ namespace Rhino.ApplicationSettings
     const int idx_bRelativePointPane = 8;
     const int idx_bCommandPromptPane = 9;
     const int idx_bAutoSuppress = 10;
+    const int idx_bEnableGumballTooltips = 11;
 
     static int GetInt(int which, IntPtr pCursorTooltipSettings)
     {
@@ -5474,308 +5493,6 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppSettings_SetPackageManagerSources(value); }
     }
   }
-
-  /// <summary>
-  /// Represents a snapshot of <see cref="ConstraintsSettings"/>.
-  /// </summary>
-  public class ConstraintsSettingsState
-  {
-
-    /// <summary>
-    /// Enables or disables constraint icons being drawn in the viewport
-    /// </summary>
-    /// <since>8.0</since>
-    public bool ShowViewportIcons { get; set; }
-
-    /// <summary>
-    /// Gets or sets the size of the constraint icons being drawn in the viewport
-    /// </summary>
-    /// <since>8.0</since>
-    public double ViewportIconSize { get; set; }
-
-    /// <summary>
-    /// Enables or disables drawing a halo around constrained curves
-    /// </summary>
-    /// <since>8.0</since>
-    public bool ShowHaloOnConstrainedCurves {  get; set; }
-
-    /// <summary>
-    /// Gets or sets the color of the halo drawn around constrained curves
-    /// </summary>
-    /// <since>8.0</since>
-    public Color ConstraintsColor { get; set; }
-
-    /// <summary>
-    /// Gets or sets the color of failure when solving a constraints system
-    /// </summary>
-    /// <since>8.0</since>
-    public Color ConstraintsFailureColor {  get; set; }
-
-    /// <summary>
-    /// Enables or disables constraint view icons being drawn horizontal to the view.
-    /// If not drawn horizontal to the view icons are drawn the construction plane of the constraint.
-    /// </summary>
-    /// <since>8.0</since>
-    public bool ShowViewportIconsHorizontalToView {  get; set; }
-
-    /// <summary>
-    /// Gets or sets whether or not to automatically create coincident constraints
-    /// </summary>
-    /// <since>8.0</since>
-    public bool AutomaticallyCreateCoincidentConstraints { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether or not to automatically create vertical and horizontal constraints
-    /// </summary>
-    /// <since>8.0</since>
-    public bool AutomaticallyCreateVerticalHorizontalConstraints { get; set; }
-
-    /// <summary>
-    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
-    /// is automatically created in radians.
-    /// </summary>
-    /// <since>8.0</since>
-    public double AutomaticVerticalHorizontalAngleToleranceRadians { get; set; }
-
-  }
-
-
-  /// <summary>
-  /// Settings for constraints such as display options for view icons and halo color.
-  /// </summary>
-  /// <since>8.0</since>
-  public static class ConstraintsSettings
-  {
-    private static ConstraintsSettingsState CreateState(bool current)
-    {
-      IntPtr ptr = UnsafeNativeMethods.CRhinoAppConstraintsSettings_New(current);
-
-      ConstraintsSettingsState rc = new ConstraintsSettingsState();
-
-      rc.ShowViewportIcons = GetBool(ptr, BoolValue.ShowViewportIcons);
-      rc.ViewportIconSize = GetDouble(ptr, DoubleValue.ViewportIconSize);
-      rc.ShowHaloOnConstrainedCurves = GetBool(ptr, BoolValue.ShowHaloOnConstrainedCurves);
-      rc.ConstraintsColor = GetColor(ptr, ColorValue.ConstraintsColor);
-      rc.ConstraintsFailureColor = GetColor(ptr, ColorValue.ConstraintsFailureColor);
-      rc.ShowViewportIconsHorizontalToView = GetBool(ptr, BoolValue.ShowViewportIconsHorizontalToView);
-      rc.AutomaticallyCreateCoincidentConstraints = GetBool(ptr, BoolValue.AutomaticCoincidentConstraints);
-      rc.AutomaticallyCreateVerticalHorizontalConstraints = GetBool(ptr, BoolValue.AutomaticVerticalHorizontalConstraints);
-      rc.AutomaticVerticalHorizontalAngleToleranceRadians = GetDouble(ptr, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians);
-
-      UnsafeNativeMethods.CRhinoAppConstraintsSettings_Delete(ptr);
-
-      return rc;
-    }
-
-    /// <summary>
-    /// Gets the factory settings of the application.
-    /// </summary>
-    /// <returns></returns>
-    /// <since>8.0</since>
-    public static ConstraintsSettingsState GetDefaultState()
-    {
-      return CreateState(false);
-    }
-
-    /// <summary>
-    /// Gets the current settings of the application.
-    /// </summary>
-    /// <returns></returns>
-    /// <since>8.0</since>
-    public static ConstraintsSettingsState GetCurrentState()
-    {
-      return CreateState(true);
-    }
-
-    /// <summary>
-    /// Commits the default settings as the current settings.
-    /// </summary>
-    /// <since>8.0</since>
-    public static void RestoreDefaults()
-    {
-      UpdateFromState(GetDefaultState());
-    }
-
-    /// <summary>
-    /// Sets all settings to a particular defined joined state.
-    /// </summary>
-    /// <param name="state">The particular state.</param>
-    /// <since>8.0</since>
-    public static void UpdateFromState(ConstraintsSettingsState state)
-    {
-      if(state != null)
-      {
-        ShowViewportIcons = state.ShowViewportIcons;
-        ViewportIconSize = state.ViewportIconSize;
-        ShowHaloOnConstrainedCurves = state.ShowHaloOnConstrainedCurves;
-        ConstraintsColor = state.ConstraintsColor;
-        ConstraintsFailureColor = state.ConstraintsFailureColor;
-        ShowViewportIconsHorizontalToView = state.ShowViewportIconsHorizontalToView;
-        AutomaticallyCreateCoincidentConstraints = state.AutomaticallyCreateCoincidentConstraints;
-        AutomaticallyCreateVerticalHorizontalConstraints = state.AutomaticallyCreateVerticalHorizontalConstraints;
-        AutomaticVerticalHorizontalAngleToleranceRadians = state.AutomaticVerticalHorizontalAngleToleranceRadians;
-      }
-    }
-
-    private enum BoolValue : int
-    {
-      ShowViewportIcons = 0,
-      ShowHaloOnConstrainedCurves = 1,
-      ShowViewportIconsHorizontalToView = 2,
-      AutomaticCoincidentConstraints = 3,
-      AutomaticVerticalHorizontalConstraints = 4,
-    }
-
-    static bool GetBool(IntPtr constraintsSettings, BoolValue which)
-    {
-      return UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetBool(constraintsSettings, (int)which);
-    }
-
-    static void SetBool(IntPtr constraintsSettings, BoolValue which, bool value)
-    {
-      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetBool(constraintsSettings, (int)which, value);
-    }
-
-    private enum DoubleValue : int
-    {
-      ViewportIconSize = 0,
-      AutomaticVerticalHorizontalConstraintsAngleToleranceRadians = 1,
-      AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees = 2,
-    }
-
-    static double GetDouble(IntPtr constraintsSettings, DoubleValue which)
-    {
-      return UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetDouble(constraintsSettings, (int)which);
-    }
-
-    static void SetDouble(IntPtr constraintsSettings, DoubleValue which, double value)
-    {
-      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetDouble(constraintsSettings, (int)which, value);
-    }
-
-    private enum ColorValue : int
-    {
-      ConstraintsColor = 0,
-      ConstraintsFailureColor = 1,
-    }
-
-    static Color GetColor(IntPtr constraintsSettings, ColorValue which)
-    {
-      int rc = UnsafeNativeMethods.CRhinoAppConstraintsSettings_GetColor(constraintsSettings, (int)which);
-      return Color.FromArgb(rc);
-    }
-
-    static void SetColor(IntPtr constraintsSettings, ColorValue which, Color value)
-    {
-      int argb = value.ToArgb();
-      UnsafeNativeMethods.CRhinoAppConstraintsSettings_SetColor(constraintsSettings, (int)which, argb);
-    }
-
-    /// <summary>
-    /// Enables or disables constraint icons being drawn in the viewport
-    /// </summary>
-    /// <since>8.0</since>
-    public static bool ShowViewportIcons
-    {
-      get => GetBool(IntPtr.Zero, BoolValue.ShowViewportIcons);
-      set => SetBool(IntPtr.Zero, BoolValue.ShowViewportIcons, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the size of the constraint icons being drawn in the viewport
-    /// </summary>
-    /// <since>8.0</since>
-    public static double ViewportIconSize
-    {
-      get => GetDouble(IntPtr.Zero, DoubleValue.ViewportIconSize);
-      set => SetDouble(IntPtr.Zero, DoubleValue.ViewportIconSize, value);
-    }
-
-    /// <summary>
-    /// Enables or disables constraint view icons being drawn horizontal to the view.
-    /// If not drawn horizontal to the view icons are drawn the construction plane of the constraint.
-    /// </summary>
-    /// <since>8.0</since>
-    public static bool ShowViewportIconsHorizontalToView
-    {
-      get => GetBool(IntPtr.Zero, BoolValue.ShowViewportIconsHorizontalToView);
-      set => SetBool(IntPtr.Zero, BoolValue.ShowViewportIconsHorizontalToView, value);
-    }
-
-    /// <summary>
-    /// Enables or disables drawing a halo around constrained curves
-    /// </summary>
-    /// <since>8.0</since>
-    public static bool ShowHaloOnConstrainedCurves
-    {
-      get => GetBool(IntPtr.Zero, BoolValue.ShowHaloOnConstrainedCurves);
-      set => SetBool(IntPtr.Zero, BoolValue.ShowHaloOnConstrainedCurves, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the color of the constrained curves halo, previews, etc
-    /// </summary>
-    /// <since>8.0</since>
-    public static Color ConstraintsColor
-    {
-      get => GetColor(IntPtr.Zero, ColorValue.ConstraintsColor);
-      set => SetColor(IntPtr.Zero, ColorValue.ConstraintsColor, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the color of failure when solving a constraints system
-    /// </summary>
-    /// <since>8.0</since>
-    public static Color ConstraintsFailureColor
-    {
-      get => GetColor(IntPtr.Zero, ColorValue.ConstraintsFailureColor);
-      set => SetColor(IntPtr.Zero, ColorValue.ConstraintsFailureColor, value);
-    }
-
-    /// <summary>
-    /// Gets or sets whether or not to automatically create coincident constraints
-    /// </summary>
-    /// <since>8.0</since>
-    public static bool AutomaticallyCreateCoincidentConstraints
-    {
-      get => GetBool(IntPtr.Zero, BoolValue.AutomaticCoincidentConstraints);
-      set => SetBool(IntPtr.Zero, BoolValue.AutomaticCoincidentConstraints, value);
-    }
-
-    /// <summary>
-    /// Gets or sets whether or not to automatically create vertical and horizontal constraints
-    /// </summary>
-    /// <since>8.0</since>
-    public static bool AutomaticallyCreateVerticalHorizontalConstraints
-    {
-      get => GetBool(IntPtr.Zero, BoolValue.AutomaticVerticalHorizontalConstraints);
-      set => SetBool(IntPtr.Zero, BoolValue.AutomaticVerticalHorizontalConstraints, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
-    /// is automatically created in radians.
-    /// </summary>
-    /// <since>8.0</since>
-    public static double AutomaticVerticalHorizontalAngleToleranceRadians
-    {
-      get => GetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians);
-      set => SetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceRadians, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the angle tolerance used to determine whether or not a vertical or horizontal constraint
-    /// is automatically created in degrees.
-    /// </summary>
-    /// <since>8.0</since>
-    public static double AutomaticVerticalHorizontalAngleToleranceDegrees
-    {
-      get => GetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees);
-      set => SetDouble(IntPtr.Zero, DoubleValue.AutomaticVerticalHorizontalConstraintsAngleToleranceDegrees, value);
-    }
-
-  }
-
 }
 
 #endif

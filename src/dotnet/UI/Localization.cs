@@ -235,6 +235,22 @@ namespace Rhino.UI
     }
 
     /// <summary>
+    /// Get a string version of a number.
+    /// </summary>
+    /// <param name="x">The number to format into a string.</param>
+    /// <returns>The formatted number.</returns>
+    /// <since>8.0</since>
+    public static string FormatNumber(double x)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoFormatNumber2(x, pString);
+        return sh.ToString();
+      }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="distance"></param>
