@@ -42,7 +42,7 @@ class BND_BrepVertexList {
 public:
   BND_BrepVertexList(ON_Brep* brep, const ON_ModelComponentReference& compref);
   int Count() const { return m_brep->m_V.Count(); }
-  //class BND_BrepVertex* GetVertex(int i);
+  class BND_BrepVertex* GetVertex(int i);
 };
 
 class BND_BrepSurfaceList {

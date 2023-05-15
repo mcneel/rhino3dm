@@ -315,6 +315,13 @@ BND_BrepEdge* BND_BrepEdgeList::GetEdge(int i)
   return new BND_BrepEdge(edge, &m_component_reference);
 }
 
+BND_BrepVertex::BND_BrepVertex(ON_BrepVertex* vertex, const ON_ModelComponentReference* compref)
+  :BND_Point(vertex, compref)
+{
+  m_vertex = vertex;
+}
+
+
 BND_BrepVertexList::BND_BrepVertexList(ON_Brep* brep, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
