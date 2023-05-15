@@ -23,7 +23,7 @@ class BND_BrepFaceList {
   class BND_BrepFace* GetFace(int i);
 };
 
-/*
+
 class BND_BrepVertex: public BND_Point {
   ON_BrepVertex* m_vertex;
 public:
@@ -32,7 +32,7 @@ public:
   //public int VertexIndex { get; }
   //public int[] EdgeIndices()
 };
-*/
+
 
 class BND_BrepVertexList {
 

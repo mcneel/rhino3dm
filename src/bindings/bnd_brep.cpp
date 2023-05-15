@@ -326,7 +326,7 @@ BND_BrepVertexList BND_Brep::GetVertices()
   return BND_BrepVertexList(m_brep, m_component_ref);
 }
 
-/*
+
 BND_BrepVertex* BND_BrepVertexList::GetVertex(int i) {
 
 #if defined(ON_PYTHON_COMPILE)
@@ -340,7 +340,7 @@ BND_BrepVertex* BND_BrepVertexList::GetVertex(int i) {
   return new BND_BrepVertex(vertex, &m_component_reference);
 
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -350,10 +350,10 @@ void initBrepBindings(pybind11::module& m)
 {
   py::class_<BND_BrepEdge, BND_CurveProxy>(m, "BrepEdge")
     ;
-  /*
+
   py::class_<BND_BrepVertex, BND_Point>(m, "BrepVertex")
     ;
-*/
+
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
     .def("UnderlyingSurface", &BND_BrepFace::UnderlyingSurface)
     .def("CreateExtrusion", &BND_BrepFace::CreateExtrusion, py::arg("pathCurve"), py::arg("cap"))
@@ -379,7 +379,7 @@ void initBrepBindings(pybind11::module& m)
 
   py::class_<BND_BrepVertexList>(m, "BrepVertexList")
     .def("__len__", &BND_BrepVertexList::Count)
-    //.def("__getitem__", &BND_BrepVertexList::GetVertex)
+    .def("__getitem__", &BND_BrepVertexList::GetVertex)
     ;
 
   py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
