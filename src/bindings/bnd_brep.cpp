@@ -348,6 +348,16 @@ BND_BrepVertex* BND_BrepVertexList::GetVertex(int i) {
 
 }
 
+BND_TUPLE BND_BrepVertex::EdgeIndices() const {
+
+  int count = m_vertex->m_ei.Count();
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+    SetTuple(rc, i, m_vertex->m_ei[i]);
+  return rc;
+
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -359,6 +369,9 @@ void initBrepBindings(pybind11::module& m)
     ;
 
   py::class_<BND_BrepVertex, BND_Point>(m, "BrepVertex")
+    .def_property_readonly("VertexIndex", &BND_BrepVertex::VertexIndex)
+    .def_property_readonly("EdgeCount", &BND_BrepVertex::EdgeCount)
+    .def("EdgeIndices", &BND_BrepVertex::EdgeIndices)
     ;
 
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
@@ -422,6 +435,12 @@ void initBrepBindings(void*)
   class_<BND_BrepEdge, base<BND_CurveProxy>>("BrepEdge")
     ;
 
+  class_<BND_BrepVertex, BND_Point>("BrepVertex")
+    .property("VertexIndex", &BND_BrepVertex::VertexIndex)
+    .property("EdgeCount", &BND_BrepVertex::EdgeCount)
+    .property("EdgeIndices", &BND_BrepVertex::EdgeIndices)
+    ;
+
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
     .function("underlyingSurface", &BND_BrepFace::UnderlyingSurface, allow_raw_pointers())
     .function("createExtrusion", &BND_BrepFace::CreateExtrusion, allow_raw_pointers())
@@ -447,7 +466,7 @@ void initBrepBindings(void*)
 
   class_<BND_BrepVertexList>("BrepVertexList")
     .property("count", &BND_BrepVertexList::Count)
-    //.function("get", &BND_BrepVertexList::GetVertex, allow_raw_pointers())
+    .function("get", &BND_BrepVertexList::GetVertex, allow_raw_pointers())
     ;
 
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")

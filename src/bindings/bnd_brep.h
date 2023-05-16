@@ -29,8 +29,9 @@ class BND_BrepVertex: public BND_Point {
 public:
   BND_BrepVertex(ON_BrepVertex* vertex, const ON_ModelComponentReference* compref);
   //public Brep Brep { get; }
-  //public int VertexIndex { get; }
-  //public int[] EdgeIndices()
+  int VertexIndex() const { return m_vertex->m_vertex_index; }
+  BND_TUPLE EdgeIndices() const;
+  int EdgeCount() const { return m_vertex->m_ei.Count();}
 };
 
 
