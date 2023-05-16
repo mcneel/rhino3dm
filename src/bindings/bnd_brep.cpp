@@ -436,9 +436,9 @@ void initBrepBindings(void*)
     ;
 
   class_<BND_BrepVertex, base<BND_Point>>("BrepVertex")
-    .property("VertexIndex", &BND_BrepVertex::VertexIndex)
-    .property("EdgeCount", &BND_BrepVertex::EdgeCount)
-    .property("EdgeIndices", &BND_BrepVertex::EdgeIndices)
+    .property("vertexIndex", &BND_BrepVertex::VertexIndex)
+    .property("edgeCount", &BND_BrepVertex::EdgeCount)
+    .property("edgeIndices", &BND_BrepVertex::EdgeIndices)
     ;
 
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
