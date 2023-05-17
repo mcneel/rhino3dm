@@ -15,14 +15,19 @@ class BND_NurbsSurfacePointList
   ON_NurbsSurface* m_surface = nullptr;
   int m_direction;
 public:
-  BND_NurbsSurfacePointList(ON_NurbsSurface* nurbscurve, const ON_ModelComponentReference& compref);
+  BND_NurbsSurfacePointList(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference& compref);
   ON_NurbsSurface* GetSurface() { return m_surface; }
   int GetCVDims() { return m_surface->m_is_rat ? m_surface->m_dim + 1 : m_surface->m_dim; }
   int CountU() const { return m_surface->CVCount(0); }
   int CountV() const { return m_surface->CVCount(1); }
   int Count() const { return CountU() * CountV(); }
-  ON_4dPoint GetControlPoint(std::tuple<int, int> index) const;
-  void SetControlPoint(std::tuple<int, int> index, ON_4dPoint point);
+  ON_4dPoint GetControlPoint1(std::tuple<int, int> index) const;
+  ON_4dPoint GetControlPoint2(int u, int v) const;
+  void SetControlPoint1(std::tuple<int, int> index, ON_4dPoint point);
+  void SetControlPoint2(int u, int v, ON_4dPoint point);
+  ON_3dPoint GetPoint(int u, int v) const;
+  //public bool GetPoint(int index, out Point4d point)
+  //same as GetControlPoint ON_4dPoint GetPoint2(int u, int v) const;
   //class BND_Polyline* ControlPolygon() const;
   bool MakeRational() { return m_surface->MakeRational(); }
   bool MakeNonRational() { return m_surface->MakeNonRational(); }
@@ -31,8 +36,6 @@ public:
   //public bool SetPoint(int index, Point3d point)
   //public bool SetPoint(int index, Point4d point)
   //public bool SetPoint(int index, Point3d point, double weight)
-  //public bool GetPoint(int index, out Point3d point)
-  //public bool GetPoint(int index, out Point4d point)
   //public bool SetWeight(int index, double weight)
   //public double GetWeight(int index)
   //public int PointSize{ get; }
@@ -44,7 +47,7 @@ class BND_NurbsSurfaceKnotList
   ON_NurbsSurface* m_surface = nullptr;
   int m_direction;
 public:
-  BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbscurve, int direction, const ON_ModelComponentReference& compref);
+  BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbssurface, int direction, const ON_ModelComponentReference& compref);
   std::vector<double> ToList();
   ON_NurbsSurface* GetSurface() { return m_surface; }
   int GetDirection() { return m_direction; }
