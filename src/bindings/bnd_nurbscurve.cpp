@@ -183,6 +183,13 @@ BND_NurbsCurvePointList BND_NurbsCurve::Points()
   return BND_NurbsCurvePointList(m_nurbscurve, m_component_ref);
 }
 
+BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
+{
+  ON_BezierCurve bc;
+  m_nurbscurve->ConvertSpanToBezier(index, bc);
+  return new BND_BezierCurve(bc);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -255,6 +262,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def("Reparameterize", &BND_NurbsCurve::Reparameterize, py::arg("c"))
     .def("GrevilleParameter", &BND_NurbsCurve::GrevilleParameter, py::arg("index"))
     .def("GrevillePoint", &BND_NurbsCurve::GrevillePoint, py::arg("index"))
+    .def("ConvertSpanToBezier", &BND_NurbsCurve::ConvertSpanToBezier, py::arg("index"))
     .def_property_readonly("Points", &BND_NurbsCurve::Points)
     .def_property_readonly("Knots", &BND_NurbsCurve::Knots)
     ;
@@ -307,6 +315,7 @@ void initNurbsCurveBindings(void*)
     .function("reparameterize", &BND_NurbsCurve::Reparameterize)
     .function("grevilleParameter", &BND_NurbsCurve::GrevilleParameter)
     .function("grevillePoint", &BND_NurbsCurve::GrevillePoint)
+    .function("convertSpanToBezier", &BND_NurbsCurve::ConvertSpanToBezier)
     .function("points", &BND_NurbsCurve::Points, allow_raw_pointers())
     .function("knots", &BND_NurbsCurve::Knots, allow_raw_pointers())
     ;
