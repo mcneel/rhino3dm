@@ -186,7 +186,10 @@ BND_NurbsCurvePointList BND_NurbsCurve::Points()
 BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
 {
   ON_BezierCurve bc;
-  m_nurbscurve->ConvertSpanToBezier(index, bc);
+  bool rc = m_nurbscurve->ConvertSpanToBezier(index, bc);
+  if( false == rc ) {
+    return nullptr;
+  }
   return new BND_BezierCurve(bc);
 }
 
