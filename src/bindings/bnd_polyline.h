@@ -52,11 +52,10 @@ public:
   ON_3dPoint PointAt(double t) const { return m_polyline.PointAt(t); }
   ON_3dVector TangentAt(double t) const { return m_polyline.TangentAt(t); }
   //public Polyline Trim(Interval domain)
+  // TODO: class BND_Polyline* Trim(BND_Interval domain) const;
   ON_3dPoint ClosestPoint(const ON_3dPoint& testPoint) const { return m_polyline.ClosestPointTo(testPoint); }
   double ClosestParameter(const ON_3dPoint& testPoint) const;
-  //public Line[] GetSegments()
   BND_TUPLE GetSegments() const;
-  //public Line SegmentAt(int index)
   BND_LineCurve* SegmentAt(int index) const;
   class BND_NurbsCurve* ToNurbsCurve() const;
   class BND_PolylineCurve* ToPolylineCurve() const;
