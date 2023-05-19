@@ -98,6 +98,35 @@ BND_Polyline* BND_Polyline::CreateStarPolygon(BND_Circle& circle, double radius,
   return rc;
 }
 
+BND_TUPLE BND_Polyline::GetSegments() const
+{
+  int count = m_polyline.SegmentCount();
+  if( count < 2 ) 
+  {
+    return NullTuple();
+  }
+  BND_TUPLE rc = CreateTuple(count);
+
+  for (int i = 0; i < count - 1; i++)
+  {
+    BND_LineCurve* lc = new BND_LineCurve(m_polyline[i], m_polyline[i+1]);
+    SetTuple(rc, i, lc);
+  }
+
+  return rc;
+
+}
+
+BND_LineCurve* BND_Polyline::SegmentAt(int index) const
+{
+
+  if ( index < 0 ) { return nullptr; }
+  if ( index >= m_polyline.Count() - 1 ) { return nullptr; }
+
+  return new BND_LineCurve(m_polyline[index], m_polyline[index+1]);
+
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,6 +169,8 @@ void initPolylineBindings(pybind11::module& m)
     .def("ClosestParameter", &BND_Polyline::ClosestParameter, py::arg("testPoint"))
     .def("ToNurbsCurve", &BND_Polyline::ToNurbsCurve)
     .def("ToPolylineCurve", &BND_Polyline::ToPolylineCurve)
+    .def("GetSegments", &BND_Polyline::GetSegments)
+    .def("SegmentAt", &BND_Polyline::SegmentAt, py::arg("index"))
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateStarPolygon", &BND_Polyline::CreateStarPolygon, py::arg("circle"), py::arg("radius"), py::arg("cornerCounts"))
@@ -184,6 +215,8 @@ void initPolylineBindings(void*)
     .function("closestParameter", &BND_Polyline::ClosestParameter)
     .function("toNurbsCurve", &BND_Polyline::ToNurbsCurve, allow_raw_pointers())
     .function("toPolylineCurve", &BND_Polyline::ToPolylineCurve, allow_raw_pointers())
+    .function("getSegments", &BND_Polyline::GetSegments, allow_raw_pointers())
+    .function("segmentAt", &BND_Polyline::SegmentAt, allow_raw_pointers())
     .class_function("createInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, allow_raw_pointers())
     .class_function("createCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, allow_raw_pointers())
     .class_function("createStarPolygon", &BND_Polyline::CreateStarPolygon, allow_raw_pointers())

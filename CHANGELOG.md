@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.0.1-beta.2] - unreleased
+### Added
+- (js, py) Polyline GetSegments and SegmentAt
+- (js, py) NurbsCurve ConvertSpanToBezier
+- (js, py) BrepVertex Index, EdgeCount, EdgeIndices
+- (js, py) BrepVertexList Count, GetVertex
+- (js, py) Brep Vertices
+- (js, py) NurbsSurface OrderU, OrderV, KnotsU, KnotsV, Control Points, Points
+
 ## [8.0.1-beta.1] - 2023-04-17
 ### Added
 - (.net) linux-arm64 native lib
