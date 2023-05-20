@@ -232,7 +232,8 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
           bool forall = false;
           bool fornone = false;
           ON_UuidList uuidlist;
-          ptr->GetClipParticipation(forall, fornone, uuidlist);
+          bool isParticipation = false;
+          ptr->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
           if (oabClipParticipationForAll == which)
             rc = forall;
           else
@@ -775,7 +776,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetClipParticipation(ON_3dmObjectAttri
     }
     else if (pIds)
     {
-      pObjectAttributes->SetClipParticipationList(pIds->Array(), pIds->Count());
+      pObjectAttributes->SetClipParticipationList(pIds->Array(), pIds->Count(), true);
     }
   }
 }
@@ -787,7 +788,8 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ClipParticipationList(const ON_3dmObje
     bool forall = true;
     bool fornone = true;
     ON_UuidList uuidlist;
-    pConstAttr->GetClipParticipation(forall, fornone, uuidlist);
+    bool isParticipation = false;
+    pConstAttr->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
     uuidlist.GetUuids(*uuids);
   }
 }
