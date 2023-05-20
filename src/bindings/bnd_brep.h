@@ -23,6 +23,29 @@ class BND_BrepFaceList {
   class BND_BrepFace* GetFace(int i);
 };
 
+
+class BND_BrepVertex: public BND_Point {
+  ON_BrepVertex* m_vertex;
+public:
+  BND_BrepVertex(ON_BrepVertex* vertex, const ON_ModelComponentReference* compref);
+  //public Brep Brep { get; }
+  int VertexIndex() const { return m_vertex->m_vertex_index; }
+  BND_TUPLE EdgeIndices() const;
+  int EdgeCount() const { return m_vertex->m_ei.Count();}
+};
+
+
+class BND_BrepVertexList {
+
+  ON_ModelComponentReference m_component_reference;
+  ON_Brep* m_brep = nullptr;
+
+public:
+  BND_BrepVertexList(ON_Brep* brep, const ON_ModelComponentReference& compref);
+  int Count() const { return m_brep->m_V.Count(); }
+  class BND_BrepVertex* GetVertex(int i);
+};
+
 class BND_BrepSurfaceList {
   ON_ModelComponentReference m_component_reference;
   ON_Brep* m_brep = nullptr;
@@ -66,6 +89,7 @@ public:
   //public Collections.BrepVertexList Vertices
   BND_BrepSurfaceList GetSurfaces();
   BND_BrepEdgeList GetEdges();
+  BND_BrepVertexList GetVertices();
   //public Collections.BrepTrimList Trims
   //public Collections.BrepLoopList Loops
   BND_BrepFaceList GetFaces();

@@ -7,26 +7,56 @@ BND_NurbsSurfacePointList::BND_NurbsSurfacePointList(ON_NurbsSurface* surface, c
   m_surface = surface;
 }
 
-ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint(std::tuple<int, int> index) const
+ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint1(std::tuple<int, int> index) const
+{
+
+  int u = std::get<0>(index);
+  int v = std::get<1>(index);
+
+  return GetControlPoint2(u, v);
+
+}
+
+ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint2(int u, int v) const
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
-      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+  if (u >= CountU() || v >= CountV() ||
+      u < 0 || v < 0)
     throw pybind11::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
-  m_surface->GetCV(std::get<0>(index), std::get<1>(index), pt);
+  m_surface->GetCV(u, v, pt);
   return pt;
 }
 
-void BND_NurbsSurfacePointList::SetControlPoint(std::tuple<int, int> index, ON_4dPoint point)
+ON_3dPoint BND_NurbsSurfacePointList::GetPoint(int u, int v) const
 {
 #if defined(ON_PYTHON_COMPILE)
-  if (std::get<0>(index) >= CountU() || std::get<1>(index) >= CountV() ||
-      std::get<0>(index) < 0 || std::get<1>(index) < 0)
+  if (u >= CountU() || v >= CountV() ||
+      u < 0 || v < 0)
     throw pybind11::index_error("list index out of range");
 #endif
-  m_surface->SetCV(std::get<0>(index), std::get<1>(index), point);
+  ON_3dPoint pt;
+  m_surface->GetCV(u, v, pt);
+  return pt;
+}
+
+void BND_NurbsSurfacePointList::SetControlPoint1(std::tuple<int, int> index, ON_4dPoint point)
+{
+  int u = std::get<0>(index);
+  int v = std::get<1>(index);
+
+  return SetControlPoint2(u, v, point);
+}
+
+void BND_NurbsSurfacePointList::SetControlPoint2(int u, int v, ON_4dPoint point)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (u >= CountU() || v >= CountV() ||
+     u < 0 || v < 0)
+    throw pybind11::index_error("list index out of range");
+#endif
+  m_surface->SetCV(u, v, point);
 }
 
 BND_NurbsSurfaceKnotList::BND_NurbsSurfaceKnotList(ON_NurbsSurface* surface, int direction, const ON_ModelComponentReference& compref)
@@ -186,8 +216,10 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("__len__", &BND_NurbsSurfacePointList::Count)
     .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
     .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
-    .def("__getitem__", &BND_NurbsSurfacePointList::GetControlPoint)
-    .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint)
+    .def("__getitem__", &BND_NurbsSurfacePointList::GetControlPoint1)
+    .def("GetPoint", &BND_NurbsSurfacePointList::GetPoint, py::arg("u"), py::arg("v") )
+    .def("GetControlPoint", &BND_NurbsSurfacePointList::GetControlPoint2, py::arg("u"), py::arg("v") )
+    .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint1)
     .def_buffer([](BND_NurbsSurfacePointList& pl) -> py::buffer_info
     {
       return py::buffer_info
@@ -249,8 +281,9 @@ void initNurbsSurfaceBindings(void*)
     .property("count", &BND_NurbsSurfacePointList::Count)
     .property("countU", &BND_NurbsSurfacePointList::CountU)
     .property("countV", &BND_NurbsSurfacePointList::CountV)
-    .function("get", &BND_NurbsSurfacePointList::GetControlPoint)
-    .function("set", &BND_NurbsSurfacePointList::SetControlPoint)
+    .function("get", &BND_NurbsSurfacePointList::GetControlPoint2)
+    .function("getPoint", &BND_NurbsSurfacePointList::GetPoint)
+    .function("set", &BND_NurbsSurfacePointList::SetControlPoint2)
     .function("makeRational", &BND_NurbsSurfacePointList::MakeRational)
     .function("makeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
     ;
@@ -266,11 +299,11 @@ void initNurbsSurfaceBindings(void*)
     .function("makeNonRational", &BND_NurbsSurface::MakeNonRational)
     .function("increaseDegreeU", &BND_NurbsSurface::IncreaseDegreeU)
     .function("increaseDegreeV", &BND_NurbsSurface::IncreaseDegreeV)
-    //.property("orderU", &BND_NurbsSurface::OrderU)
-    //.property("orderV", &BND_NurbsSurface::OrderV)
-    //.property("knotsU", &BND_NurbsSurface::KnotsU)
-    //.property("knotsV", &BND_NurbsSurface::KnotsV)
-    //.property("points", &BND_NurbsSurface::Points)
+    .property("orderU", &BND_NurbsSurface::OrderU)
+    .property("orderV", &BND_NurbsSurface::OrderV)
+    .function("knotsU", &BND_NurbsSurface::KnotsU)
+    .function("knotsV", &BND_NurbsSurface::KnotsV)
+    .function("points", &BND_NurbsSurface::Points, allow_raw_pointers())
     ;
 }
 #endif
