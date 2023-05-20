@@ -22,6 +22,14 @@ using System.Linq;
 
 namespace Rhino.Render
 {
+  /// <since>7.0</since>
+  public enum PostEffectType : int
+  {
+    Early = 0,
+    ToneMapping = 1,
+    Late = 2
+  }
+
 #if RHINO_SDK
   /// <summary>
   /// Pixel component order for channels in the RenderWindow and PostEffects.
@@ -155,14 +163,6 @@ namespace Rhino.Render.PostEffects
     Always = 1,   // The post effect supports execution while rendering and it should be run every time the dib is updated.
     UseDelay = 2, // The post effect supports execution while rendering but only after a delay the first time.
   };
-
-  /// <since>7.0</since>
-  public enum PostEffectType : int
-  {
-    Early = 0,
-    ToneMapping = 1,
-    Late = 2
-  }
 
   public abstract class PostEffect : IDisposable
   {
@@ -1907,7 +1907,6 @@ namespace Rhino.Render.PostEffects
   public class PostEffectData : IDisposable
   {
     private Guid _pep_id;
-    private int _begin_change = 0;
 
     internal IntPtr CppPointer // ON_PostEffect
     {
@@ -1930,6 +1929,8 @@ namespace Rhino.Render.PostEffects
     }
 
 #if RHINO_SDK
+    private int _begin_change = 0;
+
     public void BeginChange(ChangeContexts cc)
     {
       if (0 == _begin_change++)
@@ -1982,7 +1983,6 @@ namespace Rhino.Render.PostEffects
       }
     }
 
-#if RHINO_SDK // TODO: this is needed.
     /// <summary>
     /// Returns the type of this post effect.
     /// </summary>
@@ -2000,7 +2000,6 @@ namespace Rhino.Render.PostEffects
         }
       }
     }
-#endif
 
     /// <summary>
     /// Returns the localized name of this post effect.
@@ -2038,7 +2037,6 @@ namespace Rhino.Render.PostEffects
       set {  UnsafeNativeMethods.ON_PostEffect_SetShown(CppPointer, value); }
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Get an arbitrary parameter from this post effect by its name.
     /// If the parameter is not known to the post effect, the method will fail.
@@ -2067,7 +2065,6 @@ namespace Rhino.Render.PostEffects
       var v = new Variant(param_value);
       return UnsafeNativeMethods.ON_PostEffect_SetParameter(CppPointer, param_name, v.ConstPointer());
     }
-#endif
 
     /// <summary>
     /// Get a CRC representing the state of the entire post effect.

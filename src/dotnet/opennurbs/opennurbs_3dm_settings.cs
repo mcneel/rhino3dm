@@ -2668,7 +2668,6 @@ namespace Rhino.Render
     }
 #endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document post effect data collection.
     /// If this object is associated with a File3dm, this gets the File3dm's post effect data collection.
@@ -2679,8 +2678,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new PostEffectCollection(m_doc);
+#endif
         if (m_file3dm != null)
           return new PostEffectCollection(m_file3dm);
 
@@ -2689,7 +2690,6 @@ namespace Rhino.Render
         return new PostEffectCollection(native_ptr);
       }
     }
-#endif
 
     /// <summary>
     /// Get or set the current Render Preset.

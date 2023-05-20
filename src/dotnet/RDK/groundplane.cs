@@ -156,6 +156,10 @@ namespace Rhino.Render
       g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
     }
     private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+
+    internal delegate void RdkGroundPlaneSettingsChangedCallback(uint docSerialNumber);
+
+    private static RdkGroundPlaneSettingsChangedCallback g_settings_changed_hook;
 #endif
 
     /// <since>6.0</since>
@@ -168,10 +172,6 @@ namespace Rhino.Render
     {
       UnsafeNativeMethods.ON_GroundPlane_Delete(CppPointer);
     }
-
-    internal delegate void RdkGroundPlaneSettingsChangedCallback(uint docSerialNumber);
-
-    private static RdkGroundPlaneSettingsChangedCallback g_settings_changed_hook;
 
     ~GroundPlane()
     {
@@ -449,6 +449,17 @@ namespace Rhino.Render
 
     private static RdkRenderChannelsSettingsChangedCallback g_settings_changed_hook;
     private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+#else
+    /// <summary>
+    /// Mode.
+    /// </summary>
+    public enum Modes
+    {
+      /// <summary>Render-channels are managed automatically</summary>
+      Automatic,
+      /// <summary>Render-channels are specified by the user</summary>
+      Custom,
+    }
 #endif
 
     /// <summary>
@@ -478,7 +489,6 @@ namespace Rhino.Render
     {
     }
 
-#if RHINO_SDK // TODO: this is needed
     /// <since>7.0</since>
     public Modes Mode
     {
@@ -494,7 +504,6 @@ namespace Rhino.Render
         UnsafeNativeMethods.ON_RenderChannels_SetMode(CppPointer, v);
       }
     }
-#endif
 
     /// <since>7.0</since>
     public Guid[] CustomList

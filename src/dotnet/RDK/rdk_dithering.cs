@@ -86,6 +86,19 @@ namespace Rhino.Render
     {
       return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
     }
+#else
+    /// <summary>
+    /// Dithering algorithm.
+    /// </summary>
+    public enum Methods
+    {
+      /// <summary>No dithering</summary>
+      None, // OBSOLETE - not used except in old files.
+      /// <summary>Floyd Steinberg algorithm</summary>
+      FloydSteinberg,
+      /// <summary>Simple random noise</summary>
+      SimpleNoise,
+    }
 #endif
 
     /// <since>6.0</since>
@@ -99,7 +112,6 @@ namespace Rhino.Render
       UnsafeNativeMethods.ON_Dithering_Delete(CppPointer);
     }
 
-#if RHINO_SDK // TODO: this is needed.
     /// <since>6.0</since>
     public Methods Method
     {
@@ -115,7 +127,6 @@ namespace Rhino.Render
         UnsafeNativeMethods.ON_Dithering_SetMethod(CppPointer, v);
       }
     }
-#endif
 
     /// <since>7.0</since>
     public bool On

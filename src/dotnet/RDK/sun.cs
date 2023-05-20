@@ -2,6 +2,10 @@
 using System;
 using System.Diagnostics;
 
+#if RHINO_SDK
+using Rhino.UI.Controls;
+#endif
+
 #pragma warning disable 1591
 
 namespace Rhino.Render
@@ -319,6 +323,20 @@ namespace Rhino.Render
       }
     }
 
+    public enum Accuracies { Minimum, Maximum };
+
+    /// <summary>Accuracy.</summary>
+    /// <since>8.0</since>
+    public Accuracies Accuracy
+    {
+      get => (Accuracies)UnsafeNativeMethods.ON_Sun_Accuracy(CppPointer);
+      set
+      {
+        Debug.Assert(CanChange);
+        UnsafeNativeMethods.ON_Sun_SetAccuracy(CppPointer, (int)value);
+      }
+    }
+
 #if RHINO_SDK
     /// <summary>Turn skylight on or off.</summary>
     /// <since>5.10</since>
@@ -583,6 +601,24 @@ namespace Rhino.Render
       UnsafeNativeMethods.ON_Sun_SetDateTime(CppPointer, local, time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
     }
 
+    /// <summary>Get sun color based on altitude.</summary>
+    /// <param name="altitudeDegrees">The altitude sun angle in degrees.</param>
+    /// <returns>
+    /// Returns color for altitude.
+    /// </returns>
+    /// <since>6.0</since>
+    static public System.Drawing.Color ColorFromAltitude(double altitudeDegrees)
+    {
+      var col = UnsafeNativeMethods.ON_Sun_ColorFromAltitude(altitudeDegrees);
+      return Rhino.Runtime.Interop.ColorFromWin32(col);
+    }
+
+    /// <since>6.0</since>
+    static public double AltitudeFromValues(double latitude, double longitude, double timezoneHours, int daylightMinutes, DateTime when, double hours, bool fast = false)
+    {
+      return UnsafeNativeMethods.GetSunAltitude(latitude, longitude, timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours, fast);
+    }
+
 #if RHINO_SDK
     /// <summary>Show the modal sun dialog.</summary>
     /// <since>5.0</since>
@@ -605,28 +641,10 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_Sun_ShowDialog(CppPointer);
     }
 
-    /// <summary>Get sun color based on altitude.</summary>
-    /// <param name="altitudeDegrees">The altitude sun angle in degrees.</param>
-    /// <returns>
-    /// Returns color for altitude.
-    /// </returns>
-    /// <since>6.0</since>
-    static public System.Drawing.Color ColorFromAltitude(double altitudeDegrees)
-    {
-      var col = UnsafeNativeMethods.ON_Sun_ColorFromAltitude(altitudeDegrees);
-      return Rhino.Runtime.Interop.ColorFromWin32(col);
-    }
-
-    /// <since>6.0</since>
-    static public double AltitudeFromValues(double latitude, double longitude, double timezoneHours, int daylightMinutes, DateTime when, double hours, bool fast = false)
-    {
-      return UnsafeNativeMethods.RhRdkSun_SunAltitude(latitude, longitude, timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours, fast);
-    }
-
     /// <since>6.0</since>
     static public double JulianDay(double timezoneHours, int daylightMinutes, DateTime when, double hours)
     {
-      return UnsafeNativeMethods.RhRdkSun_JulianDay(timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours);
+      return UnsafeNativeMethods.GetSunJulianDay(timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours);
     }
 
     /// <since>6.0</since>
@@ -764,7 +782,6 @@ namespace Rhino.Render
 
     private static RdkSkylightSettingsChangedCallback g_settings_changed_hook;
     private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
-
 #endif
 
     /// <since>6.0</since>
