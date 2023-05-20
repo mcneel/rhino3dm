@@ -342,8 +342,7 @@ RH_C_FUNCTION unsigned int ON_Sun_GetDataCRC(const ON_Sun* sun)
 
 RH_C_FUNCTION ON_Sun* ON_Sun_New()
 {
-  // Return an ON_SunEx so we get the automatic azimuth and altitude calculations.
-  return new ON_SunEx;
+  return new ON_Sun;
 }
 
 RH_C_FUNCTION void ON_Sun_Delete(ON_Sun* p)
