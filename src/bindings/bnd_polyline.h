@@ -12,7 +12,10 @@ class BND_Point3dList
 public:
   ON_Polyline m_polyline;
 public:
-  //From RhinoList<Point3d>
+  BND_Point3dList() = default;
+  BND_Point3dList(int initialCapacity) : m_polyline(initialCapacity) {}
+  BND_Point3dList(const std::vector<ON_3dPoint>& points);
+
   int GetCapacity() const { return m_polyline.Capacity(); }
   void SetCapacity(int cap) { m_polyline.SetCapacity(cap); }
   int GetCount() const { return m_polyline.Count(); }
@@ -23,9 +26,6 @@ public:
   void Insert(int index, const ON_3dPoint& item) { m_polyline.Insert(index, item); }
   void RemoveAt(int index) { m_polyline.Remove(index); }
 
-  BND_Point3dList() = default;
-  BND_Point3dList(int initialCapacity) : m_polyline(initialCapacity) {}
-  BND_Point3dList(const std::vector<ON_3dPoint>& points);
   BND_BoundingBox BoundingBox() const { return BND_BoundingBox(m_polyline.BoundingBox()); }
   //public int ClosestIndex(Point3d testPoint)
   void Add(double x, double y, double z) { m_polyline.Append(ON_3dPoint(x, y, z)); }
@@ -48,13 +48,15 @@ public:
   bool IsClosed() const { return m_polyline.IsClosed(); }
   bool IsClosedWithinTolerance(double tolerance) const { return m_polyline.IsClosed(tolerance); }
   double Length() const { return m_polyline.Length(); }
-  //public Line SegmentAt(int index)
+
   ON_3dPoint PointAt(double t) const { return m_polyline.PointAt(t); }
   ON_3dVector TangentAt(double t) const { return m_polyline.TangentAt(t); }
   //public Polyline Trim(Interval domain)
+  // TODO: class BND_Polyline* Trim(BND_Interval domain) const;
   ON_3dPoint ClosestPoint(const ON_3dPoint& testPoint) const { return m_polyline.ClosestPointTo(testPoint); }
   double ClosestParameter(const ON_3dPoint& testPoint) const;
-  //public Line[] GetSegments()
+  BND_TUPLE GetSegments() const;
+  BND_LineCurve* SegmentAt(int index) const;
   class BND_NurbsCurve* ToNurbsCurve() const;
   class BND_PolylineCurve* ToPolylineCurve() const;
   //int DeleteShortSegments(double tolerance) const;
