@@ -6,14 +6,18 @@ class CRhCmnCurveDisplay
 {
 public:
   CRhCmnCurveDisplay( const ON_NurbsCurve& nc );
-  void Draw( CRhinoDisplayEngine& engine, unsigned int color, int thickness );
+  void Draw( CRhinoDisplayPipeline* pipeline, unsigned int color, int thickness );
 
 private:
-  ON_ClassArray<ON_BezierCurve> m_beziers;
+  ON_NurbsCurve m_curve;
+  CRhinoCacheHandle m_cache;
+//  ON_ClassArray<ON_BezierCurve> m_beziers;
 };
 
 CRhCmnCurveDisplay::CRhCmnCurveDisplay(const ON_NurbsCurve& nurbs_curve)
 {
+  m_curve = nurbs_curve;
+  /*
   int spancount = nurbs_curve.SpanCount();
   m_beziers.Reserve(spancount);
 
@@ -63,10 +67,21 @@ CRhCmnCurveDisplay::CRhCmnCurveDisplay(const ON_NurbsCurve& nurbs_curve)
       }
     }
   }
+  */
 }
 
-void CRhCmnCurveDisplay::Draw( CRhinoDisplayEngine& engine, unsigned int color, int thickness )
+void CRhCmnCurveDisplay::Draw( CRhinoDisplayPipeline* pipeline, unsigned int color, int thickness )
 {
+  if (nullptr == pipeline)
+    return;
+
+  unsigned int alpha = ((color & 0xff000000) >> 24);
+  color &= 0x00ffffff;
+  ON_Color c = color;
+  c.SetAlpha(alpha);
+  pipeline->DrawCurve(m_curve, c, (float)thickness, &m_cache);
+
+/*
   // check for bbox visibility first?
   // restore color,thickness if we attempt to change it?
 
@@ -93,6 +108,7 @@ void CRhCmnCurveDisplay::Draw( CRhinoDisplayEngine& engine, unsigned int color, 
     }
     pBez++;
   }
+  */
 }
 
 RH_C_FUNCTION CRhCmnCurveDisplay* CurveDisplay_FromArcCurve(const ON_ArcCurve* pCurve)
@@ -139,17 +155,44 @@ RH_C_FUNCTION void CurveDisplay_Delete(CRhCmnCurveDisplay* pCurveDisplay)
     delete pCurveDisplay;
 }
 
+RH_C_FUNCTION void ON_Curve_Draw(const ON_Curve* pConstCurve, CRhinoDisplayPipeline* pPipeline,
+  int argb, CRhinoDisplayPen* pen, CRhinoCacheHandle* cacheHandle)
+{
+  CRhinoDisplayEngine* engine = pPipeline ? pPipeline->Engine() : nullptr;
+  if (pConstCurve && engine && pen)
+  {
+    ON_Color color = ARGB_to_ABGR(argb);
+    engine->DrawCurve(*pConstCurve, *pen, cacheHandle);
+  }
+}
+
 RH_C_FUNCTION void CurveDisplay_Draw(CRhCmnCurveDisplay* pCurveDisplay, CRhinoDisplayPipeline* pPipeline, int argb, int thickness)
 {
   if( pCurveDisplay && pPipeline )
   {
-    CRhinoDisplayEngine* pEngine = pPipeline->Engine();
-    if( pEngine )
-    {
-      unsigned int abgr = ARGB_to_ABGR(argb);
-      pCurveDisplay->Draw(*pEngine, abgr, thickness);
-    }
+    unsigned int abgr = ARGB_to_ABGR(argb);
+    pCurveDisplay->Draw(pPipeline, abgr, thickness);
   }
 }
+
+RH_C_FUNCTION void ON_PolylineCurve_Draw(const ON_PolylineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
+{
+  if (pCrv && pDisplayPipeline)
+  {
+    int abgr = ARGB_to_ABGR(argb);
+    pDisplayPipeline->DrawPolyline(pCrv->m_pline, abgr, thickness);
+  }
+}
+
+
+RH_C_FUNCTION void ON_LineCurve_Draw(const ON_LineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
+{
+  if (pCrv && pDisplayPipeline)
+  {
+    int abgr = ARGB_to_ABGR(argb);
+    pDisplayPipeline->DrawLine(pCrv->m_line.from, pCrv->m_line.to, abgr, thickness);
+  }
+}
+
 #endif
 

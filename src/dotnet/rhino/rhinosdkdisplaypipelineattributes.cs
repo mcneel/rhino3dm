@@ -306,6 +306,22 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClippingPlanes); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClippingPlanes, value); }
     }
+
+    /// <summary>Show fills where clipping planes clip solid objects</summary>
+    /// <since>8.0</since>
+    public bool ShowClipIntersectionSurfaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionSurfaces); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionSurfaces, value); }
+    }
+
+    /// <summary>Show edges and hatches where clipping planes clip objects</summary>
+    /// <since>8.0</since>
+    public bool ShowClipIntersectionEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowClipIntersectionEdges, value); }
+    }
     #endregion
 
     #region View specific attributes...
@@ -600,7 +616,7 @@ namespace Rhino.Display
     #region Both surface and mesh specific attributes...
     //bool m_bUseDefaultShading;
 
-    /// <summary>Draw shaded meshes and surfaces. Set to false to use Flat Shading.</summary>
+    /// <summary>Draw shaded meshes and surfaces</summary>
     /// <since>5.1</since>
     public bool ShadingEnabled
     {
@@ -690,7 +706,6 @@ namespace Rhino.Display
     }
     //int m_nEdgeThickness;
     //int m_nEdgeColorUsage;
-    //int m_nNakedEdgeOverride;
     //int m_nNakedEdgeColorUsage;
     //int m_nNakedEdgeThickness;
     //int m_nEdgeColorReduction;
@@ -953,14 +968,159 @@ namespace Rhino.Display
     }
     #endregion
 
-/* 
-public:
-  ON_MeshParameters*  m_pMeshSettings;
-  CDisplayPipelineMaterial*  m_pMaterial;
-  // experimental
-  bool                m_bDegradeIsoDensity;
-  bool                m_bLayersFollowLockUsage;
-*/
+
+    #region Draw effect attributes
+
+    /// <summary>
+    /// Set a color fade effect to make objects fade a given amount towards a given color.
+    /// </summary>
+    /// <param name="fadeAmount">The color to fade towards.</param>
+    /// <param name="fadeColor">The amount of fade towards the given color (0..1).</param>
+    /// <since>8.0</since>
+    public void SetColorFadeEffect(in Color fadeColor, in float fadeAmount)
+    {
+      int fade_color_argb = fadeColor.ToArgb();
+
+      if (m_parent is DisplayPipeline pipeline_parent)
+      {
+        int current_fade_color_argb = 0;
+        float current_fade_amount = 0.0f;
+        UnsafeNativeMethods.CDisplayPipelineAttributes_GetColorFadeEffect(ConstPointer(), ref current_fade_color_argb, ref current_fade_amount);
+
+        if (fade_color_argb != current_fade_color_argb || fadeAmount != current_fade_amount)
+        {
+          pipeline_parent.Flush();
+        }
+      }
+
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetColorFadeEffect(ConstPointer(), fade_color_argb, fadeAmount);
+    }
+
+    /// <summary>
+    /// Get the current color fade effect data.
+    /// </summary>
+    /// <param name="fadeAmount">The current fade color</param>
+    /// <param name="fadeColor">The current fade amount</param>
+    /// <since>8.0</since>
+    public void GetColorFadeEffect(out Color fadeColor, out float fadeAmount)
+    {
+      int fade_color_argb = 0;
+      fadeAmount = 0.0f;
+      UnsafeNativeMethods.CDisplayPipelineAttributes_GetColorFadeEffect(ConstPointer(), ref fade_color_argb, ref fadeAmount);
+      fadeColor = Color.FromArgb(fade_color_argb);
+    }
+
+    /// <summary>
+    /// Returns TRUE if there is a color fade effect enabled with a color fade effect amount
+    /// larger than 0.0, FALSE otherwise.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool HasColorFadeEffect()
+    {
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasColorFadeEffect(ConstPointer());
+    }
+
+    /// <summary>
+    /// Set a dither transparency effect to make objects render with a given amount of 
+    /// transparency using a dither effect.
+    /// </summary>
+    /// <param name="transparencyAmount">The amount of transparency (0..1).</param>
+    /// <since>8.0</since>
+    public void SetDitherTransparencyEffect(in float transparencyAmount)
+    {
+      if (m_parent is DisplayPipeline pipeline_parent)
+      {
+        float current_transparency_amount = 0.0f;
+        UnsafeNativeMethods.CDisplayPipelineAttributes_GetDitherTransparencyEffect(ConstPointer(), ref current_transparency_amount);
+
+        if (transparencyAmount != current_transparency_amount)
+        {
+          pipeline_parent.Flush();
+        }
+      }
+
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetDitherTransparencyEffect(ConstPointer(), transparencyAmount);
+    }
+
+    /// <summary>
+    /// Get the current dither transparency amount.
+    /// </summary>
+    /// <since>8.0</since>
+    public float GetDitherTransparencyEffect()
+    {
+      float transparency_amount = 0.0f;
+      UnsafeNativeMethods.CDisplayPipelineAttributes_GetDitherTransparencyEffect(ConstPointer(), ref transparency_amount);
+      return transparency_amount;
+    }
+
+    /// <summary>
+    /// Returns TRUE if there is a dither transparency effect enabled with a transparency
+    /// amount larger than 0.0, FALSE otherwise.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool HasDitherTransparencyEffect()
+    {
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasDitherTransparencyEffect(ConstPointer());
+    }
+
+    /// <summary>
+    /// Set a diagonal hatch effect to make objects render with diagonal hatch with
+    /// a given strength and width in pixels. The effect works by brightening and 
+    /// darkening pixels in a diagonal pattern.
+    /// </summary>
+    /// <param name="hatchStrength">The strength of the hatch effect (0..1).</param>
+    /// <param name="hatchWidth">The width of the diagonal hatch in pixels (>= 0).</param>
+    /// <since>8.0</since>
+    public void SetDiagonalHatchEffect(in float hatchStrength, in float hatchWidth)
+    {
+      if (m_parent is DisplayPipeline pipeline_parent)
+      {
+        float current_hatch_strength = 0.0f;
+        float current_hatch_width = 0.0f;
+        UnsafeNativeMethods.CDisplayPipelineAttributes_GetDiagonalHatchEffect(ConstPointer(), ref current_hatch_strength, ref current_hatch_width);
+
+        if (hatchStrength != current_hatch_strength || hatchWidth != current_hatch_width)
+        {
+          pipeline_parent.Flush();
+        }
+      }
+
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetDiagonalHatchEffect(ConstPointer(), hatchStrength, hatchWidth);
+    }
+
+    /// <summary>
+    /// Get the current diagonal hatch strength and width in pixels.
+    /// </summary>
+    /// <param name="hatchStrength">The strength of the hatch effect.</param>
+    /// <param name="hatchWidth">The width of the diagonal hatch in pixels.</param>
+    /// <since>8.0</since>
+    public void GetDiagonalHatchEffect(out float hatchStrength, out float hatchWidth)
+    {
+      hatchStrength = 0.0f;
+      hatchWidth = 0.0f;
+      UnsafeNativeMethods.CDisplayPipelineAttributes_GetDiagonalHatchEffect(ConstPointer(), ref hatchStrength, ref hatchWidth);
+    }
+
+    /// <summary>
+    /// Returns TRUE if there is a diagonal hatch effect enabled with a hatch strength
+    /// larger than 0.0, FALSE otherwise.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool HasDiagonalHatchEffect()
+    {
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasDiagonalHatchEffect(ConstPointer());
+    }
+
+    #endregion
+
+    /* 
+    public:
+      ON_MeshParameters*  m_pMeshSettings;
+      CDisplayPipelineMaterial*  m_pMaterial;
+      // experimental
+      bool                m_bDegradeIsoDensity;
+      bool                m_bLayersFollowLockUsage;
+    */
 
     /// <since>5.0</since>
     public Guid Id

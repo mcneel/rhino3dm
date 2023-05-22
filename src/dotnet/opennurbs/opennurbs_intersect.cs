@@ -4,6 +4,7 @@ using Rhino.Runtime.InteropWrappers;
 using System.Linq;
 using Rhino.FileIO;
 using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace Rhino.Geometry.Intersect
 {
@@ -91,13 +92,12 @@ namespace Rhino.Geometry.Intersect
       return rc;
     }
     /// <summary>
-    /// Finds the closest point between two infinite lines.
+    /// Find the unique closest-points pair between two infinite lines, if it exists.
     /// </summary>
     /// <param name="lineA">First line.</param>
     /// <param name="lineB">Second line.</param>
     /// <param name="a">
-    /// Parameter on lineA that is closest to lineB. 
-    /// The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b)
+    /// Parameter on lineA that is closest to lineB.
     /// </param>
     /// <param name="b">
     /// Parameter on lineB that is closest to lineA. 
@@ -108,7 +108,7 @@ namespace Rhino.Geometry.Intersect
     /// Numerically parallel means the 2x2 matrix:
     /// <para>+AoA  -AoB</para>
     /// <para>-AoB  +BoB</para>
-    /// is numerically singular, where A = (lineA.To - lineA.From) and B = (lineB.To-lineB.From)
+    /// is numerically singular, where A = (lineA.To - lineA.From) and B = (lineB.To-lineB.From).
     /// </returns>
     /// <example>
     /// <code source='examples\vbnet\ex_intersectlines.vb' lang='vbnet'/>
@@ -474,16 +474,16 @@ namespace Rhino.Geometry.Intersect
       Polyline[] rc = new Polyline[polylines_created];
       for (int i = 0; i < polylines_created; i++)
       {
-        int point_count = UnsafeNativeMethods.ON_Intersect_MeshPlanes2(pPolys, i);
+        int point_count = UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_itemI_count(pPolys, i);
         Polyline pl = new Polyline(point_count);
         if (point_count > 0)
         {
           pl.m_size = point_count;
-          UnsafeNativeMethods.ON_Intersect_MeshPlanes3(pPolys, i, point_count, pl.m_items);
+          UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_memcpy_del(pPolys, i, point_count, pl.m_items);
         }
         rc[i] = pl;
       }
-      UnsafeNativeMethods.ON_Intersect_MeshPlanes4(pPolys);
+      UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_delete(pPolys);
 
       return rc;
     }
@@ -643,18 +643,10 @@ namespace Rhino.Geometry.Intersect
     /// <since>6.0</since>
     public static CurveIntersections CurveLine(Curve curve, Line line, double tolerance, double overlapTolerance)
     {
-      // Extend the line through the curve's bounding box
-      var bbox = curve.GetBoundingBox(false);
-      if (!bbox.IsValid)
-        return null;
-
-      line.ExtendThroughBox(bbox);
-      var line_curve = new LineCurve(line);
-
-      IntPtr pCurveA = curve.ConstPointer();
-      IntPtr pCurveB = line_curve.ConstPointer();
-      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveCurve(pCurveA, pCurveB, tolerance, overlapTolerance, IntPtr.Zero, IntPtr.Zero);
-      Runtime.CommonObject.GcProtect(curve, line_curve);
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-68486
+      IntPtr pCurve = curve.ConstPointer();
+      IntPtr pIntersectArray = UnsafeNativeMethods.ON_Intersect_CurveLine(pCurve, line.From, line.To, tolerance, overlapTolerance);
+      Runtime.CommonObject.GcProtect(curve, line);
       return CurveIntersections.Create(pIntersectArray);
     }
 
@@ -990,6 +982,33 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Intersects a plane and a bounding box.
+    /// </summary>
+    /// <param name="plane">The plane.</param>
+    /// <param name="boundingBox">The bounding box.</param>
+    /// <param name="polyline">The output polyline if successful.</param>
+    /// <returns>
+    /// True if successful, false otherwise.
+    /// </returns>
+    /// <remarks>
+    /// Intersects the four bounding box infinite lines in the direction of the max coordinate with the plane.
+    /// Point and single line intersections are ignored.
+    /// </remarks>
+    /// <since>8.0</since>
+    public static bool PlaneBoundingBox(Plane plane, BoundingBox boundingBox, out Polyline polyline)
+    {
+      polyline = null;
+      using (SimpleArrayPoint3d points = new SimpleArrayPoint3d())
+      {
+        IntPtr ptr_points = points.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoIntersectPlaneWithBoundingBox(ref plane, ref boundingBox, ptr_points);
+        if (rc)
+          polyline = Polyline.PolyLineFromNativeArray(points);
+        return rc;
+      }
+    }
+
+    /// <summary>
     /// Intersects two Breps.
     /// </summary>
     /// <param name="brepA">First Brep for intersection.</param>
@@ -1080,7 +1099,7 @@ namespace Rhino.Geometry.Intersect
     [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
-      if (UseNewMeshIntersections)
+      /*if (UseNewMeshIntersections) //temporarily remove new behavior
       {
         const double fixed_tolerance = RhinoMath.SqrtEpsilon * 10;
         var arr = new[] { meshA, meshB };
@@ -1093,7 +1112,7 @@ namespace Rhino.Geometry.Intersect
         if (result == null) return new Line[0];
         return result.SelectMany((pl) => pl.GetSegments()).ToArray();
       }
-      else
+      else*/
       {
         IntPtr ptrA = meshA.ConstPointer();
         IntPtr ptrB = meshB.ConstPointer();
@@ -1113,22 +1132,37 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Instructs Rhino to provide the new mesh-mesh intersector implementation. This affects also MeshSplit and other commands.
+    /// Instructs Rhino to provide the new mesh-mesh intersector implementation. This affects also MeshSplit.
     /// </summary>
     internal static bool UseNewMeshIntersections
     {
       get
       {
-        return UnsafeNativeMethods.RH_MX_UseNew(true, false);
+        return UnsafeNativeMethods.RH_MX_UseNew(false, false);
       }
       set
       {
-        UnsafeNativeMethods.RH_MX_UseNew(false, value);
+        UnsafeNativeMethods.RH_MX_UseNew(true, value);
       }
     }
 
     /// <summary>
-    /// Mofify an internal debug mechanism. Talk to Giulio regarding this.
+    /// Instructs Rhino to provide the new mesh-mesh intersector implementation for MeshBoolean* commands.
+    /// </summary>
+    internal static bool UseNewMeshBooleans
+    {
+      get
+      {
+        return GetSet_MX_DebugOptions(6, true, default);
+      }
+      set
+      {
+        GetSet_MX_DebugOptions(6, false, value);
+      }
+    }
+
+    /// <summary>
+    /// Modify an internal debug mechanism. Talk to Giulio regarding this.
     /// </summary>
     internal static bool GetSet_MX_DebugOptions(int which, bool get, bool new_value)
     {
@@ -1138,9 +1172,19 @@ namespace Rhino.Geometry.Intersect
     /// <summary>
     /// Instructs Rhino to print way way too much information regarding intersections.
     /// </summary>
-    internal static bool PrintMeshIntersectionErrors
+    internal static bool PrintMoreMeshIntersectionInfo
     {
-      get; set;
+      get { return GetSet_MX_DebugOptions(2, true, default); }
+      set { GetSet_MX_DebugOptions(2, false, value); }
+    }
+
+    /// <summary>
+    /// Silence any error, do not print to command line, do not report progress, no cancellation possibility, no command interactions
+    /// </summary>
+    internal static bool MeshIntersectionExecutionSilence
+    {
+      get { return GetSet_MX_DebugOptions(0, true, default); }
+      set { GetSet_MX_DebugOptions(0, false, value); }
     }
 
     private const string DiminishMeshIntersectionsTolerancesRequest_CODE = "MeshIntersections.RequestedDiminishTolerancesCoefficient";
@@ -1178,7 +1222,7 @@ namespace Rhino.Geometry.Intersect
     internal static bool MeshMesh_Helper(IEnumerable<Mesh> meshes, double tolerance,
       bool computeSelfIntersections, bool overlaps_with_intersections, out Polyline[] intersections, 
       bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
-      FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
+      bool meshpairs, out int[] meshpairsResult, FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
     {
       if (meshes == null) throw new ArgumentNullException(nameof(meshes));
       tolerance = Math.Abs(tolerance);
@@ -1186,6 +1230,7 @@ namespace Rhino.Geometry.Intersect
       intersections = null;
       overlapsPolylinesResult = null;
       overlapsMeshResult = null;
+      meshpairsResult = null;
 
       Runtime.Interop.MarshalProgressAndCancelToken(cancel, progress,
         out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
@@ -1200,8 +1245,10 @@ namespace Rhino.Geometry.Intersect
             input.Add(mesh, true);
           }
 
+          using (var pairs = meshpairs ? new SimpleArray2dex() : null)
           using (var intersections_native = new SimpleArrayArrayPoint3d())
-          using (var overlaps_native = ((overlapsPolylines) ? (overlaps_with_intersections ? intersections_native : new SimpleArrayArrayPoint3d()) : null))
+          using (var overlaps_native = (overlapsPolylines ?
+            (overlaps_with_intersections ? intersections_native : new SimpleArrayArrayPoint3d()) : null))
           {
             IntPtr mesh_overlaps_ptr = IntPtr.Zero;
             if (overlapsMesh)
@@ -1214,9 +1261,15 @@ namespace Rhino.Geometry.Intersect
             {
               overlaps_native_ptr = overlaps_native.NonConstPointer();
             }
+            IntPtr pairs_native_ptr = IntPtr.Zero;
+            if (pairs != null)
+            {
+              pairs_native_ptr = pairs.NonConstPointer();
+            }
 
             bool rc = UnsafeNativeMethods.RH_MX_MeshMeshIntersect(computeSelfIntersections,
-              input.ConstPointer(), tolerance, intersections_native.NonConstPointer(), overlaps_native_ptr, mesh_overlaps_ptr,
+              input.ConstPointer(), tolerance, intersections_native.NonConstPointer(), overlaps_native_ptr, 
+              mesh_overlaps_ptr, meshpairs, pairs_native_ptr,
               textLog != null ? textLog.NonConstPointer() : IntPtr.Zero, ptr_terminator, progress_report_serial_number);
 
             GC.KeepAlive(meshes);
@@ -1298,8 +1351,28 @@ namespace Rhino.Geometry.Intersect
     {
       return MeshMesh_Helper(meshes, tolerance, false, false, out intersections,
         overlapsPolylines, out overlapsPolylinesResult,
-        overlapsMesh, out overlapsMeshResult,
+        overlapsMesh, out overlapsMeshResult, false, out _,
         textLog, cancel, progress);
+    }
+
+    /// <summary>
+    /// Determines if meshes intersect or overlap.
+    /// </summary>
+    /// <param name="meshes">The mesh input list. This cannot be null. Null entries are tolerated.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <param name="pairs">An array containing pairs of meshes that intersect.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <returns>True, if meshes intersect or overlap, otherwise false. False is also returned on error, but textLog will start with Error: and contain the error.</returns>
+    /// <since>8.0</since>
+    public static bool MeshMeshPredicate(IEnumerable<Mesh> meshes, double tolerance, out int[] pairs,
+      FileIO.TextLog textLog)
+    {
+      return MeshMesh_Helper(meshes, tolerance, false, false, out _,
+        false, out _,
+        false, out _,
+        true, out pairs,
+        textLog, System.Threading.CancellationToken.None, null);
     }
 
     /// <summary>
@@ -1317,7 +1390,9 @@ namespace Rhino.Geometry.Intersect
       {
         var arr = new[] { meshA, meshB };
         var rc = MeshMesh_Helper(arr, tolerance, false, true,
-          out Polyline[] result, true, out Polyline[] _, false, out Mesh _, null, System.Threading.CancellationToken.None, null);
+          out Polyline[] result, true, out Polyline[] _, false, out Mesh _,
+          false, out int[] _,
+          null, System.Threading.CancellationToken.None, null);
         if (!rc) return null;
         return result;
       }
@@ -1334,16 +1409,16 @@ namespace Rhino.Geometry.Intersect
         Polyline[] rc = new Polyline[polylines_created];
         for (int i = 0; i < polylines_created; i++)
         {
-          int point_count = UnsafeNativeMethods.ON_Intersect_MeshPlanes2(pPolys, i);
+          int point_count = UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_itemI_count(pPolys, i);
           Polyline pl = new Polyline(point_count);
           if (point_count > 0)
           {
             pl.m_size = point_count;
-            UnsafeNativeMethods.ON_Intersect_MeshPlanes3(pPolys, i, point_count, pl.m_items);
+            UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_memcpy_del(pPolys, i, point_count, pl.m_items);
           }
           rc[i] = pl;
         }
-        UnsafeNativeMethods.ON_Intersect_MeshPlanes4(pPolys);
+        UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_delete(pPolys);
 
         Runtime.CommonObject.GcProtect(meshA, meshB);
         return rc;

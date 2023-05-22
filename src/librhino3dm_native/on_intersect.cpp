@@ -144,7 +144,7 @@ RH_C_FUNCTION int ON_Intersect_CircleCircle(const ON_CIRCLE_STRUCT* pCircleA, co
 }
 
 // return number of points in a certain polyline
-RH_C_FUNCTION int ON_Intersect_MeshPlanes2(ON_SimpleArray<ON_Polyline*>* pPolylines, int i)
+RH_C_FUNCTION int ON_SimpleArray_ON_Polyline_itemI_count(ON_SimpleArray<ON_Polyline*>* pPolylines, int i)
 {
   int rc = 0;
   if( pPolylines && i>=0 && i<pPolylines->Count() )
@@ -156,30 +156,24 @@ RH_C_FUNCTION int ON_Intersect_MeshPlanes2(ON_SimpleArray<ON_Polyline*>* pPolyli
   return rc;
 }
 
-RH_C_FUNCTION void ON_Intersect_MeshPlanes3(ON_SimpleArray<ON_Polyline*>* pPolylines, int i, int point_count, /*ARRAY*/ON_3dPoint* points)
+RH_C_FUNCTION void ON_SimpleArray_ON_Polyline_memcpy_del(ON_SimpleArray<ON_Polyline*>* pPolylines, int i, int point_count, /*ARRAY*/ON_3dPoint* points)
 {
   if( nullptr==pPolylines || i<0 || i>=pPolylines->Count() || point_count<0 || nullptr==points )
     return;
-  ON_Polyline* polyline = (*pPolylines)[i];
+  ON_Polyline*& polyline = (*pPolylines)[i];
   if( NULL==polyline || polyline->Count()!=point_count )
     return;
 
   const ON_3dPoint* source = polyline->Array();
   ::memcpy(points, source, sizeof(ON_3dPoint) * point_count);
+
+  delete polyline;
+  (*pPolylines)[i] = nullptr;
 }
 
-RH_C_FUNCTION void ON_Intersect_MeshPlanes4(ON_SimpleArray<ON_Polyline*>* pPolylines)
+RH_C_FUNCTION void ON_SimpleArray_ON_Polyline_delete(ON_SimpleArray<ON_Polyline*>* pPolylines)
 {
-  if( NULL==pPolylines )
-    return;
-  int count = pPolylines->Count();
-  for( int i=0; i<count; i++ )
-  {
-    ON_Polyline* polyline = (*pPolylines)[i];
-    if( polyline )
-      delete polyline;
-  }
-  delete pPolylines;
+  delete pPolylines; //delete nullptr is always OK
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,7 +188,51 @@ RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveSelf(const ON_Curve*
     rc = new ON_SimpleArray<ON_X_EVENT>();
     pCurve->IntersectSelf(*rc, tolerance);
   }
- 
+
+  return rc;
+}
+
+RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveLine(
+  const ON_Curve* pCurve,
+  ON_3DPOINT_STRUCT from,
+  ON_3DPOINT_STRUCT to,
+  double tolerance,
+  double overlap_tolerance
+)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-68486
+  ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
+  if (pCurve)
+  {
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-69329
+    rc = new ON_SimpleArray<ON_X_EVENT>();
+    const ON_3dPoint* _from = (const ON_3dPoint*)&from;
+    const ON_3dPoint* _to = (const ON_3dPoint*)&to;
+    ON_Line line(*_from, *_to);
+    if (line.IsValid())
+    {
+      // Extend line through curve bounding box
+      ON_Line long_line;
+      ON_BoundingBox box = pCurve->BoundingBox();
+      RhinoExtendLineThroughBox(line, box, long_line);
+      // Intersect the two curves
+      ON_LineCurve line_curve(long_line);
+      pCurve->IntersectCurve(&line_curve, *rc, tolerance, overlap_tolerance);
+      if (rc->Count() > 0)
+      {
+        // Convert (line) curve parameter to line parameter
+        double t = ON_UNSET_VALUE;
+        for (int i = 0; i < rc->Count(); i++)
+        {
+          ON_X_EVENT& ccx = (*rc)[i];
+          if (line.ClosestPointTo(ccx.m_B[0], &t))
+            ccx.m_b[0] = t;
+          if (line.ClosestPointTo(ccx.m_B[1], &t))
+            ccx.m_b[1] = t;
+        }
+      }
+    }
+  }
   return rc;
 }
 
@@ -435,12 +473,12 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
   if (0 == stree_list.Count())
     return rc;
 
-  ON_RayShooter ray;
+  ON_RayShooter shooter;
   ON_X_EVENT hit;
   ON_3dPoint Q = P;
   ON_3dVector R = D;
 
-  for (int i = 0; i <= max_reflections; i++)
+  for (int i = 0; i < max_reflections; i++)
   {
     ON_3dVector T = R;
     if (!T.Unitize())
@@ -448,7 +486,7 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
 
     // Shoot the ray
     memset(&hit, 0, sizeof(hit));
-    if (!ray.Shoot(Q, T, stree_list.Count(), stree_list.Array(), hit))
+    if (!shooter.Shoot(Q, T, stree_list.Count(), stree_list.Array(), hit))
       break;
 
     // Get the "hit" surface tree node
@@ -483,9 +521,10 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
 
     // Part of the fix for RR 22717.  See opennurbs_plus_xray.cpp
     // for the rest of the fix.
-    ray.m_min_travel_distance = hit.m_A[0].DistanceTo(hit.m_B[0]);
-    if (ray.m_min_travel_distance < 1.0e-8)
-      ray.m_min_travel_distance = 1.0e-8;
+    d = hit.m_A[0].DistanceTo(hit.m_B[0]);
+    shooter.m_min_travel_distance = d;
+    if (shooter.m_min_travel_distance < 1.0e-8)
+      shooter.m_min_travel_distance = 1.0e-8;
   }
 
   int point_count = pPoints->Count();
@@ -830,6 +869,20 @@ RH_C_FUNCTION bool RHC_Polyline_RemoveNearlyEqualSubsequentPoints(/*ARRAY*/ON_3d
   pl.KeepArray();
 
   return rc;
+}
+
+RH_C_FUNCTION void* RHC_Polyline_CreateByJoiningLines(/*ARRAY*/ON_Line* const_lines_ptr, int count, double tolerance, bool splitAtIntersections, int* out_created_count)
+{
+  ON_SimpleArray<const ON_Line*> lines(count);
+  for (int i = 0; i < count; i++) { lines.Append(const_lines_ptr++); }
+  ON_SimpleArray<ON_Polyline*>* polylines = new ON_SimpleArray<ON_Polyline*>();
+
+  bool rc = MX::PublicIntersectionOps::JoinLines(lines, tolerance, splitAtIntersections, polylines);
+  *out_created_count = polylines->Count();
+
+  if (!rc) ON_ERROR("JoinLines returned false.");
+
+  return polylines;
 }
 
 #endif

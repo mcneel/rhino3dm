@@ -16,7 +16,7 @@ namespace Rhino.Geometry
     IntPtr m_ptr; // This class is never const
     internal IntPtr ConstPointer() { return m_ptr; }
     internal IntPtr NonConstPointer() { return m_ptr; }
-    private BezierCurve(IntPtr ptr)
+    internal BezierCurve(IntPtr ptr)
     {
       m_ptr = ptr;
     }

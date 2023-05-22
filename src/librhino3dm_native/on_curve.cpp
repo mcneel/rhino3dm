@@ -1,13 +1,33 @@
 #include "stdafx.h"
 
-RH_C_FUNCTION bool ON_Curve_Domain( ON_Curve* pCurve, bool set, ON_Interval* ival )
+RH_C_FUNCTION bool ON_Curve_Domain(ON_Curve* pCurve, bool set, ON_Interval* ival)
 {
   bool rc = false;
-  if( pCurve && ival )
+  if (pCurve && ival)
   {
-    if( set )
+    if (set)
     {
-      rc = pCurve->SetDomain(*ival);
+#if !defined(RHINO3DM_BUILD)
+      // 6-Jun-2022 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-68909
+      ON_PolyCurve* pPolyCurve = ON_PolyCurve::Cast(pCurve);
+      if (pPolyCurve)
+      {
+        ON_Curve* pTmp = RhReparameterizeCurve(pPolyCurve, *ival, false);
+        if (pTmp)
+        {
+          ON_PolyCurve* pPolyTmp = ON_PolyCurve::Cast(pTmp);
+          if (pPolyTmp)
+          {
+            // use ON_PolyCurve::operator=
+            *pPolyCurve = *pPolyTmp;
+            rc = true;
+          }
+          delete pTmp; // don't leak
+        }
+      }
+#endif
+      if (!rc)
+        rc = pCurve->SetDomain(*ival);
     }
     else
     {

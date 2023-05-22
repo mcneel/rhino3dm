@@ -568,7 +568,7 @@ namespace Rhino.Geometry
     /// If the quaternion is not unitized, the rotation of its unitized form is returned.
     /// </summary>
     /// <param name="xform"></param>
-    /// <returns>true if successful, false otherise.</returns>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <remarks>
     /// Do not confuse the result of this method the transformation matrix returned by <see cref="MatrixForm"/>.
     /// </remarks>
@@ -701,6 +701,133 @@ namespace Rhino.Geometry
     public static Quaternion CrossProduct(Quaternion p, Quaternion q)
     {
       return new Quaternion(0.0, p.m_c * q.m_d - p.m_d * q.m_c, p.m_d * q.m_b - p.m_b * q.m_d, p.m_b * q.m_c - p.m_c * q.m_d);
+    }
+
+    /// <summary>
+    /// Interpolates between two quaternions, using spherical linear interpolation.
+    /// </summary>
+    /// <param name="a">The first quaternion.</param>
+    /// <param name="b">The second quaternion.</param>
+    /// <param name="t">The parameter in the range [0, 1].</param>
+    /// <returns>The interpolated quaternion.</returns>
+    /// <since>8.0</since>
+    public static Quaternion Slerp(Quaternion a, Quaternion b, double t)
+    {
+      Quaternion rc = new Quaternion();
+      UnsafeNativeMethods.ON_Quaternion_Slerp(ref a, ref b, t, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Interpolates between two quaternions, using linear interpolation.
+    /// </summary>
+    /// <param name="a">The first quaternion.</param>
+    /// <param name="b">The second quaternion.</param>
+    /// <param name="t">The parameter in the range [0, 1].</param>
+    /// <returns>The interpolated quaternion.</returns>
+    /// <since>8.0</since>
+    public static Quaternion Lerp(Quaternion a, Quaternion b, double t)
+    {
+      Quaternion rc = new Quaternion();
+      UnsafeNativeMethods.ON_Quaternion_Lerp(ref a, ref b, t, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns the quaternion obtained by rotating a towards b, limiting the rotation by MaxRadians.
+    /// </summary>
+    /// <param name="a">The first quaternion.</param>
+    /// <param name="b">The second quaternion.</param>
+    /// <param name="maxRadians">The maximum rotation in radians.</param>
+    /// <returns>The rotated quaternion.</returns>
+    /// <since>8.0</since>
+    public static Quaternion RotateTowards(Quaternion a, Quaternion b, double maxRadians)
+    {
+      Quaternion rc = new Quaternion();
+      UnsafeNativeMethods.ON_Quaternion_RotateTowards(ref a, ref b, maxRadians, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Constructs a quaternion defined by Tait-Byran angles, also loosely known as Euler angles.
+    /// </summary>
+    /// <param name="yaw">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <param name="pitch">Angle, in radians, to rotate about the YAxis.</param>
+    /// <param name="roll">Angle, in radians, to rotate about the XAxis.</param>
+    /// <returns>The quaternion.</returns>
+    /// <remarks>
+    /// CreateFromRotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll),
+    /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
+    /// </remarks>
+    /// <since>8.0</since>
+    public static Quaternion CreateFromRotationZYX(double yaw, double pitch, double roll)
+    {
+      Quaternion rc = new Quaternion();
+      UnsafeNativeMethods.ON_Quaternion_RotationZYX(yaw, pitch, roll, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Constructs a quaternion defined by Euler angles.
+    /// </summary>
+    /// <param name="alpha">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <param name="beta">Angle, in radians, to rotate about the YAxis.</param>
+    /// <param name="gamma">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <returns>The quaternion.</returns>
+    /// <remarks>
+    /// CreateFromRotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma),
+    /// where R_*(angle) is rotation of angle radians about the corresponding *-world coordinate axis.
+    /// </remarks>
+    /// <since>8.0</since>
+    public static Quaternion CreateFromRotationZYZ(double alpha, double beta, double gamma)
+    {
+      Quaternion rc = new Quaternion();
+      UnsafeNativeMethods.ON_Quaternion_RotationZYZ(alpha, beta, gamma, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Find sthe Tait-Byran angles, also loosely called Euler angles, for this quaternion.
+    /// </summary>
+    /// <param name="yaw">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <param name="pitch">Angle, in radians, to rotate about the YAxis.</param>
+    /// <param name="roll">Angle, in radians, to rotate about the XAxis.</param>
+    /// <returns>true if successful, or false if this is not a rotation.</returns>
+    /// <remarks>
+    /// When true, this = RotationZYX(yaw, pitch, roll) = R_z(yaw) * R_y(pitch) * R_x(roll),
+    /// where R_*(angle) is rotation of angle radians about the corresponding world coordinate axis.
+    /// roll and yaw are in the range (-pi, pi], and pitch is in [-pi/2, pi/2].
+    /// </remarks>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public bool GetYawPitchRoll(out double yaw, out double pitch, out double roll)
+    {
+      yaw = RhinoMath.UnsetValue;
+      pitch = RhinoMath.UnsetValue;
+      roll = RhinoMath.UnsetValue;
+      return UnsafeNativeMethods.ON_Quaternion_GetYawPitchRoll(ref this, ref yaw, ref pitch, ref roll);
+    }
+
+    /// <summary>
+    /// Find the Euler angles for a rotation transformation.
+    /// </summary>
+    /// <param name="alpha">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <param name="beta">Angle, in radians, to rotate about the YAxis.</param>
+    /// <param name="gamma">Angle, in radians, to rotate about the ZAxis.</param>
+    /// <returns>true if successful, or false if this is not a rotation.</returns>
+    /// <remarks>
+    /// When true, this = RotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma),
+    /// where R_*(angle) is rotation of angle radians about the corresponding *-world coordinate axis.
+    /// alpha and gamma are in the range (-pi, pi], while beta in in the range [0, pi].
+    /// </remarks>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public bool GetEulerZYZ(out double alpha, out double beta, out double gamma)
+    {
+      alpha = RhinoMath.UnsetValue;
+      beta = RhinoMath.UnsetValue;
+      gamma = RhinoMath.UnsetValue;
+      return UnsafeNativeMethods.ON_Quaternion_GetEulerZYZ(ref this, ref alpha, ref beta, ref gamma);
     }
   }
 }

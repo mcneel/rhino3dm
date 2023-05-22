@@ -42,6 +42,7 @@ add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
 add_definitions(-DRHINO3DM_BUILD)
 add_definitions(-DCMAKE_BUILD)
+add_definitions(-DON_CMAKE_BUILD)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set (CMAKE_CXX_STANDARD 17)
@@ -55,6 +56,7 @@ if(MACOS_BUILD)
   # [dan@mcneel.com]: For now, we're dumping all this into the same target.  Once we get 
   # a good handle on CMake, these should be compiled as separate CMake targets and linked accordingly.
   add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+  set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 endif()
 
 if(IOS)

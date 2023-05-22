@@ -15,16 +15,11 @@ class Import
     public const string librdk = "librhino3dm_native";
   #endif
 #else // RhinoCommon build...
-  #if MONO_BUILD // RhinoCommon build for macOS
-    public const string lib = "__Internal";
-    public const string librdk = "__Internal";
-  #else // RhinoCommon build for Windows
     // DO NOT add the ".dll, .dynlib, .so, ..." extension.
     // Each platform should be smart enough to figure out how
     // to append an extension to find the dynamic library
     public const string lib = "rhcommon_c";
     public const string librdk = "rhcommonrdk_c";
-  #endif
 #endif
   private Import() { }
 }

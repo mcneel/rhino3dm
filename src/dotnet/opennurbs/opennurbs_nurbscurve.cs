@@ -96,6 +96,35 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Constructs a NURBS curve with the start and end matching the start and end of targetCurve, and Greville points on targetCurve.
+    /// </summary>
+    /// <param name="targetCurve">The target curve.</param>
+    /// <param name="maxEndDistance">
+    /// If maxEndDistance dist &gt; 0, the curve's start must be within maxEndDistance of targetCurve start.
+    /// If maxEndDistance dist &gt; 0, the curve's end must be within maxEndDistance of targetCurve end.
+    ///</param>
+    /// <param name="maxInteriorDistance">
+    /// If maxInteriorDistance &gt; 0, all interior Greville points of the curve must be within maxInteriorDistance of targetCurve.
+    /// </param>
+    /// <param name="matchTolerance">The matching tolerance.</param>
+    /// <param name="maxLevel">
+    /// If maxLevel &gt; 0, the result will be refined up to that many times, attempting to get the result within matchTolerance.  
+    /// If matchTolerance &lt;= 0, no refinement will be done. 
+    /// In any case, the parameters closest points on targetCurve of the Greville points of the curve must be monotonic increasing.
+    /// </param>
+    /// <returns>Curve on success, null on failure.</returns>
+    /// <since>8.0</since>
+    public NurbsCurve MatchToCurve(Curve targetCurve, double maxEndDistance, double maxInteriorDistance, double matchTolerance, int maxLevel)
+    {
+      if (null == targetCurve)
+        throw new NullReferenceException(nameof(targetCurve));
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_target = targetCurve.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoMatchNURBSToCurve(ptr_const_this, ptr_const_target, maxEndDistance, maxInteriorDistance, matchTolerance, maxLevel);
+      return (ptr == IntPtr.Zero) ? null : CreateGeometryHelper(ptr, null) as NurbsCurve;
+    }
+
+    /// <summary>
     /// Calculates the u, V, and N directions of a NURBS curve at a parameter similar to the method used by Rhino's MoveUVN command.
     /// </summary>
     /// <param name="t">The evaluation parameter.</param>
@@ -152,6 +181,40 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Fits a NURBS curve to a dense, ordered set of points.
+    /// </summary>
+    /// <param name="points">An enumeration of 3D points.</param>
+    /// <param name="tolerance">The fitting tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <param name="periodic">Set true to create a periodic curve.</param>
+    /// <returns>A NURBS curve if successful, or null on failure.</returns>
+    /// <since>8.0</since>
+    public static NurbsCurve CreateFromFitPoints(IEnumerable<Point3d> points, double tolerance, bool periodic)
+    {
+      return CreateFromFitPoints(points, tolerance, 3, periodic, Vector3d.Unset, Vector3d.Unset);
+    }
+
+    /// <summary>
+    /// Fits a NURBS curve to a dense, ordered set of points.
+    /// </summary>
+    /// <param name="points">An enumeration of 3D points.</param>
+    /// <param name="tolerance">The fitting tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <param name="degree">The desired degree of the output curve.</param>
+    /// <param name="periodic">Set true to create a periodic curve.</param>
+    /// <param name="startTangent">The tangent direction at the start of the curve. If unknown, set to <see cref="Vector3d.Unset"/>.</param>
+    /// <param name="endTangent">The tangent direction at the end of the curve. If unknown, set to <see cref="Vector3d.Unset"/>.</param>
+    /// <returns>A NURBS curve if successful, or null on failure.</returns>
+    /// <since>8.0</since>
+    public static NurbsCurve CreateFromFitPoints(IEnumerable<Point3d> points, double tolerance, int degree, bool periodic, Vector3d startTangent, Vector3d endTangent)
+    {
+      if (null == points)
+        throw new ArgumentNullException("points");
+      int point_count = 0;
+      Point3d[] point_array = RhinoListHelpers.GetConstArray(points, out point_count);
+      var ptr = UnsafeNativeMethods.RHC_RhinoFitNurbsCurveToPoints(point_count, point_array, startTangent, endTangent, degree, periodic, tolerance);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as NurbsCurve;
+    }
+
+    /// <summary>
     /// Creates a parabola from vertex and end points.
     /// </summary>
     /// <param name="vertex">The vertex point.</param>
@@ -184,6 +247,22 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Creates a parabola from three points.
+    /// </summary>
+    /// <param name="startPoint">The start point.</param>
+    /// <param name="innerPoint">A point on the curve.</param>
+    /// <param name="endPoint">The end point</param>
+    /// <returns>A 2 degree NURBS curve if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public static NurbsCurve CreateParabolaFromPoints(Point3d startPoint, Point3d innerPoint, Point3d endPoint)
+    {
+      IntPtr ptr_nurbs_curve = UnsafeNativeMethods.RHC_RhinoCreateParabolaFromPoints(startPoint, innerPoint, endPoint);
+      if (ptr_nurbs_curve == IntPtr.Zero)
+        return null;
+      return CreateGeometryHelper(ptr_nurbs_curve, null) as NurbsCurve;
+    }
+
+    /// <summary>
     /// Create a uniform non-rational cubic NURBS approximation of an arc.
     /// </summary>
     /// <param name="arc"></param>
@@ -195,6 +274,25 @@ namespace Rhino.Geometry
     {
       var ptr_nurbs_curve = UnsafeNativeMethods.TLC_DeformableArc(ref arc, degree, cvCount);
       return CreateGeometryHelper(ptr_nurbs_curve, null) as NurbsCurve;
+    }
+
+    /// <summary>
+    /// Creates a non-rational approximation of a rational arc as a single bezier segment
+    /// </summary>
+    /// <param name="degree">The degree of the non-rational approximation, can be either 3, 4, or 5</param>
+    /// <param name="center">The arc center</param>
+    /// <param name="start">A point in the direction of the start point of the arc</param>
+    /// <param name="end">A point in the direction of the end point of the arc</param>
+    /// <param name="radius">The radius of the arc</param>
+    /// <param name="tanSlider">a number between zero and one which moves the tangent control point toward the mid control point of an equivalent quadratic rational arc</param>
+    /// <param name="midSlider">a number between zero and one which moves the mid control points toward the mid control point of an equivalent quadratic rational arc</param>
+    /// <returns>The approximated arc.</returns>
+    /// <since>8.0</since>
+    public static NurbsCurve CreateNonRationalArcBezier(int degree, Point3d center, Point3d start, Point3d end, double radius,
+      double tanSlider, double midSlider)
+    {
+      IntPtr ptrCrv = UnsafeNativeMethods.RHC_RhinoNonRationalArcBezier(degree, center, start, end, radius, tanSlider, midSlider);
+      return GeometryBase.CreateGeometryHelper(ptrCrv, null) as NurbsCurve;
     }
 
     /// <summary>
@@ -959,9 +1057,21 @@ namespace Rhino.Geometry
     //  bool ReserveCVCapacity(
     //  bool ReserveKnotCapacity(
 
-    //[skipping]
-    //  bool ConvertSpanToBezier(
-
+    /// <summary>
+    /// Converts a span of the NURBS curve into a Bezier. 
+    /// </summary>
+    /// <param name="spanIndex">The span index, where (0 &lt;= spanIndex &lt;= Points.Count - Order).</param>
+    /// <returns>Bezier curve if successful, null otherwise.</returns>
+    /// <since>7.25</since>
+    [ConstOperation]
+    public BezierCurve ConvertSpanToBezier(int spanIndex)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_bezier_cure = UnsafeNativeMethods.ON_NurbsCurve_ConvertSpanToBezier(ptr_const_this, spanIndex);
+      if (ptr_bezier_cure == IntPtr.Zero)
+        return null;
+      return new BezierCurve(ptr_bezier_cure);
+    }
 
 #if RHINO_SDK
     /// <summary>
@@ -1062,8 +1172,13 @@ namespace Rhino.Geometry
       return m_pCurveDisplay;
     }
 
-    internal override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness)
+    internal override void Draw(DisplayPipeline pipeline, System.Drawing.Color color, int thickness, DisplayPen pen)
     {
+      if (pen != null)
+      {
+        base.Draw(pipeline, color, thickness, pen);
+        return;
+      }
       IntPtr ptr_display_pipeline = pipeline.NonConstPointer();
       int argb = color.ToArgb();
       IntPtr ptr_curve_display = CurveDisplay();
@@ -1183,7 +1298,7 @@ namespace Rhino.Geometry
       get
       {
         // Note, the constructor for Point3d will properly convert a
-        // homogenous 4-D point to a Euclidean 3-D point.
+        // homogeneous 4-D point to a Euclidean 3-D point.
         return new Point3d(m_vertex);
       }
       set

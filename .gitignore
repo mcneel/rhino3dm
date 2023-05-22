@@ -94,3 +94,7 @@ src/dotnet/Resources/Resource.designer.cs
 script/bootstrap.pyc
 
 node_modules/
+tests/DotNetTester/.vs/
+tests/DotNetTester/bin/
+tests/DotNetTester/obj/
+tests/DotNetTester/x64/

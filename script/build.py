@@ -283,7 +283,7 @@ def build_macos():
         return False
 
     command = 'xcodebuild -UseModernBuildSystem=NO -project ' + xcodeproj_path + ' -target ' + native_lib_name + \
-              ' -arch x86_64 -configuration Release clean build'
+              ' -arch arm64 -arch x86_64 -configuration Release clean build'
     run_command(command)
 
     if not build_did_succeed(item_to_check):                
@@ -435,6 +435,11 @@ def build_js():
     item_to_check = os.path.abspath(os.path.join(target_path, "artifacts_js"))
     if not overwrite_check(item_to_check):
         return False
+
+    # build draco_wasm static lib
+    draco_path = os.path.join(target_path, "draco_wasm")
+    os.chdir(draco_path)
+    run_command("emmake make", True)
 
     os.chdir(target_path)
 

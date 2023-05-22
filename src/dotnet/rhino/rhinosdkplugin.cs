@@ -15,6 +15,9 @@ using Rhino.UI.Controls;
 using Rhino.Render;
 using System.Reflection;
 using Rhino.Render.PostEffects;
+using Rhino.Render.CustomRenderMeshes;
+using System.Linq;
+using System.Text;
 
 namespace Rhino.PlugIns
 {
@@ -321,7 +324,7 @@ namespace Rhino.PlugIns
       Assembly assembly;
       try
       {
-        assembly = Assembly.LoadFrom(path);
+        assembly = HostUtils.LoadAssemblyFrom(path);
       }
       catch
       {
@@ -458,12 +461,14 @@ namespace Rhino.PlugIns
 
 
     /// <since>6.0</since>
-    public static PersistentSettings GetPluginSettings(Guid plugInId, bool load)
+    public static PersistentSettings GetPluginSettings(Guid plugInId, bool load) => GetPluginSettings(plugInId, true, load);
+
+    internal static PersistentSettings GetPluginSettings(Guid plugInId, bool plugInSettings, bool load)
     {
       if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) > 0)
       {
         var plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(RhinoApp.CurrentRhinoId);
-        return (plug_in_settings == null ? null : plug_in_settings.PluginSettings);
+        return plugInSettings ? plug_in_settings?.PluginSettings : plug_in_settings?.WindowPositionSettings;
       }
       if (!load && !UnsafeNativeMethods.CRhinoPlugInManager_IsLoaded(plugInId))
         return null;
@@ -474,7 +479,7 @@ namespace Rhino.PlugIns
       {
         // Managed plug-in
         var plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
-        return (plug_in_settings == null ? null : plug_in_settings.PluginSettings);
+        return plugInSettings ? plug_in_settings?.PluginSettings : plug_in_settings?.WindowPositionSettings;
       }
       else
       {
@@ -489,14 +494,14 @@ namespace Rhino.PlugIns
           // Unmanaged plug-in
           var unmanaged_plug_in_settings = PersistentSettingsHooks.GetPlugInSettings(plugInId);
           if (unmanaged_plug_in_settings != null)
-            return unmanaged_plug_in_settings.PluginSettings;
+            return plugInSettings ? unmanaged_plug_in_settings.PluginSettings : unmanaged_plug_in_settings.WindowPositionSettings;
         }
       }
 
 
       if (!load)
         return null;
-      return (LoadPlugIn(plugInId) ? GetPluginSettings(plugInId, false) : null);
+      return (LoadPlugIn(plugInId) ? GetPluginSettings(plugInId, plugInSettings, false) : null);
     }
 
     /// <since>6.0</since>
@@ -636,6 +641,27 @@ namespace Rhino.PlugIns
       get { return PlugInLoadTime.WhenNeeded; }
     }
 
+    internal delegate bool UnknownUserDataCallback(uint doc_serial, Guid plugin_id);
+    private static readonly UnknownUserDataCallback g_unknown_userdata_callback = OnUnknownUserData;
+    private static bool OnUnknownUserData(uint doc_serial, Guid plugin_id)
+    {
+      var doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
+
+      try
+      {
+        var args = new UnknownUserDataEventArgs(doc, plugin_id);
+
+        UnknownUserData?.Invoke(null, args);
+      }
+
+      catch (Exception exception)
+      {
+        Runtime.HostUtils.ExceptionReport(exception);
+      }
+
+      return true;
+    }
+
     protected PlugIn()
     {
       if (!m_bOkToConstruct)
@@ -677,8 +703,40 @@ namespace Rhino.PlugIns
           );
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks3(m_OnAddPagesToOptions, m_OnAddPagesToObjectProperties, g_plug_in_proc);
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks4(m_ResetMessageBoxes);
+
+        UnsafeNativeMethods.CRhinoPlugIn_SetUnknownUserDataCallback(g_unknown_userdata_callback);
       }
     }
+
+    /// <summary>
+    /// Event argument passed to the <see cref="Rhino.PlugIns.PlugIn.UnknownUserData"/> event.
+    /// </summary>
+    public class UnknownUserDataEventArgs : EventArgs
+    {
+      internal UnknownUserDataEventArgs(RhinoDoc doc, Guid pluginId)
+      {
+        Document = doc;
+        PlugInId = pluginId;
+      }
+
+      /// <since>7.17</since>
+      public RhinoDoc Document
+      {
+        get;
+      }
+
+      /// <since>7.17</since>
+      public Guid PlugInId
+      {
+        get;
+      }
+    }
+
+    /// <summary>
+    /// This event is raised when a 3dm file is loaded with unknown user data, and the plug-in to handle it could not be loaded.
+    /// </summary>
+    /// <since>7.17</since>
+    public static event EventHandler<UnknownUserDataEventArgs> UnknownUserData;
 
     #region virtual function callbacks
     internal delegate int OnLoadDelegate(int pluginSerialNumber);
@@ -760,10 +818,12 @@ namespace Rhino.PlugIns
           // their probably protected code.
           RenderContent.RegisterContent(p);
           PostEffect.RegisterPostEffect(p);
+          //CustomRenderMeshProvider.RegisterProviders(p);
+          Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RegisterProviders(p);
           Rhino.Render.UICommands.UICommand.RegisterUICommand(p);
           RealtimeDisplayMode.RegisterDisplayModes(p);
           LightManagerSupport.RegisterLightManager(p);
-
+          ObjectManager.ObjectManager.RegisterExtensions(p);
 
           // after calling the OnLoad function, check to see if we should be creating
           // an RDK plug-in. This is the typical spot where C++ plug-ins perform their
@@ -2111,21 +2171,31 @@ namespace Rhino.PlugIns
           }
         }
 
+        // On windows we check this in native code, so only check here on mac for now.
+        if (!HostUtils.IsManagedDll(path))
+          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
       }
 
-    // attempt to load the assembly
-    // This plugin may be a standard C++ plug-in that uses .NET.
-    // If the plug-in does not reference this RhinoCommon, assume it is not plugin
+      // attempt to load the assembly
+      // This plugin may be a standard C++ plug-in that uses .NET.
+      // If the plug-in does not reference this RhinoCommon, assume it is not plugin
 
-    // 07 Dec. 2007 S. Baer
-    // Loading a plug-in a second time will throw an exception in ReflectionOnlyLoadFrom
-    // We used to just return plugin_not_dotnet when this exception was thrown. This caused
-    // the standard plug-in manager code to attempt to read the plug-in, and get completely
-    // messed up (usually by displaying a "Rhino Version not Specified message"
-    System.Reflection.Assembly reflect_assembly;
+      // 07 Dec. 2007 S. Baer
+      // Loading a plug-in a second time will throw an exception in ReflectionOnlyLoadFrom
+      // We used to just return plugin_not_dotnet when this exception was thrown. This caused
+      // the standard plug-in manager code to attempt to read the plug-in, and get completely
+      // messed up (usually by displaying a "Rhino Version not Specified message"
+      System.Reflection.Assembly reflect_assembly;
       try
       {
-        reflect_assembly = System.Reflection.Assembly.ReflectionOnlyLoadFrom( path );
+#if NETFRAMEWORK
+          reflect_assembly = Assembly.ReflectionOnlyLoadFrom(path);
+#else
+          // ensure it's actually a .NET assembly before trying to load it
+          AssemblyName.GetAssemblyName(path);
+          // .NET Core runtime does not support reflection only loading of assemblies
+          reflect_assembly = HostUtils.LoadAssemblyFrom(path);
+#endif
       }
       catch(FileLoadException e)
       {
@@ -2261,21 +2331,20 @@ namespace Rhino.PlugIns
         if(ironpython_referenced)
         {
           // force load the IronPython that ships with Rhino so we don't accidentally get one from the GAC
-          string ipy_dir = Path.GetDirectoryName(typeof(PlugIn).Assembly.Location);
-          ipy_dir = Path.Combine(ipy_dir, "Plug-ins", "IronPython");
+          var ipy_dir = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Plug-ins", "IronPython");
           try
           {
             string forceload_path = Path.Combine(ipy_dir, "IronPython.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
             forceload_path = Path.Combine(ipy_dir, "Microsoft.Dynamic.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
             forceload_path = Path.Combine(ipy_dir, "Microsoft.Scripting.dll");
-            Assembly.LoadFrom(forceload_path);
+            HostUtils.LoadAssemblyFrom(forceload_path);
           }
           catch (Exception) { } // this shouldn't happen, but is probably acceptable
         }
 
-        var plugin_assembly = System.Reflection.Assembly.LoadFrom(path);
+        var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
         
         if(displayDebugInfo)
           RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
@@ -2373,8 +2442,16 @@ namespace Rhino.PlugIns
       // I just want to make sure that a single Directory.Delete call can
       // eliminate our current caching scheme so we can start over in the future.
 
-      string cache_directory = Path.Combine(Rhino.ApplicationSettings.FileSettings.GetDataFolder(true), "compat_cache");
-      if( !g_rhcommon_hash_checked )
+      string cache_directory = Rhino.ApplicationSettings.FileSettings.GetDataFolder(true);
+
+      // store different cache results for each runtime
+      // this prevents Rhino from re-checking when switching between runtimes.
+      if (HostUtils.RunningInNetCore)
+        cache_directory = Path.Combine(cache_directory, "compat_cache_netcore");
+      else
+        cache_directory = Path.Combine(cache_directory, "compat_cache");
+
+      if ( !g_rhcommon_hash_checked )
       {
         // rebuild this directory if it has been constructed for a different
         // version of RhinoCommon
@@ -2392,7 +2469,7 @@ namespace Rhino.PlugIns
       }
 
       // get md5
-      // I consider an md5 hash to give a "good enough" 1-to-1 indentifier for
+      // I consider an md5 hash to give a "good enough" 1-to-1 identifier for
       // a given file. This way I'm not worrying about plug-in names or
       // versions which is in the spirit of using Compat in the first place!
       string hash = ComputeMd5Hash(path);
@@ -2426,13 +2503,13 @@ namespace Rhino.PlugIns
       var start = DateTime.Now;
 
       // run compat on rhp and all dlls in same dir (in parallel)
-      var task = System.Threading.Tasks.Task.Run<bool>(() => RunCompat(path));
-      var tasks = new System.Threading.Tasks.Task<bool>[dlls.Length + 1];
+      var task = System.Threading.Tasks.Task.Run(() => RunCompat(path));
+      var tasks = new System.Threading.Tasks.Task<CompatResult>[dlls.Length + 1];
       tasks[0] = task;
       for (int i = 0; i < dlls.Length; i++)
       {
         var dll_path = dlls[i];
-        tasks[i + 1] = System.Threading.Tasks.Task.Run<bool>(() => RunCompat(dll_path));
+        tasks[i + 1] = System.Threading.Tasks.Task.Run(() => RunCompat(dll_path));
       }
 
       var incomplete_tasks = new List<System.Threading.Tasks.Task>(tasks);
@@ -2461,16 +2538,31 @@ namespace Rhino.PlugIns
 
       // fail if one or more of the dlls failed
       bool result = true;
+      var output = new StringBuilder();
       foreach (var t in tasks)
       {
-        if (!t.Result)
+        if (!t.Result.Success)
         {
           result = false;
+          output.AppendLine(t.Result.Output);
+          output.AppendLine();
           break;
         }
       }
 
-      RhinoApp.WriteLine("Compatibility test {0} in {1:0.00}s", result ? "succeeded" : "failed", time.TotalSeconds);
+      RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} {(result ? "succeeded" : "failed")} in {time.TotalSeconds:0.00}s");
+
+      if (!result)
+      {
+        var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
+        if (!Directory.Exists(outputDir))
+          Directory.CreateDirectory(outputDir);
+
+        var outputFile = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path) + ".txt");
+
+        File.WriteAllText(outputFile, output.ToString());
+        RhinoApp.WriteLine($"  Details written to {outputFile}");
+      }
 
       // cache result
       try
@@ -2482,33 +2574,56 @@ namespace Rhino.PlugIns
       return result;
     }
 
-    private static bool RunCompat(string path)
+    struct CompatResult
     {
-      // get path to rhinocommon
+      public bool Success;
+      public string Output;
+    }
+
+    private static CompatResult RunCompat(string path)
+    {
+      // get path to rhinocommon.  This may be under netcore\ when running in .NET 7.
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
       if (!File.Exists (rhino_common_path)) {
         HostUtils.DebugString ($"RhinoCommon.dll not found: {rhino_common_path}");
         throw new FileNotFoundException ("RhinoCommon.dll not found");
       }
+      
+      string compat_exe = Runtime.HostUtils.RunningOnOSX ? "Compat.dll" : "Compat.exe";
 
-      // get path to compat (should be next to RhinoCommon.dll)
-      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Compat.exe");
+      // get path to compat that's next to the RhinoCommon we're using
+      string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), compat_exe);
       if (!File.Exists (compat_path)) {
-        HostUtils.DebugString ($"Compat.exe not found: {compat_path}");
-        throw new FileNotFoundException ("Compat.exe not found");
+        HostUtils.DebugString ($"{compat_exe} not found: {compat_path}");
+        throw new FileNotFoundException ($"{compat_exe} not found");
       }
 
       HostUtils.DebugString(path);
 
-      string rhino_dotnet_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), "Rhino_DotNet.dll");
+      string rhino_dotnet_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
       if (!File.Exists(rhino_dotnet_path)) rhino_dotnet_path = null;
+
+      var arguments = new List<string>();
+
+      // Curtis: Use quiet mode as the output of this needs to be human readable
+      arguments.Add("-q");
+
+      if (HostUtils.RunningInNetCore)
+        arguments.Add("--check-system-assemblies");
+
+      arguments.Add($"\"{path}\"");
+      arguments.Add($"\"{rhino_common_path}\"");
+
+      if (!string.IsNullOrEmpty(rhino_dotnet_path))
+        arguments.Add($"\"{rhino_dotnet_path}\"");
+
       // shell execute compat
       Process proc = new Process
       {
         StartInfo = new ProcessStartInfo
         {
           FileName = compat_path,
-          Arguments = $"\"{path}\" \"{rhino_common_path}\"",
+          Arguments = string.Join(" ", arguments),
           UseShellExecute = false,
           RedirectStandardOutput = true, // required for parsing output
           CreateNoWindow = true,
@@ -2523,86 +2638,44 @@ namespace Rhino.PlugIns
         // on Mac
         DirectoryInfo di = new DirectoryInfo(compat_path);
         di = di.Parent;
-        string mono_path = Path.Combine(di.FullName, "Frameworks/Mono64Rhino.framework/Versions/Current/Resources/bin/mono");
-        if( !File.Exists(mono_path))
-        {
-          di = di.Parent;
-          mono_path = Path.Combine(di.FullName, "Frameworks/Mono64Rhino.framework/Versions/Current/Resources/bin/mono");
-        }
-        proc.StartInfo.FileName = mono_path;
+        var arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86_64";
+        string dotnet_path = Path.Combine(di.FullName, "dotnet", arch, "dotnet");
+        proc.StartInfo.FileName = dotnet_path;
         proc.StartInfo.Arguments = $"\"{compat_path}\" " + proc.StartInfo.Arguments;
       }
 
-      if (!string.IsNullOrEmpty(rhino_dotnet_path))
-        proc.StartInfo.Arguments = $"--debug \"{path}\" \"{rhino_common_path}\" \"{rhino_dotnet_path}\"";
+      // read error stream asynchronously
+      var sbError = new StringBuilder();
+      proc.ErrorDataReceived += (sender, e) => sbError.Append(e.Data);
 
       proc.Start();
 
+      // reading only one stream synchronously to avoid deadlocks
+      // See https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?redirectedfrom=MSDN&view=net-7.0#remarks
+      proc.BeginErrorReadLine();
       string output = proc.StandardOutput.ReadToEnd();
-      string errout = proc.StandardError.ReadToEnd ();
+
       proc.WaitForExit();
 
       //HostUtils.DebugString ($"Compat output: {output}");
 
-      if ((proc.ExitCode == 110) // don't fail if dll is not dotnet (native)
-          || (proc.ExitCode == 128)) // don't fail for no assembly name (possibly obfuscated)
-          return true;
+      if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
+        || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
+        || proc.ExitCode == 114 // don't fail if there's only warnings 
+        )
+          return new CompatResult { Success = true, Output = output };
 
+      // write error stream if needed
+      var errout = sbError.ToString();
       if (!string.IsNullOrWhiteSpace(errout))
         HostUtils.DebugString("ERROR: " + errout);
 
-      if (proc.ExitCode == 112)
+      if (proc.ExitCode == 112 )
         System.Diagnostics.Debug.Write(output);
-      bool result = (proc.ExitCode == 0) && !CheckForRhinoSdkClasses(output);
-      
-      // TODO: throw if compat errored (check exit code)
 
-      return result;
-    }
+      bool result = proc.ExitCode == 0;
 
-    private static bool CheckForRhinoSdkClasses(string output)
-    {
-      // if plug-in assembly is not mixed-mode, then we don't need to check it
-      var mixed_mode_regex = new Regex(@"^Mixed-mode\? True\s?$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-      bool mixed_mode = mixed_mode_regex.IsMatch(output);
-      if (!mixed_mode)
-        return false;
-
-      // wfcook RH-60405 14-Sep-2020: If plugin version >= 6 we don't need to check because we 
-      // haven't broken the sdk.
-      bool bReferencesOK = true;
-      var RhinoCommonRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*RhinoCommon.*Version=)[0-9](?=\.)");
-      Match RhinoCommonMatch = RhinoCommonRegex.Match(output);
-      if (RhinoCommonMatch.Success)
-      {
-        int version;
-        if (int.TryParse(RhinoCommonMatch.Value, out version) && (version < 6)) bReferencesOK = false;
-      }
-      if (bReferencesOK)
-      {
-        var RhinoDotNetRegex = new Regex(@"(?im)(?<=^Assembly references:\r*\n([^\r]+.*\n)+.*Rhino_DotNet.*Version=)[0-9](?=\.)");
-        Match RhinoDotNetMatch = RhinoDotNetRegex.Match(output);
-        if (RhinoDotNetMatch.Success)
-        {
-          int version;
-          if (int.TryParse(RhinoDotNetMatch.Value, out version) && (version < 6)) bReferencesOK = false;
-        }
-      }
-      if (bReferencesOK) return false;
-
-      // if we find any classes with the following prefixes, odds are the assembly references the rhino c++ sdk
-      // we can't check for compatiblity with the c++ sdk so the plug-in fails the compatibility check
-      var prefixes = new string[] { "CRhino", "ON_" };
-
-      foreach (string line in output.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
-      {
-        foreach (var p in prefixes)
-        {
-          if (line.TrimStart().StartsWith(p))
-            return true;
-        }
-      }
-      return false;
+      return new CompatResult { Success = result, Output = output };
     }
 
     static void ExtractPlugInAttributes(System.Reflection.Assembly assembly, IntPtr pluginInfo)
@@ -2701,8 +2774,8 @@ namespace Rhino.PlugIns
     {
       if( HostUtils.RunningOnWindows )
       {
-        string rh_dn_path = typeof(PlugIn).Assembly.Location.Replace("RhinoCommon", "Rhino_DotNet");
-        return System.Reflection.Assembly.LoadFrom(rh_dn_path);
+        string rh_dn_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
+        return HostUtils.LoadAssemblyFrom(rh_dn_path);
       }
       return null;
     }
@@ -3783,6 +3856,9 @@ namespace Rhino.PlugIns
       }
     }
 
+    
+    
+
     internal delegate bool PlugInIconCallback(int serialNumber, int width, int height, IntPtr dibOut);
     private static readonly PlugInIconCallback g_plugin_icon_callback = PlugInIcon;
     private static bool PlugInIcon(int serialNumber, int width, int height, IntPtr dibOut)
@@ -4438,7 +4514,12 @@ namespace Rhino.PlugIns
     private static int OnDecalProperties(int serialNumber, IntPtr pXmlSection, int bInitialize)
     {
       var p = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
-      
+
+      // JohnC: 1. This never gets called. There is no icon in the Decal UI for it.
+      //        2. The code below seems to be wrong. pXmlSection!=IntPtr.Zero polarity is backwards.
+      //
+      // This seems to indicate that this code has never been tested. Am I confused? [JOHN-DECAL-FIX]
+
       if (null == p || pXmlSection!=IntPtr.Zero)
       {
         HostUtils.DebugString("ERROR: Invalid input for OnDecalProperties");
@@ -5138,7 +5219,7 @@ namespace Rhino.PlugIns
 
       // 26 Jan 2012 - S. Baer (RR 97943)
       // We were able to get this function to thrown exceptions with a bogus license file, but
-      // don't quite understand exactly where the problem was occuring.  Adding a ExceptionReport
+      // don't quite understand exactly where the problem was occurring.  Adding a ExceptionReport
       // to this function in order to try and log the exception before Rhino goes down in a blaze
       // of glory
       try
@@ -5644,6 +5725,13 @@ namespace Rhino.PlugIns
       return unix_start + unix_timespan;
     }
 
+    DateTime? Int64ToNullableDate(Int64 unixDate)
+    {
+      if (unixDate == 0)
+        return null;
+      return Int64ToDate(unixDate);
+    }
+
     private string GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields field)
     {
       using (var holder = new StringHolder())
@@ -5738,6 +5826,12 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <since>6.0</since>
     public DateTime Expiration => Int64ToDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.Exp));
+
+    /// <summary>
+    /// The date when the license in the cloud zoo entity will expire, if any
+    /// </summary>
+    /// <since>7.25</since>
+    public DateTime? RenewableUntil => Int64ToNullableDate(UnsafeNativeMethods.RHC_RhinoLicenseLease_GetTime(Pointer, UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.RenewableUntil));
 
     ~LicenseLease()
     {

@@ -3,6 +3,8 @@ using Rhino.Geometry;
 using System;
 using System.Runtime.Serialization;
 using Rhino.Runtime.InteropWrappers;
+using Rhino.FileIO;
+using Rhino.Display;
 
 namespace Rhino.DocObjects
 {
@@ -136,6 +138,17 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetInt(ptr, which, true, setValue);
+    }
+
+    double GetDouble(UnsafeNativeMethods.ObjectAttrsDouble which)
+    {
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetDouble(ptr, which, false, 0);
+    }
+    void SetDouble(UnsafeNativeMethods.ObjectAttrsDouble which, double setValue)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetDouble(ptr, which, true, setValue);
     }
 
 
@@ -283,6 +296,216 @@ namespace Rhino.DocObjects
         return (ObjectPlotWeightSource)rc;
       }
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.PlotWeightSource, (int)value); }
+    }
+
+    /// <summary>
+    /// Where clipping plane participation values are read from
+    /// </summary>
+    /// <since>8.0</since>
+    public ObjectClipParticipationSource ClipParticipationSource
+    {
+      get
+      {
+        int rc = GetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClipParticipationSource);
+        return (ObjectClipParticipationSource)rc;
+      }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClipParticipationSource, (int)value); }
+    }
+
+    /// <summary>
+    /// Attributes set to participate with all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ClipParticipationForAll
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.ObjectAttrsBool.ClipParticipationForAll);
+      }
+    }
+
+    /// <summary>
+    /// Attributes set to participate with no clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ClipParticipationForNone
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.ObjectAttrsBool.ClipParticipationForNone);
+      }
+    }
+
+    /// <summary>
+    /// Gets the clipping plane participation list for these attributes.
+    /// </summary>
+    /// <returns>
+    /// null if an object participates with all clipping planes.
+    /// An empty array if an object participates with no clipping planes.
+    /// A list of ids if an object participates with a specific set of ids
+    /// </returns>
+    /// <since>8.0</since>
+    public Guid[] ClipParticipationList()
+    {
+      if (ClipParticipationForAll)
+        return null;
+      if (ClipParticipationForNone)
+        return new Guid[0];
+      using (var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid())
+      {
+        IntPtr constPtrThis = ConstPointer();
+        IntPtr ptrIds = guidArray.NonConstPointer();
+        UnsafeNativeMethods.ON_3dmObjectAttributes_ClipParticipationList(constPtrThis, ptrIds);
+        return guidArray.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// The object will participate in all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetClipParticipationForAll()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, true, false, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Object is immune to the effects of all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetClipParticipationForNone()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, false, true, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Object interacts with a specific list of clipping planes
+    /// </summary>
+    /// <param name="planeIds"></param>
+    /// <since>8.0</since>
+    public void SetClipParticipationList(System.Collections.Generic.IEnumerable<Guid> planeIds)
+    {
+      using(var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid(planeIds))
+      {
+        IntPtr ptrThis = NonConstPointer();
+        IntPtr ptrIds = guidArray.ConstPointer();
+        UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, false, false, ptrIds);
+      }
+    }
+
+    ///<summary>
+    /// Get an optional custom section style associated with these attributes.
+    ///</summary>
+    /// <since>8.0</since>
+    public SectionStyle GetCustomSectionStyle()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_3dmObjectAttributes_GetCustomSectionStyle(const_ptr_this);
+      if (ptr_sectionstyle == IntPtr.Zero)
+        return null;
+      return new SectionStyle(ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void SetCustomSectionStyle(SectionStyle sectionStyle)
+    {
+      if (sectionStyle == null)
+      {
+        RemoveCustomSectionStyle();
+        return;
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void RemoveCustomSectionStyle()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Where section attributes are read from
+    /// </summary>
+    /// <since>8.0</since>
+    public ObjectSectionAttributesSource SectionAttributesSource
+    {
+      get
+      {
+        int rc = GetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionAttributesSource);
+        return (ObjectSectionAttributesSource)rc;
+      }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionAttributesSource, (int)value); }
+    }
+
+    /// <summary>
+    /// Per object linetype scale
+    /// </summary>
+    /// <since>8.0</since>
+    public double LinetypePatternScale
+    {
+      get { return GetDouble(UnsafeNativeMethods.ObjectAttrsDouble.LinetypePatternScale); }
+      set { SetDouble(UnsafeNativeMethods.ObjectAttrsDouble.LinetypePatternScale, value); }
+    }
+
+    /// <summary>
+    /// Fill color for hatches (default is Color.Empty)
+    /// </summary>
+    /// <since>8.0</since>
+    public System.Drawing.Color HatchBackgroundFillColor
+    {
+      get { return GetColor(IDX_HATCH_BACKGROUND_FILL_COLOR); }
+      set { SetColor(IDX_HATCH_BACKGROUND_FILL_COLOR, value); }
+    }
+
+    /// <summary>
+    /// Draw the bounrdaries for a hatch (default is false)
+    /// </summary>
+    /// <since>8.0</since>
+    public bool HatchBoundaryVisible
+    {
+      get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible); }
+      set { SetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible, value); }
+    }
+
+    ///<summary>
+    /// Get an optional custom linetype associated with these attributes. If null,
+    /// then the attributes use the linetype index to determine it's linetype
+    ///</summary>
+    /// <since>8.0</since>
+    public Linetype GetCustomLinetype()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_linetype = UnsafeNativeMethods.ON_3dmObjectAttributes_GetCustomLinetype(const_ptr_this);
+      if (ptr_linetype == IntPtr.Zero)
+        return null;
+      return new Linetype(ptr_linetype);
+    }
+
+    /// <since>8.0</since>
+    public void SetCustomLinetype(Linetype linetype)
+    {
+      if (linetype == null)
+      {
+        RemoveCustomLinetype();
+        return;
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_linetype = linetype.ConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, const_ptr_linetype);
+    }
+
+    /// <since>8.0</since>
+    public void RemoveCustomLinetype()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, IntPtr.Zero);
     }
 
     /// <summary>
@@ -645,6 +868,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Sets the render material for the object - higher level function for setting MaterialSource and MaterialIndex
     /// </summary>
+    /// <since>7.8</since>
     public Render.RenderMaterial RenderMaterial
     {
       set
@@ -675,6 +899,7 @@ namespace Rhino.DocObjects
 
     const int IDX_COLOR = 0;
     const int IDX_PLOT_COLOR = 1;
+    const int IDX_HATCH_BACKGROUND_FILL_COLOR = 2;
     System.Drawing.Color GetColor(int which)
     {
       IntPtr ptr = ConstPointer();
@@ -695,10 +920,96 @@ namespace Rhino.DocObjects
     /// <since>5.10</since>
     public Render.Decals Decals
     {
-      get { return (m_decals ?? (m_decals = new Render.Decals(this))); }
+      get
+      {
+        if (m_decals == null)
+        {
+          uint doc_sn = 0;
+          if ((m__parent is RhinoObject obj) && (obj.Document != null))
+            doc_sn = obj.Document.RuntimeSerialNumber;
+
+          m_decals = new Render.Decals(this, false, doc_sn);
+        }
+
+        return m_decals;
+      }
     }
+
     private Render.Decals m_decals;
 #endif
+
+    /// <summary>
+    /// The mapping channel id to use when calling MappingChannel to retrieve the OCS mapping if there is one.
+    /// </summary>
+    /// <returns>The mapping channel id to use when calling MappingChannel to retrieve the OCS mapping if there is one.</returns>
+    /// <since>7.17</since>
+    public static int OCSMappingChannelId
+    {
+      get
+      {
+        return 100000;
+      }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    [Flags]
+    public enum ObjectFrameFlags
+    {
+      /// <summary>
+      /// Never returns unset plane.  Will always calculate the plane even if nothing is stored.
+      /// </summary>
+      Standard = 0,
+      /// <summary>
+      /// By default, the plane is orientation and rotation only.  But scale transforms are stored if you need them.
+      /// </summary>
+      IncludeScaleTransforms = 1,
+      /// <summary>
+      /// The object frame may be stored unset by default.  If this is the case, and you want to know if it really is unset, this will tell you.
+      /// </summary>
+      ReturnUnset = 2
+    }
+
+    /// <since>8.0</since>
+    public Plane ObjectFrame()
+    {
+      var xform = new Transform();
+      if (UnsafeNativeMethods.ON_3dmObjectAttributes_ObjectFrame(ConstPointer(), ref xform))
+      {
+        var plane = Plane.WorldXY;
+        plane.Transform(xform);
+        return plane;
+      }
+
+      return Plane.Unset;
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Transform xform)
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_SetObjectFrame(NonConstPointer(), ref xform);
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Plane plane)
+    {
+      var xform = Geometry.Transform.ChangeBasis(plane, Plane.WorldXY);
+      SetObjectFrame(xform);
+    }
+
+
+
+    /// <summary>
+    /// Get an object that provides access to mesh modifiers when the attributes is for a File3dmObject.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmMeshModifiers File3dmMeshModifiers
+    {
+      get { return m_file3dm_mesh_modifiers ?? (m_file3dm_mesh_modifiers = new File3dmMeshModifiers(this)); }
+    }
+    private File3dmMeshModifiers m_file3dm_mesh_modifiers;
 
     /// <summary>
     /// If you are developing a high quality plug-in renderer, and a user is
@@ -752,17 +1063,29 @@ namespace Rhino.DocObjects
 
 
 #if RHINO_SDK
+    /// <summary>
+    /// Gets an object's draw color, which is based on the object's color source
+    /// </summary>
+    /// <param name="document">The object's documnt.</param>
+    /// <returns>The draw color.</returns>
     /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document)
     {
       return DrawColor(document, Guid.Empty);
     }
+
+    /// <summary>
+    /// Gets an object's draw color, which is based on the object's color source
+    /// </summary>
+    /// <param name="document">The object's documnt.</param>
+    /// <param name="viewportId">The id of the viewport.</param>
+    /// <returns>The draw color.</returns>
     /// <since>5.0</since>
     public System.Drawing.Color DrawColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      int abgr = UnsafeNativeMethods.CRhinoObjectAttributes_DrawColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.CRhinoObjectAttributes_DrawColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
     /// <since>5.6</since>
@@ -774,8 +1097,8 @@ namespace Rhino.DocObjects
     public System.Drawing.Color ComputedPlotColor(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      int abgr = UnsafeNativeMethods.CRhinoObjectAttributes_PlotColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
-      return Runtime.Interop.ColorFromWin32(abgr);
+      int argb = UnsafeNativeMethods.CRhinoObjectAttributes_PlotColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
     /// <since>5.6</since>
@@ -790,6 +1113,37 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoObjectAttributes_PlotWeight(const_ptr_this, document.RuntimeSerialNumber, viewportId);
     }
 
+    /// <summary>
+    /// Get the clip participation based on an object attributes settings and document
+    /// values based on clip participation source
+    /// </summary>
+    /// <param name="document"></param>
+    /// <param name="forAll"></param>
+    /// <param name="forNone"></param>
+    /// <param name="specificPlaneIds"></param>
+    /// <since>8.0</since>
+    public void ComputedClipParticipation(RhinoDoc document, out bool forAll, out bool forNone, out Guid[] specificPlaneIds)
+    {
+      forAll = true;
+      forNone = false;
+      specificPlaneIds = new Guid[0];
+      IntPtr constPtrThis = ConstPointer();
+      int specificPlaneIdCount = UnsafeNativeMethods.CRhinoObjectAttributes_ClipParticipation(
+        constPtrThis,
+        document.RuntimeSerialNumber,
+        ref forAll, ref forNone, 0, null);
+
+      if (forAll)
+        specificPlaneIds = null;
+      if (specificPlaneIdCount > 0)
+      {
+        specificPlaneIds = new Guid[specificPlaneIdCount];
+        UnsafeNativeMethods.CRhinoObjectAttributes_ClipParticipation(
+          constPtrThis,
+          document.RuntimeSerialNumber,
+          ref forAll, ref forNone, specificPlaneIdCount, specificPlaneIds);
+      }
+    }
 #endif
 
     /// <summary>
@@ -827,13 +1181,11 @@ namespace Rhino.DocObjects
     {
       get
       {
-        IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmObjectAttributes_PlotWeight(ptr, false, 0.0);
+        return GetDouble(UnsafeNativeMethods.ObjectAttrsDouble.PlotWeight);
       }
       set
       {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.ON_3dmObjectAttributes_PlotWeight(ptr, true, value);
+        SetDouble(UnsafeNativeMethods.ObjectAttrsDouble.PlotWeight, value);
       }
     }
 

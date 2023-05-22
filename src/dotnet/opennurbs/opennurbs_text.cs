@@ -364,8 +364,117 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps, IntPtr.Zero);
         return breps.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Creates planar Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Brep[]> CreateSurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double spacing)
+    {
+      IntPtr constPtrParent = IntPtr.Zero;
+      IntPtr constPtrThis = IntPtr.Zero;
+
+      TextObject parent = _GetConstObjectParent() as TextObject;
+      if (null != parent)
+        constPtrParent = parent.ConstPointer();
+      else
+        constPtrThis = ConstPointer();
+
+      using (var breps = new SimpleArrayBrepPointer())
+      using (var indices = new SimpleArrayInt())
+      {
+        IntPtr ptrBreps = breps.NonConstPointer();
+        IntPtr constPtrDimstyle = dimstyle.ConstPointer();
+        IntPtr ptrIndices = indices.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, spacing, ptrBreps, ptrIndices);
+        GC.KeepAlive(dimstyle);
+        int[] letterIndices = indices.ToArray();
+        Brep[] brepArray = breps.ToNonConstArray();
+        var dict = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<Brep>>();
+
+        int maxLetter = -1;
+        for (int i = 0; i < letterIndices.Length; i++)
+        {
+          int letter = letterIndices[i];
+          if (letter > maxLetter)
+            maxLetter = letter;
+          if (!dict.ContainsKey(letter))
+            dict[letter] = new System.Collections.Generic.List<Brep>();
+          dict[letter].Add(brepArray[i]);
+        }
+
+        var rc = new System.Collections.Generic.List<Brep[]>();
+        for (int i=0; i<=maxLetter; i++)
+        {
+          if (dict.ContainsKey(i))
+            rc.Add(dict[i].ToArray());
+        }
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="height"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Brep[]> CreatePolysurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
+    {
+      IntPtr constPtrParent = IntPtr.Zero;
+      IntPtr constPtrThis = IntPtr.Zero;
+
+      TextObject parent = _GetConstObjectParent() as TextObject;
+      if (null != parent)
+        constPtrParent = parent.ConstPointer();
+      else
+        constPtrThis = ConstPointer();
+
+      using (var breps = new SimpleArrayBrepPointer())
+      using (var indices = new SimpleArrayInt())
+      {
+        IntPtr ptrBreps = breps.NonConstPointer();
+        IntPtr constPtrDimstyle = dimstyle.ConstPointer();
+        IntPtr ptrIndices = indices.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, height, spacing, ptrBreps, ptrIndices);
+        GC.KeepAlive(dimstyle);
+        int[] letterIndices = indices.ToArray();
+        Brep[] brepArray = breps.ToNonConstArray();
+        var dict = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<Brep>>();
+
+        int maxLetter = -1;
+        for (int i = 0; i < letterIndices.Length; i++)
+        {
+          int letter = letterIndices[i];
+          if (letter > maxLetter)
+            maxLetter = letter;
+          if (!dict.ContainsKey(letter))
+            dict[letter] = new System.Collections.Generic.List<Brep>();
+          dict[letter].Add(brepArray[i]);
+        }
+
+        var rc = new System.Collections.Generic.List<Brep[]>();
+        for (int i = 0; i <= maxLetter; i++)
+        {
+          if (dict.ContainsKey(i))
+            rc.Add(dict[i].ToArray());
+        }
+        return rc;
       }
     }
 
@@ -394,8 +503,64 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps);
+        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps, IntPtr.Zero);
         return breps.ToNonConstArray();
+      }
+    }
+
+
+    /// <summary>
+    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="height"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Extrusion[]> CreateExtrusionsGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
+    {
+      IntPtr constPtrParent = IntPtr.Zero;
+      IntPtr constPtrThis = IntPtr.Zero;
+
+      TextObject parent = _GetConstObjectParent() as TextObject;
+      if (null != parent)
+        constPtrParent = parent.ConstPointer();
+      else
+        constPtrThis = ConstPointer();
+
+      using (var extrusions = new SimpleArrayExtrusionPointer())
+      using (var indices = new SimpleArrayInt())
+      {
+        IntPtr ptrExtrusions = extrusions.NonConstPointer();
+        IntPtr constPtrDimstyle = dimstyle.ConstPointer();
+        IntPtr ptrIndices = indices.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, height, spacing, ptrExtrusions, ptrIndices);
+        GC.KeepAlive(dimstyle);
+        int[] letterIndices = indices.ToArray();
+        Extrusion[] extrusionArray = extrusions.ToNonConstArray();
+        var dict = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<Extrusion>>();
+
+        int maxLetter = -1;
+        for (int i = 0; i < letterIndices.Length; i++)
+        {
+          int letter = letterIndices[i];
+          if (letter > maxLetter)
+            maxLetter = letter;
+          if (!dict.ContainsKey(letter))
+            dict[letter] = new System.Collections.Generic.List<Extrusion>();
+          dict[letter].Add(extrusionArray[i]);
+        }
+
+        var rc = new System.Collections.Generic.List<Extrusion[]>();
+        for (int i = 0; i <= maxLetter; i++)
+        {
+          if (dict.ContainsKey(i))
+            rc.Add(dict[i].ToArray());
+        }
+        return rc;
       }
     }
 
@@ -424,7 +589,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_extrusions = extrusions.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions);
+        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions, IntPtr.Zero);
         return extrusions.ToNonConstArray();
       }
     }
@@ -433,13 +598,13 @@ namespace Rhino.Geometry
     /// Returns the outline curves.
     /// </summary>
     /// <param name="dimstyle"></param>
-    /// <param name="bAllowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
+    /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
     /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
     /// <since>6.0</since>
     [ConstOperation]
-    public Curve[] CreateCurves(DimensionStyle dimstyle, bool bAllowOpen, double smallCapsScale = 1.0, double spacing = 0.0)
+    public Curve[] CreateCurves(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale = 1.0, double spacing = 0.0)
     {
       IntPtr const_ptr_parent = IntPtr.Zero;
       IntPtr const_ptr_this = IntPtr.Zero;
@@ -450,12 +615,68 @@ namespace Rhino.Geometry
       else
         const_ptr_this = ConstPointer();
 
-      using (var curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer())
+      using (var curves = new SimpleArrayCurvePointer())
       {
         IntPtr ptr_curves = curves.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !bAllowOpen, smallCapsScale, spacing, ptr_curves);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !allowOpen, smallCapsScale, spacing, ptr_curves, IntPtr.Zero);
+        GC.KeepAlive(dimstyle);
         return curves.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Creates planar curve from text outline curves. Curves are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public System.Collections.Generic.List<Curve[]> CreateCurvesGrouped(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale, double spacing)
+    {
+      IntPtr constPtrParent = IntPtr.Zero;
+      IntPtr constPtrThis = IntPtr.Zero;
+
+      TextObject parent = _GetConstObjectParent() as TextObject;
+      if (null != parent)
+        constPtrParent = parent.ConstPointer();
+      else
+        constPtrThis = ConstPointer();
+
+      using (var curves = new SimpleArrayCurvePointer())
+      using (var indices = new SimpleArrayInt())
+      {
+        IntPtr ptrCurves = curves.NonConstPointer();
+        IntPtr constPtrDimstyle = dimstyle.ConstPointer();
+        IntPtr ptrIndices = indices.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(constPtrParent, constPtrThis, constPtrDimstyle, !allowOpen, smallCapsScale, spacing, ptrCurves, ptrIndices);
+        GC.KeepAlive(dimstyle);
+
+        Curve[] curveArray = curves.ToNonConstArray();
+        int[] letterIndices = indices.ToArray();
+        var dict = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<Curve>>();
+
+        int maxLetter = -1;
+        for (int i = 0; i < letterIndices.Length; i++)
+        {
+          int letter = letterIndices[i];
+          if (letter > maxLetter)
+            maxLetter = letter;
+          if (!dict.ContainsKey(letter))
+            dict[letter] = new System.Collections.Generic.List<Curve>();
+          dict[letter].Add(curveArray[i]);
+        }
+
+        var rc = new System.Collections.Generic.List<Curve[]>();
+        for (int i = 0; i <= maxLetter; i++)
+        {
+          if (dict.ContainsKey(i))
+            rc.Add(dict[i].ToArray());
+        }
+        return rc;
       }
     }
 #endif

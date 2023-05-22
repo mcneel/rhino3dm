@@ -84,6 +84,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets or sets the center of the ellipse.
     /// </summary>
+    /// <since>7.16</since>
     public Point3d Center
     {
       get { return m_plane.Origin; }

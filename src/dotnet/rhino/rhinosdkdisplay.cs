@@ -1,6 +1,8 @@
 #pragma warning disable 1591
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Rhino.Runtime.InteropWrappers;
 
 #if RHINO_SDK
 namespace Rhino.Display
@@ -114,6 +116,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="path">If null, use a temporary tag name.  If non-null, use that path in Rhino's bitmap cache.  Note, this version does not support URLs.</param>
     /// <param name="bitmap">If null, load the bitmap from the supplied path.  If non-null, creates the bitmap from the data supplied.</param>
+    /// <since>7.16</since>
     public DisplayBitmap(string path, System.Drawing.Bitmap bitmap)
     {
       m_ptr_display_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(path, bitmap.GetHbitmap());
@@ -368,6 +371,251 @@ namespace Rhino.Display
         m_colors_argb[i] = _colors[i].ToArgb();
       m_bbox = new Geometry.BoundingBox(m_points);
     }
+  }
+
+  public class DisplayPointAttributes
+  {
+    internal static bool AreEqual(DisplayPointAttributes a, DisplayPointAttributes b)
+    {
+      if (a == null && b == null)
+        return true;
+      if (a == null || b == null)
+        return false;
+
+      return a.PointStyle == b.PointStyle &&
+        a.StrokeColor == b.StrokeColor &&
+        a.FillColor == b.FillColor &&
+        a.Diameter == b.Diameter &&
+        a.StrokeWidth == b.StrokeWidth &&
+        a.SecondarySize == b.SecondarySize &&
+        a.RotationRadians == b.RotationRadians;
+    }
+
+    /// <since>8.0</since>
+    public DisplayPointAttributes()
+    {
+    }
+
+    /// <since>8.0</since>
+    public DisplayPointAttributes(DisplayPointAttributes attributes)
+    {
+      PointStyle = attributes.PointStyle;
+      StrokeColor = attributes.StrokeColor;
+      FillColor = attributes.FillColor;
+      Diameter = attributes.Diameter;
+      StrokeWidth = attributes.StrokeWidth;
+      SecondarySize = attributes.SecondarySize;
+      RotationRadians = attributes.RotationRadians;
+    }
+
+    /// <since>8.0</since>
+    public PointStyle? PointStyle { get; set; }
+    /// <since>8.0</since>
+    public System.Drawing.Color? StrokeColor { get; set; }
+    /// <since>8.0</since>
+    public System.Drawing.Color? FillColor { get; set; }
+    /// <since>8.0</since>
+    public float? Diameter { get; set; }
+    /// <since>8.0</since>
+    public float? StrokeWidth { get; set; }
+    /// <since>8.0</since>
+    public float? SecondarySize { get; set; }
+    /// <since>8.0</since>
+    public float? RotationRadians { get; set; } 
+  }
+  /// <summary>
+  /// A 3d point with attributes used by the display pipeline
+  /// </summary>
+  public class DisplayPoint
+  {
+    readonly Rhino.Geometry.Point3d _location;
+    DisplayPointAttributes _attributes;
+
+    /// <since>8.0</since>
+    public DisplayPoint(Rhino.Geometry.Point3d location)
+    {
+      _location = location;
+    }
+
+    /// <since>8.0</since>
+    public DisplayPoint WithAttributes(DisplayPointAttributes attributes)
+    {
+      var rc = new DisplayPoint(_location);
+      if (attributes != null)
+        rc._attributes = new DisplayPointAttributes(attributes);
+      return rc;
+    }
+
+    internal DisplayPointAttributes Attributes => _attributes;
+    /// <since>8.0</since>
+    public Rhino.Geometry.Point3d Location => _location;
+
+    internal RhDisplayPoint ToDisplayPoint(DisplayPointAttributes fallbackAttributes)
+    {
+      RhDisplayPoint rc = new RhDisplayPoint(_location);
+
+      if (_attributes != null && _attributes.PointStyle.HasValue)
+        rc.m_style = UnsafeNativeMethods.RHC_RhinoPointStyleFromPointStyle(_attributes.PointStyle.Value);
+      else if (fallbackAttributes!= null && fallbackAttributes.PointStyle.HasValue)
+        rc.m_style = UnsafeNativeMethods.RHC_RhinoPointStyleFromPointStyle(fallbackAttributes.PointStyle.Value);
+
+      if (_attributes != null && _attributes.StrokeColor.HasValue)
+        rc.m_strokeColor = Rhino.Runtime.Interop.ColorToABGR(_attributes.StrokeColor.Value);
+      else if (fallbackAttributes != null && fallbackAttributes.StrokeColor.HasValue)
+        rc.m_strokeColor = Rhino.Runtime.Interop.ColorToABGR(fallbackAttributes.StrokeColor.Value);
+
+      if (_attributes != null && _attributes.FillColor.HasValue)
+        rc.m_fillColor = Rhino.Runtime.Interop.ColorToABGR(_attributes.FillColor.Value);
+      else if (fallbackAttributes != null && fallbackAttributes.FillColor.HasValue)
+        rc.m_fillColor = Rhino.Runtime.Interop.ColorToABGR(fallbackAttributes.FillColor.Value);
+
+      if (_attributes != null && _attributes.Diameter.HasValue)
+        rc.m_diameterPixels = _attributes.Diameter.Value;
+      else if (fallbackAttributes != null && fallbackAttributes.Diameter.HasValue)
+        rc.m_diameterPixels = fallbackAttributes.Diameter.Value;
+
+      if (_attributes != null && _attributes.StrokeWidth.HasValue)
+        rc.m_strokeWidthPixels = _attributes.StrokeWidth.Value;
+      else if (fallbackAttributes != null && fallbackAttributes.StrokeWidth.HasValue)
+        rc.m_strokeWidthPixels = fallbackAttributes.StrokeWidth.Value;
+
+      if (_attributes != null && _attributes.SecondarySize.HasValue)
+        rc.m_innerDiameterPixels = _attributes.SecondarySize.Value;
+      else if (fallbackAttributes != null && fallbackAttributes.SecondarySize.HasValue)
+        rc.m_innerDiameterPixels = fallbackAttributes.SecondarySize.Value;
+
+      if (_attributes != null && _attributes.RotationRadians.HasValue)
+        rc.m_rotationRadians = _attributes.RotationRadians.Value;
+      else if (fallbackAttributes != null && fallbackAttributes.RotationRadians.HasValue)
+        rc.m_rotationRadians = fallbackAttributes.RotationRadians.Value;
+
+      if (rc.m_rotationRadians == RhinoMath.UnsetSingle)
+        rc.m_rotationRadians = 0;
+      return rc;
+    }
+  }
+
+  public class DisplayPointSet : IDisposable
+  {
+    DisplayPoint[] _points;
+
+    RhDisplayPoint[] _cachedNativePoints;
+    DisplayPointAttributes _cachedFallbackAttributes;
+    IntPtr _cacheHandle = IntPtr.Zero;
+
+    /// <since>8.0</since>
+    public static DisplayPointSet Create(IEnumerable<DisplayPoint> points)
+    {
+      if (points == null)
+        return null;
+      var list = points as List<DisplayPoint>;
+      if (list == null)
+        list = new List<DisplayPoint>(points);
+      if (list.Count < 1)
+        return null;
+      return new DisplayPointSet(list);
+    }
+
+    internal RhDisplayPoint[] RhDisplayPoints(DisplayPointAttributes fallbackAttributes)
+    {
+      if (_cachedNativePoints != null &&
+        DisplayPointAttributes.AreEqual(_cachedFallbackAttributes, fallbackAttributes))
+        return _cachedNativePoints;
+
+      DestroyCacheHandle();
+
+      if (_cachedNativePoints==null)
+        _cachedNativePoints = new RhDisplayPoint[_points.Length];
+
+      _cachedFallbackAttributes = null;
+      if (fallbackAttributes != null)
+        _cachedFallbackAttributes = new DisplayPointAttributes(fallbackAttributes);
+
+      for( int i=0; i<_points.Length; i++)
+      {
+        _cachedNativePoints[i] = _points[i].ToDisplayPoint(fallbackAttributes);
+      }
+      return _cachedNativePoints;
+    }
+
+    private DisplayPointSet(List<DisplayPoint> points)
+    {
+      GC.SuppressFinalize(this);
+      _points = points.ToArray();
+    }
+
+    ~DisplayPointSet()
+    {
+      DestroyCacheHandle();
+    }
+
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      DestroyCacheHandle();
+    }
+
+    internal DisplayPoint[] Points()
+    {
+      return _points;
+    }
+
+    internal IntPtr CacheHandle()
+    {
+      if (IntPtr.Zero == _cacheHandle)
+      {
+        _cacheHandle = UnsafeNativeMethods.CRhinoCacheHandle_New();
+        GC.ReRegisterForFinalize(this);
+      }
+      return _cacheHandle;
+    }
+
+    void DestroyCacheHandle()
+    {
+      if (_cacheHandle != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.CRhinoCacheHandle_Delete(_cacheHandle);
+        _cacheHandle = IntPtr.Zero;
+        GC.SuppressFinalize(this);
+      }
+    }
+  }
+}
+
+namespace Rhino.Runtime.InteropWrappers
+{
+  [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 48)]
+  public struct RhDisplayPoint
+  {
+    /// <since>8.0</since>
+    public RhDisplayPoint(Rhino.Geometry.Point3d location)
+    {
+      m_vertex = new Geometry.Point3f((float)location.X, (float)location.Y, (float)location.Z);
+      m__padding1 = 0;
+      m_style = 50; // RPS_VARIABLE_DOT
+      unchecked
+      {
+        const uint UNSETCOLOR = 0xffffffff;
+        m_strokeColor = (int)UNSETCOLOR;
+        m_fillColor = (int)UNSETCOLOR;
+      }
+      m_diameterPixels = RhinoMath.UnsetSingle;
+      m_strokeWidthPixels = RhinoMath.UnsetSingle;
+      m_innerDiameterPixels = RhinoMath.UnsetSingle;
+      m_rotationRadians = RhinoMath.UnsetSingle;
+      m__padding2 = 0;
+    }
+
+    public Rhino.Geometry.Point3f m_vertex;
+    public float m__padding1; // to match layout used in metal shaders
+    public int m_style;
+    public int m_strokeColor;
+    public int m_fillColor;
+    public float m_diameterPixels;
+    public float m_strokeWidthPixels;
+    public float m_innerDiameterPixels;
+    public float m_rotationRadians;
+    public float m__padding2; // to match layout used in metal shaders
   }
 }
 

@@ -146,6 +146,49 @@ RH_C_FUNCTION void ON_HiddenLineDrawing_IncludeHiddenCurves(ON_HiddenLineDrawing
     pHiddenLineDrawing->IncludeHiddenCurves(bInclude);
 }
 
+RH_C_FUNCTION void ON_HiddenLineDrawing_EnableOccludingSection(ON_HiddenLineDrawing* pHiddenLineDrawing, bool bEnable)
+{
+  if (pHiddenLineDrawing)
+    pHiddenLineDrawing->EnableOccludingSection(bEnable);
+}
+
+RH_C_FUNCTION void ON_HiddenLineDrawing_EnableObjOccludingSection(ON_HiddenLineDrawing* pHiddenLineDrawing,
+  int obj_ind, bool bEnable)
+{
+  if (pHiddenLineDrawing && obj_ind >= 0 && obj_ind < pHiddenLineDrawing->m_object.Count())
+  {
+    const ON_HLD_Object* cobj = pHiddenLineDrawing->m_object[obj_ind];
+    ON_HLD_Object* obj = const_cast<ON_HLD_Object*>(cobj);
+    obj->EnableOccludingSection(bEnable);
+  }
+ }
+
+
+RH_C_FUNCTION bool ON_HiddenLineDrawing_EnableSelectiveClipping(ON_HiddenLineDrawing* pHiddenLineDrawing,
+  int obj_ind, const ON_SimpleArray<unsigned int>* active_clip_ids )
+{
+  bool rc = false;
+  ON_SimpleArray< ON__UINT_PTR> Arr2(ON_HiddenLineDrawing::PerspectiveViewClipCount + active_clip_ids->Count());
+
+  if (pHiddenLineDrawing->Viewport().IsPerspectiveProjection())
+  {
+    Arr2.Append(0); Arr2.Append(2); Arr2.Append(3); Arr2.Append(4); Arr2.Append(5);
+  }
+
+
+
+  for (int i = 0; i < active_clip_ids->Count(); i++) 
+    Arr2.Append((*active_clip_ids)[i]);
+  if (pHiddenLineDrawing && obj_ind>=0 && obj_ind< pHiddenLineDrawing->m_object.Count() && active_clip_ids)
+  {
+    const ON_HLD_Object* cobj = pHiddenLineDrawing->m_object[obj_ind];
+    ON_HLD_Object*  obj = const_cast<ON_HLD_Object*>(cobj);
+    rc = pHiddenLineDrawing->EnableSelectiveClipping(*obj, Arr2);
+  }
+  return rc;
+}
+
+
 RH_C_FUNCTION void ON_HiddenLineDrawing_SetContext(ON_HiddenLineDrawing* pHiddenLineDrawing, const ON_HiddenLineDrawing* pConstSource)
 {
   if(pHiddenLineDrawing && pConstSource)
@@ -197,12 +240,24 @@ RH_C_FUNCTION bool ON_HiddelLineDrawing_Merge2(ON_HiddenLineDrawing* pHiddenLine
   return false;
 }
 
+
 RH_C_FUNCTION bool ON_HiddenLineDrawing_Flatten(ON_HiddenLineDrawing* pHiddenLineDrawing)
 {
   if (pHiddenLineDrawing)
     return pHiddenLineDrawing->Flatten();
   return false;
 }
+
+
+
+RH_C_FUNCTION void ON_HiddenLineDrawing_RejoinCompatibleVisible(ON_HiddenLineDrawing* pHiddenLineDrawing)
+{
+  if (pHiddenLineDrawing)
+    return pHiddenLineDrawing->RejoinCompatibleVisible();
+  return;
+}
+
+
 
 RH_C_FUNCTION bool ON_HiddenLineDrawing_HasBeenFlattened(ON_HiddenLineDrawing* pHiddenLineDrawing)
 {
@@ -326,6 +381,24 @@ RH_C_FUNCTION unsigned int ON_HLD_Object_GetExtra(const ON_HiddenLineDrawing* co
     const ON_HLD_Object* hld_object = constHiddenLineDrawing->m_object[index];
     if (nullptr != hld_object)
       rc = (unsigned int)hld_object->m_obj_id;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_HLD_Object_EnableOccludingSection(ON_HLD_Object* pHiddenLineObject, bool bEnable)
+{
+  if (pHiddenLineObject)
+    pHiddenLineObject->EnableOccludingSection(bEnable);
+}
+
+
+
+RH_C_FUNCTION bool ON_HLD_Object_OccludingSectionOption(const ON_HLD_Object* pHiddenLineObject )
+{
+  bool rc = false;
+  if (pHiddenLineObject)
+  {
+     rc = pHiddenLineObject->OccludingSectionOption();
   }
   return rc;
 }
@@ -764,6 +837,5 @@ RH_C_FUNCTION int ON_HiddenLineDrawing_PointCount(ON_HiddenLineDrawing* pHiddenL
   }
   return 0;
 }
-
 
 #endif

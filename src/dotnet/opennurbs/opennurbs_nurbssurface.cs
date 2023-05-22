@@ -122,6 +122,49 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Find the closest isoparamentric curve, given a test point.
+    /// </summary>
+    /// <param name="testPoint">The test point.</param>
+    /// <returns>The enumeration.</returns>
+    /// <since>8.0</since>
+    public IsoStatus FindClosestIsoCurve(Point3d testPoint)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      int rc = UnsafeNativeMethods.RHC_RhFindBestIsoCurve(ptr_const_this, testPoint);
+      return (IsoStatus)rc;
+    }
+
+    /// <summary>
+    /// Constructs a NURBS surface with start and end edge isocurve matching the start and end of targetCurve, and Greville points on targetCurve.
+    /// </summary>
+    /// <param name="side">The isoparamentric curve direction.</param>
+    /// <param name="targetCurve">The target curve.</param>
+    /// <param name="maxEndDistance">
+    /// If maxEndDistance dist &gt; 0, the edge isocurve must be within maxEndDistance of targetCurve start.
+    /// If maxEndDistance dist &gt; 0, the edge isocurve must be within maxEndDistance of targetCurve end.
+    ///</param>
+    /// <param name="maxInteriorDistance">
+    /// If maxInteriorDistance &gt; 0, all interior Greville points of the edge isocurve must be within maxInteriorDistance of targetCurve.
+    /// </param>
+    /// <param name="matchTolerance">The matching tolerance.</param>
+    /// <param name="maxLevel">
+    /// If maxLevel &gt; 0, the result will be refined up to that many times, attempting to get the result within matchTolerance.  
+    /// If matchTolerance &lt;= 0, no refinement will be done. 
+    /// In any case, the parameters closest points on targetCurve of the Greville points of the edge isocurve must be monotonic increasing.
+    /// </param>
+    /// <returns>Surface on success, null on failure.</returns>
+    /// <since>8.0</since>
+    public NurbsSurface MatchToCurve(IsoStatus side, Curve targetCurve, double maxEndDistance, double maxInteriorDistance, double matchTolerance, int maxLevel)
+    {
+      if (null == targetCurve)
+        throw new NullReferenceException(nameof(targetCurve));
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_target = targetCurve.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoMatchNurbsSurfaceEdgeToCurve(ptr_const_this, (int)side, ptr_const_target, maxEndDistance, maxInteriorDistance, matchTolerance, maxLevel);
+      return (ptr == IntPtr.Zero) ? null : new NurbsSurface(ptr, null);
+    }
+
+    /// <summary>
     /// Create a bi-cubic SubD friendly surface from a surface.
     /// </summary>
     /// <param name="surface">>Surface to rebuild as a SubD friendly surface.</param>
@@ -141,7 +184,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Creates a NURBS surface from a plane and additonal parameters.
+    /// Creates a NURBS surface from a plane and additional parameters.
     /// </summary>
     /// <param name="plane">The plane.</param>
     /// <param name="uInterval">The interval describing the extends of the output surface in the U direction.</param>
@@ -683,7 +726,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Convert a NURBS surface bispan into a bezier surface.
+    /// Convert a NURBS surface bispan into a Bezier surface.
     /// </summary>
     /// <param name="spanIndex0">Specifies the "u" span</param>
     /// <param name="spanIndex1">Specifies the "v" span</param>

@@ -1,6 +1,6 @@
 #pragma once
 
-// we don't need to export RH_C_FUNCTION in these libraries
+// no need to export RH_C_FUNCTION in these libraries
 #define RH_C_FUNCTION
 
 #if defined(__EMSCRIPTEN__)
@@ -54,6 +54,10 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_boundingbox.h"
 #include "bnd_box.h"
 #include "bnd_point.h"
+#include "bnd_object.h"
+#include "bnd_geometry.h"
+#include "bnd_curve.h"
+#include "bnd_linecurve.h"
 #include "bnd_polyline.h"
 #include "bnd_plane.h"
 #include "bnd_xform.h"
@@ -62,7 +66,11 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_cylinder.h"
 #include "bnd_ellipse.h"
 #include "bnd_font.h"
+<<<<<<< HEAD
 #include "bnd_object.h"
+=======
+#include "bnd_3dm_settings.h"
+>>>>>>> main
 #include "bnd_model_component.h"
 
 #include "bnd_geometry.h"
@@ -94,11 +102,9 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_pointgeometry.h"
 #include "bnd_pointgrid.h"
 #include "bnd_arc.h"
-#include "bnd_curve.h"
 #include "bnd_curveproxy.h"
 #include "bnd_arccurve.h"
 #include "bnd_bezier.h"
-#include "bnd_linecurve.h"
 #include "bnd_polycurve.h"
 #include "bnd_polylinecurve.h"
 #include "bnd_nurbscurve.h"

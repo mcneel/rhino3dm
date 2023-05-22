@@ -527,6 +527,14 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromCylinder(ON_Cylinder* cylinder, bool capBotto
   return rc;
 }
 
+RH_C_FUNCTION int ON_Brep_GetConnectedComponents(const ON_Brep* pConstBrep, ON_SimpleArray<ON_Brep*>* pOutBreps)
+{
+  int rc = 0;
+  if (pConstBrep && pOutBreps)
+    rc = pConstBrep->GetConnectedComponents(*pOutBreps, true);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Brep_DuplicateEdgeCurves(const ON_Brep* pConstBrep, ON_SimpleArray<ON_Curve*>* pOutCurves, bool nakedOnly, bool nakedOuter, bool nakedInner)
 {
   RHCHECK_LICENSE
@@ -1192,6 +1200,18 @@ RH_C_FUNCTION int ON_BrepVertex_EdgeIndices(const ON_Brep* pConstBrep, int verte
   }
 
   return 0;
+}
+
+RH_C_FUNCTION double ON_BrepVertex_Tolerance(const ON_Brep* pConstBrep, int vertex_index)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pConstBrep)
+  {
+    const ON_BrepVertex* pVertex = pConstBrep->Vertex(vertex_index);
+    if (pVertex)
+      rc = pVertex->m_tolerance;
+  }
+  return rc;
 }
 
 RH_C_FUNCTION int ON_Brep_FaceEdgeIndices(const ON_Brep* pConstBrep, int face_index, ON_SimpleArray<int>* ei)
@@ -2001,6 +2021,79 @@ RH_C_FUNCTION int ON_BrepFaceSide_Face(const ON_Brep* pConstBrep, int region_ind
 }
 
 #endif
+
+// Proxy Brep information is not currently available in stand alone OpenNURBS build
+#if !defined(RHINO3DM_BUILD) // https://mcneel.myjetbrains.com/youtrack/issue/RH-68365
+
+RH_C_FUNCTION unsigned int ON_BrepVertex_ProxyBrepSubDVertexId(const ON_Brep* pConstBrep, int vertex_index)
+{
+  unsigned int rc = 0;
+  if (pConstBrep)
+  {
+    const ON_BrepVertex* pConstVertex = pConstBrep->Vertex(vertex_index);
+    if (pConstVertex)
+      rc = pConstVertex->ProxyBrepSubDVertexId();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION unsigned int ON_BrepEdge_ProxyBrepSubDEdgeId(const ON_Brep* pConstBrep, int edge_index)
+{
+  unsigned int rc = 0;
+  if (pConstBrep)
+  {
+    const ON_BrepEdge* pConstEdge = pConstBrep->Edge(edge_index);
+    if (pConstEdge)
+      rc = pConstEdge->ProxyBrepSubDEdgeId();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION unsigned int ON_BrepFace_ProxyBrepSubDFaceId(const ON_Brep* pConstBrep, int face_index)
+{
+  unsigned int rc = 0;
+  if (pConstBrep)
+  {
+    const ON_BrepFace* pConstFace = pConstBrep->Face(face_index);
+    if (pConstFace)
+      rc = pConstFace->ProxyBrepSubDFaceId();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION unsigned int ON_BrepFace_PackId(const ON_Brep* pConstBrep, int face_index)
+{
+  unsigned int rc = 0;
+  if (pConstBrep)
+  {
+    const ON_BrepFace* pConstFace = pConstBrep->Face(face_index);
+    if (pConstFace)
+      rc = pConstFace->PackId();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_BrepFace_ClearPackId(ON_Brep* pBrep, int face_index)
+{
+  if (pBrep)
+  {
+    ON_BrepFace* pFace = pBrep->Face(face_index);
+    if (pFace)
+      pFace->ClearPackId();
+  }
+}
+
+RH_C_FUNCTION void ON_BrepFace_SetPackIdForExperts(ON_Brep* pBrep, int face_index, unsigned int pack_id)
+{
+  if (pBrep)
+  {
+    ON_BrepFace* pFace = pBrep->Face(face_index);
+    if (pFace)
+      pFace->SetPackIdForExperts(pack_id);
+  }
+}
+
+#endif // !defined(RHINO3DM_BUILD)
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Meshing and mass property calculations are not available in stand alone opennurbs

@@ -1,8 +1,8 @@
 # rhino3dm build scripts
 
-Last updated by dan@mcneel.com on May 4, 2020
+Last updated by luis@mcneel.com on February 24, 2023
 
-This folder contains scripts that can used to build rhino3dm for the supported platforms.  The build process for rhino3dm is run on [CircleCi](https://circleci.com/).  That said, this process can be tested locally by using these scripts.
+This folder contains scripts that can used to build rhino3dm for the supported platforms.  The build process for rhino3dm is run on GitHub Actions.  That said, this process can be tested locally by using these scripts.
 
 **WARNING**: Targeting python is not yet supported from these scripts, but is planned.
 

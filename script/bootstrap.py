@@ -308,6 +308,8 @@ def check_git(build_tool):
         #version_output = (p.communicate()[0].splitlines()[0]).decode("utf-8")
         #running_version = re.sub(r'git version\s(\d{0,5}.\d{0,5}.\d{0,5}).*', r'\1', version_output, re.MULTILINE)
         
+    if _platform == "darwin":
+        running_version = running_version.split()[0]
     if _platform == "win32":
         running_version = running_version.split(".windows")[0]
 
@@ -600,7 +602,7 @@ def check_msbuild(build_tool):
 
     # prepare to do some searching
     drive_prefix = os.path.splitdrive(sys.executable)[0]
-    program_files = os.environ.get("PROGRAMFILES(X86)")
+    program_files = os.environ.get("PROGRAMFILES")
 
     running_version = ''
     msbuild_path = ''
@@ -610,18 +612,28 @@ def check_msbuild(build_tool):
         visual_studio_path = os.path.join(drive_prefix, program_files, "Microsoft Visual Studio")
         if os.path.exists(visual_studio_path):
             versions_found = []
-            vs_ver_subsearch = "\\20??\\Professional"
+            vs_ver_subsearch = "\\20??\\*"
             if glob.glob(visual_studio_path + vs_ver_subsearch):
                 path_to_search = visual_studio_path
                 only_folders = [d for d in listdir(path_to_search) if isdir(join(path_to_search, d))]
-        
+
                 for folder in only_folders:
                     if folder.startswith("20"):
                         versions_found.append(folder)
 
             if versions_found:
                 latest_version = str(max(versions_found))
-                path_to_search = os.path.join(visual_studio_path, latest_version, "Professional", "MSBuild", "Current", "Bin", "MSBuild.exe")
+                vs_path_version = os.path.join(visual_studio_path, latest_version)
+                vs_editions = os.listdir(vs_path_version)
+                vs_edition = vs_editions[0]
+                if len(vs_editions) > 1:
+                    if "Enterprise" in vs_editions:
+                        vs_edition = "Enterprise"
+                    elif "Professional" in vs_editions:
+                        vs_edition = "Professional"
+                    elif "Community" in vs_editions:
+                        vs_edition = "Community"
+                path_to_search = os.path.join(vs_path_version, vs_edition, "MSBuild", "Current", "Bin", "MSBuild.exe")
                 if os.path.exists(path_to_search):
                     msbuild_path = path_to_search
 
@@ -658,6 +670,8 @@ def check_msbuild(build_tool):
                         versions_found[version_id] = folder
 
             if versions_found:
+                #debug
+                print(versions_found)
                 sorted_versions_found = sorted(versions_found, key=split_by_numbers)
                 if sorted_versions_found:
                     version_id = sorted_versions_found[-1]

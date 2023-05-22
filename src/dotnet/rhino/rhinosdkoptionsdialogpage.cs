@@ -24,7 +24,8 @@ namespace Rhino.UI
     /// For internal use in determining the page type.  RhinoMac uses this
     /// to ensure pages are sized properly when hosting them.
     /// </summary>
-    internal enum PageType
+    /// <since>8.0</since>
+    public enum PageType
     {
       Options,
       DocumentProperties
@@ -35,7 +36,8 @@ namespace Rhino.UI
     /// For internal use in determining the page type.  RhinoMac uses this
     /// to ensure pages are sized properly when hosting them.
     /// </summary>
-    internal PageType OptionsPageType { get; set; } = PageType.Options;
+    /// <since>8.0</since>
+    public PageType OptionsPageType { get; internal set; } = PageType.Options;
   }
 }
 #endif

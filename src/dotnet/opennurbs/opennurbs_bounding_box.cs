@@ -587,7 +587,7 @@ namespace Rhino.Geometry
       Vector3d diag = Diagonal;
       if (tolerance < 0.0)
       {
-        // compute scale invarient tolerance
+        // compute scale invariant tolerance
         tolerance = diag.MaximumCoordinate * RhinoMath.SqrtEpsilon;
       }
       int rc = 0;

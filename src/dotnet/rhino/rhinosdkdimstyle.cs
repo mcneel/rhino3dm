@@ -155,37 +155,17 @@ namespace Rhino.DocObjects
       return base.NonConstPointer();
     }
 
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.DimStyle"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.DimStyle;
+
     /// <since>5.0</since>
-    public bool IsReference
-    {
-      get
-      {
-#if RHINO_SDK
-        if(m_doc == null || m_id == Guid.Empty)
-          return false;
-        int index = Index;
-        return UnsafeNativeMethods.CRhinoDimStyle_IsReference(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
-      }
-    }
+    public override bool IsReference => base.IsReference;
 
     /// <since>6.0</since>
-    public bool IsDeleted
-    {
-      get
-      {
-#if RHINO_SDK
-        if (m_doc == null || m_id == Guid.Empty)
-          return false;
-        int index = Index;
-        return UnsafeNativeMethods.CRhinoDimStyle_IsDeleted(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
-      }
-    }
+    public override bool IsDeleted => base.IsDeleted;
 
     /// <since>6.0</since>
     public Font Font
@@ -1078,16 +1058,6 @@ namespace Rhino.DocObjects
     }
 
 #endregion string properties
-
-    /// <summary> Returns <see cref="ModelComponentType.ModelGeometry"/>. </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get
-      {
-        return ModelComponentType.DimStyle;
-      }
-    }
 
 #region field overrides
 

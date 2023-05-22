@@ -16,6 +16,15 @@ BND_Brep::BND_Brep(ON_Brep* brep, const ON_ModelComponentReference* compref)
   SetTrackedPointer(brep, compref);
 }
 
+BND_Brep* BND_Brep::TryConvertBrep(const BND_GeometryBase& geometry)
+{
+  const ON_Geometry* g = geometry.GeometryPointer();
+  ON_Brep* brep = g ? g->BrepForm(nullptr) : nullptr;
+  if (brep)
+    return new BND_Brep(brep, nullptr);
+  return nullptr;
+}
+
 BND_Brep* BND_Brep::CreateFromMesh(const BND_Mesh& mesh, bool trimmedTriangles)
 {
   const ON_MeshTopology& top = mesh.m_mesh->Topology();
@@ -168,8 +177,6 @@ BND_BrepFaceList BND_Brep::GetFaces()
   return BND_BrepFaceList(m_brep, m_component_ref);
 }
 
-
-
 BND_BrepFaceList::BND_BrepFaceList(ON_Brep* brep, const ON_ModelComponentReference& compref)
 {
   m_component_reference = compref;
@@ -178,6 +185,11 @@ BND_BrepFaceList::BND_BrepFaceList(ON_Brep* brep, const ON_ModelComponentReferen
 
 BND_BrepFace* BND_BrepFaceList::GetFace(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_BrepFace* face = m_brep->Face(i);
   if (nullptr == face)
     return nullptr;
@@ -249,6 +261,7 @@ BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
   return new BND_Mesh(mesh, &m_component_ref);
 }
 
+
 BND_BrepSurfaceList BND_Brep::GetSurfaces()
 {
   return BND_BrepSurfaceList(m_brep, m_component_ref);
@@ -268,6 +281,11 @@ BND_BrepSurfaceList::BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentR
 
 BND_Surface* BND_BrepSurfaceList::GetSurface(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_Surface* surface = nullptr;
   if (i >= 0 && i < m_brep->m_S.Count())
   {
@@ -286,10 +304,58 @@ BND_BrepEdgeList::BND_BrepEdgeList(ON_Brep* brep, const ON_ModelComponentReferen
 
 BND_BrepEdge* BND_BrepEdgeList::GetEdge(int i)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
   ON_BrepEdge* edge = m_brep->Edge(i);
   if (nullptr == edge)
     return nullptr;
   return new BND_BrepEdge(edge, &m_component_reference);
+}
+
+BND_BrepVertex::BND_BrepVertex(ON_BrepVertex* vertex, const ON_ModelComponentReference* compref)
+  :BND_Point(vertex, compref)
+{
+  m_vertex = vertex;
+}
+
+
+BND_BrepVertexList::BND_BrepVertexList(ON_Brep* brep, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_brep = brep;
+}
+
+BND_BrepVertexList BND_Brep::GetVertices()
+{
+  return BND_BrepVertexList(m_brep, m_component_ref);
+}
+
+
+BND_BrepVertex* BND_BrepVertexList::GetVertex(int i) {
+
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw pybind11::index_error();
+#endif
+
+  ON_BrepVertex* vertex = m_brep->Vertex(i);
+  if (nullptr == vertex)
+    return nullptr;
+  return new BND_BrepVertex(vertex, &m_component_reference);
+
+}
+
+BND_TUPLE BND_BrepVertex::EdgeIndices() const {
+
+  int count = m_vertex->m_ei.Count();
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+    SetTuple(rc, i, m_vertex->m_ei[i]);
+  return rc;
+
 }
 
 
@@ -300,6 +366,12 @@ namespace py = pybind11;
 void initBrepBindings(pybind11::module& m)
 {
   py::class_<BND_BrepEdge, BND_CurveProxy>(m, "BrepEdge")
+    ;
+
+  py::class_<BND_BrepVertex, BND_Point>(m, "BrepVertex")
+    .def_property_readonly("VertexIndex", &BND_BrepVertex::VertexIndex)
+    .def_property_readonly("EdgeCount", &BND_BrepVertex::EdgeCount)
+    .def("EdgeIndices", &BND_BrepVertex::EdgeIndices)
     ;
 
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")
@@ -325,8 +397,14 @@ void initBrepBindings(pybind11::module& m)
     .def("__getitem__", &BND_BrepEdgeList::GetEdge)
     ;
 
+  py::class_<BND_BrepVertexList>(m, "BrepVertexList")
+    .def("__len__", &BND_BrepVertexList::Count)
+    .def("__getitem__", &BND_BrepVertexList::GetVertex)
+    ;
+
   py::class_<BND_Brep, BND_GeometryBase>(m, "Brep")
     .def(py::init<>())
+    .def_static("TryConvertBrep", &BND_Brep::TryConvertBrep, py::arg("geometry"))
     .def_static("CreateFromMesh", &BND_Brep::CreateFromMesh, py::arg("mesh"), py::arg("trimmedTriangles"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox, py::arg("box"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox2, py::arg("box"))
@@ -340,6 +418,7 @@ void initBrepBindings(pybind11::module& m)
     .def_property_readonly("Faces", &BND_Brep::GetFaces)
     .def_property_readonly("Surfaces", &BND_Brep::GetSurfaces)
     .def_property_readonly("Edges", &BND_Brep::GetEdges)
+    .def_property_readonly("Vertices", &BND_Brep::GetVertices)
     .def_property_readonly("IsSolid", &BND_Brep::IsSolid)
     .def_property_readonly("IsManifold", &BND_Brep::IsManifold)
     .def_property_readonly("IsSurface", &BND_Brep::IsSurface)
@@ -354,6 +433,12 @@ using namespace emscripten;
 void initBrepBindings(void*)
 {
   class_<BND_BrepEdge, base<BND_CurveProxy>>("BrepEdge")
+    ;
+
+  class_<BND_BrepVertex, base<BND_Point>>("BrepVertex")
+    .property("vertexIndex", &BND_BrepVertex::VertexIndex)
+    .property("edgeCount", &BND_BrepVertex::EdgeCount)
+    .property("edgeIndices", &BND_BrepVertex::EdgeIndices)
     ;
 
   class_<BND_BrepFace, base<BND_SurfaceProxy>>("BrepFace")
@@ -379,6 +464,11 @@ void initBrepBindings(void*)
     .function("get", &BND_BrepEdgeList::GetEdge, allow_raw_pointers())
     ;
 
+  class_<BND_BrepVertexList>("BrepVertexList")
+    .property("count", &BND_BrepVertexList::Count)
+    .function("get", &BND_BrepVertexList::GetVertex, allow_raw_pointers())
+    ;
+
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")
     .constructor<>()
     .class_function("createFromMesh", &BND_Brep::CreateFromMesh, allow_raw_pointers())
@@ -394,6 +484,7 @@ void initBrepBindings(void*)
     .function("faces", &BND_Brep::GetFaces)
     .function("surfaces", &BND_Brep::GetSurfaces)
     .function("edges", &BND_Brep::GetEdges)
+    .function("vertices", &BND_Brep::GetVertices)
     .property("isSolid", &BND_Brep::IsSolid)
     .property("isManifold", &BND_Brep::IsManifold)
     .property("isSurface", &BND_Brep::IsSurface)

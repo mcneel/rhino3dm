@@ -6,6 +6,8 @@ using Rhino.Render;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Geometry;
 using Rhino.FileIO;
+using Rhino.ApplicationSettings;
+using Rhino.Display;
 
 namespace Rhino.DocObjects
 {
@@ -19,7 +21,7 @@ namespace Rhino.DocObjects
 #if RHINO_SDK
     readonly RhinoDoc m_doc;
 #endif
-    readonly Guid m_id=Guid.Empty;
+    readonly Guid m_id = Guid.Empty;
     readonly FileIO.File3dm m_onx_model;
     #endregion
 
@@ -76,7 +78,7 @@ namespace Rhino.DocObjects
 
     // serialization constructor
     private Layer(SerializationInfo info, StreamingContext context)
-      : base (info, context)
+      : base(info, context)
     {
     }
 
@@ -131,7 +133,7 @@ namespace Rhino.DocObjects
       if (null != m_doc)
       {
         IntPtr const_ptr_this = ConstPointer();
-        if(UnsafeNativeMethods.CRhinoLayerTable_CommitChanges(m_doc.RuntimeSerialNumber, const_ptr_this, m_id)
+        if (UnsafeNativeMethods.CRhinoLayerTable_CommitChanges(m_doc.RuntimeSerialNumber, const_ptr_this, m_id)
           && IsNonConst)
         {
           // 9 Mar 2019 S. Baer (RH-51299)
@@ -164,7 +166,7 @@ namespace Rhino.DocObjects
       var parent = m__parent as LayerHolder;
       return parent != null ? parent.ConstPointer() : IntPtr.Zero;
     }
-    
+
     internal override IntPtr _InternalDuplicate(out bool applymempressure)
     {
       applymempressure = false;
@@ -183,6 +185,43 @@ namespace Rhino.DocObjects
     }
 
     #region properties
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.Layer"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.Layer;
+
+    /// <summary>
+    /// Gets or sets the status of the layer.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ComponentStatus ComponentStatus
+    {
+      get
+      {
+        return base.ComponentStatus;
+      }
+      set
+      {
+        base.ComponentStatus = value;
+        InternalCommitChanges();
+      }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this layer has been deleted and is 
+    /// currently in the Undo buffer.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsDeleted => base.IsDeleted;
+
+    /// <summary>
+    /// Gets a value indicting whether this layer is a referenced layer. 
+    /// Referenced layers are part of referenced documents.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsReference => base.IsReference;
+
     /// <summary>Gets or sets the name of this layer.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_sellayer.vb' lang='vbnet'/>
@@ -256,7 +295,7 @@ namespace Rhino.DocObjects
         return false;
 
       // ON_ModelComponent::NamePathSeparator
-      const string delimeter = @"::";
+      string delimeter = NamePathSeparator;
 
       string name = null;
       for (var i = 0; i < file.AllLayers.Count; i++)
@@ -271,8 +310,7 @@ namespace Rhino.DocObjects
         {
           var child_name = name;
           name = layer_name;
-          if (!string.IsNullOrEmpty(delimeter))
-            name += delimeter;
+          name += delimeter;
           name += child_name;
         }
 
@@ -299,6 +337,7 @@ namespace Rhino.DocObjects
     /// Gets or sets the index of this layer.
     /// </summary>
     /// <since>5.0</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Use the Index property.")]
     public int LayerIndex
     {
@@ -619,7 +658,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets the visibility of this layer.
+    /// Gets or sets the global visibility of this layer.
     /// </summary>
     /// <since>5.0</since>
     public bool IsVisible
@@ -747,33 +786,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Returns <see cref="ModelComponentType.Layer"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get { return ModelComponentType.Layer; }
-    }
-
-    /// <summary>
-    /// Gets or sets the status of the layer.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ComponentStatus ComponentStatus
-    {
-      get
-      {
-        return base.ComponentStatus;
-      }
-      set
-      {
-        base.ComponentStatus = value;
-        InternalCommitChanges();
-      }
-    }
-
-    /// <summary>
-    /// The persistent viability setting is used for layers whose visibility can
+    /// The global persistent visibility setting is used for layers whose visibility can
     /// be changed by a "parent" object. A common case is when a layer is a
     /// child layer (ParentId is not nil). In this case, when a parent layer is
     /// turned off, then child layers are also turned off. The persistent
@@ -798,13 +811,66 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Set the persistent visibility setting for this layer
+    /// Set the global persistent visibility setting for this layer.
     /// </summary>
     /// <param name="persistentVisibility"></param>
     /// <since>5.5</since>
     public void SetPersistentVisibility(bool persistentVisibility)
     {
       SetBool(UnsafeNativeMethods.LayerBool.PersistentVisibility, persistentVisibility);
+    }
+
+    /// <summary>
+    /// Gets or sets the global persistent visibility setting for this layer.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool PersistentVisibility
+    {
+      get { return GetBool(UnsafeNativeMethods.LayerBool.PersistentVisibility); }
+      set { SetBool(UnsafeNativeMethods.LayerBool.PersistentVisibility, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the model visiblity of this layer.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ModelIsVisible
+    {
+      get { return GetBool(UnsafeNativeMethods.LayerBool.ModelIsVisible); }
+      set { SetBool(UnsafeNativeMethods.LayerBool.ModelIsVisible, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the model persistent visibility of this layer.
+    /// The persistent viability setting is used for layers whose visibility can be changed by a parent layer. 
+    /// In this case, when a parent layer is turned off, then child layers are also turned off. 
+    /// The persistent visibility setting determines what happens when the parent is turned on again.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ModelPersistentVisibility
+    {
+      get { return GetBool(UnsafeNativeMethods.LayerBool.ModelPersistentVisibility); }
+      set { SetBool(UnsafeNativeMethods.LayerBool.ModelPersistentVisibility, value); }
+    }
+
+    /// <summary>
+    /// Remove any model persistent visibility setting from this layer.
+    /// </summary>
+    /// <since>8.0</since>
+    public void UnsetModelPersistentVisibility()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_UnsetModelPersistentVisibility(ptr_this);
+    }
+
+    /// <summary>
+    /// Remove any model visibility setting so the layer's global setting will be used for all viewports.
+    /// </summary>
+    /// <since>8.0</since>
+    public void DeleteModelVisible()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_DeleteModelVisible(ptr_this);
     }
 
     /// <summary>
@@ -863,47 +929,70 @@ namespace Rhino.DocObjects
       set { SetBool(UnsafeNativeMethods.LayerBool.IsExpanded, value); }
     }
 
+#if RHINO_SDK
+
     /// <summary>
-    /// Gets a value indicating whether this layer has been deleted and is 
-    /// currently in the Undo buffer.
+    /// Returns true if the layer has one or more selected Rhino objects.
     /// </summary>
-    /// <since>5.0</since>
-    public bool IsDeleted
+    /// <param name="checkSubObjects">
+    /// If true, the search will include objects that have some subset of the object selected, like some edges of a Brep.
+    /// If false, objects where the entire object is not selected are ignored.</param>
+    /// <returns>true if the layer has selected Rhino objects, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool HasSelectedObjects(bool checkSubObjects)
+    {
+      return UnsafeNativeMethods.CRhinoLayer_HasSelectedObjects(m_doc.RuntimeSerialNumber, Index, checkSubObjects);
+    }
+
+    /// <summary>
+    /// Returns true if the layer is the current layer.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool IsCurrent
     {
       get
       {
-#if RHINO_SDK
         if (null == m_doc)
           return false;
-        int index = Index;
-        return UnsafeNativeMethods.CRhinoLayer_IsDeleted(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
+        int currentIndex = UnsafeNativeMethods.CRhinoLayerTable_CurrentLayerIndex(m_doc.RuntimeSerialNumber);
+        return Index == currentIndex;
       }
     }
 
     /// <summary>
-    /// Gets a value indicting whether this layer is a referenced layer. 
-    /// Referenced layers are part of referenced documents.
+    /// Returns true if the layer is a parent layer of the layer tree from a linked instance definition
+    /// or the layer tree from a worksession reference model.
     /// </summary>
-    /// <since>5.0</since>
-    public bool IsReference
+    /// <since>8.0</since>
+    public bool IsReferenceParentLayer
     {
       get
       {
-#if RHINO_SDK
         if (null == m_doc)
           return false;
-        int index = Index;
-        return UnsafeNativeMethods.CRhinoLayer_IsReference(m_doc.RuntimeSerialNumber, index);
-#else
-        return false;
-#endif
+        return UnsafeNativeMethods.CRhinoLayer_IsReferenceParentLayer(m_doc.RuntimeSerialNumber, Index);
       }
     }
 
-#if RHINO_SDK
+    /// <summary>
+    /// Returns parent of a layer.
+    /// </summary>
+    /// <param name="rootLevelParent">
+    /// If true, the root level parent is returned. The root level parent never has a parent.
+    /// If false, the immediate parent is returned. The immediate parent may have a parent.
+    /// </param>
+    /// <returns>The parent layer, or null if the layer does not have a parent.</returns>
+    /// <since>8.0</since>
+    public Layer ParentLayer(bool rootLevelParent)
+    {
+      if (null == m_doc)
+        return null;
+      int parent = UnsafeNativeMethods.CRhinoLayer_ParentLayer(m_doc.RuntimeSerialNumber, Index, rootLevelParent);
+      if (parent != RhinoMath.UnsetIntIndex)
+        return new Layer(parent, m_doc);
+      return null;
+    }
+
     /// <summary>
     /// Gets or sets the <see cref="Render.RenderMaterial"/> for objects on
     /// this layer that have MaterialSource() == MaterialFromLayer.
@@ -920,7 +1009,7 @@ namespace Rhino.DocObjects
         // then return the cached set to render material.
         if (m_set_render_material_to_null || m_set_render_material != Guid.Empty)
         {
-          var result = RenderContent.FromId(m_doc, m_set_render_material) as RenderMaterial;
+          var result = Render.RenderContent.FromId(m_doc, m_set_render_material) as RenderMaterial;
           return result;
         }
         // Get the document Id
@@ -930,7 +1019,7 @@ namespace Rhino.DocObjects
         // Get the render material associated with the layers render material
         // index into the documents material table.
         var id = UnsafeNativeMethods.Rdk_RenderContent_LayerMaterialInstanceId(doc_id, pointer);
-        var content = RenderContent.FromId(m_doc, id) as RenderMaterial;
+        var content = Render.RenderContent.FromId(m_doc, id) as RenderMaterial;
         return content;
       }
       set
@@ -1028,20 +1117,19 @@ namespace Rhino.DocObjects
     /// <code source='examples\py\ex_addlayer.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
-    public static bool IsValidName(string name)
-    {
-      return UnsafeNativeMethods.RHC_IsValidName(name);
-    }
+    /// <deprecated>8.0</deprecated>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Obsolete("Use ModelComponent.IsValidComponentName")]
+    public static bool IsValidName(string name) => ModelComponent.IsValidComponentName(name);
 
     /// <summary>
     /// The string "::" (colon,colon) is used to
     /// separate parent and child layer names.
     /// </summary>
     /// <since>6.0</since>
-    public static string PathSeparator
-    {
-      get { return "::"; }
-    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Obsolete("Use ModelComponent.NamePathSeparator")]
+    public static string PathSeparator => ModelComponent.NamePathSeparator;
 
     /// <summary>
     /// Get a layer name's "leaf" level name
@@ -1150,7 +1238,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets immediate children of this layer. Note that child layers may have their own children.
     /// </summary>
-    /// <returns>Array of child layers. null if this layer does not have any children.</returns>
+    /// <returns>Array of child layers, or null if this layer does not have any children.</returns>
     /// <since>5.0</since>
     public Layer[] GetChildren()
     {
@@ -1171,7 +1259,139 @@ namespace Rhino.DocObjects
       child_indices.Dispose();
       return rc;
     }
+
 #endif
+
+    /// <summary>
+    /// Gets and sets the initial per viewport visibility of this layer in newly created detail views.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool PerViewportIsVisibleInNewDetails
+    {
+      get => GetBool(UnsafeNativeMethods.LayerBool.PerViewportIsVisibleInNewDetails);
+      set => SetBool(UnsafeNativeMethods.LayerBool.PerViewportIsVisibleInNewDetails, value);
+    }
+
+    /// <summary>
+    /// Layer set to participate with all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ClipParticipationForAll
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.LayerBool.ClipParticipationForAll);
+      }
+    }
+
+    /// <summary>
+    /// Layer set to participate with no clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public bool ClipParticipationForNone
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.LayerBool.ClipParticipationForNone);
+      }
+    }
+
+    /// <summary>
+    /// Gets the clipping plane participation list for this Layer.
+    /// </summary>
+    /// <returns>
+    /// null if an object participates with all clipping planes.
+    /// An empty array if an object participates with no clipping planes.
+    /// A list of ids if an object participates with a specific set of ids
+    /// </returns>
+    /// <since>8.0</since>
+    public Guid[] ClipParticipationList()
+    {
+      if (ClipParticipationForAll)
+        return null;
+      if (ClipParticipationForNone)
+        return new Guid[0];
+      using (var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid())
+      {
+        IntPtr constPtrThis = ConstPointer();
+        IntPtr ptrIds = guidArray.NonConstPointer();
+        UnsafeNativeMethods.ON_Layer_ClipParticipationList(constPtrThis, ptrIds);
+        return guidArray.ToArray();
+      }
+    }
+
+
+    /// <summary>
+    /// The object will participate in all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetClipParticipationForAll()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetClipParticipation(ptrThis, true, false, IntPtr.Zero);
+      InternalCommitChanges();
+    }
+
+    /// <summary>
+    /// Object is immune to the effects of all clipping planes
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetClipParticipationForNone()
+    {
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetClipParticipation(ptrThis, false, true, IntPtr.Zero);
+      InternalCommitChanges();
+    }
+
+    /// <summary>
+    /// Object interacts with a specific list of clipping planes
+    /// </summary>
+    /// <param name="planeIds"></param>
+    /// <since>8.0</since>
+    public void SetClipParticipationList(System.Collections.Generic.IEnumerable<Guid> planeIds)
+    {
+      using (var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid(planeIds))
+      {
+        IntPtr ptrThis = NonConstPointer();
+        IntPtr ptrIds = guidArray.ConstPointer();
+        UnsafeNativeMethods.ON_Layer_SetClipParticipation(ptrThis, false, false, ptrIds);
+        InternalCommitChanges();
+      }
+    }
+
+    ///<summary>
+    /// Get an optional custom section style associated with these attributes.
+    ///</summary>
+    /// <since>8.0</since>
+    public SectionStyle GetCustomSectionStyle()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_Layer_GetCustomSectionStyle(const_ptr_this);
+      if (ptr_sectionstyle == IntPtr.Zero)
+        return null;
+      return new SectionStyle(ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void SetCustomSectionStyle(SectionStyle sectionStyle)
+    {
+      if (sectionStyle == null)
+      {
+        RemoveCustomSectionStyle();
+        return;
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
+    }
+
+    /// <since>8.0</since>
+    public void RemoveCustomSectionStyle()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
+    }
     #endregion
 
     #region user strings
@@ -1758,6 +1978,36 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, IntPtr.Zero, true);
     }
 
+    /// <summary>
+    /// Adds all of the layer in the specified layer path, beginning with the root.
+    /// Layer paths contain one or more valid layers names, with each name separated by <see cref="ModelComponent.NamePathSeparator"/>.
+    /// For example, "Grandfather::Father::Son".
+    /// </summary>
+    /// <param name="layerPath">The layer path.</param>
+    /// <returns>The index of the last layer created if successful, <see cref="RhinoMath.UnsetIntIndex"/> on failure.</returns>
+    /// <since>8.0</since>
+    public int AddPath(string layerPath)
+    {
+      return AddPath(layerPath, AppearanceSettings.DefaultLayerColor);
+    }
+
+    /// <summary>
+    /// Adds all of the layer in the specified layer path, beginning with the root.
+    /// Layer paths contain one or more valid layers names, with each name separated by <see cref="ModelComponent.NamePathSeparator"/>.
+    /// For example, "Grandfather::Father::Son".
+    /// </summary>
+    /// <param name="layerPath">The layer path.</param>
+    /// <param name="layerColor">The color of newly created layers. The colors of layers that already exist will not be changed.</param>
+    /// <returns>The index of the last layer created if successful, <see cref="RhinoMath.UnsetIntIndex"/> on failure.</returns>
+    /// <since>8.0</since>
+    public int AddPath(string layerPath, System.Drawing.Color layerColor)
+    {
+      if (string.IsNullOrEmpty(layerPath))
+        return -1;
+ 
+      return UnsafeNativeMethods.CRhinoLayerUtilities_AddFromFullPathName(m_doc.RuntimeSerialNumber, layerPath, layerColor.ToArgb());
+    }
+
     /// <summary>Modifies layer settings.</summary>
     /// <param name="newSettings">This information is copied.</param>
     /// <param name="layerIndex">
@@ -1943,6 +2193,24 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Deletes layers.
+    /// </summary>
+    /// <param name="layerIndices">An enumeration containing the indices of the layers to delete.</param>
+    /// <param name="quiet">
+    /// If true, no warning message boxes will appear.
+    /// </param>
+    /// <returns>the number of layers that were deleted.</returns>
+    /// <since>8.0</since>
+    public int Delete(IEnumerable<int> layerIndices, bool quiet)
+    {
+      using (var indices = new SimpleArrayInt(layerIndices))
+      {
+        IntPtr ptr_const_indices = indices.ConstPointer();
+        return UnsafeNativeMethods.CRhinoLayerTable_DeleteLayers(m_doc.RuntimeSerialNumber, ptr_const_indices, quiet);
+      }
+    }
+
+    /// <summary>
     /// Deletes a layer and all geometry objects on a layer
     /// </summary>
     /// <param name="layerIndex">
@@ -2122,6 +2390,21 @@ namespace Rhino.DocObjects.Tables
     {
       return base.GetEnumerator();
     }
+
+    /// <summary>
+    /// Updates the layer sort order
+    /// </summary>
+    /// <param name="layerIndices">The sort order.</param>
+    /// <since>8.0</since>
+    public void Sort(IEnumerable<int> layerIndices)
+    {
+      using (SimpleArrayInt in_indices = new SimpleArrayInt(layerIndices))
+      {
+        IntPtr ptr_const_in_indices = in_indices.ConstPointer();
+        UnsafeNativeMethods.CRhinoLayerUtilities_UpdateSortIndices(m_doc.RuntimeSerialNumber, ptr_const_in_indices);
+      }
+    }
   }
+
 }
 #endif

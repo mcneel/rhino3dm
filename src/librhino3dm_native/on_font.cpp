@@ -2,14 +2,14 @@
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_font.h")
 
-RH_C_FUNCTION const ON_Font* ON_Font_GetManagedFont(const RHMONO_STRING* facename, ON_Font::Weight weight, ON_Font::Style style, bool underlined, bool strikeout)
+RH_C_FUNCTION const ON_Font* ON_Font_GetManagedFont(const RHMONO_STRING* facename, ON_Font::Weight weight, ON_Font::Style style, ON_Font::Stretch stretch, bool underlined, bool strikeout)
 {
   INPUTSTRINGCOERCE(_facename, facename);
   return ON_Font::GetManagedFont(
     _facename, 
     weight, 
     style,
-    ON_Font::Stretch::Medium, 
+    stretch, 
     underlined, 
     strikeout, 
     ON_FontMetrics::DefaultLineFeedRatio,
@@ -114,6 +114,13 @@ RH_C_FUNCTION ON_Font::Style ON_Font_Style(const ON_Font* constFont)
   return ON_Font::Style::Unset;
 }
 
+RH_C_FUNCTION ON_Font::Stretch ON_Font_Stretch(const ON_Font* constFont)
+{
+  if (constFont)
+    return constFont->FontStretch();
+  return ON_Font::Stretch::Unset;
+}
+
 RH_C_FUNCTION ON_Font::Weight ON_Font_Weight(const ON_Font* constFont)
 {
   if (constFont)
@@ -125,6 +132,13 @@ RH_C_FUNCTION bool ON_Font_IsBold(const ON_Font* constFont)
 {
   if (constFont)
     return constFont->IsBoldInQuartet();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Font_IsItalic(const ON_Font* constFont)
+{
+  if (constFont)
+    return constFont->IsItalicInQuartet();
   return false;
 }
 
@@ -282,4 +296,58 @@ RH_C_FUNCTION const ON_Font* ON_Font_FromQuartetProperties(const RHMONO_STRING* 
   if (rc)
     return rc->ManagedFont();
   return nullptr;
+}
+
+RH_C_FUNCTION const ON_Font* ON_Font_FromBuffer(int archive_3dm_version, unsigned int archive_on_version, int length, /*ARRAY*/const unsigned char* buffer)
+{
+  // Eliminate potential bogus file versions written
+  if (archive_3dm_version > 5 && archive_3dm_version < 50)
+    return nullptr;
+  
+  const ON_Font* rc = nullptr;
+  if (length > 0 && buffer)
+  {
+    ON_Read3dmBufferArchive archive(length, buffer, false, archive_3dm_version, archive_on_version);
+    ON_Font font_characteristics;
+    if (font_characteristics.Read(archive))
+      rc = font_characteristics.ManagedFont();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_Write3dmBufferArchive* ON_Font_WriteBufferArchive_NewWriter(const ON_Font* pConstObject, int* rhinoversion, unsigned int* length)
+{
+  ON_Write3dmBufferArchive* rc = nullptr;
+
+  if (pConstObject && length && nullptr != rhinoversion)
+  {
+    *length = 0;
+    size_t sz = 2 * sizeof(ON_Font);
+
+    // 23 Oct 2019 - If .NET user passes a huge value, just clamp it and continue.
+    const int current_3dm_version = ON_BinaryArchive::CurrentArchiveVersion();
+    if (*rhinoversion > current_3dm_version)
+      *rhinoversion = current_3dm_version;
+
+    if (*rhinoversion < 60)
+    {
+      // ON_Font objects require at least a version 6 3dm archive.
+      *rhinoversion = 60;
+    }
+
+    // figure out the appropriate version number
+    unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
+
+    rc = new ON_Write3dmBufferArchive(sz, 0, *rhinoversion, on_version__to_write);
+    if (pConstObject->Write(*rc))
+    {
+      *length = (unsigned int)rc->SizeOfArchive();
+    }
+    else
+    {
+      delete rc;
+      rc = nullptr;
+    }
+  }
+  return rc;
 }

@@ -22,13 +22,6 @@ RH_C_FUNCTION void ON_Material_Default(ON_Material* pMaterial)
     *pMaterial = ON_Material::Unset;
 }
 
-RH_C_FUNCTION int ON_Material_Index(const ON_Material* pConstMaterial)
-{
-  if( pConstMaterial )
-    return pConstMaterial->Index();
-  return -1;
-}
-
 RH_C_FUNCTION int ON_Material_FindBitmapTexture(const ON_Material* pConstMaterial, const RHMONO_STRING* filename)
 {
   int rc = -1;

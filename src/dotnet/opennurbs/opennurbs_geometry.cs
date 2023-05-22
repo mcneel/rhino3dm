@@ -152,7 +152,7 @@ namespace Rhino.Geometry
       return CreateGeometryHelper(ptr_new_geometry, null);
     }
 
-    internal GeometryBase(IntPtr ptr, object parent, int subobjectIndex)
+    internal GeometryBase(IntPtr raw_ptr, object parent, int subobjectIndex)
     {
       if (subobjectIndex >= 0 && parent == null)
       {
@@ -160,9 +160,13 @@ namespace Rhino.Geometry
       }
 
       if (null == parent)
-        ConstructNonConstObject(ptr);
+      {
+        ConstructNonConstObject(raw_ptr);
+      }
       else
+      {
         ConstructConstObject(parent, subobjectIndex);
+      }
     }
 
     internal static GeometryBase CreateGeometryHelper(IntPtr pGeometry, object parent)
@@ -431,6 +435,21 @@ namespace Rhino.Geometry
     {
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.ON_Object_SizeOf(const_ptr_this);
+    }
+
+    /// <summary>
+    /// Returns a CRC calculated from the information that defines the object.
+    /// This CRC can be used as a quick way to see if two objects are not identical.
+    /// </summary>
+    /// <param name="currentRemainder">The current remainder value.</param>
+    /// <returns>CRC of the information the defines the object.</returns>
+    /// <since>7.20</since>
+    [CLSCompliant(false)]
+    public uint DataCRC(uint currentRemainder)
+    {
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-68961
+      var const_ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_Geometry_DataCRC(const_ptr, currentRemainder);
     }
 
     /// <summary>

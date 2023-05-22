@@ -223,6 +223,7 @@ namespace Rhino.Input
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>A command result based on user choice.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.6</deprecated>
     [Obsolete("Use method that requires document")]
     public static Result GetPointOnMesh(Guid meshObjectId, string prompt, bool acceptNothing, out Point3d point)
     {
@@ -262,6 +263,7 @@ namespace Rhino.Input
     /// <param name="point">A point value will be assigned to this out parameter during this call.</param>
     /// <returns>The command result based on user choice.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.6</deprecated>
     [Obsolete("Use version that takes a document.")]
     public static Result GetPointOnMesh(MeshObject meshObject, string prompt, bool acceptNothing, out Point3d point)
     {
@@ -958,16 +960,23 @@ namespace Rhino.Input
     /// <since>6.0</since>
     public static Result GetPolygon(ref int numberSides, ref bool inscribed, out Polyline polyline)
     {
+      return GetPolygon(false, ref numberSides, ref inscribed, out polyline);
+    }
+
+    /// <since>8.0</since>
+    public static Result GetPolygon(bool useActiveLayerLinetype, ref int numberSides, ref bool inscribed, out Polyline polyline)
+    {
       polyline = null;
       using (var points = new SimpleArrayPoint3d())
       {
         IntPtr ptr_points = points.NonConstPointer();
-        var rc = (Result)UnsafeNativeMethods.RHC_RhinoGetPolygon(ref numberSides, ref inscribed, ptr_points);
+        var rc = (Result)UnsafeNativeMethods.RHC_RhinoGetPolygon(useActiveLayerLinetype, ref numberSides, ref inscribed, ptr_points);
         if (rc == Result.Success)
           polyline = new Polyline(points.ToArray());
         return rc;
       }
     }
+
 
     /// <since>5.0</since>
     public static Result GetArc(out Arc arc)
@@ -1999,6 +2008,19 @@ namespace Rhino.Input.Custom
         }
         return values[index];
     }
+
+    /// <summary>
+    /// Sets a command line option value to print "Varies" instead of the regular value. 
+    /// </summary>
+    /// <param name="optionIndex">The option index.</param>
+    /// <param name="varies">True to print "Varies", false to print the option's current value.</param>
+    /// <since>8.0</since>
+    public void SetOptionVaries(int optionIndex, bool varies)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoGet_SetOptionVaries(ptr_this, optionIndex, varies);
+    }
+
     /// <summary>Clear all command options.</summary>
     /// <example>
     /// <code source='examples\vbnet\ex_arraybydistance.vb' lang='vbnet'/>
@@ -2400,6 +2422,20 @@ namespace Rhino.Input.Custom
     }
   }
 
+  /// <summary>
+  /// Behavior for a command line option
+  /// </summary>
+  /// <since>8.0</since>
+  public enum CommandLineOptionType
+  {
+    Simple = 0,
+    Number = 1,
+    Toggle = 2,
+    Color = 3,
+    List = 4,
+    Hidden = 5
+  }
+
   // 29 Jan 2010 - S. Baer
   // Had to change Option class to CommandLineOption. Option is a reserved
   // keyword in some languages (http://msdn.microsoft.com/en-us/library/ms182248.aspx)
@@ -2446,17 +2482,16 @@ namespace Rhino.Input.Custom
       }
     }
 
-    /// <example>
-    /// <code source='examples\vbnet\ex_commandlineoptions.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
-    /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
-    public int CurrentListOptionIndex
+    /// <summary>
+    /// The type of this command line option
+    /// </summary>
+    /// <since>8.0</since>
+    public CommandLineOptionType OptionType
     {
       get
       {
-        return UnsafeNativeMethods.CRhinoCommandOption_OptionIndex(m_ptr, false);
+        int optionType = UnsafeNativeMethods.CRhinoCommandOption_OptionType(m_ptr);
+        return (CommandLineOptionType)optionType;
       }
     }
 
@@ -2511,6 +2546,82 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <example>
+    /// <code source='examples\vbnet\ex_commandlineoptions.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_commandlineoptions.cs' lang='cs'/>
+    /// <code source='examples\py\ex_commandlineoptions.py' lang='py'/>
+    /// </example>
+    /// <since>5.0</since>
+    public int CurrentListOptionIndex
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoCommandOption_OptionIndex(m_ptr, false);
+      }
+    }
+
+    /// <summary>
+    /// If this OptionType is a list, then the option should contain a list of values
+    /// that the user can pick from.
+    /// </summary>
+    /// <param name="english">return the English or local versions of the list options</param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public string[] ListOptions(bool english)
+    {
+      using (var stringList = new ClassArrayString())
+      {
+        IntPtr ptrStringList = stringList.NonConstPointer();
+        UnsafeNativeMethods.CRhinoCommandOption_GetOptionList(m_ptr, english, ptrStringList);
+        return stringList.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="english"></param>
+    /// <param name="offValue"></param>
+    /// <param name="onValue"></param>
+    /// <since>8.0</since>
+    public void ToggleValues(bool english, out string offValue, out string onValue)
+    {
+      offValue = "";
+      onValue = "";
+      using(var shOff = new StringWrapper())
+      using(var shOn = new StringWrapper())
+      {
+        IntPtr ptrOff = shOff.NonConstPointer;
+        IntPtr ptrOn = shOn.NonConstPointer;
+        UnsafeNativeMethods.CRhinoCommandOption_GetToggleValues(m_ptr, english, ptrOff, ptrOn);
+        offValue = shOff.ToString();
+        onValue = shOn.ToString();
+      }
+    }
+
+    /// <since>8.0</since>
+    public bool? CurrentToggleValue
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.CRhinoCommandOption_CurrentToggleValue(m_ptr);
+        if (1 == rc)
+          return true;
+        if (0 == rc)
+          return false;
+        return null;
+      }
+    }
+
+    /// <since>8.0</since>
+    public double CurrentNumericValue
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.CRhinoCommandOption_CurrentNumericValue(m_ptr);
+        return rc;
+      }
+    }
   }
 
   public class OptionToggle : IDisposable

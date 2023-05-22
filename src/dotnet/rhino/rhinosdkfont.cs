@@ -1,8 +1,9 @@
 #pragma warning disable 1591
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 using Rhino.Runtime.InteropWrappers;
-using System.Linq;
 
 namespace Rhino.DocObjects
 {
@@ -10,10 +11,9 @@ namespace Rhino.DocObjects
   {
     // make constructor public after conversation with Steve on slack #dev channel on March 9th 2020
     /// <since>6.26</since>
-    public FontQuartet(string name, string enName, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
+    public FontQuartet(string name, bool supportsRegular, bool supportsBold, bool supportsItalic, bool supportsBoldItalic)
     {
       QuartetName = name;
-      EnglishQuartetName = enName;
       HasRegularFont = supportsRegular;
       HasBoldFont = supportsBold;
       HasItalicFont = supportsItalic;
@@ -21,7 +21,6 @@ namespace Rhino.DocObjects
     }
     /// <since>6.7</since>
     public string QuartetName { get; private set; }
-    public string EnglishQuartetName { get; private set; }
     /// <since>6.7</since>
     public bool HasRegularFont { get; private set; }
     /// <since>6.7</since>
@@ -36,18 +35,86 @@ namespace Rhino.DocObjects
   }
 
   /// <summary>Defines a format for text.</summary>
-  public sealed partial class Font
+  [Serializable]
+  public sealed partial class Font : ISerializable
   {
     readonly IntPtr m_managed_font;
     internal IntPtr ConstPointer() { return m_managed_font; }
 
     /// <since>6.0</since>
-    public Font(string familyName) : this(familyName, FontWeight.Normal, FontStyle.Upright, false, false) { }
+    public Font(string familyName) :
+      this(familyName, FontWeight.Normal, FontStyle.Upright, FontStretch.Medium, false, false) { }
 
     /// <since>6.0</since>
-    public Font(string familyName, FontWeight weight, FontStyle style, bool underlined, bool strikethrough)
+    public Font(string familyName, FontWeight weight, FontStyle style, bool underlined, bool strikethrough) :
+      this(familyName, weight, style, FontStretch.Medium, underlined, strikethrough) { }
+
+    /// <since>8.0</since>
+    public Font(string familyName, FontWeight weight, FontStyle style, FontStretch stretch, bool underlined, bool strikethrough)
     {
-      m_managed_font = UnsafeNativeMethods.ON_Font_GetManagedFont(familyName, weight, style, underlined, strikethrough);
+      m_managed_font = UnsafeNativeMethods.ON_Font_GetManagedFont(familyName, weight, style, stretch, underlined, strikethrough);
+    }
+
+    /// <summary>
+    /// Protected constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    /// <since>8.0</since>
+    internal Font(SerializationInfo info, StreamingContext context)
+    {
+      int archive_3dm_version = info.GetInt32(Runtime.CommonObject.ARCHIVE_3DM_VERSION);
+      int archive_opennurbs_version_int = info.GetInt32(Runtime.CommonObject.ARCHIVE_OPENNURBS_VERSION);
+      uint archive_opennurbs_version = (uint)archive_opennurbs_version_int;
+      byte[] stream = info.GetValue("data", typeof(byte[])) as byte[];
+      IntPtr rc = UnsafeNativeMethods.ON_Font_FromBuffer(archive_3dm_version, archive_opennurbs_version, stream.Length, stream);
+      if (IntPtr.Zero == rc)
+        throw new SerializationException("Unable to read ON_Font from binary archive");
+
+      m_managed_font = rc;
+    }
+
+    /// <summary>
+    /// Populates a System.Runtime.Serialization.SerializationInfo with the data needed to serialize the target object.
+    /// </summary>
+    /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
+    /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    /// <since>8.0</since>
+    [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      Rhino.FileIO.SerializationOptions options = context.Context as Rhino.FileIO.SerializationOptions;
+
+      uint length = 0;
+#if RHINO_SDK
+      int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
+#else
+      int rhino_version = (options != null) ? options.RhinoVersion : 7;
+#endif
+      // 28 Aug 2014 S. Baer (RH-28446)
+      // We switched to 50,60,70,... type numbers after Rhino 4
+      if (rhino_version > 4 && rhino_version < 50)
+        rhino_version *= 10;
+
+      // NOTE: 
+      //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
+      //   if it is too big or the object type requires a different archive version.
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_Font_WriteBufferArchive_NewWriter(m_managed_font, ref rhino_version, ref length);
+
+      if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
+      {
+        int sz = (int)length;
+        IntPtr pByteArray = UnsafeNativeMethods.ON_WriteBufferArchive_Buffer(pWriteBuffer);
+        byte[] bytearray = new byte[sz];
+        System.Runtime.InteropServices.Marshal.Copy(pByteArray, bytearray, 0, sz);
+
+        info.AddValue("version", 10000);
+        info.AddValue(Runtime.CommonObject.ARCHIVE_3DM_VERSION, rhino_version);
+        uint archive_opennurbs_version = UnsafeNativeMethods.ON_WriteBufferArchive_OpenNURBSVersion(pWriteBuffer);
+        info.AddValue(Runtime.CommonObject.ARCHIVE_OPENNURBS_VERSION, (int)archive_opennurbs_version);
+        info.AddValue("data", bytearray);
+      }
+      UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
     }
 
     /// <since>6.7</since>
@@ -125,7 +192,7 @@ namespace Rhino.DocObjects
         for (int i = 0; i < quartetCount; i++)
         {
           UnsafeNativeMethods.ON_FontList_GetQuartet(i, pString, ref regular, ref bold, ref italic, ref boldItalic);
-          rc[i] = new FontQuartet(sw.ToString(), "", regular, bold, italic, boldItalic);
+          rc[i] = new FontQuartet(sw.ToString(), regular, bold, italic, boldItalic);
         }
       }
       return rc;
@@ -271,18 +338,9 @@ namespace Rhino.DocObjects
     }
     
     /// <since>5.0</since>
-    public bool Bold
-    {
-      get
-      {
-        IntPtr const_font_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Font_IsBold(const_font_ptr);
-      }
-    }
-
-    //public bool Bold => (int)Weight > (int)FontWeight.Medium;
+    public bool Bold => UnsafeNativeMethods.ON_Font_IsBold(m_managed_font);
     /// <since>5.0</since>
-    public bool Italic => Style == FontStyle.Italic;
+    public bool Italic => UnsafeNativeMethods.ON_Font_IsItalic(m_managed_font);
     /// <since>6.0</since>
     public bool Underlined => UnsafeNativeMethods.ON_Font_IsUnderlined(m_managed_font);
     /// <since>6.0</since>
@@ -299,6 +357,8 @@ namespace Rhino.DocObjects
     public FontStyle Style => UnsafeNativeMethods.ON_Font_Style(m_managed_font);
     /// <since>6.0</since>
     public FontWeight Weight => UnsafeNativeMethods.ON_Font_Weight(m_managed_font);
+    /// <since>8.0</since>
+    public FontStretch Stretch => UnsafeNativeMethods.ON_Font_Stretch(m_managed_font);
     /// <since>6.0</since>
     public double PointSize => UnsafeNativeMethods.ON_Font_PointSize(m_managed_font);
 

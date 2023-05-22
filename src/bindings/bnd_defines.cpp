@@ -13,6 +13,11 @@ enum class LoftType : int
   Uniform = 5
 };
 
+static bool TransformLine(ON_Line& line, const BND_Transform& xform)
+{
+  return line.Transform(xform.m_xform);
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
@@ -65,6 +70,7 @@ void initDefines(pybind11::module& m)
     .def_property_readonly("Direction", &ON_Line::Direction)
     .def_property_readonly("UnitTangent", &ON_Line::Tangent)
     .def("PointAt", &ON_Line::PointAt, py::arg("t"))
+    .def("Transform", &TransformLine, py::arg("xform"))
     ;
 
   py::enum_<LoftType>(m, "LoftType")
@@ -218,7 +224,7 @@ void initDefines(pybind11::module& m)
     .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
-  py::enum_<ON::EarthCoordinateSystem>(m, "BasePointZero")
+  py::enum_<ON::EarthCoordinateSystem>(m, "BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
@@ -517,7 +523,7 @@ void initDefines(void*)
     .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
-  enum_<ON::EarthCoordinateSystem>("BasePointZero")
+  enum_<ON::EarthCoordinateSystem>("BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)

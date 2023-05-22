@@ -12,7 +12,7 @@ namespace MethodGen
     readonly List<DeclarationList> m_declarations = new List<DeclarationList>();
     private readonly CppSharedEnums m_cpp_enum_imports = new CppSharedEnums();
 
-    public bool Write(string path, string libname)
+    public bool Write(string path, string libname, bool force_write = false)
     {
       var sb = new StringBuilder();
       var sw = new StringWriter(sb);
@@ -74,12 +74,15 @@ using Rhino.Runtime.InteropWrappers;
       sw.Close();
       var output_text = sb.ToString();
 
-      ReplaceIfDifferent(path, output_text);
+      if (force_write)
+        ForceWriteOutput(path, output_text);
+      else
+        ReplaceIfDifferent(path, output_text);
 
       return true;
     }
 
-    internal void WriteEnums(string path)
+    internal void WriteEnums(string path, bool force_write = false)
     {
       var sb = new StringBuilder();
       using (var sw = new StringWriter(sb))
@@ -88,7 +91,22 @@ using Rhino.Runtime.InteropWrappers;
       }
 
       var output_text = sb.ToString();
-      ReplaceIfDifferent(path, output_text);
+      if (force_write)
+        ForceWriteOutput(path, output_text);
+      else
+        ReplaceIfDifferent(path, output_text);
+    }
+
+    private static void ForceWriteOutput(string path, string output_text)
+    {
+      if (string.IsNullOrEmpty(output_text))
+      {
+        // it's empty, we don't need it.
+        if (File.Exists(path))
+          File.Delete(path);
+      }
+      else
+        File.WriteAllText(path, output_text);
     }
 
     private static void ReplaceIfDifferent(string path, string outputText)
@@ -102,9 +120,9 @@ using Rhino.Runtime.InteropWrappers;
       }
     }
 
-    public bool BuildDeclarations(string cppFilePath, bool rhino3dmBuild, string opennurbsPathReplacement)
+    public bool BuildDeclarations(string cppFilePath, bool rhino3dmBuild)
     {
-      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmBuild, opennurbsPathReplacement);
+      DeclarationList d = DeclarationList.Construct(cppFilePath, m_cpp_enum_imports, rhino3dmBuild);
       if (d!=null)
         m_declarations.Add(d);
       return (d != null);
@@ -145,7 +163,7 @@ using Rhino.Runtime.InteropWrappers;
       return sb.ToString();
     }
 
-    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmBuild, string opennurbsPathReplacement)
+    public static DeclarationList Construct(string cppFileName, CppSharedEnums cppEnumImportsToCollect, bool rhino3dmBuild)
     {
       const string RH_C_FUNCTION = "RH_C_FUNCTION";
       const string RH_C_PREPROC = "RH_C_PREPROCESSOR";
@@ -154,8 +172,6 @@ using Rhino.Runtime.InteropWrappers;
 
       var d = new DeclarationList {m_source_filename = cppFileName};
       string source_code = File.ReadAllText(cppFileName);
-      if( !string.IsNullOrWhiteSpace(opennurbsPathReplacement) )
-        source_code = source_code.Replace("../../../opennurbs", opennurbsPathReplacement);
 
       // 3 August 2017 S. Baer
       // rhino3dmBuild really means "run an extremely crude preprocessor that I don't trust"
@@ -834,16 +850,25 @@ using Rhino.Runtime.InteropWrappers;
             return "ref Vector3f";
           }
 
+          if (s.Equals("CRhPointData"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "RhDisplayPoint[]";
+              else
+                return "[In,Out] RhDisplayPoint[]";
+            }
+            return "ref RhDisplayPoint";
+          }
+
           if (s.Equals("ON_3dRay"))
             return "ref Ray3d";
-
-          if (s.Equals("ON_MeshFace"))
-            return "ref MeshFace";
 
           if (s.Equals("ON_X_EVENT"))
             return "ref CurveIntersect";
 
-          if (s.Equals("AR_MeshFace") || s.Equals("MeshFace"))
+          if (s.Equals("ON_MeshFace") || s.Equals("AR_MeshFace") || s.Equals("MeshFace"))
           {
             if (isArray)
             {
@@ -996,6 +1021,12 @@ using Rhino.Runtime.InteropWrappers;
 
         if (s_type.Equals("ON__UINT64"))
           return "ulong";
+
+        if (s_type.Equals("ON__INT32"))
+          return "int";
+
+        if (s_type.Equals("ON__UINT32"))
+          return "uint";
 
         if (s_type.Equals("COleDateTime"))
           return "DateTime";

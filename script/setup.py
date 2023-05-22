@@ -181,24 +181,20 @@ def build_methodgen():
 
     path_to_methodgen_csproj = os.path.abspath(os.path.join(src_folder, 'methodgen', 'methodgen.csproj'))
 
-    # On Linux, we compile methodgen with dotnet core SDK
-    if _platform == "linux" or _platform == "linux2":
+    # On Linux and macOS, we compile methodgen with dotnet core SDK
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
         methodgen_src_path = os.path.abspath(os.path.join(src_folder, 'methodgen'))
         src_files = os.listdir(methodgen_src_path)
         for file_name in src_files:
-            if file_name.endswith('.cs'):
+            if file_name.endswith('.cs') or file_name.endswith('csproj'):
                 full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
                 if os.path.isfile(full_path):
                     shutil.copy(full_path, methodgen_build_dir)
-            if file_name.endswith('.core'):
-                full_path = os.path.abspath(os.path.join(methodgen_src_path, file_name))
-                if os.path.isfile(full_path):
-                    shutil.copy(full_path, methodgen_build_dir + '/methodgen.csproj')
         command = "dotnet build " + methodgen_build_dir
         run_command(command)
 
-        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "netcoreapp3.1", "methodgen.dll")
+        item_to_check = os.path.join(methodgen_build_dir, "bin", "Debug", "MethodGen.dll")
     else:
         msbuild_path = 'msbuild'
         # On Windows, call bootstrap to get msbuild's path and flip the path separators to appease run_command()
@@ -207,9 +203,10 @@ def build_methodgen():
             msbuild_path = bootstrap.check_msbuild(build_tools["msbuild"]).replace('\\', '//')
             path_to_methodgen_csproj = path_to_methodgen_csproj.replace('\\', '//')
         
-        command = msbuild_path + ' ' + path_to_methodgen_csproj +' /p:Configuration=Release'
+        command = msbuild_path + ' ' + path_to_methodgen_csproj +' /t:restore,build /p:RestorePackagesConfig=true /p:Configuration=Release'
+        #print(command)
         run_command(command)
-
+        
         # Check to see if the MethodGen.exe was written...
         item_to_check = os.path.abspath(os.path.join(src_folder, 'MethodGen.exe'))
         
@@ -237,14 +234,14 @@ def run_methodgen():
     item_to_check = os.path.abspath(os.path.join(path_to_cs, 'AutoNativeMethods.cs'))
 
     # On Linux, we execute methodgen with dotnet core SDK
-    if _platform == "linux" or _platform == "linux2":
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         methodgen_build_dir = check_or_create_path(os.path.abspath(os.path.join(build_folder, "methodgen")))
         path_to_methodgen_executable = os.path.join(methodgen_build_dir, "methodgen.csproj")
         if not os.path.exists(path_to_methodgen_executable):
             print_error_message(path_to_methodgen_executable + " not found.")
             return False
         
-        command = 'dotnet run --no-build -p '
+        command = 'dotnet run --no-build --project '
     else:
         path_to_methodgen_executable = os.path.abspath(os.path.join(src_folder, "MethodGen.exe"))
         # On Windows, we need to flip the path separators to appease run_command()
@@ -264,6 +261,8 @@ def run_methodgen():
         os.remove(item_to_check)
 
     command = command + path_to_methodgen_executable + " " + path_to_cpp + " " + path_to_cs + " " + path_to_replace + " rhino3dm"
+    #print("--------------------")
+    #print(command)
     run_command(command)
 
     # Check to see if methodgen succeeded
@@ -301,7 +300,7 @@ def setup_windows():
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 16 2019\" -A Win32 " + librhino3dm_native_folder)
+    command = ("cmake -G \"Visual Studio 17 2022\" -A Win32 " + librhino3dm_native_folder)
     run_command(command)
 
     # 64 bit version...
@@ -321,7 +320,7 @@ def setup_windows():
     else:
         print(bcolors.BOLD + "Generating vcxproj files for Windows 64-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 16 2019\" -A x64 " + librhino3dm_native_folder)
+    command = ("cmake -G \"Visual Studio 17 2022\" -A x64 " + librhino3dm_native_folder)
     run_command(command)
 
     # Munge the project file to support 64 bit
@@ -394,6 +393,7 @@ def setup_macos():
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
     run_command(command)
     
+    #print(command)
     # methogen
     build_methodgen()
     run_methodgen()
@@ -488,11 +488,31 @@ def setup_js():
     if not overwrite_check(item_to_check):
         return False
     
-    os.chdir(target_path)
-
-    command = "emcmake cmake " + src_folder
+    # setup draco static lib makefiles
+    draco_path = check_or_create_path(os.path.join(target_path, "draco_wasm"))
+    os.chdir(draco_path)
     try:
-        #p = subprocess.Popen(split_command(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
+        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco")
+        environment = os.environ
+        emcmake_path = shutil.which("emcmake")
+        emscripten_path = emcmake_path[:-len("emcmake")]
+        environment["EMSCRIPTEN"] = emscripten_path
+        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode, env=environment)
+        output, err = p.communicate()
+        output = output.decode('utf-8')
+        err = err.decode('utf-8')
+        if output:
+            if verbose: print(output)
+        elif err:
+            print_error_message(err)
+    except OSError:
+        print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
+        return False
+
+
+    os.chdir(target_path)
+    try:
+        command = "emcmake cmake " + src_folder
         if _platform == "win32" or _platform == "win64":
             p = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
         else:

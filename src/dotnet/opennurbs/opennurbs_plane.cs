@@ -247,6 +247,74 @@ namespace Rhino.Geometry
       this.m_zaxis.Unitize();
     }
 
+    #region Statics
+
+    /// <summary>
+    /// Constructs a plane from a point, and two vectors in the plane.
+    /// </summary>
+    /// <param name="origin">Point on the plane.</param>
+    /// <param name="xDirection">Non-zero vector in the plane that determines the XAxis direction.</param>
+    /// <param name="yDirection">
+    /// Non-zero vector not parallel to xDirection that is used to determine the YAxis direction. 
+    /// Note, yDirection does not have to be perpendicular to xDirection.
+    /// </param>
+    /// <returns>A valid plane if successful, or Plane.Unset on failure.</returns>
+    /// <since>8.0</since>
+    public static Plane CreateFromFrame(Point3d origin, Vector3d xDirection, Vector3d yDirection)
+    {
+      Plane plane = new Plane();
+      bool rc = UnsafeNativeMethods.ON_Plane_CreateFromFrame(ref plane, origin, xDirection, yDirection);
+      return rc ? plane : Plane.Unset;
+    }
+
+    /// <summary>
+    /// Constructs a plane from a point and normal vector.
+    /// </summary>
+    /// <param name="origin">Point on the plane.</param>
+    /// <param name="normal">Non-zero normal to the plane.</param>
+    /// <returns>A valid plane if successful, or Plane.Unset on failure.</returns>
+    /// <since>8.0</since>
+    public static Plane CreateFromNormal(Point3d origin, Vector3d normal)
+    {
+      Plane plane = new Plane();
+      bool rc = UnsafeNativeMethods.ON_Plane_CreateFromNormal(ref plane, origin, normal);
+      return rc ? plane : Plane.Unset;
+    }
+
+    /// <summary>
+    /// Construct a plane from a point, a normal vector, and a vector that projects to the positive YAxis.
+    /// </summary>
+    /// <param name="origin">Point on the plane.</param>
+    /// <param name="normal">Non-zero normal to the plane.</param>
+    /// <param name="yDirection">Non-zero vector, linearly independent from normal, that projects to the positive YAxis of the plane.</param>
+    /// <returns>A valid plane if successful, or Plane.Unset on failure.</returns>
+    /// <since>8.0</since>
+    public static Plane CreateFromNormalYup(Point3d origin, Vector3d normal, Vector3d yDirection)
+    {
+      Plane plane = new Plane();
+      bool rc = UnsafeNativeMethods.ON_Plane_CreateFromNormalYup(ref plane, origin, normal, yDirection);
+      return rc ? plane : Plane.Unset;
+    }
+
+    /// <summary>
+    /// Construct a plane from three non-collinear points.
+    /// </summary>
+    /// <param name="origin">Point on the plane.</param>
+    /// <param name="xPoint">Second point in the plane. XAxis will be parallel to xPoint-origin.</param>
+    /// <param name="yPoint">
+    /// Third point on the plane that is not collinear with the first two points, where
+    /// YAxis*(yPoint-origin) will be &gt; 0.</param>
+    /// <returns>A valid plane if successful, or Plane.Unset on failure.</returns>
+    /// <since>8.0</since>
+    public static Plane CreateFromPoints(Point3d origin, Point3d xPoint, Point3d yPoint)
+    {
+      Plane plane = new Plane();
+      bool rc = UnsafeNativeMethods.ON_Plane_CreateFromPoints(ref plane, origin, xPoint, yPoint);
+      return rc ? plane : Plane.Unset;
+    }
+
+    #endregion // Statics
+
 #if RHINO_SDK
     /// <summary>Fit a plane through a collection of points.</summary>
     /// <param name="points">Points to fit to.</param>
@@ -446,6 +514,41 @@ namespace Rhino.Geometry
     public Point3d PointAt(double u, double v)
     {
       return (Origin + u * XAxis + v * YAxis);
+    }
+
+    /// <summary>
+    /// Test if this plane is co-planar with a another plane.
+    /// </summary>
+    /// <param name="plane">The plane to test.</param>
+    /// <returns>True if this plane is co-planar with the test plane, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool IsCoplanar(Plane plane)
+    {
+      return IsCoplanar(plane, RhinoMath.ZeroTolerance);
+    }
+
+    /// <summary>
+    /// Test if this plane is co-planar with a another plane.
+    /// </summary>
+    /// <param name="plane">The plane to test.</param>
+    /// <param name="tolerance">Testing tolerance.</param>
+    /// <returns>True if this plane is co-planar with the test plane, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool IsCoplanar(Plane plane, double tolerance)
+    {
+      if (!IsValid || !plane.IsValid)
+        return false;
+
+      if (tolerance < RhinoMath.ZeroTolerance)
+        tolerance = RhinoMath.ZeroTolerance;
+
+      var eq0 = GetPlaneEquation();
+      var eq1 = plane.GetPlaneEquation();
+
+      return Math.Abs(eq0[0] - eq1[0]) < tolerance &&
+             Math.Abs(eq0[1] - eq1[1]) < tolerance &&
+             Math.Abs(eq0[2] - eq1[2]) < tolerance &&
+             Math.Abs(eq0[3] - eq1[3]) < tolerance;
     }
 
     /// <summary>

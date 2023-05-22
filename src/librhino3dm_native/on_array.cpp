@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <vector>
+
 ///////////////////////////////////////////////////////////////////////////////////////
 RH_C_FUNCTION ON_SimpleArray<ON_Line>* ON_LineArray_New()
 {
@@ -216,6 +218,14 @@ RH_C_FUNCTION void ON_3dPointArray_CopyValues( const ON_3dPointArray* pArray, /*
   }
 }
 
+RH_C_FUNCTION void ON_3dPointArray_Append(ON_3dPointArray* pArray, ON_3dPoint* pt)
+{
+  if (pArray && pt)
+  {
+    pArray->Append(*pt);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION ON_SimpleArray<ON_Polyline*>* ON_3dPointArrayArray_New(int capacity)
@@ -280,8 +290,6 @@ RH_C_FUNCTION bool ON_3dPointArrayArray_Indexer(const ON_SimpleArray<ON_Polyline
   return rc;
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION ON_SimpleArray<int>* ON_IntArray_New(/*ARRAY*/const int* vals, int count)
@@ -321,6 +329,40 @@ RH_C_FUNCTION void ON_IntArray_Delete(ON_SimpleArray<int>* p)
     delete p;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+using IntPtr = void*;
+
+RH_C_FUNCTION ON_SimpleArray<IntPtr>* ON_IntPtrArray_New()
+{
+  return new ON_SimpleArray<IntPtr>();
+}
+
+RH_C_FUNCTION void ON_IntPtrArray_Delete(ON_SimpleArray<IntPtr>* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+RH_C_FUNCTION void ON_IntPtrArray_Append(ON_SimpleArray<IntPtr>* pArray, IntPtr handle)
+{
+  if (pArray)
+    pArray->Append(handle);
+}
+
+RH_C_FUNCTION int ON_IntPtrArray_Count(const ON_SimpleArray<IntPtr>* pArray)
+{
+  if (pArray)
+    return pArray->Count();
+  return 0;
+}
+
+RH_C_FUNCTION IntPtr ON_IntPtrArray_Item(ON_SimpleArray<IntPtr>* pArray, int index)
+{
+  if (pArray && index >= 0 && index < pArray->Count())
+    return (*pArray)[index];
+  return nullptr;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -404,7 +446,83 @@ RH_C_FUNCTION void ON_ByteArray_Delete(ON_SimpleArray<unsigned char>* p)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////
 
+RH_C_FUNCTION std::vector<unsigned char>* ON_ByteVector_New(/*ARRAY*/const unsigned char* vals, ON__UINT64 count)
+{
+  if (count < 1)
+  {
+    return new std::vector<unsigned char>();
+  }
+
+  auto rc = new std::vector<unsigned char>(count, 0);
+  if (nullptr != vals)
+  {
+    for (ON__UINT64 i = 0; i < count; i++)
+    {
+      (*rc)[i] = *(vals + i);
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION std::vector<unsigned char>* ON_ByteVector_CopyNew(const std::vector<unsigned char>* other)
+{
+  if (nullptr == other)
+  {
+    return new std::vector<unsigned char>();
+  }
+
+  auto rc = new std::vector<unsigned char>(*other);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_ByteVector_CopyTo(const std::vector<unsigned char>* source, std::vector<unsigned char>* target)
+{
+  if (nullptr == source || nullptr == target)
+    return;
+
+  *target = *source;
+}
+
+
+RH_C_FUNCTION void ON_ByteVector_CopyValues(const std::vector<unsigned char>* ptr, /*ARRAY*/unsigned char* vals)
+{
+  if (ptr && vals)
+  {
+    auto count = ptr->size();
+    if (count > 0)
+    {
+      const unsigned char* source = &(*ptr)[0];
+      ::memcpy(vals, source, count * sizeof(unsigned char));
+    }
+  }
+}
+
+RH_C_FUNCTION ON__UINT64 ON_ByteVector_Count(const std::vector<unsigned char>* ptr)
+{
+  ON__UINT64 rc = 0;
+  if (ptr)
+    rc = ptr->size();
+  return rc;
+}
+
+RH_C_FUNCTION unsigned char* ON_ByteVector_Memory(std::vector<unsigned char>* ptr)
+{
+  unsigned char* rc = nullptr;
+  if (ptr)
+  {
+    rc = &(*ptr)[0];
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_ByteVector_Delete(std::vector<unsigned char>* p)
+{
+    delete p;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -490,6 +608,87 @@ RH_C_FUNCTION void ON_FloatArray_Delete(ON_SimpleArray<float>* p)
 }
 
 
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION std::vector<float>* ON_FloatVector_New(/*ARRAY*/const float* vals, ON__UINT64 count)
+{
+  if (count < 1)
+  {
+    return new std::vector<float>();
+  }
+
+  auto rc = new std::vector<float>(count, 0.f);
+  if (nullptr != vals)
+  {
+    for (ON__UINT64 i = 0; i < count; i++)
+    {
+      (*rc)[i] = *(vals + i);
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION std::vector<float>* ON_FloatVector_CopyNew(const std::vector<float>* other)
+{
+  if (nullptr == other)
+  {
+    return new std::vector<float>();
+  }
+
+  auto rc = new std::vector<float>(*other);
+  return rc;
+}
+
+RH_C_FUNCTION void ON_FloatVector_CopyTo(const std::vector<float>* source, std::vector<float>* target)
+{
+  if (nullptr == source || nullptr == target)
+    return;
+
+  *target = *source;
+}
+
+
+RH_C_FUNCTION void ON_FloatVector_CopyValues(const std::vector<float>* ptr, /*ARRAY*/float* vals)
+{
+  if (ptr && vals)
+  {
+    auto count = ptr->size();
+    if (count > 0)
+    {
+      const float* source = &(*ptr)[0];
+      ::memcpy(vals, source, count * sizeof(float));
+    }
+  }
+}
+
+RH_C_FUNCTION ON__UINT64 ON_FloatVector_Count(const std::vector<float>* ptr)
+{
+  ON__UINT64 rc = 0;
+  if (ptr)
+    rc = ptr->size();
+  return rc;
+}
+
+RH_C_FUNCTION float* ON_FloatVector_Memory(std::vector<float>* ptr)
+{
+  float* rc = nullptr;
+  if (ptr)
+  {
+    rc = &(*ptr)[0];
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_FloatVector_Delete(std::vector<float>* p)
+{
+    delete p;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -601,6 +800,83 @@ RH_C_FUNCTION void ON_UUIDArray_Delete(ON_SimpleArray<ON_UUID>* p)
   if( p )
     delete p;
 }
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION std::vector<ON_UUID>* ON_UUIDVector_New(/*ARRAY*/const ON_UUID* vals, ON__UINT64 count)
+{
+  if (count < 1)
+  {
+    return new std::vector<ON_UUID>();
+  }
+
+  auto rc = new std::vector<ON_UUID>(count, ON_nil_uuid);
+  if (nullptr != vals)
+  {
+    for (ON__UINT64 i = 0; i < count; i++)
+    {
+      (*rc)[i] = *(vals + i);
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION void ON_UUIDVector_CopyValues(const std::vector<ON_UUID>* ptr, /*ARRAY*/ON_UUID* vals)
+{
+  if (ptr && vals)
+  {
+    auto count = ptr->size();
+    if (count > 0)
+    {
+      const ON_UUID* source = &(*ptr)[0];
+      ::memcpy(vals, source, count * sizeof(ON_UUID));
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_UUIDVector_Append(std::vector<ON_UUID>* ptr, const ON_UUID uuid)
+{
+  if (ptr)
+    ptr->push_back(uuid);
+}
+
+RH_C_FUNCTION ON__UINT64 ON_UUIDVector_Count(const std::vector<ON_UUID>* ptr)
+{
+  ON__UINT64 rc = 0;
+  if (ptr)
+    rc = ptr->size();
+  return rc;
+}
+
+RH_C_FUNCTION ON_UUID ON_UUIDVector_Get(std::vector<ON_UUID>* ptr, ON__UINT64 index)
+{
+  if (ptr && index >= 0 && index < ptr->size())
+  {
+    return (*ptr)[index];
+  }
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_UUIDVector_Delete(std::vector<ON_UUID>* p)
+{
+  if (p)
+    delete p;
+}
+
+
+
+
+
+
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -868,6 +1144,85 @@ RH_C_FUNCTION ON_Mesh* ON_MeshArray_Get(ON_SimpleArray<ON_Mesh*>* pMeshArray, in
   return rc;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+using SharedMeshArray = std::vector<std::shared_ptr<ON_Mesh>>;
+
+RH_C_FUNCTION SharedMeshArray* ON_StdVectorOfSharedPtrToMesh_New()
+{
+    return new SharedMeshArray();
+}
+
+RH_C_FUNCTION void ON_StdVectorOfSharedPtrToMesh_erase(SharedMeshArray* pMeshArray)
+{
+  if (pMeshArray)
+    delete pMeshArray;
+}
+
+RH_C_FUNCTION int ON_StdVectorOfSharedPtrToMesh_size(const SharedMeshArray* pMeshArray)
+{
+  int rc = 0;
+  if (pMeshArray)
+  {
+    rc = (int)pMeshArray->size();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_StdVectorOfSharedPtrToMesh_push_back(SharedMeshArray* pMeshArray, ON_Mesh* pMesh)
+{
+  if (pMeshArray && pMesh)
+  {
+    pMeshArray->push_back(std::shared_ptr<ON_Mesh>(pMesh->Duplicate()));
+  }
+}
+
+RH_C_FUNCTION ON_Mesh* ON_StdVectorOfSharedPtrToMesh_GetRawMeshPtr(SharedMeshArray* pMeshArray, int index)
+{
+  ON_Mesh* rc = nullptr;
+  if (pMeshArray && index >= 0 && index < pMeshArray->size())
+  {
+    rc = (*pMeshArray)[index].get();
+  }
+  return rc;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+RH_C_FUNCTION ON_SimpleArray<ON_MeshFace>* ON_MeshFaceArray_New()
+{
+  return new ON_SimpleArray<ON_MeshFace>();
+}
+
+RH_C_FUNCTION void ON_MeshFaceArray_Delete(ON_SimpleArray<ON_MeshFace>* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+RH_C_FUNCTION int ON_MeshFaceArray_Count(const ON_SimpleArray<ON_MeshFace>* pArray)
+{
+  int rc = 0;
+  if (pArray)
+    rc = pArray->Count();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_MeshFaceArray_CopyValues(const ON_SimpleArray<ON_MeshFace>* pArray, /*ARRAY*/ON_MeshFace* faces)
+{
+  if (pArray && faces)
+  {
+    int count = pArray->Count();
+    if (count > 0)
+    {
+      const ON_MeshFace* source = pArray->Array();
+      ::memcpy(faces, source, count * sizeof(ON_MeshFace));
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 RH_C_FUNCTION ON_ClassArray<ON_wString>* ON_StringArray_New()
 {
   return new ON_ClassArray<ON_wString>();
@@ -980,6 +1335,47 @@ RH_C_FUNCTION void ON_IntervalArray_CopyValues(const ON_SimpleArray<ON_Interval>
 RH_C_FUNCTION ON_SimpleArray<ON_BezierCurve*>* ON_SimpleArray_BezierCurveNew()
 {
   return new ON_SimpleArray<ON_BezierCurve*>();
+}
+
+RH_C_FUNCTION int ON_SimpleArray_BezierCurveCount(const ON_SimpleArray<ON_BezierCurve*>* pBezArray)
+{
+  if (pBezArray)
+    return pBezArray->Count();
+  return 0;
+}
+
+RH_C_FUNCTION bool ON_SimpleArray_CubicBezPoints(const ON_SimpleArray<ON_BezierCurve*>* pBezArray, /*ARRAY*/ON_2fPoint* points, int pointCount)
+{
+  if (nullptr == pBezArray || nullptr == points)
+    return false;
+
+  if ((pBezArray->Count()*4)!=pointCount)
+    return false;
+
+  for (int i = 0; i < pBezArray->Count(); i++)
+  {
+    ON_BezierCurve* bez = (*pBezArray)[i];
+    if (nullptr == bez)
+    {
+      points[i * 4 + 0].Set(0, 0);
+      points[i * 4 + 1].Set(0, 0);
+      points[i * 4 + 2].Set(0, 0);
+      points[i * 4 + 3].Set(0, 0);
+      continue;
+    }
+
+    if (bez->CVCount() != 4)
+      return false;
+
+    ON_3dPoint pt(0, 0, 0);
+    for (int j = 0; j < 4; j++)
+    {
+      bez->GetCV(j, pt);
+      points[i * 4 + j].Set((float)pt.x, (float)pt.y);
+    }
+  }
+
+  return true;
 }
 
 RH_C_FUNCTION void ON_SimpleArray_BezierCurveDelete(ON_SimpleArray<ON_BezierCurve*>* pBezArray)
@@ -1205,4 +1601,57 @@ RH_C_FUNCTION ON_Linetype* ON_Linetype_Get(ON_SimpleArray<ON_Linetype*>* pArray,
   if (pArray && index >= 0 && index < pArray->Count())
     rc = (*pArray)[index];
   return rc;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+RH_C_FUNCTION ON_SimpleArray<unsigned int>* ON_UIntArray_New()
+{
+  return new ON_SimpleArray<unsigned int>();
+}
+
+RH_C_FUNCTION void ON_UIntArray_Delete(ON_SimpleArray<unsigned int>* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+RH_C_FUNCTION int ON_UIntArray_Count(const ON_SimpleArray<unsigned int>* pArray)
+{
+  int rc = 0;
+  if (pArray)
+    rc = pArray->Count();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_UIntArray_CopyValues(const ON_SimpleArray<unsigned int>* pArray, /*ARRAY*/ unsigned int* uints)
+{
+  if (pArray && uints)
+  {
+    int count = pArray->Count();
+    if (count > 0)
+    {
+      for (int i = 0; i < count; i++)
+        uints[i] = pArray->Array()[i];
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// ON_SimpleArray<ON_HatchLine*>
+
+RH_C_FUNCTION ON_SimpleArray<ON_HatchLine*>* ON_HatchLineArray_New()
+{
+  return new ON_SimpleArray<ON_HatchLine*>();
+}
+
+RH_C_FUNCTION void ON_HatchLineArray_Delete(ON_SimpleArray<ON_Curve*>* arrayPtr)
+{
+  if (arrayPtr)
+    delete arrayPtr;
+}
+
+RH_C_FUNCTION void ON_HatchLineArray_Append(ON_SimpleArray<ON_HatchLine*>* pHatchLines, ON_HatchLine* pHatchLine)
+{
+  if (pHatchLines && pHatchLine)
+    pHatchLines->Append(pHatchLine);
 }

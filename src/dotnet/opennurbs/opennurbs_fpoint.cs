@@ -360,12 +360,6 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Other point for distance measurement.</param>
     /// <returns>The length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
-    /// <example>
-    /// <code source='examples\vbnet\ex_intersectcurves.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_intersectcurves.cs' lang='cs'/>
-    /// <code source='examples\py\ex_intersectcurves.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
     [ConstOperation]
     public double DistanceTo(Point2f other)
     {
@@ -384,6 +378,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Other point for distance measurement.</param>
     /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    /// <since>7.14</since>
     [ConstOperation]
     public double DistanceToSquared(Point2f other)
     {
@@ -489,7 +484,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
@@ -613,6 +608,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="other">Other point for distance measurement.</param>
     /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    /// <since>7.14</since>
     [ConstOperation]
     public double DistanceToSquared(Point3f other)
     {
@@ -896,7 +892,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>
@@ -1277,7 +1273,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Check that all values in other are withing epsilon of the values in this
+    /// Check that all values in other are within epsilon of the values in this
     /// </summary>
     /// <param name="other"></param>
     /// <param name="epsilon"></param>

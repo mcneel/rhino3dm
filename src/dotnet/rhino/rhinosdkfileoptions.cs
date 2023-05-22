@@ -9,6 +9,7 @@ namespace Rhino.FileIO
   {
     bool m_delete_pointer; // = false; initialized to false by runtime
     IntPtr m_ptr;
+    Collections.ArchivableDictionary m_archivableDictionary;
 
     /// <since>5.0</since>
     public FileWriteOptions()
@@ -21,10 +22,20 @@ namespace Rhino.FileIO
     internal FileWriteOptions(IntPtr ptr)
     {
       m_ptr = ptr;
+      IntPtr ptrArchivableDictionary = UnsafeNativeMethods.CRhinoFileWriteOptions_GetOptionsDictionary(m_ptr);
+      int itemCount = UnsafeNativeMethods.ON_ArchivableDictionary_ItemCount(ptrArchivableDictionary);
+      if (itemCount > 0)
+        m_archivableDictionary = Collections.ArchivableDictionary.FromInternalDictionary(ptrArchivableDictionary);
     }
 
-    internal IntPtr ConstPointer()
+    internal IntPtr ConstPointer(bool syncDictionary)
     {
+      if (m_archivableDictionary != null && syncDictionary)
+      {
+        IntPtr pDictionary = Collections.ArchivableDictionary.ToInternalDictionary(m_archivableDictionary);
+        UnsafeNativeMethods.CRhinoFileWriteOptions_SetOptionsDictionary(m_ptr, pDictionary);
+        UnsafeNativeMethods.ON_ArchivableDictionary_Delete(pDictionary);
+      }
       return m_ptr;
     }
 
@@ -180,7 +191,7 @@ namespace Rhino.FileIO
 
     /// <summary>
     /// For use on Apple frameworks only.
-    /// Retrns the final destination file name.
+    /// Returns the final destination file name.
     /// </summary>
     /// <since>6.3</since>
     public string DestinationFileName
@@ -197,13 +208,27 @@ namespace Rhino.FileIO
     }
 
     /// <summary>Source RhinoDoc that is being written</summary>
+    /// <since>7.7</since>
     public RhinoDoc RhinoDoc
     {
       get
       {
-        IntPtr const_ptr_this = ConstPointer();
-        uint sn = UnsafeNativeMethods.CRhinoFileWriteOption_DocumentSerialNumber(const_ptr_this);
+        uint sn = UnsafeNativeMethods.CRhinoFileWriteOption_DocumentSerialNumber(m_ptr);
         return RhinoDoc.FromRuntimeSerialNumber(sn);
+      }
+    }
+
+    /// <summary>
+    /// Additional read options.
+    /// </summary>
+    /// <since>8.0</since>
+    public Collections.ArchivableDictionary OptionsDictionary
+    {
+      get
+      {
+        if (null == m_archivableDictionary)
+          m_archivableDictionary = new Collections.ArchivableDictionary();
+        return m_archivableDictionary;
       }
     }
     #endregion
@@ -237,6 +262,7 @@ namespace Rhino.FileIO
   {
     bool m_delete_pointer; // = false; initialized to false by runtime
     IntPtr m_ptr;
+    Collections.ArchivableDictionary m_archivableDictionary;
 
     /// <since>5.0</since>
     public FileReadOptions()
@@ -248,10 +274,20 @@ namespace Rhino.FileIO
     internal FileReadOptions(IntPtr ptr)
     {
       m_ptr = ptr;
+      IntPtr pDictionary = UnsafeNativeMethods.CRhinoFileReadOptions_GetOptionsDictionary(m_ptr);
+      int count = UnsafeNativeMethods.ON_ArchivableDictionary_ItemCount(pDictionary);
+      if (count > 0)
+        m_archivableDictionary = Collections.ArchivableDictionary.FromInternalDictionary(pDictionary);
     }
 
-    internal IntPtr ConstPointer()
+    internal IntPtr ConstPointer(bool syncDictionary)
     {
+      if (m_archivableDictionary != null && syncDictionary)
+      {
+        IntPtr pDictionary = Collections.ArchivableDictionary.ToInternalDictionary(OptionsDictionary);
+        UnsafeNativeMethods.CRhinoFileReadOptions_SetOptionsDictionary(m_ptr, pDictionary);
+        UnsafeNativeMethods.ON_ArchivableDictionary_Delete(pDictionary);
+      }
       return m_ptr;
     }
 
@@ -378,6 +414,19 @@ namespace Rhino.FileIO
       set { SetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.ScaleGeometry, value); }
     }
 
+    /// <summary>
+    /// Additional read options.
+    /// </summary>
+    /// <since>8.0</since>
+    public Collections.ArchivableDictionary OptionsDictionary
+    {
+      get
+      {
+        if (null == m_archivableDictionary)
+          m_archivableDictionary = new Collections.ArchivableDictionary();
+        return m_archivableDictionary;
+      }
+    }
     #endregion
 
     #region disposable

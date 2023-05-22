@@ -62,7 +62,7 @@ enum LayerInt : int
 {
   idxLinetypeIndex = 0,
   idxRenderMaterialIndex = 1,
-  idxIgesLevel = 3
+  idxIgesLevel = 3,
 };
 
 RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
@@ -111,43 +111,73 @@ enum LayerBool : int
   idxIsLocked = 1,
   idxIsExpanded = 2,
   idxPersistentVisibility = 3,
-  idxPersistentLocking = 4
+  idxPersistentLocking = 4,
+  idxClipParticipationForAll = 5,
+  idxClipParticipationForNone = 6,
+  idxModelIsVisible = 7,
+  idxModelPersistentVisibility = 8,
+  idxPerViewportIsVisibleInNewDetails = 9
 };
 
 RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, bool set, bool val)
 {
   bool rc = val;
-  if( pLayer )
+  if (pLayer)
   {
-    if( set )
+    if (set)
     {
-      if( idxIsVisible==which )
+      if (idxIsVisible == which)
         pLayer->SetVisible(val);
-      else if( idxIsLocked==which )
+      else if (idxIsLocked == which)
         pLayer->SetLocked(val);
-      else if( idxIsExpanded==which )
+      else if (idxIsExpanded == which)
         pLayer->m_bExpanded = val;
-      else if( idxPersistentVisibility==which )
+      else if (idxPersistentVisibility == which)
         pLayer->SetPersistentVisibility(val);
-      else if( idxPersistentLocking==which )
+      else if (idxPersistentLocking == which)
         pLayer->SetPersistentLocking(val);
+      else if (idxModelIsVisible == which)
+        pLayer->SetModelVisible(val);
+      else if (idxModelPersistentVisibility == which)
+        pLayer->SetModelPersistentVisibility(val);
+      else if (idxPerViewportIsVisibleInNewDetails == which)
+        pLayer->SetPerViewportIsVisibleInNewDetails(val);
     }
-    else 
+    else
     {
-      if( idxIsVisible==which )
+      if (idxIsVisible == which)
         rc = pLayer->IsVisible();
-      else if( idxIsLocked==which )
+      else if (idxIsLocked == which)
         rc = pLayer->IsLocked();
-      else if( idxIsExpanded==which )
+      else if (idxIsExpanded == which)
         rc = pLayer->m_bExpanded;
-      else if( idxPersistentVisibility==which )
+      else if (idxPersistentVisibility == which)
         rc = pLayer->PersistentVisibility();
-      else if( idxPersistentLocking==which )
+      else if (idxPersistentLocking == which)
         rc = pLayer->PersistentLocking();
+      else if (idxClipParticipationForAll == which || idxClipParticipationForNone == which)
+      {
+        bool forall = false;
+        bool fornone = false;
+        ON_UuidList uuidlist;
+        bool isParticipation = false;
+        pLayer->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
+        if (idxClipParticipationForAll == which)
+          rc = forall;
+        else
+          rc = fornone;
+      }
+      else if (idxModelIsVisible == which)
+        rc = pLayer->ModelIsVisible();
+      else if (idxModelPersistentVisibility == which)
+        rc = pLayer->ModelPersistentVisibility();
+      else if (idxPerViewportIsVisibleInNewDetails == which)
+        rc = pLayer->PerViewportIsVisibleInNewDetails();
     }
   }
   return rc;
 }
+
 
 RH_C_FUNCTION void ON_Layer_UnsetPersistentVisibility(ON_Layer* pLayer)
 {
@@ -307,5 +337,71 @@ RH_C_FUNCTION void ON_Layer_SetPerViewportVisibility(ON_Layer* pLayer, ON_UUID v
       pLayer->SetPerViewportVisible(viewportId, visible);
     else
       pLayer->SetPerViewportPersistentVisibility(viewportId, visible);
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_SetClipParticipation(ON_Layer* pLayer, bool forAll, bool forNone, const ON_SimpleArray<ON_UUID>* pIds)
+{
+  if (pLayer)
+  {
+    if (forAll)
+    {
+      pLayer->SetClipParticipationForAll();
+    }
+    else if (forNone)
+    {
+      pLayer->SetClipParticipationForNone();
+    }
+    else if (pIds)
+    {
+      pLayer->SetClipParticipationList(pIds->Array(), pIds->Count(), true);
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_ClipParticipationList(const ON_Layer* pConstLayer, ON_SimpleArray<ON_UUID>* uuids)
+{
+  if (pConstLayer && uuids)
+  {
+    bool forall = true;
+    bool fornone = true;
+    ON_UuidList uuidlist;
+    bool isParticipation = false;
+    pConstLayer->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
+    uuidlist.GetUuids(*uuids);
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_UnsetModelPersistentVisibility(ON_Layer* pLayer)
+{
+  if (pLayer)
+    pLayer->UnsetModelPersistentVisibility();
+}
+
+RH_C_FUNCTION void ON_Layer_DeleteModelVisible(ON_Layer* pLayer)
+{
+  if (pLayer)
+    pLayer->DeleteModelVisible();
+}
+
+RH_C_FUNCTION ON_SectionStyle* ON_Layer_GetCustomSectionStyle(const ON_Layer* layer)
+{
+  if (layer)
+  {
+    const ON_SectionStyle* sectionstyle = layer->CustomSectionStyle();
+    if (sectionstyle)
+      return new ON_SectionStyle(*sectionstyle);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_Layer_SetCustomSectionStyle(ON_Layer* layer, const ON_SectionStyle* sectionstyle)
+{
+  if (layer)
+  {
+    if (sectionstyle)
+      layer->SetCustomSectionStyle(*sectionstyle);
+    else
+      layer->RemoveCustomSectionStyle();
   }
 }

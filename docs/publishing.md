@@ -7,7 +7,7 @@ There are several places where version numbers should be updated:
 - [JavaScript] package.json, line 3
 - [.NET] src/dotnet/Rhino3dm.csproj, line 11
 - [Python]
-  - setup.py, line 113
+  - setup.py, line 127
   - src/rhino3dm/\_\_init\_\_.py, line 7
 - src/version.txt, line 1
 
@@ -15,12 +15,10 @@ There are several places where version numbers should be updated:
 
 ### Node.js
 
-1. Build rhino3dm.js, rhino3dm.wasm, and rhino3dm.module.js (or get them from the [Github Repo Actions Artifacts](https://github.com/mcneel/rhino3dm/actions) )
-2. Build and run docgen (for type definitions). At the time of writing this needs to be done on windows as building docgen results in an exe. Once docgen is built, you can run it from `src/docgen/bin/docgen.exe`. After running docgen, the `rhino3dm.d.ts` file will be in the `src/docgen/out/js_tsdef` directory
-3. Create a new directory and copy in rhino3dm.js, rhino3dm.wasm, rhino3dm.module.js and rhino3dm.d.ts
-4. Copy in RHINO3DM.JS.md from `docs/javascript` and rename to README.md
-6. Update the version number in package.json and copy that in too
-7. From inside the new directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
+1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including the js version.
+2. Download and extract the `rhino3dm.js` artifact.
+3. cd into the directory you've just extracted
+4. From inside this directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
 
 See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for more info.
 
@@ -57,3 +55,28 @@ See https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#publish-w
 #### Notes:
 
 1. To create an API Key for NuGet, see https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys 
+
+## Python
+
+Python packages can be uploaded to the corresponding `pypi.org` project: https://pypi.org/project/rhino3dm.
+
+1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including all Python packages.
+2. Download all of the `.whl` and `*.tar.gz` (source distribution) artifacts to a folder called `dist`.. Do not download any .whl that includes `linux_x86_64`
+3. Extract all of the `.zip` files and delete them. You should be left with many `.whl` files and one `.tar.gz` file.
+4. From the `dist` parent folder, upload all Python packages with `twine`
+
+```bash
+python3 -m twine upload dist/*
+```
+
+#### Requirements
+
+1. Have an account on pypi.org.
+2. Be a maintainer or owner for the [rhino3dm package](https://pypi.org/project/rhino3dm).
+3. Ensure `twine` is installed
+
+```bash
+python3 -m pip install --upgrade twine
+```
+
+4. Acquire an API token at https://pypi.org/manage/account/token/

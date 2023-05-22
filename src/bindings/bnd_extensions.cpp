@@ -590,8 +590,14 @@ static BND_FileObject* FileObjectFromCompRef(ON_ModelComponentReference& compref
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0)
+    throw pybind11::index_error();
+#else
   if (index < 0)
     return nullptr;
+#endif
+
   if (0 == index)
     m_compref_cache.Empty(); // clear cache every time we restart counting
 
@@ -619,7 +625,12 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
   {
     return FileObjectFromCompRef(m_compref_cache[index]);
   }
+
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 // helper function for iterator
@@ -676,7 +687,12 @@ BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
   ON_Material* modelmaterial = const_cast<ON_Material*>(ON_Material::Cast(model_component));
   if (modelmaterial)
     return new BND_Material(modelmaterial, &compref);
+
+#if defined(ON_PYTHON_COMPILE)
+    throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 BND_Material* BND_File3dmMaterialTable::FindId(BND_UUID id)
@@ -715,7 +731,12 @@ BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
   ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
   if (modelbitmap)
     return new BND_Bitmap(modelbitmap, &compref);
+
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 BND_Bitmap* BND_File3dmBitmapTable::IterIndex(int index)
@@ -774,7 +795,12 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
   ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
   if (modellayer)
     return new BND_Layer(modellayer, &compref, m_model);
+
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
@@ -804,13 +830,18 @@ BND_Group* BND_File3dmGroupTable::FindIndex(int index)
 {
   ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::Group, index); //no specific method in ON Extensions, therefore getting component here
   const ON_ModelComponent* model_component = compref.ModelComponent();
-  if (compref.IsEmpty())
-    return nullptr;
-  ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
-  if (modelgroup)
-    return new BND_Group(modelgroup, &compref);
+  if (!compref.IsEmpty())
+  {
+    ON_Group* modelgroup = const_cast<ON_Group*>(ON_Group::Cast(model_component));
+    if (modelgroup)
+      return new BND_Group(modelgroup, &compref);
+  }
 
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 BND_Group* BND_File3dmGroupTable::FindName(std::wstring name)
@@ -877,8 +908,15 @@ BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
 {
   int count = m_named_views ? m_model->m_settings.m_named_views.Count()
     : m_model->m_settings.m_views.Count();
+
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= count)
+    throw pybind11::index_error();
+#else
   if (index < 0 || index >= count)
     return nullptr;
+#endif
+
   BND_ViewInfo* rc = new BND_ViewInfo();
   if (m_named_views)
     rc->m_view = m_model->m_settings.m_named_views[index];
@@ -918,7 +956,12 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindIndex(int index) const
   ON_DimStyle* modeldimstyle = const_cast<ON_DimStyle*>(ON_DimStyle::Cast(model_component));
   if (modeldimstyle)
     return new BND_DimensionStyle(modeldimstyle, &compref);
+
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 
 BND_DimensionStyle* BND_File3dmDimStyleTable::IterIndex(int index) const
@@ -945,14 +988,19 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
   ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, index);
-  if (compref.IsEmpty())
-    return nullptr;
+  if (!compref.IsEmpty())
+  {
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
+    if (modelidef)
+      return new BND_InstanceDefinitionGeometry(modelidef, &compref);
+  }
 
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_InstanceDefinition* modelidef = const_cast<ON_InstanceDefinition*>(ON_InstanceDefinition::Cast(model_component));
-  if (modelidef)
-    return new BND_InstanceDefinitionGeometry(modelidef, &compref);
+#if defined(ON_PYTHON_COMPILE)
+  throw pybind11::index_error();
+#else
   return nullptr;
+#endif
 }
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::IterIndex(int index) const
 {
@@ -992,8 +1040,13 @@ std::wstring BND_RDKPlugInData::RdkDocumentData() const
 
 BND_File3dmPlugInData* BND_File3dmPlugInDataTable::GetPlugInData(int index)
 {
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0 || index >= m_model->m_userdata_table.Count())
+    throw pybind11::index_error();
+#else
   if (index < 0 || index >= m_model->m_userdata_table.Count())
     return nullptr;
+#endif
   ONX_Model_UserData* ud = m_model->m_userdata_table[index];
   if (nullptr == ud)
     return nullptr;
@@ -1038,6 +1091,12 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
 {
   ON_ClassArray<ON_UserString> strings;
   m_model->GetDocumentUserStrings(strings);
+
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= strings.Count())
+    throw pybind11::index_error();
+#endif
+
   const ON_UserString& us = strings[i];
   std::wstring key(us.m_key.Array());
   std::wstring sval(us.m_string_value.Array());

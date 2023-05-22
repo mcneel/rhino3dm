@@ -38,8 +38,8 @@ class CMakeBuild(build_ext):
         if platform.system() == "Windows":
             cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)',
                                          out.decode()).group(1))
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            if cmake_version < '3.21.0':
+                raise RuntimeError("CMake >= 3.21.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -76,14 +76,23 @@ class CMakeBuild(build_ext):
             self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+        build_temp_dir = os.path.abspath(self.build_temp)
+        draco_static_dir = os.path.join(build_temp_dir, "draco_static")
+        if not os.path.exists(draco_static_dir):
+            os.makedirs(draco_static_dir)
 
         current_dir = os.getcwd()
-        os.chdir(self.build_temp)
 
-        windows_build = os.name == 'nt'
-
-        if windows_build:
+        if os.name == 'nt':  # windows
             bitness = 8 * struct.calcsize("P")
+
+            os.chdir(draco_static_dir)
+            command = 'cmake -A {} "{}"'.format("win32" if bitness == 32 else "x64",
+                                                ext.sourcedir+"/src/lib/draco")
+            system(command)
+            system("cmake --build . --config Release")
+
+            os.chdir(build_temp_dir)
             command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
                                                                                    sys.executable,
                                                                                    ext.sourcedir+"/src")
@@ -95,8 +104,13 @@ class CMakeBuild(build_ext):
                     print(line.replace("WIN32;", "WIN64;"))
             system("cmake --build . --config Release --target _rhino3dm")
         else:
+            os.chdir(draco_static_dir)
+            system("cmake {}".format(ext.sourcedir+"/src/lib/draco"))
+            system("cmake --build .")
+
+            os.chdir(build_temp_dir)
             system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-            system("make")
+            system("cmake --build .")
 
         os.chdir(current_dir)
         if not os.path.exists(self.build_lib + "/rhino3dm"):
@@ -110,7 +124,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='7.15.0',
+    version='8.0.0-beta2',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -121,8 +135,8 @@ CPython package based on OpenNURBS with a RhinoCommon style
 Project Homepage at: https://github.com/mcneel/rhino3dm
 
 ### Supported platforms
-* Python 2.7, 3.7, 3.8, 3.9, 3.10 - Windows (32 and 64 bit)
-* Python 2.7, 3.7, 3.8, 3.9, 3.10 - OSX (installed through homebrew)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11 - Windows (32 and 64 bit)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11 - OSX (installed through homebrew)
 * Linux and other python versions are supported through source distributions\
 
 

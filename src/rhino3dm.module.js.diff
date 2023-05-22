@@ -1,16 +1,59 @@
---- rhino3dm.js	1985-10-26 09:15:00.000000000 +0100
-+++ rhino3dm.module.js	1985-10-26 09:15:00.000000000 +0100
-@@ -1,7 +1,7 @@
+diff --git a/rhino3dm.js b/rhino3dm.module.js
+index ebc7b8c..eaff872 100644
+--- a/rhino3dm.js
++++ b/rhino3dm.module.js
+@@ -1,9 +1,9 @@
  
- var rhino3dm = (function() {
+ var rhino3dm = (() => {
 -  var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
 -  if (typeof __filename !== 'undefined') _scriptDir = _scriptDir || __filename;
 +  var _scriptDir = import.meta.url;
 +  
    return (
- function(rhino3dm) {
-   rhino3dm = rhino3dm || {};
-@@ -13,9 +13,4 @@
+-function(config) {
++async function(config) {
+   var rhino3dm = config || {};
+ 
+ 
+@@ -111,6 +111,9 @@ if (ENVIRONMENT_IS_NODE) {
+   // the require()` function.  This is only necessary for multi-environment
+   // builds, `-sENVIRONMENT=node` emits a static import declaration instead.
+   // TODO: Swap all `require()`'s with `import()`'s?
++  const { createRequire } = await import('module');
++  /** @suppress{duplicate} */
++  var require = createRequire(import.meta.url);
+   // These modules will usually be used on Node.js. Load them eagerly to avoid
+   // the complexity of lazy-loading.
+   var fs = require('fs');
+@@ -119,7 +122,10 @@ if (ENVIRONMENT_IS_NODE) {
+   if (ENVIRONMENT_IS_WORKER) {
+     scriptDirectory = nodePath.dirname(scriptDirectory) + '/';
+   } else {
+-    scriptDirectory = __dirname + '/';
++    // EXPORT_ES6 + ENVIRONMENT_IS_NODE always requires use of import.meta.url,
++    // since there's no way getting the current absolute path of the module when
++    // support for that is not available.
++    scriptDirectory = require('url').fileURLToPath(new URL('./', import.meta.url)); // includes trailing slash
+   }
+ 
+ // include: node_shell_read.js
+@@ -1055,10 +1061,15 @@ function createExportWrapper(name, fixedasm) {
+ }
+ 
+ var wasmBinaryFile;
++if (Module['locateFile']) {
+   wasmBinaryFile = 'rhino3dm.wasm';
+   if (!isDataURI(wasmBinaryFile)) {
+     wasmBinaryFile = locateFile(wasmBinaryFile);
+   }
++} else {
++  // Use bundler-friendly `new URL(..., import.meta.url)` pattern; works in browsers too.
++  wasmBinaryFile = new URL('rhino3dm.wasm', import.meta.url).href;
++}
+ 
+ function getBinary(file) {
+   try {
+@@ -8732,9 +8743,4 @@ run();
  }
  );
  })();

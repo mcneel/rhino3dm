@@ -16,6 +16,10 @@ using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Render;
 using Rhino.Runtime;
+#if RHINO_SDK
+using System.Security.Policy;
+using Rhino.Commands;
+#endif
 
 namespace Rhino.Render
 {
@@ -614,7 +618,7 @@ namespace Rhino.Geometry
     public int VertexFaceNormalsDifferCount => m_totalVertexFaceNormalDifferCt;
 
     /// <summary>
-    /// If true, then look for faces that have vertexes (not necessarily vertex indexes) that are identical.
+    /// If true, then look for faces that have vertices (not necessarily vertex indexes) that are identical.
     /// </summary>
     /// <since>7.0</since>
     public bool CheckForDuplicateFaces
@@ -747,15 +751,591 @@ namespace Rhino.Geometry
     PackedScaledNormalized = 2,
   }
 
+  /// <summary>
+  /// A collection of parameters that are passed to functions that calculate a various representations of SubD objects.
+  /// </summary>
+  /// <since>7.18</since>
+  [Serializable]
+  public class SubDDisplayParameters : IDisposable, ISerializable
+  {
+    IntPtr m_ptr;
+    internal IntPtr ConstPointer() { return m_ptr; }
+    internal IntPtr NonConstPointer() { return m_ptr; }
+
+    internal SubDDisplayParameters(IntPtr pMeshingParameters)
+    {
+      m_ptr = pMeshingParameters;
+    }
+
+    /// <summary>
+    /// Initializes a new instance with default values.
+    /// </summary>
+    /// <since>7.18</since>
+    public SubDDisplayParameters()
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_New();
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SubDDisplayParameters()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>7.18</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubDDisplayParameters_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Density enumeration
+    /// </summary>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public enum Density : uint
+    {
+      /// <summary>
+      /// Indicates the SubD display mesh density has not be set.
+      /// </summary>
+      UnsetDensity = 0,
+
+      ///<summary>
+      /// The minimum SubD display density that can be se in Rhino user interface is ExtraCoarseDensity (1).
+      ///</summary>
+      MinimumUserInterfaceDensity = 1,
+
+      /// <summary>
+      /// The maximum SubD display density that can be se in Rhino user interface is ExtraFineDensity (5).
+      /// </summary>
+      MaximumUserInterfaceDensity = 5,
+
+      ///<summary>
+      /// SubD display density values &lt;= MinimumAdaptiveDensity will never be adaptively reduced.
+      /// SubD display density values &gt; MinimumAdaptiveDensity may be adaptively reduced to a value &gt;= MinimumAdaptiveDensity.
+      ///</summary>
+      MinimumAdaptiveDensity = 1,
+
+      /// <summary>
+      /// Each SubD quad will generate 1 display mesh quads in a 1x1 grid.
+      /// This density can only be used with SubDs where every face is a quad.
+      /// User interface code never returns this density. 
+      /// </summary>
+      MinimumDensity = 0,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 4 display mesh quads in a 2x2 grid and each SubD N-gon will generate N display mesh quads.
+      /// Adaptive reductions do not apply to this density.
+      /// This is the minimum SubD display density.
+      /// </summary>
+      ExtraCoarseDensity = 1,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 16 display mesh quads in a 4x4 grid and each SubD N-gon will generate N*4 display mesh quads.
+      /// Adaptive reductions do not apply to this density.
+      /// </summary>
+      CoarseDensity = 2,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 64 display mesh quads in an 8x8 grid and each SubD N-gon will generate N*8 display mesh quads.
+      /// When a SubD has more than 8000 faces, adaptive MediumDensity is reduced to CoarseDensity.
+      /// </summary>
+      MediumDensity = 3,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 256 display mesh quads in a 16x16 grid and each SubD N-gon will generate N*16 display mesh quads.
+      /// When a SubD has more than 2000 faces, adaptive FineDensity is reduced to adaptive MediumDensity.
+      /// </summary>
+      FineDensity = 4,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 256 display mesh quads in a 16x16 grid and each SubD N-gon will generate N*16 display mesh quads.
+      /// When a SubD has more than 2000 faces, adaptive DefaultDensity is reduced to adaptive MediumDensity.
+      /// This is the default value for creating mesh approximations of SubD surface.  
+      /// When treadted as an adaptive setting, it produces acceptable results for most SubDs.
+      /// </summary>
+      DefaultDensity = 4,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 1024 display mesh quads in a 32x32 grid and each SubD N-gon will generate N*32 display mesh quads.
+      /// When a SubD has more than 500 faces, adaptive ExtraFineDensity is reduced to adaptive FineDensity.
+      /// </summary>
+      ExtraFineDensity = 5,
+
+      /// <summary>
+      /// When interpreted as an absolute SubD display density, each SubD quad will generate 
+      /// 4096 display mesh quads in a 64x64 grid and each SubD N-gon will generate N*64 display mesh quads.
+      /// SubDDisplayParameters.AdaptiveDensity() determines if the subd display density is 
+      /// treated adaptively or absolutely.
+      /// This value creates ridiculously dense display meshes and should generally be avoided. 
+      /// No Rhino user interface will create this value.
+      ///</summary>
+      MaximumDensity = 6,
+    }
+
+    /// <summary>
+    /// Limits display density to a value useful in user interface code. 
+    /// </summary>
+    /// <param name="displayDensity"></param>
+    /// <returns>The clamped value.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint ClampDisplayDensity(uint displayDensity)
+    {
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_ClampDisplayDensity(displayDensity);
+    }
+
+    /// <summary>
+    /// When the SubD display density is adaptive (default), AdaptiveMeshQuadMaximum
+    /// specifies the approximate number of display mesh quads to permit before
+    /// reducing the SubD display mesh density. 
+    /// </summary>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AdaptiveDisplayMeshQuadMaximum
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_AdaptiveDisplayMeshQuadMaximum();
+      }
+    }
+
+    /// <summary>
+    /// Get an empty SubDDisplayParameters.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Empty()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Empty();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for an extra course limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.ExtraCoarseDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters ExtraCoarse()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_ExtraCoarse();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a course limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.CoarseDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Coarse()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Coarse();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a medium limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.MediumDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Medium()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Medium();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Parameters for a fine limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.FineDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Fine()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Fine();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    ///  Parameters for an extra fine limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.ExtraFineDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters ExtraFine()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_ExtraFine();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    ///  Parameters for the default limit surface display mesh.
+    /// SubD display density = adaptive SubDDisplayParameters.Density.DefaultDensity.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters Default()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_Default();
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Gets the absolute SubD display density for SubD with subdFaceCount faces.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <param name="subDFaceCount">Number of SubD faces.</param>
+    /// <returns>
+    /// The absolute SubD display density is &lt;= adaptiveSubDDisplayDensity and &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// </returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AbsoluteDisplayDensityFromSubDFaceCount(uint adaptiveSubDDisplayDensity, uint subDFaceCount)
+    {
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(adaptiveSubDDisplayDensity, subDFaceCount);
+    }
+
+    /// <summary>
+    /// Gets absolute SubD display density for subd.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <param name="subd">
+    /// In the cases when the SubD in question is not available, like user interface code that applies in general 
+    /// and to unknown SubDs, pass SubD.Empty.
+    /// </param>
+    /// <returns>
+    /// The absolute SubD display density is &lt;= adaptiveSubDDisplayDensity and &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// </returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static uint AbsoluteDisplayDensityFromSubD(uint adaptiveSubDDisplayDensity, SubD subd)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      IntPtr ptr_const_subd = subd.ConstPointer();
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(adaptiveSubDDisplayDensity, ptr_const_subd);
+    }
+
+    /// <summary>
+    /// In most applications, the caller sets the mesh density and leaves the other parameters set to the default values.
+    /// </summary>
+    /// <param name="adaptiveSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity. When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// Values &lt; SubDDisplayParameters.Density.MinimumAdaptiveDensity are treated as SubDDisplayParameters.Density.MinimumAdaptiveDensity.
+    /// All other invalid input values are treated as SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static SubDDisplayParameters CreateFromDisplayDensity(uint adaptiveSubDDisplayDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromDisplayDensity(adaptiveSubDDisplayDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Use of absolute display density is strongly discouraged. 
+    /// SubDs can have a single face or millions of faces.
+    /// Adaptive display meshing produces more desirable results in almost all cases.
+    /// </summary>
+    /// <param name="absoluteSubDDisplayDensity">
+    /// A value &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// When in doubt, pass SubDDisplayParameters.Density.DefaultDensity.
+    /// </param>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public static SubDDisplayParameters CreateFromAbsoluteDisplayDensity(uint absoluteSubDDisplayDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromAbsoluteDisplayDensity(absoluteSubDDisplayDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// This function creates SubDDisplayParameters from a user interface "slider" like Rhino's simple mesh controls.
+    /// </summary>
+    /// <param name="normalizedMeshDensity">A double between 0.0 and 1.0.</param>
+    /// <returns>A valid ON_SubDDisplayParameters with the specified subd display density.</returns>
+    /// <since>7.18</since>
+    public static SubDDisplayParameters CreateFromMeshDensity(double normalizedMeshDensity)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_CreateFromMeshDensity(normalizedMeshDensity);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// True if the SubD display density setting is adaptive and approximate display
+    /// mesh quad count is capped at SubDDisplayParameters::AdaptiveDisplayMeshQuadMaximum.
+    /// </summary>
+    /// <since>7.18</since>
+    public bool DisplayDensityIsAdaptive
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensityIsAdaptive(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// True if the SubD display density setting is absolute.
+    /// </summary>
+    /// <since>7.18</since>
+    public bool DisplayDensityIsAbsolute
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensityIsAbsolute(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// Gets the absolute display density to use when creating display meshes for SubD.
+    /// When adaptive reduction is enabled, subd.Faces.Count is used to determine
+    /// the appropriate display density.
+    /// </summary>
+    /// <param name="subd">The SubD object.</param>
+    /// <returns>The display density.</returns>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public uint DisplayDensity(SubD subd)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      IntPtr ptr_const_subd = subd.ConstPointer();
+      return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensity(m_ptr, ptr_const_subd);
+    }
+
+    /// <summary>
+    /// Set an adaptive SubD display density that caps display mesh quad count at SubDDisplayParameters.AdaptiveDisplayMeshQuadMaximum.
+    /// </summary>
+    /// <param name="adaptiveDisplayDensity">
+    /// adaptiveDisplayDensity &lt;= SubDDisplayParameters.Density.MaximumDensity.
+    /// Values &lt;= SubDDisplayParameters.Density.MinimumAdaptiveDensity will never be adaptively reduced during display mesh creation.
+    /// </param>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public void SetAdaptiveDisplayDensity(uint adaptiveDisplayDensity)
+    {
+      UnsafeNativeMethods.ON_SubDDisplayParameters_SetAdaptiveDisplayDensity(m_ptr, adaptiveDisplayDensity);
+    }
+
+    /// <summary>
+    /// In almast all cases, you are better off using SetAdaptiveDisplayDensity().
+    /// </summary>
+    /// <param name="absoluteDisplayDensity">absoluteDisplayDensity &lt;= SubDDisplayParameters.Density.MaximumDensity.</param>
+    /// <since>7.18</since>
+    [CLSCompliant(false)]
+    public void SetAbsoluteDisplayDensity(uint absoluteDisplayDensity)
+    {
+      UnsafeNativeMethods.ON_SubDDisplayParameters_SetAbsoluteDisplayDensity(m_ptr, absoluteDisplayDensity);
+    }
+
+    /// <summary>
+    /// The MeshLocation property determines if the mesh is on the SubD's control net or the SubD's surface.
+    /// </summary>
+    /// <since>7.18</since>
+    public SubDComponentLocation MeshLocation
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_SubDDisplayParameters_MeshLocation(m_ptr);
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_SubDDisplayParameters_SetMeshLocation(m_ptr, value);
+      }
+    }
+    #region ISerializable code
+
+    /// <inheritdoc/>
+    /// <since>8.0</since>
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      info.AddValue(nameof(DisplayDensityIsAbsolute), DisplayDensityIsAbsolute, typeof(bool));
+      info.AddValue(nameof(DisplayDensity), DisplayDensity(SubD.Empty), typeof(uint));
+    }
+
+
+    /// <summary>
+    /// Called by BinaryFormatter.Deserialize to create a new MeshParamaters
+    /// object.
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="context"></param>
+    /// <since>8.0</since>
+    public SubDDisplayParameters(SerializationInfo info, StreamingContext context)
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubDDisplayParameters_New();
+      var absolute = info.GetBool(nameof(DisplayDensityIsAbsolute), DisplayDensityIsAbsolute);
+      var density = info.GetUnsignedInt(nameof(DisplayDensity), DisplayDensity(SubD.Empty));
+      if (absolute)
+        SetAbsoluteDisplayDensity(density);
+      else
+        SetAdaptiveDisplayDensity(density);
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public string ToEncodedString() => SerializableExtensions.ToEncodedString(this);
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static SubDDisplayParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<SubDDisplayParameters>(value);
+
+    #endregion ISerializable code
+  }
+
+  /// <summary>
+  /// Call used to extend SerializationInfo and encode/decode serialized string
+  /// </summary>
+  static class SerializableExtensions
+  {
+    public static bool GetBool(this SerializationInfo info, string key, bool defaultValue)
+    {
+      if (info.GetValue(key, typeof(bool)) is bool b)
+        return b;
+      return defaultValue;
+    }
+
+    public static uint GetUnsignedInt(this SerializationInfo info, string key, uint defaultValue)
+    {
+      if (info.GetValue(key, typeof(uint)) is uint i)
+        return i;
+      return defaultValue;
+    }
+
+    public static int GetInt(this SerializationInfo info, string key, int defaultValue)
+    {
+      if (info.GetValue(key, typeof(int)) is int i)
+        return i;
+      return defaultValue;
+    }
+
+    public static double GetDouble(this SerializationInfo info, string key, double defaultValue)
+    {
+      if (info.GetValue(key, typeof(double)) is double d)
+        return d;
+      return defaultValue;
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public static string ToEncodedString(ISerializable objectToEncode)
+    {
+#if RHINO_SDK
+      using (var stream = new System.IO.MemoryStream())
+      {
+        var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+        formatter.Serialize(stream, objectToEncode);
+        return Convert.ToBase64String(stream.ToArray());
+      }
+#else
+      throw new NotImplementedException();
+#endif
+    }
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static T FromEncodedString<T>(string value) where T : class
+    {
+#if RHINO_SDK
+      try
+      {
+        if (string.IsNullOrWhiteSpace(value))
+          return null;
+        using (var stream = new System.IO.MemoryStream(Convert.FromBase64String(value)))
+        {
+          var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+          var result = formatter.Deserialize(stream) as MeshingParameters;
+          return result as T;
+        }
+      }
+      catch
+      {
+        return null;
+      }
+#else
+      throw new NotImplementedException();
+#endif
+    }
+  }
 
   /// <summary>
   /// Represents settings used for creating a mesh representation of a brep or surface.
   /// </summary>
-  public class MeshingParameters : IDisposable
+  [Serializable]
+  public class MeshingParameters : IDisposable, ISerializable, IEquatable<MeshingParameters>
   {
     IntPtr m_ptr; // This class is never const
     internal IntPtr ConstPointer() { return m_ptr; }
     internal IntPtr NonConstPointer() { return m_ptr; }
+
 
     /// <summary>
     /// Initializes a new instance with default values.
@@ -765,6 +1345,17 @@ namespace Rhino.Geometry
     public MeshingParameters()
     {
       m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+    }
+
+    /// <summary>
+    /// Initializes a new instance copying values from source.
+    /// <para>Initial values are same as <see cref="Default"/>.</para>
+    /// </summary>
+    /// <since>8.0</since>
+    public MeshingParameters(MeshingParameters source)
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+      CopyFrom(source);
     }
 
     /// <summary>
@@ -808,6 +1399,96 @@ namespace Rhino.Geometry
     {
       Dispose(false);
     }
+
+    #region ISerializable code
+
+    /// <inheritdoc/>
+    /// <since>8.0</since>
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      info.AddValue(nameof(ClosedObjectPostProcess), ClosedObjectPostProcess, typeof(bool));
+      info.AddValue(nameof(ComputeCurvature), ComputeCurvature, typeof(bool));
+      info.AddValue(nameof(DoublePrecision), DoublePrecision, typeof(bool));
+      info.AddValue(nameof(GridAmplification), GridAmplification, typeof(double));
+      info.AddValue(nameof(GridAngle), GridAngle, typeof(double));
+      info.AddValue(nameof(GridAspectRatio), GridAspectRatio, typeof(double));
+      info.AddValue(nameof(GridMaxCount), GridMaxCount, typeof(int));
+      info.AddValue(nameof(GridMinCount), GridMinCount, typeof(int));
+      info.AddValue(nameof(JaggedSeams), JaggedSeams, typeof(bool));
+      info.AddValue(nameof(MaximumEdgeLength), MaximumEdgeLength, typeof(double));
+      info.AddValue(nameof(MinimumEdgeLength), MinimumEdgeLength, typeof(double));
+      info.AddValue(nameof(MinimumTolerance), MinimumTolerance, typeof(double));
+      info.AddValue(nameof(RefineAngle), RefineAngle, typeof(double));
+      info.AddValue(nameof(RefineAngleInDegrees), RefineAngleInDegrees, typeof(double));
+      info.AddValue(nameof(RefineGrid), RefineGrid, typeof(bool));
+      info.AddValue(nameof(RelativeTolerance), RelativeTolerance, typeof(double));
+      info.AddValue(nameof(SimplePlanes), SimplePlanes, typeof(bool));
+      info.AddValue(nameof(TextureRange), TextureRange, typeof(int));
+      info.AddValue(nameof(Tolerance), Tolerance, typeof(double));
+      using (var subd = SubDDisplayParameters())
+        info.AddValue(nameof(SubDDisplayParameters), subd.ToEncodedString(), typeof(string));
+    }
+
+
+    /// <summary>
+    /// Called by BinaryFormatter.Deserialize to create a new MeshParamaters
+    /// object.
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="context"></param>
+    /// <since>8.0</since>
+    public MeshingParameters(SerializationInfo info, StreamingContext context)
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshParameters_New();
+      ClosedObjectPostProcess = info.GetBool(nameof(ClosedObjectPostProcess), ClosedObjectPostProcess);
+      ComputeCurvature = info.GetBool(nameof(ComputeCurvature), ComputeCurvature);
+      DoublePrecision = info.GetBool(nameof(DoublePrecision), DoublePrecision);
+      GridAmplification = info.GetDouble(nameof(GridAmplification), GridAmplification);
+      GridAngle = info.GetDouble(nameof(GridAngle), GridAngle);
+      GridAspectRatio = info.GetDouble(nameof(GridAspectRatio), GridAspectRatio);
+      GridMaxCount = info.GetInt(nameof(GridMaxCount), GridMaxCount);
+      GridMinCount = info.GetInt(nameof(GridMinCount), GridMinCount);
+      JaggedSeams = info.GetBool(nameof(JaggedSeams), JaggedSeams);
+      MaximumEdgeLength = info.GetDouble(nameof(MaximumEdgeLength), MaximumEdgeLength);
+      MinimumEdgeLength = info.GetDouble(nameof(MinimumEdgeLength), MinimumEdgeLength);
+      MinimumTolerance = info.GetDouble(nameof(MinimumTolerance), MinimumTolerance);
+      RefineAngle = info.GetDouble(nameof(RefineAngle), RefineAngle);
+      RefineAngleInDegrees = info.GetDouble(nameof(RefineAngleInDegrees), RefineAngleInDegrees);
+      RefineGrid = info.GetBool(nameof(RefineGrid), RefineGrid);
+      RelativeTolerance = info.GetDouble(nameof(RelativeTolerance), RelativeTolerance);
+      SimplePlanes = info.GetBool(nameof(SimplePlanes), SimplePlanes);
+      TextureRange = (MeshingParameterTextureRange)info.GetInt(nameof(TextureRange), (int)TextureRange);
+      Tolerance = info.GetDouble(nameof(Tolerance), Tolerance);
+      using (var subd = Geometry.SubDDisplayParameters.FromEncodedString(info.GetString(nameof(SubDDisplayParameters))))
+      {
+        if (subd != null)
+          SetSubDDisplayParameters(subd);
+      }
+    }
+
+    /// <summary>
+    /// Returns a encoded string that represents the MeshingParameters.
+    /// </summary>
+    /// <returns>
+    /// A encoded string that represents the MeshingParameters.
+    /// </returns>
+    /// <since>8.0</since>
+    public string ToEncodedString() => SerializableExtensions.ToEncodedString(this);
+
+    /// <summary>
+    /// Converts encoded serialized string into a MeshingParameters
+    /// </summary>
+    /// <param name="value">
+    /// Encoded string returned by MeshingParameters.ToString()
+    /// </param>
+    /// <returns>
+    /// Returns a new MeshingParameters created by decoding and deserializing
+    /// the string or null if value is invalid.
+    /// </returns>
+    /// <since>8.0</since>
+    public static MeshingParameters FromEncodedString(string value) => SerializableExtensions.FromEncodedString<MeshingParameters>(value);
+
+    #endregion ISerializable code
 
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
@@ -1078,6 +1759,17 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not the mesh should have
+    /// double precision vertices in addition to the floats.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool DoublePrecision
+    {
+      get { return GetBool(UnsafeNativeMethods.MeshParametersBoolConst.DoublePrecision); }
+      set { SetBool(UnsafeNativeMethods.MeshParametersBoolConst.DoublePrecision, value); }
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether or not planar areas are allowed 
     /// to be meshed in a simplified manner.
     /// </summary>
@@ -1243,7 +1935,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the mesh parameter refine angle.
+    /// Gets or sets the mesh parameter refine angle in radians.
     /// </summary>
     /// <since>5.0</since>
     public double RefineAngle
@@ -1252,8 +1944,134 @@ namespace Rhino.Geometry
       set { SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngle, value); }
     }
 
+    /// <summary>
+    /// Gets or sets the mesh parameter refine angle in degrees.
+    /// </summary>
+    /// <since>8.0</since>
+    public double RefineAngleInDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngleInDegrees); }
+      set { SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst.RefineAngleInDegrees, value); }
+    }
 
     #endregion
+
+    /// <summary>
+    /// Gets the SubD display parameters.
+    /// </summary>
+    /// <returns>The SubD display parameters.</returns>
+    /// <since>7.18</since>
+    public SubDDisplayParameters SubDDisplayParameters()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_MeshParameters_SubDDisplayParameters(m_ptr);
+      return new SubDDisplayParameters(ptr);
+    }
+
+    /// <summary>
+    /// Sets the SubD display parameters.
+    /// </summary>
+    /// <param name="subDDisplayParameters">The SubD display parameters.</param>
+    /// <since>7.18</since>
+    public void SetSubDDisplayParameters(SubDDisplayParameters subDDisplayParameters)
+    {
+      if (null == subDDisplayParameters)
+        throw new ArgumentNullException(nameof(subDDisplayParameters));
+      IntPtr ptr_const_params = subDDisplayParameters.ConstPointer();
+      UnsafeNativeMethods.ON_MeshParameters_SetSubDDisplayParameters(m_ptr, ptr_const_params);
+    }
+
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="other">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public bool Equals(MeshingParameters other)
+    {
+      IntPtr const_ptr_this = this.ConstPointer();
+      IntPtr const_ptr_other = other.ConstPointer();
+      return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
+    }
+
+    /// <summary>
+    /// Call this method to compare this parameters with another
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public int Compare(MeshingParameters other)
+    {
+      return UnsafeNativeMethods.ON_MeshParameters_OperatorCompare(ConstPointer(), other?.ConstPointer() ?? IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="obj">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public override bool Equals(Object obj)
+    {
+      if (obj == null)
+        return false;
+
+      MeshingParameters mpObj = obj as MeshingParameters;
+      if (mpObj == null)
+        return false;
+      else
+        return Equals(mpObj);
+    }
+
+    /// <summary>
+    /// Call this method to copy MeshingParameters from another instance.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <since>8.0</since>
+    public void CopyFrom(MeshingParameters source)
+    {
+      if (source != null)
+        UnsafeNativeMethods.ON_MeshParameters_OperatorEqual(source.ConstPointer(), NonConstPointer());
+    }
+
+    /// <summary>
+    /// Computes a hash number that represents the current MeshingParameters.
+    /// </summary>
+    /// <returns>A hash code for MeshingParameters.</returns>    
+    public override int GetHashCode()
+    {
+      // MSDN docs recommend XOR'ing the internal values to get a hash code
+      return RelativeTolerance.GetHashCode() ^ MaximumEdgeLength.GetHashCode() ^ MinimumEdgeLength.GetHashCode() ^ MinimumTolerance.GetHashCode();
+    }
+
+    /// <summary>
+    /// Determines whether the two MeshingParameters have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if all of components of the two MeshingParameters are equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator ==(MeshingParameters mp1, MeshingParameters mp2)
+    {
+      if (((object)mp1) == null || ((object)mp2) == null)
+        return Equals(mp1, mp2);
+
+      return mp1.Equals(mp2);
+    }
+
+    /// <summary>
+    /// Determines whether the two MeshingParameters do not have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if any components of the two MeshingParameters are not equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator !=(MeshingParameters mp1, MeshingParameters mp2)
+    {
+      if (((object)mp1) == null || ((object)mp2) == null)
+        return !Object.Equals(mp1, mp2);
+
+      return !(mp1.Equals(mp2));
+    }
   }
 
   /// <summary>
@@ -1452,6 +2270,7 @@ namespace Rhino.Geometry
     /// e.g TargetQuadCount = Input mesh Area * sqr(TargetEdgeLength)
     /// AdaptiveSize as well as AdaptiveQuadCount will also be ignored;
     /// </summary>
+    /// <since>7.8</since>
     public double TargetEdgeLength { get; set; } = 0;
 
     /// <summary>
@@ -1522,6 +2341,44 @@ namespace Rhino.Geometry
     Z = 4
   }
 
+
+  /// <summary>
+  /// Parameters for ShrinkWrap method
+  /// </summary>
+  /// <since>8.0</since>
+  public class ShrinkWrapParameters
+  {
+    /// <summary>
+    /// The desired target edge length in document units
+    /// Smaller values equal more mesh resolution at the expense of larger mesh sizes
+    /// </summary>
+    /// <since>8.0</since>
+    public double TargetEdgeLength { get; set; } = 1;
+    /// <summary>
+    /// Distance to offset outward or inward
+    /// </summary>
+    /// <since>8.0</since>
+    public double Offset { get; set; } = 0;
+    /// <summary>
+    /// Number of times to apply smoothing
+    /// </summary>
+    /// <since>8.0</since>
+    public int SmoothingIterations { get; set; } = 0;
+    /// <summary>
+    /// Any input meshes will have "Fill Holes" applied to them before volume creation
+    /// This value is ignored when input objects are Point Clouds
+    /// </summary>
+    /// <since>8.0</since>
+    public bool FillHolesInInputObjects { get; set; }
+    /// <summary>
+    /// 0 - 100 the percentage of optimization desired.
+    /// Polygons will be reduced in areas of lower curvature
+    /// Lower values result in better feature preservation at the cost of more polygons
+    /// </summary>
+    /// <since>8.0</since>
+    public int PolygonOptimization { get; set; } = 10;
+  }
+
   /// <summary>
   /// Represents a geometry type that is defined by vertices and faces.
   /// <para>This is often called a face-vertex mesh.</para>
@@ -1581,15 +2438,17 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a sub-mesh, that contains a filtered list of faces.
     /// </summary>
-    /// <param name="original">The mesh to copy. This item can be null, and in this case an empty mesh is returned.</param>
-    /// <param name="inclusion">A series of true and false values, that determine if each face is used in the new mesh.
+    /// <param name="original">The mesh to copy. If null, null is returned.</param>
+    /// <param name="inclusion">A series of true and false values, that determine if each face is used in the new mesh. 
+    /// If null or empty, a non-filtered copy of the original mesh is returned.
     /// <para>If the amount does not match the length of the face list, the pattern is repeated. If it exceeds the amount
-    /// of faces in the mesh face list, the pattern is truncated. This items can be null or empty, and the mesh will simply be duplicated.</para>
+    /// of faces in the mesh face list, the pattern is truncated.</para>
     /// </param>
+    /// <returns>A copy of the original mesh with its faces filtered, or null on failure.</returns>
     /// <since>7.0</since>
     public static Mesh CreateFromFilteredFaceList(Mesh original, IEnumerable<bool> inclusion)
     {
-      if (original == null) { return new Mesh(); }
+      if (original == null) { return null; }
       if (inclusion == null) { return original.DuplicateMesh(); }
 
       IntPtr original_int_ptr = original.ConstPointer();
@@ -2078,6 +2937,24 @@ namespace Rhino.Geometry
       return null;
     }
 
+    /// <summary>
+    /// Calculate a mesh representation of a surface's control net.
+    /// </summary>
+    /// <param name="surface">The surface.</param>
+    /// <returns>Mesh representing the surface control net on success, null on failure</returns>
+    /// <since>7.18</since>
+    public static Mesh CreateFromSurfaceControlNet(Surface surface)
+    {
+      if (null == surface)
+        throw new ArgumentNullException(nameof(surface));
+      IntPtr ptr_const_surface = surface.ConstPointer();
+      IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_ControlPolygonMesh(ptr_const_surface);
+      if (IntPtr.Zero != ptr_mesh)
+        return new Mesh(ptr_mesh, null);
+      GC.KeepAlive(surface);
+      return null;
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Construct a mesh patch from a variety of input geometry.
@@ -2097,7 +2974,7 @@ namespace Rhino.Geometry
     /// (optional: can be null) Polylines to create holes in the output mesh.
     /// If innerBoundaryCurves are the only input then the result may be null
     /// if trimback is set to false (see comments for trimback) because the
-    /// resulting mesh could be invalid (all faces created contained vertexes
+    /// resulting mesh could be invalid (all faces created contained vertices
     /// from the perimeter boundary).
     /// </param>
     /// <param name="pullbackSurface">
@@ -2216,50 +3093,53 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes the solid union of a set of meshes.
+    /// Computes the solid union of a set of meshes. WARNING: Use the overload that takes a tolerance or options.
     /// </summary>
     /// <param name="meshes">Meshes to union.</param>
     /// <returns>An array of Mesh results or null on failure.</returns>
     /// <since>5.0</since>
     public static Mesh[] CreateBooleanUnion(IEnumerable<Mesh> meshes)
     {
-      if (null == meshes)
-        return null;
-
-      using (var input = new SimpleArrayMeshPointer())
-      using (var output = new SimpleArrayMeshPointer())
-      {
-        foreach (var mesh in meshes)
-        {
-          if (null == mesh)
-            continue;
-          input.Add(mesh, true);
-        }
-
-        IntPtr const_ptr_input = input.ConstPointer();
-        IntPtr ptr_output = output.NonConstPointer();
-
-        // Fugier uses the following two tolerances in RhinoScript for all MeshBooleanUnion
-        // calculations.
-        const double mesh_bool_intersection_tolerance = RhinoMath.SqrtEpsilon * 10.0;
-        const double mesh_bool_overlap_tolerance = RhinoMath.SqrtEpsilon * 10.0;
-
-        Mesh[] rc = null;
-        if (UnsafeNativeMethods.RHC_RhinoMeshBooleanUnion(const_ptr_input, mesh_bool_intersection_tolerance, mesh_bool_overlap_tolerance, ptr_output))
-          rc = output.ToNonConstArray();
-        GC.KeepAlive(meshes);
-
-        return rc;
-      }
+      return CreateBooleanUnion(meshes, null, out _);
     }
 
-    static Mesh[] MeshBooleanHelper(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst which)
+    /// <summary>
+    /// Computes the solid union of a set of meshes.
+    /// </summary>
+    /// <param name="meshes">Meshes to union.</param>
+    /// <param name="tolerance">A valid tolerance value. See <see cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/></param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>8.0</since>
+    public static Mesh[] CreateBooleanUnion(IEnumerable<Mesh> meshes, double tolerance)
     {
-      if (null == firstSet || null == secondSet)
+      var default_options = new MeshBooleanOptions();
+      default_options.Tolerance = tolerance;
+      return CreateBooleanUnion(meshes, default_options, out _);
+    }
+
+    /// <summary>
+    /// Computes the solid union of a set of meshes.
+    /// </summary>
+    /// <param name="meshes">Meshes to union.</param>
+    /// <param name="options">An option instance. Can be null, but generally it should be instantiated and have a tolerance set.</param>
+    /// <param name="commandResult">A value indicating if the function was successful, or if it was cancelled, or if it did nothing, or failed.</param>
+    /// <since>8.0</since>
+    public static Mesh[] CreateBooleanUnion(IEnumerable<Mesh> meshes, MeshBooleanOptions options, out Commands.Result commandResult)
+    {
+      return MeshBooleanHelper(meshes, null, UnsafeNativeMethods.MeshBooleanIntDiffConst.Union, out commandResult, options);
+    }
+
+    private static Mesh[] MeshBooleanHelper(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst which, out Commands.Result result, MeshBooleanOptions options=null)
+    {
+      result = Commands.Result.Failure;
+
+      if (null == firstSet || (null == secondSet && UnsafeNativeMethods.MeshBooleanIntDiffConst.Union != which))
         return null;
 
+      if (options == null) options = new MeshBooleanOptions();
+      
       using (var input1 = new SimpleArrayMeshPointer())
-      using (var input2 = new SimpleArrayMeshPointer())
+      using (var input2 = (which != UnsafeNativeMethods.MeshBooleanIntDiffConst.Union) ? new SimpleArrayMeshPointer() : null)
       using (var output = new SimpleArrayMeshPointer())
       {
         foreach (Mesh mesh in firstSet)
@@ -2269,29 +3149,39 @@ namespace Rhino.Geometry
           input1.Add(mesh, true);
         }
 
-        foreach (Mesh mesh in secondSet)
+        if (secondSet != null)
         {
-          if (null == mesh)
-            continue;
-          input2.Add(mesh, true);
+          foreach (Mesh mesh in secondSet)
+          {
+            if (null == mesh)
+              continue;
+            input2.Add(mesh, true);
+          }
         }
 
         IntPtr const_ptr_input1 = input1.ConstPointer();
-        IntPtr const_ptr_input2 = input2.ConstPointer();
+        IntPtr const_ptr_input2 = input2?.ConstPointer() ?? IntPtr.Zero;
         IntPtr ptr_output = output.NonConstPointer();
 
-        // Fugier uses the following two tolerances in RhinoScript for all MeshBoolean...
-        // calculations.
-        const double mesh_bool_intersection_tolerance = RhinoMath.SqrtEpsilon * 10.0;
-        const double mesh_bool_overlap_tolerance = RhinoMath.SqrtEpsilon * 10.0;
+        IntPtr text_log_ptr = options.TextLog?.NonConstPointer() ?? IntPtr.Zero;
 
+        Interop.MarshalProgressAndCancelToken(options.CancellationToken, options.ProgressReporter,
+          out IntPtr ptrTerminator, out int progressInt, out ProgressReporter reporter, out ThreadTerminator terminator);
+
+        int commandResult = 0;
         Mesh[] rc = null;
-        if (UnsafeNativeMethods.RHC_RhinoMeshBooleanIntDiff(const_ptr_input1, const_ptr_input2, mesh_bool_intersection_tolerance, mesh_bool_overlap_tolerance, ptr_output, which))
+        if (UnsafeNativeMethods.RHC_RhinoMeshBooleanIntDiffUni(const_ptr_input1, const_ptr_input2, 
+          options.Tolerance, options.Tolerance, ptr_output, which, text_log_ptr, ptrTerminator, progressInt, ref commandResult))
         {
           rc = output.ToNonConstArray();
+          result = (Commands.Result)commandResult;
         }
         GC.KeepAlive(firstSet);
         GC.KeepAlive(secondSet);
+        GC.KeepAlive(options);
+
+        if (terminator != null) terminator.Dispose();
+        if (reporter != null) reporter.Disable();
 
         return rc;
       }
@@ -2306,8 +3196,24 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Mesh[] CreateBooleanDifference(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet)
     {
-      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference);
+      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference, out _);
     }
+
+    /// <summary>
+    /// Computes the solid difference of two sets of Meshes.
+    /// </summary>
+    /// <param name="firstSet">First set of Meshes (the set to subtract from).</param>
+    /// <param name="secondSet">Second set of Meshes (the set to subtract).</param>
+    /// <param name="options">An option instance. Should have a valid Tolerance set.</param>
+    /// <param name="result">Indicates if the function succeeded, was cancelled, did nothing, or failed.</param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>8.0</since>
+    public static Mesh[] CreateBooleanDifference(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, MeshBooleanOptions options, out Commands.Result result)
+    {
+      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference, out result, options);
+    }
+
+
     /// <summary>
     /// Computes the solid intersection of two sets of meshes.
     /// </summary>
@@ -2317,7 +3223,20 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Mesh[] CreateBooleanIntersection(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet)
     {
-      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Intersect);
+      return CreateBooleanIntersection(firstSet, secondSet, null, out _);
+    }
+    /// <summary>
+    /// Computes the solid intersection of two sets of meshes.
+    /// </summary>
+    /// <param name="firstSet">First set of Meshes.</param>
+    /// <param name="secondSet">Second set of Meshes.</param>
+    /// <param name="options">The boolean option instance, or null.</param>
+    /// <param name="result">A value indicating success, or cancel, or failure, or nothing.</param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>5.0</since>
+    public static Mesh[] CreateBooleanIntersection(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, MeshBooleanOptions options, out Result result)
+    {
+      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Intersect, out result, options);
     }
 
     /// <summary>
@@ -2329,7 +3248,21 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Mesh[] CreateBooleanSplit(IEnumerable<Mesh> meshesToSplit, IEnumerable<Mesh> meshSplitters)
     {
-      return MeshBooleanHelper(meshesToSplit, meshSplitters, UnsafeNativeMethods.MeshBooleanIntDiffConst.Split);
+      return CreateBooleanSplit(meshesToSplit, meshSplitters, null, out _);
+    }
+    /// <summary>
+    /// Splits a set of meshes with another set.
+    /// </summary>
+    /// <param name="meshesToSplit">A list, an array, or any enumerable set of meshes to be split. If this is null, null will be returned.</param>
+    /// <param name="meshSplitters">A list, an array, or any enumerable set of meshes that cut. If this is null, null will be returned.</param>
+    /// <param name="result">A value indicating success, or cancel, or failure, or nothing.</param>
+    /// <param name="options">The boolean option instance, or null.</param>
+    /// 
+    /// <returns>A new mesh array, or null on error.</returns>
+    /// <since>5.0</since>
+    public static Mesh[] CreateBooleanSplit(IEnumerable<Mesh> meshesToSplit, IEnumerable<Mesh> meshSplitters, MeshBooleanOptions options, out Result result)
+    {
+      return MeshBooleanHelper(meshesToSplit, meshSplitters, UnsafeNativeMethods.MeshBooleanIntDiffConst.Split, out result, options);
     }
 
     /// <summary>
@@ -2383,13 +3316,19 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Constructs a new extrusion from a curve.
+    /// Constructs a mesh from an extruded curve.
     /// </summary>
     /// <param name="curve">A curve to extrude.</param>
     /// <param name="direction">The direction of extrusion.</param>
     /// <param name="parameters">The parameters of meshing.</param>
     /// <param name="boundingBox">The bounding box controls the length of the extrusion.</param>
     /// <returns>A new mesh, or null on failure.</returns>
+    /// <remarks>
+    /// This method is designed to be used when projecting curves onto a mesh. In general,
+    /// a better solution is to use extrude the curve into a surface using <see cref="Surface.CreateExtrusion"/>,
+    /// and then create a mesh from the surface using <see cref="CreateFromSurface(Surface)"/>. The <see cref="Extrusion"/> and
+    /// <see cref="SumSurface"/> classes can also be used to create extrusions.
+    /// </remarks>
     /// <since>7.0</since>
     public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters,
       BoundingBox boundingBox)
@@ -2871,6 +3810,29 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// If the mesh does not have surface evaluation parameters,
+    /// has texture coordinates, and the surface parameters can
+    /// be set in a way so the existing texture coordinates can
+    /// be computed from the surface parameters, then this function
+    /// sets the surface parameters. This is useful when meshes
+    /// that have texture coordinates and do not have surface
+    /// parameters want to set the surface parameters in a way
+    /// so that the texture mapping of type
+    /// TextureMappingType.SurfaceParameters
+    /// will restore the texture coordinates.
+    /// </summary>
+    /// <returns>
+    /// true - successful
+    /// false - failure - no changes made to the mesh
+    /// </returns>
+    /// <since>8.0</since>
+    public bool SetSurfaceParametersFromTextureCoordinates()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Mesh_SetSurfaceParametersFromTextureCoordinates(ptr_this);
+    }
+
+    /// <summary>
     /// Removes topology data, forcing all topology information to be recomputed.
     /// </summary>
     /// <since>6.0</since>
@@ -2981,6 +3943,22 @@ namespace Rhino.Geometry
     public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
     {
       return CachedTextureCoordinates.GetCachedTextureCoordinates(this, textureMappingId);
+    }
+
+    /// <summary>
+    /// Invalidates all cached texture coordinates. Call this
+    /// function when you have made changes that will affect
+    /// the texture coordinates on the mesh.
+    /// </summary>
+    /// <param name="bOnlyInvalidateCachedSurfaceParameterMapping">
+    /// If true then only cached surface parameter mapping
+    /// texture coordinates will be invalidated. Use this
+    /// after making changes to the m_S array.
+    /// </param>
+    /// <since>8.0</since>
+    public void InvalidateCachedTextureCoordinates(bool bOnlyInvalidateCachedSurfaceParameterMapping = false)
+    {
+      UnsafeNativeMethods.ON_Mesh_InvalidateCachedTextureCoordinates(NonConstPointer(), bOnlyInvalidateCachedSurfaceParameterMapping);
     }
 
     /// <summary>
@@ -3121,8 +4099,26 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public bool Smooth(double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
+      return Smooth(smoothFactor, 1, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+    }
+
+    /// <summary>
+    /// Smooths a mesh by averaging the positions of mesh vertices in a specified region.
+    /// </summary>
+    /// <param name="smoothFactor">The smoothing factor, which controls how much vertices move towards the average of the neighboring vertices.</param>
+    /// <param name="numSteps">The number of smoothing iterations.</param>
+    /// <param name="bXSmooth">When true vertices move in X axis direction.</param>
+    /// <param name="bYSmooth">When true vertices move in Y axis direction.</param>
+    /// <param name="bZSmooth">When true vertices move in Z axis direction.</param>
+    /// <param name="bFixBoundaries">When true vertices along naked edges will not be modified.</param>
+    /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
+    /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Smooth(double smoothFactor, int numSteps, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
+    {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+      return UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
     }
 
     /// <summary>
@@ -3140,17 +4136,36 @@ namespace Rhino.Geometry
     /// <since>6.8</since>
     public bool Smooth(IEnumerable<int> vertexIndices, double smoothFactor, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
+      return Smooth(vertexIndices, smoothFactor, 1, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane);
+    }
+
+    /// <summary>
+    /// Smooths part of a mesh by averaging the positions of mesh vertices in a specified region.
+    /// </summary>
+    /// <param name="vertexIndices">The mesh vertex indices that specify the part of the mesh to smooth.</param>
+    /// <param name="smoothFactor">The smoothing factor, which controls how much vertices move towards the average of the neighboring vertices.</param>
+    /// <param name="numSteps">The number of smoothing iterations.</param>
+    /// <param name="bXSmooth">When true vertices move in X axis direction.</param>
+    /// <param name="bYSmooth">When true vertices move in Y axis direction.</param>
+    /// <param name="bZSmooth">When true vertices move in Z axis direction.</param>
+    /// <param name="bFixBoundaries">When true vertices along naked edges will not be modified.</param>
+    /// <param name="coordinateSystem">The coordinates to determine the direction of the smoothing.</param>
+    /// <param name="plane">If SmoothingCoordinateSystem.CPlane specified, then the construction plane.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Smooth(IEnumerable<int> vertexIndices, double smoothFactor, int numSteps, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
+    {
       IntPtr ptr_this = NonConstPointer();
       using (var indices = new SimpleArrayInt(vertexIndices))
       {
         IntPtr ptr_indices = indices.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
       }
     }
 
     /// <summary>
     /// Makes sure that faces sharing an edge and having a difference of normal greater
-    /// than or equal to angleToleranceRadians have unique vertexes along that edge,
+    /// than or equal to angleToleranceRadians have unique vertices along that edge,
     /// adding vertices if necessary.
     /// </summary>
     /// <param name="angleToleranceRadians">Angle at which to make unique vertices.</param>
@@ -3209,7 +4224,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Makes sure that faces sharing an edge and having a difference of normal greater
-    /// than or equal to angleToleranceRadians share vertexes along that edge, vertex normals
+    /// than or equal to angleToleranceRadians share vertices along that edge, vertex normals
     /// are averaged.
     /// </summary>
     /// <param name="angleToleranceRadians">Angle at which to weld vertices.</param>
@@ -3218,6 +4233,77 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.RHC_RhinoWeldMesh(ptr_this, angleToleranceRadians);
+    }
+
+    /// <summary>
+    /// Creates a single mesh face from the given input. The new mesh will be apppended to this mesh.
+    /// </summary>
+    /// <param name="components">An enumeration of component indexes from this mesh.
+    /// This can be one following combinations:
+    /// 1 vertex (MeshVertex or MeshTopologyVertex) and 1 edge (MeshTopologyEdge), 
+    /// 2 edges (MeshTopologyEdge), 
+    /// or 3 vertices (MeshVertex or MeshTopologyVertex).
+    /// </param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool PatchSingleFace(IEnumerable<ComponentIndex> components)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      ComponentIndex[] arr_components = components.ToArray();
+      return UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace(ptr_this, arr_components.Length, arr_components);
+    }
+
+    /// <summary>
+    /// Creates a single mesh face from the given input.
+    /// </summary>
+    /// <param name="mesh">The input mesh.</param>
+    /// <param name="components">An enumeration of component indexes from the input mesh.
+    /// This can be one following combinations:
+    /// 1 vertex (MeshVertex or MeshTopologyVertex) and 1 edge (MeshTopologyEdge), 
+    /// 2 edges (MeshTopologyEdge), 
+    /// or 3 vertices (MeshVertex or MeshTopologyVertex).
+    /// </param>
+    /// <returns>A new mesh if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public static Mesh CreateFromPatchSingleFace(Mesh mesh, IEnumerable<ComponentIndex> components)
+    {
+      if (null == mesh)
+        throw new ArgumentNullException(nameof(mesh));
+      IntPtr ptr_const_this = mesh.ConstPointer();
+      ComponentIndex[] arr_components = components.ToArray();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace2(ptr_const_this, arr_components.Length, arr_components);
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new Mesh(ptr, null);
+    }
+
+    /// <summary>
+    /// Subdivides the faces of the mesh.
+    /// </summary>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Subdivide()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoMeshSubdivide(ptr_this);
+    }
+
+    /// <summary>
+    /// Subdivides specific faces of the mesh.
+    /// </summary>
+    /// <param name="faceIndices">Indices of the faces to subdivide.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public bool Subdivide(IEnumerable<int> faceIndices)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var index in faceIndices)
+          ciArray.Add(new ComponentIndex(ComponentIndexType.MeshFace, index));
+        IntPtr pCiArray = ciArray.NonConstPointer();
+        return UnsafeNativeMethods.RHC_RhinoMeshSubdivideFaces(ptr_this, pCiArray);
+      }
     }
 
     /// <summary>
@@ -3246,7 +4332,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Attempts to "heal" naked edges in a mesh based on a given distance.  
-    /// First attempts to move vertexes to neighboring vertexes that are within that
+    /// First attempts to move vertices to neighboring vertices that are within that
     /// distance away. Then it finds edges that have a closest point to the vertex within
     /// the distance and splits the edge. When it finds one it splits the edge and
     /// makes two new edges using that point.
@@ -3345,6 +4431,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAbsoluteTolerance property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance)
     {
       return MergeAllCoplanarFaces(tolerance, RhinoMath.UnsetValue);
@@ -3362,6 +4449,7 @@ namespace Rhino.Geometry
     /// When in doubt, use the document's ModelAngleToleranceRadians property.
     /// </param>
     /// <returns>true if faces were merged, false if no faces were merged.</returns>
+    /// <since>7.9</since>
     public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
     {
       IntPtr ptrThis = NonConstPointer();
@@ -3647,7 +4735,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Explode the mesh into sub-meshes where a sub-mesh is a collection of faces that are contained
     /// within a closed loop of "unwelded" edges. Unwelded edges are edges where the faces that share
-    /// the edge have unique mesh vertexes (not mesh topology vertexes) at both ends of the edge.
+    /// the edge have unique mesh vertices (not mesh topology vertices) at both ends of the edge.
     /// </summary>
     /// <returns>
     /// Array of sub-meshes on success; null on error. If the count in the returned array is 1, then
@@ -4593,6 +5681,7 @@ namespace Rhino.Geometry
     /// <param name="xform">Local mapping transform for the mesh mapping.  Use identity for surface parameter mapping.</param>
     /// <param name="bitmap">The bitmap to use for the colors.</param>
     /// <returns></returns>
+    /// <since>7.10</since>
     public bool CreateVertexColorsFromBitmap(RhinoDoc doc, TextureMapping mapping, Transform xform, System.Drawing.Bitmap bitmap)
     {
       return UnsafeNativeMethods.Rhino_CreateVertexColors(
@@ -4778,6 +5867,72 @@ namespace Rhino.Geometry
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
       return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, faceBlocks, settings, guideCurves, progress, cancelToken), cancelToken);
     }
+
+
+    /// <summary>
+    /// Get the shrinkwrap plugin and pass back the shrinkwrap interface
+    /// </summary>
+    /// <returns></returns>
+    private static IShrinkWrapService GetShrinkWrapPluginService()
+    {
+      Guid plugin_id = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
+      object obj = Rhino.RhinoApp.GetPlugInObject(plugin_id);
+      IShrinkWrapService sw = obj as IShrinkWrapService;
+      return sw ?? null;
+    }
+
+    /// <summary>
+    /// Returns a ShrinkWraped mesh or
+    /// null when a mesh was not created or error. 
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public Mesh ShrinkWrap(ShrinkWrapParameters parameters)
+    {
+      var sw = GetShrinkWrapPluginService();
+      return sw.ShrinkWrap(this, parameters) ?? null;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public Mesh ShrinkWrap(ShrinkWrapParameters parameters, CancellationToken token)
+    {
+      var sw = GetShrinkWrapPluginService();
+      return sw.ShrinkWrap(this, parameters) ?? null;
+    }
+
+    /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a collection of input meshes
+    /// </summary>
+    /// <param name="meshes"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters)
+    {
+      var sw = GetShrinkWrapPluginService();
+      return sw.ShrinkWrap(meshes, parameters) ?? null;
+    }
+
+    /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a point cloud
+    /// </summary>
+    /// <param name="pointCloud"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters)
+    {
+      var sw = GetShrinkWrapPluginService();
+      return sw.ShrinkWrap(pointCloud, parameters) ?? null;
+    }
+
 
     /// <summary>
     /// Reduce polygon count
@@ -5021,6 +6176,7 @@ namespace Rhino.Geometry
     /// <param name="interval">Avoid.</param>
     /// <returns>Avoid.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.13</deprecated>
     [Obsolete("Prefer the overload that takes a tolerance value.")]
     public static Curve[] CreateContourCurves(Mesh meshToContour, Point3d contourStart, Point3d contourEnd, double interval)
     {
@@ -5065,6 +6221,7 @@ namespace Rhino.Geometry
     /// <param name="sectionPlane">Avoid.</param>
     /// <returns>Avoid.</returns>
     /// <since>5.0</since>
+    /// <deprecated>7.13</deprecated>
     [Obsolete("Prefer the option that takes a tolerance value.")]
     public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane)
     {
@@ -5086,6 +6243,8 @@ namespace Rhino.Geometry
     /// <seealso cref="Intersect.Intersection.MeshPlane(Mesh, Plane)"/>
     public static Curve[] CreateContourCurves(Mesh meshToContour, Plane sectionPlane, double tolerance)
     {
+      if (meshToContour == null) throw new ArgumentNullException(nameof(meshToContour));
+
       IntPtr const_ptr_mesh = meshToContour.ConstPointer();
       using (var outputcurves = new SimpleArrayCurvePointer())
       {
@@ -5120,13 +6279,53 @@ namespace Rhino.Geometry
       return Intersect.Intersection.MeshMesh_Helper(
         list, tolerance, true, false, out perforations,
         overlapsPolylines, out overlapsPolylinesResult,
-        overlapsMesh, out overlapsMeshResult, textLog, cancel, progress);
+        overlapsMesh, out overlapsMeshResult, false, out int[] _, textLog, cancel, progress);
     }
 
 #endif
   }
 
+  /// <summary>
+  /// Contains a set of data to pass to boolean options.
+  /// </summary>
+  public class MeshBooleanOptions
+  {
+    /// <summary>
+    /// Gets or sets a tolerance value for intersections and overlaps.
+    /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
+    /// </summary>
+    /// <value>The default value is <see cref="RhinoMath.ZeroTolerance"/>*10. However, this is
+    /// only a reference value for testing and geometry developers should generally use the 
+    /// document tolerance, multiplied by 
+    /// <see cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>.</value>
+    /// <since>8.0</since>
+    public double Tolerance { get; set; } = RhinoMath.ZeroTolerance * 10;
+
+    /// <summary>
+    /// Gets or sets a text log to write computed operations into.
+    /// </summary>
+    /// <since>8.0</since>
+    public TextLog TextLog { get; set; }
+
+    /// <summary>
+    /// A token that allows to request the cancellation of the operation.
+    /// </summary>
+    /// <since>8.0</since>
+    public CancellationToken CancellationToken { get; set; }
+
+    /// <summary>
+    /// Gets or sets the object that is responsible to keep track of calculation progression.
+    /// </summary>
+    /// <since>8.0</since>
+    public IProgress<double> ProgressReporter { get; set; }
+  }
+
+
 #if RHINO_SDK
+  /// <summary>
+  /// Concentrates boolean operation information into a single object.
+  /// </summary>
+
   /// <summary>
   /// Permits access to the underlying mesh raw data structures in an unsafe way.
   /// </summary>
@@ -7674,6 +8873,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="edgeIndex">The common topological edge index.</param>
     /// <returns>true if successful, false otherwise.</returns>
+    /// <since>7.6</since>
     public bool MergeAdjacentFaces(int edgeIndex)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
@@ -10990,7 +12190,7 @@ namespace Rhino.Geometry.Collections
 //                    sides are a common source of degenerate qauds.
 //  input_mesh - [in] If NULL, then the returned mesh is created
 //       by a class to new ON_Mesh().  If not null, then this 
-//       mesh will be used to store the conrol polygon.
+//       mesh will be used to store the control polygon.
 //Returns:
 //  If successful, a pointer to a mesh.
 //*/
@@ -12169,4 +13369,44 @@ namespace Rhino.Geometry
 
 
 #endif
+}
+
+
+namespace Rhino.Runtime
+{
+  /// <summary>
+  /// Internal interface used by ShrinkWrap functions
+  /// </summary>
+  public interface IShrinkWrapService
+  {
+    /// <summary>
+    /// Create a shrinkwrap from a single mesh
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    Mesh ShrinkWrap(Mesh mesh,ShrinkWrapParameters parameters);
+
+    /// <summary>
+    /// Create mesh from input meshes.
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="meshes"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters);
+
+    /// <summary>
+    /// Create mesh from point cloud input.
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="pointCloud"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters);
+  }
 }

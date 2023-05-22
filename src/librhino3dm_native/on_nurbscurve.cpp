@@ -43,7 +43,6 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
 
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {
-  RHCHECK_LICENSE
   if (count < 2 || nullptr == points)
     return nullptr;
 
@@ -344,6 +343,20 @@ RH_C_FUNCTION bool ON_NurbsCurve_Append(ON_NurbsCurve* pCurve, const ON_NurbsCur
   return rc;
 }
 
+RH_C_FUNCTION ON_BezierCurve* ON_NurbsCurve_ConvertSpanToBezier(const ON_NurbsCurve* pCurve, int spanIndex)
+{
+  ON_BezierCurve* rc = nullptr;
+  if (pCurve)
+  {
+    rc = new ON_BezierCurve();
+    if (!pCurve->ConvertSpanToBezier(spanIndex, *rc))
+    {
+      delete rc;
+      rc = nullptr;
+    }
+  }
+  return rc;
+}
 
 #if !defined(RHINO3DM_BUILD)  //not available in opennurbs build
 

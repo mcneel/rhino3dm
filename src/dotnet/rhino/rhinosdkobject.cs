@@ -6,6 +6,9 @@ using Rhino.Runtime.InteropWrappers;
 using Rhino.Display;
 using System.Collections.Generic;
 using Rhino.UI.Gumball;
+#if RHINO_SDK
+using Rhino.Render.CustomRenderMeshes;
+#endif
 
 namespace Rhino.DocObjects
 {
@@ -655,6 +658,9 @@ namespace Rhino.DocObjects
     /// <param name="returnAllObjects">true if all objects should be returned.</param>
     /// <returns>An array of object references.</returns>
     /// <since>5.0</since>
+    /// <seealso cref="RhinoObject.RenderMeshes(MeshType, ViewportInfo, List{InstanceObject}, ref RenderMeshProvider.Flags, PlugIns.PlugIn, DisplayPipelineAttributes)"/>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete ("Does not support custom render meshes, per-face materials or delivery of the shared pointer meshes.  Prefer RhinoObject.RenderMeshes.")]
     public static ObjRef[] GetRenderMeshes(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, bool okToCreate, bool returnAllObjects)
     {
       var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects);
@@ -690,6 +696,9 @@ namespace Rhino.DocObjects
     /// <param name="updateMeshTCs">true if the TCs should be updated with a texture mapping.</param>
     /// <returns>An array of object references.</returns>
     /// <since>7.3</since>
+    /// <seealso cref="RhinoObject.RenderMeshes(MeshType, ViewportInfo, List{InstanceObject}, ref RenderMeshProvider.Flags, PlugIns.PlugIn, DisplayPipelineAttributes)"/>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("Does not support custom render meshes, per-face materials or delivery of the shared pointer meshes.  Prefer RhinoObject.RenderMeshes.")]
     public static ObjRef[] GetRenderMeshesWithUpdatedTCs(
       System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, 
       bool okToCreate, 
@@ -822,6 +831,33 @@ namespace Rhino.DocObjects
 
     #region properties
     /// <summary>
+    /// Returns <see cref="ModelComponentType.ModelGeometry"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.ModelGeometry;
+
+    /// <summary>
+    /// true if the object is deleted. Deleted objects are kept by the document
+    /// for undo purposes. Call RhinoDoc.UndeleteObject to undelete an object.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsDeleted
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsDeleted); }
+    }
+
+    /// <summary>
+    /// Gets a value indicating if an object is a reference object. An object from a work session
+    /// reference model is a reference object and cannot be modified. An object is
+    /// a reference object if, and only if, it is on a reference layer.
+    /// </summary>
+    /// <since>5.0</since>
+    public override bool IsReference
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsReference); }
+    }
+
+    /// <summary>
     /// Gets the Rhino-based object type.
     /// </summary>
     /// <since>5.0</since>
@@ -834,7 +870,6 @@ namespace Rhino.DocObjects
         return (ObjectType)UnsafeNativeMethods.CRhinoObject_ObjectType(ptr);
       }
     }
-
 
     /// <summary>
     /// Gets the document that owns this object.
@@ -849,7 +884,6 @@ namespace Rhino.DocObjects
         return RhinoDoc.FromRuntimeSerialNumber(sn);
       }
     }
-
 
     /// <summary>
     /// Gets the underlying geometry for this object.
@@ -882,7 +916,6 @@ namespace Rhino.DocObjects
       // geometry getters (CurveObject.CurveGeometry)
     }
 
-
     /// <summary>
     /// Gets or sets the object attributes.
     /// </summary>
@@ -899,7 +932,7 @@ namespace Rhino.DocObjects
       set
       {
         // make sure this object is still valid - ConstPointer will throw a DocumentCollectedException
-        // if the object is no longer in existance
+        // if the object is no longer in existence
         ConstPointer();
         if (m_edited_attributes == value || Document == null)
           return;
@@ -961,16 +994,6 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// true if the object is deleted. Deleted objects are kept by the document
-    /// for undo purposes. Call RhinoDoc.UndeleteObject to undelete an object.
-    /// </summary>
-    /// <since>5.0</since>
-    public bool IsDeleted
-    {
-      get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsDeleted); }
-    }
-
-    /// <summary>
     /// true if the object is used as part of an instance definition.   
     /// </summary>
     /// <since>5.0</since>
@@ -1019,20 +1042,11 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets a value indicating if an object is a reference object. An object from a work session
-    /// reference model is a reference object and cannot be modified. An object is
-    /// a reference object if, and only if, it is on a reference layer.
-    /// </summary>
-    /// <since>5.0</since>
-    public bool IsReference
-    {
-      get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsReference); }
-    }
-
-    /// <summary>
     /// Obsolete - use ReferenceModelSerialNumber
     /// </summary>
     /// <since>6.3</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    //[Obsolete("Use the ReferenceModelSerialNumber property.")]
     [CLSCompliant(false)]
     public uint WorksessionReferenceSerialNumber
     {
@@ -1793,6 +1807,26 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets a localized short descriptive name of the object, along with it's open/closed status.
+    /// </summary>
+    /// <param name="prepend">true if "open" or "closed" should be prepended to the descriptive name.</param>
+    /// <param name="plural">true if the descriptive name should in plural.</param>
+    /// <param name="status">The open/closed status, where: 0 = undefined, 1 = open, 2 = closed.</param>
+    /// <returns>A string with the short localized descriptive name.</returns>
+    /// <since>8.0</since>
+    public string ShortDescriptionWithClosedStatus(bool prepend, bool plural, out int status)
+    {
+      status = 0;
+      using (var sh = new StringHolder())
+      {
+        var p_const_this = ConstPointer();
+        var p_string = sh.NonConstPointer();
+        status = UnsafeNativeMethods.CRhinoObject_ShortDescription2(p_const_this, p_string, prepend, plural);
+        return sh.ToString();
+      }
+    }
+
+    /// <summary>
     /// Get a brief description of a object, including it's attributes and geometry.
     /// </summary>
     /// <param name="textLog">A text log for collecting the description.</param>
@@ -1969,6 +2003,60 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <since>8.0</since>
+    [Flags]
+    public enum ObjectFrameFlags
+    {
+      /// <summary>
+      /// Never returns unset plane.  Will always calculate the plane even if nothing is stored.
+      /// </summary>
+      Standard = 0,
+      /// <summary>
+      /// By default, the plane is orientation and rotation only.  But scale transforms are stored if you need them.
+      /// </summary>
+      IncludeScaleTransforms = 1,
+      /// <summary>
+      /// The object frame may be stored unset by default.  If this is the case, and you want to know if it really is unset, this will tell you.
+      /// </summary>
+      ReturnUnset = 2
+    }
+
+    /// <since>8.0</since>
+    public Plane ObjectFrame()
+    {
+      return ObjectFrame(ObjectFrameFlags.Standard);
+    }
+
+    /// <since>8.0</since>
+    public Plane ObjectFrame(ObjectFrameFlags flags)
+    {
+      var xform = new Transform();
+      if (UnsafeNativeMethods.CRhinoObject_ObjectFrame(ConstPointer(), ref xform, (uint)flags))
+      {
+        var plane = Plane.WorldXY;
+        plane.Transform(xform);
+        return plane;
+      }
+
+      return Plane.Unset;
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Transform xform)
+    {
+      UnsafeNativeMethods.CRhinoObject_SetObjectFrame(NonConstPointer(), ref xform);
+    }
+
+    /// <since>8.0</since>
+    public void SetObjectFrame(Plane plane)
+    {
+      var xform = Transform.ChangeBasis(plane, Plane.WorldXY);
+      SetObjectFrame(xform);
+    }
+
+    /// <summary>
     /// Determines if custom render meshes will be built for a particular object.
     /// </summary>
     /// <param name="viewport">The viewport being rendered.</param>
@@ -1981,7 +2069,7 @@ namespace Rhino.DocObjects
     /// </returns>
     /// <since>5.7</since>
     /// <deprecated>6.0</deprecated>
-    [Obsolete]
+    [Obsolete("Use HasCustomRenderPrimitives instead")]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2007,6 +2095,8 @@ namespace Rhino.DocObjects
     /// Returns true if custom render mesh(es) will get built for this object.
     /// </returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("Use HasCustomRenderPrimitives instead")]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2031,7 +2121,7 @@ namespace Rhino.DocObjects
     /// </returns>
     /// <since>5.7</since>
     /// <deprecated>6.0</deprecated>
-    [Obsolete]
+    [Obsolete("This version is obsolete because it returns the obsolete RenderPrimitiveList - ie, the old school custom render meshes.  Use CustomRenderMeshes instead.")]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, bool preview)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2050,7 +2140,7 @@ namespace Rhino.DocObjects
       return null;
     }
 
-
+#pragma warning disable 0618
     /// <summary>
     /// Build custom render mesh(es) for this object.
     /// </summary>
@@ -2062,6 +2152,8 @@ namespace Rhino.DocObjects
     /// Returns a RenderPrimitiveList if successful otherwise returns null.
     /// </returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete ("This version is obsolete because it returns the obsolete RenderPrimitiveList - ie, the old school custom render meshes.  Use CustomRenderMeshes instead.")]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2076,6 +2168,105 @@ namespace Rhino.DocObjects
         return primitives;
       primitives.Dispose();
       return null;
+    }
+
+    /// <summary>
+    /// Returns true if the object will has a set of custom render primitives - ie, CustomRenderMeshes will return non-null.
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered.</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <returns>Returns true if the object will has a set of custom render primitives</returns>
+    /// /// <seealso cref="RenderMeshes"/>
+    /// <since>8.0</since>
+    public bool HasCustomRenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
+    {
+      if (Document == null)
+        return false;
+
+      uint f = (uint)flags;
+
+      if (vp == null)
+        vp = new ViewportInfo();
+
+      var ret = UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_HasCustomMeshes(
+        (int)mt, 
+        vp.ConstPointer(), 
+        Document.RuntimeSerialNumber, 
+        Id, 
+        ref f, 
+        (plugin==null) ? IntPtr.Zero : plugin.NonConstPointer(), 
+        (attrs ==null) ? IntPtr.Zero : attrs.ConstPointer()
+        );
+
+      flags = (RenderMeshProvider.Flags)f;
+
+      return ret;
+    }
+
+
+    /// <summary>
+    /// Returns a set of custom render primitives for this object.
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered</param>
+    /// <param name="ancestry">The ancestry tree - only used for by-parent object properties assignments.</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <returns> Returns a set of custom render primitives for this object</returns>
+    /// <seealso cref="HasCustomRenderMeshes"/>
+    /// <since>8.0</since>
+    public RenderMeshes RenderMeshes(MeshType mt, ViewportInfo vp, List<DocObjects.InstanceObject> ancestry, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
+    {
+      if (Document == null)
+        return null;
+
+      var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0);
+
+      uint f = (uint)flags;
+
+      if (vp == null) vp = new ViewportInfo();
+      if (ancestry == null) ancestry = new List<InstanceObject>();
+
+      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp.ConstPointer(), Document.RuntimeSerialNumber, Id, ref f, null == plugin ? IntPtr.Zero : plugin.NonConstPointer(), attrs == null ? IntPtr.Zero : attrs.ConstPointer(), IntPtr.Zero);
+
+      flags = (RenderMeshProvider.Flags)f;
+
+      return primitives;
+    }
+
+    /// <summary>
+    /// Returns the bounding box of custom render primitives for this object .
+    /// </summary>
+    /// <param name="mt">The mesh type requested (render or analysis).</param>
+    /// <param name="vp">The viewport being rendered</param>
+    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
+    /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
+    /// <param name="boundingBox">The requested bounding box</param>
+    /// <returns>True if the process was a success</returns>
+    /// <since>8.0</since>
+    public bool CustomRenderMeshesBoundingBox(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
+    {
+      boundingBox = BoundingBox.Unset;
+
+      if (Document == null)
+        return false;
+
+      var min = new Point3d();
+      var max = new Point3d();
+
+      uint f = (uint)flags;
+
+      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_BoundingBox(ref min, ref max, (int)mt, vp.ConstPointer(), Document.RuntimeSerialNumber, Id, ref f, plugin.NonConstPointer(), attrs.ConstPointer(), IntPtr.Zero);
+
+      flags = (RenderMeshProvider.Flags)f;
+
+      boundingBox = new BoundingBox(min, max);
+      return boundingBox.IsValid;
     }
 
     /// <summary>
@@ -2098,7 +2289,7 @@ namespace Rhino.DocObjects
     /// </returns>
     /// <since>5.7</since>
     /// <deprecated>6.0</deprecated>
-    [Obsolete]
+    [Obsolete ("Use CustomRenderMeshesBoundingBox instead")]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, bool preview, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -2142,6 +2333,8 @@ namespace Rhino.DocObjects
     /// returns false on error.
     /// </returns>
     /// <since>6.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("Use CustomRenderMeshesBoundingBox instead")]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -2163,6 +2356,7 @@ namespace Rhino.DocObjects
 
       return false;
     }
+#pragma warning restore 0618
 
     /// <summary>
     /// Explodes the object into sub-objects. It is up to the caller to add the returned objects to the document.
@@ -2342,7 +2536,7 @@ namespace Rhino.DocObjects
           }
         }
 
-        return RenderContent.FromId(Document, id) as RenderMaterial;
+        return Render.RenderContent.FromId(Document, id) as RenderMaterial;
       }
       set
       {
@@ -2392,7 +2586,7 @@ namespace Rhino.DocObjects
     {
       var const_pointer = ConstPointer();
       var id = UnsafeNativeMethods.Rdk_RenderContent_ObjectMaterialInstanceId(const_pointer, frontMaterial);
-      return RenderContent.FromId(Document, id) as RenderMaterial;
+      return Render.RenderContent.FromId(Document, id) as RenderMaterial;
     }
 
 
@@ -2428,7 +2622,7 @@ namespace Rhino.DocObjects
       var pointer = ConstPointer();
       var att_pointer = attributes == null ? IntPtr.Zero : attributes.ConstPointer();
       var id = UnsafeNativeMethods.Rdk_RenderContent_ObjectRdkMaterial(pointer, componentIndex, plugInId, att_pointer);
-      return RenderContent.FromId(Document, id) as RenderMaterial;
+      return Render.RenderContent.FromId(Document, id) as RenderMaterial;
     }
 
     /// <summary>
@@ -2518,18 +2712,6 @@ namespace Rhino.DocObjects
         }
         var value = array.ToArray();
         return value;
-      }
-    }
-
-    /// <summary>
-    /// Returns <see cref="ModelComponentType.ModelGeometry"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get
-      {
-        return ModelComponentType.ModelGeometry;
       }
     }
 
@@ -2813,7 +2995,17 @@ namespace Rhino.DocObjects
       var p_const_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoObject_HasHistoryRecord(p_const_this);
     }
+    /// <summary>
+    /// Sets a history record on the 
+    /// </summary>
+    /// <param name="history">The history record to set for the object</param>
+    /// <returns>true if successful</returns>
+    public bool SetHistory(HistoryRecord history)
+    {
+      var p_this = NonConstPointer();
 
+      return UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
+    }
     internal bool IsCustom
     {
       get
@@ -2919,6 +3111,20 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the document that owns this object reference.
+    /// </summary>
+    /// <since>8.0</since>
+    public RhinoDoc Document
+    {
+      get
+      {
+        var const_ptr = ConstPointer();
+        var sn = UnsafeNativeMethods.CRhinoObjRef_DocumentRuntimeSerailNumber(const_ptr);
+        return RhinoDoc.FromRuntimeSerialNumber(sn);
+      }
+    }
+
+    /// <summary>
     /// Copy constructor
     /// </summary>
     /// <param name="other"></param>
@@ -2948,6 +3154,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="id">The ID.</param>
     /// <since>5.0</since>
+    /// <deprecated>7.6</deprecated>
     [Obsolete("Use version that takes a document.")]
     public ObjRef(Guid id)
     {
@@ -2975,6 +3182,7 @@ namespace Rhino.DocObjects
     /// <param name="id">The object's Id</param>
     /// <param name="ci">a portion of the object</param>
     /// <since>7.0</since>
+    /// <deprecated>7.6</deprecated>
     [Obsolete("Use version that takes a document.")]
     public ObjRef(Guid id, Geometry.ComponentIndex ci)
     {

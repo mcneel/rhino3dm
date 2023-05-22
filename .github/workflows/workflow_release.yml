@@ -7,16 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.x'
+          python-version: '3.7.x'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: build python sdist
@@ -47,9 +47,9 @@ jobs:
         id: artifactname
         run: |
           cd dist
-          echo "::set-output name=file::$(ls *.tar.gz| head -1)"
+          echo "file=$(ls *.tar.gz| head -1)" >> $GITHUB_OUTPUT
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
@@ -66,7 +66,7 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.3.0
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
@@ -81,9 +81,9 @@ jobs:
       id: artifactname
       run: |
         cd wheelhouse
-        echo "::set-output name=file::$(ls *.whl| head -1)"
+        echo "file=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
     - name: artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.2
       with:
         path: wheelhouse/*.whl
         name: ${{ steps.artifactname.outputs.file }}
@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-11]
-        python-version: [2.7, 3.7, 3.8, 3.9, '3.10']
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
         include:
           - os: ubuntu-latest
             target: linux
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -113,7 +113,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
@@ -139,9 +139,9 @@ jobs:
         shell: bash
         run: |
           cd dist
-          echo "::set-output name=file::$(ls *.whl| head -1)"
+          echo "file=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
@@ -149,65 +149,147 @@ jobs:
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    container:
+      image: ${{ matrix.image }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-11, windows-2019]
+        os: [ubuntu-latest, macos-11, windows-2022]
         include:
           - os: ubuntu-latest
             target: linux
+            image: mcneel/rhino3dm-dev-amzn2
             artifact-path: src/build/linux/librhino3dm_native.so
-          - os: windows-2019
+          - os: windows-2022
             target: windows
+            image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
           - os: macos-11
             target: macos
+            image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
       fail-fast: false
     steps:
-      - name: setup xcode
-        if: ${{ matrix.target == 'macos' }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '12.5'
+      #- name: setup dotnet
+      #  if: ${{ matrix.target == 'macos'}}
+      #  uses: actions/setup-dotnet@v3
+      #  with:
+      #    dotnet-version: '7.0.x'
       - name: setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.9
+        if: ${{ matrix.target != 'linux' }}
+        uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
           cmake-version: '3.21.1'
-      - name: set up python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - name: info
-        run: python --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
+      - name: safe directory
+        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: ls && git submodule update --init
-      - name: bootstrap dotnet ${{ matrix.os }}
-        run: python script/bootstrap.py -p ${{ matrix.target }}
-      - name: setup dotnet ${{ matrix.os }}
-        run: python script/setup.py -p ${{ matrix.target }} -v
-      - name: build dotnet ${{ matrix.os }}
-        run: python script/build.py -p ${{ matrix.target }} -v
+      - name: bootstrap dotnet ${{ matrix.target }}
+        run: python3 script/bootstrap.py -p ${{ matrix.target }}
+      - name: setup dotnet ${{ matrix.target }}
+        run: python3 script/setup.py -p ${{ matrix.target }} -v
+      - name: build dotnet ${{ matrix.target }}
+        run: python3 script/build.py -p ${{ matrix.target }} -v
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
+      - name: code-sign native libraries
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
+        shell: bash
+        run: ./script/codesign-native.sh src/build/macos/Release
+      - name: notarize native library
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACDEV_PW: ${{ secrets.MACDEV_PW }}
+        shell: bash
+        run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
 
+  build_js:
+    name: build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:3.1.30
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v3.3.0
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup
+        run: python3 script/setup.py -p js -o -v
+      - name: build js
+        run: python3 script/build.py -p js -o -v
+      - name: minify js
+        uses: tinpotnick/webpreprocessor@v1.13
+        with:
+          dir: src/build/javascript/artifacts_js
+          action: uglifyjs
+          filename: rhino3dm.js
+          output: src/build/javascript/artifacts_js/rhino3dm.min.js
+      - name: minify module
+        uses: tinpotnick/webpreprocessor@v1.13
+        with:
+          dir: src/build/javascript/artifacts_js
+          action: uglifyjs
+          filename: rhino3dm.module.js
+          output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: docgen
+        shell: bash
+        run: |
+          dotnet build src/docgen
+          cd src/docgen/bin/Debug
+          ./docgen
+          cd ../../../../
+          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
+          patch src/build/javascript/artifacts_js/rhino3dm.d.ts < src/rhino3dm.d.ts.diff
+      - name: copy files
+        shell: bash
+        run: |
+          cp package.json src/build/javascript/artifacts_js
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
+      - name: artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          path: src/build/javascript/artifacts_js
+          name: rhino3dm.js
+          retention-days: ${{ env.RETENTION_DAYS }}
+
   pack_dotnet:
     name: pack dotnet
     needs: build_dotnet_os
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.5.0
         with:
-          python-version: 3.x
+          python-version: 3.7.x
+      - name: setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: '3.21.1'
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: update submodules
         run: ls && git submodule update --init
       - name: bootstrap dotnet
@@ -217,17 +299,17 @@ jobs:
       - name: build dotnet
         run: dotnet build src/dotnet/Rhino3dm.csproj
       - name: download rhino3dm.net linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net linux
           path: src/build/linux/Release/
       - name: download rhino3dm.net macos
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net macos
           path: src/build/macos/Release/
       - name: download rhino3dm.net windows
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.2
         with:
           name: rhino3dm.net windows
           path: src/build/windows/
@@ -236,7 +318,7 @@ jobs:
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts nupkg
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: src/dotnet/bin/Debug/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
@@ -253,16 +335,16 @@ jobs:
           path: dist
       - name: Display structure of downloaded files
         run: ls -R
-      - name: unzip files
-        run: |
-          mkdir output
-          find dist -type f -print0 | xargs -0 mv -t output
-          cd output
-          ls
+      #- name: unzip files
+      #  run: |
+      #    mkdir output
+      #    find dist -type f -print0 | xargs -0 mv -t output
+      #    cd output
+      #    ls
       - name: artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
-          path: output
+          path: dist
           name: rhino3dm.py all wheels
 
   # build_dotnet_ios:
@@ -312,7 +394,7 @@ jobs:
   #   runs-on: macos-11
   #   steps:
   #     - name: set up python
-  #       uses: actions/setup-python@v2
+  #       uses: actions/setup-python@v4.5.0
   #       with:
   #         python-version: 3.7.1
   #     - name: setup cmake
@@ -357,27 +439,3 @@ jobs:
   #       with:
   #         path: src/build/android/dotnet/Rhino3dm.Android.dll
   #         name: rhino3dm.net android
-
-  build_js:
-    name: build rhino3dm.js
-    runs-on: ubuntu-latest
-    container:
-      image: emscripten/emsdk:2.0.10
-    steps:
-      - name: info
-        run: python3 --version && emcc --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: update submodules
-        run: git submodule update --init
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p js
-      - name: setup
-        run: python3 script/setup.py -p js -v
-      - name: build js
-        run: python3 script/build.py -p js -v
-      - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: src/build/javascript/artifacts_js
-          name: rhino3dm.js

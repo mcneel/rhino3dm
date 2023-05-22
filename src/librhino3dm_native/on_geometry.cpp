@@ -8,6 +8,15 @@ int ON_Geometry_Dimension(const ON_Geometry* constGeometry)
   return rc;
 }
 
+RH_C_FUNCTION unsigned int ON_Geometry_DataCRC(const ON_Geometry* pGeometry, unsigned int currentRemainder)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-68961
+  unsigned int rc = 0;
+  if (pGeometry)
+    rc = pGeometry->DataCRC(currentRemainder);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Geometry_BoundingBox( const ON_Geometry* ptr, ON_BoundingBox* bbox )
 {
   if( ptr && bbox )
@@ -77,7 +86,18 @@ RH_C_FUNCTION bool ON_Geometry_Transform( ON_Geometry* ptr, ON_Xform* xf)
   bool rc = false;
   if( ptr && xf )
   {
+    // 5 Jan 2023, Mikko, RH-41161:
+    // Similar to RH-72102 that applies to polycurves that get added to doc, make sure polycurves that
+    // had no gaps before transform have no gaps after the transform.
+    // IMO this should be in ON_PolyCurve::Transform, but in case something expects the current beahvior,
+    // limit the effect to calls to this function, for example from Grasshopper.
+    ON_PolyCurve* pPC = ON_PolyCurve::Cast(ptr);
+    bool bNoGapsPolyCurve = (nullptr != pPC) ? (0 == pPC->FindNextGap(0)) : false;
+
     rc = ptr->Transform(*xf)?true:false;
+
+    if (rc && bNoGapsPolyCurve && 0 != pPC->FindNextGap(0))
+      pPC->CloseGaps();
   }
   return rc;
 }

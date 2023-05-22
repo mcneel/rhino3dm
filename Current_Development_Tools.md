@@ -1,6 +1,6 @@
 # Current Development Tools (rhino3dm)
 
-Last updated by dan@mcneel.com on August 17, 2021
+Last updated by luis@mcneel.com on February 24, 2023
 
 :warning: Change this file at your own risk. This file is read by scripts to determine the required development tools and versions of those tools.  Though it is human-readable, it is part of build processes. Renaming or reformatting this file may cause undesired results.
 
@@ -52,9 +52,9 @@ We are currently using the Xamarin.Android Framework 10.1.3.  Scripts read this:
 
 ### Emscripten
 
-We are currently using Emscripten 2.0.10. Scripts read this:
+We are currently using Emscripten 3.1.30. Scripts read this:
 
-`emscripten_currently_using = 2.0.10`
+`emscripten_currently_using = 3.1.30`
 `emscripten_install_notes = To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal. You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html`
 `emscripten_install_notes_windows =  To install Emscripten, follow these instructions: https://emscripten.org/docs/getting_started/downloads.html. You must activate PATH and other environment variables in the current terminal.  You can verify the installation following these instructions: https://emscripten.org/docs/building_from_source/verify_emscripten_environment.html.  Be sure to use the --global flag when running the activate batch file to set all the path variables correctly.`
 

@@ -87,6 +87,7 @@ public:
   bool Reparameterize(double c) { return m_nurbscurve->Reparameterize(c); }
   double GrevilleParameter(int index) const { return m_nurbscurve->GrevilleAbcissa(index); }
   ON_3dPoint GrevillePoint(int index) const;
+  BND_BezierCurve* ConvertSpanToBezier(int index) const;
   //double[] GrevilleParameters()
   //class BND_Point3dList* GrevillePoints() const;
   //bool EpsilonEquals(NurbsCurve other, double epsilon)

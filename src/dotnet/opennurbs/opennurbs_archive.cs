@@ -135,6 +135,7 @@ namespace Rhino.Collections
     /// Retrieve current change serial number. This is a number that
     /// gets increased each time a datum is set or changed.
     /// </summary>
+    /// <since>7.8</since>
     [CLSCompliant(false)]
     public uint ChangeSerialNumber
     {
@@ -264,6 +265,51 @@ namespace Rhino.Collections
       UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
     }
 
+    internal static IntPtr ToInternalDictionary(ArchivableDictionary dictionary)
+    {
+      // Create a temporary memory buffer for writing the contents of an
+      // ON_ArchivableDictionary into and then read the buffer with .NET to
+      // create the RhinoCommon ArchivableDictionary
+      IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
+      try
+      {
+        FileIO.BinaryArchiveWriter archive = new FileIO.BinaryArchiveWriter(internal_archive);
+        if (dictionary.Write(archive))
+        {
+          UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
+
+          IntPtr internal_dictionary = UnsafeNativeMethods.ON_ArchivableDictionary_New();
+          if(UnsafeNativeMethods.ON_ArchivableDictionary_Read(internal_dictionary, internal_archive))
+            return internal_dictionary;
+        }
+      }
+      finally 
+      { 
+        UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+      }
+
+      return IntPtr.Zero;
+    }
+
+    internal static ArchivableDictionary FromInternalDictionary(IntPtr dictionary)
+    {
+      IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
+      try
+      {
+        if (UnsafeNativeMethods.ON_ArchivableDictionary_Write(dictionary, internal_archive))
+        {
+          UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
+          FileIO.BinaryArchiveReader archive = new FileIO.BinaryArchiveReader(internal_archive);
+          return Read(archive);
+        }
+      }
+      finally
+      {
+        UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+      }
+
+      return default;
+    }
 
     /// <summary>
     /// If this dictionary is part of user-data (or is a UserDictionary), then
@@ -527,7 +573,7 @@ namespace Rhino.Collections
           break;
         case ItemType.Font: //29
           {
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !RHINO3DM_BUILD && !DOTNETCORE
             System.Drawing.Font val = archive.ReadFont();
             rc = Set(key, val);
 #endif
@@ -795,7 +841,7 @@ namespace Rhino.Collections
           archive.WriteSizeF((System.Drawing.SizeF)val);
           break;
         case ItemType.Font: // 29
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !RHINO3DM_BUILD && !DOTNETCORE
           archive.WriteFont((System.Drawing.Font)val);
 #endif
           break;
@@ -1747,7 +1793,7 @@ namespace Rhino.Collections
     /// <since>5.0</since>
     public bool Set(string key, System.Drawing.SizeF val) { return SetItem(key, ItemType.SizeF, val); }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Sets a <see cref="System.Drawing.Font"/>.
     /// </summary>
@@ -2244,7 +2290,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets the enumerator of this dictionary.
     /// </summary>
-    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as System.Object.</returns>
     /// <since>5.0</since>
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
     {
@@ -2259,7 +2305,7 @@ namespace Rhino.Collections
     /// <summary>
     /// Gets the enumerator of this dictionary.
     /// </summary>
-    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as Syste.Object.</returns>
+    /// <returns>A <see cref="IEnumerator{T}"/>, where T is an instance of <see cref="KeyValuePair{T0,T1}"/>, with T0 set as string, and T1 as System.Object.</returns>
     /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
@@ -2303,6 +2349,11 @@ namespace Rhino.FileIO
     internal void ClearPointer()
     {
       m_ptr = IntPtr.Zero;
+    }
+
+    internal IntPtr NonConstPointer()
+    {
+      return m_ptr;
     }
 
     bool m_write_error_occured;
@@ -2862,7 +2913,7 @@ namespace Rhino.FileIO
     }
 
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Writes a <see cref="System.Drawing.Font"/> value to the archive.
     /// </summary>
@@ -3895,7 +3946,7 @@ namespace Rhino.FileIO
       return new System.Drawing.SizeF(xy[0], xy[1]);
     }
 
-#if !MOBILE_BUILD && !DOTNETCORE
+#if !RHINO3DM_BUILD && !DOTNETCORE
     /// <summary>
     /// Reads a <see cref="System.Drawing.Font"/> from the archive.
     /// </summary>

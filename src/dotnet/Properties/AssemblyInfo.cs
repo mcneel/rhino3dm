@@ -2,16 +2,15 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !DOTNETCORE && MOBILE_BUILD
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Rhino3dm")]
+//[assembly: AssemblyTitle("Rhino3dm")]
 [assembly: AssemblyDescription("Cross Platform Rhino.NET SDK")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Robert McNeel & Associates")]
-[assembly: AssemblyProduct("Rhino")]
-[assembly: AssemblyCopyright("Copyright © 2019")]
+//[assembly: AssemblyConfiguration("")]
+//[assembly: AssemblyCompany("Robert McNeel & Associates")]
+//[assembly: AssemblyProduct("Rhino")]
+//[assembly: AssemblyCopyright("Copyright © 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 // Brian Gillespie: 9/22/2010
@@ -24,10 +23,19 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
+// Setting DefaultDllImportSearchPaths to AssemblyDirectory | UseDllDirectoryForDependencies | System32
+// Ensures RhinoCommon will load its dependencies only from the Rhino\System folder or
+// from Windwos\System32 folder but never will try from the Appliction folder, where the .exe is located.
+// This is especially significant when Rhino is loaded as DLL
+// 
+// See also:
+// https://docs.microsoft.com/windows/desktop/dlls/dynamic-link-library-search-order
+// https://msdn.microsoft.com/library/system.runtime.interopservices.dllimportsearchpath
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory | DllImportSearchPath.UseDllDirectoryForDependencies | DllImportSearchPath.System32)]
+
+
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("e1abd154-3fbb-4901-b1b7-76202cafc6bf")]
-
-#endif
 
 // Version information for an assembly consists of the following four values:
 //
@@ -61,12 +69,10 @@ using System.Runtime.InteropServices;
 // 21 Feb 2013 (5.1.30000.7) Update for SR3 of Rhino 5
 // March 2013 Rhino V6 version = 6.0.0.1
 // 29 Aug 2017 - switch to automated assembly versioning
-
-#if RHINO3DM_BUILD
-#if !DOTNETCORE && MOBILE_BUILD
-[assembly: AssemblyVersion("7.0.0.1")]
-#endif
-#endif
+// 2019-05-06 - use rhino3dm_version.cs
+//#if RHINO3DMIO_BUILD
+//[assembly: AssemblyVersion("6.0.0.1")]
+//#endif
 
 // 2013-12-19, Brian Gillespie
 // AssemblyFileVersion is set in /src4/version.h
@@ -74,7 +80,7 @@ using System.Runtime.InteropServices;
 // replace RhinoCommon.dll.
 // [assembly: AssemblyFileVersion("6.0.0.1")]
 
-#if MONO_BUILD && RHINO3DM_BUILD
+#if MONO_BUILD && RHINO3DMIO_BUILD
 //Mobile platform build has non-compliant classes
 [assembly: System.CLSCompliant(false)]
 #else
@@ -90,3 +96,52 @@ using System.Runtime.InteropServices;
 [assembly: System.Security.SecurityRules(System.Security.SecurityRuleSet.Level1)]
 #endif
 
+// 04 August 2016 Max S. RH-34981
+// InternalsVisibleTo so that Rhino.UI can access internal classes in RhinoCommon
+[assembly: InternalsVisibleTo("Rhino.UI, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo("RDK_EtoUI, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo("RhinoWindows, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo ("RhinoMac, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo("MeshCommands, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo ("Commands, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo("MeshUtilities, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]
+
+[assembly: InternalsVisibleTo("ConstraintsUI, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]

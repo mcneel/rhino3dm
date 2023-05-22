@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
+using Rhino.Runtime;
 
 // none of the UI namespace needs to be in the stand-alone opennurbs library
 #if RHINO_SDK
@@ -30,6 +32,40 @@ namespace Rhino.UI
   /// </summary>
   static class PanelSystem
   {
+    internal static bool UsingNewTabPanelSystem => true;
+
+    private static void RegisterPanel(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
+    {
+      // Plug-in that owns the panel, currently required.  Investigate changing to
+      // System.Reflection.Assembly to allow Rhino.UI to register panels directly
+      if (plugInId == Guid.Empty)
+        throw new ArgumentException($"{nameof(plugInId)} Can't be Guid.Empty", nameof(plugInId));
+      // Type of the control object to be displayed in the panel
+      if (type == null)
+        throw new ArgumentNullException(nameof(type));
+      if (!Panels.Service.SupportedType(type, out string exception_message))
+        throw new ArgumentException(exception_message, nameof(type));
+      // The panel class must have a constructor that either takes a single,
+      // unsigned integer parameter representing a document serial number or no
+      // parameters.
+      var constructor = type.GetConstructor(Type.EmptyTypes);
+      // Allow constructor that takes a single unsigned int which will get
+      // passed the runtime serial number of the active document generating the
+      // new panel request.
+      var constructor_with_doc_and_runtime_id = type.GetConstructor(new[] { typeof(Guid), typeof(RhinoDoc) });
+      var constructor_with_sn = type.GetConstructor(new[] { typeof(uint) });
+      var constructor_with_doc = type.GetConstructor(new[] { typeof(RhinoDoc) });
+      if (!type.IsPublic || (constructor == null && constructor_with_sn == null && constructor_with_doc == null && constructor_with_doc_and_runtime_id == null))
+        throw new ArgumentException(@"The panel type must have a constructor with a uint, RhinoDoc or no parameters",
+          nameof(type));
+      // Check for a GUID attribute
+      var attr = type.GetCustomAttributes(typeof(System.Runtime.InteropServices.GuidAttribute), false);
+      if (attr.Length != 1)
+        throw new ArgumentException(@"type must have a GuidAttribute", "type");
+      // Add the panel type, won't do anything if the type was previously registered
+      Add(plugInId, type, caption, icon, iconAssembly, iconResourceId, panelType);
+    }
+
     /// <summary>
     /// Call once to register a panel type which will get dynamically created
     /// and embedded in a Rhino docking/floating location.
@@ -55,34 +91,7 @@ namespace Rhino.UI
     /// </param>
     public static void Register(Guid plugInId, Type type, string caption, Icon icon, PanelType panelType)
     {
-      // Plug-in that owns the panel, currently required.  Investigate changing to
-      // System.Reflection.Assembly to allow Rhino.UI to register panels directly
-      if (plugInId == Guid.Empty)
-        throw new ArgumentException($"{nameof(plugInId)} Can't be Guid.Empty", nameof(plugInId));
-      // Type of the control object to be displayed in the panel
-      if (type == null)
-        throw new ArgumentNullException (nameof (type));
-      if (!Panels.Service.SupportedType (type, out string exception_message))
-        throw new ArgumentException (exception_message, nameof (type));
-      // The panel class must have a constructor that either takes a single,
-      // unsigned integer parameter representing a document serial number or no
-      // parameters.
-      var constructor = type.GetConstructor (Type.EmptyTypes);
-      // Allow constructor that takes a single unsigned int which will get
-      // passed the runtime serial number of the active document generating the
-      // new panel request.
-      var constructor_with_doc_and_runtime_id = type.GetConstructor (new [] { typeof (Guid), typeof (RhinoDoc) });
-      var constructor_with_sn = type.GetConstructor (new [] { typeof (uint) });
-      var constructor_with_doc = type.GetConstructor (new [] { typeof (RhinoDoc) });
-      if (!type.IsPublic || (constructor == null && constructor_with_sn == null && constructor_with_doc == null && constructor_with_doc_and_runtime_id == null))
-        throw new ArgumentException (@"The panel type must have a constructor with a uint, RhinoDoc or no parameters",
-          nameof (type));
-      // Check for a GUID attribute
-      var attr = type.GetCustomAttributes (typeof (System.Runtime.InteropServices.GuidAttribute), false);
-      if (attr.Length != 1)
-        throw new ArgumentException (@"type must have a GuidAttribute", "type");
-      // Add the panel type, wont do anything if the type was previously registered
-      Add (plugInId, type, caption, icon, panelType);
+      RegisterPanel(plugInId, type, caption, icon, null, null, panelType);
     }
     /// <summary>
     /// Call once to register a panel type which will get dynamically created
@@ -116,6 +125,20 @@ namespace Rhino.UI
       Register(GetPlugInId(plugIn), type, caption, icon, panelType);
     }
 
+    internal static void Register(Guid plugIn, Type type, string caption, System.Reflection.Assembly iconAssembly, string iconResourceId, PanelType panelType)
+    {
+      RegisterPanel(plugIn, type, caption, null, iconAssembly, iconResourceId, panelType);
+    }
+
+    internal static void Register(PlugIns.PlugIn plugIn, Type type, string caption, System.Reflection.Assembly iconAssembly, string iconResourceId, PanelType panelType)
+    {
+      // Plug-in that owns the panel, currently required.  Investigate changing to
+      // System.Reflection.Assembly to allow Rhino.UI to register panels directly
+      if (plugIn == null)
+        throw new ArgumentNullException(nameof(plugIn));
+      Register(GetPlugInId(plugIn), type, caption, iconAssembly, iconResourceId, panelType);
+    }
+
     private static Guid GetPlugInId(PlugIns.PlugIn plugIn)
     {
       try
@@ -138,6 +161,29 @@ namespace Rhino.UI
     /// Update the icon used for a panel tab.
     /// </summary>
     /// <param name="panelType"></param>
+    /// <param name="fullPathToResource">New icon resource path</param>
+    public static void ChangePanelIcon(Type panelType, string fullPathToResource)
+    {
+      if (panelType == null)
+        throw new ArgumentNullException(nameof(panelType));
+      Definitions.TryGetValue(panelType.GUID, out PanelDefinition definition);
+      if (definition != null)
+      {
+        definition.IconResourceId = fullPathToResource;
+        definition.Icon = null;
+        PanelIconChanged?.Invoke(definition, EventArgs.Empty);
+      }
+      using (var args = new NamedParametersEventArgs())
+      {
+        args.Set("panelTypeId", panelType.GUID);
+        HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.TabPanels.NamedCallbacks.ChangePanelIcon", args);
+      }
+    }
+
+    /// <summary>
+    /// Update the icon used for a panel tab.
+    /// </summary>
+    /// <param name="panelType"></param>
     /// <param name="icon">New icon to use</param>
     public static void ChangePanelIcon(Type panelType, Icon icon)
     {
@@ -149,7 +195,18 @@ namespace Rhino.UI
         definition.Icon = icon;
         PanelIconChanged?.Invoke(definition, EventArgs.Empty);
       }
-      UnsafeNativeMethods.RHC_ChangePanelIcon(panelType.GUID, StackedDialogPage.Service.GetImageHandle(icon, false));
+      if (UsingNewTabPanelSystem)
+      {
+        using (var args = new NamedParametersEventArgs())
+        {
+          args.Set("panelTypeId", panelType.GUID);
+          HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.TabPanels.NamedCallbacks.ChangePanelIcon", args);
+        }
+      }
+      else
+      {
+        UnsafeNativeMethods.RHC_ChangePanelIcon(panelType.GUID, StackedDialogPage.Service.GetImageHandle(icon, false));
+      }
     }
     public static event EventHandler PanelIconChanged;
 
@@ -210,14 +267,15 @@ namespace Rhino.UI
       // so it knows which dock bar container to associate it with.  This will
       // allow for multiple instances per document or multiple instance per
       // Rhino session.
-      //
+
       // Find an existing panel instance for the specified dock bar or create
       // one if there was not an existing instance
-      var instance = containers.FindOrCreateInstance(hostId, definition, documentSerailNumber);
+      var instance = containers.FindOrCreateInstance(hostId, definition, documentSerailNumber, true);
       // Get the native objects minimum size if provided
       var min_size = instance?.MinimumSize ?? SizeF.Empty;
       minimumWidth = min_size.Width;
       minimumHeight = min_size.Height;
+      UnsafeNativeMethods.RHC_ON_FPU_Init();
       // Return the native object pointer, this will be a HWND or on Windows
       // or a NSView* on Mac
       return instance?.NativePointer ?? IntPtr.Zero;
@@ -265,11 +323,11 @@ namespace Rhino.UI
     /// <param name="documentSerailNumber"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    private static int OnShowPanelCallback(Guid panelTypeGuid, Guid hostId, uint documentSerailNumber, uint state)
+    internal static int OnShowPanelCallback(Guid panelTypeGuid, Guid hostId, uint documentSerailNumber, uint state)
     {
       var definition = Definition(panelTypeGuid);
       var instance = definition?.Containers(documentSerailNumber)?.Instance(hostId);
-      var panel = instance?.PanelObject as IPanel;
+      var panel = instance?.PanelObject as IPanel ?? instance?.Host as IPanel;
       switch (state)
       {
         case (uint)UnsafeNativeMethods.RhCmnPanelShowMessage.DestroyWindow:
@@ -377,9 +435,11 @@ namespace Rhino.UI
     /// <param name="type"></param>
     /// <param name="caption"></param>
     /// <param name="icon"></param>
+    /// <param name="iconAssembly"></param>
+    /// <param name="iconResourceId"></param>
     /// <param name="panelType"></param>
     /// <returns></returns>
-    private static void Add(Guid plugInId, Type type, string caption, Icon icon, PanelType panelType)
+    private static void Add(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
     {
       if (type == null)
         throw new ArgumentNullException(nameof(type));
@@ -388,10 +448,10 @@ namespace Rhino.UI
       if (def != null)
         return; // The type is already registered so don't do anything
       // Create a new definition record
-      def = new PanelDefinition(plugInId, type, caption, caption, icon, panelType);
+      def = new PanelDefinition(plugInId, type, caption, caption, icon, iconAssembly, iconResourceId, panelType);
       // Add the new definition to the runtime definitions dictionary
       Definitions.Add(type.GUID, def);
-      var image = StackedDialogPage.Service.GetImageHandle(icon, false);
+      var image = StackedDialogPage.Service.GetImageHandle(def.Icon, false);
       // Register the new panel type with core Rhino
       UnsafeNativeMethods.RHC_RegisterTabbedDockBar(
         caption,
@@ -402,6 +462,17 @@ namespace Rhino.UI
         g_create_panel_callback,
         g_visible_panel_callback,
         g_on_show_panel_callback);
+    }
+
+    internal static List<Tuple<string, Guid>> GetDefinitionList(bool sorted)
+    {
+      var list = new List<Tuple<string, Guid>>();
+      foreach (var item in Definitions)
+        if (!UnsafeNativeMethods.RHC_IsCoreRhinoPanelId(item.Key) && !UnsafeNativeMethods.RHC_DockBar_IsAnalysisDockBar(item.Key))
+          list.Add(new Tuple<string, Guid>(item.Value.EnglishCaption, item.Key));
+      return sorted
+        ? list.OrderBy(o => o.Item1).ToList()
+        : list;
     }
 
     /// <summary>
@@ -431,8 +502,18 @@ namespace Rhino.UI
     /// <param name="englishCaption"></param>
     /// <param name="localCaption"></param>
     /// <param name="icon"></param>
+    /// <param name="iconAssembly"></param>
+    /// <param name="iconResourceId"></param>
     /// <param name="panelType"></param>
-    internal PanelDefinition(Guid plugInId, Type type, string englishCaption, string localCaption, Icon icon, PanelType panelType)
+    internal PanelDefinition(
+      Guid plugInId,
+      Type type,
+      string englishCaption,
+      string localCaption,
+      Icon icon,
+      Assembly iconAssembly,
+      string iconResourceId,
+      PanelType panelType)
     {
       PlugInId = plugInId;
       Id = type.GUID;
@@ -441,16 +522,16 @@ namespace Rhino.UI
       LocalCaption = localCaption;
       Icon = icon;
       PanelType = panelType;
-      switch (panelType)
-      {
-        case PanelType.PerDoc:
-          m_document_containers = new Dictionary<uint, PanelContainers>();
-          break;
-        case PanelType.System:
-          m_system_containers = new PanelContainers();
-          break;
-      }
+      IconAssembly = iconAssembly;
+      IconResourceId = iconResourceId;
+      if (panelType == PanelType.PerDoc || ForcePerDocPanels)
+        m_document_containers = new Dictionary<uint, PanelContainers>();
+      else
+        m_system_containers = new PanelContainers();
     }
+
+    private bool ForcePerDocPanels => (_forcePerDocPanels ?? (_forcePerDocPanels = PanelSystem.UsingNewTabPanelSystem && Rhino.Runtime.HostUtils.RunningOnOSX)).Value;
+    static bool? _forcePerDocPanels;
 
     /// <summary>
     /// Gets the PanelContainers manager for the specified document runtime
@@ -461,8 +542,9 @@ namespace Rhino.UI
     public PanelContainers Containers(uint docSerialNumber)
     {
       // If the PanelType is PanelType.System then use the non document specific
-      // container object
-      if (PanelType == PanelType.System)
+      // container object unless using the new panel system on Mac. Mac requires 
+      // a object per document window to allow docking.
+      if (PanelType == PanelType.System && !ForcePerDocPanels)
         return m_system_containers;
       // Check to see if there is an document specific existing containers object
       m_document_containers.TryGetValue(docSerialNumber, out PanelContainers container);
@@ -480,7 +562,14 @@ namespace Rhino.UI
     public string LocalCaption { get; }
     public Icon Icon
     {
-      get => m_icon;
+      get
+      {
+        // If m_icon is null and there is a IconResourceId then try to load the
+        // icon from the specified assembly
+        if (m_icon == null && !string.IsNullOrWhiteSpace(IconResourceId))
+          m_icon = RhinoUiServiceLocater.DialogService.IconFromResourceId(IconAssembly, IconResourceId);
+        return m_icon;
+      }
       set
       {
         // 14 May 2019 John Morse
@@ -495,6 +584,31 @@ namespace Rhino.UI
       }
     }
     private Icon m_icon;
+    /// <summary>
+    /// Assembly to load the IconResrouceId from, if null the Rhino.UI assembly
+    /// is assumed.
+    /// </summary>
+    internal Assembly IconAssembly { get; }
+
+    /// <summary>
+    /// Embedded resource Id string, resource is loaded from IconAssembly
+    /// </summary>
+    internal string IconResourceId
+    {
+      get => _iconResourceId;
+      set
+      {
+        if (string.Equals(_iconResourceId, value, StringComparison.Ordinal))
+          return; // Nothing changed
+        _iconResourceId = value;
+        // Clear the cached m_icon, it will get set the next time get_Icon is
+        // accessed.
+        if (!string.IsNullOrWhiteSpace(_iconResourceId))
+          m_icon = null;
+      }
+    }
+    private string _iconResourceId;
+
     public PanelType PanelType { get; }
 
     #endregion Public properties
@@ -555,18 +669,22 @@ namespace Rhino.UI
     /// The document runtime serial number which will be optionally passed to 
     /// the panel class constructor.
     /// </param>
+    /// <param name="createUnmangedHost">
+    /// If true then a unmanaged window or NSView is created to host the .NET
+    /// control otherwise only the .NET control is created.
+    /// </param>
     /// <returns>
     /// Returns the <see cref="PanelInstance"/> associated with a container of
     /// null if there was a problem creating one.
     /// </returns>
-    public PanelInstance FindOrCreateInstance(Guid containerId, PanelDefinition definition, uint documentSerailNumber)
+    public PanelInstance FindOrCreateInstance(Guid containerId, PanelDefinition definition, uint documentSerailNumber, bool createUnmangedHost)
     {
       var instance = Instance(containerId);
       if (instance != null)
         return instance;
       // No existing instance for the specified dock bar Id so create one and
       // add it to the container
-      instance = PanelInstance.CreateInstance(containerId, definition.Type, documentSerailNumber);
+      instance = PanelInstance.CreateInstance(containerId, definition.Type, documentSerailNumber, createUnmangedHost);
       // Problem creating the instance, this should not happen but you can never
       // be too careful
       if (instance == null)
@@ -634,6 +752,40 @@ namespace Rhino.UI
   /// </summary>
   internal class PanelInstance : IDisposable
   {
+    internal static object CreatePanelObjectInstance(Guid runtimeId, Type panelType, uint documentSerailNumber)
+    {
+      try
+      {
+        if (panelType == null)
+          throw new ArgumentNullException(nameof(panelType));
+        // Check for a constructor which takes a single uint which
+        // should represents the serial number of the document requesting
+        // the new panel.
+        var constructor_runtime_id_doc = panelType.GetConstructor(new[] { typeof(Guid), typeof(RhinoDoc) });
+        var constructor_with_sn = panelType.GetConstructor(new[] { typeof(uint) });
+        var constructor_with_rhino_doc = panelType.GetConstructor(new[] { typeof(RhinoDoc) });
+        // args will be an empty array which will cause the default
+        // constructor to get called when there is no constructor 
+        // with a uint argument, if there is a uint version of the
+        // constructor then args will be an array with the docSerialNumber
+        var constructor_args = new object[0];
+        if (constructor_runtime_id_doc != null)
+          constructor_args = new object[] { runtimeId, RhinoDoc.FromRuntimeSerialNumber(documentSerailNumber) };
+        else if (constructor_with_rhino_doc != null)
+          constructor_args = new object[] { RhinoDoc.FromRuntimeSerialNumber(documentSerailNumber) };
+        else if (constructor_with_sn != null)
+          constructor_args = new object[] { documentSerailNumber };
+        // Call the default constructor if args is null or empty otherwise
+        // call the constructor passing a single uint
+        var panel_object = Activator.CreateInstance(panelType, constructor_args);
+        return panel_object;
+      }
+      catch (Exception e)
+      {
+        Runtime.HostUtils.ExceptionReport(e);
+        return null;
+      }
+    }
     /// <summary>
     /// Dynamically create an instance of the panelType and a managed host
     /// as necessary.  If the object and host are created successfully than
@@ -651,36 +803,21 @@ namespace Rhino.UI
     /// constructor if the class has a constructor that takes  document serial
     /// number
     /// </param>
+    /// <param name="createUnmangedHost">
+    /// If true then a unmanaged window or NSView is created to host the .NET
+    /// control otherwise only the .NET control is created.
+    /// </param>
     /// <returns>
     /// If the panel and native host pointer were created then return a new
     /// PanelInstance otherwise return null on error.
     /// </returns>
-    public static PanelInstance CreateInstance(Guid runtimeId, Type panelType, uint documentSerailNumber)
+    public static PanelInstance CreateInstance(Guid runtimeId, Type panelType, uint documentSerailNumber, bool createUnmangedHost)
     {
+      var panel_object = CreatePanelObjectInstance(runtimeId, panelType, documentSerailNumber);
+      if (!createUnmangedHost)
+        return new PanelInstance(panel_object, IntPtr.Zero, null, documentSerailNumber);
       try
       {
-        if (panelType == null)
-          throw new ArgumentNullException(nameof(panelType));
-        // Check for a constructor which takes a single uint which
-        // should represents the serial number of the document requesting
-        // the new panel.
-        var constructor_runtime_id_doc = panelType.GetConstructor (new [] { typeof(Guid), typeof (RhinoDoc) });
-        var constructor_with_sn = panelType.GetConstructor(new[] { typeof(uint) });
-        var constructor_with_rhino_doc = panelType.GetConstructor (new [] { typeof (RhinoDoc) });
-        // args will be an empty array which will cause the default
-        // constructor to get called when there is no constructor 
-        // with a uint argument, if there is a uint version of the
-        // constructor then args will be an array with the docSerialNumber
-        var constructor_args = new object[0];
-        if (constructor_runtime_id_doc != null)
-          constructor_args = new object [] { runtimeId, RhinoDoc.FromRuntimeSerialNumber (documentSerailNumber) };
-        else if (constructor_with_rhino_doc != null)
-          constructor_args = new object [] { RhinoDoc.FromRuntimeSerialNumber (documentSerailNumber) };
-        else if (constructor_with_sn != null)
-          constructor_args = new object [] { documentSerailNumber };
-        // Call the default constructor if args is null or empty otherwise
-        // call the constructor passing a single uint
-        var panel_object = Activator.CreateInstance(panelType, constructor_args);
         var native_pointer = StackedDialogPage.Service.GetNativePageWindow(panel_object, true, true, out object host);
         return native_pointer == IntPtr.Zero
                  ? null 
@@ -735,10 +872,21 @@ namespace Rhino.UI
     /// <param name="e"></param>
     private static void F1Pressed(object sender, EventArgs e)
     {
-      var help = sender as IHelp;
-      var help_string = help?.HelpUrl;
-      if (!string.IsNullOrWhiteSpace(help_string))
-        RhinoHelp.Show(help_string);
+      // 20 July 2022 S. Baer (RH-69469)
+      // The Layout panel was throwing a NotImplementedException in
+      // its HelpUrl property which would take Rhino down. Just
+      // wrap this in a try/catch block and do nothing when an exception
+      // is thrown
+      try
+      {
+        var help = sender as IHelp;
+        var help_string = help?.HelpUrl;
+        if (!string.IsNullOrWhiteSpace(help_string))
+          RhinoHelp.Show(help_string);
+      }
+      catch(Exception)
+      {
+      }
     }
 
     /// <summary>
@@ -769,7 +917,7 @@ namespace Rhino.UI
     /// Placeholder for managed control host to avoid it getting garbage
     /// collected.
     /// </summary>
-    public object Host { get; private set; }
+    public object Host { get; internal set; }
 
     public SizeF MinimumSize { get; } = SizeF.Empty;
   }

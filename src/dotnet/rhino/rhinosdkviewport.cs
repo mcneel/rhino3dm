@@ -224,11 +224,35 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public System.Drawing.Size Size
     {
-      get { return Bounds.Size; }
+      get 
+      {
+        IntPtr ptr_this = NonConstPointer();
+        int width = 0, height = 0;
+        bool rc = UnsafeNativeMethods.CRhinoViewport_GetScreenSize(ptr_this, ref width, ref height);
+        return (rc) ? new System.Drawing.Size(width, height) : Bounds.Size; 
+      }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_SetScreenSize(ptr_this, value.Width, value.Height);
+      }
+    }
+
+    /// <summary>
+    /// If true, the the camera location, camera direction, and lens angle should not be changed.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool LockedProjection
+    {
+      get
+      {
+        IntPtr ptr_this = NonConstPointer();
+        return UnsafeNativeMethods.CRhinoViewport_GetSetLockProjection(ptr_this, false, false);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CRhinoViewport_GetSetLockProjection(ptr_this, true, value);
       }
     }
 
@@ -1103,6 +1127,21 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Get Scale transform applied to the viewport
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public double[] GetViewScale()
+    {
+      double scaleX = 1;
+      double scaleY = 1;
+      double scaleZ = 1;
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr constPtrViewport = UnsafeNativeMethods.CRhinoViewport_VP(constPtrThis);
+      UnsafeNativeMethods.ON_Viewport_GetViewScale(constPtrViewport, ref scaleX, ref scaleY, ref scaleZ);
+      return new double[] { scaleX, scaleY, scaleZ };
+    }
+    /// <summary>
     /// Use this function to change projections of valid viewports from perspective to parallel.
     /// It will make common additional adjustments to the frustum so the resulting views are
     /// similar. The camera location and direction will not be changed.
@@ -1877,6 +1916,8 @@ namespace Rhino.Display
   {
     StandardModelingViewport = 0,
     PageViewMainViewport = 1,
-    DetailViewport = 2
+    DetailViewport = 2,
+    UVEditorViewport = 3,
+    BlockEditorViewport = 4
   }
 }

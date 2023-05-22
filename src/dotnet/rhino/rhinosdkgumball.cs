@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 using System;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 
 namespace Rhino.UI.Gumball
@@ -479,9 +480,17 @@ namespace Rhino.UI.Gumball
   public class GumballDisplayConduit : IDisposable
   {
     /// <since>5.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public GumballDisplayConduit()
     {
-      m_pGumballDisplayConduit = UnsafeNativeMethods.CRhinoGumballDisplayConduit_New();
+      m_pGumballDisplayConduit = UnsafeNativeMethods.CRhinoGumballDisplayConduit_New((int)ActiveSpace.None);
+    }
+
+    /// <since>8.0</since>
+    public GumballDisplayConduit(ActiveSpace space)
+    {
+      m_pGumballDisplayConduit = UnsafeNativeMethods.CRhinoGumballDisplayConduit_New((int)space);
     }
 
     #region IDisposable/Pointer handling
@@ -639,7 +648,7 @@ namespace Rhino.UI.Gumball
 
 
     GumballPickResult m_pick_result;
-    /// <summary>The inital mouse down event sets PickResult.</summary>
+    /// <summary>The initial mouse down event sets PickResult.</summary>
     /// <since>5.0</since>
     public GumballPickResult PickResult
     {

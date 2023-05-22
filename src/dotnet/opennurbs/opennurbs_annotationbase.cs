@@ -80,8 +80,8 @@ namespace Rhino.Geometry
     {
       get
       {
-        IntPtr const_ptr_dimstyle = ConstPointerForDimStyle();
-        bool b =UnsafeNativeMethods.ON_DimStyle_HasFieldOverrides(const_ptr_dimstyle);
+        IntPtr const_ptr = ConstPointer();
+        bool b = UnsafeNativeMethods.ON_V6_Annotation_HasOverrideDimstyle(const_ptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
         return b;
       }
@@ -96,8 +96,8 @@ namespace Rhino.Geometry
     [ConstOperation]
     public bool IsPropertyOverridden(DimensionStyle.Field field)
     {
-      IntPtr const_ptr_dimstyle = ConstPointerForDimStyle();
-      bool b = UnsafeNativeMethods.ON_DimStyle_IsFieldOverride(const_ptr_dimstyle, field);
+      IntPtr const_ptr = ConstPointer();
+      bool b = UnsafeNativeMethods.ON_V6_Annotation_FieldIsOverridden(const_ptr, field);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
       return b;
     }
@@ -117,7 +117,12 @@ namespace Rhino.Geometry
     /// </summary>
     /// <returns></returns>
     /// <since>6.0</since>
-    public bool ClearPropertyOverrides() => ClearOverrideDimStyle();
+    public bool ClearPropertyOverrides()
+    {
+      var ptr_this = NonConstPointer();
+      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
+      return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
+    }
 
     /// <summary>
     /// Return the proper dimension style from which to get properties
@@ -136,7 +141,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_parentdimsytyle = parentDimStyle != null ? parentDimStyle.ConstPointer() : IntPtr.Zero;
       // TODO: We should look at the pointer returned from ON_Annotation_DimensionStyle and make a light copy
       // when it is the same as parentDimStyle's. This is the typical case. I'm leaving this alone for the
-      // moment to minimze change.
+      // moment to minimize change.
       IntPtr ptr_new_dimstyle =
         UnsafeNativeMethods.ON_V6_Annotation_DimensionStyle(const_ptr_this, const_ptr_parentdimsytyle);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
@@ -180,18 +185,6 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Clear the override DimensionStyle for this annotation object, reverting
-    /// to using the parent style for all properties
-    /// </summary>
-    /// <returns></returns>
-    private bool ClearOverrideDimStyle()
-    {
-      var ptr_this = NonConstPointer();
-      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
-      return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
-    }
-
-    /// <summary>
     /// The parent dimension style associated with this annotation
     /// </summary>
     /// <since>6.0</since>
@@ -208,11 +201,12 @@ namespace Rhino.Geometry
       }
       set
       {
-        DimensionStyleId = value.Id;
         if (value.IsDocumentControlled)
           m_parent_dimstyle = value.InternalLightCopy();
         else
           m_parent_dimstyle = value;
+
+        DimensionStyleId = value.Id;
       }
     }
 
@@ -332,18 +326,20 @@ namespace Rhino.Geometry
     /// Gets or sets whether to draw a frame around a text mask
     /// </summary>
     /// <since>7.0</since>
+    [Obsolete("Do not use setter as the MaskFrame is an enum. Use MaskFrame property instead")]
     public bool DrawTextFrame
     {
-      get { return MaskFrame == DimensionStyle.MaskFrame.RectFrame; }
+      get { return MaskFrame != DimensionStyle.MaskFrame.NoFrame; }
       set
       {
-        if (value != (MaskFrame == DimensionStyle.MaskFrame.RectFrame))
-        {
-          if (value)
-            MaskFrame = DimensionStyle.MaskFrame.RectFrame;
-          else
-            MaskFrame = DimensionStyle.MaskFrame.NoFrame;
-        }
+        var current = MaskFrame;
+        if (false == value && DimensionStyle.MaskFrame.NoFrame == current)
+          return;
+
+        if (true == value && DimensionStyle.MaskFrame.NoFrame != current)
+          return;
+
+        MaskFrame = value ? DimensionStyle.MaskFrame.RectFrame : DimensionStyle.MaskFrame.NoFrame;
       }
     }
 
@@ -518,7 +514,7 @@ namespace Rhino.Geometry
     /// <summary> Obsolete; use Font property instead </summary>
     /// <since>6.1</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [Obsolete("Use Font property instead")]
+    [Obsolete("Use Font property instead. Ex: textEntity.Font = Rhino.DocObjects.Font.FromQuartetProperties(\"Arial\", false, false);")]
     public int FontIndex
     {
       // 8 Jan 2018 (S. Baer) RH-42907
@@ -1086,9 +1082,7 @@ namespace Rhino.Geometry
     /// <since>6.10</since>
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      BoundingBox bbox = BoundingBox.Empty;
-
-      bbox = InternalGetBoundingBox();
+      BoundingBox bbox = InternalGetBoundingBox();
       bbox.Transform(xform);
       return bbox;
     }
@@ -1098,15 +1092,7 @@ namespace Rhino.Geometry
       BoundingBox bbox = BoundingBox.Empty;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr parent_dimstyle = ConstParentDimStylePointer();
-      DimensionStyle dimstyle = null;
-      if (parent_dimstyle == IntPtr.Zero)
-      {
-        dimstyle = DimensionStyle;
-        if (dimstyle != null)
-          parent_dimstyle = dimstyle.ConstPointer();
-      }
       BoundingBox b = UnsafeNativeMethods.ON_Annotation_GetAnnotationBoundingBox(const_ptr_this, parent_dimstyle, ref bbox) ? bbox : BoundingBox.Empty;
-      GC.KeepAlive(dimstyle);
       GC.KeepAlive(this);  // Added because of RH-60715
       return b;
     }

@@ -60,6 +60,19 @@ namespace Rhino.DocObjects
     }
 
     #region properties
+    /// <summary>
+    /// Returns <see cref="ModelComponentType.Image"/>.
+    /// </summary>
+    /// <since>6.0</since>
+    public override ModelComponentType ComponentType => ModelComponentType.Image;
+
+    /// <summary>
+    /// Gets a value indicting whether this bitmap is a referenced bitmap. 
+    /// Referenced bitmaps are part of referenced documents.
+    /// </summary>
+    /// <since>5.1</since>
+    public override bool IsReference => base.IsReference;
+
     /// <summary>The name of this bitmap.</summary>
     /// <since>5.1</since>
     public string FileName
@@ -76,37 +89,6 @@ namespace Rhino.DocObjects
           }
 #endif
         return string.Empty;
-      }
-    }
-
-    /// <summary>
-    /// Gets a value indicting whether this bitmap is a referenced bitmap. 
-    /// Referenced bitmaps are part of referenced documents.
-    /// </summary>
-    /// <since>5.1</since>
-    public bool IsReference
-    {
-      get
-      {
-#if RHINO_SDK
-        if (null == m_doc)
-          return false;
-        return UnsafeNativeMethods.CRhinoBitmap_IsReference(m_doc.RuntimeSerialNumber, m_index);
-#else
-        return false;
-#endif
-      }
-    }
-
-    /// <summary>
-    /// Returns <see cref="ModelComponentType.Image"/>.
-    /// </summary>
-    /// <since>6.0</since>
-    public override ModelComponentType ComponentType
-    {
-      get
-      {
-        return ModelComponentType.Image;
       }
     }
     #endregion

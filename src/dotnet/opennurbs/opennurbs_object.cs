@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Runtime
@@ -17,7 +18,8 @@ namespace Rhino.Runtime
     /// </summary>
     /// <since>5.0</since>
     public DocumentCollectedException() :
-      base("This object cannot be modified because it is controlled by a document.") { }
+      base("This object cannot be modified because it is controlled by a document.")
+    { }
 
     /// <summary>
     /// Initializes a new instance of the document collected exception class.
@@ -81,8 +83,8 @@ namespace Rhino.Runtime
     long m_unmanaged_memory;  // amount of "memory" pressure reported to the .NET runtime
 
     IntPtr m_ptr = IntPtr.Zero; // C++ pointer. This is only set when the wrapped pointer is of an
-                              // object that has been created in .NET and is not part of the document
-                              // m_ptr must have been created outside of the document and must be deleted in Dispose
+                                // object that has been created in .NET and is not part of the document
+                                // m_ptr must have been created outside of the document and must be deleted in Dispose
 
     internal object m__parent;  // May be a Rhino.DocObject.RhinoObject, Rhino.DocObjects.ObjRef,
                                 // Rhino.Render.RenderMesh, PolyCurve 
@@ -136,14 +138,19 @@ namespace Rhino.Runtime
         // m_ptr points ot an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 paramter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
-        if ( PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
+        if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
         {
           throw new CorruptGeometryException(m_ptr, this);
         }
         return m_ptr;
+      }
+
+      if (m__parent is SharedPtrCommonObject sp)
+      {
+        return sp.ConstPointerToOnObject();
       }
 
       IntPtr const_ptr_this = _InternalGetConstPointer();
@@ -176,10 +183,10 @@ namespace Rhino.Runtime
         // m_ptr points ot an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 paramter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
-        if ( PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
+        if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
         {
           throw new CorruptGeometryException(m_ptr, this);
         }
@@ -250,7 +257,7 @@ namespace Rhino.Runtime
     /// </summary>
     protected virtual void NonConstOperation()
     {
-      if ( IntPtr.Zero==m_ptr )
+      if (IntPtr.Zero == m_ptr)
       {
         // 1 Sept 2017 S. Baer
         // Ensure switching to non-const is thread safe
@@ -261,6 +268,11 @@ namespace Rhino.Runtime
             bool applymempressure;
             IntPtr pNewPointer = _InternalDuplicate(out applymempressure);
             m_ptr = pNewPointer;
+            if (m__parent is SharedPtrCommonObject sp)
+            {
+              sp.Dispose();
+              m__parent = null;
+            }
             if (applymempressure)
               ApplyMemoryPressure();
 
@@ -289,7 +301,7 @@ namespace Rhino.Runtime
     /// <summary>
     /// Is called when a non-constant operation first occurs.
     /// </summary>
-    protected virtual void OnSwitchToNonConst(){}
+    protected virtual void OnSwitchToNonConst() { }
 
     /// <summary>
     /// If you want to keep a copy of this class around by holding onto it in a variable after a command
@@ -302,6 +314,25 @@ namespace Rhino.Runtime
       NonConstOperation();
     }
 
+    internal SharedPtrCommonObject ConvertToConstObjectWithSharedPointerParent()
+    {
+      if (m__parent is SharedPtrCommonObject sp)
+      {
+        return sp;
+      }
+
+      EnsurePrivateCopy();
+      IntPtr sharedPtr = UnsafeNativeMethods.ON_Object_NewSharedPointer(m_ptr);
+      SharedPtrCommonObject shared = SharedPtrCommonObject.WrapSharedPointer(sharedPtr);
+      if (null == shared)
+        return null;
+
+      m__parent = shared;
+      m_ptr = IntPtr.Zero;
+
+      return shared;
+    }
+
     /// <summary>
     /// If true this object may not be modified. Any properties or functions that attempt
     /// to modify this object when it is set to "IsReadOnly" will throw a NotSupportedException.
@@ -309,7 +340,7 @@ namespace Rhino.Runtime
     /// <since>5.0</since>
     public virtual bool IsDocumentControlled
     {
-      get { return (IntPtr.Zero==m_ptr); }
+      get { return (IntPtr.Zero == m_ptr); }
     }
 
     /// <summary>
@@ -423,11 +454,17 @@ namespace Rhino.Runtime
     /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
     protected virtual void Dispose(bool disposing)
     {
+      if (m__parent is SharedPtrCommonObject sp)
+      {
+        sp.Dispose();
+        m__parent = null;
+      }
+
       if (IntPtr.Zero == m_ptr || m__parent is ConstCastHolder)
         return;
 
       Geometry.MeshHolder mh = m__parent as Geometry.MeshHolder;
-      if (mh!=null)
+      if (mh != null)
       {
         mh.ReleaseMesh();
       }
@@ -489,7 +526,7 @@ namespace Rhino.Runtime
 
     internal void ApplyConstCast()
     {
-      if (m_ptr == IntPtr.Zero && m__parent!=null)
+      if (m_ptr == IntPtr.Zero && m__parent != null)
       {
         IntPtr const_ptr_this = ConstPointer();
         ConstCastHolder ch = new ConstCastHolder(this, m__parent);
@@ -500,7 +537,7 @@ namespace Rhino.Runtime
     internal void RemoveConstCast()
     {
       ConstCastHolder ch = m__parent as ConstCastHolder;
-      if (m_ptr != IntPtr.Zero && ch!=null)
+      if (m_ptr != IntPtr.Zero && ch != null)
       {
         m__parent = ch.m_oldparent;
         m_ptr = IntPtr.Zero;
@@ -547,7 +584,7 @@ namespace Rhino.Runtime
 
     /// <summary>
     /// Dictionary of custom information attached to this class. The dictionary is actually user
-    /// data provided as an easy to use sharable set of information.
+    /// data provided as an easy to use shareable set of information.
     /// </summary>
     /// <since>5.0</since>
     public Collections.ArchivableDictionary UserDictionary
@@ -621,8 +658,8 @@ namespace Rhino.Runtime
       int count = 0;
       IntPtr ptr_userstrings = UnsafeNativeMethods.ON_Object_GetUserStrings(const_ptr_this, ref count);
 
-      using( var keyHolder = new StringHolder() )
-      using( var valueHolder = new StringHolder() )
+      using (var keyHolder = new StringHolder())
+      using (var valueHolder = new StringHolder())
       {
         IntPtr pKeyHolder = keyHolder.NonConstPointer();
         IntPtr pValueHolder = valueHolder.NonConstPointer();
@@ -673,7 +710,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <param name="info">Serialization data.</param>
     /// <param name="context">Serialization stream.</param>
-    protected CommonObject( SerializationInfo info, StreamingContext context)
+    protected CommonObject(SerializationInfo info, StreamingContext context)
     {
       m_ptr = SerializeReadON_Object(info, context);
     }
@@ -723,7 +760,7 @@ namespace Rhino.Runtime
     /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
     /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
     /// <since>5.0</since>
-    [SecurityPermission(SecurityAction.LinkDemand, Flags=SecurityPermissionFlag.SerializationFormatter)]
+    [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       IntPtr pConstThis = ConstPointer();
@@ -783,15 +820,15 @@ namespace Rhino.Runtime
     /// <param name="jsonDictionary"></param>
     /// <returns></returns>
     /// <since>7.0</since>
-    public static CommonObject FromJSON(System.Collections.Generic.Dictionary<string,string> jsonDictionary)
+    public static CommonObject FromJSON(System.Collections.Generic.Dictionary<string, string> jsonDictionary)
     {
       int archive3dm = 0;
       int opennurbs = 0;
       string data = null;
-      foreach(var kv in jsonDictionary)
+      foreach (var kv in jsonDictionary)
       {
         string key = kv.Key;
-        if( key.Equals(ARCHIVE_3DM_VERSION, StringComparison.OrdinalIgnoreCase))
+        if (key.Equals(ARCHIVE_3DM_VERSION, StringComparison.OrdinalIgnoreCase))
         {
           archive3dm = int.Parse(kv.Value);
         }
@@ -860,19 +897,23 @@ namespace Rhino.Runtime
     static CommonObject CreateCommonObjectHelper(IntPtr pObject)
     {
       var geometry = Geometry.GeometryBase.CreateGeometryHelper(pObject, null);
-      if (geometry == null)
-      {
-        const uint LAYER = 0x40; // Not sure why this was not added to the DocObjects.ObjectType enum
-                                 // will just use the low level OpenNURBS value for now.
-        uint objectType = UnsafeNativeMethods.ON_Object_ObjectType(pObject);
-        if (objectType == LAYER)
-        {
-          return new Rhino.DocObjects.Layer(pObject, false);
-        }
-      }
+      if (null != geometry)
+        return geometry;
+
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-66667
+      var classType = UnsafeNativeMethods.ON_Object_ClassType(pObject);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_Layer)
+        return new Rhino.DocObjects.Layer(pObject, false);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_Material)
+        return new Rhino.DocObjects.Material(pObject);
+
+      if (classType == UnsafeNativeMethods.OnClassTypeConsts.ON_3dmObjectAttributes)
+        return new ObjectAttributes(pObject);
 
       // TODO: handle other cases where this pointer is not specifically ON_Geometry
-      return geometry;
+      return null;
     }
     #endregion
   }
@@ -883,6 +924,52 @@ namespace Rhino.Runtime
     public ConstCastHolder(CommonObject obj, object old_parent)
     {
       m_oldparent = old_parent;
+    }
+  }
+
+  class SharedPtrCommonObject : IDisposable
+  {
+    IntPtr _sharedPtrOnObject;
+    IntPtr _ptrOnObject;
+
+    public static SharedPtrCommonObject WrapSharedPointer(IntPtr sharedPtr)
+    {
+      if (IntPtr.Zero == sharedPtr)
+        return null;
+
+      IntPtr ptrToObject = UnsafeNativeMethods.ON_Object_SharedPointer_Get(sharedPtr);
+      if (IntPtr.Zero == ptrToObject)
+        return null;
+
+      SharedPtrCommonObject rc = new SharedPtrCommonObject();
+      rc._sharedPtrOnObject = sharedPtr;
+      rc._ptrOnObject = ptrToObject;
+      return rc;
+    }
+
+    private SharedPtrCommonObject() { }
+
+    /// <summary> The real const ON_Object*</summary>
+    /// <returns></returns>
+    public IntPtr ConstPointerToOnObject()
+    {
+      if (_ptrOnObject == IntPtr.Zero)
+      {
+        _ptrOnObject = UnsafeNativeMethods.ON_Object_SharedPointer_Get(_sharedPtrOnObject);
+      }
+      return _ptrOnObject;
+    }
+
+    public IntPtr NativeSharedPointer()
+    {
+      return _sharedPtrOnObject;
+    }
+
+    public void Dispose()
+    {
+      UnsafeNativeMethods.ON_Object_DeleteSharedPointer(_sharedPtrOnObject);
+      _sharedPtrOnObject = IntPtr.Zero;
+      _ptrOnObject = IntPtr.Zero;
     }
   }
 }

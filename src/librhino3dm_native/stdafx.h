@@ -23,12 +23,6 @@
 
 #endif //(_WIN32) && !(RHINO3DM_BUILD)
 
-#if defined (__APPLE__) && !defined(RHINO3DM_BUILD)
-#define RHINO_SDK_MFC
-#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
-#include "../../../rhino4/AfxMac.h"
-#include "../../../rhino4/MacOS/MacHelpers.h"
-#endif
 
 #if !defined(RHINO3DM_BUILD)
 
@@ -36,16 +30,26 @@
 #include "../../../rhino4/SDK/inc/RhinoSdkUiFile.h"
 #endif
 
-// gh_private_sdk.h is where all of the "private" TL and Rhino functions are declared
-// This lets us figure out exactly which private classes/functions are being used by
-// grasshopper
-#include "gh_private_sdk.h"
+#if defined (__linux__) || defined(__ANDROID__) || defined(ANDROID)
+#define RHINO_SDK_MFC
+#define OPENNURBS_PLUS
+#define ON_RUNTIME_LINUX
+#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
+#include "../../../rhino4/AfxLinux.h"
+#endif
+
+#if defined (__APPLE__)
+#define RHINO_SDK_MFC
+#include "../../../rhino4/RhinoCorePlugInStdAfx.h"
+#include "../../../rhino4/AfxMac.h"
+#include "../../../rhino4/MacOS/MacHelpers.h"
+#endif
+
 #else
 
 // NOTE: THIS NEEDS TO BE CHANGED WHEN WE RELEASE A PUBLIC BUILD
 #define RHINO_CORE_COMPONENT 1
 #include "../lib//opennurbs/opennurbs.h"
-//#include "./opennurbs_public/opennurbs.h"
 #endif
 
 // Rhino System Plug-in linking pragmas

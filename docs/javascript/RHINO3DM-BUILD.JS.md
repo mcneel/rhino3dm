@@ -87,7 +87,32 @@ The build might take a few minutes, but if everything is configured correctly yo
 
 ## Dev Container
 
-Getting the toolchain set up for building rhino3dm.js can be painful. Visual Studio Code can help by using a preconfigured Docker container as a development environment. There are two options (assuming you already have Docker installed and running)...
+Getting the toolchain set up for building rhino3dm.js can be painful. Visual Studio Code can help by using a preconfigured Docker container as a development environment. 
+
+macos setup
+1. Install Docker desktop: https://docs.docker.com/desktop/install/mac-install/ and start the docker app
+2. Install vscode extension for remote: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
+3. In a terminal, run the following command:
+
+    `docker run --rm -dit -v $(pwd):/src emscripten/emsdk:2.0.10`
+
+    `--rm` deletes the container when it's stopped
+    
+    `-dit` runs the container as a daemon (in the background) but still allows interaction
+    
+    `-v $(pwd):/src` maps the current directory (rhino3dm) to /src in the container
+
+4. In vs code, open remote explorer
+5. You should see a container in the list. Right-click on it and select "Attach to Container"
+6. A new vscode window will appear, but it will not have any directory associated with it. Open the `/src` folder.
+7. Open a terminal in vscode and navigate into the `/script` directory
+8. Run the following command to setup the rhino3dm.js build:
+`python3 setup.py --platform js`
+9. Run the following command to build rhino3dm.js:
+
+    `python3 build.py --platform js --verbose --overwrite`
+
+There are two options (assuming you already have Docker installed and running)...
 
 1. Open the project in VS Code and run the **Remote-Containers: Reopen Folder in Container** command to start a container with the Emscripten toolchain set up and the current directory mapped to a volume.
 1. Alternatively, for slightly faster build times (I/O between the container and the host filesystem can slow things down), open VS Code and run the **Remote-Containers: Clone Repository in Container Volume...** command. Enter `mcneel/rhino3dm` in the input box and press <kbd>Enter</kbd>. Note, that if you need to copy any files from the container volume to the host filesystem, you can right-click on them in the Explorer side bar and choose _Download_.

@@ -616,7 +616,8 @@ namespace Rhino.Runtime
       var builder = new StringBuilder();
       try
       {
-        var rules = Directory.GetAccessControl(directoryName, AccessControlSections.Access)?.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+        var di = new DirectoryInfo(directoryName);
+        var rules = di.GetAccessControl(AccessControlSections.Access)?.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
         if (rules == null)
           return "Directory.GetAccessControl returned null";
         builder.AppendLine($"Access rights for {directoryName}");
@@ -1334,6 +1335,24 @@ namespace Rhino
       return false;
     }
 
+    public bool TryGetColor(bool isDefault, out Color? value)
+    {
+      var success = TryGetColor(GetValue(isDefault), out value);
+      RuntimeType = typeof(Color?);
+      return success;
+    }
+
+    public static bool TryGetColor(string str, out Color? value)
+    {
+      if (TryGetColor(str, out Color color))
+      {
+        value = color;
+        return true;
+      }
+      value = null;
+      return false;
+    }
+
     public bool TryGetPoint3d(bool isDefault, out Point3d value)
     {
       var success = TryGetPoint3d(GetValue(isDefault), out value);
@@ -1682,6 +1701,26 @@ namespace Rhino
       value.R.ToString(SettingValue.ParseNumberFormat),
       value.G.ToString(SettingValue.ParseNumberFormat),
       value.B.ToString(SettingValue.ParseNumberFormat));
+
+    public void SetColor(bool isDefault, Color? value, EventHandler<PersistentSettingsEventArgs<Color?>> validator,
+      bool setChangedFlag)
+    {
+      if (validator != null)
+      {
+        Color? old_value = null;
+        TryGetColor(isDefault, out old_value);
+        var a = new PersistentSettingsEventArgs<Color?>(old_value, value);
+        validator(this, a);
+        if (a.Cancel)
+          return;
+        value = a.NewValue;
+      }
+      RuntimeType = typeof(Color?);
+      if (value == null || value.Value.IsEmpty)
+        SetValue(isDefault, null, setChangedFlag);
+      else
+        SetValue(isDefault, ColorToString(value.Value), setChangedFlag);
+    }
 
     public void SetColor(bool isDefault, Color value, EventHandler<PersistentSettingsEventArgs<Color>> validator,
       bool setChangedFlag)
@@ -3115,6 +3154,20 @@ namespace Rhino
       return false;
     }
 
+    public bool TryGetColor(string key, out Color? value)
+    {
+      return TryGetColor(key, out value, null);
+    }
+
+    public bool TryGetColor(string key, out Color? value, IEnumerable<string> legacyKeyList)
+    {
+      var sv = TryGetSettingsValue(typeof(Color?), key, legacyKeyList);
+      if (sv != null)
+        return sv.TryGetColor(false, out value);
+      value = null;
+      return false;
+    }
+
     /// <since>5.0</since>
     public Color GetColor(string key)
     {
@@ -3141,7 +3194,34 @@ namespace Rhino
       }
       SetDefault(key, defaultValue);
       SetValueToDefaultIfEmpy(key, setting => setting.SetColor(false, defaultValue, GetValidator<Color>(key), false));
-      return GetColor(key);
+      // Won't be in PLIST on Mac if current value is equal to the default value so
+      // calling GetColor will throw an exception when the color is not found. This
+      // should just return the default color in that case.
+      if (TryGetColor(key, out rc))
+        return rc;
+      return defaultValue;
+    }
+
+    public Color? GetColor(string key, Color? defaultValue)
+    {
+      return GetColor(key, defaultValue, null);
+    }
+
+    public Color? GetColor(string key, Color? defaultValue, IEnumerable<string> legacyKeyList)
+    {
+      if (TryGetColor(key, out Color? color, legacyKeyList))
+      {
+        m_settings[key].SetColor(true, defaultValue, GetValidator<Color?>(key), false);
+        return color;
+      }
+      SetDefault(key, defaultValue);
+      SetValueToDefaultIfEmpy(key, setting => setting.SetColor(false, defaultValue, GetValidator<Color?>(key), false));
+      // Won't be in PLIST on Mac if current value is equal to the default value so
+      // calling GetColor will throw an exception when the color is not found. This
+      // should just return the default color in that case.
+      if (TryGetColor(key, out Color? c, null))
+        return c;
+      return defaultValue;
     }
 
     /// <since>6.0</since>
@@ -3671,6 +3751,11 @@ namespace Rhino
       GetValue(key, typeof(Color)).SetColor(false, value, GetValidator<Color>(key), true);
     }
 
+    public void SetColor(string key, Color? value)
+    {
+      GetValue(key, typeof(Color?)).SetColor(false, value, GetValidator<Color?>(key), true);
+    }
+
     /// <since>5.0</since>
     public void SetPoint3d(string key, Point3d value)
     {
@@ -3752,6 +3837,11 @@ namespace Rhino
     public void SetDefault(string key, Color value)
     {
       GetValue(key, typeof(Color)).SetColor(true, value, GetValidator<Color>(key), true);
+    }
+
+    public void SetDefault(string key, Color? value)
+    {
+      GetValue(key, typeof(Color?)).SetColor(true, value, GetValidator<Color?>(key), true);
     }
 
     /// <since>5.0</since>
@@ -4030,6 +4120,8 @@ namespace Rhino
         {
           // C++ Plug-in
           PersistentSettingsHooks.InvokeSetingsSaved(plugInId, isWriting, dirty);
+          if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(plugInId) != 0)
+            RhinoApp.OnSettingsSaved(isWriting, dirty);
         }
         else
         {
@@ -4058,7 +4150,7 @@ namespace Rhino
         else if (!g_changed_settings.Contains(this))
           g_changed_settings.Add(this);
         // If running on Mac OS-X then there will only be a single instance of 
-        // Rhino running and file watchers wont be working so manually raise the
+        // Rhino running and file watchers won't be working so manually raise the
         // settings changed event
         if (Runtime.HostUtils.RunningOnOSX)
         {
@@ -4210,7 +4302,7 @@ namespace Rhino
           {
             item.WriteSettings(false);
             // If running on Mac OS-X then there will only be a single instance of 
-            // Rhino running and file watchers wont be working so manually raise the
+            // Rhino running and file watchers won't be working so manually raise the
             // settings changed event
             if (PersistentSettings.Service.RaiseChangedEventAfterWriting)
               InvokeSettingsSaved(item.m_plugin_id, true);
@@ -4240,9 +4332,14 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Computes full path to settings file to read or write.
+    /// Get the current Rhino scheme name as a valid file path name without any
+    /// spaces
     /// </summary>
-    private string SettingsFileName(bool localSettings, bool windowPositions)
+    /// <returns>
+    /// Returns the current Rhino scheme name as a valid file path name without
+    /// any spaces
+    /// </returns>
+    internal static string GetRhinoSchemeRegistryPath()
     {
       // Parse the scheme name
       string scheme;
@@ -4258,6 +4355,16 @@ namespace Rhino
           scheme = Path.GetInvalidFileNameChars().Aggregate(scheme, (current, c) => current.Replace(c, replace_char));
         scheme = scheme.Replace(' ', replace_char).Replace(':', replace_char);
       }
+      return scheme;
+    }
+
+    /// <summary>
+    /// Computes full path to settings file to read or write.
+    /// </summary>
+    private string SettingsFileName(bool localSettings, bool windowPositions)
+    {
+      // Parse the scheme name
+      string scheme = GetRhinoSchemeRegistryPath();
       var file_name = windowPositions ? "window_positions" : "settings";
       if (!string.IsNullOrEmpty(scheme))
         file_name = file_name + "-" + scheme;
@@ -4505,7 +4612,7 @@ namespace Rhino
         }
         else // Use service to read XML into a stream then parse the XML
         {
-          // Get stream from service provider, the stream should cointain the XML to parse
+          // Get stream from service provider, the stream should contain the XML to parse
           stream = PersistentSettings.Service.ReadSettings(settings_file_name);
           if (stream == null)
             return false; // File not found or error reading the file
@@ -4891,9 +4998,21 @@ namespace Rhino
         DeleteSettingsFile(true, true);
         return true;
       }
-      if (!windowPositions)
+      if (windowPositions)
       {
-        var resetting_dont_write = (m_plugin_settings != null && m_plugin_settings.ResettingDontWrite);
+        var resetting_dont_write = (m_windows_position_settings?.ResettingDontWrite ?? false)
+          || (m_plugin_settings?.ResettingDontWrite ?? false)
+          || (/*UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(PlugInId) != 0 &&*/  UnsafeNativeMethods.CRhCommandsCallbacks_ResetWindowPositions())
+          || UnsafeNativeMethods.CRhCommandsCallbacks_ResetSettings();
+        if (resetting_dont_write)
+        {
+          DeleteSettingsFile(localSettings, true);
+          return true;
+        }
+      }
+      else
+      {
+        var resetting_dont_write = (m_plugin_settings != null && m_plugin_settings.ResettingDontWrite) || UnsafeNativeMethods.CRhCommandsCallbacks_ResetSettings();
         ClearChangedSinceSavedFlag();
         if (resetting_dont_write || !ContainsModifiedValues())
         {
@@ -4942,13 +5061,13 @@ namespace Rhino
         // can tell when settings change and notify Rhino or the plug-in of 
         // the change.
         PersistentSettings settings = null;
-        if (windowPositions) // Window postions - if it contains modified values
+        if (windowPositions) // Window positions - if it contains modified values
           settings = (m_windows_position_settings?.ContainsModifiedValues (null) ?? false) ? m_windows_position_settings : null;
         else // plug-in settings - if the plug-in settings contains modified values
           settings = ContainsModifiedValues () ? m_plugin_settings : null;
         // Write settings to a memory stream then flush to temp_file
-        // Pass null command settings dictionary for window postions, only the
-        // plug-in settings should countain a commands section
+        // Pass null command settings dictionary for window positions, only the
+        // plug-in settings should contain a commands section
         return ToStream(settings, windowPositions ? null : m_command_settings_dict);
       }
       catch (Exception ex)

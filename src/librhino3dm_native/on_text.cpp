@@ -82,8 +82,8 @@ RH_C_FUNCTION bool ON_V6_Annotation_ClearOverrideDimstyle(ON_Annotation* ptrAnno
 {
   if (ptrAnnotation)
   {
-    ON_DimStyle* dimstyle = nullptr;
-    return ptrAnnotation->SetOverrideDimensionStyle(dimstyle);
+    ptrAnnotation->ClearOverrideDimensionStyle();
+    return true;
   }
   return false;
 }
@@ -1734,27 +1734,8 @@ RH_C_FUNCTION bool ON_Annotation_GetAnnotationBoundingBox(const ON_Annotation* c
   bool rc = false;
   if (constAnnotation && bbox)
   {
-    const ON_DimStyle* dimstyle = nullptr;
-    if (constParentDimstyle)
-      dimstyle = &(constAnnotation->DimensionStyle(*constParentDimstyle));
-    if (nullptr == dimstyle)
-    {
-      // 19 July 2018 S. Baer (RH-44507)
-      // I have no idea why the annotation bounding box calculation purely relies on
-      // a dimstyle height, but it appears to work for the most part in Rhino. In the
-      // case where an annotation with no associated dimstyle is created in RhinoCommon,
-      // just use a temp dimstyle to ensure the correct text height is used during the
-      // bounding box calculation.
-      const double height = constAnnotation->TextHeight(nullptr);
-      if (fabs(height - 1) > 0.0001)
-      {
-        ON_DimStyle tempDimStyle = ON_DimStyle::Default;
-        tempDimStyle.SetTextHeight(height);
-        dimstyle = &tempDimStyle;
-        return constAnnotation->GetAnnotationBoundingBox(nullptr, dimstyle, 1.0, &bbox->m_min.x, &bbox->m_max.x, false);
-      }
-    }
-    rc = constAnnotation->GetAnnotationBoundingBox(nullptr, dimstyle, 1.0, &bbox->m_min.x, &bbox->m_max.x, false);
+    const ON_DimStyle& dimstyle = constAnnotation->DimensionStyle(ON_DimStyle::DimStyleOrDefault(constParentDimstyle));
+    rc = constAnnotation->GetAnnotationBoundingBox(nullptr, &dimstyle, 1.0, &bbox->m_min.x, &bbox->m_max.x, false);
   }
   return rc;
 }
@@ -1823,7 +1804,12 @@ int TextRunType(TextRunTypeConsts rt)
   case rtColumn:     type = (int)ON_TextRun::RunType::kNewline;   break;
   case rtField:      type = (int)ON_TextRun::RunType::kField;     break;
   case rtFontdef:    type = (int)ON_TextRun::RunType::kFontdef;   break;
-  case rtHeader:     type = (int)ON_TextRun::RunType::kHeader;    break;
+  case rtHeader:
+    type = (int)ON_TextRun::RunType::kHeader;
+    break;
+  case rtNone:
+    type =(int)ON_TextRun::RunType::kNone;
+    break;
   }
   return type;
 }

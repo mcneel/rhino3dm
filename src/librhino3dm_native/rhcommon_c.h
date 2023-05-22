@@ -154,6 +154,8 @@ typedef LPUNKNOWN (CALLBACK* CRHINOPLUGIN_GETPLUGINOBJECTPROC)(int pluginSerialN
 typedef int (CALLBACK* DISPLAY_FILEIO_OPTIONS_DIALOG_QUERY_PROC)(int serialNumber);
 typedef void (CALLBACK* DISPLAY_FILEIO_OPTIONS_DIALOG_PROC)(int serialNumber, HWND parent, const wchar_t* fileDescription, const wchar_t* fileExtension);
 
+typedef void (CALLBACK* UNKNOWN_USERDATA_PROC)(unsigned int rsn, ON_UUID plugin_id);
+
 RH_C_FUNCTION void CRhinoPlugIn_SetCallbacks(
   int plugInSerialNumber,
   CRHINOPLUGIN_ONLOADPROC onload,

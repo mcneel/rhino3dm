@@ -57,7 +57,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Inserts bitmap into Rhino's texure manager and returns a FileReference.
+    /// Inserts bitmap into Rhino's texture manager and returns a FileReference.
     /// </summary>
     /// <param name="bitmap">The bitmap which will be referenced by the FileReference.</param>
     /// <param name="crc">The crc of the bitmap. This should be a unique number which changes if the contents of the bitmap changes.

@@ -1,10 +1,241 @@
 #pragma warning disable 1591
 #if RHINO_SDK
 using System;
+using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.UI;
 
 namespace Rhino.Display
 {
+  /// <summary>
+  /// Pen used to define stroke applied to several DisplayPipeline draw functions
+  /// </summary>
+  public class DisplayPen
+  {
+    internal static DisplayPen FromNativeCRhinoDisplayPen(IntPtr ptrPen)
+    {
+      if (IntPtr.Zero == ptrPen)
+        return null;
+      DisplayPen rc = new DisplayPen();
+      int argb = UnsafeNativeMethods.CRhinoDisplayPen_Color(ptrPen, false);
+      rc.Color = System.Drawing.Color.FromArgb(argb);
+      argb = UnsafeNativeMethods.CRhinoDisplayPen_Color(ptrPen, true);
+      rc.HaloColor = System.Drawing.Color.FromArgb(argb);
+      rc.Thickness = UnsafeNativeMethods.CRhinoDisplayPen_Thickness(ptrPen, false);
+      rc.ThicknessSpace = (DocObjects.CoordinateSystem)UnsafeNativeMethods.CRhinoDisplayPen_ThicknessSpace(ptrPen);
+      rc.HaloThickness = UnsafeNativeMethods.CRhinoDisplayPen_Thickness(ptrPen, true);
+      DocObjects.LineCapStyle cap = DocObjects.LineCapStyle.Round;
+      DocObjects.LineJoinStyle join = DocObjects.LineJoinStyle.Round;
+      UnsafeNativeMethods.CRhinoDisplayPen_CapAndJoin(ptrPen, ref cap, ref join);
+      rc.CapStyle = cap;
+      rc.JoinStyle = join;
+      bool patternBySeg = rc.PatternBySegment;
+      bool patternLengthInWorld = rc.PatternLengthInWorldUnits;
+      float offset = rc.PatternOffset;
+      float[] pattern = new float[8];
+      UnsafeNativeMethods.CRhinoDisplayPen_Pattern(ptrPen, ref patternBySeg, ref patternLengthInWorld, ref offset, pattern, pattern.Length);
+      rc.PatternBySegment = patternBySeg;
+      rc.PatternLengthInWorldUnits = patternLengthInWorld;
+      rc.PatternOffset = offset;
+      rc.SetPattern(pattern);
+
+      float taperPosition = -1;
+      float taperWidth = 1;
+      float endThickness = 0;
+      UnsafeNativeMethods.CRhinoDisplayPen_Taper(ptrPen, ref taperPosition, ref taperWidth, ref endThickness);
+      if (taperPosition>=0 || endThickness>-0.01f)
+      {
+        rc.SetTaper(rc.Thickness, endThickness, new Point2f(taperPosition, taperWidth));
+      }
+      return rc;
+    }
+
+    internal System.IntPtr ToNativePointer()
+    {
+      int argb = Color.ToArgb();
+      int argbHalo = HaloColor.ToArgb();
+      var pattern = PatternAsArray();
+      IntPtr ptrPen = UnsafeNativeMethods.CRhinoDisplayPen_New(
+        argb, Thickness, argbHalo, HaloThickness,
+        pattern.Length, pattern, PatternBySegment,
+        PatternOffset, PatternLengthInWorldUnits, CapStyle, JoinStyle, (int)ThicknessSpace,
+        _taperPosition, _taperThickness, _endThickness);
+      return ptrPen;
+    }
+    internal static void DeleteNativePointer(IntPtr ptrPen)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrPen);
+    }
+
+    /// <summary>
+    /// Create a display pen that matches a linetype definition
+    /// </summary>
+    /// <param name="linetype"></param>
+    /// <param name="patternScale">scale to be applied to linetype dash pattern. Typically this is 1</param>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static DisplayPen FromLinetype(Linetype linetype, System.Drawing.Color color, double patternScale)
+    {
+      if (linetype == null)
+        return null;
+
+      IntPtr ptrLinetype = linetype.ConstPointer();
+      IntPtr ptrNativePen = UnsafeNativeMethods.CRhinoDisplayPen_FromLinetype(ptrLinetype, patternScale, color.ToArgb());
+      var rc = FromNativeCRhinoDisplayPen(ptrNativePen);
+      UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrNativePen);
+      return rc;
+    }
+
+    /// <summary>
+    /// Color applied to stroke
+    /// </summary>
+    /// <since>8.0</since>
+    public System.Drawing.Color Color { get; set; } = System.Drawing.Color.Black;
+
+    /// <summary>
+    /// Thickness for stroke
+    /// </summary>
+    /// <since>8.0</since>
+    public float Thickness { get; set; } = 1.0f;
+
+    /// <summary>
+    /// Coordinate system for the pen's thickness
+    /// </summary>
+    /// <since>8.0</since>
+    public DocObjects.CoordinateSystem ThicknessSpace { get; set; } = DocObjects.CoordinateSystem.Screen;
+
+    /// <summary>
+    /// How caps are drawn at the ends of open curves
+    /// </summary>
+    /// <since>8.0</since>
+    public DocObjects.LineCapStyle CapStyle { get; set; } = DocObjects.LineCapStyle.Round;
+
+    /// <summary>
+    /// How corners of curves are joined
+    /// </summary>
+    /// <since>8.0</since>
+    public DocObjects.LineJoinStyle JoinStyle { get; set; } = DocObjects.LineJoinStyle.Round;
+
+    /// <summary>
+    /// Halos are blended colors drawn around a curve for purposes like selection
+    /// </summary>
+    /// <since>8.0</since>
+    public float HaloThickness { get; set; } = 0.0f;
+
+    /// <summary>
+    /// Halos are blended colors drawn around a curve for purposes like selection
+    /// </summary>
+    /// <since>8.0</since>
+    public System.Drawing.Color HaloColor { get; set; } = System.Drawing.Color.Empty;
+
+    /// <summary>
+    /// Set pattern to apply for a stroke.
+    /// </summary>
+    /// <param name="dashesAndGaps">
+    /// Lengths of dashes and gaps for a pattern. Dash is always assumed the first item.
+    /// There is a limit to 8 dashes and gaps total
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// thrown when dashes and gaps have more than 8 items
+    /// </exception>
+    /// <since>8.0</since>
+    public void SetPattern(System.Collections.Generic.IEnumerable<float> dashesAndGaps)
+    {
+      if (dashesAndGaps==null)
+      {
+        _pattern = null;
+        return;
+      }
+
+      var pattern = new System.Collections.Generic.List<float>(dashesAndGaps);
+      if (pattern.Count == 0)
+      {
+        _pattern = null;
+        return;
+      }
+
+      _pattern = pattern;
+    }
+
+    /// <summary>
+    /// Get the pattern for this pen as an array of dash,gap,dash,gap... values
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public float[] PatternAsArray()
+    {
+      if (_pattern == null)
+        return new float[0];
+      return _pattern.ToArray();
+    }
+
+    /// <summary>
+    /// Offset to apply to pattern. If RhinoMath.UnsetSingle, then pattern
+    /// is centered to keep even dash lengths at ends
+    /// </summary>
+    /// <since>8.0</since>
+    public float PatternOffset { get; set; } = RhinoMath.UnsetSingle;
+
+    /// <summary>
+    /// Restart patterns at corners in a curve
+    /// </summary>
+    /// <since>8.0</since>
+    public bool PatternBySegment { get; set; } = true;
+
+    /// <summary>
+    /// If true, lengths in pattern definition are interpreted to be in world
+    /// units. If false, screen pixel distances are used.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool PatternLengthInWorldUnits { get; set; } = true;
+
+    /// <summary>
+    /// Positions and thickness at those positions along a curve that define a taper.
+    /// </summary>
+    /// <param name="startThickness"></param>
+    /// <param name="endThickness"></param>
+    /// <param name="taperPoint"></param>
+    /// <since>8.0</since>
+    public void SetTaper(float startThickness, float endThickness, Point2f taperPoint)
+    {
+      Thickness = startThickness;
+      _endThickness = endThickness;
+      _taperPosition = taperPoint.X;
+      _taperThickness = taperPoint.Y;
+    }
+
+    /// <summary>
+    /// Collection of positions and thicknesses at those positions to define a taper
+    /// Rhino currently only supports either no taper or a single taper. An array is
+    /// used here in case Rhino supports multiple taper values in the future.
+    /// </summary>
+    /// <since>8.0</since>
+    public Point2f[] TaperAsArray()
+    {
+      if (_taperThickness<0 && _endThickness<0)
+        return new Point2f[0];
+      if (_taperThickness<0 || _taperPosition<=0 || _taperPosition>=1)
+        return new Point2f[2] { new Point2f(0,Thickness), new Point2f(1, _endThickness)};
+      float end = _endThickness < 0 ? Thickness : _endThickness;
+      return new Point2f[3] { new Point2f(0,Thickness), new Point2f(_taperPosition, _taperThickness), new Point2f(1, _endThickness) };
+    }
+
+    System.Collections.Generic.List<float> _pattern;
+    float _taperPosition = 0.5f;
+    float _taperThickness = -1;
+    float _endThickness = -1;
+  }
+
+  /*
+  // still a work in progress. Trying to figure out what needs to go here
+  // color stops for gradient
+  // gradient direction
+  // texture
+  // halo thickness
+  // halo color
+  */
+
   /// <since>5.0</since>
   public enum DepthMode
   {
@@ -1449,6 +1680,27 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_Pop(m_ptr, idxCullFaceMode);
     }
 
+    /// <summary>
+    /// Push the current view projection and set the viewport up to be a
+    /// simple 2D top projection where the camera frustum matches the same
+    /// size as the screen port. This allows geometry draw functions to act
+    /// like they are working with typical 2d graphics APIs on a window
+    /// </summary>
+    /// <since>8.0</since>
+    public void Push2dProjection()
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Push2dProjection(m_ptr);
+    }
+
+    /// <summary>
+    /// Pop a view projection off this pipelines projection stack
+    /// </summary>
+    /// <since>8.0</since>
+    public void PopProjection()
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_PopProjection(m_ptr);
+    }
+
     /// <since>5.0</since>
     public DepthMode DepthMode
     {
@@ -1505,11 +1757,23 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Fill the frame buffer with a single color. This function also clears
+    /// the depth buffer for engines that support depth buffered drawing.
+    /// </summary>
+    /// <param name="color">the color to fill the frame buffer with</param>
+    /// <since>8.0</since>
+    public void ClearFrameBuffer(System.Drawing.Color color)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_ClearFrameBuffer(m_ptr, color.ToArgb());
+    }
+
+    /// <summary>
     /// Force the pipeline to immediately flush any cached geometry to the display
     /// </summary>
     /// <since>7.0</since>
     public void Flush()
     {
+      m_cache.Flush(this);
       UnsafeNativeMethods.CRhinoDisplayPipeline_Flush(m_ptr);
     }
 
@@ -2090,6 +2354,29 @@ namespace Rhino.Display
         radius * 2, strokeWidth, secondarySize * 2, rotationRadians, diameterIsInPixels, autoScaleForDpi);
     }
 
+    /// <since>8.0</since>
+    public void DrawPoints(DisplayPointSet points)
+    {
+      var attrs = new DisplayPointAttributes();
+      DrawPoints(points, attrs, attrs);
+    }
+
+    /// <since>8.0</since>
+    public void DrawPoints(DisplayPointSet points, DisplayPointAttributes fallbackAttributes, DisplayPointAttributes overrideAttributes)
+    {
+      if (points == null)
+        return;
+
+      var nativePoints = points.RhDisplayPoints(fallbackAttributes);
+      var overridePoint = new DisplayPoint(Point3d.Origin).WithAttributes(overrideAttributes).ToDisplayPoint(null);
+      if (overrideAttributes == null || !overrideAttributes.PointStyle.HasValue)
+        overridePoint.m_style = 0;
+      if (overrideAttributes == null || !overrideAttributes.RotationRadians.HasValue)
+        overridePoint.m_rotationRadians = RhinoMath.UnsetSingle;
+      IntPtr cacheHandle = points.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDisplayPoints(m_ptr, nativePoints.Length, nativePoints, ref overridePoint, cacheHandle);
+    }
+
     /// <summary>Draws a point with a given radius, style and color.</summary>
     /// <param name="point">Location of point in world coordinates.</param>
     /// <param name="style">Point display style.</param>
@@ -2622,12 +2909,25 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public void DrawHatch(Hatch hatch, System.Drawing.Color hatchColor, System.Drawing.Color boundaryColor)
     {
+      DisplayPen boundary = new DisplayPen();
+      boundary.Color = boundaryColor;
+      boundary.Thickness = -100;
+      DrawHatch(hatch, hatchColor, boundary, System.Drawing.Color.Empty);
+    }
+
+    /// <since>8.0</since>
+    public void DrawHatch(Hatch hatch, System.Drawing.Color hatchColor,
+      DisplayPen boundary, System.Drawing.Color backgroundFillColor)
+    {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_hatch = hatch.ConstPointer();
-      int argb_fill = hatchColor.ToArgb();
-      int argb_border = boundaryColor.ToArgb();
+      int argb_hatch = hatchColor.ToArgb();
+      int argb_fill = backgroundFillColor.ToArgb();
+      IntPtr ptrPen = boundary!=null ? boundary.ToNativePointer() : IntPtr.Zero;
       IntPtr cache_handle = hatch.CacheHandle();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch(ptr_this, const_ptr_hatch, argb_fill, argb_border, cache_handle);
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch(ptr_this, const_ptr_hatch, argb_hatch, ptrPen, argb_fill, cache_handle);
+      if (ptrPen!=IntPtr.Zero)
+        DisplayPen.DeleteNativePointer(ptrPen);
       GC.KeepAlive(hatch);
     }
 
@@ -2646,26 +2946,29 @@ namespace Rhino.Display
     public void DrawGradientHatch(Hatch hatch, System.Drawing.Color color1, System.Drawing.Color color2, Point3d point1, Point3d point2,
       bool linearGradient, float boundaryThickness, System.Drawing.Color boundaryColor)
     {
-      IntPtr ptr_this = NonConstPointer();
-      IntPtr const_ptr_hatch = hatch.ConstPointer();
-      int argb_fill1 = color1.ToArgb();
-      int argb_fill2 = color2.ToArgb();
-      int argb_border = boundaryColor.ToArgb();
-      IntPtr cache_handle = hatch.CacheHandle();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch2(ptr_this, const_ptr_hatch, argb_fill1, argb_fill2,
-        point1, point2, linearGradient, boundaryThickness, argb_border, cache_handle);
-      GC.KeepAlive(hatch);
+      var stops = new ColorStop[] { new ColorStop(color1, 0), new ColorStop(color2, 1) };
+      DrawGradientHatch(hatch, stops, point1, point2, linearGradient, 1, boundaryThickness, boundaryColor);
     }
 
     /// <since>7.0</since>
     public void DrawGradientHatch(Hatch hatch, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
       bool linearGradient, float repeat, float boundaryThickness, System.Drawing.Color boundaryColor)
     {
+      var pen = new DisplayPen();
+      pen.Thickness = boundaryThickness;
+      pen.Color = boundaryColor;
+      DrawGradientHatch(hatch, stops, point1, point2, linearGradient, repeat, pen, System.Drawing.Color.Empty);
+    }
+
+    /// <since>8.0</since>
+    public void DrawGradientHatch(Hatch hatch, System.Collections.Generic.IEnumerable<ColorStop> stops, Point3d point1, Point3d point2,
+      bool linearGradient, float repeat, DisplayPen boundary, System.Drawing.Color backgroundFillColor)
+    {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_hatch = hatch.ConstPointer();
       var argbList = new System.Collections.Generic.List<int>();
       var positionList = new System.Collections.Generic.List<double>();
-      foreach(var stop in stops)
+      foreach (var stop in stops)
       {
         argbList.Add(stop.Color.ToArgb());
         positionList.Add(stop.Position);
@@ -2673,10 +2976,13 @@ namespace Rhino.Display
       int[] argbs = argbList.ToArray();
       double[] positions = positionList.ToArray();
 
-      int argb_border = boundaryColor.ToArgb();
+      IntPtr ptrPen = boundary != null ? boundary.ToNativePointer() : IntPtr.Zero;
+      int argb_fill = backgroundFillColor.ToArgb();
       IntPtr cache_handle = hatch.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawHatch3(ptr_this, const_ptr_hatch, argbs.Length, argbs, positions,
-        point1, point2, linearGradient, repeat, boundaryThickness, argb_border, cache_handle);
+        point1, point2, linearGradient, repeat, ptrPen, argb_fill, cache_handle);
+      if (ptrPen != IntPtr.Zero)
+        DisplayPen.DeleteNativePointer(ptrPen);
       GC.KeepAlive(hatch);
     }
 
@@ -3463,7 +3769,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void DrawCurve(Curve curve, System.Drawing.Color color)
     {
-      curve.Draw(this, color, 1);
+      curve.Draw(this, color, 1, null);
     }
     /// <summary>
     /// Draw a single Curve object.
@@ -3474,7 +3780,27 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void DrawCurve(Curve curve, System.Drawing.Color color, int thickness)
     {
-      curve.Draw(this, color, thickness);
+      curve.Draw(this, color, thickness, null);
+    }
+
+    /// <since>8.0</since>
+    public void DrawCurve(Curve curve, DisplayPen pen)
+    {
+      curve.Draw(this, pen.Color, (int)pen.Thickness, pen);
+    }
+
+    /// <since>8.0</since>
+    public void DrawLine(Line line, DisplayPen pen)
+    {
+      DrawLines(new Line[] { line }, pen);
+    }
+
+    /// <since>8.0</since>
+    public void DrawLines(Line[] lines, DisplayPen pen)
+    {
+      IntPtr ptrPen = pen.ToNativePointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineWithPen(lines, lines.Length, m_ptr, ptrPen);
+      DisplayPen.DeleteNativePointer(ptrPen);
     }
 
     /// <summary>
@@ -3658,6 +3984,85 @@ namespace Rhino.Display
     public void Draw2dLine(System.Drawing.PointF from, System.Drawing.PointF to, System.Drawing.Color color, float thickness)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dLine2(m_ptr, from.X, from.Y, to.X, to.Y, color.ToArgb(), thickness);
+    }
+
+    /// <summary>
+    /// Sets up a display material.
+    /// </summary>
+    /// <param name="doc">The active document.</param>
+    /// <param name="rhinoObject">The Rhino object.</param>
+    /// <returns>A display material if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public DisplayMaterial SetupDisplayMaterial(RhinoDoc doc, RhinoObject rhinoObject)
+    {
+      return SetupDisplayMaterial(doc, rhinoObject, null, Transform.Unset);
+    }
+
+    /// <since>8.0</since>
+    public DisplayMaterial SetupDisplayMaterial(System.Drawing.Color color)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      DisplayMaterial material = new DisplayMaterial();
+      IntPtr ptr_material = material.NonConstPointer();
+      if (UnsafeNativeMethods.CDisplayPipeline_SetupDisplayMaterialByColor(ptr_this, ptr_material, color.ToArgb()))
+        return material;
+      material.Dispose();
+      return null;
+    }
+
+    /// <summary>
+    /// Sets up a display material.
+    /// </summary>
+    /// <param name="doc">The active document.</param>
+    /// <param name="rhinoObject">The Rhino object.</param>
+    /// <param name="attributes">The object attributes.</param>
+    /// <returns>A display material if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public DisplayMaterial SetupDisplayMaterial(RhinoDoc doc, RhinoObject rhinoObject, ObjectAttributes attributes)
+    {
+      return SetupDisplayMaterial(doc, rhinoObject, attributes, Transform.Unset);
+    }
+
+    /// <summary>
+    /// Sets up a display material.
+    /// </summary>
+    /// <param name="doc">The active document.</param>
+    /// <param name="rhinoObject">The Rhino object.</param>
+    /// <param name="attributes">The object attributes.</param>
+    /// <param name="instanceTransform">The instance object transformation.</param>
+    /// <returns>A display material if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public DisplayMaterial SetupDisplayMaterial(RhinoDoc doc, RhinoObject rhinoObject, ObjectAttributes attributes, Transform instanceTransform)
+    {
+      if (null == doc)
+        throw new ArgumentNullException(nameof(doc));
+      if (null == rhinoObject)
+        throw new ArgumentNullException(nameof(rhinoObject));
+
+      IntPtr ptr_this = NonConstPointer();
+
+      DisplayMaterial material = new DisplayMaterial();
+      IntPtr ptr_material = material.NonConstPointer();
+
+      IntPtr ptr_object = rhinoObject.ConstPointer();
+      IntPtr ptr_attributes = (null != attributes) ? attributes.ConstPointer() : IntPtr.Zero;
+
+      bool rc = UnsafeNativeMethods.CDisplayPipeline_SetupDisplayMaterial(
+        ptr_this,
+        ptr_material,
+        doc.RuntimeSerialNumber,
+        ptr_object,
+        ptr_attributes,
+        ref instanceTransform
+        );
+
+      if (!rc)
+      {
+        material.Dispose();
+        material = null;
+      }
+
+      return material;
     }
   }
 
@@ -4075,5 +4480,196 @@ namespace Rhino.Display
     }
 
   }
+
+
+  internal class FlairDefinition
+  {
+    Guid _id;
+    private FlairDefinition(Guid id)
+    {
+      _id = id;
+    }
+
+    public static FlairDefinition Find(Guid definitionId)
+    {
+      IntPtr ptr = UnsafeNativeMethods.RhFlair_FindDefinition(definitionId);
+      if (ptr == IntPtr.Zero)
+        return null;
+
+      FlairDefinition def = new FlairDefinition(definitionId);
+      return def;
+    }
+
+    public static FlairDefinition ActiveDefinition()
+    {
+      IntPtr ptr = UnsafeNativeMethods.RhFlair_GetActiveDefinition();
+      Guid id = UnsafeNativeMethods.RhFlair_GetDefinitionId(ptr);
+      return Find(id);
+    }
+
+    public static FlairDefinition[] GetDefinitions(RhinoDoc doc)
+    {
+      using(var ids = new Rhino.Runtime.InteropWrappers.SimpleArrayGuid())
+      {
+        IntPtr ptrIds = ids.NonConstPointer();
+        UnsafeNativeMethods.RhFlair_GetDefinitions(doc.RuntimeSerialNumber, ptrIds);
+        Guid[] defIds = ids.ToArray();
+        FlairDefinition[] rc = new FlairDefinition[defIds.Length];
+        for (int i=0; i<defIds.Length; i++)
+        {
+          rc[i] = Find(defIds[i]);
+        }
+        return rc;
+      }
+    }
+
+    public Guid Id { get { return _id; } }
+
+    public string Name
+    {
+      get
+      {
+        IntPtr ptrDefinition = UnsafeNativeMethods.RhFlair_FindDefinition(Id);
+        using(var s = new Rhino.Runtime.InteropWrappers.StringWrapper())
+        {
+          IntPtr ptrString = s.NonConstPointer;
+          UnsafeNativeMethods.RhFlair_FlrDefinitionGetName(ptrDefinition, ptrString);
+          return s.ToString();
+        }
+      }
+    }
+
+    public FlairParameters GetParameters()
+    {
+      IntPtr ptrDefinition = UnsafeNativeMethods.RhFlair_FindDefinition(Id);
+      IntPtr ptrParams = UnsafeNativeMethods.RhFlair_NewParams();
+      UnsafeNativeMethods.RhFlair_GetRenderParams(ptrDefinition, ptrParams);
+      FlairParameters rc = FlairParameters.FromPointer(ptrParams);
+      UnsafeNativeMethods.RhFlair_DeleteParams(ptrParams);
+      return rc;
+    }
+
+    public void UpdateParameters(FlairParameters newParameters)
+    {
+      IntPtr ptrParams = newParameters.CreateNative();
+      UnsafeNativeMethods.RhFlair_UpdateParams(Id, ptrParams);
+      UnsafeNativeMethods.RhFlair_DeleteParams(ptrParams);
+    }
+
+    public void Enable(RhinoViewport viewport)
+    {
+      var view = viewport.ParentView;
+      UnsafeNativeMethods.RhFlair_EnableRhinoFlair(view.RuntimeSerialNumber, Id);
+    }
+
+    public static void Disable(RhinoViewport viewport)
+    {
+      var view = viewport.ParentView;
+      UnsafeNativeMethods.RhFlair_DisableRhinoFlair(view.RuntimeSerialNumber);
+    }
+
+    public static FlairDefinition EnabledDefinitionForViewport(RhinoViewport viewport)
+    {
+      IntPtr ptrViewport = viewport.ConstPointer();
+      Guid id = Guid.Empty;
+      UnsafeNativeMethods.RhFlair_RhinoFlairEnabledViewport(ptrViewport, ref id);
+      return Find(id);
+    }
+  }
+
+  internal class FlairParameters
+  {
+    public float PrimaryColorMag { get; set; } = 10.0f;
+    public float EdgeColorMag { get; set; } = 80.0f;
+    public float BrushSize { get; set; } = 16.0f;
+    public float BrushStroke { get; set; } = 1.5f;
+    public int QuantizeMethod { get; set; } = 2;
+    public int ColorSource { get; set; } = 1;
+    public int ColorSteps { get; set; } = 2000;
+    public Color4f MainInkColor { get; set; } = new Color4f(0, 0, 0, 0);
+    public Color4f CSB { get; set; } = new Color4f(1.0f, 1.0f, 1.0f, 0.0f);
+    public int EdgeMixingMode { get; set; } = 0;
+    public int BackgroundMixingMode { get; set; } = 1;
+    public float BackgroundMixFactor { get; set; } = 2.5f;
+
+    internal static FlairParameters FromPointer(IntPtr ptr)
+    {
+      if (IntPtr.Zero == ptr)
+        return null;
+
+      float primaryColorMag = 10.0f;
+      float edgeColorMag = 80.0f;
+      float brushSize = 16.0f;
+      float brushStroke = 1.5f;
+      int quantizeMethod = 2;
+      int colorSource = 1;
+      int colorSteps = 2000;
+      Color4f mainInkColor = new Color4f(0, 0, 0, 0);
+      Color4f csb = new Color4f(1.0f, 1.0f, 1.0f, 0.0f);
+      int edgeMixingMode = 0;
+      int backgroundMixingMode = 1;
+      float backgroundMixFactor = 2.5f;
+      UnsafeNativeMethods.RhFlair_GetParams(ptr, ref primaryColorMag, ref edgeColorMag, ref brushSize, ref brushStroke,
+        ref quantizeMethod, ref colorSource, ref colorSteps, ref mainInkColor, ref csb, ref edgeMixingMode,
+        ref backgroundMixingMode, ref backgroundMixFactor);
+
+      FlairParameters rc = new FlairParameters();
+      rc.PrimaryColorMag = primaryColorMag;
+      rc.EdgeColorMag = edgeColorMag;
+      rc.BrushSize = brushSize;
+      rc.BrushStroke = brushStroke;
+      rc.QuantizeMethod = quantizeMethod;
+      rc.ColorSource = colorSource;
+      rc.ColorSteps = colorSteps;
+      rc.MainInkColor = mainInkColor;
+      rc.CSB = csb;
+      rc.EdgeMixingMode = edgeMixingMode;
+      rc.BackgroundMixingMode = backgroundMixingMode;
+      rc.BackgroundMixFactor = backgroundMixFactor;
+      return rc;
+    }
+
+    internal IntPtr CreateNative()
+    {
+      IntPtr ptr = UnsafeNativeMethods.RhFlair_NewParams();
+      UnsafeNativeMethods.RhFlair_SetParams(ptr, PrimaryColorMag, EdgeColorMag, BrushSize, BrushStroke, QuantizeMethod,
+        ColorSource, ColorSteps, MainInkColor, CSB, EdgeMixingMode, BackgroundMixingMode, BackgroundMixFactor);
+      return ptr;
+    }
+  }
+
+  /*
+  internal class Flair
+  {
+    public static string ProductName
+    { 
+      get 
+      {
+        using(var s = new Rhino.Runtime.InteropWrappers.StringWrapper())
+        {
+          IntPtr ptr = s.NonConstPointer;
+          UnsafeNativeMethods.RhFlair_ProductName(ptr);
+          return s.ToString();
+        }
+      }
+    }
+
+    public static Guid ProductId
+    {
+      get
+      {
+        return UnsafeNativeMethods.RhFliar_ProductId();
+      }
+    }
+
+    public static bool CapabilitiesAvailable
+    {
+      get
+      {
+        return UnsafeNativeMethods.RhFlair_CapabilitiesAvailable();
+      }
+    }
+  }
+  */
 }
 #endif

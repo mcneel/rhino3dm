@@ -35,6 +35,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the point array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe Point3d* PointArray(out int length)
     {
@@ -61,6 +62,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the vector array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe Vector3d* NormalArray(out int length)
     {
@@ -88,6 +90,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the color array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe int* ColorArray(out int length)
     {
@@ -114,6 +117,7 @@ namespace Rhino.Geometry
     /// 0 is returned when there is no single precision array.</param>
     /// <returns>The beginning of the value array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one. If no array is available, null is returned.</returns>
+    /// <since>7.9</since>
     [CLSCompliant(false)]
     public unsafe double* ValueArray(out int length)
     {
@@ -752,7 +756,7 @@ namespace Rhino.Geometry
       int countColor;
 
       var argbList = new List<int>();
-#if MOBILE_BUILD || DOTNETCORE
+#if RHINO3DM_BUILD || DOTNETCORE
       foreach (var color in colors) {
         var abgr = Color.FromArgb (color.A, color.B, color.G, color.R);
         argbList.Add (abgr.ToArgb ());
@@ -977,6 +981,26 @@ namespace Rhino.Geometry
       }
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Returns a ShrinkWrap mesh from this point cloud object.
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public Mesh ShrinkWrap(ShrinkWrapParameters parameters)
+    {
+      var plugin_id = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
+      var obj = Rhino.RhinoApp.GetPlugInObject(plugin_id);
+      if (!(obj is IShrinkWrapService sw))
+        return null;
+
+      var mesh = sw.ShrinkWrap(this, parameters);
+
+      return mesh;
+    }
+#endif
+
     /// <summary>
     /// Copy all the point coordinates in this point cloud to an array.
     /// </summary>
@@ -1138,6 +1162,7 @@ namespace Rhino.Geometry
     /// <remarks>The lock implements the IDisposable interface, and one call of its
     /// <see cref="IDisposable.Dispose()"/> or <see cref="ReleaseUnsafeLock"/> will update the data structure as required.
     /// This can be achieved with a using statement (Using in Vb.Net).</remarks>
+    /// <since>7.9</since>
     public PointCloudUnsafeLock GetUnsafeLock(bool writable)
     {
       return new PointCloudUnsafeLock(this, writable);
@@ -1147,14 +1172,15 @@ namespace Rhino.Geometry
     /// Updates the PointCloud data with the information that was stored via the <see cref="PointCloudUnsafeLock"/>.
     /// </summary>
     /// <param name="pointCloudData">The data that will be unlocked.</param>
+    /// <since>7.9</since>
     public void ReleaseUnsafeLock(PointCloudUnsafeLock pointCloudData)
     {
       pointCloudData.Release();
     }
 
-    #endregion
+#endregion
 
-    #region IEnumerable<PointCloudItem> Members
+#region IEnumerable<PointCloudItem> Members
 
     private class PointCloudPoints : IReadOnlyList<Point3d>, IList<Point3d>
     {
@@ -1250,19 +1276,19 @@ namespace Rhino.Geometry
     }
     private class PointCloudItemEnumerator : IEnumerator<PointCloudItem>
     {
-      #region members
+#region members
       private readonly PointCloud m_owner;
       int position = -1;
-      #endregion
+#endregion
 
-      #region constructor
+#region constructor
       public PointCloudItemEnumerator(PointCloud cloud_points)
       {
         m_owner = cloud_points;
       }
-      #endregion
+#endregion
 
-      #region enumeration logic
+#region enumeration logic
       public bool MoveNext()
       {
         position++;
@@ -1301,9 +1327,9 @@ namespace Rhino.Geometry
           }
         }
       }
-      #endregion
+#endregion
 
-      #region IDisposable logic
+#region IDisposable logic
       private bool m_disposed; // = false; <- initialized by runtime
       public void Dispose()
       {
@@ -1311,9 +1337,9 @@ namespace Rhino.Geometry
         m_disposed = true;
         GC.SuppressFinalize(this);
       }
-      #endregion
+#endregion
     }
-    #endregion
+#endregion
   }
 }
 

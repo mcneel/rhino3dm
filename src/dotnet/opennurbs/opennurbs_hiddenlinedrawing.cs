@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Rhino.DocObjects;
 using Rhino.Geometry.Collections;
@@ -20,6 +21,7 @@ namespace Rhino.Geometry
       IncludeTangentEdges = true;
       IncludeTangentSeams = true;
       IncludeHiddenCurves = true;
+      OccludingSectionOption = false;
       // Matches defaults in C++
       AbsoluteTolerance = .01;
     }
@@ -77,6 +79,7 @@ namespace Rhino.Geometry
       m_clipping_planes.Add(plane);
     }
 
+
     /// <summary> Include tangent edges in hidden line drawing (default is true) </summary>
     /// <since>6.0</since>
     public bool IncludeTangentEdges { get; set; }
@@ -86,6 +89,10 @@ namespace Rhino.Geometry
     /// <summary> Include hidden curves in hidden line drawing (default is true) </summary>
     /// <since>6.0</since>
     public bool IncludeHiddenCurves { get; set; }
+    /// <summary> Enable occluding section option (default is false) </summary>
+    /// <since>8.0</since>
+    public bool OccludingSectionOption { get; set; }
+
 
     /// <summary>
     /// Add geometry that should be included in the calculation
@@ -101,7 +108,25 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, object tag)
     {
-      return AddGeometry(geometry, Transform.Identity, tag);
+      return AddGeometry(geometry, Transform.Identity, tag, false);
+    }
+    /// <summary>
+    /// Add geometry that should be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="tag">arbitrary data to be associated with this geometry
+    /// </param>
+    /// <param name="occluding_sections">sections of this geometry occlude</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometry(GeometryBase geometry, object tag, bool occluding_sections)
+    {
+      return AddGeometry(geometry, Transform.Identity, tag, occluding_sections);
     }
 
     /// <summary>
@@ -119,6 +144,26 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, Transform xform, object tag)
     {
+      return AddGeometry(geometry, xform, tag, false);
+    }
+
+    /// <summary>
+    /// Add geometry that should be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="xform"></param>
+    /// <param name="tag">arbitrary data to be associated with this geometry
+    /// </param>
+    /// <param name="occluding_sections">sections of this geometry occlude</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometry(GeometryBase geometry, Transform xform, object tag, bool occluding_sections)
+    {
       if( geometry is Brep || 
           geometry is Curve || 
           geometry is Mesh ||
@@ -128,28 +173,130 @@ namespace Rhino.Geometry
           geometry is PointCloud
           )
       {
-        AddGeometryImpl(geometry, xform, tag);
+        AddGeometryImpl(geometry, xform, tag, occluding_sections, false, new List<Plane>() );
         return true;
       }
       return false;
     }
 
-    void AddGeometryImpl(GeometryBase geometry, Transform xform, object tag)
+    /// <summary>
+    /// Add geometry and its active clipping planes to be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="tag">arbitrary data to be associated with this geometry</param>
+    /// <param name="clips">Active clipping planes for this object</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometryAndPlanes(GeometryBase geometry, object tag, List<Plane> clips)
+    {
+      return AddGeometryAndPlanes(geometry, Transform.Identity, tag, false, clips);
+    }
+    /// <summary>
+    /// Add geometry and its active clipping planes to be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="tag">arbitrary data to be associated with this geometry
+    /// </param>
+    /// <param name="occluding_sections">sections of this geometry occlude</param>
+    /// <param name="clips">Active clipping planes for this object</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometryAndPlanes(GeometryBase geometry, object tag, bool occluding_sections, List<Plane> clips)
+    {
+      return AddGeometryAndPlanes(geometry, Transform.Identity, tag, occluding_sections, clips);
+    }
+
+    /// <summary>
+    /// Add geometry and its active clipping planes to be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="xform"></param>
+    /// <param name="tag">arbitrary data to be associated with this geometry</param>
+    /// <param name="clips">Active clipping planes for this object</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometryAndPlanes(GeometryBase geometry, Transform xform, object tag, List<Plane> clips)
+    {
+      return AddGeometryAndPlanes(geometry, xform, tag, false, clips);
+    }
+
+    /// <summary>
+    /// Add geometry and its active clipping planes to be included in the calculation
+    /// </summary>
+    /// <param name="geometry">
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
+    /// </param>
+    /// <param name="xform"></param>
+    /// <param name="tag">arbitrary data to be associated with this geometry
+    /// </param>
+    /// <param name="occluding_sections">sections of this geometry occlude</param>
+    /// <param name="clips">Active clipping planes for this object</param>
+    /// <returns>
+    /// true if the type of geometry can be added for calculations.
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// </returns>
+    /// <since>6.0</since>
+    public bool AddGeometryAndPlanes(GeometryBase geometry, Transform xform, object tag, bool occluding_sections, List<Plane> clips)
+    {
+      if (geometry is Brep ||
+          geometry is Curve ||
+          geometry is Mesh ||
+          geometry is Extrusion ||
+          geometry is Surface ||
+          geometry is Point ||
+          geometry is PointCloud
+          )
+      {
+        AddGeometryImpl(geometry, xform, tag, occluding_sections, true, clips);
+        return true;
+      }
+      return false;
+    }
+
+
+
+    void AddGeometryImpl(GeometryBase geometry, Transform xform, object tag, bool occluding_sections,
+      bool selective_clipping, List<Plane> clipping_planes)
     {
       m_geometry.Add(geometry);
       m_transforms.Add(xform);
       m_tags.Add(tag);
+      m_occluding_sections.Add(occluding_sections);
+      m_selective_clipping.Add(selective_clipping);
+      m_perobject_planes.Add(clipping_planes);
     }
 
     internal List<GeometryBase> Geometry => m_geometry;
     internal List<Transform> Transforms => m_transforms;
     internal List<object> Tags => m_tags;
+    internal List<bool> OccludingSections => m_occluding_sections;
+    internal List<bool> SelectiveClipping => m_selective_clipping;
+    internal List<List<Plane>> PerObjectClippingPlanes => m_perobject_planes;
+
     internal ViewportInfo Viewport => m_viewport;
     internal List<Plane> ClippingPlanes => m_clipping_planes;
 
     readonly List<GeometryBase> m_geometry = new List<GeometryBase>();
     readonly List<Transform> m_transforms = new List<Transform>();
     readonly List<object> m_tags = new List<object>();
+    readonly List<bool> m_occluding_sections = new List<bool>();
+    readonly List<bool> m_selective_clipping = new List<bool>();
+    readonly List<List<Plane>> m_perobject_planes = new List<List<Plane>>();
     readonly List<Plane> m_clipping_planes = new List<Plane>();
     ViewportInfo m_viewport;
   }
@@ -171,6 +318,7 @@ namespace Rhino.Geometry
 
     private HiddenLineDrawingParameters m_parameters;
     private List<GeometryBase> m_list_for_gc_protection = new List<GeometryBase>();
+    private const uint UserClipBase = 10;
     #endregion
 
     internal IntPtr ConstPointer() { return m_ptr; }
@@ -210,18 +358,58 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_HiddenLineDrawing_SetAbsoluteTolerance(ptr_hld, parameters.AbsoluteTolerance);
       IntPtr const_ptr_viewport = parameters.Viewport.ConstPointer();
       UnsafeNativeMethods.ON_HiddenLineDrawing_SetViewport(ptr_hld, const_ptr_viewport);
-      for( int i=0; i<parameters.ClippingPlanes.Count; i++)
+
+      uint clip_count = 0;
+      Dictionary<Plane, uint> clip_dict = new Dictionary<Plane, uint>();
+      // Value field of clip_dict is the clip_id stored in TL_HiddenLineDrawingImpl::m_Clip_Id.
+      // This number uniquly identifies the clippingplane.  The Frustum clipping planes have clip_id
+      // values 0,2,3,4,5.  User clipping planes have clip_ids starting at UserClipBase=10.
+      for ( int i=0; i<parameters.ClippingPlanes.Count; i++)
       {
         var plane = parameters.ClippingPlanes[i];
-        UnsafeNativeMethods.ON_HiddenLineDrawing_AddClippingPlane(ptr_hld, ref plane, 0);
+        if(UnsafeNativeMethods.ON_HiddenLineDrawing_AddClippingPlane(ptr_hld, ref plane, 10 + clip_count))
+        {
+
+          clip_dict.Add(plane, UserClipBase + clip_count);
+          clip_count++;
+        }
       }
       UnsafeNativeMethods.ON_HiddenLineDrawing_IncludeTangentEdges(ptr_hld, parameters.IncludeTangentEdges);
       UnsafeNativeMethods.ON_HiddenLineDrawing_IncludeTangentSeams(ptr_hld, parameters.IncludeTangentSeams);
       UnsafeNativeMethods.ON_HiddenLineDrawing_IncludeHiddenCurves(ptr_hld, parameters.IncludeHiddenCurves);
 
+      bool OptionOccludingSections = false;
       for (int i = 0; i < parameters.Geometry.Count; i++)
-        rc.AddObject(parameters.Geometry[i], parameters.Transforms[i], i);
+        OptionOccludingSections |= parameters.OccludingSections[i];
 
+      UnsafeNativeMethods.ON_HiddenLineDrawing_EnableOccludingSection(ptr_hld, OptionOccludingSections);
+
+      for (int i = 0; i < parameters.Geometry.Count; i++)
+      {
+        int obji = rc.AddObject(parameters.Geometry[i], parameters.Transforms[i], i);
+        if( obji>=0)
+          UnsafeNativeMethods.ON_HiddenLineDrawing_EnableObjOccludingSection(ptr_hld, obji, parameters.OccludingSections[i]);
+          //rc.Objects[obji].OccludingSections = parameters.OccludingSections[i];  // this doesn't work!!
+        if(parameters.SelectiveClipping[i])
+        {
+          List<uint> clip_ids= new List<uint>();
+          foreach (Plane p in parameters.PerObjectClippingPlanes[i])
+          {
+            if (clip_dict.ContainsKey(p))
+              clip_ids.Add(clip_dict[p]);
+            else
+            {
+              clip_ids.Add(UserClipBase + clip_count);
+              clip_dict.Add(p, clip_count++);
+            }
+          }
+          using (var array_clipid = new SimpleArrayUint(clip_ids))
+          {
+            var array_intptr = array_clipid.ConstPointer();
+            UnsafeNativeMethods.ON_HiddenLineDrawing_EnableSelectiveClipping(ptr_hld, obji, array_intptr);
+          }
+        }
+      }
       bool compute_success;
       if (null == progress && cancelToken == System.Threading.CancellationToken.None)
       {
@@ -332,7 +520,7 @@ namespace Rhino.Geometry
     /// <param name="xform">A transformation to apply to geometry to place it in the world coordinate system.</param>
     /// <param name="tagIndex">A value used to cross-reference the geometry, such as a layer index.</param>
     /// <returns>Index of the object, or -1 if the geometry type is not supported.</returns>
-    private void AddObject(GeometryBase geometry, Transform xform, int tagIndex)
+    private int AddObject(GeometryBase geometry, Transform xform, int tagIndex)
     {
       if (geometry == null) throw new ArgumentNullException("geometry");
       Extrusion extrusion = geometry as Extrusion;
@@ -351,7 +539,7 @@ namespace Rhino.Geometry
       var const_ptr_geometry = geometry.ConstPointer();
       if (brep != null)
         const_ptr_geometry = brep.ConstPointer();
-      UnsafeNativeMethods.ON_HiddenLineDrawing_AddObject(ptr_this, const_ptr_geometry, ref xform, Guid.Empty, (uint)tagIndex);
+      return UnsafeNativeMethods.ON_HiddenLineDrawing_AddObject(ptr_this, const_ptr_geometry, ref xform, Guid.Empty, (uint)tagIndex);
     }
 
     /// <summary>
@@ -395,6 +583,20 @@ namespace Rhino.Geometry
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HiddenLineDrawing_Flatten(ptr_this);
+    }
+
+    /// <summary>
+    /// /// <summary>
+    /// Join consecutive visible curves from a single FullCurve
+    /// </summary>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// </summary>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.0</since>
+    public void RejoinCompatibleVisible()
+    {
+      var ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_HiddenLineDrawing_RejoinCompatibleVisible(ptr_this);
     }
 
     /// <summary> Returns the ViewportInfo used by the hidden line drawing.</summary>
@@ -457,6 +659,30 @@ namespace Rhino.Geometry
     #endregion
 
     #region properties
+
+    /// <summary>
+    /// Objects in this drawing could have occluding sections.  
+    /// Objects must added with the occluding section  option set as desired.
+    /// </summary>
+    /// <since>8.0</since>
+    /// 
+
+    public bool OccludingSections
+    {
+      get
+      {
+        var ptr = m_owner.NonConstPointer();
+        var rc = UnsafeNativeMethods.ON_HLD_Object_OccludingSectionOption(ptr);
+        return rc;
+      }
+      set
+      {
+        var ptr = m_owner.NonConstPointer();
+        UnsafeNativeMethods.ON_HLD_Object_EnableOccludingSection(ptr, value );
+       // OccludingSections = value;
+      }
+    }
+
 
     /// <summary>
     /// Returns the geometry in world coordinates if UseXform is false. 
@@ -1374,7 +1600,7 @@ namespace Rhino.Geometry.Collections
 namespace Rhino.Geometry.HiddenLineDrawingProposal
 {
   /// <summary>
-  /// Enumerates the different types of HiddenLineDrawingCurve visiblity
+  /// Enumerates the different types of HiddenLineDrawingCurve visibility
   /// </summary>
   enum SegmentVisibility
   {

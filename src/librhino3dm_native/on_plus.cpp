@@ -52,13 +52,9 @@ RH_C_FUNCTION void RHC_ON_FPU_ClearExceptionStatus()
   ON_FPU_ClearExceptionStatus();
 }
 
-RH_C_FUNCTION void RHC_ON_FPU_BeforeSloppyCall()
+RH_C_FUNCTION void RHC_ON_FPU_Init()
 {
-  ON_FPU_BeforeSloppyCall();
+  ON_FPU_Init();
 }
 
-RH_C_FUNCTION void RHC_ON_FPU_AfterSloppyCall()
-{
-  ON_FPU_AfterSloppyCall();
-}
 #endif

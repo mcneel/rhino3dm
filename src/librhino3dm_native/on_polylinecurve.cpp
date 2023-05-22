@@ -91,18 +91,6 @@ RH_C_FUNCTION void ON_SimpleArray_PolylineCurve_Delete(ON_SimpleArray<ON_Polylin
   }
 }
 
-
-#if !defined(RHINO3DM_BUILD)
-RH_C_FUNCTION void ON_PolylineCurve_Draw(const ON_PolylineCurve* pCrv, CRhinoDisplayPipeline* pDisplayPipeline, int argb, int thickness)
-{
-  if( pCrv && pDisplayPipeline )
-  {
-    int abgr = ARGB_to_ABGR(argb);
-    pDisplayPipeline->DrawPolyline(pCrv->m_pline, abgr, thickness);
-  }
-}
-#endif
-
 RH_C_FUNCTION void ON_PolylineCurve_CopyValues(const ON_PolylineCurve* pConstCurve, ON_3dPointArray* pPoints)
 {
   // http://mcneel.myjetbrains.com/youtrack/issue/RH-30969
@@ -114,6 +102,12 @@ RH_C_FUNCTION void ON_PolylineCurve_CopyValues(const ON_PolylineCurve* pConstCur
       pPoints->Append(count, pConstCurve->m_pline.Array());
     }
   }
+}
+
+RH_C_FUNCTION void ON_PolylineCurve_SetArcLengthParameterization(ON_PolylineCurve* pCurve, double tolerance)
+{
+  if (pCurve)
+    pCurve->SetArcLengthParameterization(tolerance);
 }
 
 RH_C_FUNCTION bool ON_Polyline_CreateInscribedPolygon(const ON_CIRCLE_STRUCT* pCircle, int side_count, ON_3dPointArray* pPoints)

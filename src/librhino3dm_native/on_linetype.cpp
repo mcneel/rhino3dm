@@ -1,7 +1,11 @@
 #include "stdafx.h"
 
-RH_C_FUNCTION ON_Linetype* ON_Linetype_New()
+RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_sectionstyle.h")
+
+RH_C_FUNCTION ON_Linetype* ON_Linetype_New(const ON_Linetype* pConstLinetype)
 {
+  if (pConstLinetype)
+    return new ON_Linetype(*pConstLinetype);
   return new ON_Linetype();
 }
 
@@ -26,16 +30,30 @@ RH_C_FUNCTION void ON_Linetype_SetLinetypeName(ON_Linetype* pLinetype, const RHM
   }
 }
 
-RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, int which)
+enum LinetypeInteger : int
 {
-  const int idxSegmentCount = 1;
+  ltiSegmentCount = 0,
+  ltiLinetypeIndex = 1,
+  ltiLineCap = 2,
+  ltiLineJoin = 3
+};
+
+
+RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, enum LinetypeInteger which)
+{
   int rc = -1;
   if( pLinetype )
   {
     switch(which)
     {
-    case idxSegmentCount:
+    case ltiSegmentCount:
       rc = pLinetype->SegmentCount();
+      break;
+    case ltiLineCap:
+      rc = (int)pLinetype->LineCapStyle();
+      break;
+    case ltiLineJoin:
+      rc = (int)pLinetype->LineJoinStyle();
       break;
     default:
       break;
@@ -44,15 +62,20 @@ RH_C_FUNCTION int ON_Linetype_GetInt(const ON_Linetype* pLinetype, int which)
   return rc;
 }
 
-RH_C_FUNCTION void ON_Linetype_SetInt(ON_Linetype* pLinetype, int which, int val)
+RH_C_FUNCTION void ON_Linetype_SetInt(ON_Linetype* pLinetype, enum LinetypeInteger which, int val)
 {
-  const int idxLinetypeIndex = 0;
   if( pLinetype )
   {
     switch(which)
     {
-    case idxLinetypeIndex:
+    case ltiLinetypeIndex:
       pLinetype->SetIndex(val);
+      break;
+    case ltiLineCap:
+      pLinetype->SetLineCapStyle(ON::LineCapStyleFromUnsigned(val));
+      break;
+    case ltiLineJoin:
+      pLinetype->SetLineJoinStyle(ON::LineJoinStyleFromUnsigned(val));
       break;
     default:
       break;
@@ -114,9 +137,18 @@ RH_C_FUNCTION void ON_Linetype_GetSegment(const ON_Linetype* pConstLinetype, int
 
 RH_C_FUNCTION bool ON_Linetype_SetSegments(ON_Linetype* pLinetype, int segment_count, /*ARRAY*/const double* pSegmentLengths)
 {
-  // https://mcneel.myjetbrains.com/youtrack/issue/RH-47148
+  if (nullptr == pLinetype)
+    return false;
+
   bool rc = false;
-  if (pLinetype && segment_count > 0 && pSegmentLengths)
+  if (segment_count < 2)
+  {
+    ON_SimpleArray<ON_LinetypeSegment> empty;
+    rc = pLinetype->SetSegments(empty);
+    pLinetype->AppendSegment(ON_LinetypeSegment::OneMillimeterLine);
+  }
+
+  if (segment_count > 0 && pSegmentLengths)
   {
     ON_SimpleArray<double> segment_lengths(segment_count);
     segment_lengths.Append(segment_count, pSegmentLengths);
@@ -132,8 +164,266 @@ RH_C_FUNCTION bool ON_Linetype_SetSegments(ON_Linetype* pLinetype, int segment_c
     }
 
     rc = pLinetype->SetSegments(segments);
-    if (rc)
-      rc = pLinetype->IsValid();
+  }
+
+  if (rc)
+    rc = pLinetype->IsValid();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_Linetype_GetWidth(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->Width() : 0;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetWidth(ON_Linetype* linetype, double width)
+{
+  if (linetype)
+    linetype->SetWidth(width);
+}
+
+RH_C_FUNCTION ON::LengthUnitSystem ON_Linetype_GetWidthUnits(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->WidthUnits() : ON::LengthUnitSystem::None;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetWidthUnits(ON_Linetype* linetype, ON::LengthUnitSystem units)
+{
+  if (linetype)
+    linetype->SetWidthUnits(units);
+}
+
+RH_C_FUNCTION void ON_Linetype_GetTaperPoints(const ON_Linetype* linetype, ON_SimpleArray<ON_2dPoint>* points)
+{
+  if (linetype && points)
+  {
+    const ON_SimpleArray<ON_2dPoint>* ltpts = linetype->TaperPoints();
+    if (ltpts)
+      *points = *ltpts;
+  }
+}
+
+RH_C_FUNCTION void ON_Linetype_SetTaper(ON_Linetype* linetype, double startwidth, ON_2DPOINT_STRUCT pt, double endWidth)
+{
+  if (linetype)
+  {
+    ON_2dPoint taperPoint(pt.val);
+    if (taperPoint.IsValid())
+      linetype->SetTaper(startwidth, taperPoint, endWidth);
+    else
+      linetype->SetTaper(startwidth, endWidth);
+  }
+}
+
+RH_C_FUNCTION void ON_Linetype_RemoveTaper(ON_Linetype* linetype)
+{
+  if (linetype)
+    linetype->RemoveTaper();
+}
+
+
+// TODO: Move to on_sectionstyle.cpp and update all projects that compile rhcommon_c
+
+RH_C_FUNCTION ON_SectionStyle* ON_SectionStyle_New(const ON_SectionStyle* pConstSectionStyle)
+{
+  if (pConstSectionStyle)
+    return new ON_SectionStyle(*pConstSectionStyle);
+  return new ON_SectionStyle();
+}
+
+enum SectionStyleColor : int
+{
+  sscBackgroundFill = 0,
+  sscBoundary = 1,
+  sscHatchPattern = 2,
+  sscBackgroundFillPrint = 3,
+  sscBoundaryPrint = 4,
+  sscHatchPatternPrint = 5,
+};
+
+RH_C_FUNCTION int ON_SectionStyle_GetSetColor(ON_SectionStyle* pSectionStyle, enum SectionStyleColor which, bool set, int setValue)
+{
+  int rc = setValue;
+  if (pSectionStyle)
+  {
+    if (set)
+    {
+      ON_Color color = ARGB_to_ABGR(setValue);
+      switch (which)
+      {
+      case sscBackgroundFill:
+        pSectionStyle->SetBackgroundFillColor(color, false);
+        break;
+      case sscBoundary:
+        pSectionStyle->SetBoundaryColor(color, false);
+        break;
+      case sscHatchPattern:
+        pSectionStyle->SetHatchColor(color, false);
+        break;
+      case sscBackgroundFillPrint:
+        pSectionStyle->SetBackgroundFillColor(color, true);
+        break;
+      case sscBoundaryPrint:
+        pSectionStyle->SetBoundaryColor(color, true);
+        break;
+      case sscHatchPatternPrint:
+        pSectionStyle->SetHatchColor(color, true);
+        break;
+      }
+    }
+    else
+    {
+      ON_Color color;
+      switch (which)
+      {
+      case sscBackgroundFill:
+        color = pSectionStyle->BackgroundFillColor(false);
+        break;
+      case sscBoundary:
+        color = pSectionStyle->BoundaryColor(false);
+        break;
+      case sscHatchPattern:
+        color = pSectionStyle->HatchColor(false);
+        break;
+      case sscBackgroundFillPrint:
+        color = pSectionStyle->BackgroundFillColor(true);
+        break;
+      case sscBoundaryPrint:
+        color = pSectionStyle->BoundaryColor(true);
+        break;
+      case sscHatchPatternPrint:
+        color = pSectionStyle->HatchColor(true);
+        break;
+      }
+      rc = (int)ABGR_to_ARGB((unsigned int)color);
+    }
+  }
+  return rc;
+}
+
+enum SectionStyleDouble : int
+{
+  ssdBoundaryWidthScale = 0,
+  ssdHatchScale = 1,
+  ssdHatchRotation = 2,
+};
+
+
+RH_C_FUNCTION double ON_SectionStyle_GetSetDouble(ON_SectionStyle* pSectionStyle, enum SectionStyleDouble which, bool set, double setValue)
+{
+  double rc = 0;
+  if (pSectionStyle)
+  {
+    if (set)
+    {
+      switch (which)
+      {
+      case ssdBoundaryWidthScale:
+        pSectionStyle->SetBoundaryWidthScale(setValue);
+        break;
+      case ssdHatchScale:
+        pSectionStyle->SetHatchScale(setValue);
+        break;
+      case ssdHatchRotation:
+        pSectionStyle->SetHatchRotation(setValue);
+        break;
+      }
+    }
+    else
+    {
+      switch (which)
+      {
+      case ssdBoundaryWidthScale:
+        rc = pSectionStyle->BoundaryWidthScale();
+        break;
+      case ssdHatchScale:
+        rc = pSectionStyle->HatchScale();
+        break;
+      case ssdHatchRotation:
+        rc = pSectionStyle->HatchRotation();
+        break;
+      }
+    }
+  }
+  return rc;
+}
+
+enum SectionStyleInt : int
+{
+  ssiBackgroundFillMode = 0,
+  ssiSectionFillRule = 1,
+  ssiHatchIndex = 2,
+};
+
+
+RH_C_FUNCTION int ON_SectionStyle_GetSetInt(ON_SectionStyle* pSectionStyle, enum SectionStyleInt which, bool set, int setValue)
+{
+  int rc = 0;
+  if (pSectionStyle)
+  {
+    if (set)
+    {
+      switch (which)
+      {
+      case ssiBackgroundFillMode:
+        pSectionStyle->SetBackgroundFillMode((ON_SectionStyle::SectionBackgroundFillMode)setValue);
+        break;
+      case ssiSectionFillRule:
+        pSectionStyle->SetSectionFillRule(ON::SectionFillRuleFromUnsigned(setValue));
+        break;
+      case ssiHatchIndex:
+        pSectionStyle->SetHatchIndex(setValue);
+        break;
+      }
+    }
+    else
+    {
+      switch (which)
+      {
+      case ssiBackgroundFillMode:
+        rc = (int)pSectionStyle->BackgroundFillMode();
+        break;
+      case ssiSectionFillRule:
+        rc = (int)pSectionStyle->SectionFillRule();
+        break;
+      case ssiHatchIndex:
+        rc = pSectionStyle->HatchIndex();
+        break;
+      }
+    }
+  }
+  return rc;
+}
+
+enum SectionStyleBool : int
+{
+  ssbBoundaryVisible = 0,
+};
+
+
+RH_C_FUNCTION bool ON_SectionStyle_GetSetBool(ON_SectionStyle* pSectionStyle, enum SectionStyleBool which, bool set, bool setValue)
+{
+  bool rc = false;
+  if (pSectionStyle)
+  {
+    if (set)
+    {
+      switch (which)
+      {
+      case ssbBoundaryVisible:
+        pSectionStyle->SetBoundaryVisible(setValue);
+        break;
+      }
+    }
+    else
+    {
+      switch (which)
+      {
+      case ssbBoundaryVisible:
+        rc = pSectionStyle->BoundaryVisible();
+        break;
+      }
+    }
   }
   return rc;
 }

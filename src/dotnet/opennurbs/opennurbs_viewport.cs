@@ -961,6 +961,40 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the corners of the frame plane rectangle at specified depth.
+    /// 4 points are returned in the order of bottom left, bottom right,
+    /// top left, top right.
+    /// </summary>
+    /// <param name="depth">Distance from camera location.</param>
+    /// <returns>
+    /// Four corner points on success.
+    /// Empty array if viewport is not valid.
+    /// </returns>
+    /// <since>8.0</since>
+    public Point3d[] GetFramePlaneCorners(double depth)
+    {
+      if (!IsValidCamera || !IsValidFrustum)
+        return new Point3d[0];
+
+      var plane = new Plane(CameraLocation - CameraZ * depth, CameraX, CameraY);
+      var s = IsPerspectiveProjection ? depth / FrustumNear : 1.0;
+
+      var scale = GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      var width = new Interval(FrustumLeft, FrustumRight);
+      var height = new Interval(FrustumBottom, FrustumTop);
+      return new Point3d[]
+      {
+        plane.PointAt(s * x * width.T0, s * y * height.T0),
+        plane.PointAt(s * x * width.T1, s * y * height.T0),
+        plane.PointAt(s * x * width.T0, s * y * height.T1),
+        plane.PointAt(s * x * width.T1, s * y * height.T1),
+      };
+    }
+
+    /// <summary>
     /// Location of viewport in pixels.
     /// These are provided so you can set the port you are using
     /// and get the appropriate transformations to and from
@@ -1436,54 +1470,45 @@ namespace Rhino.DocObjects
     {
       get
       {
-        double w = 0.0;
-        double h = 0.0;
-        IntPtr const_ptr_this = ConstPointer();
-        UnsafeNativeMethods.ON_Viewport_GetViewScale(const_ptr_this, ref w, ref h);
-        return new System.Drawing.SizeF((float)w, (float)h);
+        double[] scale = GetViewScale();
+        return new System.Drawing.SizeF((float)scale[0], (float)scale[1]);
       }
       set
       {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.ON_Viewport_SetViewScale(ptr_this, (double)value.Width, (double)value.Height);
-      }
-    }
-    
-    /* Don't wrap until someone asks for this.
-    /// <summary>
-    /// Gets the m_clip_mod transformation.
-    /// </summary>
-    public Rhino.Geometry.Transform ClipModTransform
-    {
-      get
-      {
-        Rhino.Geometry.Transform matrix = new Rhino.Geometry.Transform();
-        UnsafeNativeMethods.ON_Viewport_ClipModXform(ConstPointer(), ref matrix);
-        return matrix;
+        SetViewScale((double)value.Width, (double)value.Height, 1.0);
       }
     }
 
     /// <summary>
-    /// Gets the m_clip_mod inverse transformation.
+    /// Set scaling applied for this viewport projection. For reflected
+    /// projections, call with values 1,1,-1
     /// </summary>
-    public Rhino.Geometry.Transform ClipModInverseTransform
+    /// <param name="scaleX"></param>
+    /// <param name="scaleY"></param>
+    /// <param name="scaleZ"></param>
+    /// <since>8.0</since>
+    public void SetViewScale(double scaleX, double scaleY, double scaleZ)
     {
-      get
-      {
-        Rhino.Geometry.Transform matrix = new Rhino.Geometry.Transform();
-        UnsafeNativeMethods.ON_Viewport_ClipModInverseXform(ConstPointer(), ref matrix);
-        return matrix;
-      }
+      IntPtr ptrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_Viewport_SetViewScale(ptrThis, scaleX, scaleY, scaleZ);
     }
 
-    public bool IsClipModTransformIdentity
+    /// <summary>
+    /// Get scaling applied to this viewport projection. Reflected ceiling projections
+    /// will return the values 1,1,-1
+    /// </summary>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public double[] GetViewScale()
     {
-      get
-      {
-        return 1==UnsafeNativeMethods.ON_Viewport_ClipModXformIsIdentity(ConstPointer());
-      }
+      double scaleX = 1.0;
+      double scaleY = 1.0;
+      double scaleZ = 1.0;
+      IntPtr constPtrThis = ConstPointer();
+      UnsafeNativeMethods.ON_Viewport_GetViewScale(constPtrThis, ref scaleX, ref scaleY, ref scaleZ);
+      return new double[] { scaleX, scaleY, scaleZ };
     }
-    */
+
 
     /// <summary>
     /// Return a point on the central axis of the view frustum.
