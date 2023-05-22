@@ -66,11 +66,8 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_cylinder.h"
 #include "bnd_ellipse.h"
 #include "bnd_font.h"
-<<<<<<< HEAD
 #include "bnd_object.h"
-=======
 #include "bnd_3dm_settings.h"
->>>>>>> main
 #include "bnd_model_component.h"
 
 #include "bnd_geometry.h"
