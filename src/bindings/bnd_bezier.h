@@ -10,9 +10,11 @@ void initBezierBindings(void* m);
 
 class BND_BezierCurve
 {
-public:
   ON_BezierCurve m_bezcurve;
 public:
+  BND_BezierCurve() = default;
+  BND_BezierCurve(const ON_BezierCurve& bc) : m_bezcurve(bc) {}
+  
   //public BezierCurve(IEnumerable<Point2d> controlPoints)
   //public BezierCurve(IEnumerable<Point3d> controlPoints)
   //public BezierCurve(IEnumerable<Point4d> controlPoints)
