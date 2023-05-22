@@ -62,15 +62,17 @@ private:
   std::shared_ptr<ONX_Model> m_model;
   ON_3dmRenderSettings* m_render_settings = nullptr;
 
-  BND_File3dmGroundPlane* m_ground_plane = nullptr;
-  BND_File3dmSafeFrame* m_safe_frame = nullptr;
-  BND_File3dmDithering* m_dithering = nullptr;
-  BND_File3dmSkylight* m_skylight = nullptr;
-  BND_File3dmLinearWorkflow* m_linear_workflow = nullptr;
-  BND_File3dmRenderChannels* m_render_channels = nullptr;
-  BND_File3dmRenderEnvironments* m_render_environments = nullptr;
-  BND_File3dmSun* m_sun = nullptr;
-  BND_File3dmPostEffectTable* m_post_effects = nullptr;
+  class BND_File3dmGroundPlane* m_ground_plane = nullptr;
+  class BND_File3dmSafeFrame* m_safe_frame = nullptr;
+  class BND_File3dmDithering* m_dithering = nullptr;
+  class BND_File3dmSkylight* m_skylight = nullptr;
+  class BND_File3dmLinearWorkflow* m_linear_workflow = nullptr;
+  class BND_File3dmRenderChannels* m_render_channels = nullptr;
+  class BND_File3dmRenderEnvironments* m_render_environments = nullptr;
+  class BND_File3dmSun* m_sun = nullptr;
+  class BND_File3dmPostEffectTable* m_post_effects = nullptr;
+
+  void Construct();
 
 protected:
   void SetTrackedPointer(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref);

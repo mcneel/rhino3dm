@@ -14,22 +14,27 @@ void BND_ViewInfo::SetViewport(const BND_Viewport& viewport)
 BND_RenderSettings::BND_RenderSettings()
 {
   SetTrackedPointer(new ON_3dmRenderSettings, nullptr);
+  Construct();
 }
 
 BND_RenderSettings::BND_RenderSettings(std::shared_ptr<ONX_Model> m)
 {
   m_model = m;
   m_render_settings = &m_model->m_settings.m_RenderSettings;
+
+  Construct();
 }
 
 BND_RenderSettings::BND_RenderSettings(const BND_RenderSettings& other)
 {
   SetTrackedPointer(new ON_3dmRenderSettings(*other.m_render_settings), nullptr);
+  Construct();
 }
 
 BND_RenderSettings::BND_RenderSettings(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(renderSettings, compref);
+  Construct();
 }
 
 BND_RenderSettings::~BND_RenderSettings()
@@ -48,18 +53,22 @@ BND_RenderSettings::~BND_RenderSettings()
     m_render_settings = nullptr;
 }
 
+void BND_RenderSettings::Construct()
+{
+  m_ground_plane        = new BND_File3dmGroundPlane       (&m_render_settings->GroundPlane());
+  m_safe_frame          = new BND_File3dmSafeFrame         (&m_render_settings->SafeFrame());
+  m_dithering           = new BND_File3dmDithering         (&m_render_settings->Dithering());
+  m_skylight            = new BND_File3dmSkylight          (&m_render_settings->Skylight());
+  m_linear_workflow     = new BND_File3dmLinearWorkflow    (&m_render_settings->LinearWorkflow());
+  m_render_channels     = new BND_File3dmRenderChannels    (&m_render_settings->RenderChannels());
+  m_render_environments = new BND_File3dmRenderEnvironments( m_render_settings);
+  m_sun                 = new BND_File3dmSun               (&m_render_settings->Sun());
+  m_post_effects        = new BND_File3dmPostEffectTable   (&m_render_settings->PostEffects());
+}
+
 void BND_RenderSettings::SetTrackedPointer(ON_3dmRenderSettings* rs, const ON_ModelComponentReference* compref)
 {
-  m_render_settings     = rs;
-  m_ground_plane        = new BND_File3dmGroundPlane       (&rs->GroundPlane());
-  m_safe_frame          = new BND_File3dmSafeFrame         (&rs->SafeFrame());
-  m_dithering           = new BND_File3dmDithering         (&rs->Dithering());
-  m_skylight            = new BND_File3dmSkylight          (&rs->Skylight());
-  m_linear_workflow     = new BND_File3dmLinearWorkflow    (&rs->LinearWorkflow());
-  m_render_channels     = new BND_File3dmRenderChannels    (&rs->RenderChannels());
-  m_render_environments = new BND_File3dmRenderEnvironments( rs);
-  m_sun                 = new BND_File3dmSun               (&rs->Sun());
-  m_post_effects        = new BND_File3dmPostEffectTable   (&rs->PostEffects());
+  m_render_settings = rs;
 
   BND_CommonObject::SetTrackedPointer(rs, compref);
 }
