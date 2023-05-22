@@ -90,6 +90,23 @@ RH_C_FUNCTION void ON_Sun_SetManualControlOn(ON_Sun* sun, bool value)
   }
 }
 
+RH_C_FUNCTION int ON_Sun_Accuracy(const ON_Sun* sun)
+{
+  if (sun)
+  {
+    return 0;//int(sun->Accuracy()); // Waiting for new OpenNURBS publishing.
+  }
+  return -1;
+}
+
+RH_C_FUNCTION void ON_Sun_SetAccuracy(ON_Sun* sun, int acc)
+{
+  if (sun)
+  {
+//    sun->SetAccuracy(ON_SunEngine::Accuracy(acc));
+  }
+}
+
 RH_C_FUNCTION double ON_Sun_North(const ON_Sun* sun)
 {
   if (sun)
@@ -342,7 +359,9 @@ RH_C_FUNCTION unsigned int ON_Sun_GetDataCRC(const ON_Sun* sun)
 
 RH_C_FUNCTION ON_Sun* ON_Sun_New()
 {
-  // Return an ON_SunEx so we get the automatic azimuth and altitude calculations.
+  // The default ON_Sun is smart enough to do the automatic azimuth and altitude calculations
+  // but it stores lat/lon/north in XML -- it doesn't use an earth anchor point because that's
+  // only used when the sun is in render settings or a Rhino document.
   return new ON_Sun;
 }
 
@@ -357,4 +376,30 @@ RH_C_FUNCTION void ON_Sun_CopyFrom(ON_Sun* target, const ON_Sun* source)
   {
     *target = *source;
   }
+}
+
+RH_C_FUNCTION double GetSunAltitude(double latitude, double longitude, double timeZoneHours,
+                     int daylightMinutes, int year, int month, int day, double hours, bool fast)
+{
+	const auto acc = fast ? ON_SunEngine::Accuracy::Minimum : ON_SunEngine::Accuracy::Maximum;
+
+	ON_SunEngine engine(acc);
+	engine.SetLongitude(longitude);
+	engine.SetLatitude(latitude);
+	engine.SetTimeZoneHours(timeZoneHours);
+	engine.SetDaylightSavingMinutes(daylightMinutes);
+	engine.SetLocalDateTime(year, month, day, hours);
+
+	return engine.Altitude();
+}
+
+RH_C_FUNCTION double GetSunJulianDay(double timeZoneHours, int daylightMinutes,
+                                     int year, int month, int day, double hours)
+{
+	ON_SunEngine engine(ON_SunEngine::Accuracy::Minimum);
+	engine.SetLocalDateTime(year, month, day, hours);
+	engine.SetTimeZoneHours(timeZoneHours);
+	engine.SetDaylightSavingMinutes(daylightMinutes);
+
+	return engine.JulianDay();
 }

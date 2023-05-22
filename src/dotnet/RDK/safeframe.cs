@@ -1,11 +1,5 @@
 
-#if RHINO_SDK
-
-#pragma warning disable 1591
-
-using Rhino.Geometry;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Rhino.Render
@@ -17,15 +11,17 @@ namespace Rhino.Render
   {
     internal SafeFrame(IntPtr native)             : base(native) { } // ON_SafeFrame
     internal SafeFrame(IntPtr native, bool write) : base(native, write) { }
-    internal SafeFrame(uint doc_serial)           : base(doc_serial) { }
-    //ternal SafeFrame(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { } UGH! This is public!
     internal SafeFrame(FileIO.File3dm f)          : base(f) { }
+
+#if RHINO_SDK
+    internal SafeFrame(uint doc_serial)           : base(doc_serial) { }
 
     /// <summary>
     /// Create the SafeFrame object which is associated with the document
     /// </summary>
     /// <since>7.12</since>
     public SafeFrame(RhinoDoc doc) : base(doc.RuntimeSerialNumber) { }
+#endif
 
     /// <summary>
     /// Create a utility object not associated with any document
@@ -61,6 +57,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_SafeFrame_FromONX_Model(f.ConstPointer());
     }
 
+#if RHINO_SDK
     internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
     {
       if (const_ptr_is_rs)
@@ -109,6 +106,12 @@ namespace Rhino.Render
       g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
     }
 
+    internal delegate void RdkSafeFrameChangedCallback(uint docSerialNumber);
+
+    private static RdkSafeFrameChangedCallback g_settings_changed_hook;
+    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+#endif
+
     /// <since>7.12</since>
     public override void CopyFrom(FreeFloatingBase src)
     {
@@ -136,11 +139,6 @@ namespace Rhino.Render
     void Dispose(bool disposing)
     {
     }
-
-    internal delegate void RdkSafeFrameChangedCallback(uint docSerialNumber);
-
-    private static RdkSafeFrameChangedCallback g_settings_changed_hook;
-    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
 
     /// <summary>
     /// Determines whether the safeframe is enabled.
@@ -358,4 +356,3 @@ namespace Rhino.Render
     }
   }
 }
-#endif

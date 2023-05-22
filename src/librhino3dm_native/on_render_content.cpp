@@ -89,15 +89,6 @@ RH_C_FUNCTION void ON_RenderContent_TypeName(const ON_RenderContent* rc, ON_wStr
   }
 }
 
-//RH_C_FUNCTION void ON_RenderContent_SetTypeName(ON_RenderContent* rc, const RHMONO_STRING* string)
-//{
-//  if ((nullptr != rc) && (nullptr != string))
-//  {
-//    INPUTSTRINGCOERCE(_string, string);
-//    rc->SetTypeName(_string);
-//  }
-//}
-
 RH_C_FUNCTION void ON_RenderContent_Kind(const ON_RenderContent* rc, ON_wString* kind)
 {
   if ((nullptr != rc) && (nullptr != kind))
@@ -242,12 +233,40 @@ RH_C_FUNCTION void ON_RenderContent_XML(const ON_RenderContent* rc, bool recursi
   }
 }
 
+RH_C_FUNCTION bool ON_RenderContent_GetParameter(const ON_RenderContent* rc, const RHMONO_STRING* param, ON_XMLVariant* variant)
+{
+  if ((nullptr == rc) || (nullptr == param) || (nullptr == variant))
+    return false;
+
+  INPUTSTRINGCOERCE(_param, param);
+
+  const auto v = rc->GetParameter(_param);
+  if (v.IsNull())
+    return false;
+
+  *variant = v;
+
+  return true;
+}
+
+RH_C_FUNCTION bool ON_RenderContent_SetParameter(ON_RenderContent* rc, const RHMONO_STRING* param, const ON_XMLVariant* variant)
+{
+  if ((nullptr == rc) || (nullptr == param) || (nullptr == variant))
+    return false;
+
+  INPUTSTRINGCOERCE(_param, param);
+
+  if (!rc->SetParameter(_param, *variant))
+    return false;
+
+  return true;
+}
+
 RH_C_FUNCTION bool ON_RenderMaterial_SimulatedMaterial(const ON_RenderMaterial* rm, ON_Material* mat)
 {
   if ((nullptr != rm) && (nullptr != mat))
   {
     *mat = rm->SimulatedMaterial();
-
     return true;
   }
 
@@ -259,7 +278,6 @@ RH_C_FUNCTION bool ON_RenderEnvironment_SimulatedEnvironment(const ON_RenderEnvi
   if ((nullptr != re) && (nullptr != env))
   {
     *env = re->SimulatedEnvironment();
-
     return true;
   }
 
@@ -271,7 +289,6 @@ RH_C_FUNCTION bool ON_RenderTexture_SimulatedTexture(const ON_RenderTexture* rt,
   if ((nullptr != rt) && (nullptr != tex))
   {
     *tex = rt->SimulatedTexture();
-
     return true;
   }
 
@@ -307,4 +324,264 @@ RH_C_FUNCTION int ON_Environment_BackgroundProjection(const ON_Environment* env)
     return -1;
 
   return int(env->BackgroundProjection());
+}
+
+RH_C_FUNCTION ON_XMLVariant* ON_XMLVariant_New()
+{
+  return new ON_XMLVariant;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_Copy(const ON_XMLVariant* pVS, ON_XMLVariant* pVD)
+{
+  if (pVS && pVD)
+  {
+    *pVD = *pVS;
+  }
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetUnits(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return int(pV->Units());
+
+  return 0;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetUnits(ON_XMLVariant* pV, int value)
+{
+  if (pV) pV->SetUnits((ON::LengthUnitSystem)value);
+}
+
+RH_C_FUNCTION int ON_XMLVariant_IsNull(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->IsNull() ? 1 : 0;
+
+  return 1;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetNull(ON_XMLVariant* pV)
+{
+  if (pV) pV->SetNull();
+}
+
+RH_C_FUNCTION int ON_XMLVariant_Varies(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->Varies() ? 1 : 0;
+
+  return 0;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetVaries(ON_XMLVariant* pV)
+{
+  if (pV) pV->SetVaries();
+}
+
+RH_C_FUNCTION int ON_XMLVariant_Type(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return int(pV->Type());
+
+  return 0;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetIntValue(ON_XMLVariant* pV, int v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetBoolValue(ON_XMLVariant* pV, bool v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetDoubleValue(ON_XMLVariant* pV, double v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetFloatValue(ON_XMLVariant* pV, float v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetStringValue(ON_XMLVariant* pV, RHMONO_STRING* _ps)
+{
+  if (pV && _ps)
+  {
+    INPUTSTRINGCOERCE(ps, _ps);
+    pV->SetValue(ps);
+  }
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetOnColorValue(ON_XMLVariant* pV, int v)
+{
+  if (pV) pV->SetValue(ON_4fColor(ARGB_to_ABGR(v)));
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetColor4fValue(ON_XMLVariant* pV, ON_4FVECTOR_STRUCT v)
+{
+  if (pV)
+  {
+    const ON_4fColor col(v.val[0], v.val[1], v.val[2], v.val[3]);
+    pV->SetValue(col);
+  }
+}
+
+RH_C_FUNCTION void ON_XMLVariant_Set2dVectorValue(ON_XMLVariant* pV, ON_2DVECTOR_STRUCT v)
+{
+  if (pV) pV->SetValue(ON_2dPoint(v.val));
+}
+
+RH_C_FUNCTION void ON_XMLVariant_Set3dVectorValue(ON_XMLVariant* pV, ON_3DVECTOR_STRUCT v)
+{
+  if (pV) pV->SetValue(ON_3dPoint(v.val));
+}
+
+RH_C_FUNCTION void ON_XMLVariant_Set4dPointValue(ON_XMLVariant* pV, ON_4DPOINT_STRUCT v)
+{
+  if (pV) pV->SetValue(ON_4dPoint(v.val));
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetUuidValue(ON_XMLVariant* pV, ON_UUID v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetXformValue(ON_XMLVariant* pV, ON_XFORM_STRUCT v)
+{
+  if (pV) pV->SetValue(ON_Xform(v.val));
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetByteArrayValue(ON_XMLVariant* pV, /*ARRAY*/const char* buffer, int sizeOfBuffer)
+{
+  if (pV) pV->SetValue(buffer, sizeOfBuffer);
+}
+
+RH_C_FUNCTION void ON_XMLVariant_SetTimeValue(ON_XMLVariant* pV, time_t v)
+{
+  if (pV) pV->SetValue(v);
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetIntValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsInteger();
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetBoolValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsBool() ? 1 : 0;
+  return 0;
+}
+
+RH_C_FUNCTION double ON_XMLVariant_GetDoubleValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsDouble();
+  return 0.0;
+}
+
+RH_C_FUNCTION float ON_XMLVariant_GetFloatValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsFloat();
+  return 0.0f;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetStringValue(const ON_XMLVariant* pV, CRhCmnStringHolder* pSH)
+{
+  if (pV && pSH)
+  {
+    pSH->Set(pV->AsString());
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetOnColorValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+  {
+    const auto col = (ON_Color)pV->AsColor();
+    return ABGR_to_ARGB(col);
+  }
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetColor4fValue(const ON_XMLVariant* pV, ON_4fPoint* p)
+{
+  if (pV && p)
+  {
+    const auto c = pV->AsColor();
+    p->x = c.Red();
+    p->y = c.Green();
+    p->z = c.Blue();
+    p->w = c.Alpha();
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_Get2dVectorValue(const ON_XMLVariant* pV, ON_2dVector* v)
+{
+  if (pV && v)
+  {
+    *v = pV->As2dPoint();
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_Get3dVectorValue(const ON_XMLVariant* pV, ON_3dVector* v)
+{
+  if (pV && v)
+  {
+    *v = pV->As3dPoint();
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_Get4dPointValue(const ON_XMLVariant* pV, ON_4dPoint* v)
+{
+  if (pV && v)
+  {
+    *v = pV->As4dPoint();
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION ON_UUID ON_XMLVariant_GetUuidValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsUuid();
+
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION int ON_XMLVariant_GetXformValue(const ON_XMLVariant* pV, ON_Xform* v)
+{
+  if (pV && v)
+  {
+    *v = pV->AsXform();
+    return 1;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION time_t ON_XMLVariant_GetTimeValue(const ON_XMLVariant* pV)
+{
+  if (pV)
+    return pV->AsTime();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_XMLVariant_Delete(ON_XMLVariant* p)
+{
+  delete p;
 }

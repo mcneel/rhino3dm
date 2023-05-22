@@ -139,3 +139,32 @@ RH_C_FUNCTION const ON_PostEffect* ON_PostEffects_GetAt(const ON_PostEffects* pe
 
   return a[index];
 }
+
+RH_C_FUNCTION bool ON_PostEffect_GetParameter(const ON_PostEffect* pep, const RHMONO_STRING* param, ON_XMLVariant* variant)
+{
+  if ((nullptr == pep) || (nullptr == param) || (nullptr == variant))
+    return false;
+
+  INPUTSTRINGCOERCE(_param, param);
+
+  const auto v = pep->GetParameter(_param);
+  if (v.IsNull())
+    return false;
+
+  *variant = v;
+
+  return true;
+}
+
+RH_C_FUNCTION bool ON_PostEffect_SetParameter(ON_PostEffect* pep, const RHMONO_STRING* param, const ON_XMLVariant* variant)
+{
+  if ((nullptr == pep) || (nullptr == param) || (nullptr == variant))
+    return false;
+
+  INPUTSTRINGCOERCE(_param, param);
+
+  if (!pep->SetParameter(_param, *variant))
+    return false;
+
+  return true;
+}

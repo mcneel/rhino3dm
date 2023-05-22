@@ -1,15 +1,13 @@
 
-#if RHINO_SDK
-
 using System;
 using System.Diagnostics;
 using Rhino.Runtime.InteropWrappers;
-using static Rhino.Render.Dithering;
 
 #pragma warning disable 1591
 
 namespace Rhino.Render
 {
+#if RHINO_SDK
   /// <summary>
   /// Used by Rhino.Render object property value has changed events.
   /// </summary>
@@ -53,6 +51,7 @@ namespace Rhino.Render
     private readonly IntPtr m_event_args;
     private readonly Guid m_event_type;
   }*/
+#endif
 
   /// <summary>
   /// Represents an infinite plane for implementation by renderers.
@@ -62,9 +61,12 @@ namespace Rhino.Render
   {
     internal GroundPlane(IntPtr native)             : base(native) { } // ON_GroundPlane
     internal GroundPlane(IntPtr native, bool write) : base(native, write) { }
+    internal GroundPlane(FileIO.File3dm f)          : base(f) { }
+
+#if RHINO_SDK
     internal GroundPlane(uint doc_serial)           : base(doc_serial) { }
     internal GroundPlane(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
-    internal GroundPlane(FileIO.File3dm f)          : base(f) { }
+#endif
 
     /// <summary>
     /// Create a utility object not associated with any document
@@ -100,6 +102,8 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_GroundPlane_FromONX_Model(f.ConstPointer());
     }
 
+
+#if RHINO_SDK
     internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
     {
       if (const_ptr_is_rs)
@@ -151,6 +155,12 @@ namespace Rhino.Render
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
       g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
     }
+    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+
+    internal delegate void RdkGroundPlaneSettingsChangedCallback(uint docSerialNumber);
+
+    private static RdkGroundPlaneSettingsChangedCallback g_settings_changed_hook;
+#endif
 
     /// <since>6.0</since>
     public override void CopyFrom(FreeFloatingBase src)
@@ -162,11 +172,6 @@ namespace Rhino.Render
     {
       UnsafeNativeMethods.ON_GroundPlane_Delete(CppPointer);
     }
-
-    internal delegate void RdkGroundPlaneSettingsChangedCallback(uint docSerialNumber);
-
-    private static RdkGroundPlaneSettingsChangedCallback g_settings_changed_hook;
-    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
 
     ~GroundPlane()
     {
@@ -355,9 +360,12 @@ namespace Rhino.Render
   {
     internal RenderChannels(IntPtr p)             : base(p) { } // ON_RenderChannels.
     internal RenderChannels(IntPtr p, bool write) : base(p, write) { }
+    internal RenderChannels(FileIO.File3dm f)     : base(f) { }
+
+#if RHINO_SDK
     internal RenderChannels(uint doc_serial)      : base(doc_serial) { }
     internal RenderChannels(RhinoDoc doc)         : base(doc.RuntimeSerialNumber) { }
-    internal RenderChannels(FileIO.File3dm f)     : base(f) { }
+#endif
 
     internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
     {
@@ -380,6 +388,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_RenderChannels_FromONX_Model(f.ConstPointer());
     }
 
+#if RHINO_SDK
     internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
     {
       if (const_ptr_is_rs)
@@ -394,12 +403,14 @@ namespace Rhino.Render
     {
       return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
     }
+#endif
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_RenderChannels_Delete(CppPointer);
     }
 
+#if RHINO_SDK
     /// <summary>
     /// This event is raised when a Render Channels property value is changed.
     /// </summary>
@@ -434,6 +445,23 @@ namespace Rhino.Render
       g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
     }
 
+    internal delegate void RdkRenderChannelsSettingsChangedCallback(uint docSerialNumber);
+
+    private static RdkRenderChannelsSettingsChangedCallback g_settings_changed_hook;
+    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+#else
+    /// <summary>
+    /// Mode.
+    /// </summary>
+    public enum Modes
+    {
+      /// <summary>Render-channels are managed automatically</summary>
+      Automatic,
+      /// <summary>Render-channels are specified by the user</summary>
+      Custom,
+    }
+#endif
+
     /// <summary>
     /// Create a utility object not associated with any document.
     /// </summary>
@@ -445,11 +473,6 @@ namespace Rhino.Render
     {
       UnsafeNativeMethods.ON_RenderChannels_CopyFrom(CppPointer, src.CppPointer);
     }
-
-    internal delegate void RdkRenderChannelsSettingsChangedCallback(uint docSerialNumber);
-
-    private static RdkRenderChannelsSettingsChangedCallback g_settings_changed_hook;
-    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
 
     ~RenderChannels()
     {
@@ -500,5 +523,3 @@ namespace Rhino.Render
     }
   }
 }
-
-#endif

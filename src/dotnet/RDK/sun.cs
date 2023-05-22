@@ -1,14 +1,16 @@
 
-#if RHINO_SDK
-
-using Rhino.UI.Controls;
 using System;
 using System.Diagnostics;
+
+#if RHINO_SDK
+using Rhino.UI.Controls;
+#endif
 
 #pragma warning disable 1591
 
 namespace Rhino.Render
 {
+#if RHINO_SDK
   /// <summary>
   /// This class contains the event to add custom ui sections when the content ui is created.
   /// </summary>
@@ -163,6 +165,7 @@ namespace Rhino.Render
     private static RdkUndoRedoEndedCallback g_undo_redo_ended_hook;
     private static EventHandler<RenderPropertyChangedEvent> g_undo_redo_ended_event_handler;
   }
+#endif
 
   /// <summary>
   /// Represents the Sun on a little portion of Earth.
@@ -171,9 +174,12 @@ namespace Rhino.Render
   {
     internal Sun(IntPtr native)             : base(native)        { GC.SuppressFinalize(this); } // ON_Sun
     internal Sun(IntPtr native, bool write) : base(native, write) { GC.SuppressFinalize(this); }
+    internal Sun(FileIO.File3dm f)          : base(f) { }
+
+#if RHINO_SDK
     internal Sun(uint doc_serial)           : base(doc_serial)    { GC.SuppressFinalize(this); }
     internal Sun(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
-    internal Sun(FileIO.File3dm f)          : base(f) { }
+#endif
 
     internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
     {
@@ -196,6 +202,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_Sun_FromONX_Model(f.ConstPointer());
     }
 
+#if RHINO_SDK
     internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
     {
       if (const_ptr_is_rs)
@@ -258,6 +265,7 @@ namespace Rhino.Render
       UnsafeNativeMethods.RhRdkSun_SunDirection(latitude, longitude, local, when.Year, when.Month, when.Day, when.Hour, when.Minute, when.Second, ref vec);
       return vec;
     }
+#endif
 
     /// <summary>
     /// Create a utility object not associated with any document
@@ -315,6 +323,21 @@ namespace Rhino.Render
       }
     }
 
+    public enum Accuracies { Minimum, Maximum };
+
+    /// <summary>Accuracy.</summary>
+    /// <since>8.0</since>
+    public Accuracies Accuracy
+    {
+      get => (Accuracies)UnsafeNativeMethods.ON_Sun_Accuracy(CppPointer);
+      set
+      {
+        Debug.Assert(CanChange);
+        UnsafeNativeMethods.ON_Sun_SetAccuracy(CppPointer, (int)value);
+      }
+    }
+
+#if RHINO_SDK
     /// <summary>Turn skylight on or off.</summary>
     /// <since>5.10</since>
     [Obsolete("Use Rhino.Render.Skylight instead")]
@@ -342,6 +365,7 @@ namespace Rhino.Render
         }
       }
     }
+#endif
 
     /// <since>5.10</since>
     /// <obsolete>8.0</obsolete>
@@ -577,6 +601,25 @@ namespace Rhino.Render
       UnsafeNativeMethods.ON_Sun_SetDateTime(CppPointer, local, time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
     }
 
+    /// <summary>Get sun color based on altitude.</summary>
+    /// <param name="altitudeDegrees">The altitude sun angle in degrees.</param>
+    /// <returns>
+    /// Returns color for altitude.
+    /// </returns>
+    /// <since>6.0</since>
+    static public System.Drawing.Color ColorFromAltitude(double altitudeDegrees)
+    {
+      var col = UnsafeNativeMethods.ON_Sun_ColorFromAltitude(altitudeDegrees);
+      return Rhino.Runtime.Interop.ColorFromWin32(col);
+    }
+
+    /// <since>6.0</since>
+    static public double AltitudeFromValues(double latitude, double longitude, double timezoneHours, int daylightMinutes, DateTime when, double hours, bool fast = false)
+    {
+      return UnsafeNativeMethods.GetSunAltitude(latitude, longitude, timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours, fast);
+    }
+
+#if RHINO_SDK
     /// <summary>Show the modal sun dialog.</summary>
     /// <since>5.0</since>
     /// <deprecated>6.0</deprecated>
@@ -598,28 +641,10 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_Sun_ShowDialog(CppPointer);
     }
 
-    /// <summary>Get sun color based on altitude.</summary>
-    /// <param name="altitudeDegrees">The altitude sun angle in degrees.</param>
-    /// <returns>
-    /// Returns color for altitude.
-    /// </returns>
-    /// <since>6.0</since>
-    static public System.Drawing.Color ColorFromAltitude(double altitudeDegrees)
-    {
-      var col = UnsafeNativeMethods.ON_Sun_ColorFromAltitude(altitudeDegrees);
-      return Rhino.Runtime.Interop.ColorFromWin32(col);
-    }
-
-    /// <since>6.0</since>
-    static public double AltitudeFromValues(double latitude, double longitude, double timezoneHours, int daylightMinutes, DateTime when, double hours, bool fast = false)
-    {
-      return UnsafeNativeMethods.RhRdkSun_SunAltitude(latitude, longitude, timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours, fast);
-    }
-
     /// <since>6.0</since>
     static public double JulianDay(double timezoneHours, int daylightMinutes, DateTime when, double hours)
     {
-      return UnsafeNativeMethods.RhRdkSun_JulianDay(timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours);
+      return UnsafeNativeMethods.GetSunJulianDay(timezoneHours, daylightMinutes, when.Year, when.Month, when.Day, hours);
     }
 
     /// <since>6.0</since>
@@ -634,6 +659,7 @@ namespace Rhino.Render
       latitude = longitude = 0.0;
       return UnsafeNativeMethods.RhRdkSun_Here(ref latitude, ref longitude);
     }
+#endif
 
     /// <summary>
     /// Get a hash of the sun state.
@@ -661,9 +687,12 @@ namespace Rhino.Render
   {
     internal Skylight(IntPtr native)             : base(native) { } // ON_Skylight
     internal Skylight(IntPtr native, bool write) : base(native, write) { }
+    internal Skylight(FileIO.File3dm f)          : base(f) { }
+
+#if RHINO_SDK
     internal Skylight(uint doc_serial)           : base(doc_serial) { }
     internal Skylight(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
-    internal Skylight(FileIO.File3dm f)          : base(f) { }
+#endif
 
     /// <summary>
     /// Create a utility object not associated with any document
@@ -699,6 +728,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_Skylight_FromONX_Model(f.ConstPointer());
     }
 
+#if RHINO_SDK
     internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
     {
       if (const_ptr_is_rs)
@@ -748,6 +778,12 @@ namespace Rhino.Render
       g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0080));
     }
 
+    internal delegate void RdkSkylightSettingsChangedCallback(uint docSerialNumber);
+
+    private static RdkSkylightSettingsChangedCallback g_settings_changed_hook;
+    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
+#endif
+
     /// <since>6.0</since>
     public override void CopyFrom(FreeFloatingBase src)
     {
@@ -758,11 +794,6 @@ namespace Rhino.Render
     {
       UnsafeNativeMethods.ON_Skylight_Delete(CppPointer);
     }
-
-    internal delegate void RdkSkylightSettingsChangedCallback(uint docSerialNumber);
-
-    private static RdkSkylightSettingsChangedCallback g_settings_changed_hook;
-    private static EventHandler<RenderPropertyChangedEvent> g_changed_event_handler;
 
     ~Skylight()
     {
@@ -841,8 +872,7 @@ namespace Rhino.Render
   }
 }
 
-
-
+#if RHINO_SDK
 namespace Rhino.Render.UI
 {
   public sealed class WorldMapDayNight : IDisposable
@@ -934,5 +964,4 @@ namespace Rhino.Render.UI
     }
   }
 }
-
 #endif

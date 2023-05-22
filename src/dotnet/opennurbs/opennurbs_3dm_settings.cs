@@ -2394,7 +2394,6 @@ namespace Rhino.Render
       set { SetInt(UnsafeNativeMethods.RenderSettingInt.BackgroundStyle, (int)value); }
     }
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document linear workflow.
     /// If this object is associated with a File3dm, this gets the File3dm's linear workflow.
@@ -2405,8 +2404,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new LinearWorkflow(m_doc);
+#endif
         if (m_file3dm != null)
           return new LinearWorkflow(m_file3dm);
 
@@ -2415,9 +2416,7 @@ namespace Rhino.Render
         return new LinearWorkflow(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document dithering.
     /// If this object is associated with a File3dm, this gets the File3dm's dithering.
@@ -2428,8 +2427,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new Dithering(m_doc);
+#endif
         if (m_file3dm != null)
           return new Dithering(m_file3dm);
 
@@ -2438,9 +2439,7 @@ namespace Rhino.Render
         return new Dithering(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document render channels.
     /// Otherwise it gets a 'free-floating' render channels object.
@@ -2450,8 +2449,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new RenderChannels(m_doc);
+#endif
         if (m_file3dm != null)
           return new RenderChannels(m_file3dm);
 
@@ -2460,9 +2461,7 @@ namespace Rhino.Render
         return new RenderChannels(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document ground plane.
     /// If this object is associated with a File3dm, this gets the File3dm's ground plane.
@@ -2473,8 +2472,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new GroundPlane(m_doc);
+#endif
         if (m_file3dm != null)
           return new GroundPlane(m_file3dm);
 
@@ -2483,9 +2484,7 @@ namespace Rhino.Render
         return new GroundPlane(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document safe-frame.
     /// If this object is associated with a File3dm, this gets the File3dm's safe-frame.
@@ -2496,8 +2495,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new SafeFrame(m_doc);
+#endif
         if (m_file3dm != null)
           return new SafeFrame(m_file3dm);
 
@@ -2506,9 +2507,7 @@ namespace Rhino.Render
         return new SafeFrame(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document skylight.
     /// If this object is associated with a File3dm, this gets the File3dm's skylight.
@@ -2519,8 +2518,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new Skylight(m_doc);
+#endif
         if (m_file3dm != null)
           return new Skylight(m_file3dm);
 
@@ -2529,9 +2530,7 @@ namespace Rhino.Render
         return new Skylight(native_ptr);
       }
     }
-#endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document sun.
     /// If this object is associated with a File3dm, this gets the File3dm's sun.
@@ -2542,8 +2541,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new Sun(m_doc);
+#endif
         if (m_file3dm != null)
           return new Sun(m_file3dm);
 
@@ -2552,7 +2553,6 @@ namespace Rhino.Render
         return new Sun(native_ptr);
       }
     }
-#endif
 
     /// <summary>
     /// The usage of a render environment.
@@ -2668,7 +2668,6 @@ namespace Rhino.Render
     }
 #endif
 
-#if RHINO_SDK
     /// <summary>
     /// If this object is associated with a document, this gets the document post effect data collection.
     /// If this object is associated with a File3dm, this gets the File3dm's post effect data collection.
@@ -2679,8 +2678,10 @@ namespace Rhino.Render
     {
       get
       {
+#if RHINO_SDK
         if (m_doc != null)
           return new PostEffectCollection(m_doc);
+#endif
         if (m_file3dm != null)
           return new PostEffectCollection(m_file3dm);
 
@@ -2689,7 +2690,6 @@ namespace Rhino.Render
         return new PostEffectCollection(native_ptr);
       }
     }
-#endif
 
     /// <summary>
     /// Get or set the current Render Preset.
