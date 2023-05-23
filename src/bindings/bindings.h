@@ -67,12 +67,9 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_ellipse.h"
 #include "bnd_font.h"
 #include "bnd_object.h"
-#include "bnd_3dm_settings.h"
 #include "bnd_model_component.h"
-
 #include "bnd_geometry.h"
 #include "bnd_light.h"
-
 #include "bnd_embedded_file.h"
 #include "bnd_skylight.h"
 #include "bnd_ground_plane.h"
@@ -84,7 +81,6 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_post_effects.h"
 #include "bnd_sun.h"
 #include "bnd_decals.h"
-
 #include "bnd_3dm_settings.h"
 #include "bnd_bitmap.h"
 #include "bnd_dimensionstyle.h"
