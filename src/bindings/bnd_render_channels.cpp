@@ -1,6 +1,8 @@
 
 #include "bindings.h"
 
+#if !defined ON_WASM_COMPILE // Why do I need this?
+
 BND_TUPLE BND_File3dmRenderChannels::GetCustomList(void) const
 {
   ON_SimpleArray<ON_UUID> list;
@@ -27,6 +29,8 @@ void BND_File3dmRenderChannels::SetCustomList(BND_TUPLE tuple)
 
   _rch->SetCustomList(list);
 }
+
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 
