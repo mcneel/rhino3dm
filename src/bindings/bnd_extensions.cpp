@@ -1719,52 +1719,52 @@ void initExtensionsBindings(void*)
     .property("saveUserData", &BND_File3dmWriteOptions::SaveUserData, &BND_File3dmWriteOptions::SetSaveUserData)
     ;
 
-  class_<BND_File3dmEmbeddedFileTable>("File3dmEmbeddedFileTable")
-    .constructor<>()
-    .function("count", &BND_File3dmEmbeddedFileTable::Count)
-    .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
-    .function("add", &BND_File3dmEmbeddedFileTable::Add)
-    .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
-    .function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
-    ;
-
-  class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
-    .constructor<>()
-    .function("count", &BND_File3dmPostEffectTable::Count)
-    .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
-    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
-    .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
-    ;
-
-  class_<BND_ONXModel>("File3dmDecalTable")
-    .constructor<>()
-    .function("count", &BND_File3dmDecalTable::Count)
-    .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
-    .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
-    ;
-
-  class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
-    .constructor<>()
-    .property("Displacement", &BND_File3dmMeshModifiers::Displacement)
-    .property("EdgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening)
-    .property("Thickening", &BND_File3dmMeshModifiers::Thickening)
-    .property("CurvePiping", &BND_File3dmMeshModifiers::CurvePiping)
-    .property("ShutLining", &BND_File3dmMeshModifiers::ShutLining)
-    .function("CreateDisplacement", &BND_File3dmMeshModifiers::CreateDisplacement)
-    .function("CreateEdgeSoftening", &BND_File3dmMeshModifiers::CreateEdgeSoftening)
-    .function("CreateThickening ", &BND_File3dmMeshModifiers::CreateThickening)
-    .function("CreateCurvePiping", &BND_File3dmMeshModifiers::CreateCurvePiping)
-    .function("CreateShutLining ", &BND_File3dmMeshModifiers::CreateShutLining)
-    ;
-
-  class_<BND_File3dmShutLiningCurveTable>("File3dmShutLiningCurveTable")
-    .constructor<>()
-    .function("count", &BND_File3dmShutLiningCurveTable::Count)
-    .function("get", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
-    .function("add", &BND_File3dmShutLiningCurveTable::Add)
-    .function("findIndex", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
-    .function("findId", &BND_File3dmShutLiningCurveTable::FindId, allow_raw_pointers())
-    ;
+//  class_<BND_File3dmEmbeddedFileTable>("File3dmEmbeddedFileTable")
+//    .constructor<>()
+//    .function("count", &BND_File3dmEmbeddedFileTable::Count)
+//    .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
+//    .function("add", &BND_File3dmEmbeddedFileTable::Add)
+//    .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
+//    .function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
+//    ;
+//
+//  class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
+//    .constructor<>()
+//    .function("count", &BND_File3dmPostEffectTable::Count)
+//    .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
+//    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
+//    .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
+//    ;
+//
+//  class_<BND_ONXModel>("File3dmDecalTable")
+//    .constructor<>()
+//    .function("count", &BND_File3dmDecalTable::Count)
+//    .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
+//    .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
+//    ;
+//
+//  class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
+//    .constructor<>()
+//    .property("Displacement", &BND_File3dmMeshModifiers::Displacement)
+//    .property("EdgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening)
+//    .property("Thickening", &BND_File3dmMeshModifiers::Thickening)
+//    .property("CurvePiping", &BND_File3dmMeshModifiers::CurvePiping)
+//    .property("ShutLining", &BND_File3dmMeshModifiers::ShutLining)
+//    .function("CreateDisplacement", &BND_File3dmMeshModifiers::CreateDisplacement)
+//    .function("CreateEdgeSoftening", &BND_File3dmMeshModifiers::CreateEdgeSoftening)
+//    .function("CreateThickening ", &BND_File3dmMeshModifiers::CreateThickening)
+//    .function("CreateCurvePiping", &BND_File3dmMeshModifiers::CreateCurvePiping)
+//    .function("CreateShutLining ", &BND_File3dmMeshModifiers::CreateShutLining)
+//    ;
+//
+//  class_<BND_File3dmShutLiningCurveTable>("File3dmShutLiningCurveTable")
+//    .constructor<>()
+//    .function("count", &BND_File3dmShutLiningCurveTable::Count)
+//    .function("get", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
+//    .function("add", &BND_File3dmShutLiningCurveTable::Add)
+//    .function("findIndex", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
+//    .function("findId", &BND_File3dmShutLiningCurveTable::FindId, allow_raw_pointers())
+//    ;
 
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
