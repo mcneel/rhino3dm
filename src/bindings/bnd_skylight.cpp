@@ -14,7 +14,7 @@ void initSkylightBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE)
+#if defined(ON_WASM_COMPILE____TEMP)
 using namespace emscripten;
 
 void initSkylightBindings(void*)
