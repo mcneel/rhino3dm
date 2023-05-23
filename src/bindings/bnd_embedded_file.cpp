@@ -53,7 +53,7 @@ void initEmbeddedFileBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE)
+#if defined(ON_WASM_COMPILE__TEMP)
 using namespace emscripten;
 
 void initEmbeddedFileBindings(void*)
