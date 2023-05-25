@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Rhino.Geometry;
-#if RHINO_SDK
 using Rhino.Render.PostEffects;
-#endif
 using Rhino.Runtime.InteropWrappers;
 
 // Most of these should not need to be wrapped. Some of their

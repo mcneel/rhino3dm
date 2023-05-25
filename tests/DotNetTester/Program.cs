@@ -2,6 +2,7 @@
 using Rhino.Geometry;
 using Rhino.FileIO;
 using Rhino.Render;
+using Rhino.Render.PostEffects;
 using System.Globalization;
 
 namespace DotNetTester
@@ -122,6 +123,7 @@ namespace DotNetTester
 //      Console.WriteLine("DataCRC: {0}", dit.DataCRC(0));
 
       Console.WriteLine("Dithering set Method FloydSteinberg");
+      dit.On = true;
       dit.Method = Dithering.Methods.FloydSteinberg;
       Console.WriteLine("Method:  {0}", dit.Method);
       Console.WriteLine("Dithering set Method SimpleNoise");
@@ -186,7 +188,6 @@ namespace DotNetTester
       var s = string.Format(CultureInfo.InvariantCulture, format, dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
       Console.WriteLine(s);
 
-      // Note: This works, but Rhino doesn't see it because it uses the Earth Anchor Point.
       Console.WriteLine("Sun set lat/long to Greenwich");
       sun.Latitude = 51.4934;
       sun.Longitude = 0.0098;

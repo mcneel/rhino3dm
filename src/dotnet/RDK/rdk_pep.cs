@@ -20,7 +20,7 @@ using Rhino.FileIO;
 using System.Collections;
 using System.Linq;
 
-namespace Rhino.Render
+namespace Rhino.Render.PostEffects
 {
   /// <since>7.0</since>
   public enum PostEffectType : int
@@ -29,8 +29,11 @@ namespace Rhino.Render
     ToneMapping = 1,
     Late = 2
   }
+}
 
 #if RHINO_SDK
+namespace Rhino.Render
+{
   /// <summary>
   /// Pixel component order for channels in the RenderWindow and PostEffects.
   /// </summary>
@@ -1899,8 +1902,11 @@ namespace Rhino.Render.PostEffects
       UnsafeNativeMethods.IRhRdkPostEffect_Changed(CppPointer);
     }
   }
+}
 #endif
 
+namespace Rhino.Render.PostEffects
+{
   /// <summary>
   /// This is a wrapper around the data ('on', 'shown', 'state' parameters, etc.) of a post effect.
   /// </summary>
