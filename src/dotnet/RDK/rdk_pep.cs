@@ -2192,6 +2192,49 @@ namespace Rhino.Render.PostEffects
     }
 #endif
 
+    /// <summary>
+    /// Get a post effect data for an id.
+    /// </summary>
+    /// <since>8.0</since>
+    public PostEffectData PostEffectDataFromId(Guid id)
+    {
+      return new PostEffectData(this, id);
+    }
+
+    /// <summary>
+    /// Move a post effect before another post effect in the list.
+    /// Param 'id_move' is the id of the post effect to move.
+    /// Param 'id_before' is the id of a post effect before which the post effect should be moved.
+    /// If this is Guid.Empty, the post effect is moved to the end of the list.
+    /// If the post effect identified by 'id_before' is not found, the method will fail.
+    /// Returns true if successful, else false.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool MovePostEffectBefore(Guid id_move, Guid id_before)
+    {
+      return UnsafeNativeMethods.ON_PostEffects_MovePostEffectBefore(CppPointer, ref id_move, ref id_before);
+    }
+
+    /// <summary>
+    /// Gets the selected post effect for a certain type into 'id'.
+    /// Returns true if successful or false if the selection information could not be found.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool GetSelectedPostEffect(PostEffectType type, out Guid id)
+    {
+      id = Guid.Empty;
+      return UnsafeNativeMethods.ON_PostEffects_GetSelectedPostEffect(CppPointer, (int)type, ref id);
+    }
+
+    /// <summary>
+    /// Sets the selected post effect for a certain type.
+    /// </summary>
+    /// <since>8.0</since>
+    public void SetSelectedPostEffect(PostEffectType type, Guid id)
+    {
+      UnsafeNativeMethods.ON_PostEffects_SetSelectedPostEffect(CppPointer, (int)type, ref id);
+    }
+
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_PostEffects_CopyFrom(CppPointer, src.CppPointer);

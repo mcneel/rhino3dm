@@ -279,27 +279,54 @@ namespace DotNetTester
     {
       Console.WriteLine("BEGIN Post Effect collection");
 
+      var id1 = Guid.Empty;
+      var id2 = Guid.Empty;
+
       foreach (var pep in peps)
       {
         PostEffectTest(pep);
+        id2 = id1;
+        id1 = pep.Id;
       }
+
+      var data1 = peps.PostEffectDataFromId(id1);
+      var type1 = data1.Type;
+      Console.WriteLine("id1: {0}", data1.LocalName);
+
+      var data2 = peps.PostEffectDataFromId(id2);
+      Console.WriteLine("id2: {0}", data2.LocalName);
+
+      peps.MovePostEffectBefore(id1, id2);
+
+      peps.GetSelectedPostEffect(type1, out id1);
+      if (id1 != Guid.Empty)
+      {
+        data1 = peps.PostEffectDataFromId(id1);
+        Console.WriteLine("Early Post Effect selection is {0}", data1.LocalName);
+      }
+
+      peps.SetSelectedPostEffect(type1, id2);
+
+      peps.GetSelectedPostEffect(type1, out id1);
+      data1 = peps.PostEffectDataFromId(id1);
+      Console.WriteLine("{0} Post Effect selection is {1}", type1, data1.LocalName);
 
       Console.WriteLine("END Post Effect collection");
     }
-    
+
     static void PostEffectTest(PostEffectData pep)
     {
       var ci = CultureInfo.InvariantCulture;
     
       Console.WriteLine("  BEGIN Post Effect");
-    
+
       Console.WriteLine("    Id:        {0}", pep.Id);
       Console.WriteLine("    Type:      {0}", pep.Type);
       Console.WriteLine("    LocalName: {0}", pep.LocalName);
       Console.WriteLine("    On:        {0}", pep.On);
       Console.WriteLine("    Shown:     {0}", pep.Shown);
       Console.WriteLine("    DataCRC:   {0}", pep.DataCRC(0));
-    
+
       var p = pep.GetParameter("radius");
       if (p != null) Console.WriteLine("    Radius:    {0}", p.ToDouble(ci));
 
@@ -307,13 +334,13 @@ namespace DotNetTester
 
       p = pep.GetParameter("radius");
       if (p != null) Console.WriteLine("    New Radius:{0}", p.ToDouble(ci));
-    
+
       p = pep.GetParameter("brightness");
       if (p != null) Console.WriteLine("    Brightness:{0}", p.ToDouble(ci));
-    
+
       p = pep.GetParameter("bias");
       if (p != null) Console.WriteLine("    Bias:      {0}", p.ToDouble(ci));
-    
+
       Console.WriteLine("  END Post Effect");
     }
 
